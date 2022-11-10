@@ -1,0 +1,38 @@
+{
+  "files.autoSave": "off",
+  "files.eol": "\n",
+  "workbench.tree.indent": 16,
+  "editor.tabSize": 4,
+  "editor.wordWrap": "off",
+  "workbench.editor.wrapTabs": true,
+  "typescript.inlayHints.parameterNames.enabled": "literals",
+  "editor.inlayHints.fontSize": 10,
+  "workbench.colorCustomizations": {
+    "editorInlayHint.background": "#4d4d4d99",
+    "editorInlayHint.foreground": "#ffffffcc"
+  },
+  "cSpell.language": "en,vi",
+  "cSpell.words": [
+    "adminer",
+    "bitnami",
+    "certbot",
+    "datetime",
+    "jdbc",
+    "kafkajs",
+    "letsencrypt",
+    "medihome",
+    "nats",
+    "nestjs",
+    "Partitioner",
+    "Partitioners",
+    "redisinsight",
+    "redislabs",
+    "taskkill",
+    "tinyint",
+    "typeorm",
+    "websockets"
+  ],
+  "window.title": "${rootName}",
+  "typescript.preferences.quoteStyle": "single",
+  "javascript.preferences.quoteStyle": "single"
+}

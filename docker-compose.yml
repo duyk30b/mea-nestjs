@@ -1,0 +1,64 @@
+version: '3.3'
+
+networks:
+  mh_network:
+    driver: bridge
+
+volumes:
+  mhv_node_modules:
+
+services:
+  api-public:
+    container_name: mhc_api-public
+    image: mhi_nestjs_${NODE_ENV:-development}:1.0.0
+    restart: unless-stopped
+    networks:
+      - mh_network
+    build:
+      dockerfile: Dockerfile
+      context: "./"
+      target: ${NODE_ENV:-development}
+    volumes:
+      - ./:/app/
+      - mhv_node_modules:/app/node_modules/
+    command: ["sh", "-c", "npm run dev api-public"]
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+    ports:
+      - "${API_PUBLIC_PORT:-7200}:${API_PUBLIC_PORT:-7200}"
+
+  # event-dispatcher:
+  #   container_name: mhc_event-dispatcher
+  #   image: mhi_nestjs_${NODE_ENV:-development}:1.0.0
+  #   restart: unless-stopped
+  #   networks:
+  #     - mh_network
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: "./"
+  #     target: ${NODE_ENV:-development}
+  #   volumes:
+  #     - ./:/app/
+  #     - mhv_node_modules:/app/node_modules/
+  #   command: ["sh", "-c", "npm run dev event-dispatcher"]
+  #   environment:
+  #     - NODE_ENV=${NODE_ENV:-development}
+
+  # worker:
+  #   container_name: mhc_worker
+  #   image: mhi_nestjs_${NODE_ENV:-development}:1.0.0
+  #   restart: unless-stopped
+  #   networks:
+  #     - mh_network
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: "./"
+  #     target: ${NODE_ENV:-development}
+  #   volumes:
+  #     - ./:/app/
+  #     - mhv_node_modules:/app/node_modules/
+  #   command: ["sh", "-c", "npm run dev worker"]
+  #   environment:
+  #     - NODE_ENV=${NODE_ENV:-development}
+  #   ports:
+  #     - "${WEBSOCKET_PORT:-7201}:${WEBSOCKET_PORT:-7201}"

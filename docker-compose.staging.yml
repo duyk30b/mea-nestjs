@@ -1,0 +1,49 @@
+version: '3.3'
+
+networks:
+  mh_network:
+    driver: bridge
+
+services:
+  api-public:
+    container_name: mhc_api-public
+    image: mhi_nestjs_${NODE_ENV:-staging}:1.0.0
+    restart: unless-stopped
+    networks:
+      - mh_network
+    build:
+      dockerfile: Dockerfile
+      context: "./"
+      target: ${NODE_ENV:-staging}
+    command: node dist/apps/api-public/main
+    environment:
+      - NODE_ENV=${NODE_ENV:-staging}
+
+      
+  # event-dispatcher:
+  #   container_name: mhc_event-dispatcher
+  #   image: mhi_nestjs_${NODE_ENV:-staging}:1.0.0
+  #   restart: unless-stopped
+  #   networks:
+  #     - mh_network
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: "./"
+  #     target: ${NODE_ENV:-staging}
+  #   command: node dist/apps/event-dispatcher/main
+  #   environment:
+  #     - NODE_ENV=${NODE_ENV:-staging}
+
+  # worker:
+  #   container_name: mhc_worker
+  #   image: mhi_nestjs_${NODE_ENV:-staging}:1.0.0
+  #   restart: unless-stopped
+  #   networks:
+  #     - mh_network
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: "./"
+  #     target: ${NODE_ENV:-staging}
+  #   command: node dist/apps/worker/main
+  #   environment:
+  #     - NODE_ENV=${NODE_ENV:-staging}

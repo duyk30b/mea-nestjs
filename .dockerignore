@@ -1,0 +1,29 @@
+node_modules
+
+# Git file
+.git
+.gitignore
+
+# Docker file
+Dockerfile*
+docker-compose*
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Deploy folder and file
+.github
+.gitlab-ci.yml
+.gitignore
+
+.vscode
+.editorconfig
+.eslintrc.*
+.nvmrc
+
+# Data MySQL
+data

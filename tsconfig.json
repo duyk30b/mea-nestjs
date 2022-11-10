@@ -1,0 +1,56 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "_libs/common": [
+        "libs/common/src"
+      ],
+      "_libs/common/*": [
+        "libs/common/src/*"
+      ],
+      "_libs/redis": [
+        "libs/redis/src"
+      ],
+      "_libs/redis/*": [
+        "libs/redis/src/*"
+      ],
+      "_libs/database": [
+        "libs/database/src"
+      ],
+      "_libs/database/*": [
+        "libs/database/src/*"
+      ],
+      "_libs/transporter": [
+        "libs/transporter/src"
+      ],
+      "_libs/transporter/*": [
+        "libs/transporter/src/*"
+      ]
+    }
+  },
+  "include": [
+    "apps/**/*.ts",
+    "libs/**/*.ts",
+    ".eslintrc.js",
+    "webpack-hmr.config.js"
+  ],
+  "exclude": [
+    "dist/"
+  ]
+}

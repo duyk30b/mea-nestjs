@@ -1,0 +1,103 @@
+version: "3.3"
+
+networks:
+  mh_network:
+    driver: bridge
+
+services:
+  # mysql:
+  #   container_name: mhc_mysql
+  #   image: mysql:8.0.31
+  #   restart: unless-stopped
+  #   command: --default-authentication-plugin=mysql_native_password
+  #   networks:
+  #     - mh_network
+  #   volumes:
+  #     - ./data/mysql:/var/lib/mysql
+  #   environment:
+  #     - MYSQL_ROOT_PASSWORD=Abc@12345
+  #     - MYSQL_DATABASE=medihome_sql
+  #     - MYSQL_USER=medihome
+  #     - MYSQL_PASSWORD=Abc@12345
+  #   ports:
+  #     - "23306:3306"
+
+  mariadb:
+    container_name: mhc_mariadb
+    image: mariadb:11.0.2
+    restart: unless-stopped
+    networks:
+      - mh_network
+    volumes:
+      - ./data/mariadb:/var/lib/mysql
+    environment:
+      - MARIADB_ROOT_PASSWORD=Abc@12345
+      - MARIADB_DATABASE=medihome_sql
+      - MARIADB_USER=medihome
+      - MARIADB_PASSWORD=Abc@12345
+    ports:
+      - "23306:3306"
+
+  # mongo:
+  #   image: mongo:6.0.2
+  #   container_name: mhc_mongo
+  #   restart: unless-stopped
+  #   networks:
+  #     - mh_network
+  #   volumes:
+  #     - ./data/mongo:/data/db
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: root
+  #     MONGO_INITDB_ROOT_PASSWORD: medihome2022
+  #   ports:
+  #     - 27017:27017
+
+  # mongo-express:
+  #   image: mongo-express:0.54
+  #   container_name: mhc_mongo_express
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - mongo
+  #   networks:
+  #     - mh_network
+  #   ports:
+  #     - 28081:8081
+  #   environment:
+  #     ME_CONFIG_MONGODB_ADMINUSERNAME: root
+  #     ME_CONFIG_MONGODB_ADMINPASSWORD: medihome2022
+  #     ME_CONFIG_MONGODB_URL: mongodb://root:medihome2022@mongo:27017/
+
+  adminer:
+    container_name: mhc_adminer
+    image: adminer:4.8.1
+    restart: unless-stopped
+    networks:
+      - mh_network
+    depends_on:
+      - mariadb
+    # ports:
+    #   - 23080:8080
+
+  # redis:
+  #   container_name: mhc_redis
+  #   image: redis:7.0.9-alpine
+  #   restart: unless-stopped
+  #   networks:
+  #     - mh_network
+  #   volumes:
+  #     - ./data/redis:/data
+  #   ports:
+  #     - "26379:6379"
+
+  # redis-insight:
+  #   container_name: mhc_redis-insight
+  #   image: redislabs/redisinsight:1.13.1
+  #   restart: unless-stopped
+  #   networks:
+  #     - mh_network
+  #   depends_on:
+  #     - redis
+  #   volumes:
+  #     - ./data/redis-insight:/db
+  #   ports:
+  #     - '26301:8001'
