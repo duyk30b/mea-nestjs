@@ -30,6 +30,7 @@ services:
       - mh_network
     volumes:
       - ./data/mariadb:/var/lib/mysql
+      - ./data/backup:/backup
     environment:
       - MARIADB_ROOT_PASSWORD=Abc@12345
       - MARIADB_DATABASE=medihome_sql
@@ -75,8 +76,8 @@ services:
       - mh_network
     depends_on:
       - mariadb
-    # ports:
-    #   - 23080:8080
+    ports:
+      - 23080:8080
 
   # redis:
   #   container_name: mhc_redis
@@ -91,7 +92,7 @@ services:
 
   # redis-insight:
   #   container_name: mhc_redis-insight
-  #   image: redislabs/redisinsight:1.13.1
+  #   image: redislabs/redisinsight:1.14.0
   #   restart: unless-stopped
   #   networks:
   #     - mh_network

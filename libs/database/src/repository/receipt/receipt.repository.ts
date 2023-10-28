@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common/decorators'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { Receipt } from '_libs/database/entities'
 import { Between, DataSource, EntityManager, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual } from 'typeorm'
-import { ReceiptCriteria, ReceiptOrder } from './receipt.dto'
+import { ReceiptCondition, ReceiptOrder } from './receipt.dto'
 
 @Injectable()
 export class ReceiptRepository {
@@ -11,36 +11,31 @@ export class ReceiptRepository {
 		@InjectEntityManager() private manager: EntityManager
 	) { }
 
-	getWhereOptions(criteria: ReceiptCriteria = {}) {
+	getWhereOptions(condition: ReceiptCondition = {}) {
 		const where: FindOptionsWhere<Receipt> = {}
 
-		if (criteria.id != null) where.id = criteria.id
-		if (criteria.oid != null) where.oid = criteria.oid
-		if (criteria.distributorId != null) where.distributorId = criteria.distributorId
-		if (criteria.purchaseId != null) where.purchaseId = criteria.purchaseId
-		if (criteria.paymentStatus != null) where.paymentStatus = criteria.paymentStatus
+		if (condition.id != null) where.id = condition.id
+		if (condition.oid != null) where.oid = condition.oid
+		if (condition.distributorId != null) where.distributorId = condition.distributorId
+		if (condition.status != null) where.status = condition.status
 
-		if (criteria.ids) {
-			if (criteria.ids.length === 0) criteria.ids.push(0)
-			where.id = In(criteria.ids)
+		if (condition.ids) {
+			if (condition.ids.length === 0) condition.ids.push(0)
+			where.id = In(condition.ids)
 		}
-		if (criteria.distributorIds) {
-			if (criteria.distributorIds.length === 0) criteria.distributorIds.push(0)
-			where.distributorId = In(criteria.distributorIds)
+		if (condition.distributorIds) {
+			if (condition.distributorIds.length === 0) condition.distributorIds.push(0)
+			where.distributorId = In(condition.distributorIds)
 		}
-		if (criteria.purchaseIds) {
-			if (criteria.purchaseIds.length === 0) criteria.purchaseIds.push(0)
-			where.purchaseId = In(criteria.purchaseIds)
-		}
-		if (criteria.paymentStatuses) {
-			if (criteria.paymentStatuses.length === 0) criteria.paymentStatuses.push(0)
-			where.paymentStatus = In(criteria.paymentStatuses)
+		if (condition.statuses) {
+			if (condition.statuses.length === 0) condition.statuses.push(0)
+			where.status = In(condition.statuses)
 		}
 
 		let paymentTime = undefined
-		if (criteria.fromTime && criteria.toTime) paymentTime = Between(criteria.fromTime, criteria.toTime)
-		else if (criteria.fromTime) paymentTime = MoreThanOrEqual(criteria.fromTime)
-		else if (criteria.toTime) paymentTime = LessThanOrEqual(criteria.toTime)
+		if (condition.fromTime && condition.toTime) paymentTime = Between(condition.fromTime, condition.toTime)
+		else if (condition.fromTime) paymentTime = MoreThanOrEqual(condition.fromTime)
+		else if (condition.toTime) paymentTime = LessThanOrEqual(condition.toTime)
 		if (paymentTime != null) where.paymentTime = paymentTime
 
 		return where
@@ -49,13 +44,13 @@ export class ReceiptRepository {
 	async pagination(options: {
 		page: number,
 		limit: number,
-		criteria?: ReceiptCriteria,
+		condition?: ReceiptCondition,
 		order?: ReceiptOrder
 	}) {
-		const { limit, page, criteria, order } = options
+		const { limit, page, condition, order } = options
 
 		const [data, total] = await this.manager.findAndCount(Receipt, {
-			where: this.getWhereOptions(criteria),
+			where: this.getWhereOptions(condition),
 			order,
 			take: limit,
 			skip: (page - 1) * limit,
@@ -64,41 +59,41 @@ export class ReceiptRepository {
 		return { total, page, limit, data }
 	}
 
-	async findMany(criteria: ReceiptCriteria, relations?: { distributor?: boolean, receiptItems?: boolean }): Promise<Receipt[]> {
+	async findMany(condition: ReceiptCondition, relation?: { distributor?: boolean, receiptItems?: boolean }): Promise<Receipt[]> {
 		const receipts = await this.manager.find(Receipt, {
-			where: this.getWhereOptions(criteria),
+			where: this.getWhereOptions(condition),
 			relations: {
-				distributor: !!relations?.distributor,
-				receiptItems: relations.receiptItems ? { productBatch: { product: true } } : false,
+				distributor: !!relation?.distributor,
+				receiptItems: relation.receiptItems ? { productBatch: { product: true } } : false,
 			},
 			relationLoadStrategy: 'join',
 		})
 		return receipts
 	}
 
-	async findOne(criteria: ReceiptCriteria, relations?: { distributor?: boolean, receiptItems?: boolean }): Promise<Receipt> {
+	async findOne(condition: ReceiptCondition, relation?: { distributor?: boolean, receiptItems?: boolean }): Promise<Receipt> {
 		const [receipt] = await this.manager.find(Receipt, {
-			where: this.getWhereOptions(criteria),
+			where: this.getWhereOptions(condition),
 			relations: {
-				distributor: !!relations?.distributor,
-				receiptItems: relations.receiptItems ? { productBatch: { product: true } } : false,
+				distributor: !!relation?.distributor,
+				receiptItems: relation.receiptItems ? { productBatch: { product: true } } : false,
 			},
 			relationLoadStrategy: 'join',
 		})
 		return receipt
 	}
 
-	async queryOneBy(criteria: { id: number, oid: number }, relations?: {
+	async queryOneBy(condition: { id: number, oid: number }, relation?: {
 		distributor?: boolean,
 		receiptItems?: { productBatch?: boolean }
 	}): Promise<Receipt> {
 		let query = this.manager.createQueryBuilder(Receipt, 'receipt')
-			.where('receipt.id = :id', { id: criteria.id })
-			.andWhere('receipt.oid = :oid', { oid: criteria.oid })
+			.where('receipt.id = :id', { id: condition.id })
+			.andWhere('receipt.oid = :oid', { oid: condition.oid })
 
-		if (relations?.distributor) query = query.leftJoinAndSelect('receipt.distributor', 'distributor')
-		if (relations?.receiptItems) query = query.leftJoinAndSelect('receipt.receiptItems', 'receiptItem')
-		if (relations?.receiptItems?.productBatch) {
+		if (relation?.distributor) query = query.leftJoinAndSelect('receipt.distributor', 'distributor')
+		if (relation?.receiptItems) query = query.leftJoinAndSelect('receipt.receiptItems', 'receiptItem')
+		if (relation?.receiptItems?.productBatch) {
 			query = query
 				.leftJoinAndSelect('receiptItem.productBatch', 'productBatch')
 				.leftJoinAndSelect('productBatch.product', 'product')

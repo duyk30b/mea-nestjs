@@ -3,8 +3,8 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import { sleep } from '_libs/common/helpers/function.helper'
 import { randomFullName } from '_libs/common/helpers/random.helper'
-import { InvoiceItemType, PaymentStatus } from '_libs/database/common/variable'
-import { Arrival, Customer, Distributor, Invoice, InvoiceItem, Purchase, Receipt } from '_libs/database/entities'
+import { InvoiceItemType } from '_libs/database/common/variable'
+import { Arrival, Customer, Distributor, Receipt } from '_libs/database/entities'
 import { DataSource, EntityManager, Repository } from 'typeorm'
 
 @ApiTags('Test')
@@ -41,17 +41,17 @@ export class TestApi {
 
 	@Get('insert')
 	async insert() {
-		const purchaseEntity = this.manager.create<Purchase>(Purchase, [
-			{
-				oid: 1,
-				distributorId: 12,
-				paymentStatus: PaymentStatus.Unpaid,
-				createTime: 12313,
-				totalMoney: 123,
-				debt: 123123,
-			},
-		])
-		const result = await this.manager.insert(Purchase, purchaseEntity)
+		// const purchaseEntity = this.manager.create<Receipt>(Receipt, [
+		// 	{
+		// 		oid: 1,
+		// 		distributorId: 12,
+		// 		paymentStatus: PaymentStatus.Waiting,
+		// 		createTime: 12313,
+		// 		totalMoney: 123,
+		// 		debt: 123123,
+		// 	},
+		// ])
+		// const result = await this.manager.insert(Receipt, purchaseEntity)
 		// result = {
 		// 	identifiers: [{ id: 6 }],
 		// 	generatedMaps: [
@@ -71,7 +71,7 @@ export class TestApi {
 		// 		},
 		// 	],
 		// }
-		return result
+		// return result
 	}
 
 	@Get('query-builder')
@@ -85,7 +85,7 @@ export class TestApi {
 		// const result = await this.arrivalRepository
 		// 	.createQueryBuilder('arrival')
 		// 	.leftJoinAndSelect('distributor', 'distributor', 'arrival.customer_id = distributor.id')
-		// 	.select(['arrival.id as id', 'distributor.full_name_vi as fullNameVi'])
+		// 	.select(['arrival.id as id', 'distributor.full_name as fullName'])
 		// 	.where('arrival.id = :arrivalId', { arrivalId: 1 })
 		// 	.getRawOne()
 
@@ -119,20 +119,20 @@ export class TestApi {
 		const result = await Promise.allSettled([
 			this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
 				await sleep(1000)
-				await manager.update(Customer, { id: 1, fullNameVi: '444' }, { fullNameVi: '666' })
+				await manager.update(Customer, { id: 1, fullName: '444' }, { fullName: '666' })
 				await sleep(3000)
 			}),
 			this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-				await manager.update(Customer, { id: 1 }, { fullNameVi: '555' })
+				await manager.update(Customer, { id: 1 }, { fullName: '555' })
 				await sleep(2000)
 			}),
 		])
 		const endTime = Date.now()
 		const [customerAfter] = await this.manager.find(Customer, { where: { id: 1 } })
 		return {
-			customerRoot: customerRoot.fullNameVi,
+			customerRoot: customerRoot.fullName,
 			result,
-			customerAfter: customerAfter.fullNameVi,
+			customerAfter: customerAfter.fullName,
 			time: endTime - startTime,
 		}
 	}
@@ -145,7 +145,7 @@ export class TestApi {
 			this.dataSource.transaction('REPEATABLE READ', async (manager) => {
 				await sleep(1000)
 				// await manager.update(Receipt, { id: 1 }, { note: randomFullName() })
-				await manager.update(Distributor, { id: 156 }, { fullNameVi: randomFullName() })
+				await manager.update(Distributor, { id: 156 }, { fullName: randomFullName() })
 				await sleep(3000)
 			}),
 			this.dataSource.transaction('SERIALIZABLE', async (manager) => {
@@ -175,21 +175,21 @@ export class TestApi {
 		const result = await Promise.allSettled([
 			this.dataSource.transaction('SERIALIZABLE', async (manager) => {
 				await sleep(1000)
-				await manager.update(Customer, { id: 1 }, { fullNameVi: randomFullName() })
+				await manager.update(Customer, { id: 1 }, { fullName: randomFullName() })
 				await sleep(3000)
 			}),
 			this.dataSource.transaction('SERIALIZABLE', async (manager) => {
 				const [customer] = await manager.find(Customer, { where: { id: 1 } })
 				await sleep(2000)
-				return customer.fullNameVi
+				return customer.fullName
 			}),
 		])
 		const endTime = Date.now()
 		const [customerAfter] = await this.manager.find(Customer, { where: { id: 1 } })
 		return {
-			customerRoot: customerRoot.fullNameVi,
+			customerRoot: customerRoot.fullName,
 			result,
-			customerAfter: customerAfter.fullNameVi,
+			customerAfter: customerAfter.fullName,
 			time: endTime - startTime,
 		}
 	}
@@ -203,35 +203,35 @@ export class TestApi {
 			this.dataSource.transaction('SERIALIZABLE', async (manager) => {
 				// await sleep(1000) 
 				manager.find(Customer, { where: { id: 1 } })
-				// manager.update(Customer, { id: 1 }, { fullNameVi: randomFullName() })
+				// manager.update(Customer, { id: 1 }, { fullName: randomFullName() })
 				await sleep(3000)
 				// throw new Error('some error')
 			}),
 			(async () => {
 				await sleep(2000)
-				await this.manager.update(Customer, { id: 1 }, { fullNameVi: new Date().toISOString() })
+				await this.manager.update(Customer, { id: 1 }, { fullName: new Date().toISOString() })
 				await sleep(1000)
 			})(),
 			// (async () => {
 			// 	await sleep(1000)
 			// 	const [customer] = await this.manager.find(Customer, { where: { id: 1 } })
 			// 	await sleep(1000)
-			// 	return customer.fullNameVi
+			// 	return customer.fullName
 			// })(),
 			// (async () => {
 			// 	await sleep(5000) // cái này thì luôn đúng vì sleep 5s, thằng transaction thực hiện xong rôi
 			// 	const [customer] = await this.manager.find(Customer, { where: { id: 1 } })
 			// 	await sleep(1000)
-			// 	return customer.fullNameVi
+			// 	return customer.fullName
 			// })(),
 		])
 		const endTime = Date.now()
 		const [customerAfter] = await this.manager.find(Customer, { where: { id: 1 } })
 
 		return {
-			customerRoot: customerRoot.fullNameVi,
+			customerRoot: customerRoot.fullName,
 			result,
-			customerAfter: customerAfter.fullNameVi,
+			customerAfter: customerAfter.fullName,
 			time: endTime - startTime,
 		}
 	}
@@ -242,12 +242,12 @@ export class TestApi {
 			this.dataSource.transaction('SERIALIZABLE', async (manager) => {
 				const [customer] = await manager.find(Customer, { where: { id: 1 } })
 				await sleep(2000)
-				await manager.update(Customer, { id: 1 }, { fullNameVi: randomFullName() })
+				await manager.update(Customer, { id: 1 }, { fullName: randomFullName() })
 			}),
 			this.dataSource.transaction('SERIALIZABLE', async (manager) => {
 				const [customer] = await manager.find(Customer, { where: { id: 1 } })
 				await sleep(2000)
-				await manager.update(Customer, { id: 1 }, { fullNameVi: randomFullName() })
+				await manager.update(Customer, { id: 1 }, { fullName: randomFullName() })
 			}),
 		])
 		return { result }
@@ -257,14 +257,14 @@ export class TestApi {
 	async transaction_DEADLOCK_READ_UNCOMMITTED() {
 		const result = await Promise.allSettled([
 			this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-				await manager.update(Customer, { id: 1 }, { fullNameVi: randomFullName() })
+				await manager.update(Customer, { id: 1 }, { fullName: randomFullName() })
 				await sleep(2000)
-				await manager.update(Customer, { id: 2 }, { fullNameVi: randomFullName() })
+				await manager.update(Customer, { id: 2 }, { fullName: randomFullName() })
 			}),
 			this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-				await manager.update(Customer, { id: 2 }, { fullNameVi: randomFullName() })
+				await manager.update(Customer, { id: 2 }, { fullName: randomFullName() })
 				await sleep(2000)
-				await manager.update(Customer, { id: 1 }, { fullNameVi: randomFullName() })
+				await manager.update(Customer, { id: 1 }, { fullName: randomFullName() })
 			}),
 		])
 		return { result }

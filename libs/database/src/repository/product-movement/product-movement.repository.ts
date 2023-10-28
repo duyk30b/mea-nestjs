@@ -3,17 +3,17 @@ import { InjectEntityManager } from '@nestjs/typeorm'
 import { ProductMovementType } from '_libs/database/common/variable'
 import { ProductMovement } from '_libs/database/entities'
 import { EntityManager, FindOptionsWhere } from 'typeorm'
-import { ProductMovementCriteria, ProductMovementOrder } from './product-movement.dto'
+import { ProductMovementCondition, ProductMovementOrder } from './product-movement.dto'
 
 @Injectable()
 export class ProductMovementRepository {
 	constructor(@InjectEntityManager() private manager: EntityManager) { }
 
-	getWhereOptions(criteria: ProductMovementCriteria = {}) {
+	getWhereOptions(condition: ProductMovementCondition = {}) {
 		const where: FindOptionsWhere<ProductMovement> = {}
-		if (criteria.oid != null) where.oid = criteria.oid
-		if (criteria.productId != null) where.productId = criteria.productId
-		if (criteria.productBatchId != null) where.productBatchId = criteria.productBatchId
+		if (condition.oid != null) where.oid = condition.oid
+		if (condition.productId != null) where.productId = condition.productId
+		if (condition.productBatchId != null) where.productBatchId = condition.productBatchId
 
 		return where
 	}
@@ -21,13 +21,13 @@ export class ProductMovementRepository {
 	async pagination(options: {
 		page: number,
 		limit: number,
-		criteria?: ProductMovementCriteria,
+		condition?: ProductMovementCondition,
 		order?: ProductMovementOrder,
 	}) {
-		const { limit, page, criteria, order } = options
+		const { limit, page, condition, order } = options
 
 		const [data, total] = await this.manager.findAndCount(ProductMovement, {
-			where: this.getWhereOptions(criteria),
+			where: this.getWhereOptions(condition),
 			order,
 			take: limit,
 			skip: (page - 1) * limit,
@@ -37,27 +37,27 @@ export class ProductMovementRepository {
 	}
 
 	async queryOne(
-		criteria?: { oid: number, productId?: number, productBatchId?: number, },
-		relations?: {
+		condition?: { oid: number, productId?: number, productBatchId?: number, },
+		relation?: {
 			productBatch?: { product?: boolean },
 			invoice?: { customer?: boolean },
 			receipt?: { distributor?: boolean }
 		}
 	) {
 		let query = this.manager.createQueryBuilder(ProductMovement, 'productMovement')
-			.where('productMovement.oid = :oid', { oid: criteria.oid })
+			.where('productMovement.oid = :oid', { oid: condition.oid })
 
-		if (criteria?.productId) {
-			query = query.andWhere('productMovement.productId = :productId', { productId: criteria.productId })
+		if (condition?.productId) {
+			query = query.andWhere('productMovement.productId = :productId', { productId: condition.productId })
 		}
-		if (criteria?.productBatchId) {
+		if (condition?.productBatchId) {
 			query = query.andWhere(
 				'productMovement.productBatchId = :productBatchId',
-				{ productBatchId: criteria.productBatchId }
+				{ productBatchId: condition.productBatchId }
 			)
 		}
 
-		if (relations?.invoice) {
+		if (relation?.invoice) {
 			query = query.leftJoinAndSelect(
 				'productMovement.invoice',
 				'invoice',
@@ -65,11 +65,11 @@ export class ProductMovementRepository {
 				{ typeInvoice: ProductMovementType.Invoice }
 			)
 		}
-		if (relations?.invoice?.customer) {
+		if (relation?.invoice?.customer) {
 			query = query.leftJoinAndSelect('invoice.customer', 'customer')
 		}
 
-		if (relations?.receipt) {
+		if (relation?.receipt) {
 			query = query.leftJoinAndSelect(
 				'productMovement.receipt',
 				'receipt',
@@ -77,7 +77,7 @@ export class ProductMovementRepository {
 				{ typeReceipt: ProductMovementType.Receipt }
 			)
 		}
-		if (relations?.receipt?.distributor) {
+		if (relation?.receipt?.distributor) {
 			query = query.leftJoinAndSelect('receipt.distributor', 'distributor')
 		}
 

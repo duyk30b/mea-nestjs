@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { DiscountType, InvoiceItemType } from '../common/variable'
+import { DiscountType, InvoiceItemType, UnitType } from '../common/variable'
 import Invoice from './invoice.entity'
 import Procedure from './procedure.entity'
 import ProductBatch from './product-batch.entity'
@@ -27,9 +27,9 @@ export default class InvoiceItem extends BaseEntity {
 	@Expose({ name: 'type' })
 	type: InvoiceItemType
 
-	@Column({ name: 'unit', default: '{"name":"","rate":1}' })
+	@Column({ name: 'unit', type: 'simple-json', default: '{"name":"","rate":1}' })
 	@Expose({ name: 'unit' })
-	unit: string
+	unit: UnitType
 
 	@Column({ name: 'cost_price', nullable: true })
 	@Expose({ name: 'cost_price' })

@@ -21,10 +21,8 @@ export class ProcedurePaginationQuery extends PaginationQuery {
 export class ProcedureGetManyQuery {
 	@ApiPropertyOptional({ name: 'limit', example: 10 })
 	@Expose({ name: 'limit' })
-	@Transform(({ value }) => parseInt(value))
+	@Type(() => Number)
 	@IsInt()
-	@Min(3)
-	@Max(100)
 	limit: number
 
 	@ApiPropertyOptional({ type: ProcedureFilterQuery })

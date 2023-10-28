@@ -1,141 +1,106 @@
 import { Injectable } from '@nestjs/common/decorators'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { uniqueArray } from '_libs/common/helpers/object.helper'
-import { DebtType, PaymentStatus, ProductMovementType } from '_libs/database/common/variable'
-import { Distributor, DistributorDebt, ProductBatch, ProductMovement, Purchase, Receipt, ReceiptItem } from '_libs/database/entities'
-import { DataSource, EntityManager, In } from 'typeorm'
-import { ReceiptInsertDto, ReceiptUpdateDto } from './purchase-receipt.dto'
+import { DebtType, ProductMovementType, ReceiptStatus } from '_libs/database/common/variable'
+import { Distributor, DistributorDebt, ProductBatch, ProductMovement, Receipt, ReceiptItem } from '_libs/database/entities'
+import { DataSource, EntityManager, In, IsNull } from 'typeorm'
+import { ProductRepository } from '../product/product.repository'
+import { ReceiptInsertDto, ReceiptUpdateDto } from './receipt.dto'
 
 @Injectable()
-export class PurchaseReceiptRepository {
+export class ReceiptQuickRepository {
 	constructor(
 		private dataSource: DataSource,
-		@InjectEntityManager() private manager: EntityManager
+		@InjectEntityManager() private manager: EntityManager,
+		private productRepository: ProductRepository
 	) { }
 
-	async createReceiptDraft(oid: number, receiptInsertDto: ReceiptInsertDto, time: number) {
+	async createDraft(params: { oid: number, receiptInsertDto: ReceiptInsertDto }) {
+		const { oid, receiptInsertDto } = params
 		return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-			const purchaseSnap = manager.create<Purchase>(Purchase, {
-				oid,
-				distributorId: receiptInsertDto.distributorId,
-				paymentStatus: PaymentStatus.Unpaid,
-				createTime: time,
-				totalMoney: receiptInsertDto.totalMoney,
-				debt: receiptInsertDto.debt,
-			})
-			const purchaseResult = await manager.insert(Purchase, purchaseSnap)
-			const purchaseId = purchaseResult.identifiers?.[0]?.id
-			if (!purchaseId) {
-				throw new Error(`Create Purchase failed: Insert error ${JSON.stringify(purchaseResult)}`)
-			}
-
 			const receiptSnap = manager.create<Receipt>(Receipt, receiptInsertDto)
 			receiptSnap.oid = oid
-			receiptSnap.purchaseId = purchaseId
-			receiptSnap.paymentStatus = PaymentStatus.Unpaid
+			receiptSnap.status = ReceiptStatus.Draft
+
 			const receiptResult = await manager.insert(Receipt, receiptSnap)
 			const receiptId = receiptResult.identifiers?.[0]?.id
 			if (!receiptId) {
-				throw new Error(`Create Purchase failed: Insert error ${JSON.stringify(receiptResult)}`)
+				throw new Error(`Create Receipt failed: Insert error ${JSON.stringify(receiptResult)}`)
 			}
 
 			const receiptItemsEntity = manager.create<ReceiptItem>(ReceiptItem, receiptInsertDto.receiptItems)
 			receiptItemsEntity.forEach((item) => {
 				item.oid = oid
 				item.receiptId = receiptId
+				item.distributorId = receiptInsertDto.distributorId
 			})
 			await manager.insert(ReceiptItem, receiptItemsEntity)
 
-			return { purchaseId, receiptId }
+			return { receiptId }
 		})
 	}
 
-	async updateReceiptDraft(oid: number, receiptId: number, receiptUpdateDto: ReceiptUpdateDto) {
+	async updateDraft(params: { oid: number, receiptId: number, receiptUpdateDto: ReceiptUpdateDto }) {
+		const { oid, receiptId, receiptUpdateDto } = params
+
 		return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
 			const { receiptItems, ...receiptSnap } = manager.create<Receipt>(Receipt, receiptUpdateDto)
-			const { affected } = await manager.update(Receipt, {
+			const receiptUpdateResult = await manager.update(Receipt, {
 				id: receiptId,
 				oid,
-				paymentStatus: PaymentStatus.Unpaid,
+				status: ReceiptStatus.Draft,
 			}, receiptSnap)
-			if (affected !== 1) {
+			if (receiptUpdateResult.affected !== 1) {
 				throw new Error(`Update Receipt ${receiptId} failed: Status invalid`)
 			}
 
-			const [receipt] = await manager.find(Receipt, { where: { id: receiptId, oid } })
-			const { purchaseId } = receipt
-			const updatePurchase = await manager.update(Purchase, {
-				oid,
-				id: purchaseId,
-				paymentStatus: PaymentStatus.Unpaid,
-			}, {
-				totalMoney: receiptUpdateDto.totalMoney,
-				debt: receiptUpdateDto.debt,
-			})
-			if (updatePurchase.affected !== 1) {
-				throw new Error(`Update Arrival ${purchaseId} failed: Status invalid`)
-			}
+			const receipt = await manager.findOneBy(Receipt, { id: receiptId, oid })
 
 			await manager.delete(ReceiptItem, { oid, receiptId })
 			const receiptItemsEntity = manager.create<ReceiptItem>(ReceiptItem, receiptUpdateDto.receiptItems)
 			receiptItemsEntity.forEach((item) => {
 				item.oid = oid
 				item.receiptId = receiptId
+				item.distributorId = receipt.distributorId
 			})
 			await manager.insert(ReceiptItem, receiptItemsEntity)
 
-			return { purchaseId, receiptId }
+			return { receiptId }
 		})
 	}
 
-	async createReceiptDraftAfterRefund(oid: number, purchaseId: number, receiptInsertDto: ReceiptInsertDto) {
+	async deleteDraft(params: { oid: number, receiptId: number }) {
+		const { oid, receiptId } = params
 		return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-			const updatePurchase = await manager.update(Purchase, {
+			const receiptDeleteResult = await manager.delete(Receipt, {
 				oid,
-				id: purchaseId,
-				paymentStatus: PaymentStatus.Refund,
-			}, {
-				totalMoney: receiptInsertDto.totalMoney,
-				debt: receiptInsertDto.debt,
-				paymentStatus: PaymentStatus.Unpaid,
+				id: receiptId,
+				status: ReceiptStatus.Draft,
 			})
-			if (updatePurchase.affected !== 1) {
-				throw new Error(`Create Receipt for Purchase ${purchaseId} failed: Status invalid`)
+			if (receiptDeleteResult.affected !== 1) {
+				throw new Error(`Delete Invoice ${receiptId} failed: Status invalid`)
 			}
-
-			const receiptSnap = manager.create<Receipt>(Receipt, receiptInsertDto)
-			receiptSnap.oid = oid
-			receiptSnap.purchaseId = purchaseId
-			receiptSnap.paymentStatus = PaymentStatus.Unpaid
-			const receiptResult = await manager.insert(Receipt, receiptSnap)
-			const receiptId = receiptResult.identifiers?.[0]?.id
-			if (!receiptId) {
-				throw new Error(`Create Receipt for Purchase ${purchaseId} failed: Insert error ${JSON.stringify(receiptResult)}`)
-			}
-
-			const receiptItemsEntity = manager.create<ReceiptItem>(ReceiptItem, receiptInsertDto.receiptItems)
-			receiptItemsEntity.forEach((item) => {
-				item.oid = oid
-				item.receiptId = receiptId
-			})
-			await manager.insert(ReceiptItem, receiptItemsEntity)
-
-			return { purchaseId, receiptId }
+			await manager.delete(ReceiptItem, { oid, receiptId })
 		})
 	}
 
-	async paymentReceiptDraft(oid: number, receiptId: number, time: number) {
-		return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-			const { affected } = await manager.update(Receipt, {
+	async startShipAndPayment(params: { oid: number, receiptId: number, shipTime: number }) {
+		const { oid, receiptId, shipTime } = params
+
+		const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
+			const receiptUpdateResult = await manager.update(Receipt, {
 				id: receiptId,
 				oid,
-				paymentStatus: PaymentStatus.Unpaid,
+				shipTime: IsNull(),
+				paymentTime: IsNull(),
+				status: In([ReceiptStatus.Draft, ReceiptStatus.Process]),
 			}, {
-				paymentStatus: PaymentStatus.Full,
-				paymentTime: time,
+				status: ReceiptStatus.Finish,
+				paymentTime: shipTime,
+				shipTime,
 			})
-			if (affected !== 1) {
-				throw new Error(`Payment Receipt ${receiptId} failed: Status invalid`)
+			if (receiptUpdateResult.affected !== 1) {
+				throw new Error(`Process Receipt ${receiptId} failed: Status invalid`)
 			}
 
 			const [receipt] = await manager.find(Receipt, {
@@ -144,23 +109,14 @@ export class PurchaseReceiptRepository {
 				where: { oid, id: receiptId },
 			})
 			if (receipt.receiptItems.length === 0) {
-				throw new Error(`Payment Receipt ${receiptId} failed: Not found receipt_items`)
-			}
-			const { purchaseId } = receipt
-
-			const updatePurchase = await manager.update(Purchase, { id: receipt.purchaseId }, {
-				totalMoney: receipt.totalMoney,
-				debt: receipt.debt,
-				createTime: time,
-				paymentStatus: PaymentStatus.Full,
-			})
-			if (updatePurchase.affected !== 1) {
-				throw new Error(`Payment Receipt ${receiptId} failed: Purchase ${purchaseId} invalid`)
+				throw new Error(`Process Receipt ${receiptId} failed: Not found receipt_items`)
 			}
 
 			// Cộng số lượng vào lô hàng
+			const productBatchIds = uniqueArray(receipt.receiptItems.map((i) => i.productBatchId))
+			let productIds: number[] = []
+
 			if (receipt.receiptItems.length) {
-				const productBatchIds = uniqueArray(receipt.receiptItems.map((i) => i.productBatchId))
 				// update trước để lock các bản ghi của productBatch
 				const updateBatch = await manager.query(`
 					UPDATE product_batch 
@@ -168,23 +124,24 @@ export class PurchaseReceiptRepository {
 							FROM receipt_item
 							WHERE receipt_item.receipt_id = ${receipt.id} AND receipt_item.oid = ${oid}
 							GROUP BY product_batch_id
-						) receipt_item 
-						ON product_batch.id = receipt_item.product_batch_id
-					SET product_batch.quantity = product_batch.quantity + receipt_item.sum_quantity
+						) sri 
+						ON product_batch.id = sri.product_batch_id
+					SET product_batch.quantity = product_batch.quantity + sri.sum_quantity
 					WHERE product_batch.id IN (${productBatchIds.toString()})
 						AND product_batch.oid = ${oid}
 				`)
 
 				if (updateBatch.affectedRows !== productBatchIds.length) {
-					throw new Error(`Payment Receipt ${receiptId} failed: Some batch can't update quantity`)
+					throw new Error(`Process Receipt ${receiptId} failed: Some batch can't update quantity`)
 				}
 
 				const productBatches = await manager.findBy(ProductBatch, { id: In(productBatchIds) })
+				productIds = uniqueArray(productBatches.map((i) => i.productId))
 
 				const productMovementsEntity = receipt.receiptItems.map((receiptItem) => {
 					const productBatch = productBatches.find((i) => i.id === receiptItem.productBatchId)
 					if (!productBatch) {
-						throw new Error(`Payment Receipt ${receiptId} failed: ProductBatchID ${receiptItem.productBatchId} invalid`)
+						throw new Error(`Process Receipt ${receiptId} failed: ProductBatchID ${receiptItem.productBatchId} invalid`)
 					}
 					// cần phải cập nhật số lượng vì có thể nhiều sản phẩm cùng update số lượng
 					productBatch.quantity = productBatch.quantity - receiptItem.quantity // trả lại số lượng ban đầu vì ở trên đã bị update trước
@@ -194,7 +151,7 @@ export class PurchaseReceiptRepository {
 						productId: productBatch.productId,
 						productBatchId: productBatch.id,
 						referenceId: receiptId,
-						createTime: time,
+						createTime: shipTime,
 						type: ProductMovementType.Receipt,
 						isRefund: false,
 						openQuantity: productBatch.quantity,
@@ -216,7 +173,7 @@ export class PurchaseReceiptRepository {
 					receipt.debt
 				)
 				if (updateDistributor.affected !== 1) {
-					throw new Error(`Payment Receipt ${receiptId} failed: Update distributor ${receipt.distributorId} invalid`)
+					throw new Error(`Process Receipt ${receiptId} failed: Update distributor ${receipt.distributorId} invalid`)
 				}
 
 				const distributor = await manager.findOne(Distributor, {
@@ -229,26 +186,34 @@ export class PurchaseReceiptRepository {
 					distributorId: receipt.distributorId,
 					receiptId,
 					type: DebtType.Borrow,
-					createTime: time,
+					createTime: shipTime,
 					openDebt: distributor.debt - receipt.debt, // do đã bị update ở trên
 					money: receipt.debt,
 					closeDebt: distributor.debt,
 				})
 				await manager.insert(DistributorDebt, distributorDebtDto)
 			}
-			return { purchaseId, receiptId }
+			return { productIds }
 		})
+
+		if (transaction.productIds.length) {
+			await this.productRepository.calculateProductQuantity({
+				oid,
+				productIds: transaction.productIds,
+			})
+		}
 	}
 
-	async refundReceipt(oid: number, receiptId: number, time: number) {
-		return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
+	async startRefund(params: { oid: number, receiptId: number, refundTime: number }) {
+		const { oid, receiptId, refundTime } = params
+		const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
 			const { affected } = await manager.update(Receipt, {
 				id: receiptId,
 				oid,
-				paymentStatus: PaymentStatus.Full,
+				status: ReceiptStatus.Finish,
 			}, {
-				paymentStatus: PaymentStatus.Refund,
-				refundTime: time,
+				refundTime,
+				status: ReceiptStatus.Refund,
 			})
 			if (affected !== 1) {
 				throw new Error(`Refund Receipt ${receiptId} failed: Receipt ${receiptId} invalid`)
@@ -262,21 +227,12 @@ export class PurchaseReceiptRepository {
 			if (receipt.receiptItems.length === 0) {
 				throw new Error(`Refund Receipt ${receiptId} failed: Not found receipt_items`)
 			}
-			const { purchaseId } = receipt
-
-			const updatePurchase = await manager.update(Purchase, { oid, id: receipt.purchaseId }, {
-				totalMoney: receipt.totalMoney,
-				debt: receipt.debt,
-				createTime: time,
-				paymentStatus: PaymentStatus.Refund,
-			})
-			if (updatePurchase.affected !== 1) {
-				throw new Error(`Refund Receipt ${receiptId} failed: Purchase ${purchaseId} invalid`)
-			}
 
 			// Trừ số lượng vào lô hàng
+			let productIds: number[] = []
+			const productBatchIds = uniqueArray(receipt.receiptItems.map((i) => i.productBatchId))
+
 			if (receipt.receiptItems.length) {
-				const productBatchIds = uniqueArray(receipt.receiptItems.map((i) => i.productBatchId))
 				// update trước để lock các bản ghi của productBatch
 				const updateBatch = await manager.query(`
 					UPDATE product_batch 
@@ -295,6 +251,7 @@ export class PurchaseReceiptRepository {
 				}
 
 				const productBatches = await manager.findBy(ProductBatch, { id: In(productBatchIds) })
+				productIds = uniqueArray(productBatches.map((i) => i.productId))
 
 				const productMovementsEntity = receipt.receiptItems.map((receiptItem) => {
 					const productBatch = productBatches.find((i) => i.id === receiptItem.productBatchId)
@@ -310,7 +267,7 @@ export class PurchaseReceiptRepository {
 						productBatchId: productBatch.id,
 						referenceId: receiptId,
 						type: ProductMovementType.Receipt,
-						createTime: time,
+						createTime: refundTime,
 						isRefund: true,
 						openQuantity: productBatch.quantity,
 						number: -receiptItem.quantity,
@@ -345,7 +302,7 @@ export class PurchaseReceiptRepository {
 					distributorId: receipt.distributorId,
 					receiptId,
 					type: DebtType.Refund,
-					createTime: time,
+					createTime: refundTime,
 					openDebt: distributor.debt + receipt.debt, // Trả lại số lượng ban đầu vì đã bị update trước đó
 					money: -receipt.debt,
 					closeDebt: distributor.debt,
@@ -353,29 +310,14 @@ export class PurchaseReceiptRepository {
 				await manager.insert(DistributorDebt, distributorDebtDto)
 			}
 
-			return { purchaseId, receiptId }
+			return { productIds }
 		})
+
+		if (transaction.productIds.length) {
+			await this.productRepository.calculateProductQuantity({
+				oid,
+				productIds: transaction.productIds,
+			})
+		}
 	}
-
-	// async recalculateProductQuantity(oid: number, purchaseId: number) {
-	// 	await this.manager.query(`
-	// 		UPDATE product 
-	// 			LEFT JOIN ( SELECT product_id, SUM(quantity) as quantity FROM product_batch GROUP BY product_id ) sa 
-	// 			ON product.id = sa.product_id
-	// 		SET product.quantity = sa.quantity
-	// 		WHERE product.id IN (SELECT DISTINCT product_id FROM product_in WHERE purchase_id = ${purchaseId}) 
-	// 			AND product.oid = ${oid}
-	// 	`)
-	// }
-
-	// async updateExpiryDateAndCostPriceProduct(oid: number, purchaseId: number) {
-	// 	await this.manager.query(`
-	// 		UPDATE product LEFT JOIN product_in ON product.id = product_in.product_id 
-	// 		SET product.last_expiry_date = product_in.expiry_date, 
-	// 			product.last_cost_price = product_in.cost_price,
-	// 			product.last_retail_price = product_in.retail_price,
-	// 			product.last_wholesale_price = product_in.wholesale_price
-	// 		WHERE product_in.purchase_id = ${purchaseId} AND product_in.oid = ${oid}
-	// 	`)
-	// }
 }

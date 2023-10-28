@@ -15,15 +15,14 @@ export class DistributorSeed {
 		const distributorsDto: Distributor[] = []
 		for (let i = 0; i < number; i++) {
 			const gender = randomEnum<EGender>(EGender)
-			const fullNameVi = randomFullName(gender)
-			const fullNameEn = convertViToEn(fullNameVi)
+			const fullName = randomFullName(gender)
 			const address = AddressData.getRandomAddress()
 
 			const distributor = new Distributor()
 
 			distributor.oid = oid
-			distributor.fullNameVi = fullNameVi
-			distributor.fullNameEn = fullNameEn
+			distributor.fullName = fullName
+			distributor.fullName = fullName
 			distributor.phone = randomPhoneNumber()
 			distributor.addressProvince = address.province
 			distributor.addressDistrict = address.district

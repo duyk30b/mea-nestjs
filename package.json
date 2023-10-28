@@ -8,7 +8,7 @@
   "scripts": {
     "start": "nest start",
     "dev": "nest start --debug --watch",
-    "dev:hot": "nest build --webpack --webpackPath webpack-hmr.config.js --watch",
+    "debug": "nest start --debug 0.0.0.0:9229 --watch",
     "build": "nest build",
     "lint": "eslint \"apps/**/*.ts\" \"libs/**/*.ts\" --fix",
     "test": "jest",
@@ -17,11 +17,11 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/api/test/jest-e2e.json",
-    "migration:generate": "npm config set name change_db && typeorm-ts-node-commonjs migration:generate -p -d ./libs/database/src/common/data-source.ts ./libs/database/src/migrations/%npm_config_name%",
-    "migration-ubuntu:generate": "typeorm-ts-node-commonjs migration:generate -p -d ./libs/database/src/common/data-source.ts ./libs/database/src/migrations/db-change",
-    "migration:create": "npm config set name change_db && typeorm-ts-node-commonjs migration:create ./libs/database/src/migrations/%npm_config_name%",
-    "migration:run": "typeorm-ts-node-commonjs migration:run -d ./libs/database/src/common/data-source.ts",
-    "migration:revert": "typeorm-ts-node-commonjs migration:revert -d ./libs/database/src/common/data-source.ts",
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli -d libs/database/src/common/data-source.ts",
+    "migration:generate": "cross-var npm run typeorm -- migration:generate -p libs/database/src/migrations/$npm_config_name",
+    "migration:create": "cross-var ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli migration:create libs/database/src/migrations/$npm_config_name",
+    "migration:run": "npm run build && npm run typeorm -- migration:run",
+    "migration:revert": "npm run typeorm -- migration:revert",
     "seed:data": "npm run build seed-data && node dist/apps/seed-data/main.js start:seed",
     "stop:local": "taskkill /f /im node.exe"
   },
@@ -30,6 +30,7 @@
     "@nestjs-modules/mailer": "^1.8.1",
     "@nestjs/axios": "^1.0.1",
     "@nestjs/bull": "^0.6.2",
+    "@nestjs/cli": "^10.1.18",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.0",
@@ -48,11 +49,13 @@
     "bull": "^4.10.2",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.13.2",
+    "cross-var": "^1.1.0",
     "express-rate-limit": "^6.7.0",
     "helmet": "^6.0.0",
     "kafkajs": "^2.2.3",
     "mysql2": "^2.3.3",
     "nest-commander": "^3.6.1",
+    "nestjs-i18n": "^10.3.1",
     "nodemailer": "^6.9.3",
     "reflect-metadata": "^0.1.13",
     "request-ip": "^3.3.0",
@@ -64,7 +67,6 @@
     "typescript": "^4.9.3"
   },
   "devDependencies": {
-    "@nestjs/cli": "^9.0.0",
     "@nestjs/schematics": "^9.0.0",
     "@nestjs/testing": "^9.0.0",
     "@types/bcrypt": "^5.0.0",
@@ -79,13 +81,11 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^8.0.1",
     "jest": "28.1.3",
-    "run-script-webpack-plugin": "^0.1.1",
     "source-map-support": "^0.5.20",
     "supertest": "^6.1.3",
     "ts-jest": "28.0.8",
     "ts-loader": "^9.2.3",
-    "webpack": "^5.75.0",
-    "webpack-node-externals": "^3.0.0"
+    "webpack": "^5.75.0"
   },
   "jest": {
     "moduleFileExtensions": [

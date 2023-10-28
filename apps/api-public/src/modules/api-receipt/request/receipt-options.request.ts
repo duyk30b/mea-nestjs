@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
 import { valuesEnum } from '_libs/common/helpers/typescript.helper'
-import { PaymentStatus } from '_libs/database/common/variable'
+import { ReceiptStatus } from '_libs/database/common/variable'
 import { SortQuery } from 'apps/api-public/src/common/pagination.query'
 import { Expose, Transform, Type } from 'class-transformer'
 import { IsBoolean, IsEnum, IsNumber } from 'class-validator'
@@ -24,15 +24,15 @@ export class ReceiptFilterQuery {
 	@IsNumber()
 	toTime: number
 
-	@ApiPropertyOptional({ name: 'filter[payment_status]', enum: valuesEnum(PaymentStatus), example: PaymentStatus.Full })
-	@Expose({ name: 'payment_status' })
+	@ApiPropertyOptional({ name: 'filter[status]', enum: valuesEnum(ReceiptStatus), example: ReceiptStatus.Draft })
+	@Expose({ name: 'status' })
 	@Type(() => Number)
-	@IsEnum(PaymentStatus)
-	paymentStatus: PaymentStatus
+	@IsEnum(ReceiptStatus)
+	status: ReceiptStatus
 }
 
-export class ReceiptRelationsQuery {
-	@ApiPropertyOptional({ name: 'relations[distributor]' })
+export class ReceiptRelationQuery {
+	@ApiPropertyOptional({ name: 'relation[distributor]' })
 	@Expose({ name: 'distributor' })
 	@Transform(({ value }) => {
 		if (['1', 'true'].includes(value)) return true
@@ -42,7 +42,7 @@ export class ReceiptRelationsQuery {
 	@IsBoolean()
 	distributor: boolean
 
-	@ApiPropertyOptional({ name: 'relations[receipt_items]' })
+	@ApiPropertyOptional({ name: 'relation[receipt_items]' })
 	@Expose({ name: 'receipt_items' })
 	@Transform(({ value }) => {
 		if (['1', 'true'].includes(value)) return true

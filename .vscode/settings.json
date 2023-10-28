@@ -34,5 +34,6 @@
   ],
   "window.title": "${rootName}",
   "typescript.preferences.quoteStyle": "single",
-  "javascript.preferences.quoteStyle": "single"
+  "javascript.preferences.quoteStyle": "single",
+  "git.allowForcePush": true
 }

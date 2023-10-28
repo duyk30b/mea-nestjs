@@ -6,12 +6,16 @@
   "configurations": [
     {
       "name": "Attach",
-      "port": 29229,
+      "type": "node",
       "request": "attach",
+      "restart": true,
+      "port": 9229,
+      "address": "0.0.0.0",
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "/app",
       "skipFiles": [
         "<node_internals>/**"
       ],
-      "type": "node"
     }
   ]
 }

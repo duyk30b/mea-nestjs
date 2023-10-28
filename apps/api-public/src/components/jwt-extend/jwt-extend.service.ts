@@ -1,11 +1,13 @@
-import { HttpException, HttpStatus, Inject } from '@nestjs/common'
+import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
+import { BusinessException } from '_libs/common/exception-filter/business-exception.filter'
 import Employee from '_libs/database/entities/employee.entity'
-import { IAccessTokenPayload, IRefreshTokenPayload } from '../../common/constants'
+import { IRefreshTokenPayload } from '../../common/constants'
+import { TExternal } from '../../common/request-external'
 import { JwtConfig } from '../../environments'
-import { ErrorMessage } from '../../exception-filters/exception.const'
 
+@Injectable()
 export class JwtExtendService {
 	constructor(
 		@Inject(JwtConfig.KEY) private jwtConfig: ConfigType<typeof JwtConfig>,
@@ -13,7 +15,7 @@ export class JwtExtendService {
 	) { }
 
 	createAccessToken(user: Employee, ip: string): { token: string, exp: number } {
-		const userPayload: IAccessTokenPayload = {
+		const userPayload: TExternal = {
 			ip,
 			orgPhone: user.organization.phone,
 			oid: user.organization.id,
@@ -51,23 +53,22 @@ export class JwtExtendService {
 		return { accessToken, refreshToken }
 	}
 
-	verifyAccessToken(accessToken: string, ip: string): IAccessTokenPayload {
+	verifyAccessToken(accessToken: string, ip: string): TExternal {
 		try {
 			const jwtPayload = this.jwtService.verify(accessToken, { secret: this.jwtConfig.accessKey })
 
-			const data = jwtPayload.data as IAccessTokenPayload
+			const data = jwtPayload.data as TExternal
 			// if (data.ip !== ip) throw new Error(ErrorMessage.Token.WrongIp) // accessToken allow change ip
 
 			return data
 		} catch (error) {
 			if (error.name === 'TokenExpiredError') {
-				throw new HttpException(ErrorMessage.Token.Expired, HttpStatus.UNAUTHORIZED)
-			} else if (error.name === 'JsonWebTokenError') {
-				throw new HttpException(ErrorMessage.Token.Invalid, HttpStatus.UNAUTHORIZED)
-			} else if (error.message === ErrorMessage.Token.Invalid) {
-				throw new HttpException(ErrorMessage.Token.Invalid, HttpStatus.UNAUTHORIZED)
+				throw new BusinessException('common.Token.Expired', HttpStatus.UNAUTHORIZED)
 			}
-			throw new HttpException(ErrorMessage.Unknown, HttpStatus.INTERNAL_SERVER_ERROR)
+			else if (error.name === 'JsonWebTokenError') {
+				throw new BusinessException('common.Token.Invalid', HttpStatus.UNAUTHORIZED)
+			}
+			throw error
 		}
 	}
 
@@ -76,18 +77,17 @@ export class JwtExtendService {
 			const jwtPayload = this.jwtService.verify(refreshToken, { secret: this.jwtConfig.refreshKey })
 
 			const data = jwtPayload.data as IRefreshTokenPayload
-			if (data.ip !== ip) throw new Error(ErrorMessage.Token.WrongIp)
+			// if (data.ip !== ip) throw new Error(ErrorMessage.Token.WrongIp)
 
 			return data
 		} catch (error) {
 			if (error.name === 'TokenExpiredError') {
-				throw new HttpException(ErrorMessage.Token.Expired, HttpStatus.FORBIDDEN)
-			} else if (error.name === 'JsonWebTokenError') {
-				throw new HttpException(ErrorMessage.Token.Invalid, HttpStatus.FORBIDDEN)
-			} else if (error.message === ErrorMessage.Token.WrongIp) {
-				throw new HttpException(ErrorMessage.Token.WrongIp, HttpStatus.FORBIDDEN)
+				throw new BusinessException('common.Token.Expired', HttpStatus.UNAUTHORIZED)
 			}
-			throw new HttpException(ErrorMessage.Unknown, HttpStatus.INTERNAL_SERVER_ERROR)
+			else if (error.name === 'JsonWebTokenError') {
+				throw new BusinessException('common.Token.Invalid', HttpStatus.UNAUTHORIZED)
+			}
+			throw error
 		}
 	}
 }

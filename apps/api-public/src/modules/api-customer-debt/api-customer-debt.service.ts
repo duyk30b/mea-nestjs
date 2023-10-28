@@ -10,7 +10,7 @@ export class ApiCustomerDebtService {
 		return await this.customerDebtRepository.pagination({
 			page: query.page,
 			limit: query.limit,
-			criteria: {
+			condition: {
 				oid,
 				customerId: query.filter?.customerId,
 			},

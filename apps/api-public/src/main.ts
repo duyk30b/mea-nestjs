@@ -1,19 +1,17 @@
 import { ClassSerializerInterceptor, Logger, ValidationError, ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory, Reflector } from '@nestjs/core'
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { BusinessExceptionFilter } from '_libs/common/exception-filter/business-exception.filter'
+import { UnknownExceptionFilter } from '_libs/common/exception-filter/unknown-exception.filter'
+import { ValidationException, ValidationExceptionFilter } from '_libs/common/exception-filter/validation-exception.filter'
 import rateLimit from 'express-rate-limit'
 import helmet from 'helmet'
 import * as requestIp from 'request-ip'
+import { AccessLogInterceptor } from '../../../libs/common/src/interceptor/access-log.interceptor'
+import { TimeoutInterceptor } from '../../../libs/common/src/interceptor/timeout.interceptor'
 import { AppModule } from './app.module'
-import { BusinessExceptionFilter } from './exception-filters/business-exception.filter'
-import { HttpExceptionFilter } from './exception-filters/http-exception.filter'
-import { UnknownExceptionFilter } from './exception-filters/unknown-exception.filter'
-import { ValidationException, ValidationExceptionFilter } from './exception-filters/validation-exception.filter'
-import { RolesGuard } from './guards/roles.guard'
-import { AccessLogInterceptor } from './interceptor/access-log.interceptor'
-import { TimeoutInterceptor } from './interceptor/timeout.interceptor'
 import { configSwagger } from './common/swagger'
+import { RolesGuard } from './guards/roles.guard'
 
 async function bootstrap() {
 	const logger = new Logger('bootstrap')
@@ -43,7 +41,6 @@ async function bootstrap() {
 	)
 	app.useGlobalFilters(
 		new UnknownExceptionFilter(),
-		new HttpExceptionFilter(),
 		new BusinessExceptionFilter(),
 		new ValidationExceptionFilter()
 	)
@@ -65,16 +62,21 @@ async function bootstrap() {
 
 	const configService = app.get(ConfigService)
 	const NODE_ENV = configService.get<string>('NODE_ENV') || 'local'
-	const HOST = configService.get<string>('API_PUBLIC_HOST') || 'localhost'
-	const PORT = configService.get<string>('API_PUBLIC_PORT') || 7100
+	const API_PUBLIC_HOST = configService.get<string>('API_PUBLIC_HOST') || 'localhost'
+	const API_PUBLIC_PORT = configService.get<string>('API_PUBLIC_PORT')
+
+	const SQL_TYPE = configService.get<string>('SQL_TYPE')
+	const SQL_HOST = configService.get<string>('SQL_HOST')
+	const SQL_PORT = configService.get<string>('SQL_PORT')
+	const SQL_DATABASE = configService.get<string>('SQL_DATABASE')
 
 	if (NODE_ENV !== 'production') {
 		configSwagger(app)
 	}
 
-	await app.listen(PORT, () => {
-		logger.debug(`🚀 ===== [API] Server document: http://${HOST}:${PORT}/documents =====`)
+	await app.listen(API_PUBLIC_PORT, () => {
+		logger.debug(`🚀 ===== [API] Server document: http://${API_PUBLIC_HOST}:${API_PUBLIC_PORT}/documents =====`)
+		logger.debug(`🚀 ===== [SQL] Database: jdbc:${SQL_TYPE}://${SQL_HOST}:${SQL_PORT}/${SQL_DATABASE} =====`)
 	})
 }
-
 bootstrap()

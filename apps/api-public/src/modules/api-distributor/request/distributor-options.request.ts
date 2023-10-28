@@ -4,7 +4,7 @@ import { Expose, Transform } from 'class-transformer'
 import { IsBoolean, IsIn, IsNotEmpty, IsString } from 'class-validator'
 
 export class DistributorFilterQuery {
-	@ApiPropertyOptional({ name: 'filter[is_active]', example: false })
+	@ApiPropertyOptional({ name: 'filter[is_active]', example: 'true' })
 	@Expose({ name: 'is_active' })
 	@Transform(({ value }) => {
 		if (['1', 'true'].includes(value)) return true
@@ -14,13 +14,13 @@ export class DistributorFilterQuery {
 	@IsBoolean()
 	isActive: boolean
 
-	@ApiPropertyOptional({ name: 'filter[full_name_en]', example: 'Đỗ' })
-	@Expose({ name: 'full_name_en' })
+	@ApiPropertyOptional({ name: 'filter[full_name]' })
+	@Expose({ name: 'full_name' })
 	@IsNotEmpty()
 	@IsString()
-	fullNameEn: string
+	fullName: string
 
-	@ApiPropertyOptional({ name: 'filter[phone]', example: '09860' })
+	@ApiPropertyOptional({ name: 'filter[phone]' })
 	@Expose({ name: 'phone' })
 	@IsNotEmpty()
 	@IsString()
@@ -28,13 +28,13 @@ export class DistributorFilterQuery {
 }
 
 export class DistributorSortQuery extends SortQuery {
-	@ApiPropertyOptional({ name: 'sort[debt]', example: 'DESC' })
+	@ApiPropertyOptional({ name: 'sort[debt]', enum: ['ASC', 'DESC'], example: 'DESC' })
 	@Expose({ name: 'debt' })
 	@IsIn(['ASC', 'DESC'])
 	debt: 'ASC' | 'DESC'
 
-	@ApiPropertyOptional({ name: 'sort[full_name_en]', example: 'DESC' })
-	@Expose({ name: 'full_name_en' })
+	@ApiPropertyOptional({ name: 'sort[full_name]', enum: ['ASC', 'DESC'], example: 'DESC' })
+	@Expose({ name: 'full_name' })
 	@IsIn(['ASC', 'DESC'])
-	fullNameEn: 'ASC' | 'DESC'
+	fullName: 'ASC' | 'DESC'
 }

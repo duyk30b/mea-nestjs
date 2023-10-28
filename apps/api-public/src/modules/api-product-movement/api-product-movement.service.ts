@@ -21,7 +21,7 @@ export class ApiProductMovementService {
 		const { total, page, limit, data } = await this.productMovementRepository.pagination({
 			page: query.page,
 			limit: query.limit,
-			criteria: {
+			condition: {
 				oid,
 				productId: query.filter?.productId,
 				productBatchId: query.filter?.productBatchId,
@@ -36,9 +36,18 @@ export class ApiProductMovementService {
 		const productBatchIds = data.map((i) => i.productBatchId)
 
 		const [invoices, receipts, productBatches] = await Promise.all([
-			invoiceIds.length ? this.invoiceRepository.findMany({ ids: uniqueArray(invoiceIds) }, { customer: true }) : [],
-			receiptIds.length ? this.receiptRepository.findMany({ ids: uniqueArray(receiptIds) }, { distributor: true }) : [],
-			productBatchIds.length ? this.productBatchRepository.findMany({ ids: uniqueArray(productBatchIds) }, { product: false }) : [],
+			invoiceIds.length ? this.invoiceRepository.findMany(
+				{ ids: uniqueArray(invoiceIds) },
+				{ customer: true }
+			) : [],
+			receiptIds.length ? this.receiptRepository.findMany(
+				{ ids: uniqueArray(receiptIds) },
+				{ distributor: true }
+			) : [],
+			productBatchIds.length ? this.productBatchRepository.findMany(
+				{ ids: uniqueArray(productBatchIds) },
+				{ product: false }
+			) : [],
 		])
 
 		data.forEach((mov: ProductMovement) => {

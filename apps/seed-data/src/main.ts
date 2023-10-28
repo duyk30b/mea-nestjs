@@ -25,8 +25,8 @@ async function startApi() {
 	const document = SwaggerModule.createDocument(app, config)
 	SwaggerModule.setup('document', app, document)
 
-	await app.listen(4000, () => {
-		logger.debug('🚀 ===== [TEST] Server document: http://localhost:4000/document =====')
+	await app.listen(20001, () => {
+		logger.debug('🚀 ===== [TEST] Server document: http://localhost:20001/document =====')
 	})
 }
 

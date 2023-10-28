@@ -1,8 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
-import { PaginationQuery } from 'apps/api-public/src/common/pagination.query'
 import { Expose, Type } from 'class-transformer'
-import { ValidateNested } from 'class-validator'
-import { ReceiptFilterQuery, ReceiptRelationsQuery, ReceiptSortQuery } from './receipt-options.request'
+import { IsInt, ValidateNested } from 'class-validator'
+import { PaginationQuery } from '../../../common/pagination.query'
+import { ReceiptFilterQuery, ReceiptRelationQuery, ReceiptSortQuery } from './receipt-options.request'
 
 export class ReceiptPaginationQuery extends PaginationQuery {
 	@ApiPropertyOptional({ type: ReceiptFilterQuery })
@@ -11,11 +11,11 @@ export class ReceiptPaginationQuery extends PaginationQuery {
 	@ValidateNested({ each: true })
 	filter: ReceiptFilterQuery
 
-	@ApiPropertyOptional({ type: ReceiptRelationsQuery })
-	@Expose({ name: 'relations' })
-	@Type(() => ReceiptRelationsQuery)
+	@ApiPropertyOptional({ type: ReceiptRelationQuery })
+	@Expose({ name: 'relation' })
+	@Type(() => ReceiptRelationQuery)
 	@ValidateNested({ each: true })
-	relations: ReceiptRelationsQuery
+	relation: ReceiptRelationQuery
 
 	@ApiPropertyOptional({ type: ReceiptSortQuery })
 	@Expose({ name: 'sort' })
@@ -24,10 +24,30 @@ export class ReceiptPaginationQuery extends PaginationQuery {
 	sort: ReceiptSortQuery
 }
 
-export class ReceiptGetOneQuery {
-	@ApiPropertyOptional({ type: ReceiptRelationsQuery })
-	@Expose({ name: 'select' })
-	@Type(() => ReceiptRelationsQuery)
+export class ReceiptGetManyQuery {
+	@ApiPropertyOptional({ name: 'limit', example: 10 })
+	@Expose({ name: 'limit' })
+	@Type(() => Number)
+	@IsInt()
+	limit: number
+
+	@ApiPropertyOptional({ type: ReceiptFilterQuery })
+	@Expose({ name: 'filter' })
+	@Type(() => ReceiptFilterQuery)
 	@ValidateNested({ each: true })
-	relations: ReceiptRelationsQuery
+	filter: ReceiptFilterQuery
+
+	@ApiPropertyOptional({ type: ReceiptRelationQuery })
+	@Expose({ name: 'relation' })
+	@Type(() => ReceiptRelationQuery)
+	@ValidateNested({ each: true })
+	relation: ReceiptRelationQuery
+}
+
+export class ReceiptGetOneQuery {
+	@ApiPropertyOptional({ type: ReceiptRelationQuery })
+	@Expose({ name: 'select' })
+	@Type(() => ReceiptRelationQuery)
+	@ValidateNested({ each: true })
+	relation: ReceiptRelationQuery
 }

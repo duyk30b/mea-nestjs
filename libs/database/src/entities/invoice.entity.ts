@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { DiscountType, PaymentStatus } from '../common/variable'
+import { DiscountType, ExpensesDetailsType, InvoiceStatus, SurchargeDetailsType } from '../common/variable'
 import Arrival from './arrival.entity'
 import Customer from './customer.entity'
 import InvoiceItem from './invoice-item.entity'
@@ -19,9 +19,18 @@ export default class Invoice extends BaseEntity {
 	@Expose({ name: 'customer_id' })
 	customerId: number
 
-	@Column({ name: 'payment_status', type: 'tinyint' })
-	@Expose({ name: 'payment_status' })
-	paymentStatus: PaymentStatus
+	@Column({ name: 'status', type: 'tinyint', default: 1 })
+	@Expose({ name: 'status' })
+	status: InvoiceStatus
+
+	@Column({
+		name: 'create_time',
+		type: 'bigint',
+		nullable: true,
+		transformer: { to: (value) => value, from: (value) => value == null ? value : Number(value) },
+	})
+	@Expose({ name: 'create_time' })
+	createTime: number
 
 	@Column({
 		name: 'payment_time',
@@ -34,6 +43,18 @@ export default class Invoice extends BaseEntity {
 	})
 	@Expose({ name: 'payment_time' })
 	paymentTime: number
+
+	@Column({
+		name: 'ship_time',
+		type: 'bigint',
+		nullable: true,
+		transformer: {
+			to: (value) => value,
+			from: (value) => value == null ? value : Number(value),
+		},
+	})
+	@Expose({ name: 'ship_time' })
+	shipTime: number
 
 	@Column({
 		name: 'refund_time',
@@ -69,19 +90,27 @@ export default class Invoice extends BaseEntity {
 
 	@Column({ name: 'surcharge', default: 0 })
 	@Expose({ name: 'surcharge' })
-	surcharge: number                                         // phụ phí
+	surcharge: number                                         // Phụ phí
+
+	@Column({ name: 'surcharge_details', type: 'simple-json', default: '[]' })
+	@Expose({ name: 'surcharge_details' })
+	surchargeDetails: SurchargeDetailsType[]                                  // Phụ phí chi tiết
 
 	@Column({ name: 'total_money' })
 	@Expose({ name: 'total_money' })
 	totalMoney: number                                        // Doanh thu = totalItemMoney + phụ phí - tiền giảm giá
 
-	@Column({ name: 'expenses', default: 0 })                 // Khoản chi (người bán trả): Ví dụ: chi phí ship người bán trả, chi phí thuê người trông, tiền vé xe ...
+	@Column({ name: 'expenses', default: 0 })                 // Chi phí (người bán trả): Ví dụ: chi phí ship người bán trả, chi phí thuê người trông, tiền vé xe ...
 	@Expose({ name: 'expenses' })                             // Mục này sinh ra để tính lãi cho chính xác, nghĩa là để trừ cả các chi phí sinh ra khi tạo đơn
 	expenses: number                                          // Mục này sẽ không hiện trong đơn hàng, khách hàng ko nhìn thấy
 
+	@Column({ name: 'expenses_details', type: 'simple-json', default: '[]' })
+	@Expose({ name: 'expenses_details' })
+	expensesDetails: ExpensesDetailsType[]                                   // Chi phí
+
 	@Column({ name: 'profit' })
 	@Expose({ name: 'profit' })
-	profit: number                                            // tiền lãi = Doanh thu - tiền cost - khoản chi
+	profit: number                                            // tiền lãi = Doanh thu - Tiền cost - Chi phí
 
 	@Column({ name: 'debt', default: 0 })
 	@Expose({ name: 'debt' })

@@ -30,8 +30,8 @@ export class InvoiceItemFilterQuery {
 }
 
 // @ApiExtraModels()
-export class InvoiceRelationsQuery {
-	@ApiPropertyOptional({ name: 'relations[invoice][customer]', enum: ['true', 'false'] })
+export class InvoiceRelationQuery {
+	@ApiPropertyOptional({ name: 'relation[invoice][customer]', enum: ['true', 'false'] })
 	@Expose({ name: 'customer' })
 	@Transform(({ value }) => {
 		if (['1', 'true'].includes(value)) return true
@@ -42,8 +42,8 @@ export class InvoiceRelationsQuery {
 	customer: boolean
 }
 
-export class ProductBatchRelationsQuery {
-	@ApiPropertyOptional({ name: 'relations[product_batch][product]', enum: ['true', 'false'], example: 'false' })
+export class ProductBatchRelationQuery {
+	@ApiPropertyOptional({ name: 'relation[product_batch][product]', enum: ['true', 'false'], example: 'false' })
 	@Transform(({ value }) => {
 		if (['1', 'true'].includes(value)) return true
 		if (['0', 'false'].includes(value)) return false
@@ -53,14 +53,14 @@ export class ProductBatchRelationsQuery {
 	product: boolean
 }
 
-export class InvoiceItemRelationsQuery {
-	@ApiPropertyOptional({ type: InvoiceRelationsQuery })
+export class InvoiceItemRelationQuery {
+	@ApiPropertyOptional({ type: InvoiceRelationQuery })
 	@Expose({ name: 'invoice' })
-	@Type(() => InvoiceRelationsQuery)
+	@Type(() => InvoiceRelationQuery)
 	@ValidateNested({ each: true })
-	invoice: InvoiceRelationsQuery
+	invoice: InvoiceRelationQuery
 
-	@ApiPropertyOptional({ name: 'relations[procedure]' })
+	@ApiPropertyOptional({ name: 'relation[procedure]' })
 	@Expose({ name: 'procedure' })
 	@Transform(({ value }) => {
 		if (['1', 'true'].includes(value)) return true
@@ -70,11 +70,11 @@ export class InvoiceItemRelationsQuery {
 	@IsBoolean()
 	procedure: boolean
 
-	@ApiPropertyOptional({ type: ProductBatchRelationsQuery })
+	@ApiPropertyOptional({ type: ProductBatchRelationQuery })
 	@Expose({ name: 'product_batch' })
-	@Type(() => ProductBatchRelationsQuery)
+	@Type(() => ProductBatchRelationQuery)
 	@ValidateNested({ each: true })
-	productBatch: ProductBatchRelationsQuery
+	productBatch: ProductBatchRelationQuery
 }
 
 export class InvoiceItemSortQuery extends SortQuery {

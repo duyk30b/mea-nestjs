@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { DebtType } from '_libs/database/common/variable'
 import { Distributor, DistributorDebt } from '_libs/database/entities'
 import { DataSource, FindOptionsWhere, In, Repository } from 'typeorm'
-import { DistributorDebtCriteria, DistributorDebtOrder } from './distributor-debt.dto'
+import { DistributorDebtCondition, DistributorDebtOrder } from './distributor-debt.dto'
 
 @Injectable()
 export class DistributorDebtRepository {
@@ -12,25 +12,25 @@ export class DistributorDebtRepository {
 		@InjectRepository(DistributorDebt) private readonly distributorDebtRepository: Repository<DistributorDebt>
 	) { }
 
-	getWhereOptions(criteria: DistributorDebtCriteria = {}) {
+	getWhereOptions(condition: DistributorDebtCondition = {}) {
 		const where: FindOptionsWhere<DistributorDebt> = {}
-		if (criteria.id != null) where.id = criteria.id
-		if (criteria.oid != null) where.oid = criteria.oid
-		if (criteria.distributorId != null) where.distributorId = criteria.distributorId
+		if (condition.id != null) where.id = condition.id
+		if (condition.oid != null) where.oid = condition.oid
+		if (condition.distributorId != null) where.distributorId = condition.distributorId
 
-		if (criteria.ids) {
-			if (criteria.ids.length === 0) criteria.ids.push(0)
-			where.id = In(criteria.ids)
+		if (condition.ids) {
+			if (condition.ids.length === 0) condition.ids.push(0)
+			where.id = In(condition.ids)
 		}
 
 		return where
 	}
 
-	async pagination(options: { page: number, limit: number, criteria?: DistributorDebtCriteria, order?: DistributorDebtOrder }) {
-		const { limit, page, criteria, order } = options
+	async pagination(options: { page: number, limit: number, condition?: DistributorDebtCondition, order?: DistributorDebtOrder }) {
+		const { limit, page, condition, order } = options
 
 		const [data, total] = await this.distributorDebtRepository.findAndCount({
-			where: this.getWhereOptions(criteria),
+			where: this.getWhereOptions(condition),
 			order,
 			take: limit,
 			skip: (page - 1) * limit,
@@ -39,13 +39,13 @@ export class DistributorDebtRepository {
 		return { total, page, limit, data }
 	}
 
-	async findMany(criteria: DistributorDebtCriteria): Promise<DistributorDebt[]> {
-		const where = this.getWhereOptions(criteria)
+	async findMany(condition: DistributorDebtCondition): Promise<DistributorDebt[]> {
+		const where = this.getWhereOptions(condition)
 		return await this.distributorDebtRepository.find({ where })
 	}
 
-	async findOne(criteria: DistributorDebtCriteria): Promise<DistributorDebt> {
-		const where = this.getWhereOptions(criteria)
+	async findOne(condition: DistributorDebtCondition): Promise<DistributorDebt> {
+		const where = this.getWhereOptions(condition)
 		return await this.distributorDebtRepository.findOne({ where })
 	}
 

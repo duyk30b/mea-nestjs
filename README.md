@@ -19,16 +19,14 @@
 1. Initialize database
 - Run Migration: `npm run migration:run`
 - Fake database: `npm run seed:data`
-- When change entity, create migration: `npm run migration:generate --name=change-db` (recommend) or `npm run migration:create --name=change-db`
+- When change entity, with WINDOW create migration: `npm run migration:generate --name=change-db` (recommend) or `npm run migration:create --name=change-db`
 - When revert migration: `npm run migration:revert`
 
-2. When build project: `npm run build`
-
+2. When build project: `npm run build api-public && npm run build assets`
 3. Run project in local: `npm run dev api-public` 
-==> Now, access: http://localhost:20000/document
-
 4. Run project with Docker in production: `docker compose -f docker-compose.production.yml --env-file .env.production up -d --build`
-==> Now, access: http://localhost:7300/document
+
+==> Now, access: http://localhost:20000/document
 
 ## III. Nginx
 1. openSSL

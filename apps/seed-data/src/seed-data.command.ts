@@ -2,14 +2,14 @@ import { Logger } from '@nestjs/common'
 import { Command, CommandRunner } from 'nest-commander'
 import { DataSource } from 'typeorm'
 import { AddressData } from './address/address.service'
-import { ArrivalInvoiceSeed } from './service/arrival-invoice.seed'
 import { CustomerSeed } from './service/customer.seed'
 import { DistributorSeed } from './service/distributor.seed'
 import { EmployeeSeed } from './service/employee.seed'
+import { InvoiceSeed } from './service/invoice.seed'
 import { OrganizationSeed } from './service/organization.seed'
 import { ProcedureSeed } from './service/procedure.seed'
 import { ProductSeed } from './service/product.seed'
-import { PurchaseSeed } from './service/purchase.seed'
+import { ReceiptSeed } from './service/receipt.seed'
 
 @Command({ name: 'start:seed' })
 export class SeedDataCommand extends CommandRunner {
@@ -22,9 +22,9 @@ export class SeedDataCommand extends CommandRunner {
 		private readonly distributorSeed: DistributorSeed,
 		private readonly customerSeed: CustomerSeed,
 		private readonly productSeed: ProductSeed,
-		private readonly arrivalInvoiceSeed: ArrivalInvoiceSeed,
+		private readonly invoiceSeed: InvoiceSeed,
 		// private readonly diagnosisSeed: DiagnosisSeed,
-		private readonly purchaseSeed: PurchaseSeed,
+		private readonly receiptSeed: ReceiptSeed,
 		private readonly procedureSeed: ProcedureSeed
 	) {
 		super()
@@ -45,8 +45,8 @@ export class SeedDataCommand extends CommandRunner {
 			await this.procedureSeed.start(oid)
 
 			await this.productSeed.startCreateProductBatch(oid)
-			await this.purchaseSeed.start(oid, 200)
-			await this.arrivalInvoiceSeed.start(oid, 200, new Date('2023-06-20'), new Date('2023-08-06'))
+			await this.receiptSeed.start(oid, 200)
+			await this.invoiceSeed.start(oid, 200, new Date('2023-06-20'), new Date('2023-08-06'))
 
 			// await this.diagnosisSeed.createForAllArrival(oid)
 

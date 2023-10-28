@@ -1,6 +1,4 @@
-import { ComparisonType } from '_libs/database/common/base.dto'
-
-export interface ProcedureCriteria {
+export interface ProcedureCondition {
 	id?: number
 	oid?: number
 	group?: string

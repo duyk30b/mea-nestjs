@@ -10,7 +10,7 @@ export class ApiEmployeeService {
 		return await this.employeeRepository.pagination({
 			page: query.page,
 			limit: query.limit,
-			criteria: { oid },
+			condition: { oid },
 		})
 	}
 

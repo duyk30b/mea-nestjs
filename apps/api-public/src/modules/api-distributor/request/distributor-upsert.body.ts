@@ -4,17 +4,11 @@ import { IsBoolean, IsDefined, IsNotEmpty, IsString, Validate } from 'class-vali
 import { IsPhone } from '_libs/common/validate/class-validator.custom'
 
 export class DistributorCreateBody {
-	@ApiProperty({ name: 'full_name_vi', example: 'Ngô Nhật Dương' })
-	@Expose({ name: 'full_name_vi' })
+	@ApiProperty({ name: 'full_name', example: 'Ngô Nhật Dương' })
+	@Expose({ name: 'full_name' })
 	@IsDefined()
 	@IsNotEmpty()
-	fullNameVi: string
-
-	@ApiProperty({ name: 'full_name_en', example: 'Ngo Nhat Duong' })
-	@Expose({ name: 'full_name_en' })
-	@IsDefined()
-	@IsNotEmpty()
-	fullNameEn: string
+	fullName: string
 
 	@ApiProperty({ name: 'phone', default: '0986123456' })
 	@Expose({ name: 'phone' })

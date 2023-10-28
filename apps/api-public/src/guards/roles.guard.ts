@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable, SetMetadata } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { ERole } from '_libs/database/common/variable'
-import { RequestToken } from '../common/constants'
+import { RequestExternal } from '../common/request-external'
 
 export const Roles = (...roles: ERole[]) => SetMetadata('roles_guard', roles)
 
@@ -16,8 +16,8 @@ export class RolesGuard implements CanActivate {
 		])
 		if (!requiredRoles) return true
 
-		const request: RequestToken = context.switchToHttp().getRequest()
-		const { role } = request.tokenPayload
+		const request: RequestExternal = context.switchToHttp().getRequest()
+		const { role } = request.external
 
 		return requiredRoles.includes(role)
 	}

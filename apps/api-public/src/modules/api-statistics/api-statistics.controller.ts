@@ -1,6 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { OrganizationId } from '../../decorators/request.decorator'
+import { External, TExternal } from '../../common/request-external'
 import { ApiStatisticsService } from './api-statistics.service'
 import { StatisticsRevenueMonthQuery } from './request/statistics-revenue.query'
 
@@ -11,7 +11,7 @@ export class ApiStatisticsController {
 	constructor(private readonly apiStatisticsService: ApiStatisticsService) { }
 
 	@Get('revenue-month')
-	revenueMonth(@OrganizationId() oid: number, @Query() query: StatisticsRevenueMonthQuery) {
+	revenueMonth(@External() { oid }: TExternal, @Query() query: StatisticsRevenueMonthQuery) {
 		return this.apiStatisticsService.revenueMonth(oid, query.year, query.month)
 	}
 }

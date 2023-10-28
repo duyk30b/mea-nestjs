@@ -1,6 +1,7 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, OneToMany } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
+import { UnitType } from '../common/variable'
 import ProductBatch from './product-batch.entity'
 
 @Entity('product')
@@ -17,13 +18,17 @@ export default class Product extends BaseEntity {
 	@Expose({ name: 'substance' })
 	substance: string                                              // Hoạt chất
 
+	@Column({ name: 'quantity', default: 0 })
+	@Expose({ name: 'quantity' })
+	quantity: number
+
 	@Column({ name: 'group', nullable: true })
 	@Expose({ name: 'group' })
 	group: string                                                  // Nhóm thuốc: kháng sinh, dinh dưỡng ...
 
-	@Column({ name: 'unit', nullable: true })
+	@Column({ name: 'unit', type: 'simple-json', default: '[]' })
 	@Expose({ name: 'unit' })
-	unit: string                                                   // Đơn vị tính: lọ, ống, vỉ
+	unit: UnitType[]                                               // Đơn vị tính: lọ, ống, vỉ
 
 	@Column({ name: 'route', nullable: true })
 	@Expose({ name: 'route' })
@@ -39,7 +44,7 @@ export default class Product extends BaseEntity {
 
 	@Column({ name: 'hint_usage', nullable: true })
 	@Expose({ name: 'hint_usage' })
-	hintUsage: string                                             // Gợi ý cách sử dụng
+	hintUsage: string                                              // Gợi ý cách sử dụng
 
 	@Column({ name: 'is_active', type: 'boolean', default: true })
 	@Expose({ name: 'is_active' })

@@ -15,6 +15,34 @@ services:
       dockerfile: Dockerfile
       context: "./"
       target: production
-    command: node dist/apps/api-public/main
+    command: [ "sh", "-c", "npm run migration:run && node dist/apps/api-public/main" ]
     environment:
       - NODE_ENV=production
+      
+  # event-dispatcher:
+  #   container_name: mhc_event-dispatcher
+  #   image: mhi_nestjs_${NODE_ENV:-production}:1.0.0
+  #   restart: unless-stopped
+  #   networks:
+  #     - mh_network
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: "./"
+  #     target: ${NODE_ENV:-production}
+  #   command: node dist/apps/event-dispatcher/main
+  #   environment:
+  #     - NODE_ENV=${NODE_ENV:-production}
+
+  # worker:
+  #   container_name: mhc_worker
+  #   image: mhi_nestjs_${NODE_ENV:-production}:1.0.0
+  #   restart: unless-stopped
+  #   networks:
+  #     - mh_network
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: "./"
+  #     target: ${NODE_ENV:-production}
+  #   command: node dist/apps/worker/main
+  #   environment:
+  #     - NODE_ENV=${NODE_ENV:-production}

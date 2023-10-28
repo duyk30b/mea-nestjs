@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { PaymentStatus } from '_libs/database/common/variable'
+import { InvoiceStatus } from '_libs/database/common/variable'
 import { InvoiceRepository } from '_libs/database/repository'
 
 @Injectable()
@@ -22,9 +22,8 @@ export class ApiStatisticsService {
 
 		const invoices = await this.invoiceRepository.findMany({
 			oid,
-			fromTime: startMonth,
-			toTime: endMonth,
-			paymentStatus: PaymentStatus.Full,
+			createTime: ['BETWEEN', startMonth, endMonth],
+			status: InvoiceStatus.Finish,
 		})
 		invoices.forEach((invoice) => {
 			const date = new Date(invoice.paymentTime + 7 * 60 * 60 * 1000).getUTCDate()

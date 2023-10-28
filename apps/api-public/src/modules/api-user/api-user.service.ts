@@ -1,8 +1,8 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
+import { BusinessException } from '_libs/common/exception-filter/business-exception.filter'
 import { encrypt } from '_libs/common/helpers/string.helper'
 import { EmployeeRepository } from '_libs/database/repository'
 import * as bcrypt from 'bcrypt'
-import { ErrorMessage } from '../../exception-filters/exception.const'
 import { UserChangePasswordBody } from './request/user-change-password.body'
 import { UserUpdateInfoBody } from './request/user-update-info.body'
 
@@ -17,10 +17,10 @@ export class ApiUserService {
 	async changePassword(oid: number, id: number, body: UserChangePasswordBody) {
 		const { oldPassword, newPassword } = body
 		const employee = await this.employeeRepository.findOne({ id, oid })
-		if (!employee) throw new HttpException(ErrorMessage.Employee.NotFound, HttpStatus.BAD_REQUEST)
+		if (!employee) throw new BusinessException('common.User.NotExist')
 
 		const checkPassword = await bcrypt.compare(oldPassword, employee.password)
-		if (!checkPassword) throw new HttpException(ErrorMessage.User.WrongPassword, HttpStatus.BAD_REQUEST)
+		if (!checkPassword) throw new BusinessException('common.User.WrongPassword')
 
 		const password = await bcrypt.hash(newPassword, 5)
 		const secret = encrypt(newPassword, employee.username)

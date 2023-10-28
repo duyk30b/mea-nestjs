@@ -41,12 +41,18 @@ export enum DebtType {
 	Refund = 3,
 }
 
-export enum PaymentStatus {
-	Unknown = 0,
-	Unpaid = 1,
-	Partial = 2,
-	Full = 3,
-	Refund = 4,
+export enum InvoiceStatus {
+	Refund = 0,
+	Draft = 1,
+	Process = 2,
+	Finish = 3
+}
+
+export enum ReceiptStatus {
+	Refund = 0,
+	Draft = 1,
+	Process = 2,
+	Finish = 3
 }
 
 export enum ProductMovementType {
@@ -60,14 +66,17 @@ export enum InvoiceItemType {
 }
 
 export enum ArrivalStatus {
-	Unknown = 0,
-	Waiting = 1,
-	Examining = 2,
-	Paying = 3,
-	Finish = 4,
+	Refund = 0,
+	Draft = 1,
+	Process = 2,
+	Finish = 3
 }
 
 export enum ArrivalType {
 	Invoice = 1,
 	Normal = 2,
 }
+
+export type UnitType = { name: string, rate: number }
+export type SurchargeDetailsType = { key: string, name: string, money: number }
+export type ExpensesDetailsType = { key: string, name: string, money: number }

@@ -2,7 +2,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger'
 import { PaginationQuery } from 'apps/api-public/src/common/pagination.query'
 import { Expose, Type } from 'class-transformer'
 import { ValidateNested } from 'class-validator'
-import { InvoiceItemFilterQuery, InvoiceItemRelationsQuery, InvoiceItemSortQuery } from './invoice-item-options.request'
+import { InvoiceItemFilterQuery, InvoiceItemRelationQuery, InvoiceItemSortQuery } from './invoice-item-options.request'
 
 export class InvoiceItemPaginationQuery extends PaginationQuery {
 	@ApiPropertyOptional({ type: InvoiceItemFilterQuery })
@@ -11,11 +11,11 @@ export class InvoiceItemPaginationQuery extends PaginationQuery {
 	@ValidateNested({ each: true })
 	filter: InvoiceItemFilterQuery
 
-	@ApiPropertyOptional({ type: InvoiceItemRelationsQuery })
-	@Expose({ name: 'relations' })
-	@Type(() => InvoiceItemRelationsQuery)
+	@ApiPropertyOptional({ type: InvoiceItemRelationQuery })
+	@Expose({ name: 'relation' })
+	@Type(() => InvoiceItemRelationQuery)
 	@ValidateNested({ each: true })
-	relations: InvoiceItemRelationsQuery
+	relation: InvoiceItemRelationQuery
 
 	@ApiPropertyOptional({ type: InvoiceItemSortQuery })
 	@Expose({ name: 'sort' })

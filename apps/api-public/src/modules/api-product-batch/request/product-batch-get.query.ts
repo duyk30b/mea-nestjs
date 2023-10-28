@@ -1,8 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
 import { PaginationQuery } from 'apps/api-public/src/common/pagination.query'
-import { Expose, Transform, Type } from 'class-transformer'
-import { IsArray, ValidateNested } from 'class-validator'
-import { ProductBatchFilterQuery, ProductBatchRelationsQuery, ProductBatchSortQuery } from './product-batch-options.request'
+import { Expose, Type } from 'class-transformer'
+import { IsInt, ValidateNested } from 'class-validator'
+import { ProductBatchFilterQuery, ProductBatchRelationQuery, ProductBatchSortQuery } from './product-batch-options.request'
 
 export class ProductBatchPaginationQuery extends PaginationQuery {
 	@ApiPropertyOptional({ type: ProductBatchFilterQuery })
@@ -11,11 +11,11 @@ export class ProductBatchPaginationQuery extends PaginationQuery {
 	@ValidateNested({ each: true })
 	filter: ProductBatchFilterQuery
 
-	@ApiPropertyOptional({ type: ProductBatchRelationsQuery })
-	@Expose({ name: 'relations' })
-	@Type(() => ProductBatchRelationsQuery)
+	@ApiPropertyOptional({ type: ProductBatchRelationQuery })
+	@Expose({ name: 'relation' })
+	@Type(() => ProductBatchRelationQuery)
 	@ValidateNested({ each: true })
-	relations: ProductBatchRelationsQuery
+	relation: ProductBatchRelationQuery
 
 	@ApiPropertyOptional({ type: ProductBatchSortQuery })
 	@Expose({ name: 'sort' })
@@ -25,9 +25,29 @@ export class ProductBatchPaginationQuery extends PaginationQuery {
 }
 
 export class ProductBatchGetOneQuery {
-	@ApiPropertyOptional({ type: ProductBatchRelationsQuery })
-	@Expose({ name: 'relations' })
-	@Type(() => ProductBatchRelationsQuery)
+	@ApiPropertyOptional({ type: ProductBatchRelationQuery })
+	@Expose({ name: 'relation' })
+	@Type(() => ProductBatchRelationQuery)
 	@ValidateNested({ each: true })
-	relations: ProductBatchRelationsQuery
+	relation: ProductBatchRelationQuery
+}
+
+export class ProductBatchGetManyQuery {
+	@ApiPropertyOptional({ name: 'limit', example: 10 })
+	@Expose({ name: 'limit' })
+	@Type(() => Number)
+	@IsInt()
+	limit: number
+
+	@ApiPropertyOptional({ type: ProductBatchFilterQuery })
+	@Expose({ name: 'filter' })
+	@Type(() => ProductBatchFilterQuery)
+	@ValidateNested({ each: true })
+	filter: ProductBatchFilterQuery
+
+	@ApiPropertyOptional({ type: ProductBatchRelationQuery })
+	@Expose({ name: 'relation' })
+	@Type(() => ProductBatchRelationQuery)
+	@ValidateNested({ each: true })
+	relation: ProductBatchRelationQuery
 }

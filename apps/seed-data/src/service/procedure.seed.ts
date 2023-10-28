@@ -19,8 +19,7 @@ export class ProcedureSeed {
 			const procedureName = procedureExampleData[i]
 
 			procedure.oid = oid
-			procedure.nameVi = procedureName
-			procedure.nameEn = convertViToEn(procedureName)
+			procedure.name = procedureName
 			procedure.price = randomNumber(500_000, 20_000_000, 100)
 			procedure.isActive = true
 			proceduresDto.push(procedure)

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
+import { BusinessException } from '_libs/common/exception-filter/business-exception.filter'
 import { uniqueArray } from '_libs/common/helpers/object.helper'
 import { ProductBatchRepository, ProductRepository } from '_libs/database/repository'
-import { ErrorMessage } from '../../exception-filters/exception.const'
 import { ProductCreateBody, ProductGetManyQuery, ProductGetOneQuery, ProductPaginationQuery, ProductUpdateBody } from './request'
 
 @Injectable()
@@ -15,7 +15,7 @@ export class ApiProductService {
 		const { page, limit, total, data } = await this.productRepository.pagination({
 			page: query.page,
 			limit: query.limit,
-			criteria: {
+			condition: {
 				oid,
 				group: query.filter?.group,
 				isActive: query.filter?.isActive,
@@ -24,9 +24,14 @@ export class ApiProductService {
 			order: query.sort || { id: 'DESC' },
 		})
 
-		if (query.relations?.productBatches && data.length) {
+		if (query.relation?.productBatches && data.length) {
 			const productIds = uniqueArray(data.map((item) => item.id))
-			const productBatches = await this.productBatchRepository.findMany({ productIds, quantityZero: false })
+			const productBatches = await this.productBatchRepository.findMany({
+				productIds,
+				quantityZero: false,
+				overdue: true,
+				isActive: true,
+			})
 			data.forEach((item) => item.productBatches = productBatches
 				.filter((ma) => ma.productId === item.id)
 				.sort((a, b) => (a.expiryDate || 0) > (b.expiryDate || 0) ? 1 : -1))
@@ -37,7 +42,7 @@ export class ApiProductService {
 
 	async getList(oid: number, query: ProductGetManyQuery) {
 		const products = await this.productRepository.find({
-			criteria: {
+			condition: {
 				oid,
 				isActive: query.filter?.isActive,
 				group: query.filter?.group,
@@ -45,11 +50,12 @@ export class ApiProductService {
 			},
 			limit: query.limit,
 		})
-		if (query.relations?.productBatches && products.length) {
+		if (query.relation?.productBatches && products.length) {
 			const productBatches = await this.productBatchRepository.findMany({
 				productIds: uniqueArray(products.map((item) => item.id)),
-				quantityZero: query.filter.quantityZero,          // có lấy số lượng 0
-				overdue: query.filter.overdue,                    // không lấy quá hạn
+				quantityZero: false,          // lấy số lượng 0: không
+				overdue: true,                // lấy quá hạn: có
+				isActive: true,
 			})
 			products.forEach((item) => item.productBatches = productBatches
 				.filter((ma) => ma.productId === item.id)
@@ -60,7 +66,10 @@ export class ApiProductService {
 
 	async getOne(oid: number, id: number, query: ProductGetOneQuery) {
 		const product = await this.productRepository.findOne({ oid, id })
-		if (query.relations?.productBatches) {
+		if (!product) {
+			throw new BusinessException('common.Product.NotExist')
+		}
+		if (query.relation?.productBatches) {
 			const batches = await this.productBatchRepository.findMany({
 				oid,
 				productId: product.id,
@@ -77,7 +86,7 @@ export class ApiProductService {
 
 	async updateOne(oid: number, id: number, body: ProductUpdateBody) {
 		const { affected } = await this.productRepository.update({ id, oid }, body)
-		if (affected !== 1) throw new Error(ErrorMessage.Database.UpdateFailed)
+		if (affected !== 1) throw new Error('Database.UpdateFailed')
 		return await this.productRepository.findOne({ id })
 	}
 }

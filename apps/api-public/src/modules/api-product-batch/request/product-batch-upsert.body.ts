@@ -1,6 +1,6 @@
 import { ApiPropertyOptional, OmitType } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
-import { IsDefined, IsNumber, IsString } from 'class-validator'
+import { IsBoolean, IsDefined, IsNumber, IsString } from 'class-validator'
 
 export class ProductBatchInsertBody {
 	@ApiPropertyOptional({ name: 'product_id', example: 12 })
@@ -34,6 +34,11 @@ export class ProductBatchInsertBody {
 	@Expose({ name: 'wholesale_price' })
 	@IsNumber()
 	wholesalePrice: number
+
+	@ApiPropertyOptional({ name: 'is_active', example: true })
+	@Expose({ name: 'is_active' })
+	@IsBoolean()
+	isActive: boolean
 }
 
 export class ProductBatchUpdateBody extends OmitType(ProductBatchInsertBody, ['costPrice', 'productId']) {

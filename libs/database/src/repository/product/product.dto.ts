@@ -1,4 +1,4 @@
-export class ProductCriteria {
+export class ProductCondition {
 	id?: number
 	oid?: number
 	group?: string
@@ -10,5 +10,5 @@ export class ProductCriteria {
 }
 
 export type ProductOrder = {
-	[P in 'id' | 'brandName']?: 'ASC' | 'DESC'
+	[P in 'id' | 'brandName' | 'quantity']?: 'ASC' | 'DESC'
 }

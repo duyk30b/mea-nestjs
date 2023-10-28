@@ -1,17 +1,12 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity, Index } from 'typeorm'
+import { Column, Entity } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 
 @Entity('procedure')
-@Index(['oid', 'nameEn'])
 export default class Procedure extends BaseEntity {
-	@Column({ name: 'name_en', nullable: true })
-	@Expose({ name: 'name_en' })
-	nameEn: string                                                 // Tên dịch vụ
-
-	@Column({ name: 'name_vi', nullable: true })
-	@Expose({ name: 'name_vi' })
-	nameVi: string                                                 // Tên dịch vụ
+	@Column({ name: 'name' })
+	@Expose({ name: 'name' })
+	name: string                                                 // Tên dịch vụ
 
 	@Column({ name: 'group', nullable: true })
 	@Expose({ name: 'group' })

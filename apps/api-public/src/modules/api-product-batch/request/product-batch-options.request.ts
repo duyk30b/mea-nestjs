@@ -20,7 +20,7 @@ export class ProductBatchFilterQuery {
 	@IsBoolean()
 	quantityZero: boolean
 
-	@ApiPropertyOptional({ name: 'filter[is_active]' })
+	@ApiPropertyOptional({ name: 'filter[overdue]' })
 	@Expose({ name: 'overdue' })
 	@Transform(({ value }) => {
 		if (['1', 'true'].includes(value)) return true
@@ -29,10 +29,20 @@ export class ProductBatchFilterQuery {
 	})
 	@IsBoolean()
 	overdue: boolean
+
+	@ApiPropertyOptional({ name: 'filter[is_active]' })
+	@Expose({ name: 'is_active' })
+	@Transform(({ value }) => {
+		if (['1', 'true'].includes(value)) return true
+		if (['0', 'false'].includes(value)) return false
+		return undefined
+	})
+	@IsBoolean()
+	isActive: boolean
 }
 
-export class ProductBatchRelationsQuery {
-	@ApiPropertyOptional({ name: 'relations[product]' })
+export class ProductBatchRelationQuery {
+	@ApiPropertyOptional({ name: 'relation[product]' })
 	@Expose({ name: 'product' })
 	@Transform(({ value }) => {
 		if (['1', 'true'].includes(value)) return true
@@ -44,7 +54,7 @@ export class ProductBatchRelationsQuery {
 }
 
 export class ProductBatchSortQuery extends SortQuery {
-	@ApiPropertyOptional({ name: 'sort[expiry_date]' })
+	@ApiPropertyOptional({ name: 'sort[expiry_date]', enum: ['ASC', 'DESC'] })
 	@Expose({ name: 'expiry_date' })
 	@IsIn(['ASC', 'DESC'])
 	expiryDate: 'ASC' | 'DESC'

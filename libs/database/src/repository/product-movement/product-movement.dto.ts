@@ -1,4 +1,4 @@
-export class ProductMovementCriteria {
+export class ProductMovementCondition {
 	oid?: number
 	productId?: number
 	productBatchId?: number

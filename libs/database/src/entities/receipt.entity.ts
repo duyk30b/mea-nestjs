@@ -2,25 +2,31 @@ import { Expose, Type } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
 import { Distributor } from '.'
 import { BaseEntity } from '../common/base.entity'
-import { DiscountType, PaymentStatus } from '../common/variable'
-import Purchase from './purchase.entity'
+import { DiscountType, ReceiptStatus } from '../common/variable'
 import ReceiptItem from './receipt-item.entity'
 
 @Entity('receipt')
-@Index(['oid', 'purchaseId'])
 @Index(['oid', 'paymentTime'])
 export default class Receipt extends BaseEntity {
-	@Column({ name: 'purchase_id' })
-	@Expose({ name: 'purchase_id' })
-	purchaseId: number
-
 	@Column({ name: 'distributor_id' })
 	@Expose({ name: 'distributor_id' })
 	distributorId: number
 
-	@Column({ name: 'payment_status', type: 'tinyint' })
-	@Expose({ name: 'payment_status' })
-	paymentStatus: PaymentStatus
+	@Column({ name: 'status', type: 'tinyint' })
+	@Expose({ name: 'status' })
+	status: ReceiptStatus
+
+	@Column({
+		name: 'create_time',
+		type: 'bigint',
+		nullable: true,
+		transformer: {
+			to: (value) => value,
+			from: (value) => value == null ? value : Number(value),
+		},
+	})
+	@Expose({ name: 'create_time' })
+	createTime: number
 
 	@Column({
 		name: 'payment_time',
@@ -33,6 +39,18 @@ export default class Receipt extends BaseEntity {
 	})
 	@Expose({ name: 'payment_time' })
 	paymentTime: number
+
+	@Column({
+		name: 'ship_time',
+		type: 'bigint',
+		nullable: true,
+		transformer: {
+			to: (value) => value,
+			from: (value) => value == null ? value : Number(value),
+		},
+	})
+	@Expose({ name: 'ship_time' })
+	shipTime: number
 
 	@Column({
 		name: 'refund_time',
@@ -83,11 +101,6 @@ export default class Receipt extends BaseEntity {
 	@Expose({ name: 'receipt_items' })
 	@OneToMany(() => ReceiptItem, (receiptItem) => receiptItem.receipt)
 	receiptItems: ReceiptItem[]
-
-	@Expose({ name: 'purchase' })
-	@ManyToOne((type) => Purchase, { createForeignKeyConstraints: false })
-	@JoinColumn({ name: 'purchase_id', referencedColumnName: 'id' })
-	purchase: Purchase
 
 	@Expose({ name: 'distributor' })
 	@ManyToOne((type) => Distributor, { createForeignKeyConstraints: false })

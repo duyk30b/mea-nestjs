@@ -24,30 +24,10 @@ export class ProductFilterQuery {
 	})
 	@IsBoolean()
 	isActive: boolean
-
-	@ApiPropertyOptional({ name: 'filter[quantity_zero]' })
-	@Expose({ name: 'quantity_zero' })
-	@Transform(({ value }) => {
-		if (['1', 'true'].includes(value)) return true
-		if (['0', 'false'].includes(value)) return false
-		return undefined
-	})
-	@IsBoolean()
-	quantityZero: boolean
-
-	@ApiPropertyOptional({ name: 'filter[overdue]' })
-	@Expose({ name: 'overdue' })
-	@Transform(({ value }) => {
-		if (['1', 'true'].includes(value)) return true
-		if (['0', 'false'].includes(value)) return false
-		return undefined
-	})
-	@IsBoolean()
-	overdue: boolean
 }
 
-export class ProductRelationsQuery {
-	@ApiPropertyOptional({ name: 'relations[product_batches]' })
+export class ProductRelationQuery {
+	@ApiPropertyOptional({ name: 'relation[product_batches]' })
 	@Expose({ name: 'product_batches' })
 	@Transform(({ value }) => {
 		if (['1', 'true'].includes(value)) return true
@@ -59,8 +39,13 @@ export class ProductRelationsQuery {
 }
 
 export class ProductSortQuery extends SortQuery {
-	@ApiPropertyOptional({ name: 'sort[brand_name]' })
+	@ApiPropertyOptional({ name: 'sort[brand_name]', enum: ['ASC', 'DESC'] })
 	@Expose({ name: 'brand_name' })
 	@IsIn(['ASC', 'DESC'])
 	brandName: 'ASC' | 'DESC'
+
+	@ApiPropertyOptional({ name: 'sort[quantity]', enum: ['ASC', 'DESC'] })
+	@Expose({ name: 'quantity' })
+	@IsIn(['ASC', 'DESC'])
+	quantity: 'ASC' | 'DESC'
 }

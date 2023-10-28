@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { DistributorRepository } from '_libs/database/repository'
-import { BusinessException } from '../../exception-filters/business-exception.filter'
-import { ErrorMessage } from '../../exception-filters/exception.const'
 import { DistributorCreateBody, DistributorGetManyQuery, DistributorPaginationQuery, DistributorUpdateBody } from './request'
+import { BusinessException } from '_libs/common/exception-filter/business-exception.filter'
 
 @Injectable()
 export class ApiDistributorService {
@@ -12,30 +11,31 @@ export class ApiDistributorService {
 		return await this.distributorRepository.pagination({
 			page: query.page,
 			limit: query.limit,
-			criteria: {
+			condition: {
 				oid,
 				isActive: query.filter?.isActive,
-				fullNameEn: ['LIKE', query.filter?.fullNameEn],
+				fullName: ['LIKE', query.filter?.fullName],
 				phone: ['LIKE', query.filter?.phone],
 			},
 			order: query.sort || { id: 'DESC' },
 		})
 	}
 
-	async getMany(oid: number, { limit, filter }: DistributorGetManyQuery) {
+	async getMany(oid: number, query: DistributorGetManyQuery) {
 		return await this.distributorRepository.find({
-			criteria: {
+			condition: {
 				oid,
-				fullNameEn: ['LIKE', filter?.fullNameEn],
-				phone: ['LIKE', filter?.phone],
+				isActive: query.filter?.isActive,
+				fullName: ['LIKE', query.filter?.fullName],
+				phone: ['LIKE', query.filter?.phone],
 			},
-			limit,
+			limit: query.limit,
 		})
 	}
 
 	async getOne(oid: number, id: number) {
 		const distributor = await this.distributorRepository.findOne({ oid, id })
-		if (!distributor) throw new BusinessException(ErrorMessage.Distributor.NotFound)
+		if (!distributor) throw new BusinessException('common.Distributor.NotExist')
 		return distributor
 	}
 
@@ -45,7 +45,7 @@ export class ApiDistributorService {
 
 	async updateOne(oid: number, id: number, body: DistributorUpdateBody) {
 		const { affected } = await this.distributorRepository.updateOne({ id, oid }, body)
-		if (affected !== 1) throw new Error(ErrorMessage.Database.UpdateFailed)
+		if (affected !== 1) throw new Error('Database.UpdateFailed')
 		return await this.distributorRepository.findOne({ id })
 	}
 }

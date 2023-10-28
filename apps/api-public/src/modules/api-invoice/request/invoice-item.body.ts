@@ -1,8 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { valuesEnum } from '_libs/common/helpers/typescript.helper'
 import { DiscountType, InvoiceItemType } from '_libs/database/common/variable'
-import { Expose, Transform } from 'class-transformer'
-import { IsDefined, IsEnum, IsNumber, IsString, Min, validateSync } from 'class-validator'
+import { Expose, Type } from 'class-transformer'
+import { IsDefined, IsEnum, IsNumber, Min, ValidateNested } from 'class-validator'
 import { UnitConversionQuery } from '../../api-product/request'
 
 export class InvoiceItemBody {
@@ -18,19 +18,26 @@ export class InvoiceItemBody {
 	@IsEnum(InvoiceItemType)
 	type: InvoiceItemType
 
-	@ApiPropertyOptional({ name: 'unit', type: 'string', example: '{"name":"Viên","rate":1}' })
+	// @ApiPropertyOptional({ name: 'unit', type: 'string', example: '{"name":"Viên","rate":1}' })
+	// @Expose({ name: 'unit' })
+	// @Transform(({ value }) => {
+	// 	try {
+	// 		const instance = Object.assign(new UnitConversionQuery(), JSON.parse(value))
+	// 		const validate = validateSync(instance, { whitelist: true, forbidNonWhitelisted: true })
+	// 		if (validate.length) return validate
+	// 		else return JSON.stringify(instance)
+	// 	}
+	// 	catch (error) { return [error.message] }
+	// })
+	// @IsString({ message: 'Validate unit failed: Example: {"name":"Viên","rate":1}' })
+	// unit: string                                   // đơn vị tính: lọ, ống, vỉ
+
+	@ApiPropertyOptional({ name: 'unit', type: UnitConversionQuery, example: { name: 'Viên', rate: 1 } })
 	@Expose({ name: 'unit' })
-	@Transform(({ value }) => {
-		try {
-			const instance = Object.assign(new UnitConversionQuery(), JSON.parse(value))
-			const validate = validateSync(instance, { whitelist: true, forbidNonWhitelisted: true })
-			if (validate.length) return validate
-			else return JSON.stringify(instance)
-		}
-		catch (error) { return [error.message] }
-	})
-	@IsString({ message: 'Validate unit failed: Example: {"name":"Viên","rate":1}' })
-	unit: string                                   // đơn vị tính: lọ, ống, vỉ
+	@Type(() => UnitConversionQuery)
+	@IsDefined()
+	@ValidateNested({ each: true })
+	unit: UnitConversionQuery
 
 	@ApiPropertyOptional({ name: 'cost_price', example: 12_000 })
 	@Expose({ name: 'cost_price' })

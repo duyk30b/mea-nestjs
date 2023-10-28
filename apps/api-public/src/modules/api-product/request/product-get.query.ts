@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { PaginationQuery } from 'apps/api-public/src/common/pagination.query'
 import { Expose, Transform, Type } from 'class-transformer'
 import { IsInt, Max, Min, ValidateNested } from 'class-validator'
-import { ProductFilterQuery, ProductRelationsQuery, ProductSortQuery } from './product-options.request'
+import { ProductFilterQuery, ProductRelationQuery, ProductSortQuery } from './product-options.request'
 
 export class ProductPaginationQuery extends PaginationQuery {
 	@ApiPropertyOptional({ type: ProductFilterQuery })
@@ -11,11 +11,11 @@ export class ProductPaginationQuery extends PaginationQuery {
 	@ValidateNested({ each: true })
 	filter: ProductFilterQuery
 
-	@ApiPropertyOptional({ type: ProductRelationsQuery })
-	@Expose({ name: 'relations' })
-	@Type(() => ProductRelationsQuery)
+	@ApiPropertyOptional({ type: ProductRelationQuery })
+	@Expose({ name: 'relation' })
+	@Type(() => ProductRelationQuery)
 	@ValidateNested({ each: true })
-	relations: ProductRelationsQuery
+	relation: ProductRelationQuery
 
 	@ApiPropertyOptional({ type: ProductSortQuery })
 	@Expose({ name: 'sort' })
@@ -25,12 +25,10 @@ export class ProductPaginationQuery extends PaginationQuery {
 }
 
 export class ProductGetManyQuery {
-	@ApiProperty({ name: 'limit', example: 10 })
+	@ApiPropertyOptional({ name: 'limit', example: 10 })
 	@Expose({ name: 'limit' })
-	@Transform(({ value }) => parseInt(value))
+	@Type(() => Number)
 	@IsInt()
-	@Min(3)
-	@Max(100)
 	limit: number
 
 	@ApiPropertyOptional({ type: ProductFilterQuery })
@@ -39,17 +37,17 @@ export class ProductGetManyQuery {
 	@ValidateNested({ each: true })
 	filter: ProductFilterQuery
 
-	@ApiPropertyOptional({ type: ProductRelationsQuery })
-	@Expose({ name: 'relations' })
-	@Type(() => ProductRelationsQuery)
+	@ApiPropertyOptional({ type: ProductRelationQuery })
+	@Expose({ name: 'relation' })
+	@Type(() => ProductRelationQuery)
 	@ValidateNested({ each: true })
-	relations: ProductRelationsQuery
+	relation: ProductRelationQuery
 }
 
 export class ProductGetOneQuery {
-	@ApiPropertyOptional({ type: ProductRelationsQuery })
-	@Expose({ name: 'relations' })
-	@Type(() => ProductRelationsQuery)
+	@ApiPropertyOptional({ type: ProductRelationQuery })
+	@Expose({ name: 'relation' })
+	@Type(() => ProductRelationQuery)
 	@ValidateNested({ each: true })
-	relations: ProductRelationsQuery
+	relation: ProductRelationQuery
 }

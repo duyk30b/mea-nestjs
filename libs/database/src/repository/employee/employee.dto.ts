@@ -1,12 +1,12 @@
 import { ComparisonType } from '_libs/database/common/base.dto'
 
-export class EmployeeCriteria {
+export class EmployeeCondition {
 	oid?: number
 	id?: number
 
 	ids?: number[]
 
-	fullNameEn?: string | [ComparisonType, string]
+	fullName?: string | [ComparisonType, string]
 	phone?: string | [ComparisonType, string]
 }
 

@@ -1,37 +1,8 @@
 import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger'
 import { DiscountType } from '_libs/database/common/variable'
-import { Expose, Transform, Type } from 'class-transformer'
-import { IsDefined, IsEnum, IsNumber, IsString, Min, ValidateNested, validateSync } from 'class-validator'
-import { UnitConversionQuery } from '../../api-product/request'
-
-export class ReceiptItemBody {
-	@ApiPropertyOptional({ name: 'product_batch_id', example: 52 })
-	@Expose({ name: 'product_batch_id' })
-	@IsDefined()
-	@IsNumber()
-	productBatchId: number
-
-	@ApiPropertyOptional({ name: 'unit', type: 'string', example: '{"name":"Viên","rate":1}' })
-	@Expose({ name: 'unit' })
-	@Transform(({ value }) => {
-		try {
-			const instance = Object.assign(new UnitConversionQuery(), JSON.parse(value))
-			const validate = validateSync(instance, { whitelist: true, forbidNonWhitelisted: true })
-			if (validate.length) return validate
-			else return JSON.stringify(instance)
-		}
-		catch (error) { return [error.message] }
-	})
-	@IsString({ message: 'Validate unit failed: Example: {"name":"Viên","rate":1}' })
-	unit: string
-
-	@ApiProperty({ name: 'quantity', example: 4 })
-	@Expose({ name: 'quantity' })
-	@IsDefined()
-	@IsNumber()
-	@Min(1)
-	quantity: number
-}
+import { Expose, Type } from 'class-transformer'
+import { IsDefined, IsEnum, IsNumber, IsString, ValidateNested } from 'class-validator'
+import { ReceiptItemBody } from './receipt-item.body'
 
 export class ReceiptCreateBody {
 	@ApiPropertyOptional({ name: 'distributor_id', example: 52 })
@@ -46,6 +17,12 @@ export class ReceiptCreateBody {
 	@Type(() => ReceiptItemBody)
 	@ValidateNested({ each: true })
 	receiptItems: ReceiptItemBody[]
+
+	@ApiPropertyOptional({ name: 'create_time' })
+	@Expose({ name: 'create_time' })
+	@Type(() => Number)
+	@IsNumber()
+	createTime: number
 
 	@ApiPropertyOptional({ name: 'total_item_money', example: 50_000 })
 	@Expose({ name: 'total_item_money' })

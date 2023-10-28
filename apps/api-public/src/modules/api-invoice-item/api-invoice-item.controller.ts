@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common'
 import { Query } from '@nestjs/common/decorators/http/route-params.decorator'
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger'
-import { OrganizationId } from '../../decorators/request.decorator'
+import { External, TExternal } from '../../common/request-external'
 import { ApiInvoiceItemService } from './api-invoice-item.service'
 import { InvoiceItemPaginationQuery } from './request'
 
@@ -12,7 +12,7 @@ export class ApiInvoiceItemController {
 	constructor(private readonly apiInvoiceItemService: ApiInvoiceItemService) { }
 
 	@Get('pagination')
-	async pagination(@OrganizationId() oid: number, @Query() query: InvoiceItemPaginationQuery) {
+	async pagination(@External() { oid }: TExternal, @Query() query: InvoiceItemPaginationQuery) {
 		return await this.apiInvoiceItemService.pagination(oid, query)
 	}
 }

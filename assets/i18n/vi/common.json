@@ -1,0 +1,41 @@
+{
+    "Token": {
+        "Expired": "Phiên đăng nhập đã hết hạn",
+        "Invalid": "Xác thực mã đăng nhập thất bại",
+        "WrongIp": "Phát hiện thay đổi địa chỉ IP"
+    },
+    "Register": {
+        "ExistEmailAndPhone": "Email và số điện thoại đã được đăng ký",
+        "ExistEmail": "Email đã đã được đăng ký",
+        "ExistPhone": "Số điện thoại đã đã được đăng ký",
+        "ExistUsername": "Tên đăng nhập đã được đăng ký"
+    },
+    "Login": {
+        "WrongPassword": "Mật khẩu không đúng"
+    },
+    "User": {
+        "NotExist": "User không tồn tại",
+        "WrongPassword": "Mật khẩu không đúng"
+    },
+    "Organization": {
+        "NotExist": "Organization không tồn tại"
+    },
+    "Diagnosis": {
+        "ConflictArrival": "Diagnosis không tồn tại"
+    },
+    "Product": {
+        "NotExist": "Sản phẩm không tồn tại"
+    },
+    "Customer": {
+        "NotExist": "Khách hàng không tồn tại"
+    },
+    "Invoice": {
+        "NotExist": "Hóa đơn không tồn tại"
+    },
+    "Employee": {
+        "NotExist": "Employee không tồn tại"
+    },
+    "Distributor": {
+        "NotExist": "Nhà cung cấp không tồn tại"
+    }
+}

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { InvoiceItem } from '_libs/database/entities'
 import { DataSource, EntityManager, FindOptionsWhere, In } from 'typeorm'
-import { InvoiceItemCriteria, InvoiceItemOrder } from './invoice-item.dto'
+import { InvoiceItemCondition, InvoiceItemOrder } from './invoice-item.dto'
 
 @Injectable()
 export class InvoiceItemRepository {
@@ -11,36 +11,36 @@ export class InvoiceItemRepository {
 		@InjectEntityManager() private manager: EntityManager
 	) { }
 
-	getWhereOptions(criteria: InvoiceItemCriteria = {}) {
+	getWhereOptions(condition: InvoiceItemCondition = {}) {
 		const where: FindOptionsWhere<InvoiceItem> = {}
 
-		if (criteria.id != null) where.id = criteria.id
-		if (criteria.oid != null) where.oid = criteria.oid
-		if (criteria.customerId != null) where.customerId = criteria.customerId
-		if (criteria.referenceId != null) where.referenceId = criteria.referenceId
-		if (criteria.type != null) where.type = criteria.type
+		if (condition.id != null) where.id = condition.id
+		if (condition.oid != null) where.oid = condition.oid
+		if (condition.customerId != null) where.customerId = condition.customerId
+		if (condition.referenceId != null) where.referenceId = condition.referenceId
+		if (condition.type != null) where.type = condition.type
 
-		if (criteria.ids) {
-			if (criteria.ids.length === 0) criteria.ids.push(0)
-			where.id = In(criteria.ids)
+		if (condition.ids) {
+			if (condition.ids.length === 0) condition.ids.push(0)
+			where.id = In(condition.ids)
 		}
 
 		return where
 	}
 
-	getQueryBuilder(criteria: InvoiceItemCriteria = {}) {
+	getQueryBuilder(condition: InvoiceItemCondition = {}) {
 		let query = this.manager.createQueryBuilder(InvoiceItem, 'invoiceItem')
-		if (criteria.id != null) {
-			query = query.andWhere('invoiceItem.id = :id', { id: criteria.id })
+		if (condition.id != null) {
+			query = query.andWhere('invoiceItem.id = :id', { id: condition.id })
 		}
-		if (criteria.referenceId != null) {
-			query = query.andWhere('invoiceItem.referenceId = :referenceId', { referenceId: criteria.referenceId })
+		if (condition.referenceId != null) {
+			query = query.andWhere('invoiceItem.referenceId = :referenceId', { referenceId: condition.referenceId })
 		}
-		if (criteria.type != null) {
-			query = query.andWhere('invoiceItem.type = :type', { type: criteria.type })
+		if (condition.type != null) {
+			query = query.andWhere('invoiceItem.type = :type', { type: condition.type })
 		}
-		if (criteria.oid != null) {
-			query = query.andWhere('invoiceItem.oid = :oid', { oid: criteria.oid })
+		if (condition.oid != null) {
+			query = query.andWhere('invoiceItem.oid = :oid', { oid: condition.oid })
 		}
 		return query
 	}
@@ -48,12 +48,12 @@ export class InvoiceItemRepository {
 	async pagination(options: {
 		page: number,
 		limit: number,
-		criteria?: InvoiceItemCriteria,
+		condition?: InvoiceItemCondition,
 		order?: InvoiceItemOrder
 	}) {
-		const { limit, page, criteria, order } = options
+		const { limit, page, condition, order } = options
 		const [data, total] = await this.manager.findAndCount(InvoiceItem, {
-			where: this.getWhereOptions(criteria),
+			where: this.getWhereOptions(condition),
 			order,
 			take: limit,
 			skip: (page - 1) * limit,

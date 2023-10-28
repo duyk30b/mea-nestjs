@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 import { ProcedureRepository } from '_libs/database/repository'
-import { ErrorMessage } from '../../exception-filters/exception.const'
 import { ProcedureCreateBody, ProcedureGetManyQuery, ProcedurePaginationQuery, ProcedureUpdateBody } from './request'
 
 @Injectable()
@@ -11,7 +10,7 @@ export class ApiProcedureService {
 		return this.procedureService.pagination({
 			page: query.page,
 			limit: query.limit,
-			criteria: {
+			condition: {
 				oid,
 				group: query.filter?.group,
 				isActive: query.filter?.isActive,
@@ -23,9 +22,11 @@ export class ApiProcedureService {
 
 	async getMany(oid: number, query: ProcedureGetManyQuery) {
 		return await this.procedureService.find({
-			criteria: {
+			condition: {
 				oid,
 				searchText: query.filter?.searchText,
+				group: query.filter?.group,
+				isActive: query.filter?.isActive,
 			},
 			limit: query.limit,
 		})
@@ -41,7 +42,7 @@ export class ApiProcedureService {
 
 	async updateOne(oid: number, id: number, body: ProcedureUpdateBody) {
 		const { affected } = await this.procedureService.update({ id, oid }, body)
-		if (affected !== 1) throw new Error(ErrorMessage.Database.UpdateFailed)
+		if (affected !== 1) throw new Error('Database.UpdateFailed')
 		return await this.procedureService.findOne({ id })
 	}
 }

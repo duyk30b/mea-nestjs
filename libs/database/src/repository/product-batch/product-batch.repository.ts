@@ -3,7 +3,7 @@ import { InjectEntityManager } from '@nestjs/typeorm'
 import { NoExtraProperties } from '_libs/common/helpers/typescript.helper'
 import { ProductBatch, ProductMovement } from '_libs/database/entities'
 import { DataSource, EntityManager, FindOptionsWhere, In, Not, Raw } from 'typeorm'
-import { ProductBatchCriteria, ProductBatchOrder } from './product-batch.dto'
+import { ProductBatchCondition, ProductBatchOrder } from './product-batch.dto'
 
 @Injectable()
 export class ProductBatchRepository {
@@ -12,24 +12,25 @@ export class ProductBatchRepository {
 		@InjectEntityManager() private manager: EntityManager
 	) { }
 
-	getWhereOptions(criteria: ProductBatchCriteria = {}) {
+	getWhereOptions(condition: ProductBatchCondition = {}) {
 		const where: FindOptionsWhere<ProductBatch> = {}
-		if (criteria.id != null) where.id = criteria.id
-		if (criteria.oid != null) where.oid = criteria.oid
-		if (criteria.productId != null) where.productId = criteria.productId
+		if (condition.id != null) where.id = condition.id
+		if (condition.oid != null) where.oid = condition.oid
+		if (condition.productId != null) where.productId = condition.productId
+		if (condition.isActive != null) where.isActive = condition.isActive
 
-		if (criteria.quantityZero === false) where.quantity = Not(0)    // không lấy số lượng 0
-		if (criteria.overdue === false) {                                    // không lấy quá hạn
+		if (condition.quantityZero === false) where.quantity = Not(0)    // không lấy số lượng 0
+		if (condition.overdue === false) {                                    // không lấy quá hạn
 			where.expiryDate = Raw((alias) => `(${alias} > :date OR ${alias} IS NULL)`, { date: Date.now() })
 		}
 
-		if (criteria.ids) {
-			if (criteria.ids.length === 0) criteria.ids.push(0)
-			where.id = In(criteria.ids)
+		if (condition.ids) {
+			if (condition.ids.length === 0) condition.ids.push(0)
+			where.id = In(condition.ids)
 		}
-		if (criteria.productIds) {
-			if (criteria.productIds.length === 0) criteria.productIds.push(0)
-			where.productId = In(criteria.productIds)
+		if (condition.productIds) {
+			if (condition.productIds.length === 0) condition.productIds.push(0)
+			where.productId = In(condition.productIds)
 		}
 
 		return where
@@ -38,13 +39,13 @@ export class ProductBatchRepository {
 	async pagination(options: {
 		page: number,
 		limit: number,
-		criteria?: ProductBatchCriteria,
+		condition?: ProductBatchCondition,
 		order?: ProductBatchOrder,
 	}) {
-		const { limit, page, criteria, order } = options
+		const { limit, page, condition, order } = options
 
 		const [data, total] = await this.manager.findAndCount(ProductBatch, {
-			where: this.getWhereOptions(criteria),
+			where: this.getWhereOptions(condition),
 			order,
 			take: limit,
 			skip: (page - 1) * limit,
@@ -53,22 +54,32 @@ export class ProductBatchRepository {
 		return { total, page, limit, data }
 	}
 
-	async findOne(criteria: ProductBatchCriteria, relations?: { product?: boolean }): Promise<ProductBatch> {
-		const [productBatch] = await this.manager.find(ProductBatch, {
-			where: this.getWhereOptions(criteria),
-			relations: { product: !!relations?.product },
-			relationLoadStrategy: 'join', // dùng join thì bị lỗi 2 câu query, bằng hòa
+	async find(options: { limit?: number, condition?: ProductBatchCondition, order?: ProductBatchOrder }): Promise<ProductBatch[]> {
+		const { limit, condition, order } = options
+
+		return await this.manager.find(ProductBatch, {
+			where: this.getWhereOptions(condition),
+			order,
+			take: limit,
 		})
-		return productBatch
 	}
 
-	async findMany(criteria: ProductBatchCriteria, relations?: { product?: boolean }): Promise<ProductBatch[]> {
+	async findMany(condition: ProductBatchCondition, relation?: { product?: boolean }): Promise<ProductBatch[]> {
 		const productBatches = await this.manager.find(ProductBatch, {
-			where: this.getWhereOptions(criteria),
-			relations: { product: !!relations?.product },
+			where: this.getWhereOptions(condition),
+			relations: { product: !!relation?.product },
 			relationLoadStrategy: 'join', // dùng join thì bị lỗi 2 câu query, bằng hòa
 		})
 		return productBatches
+	}
+
+	async findOne(condition: ProductBatchCondition, relation?: { product?: boolean }): Promise<ProductBatch> {
+		const [productBatch] = await this.manager.find(ProductBatch, {
+			where: this.getWhereOptions(condition),
+			relations: { product: !!relation?.product },
+			relationLoadStrategy: 'join', // dùng join thì bị lỗi 2 câu query, bằng hòa
+		})
+		return productBatch
 	}
 
 	async insertOne<T extends Partial<Omit<ProductBatch, 'id' | 'oid' | 'quantity'>> & { productId: number }>(
@@ -81,10 +92,10 @@ export class ProductBatchRepository {
 	}
 
 	async update<T extends Partial<Omit<ProductBatch, 'id' | 'oid' | 'quantity'>>>(
-		criteria: ProductBatchCriteria,
+		condition: ProductBatchCondition,
 		dto: NoExtraProperties<Partial<Omit<ProductBatch, 'id' | 'oid' | 'quantity' | 'productId'>>, T>
 	) {
-		const where = this.getWhereOptions(criteria)
+		const where = this.getWhereOptions(condition)
 		return await this.manager.update(ProductBatch, where, dto)
 	}
 
@@ -92,11 +103,11 @@ export class ProductBatchRepository {
 		return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
 			const deleteBatch = await manager.delete(ProductBatch, { oid, id, quantity: 0 }) // delete trước để lock bản ghi lại
 			if (deleteBatch.affected !== 1) {
-				throw new Error(`Delete ProductBatch ${id} failed: Can't delete ProductBatch with quantity !== 0`)
+				throw new Error('Chỉ có thể xóa lô hàng có số lượng = 0')
 			}
 			const number = await manager.count(ProductMovement, { where: { productBatchId: id, oid } })
 			if (number) {
-				throw new Error(`Delete ProductBatch ${id} failed: Can't delete ProductBatch with exits ProductMovement`)
+				throw new Error('Không thể xóa lô hàng đã có dữ liệu nhập xuất')
 			}
 		})
 	}

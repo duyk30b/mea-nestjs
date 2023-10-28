@@ -1,8 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
-import { Expose, Transform, Type } from 'class-transformer'
-import { IsInt, Max, Min, ValidateNested } from 'class-validator'
+import { Expose, Type } from 'class-transformer'
+import { IsInt, ValidateNested } from 'class-validator'
 import { PaginationQuery } from '../../../common/pagination.query'
-import { CustomerFilterQuery, CustomerRelationsQuery, CustomerSortQuery } from './customer-options.request'
+import { CustomerFilterQuery, CustomerRelationQuery, CustomerSortQuery } from './customer-options.request'
 
 export class CustomerPaginationQuery extends PaginationQuery {
 	@ApiPropertyOptional({ type: CustomerFilterQuery })
@@ -21,10 +21,8 @@ export class CustomerPaginationQuery extends PaginationQuery {
 export class CustomerGetManyQuery {
 	@ApiPropertyOptional({ name: 'limit', example: 10 })
 	@Expose({ name: 'limit' })
-	@Transform(({ value }) => parseInt(value))
+	@Type(() => Number)
 	@IsInt()
-	@Min(3)
-	@Max(100)
 	limit: number
 
 	@ApiPropertyOptional({ type: CustomerFilterQuery })
@@ -33,17 +31,17 @@ export class CustomerGetManyQuery {
 	@ValidateNested({ each: true })
 	filter: CustomerFilterQuery
 
-	@ApiPropertyOptional({ type: CustomerRelationsQuery })
-	@Expose({ name: 'relations' })
-	@Type(() => CustomerRelationsQuery)
+	@ApiPropertyOptional({ type: CustomerRelationQuery })
+	@Expose({ name: 'relation' })
+	@Type(() => CustomerRelationQuery)
 	@ValidateNested({ each: true })
-	relations: CustomerRelationsQuery
+	relation: CustomerRelationQuery
 }
 
 export class CustomerGetOneQuery {
-	@ApiPropertyOptional({ type: CustomerRelationsQuery })
-	@Expose({ name: 'relations' })
-	@Type(() => CustomerRelationsQuery)
+	@ApiPropertyOptional({ type: CustomerRelationQuery })
+	@Expose({ name: 'relation' })
+	@Type(() => CustomerRelationQuery)
 	@ValidateNested({ each: true })
-	relations: CustomerRelationsQuery
+	relation: CustomerRelationQuery
 }

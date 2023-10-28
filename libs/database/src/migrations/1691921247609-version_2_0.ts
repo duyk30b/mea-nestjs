@@ -1,10 +1,10 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class version201691921247609 implements MigrationInterface {
     name = 'version201691921247609'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+    	await queryRunner.query(`
             CREATE TABLE \`customer\` (
                 \`oid\` int NOT NULL,
                 \`id\` int NOT NULL AUTO_INCREMENT,
@@ -29,8 +29,8 @@ export class version201691921247609 implements MigrationInterface {
                 INDEX \`IDX_65d0c6e1354a475ef03e6071e2\` (\`oid\`, \`full_name_en\`),
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             CREATE TABLE \`diagnosis\` (
                 \`oid\` int NOT NULL,
                 \`id\` int NOT NULL AUTO_INCREMENT,
@@ -50,8 +50,8 @@ export class version201691921247609 implements MigrationInterface {
                 INDEX \`IDX_b7e3f5da764ed431b3acb0412d\` (\`arrival_id\`),
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             CREATE TABLE \`distributor_debt\` (
                 \`oid\` int NOT NULL,
                 \`id\` int NOT NULL AUTO_INCREMENT,
@@ -67,8 +67,8 @@ export class version201691921247609 implements MigrationInterface {
                 INDEX \`IDX_30800e79e2cab0345762b42f11\` (\`oid\`, \`distributor_id\`),
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             CREATE TABLE \`customer_debt\` (
                 \`oid\` int NOT NULL,
                 \`id\` int NOT NULL AUTO_INCREMENT,
@@ -84,8 +84,8 @@ export class version201691921247609 implements MigrationInterface {
                 INDEX \`IDX_58d7593e401ba54185a6f1617b\` (\`oid\`, \`customer_id\`),
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             CREATE TABLE \`arrival\` (
                 \`oid\` int NOT NULL,
                 \`id\` int NOT NULL AUTO_INCREMENT,
@@ -105,8 +105,8 @@ export class version201691921247609 implements MigrationInterface {
                 INDEX \`IDX_1ae827fce2d5aa2dee2370f043\` (\`oid\`),
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             CREATE TABLE \`invoice\` (
                 \`oid\` int NOT NULL,
                 \`id\` int NOT NULL AUTO_INCREMENT,
@@ -132,8 +132,8 @@ export class version201691921247609 implements MigrationInterface {
                 INDEX \`IDX_3655a45b4999ca5fa614e8901d\` (\`oid\`, \`customer_id\`),
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             CREATE TABLE \`procedure\` (
                 \`oid\` int NOT NULL,
                 \`id\` int NOT NULL AUTO_INCREMENT,
@@ -147,8 +147,8 @@ export class version201691921247609 implements MigrationInterface {
                 INDEX \`IDX_6fed1d3f8cff2a7e68abae8767\` (\`oid\`, \`name_en\`),
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             CREATE TABLE \`product\` (
                 \`oid\` int NOT NULL,
                 \`id\` int NOT NULL AUTO_INCREMENT,
@@ -168,8 +168,8 @@ export class version201691921247609 implements MigrationInterface {
                 INDEX \`IDX_920f1fb7e84a62bb1989f6967a\` (\`oid\`, \`brand_name\`),
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             CREATE TABLE \`product_batch\` (
                 \`oid\` int NOT NULL,
                 \`id\` int NOT NULL AUTO_INCREMENT,
@@ -184,8 +184,8 @@ export class version201691921247609 implements MigrationInterface {
                 INDEX \`IDX_37a39dd69157bacf84fdf01633\` (\`oid\`, \`product_id\`),
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             CREATE TABLE \`invoice_item\` (
                 \`oid\` int NOT NULL,
                 \`id\` int NOT NULL AUTO_INCREMENT,
@@ -207,8 +207,8 @@ export class version201691921247609 implements MigrationInterface {
                 INDEX \`IDX_c67bd177d02805fdbd027f98ec\` (\`oid\`, \`invoice_id\`),
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             CREATE TABLE \`organization\` (
                 \`id\` int NOT NULL AUTO_INCREMENT,
                 \`phone\` char(10) NOT NULL,
@@ -224,8 +224,8 @@ export class version201691921247609 implements MigrationInterface {
                 UNIQUE INDEX \`IDX_d11ed6c5ea801c6eda5bb7aee1\` (\`phone\`),
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             CREATE TABLE \`employee\` (
                 \`oid\` int NOT NULL,
                 \`id\` int NOT NULL AUTO_INCREMENT,
@@ -241,8 +241,8 @@ export class version201691921247609 implements MigrationInterface {
                 UNIQUE INDEX \`IDX_EMPLOYEE__OID_USERNAME\` (\`oid\`, \`username\`),
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             CREATE TABLE \`distributor\` (
                 \`oid\` int NOT NULL,
                 \`id\` int NOT NULL AUTO_INCREMENT,
@@ -262,8 +262,8 @@ export class version201691921247609 implements MigrationInterface {
                 INDEX \`IDX_31fe00a5e47aa49f7526c468e7\` (\`oid\`, \`full_name_en\`),
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             CREATE TABLE \`organization_setting\` (
                 \`oid\` int NOT NULL,
                 \`id\` int NOT NULL AUTO_INCREMENT,
@@ -273,8 +273,8 @@ export class version201691921247609 implements MigrationInterface {
                 UNIQUE INDEX \`IDX_ORG_SETTING_TYPE\` (\`oid\`, \`type\`),
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             CREATE TABLE \`purchase\` (
                 \`oid\` int NOT NULL,
                 \`id\` int NOT NULL AUTO_INCREMENT,
@@ -289,8 +289,8 @@ export class version201691921247609 implements MigrationInterface {
                 INDEX \`IDX_dbbd540cfea3d9a0e6bc33f9b2\` (\`oid\`),
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             CREATE TABLE \`receipt_item\` (
                 \`oid\` int NOT NULL,
                 \`id\` int NOT NULL AUTO_INCREMENT,
@@ -303,8 +303,8 @@ export class version201691921247609 implements MigrationInterface {
                 INDEX \`IDX_6b1183515b9d1d6d9aed30eb0b\` (\`oid\`, \`product_batch_id\`),
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             CREATE TABLE \`receipt\` (
                 \`oid\` int NOT NULL,
                 \`id\` int NOT NULL AUTO_INCREMENT,
@@ -326,8 +326,8 @@ export class version201691921247609 implements MigrationInterface {
                 INDEX \`IDX_f8b7ca556bf5b4a5ea451385a1\` (\`oid\`, \`purchase_id\`),
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             CREATE TABLE \`product_movement\` (
                 \`oid\` int NOT NULL,
                 \`id\` int NOT NULL AUTO_INCREMENT,
@@ -347,175 +347,174 @@ export class version201691921247609 implements MigrationInterface {
                 INDEX \`IDX_ce98293f52d5ce63c778847e4d\` (\`oid\`, \`product_id\`, \`create_time\`),
                 PRIMARY KEY (\`id\`)
             ) ENGINE = InnoDB
-        `);
+        `)
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+    	await queryRunner.query(`
             DROP INDEX \`IDX_ce98293f52d5ce63c778847e4d\` ON \`product_movement\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_f5dd499805216ed53f217dbb5d\` ON \`product_movement\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP TABLE \`product_movement\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_f8b7ca556bf5b4a5ea451385a1\` ON \`receipt\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_ddbeebd03fdcebab9803ef6a86\` ON \`receipt\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP TABLE \`receipt\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_6b1183515b9d1d6d9aed30eb0b\` ON \`receipt_item\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_2dc6dbe700bc9f6bb01d01fbd0\` ON \`receipt_item\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP TABLE \`receipt_item\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_dbbd540cfea3d9a0e6bc33f9b2\` ON \`purchase\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_10e11701749dd3a151ed89a641\` ON \`purchase\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_35dcb0db1566a6590f7472fb37\` ON \`purchase\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP TABLE \`purchase\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_ORG_SETTING_TYPE\` ON \`organization_setting\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP TABLE \`organization_setting\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_31fe00a5e47aa49f7526c468e7\` ON \`distributor\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_214fb8d03085aaaf7888fcdb06\` ON \`distributor\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_e8cab0ac13371c4708272747e7\` ON \`distributor\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP TABLE \`distributor\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_EMPLOYEE__OID_USERNAME\` ON \`employee\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP TABLE \`employee\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_d11ed6c5ea801c6eda5bb7aee1\` ON \`organization\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_5d06de67ef6ab02cbd938988bb\` ON \`organization\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP TABLE \`organization\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_c67bd177d02805fdbd027f98ec\` ON \`invoice_item\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_39bb19ddb85b01a267f8ddb554\` ON \`invoice_item\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_34e829a73cb24dc6b06eec7844\` ON \`invoice_item\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP TABLE \`invoice_item\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_37a39dd69157bacf84fdf01633\` ON \`product_batch\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP TABLE \`product_batch\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_920f1fb7e84a62bb1989f6967a\` ON \`product\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_4a411f49c5e353bcac9b7b00a0\` ON \`product\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_d7a4a50504b4651387dee06e91\` ON \`product\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_6bb1fffbeca2cb0056710910c1\` ON \`product\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP TABLE \`product\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_6fed1d3f8cff2a7e68abae8767\` ON \`procedure\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP TABLE \`procedure\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_3655a45b4999ca5fa614e8901d\` ON \`invoice\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_1eb552f67f21dfd6c2b999f702\` ON \`invoice\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_fa89aa3d5768ec2d54ffbd0b60\` ON \`invoice\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP TABLE \`invoice\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_1ae827fce2d5aa2dee2370f043\` ON \`arrival\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_0819acd372dac1668c0afbcc71\` ON \`arrival\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_4b964e192a33979d00bec2b34d\` ON \`arrival\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP TABLE \`arrival\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_58d7593e401ba54185a6f1617b\` ON \`customer_debt\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP TABLE \`customer_debt\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_30800e79e2cab0345762b42f11\` ON \`distributor_debt\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP TABLE \`distributor_debt\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_b7e3f5da764ed431b3acb0412d\` ON \`diagnosis\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP TABLE \`diagnosis\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_65d0c6e1354a475ef03e6071e2\` ON \`customer\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_84962f02b4390444121d73c58a\` ON \`customer\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP INDEX \`IDX_49fe63dd92219c89a77642ed62\` ON \`customer\`
-        `);
-        await queryRunner.query(`
+        `)
+    	await queryRunner.query(`
             DROP TABLE \`customer\`
-        `);
+        `)
     }
-
 }

@@ -2,47 +2,49 @@ import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { InvoiceItemType } from '_libs/database/common/variable'
 import { Invoice } from '_libs/database/entities'
-import { Between, DataSource, EntityManager, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual } from 'typeorm'
-import { InvoiceCriteria, InvoiceOrder } from './invoice.dto'
+import { Between, EntityManager, FindOptionsWhere, In } from 'typeorm'
+import { InvoiceCondition, InvoiceOrder } from './invoice.dto'
 
 @Injectable()
 export class InvoiceRepository {
-	constructor(
-		private dataSource: DataSource,
-		@InjectEntityManager() private manager: EntityManager
-	) { }
+	constructor(@InjectEntityManager() private manager: EntityManager) { }
 
-	getWhereOptions(criteria: InvoiceCriteria = {}) {
+	getWhereOptions(condition: InvoiceCondition = {}) {
 		const where: FindOptionsWhere<Invoice> = {}
 
-		if (criteria.id != null) where.id = criteria.id
-		if (criteria.oid != null) where.oid = criteria.oid
-		if (criteria.customerId != null) where.customerId = criteria.customerId
-		if (criteria.arrivalId != null) where.arrivalId = criteria.arrivalId
-		if (criteria.paymentStatus != null) where.paymentStatus = criteria.paymentStatus
+		if (condition.id != null) where.id = condition.id
+		if (condition.oid != null) where.oid = condition.oid
+		if (condition.customerId != null) where.customerId = condition.customerId
+		if (condition.arrivalId != null) where.arrivalId = condition.arrivalId
+		if (condition.status != null) where.status = condition.status
 
-		if (criteria.ids) {
-			if (criteria.ids.length === 0) criteria.ids.push(0)
-			where.id = In(criteria.ids)
+		if (condition.ids) {
+			if (condition.ids.length === 0) condition.ids.push(0)
+			where.id = In(condition.ids)
 		}
-		if (criteria.customerIds) {
-			if (criteria.customerIds.length === 0) criteria.customerIds.push(0)
-			where.customerId = In(criteria.customerIds)
+		if (condition.customerIds) {
+			if (condition.customerIds.length === 0) condition.customerIds.push(0)
+			where.customerId = In(condition.customerIds)
 		}
-		if (criteria.arrivalIds) {
-			if (criteria.arrivalIds.length === 0) criteria.arrivalIds.push(0)
-			where.arrivalId = In(criteria.arrivalIds)
+		if (condition.arrivalIds) {
+			if (condition.arrivalIds.length === 0) condition.arrivalIds.push(0)
+			where.arrivalId = In(condition.arrivalIds)
 		}
-		if (criteria.paymentStatuses) {
-			if (criteria.paymentStatuses.length === 0) criteria.paymentStatuses.push(0)
-			where.paymentStatus = In(criteria.paymentStatuses)
+		if (condition.statuses) {
+			if (condition.statuses.length === 0) condition.statuses.push(0)
+			where.status = In(condition.statuses)
 		}
 
-		let paymentTime = undefined
-		if (criteria.fromTime && criteria.toTime) paymentTime = Between(criteria.fromTime, criteria.toTime)
-		else if (criteria.fromTime) paymentTime = MoreThanOrEqual(criteria.fromTime)
-		else if (criteria.toTime) paymentTime = LessThanOrEqual(criteria.toTime)
-		if (paymentTime != null) where.paymentTime = paymentTime
+		if (condition.createTime != null) {
+			if (typeof condition.createTime === 'number') {
+				where.createTime = condition.createTime
+			}
+			else if (Array.isArray(condition.createTime)) {
+				if (condition.createTime[0] === 'BETWEEN') {
+					where.createTime = Between(condition.createTime[1], condition.createTime[2])
+				}
+			}
+		}
 
 		return where
 	}
@@ -50,16 +52,16 @@ export class InvoiceRepository {
 	async pagination(options: {
 		page: number,
 		limit: number,
-		criteria?: InvoiceCriteria,
-		relations?: { customer?: boolean },
+		condition?: InvoiceCondition,
+		relation?: { customer?: boolean },
 		order?: InvoiceOrder
 	}) {
-		const { limit, page, criteria, relations, order } = options
+		const { limit, page, condition, relation, order } = options
 
 		const [data, total] = await this.manager.findAndCount(Invoice, {
-			relations: { customer: !!relations?.customer },
+			relations: { customer: !!relation?.customer },
 			relationLoadStrategy: 'query', // dùng join thì bị lỗi 2 câu query, bằng hòa
-			where: this.getWhereOptions(criteria),
+			where: this.getWhereOptions(condition),
 			order,
 			take: limit,
 			skip: (page - 1) * limit,
@@ -68,41 +70,41 @@ export class InvoiceRepository {
 		return { total, page, limit, data }
 	}
 
-	async findOne(criteria: InvoiceCriteria, relations?: { customer: boolean }): Promise<Invoice> {
+	async findOne(condition: InvoiceCondition, relation?: { customer: boolean }): Promise<Invoice> {
 		const [invoice] = await this.manager.find(Invoice, {
-			where: this.getWhereOptions(criteria),
-			relations: { customer: !!relations?.customer },
+			where: this.getWhereOptions(condition),
+			relations: { customer: !!relation?.customer },
 			relationLoadStrategy: 'join',
 		})
 		return invoice
 	}
 
-	async findMany(criteria: InvoiceCriteria, relations?: { customer: boolean }): Promise<Invoice[]> {
+	async findMany(condition: InvoiceCondition, relation?: { customer: boolean }): Promise<Invoice[]> {
 		const invoices = await this.manager.find(Invoice, {
-			where: this.getWhereOptions(criteria),
-			relations: { customer: !!relations?.customer },
+			where: this.getWhereOptions(condition),
+			relations: { customer: !!relation?.customer },
 			relationLoadStrategy: 'join',
 		})
 		return invoices
 	}
 
-	async queryOneBy(criteria: { id: number, oid: number }, relations?: {
+	async queryOneBy(condition: { id: number, oid: number }, relation?: {
 		customer?: boolean,
 		invoiceItems?: { procedure?: boolean, productBatch?: { product?: boolean } }
 	}): Promise<Invoice> {
 		let query = this.manager.createQueryBuilder(Invoice, 'invoice')
-			.where('invoice.id = :id', { id: criteria.id })
-			.andWhere('invoice.oid = :oid', { oid: criteria.oid })
+			.where('invoice.id = :id', { id: condition.id })
+			.andWhere('invoice.oid = :oid', { oid: condition.oid })
 
-		if (relations?.customer) query = query.leftJoinAndSelect('invoice.customer', 'customer')
-		if (relations?.invoiceItems) query = query.leftJoinAndSelect('invoice.invoiceItems', 'invoiceItem')
-		if (relations?.invoiceItems?.procedure) query = query.leftJoinAndSelect(
+		if (relation?.customer) query = query.leftJoinAndSelect('invoice.customer', 'customer')
+		if (relation?.invoiceItems) query = query.leftJoinAndSelect('invoice.invoiceItems', 'invoiceItem')
+		if (relation?.invoiceItems?.procedure) query = query.leftJoinAndSelect(
 			'invoiceItem.procedure',
 			'procedure',
 			'invoiceItem.type = :typeProcedure',
 			{ typeProcedure: InvoiceItemType.Procedure }
 		)
-		if (relations?.invoiceItems?.productBatch) {
+		if (relation?.invoiceItems?.productBatch) {
 			query = query.leftJoinAndSelect(
 				'invoiceItem.productBatch',
 				'productBatch',
@@ -110,7 +112,7 @@ export class InvoiceRepository {
 				{ typeProductBatch: InvoiceItemType.ProductBatch }
 			)
 		}
-		if (relations?.invoiceItems?.productBatch?.product) {
+		if (relation?.invoiceItems?.productBatch?.product) {
 			query = query.leftJoinAndSelect('productBatch.product', 'product')
 		}
 

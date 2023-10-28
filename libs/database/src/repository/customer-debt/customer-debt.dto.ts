@@ -1,4 +1,4 @@
-export class CustomerDebtCriteria {
+export class CustomerDebtCondition {
 	id?: number
 	oid?: number
 	customerId?: number

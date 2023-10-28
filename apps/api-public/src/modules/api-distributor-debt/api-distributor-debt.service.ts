@@ -10,7 +10,7 @@ export class ApiDistributorDebtService {
 		return await this.distributorDebtRepository.pagination({
 			page: query.page,
 			limit: query.limit,
-			criteria: { distributorId: query.filter?.distributorId },
+			condition: { distributorId: query.filter?.distributorId },
 			order: query.sort || { id: 'DESC' },
 		})
 	}

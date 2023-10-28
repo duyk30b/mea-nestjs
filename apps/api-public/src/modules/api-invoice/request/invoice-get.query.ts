@@ -1,8 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
-import { PaginationQuery } from 'apps/api-public/src/common/pagination.query'
 import { Expose, Type } from 'class-transformer'
-import { ValidateNested } from 'class-validator'
-import { InvoiceFilterQuery, InvoiceRelationsQuery, InvoiceSortQuery } from './invoice-options.request'
+import { IsInt, ValidateNested } from 'class-validator'
+import { PaginationQuery } from '../../../common/pagination.query'
+import { InvoiceFilterQuery, InvoiceRelationQuery, InvoiceSortQuery } from './invoice-options.request'
 
 export class InvoicePaginationQuery extends PaginationQuery {
 	@ApiPropertyOptional({ type: InvoiceFilterQuery })
@@ -11,11 +11,11 @@ export class InvoicePaginationQuery extends PaginationQuery {
 	@ValidateNested({ each: true })
 	filter: InvoiceFilterQuery
 
-	@ApiPropertyOptional({ type: InvoiceRelationsQuery })
-	@Expose({ name: 'relations' })
-	@Type(() => InvoiceRelationsQuery)
+	@ApiPropertyOptional({ type: InvoiceRelationQuery })
+	@Expose({ name: 'relation' })
+	@Type(() => InvoiceRelationQuery)
 	@ValidateNested({ each: true })
-	relations: InvoiceRelationsQuery
+	relation: InvoiceRelationQuery
 
 	@ApiPropertyOptional({ type: InvoiceSortQuery })
 	@Expose({ name: 'sort' })
@@ -24,10 +24,30 @@ export class InvoicePaginationQuery extends PaginationQuery {
 	sort: InvoiceSortQuery
 }
 
-export class InvoiceGetOneQuery {
-	@ApiPropertyOptional({ type: InvoiceRelationsQuery })
-	@Expose({ name: 'select' })
-	@Type(() => InvoiceRelationsQuery)
+export class InvoiceGetManyQuery {
+	@ApiPropertyOptional({ name: 'limit', example: 10 })
+	@Expose({ name: 'limit' })
+	@Type(() => Number)
+	@IsInt()
+	limit: number
+
+	@ApiPropertyOptional({ type: InvoiceFilterQuery })
+	@Expose({ name: 'filter' })
+	@Type(() => InvoiceFilterQuery)
 	@ValidateNested({ each: true })
-	relations: InvoiceRelationsQuery
+	filter: InvoiceFilterQuery
+
+	@ApiPropertyOptional({ type: InvoiceRelationQuery })
+	@Expose({ name: 'relation' })
+	@Type(() => InvoiceRelationQuery)
+	@ValidateNested({ each: true })
+	relation: InvoiceRelationQuery
+}
+
+export class InvoiceGetOneQuery {
+	@ApiPropertyOptional({ type: InvoiceRelationQuery })
+	@Expose({ name: 'select' })
+	@Type(() => InvoiceRelationQuery)
+	@ValidateNested({ each: true })
+	relation: InvoiceRelationQuery
 }

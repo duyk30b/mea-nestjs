@@ -3,9 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 import {
 	Arrival, Customer, CustomerDebt, Diagnosis, Distributor, DistributorDebt, Employee,
 	Invoice, InvoiceItem, Organization, OrganizationSetting,
-	Procedure, Product, ProductBatch, ProductMovement, Purchase, Receipt, ReceiptItem,
+	Procedure, Product, ProductBatch, ProductMovement, Receipt, ReceiptItem,
 } from '../entities'
-import { ArrivalInvoiceRepository } from './arrival/arrival-invoice.repository'
 import { ArrivalRepository } from './arrival/arrival.repository'
 import { CustomerDebtRepository } from './customer-debt/customer-debt.repository'
 import { CustomerRepository } from './customer/customer.repository'
@@ -13,14 +12,14 @@ import { DistributorDebtRepository } from './distributor-debt/distributor-debt.r
 import { DistributorRepository } from './distributor/distributor.repository'
 import { EmployeeRepository } from './employee/employee.repository'
 import { InvoiceItemRepository } from './invoice-item/invoice-item.repository'
+import { InvoiceQuickRepository } from './invoice/invoice-quick.repository'
 import { InvoiceRepository } from './invoice/invoice.repository'
 import { OrganizationRepository } from './organization/organization.repository'
 import { ProcedureRepository } from './procedure/procedure.repository'
 import { ProductBatchRepository } from './product-batch/product-batch.repository'
 import { ProductMovementRepository } from './product-movement/product-movement.repository'
 import { ProductRepository } from './product/product.repository'
-import { PurchaseReceiptRepository } from './purchase/purchase-receipt.repository'
-import { PurchaseRepository } from './purchase/purchase.repository'
+import { ReceiptQuickRepository } from './receipt/receipt-quick.repository'
 import { ReceiptRepository } from './receipt/receipt.repository'
 
 @Global()
@@ -42,47 +41,44 @@ import { ReceiptRepository } from './receipt/receipt.repository'
 			Product,
 			ProductBatch,
 			ProductMovement,
-			Purchase,
 			Receipt,
 			ReceiptItem,
 		]),
 	],
 	providers: [
 		ArrivalRepository,
-		ArrivalInvoiceRepository,
 		CustomerRepository,
 		CustomerDebtRepository,
 		DistributorRepository,
 		DistributorDebtRepository,
 		EmployeeRepository,
 		InvoiceRepository,
+		InvoiceQuickRepository,
 		InvoiceItemRepository,
 		OrganizationRepository,
 		ProcedureRepository,
 		ProductRepository,
 		ProductBatchRepository,
 		ProductMovementRepository,
-		PurchaseRepository,
-		PurchaseReceiptRepository,
+		ReceiptQuickRepository,
 		ReceiptRepository,
 	],
 	exports: [
 		ArrivalRepository,
-		ArrivalInvoiceRepository,
 		CustomerRepository,
 		CustomerDebtRepository,
 		DistributorRepository,
 		DistributorDebtRepository,
 		EmployeeRepository,
 		InvoiceRepository,
+		InvoiceQuickRepository,
 		InvoiceItemRepository,
 		OrganizationRepository,
 		ProductRepository,
 		ProcedureRepository,
 		ProductBatchRepository,
 		ProductMovementRepository,
-		PurchaseRepository,
-		PurchaseReceiptRepository,
+		ReceiptQuickRepository,
 		ReceiptRepository,
 	],
 })

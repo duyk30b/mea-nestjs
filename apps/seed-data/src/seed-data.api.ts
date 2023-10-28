@@ -1,18 +1,24 @@
 import { Controller, Get } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { InjectEntityManager } from '@nestjs/typeorm'
-import { Arrival, Customer, CustomerDebt, Distributor, DistributorDebt, Invoice, InvoiceItem, Organization, OrganizationSetting, Product, ProductBatch, ProductMovement, Purchase, Receipt, ReceiptItem } from '_libs/database/entities'
+import {
+	Arrival, Customer, CustomerDebt, Distributor,
+	DistributorDebt, Invoice, InvoiceItem, Organization,
+	OrganizationSetting, Product, ProductBatch,
+	ProductMovement,
+	Receipt, ReceiptItem,
+} from '_libs/database/entities'
 import { DataSource, EntityManager } from 'typeorm'
 import { AddressData } from './address/address.service'
-import { ArrivalInvoiceSeed } from './service/arrival-invoice.seed'
 import { CustomerSeed } from './service/customer.seed'
 import { DiagnosisSeed } from './service/diagnosis.seed'
 import { DistributorSeed } from './service/distributor.seed'
 import { EmployeeSeed } from './service/employee.seed'
+import { InvoiceSeed } from './service/invoice.seed'
 import { OrganizationSeed } from './service/organization.seed'
 import { ProcedureSeed } from './service/procedure.seed'
 import { ProductSeed } from './service/product.seed'
-import { PurchaseSeed } from './service/purchase.seed'
+import { ReceiptSeed } from './service/receipt.seed'
 
 @ApiTags('Seed Data')
 @ApiBearerAuth('access-token')
@@ -26,9 +32,9 @@ export class SeedDataApi {
 		private readonly distributorSeed: DistributorSeed,
 		private readonly customerSeed: CustomerSeed,
 		private readonly productSeed: ProductSeed,
-		private readonly arrivalInvoiceSeed: ArrivalInvoiceSeed,
+		private readonly invoiceSeed: InvoiceSeed,
 		private readonly diagnosisSeed: DiagnosisSeed,
-		private readonly purchaseSeed: PurchaseSeed,
+		private readonly receiptSeed: ReceiptSeed,
 		private readonly procedureSeed: ProcedureSeed
 	) {
 		this.init()
@@ -38,25 +44,24 @@ export class SeedDataApi {
 		await AddressData.init()
 	}
 
-	@Get('truncate')
-	async truncate() {
-		await this.manager.clear(Organization)
-		await this.manager.clear(OrganizationSetting)
-		await this.manager.clear(Customer)
-		await this.manager.clear(CustomerDebt)
-		await this.manager.clear(Distributor)
-		await this.manager.clear(DistributorDebt)
-		await this.manager.clear(Product)
-		await this.manager.clear(ProductBatch)
-		await this.manager.clear(ProductMovement)
-		await this.manager.clear(Arrival)
-		await this.manager.clear(Invoice)
-		await this.manager.clear(InvoiceItem)
-		await this.manager.clear(Purchase)
-		await this.manager.clear(Receipt)
-		await this.manager.clear(ReceiptItem)
-		return { success: true }
-	}
+	// @Get('truncate')
+	// async truncate() {
+	// 	await this.manager.clear(Organization)
+	// 	await this.manager.clear(OrganizationSetting)
+	// 	await this.manager.clear(Customer)
+	// 	await this.manager.clear(CustomerDebt)
+	// 	await this.manager.clear(Distributor)
+	// 	await this.manager.clear(DistributorDebt)
+	// 	await this.manager.clear(Product)
+	// 	await this.manager.clear(ProductBatch)
+	// 	await this.manager.clear(ProductMovement)
+	// 	await this.manager.clear(Arrival)
+	// 	await this.manager.clear(Invoice)
+	// 	await this.manager.clear(InvoiceItem)
+	// 	await this.manager.clear(Receipt)
+	// 	await this.manager.clear(ReceiptItem)
+	// 	return { success: true }
+	// }
 
 	@Get('start')
 	async startSeedData() {
@@ -72,8 +77,8 @@ export class SeedDataApi {
 		await this.procedureSeed.start(oid)
 
 		await this.productSeed.startCreateProductBatch(oid)
-		await this.purchaseSeed.start(oid, 200)
-		await this.arrivalInvoiceSeed.start(oid, 200, new Date('2023-06-20'), new Date('2023-08-06'))
+		await this.receiptSeed.start(oid, 200)
+		await this.invoiceSeed.start(oid, 200, new Date('2023-06-20'), new Date('2023-08-06'))
 
 		// await this.diagnosisSeed.createForAllArrival(oid)
 
@@ -83,10 +88,10 @@ export class SeedDataApi {
 		return { time }
 	}
 
-	@Get('drop_db')
-	async drop() {
-		await this.manager.query('DROP DATABASE medihome_sql;')
-		await this.manager.query('CREATE DATABASE medihome_sql;')
-		return { success: true }
-	}
+	// @Get('drop_db')
+	// async drop() {
+	// 	await this.manager.query('DROP DATABASE medihome_sql;')
+	// 	await this.manager.query('CREATE DATABASE medihome_sql;')
+	// 	return { success: true }
+	// }
 }

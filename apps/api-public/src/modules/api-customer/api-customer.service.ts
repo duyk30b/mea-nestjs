@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common'
+import { BusinessException } from '_libs/common/exception-filter/business-exception.filter'
 import { CustomerRepository } from '_libs/database/repository'
-import { BusinessException } from '../../exception-filters/business-exception.filter'
-import { ErrorMessage } from '../../exception-filters/exception.const'
-import { CustomerCreateBody, CustomerGetManyQuery, CustomerGetOneQuery, CustomerPaginationQuery, CustomerUpdateBody } from './request'
+import {
+	CustomerCreateBody, CustomerGetManyQuery,
+	CustomerGetOneQuery, CustomerPaginationQuery, CustomerUpdateBody,
+} from './request'
 
 @Injectable()
 export class ApiCustomerService {
@@ -12,30 +14,31 @@ export class ApiCustomerService {
 		return await this.customerRepository.pagination({
 			page: query.page,
 			limit: query.limit,
-			criteria: {
+			condition: {
 				oid,
 				isActive: query.filter?.isActive,
-				fullNameEn: ['LIKE', query.filter?.fullNameEn],
+				fullName: ['LIKE', query.filter?.fullName],
 				phone: ['LIKE', query.filter?.phone],
 			},
 			order: query.sort || { id: 'DESC' },
 		})
 	}
 
-	async getMany(oid: number, { limit, filter }: CustomerGetManyQuery) {
+	async getMany(oid: number, query: CustomerGetManyQuery) {
 		return await this.customerRepository.find({
-			criteria: {
+			condition: {
 				oid,
-				fullNameEn: ['LIKE', filter?.fullNameEn],
-				phone: ['LIKE', filter?.phone],
+				isActive: query.filter?.isActive,
+				fullName: ['LIKE', query.filter?.fullName],
+				phone: ['LIKE', query.filter?.phone],
 			},
-			limit,
+			limit: query.limit,
 		})
 	}
 
 	async getOne(oid: number, id: number, query?: CustomerGetOneQuery) {
 		const customer = await this.customerRepository.findOne({ oid, id })
-		if (!customer) throw new BusinessException(ErrorMessage.Customer.NotFound)
+		if (!customer) throw new BusinessException('common.Customer.NotExist')
 		return customer
 	}
 
@@ -45,7 +48,7 @@ export class ApiCustomerService {
 
 	async updateOne(oid: number, id: number, body: CustomerUpdateBody) {
 		const { affected } = await this.customerRepository.update({ id, oid }, body)
-		if (affected !== 1) throw new Error(ErrorMessage.Database.UpdateFailed)
+		if (affected !== 1) throw new Error('Database.UpdateFailed')
 		return await this.customerRepository.findOne({ id, oid })
 	}
 }

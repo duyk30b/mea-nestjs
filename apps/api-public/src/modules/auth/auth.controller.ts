@@ -1,7 +1,7 @@
-import { Body, Controller, Param, Patch, Post } from '@nestjs/common'
+import { Body, Controller, Param, Post } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { JwtExtendService } from '../../components/jwt-extend/jwt-extend.service'
-import { IpRequest } from '../../decorators/request.decorator'
+import { External, TExternal } from '../../common/request-external'
 import { AuthService } from './auth.service'
 import { ForgotPasswordBody } from './request/forgot-password.body'
 import { LoginBody } from './request/login.body'
@@ -18,7 +18,7 @@ export class AuthController {
 	) { }
 
 	@Post('register')
-	async register(@Body() registerDto: RegisterBody, @IpRequest() ip: string) {
+	async register(@Body() registerDto: RegisterBody, @External() { ip }: TExternal) {
 		const employee = await this.authService.register(registerDto)
 		const { accessToken, refreshToken } = this.jwtExtendService.createTokenFromUser(employee, ip)
 		return {
@@ -29,7 +29,7 @@ export class AuthController {
 	}
 
 	@Post('login')
-	async login(@Body() loginDto: LoginBody, @IpRequest() ip: string) {
+	async login(@Body() loginDto: LoginBody, @External() { ip }: TExternal) {
 		const employee = await this.authService.login(loginDto)
 		const { accessToken, refreshToken } = this.jwtExtendService.createTokenFromUser(employee, ip)
 		return {
@@ -40,7 +40,7 @@ export class AuthController {
 	}
 
 	@Post('login-demo')
-	async loginDemo(@IpRequest() ip: string) {
+	async loginDemo(@External() { ip }: TExternal) {
 		const employee = await this.authService.loginDemo()
 		const { accessToken, refreshToken } = this.jwtExtendService.createTokenFromUser(employee, ip)
 		return {
@@ -66,7 +66,7 @@ export class AuthController {
 	}
 
 	@Post('refresh-token')
-	async grantAccessToken(@Body() refreshTokenDto: RefreshTokenBody, @IpRequest() ip: string) {
+	async grantAccessToken(@Body() refreshTokenDto: RefreshTokenBody, @External() { ip }: TExternal) {
 		const accessToken = await this.authService.grantAccessToken(refreshTokenDto.refreshToken, ip)
 		return { access_token: accessToken }
 	}

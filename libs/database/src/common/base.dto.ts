@@ -7,7 +7,7 @@ export interface PaginationDto<T> {
 	searchText?: string
 }
 
-export type ComparisonType = 'LIKE' | 'EQUAL'
+export type ComparisonType = 'LIKE' | 'EQUAL' | 'BETWEEN'
 
 export const escapeSearch = (str = '') => {
 	return str.toLowerCase().replace(/[?%\\_]/gi, (x) => '\\' + x)

@@ -1,2 +1,2 @@
-export class CriteriaOrganizationDto {
+export class ConditionOrganizationDto {
 }

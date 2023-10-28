@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../common/swagger'
-import { OrganizationId } from '../../decorators/request.decorator'
+import { External, TExternal } from '../../common/request-external'
 import { ApiCustomerService } from './api-customer.service'
 import {
 	CustomerCreateBody, CustomerGetManyQuery,
@@ -15,27 +15,27 @@ export class ApiCustomerController {
 	constructor(private readonly apiCustomerService: ApiCustomerService) { }
 
 	@Get('pagination')
-	pagination(@OrganizationId() oid: number, @Query() query: CustomerPaginationQuery) {
+	pagination(@External() { oid }: TExternal, @Query() query: CustomerPaginationQuery) {
 		return this.apiCustomerService.pagination(oid, query)
 	}
 
 	@Get('list')
-	list(@OrganizationId() oid: number, @Query() query: CustomerGetManyQuery) {
+	list(@External() { oid }: TExternal, @Query() query: CustomerGetManyQuery) {
 		return this.apiCustomerService.getMany(oid, query)
 	}
 
 	@Get('detail/:id')
-	async detail(@OrganizationId() oid: number, @Param() { id }: IdParam, @Query() query: CustomerGetOneQuery) {
+	async detail(@External() { oid }: TExternal, @Param() { id }: IdParam, @Query() query: CustomerGetOneQuery) {
 		return await this.apiCustomerService.getOne(oid, id, query)
 	}
 
 	@Post('create')
-	async create(@OrganizationId() oid: number, @Body() body: CustomerCreateBody) {
+	async create(@External() { oid }: TExternal, @Body() body: CustomerCreateBody) {
 		return await this.apiCustomerService.createOne(oid, body)
 	}
 
 	@Patch('update/:id')
-	async update(@OrganizationId() oid: number, @Param() { id }: IdParam, @Body() body: CustomerUpdateBody) {
+	async update(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: CustomerUpdateBody) {
 		return await this.apiCustomerService.updateOne(oid, +id, body)
 	}
 }

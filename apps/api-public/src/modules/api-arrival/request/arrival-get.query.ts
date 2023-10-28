@@ -1,8 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
-import { PaginationQuery } from 'apps/api-public/src/common/pagination.query'
-import { Expose, Transform, Type } from 'class-transformer'
-import { IsArray, IsNumber, ValidateNested } from 'class-validator'
-import { ArrivalFilterQuery, ArrivalRelationsQuery, ArrivalSortQuery } from './arrival-options.request'
+import { Expose, Type } from 'class-transformer'
+import { ValidateNested } from 'class-validator'
+import { PaginationQuery } from '../../../common/pagination.query'
+import { ArrivalFilterQuery, ArrivalRelationQuery, ArrivalSortQuery } from './arrival-options.request'
 
 export class ArrivalPaginationQuery extends PaginationQuery {
 	@ApiPropertyOptional({ type: ArrivalFilterQuery })
@@ -11,11 +11,11 @@ export class ArrivalPaginationQuery extends PaginationQuery {
 	@ValidateNested({ each: true })
 	filter: ArrivalFilterQuery
 
-	@ApiPropertyOptional({ type: ArrivalRelationsQuery })
-	@Expose({ name: 'relations' })
-	@Type(() => ArrivalRelationsQuery)
+	@ApiPropertyOptional({ type: ArrivalRelationQuery })
+	@Expose({ name: 'relation' })
+	@Type(() => ArrivalRelationQuery)
 	@ValidateNested({ each: true })
-	relations: ArrivalRelationsQuery
+	relation: ArrivalRelationQuery
 
 	@ApiPropertyOptional({ type: ArrivalSortQuery })
 	@Expose({ name: 'sort' })
@@ -31,17 +31,17 @@ export class ArrivalGetManyQuery {
 	@ValidateNested({ each: true })
 	filter: ArrivalFilterQuery
 
-	@ApiPropertyOptional({ type: ArrivalRelationsQuery })
-	@Expose({ name: 'relations' })
-	@Type(() => ArrivalRelationsQuery)
+	@ApiPropertyOptional({ type: ArrivalRelationQuery })
+	@Expose({ name: 'relation' })
+	@Type(() => ArrivalRelationQuery)
 	@ValidateNested({ each: true })
-	relations: ArrivalRelationsQuery
+	relation: ArrivalRelationQuery
 }
 
 export class ArrivalGetOneQuery {
-	@ApiPropertyOptional({ type: ArrivalRelationsQuery })
-	@Expose({ name: 'relations' })
-	@Type(() => ArrivalRelationsQuery)
+	@ApiPropertyOptional({ type: ArrivalRelationQuery })
+	@Expose({ name: 'relation' })
+	@Type(() => ArrivalRelationQuery)
 	@ValidateNested({ each: true })
-	relations: ArrivalRelationsQuery
+	relation: ArrivalRelationQuery
 }

@@ -41,14 +41,20 @@
       ],
       "_libs/transporter/*": [
         "libs/transporter/src/*"
+      ],
+      "_libs/assets": [
+        "libs/assets/src"
+      ],
+      "_libs/assets/*": [
+        "libs/assets/src/*"
       ]
     }
   },
   "include": [
     "apps/**/*.ts",
     "libs/**/*.ts",
-    ".eslintrc.js",
-    "webpack-hmr.config.js"
+    "assets/**/*.ts",
+    ".eslintrc.js"
   ],
   "exclude": [
     "dist/"

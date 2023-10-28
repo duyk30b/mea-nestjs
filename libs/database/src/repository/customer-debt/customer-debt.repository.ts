@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { DebtType } from '_libs/database/common/variable'
 import { Customer, CustomerDebt } from '_libs/database/entities'
 import { DataSource, FindOptionsWhere, In, Repository } from 'typeorm'
-import { CustomerDebtCriteria, CustomerDebtOrder } from './customer-debt.dto'
+import { CustomerDebtCondition, CustomerDebtOrder } from './customer-debt.dto'
 
 @Injectable()
 export class CustomerDebtRepository {
@@ -12,15 +12,15 @@ export class CustomerDebtRepository {
 		@InjectRepository(CustomerDebt) private readonly customerDebtRepository: Repository<CustomerDebt>
 	) { }
 
-	getWhereOptions(criteria: CustomerDebtCriteria = {}) {
+	getWhereOptions(condition: CustomerDebtCondition = {}) {
 		const where: FindOptionsWhere<CustomerDebt> = {}
-		if (criteria.id != null) where.id = criteria.id
-		if (criteria.oid != null) where.oid = criteria.oid
-		if (criteria.customerId != null) where.customerId = criteria.customerId
+		if (condition.id != null) where.id = condition.id
+		if (condition.oid != null) where.oid = condition.oid
+		if (condition.customerId != null) where.customerId = condition.customerId
 
-		if (criteria.ids) {
-			if (criteria.ids.length === 0) criteria.ids.push(0)
-			where.id = In(criteria.ids)
+		if (condition.ids) {
+			if (condition.ids.length === 0) condition.ids.push(0)
+			where.id = In(condition.ids)
 		}
 
 		return where
@@ -29,13 +29,13 @@ export class CustomerDebtRepository {
 	async pagination(options: {
 		page: number,
 		limit: number,
-		criteria: CustomerDebtCriteria,
+		condition: CustomerDebtCondition,
 		order: CustomerDebtOrder
 	}) {
-		const { limit, page, criteria, order } = options
+		const { limit, page, condition, order } = options
 
 		const [data, total] = await this.customerDebtRepository.findAndCount({
-			where: this.getWhereOptions(criteria),
+			where: this.getWhereOptions(condition),
 			order,
 			take: limit,
 			skip: (page - 1) * limit,
@@ -44,13 +44,13 @@ export class CustomerDebtRepository {
 		return { total, page, limit, data }
 	}
 
-	async findMany(criteria: CustomerDebtCriteria): Promise<CustomerDebt[]> {
-		const where = this.getWhereOptions(criteria)
+	async findMany(condition: CustomerDebtCondition): Promise<CustomerDebt[]> {
+		const where = this.getWhereOptions(condition)
 		return await this.customerDebtRepository.find({ where })
 	}
 
-	async findOne(criteria: CustomerDebtCriteria): Promise<CustomerDebt> {
-		const where = this.getWhereOptions(criteria)
+	async findOne(condition: CustomerDebtCondition): Promise<CustomerDebt> {
+		const where = this.getWhereOptions(condition)
 		return await this.customerDebtRepository.findOne({ where })
 	}
 

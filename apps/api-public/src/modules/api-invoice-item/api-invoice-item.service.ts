@@ -15,13 +15,12 @@ export class ApiInvoiceItemService {
 	) { }
 
 	async pagination(oid: number, query: InvoiceItemPaginationQuery) {
-		const { page, limit, filter, relations, sort } = query
-		console.log('🚀 ~ file: api-invoice-item.service.ts:19 ~ ApiInvoiceItemService ~ pagination ~ query:', query)
+		const { page, limit, filter, relation, sort } = query
 
 		const { total, data } = await this.invoiceItemRepository.pagination({
 			page,
 			limit,
-			criteria: {
+			condition: {
 				oid,
 				customerId: filter?.customerId,
 				referenceId: filter?.referenceId,
@@ -37,17 +36,17 @@ export class ApiInvoiceItemService {
 			.map((i) => i.referenceId))
 
 		const [invoices, productBatches, procedures] = await Promise.all([
-			relations?.invoice && invoiceIds.length
+			relation?.invoice && invoiceIds.length
 				? this.invoiceRepository.findMany(
 					{ ids: invoiceIds },
-					{ customer: !!relations?.invoice?.customer }
+					{ customer: !!relation?.invoice?.customer }
 				) : [],
-			relations?.productBatch && productBatchIds.length
+			relation?.productBatch && productBatchIds.length
 				? this.productBatchRepository.findMany(
 					{ ids: productBatchIds },
-					{ product: !!relations?.productBatch?.product }
+					{ product: !!relation?.productBatch?.product }
 				) : [],
-			relations?.procedure && procedureIds.length
+			relation?.procedure && procedureIds.length
 				? this.procedureRepository.findMany({ ids: procedureIds }) : [],
 		])
 

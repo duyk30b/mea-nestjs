@@ -1,4 +1,4 @@
-export class DistributorDebtCriteria {
+export class DistributorDebtCondition {
 	id?: number
 	oid?: number
 	distributorId?: number

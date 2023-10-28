@@ -1,27 +1,47 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger'
 import { DiscountType } from '_libs/database/common/variable'
 import { Expose, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsEnum, IsNotEmpty, IsNumber, IsString, ValidateNested } from 'class-validator'
+import { IsArray, IsDefined, IsEnum, IsNotEmpty, IsNumber, IsPositive, IsString, ValidateNested } from 'class-validator'
 import { InvoiceItemBody } from './invoice-item.body'
 
-export class InvoiceCreateQuery {
-	@ApiProperty({ name: 'customer_id', example: 45 })
-	@Expose({ name: 'customer_id' })
+export class MoneyDetails {
+	@Expose({ name: 'key' })
 	@IsDefined()
-	@IsNotEmpty()
-	@Type(() => Number)
+	@IsString()
+	key: string
+
+	@Expose({ name: 'name' })
+	@IsDefined()
+	@IsString()
+	name: string
+
+	@Expose({ name: 'money' })
+	@IsDefined()
 	@IsNumber()
-	customerId: number
+	money: number
 }
 
-export class InvoiceUpsertBody {
+export class InvoiceCreateBody {
+	@ApiProperty({ name: 'customer_id', example: 45 })
+	@Expose({ name: 'customer_id' })
+	@Type(() => Number)
+	@IsDefined()
+	@IsPositive()
+	customerId: number
+
 	@ApiProperty({ type: InvoiceItemBody, isArray: true })
 	@Expose({ name: 'invoice_items' })
+	@Type(() => InvoiceItemBody)
 	@IsDefined()
 	@IsArray()
-	@Type(() => InvoiceItemBody)
 	@ValidateNested({ each: true })
 	invoiceItems: InvoiceItemBody[]
+
+	@ApiProperty({ name: 'create_time', example: Date.now() })
+	@Expose({ name: 'create_time' })
+	@IsDefined()
+	@IsNumber()
+	createTime: number
 
 	@ApiProperty({ name: 'total_cost_money', example: 750_000 })
 	@Expose({ name: 'total_cost_money' })
@@ -53,31 +73,54 @@ export class InvoiceUpsertBody {
 	@IsEnum(DiscountType)
 	discountType: DiscountType
 
-	@ApiPropertyOptional({ name: 'surcharge', example: 12_000 })
+	@ApiProperty({ name: 'surcharge', example: 12_000 })
 	@Expose({ name: 'surcharge' })
 	@IsDefined()
 	@IsNumber()
 	surcharge: number                                    // Phụ phí
 
-	@ApiPropertyOptional({ name: 'total_money', example: 1_250_000 })
+	@ApiPropertyOptional({
+		type: MoneyDetails,
+		isArray: true,
+		example: [{ key: 'xx', name: 'Hoa hồng', money: 10000 }, { key: 'xxe', name: 'Ship', money: 200000 }],
+	})
+	@Expose({ name: 'surcharge_details' })
+	@IsDefined()
+	@Type(() => MoneyDetails)
+	@IsArray()
+	@ValidateNested({ each: true })
+	surchargeDetails: MoneyDetails[]                 // Phụ phí
+
+	@ApiProperty({ name: 'total_money', example: 1_250_000 })
 	@Expose({ name: 'total_money' })
 	@IsDefined()
 	@IsNumber()
 	totalMoney: number                                    // totalMoney = totalItemMoney - discountMoney + phụ phí
 
-	@ApiPropertyOptional({ name: 'expenses', example: 20_000 })
+	@ApiProperty({ name: 'expenses', example: 20_000 })
 	@Expose({ name: 'expenses' })
-	@IsDefined()
 	@IsNumber()
 	expenses: number                                    // Khoản chi (chi phí phải trả như tiền môi giới)
 
-	@ApiPropertyOptional({ name: 'profit', example: 20_000 })
+	@ApiPropertyOptional({
+		type: MoneyDetails,
+		isArray: true,
+		example: [{ key: 'xx', name: 'Vật tư', money: 10000 }, { key: 'xxe', name: 'Ship', money: 200000 }],
+	})
+	@Expose({ name: 'expenses_details' })
+	@IsDefined()
+	@Type(() => MoneyDetails)
+	@IsArray()
+	@ValidateNested({ each: true })
+	expensesDetails: MoneyDetails[]
+
+	@ApiProperty({ name: 'profit', example: 20_000 })
 	@Expose({ name: 'profit' })
 	@IsDefined()
 	@IsNumber()
 	profit: number                                     // Tiền lãi = totalMoney - totalCostMoney - khoản chi
 
-	@ApiPropertyOptional({ name: 'debt', example: 500_000 })
+	@ApiProperty({ name: 'debt', example: 500_000 })
 	@Expose({ name: 'debt' })
 	@IsDefined()
 	@IsNumber()
@@ -88,3 +131,5 @@ export class InvoiceUpsertBody {
 	@IsString()
 	note: string
 }
+
+export class InvoiceUpdateBody extends OmitType(InvoiceCreateBody, ['customerId']) { }

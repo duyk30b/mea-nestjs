@@ -17,8 +17,8 @@ export class ProductMovementFilterQuery {
 	productBatchId: number
 }
 
-export class ProductMovementRelationsQuery {
-	@ApiPropertyOptional({ name: 'relations[product_batch]' })
+export class ProductMovementRelationQuery {
+	@ApiPropertyOptional({ name: 'relation[product_batch]' })
 	@Expose({ name: 'product_batch' })
 	@Transform(({ value }) => {
 		if (['1', 'true'].includes(value)) return true
@@ -28,7 +28,7 @@ export class ProductMovementRelationsQuery {
 	@IsBoolean()
 	productBatch: boolean
 
-	@ApiPropertyOptional({ name: 'relations[invoice]' })
+	@ApiPropertyOptional({ name: 'relation[invoice]' })
 	@Expose({ name: 'invoice' })
 	@Transform(({ value }) => {
 		if (['1', 'true'].includes(value)) return true
@@ -38,7 +38,7 @@ export class ProductMovementRelationsQuery {
 	@IsBoolean()
 	invoice: boolean
 
-	@ApiPropertyOptional({ name: 'relations[receipt]' })
+	@ApiPropertyOptional({ name: 'relation[receipt]' })
 	@Expose({ name: 'receipt' })
 	@Transform(({ value }) => {
 		if (['1', 'true'].includes(value)) return true

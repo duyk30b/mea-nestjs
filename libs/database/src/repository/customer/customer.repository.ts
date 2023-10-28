@@ -5,33 +5,33 @@ import { NoExtraProperties } from '_libs/common/helpers/typescript.helper'
 import { escapeSearch } from '_libs/database/common/base.dto'
 import { FindOptionsWhere, In, Like, Repository, UpdateResult } from 'typeorm'
 import { Customer } from '../../entities'
-import { CustomerCriteria, CustomerOrder } from './customer.dto'
+import { CustomerCondition, CustomerOrder } from './customer.dto'
 
 @Injectable()
 export class CustomerRepository {
 	constructor(@InjectRepository(Customer) private customerRepository: Repository<Customer>) { }
 
-	getWhereOptions(criteria: CustomerCriteria) {
+	getWhereOptions(condition: CustomerCondition) {
 		const where: FindOptionsWhere<Customer> = {}
 
-		if (criteria.oid != null) where.oid = criteria.oid
-		if (criteria.id != null) where.id = criteria.id
-		if (criteria.isActive != null) where.isActive = criteria.isActive
+		if (condition.oid != null) where.oid = condition.oid
+		if (condition.id != null) where.id = condition.id
+		if (condition.isActive != null) where.isActive = condition.isActive
 
-		if (criteria.ids) {
-			if (criteria.ids.length === 0) criteria.ids.push(0)
-			where.id = In(criteria.ids)
+		if (condition.ids) {
+			if (condition.ids.length === 0) condition.ids.push(0)
+			where.id = In(condition.ids)
 		}
 
-		if (criteria.fullNameEn && Array.isArray(criteria.fullNameEn)) {
-			if (criteria.fullNameEn[0] === 'LIKE' && criteria.fullNameEn[1]) {
-				const text = escapeSearch(convertViToEn(criteria.fullNameEn[1]))
-				where.fullNameEn = Like(`%${text}%`)
+		if (condition.fullName && Array.isArray(condition.fullName)) {
+			if (condition.fullName[0] === 'LIKE' && condition.fullName[1]) {
+				const text = escapeSearch(convertViToEn(condition.fullName[1]))
+				where.fullName = Like(`%${text}%`)
 			}
 		}
-		if (criteria.phone && Array.isArray(criteria.phone)) {
-			if (criteria.phone[0] === 'LIKE' && criteria.phone[1]) {
-				where.phone = Like(`%${escapeSearch(criteria.phone[1])}%`)
+		if (condition.phone && Array.isArray(condition.phone)) {
+			if (condition.phone[0] === 'LIKE' && condition.phone[1]) {
+				where.phone = Like(`%${escapeSearch(condition.phone[1])}%`)
 			}
 		}
 
@@ -41,13 +41,13 @@ export class CustomerRepository {
 	async pagination(options: {
 		page: number,
 		limit: number,
-		criteria?: CustomerCriteria,
+		condition?: CustomerCondition,
 		order?: CustomerOrder
 	}) {
-		const { limit, page, criteria, order } = options
+		const { limit, page, condition, order } = options
 
 		const [data, total] = await this.customerRepository.findAndCount({
-			where: this.getWhereOptions(criteria),
+			where: this.getWhereOptions(condition),
 			order,
 			take: limit,
 			skip: (page - 1) * limit,
@@ -56,22 +56,22 @@ export class CustomerRepository {
 		return { total, page, limit, data }
 	}
 
-	async find(options: { limit?: number, criteria?: CustomerCriteria, order?: CustomerOrder }): Promise<Customer[]> {
-		const { limit, criteria, order } = options
+	async find(options: { limit?: number, condition?: CustomerCondition, order?: CustomerOrder }): Promise<Customer[]> {
+		const { limit, condition, order } = options
 		return await this.customerRepository.find({
-			where: this.getWhereOptions(criteria),
+			where: this.getWhereOptions(condition),
 			order,
 			take: limit,
 		})
 	}
 
-	async findMany(criteria: CustomerCriteria): Promise<Customer[]> {
-		return await this.customerRepository.find({ where: this.getWhereOptions(criteria) })
+	async findMany(condition: CustomerCondition): Promise<Customer[]> {
+		return await this.customerRepository.find({ where: this.getWhereOptions(condition) })
 	}
 
-	async findOne(criteria: CustomerCriteria, order?: CustomerOrder): Promise<Customer> {
+	async findOne(condition: CustomerCondition, order?: CustomerOrder): Promise<Customer> {
 		return await this.customerRepository.findOne({
-			where: this.getWhereOptions(criteria),
+			where: this.getWhereOptions(condition),
 			order,
 		})
 	}
@@ -81,8 +81,8 @@ export class CustomerRepository {
 		return this.customerRepository.save(customer)
 	}
 
-	async update(criteria: CustomerCriteria, dto: Partial<Omit<Customer, 'id' | 'oid'>>): Promise<UpdateResult> {
-		const where = this.getWhereOptions(criteria)
+	async update(condition: CustomerCondition, dto: Partial<Omit<Customer, 'id' | 'oid'>>): Promise<UpdateResult> {
+		const where = this.getWhereOptions(condition)
 		return await this.customerRepository.update(where, dto)
 	}
 }

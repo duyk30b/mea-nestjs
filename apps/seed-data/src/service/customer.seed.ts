@@ -15,15 +15,14 @@ export class CustomerSeed {
 		const customersDto: Customer[] = []
 		for (let i = 0; i < number; i++) {
 			const gender = randomEnum<EGender>(EGender)
-			const fullNameVi = randomFullName(gender)
-			const fullNameEn = convertViToEn(fullNameVi)
+			const fullName = randomFullName(gender)
 			const address = AddressData.getRandomAddress()
 
 			const customer = new Customer()
 
 			customer.oid = oid
-			customer.fullNameVi = fullNameVi
-			customer.fullNameEn = fullNameEn
+			customer.fullName = fullName
+			customer.fullName = fullName
 			customer.phone = randomPhoneNumber()
 			customer.birthday = randomDate('1965-03-28', '2020-12-29').getTime()
 			customer.gender = gender

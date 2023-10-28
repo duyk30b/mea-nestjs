@@ -1,11 +1,11 @@
-import { ArrivalType, PaymentStatus } from '_libs/database/common/variable'
+import { ArrivalStatus, ArrivalType } from '_libs/database/common/variable'
 
-export interface ArrivalCriteria {
+export interface ArrivalCondition {
 	id?: number
 	oid?: number
 	customerId?: number
 	type?: ArrivalType
-	paymentStatus?: PaymentStatus
+	status?: ArrivalStatus
 
 	ids?: number[]
 	types?: ArrivalType[]

@@ -1,6 +1,7 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
-import { decrypt, encrypt, formatUrlEncode } from '_libs/common/helpers/string.helper'
+import { BusinessException } from '_libs/common/exception-filter/business-exception.filter'
+import { decrypt, encrypt } from '_libs/common/helpers/string.helper'
 import { ERole } from '_libs/database/common/variable'
 import Employee from '_libs/database/entities/employee.entity'
 import Organization from '_libs/database/entities/organization.entity'
@@ -9,11 +10,11 @@ import { DataSource } from 'typeorm'
 import { EmailService } from '../../components/email/email.service'
 import { JwtExtendService } from '../../components/jwt-extend/jwt-extend.service'
 import { GlobalConfig, JwtConfig } from '../../environments'
-import { ErrorMessage } from '../../exception-filters/exception.const'
 import { ForgotPasswordBody } from './request/forgot-password.body'
-import { ResetPasswordBody } from './request/reset-password.body'
-import { RegisterBody } from './request/register.body'
 import { LoginBody } from './request/login.body'
+import { RegisterBody } from './request/register.body'
+import { ResetPasswordBody } from './request/reset-password.body'
+import { Customer, Distributor } from '_libs/database/entities'
 
 @Injectable()
 export class AuthService {
@@ -31,13 +32,13 @@ export class AuthService {
 		const existOrg = await this.dataSource.manager.findOne(Organization, { where: [{ email }, { phone }] })
 		if (existOrg) {
 			if (existOrg.email === email && existOrg.phone === phone) {
-				throw new HttpException(ErrorMessage.Register.ExistEmailAndPhone, HttpStatus.BAD_REQUEST)
+				throw new BusinessException('common.Register.ExistEmailAndPhone')
 			}
 			else if (existOrg.email === email) {
-				throw new HttpException(ErrorMessage.Register.ExistEmail, HttpStatus.BAD_REQUEST)
+				throw new BusinessException('common.Register.ExistEmail')
 			}
 			else if (existOrg.phone === phone) {
-				throw new HttpException(ErrorMessage.Register.ExistPhone, HttpStatus.BAD_REQUEST)
+				throw new BusinessException('common.Register.ExistPhone')
 			}
 		}
 
@@ -58,6 +59,23 @@ export class AuthService {
 			return employee
 		})
 
+		await Promise.all([
+			this.dataSource.manager.insert(Customer, [
+				{
+					oid: employee.oid,
+					fullName: 'Khách lẻ',
+				},
+				{
+					oid: employee.oid,
+					fullName: 'Xuất thiếu',
+				},
+			]),
+			this.dataSource.manager.save(Distributor, {
+				oid: employee.oid,
+				fullName: 'Nhập thiếu',
+			}),
+		])
+
 		return employee
 	}
 
@@ -70,10 +88,10 @@ export class AuthService {
 				organization: { phone: loginDto.orgPhone },
 			},
 		})
-		if (!employee) throw new HttpException(ErrorMessage.User.NotExist, HttpStatus.BAD_REQUEST)
+		if (!employee) throw new BusinessException('common.User.NotExist')
 
 		const checkPassword = await bcrypt.compare(loginDto.password, employee.password)
-		if (!checkPassword) throw new HttpException(ErrorMessage.User.WrongPassword, HttpStatus.BAD_REQUEST)
+		if (!checkPassword) throw new BusinessException('common.User.WrongPassword')
 
 		return employee
 	}
@@ -84,7 +102,7 @@ export class AuthService {
 			relationLoadStrategy: 'query', // dùng join+findOne thì bị lỗi 2 câu query
 			where: { id: 1, organization: { id: 1 } },
 		})
-		if (!employee) throw new HttpException(ErrorMessage.User.NotExist, HttpStatus.BAD_REQUEST)
+		if (!employee) throw new BusinessException('common.User.NotExist')
 
 		return employee
 	}
@@ -94,7 +112,7 @@ export class AuthService {
 			Organization,
 			{ where: { phone: body.orgPhone, email: body.email } }
 		)
-		if (!organization) throw new HttpException(ErrorMessage.Organization.NotExist, HttpStatus.BAD_REQUEST)
+		if (!organization) throw new BusinessException('common.Organization.NotExist')
 
 		const employee = await this.dataSource.manager.findOne(Employee, {
 			where: {
@@ -102,7 +120,7 @@ export class AuthService {
 				oid: organization.id,
 			},
 		})
-		if (!employee) throw new HttpException(ErrorMessage.User.NotExist, HttpStatus.BAD_REQUEST)
+		if (!employee) throw new BusinessException('common.User.NotExist')
 
 		const token = encodeURIComponent(encrypt(employee.password, this.jwtConfig.accessKey, 30 * 60 * 1000))
 		const link = `${this.globalConfig.domain}/auth/reset-password?token=${token}&org_phone=${body.orgPhone}&username=${body.username}&ver=1`
@@ -128,16 +146,16 @@ export class AuthService {
 				organization: { phone: body.orgPhone },
 			},
 		})
-		if (!employee) throw new HttpException(ErrorMessage.User.NotExist, HttpStatus.BAD_REQUEST)
+		if (!employee) throw new BusinessException('common.User.NotExist')
 
 		let hash: string
 		try {
 			hash = decrypt(body.token, this.jwtConfig.accessKey)
 		} catch (error) {
-			throw new HttpException(ErrorMessage.Token.Expired, HttpStatus.BAD_REQUEST)
+			throw new BusinessException('common.Token.Expired')
 		}
 		if (employee.password !== hash) {
-			throw new HttpException(ErrorMessage.Token.Invalid, HttpStatus.BAD_REQUEST)
+			throw new BusinessException('common.Token.Invalid')
 		}
 
 		employee.password = await bcrypt.hash(body.password, 5)
@@ -153,7 +171,7 @@ export class AuthService {
 			relations: { organization: true },
 			where: { id: uid, oid },
 		})
-		if (!employee) throw new HttpException(ErrorMessage.User.NotExist, HttpStatus.BAD_REQUEST)
+		if (!employee) throw new BusinessException('common')
 		return this.jwtExtendService.createAccessToken(employee, ip)
 	}
 }

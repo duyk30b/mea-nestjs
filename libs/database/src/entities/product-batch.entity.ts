@@ -42,6 +42,10 @@ export default class ProductBatch extends BaseEntity {
 	@Expose({ name: 'quantity' })
 	quantity: number
 
+	@Column({ name: 'is_active', type: 'boolean', default: true })
+	@Expose({ name: 'is_active' })
+	isActive: boolean
+
 	@Expose({ name: 'product' })
 	@ManyToOne((type) => Product, { createForeignKeyConstraints: false })
 	@JoinColumn({ name: 'product_id', referencedColumnName: 'id' })

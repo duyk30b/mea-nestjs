@@ -2,32 +2,32 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import Diagnosis from '_libs/database/entities/diagnosis.entity'
 import { FindOptionsWhere, In, Repository } from 'typeorm'
-import { CriteriaDiagnosis } from './diagnosis.dto'
+import { ConditionDiagnosis } from './diagnosis.dto'
 
 @Injectable()
 export class DiagnosisRepository {
 	constructor(@InjectRepository(Diagnosis) private readonly diagnosisRepository: Repository<Diagnosis>) { }
 
-	getWhereOptions(criteria: CriteriaDiagnosis = {}) {
+	getWhereOptions(condition: ConditionDiagnosis = {}) {
 		const where: FindOptionsWhere<Diagnosis> = {}
-		if (criteria.id != null) where.id = criteria.id
-		if (criteria.arrivalId != null) where.arrivalId = criteria.arrivalId
+		if (condition.id != null) where.id = condition.id
+		if (condition.arrivalId != null) where.arrivalId = condition.arrivalId
 
-		if (criteria.ids) {
-			if (criteria.ids.length === 0) criteria.ids.push(0)
-			where.id = In(criteria.ids)
+		if (condition.ids) {
+			if (condition.ids.length === 0) condition.ids.push(0)
+			where.id = In(condition.ids)
 		}
 
 		return where
 	}
 
-	async findOne(criteria: CriteriaDiagnosis): Promise<Diagnosis> {
-		const where = this.getWhereOptions(criteria)
+	async findOne(condition: ConditionDiagnosis): Promise<Diagnosis> {
+		const where = this.getWhereOptions(condition)
 		return await this.diagnosisRepository.findOne({ where })
 	}
 
-	async findMany(criteria: CriteriaDiagnosis): Promise<Diagnosis[]> {
-		const where = this.getWhereOptions(criteria)
+	async findMany(condition: ConditionDiagnosis): Promise<Diagnosis[]> {
+		const where = this.getWhereOptions(condition)
 		return await this.diagnosisRepository.find({ where })
 	}
 
@@ -36,8 +36,8 @@ export class DiagnosisRepository {
 		return this.diagnosisRepository.save(product)
 	}
 
-	async update(criteria: CriteriaDiagnosis, dto: Partial<Omit<Diagnosis, 'id' | 'oid' | 'arrivalId'>>) {
-		const where = this.getWhereOptions(criteria)
+	async update(condition: ConditionDiagnosis, dto: Partial<Omit<Diagnosis, 'id' | 'oid' | 'arrivalId'>>) {
+		const where = this.getWhereOptions(condition)
 		return await this.diagnosisRepository.update(where, dto)
 	}
 }

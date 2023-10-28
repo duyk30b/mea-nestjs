@@ -1,9 +1,9 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
 import { valuesEnum } from '_libs/common/helpers/typescript.helper'
-import { PaymentStatus } from '_libs/database/common/variable'
-import { SortQuery } from 'apps/api-public/src/common/pagination.query'
+import { InvoiceStatus } from '_libs/database/common/variable'
 import { Expose, Transform, Type } from 'class-transformer'
 import { IsBoolean, IsEnum, IsNumber } from 'class-validator'
+import { SortQuery } from '../../../common/pagination.query'
 
 export class InvoiceFilterQuery {
 	@ApiPropertyOptional({ name: 'filter[customer_id]' })
@@ -24,15 +24,15 @@ export class InvoiceFilterQuery {
 	@IsNumber()
 	toTime: number
 
-	@ApiPropertyOptional({ name: 'filter[payment_status]', enum: valuesEnum(PaymentStatus), example: PaymentStatus.Full })
-	@Expose({ name: 'payment_status' })
+	@ApiPropertyOptional({ name: 'filter[status]', enum: valuesEnum(InvoiceStatus), example: InvoiceStatus.Refund })
+	@Expose({ name: 'status' })
 	@Type(() => Number)
-	@IsEnum(PaymentStatus)
-	paymentStatus: PaymentStatus
+	@IsEnum(InvoiceStatus)
+	status: InvoiceStatus
 }
 
-export class InvoiceRelationsQuery {
-	@ApiPropertyOptional({ name: 'relations[customer]' })
+export class InvoiceRelationQuery {
+	@ApiPropertyOptional({ name: 'relation[customer]' })
 	@Expose({ name: 'customer' })
 	@Transform(({ value }) => {
 		if (['1', 'true'].includes(value)) return true
@@ -42,7 +42,7 @@ export class InvoiceRelationsQuery {
 	@IsBoolean()
 	customer: boolean
 
-	@ApiPropertyOptional({ name: 'relations[invoice_items]' })
+	@ApiPropertyOptional({ name: 'relation[invoice_items]' })
 	@Expose({ name: 'invoice_items' })
 	@Transform(({ value }) => {
 		if (['1', 'true'].includes(value)) return true

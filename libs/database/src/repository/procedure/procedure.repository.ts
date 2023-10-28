@@ -5,38 +5,38 @@ import { NoExtraProperties } from '_libs/common/helpers/typescript.helper'
 import { escapeSearch } from '_libs/database/common/base.dto'
 import { FindOptionsWhere, In, Like, Repository, UpdateResult } from 'typeorm'
 import { Procedure } from '../../entities'
-import { ProcedureCriteria, ProcedureOrder } from './procedure.dto'
+import { ProcedureCondition, ProcedureOrder } from './procedure.dto'
 
 @Injectable()
 export class ProcedureRepository {
 	constructor(@InjectRepository(Procedure) private procedureRepository: Repository<Procedure>) { }
 
-	getWhereOptions(criteria: ProcedureCriteria = {}) {
+	getWhereOptions(condition: ProcedureCondition = {}) {
 		const where: FindOptionsWhere<Procedure> = {}
 
-		if (criteria.id != null) where.id = criteria.id
-		if (criteria.oid != null) where.oid = criteria.oid
-		if (criteria.group != null) where.group = criteria.group
-		if (criteria.isActive != null) where.isActive = criteria.isActive
+		if (condition.id != null) where.id = condition.id
+		if (condition.oid != null) where.oid = condition.oid
+		if (condition.group != null) where.group = condition.group
+		if (condition.isActive != null) where.isActive = condition.isActive
 
-		if (criteria.ids) {
-			if (criteria.ids.length === 0) criteria.ids.push(0)
-			where.id = In(criteria.ids)
+		if (condition.ids) {
+			if (condition.ids.length === 0) condition.ids.push(0)
+			where.id = In(condition.ids)
 		}
 
-		if (criteria.searchText) {
-			const text = escapeSearch(convertViToEn(criteria.searchText))
-			where.nameEn = Like(`%${text}%`)
+		if (condition.searchText) {
+			const text = escapeSearch(convertViToEn(condition.searchText))
+			where.name = Like(`%${text}%`)
 		}
 
 		return where
 	}
 
-	async pagination(options: { page: number, limit: number, criteria?: ProcedureCriteria, order?: ProcedureOrder }) {
-		const { limit, page, criteria, order } = options
+	async pagination(options: { page: number, limit: number, condition?: ProcedureCondition, order?: ProcedureOrder }) {
+		const { limit, page, condition, order } = options
 
 		const [data, total] = await this.procedureRepository.findAndCount({
-			where: this.getWhereOptions(criteria),
+			where: this.getWhereOptions(condition),
 			order,
 			take: limit,
 			skip: (page - 1) * limit,
@@ -46,23 +46,23 @@ export class ProcedureRepository {
 		return { total, page, limit, data, totalPage }
 	}
 
-	async find(options: { criteria?: ProcedureCriteria, order?: ProcedureOrder, limit?: number }): Promise<Procedure[]> {
-		const { limit, criteria, order } = options
+	async find(options: { condition?: ProcedureCondition, order?: ProcedureOrder, limit?: number }): Promise<Procedure[]> {
+		const { limit, condition, order } = options
 
 		return await this.procedureRepository.find({
-			where: this.getWhereOptions(criteria),
+			where: this.getWhereOptions(condition),
 			order,
 			take: limit,
 		})
 	}
 
-	async findMany(criteria: ProcedureCriteria): Promise<Procedure[]> {
-		const where = this.getWhereOptions(criteria)
+	async findMany(condition: ProcedureCondition): Promise<Procedure[]> {
+		const where = this.getWhereOptions(condition)
 		return await this.procedureRepository.find({ where })
 	}
 
-	async findOne(criteria: ProcedureCriteria): Promise<Procedure> {
-		const where = this.getWhereOptions(criteria)
+	async findOne(condition: ProcedureCondition): Promise<Procedure> {
+		const where = this.getWhereOptions(condition)
 		return await this.procedureRepository.findOne({ where })
 	}
 
@@ -71,8 +71,8 @@ export class ProcedureRepository {
 		return this.procedureRepository.save(customer)
 	}
 
-	async update(criteria: ProcedureCriteria, dto: Partial<Omit<Procedure, 'id' | 'oid'>>): Promise<UpdateResult> {
-		const where = this.getWhereOptions(criteria)
+	async update(condition: ProcedureCondition, dto: Partial<Omit<Procedure, 'id' | 'oid'>>): Promise<UpdateResult> {
+		const where = this.getWhereOptions(condition)
 		return await this.procedureRepository.update(where, dto)
 	}
 }

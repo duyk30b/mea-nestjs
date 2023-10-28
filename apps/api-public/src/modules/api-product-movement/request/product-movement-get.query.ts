@@ -2,14 +2,14 @@ import { ApiPropertyOptional } from '@nestjs/swagger'
 import { PaginationQuery } from 'apps/api-public/src/common/pagination.query'
 import { Expose, Type } from 'class-transformer'
 import { ValidateNested } from 'class-validator'
-import { ProductMovementFilterQuery, ProductMovementRelationsQuery, ProductMovementSortQuery } from './product-movement-options.request'
+import { ProductMovementFilterQuery, ProductMovementRelationQuery, ProductMovementSortQuery } from './product-movement-options.request'
 
 export class ProductMovementPaginationQuery extends PaginationQuery {
-	@ApiPropertyOptional({ type: ProductMovementRelationsQuery })
-	@Expose({ name: 'relations' })
-	@Type(() => ProductMovementRelationsQuery)
+	@ApiPropertyOptional({ type: ProductMovementRelationQuery })
+	@Expose({ name: 'relation' })
+	@Type(() => ProductMovementRelationQuery)
 	@ValidateNested({ each: true })
-	relations: ProductMovementRelationsQuery
+	relation: ProductMovementRelationQuery
 
 	@ApiPropertyOptional({ type: ProductMovementFilterQuery })
 	@Expose({ name: 'filter' })

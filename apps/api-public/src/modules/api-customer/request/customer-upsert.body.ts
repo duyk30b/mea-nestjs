@@ -5,17 +5,11 @@ import { Expose } from 'class-transformer'
 import { IsBoolean, IsDefined, IsIn, IsNotEmpty, IsNumber, IsString, Validate } from 'class-validator'
 
 export class CustomerCreateBody {
-	@ApiProperty({ name: 'full_name_vi', example: 'Phạm Hoàng Mai' })
-	@Expose({ name: 'full_name_vi' })
+	@ApiProperty({ name: 'full_name', example: 'Phạm Hoàng Mai' })
+	@Expose({ name: 'full_name' })
 	@IsDefined()
 	@IsNotEmpty()
-	fullNameVi: string
-
-	@ApiProperty({ name: 'full_name_en', example: 'Pham Hoang Mai' })
-	@Expose({ name: 'full_name_en' })
-	@IsDefined()
-	@IsNotEmpty()
-	fullNameEn: string
+	fullName: string
 
 	@ApiPropertyOptional({ name: 'phone', example: '0986123456' })
 	@Expose({ name: 'phone' })
@@ -70,7 +64,7 @@ export class CustomerCreateBody {
 	@ApiPropertyOptional({ name: 'note', example: 'Khách hàng không' })
 	@Expose({ name: 'note' })
 	note: string
-	
+
 	@ApiPropertyOptional({ name: 'is_active', example: true })
 	@Expose({ name: 'is_active' })
 	@IsBoolean()

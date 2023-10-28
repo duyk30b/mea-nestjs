@@ -3,17 +3,11 @@ import { Expose } from 'class-transformer'
 import { IsBoolean, IsDefined, IsNumber, IsString } from 'class-validator'
 
 export class ProcedureCreateBody {
-	@ApiProperty({ name: 'name_vi', example: 'Truyền dịch 500ml' })
-	@Expose({ name: 'name_vi' })
+	@ApiProperty({ name: 'name', example: 'Truyền dịch 500ml' })
+	@Expose({ name: 'name' })
 	@IsDefined()
 	@IsString()
-	nameVi: string                                 // tên dịch vụ
-
-	@ApiProperty({ name: 'name_en', example: 'Truyen dich 500ml' })
-	@Expose({ name: 'name_en' })
-	@IsDefined()
-	@IsString()
-	nameEn: string                                 // tên dịch vụ
+	name: string                                 // tên dịch vụ
 
 	@ApiPropertyOptional({ name: 'group', example: 'Tiêm truyền' })
 	@Expose({ name: 'group' })

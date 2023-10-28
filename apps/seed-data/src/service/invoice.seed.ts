@@ -4,19 +4,19 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { randomEnum, randomItemsInArray, randomNumber, shuffleArray } from '_libs/common/helpers/random.helper'
 import { DiscountType, InvoiceItemType } from '_libs/database/common/variable'
 import { Customer, Procedure, ProductBatch } from '_libs/database/entities'
-import { ArrivalInvoiceRepository, InvoiceItemDto, InvoiceUpsertDto } from '_libs/database/repository'
+import { InvoiceQuickRepository, InvoiceItemDto, InvoiceInsertDto } from '_libs/database/repository'
 import { Repository } from 'typeorm'
 
 @Injectable()
-export class ArrivalInvoiceSeed {
+export class InvoiceSeed {
 	constructor(
 		@InjectRepository(ProductBatch) private productBatchRepository: Repository<ProductBatch>,
 		@InjectRepository(Customer) private customerRepository: Repository<Customer>,
 		@InjectRepository(Procedure) private procedureRepository: Repository<Procedure>,
-		private readonly arrivalInvoiceRepository: ArrivalInvoiceRepository
+		private readonly invoiceQuickRepository: InvoiceQuickRepository
 	) { }
 
-	fakeInvoiceUpsertDto(productBatches: ProductBatch[], procedures: Procedure[]): InvoiceUpsertDto {
+	fakeInvoiceInsertDto(productBatches: ProductBatch[], procedures: Procedure[]): InvoiceInsertDto {
 		const numberProductBatch = randomNumber(2, 5)
 		const numberProcedure = randomNumber(2, 5)
 
@@ -25,8 +25,7 @@ export class ArrivalInvoiceSeed {
 		for (let i = 0; i < numberProductBatch; i++) {
 			const productBatch = productBatches[i]
 
-			const productUnit = JSON.parse(productBatch.product.unit) as { name: string, rate: number }[]
-			const unit = JSON.stringify(productUnit.find((i) => i.rate === 1))
+			const unit = productBatch.product.unit.find((i) => i.rate === 1)
 
 			const expectedPrice = productBatch.retailPrice
 			const discountPercent = randomNumber(10, 30)
@@ -60,7 +59,7 @@ export class ArrivalInvoiceSeed {
 			invoiceItemsDto.push({
 				referenceId: procedure.id,
 				type: InvoiceItemType.Procedure,
-				unit: JSON.stringify({ name: '', rate: 1 }),
+				unit: { name: '', rate: 1 },
 				costPrice: 0,
 				expectedPrice,
 				quantity: randomNumber(1, 5),
@@ -84,7 +83,7 @@ export class ArrivalInvoiceSeed {
 		const profit = totalMoney - totalCostMoney - expenses
 		const debt = Math.floor(totalMoney * randomNumber(0.1, 0.5, 0.1) / 1000) * 1000
 
-		const invoiceUpsertDto: InvoiceUpsertDto = {
+		const invoiceInsertDto: InvoiceInsertDto = {
 			invoiceItems: invoiceItemsDto,
 			totalCostMoney,
 			totalItemMoney,
@@ -99,7 +98,7 @@ export class ArrivalInvoiceSeed {
 			note: faker.lorem.sentence(),
 		}
 
-		return invoiceUpsertDto
+		return invoiceInsertDto
 	}
 
 	async start(oid: number, number: number, startTime: Date, endTime: Date) {
@@ -120,56 +119,57 @@ export class ArrivalInvoiceSeed {
 
 			const createTime = startTime.getTime() + i * gap
 			const paymentTime = startTime.getTime() + i * gap + 60 * 60 * 1000
+			const shipTime = paymentTime
 			const refundTime = startTime.getTime() + i * gap + 2 * 60 * 60 * 1000
 
-			const invoiceUpsertDto = this.fakeInvoiceUpsertDto(productBatchesShuffle, proceduresShuffle)
-			const { invoiceId, arrivalId } = await this.arrivalInvoiceRepository.createInvoiceDraft({
+			const invoiceInsertDto = this.fakeInvoiceInsertDto(productBatchesShuffle, proceduresShuffle)
+			invoiceInsertDto.createTime = createTime
+			invoiceInsertDto.customerId = customer.id
+			const { invoiceId } = await this.invoiceQuickRepository.createDraft({
 				oid,
-				customerId: customer.id,
-				invoiceUpsertDto,
-				time: createTime,
+				invoiceInsertDto,
 			})
 
 			if (i % 2 === 0) {
-				const invoice = await this.arrivalInvoiceRepository.paymentInvoiceDraft({ oid, invoiceId, time: paymentTime })
-				if (i % 4 === 0) {
-					await this.arrivalInvoiceRepository.refundInvoice({ oid, invoiceId, time: refundTime })
-					if (i % 8 === 0) {
-						const invoiceInsertAfterRefundDto = this.fakeInvoiceUpsertDto(productBatchesShuffle, proceduresShuffle)
-						await this.arrivalInvoiceRepository.createInvoiceDraftAfterRefund({
-							oid,
-							arrivalId,
-							invoiceUpsertDto: invoiceInsertAfterRefundDto,
-						})
-					}
-				}
+				await this.invoiceQuickRepository.startShip({ oid, invoiceId, shipTime })
+			}
+			if (i % 3 === 0) {
+				await this.invoiceQuickRepository.startPayment({
+					oid,
+					invoiceId,
+					paymentTime,
+					debt: invoiceInsertDto.debt,
+				})
+			}
+			if (i % 6 === 0) {
+				await this.invoiceQuickRepository.startRefund({ oid, invoiceId, refundTime })
 			}
 
 			// const createMultiDraft = await Promise.allSettled(Array.from(Array(300)).map((i, index) => {
-			// 	const dto = JSON.parse(JSON.stringify(invoiceUpsertDto))
+			// 	const dto = JSON.parse(JSON.stringify(invoiceInsertDto))
 			// 	const r = randomNumber(1, 1000, 1)
 			// 	dto.totalMoney = r
 			// 	dto.invoiceItems.forEach((item) => item.quantity = r)
-			// 	return this.arrivalInvoiceRepository.createInvoiceDraft(oid, dto, createTime)
+			// 	return this.invoiceQuickRepository.createInvoiceDraft(oid, dto, createTime)
 			// }))
 			// console.log('🚀 ~ file: purchase.seed.ts:83 ~ PurchaseSeed ~ start ~ createMultiDraft:', createMultiDraft)
 
 			// const updateMultiDraft = await Promise.allSettled(Array.from(Array(200)).map((i, index) => {
-			// 	const dto = JSON.parse(JSON.stringify(invoiceUpsertDto))
+			// 	const dto = JSON.parse(JSON.stringify(invoiceInsertDto))
 			// 	const r = 10 + index
 			// 	dto.totalMoney = r
 			// 	dto.invoiceItems.forEach((item) => item.quantity = r)
-			// 	return this.arrivalInvoiceRepository.updateInvoiceDraft(oid, 201, dto)
+			// 	return this.invoiceQuickRepository.updateInvoiceDraft(oid, 201, dto)
 			// }))
 			// console.log('🚀 ~ file: purchase.seed.ts:83 ~ PurchaseSeed ~ start ~ draft:', updateMultiDraft)
 
 			// const paymentMultiDraft = await Promise.allSettled(Array.from(Array(5)).map((i, index) => {
-			// 	return this.arrivalInvoiceRepository.paymentInvoiceDraft(oid, 3, 1234123)
+			// 	return this.invoiceQuickRepository.paymentInvoiceDraft(oid, 3, 1234123)
 			// }))
 			// console.log('🚀 ~ file: purchase.seed.ts:83 ~ PurchaseSeed ~ start ~ draft:', paymentMultiDraft)
 
 			// const refundMultiDraft = await Promise.allSettled(Array.from(Array(20)).map((i, index) => {
-			// 	return this.arrivalInvoiceRepository.refundInvoice(oid, 20, 1234123)
+			// 	return this.invoiceQuickRepository.refundInvoice(oid, 20, 1234123)
 			// }))
 			// console.log('🚀 ~ file: purchase.seed.ts:83 ~ PurchaseSeed ~ start ~ draft:', refundMultiDraft)
 		}

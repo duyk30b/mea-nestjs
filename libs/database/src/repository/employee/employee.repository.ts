@@ -3,20 +3,20 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { NoExtraProperties } from '_libs/common/helpers/typescript.helper'
 import { FindOptionsWhere, In, Repository, UpdateResult } from 'typeorm'
 import { Employee } from '../../entities'
-import { EmployeeCriteria, EmployeeOrder } from './employee.dto'
+import { EmployeeCondition, EmployeeOrder } from './employee.dto'
 
 @Injectable()
 export class EmployeeRepository {
 	constructor(@InjectRepository(Employee) private employeeRepository: Repository<Employee>) { }
 
-	getWhereOptions(criteria: EmployeeCriteria) {
+	getWhereOptions(condition: EmployeeCondition) {
 		const where: FindOptionsWhere<Employee> = {}
-		if (criteria.oid !== undefined) where.oid = criteria.oid
-		if (criteria.id !== undefined) where.id = criteria.id
+		if (condition.oid !== undefined) where.oid = condition.oid
+		if (condition.id !== undefined) where.id = condition.id
 
-		if (criteria.ids) {
-			if (criteria.ids.length === 0) criteria.ids.push(0)
-			where.id = In(criteria.ids)
+		if (condition.ids) {
+			if (condition.ids.length === 0) condition.ids.push(0)
+			where.id = In(condition.ids)
 		}
 
 		return where
@@ -26,12 +26,12 @@ export class EmployeeRepository {
 		page: number,
 		limit: number,
 		order?: EmployeeOrder,
-		criteria?: EmployeeCriteria
+		condition?: EmployeeCondition
 	}) {
-		const { limit, page, criteria, order } = options
+		const { limit, page, condition, order } = options
 
 		const [data, total] = await this.employeeRepository.findAndCount({
-			where: this.getWhereOptions(criteria),
+			where: this.getWhereOptions(condition),
 			order,
 			take: limit,
 			skip: (page - 1) * limit,
@@ -40,13 +40,13 @@ export class EmployeeRepository {
 		return { total, page, limit, data }
 	}
 
-	async findOne(criteria: EmployeeCriteria): Promise<Employee> {
-		const where = this.getWhereOptions(criteria)
+	async findOne(condition: EmployeeCondition): Promise<Employee> {
+		const where = this.getWhereOptions(condition)
 		return await this.employeeRepository.findOne({ where })
 	}
 
-	async findOneOrFail(criteria: EmployeeCriteria) {
-		const where = this.getWhereOptions(criteria)
+	async findOneOrFail(condition: EmployeeCondition) {
+		const where = this.getWhereOptions(condition)
 
 		return await this.employeeRepository.findOneOrFail({ where })
 	}
@@ -57,10 +57,10 @@ export class EmployeeRepository {
 	}
 
 	async update<T extends Partial<Employee>>(
-		criteria: EmployeeCriteria,
+		condition: EmployeeCondition,
 		dto: NoExtraProperties<Partial<Omit<Employee, 'id' | 'oid' | 'username'>>, T>
 	): Promise<UpdateResult> {
-		const where = this.getWhereOptions(criteria)
+		const where = this.getWhereOptions(condition)
 		return await this.employeeRepository.update(where, dto)
 	}
 }

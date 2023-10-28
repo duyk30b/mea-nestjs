@@ -1,0 +1,41 @@
+{
+    "Token": {
+        "Expired": "Token.Expired",
+        "Invalid": "Token.Invalid",
+        "WrongIp": "Token.WrongIp"
+    },
+    "Register": {
+        "ExistEmailAndPhone": "Register.ExistEmailAndPhone",
+        "ExistEmail": "Register.ExistEmail",
+        "ExistPhone": "Register.ExistPhone",
+        "ExistUsername": "Register.ExistUsername"
+    },
+    "Login": {
+        "WrongPassword": "Login.WrongPassword"
+    },
+    "User": {
+        "NotExist": "User.NotExist",
+        "WrongPassword": "User.WrongPassword"
+    },
+    "Organization": {
+        "NotExist": "User.NotExist"
+    },
+    "Diagnosis": {
+        "ConflictArrival": "Diagnosis.ConflictArrival"
+    },
+    "Product": {
+        "NotExist": "Product.NotExist"
+    },
+    "Customer": {
+        "NotExist": "Customer.NotExist"
+    },
+    "Invoice": {
+        "NotExist": "Invoice.NotExist"
+    },
+    "Employee": {
+        "NotExist": "Employee.NotExist"
+    },
+    "Distributor": {
+        "NotExist": "Distributor.NotExist"
+    }
+}

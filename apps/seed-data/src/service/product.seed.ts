@@ -23,7 +23,7 @@ export class ProductSeed {
 			product.brandName = medicine.brandName
 			product.substance = medicine.substance
 			product.group = medicine.group
-			product.unit = JSON.stringify([{ name: medicine.unit, rate: 1 }])
+			product.unit = [{ name: medicine.unit, rate: 1 }]
 			product.route = medicine.route
 			product.source = medicine.source
 			product.hintUsage = faker.lorem.sentence()

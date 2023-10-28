@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Patch } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { TUserReq, UserReq } from '../../decorators/request.decorator'
+import { External, TExternal } from '../../common/request-external'
 import { ApiUserService } from './api-user.service'
 import { UserChangePasswordBody } from './request/user-change-password.body'
 import { UserUpdateInfoBody } from './request/user-update-info.body'
@@ -12,17 +12,17 @@ export class ApiUserController {
 	constructor(private readonly apiUserService: ApiUserService) { }
 
 	@Get('me')
-	async me(@UserReq() userReq: TUserReq) {
-		return await this.apiUserService.me(userReq.oid, userReq.id)
+	async me(@External() { oid, uid }: TExternal) {
+		return await this.apiUserService.me(oid, uid)
 	}
 
 	@Patch('change-password')
-	async detail(@UserReq() userReq: TUserReq, @Body() body: UserChangePasswordBody) {
-		return await this.apiUserService.changePassword(userReq.oid, userReq.id, body)
+	async detail(@External() { oid, uid }: TExternal, @Body() body: UserChangePasswordBody) {
+		return await this.apiUserService.changePassword(oid, uid, body)
 	}
 
 	@Patch('update-info')
-	async update(@UserReq() userReq: TUserReq, @Body() body: UserUpdateInfoBody) {
-		return await this.apiUserService.updateInfo(userReq.oid, userReq.id, body)
+	async update(@External() { oid, uid }: TExternal, @Body() body: UserUpdateInfoBody) {
+		return await this.apiUserService.updateInfo(oid, uid, body)
 	}
 }
