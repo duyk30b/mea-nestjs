@@ -1,100 +1,127 @@
-version: "3.3"
+version: '3.8'
 
 networks:
-  mh_network:
+  mn_network:
     driver: bridge
 
 services:
+  postgres:
+    container_name: mc_postgres
+    image: postgres:16.1-alpine
+    restart: unless-stopped
+    networks:
+      - mn_network
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+      - ./data/backup:/backup
+      - ./data/restore:/restore
+    environment:
+      POSTGRES_DB: mea_sql
+      POSTGRES_USER: mea
+      POSTGRES_PASSWORD: Abc12345
+    ports:
+      - 25432:5432
+
+  adminer:
+    container_name: mc_adminer
+    image: adminer:4.8.1
+    restart: unless-stopped
+    networks:
+      - mn_network
+    depends_on:
+      - postgres
+    ports:
+      - 23080:8080
+
+  # mariadb:
+  #   container_name: mc_mariadb
+  #   image: mariadb:11.0.2
+  #   restart: unless-stopped
+  #   networks:
+  #     - mn_network
+  #   volumes:
+  #     - ./data/mariadb:/var/lib/mysql
+  #     - ./data/backup:/backup
+  #     - ./data/restore:/restore
+  #   environment:
+  #     - MARIADB_ROOT_PASSWORD=Abc12345
+  #     - MARIADB_DATABASE=mea_sql
+  #     - MARIADB_USER=mea
+  #     - MARIADB_PASSWORD=Abc12345
+  #   ports:
+  #     - "23306:3306"
+
   # mysql:
-  #   container_name: mhc_mysql
+  #   container_name: mc_mysql
   #   image: mysql:8.0.31
   #   restart: unless-stopped
   #   command: --default-authentication-plugin=mysql_native_password
   #   networks:
-  #     - mh_network
+  #     - mn_network
   #   volumes:
   #     - ./data/mysql:/var/lib/mysql
   #   environment:
-  #     - MYSQL_ROOT_PASSWORD=Abc@12345
-  #     - MYSQL_DATABASE=medihome_sql
-  #     - MYSQL_USER=medihome
-  #     - MYSQL_PASSWORD=Abc@12345
+  #     - MYSQL_ROOT_PASSWORD=Abc12345
+  #     - MYSQL_DATABASE=mea_sql
+  #     - MYSQL_USER=mea
+  #     - MYSQL_PASSWORD=Abc12345
   #   ports:
   #     - "23306:3306"
 
-  mariadb:
-    container_name: mhc_mariadb
-    image: mariadb:11.0.2
-    restart: unless-stopped
-    networks:
-      - mh_network
-    volumes:
-      - ./data/mariadb:/var/lib/mysql
-    environment:
-      - MARIADB_ROOT_PASSWORD=Abc@12345
-      - MARIADB_DATABASE=medihome_sql
-      - MARIADB_USER=medihome
-      - MARIADB_PASSWORD=Abc@12345
-    ports:
-      - "23306:3306"
-
   # mongo:
-  #   image: mongo:6.0.2
-  #   container_name: mhc_mongo
+  #   image: mongo:7.0.5
+  #   container_name: mc_mongo
   #   restart: unless-stopped
   #   networks:
-  #     - mh_network
+  #     - mn_network
   #   volumes:
   #     - ./data/mongo:/data/db
+  #   command: mongod --replSet rs0
+  #   healthcheck:
+  #     test: |
+  #       mongosh --eval "try { rs.status().ok } catch (e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] }).ok }"
+  #     start_period: 0s
+  #     interval: 500ms
+  #     timeout: 5s
+  #     retries: 5
   #   environment:
-  #     MONGO_INITDB_ROOT_USERNAME: root
-  #     MONGO_INITDB_ROOT_PASSWORD: medihome2022
+  #     MONGO_INITDB_ROOT_USERNAME: mea
+  #     MONGO_INITDB_ROOT_PASSWORD: Abc12345
   #   ports:
   #     - 27017:27017
 
   # mongo-express:
-  #   image: mongo-express:0.54
-  #   container_name: mhc_mongo_express
+  #   image: mongo-express:1.0.2-20
+  #   container_name: mc_mongo_express
   #   restart: unless-stopped
   #   depends_on:
   #     - mongo
   #   networks:
-  #     - mh_network
+  #     - mn_network
   #   ports:
   #     - 28081:8081
   #   environment:
-  #     ME_CONFIG_MONGODB_ADMINUSERNAME: root
-  #     ME_CONFIG_MONGODB_ADMINPASSWORD: medihome2022
-  #     ME_CONFIG_MONGODB_URL: mongodb://root:medihome2022@mongo:27017/
-
-  adminer:
-    container_name: mhc_adminer
-    image: adminer:4.8.1
-    restart: unless-stopped
-    networks:
-      - mh_network
-    depends_on:
-      - mariadb
-    # ports:
-    #   - 23080:8080
+  #     ME_CONFIG_MONGODB_ADMINUSERNAME: mea
+  #     ME_CONFIG_MONGODB_ADMINPASSWORD: Abc12345
+  #     ME_CONFIG_MONGODB_URL: mongodb://mea:Abc12345@mongo:27017/
 
   # redis:
-  #   container_name: mhc_redis
+  #   container_name: mc_redis
   #   image: redis:7.0.9-alpine
   #   restart: unless-stopped
   #   networks:
-  #     - mh_network
+  #     - mn_network
   #   volumes:
   #     - ./data/redis:/data
   #   ports:
   #     - "26379:6379"
 
   # redis-insight:
-  #   container_name: mhc_redis-insight
-  #   image: redislabs/redisinsight:1.13.1
+  #   container_name: mc_redis-insight
+  #   image: redislabs/redisinsight:1.14.0
   #   restart: unless-stopped
   #   networks:
-  #     - mh_network
+  #     - mn_network
   #   depends_on:
   #     - redis
   #   volumes:

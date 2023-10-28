@@ -1,0 +1,10 @@
+{
+  "Success": "Thành công",
+  "Forbidden": "Bạn không có quyền truy cập",
+  "ForbiddenPermission": "Bạn không có quyền: {permission}",
+  "AccountInactive": "Tài khoản của bạn đang bị khóa",
+  "ApiInactive": "Link truy cập đã bị khóa",
+  "ForgotPassword": {
+    "Success": "Gửi email thành công, vui lòng kiểm tra email"
+  }
+}

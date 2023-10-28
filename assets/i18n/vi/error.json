@@ -1,0 +1,54 @@
+{
+  "Database": {
+    "NotFound": "Không tìm thấy bản ghi",
+    "UpdateFailed": "Lỗi cập nhật bản ghi",
+    "DeleteFailed": "Lỗi xóa bản ghi"
+  },
+  "Token": {
+    "Expired": "Phiên đăng nhập đã hết hạn",
+    "Empty": "Mã xác thực không được phép trống",
+    "Invalid": "Xác thực mã đăng nhập thất bại",
+    "NoInCache": "Mã xác thực không còn lưu trong bộ nhớ",
+    "WrongIp": "Phát hiện thay đổi địa chỉ IP"
+  },
+  "Register": {
+    "ExistEmailAndPhone": "Email và số điện thoại đã được đăng ký",
+    "ExistEmail": "Email đã đã được đăng ký",
+    "ExistPhone": "Số điện thoại đã đã được đăng ký",
+    "ExistUsername": "Tên đăng nhập đã được đăng ký"
+  },
+  "Login": {
+    "WrongPassword": "Mật khẩu không đúng"
+  },
+  "User": {
+    "NotExist": "User không tồn tại",
+    "WrongPassword": "Mật khẩu không đúng",
+    "WrongRole": "Vai trò không phù hợp"
+  },
+  "Role": {
+    "NotExist": "Vai trò không tồn tại",
+    "Inactive": "Vai trò tạm khóa"
+  },
+  "Organization": {
+    "NotExist": "Organization không tồn tại"
+  },
+  "Diagnosis": {
+    "ConflictArrival": "Diagnosis không tồn tại"
+  },
+  "Product": {
+    "NotExist": "Sản phẩm không tồn tại",
+    "ConflictManageQuantity": "Sản phẩm đã có số lượng không thể hủy theo dõi tồn kho"
+  },
+  "Customer": {
+    "NotExist": "Khách hàng không tồn tại"
+  },
+  "Invoice": {
+    "NotExist": "Hóa đơn không tồn tại"
+  },
+  "Distributor": {
+    "NotExist": "Nhà cung cấp không tồn tại"
+  },
+  "Procedure": {
+    "NotExist": "Dịch vụ không tồn tại"
+  }
+}

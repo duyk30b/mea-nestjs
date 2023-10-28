@@ -44,42 +44,6 @@
       "compilerOptions": {
         "tsConfigPath": "apps/seed-data/tsconfig.app.json"
       }
-    },
-    "common": {
-      "type": "library",
-      "root": "libs/common",
-      "entryFile": "index",
-      "sourceRoot": "libs/common/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/common/tsconfig.lib.json"
-      }
-    },
-    "redis": {
-      "type": "library",
-      "root": "libs/redis",
-      "entryFile": "index",
-      "sourceRoot": "libs/redis/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/redis/tsconfig.lib.json"
-      }
-    },
-    "database": {
-      "type": "library",
-      "root": "libs/database",
-      "entryFile": "index",
-      "sourceRoot": "libs/database/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/database/tsconfig.lib.json"
-      }
-    },
-    "transporter": {
-      "type": "library",
-      "root": "libs/transporter",
-      "entryFile": "index",
-      "sourceRoot": "libs/transporter/src",
-      "compilerOptions": {
-        "tsConfigPath": "libs/transporter/tsconfig.lib.json"
-      }
     }
   }
 }

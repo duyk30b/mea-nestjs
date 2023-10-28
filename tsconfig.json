@@ -17,40 +17,8 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
-    "paths": {
-      "_libs/common": [
-        "libs/common/src"
-      ],
-      "_libs/common/*": [
-        "libs/common/src/*"
-      ],
-      "_libs/redis": [
-        "libs/redis/src"
-      ],
-      "_libs/redis/*": [
-        "libs/redis/src/*"
-      ],
-      "_libs/database": [
-        "libs/database/src"
-      ],
-      "_libs/database/*": [
-        "libs/database/src/*"
-      ],
-      "_libs/transporter": [
-        "libs/transporter/src"
-      ],
-      "_libs/transporter/*": [
-        "libs/transporter/src/*"
-      ]
-    }
+    "paths": {},
   },
-  "include": [
-    "apps/**/*.ts",
-    "libs/**/*.ts",
-    ".eslintrc.js",
-    "webpack-hmr.config.js"
-  ],
-  "exclude": [
-    "dist/"
-  ]
+  "include": ["apps/**/*.ts", "libs/**/*.ts", "assets/**/*.ts", ".eslintrc.cjs"],
+  "exclude": ["dist/"],
 }

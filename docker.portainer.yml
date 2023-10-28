@@ -1,8 +1,8 @@
-version: '3.3'
+version: '3.8'
 
 services:
   portainer:
-    container_name: mhc_portainer
+    container_name: mc_portainer
     image: portainer/portainer-ce:2.18.4-alpine
     restart: unless-stopped
     security_opt:

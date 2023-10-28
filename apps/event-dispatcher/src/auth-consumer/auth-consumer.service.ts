@@ -1,15 +1,15 @@
-import { Injectable, Logger } from '@nestjs/common'
-import { BullQueueService, IKafkaJob } from '_libs/redis'
+// import { Injectable, Logger } from '@nestjs/common'
+// import { BullQueueService, IKafkaJob } from 'xxx/redis'
 
-@Injectable()
-export class AuthConsumerService {
-	private readonly logger = new Logger(AuthConsumerService.name)
+// @Injectable()
+// export class AuthConsumerService {
+//     private readonly logger = new Logger(AuthConsumerService.name)
 
-	constructor(private readonly bullQueueService: BullQueueService) { }
+//     constructor(private readonly bullQueueService: BullQueueService) {}
 
-	async handleAuthMessage(data: IKafkaJob) {
-		this.logger.log(`handleAuthMessage: ${JSON.stringify(data)}`)
+//     async handleAuthMessage(data: IKafkaJob) {
+//         this.logger.log(`handleAuthMessage: ${JSON.stringify(data)}`)
 
-		this.bullQueueService.addKafkaJob(data)
-	}
-}
+//         this.bullQueueService.addKafkaJob(data)
+//     }
+// }

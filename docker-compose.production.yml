@@ -1,20 +1,52 @@
-version: "3.3"
+version: "3.8"
 
 networks:
-  mh_network:
+  mn_network:
     driver: bridge
 
 services:
-  api-public:
-    container_name: mhc_api-public
-    image: mhi_nestjs_production:1.0.0
+  api_public:
+    container_name: mc_api_public_production
+    image: mi_production:1.0.0
     restart: unless-stopped
     networks:
-      - mh_network
+      - mn_network
     build:
       dockerfile: Dockerfile
       context: "./"
       target: production
-    command: node dist/apps/api-public/main
+    command:
+      [
+        "sh",
+        "-c",
+        "npm run build && npm run migration:run && node dist/apps/api-public/main"
+      ]
     environment:
       - NODE_ENV=production
+  # event-dispatcher:
+  #   container_name: mc_event-dispatcher
+  #   image: mi_nestjs_${NODE_ENV:-production}:1.0.0
+  #   restart: unless-stopped
+  #   networks:
+  #     - mn_network
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: "./"
+  #     target: ${NODE_ENV:-production}
+  #   command: node dist/apps/event-dispatcher/main
+  #   environment:
+  #     - NODE_ENV=${NODE_ENV:-production}
+
+  # worker:
+  #   container_name: mc_worker
+  #   image: mi_nestjs_${NODE_ENV:-production}:1.0.0
+  #   restart: unless-stopped
+  #   networks:
+  #     - mn_network
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: "./"
+  #     target: ${NODE_ENV:-production}
+  #   command: node dist/apps/worker/main
+  #   environment:
+  #     - NODE_ENV=${NODE_ENV:-production}

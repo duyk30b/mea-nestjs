@@ -1,80 +1,95 @@
+import cors from '@fastify/cors'
+import helmet from '@fastify/helmet'
 import { ClassSerializerInterceptor, Logger, ValidationError, ValidationPipe } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
 import { NestFactory, Reflector } from '@nestjs/core'
+import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
-import rateLimit from 'express-rate-limit'
-import helmet from 'helmet'
 import * as requestIp from 'request-ip'
+import {
+  ServerExceptionFilter,
+  ValidationException,
+} from '../../_libs/common/exception-filter/exception-filter'
+import { AccessLogInterceptor } from '../../_libs/common/interceptor/access-log.interceptor'
+import { TimeoutInterceptor } from '../../_libs/common/interceptor/timeout.interceptor'
+import { TransformResponseInterceptor } from '../../_libs/common/interceptor/transform-response.interceptor'
 import { AppModule } from './app.module'
-import { BusinessExceptionFilter } from './exception-filters/business-exception.filter'
-import { HttpExceptionFilter } from './exception-filters/http-exception.filter'
-import { UnknownExceptionFilter } from './exception-filters/unknown-exception.filter'
-import { ValidationException, ValidationExceptionFilter } from './exception-filters/validation-exception.filter'
-import { RolesGuard } from './guards/roles.guard'
-import { AccessLogInterceptor } from './interceptor/access-log.interceptor'
-import { TimeoutInterceptor } from './interceptor/timeout.interceptor'
-import { configSwagger } from './common/swagger'
+import { GlobalConfig } from './environments'
+import { RootGuard } from './guards/root.guard'
+import { UserGuard } from './guards/user.guard.'
 
 async function bootstrap() {
-	const logger = new Logger('bootstrap')
+  const logger = new Logger('bootstrap')
 
-	const app = await NestFactory.create(AppModule)
+  const fastifyAdapter = new FastifyAdapter()
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, fastifyAdapter, {
+    logger: ['error', 'warn', 'log', 'debug'],
+  })
+  app.register(cors, { origin: '*' })
 
-	app.useLogger(['log', 'error', 'warn', 'debug', 'verbose'])
+  await app.register(helmet)
+  app.use(requestIp.mw())
 
-	app.use(helmet())
-	app.use(rateLimit({
-		windowMs: 60 * 1000, // 1 minutes
-		max: 200, // limit each IP to 100 requests per windowMs
-		standardHeaders: true,
-		message: 'Too many request',
-	}))
-	app.enableCors()
+  app.useGlobalInterceptors(
+    new AccessLogInterceptor(),
+    new TimeoutInterceptor(),
+    new TransformResponseInterceptor(),
+    new ClassSerializerInterceptor(app.get(Reflector), {
+      excludeExtraneousValues: true,
+      exposeUnsetFields: false,
+    })
+  )
 
-	app.use(requestIp.mw())
+  app.useGlobalFilters(new ServerExceptionFilter())
 
-	app.useGlobalInterceptors(
-		new AccessLogInterceptor(),
-		new TimeoutInterceptor(),
-		new ClassSerializerInterceptor(app.get(Reflector), {
-			excludeExtraneousValues: true,
-			exposeUnsetFields: false,
-		})
-	)
-	app.useGlobalFilters(
-		new UnknownExceptionFilter(),
-		new HttpExceptionFilter(),
-		new BusinessExceptionFilter(),
-		new ValidationExceptionFilter()
-	)
+  app.useGlobalGuards(new UserGuard(app.get(Reflector)), new RootGuard(app.get(Reflector)))
 
-	app.useGlobalGuards(new RolesGuard(app.get(Reflector)))
+  app.useGlobalPipes(
+    new ValidationPipe({
+      validationError: { target: false, value: false },
+      skipMissingProperties: true, // no validate field undefined
+      whitelist: true, // no field not in DTO
+      forbidNonWhitelisted: true, // exception when field not in DTO
+      transform: true, // use for DTO
+      transformOptions: {
+        excludeExtraneousValues: false, // exclude field not in class DTO => no
+        exposeUnsetFields: false, // expose field undefined in DTO => no
+      },
+      exceptionFactory: (errors: ValidationError[] = []) => new ValidationException(errors),
+    })
+  )
 
-	app.useGlobalPipes(new ValidationPipe({
-		validationError: { target: false, value: true },
-		skipMissingProperties: true, // no validate field undefined
-		whitelist: true, // no field not in DTO
-		forbidNonWhitelisted: true, // exception when field not in DTO
-		transform: true, // use for DTO
-		transformOptions: {
-			excludeExtraneousValues: false, // exclude field not in class DTO => no
-			exposeUnsetFields: false, // expose field undefined in DTO => no
-		},
-		exceptionFactory: (errors: ValidationError[] = []) => new ValidationException(errors),
-	}))
+  const {
+    NODE_VERSION,
+    NODE_ENV,
+    API_PUBLIC_HOST,
+    API_PUBLIC_PORT,
+    SQL_TYPE,
+    SQL_HOST,
+    SQL_PORT,
+    SQL_DATABASE,
+  } = GlobalConfig()
 
-	const configService = app.get(ConfigService)
-	const NODE_ENV = configService.get<string>('NODE_ENV') || 'local'
-	const HOST = configService.get<string>('API_PUBLIC_HOST') || 'localhost'
-	const PORT = configService.get<string>('API_PUBLIC_PORT') || 7100
-
-	if (NODE_ENV !== 'production') {
-		configSwagger(app)
-	}
-
-	await app.listen(PORT, () => {
-		logger.debug(`🚀 ===== [API] Server document: http://${HOST}:${PORT}/documents =====`)
-	})
+  if (NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('Simple API')
+      .setDescription('MEA API use Swagger')
+      .setVersion('1.0')
+      .addBearerAuth({ type: 'http', description: 'Access token' }, 'access-token')
+      .build()
+    const document = SwaggerModule.createDocument(app, config)
+    SwaggerModule.setup('documents', app, document, {
+      swaggerOptions: { persistAuthorization: true },
+    })
+  }
+  await app.listen(API_PUBLIC_PORT, '0.0.0.0', () => {
+    logger.debug(
+      `🚀 ===== [API] Server document: http://${API_PUBLIC_HOST}:${API_PUBLIC_PORT}/documents/ =====`
+    )
+    logger.debug(
+      `🚀 ===== [SQL] Database: jdbc:${SQL_TYPE}://${SQL_HOST}:${SQL_PORT}/${SQL_DATABASE} =====`
+    )
+    logger.debug(`🚀 ===== [TIME] Timezone: offset ${new Date().getTimezoneOffset()} =====`)
+    logger.debug(`🚀 ===== [NODE] NodeJS version: ${NODE_VERSION} =====`)
+  })
 }
-
 bootstrap()

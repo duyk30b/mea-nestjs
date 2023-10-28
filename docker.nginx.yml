@@ -1,16 +1,16 @@
-version: '3.3'
+version: "3.8"
 
 networks:
-  mh_network:
+  mn_network:
     driver: bridge
 
 services:
   nginx:
-    container_name: mhc_nginx
+    container_name: mc_nginx
     image: nginx:1.23.3-alpine
     restart: unless-stopped
     networks:
-      - mh_network
+      - mn_network
     volumes:
       - ./nginx/conf.d/:/etc/nginx/conf.d/
       - ./nginx/adminer.d/:/etc/nginx/adminer.d/
@@ -18,4 +18,4 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "23080:23080"
+      # - "23080:23080"
