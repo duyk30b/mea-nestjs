@@ -1,4 +1,4 @@
-version: '3.3'
+version: "3.3"
 
 networks:
   mh_network:
@@ -25,8 +25,9 @@ services:
     environment:
       - NODE_ENV=${NODE_ENV:-local}
     ports:
-      - 9229:9229
       - "${API_PUBLIC_PORT:-20000}:${API_PUBLIC_PORT:-20000}"
+      - 9229:9229
+
   # event-dispatcher:
   #   container_name: mhc_event-dispatcher
   #   image: mhi_nestjs_${NODE_ENV:-local}:1.0.0

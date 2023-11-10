@@ -59,6 +59,10 @@ export default class InvoiceItem extends BaseEntity {
 	@Expose({ name: 'quantity' })
 	quantity: number
 
+	@Column({ name: 'hint_usage', nullable: true })
+	@Expose({ name: 'hint_usage' })
+	hintUsage: string
+
 	@Expose({ name: 'invoice' })
 	@ManyToOne((type) => Invoice, { createForeignKeyConstraints: false })
 	@JoinColumn({ name: 'invoice_id', referencedColumnName: 'id' })

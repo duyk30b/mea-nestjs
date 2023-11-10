@@ -1,4 +1,4 @@
-import { Exclude, Expose, Type } from 'class-transformer'
+import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import { EGender, ERole } from '../common/variable'

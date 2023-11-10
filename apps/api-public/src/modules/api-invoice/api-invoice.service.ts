@@ -1,16 +1,23 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
-import { InvoiceInsertDto, InvoiceQuickRepository, InvoiceRepository, InvoiceUpdateDto } from '_libs/database/repository'
-import { InvoiceCreateBody, InvoiceGetOneQuery, InvoicePaginationQuery, InvoiceUpdateBody } from './request'
+import {
+	InvoiceDraftInsertDto, InvoiceDraftUpdateDto,
+	InvoiceProcessRepository, InvoiceRepository,
+} from '_libs/database/repository'
+import {
+	InvoiceDraftCreateBody, InvoiceDraftUpdateBody,
+	InvoiceGetManyQuery, InvoiceGetOneQuery,
+	InvoicePaginationQuery,
+} from './request'
 
 @Injectable()
 export class ApiInvoiceService {
 	constructor(
 		private readonly invoiceRepository: InvoiceRepository,
-		private readonly invoiceQuickRepository: InvoiceQuickRepository
+		private readonly invoiceProcessRepository: InvoiceProcessRepository
 	) { }
 
 	async pagination(oid: number, query: InvoicePaginationQuery) {
-		const { fromTime, toTime, customerId } = query.filter || {}
+		const { fromTime, toTime, customerId, hasDelete, status } = query.filter || {}
 
 		return await this.invoiceRepository.pagination({
 			page: query.page,
@@ -18,91 +25,120 @@ export class ApiInvoiceService {
 			condition: {
 				oid,
 				customerId,
-				status: query.filter?.status,
+				status,
 				createTime: fromTime != null && toTime != null ? ['BETWEEN', fromTime, toTime] : undefined,
+				deleteTime: hasDelete ? undefined : ['ISNULL'],
 			},
 			relation: { customer: query.relation?.customer },
 			order: query.sort || { id: 'DESC' },
 		})
 	}
 
+	async getMany(oid: number, query: InvoiceGetManyQuery) {
+		const { relation, limit } = query
+		const { fromTime, toTime, customerId, hasDelete, status } = query.filter || {}
+
+		return await this.invoiceRepository.findMany(
+			{
+				oid,
+				customerId,
+				status,
+				createTime: fromTime != null && toTime != null ? ['BETWEEN', fromTime, toTime] : undefined,
+				deleteTime: hasDelete ? undefined : ['ISNULL'],
+			},
+			{ customer: relation?.customer },
+			limit
+		)
+	}
+
 	async getOne(oid: number, id: number, { relation }: InvoiceGetOneQuery) {
 		return await this.invoiceRepository.queryOneBy({ oid, id }, {
 			customer: !!relation?.customer,
+			customerPayments: !!relation?.customerPayments,
 			invoiceItems: relation?.invoiceItems && { procedure: true, productBatch: { product: true } },
 		})
 	}
 
-	async createDraft(params: { oid: number, body: InvoiceCreateBody }) {
+	async createDraft(params: { oid: number, body: InvoiceDraftCreateBody }) {
 		const { oid, body } = params
 		try {
-			return await this.invoiceQuickRepository.createDraft({
+			return await this.invoiceProcessRepository.createDraft({
 				oid,
-				invoiceInsertDto: InvoiceInsertDto.from(body),
+				invoiceInsertDto: InvoiceDraftInsertDto.from(body),
 			})
 		} catch (error: any) {
 			throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
 		}
 	}
 
-	async updateDraft(params: { oid: number, invoiceId: number, body: InvoiceUpdateBody }) {
+	async updateDraft(params: { oid: number, invoiceId: number, body: InvoiceDraftUpdateBody }) {
 		const { oid, invoiceId, body } = params
 		try {
-			return await this.invoiceQuickRepository.updateDraft({
+			return await this.invoiceProcessRepository.updateDraft({
 				oid,
 				invoiceId,
-				invoiceUpdateDto: InvoiceUpdateDto.from(body),
+				invoiceUpdateDto: InvoiceDraftUpdateDto.from(body),
 			})
 		} catch (error: any) {
 			throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
 		}
 	}
 
-	async deleteDraft(params: { oid: number, invoiceId: number }) {
+	async destroyDraft(params: { oid: number, invoiceId: number }) {
 		const { oid, invoiceId } = params
 		try {
-			await this.invoiceQuickRepository.deleteDraft({ oid, invoiceId })
+			await this.invoiceProcessRepository.destroyDraft({ oid, invoiceId })
 			return { success: true }
 		} catch (error: any) {
 			throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
 		}
 	}
 
-	async startShip(params: { oid: number, invoiceId: number, shipTime: number }) {
-		const { oid, invoiceId, shipTime } = params
+	async prepayment(params: { oid: number, invoiceId: number, money: number }) {
+		const { oid, invoiceId, money } = params
+		await this.invoiceProcessRepository.prepayment({
+			oid,
+			invoiceId,
+			time: Date.now(),
+			money,
+		})
+		return { success: true }
+	}
+
+	async startShipAndPayment(params: { oid: number, invoiceId: number, time: number, money: number }) {
+		const { oid, invoiceId, time, money } = params
 		try {
-			await this.invoiceQuickRepository.startShip({ oid, invoiceId, shipTime })
+			await this.invoiceProcessRepository.startShipAndPayment({ oid, invoiceId, time, money })
 			return { success: true }
 		} catch (error: any) {
 			throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
 		}
 	}
 
-	async startPayment(params: { oid: number, invoiceId: number, paymentTime: number, debt: number }) {
-		const { oid, invoiceId, paymentTime, debt } = params
+	async payDebt(params: { oid: number, invoiceId: number, time: number, money: number }) {
+		const { oid, invoiceId, time, money } = params
 		try {
-			await this.invoiceQuickRepository.startPayment({ oid, invoiceId, paymentTime, debt })
+			await this.invoiceProcessRepository.payDebt({ oid, invoiceId, time, money })
 			return { success: true }
 		} catch (error: any) {
 			throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
 		}
 	}
 
-	async startShipAndPayment(options: { oid: number, invoiceId: number, time: number, debt: number }) {
-		const { oid, invoiceId, debt, time } = options
+	async startRefund(params: { oid: number, invoiceId: number, time: number }) {
+		const { oid, invoiceId, time } = params
 		try {
-			await this.invoiceQuickRepository.startShip({ oid, invoiceId, shipTime: time })
-			await this.invoiceQuickRepository.startPayment({ oid, invoiceId, paymentTime: time, debt })
+			await this.invoiceProcessRepository.startRefund({ oid, invoiceId, time })
 			return { success: true }
 		} catch (error: any) {
 			throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
 		}
 	}
 
-	async startRefund(params: { oid: number, invoiceId: number, refundTime: number }) {
-		const { oid, invoiceId, refundTime } = params
+	async softDeleteRefund(params: { oid: number, invoiceId: number }) {
+		const { oid, invoiceId } = params
 		try {
-			await this.invoiceQuickRepository.startRefund({ oid, invoiceId, refundTime })
+			await this.invoiceProcessRepository.softDeleteRefund({ oid, invoiceId })
 			return { success: true }
 		} catch (error: any) {
 			throw new HttpException(error.message, HttpStatus.BAD_REQUEST)

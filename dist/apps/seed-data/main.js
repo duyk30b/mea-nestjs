@@ -73,7 +73,7 @@ SeedDataModule = __decorate([
                 entities_1.Customer,
                 entities_1.CustomerDebt,
                 entities_1.Distributor,
-                entities_1.DistributorDebt,
+                entities_1.DistributorPayment,
                 entities_1.Diagnosis,
                 entities_1.Employee,
                 entities_1.Invoice,
@@ -125,7 +125,7 @@ module.exports = require("@nestjs/typeorm");
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReceiptItem = exports.Receipt = exports.ProductMovement = exports.ProductBatch = exports.Product = exports.Procedure = exports.OrganizationSetting = exports.Organization = exports.InvoiceItem = exports.Invoice = exports.Employee = exports.DistributorDebt = exports.Distributor = exports.Diagnosis = exports.CustomerDebt = exports.Customer = exports.Arrival = void 0;
+exports.ReceiptItem = exports.Receipt = exports.ProductMovement = exports.ProductBatch = exports.Product = exports.Procedure = exports.OrganizationSetting = exports.Organization = exports.InvoiceItem = exports.Invoice = exports.Employee = exports.DistributorPayment = exports.Distributor = exports.Diagnosis = exports.CustomerDebt = exports.Customer = exports.Arrival = void 0;
 const arrival_entity_1 = __webpack_require__(9);
 exports.Arrival = arrival_entity_1.default;
 const customer_debt_entity_1 = __webpack_require__(21);
@@ -135,7 +135,7 @@ exports.Customer = customer_entity_1.default;
 const diagnosis_entity_1 = __webpack_require__(15);
 exports.Diagnosis = diagnosis_entity_1.default;
 const distributor_debt_entity_1 = __webpack_require__(22);
-exports.DistributorDebt = distributor_debt_entity_1.default;
+exports.DistributorPayment = distributor_debt_entity_1.default;
 const distributor_entity_1 = __webpack_require__(23);
 exports.Distributor = distributor_entity_1.default;
 const employee_entity_1 = __webpack_require__(24);
@@ -1172,38 +1172,38 @@ const class_transformer_1 = __webpack_require__(10);
 const typeorm_1 = __webpack_require__(11);
 const base_entity_1 = __webpack_require__(12);
 const variable_1 = __webpack_require__(13);
-let DistributorDebt = class DistributorDebt extends base_entity_1.BaseEntity {
+let DistributorPayment = class DistributorPayment extends base_entity_1.BaseEntity {
 };
 __decorate([
     (0, typeorm_1.Column)({ name: 'distributor_id' }),
     (0, class_transformer_1.Expose)({ name: 'distributor_id' }),
     __metadata("design:type", Number)
-], DistributorDebt.prototype, "distributorId", void 0);
+], DistributorPayment.prototype, "distributorId", void 0);
 __decorate([
     (0, typeorm_1.Column)({ name: 'receipt_id', default: 0 }),
     (0, class_transformer_1.Expose)({ name: 'receipt_id' }),
     __metadata("design:type", Number)
-], DistributorDebt.prototype, "receiptId", void 0);
+], DistributorPayment.prototype, "receiptId", void 0);
 __decorate([
     (0, typeorm_1.Column)({ name: 'type', type: 'tinyint' }),
     (0, class_transformer_1.Expose)({ name: 'type' }),
     __metadata("design:type", typeof (_a = typeof variable_1.DebtType !== "undefined" && variable_1.DebtType) === "function" ? _a : Object)
-], DistributorDebt.prototype, "type", void 0);
+], DistributorPayment.prototype, "type", void 0);
 __decorate([
     (0, typeorm_1.Column)({ name: 'open_debt' }),
     (0, class_transformer_1.Expose)({ name: 'open_debt' }),
     __metadata("design:type", Number)
-], DistributorDebt.prototype, "openDebt", void 0);
+], DistributorPayment.prototype, "openDebt", void 0);
 __decorate([
     (0, typeorm_1.Column)({ name: 'money' }),
     (0, class_transformer_1.Expose)({ name: 'money' }),
     __metadata("design:type", Number)
-], DistributorDebt.prototype, "money", void 0);
+], DistributorPayment.prototype, "money", void 0);
 __decorate([
     (0, typeorm_1.Column)({ name: 'close_debt' }),
     (0, class_transformer_1.Expose)({ name: 'close_debt' }),
     __metadata("design:type", Number)
-], DistributorDebt.prototype, "closeDebt", void 0);
+], DistributorPayment.prototype, "closeDebt", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         name: 'create_time',
@@ -1212,17 +1212,17 @@ __decorate([
     }),
     (0, class_transformer_1.Expose)({ name: 'create_time' }),
     __metadata("design:type", Number)
-], DistributorDebt.prototype, "createTime", void 0);
+], DistributorPayment.prototype, "createTime", void 0);
 __decorate([
     (0, typeorm_1.Column)({ name: 'note', nullable: true }),
     (0, class_transformer_1.Expose)({ name: 'note' }),
     __metadata("design:type", String)
-], DistributorDebt.prototype, "note", void 0);
-DistributorDebt = __decorate([
+], DistributorPayment.prototype, "note", void 0);
+DistributorPayment = __decorate([
     (0, typeorm_1.Entity)('distributor_debt'),
     (0, typeorm_1.Index)(['oid', 'distributorId'])
-], DistributorDebt);
-exports["default"] = DistributorDebt;
+], DistributorPayment);
+exports["default"] = DistributorPayment;
 
 
 /***/ }),
@@ -2425,10 +2425,10 @@ exports.DiagnosisRepository = DiagnosisRepository;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.DistributorDebtCondition = void 0;
-class DistributorDebtCondition {
+exports.DistributorPaymentCondition = void 0;
+class DistributorPaymentCondition {
 }
-exports.DistributorDebtCondition = DistributorDebtCondition;
+exports.DistributorPaymentCondition = DistributorPaymentCondition;
 
 
 /***/ }),
@@ -2450,16 +2450,16 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 };
 var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.DistributorDebtRepository = void 0;
+exports.DistributorPaymentRepository = void 0;
 const common_1 = __webpack_require__(1);
 const typeorm_1 = __webpack_require__(7);
 const variable_1 = __webpack_require__(13);
 const entities_1 = __webpack_require__(8);
 const typeorm_2 = __webpack_require__(11);
-let DistributorDebtRepository = class DistributorDebtRepository {
-    constructor(dataSource, distributorDebtRepository) {
+let DistributorPaymentRepository = class DistributorPaymentRepository {
+    constructor(dataSource, distributorPaymentRepository) {
         this.dataSource = dataSource;
-        this.distributorDebtRepository = distributorDebtRepository;
+        this.distributorPaymentRepository = distributorPaymentRepository;
     }
     getWhereOptions(condition = {}) {
         const where = {};
@@ -2478,7 +2478,7 @@ let DistributorDebtRepository = class DistributorDebtRepository {
     }
     async pagination(options) {
         const { limit, page, condition, order } = options;
-        const [data, total] = await this.distributorDebtRepository.findAndCount({
+        const [data, total] = await this.distributorPaymentRepository.findAndCount({
             where: this.getWhereOptions(condition),
             order,
             take: limit,
@@ -2488,11 +2488,11 @@ let DistributorDebtRepository = class DistributorDebtRepository {
     }
     async findMany(condition) {
         const where = this.getWhereOptions(condition);
-        return await this.distributorDebtRepository.find({ where });
+        return await this.distributorPaymentRepository.find({ where });
     }
     async findOne(condition) {
         const where = this.getWhereOptions(condition);
-        return await this.distributorDebtRepository.findOne({ where });
+        return await this.distributorPaymentRepository.findOne({ where });
     }
     async startPayDebt(options) {
         const { oid, distributorId, money, createTime, note } = options;
@@ -2503,7 +2503,7 @@ let DistributorDebtRepository = class DistributorDebtRepository {
             }
             const distributor = await manager.findOne(entities_1.Distributor, { where: { oid, id: distributorId } });
             const openDebt = distributor.debt + money;
-            const distributorDebtSnap = manager.create(entities_1.DistributorDebt, {
+            const distributorPaymentSnap = manager.create(entities_1.DistributorPayment, {
                 oid,
                 distributorId,
                 type: variable_1.DebtType.PayUp,
@@ -2513,17 +2513,17 @@ let DistributorDebtRepository = class DistributorDebtRepository {
                 closeDebt: openDebt - money,
                 note,
             });
-            const distributorDebt = await manager.save(distributorDebtSnap);
-            return { distributor, distributorDebt };
+            const distributorPayment = await manager.save(distributorPaymentSnap);
+            return { distributor, distributorPayment };
         });
     }
 };
-DistributorDebtRepository = __decorate([
+DistributorPaymentRepository = __decorate([
     (0, common_1.Injectable)(),
-    __param(1, (0, typeorm_1.InjectRepository)(entities_1.DistributorDebt)),
+    __param(1, (0, typeorm_1.InjectRepository)(entities_1.DistributorPayment)),
     __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.DataSource !== "undefined" && typeorm_2.DataSource) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object])
-], DistributorDebtRepository);
-exports.DistributorDebtRepository = DistributorDebtRepository;
+], DistributorPaymentRepository);
+exports.DistributorPaymentRepository = DistributorPaymentRepository;
 
 
 /***/ }),
@@ -3403,20 +3403,20 @@ exports.ProductRepository = ProductRepository;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.InvoiceUpdateDto = exports.InvoiceInsertDto = exports.InvoiceItemDto = void 0;
+exports.InvoiceDraftUpdateDto = exports.InvoiceDraftInsertDto = exports.InvoiceItemDto = void 0;
 const swagger_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(8);
 const class_transformer_1 = __webpack_require__(10);
 class InvoiceItemDto extends (0, swagger_1.PartialType)((0, swagger_1.OmitType)(entities_1.InvoiceItem, ['invoiceId', 'procedure', 'productBatch', 'invoice'])) {
 }
 exports.InvoiceItemDto = InvoiceItemDto;
-class InvoiceInsertDto extends (0, swagger_1.PartialType)((0, swagger_1.OmitType)(entities_1.Invoice, ['oid', 'invoiceItems', 'status', 'arrivalId'])) {
+class InvoiceDraftInsertDto extends (0, swagger_1.PartialType)((0, swagger_1.OmitType)(entities_1.Invoice, ['oid', 'invoiceItems', 'status', 'arrivalId'])) {
     constructor() {
         super(...arguments);
         this.invoiceItems = [];
     }
     static from(plain) {
-        const instance = (0, class_transformer_1.plainToInstance)(InvoiceInsertDto, plain, {
+        const instance = (0, class_transformer_1.plainToInstance)(InvoiceDraftInsertDto, plain, {
             exposeUnsetFields: false,
             excludeExtraneousValues: true,
             ignoreDecorators: true
@@ -3431,14 +3431,14 @@ class InvoiceInsertDto extends (0, swagger_1.PartialType)((0, swagger_1.OmitType
         return instance;
     }
 }
-exports.InvoiceInsertDto = InvoiceInsertDto;
-class InvoiceUpdateDto extends (0, swagger_1.PartialType)((0, swagger_1.OmitType)(entities_1.Invoice, ['oid', 'invoiceItems', 'status', 'arrivalId', 'customerId'])) {
+exports.InvoiceDraftInsertDto = InvoiceDraftInsertDto;
+class InvoiceDraftUpdateDto extends (0, swagger_1.PartialType)((0, swagger_1.OmitType)(entities_1.Invoice, ['oid', 'invoiceItems', 'status', 'arrivalId', 'customerId'])) {
     constructor() {
         super(...arguments);
         this.invoiceItems = [];
     }
     static from(plain) {
-        const instance = (0, class_transformer_1.plainToInstance)(InvoiceUpdateDto, plain, {
+        const instance = (0, class_transformer_1.plainToInstance)(InvoiceDraftUpdateDto, plain, {
             exposeUnsetFields: false,
             excludeExtraneousValues: true,
             ignoreDecorators: true
@@ -3453,7 +3453,7 @@ class InvoiceUpdateDto extends (0, swagger_1.PartialType)((0, swagger_1.OmitType
         return instance;
     }
 }
-exports.InvoiceUpdateDto = InvoiceUpdateDto;
+exports.InvoiceDraftUpdateDto = InvoiceDraftUpdateDto;
 
 
 /***/ }),
@@ -4036,7 +4036,7 @@ var __rest = (this && this.__rest) || function (s, e) {
 };
 var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReceiptQuickRepository = void 0;
+exports.ReceiptProcessRepository = void 0;
 const decorators_1 = __webpack_require__(64);
 const typeorm_1 = __webpack_require__(7);
 const object_helper_1 = __webpack_require__(51);
@@ -4044,7 +4044,7 @@ const variable_1 = __webpack_require__(13);
 const entities_1 = __webpack_require__(8);
 const typeorm_2 = __webpack_require__(11);
 const product_repository_1 = __webpack_require__(52);
-let ReceiptQuickRepository = class ReceiptQuickRepository {
+let ReceiptProcessRepository = class ReceiptProcessRepository {
     constructor(dataSource, manager, productRepository) {
         this.dataSource = dataSource;
         this.manager = manager;
@@ -4187,7 +4187,7 @@ let ReceiptQuickRepository = class ReceiptQuickRepository {
                     where: { oid, id: receipt.distributorId },
                     select: { debt: true },
                 });
-                const distributorDebtDto = manager.create(entities_1.DistributorDebt, {
+                const distributorPaymentDto = manager.create(entities_1.DistributorPayment, {
                     oid,
                     distributorId: receipt.distributorId,
                     receiptId,
@@ -4197,7 +4197,7 @@ let ReceiptQuickRepository = class ReceiptQuickRepository {
                     money: receipt.debt,
                     closeDebt: distributor.debt,
                 });
-                await manager.insert(entities_1.DistributorDebt, distributorDebtDto);
+                await manager.insert(entities_1.DistributorPayment, distributorPaymentDto);
             }
             return { productIds };
         });
@@ -4282,7 +4282,7 @@ let ReceiptQuickRepository = class ReceiptQuickRepository {
                     where: { oid, id: receipt.distributorId },
                     select: { debt: true },
                 });
-                const distributorDebtDto = manager.create(entities_1.DistributorDebt, {
+                const distributorPaymentDto = manager.create(entities_1.DistributorPayment, {
                     oid,
                     distributorId: receipt.distributorId,
                     receiptId,
@@ -4292,7 +4292,7 @@ let ReceiptQuickRepository = class ReceiptQuickRepository {
                     money: -receipt.debt,
                     closeDebt: distributor.debt,
                 });
-                await manager.insert(entities_1.DistributorDebt, distributorDebtDto);
+                await manager.insert(entities_1.DistributorPayment, distributorPaymentDto);
             }
             return { productIds };
         });
@@ -4304,12 +4304,12 @@ let ReceiptQuickRepository = class ReceiptQuickRepository {
         }
     }
 };
-ReceiptQuickRepository = __decorate([
+ReceiptProcessRepository = __decorate([
     (0, decorators_1.Injectable)(),
     __param(1, (0, typeorm_1.InjectEntityManager)()),
     __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.DataSource !== "undefined" && typeorm_2.DataSource) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.EntityManager !== "undefined" && typeorm_2.EntityManager) === "function" ? _b : Object, typeof (_c = typeof product_repository_1.ProductRepository !== "undefined" && product_repository_1.ProductRepository) === "function" ? _c : Object])
-], ReceiptQuickRepository);
-exports.ReceiptQuickRepository = ReceiptQuickRepository;
+], ReceiptProcessRepository);
+exports.ReceiptProcessRepository = ReceiptProcessRepository;
 
 
 /***/ }),
@@ -4415,7 +4415,7 @@ RepositoryModule = __decorate([
                 entities_1.CustomerDebt,
                 entities_1.Diagnosis,
                 entities_1.Distributor,
-                entities_1.DistributorDebt,
+                entities_1.DistributorPayment,
                 entities_1.Employee,
                 entities_1.Invoice,
                 entities_1.InvoiceItem,
@@ -4434,7 +4434,7 @@ RepositoryModule = __decorate([
             customer_repository_1.CustomerRepository,
             customer_debt_repository_1.CustomerDebtRepository,
             distributor_repository_1.DistributorRepository,
-            distributor_debt_repository_1.DistributorDebtRepository,
+            distributor_debt_repository_1.DistributorPaymentRepository,
             employee_repository_1.EmployeeRepository,
             invoice_repository_1.InvoiceRepository,
             invoice_quick_repository_1.InvoiceQuickRepository,
@@ -4444,7 +4444,7 @@ RepositoryModule = __decorate([
             product_repository_1.ProductRepository,
             product_batch_repository_1.ProductBatchRepository,
             product_movement_repository_1.ProductMovementRepository,
-            receipt_quick_repository_1.ReceiptQuickRepository,
+            receipt_quick_repository_1.ReceiptProcessRepository,
             receipt_repository_1.ReceiptRepository,
         ],
         exports: [
@@ -4452,7 +4452,7 @@ RepositoryModule = __decorate([
             customer_repository_1.CustomerRepository,
             customer_debt_repository_1.CustomerDebtRepository,
             distributor_repository_1.DistributorRepository,
-            distributor_debt_repository_1.DistributorDebtRepository,
+            distributor_debt_repository_1.DistributorPaymentRepository,
             employee_repository_1.EmployeeRepository,
             invoice_repository_1.InvoiceRepository,
             invoice_quick_repository_1.InvoiceQuickRepository,
@@ -4462,7 +4462,7 @@ RepositoryModule = __decorate([
             procedure_repository_1.ProcedureRepository,
             product_batch_repository_1.ProductBatchRepository,
             product_movement_repository_1.ProductMovementRepository,
-            receipt_quick_repository_1.ReceiptQuickRepository,
+            receipt_quick_repository_1.ReceiptProcessRepository,
             receipt_repository_1.ReceiptRepository,
         ],
     })
@@ -4549,9 +4549,9 @@ const typeorm_1 = __webpack_require__(7);
 const repository_1 = __webpack_require__(30);
 const typeorm_2 = __webpack_require__(11);
 let BuiTrangApi = class BuiTrangApi {
-    constructor(manager, receiptQuickRepository, invoiceQuickRepository) {
+    constructor(manager, receiptProcessRepository, invoiceQuickRepository) {
         this.manager = manager;
-        this.receiptQuickRepository = receiptQuickRepository;
+        this.receiptProcessRepository = receiptProcessRepository;
         this.invoiceQuickRepository = invoiceQuickRepository;
     }
 };
@@ -4560,7 +4560,7 @@ BuiTrangApi = __decorate([
     (0, swagger_1.ApiBearerAuth)('access-token'),
     (0, common_1.Controller)('bui-trang'),
     __param(0, (0, typeorm_1.InjectEntityManager)()),
-    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.EntityManager !== "undefined" && typeorm_2.EntityManager) === "function" ? _a : Object, typeof (_b = typeof repository_1.ReceiptQuickRepository !== "undefined" && repository_1.ReceiptQuickRepository) === "function" ? _b : Object, typeof (_c = typeof repository_1.InvoiceQuickRepository !== "undefined" && repository_1.InvoiceQuickRepository) === "function" ? _c : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.EntityManager !== "undefined" && typeorm_2.EntityManager) === "function" ? _a : Object, typeof (_b = typeof repository_1.ReceiptProcessRepository !== "undefined" && repository_1.ReceiptProcessRepository) === "function" ? _b : Object, typeof (_c = typeof repository_1.InvoiceQuickRepository !== "undefined" && repository_1.InvoiceQuickRepository) === "function" ? _c : Object])
 ], BuiTrangApi);
 exports.BuiTrangApi = BuiTrangApi;
 
@@ -5190,7 +5190,7 @@ let InvoiceSeed = class InvoiceSeed {
         this.procedureRepository = procedureRepository;
         this.invoiceQuickRepository = invoiceQuickRepository;
     }
-    fakeInvoiceInsertDto(productBatches, procedures) {
+    fakeInvoiceDraftInsertDto(productBatches, procedures) {
         const numberProductBatch = (0, random_helper_1.randomNumber)(2, 5);
         const numberProcedure = (0, random_helper_1.randomNumber)(2, 5);
         const invoiceItemsDto = [];
@@ -5278,7 +5278,7 @@ let InvoiceSeed = class InvoiceSeed {
             const paymentTime = startTime.getTime() + i * gap + 60 * 60 * 1000;
             const shipTime = paymentTime;
             const refundTime = startTime.getTime() + i * gap + 2 * 60 * 60 * 1000;
-            const invoiceInsertDto = this.fakeInvoiceInsertDto(productBatchesShuffle, proceduresShuffle);
+            const invoiceInsertDto = this.fakeInvoiceDraftInsertDto(productBatchesShuffle, proceduresShuffle);
             invoiceInsertDto.createTime = createTime;
             invoiceInsertDto.customerId = customer.id;
             const { invoiceId } = await this.invoiceQuickRepository.createDraft({
@@ -9575,10 +9575,10 @@ const entities_1 = __webpack_require__(8);
 const repository_1 = __webpack_require__(30);
 const typeorm_2 = __webpack_require__(11);
 let ReceiptSeed = class ReceiptSeed {
-    constructor(productBatchRepository, distributorRepository, receiptQuickRepository) {
+    constructor(productBatchRepository, distributorRepository, receiptProcessRepository) {
         this.productBatchRepository = productBatchRepository;
         this.distributorRepository = distributorRepository;
-        this.receiptQuickRepository = receiptQuickRepository;
+        this.receiptProcessRepository = receiptProcessRepository;
     }
     fakeReceiptInsertDto(productBatches) {
         const numberStock = (0, random_helper_1.randomNumber)(10, 20);
@@ -9631,11 +9631,11 @@ let ReceiptSeed = class ReceiptSeed {
             const receiptInsertDto = this.fakeReceiptInsertDto(productBatchesShuffle);
             receiptInsertDto.distributorId = distributor.id;
             receiptInsertDto.createTime = createTime;
-            const { receiptId } = await this.receiptQuickRepository.createDraft({ oid, receiptInsertDto });
+            const { receiptId } = await this.receiptProcessRepository.createDraft({ oid, receiptInsertDto });
             if (i % 2 === 0) {
-                await this.receiptQuickRepository.startShipAndPayment({ oid, receiptId, shipTime });
+                await this.receiptProcessRepository.startShipAndPayment({ oid, receiptId, shipTime });
                 if (i % 4 === 0) {
-                    await this.receiptQuickRepository.startRefund({ oid, receiptId, refundTime });
+                    await this.receiptProcessRepository.startRefund({ oid, receiptId, refundTime });
                 }
             }
         }
@@ -9645,7 +9645,7 @@ ReceiptSeed = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, typeorm_1.InjectRepository)(entities_1.ProductBatch)),
     __param(1, (0, typeorm_1.InjectRepository)(entities_1.Distributor)),
-    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object, typeof (_c = typeof repository_1.ReceiptQuickRepository !== "undefined" && repository_1.ReceiptQuickRepository) === "function" ? _c : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object, typeof (_c = typeof repository_1.ReceiptProcessRepository !== "undefined" && repository_1.ReceiptProcessRepository) === "function" ? _c : Object])
 ], ReceiptSeed);
 exports.ReceiptSeed = ReceiptSeed;
 

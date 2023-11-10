@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { InvoiceItemType } from '_libs/database/common/variable'
 import { Invoice } from '_libs/database/entities'
-import { Between, EntityManager, FindOptionsWhere, In } from 'typeorm'
+import { Between, EntityManager, FindOptionsWhere, In, IsNull } from 'typeorm'
 import { InvoiceCondition, InvoiceOrder } from './invoice.dto'
 
 @Injectable()
@@ -46,6 +46,17 @@ export class InvoiceRepository {
 			}
 		}
 
+		if (condition.deleteTime != null) {
+			if (typeof condition.deleteTime === 'number') {
+				where.deleteTime = condition.deleteTime
+			}
+			else if (Array.isArray(condition.deleteTime)) {
+				if (condition.deleteTime[0] === 'ISNULL') {
+					where.deleteTime = IsNull()
+				}
+			}
+		}
+
 		return where
 	}
 
@@ -57,11 +68,12 @@ export class InvoiceRepository {
 		order?: InvoiceOrder
 	}) {
 		const { limit, page, condition, relation, order } = options
+		const where = this.getWhereOptions(condition)
 
 		const [data, total] = await this.manager.findAndCount(Invoice, {
 			relations: { customer: !!relation?.customer },
 			relationLoadStrategy: 'query', // dùng join thì bị lỗi 2 câu query, bằng hòa
-			where: this.getWhereOptions(condition),
+			where,
 			order,
 			take: limit,
 			skip: (page - 1) * limit,
@@ -71,25 +83,35 @@ export class InvoiceRepository {
 	}
 
 	async findOne(condition: InvoiceCondition, relation?: { customer: boolean }): Promise<Invoice> {
+		const where = this.getWhereOptions(condition)
+
 		const [invoice] = await this.manager.find(Invoice, {
-			where: this.getWhereOptions(condition),
+			where,
 			relations: { customer: !!relation?.customer },
 			relationLoadStrategy: 'join',
 		})
 		return invoice
 	}
 
-	async findMany(condition: InvoiceCondition, relation?: { customer: boolean }): Promise<Invoice[]> {
+	async findMany(
+		condition: InvoiceCondition,
+		relation?: { customer: boolean },
+		limit?: number
+	): Promise<Invoice[]> {
+		const where = this.getWhereOptions(condition)
+
 		const invoices = await this.manager.find(Invoice, {
-			where: this.getWhereOptions(condition),
+			where,
 			relations: { customer: !!relation?.customer },
 			relationLoadStrategy: 'join',
+			take: limit ? limit : undefined,
 		})
 		return invoices
 	}
 
 	async queryOneBy(condition: { id: number, oid: number }, relation?: {
 		customer?: boolean,
+		customerPayments?: boolean,
 		invoiceItems?: { procedure?: boolean, productBatch?: { product?: boolean } }
 	}): Promise<Invoice> {
 		let query = this.manager.createQueryBuilder(Invoice, 'invoice')
@@ -97,6 +119,7 @@ export class InvoiceRepository {
 			.andWhere('invoice.oid = :oid', { oid: condition.oid })
 
 		if (relation?.customer) query = query.leftJoinAndSelect('invoice.customer', 'customer')
+		if (relation?.customerPayments) query = query.leftJoinAndSelect('invoice.customerPayments', 'customerPayment')
 		if (relation?.invoiceItems) query = query.leftJoinAndSelect('invoice.invoiceItems', 'invoiceItem')
 		if (relation?.invoiceItems?.procedure) query = query.leftJoinAndSelect(
 			'invoiceItem.procedure',

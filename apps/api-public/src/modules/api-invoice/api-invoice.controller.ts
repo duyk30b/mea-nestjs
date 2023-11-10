@@ -1,9 +1,13 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IdParam } from '../../common/swagger'
 import { External, TExternal } from '../../common/request-external'
+import { IdParam } from '../../common/swagger'
 import { ApiInvoiceService } from './api-invoice.service'
-import { InvoiceCreateBody, InvoiceGetOneQuery, InvoicePaginationQuery, InvoicePaymentMoneyBody, InvoiceUpdateBody } from './request'
+import {
+	InvoiceDraftCreateBody, InvoiceDraftUpdateBody,
+	InvoiceGetManyQuery, InvoiceGetOneQuery,
+	InvoicePaginationQuery, InvoicePaymentBody,
+} from './request'
 
 @ApiTags('Invoice')
 @ApiBearerAuth('access-token')
@@ -16,51 +20,63 @@ export class ApiInvoiceController {
 		return await this.apiInvoiceService.pagination(oid, query)
 	}
 
+	@Get('list')
+	async list(@External() { oid }: TExternal, @Query() query: InvoiceGetManyQuery) {
+		return await this.apiInvoiceService.getMany(oid, query)
+	}
+
 	@Get('detail/:id')
 	async detail(@External() { oid }: TExternal, @Param() { id }: IdParam, @Query() query: InvoiceGetOneQuery) {
 		return await this.apiInvoiceService.getOne(oid, id, query)
 	}
 
 	@Post('create-draft')
-	async createInvoiceDraft(@External() { oid }: TExternal, @Body() body: InvoiceCreateBody) {
+	async createDraft(@External() { oid }: TExternal, @Body() body: InvoiceDraftCreateBody) {
 		return await this.apiInvoiceService.createDraft({ oid, body })
 	}
 
 	@Patch('update-draft/:id')
-	async updateInvoiceDraft(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: InvoiceUpdateBody) {
-		return await this.apiInvoiceService.updateDraft({ oid, invoiceId: id, body })
-	}
-
-	@Delete('delete-draft/:id')
-	async deleteInvoiceDraft(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-		return await this.apiInvoiceService.deleteDraft({ oid, invoiceId: id })
-	}
-
-	@Post('start-ship/:id')
-	async startShip(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-		return await this.apiInvoiceService.startShip({
+	async updateDraft(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: InvoiceDraftUpdateBody) {
+		return await this.apiInvoiceService.updateDraft({
 			oid,
 			invoiceId: id,
-			shipTime: Date.now(),
+			body,
 		})
 	}
 
-	@Post('start-payment/:id')
-	async startPaymentInvoice(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: InvoicePaymentMoneyBody) {
-		return await this.apiInvoiceService.startPayment({
+	@Delete('destroy-draft/:id')
+	async destroyDraft(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+		return await this.apiInvoiceService.destroyDraft({
 			oid,
 			invoiceId: id,
-			debt: body.debt,
-			paymentTime: Date.now(),
+		})
+	}
+
+	@Post('prepayment/:id')
+	async prepayment(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: InvoicePaymentBody) {
+		return await this.apiInvoiceService.prepayment({
+			oid,
+			invoiceId: id,
+			money: body.money,
 		})
 	}
 
 	@Post('start-ship-and-payment/:id')
-	async startShipAndPayment(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: InvoicePaymentMoneyBody) {
+	async startShipAndPayment(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: InvoicePaymentBody) {
 		return await this.apiInvoiceService.startShipAndPayment({
 			oid,
 			invoiceId: id,
-			debt: body.debt,
+			time: Date.now(),
+			money: body.money,
+		})
+	}
+
+	@Post('pay-debt/:id')
+	async payDebt(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: InvoicePaymentBody) {
+		return await this.apiInvoiceService.payDebt({
+			oid,
+			invoiceId: id,
+			money: body.money,
 			time: Date.now(),
 		})
 	}
@@ -70,7 +86,15 @@ export class ApiInvoiceController {
 		return await this.apiInvoiceService.startRefund({
 			oid,
 			invoiceId: id,
-			refundTime: Date.now(),
+			time: Date.now(),
+		})
+	}
+
+	@Delete('soft-delete-refund/:id')
+	async softDeleteRefund(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+		return await this.apiInvoiceService.softDeleteRefund({
+			oid,
+			invoiceId: id,
 		})
 	}
 }

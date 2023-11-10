@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity, Index } from 'typeorm'
+import { Column, Entity } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import { EGender } from '../common/variable'
 

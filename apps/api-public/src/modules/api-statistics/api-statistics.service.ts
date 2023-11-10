@@ -23,10 +23,10 @@ export class ApiStatisticsService {
 		const invoices = await this.invoiceRepository.findMany({
 			oid,
 			createTime: ['BETWEEN', startMonth, endMonth],
-			status: InvoiceStatus.Finish,
+			statuses: [InvoiceStatus.Debt, InvoiceStatus.Success],
 		})
 		invoices.forEach((invoice) => {
-			const date = new Date(invoice.paymentTime + 7 * 60 * 60 * 1000).getUTCDate()
+			const date = new Date(invoice.createTime + 7 * 60 * 60 * 1000).getUTCDate()
 			data[date - 1].revenue += invoice.totalMoney
 			data[date - 1].profit += invoice.profit
 		})

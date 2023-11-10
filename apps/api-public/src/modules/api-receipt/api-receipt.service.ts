@@ -1,41 +1,56 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
-import { uniqueArray } from '_libs/common/helpers/object.helper'
-import { DistributorRepository, ReceiptInsertDto, ReceiptQuickRepository, ReceiptRepository, ReceiptUpdateDto } from '_libs/database/repository'
-import { ReceiptCreateBody, ReceiptGetOneQuery, ReceiptPaginationQuery, ReceiptUpdateBody } from './request'
+import { ReceiptInsertDto, ReceiptProcessRepository, ReceiptRepository, ReceiptUpdateDto } from '_libs/database/repository'
+import {
+	ReceiptDraftCreateBody, ReceiptDraftUpdateBody,
+	ReceiptGetManyQuery, ReceiptGetOneQuery, ReceiptPaginationQuery,
+} from './request'
 
 @Injectable()
 export class ApiReceiptService {
 	constructor(
 		private readonly receiptRepository: ReceiptRepository,
-		private readonly receiptQuickRepository: ReceiptQuickRepository,
-		private readonly distributorRepository: DistributorRepository
+		private readonly receiptProcessRepository: ReceiptProcessRepository
 	) { }
 
 	async pagination(oid: number, query: ReceiptPaginationQuery) {
-		const { page, limit, total, data } = await this.receiptRepository.pagination({
+		const { fromTime, toTime, distributorId, hasDelete } = query.filter || {}
+
+		return await this.receiptRepository.pagination({
 			page: query.page,
 			limit: query.limit,
 			condition: {
 				oid,
-				distributorId: query.filter?.distributorId,
-				fromTime: query.filter?.fromTime,
-				toTime: query.filter?.toTime,
+				distributorId,
 				status: query.filter?.status,
+				createTime: fromTime != null && toTime != null ? ['BETWEEN', fromTime, toTime] : undefined,
+				deleteTime: hasDelete ? undefined : ['ISNULL'],
 			},
+			relation: { distributor: query.relation?.distributor },
 			order: query.sort || { id: 'DESC' },
 		})
+	}
 
-		if (query.relation?.distributor && data.length) {
-			const distributorIds = uniqueArray(data.map((i) => i.distributorId))
-			const distributors = await this.distributorRepository.findMany({ ids: distributorIds })
-			data.forEach((i) => i.distributor = distributors.find((j) => j.id === i.distributorId))
-		}
-		return { page, limit, total, data }
+	async getMany(oid: number, query: ReceiptGetManyQuery) {
+		const { relation, limit } = query
+		const { fromTime, toTime, distributorId, hasDelete, status } = query.filter || {}
+
+		return await this.receiptRepository.findMany(
+			{
+				oid,
+				distributorId,
+				status,
+				createTime: fromTime != null && toTime != null ? ['BETWEEN', fromTime, toTime] : undefined,
+				deleteTime: hasDelete ? undefined : ['ISNULL'],
+			},
+			{ distributor: relation?.distributor },
+			limit
+		)
 	}
 
 	async getOne(oid: number, id: number, { relation }: ReceiptGetOneQuery) {
 		return await this.receiptRepository.findOne({ oid, id }, {
 			distributor: !!relation?.distributor,
+			distributorPayments: !!relation?.distributorPayments,
 			receiptItems: !!relation?.receiptItems,
 		})
 	}
@@ -43,14 +58,15 @@ export class ApiReceiptService {
 	async queryOne(oid: number, id: number, { relation }: ReceiptGetOneQuery) {
 		return await this.receiptRepository.queryOneBy({ oid, id }, {
 			distributor: !!relation?.distributor,
+			distributorPayments: !!relation?.distributorPayments,
 			receiptItems: !!relation?.receiptItems && { productBatch: true },
 		})
 	}
 
-	async createDraft(params: { oid: number, body: ReceiptCreateBody }) {
+	async createDraft(params: { oid: number, body: ReceiptDraftCreateBody }) {
 		const { oid, body } = params
 		try {
-			return await this.receiptQuickRepository.createDraft({
+			return await this.receiptProcessRepository.createDraft({
 				oid,
 				receiptInsertDto: ReceiptInsertDto.from(body),
 			})
@@ -59,10 +75,10 @@ export class ApiReceiptService {
 		}
 	}
 
-	async updateDraft(params: { oid: number, receiptId: number, body: ReceiptUpdateBody }) {
+	async updateDraft(params: { oid: number, receiptId: number, body: ReceiptDraftUpdateBody }) {
 		const { oid, receiptId, body } = params
 		try {
-			return await this.receiptQuickRepository.updateDraft({
+			return await this.receiptProcessRepository.updateDraft({
 				oid,
 				receiptId,
 				receiptUpdateDto: ReceiptUpdateDto.from(body),
@@ -72,30 +88,61 @@ export class ApiReceiptService {
 		}
 	}
 
-	async deleteDraft(params: { oid: number, receiptId: number }) {
+	async destroyDraft(params: { oid: number, receiptId: number }) {
 		const { oid, receiptId } = params
 		try {
-			await this.receiptQuickRepository.deleteDraft({ oid, receiptId })
+			await this.receiptProcessRepository.destroyDraft({ oid, receiptId })
 			return { success: true }
 		} catch (error: any) {
 			throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
 		}
 	}
 
-	async startShipAndPayment(params: { oid: number, receiptId: number, shipTime: number }) {
-		const { oid, receiptId, shipTime } = params
+	async prepayment(params: { oid: number, receiptId: number, money: number }) {
+		const { oid, receiptId, money } = params
+		await this.receiptProcessRepository.prepayment({
+			oid,
+			receiptId,
+			time: Date.now(),
+			money,
+		})
+		return { success: true }
+	}
+
+	async startShipAndPayment(params: { oid: number, receiptId: number, time: number, money: number }) {
+		const { oid, receiptId, time, money } = params
 		try {
-			await this.receiptQuickRepository.startShipAndPayment({ oid, receiptId, shipTime })
+			await this.receiptProcessRepository.startShipAndPayment({ oid, receiptId, time, money })
 			return { success: true }
 		} catch (error: any) {
 			throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
 		}
 	}
 
-	async startRefund(params: { oid: number, receiptId: number, refundTime: number }) {
-		const { oid, receiptId, refundTime } = params
+	async payDebt(params: { oid: number, receiptId: number, time: number, money: number }) {
+		const { oid, receiptId, time, money } = params
 		try {
-			await this.receiptQuickRepository.startRefund({ oid, receiptId, refundTime })
+			await this.receiptProcessRepository.payDebt({ oid, receiptId, time, money })
+			return { success: true }
+		} catch (error: any) {
+			throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+		}
+	}
+
+	async startRefund(params: { oid: number, receiptId: number, time: number }) {
+		const { oid, receiptId, time } = params
+		try {
+			await this.receiptProcessRepository.startRefund({ oid, receiptId, time })
+			return { success: true }
+		} catch (error: any) {
+			throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+		}
+	}
+
+	async softDeleteRefund(params: { oid: number, receiptId: number }) {
+		const { oid, receiptId } = params
+		try {
+			await this.receiptProcessRepository.softDeleteRefund({ oid, receiptId })
 			return { success: true }
 		} catch (error: any) {
 			throw new HttpException(error.message, HttpStatus.BAD_REQUEST)

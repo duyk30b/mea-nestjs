@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { randomEnum, randomItemsInArray, randomNumber, shuffleArray } from '_libs/common/helpers/random.helper'
 import { DiscountType, InvoiceItemType } from '_libs/database/common/variable'
 import { Customer, Procedure, ProductBatch } from '_libs/database/entities'
-import { InvoiceQuickRepository, InvoiceItemDto, InvoiceInsertDto } from '_libs/database/repository'
+import { InvoiceQuickRepository, InvoiceItemDto, InvoiceDraftInsertDto } from '_libs/database/repository'
 import { Repository } from 'typeorm'
 
 @Injectable()
@@ -16,7 +16,7 @@ export class InvoiceSeed {
 		private readonly invoiceQuickRepository: InvoiceQuickRepository
 	) { }
 
-	fakeInvoiceInsertDto(productBatches: ProductBatch[], procedures: Procedure[]): InvoiceInsertDto {
+	fakeInvoiceDraftInsertDto(productBatches: ProductBatch[], procedures: Procedure[]): InvoiceDraftInsertDto {
 		const numberProductBatch = randomNumber(2, 5)
 		const numberProcedure = randomNumber(2, 5)
 
@@ -83,7 +83,7 @@ export class InvoiceSeed {
 		const profit = totalMoney - totalCostMoney - expenses
 		const debt = Math.floor(totalMoney * randomNumber(0.1, 0.5, 0.1) / 1000) * 1000
 
-		const invoiceInsertDto: InvoiceInsertDto = {
+		const invoiceInsertDto: InvoiceDraftInsertDto = {
 			invoiceItems: invoiceItemsDto,
 			totalCostMoney,
 			totalItemMoney,
@@ -122,7 +122,7 @@ export class InvoiceSeed {
 			const shipTime = paymentTime
 			const refundTime = startTime.getTime() + i * gap + 2 * 60 * 60 * 1000
 
-			const invoiceInsertDto = this.fakeInvoiceInsertDto(productBatchesShuffle, proceduresShuffle)
+			const invoiceInsertDto = this.fakeInvoiceDraftInsertDto(productBatchesShuffle, proceduresShuffle)
 			invoiceInsertDto.createTime = createTime
 			invoiceInsertDto.customerId = customer.id
 			const { invoiceId } = await this.invoiceQuickRepository.createDraft({

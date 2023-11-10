@@ -25,7 +25,7 @@ module.exports = {
 		'no-underscore-dangle': 0,                                                // dùng dấu gạch dưới _
 		'no-multi-spaces': [1, { ignoreEOLComments: true }],
 		'prefer-template': 0,                                                     // Bắt buộc dùng template string khi cộng chuỗi, vcc
-		'no-multiple-empty-lines': [1, { max: 1, maxEOF: 0 }],                    // Số dòng trống tối đa
+		'no-multiple-empty-lines': [1, { max: 1, maxEOF: 0, maxBOF: 0 }],                    // Số dòng trống tối đa
 		'max-len': [
 			1, {
 				code: 160,

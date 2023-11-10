@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common/decorators'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { Receipt } from '_libs/database/entities'
-import { Between, DataSource, EntityManager, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual } from 'typeorm'
+import { Between, DataSource, EntityManager, FindOptionsWhere, In, IsNull } from 'typeorm'
 import { ReceiptCondition, ReceiptOrder } from './receipt.dto'
 
 @Injectable()
@@ -32,11 +32,27 @@ export class ReceiptRepository {
 			where.status = In(condition.statuses)
 		}
 
-		let paymentTime = undefined
-		if (condition.fromTime && condition.toTime) paymentTime = Between(condition.fromTime, condition.toTime)
-		else if (condition.fromTime) paymentTime = MoreThanOrEqual(condition.fromTime)
-		else if (condition.toTime) paymentTime = LessThanOrEqual(condition.toTime)
-		if (paymentTime != null) where.paymentTime = paymentTime
+		if (condition.createTime != null) {
+			if (typeof condition.createTime === 'number') {
+				where.createTime = condition.createTime
+			}
+			else if (Array.isArray(condition.createTime)) {
+				if (condition.createTime[0] === 'BETWEEN') {
+					where.createTime = Between(condition.createTime[1], condition.createTime[2])
+				}
+			}
+		}
+
+		if (condition.deleteTime != null) {
+			if (typeof condition.deleteTime === 'number') {
+				where.deleteTime = condition.deleteTime
+			}
+			else if (Array.isArray(condition.deleteTime)) {
+				if (condition.deleteTime[0] === 'ISNULL') {
+					where.deleteTime = IsNull()
+				}
+			}
+		}
 
 		return where
 	}
@@ -45,12 +61,20 @@ export class ReceiptRepository {
 		page: number,
 		limit: number,
 		condition?: ReceiptCondition,
+		relation?: { distributor?: boolean, receiptItems?: boolean, distributorPayments?: boolean },
 		order?: ReceiptOrder
 	}) {
-		const { limit, page, condition, order } = options
+		const { limit, page, condition, relation, order } = options
+		const where = this.getWhereOptions(condition)
 
 		const [data, total] = await this.manager.findAndCount(Receipt, {
-			where: this.getWhereOptions(condition),
+			relations: {
+				distributor: !!relation?.distributor,
+				distributorPayments: relation?.distributorPayments,
+				receiptItems: relation.receiptItems ? { productBatch: { product: true } } : false,
+			},
+			relationLoadStrategy: 'query', // dùng join thì bị lỗi 2 câu query, bằng hòa
+			where,
 			order,
 			take: limit,
 			skip: (page - 1) * limit,
@@ -59,23 +83,36 @@ export class ReceiptRepository {
 		return { total, page, limit, data }
 	}
 
-	async findMany(condition: ReceiptCondition, relation?: { distributor?: boolean, receiptItems?: boolean }): Promise<Receipt[]> {
+	async findMany(
+		condition: ReceiptCondition,
+		relation?: { distributor?: boolean, receiptItems?: boolean, distributorPayments?: boolean },
+		limit?: number
+	): Promise<Receipt[]> {
+		const where = this.getWhereOptions(condition)
+
 		const receipts = await this.manager.find(Receipt, {
-			where: this.getWhereOptions(condition),
+			where,
 			relations: {
 				distributor: !!relation?.distributor,
+				distributorPayments: relation?.distributorPayments,
 				receiptItems: relation.receiptItems ? { productBatch: { product: true } } : false,
 			},
 			relationLoadStrategy: 'join',
+			take: limit ? limit : undefined,
 		})
 		return receipts
 	}
 
-	async findOne(condition: ReceiptCondition, relation?: { distributor?: boolean, receiptItems?: boolean }): Promise<Receipt> {
+	async findOne(condition: ReceiptCondition, relation?: {
+		distributor?: boolean,
+		distributorPayments?: boolean,
+		receiptItems?: boolean
+	}): Promise<Receipt> {
 		const [receipt] = await this.manager.find(Receipt, {
 			where: this.getWhereOptions(condition),
 			relations: {
 				distributor: !!relation?.distributor,
+				distributorPayments: !!relation?.distributorPayments,
 				receiptItems: relation.receiptItems ? { productBatch: { product: true } } : false,
 			},
 			relationLoadStrategy: 'join',
@@ -85,6 +122,7 @@ export class ReceiptRepository {
 
 	async queryOneBy(condition: { id: number, oid: number }, relation?: {
 		distributor?: boolean,
+		distributorPayments?: boolean,
 		receiptItems?: { productBatch?: boolean }
 	}): Promise<Receipt> {
 		let query = this.manager.createQueryBuilder(Receipt, 'receipt')
@@ -92,6 +130,7 @@ export class ReceiptRepository {
 			.andWhere('receipt.oid = :oid', { oid: condition.oid })
 
 		if (relation?.distributor) query = query.leftJoinAndSelect('receipt.distributor', 'distributor')
+		if (relation?.distributorPayments) query = query.leftJoinAndSelect('invoice.distributorPayments', 'distributorPayment')
 		if (relation?.receiptItems) query = query.leftJoinAndSelect('receipt.receiptItems', 'receiptItem')
 		if (relation?.receiptItems?.productBatch) {
 			query = query

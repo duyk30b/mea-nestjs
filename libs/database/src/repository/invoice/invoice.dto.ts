@@ -17,7 +17,9 @@ export interface InvoiceCondition {
 	arrivalIds?: number[]
 	statuses?: InvoiceStatus[]
 
-	createTime?: number | [ComparisonType, number, number?]
+	createTime?: number | [ComparisonType, number?, number?]
+
+	deleteTime?: number | [ComparisonType, number?, number?]
 }
 
 export type InvoiceOrder = {
@@ -33,20 +35,20 @@ export class InvoiceItemDto extends PartialType(OmitType(
 	referenceId: number
 }
 
-export class InvoiceInsertDto extends PartialType(OmitType(
+export class InvoiceDraftInsertDto extends PartialType(OmitType(
 	Invoice,
-	['oid', 'invoiceItems', 'status', 'arrivalId']
+	['oid', 'invoiceItems', 'status', 'arrivalId', 'paid', 'debt']
 )) {
 	invoiceItems: InvoiceItemDto[] = []
 
 	/* eslint-disable */
 	static from<
-		T extends InvoiceInsertDto,
+		T extends InvoiceDraftInsertDto,
 		K extends InvoiceItemDto,
-	>(plain: NoExtraProperties<InvoiceInsertDto, T>
+	>(plain: NoExtraProperties<InvoiceDraftInsertDto, T>
 		& { invoiceItems?: NoExtraProperties<InvoiceItemDto, K>[] }
-	): InvoiceInsertDto {
-		const instance = plainToInstance(InvoiceInsertDto, plain, {
+	): InvoiceDraftInsertDto {
+		const instance = plainToInstance(InvoiceDraftInsertDto, plain, {
 			exposeUnsetFields: false,
 			excludeExtraneousValues: true,
 			ignoreDecorators: true
@@ -64,20 +66,20 @@ export class InvoiceInsertDto extends PartialType(OmitType(
 	}
 }
 
-export class InvoiceUpdateDto extends PartialType(OmitType(
+export class InvoiceDraftUpdateDto extends PartialType(OmitType(
 	Invoice,
-	['oid', 'invoiceItems', 'status', 'arrivalId', 'customerId']
+	['oid', 'invoiceItems', 'status', 'arrivalId', 'customerId', 'paid', 'debt']
 )) {
 	invoiceItems: InvoiceItemDto[] = []
 
 	/* eslint-disable */
 	static from<
-		T extends InvoiceUpdateDto,
+		T extends InvoiceDraftUpdateDto,
 		K extends InvoiceItemDto,
-	>(plain: NoExtraProperties<InvoiceUpdateDto, T>
+	>(plain: NoExtraProperties<InvoiceDraftUpdateDto, T>
 		& { invoiceItems?: NoExtraProperties<InvoiceItemDto, K>[] }
-	): InvoiceUpdateDto {
-		const instance = plainToInstance(InvoiceUpdateDto, plain, {
+	): InvoiceDraftUpdateDto {
+		const instance = plainToInstance(InvoiceDraftUpdateDto, plain, {
 			exposeUnsetFields: false,
 			excludeExtraneousValues: true,
 			ignoreDecorators: true

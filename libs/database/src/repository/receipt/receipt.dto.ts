@@ -1,5 +1,6 @@
 import { OmitType, PartialType } from '@nestjs/swagger'
 import { NoExtraProperties } from '_libs/common/helpers/typescript.helper'
+import { ComparisonType } from '_libs/database/common/base.dto'
 import { ReceiptStatus, UnitType } from '_libs/database/common/variable'
 import { Receipt, ReceiptItem } from '_libs/database/entities'
 import { plainToInstance } from 'class-transformer'
@@ -16,6 +17,10 @@ export interface ReceiptCondition {
 
 	fromTime?: number
 	toTime?: number
+
+	createTime?: number | [ComparisonType, number?, number?]
+
+	deleteTime?: number | [ComparisonType, number?, number?]
 }
 
 export type ReceiptOrder = {
@@ -32,7 +37,7 @@ export class ReceiptItemDto extends PartialType(OmitType(
 
 export class ReceiptInsertDto extends PartialType(OmitType(
 	Receipt,
-	['oid', 'receiptItems', 'status']
+	['oid', 'receiptItems', 'status', 'paid', 'debt']
 )) {
 	receiptItems: ReceiptItemDto[] = []
 
@@ -62,7 +67,7 @@ export class ReceiptInsertDto extends PartialType(OmitType(
 
 export class ReceiptUpdateDto extends PartialType(OmitType(
 	Receipt,
-	['oid', 'receiptItems', 'status', 'distributorId']
+	['oid', 'receiptItems', 'status', 'distributorId', 'paid', 'debt']
 )) {
 	receiptItems: ReceiptItemDto[] = []
 

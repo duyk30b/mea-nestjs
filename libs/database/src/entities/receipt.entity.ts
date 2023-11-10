@@ -1,12 +1,14 @@
 import { Expose, Type } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
-import { Distributor } from '.'
 import { BaseEntity } from '../common/base.entity'
 import { DiscountType, ReceiptStatus } from '../common/variable'
+import DistributorPayment from './distributor-payment.entity'
+import Distributor from './distributor.entity'
 import ReceiptItem from './receipt-item.entity'
 
 @Entity('receipt')
-@Index(['oid', 'paymentTime'])
+@Index('IDX_RECEIPT__DISTRIBUTOR_ID', ['oid', 'distributorId'])
+@Index('IDX_RECEIPT__CREATE_TIME', ['oid', 'createTime'])
 export default class Receipt extends BaseEntity {
 	@Column({ name: 'distributor_id' })
 	@Expose({ name: 'distributor_id' })
@@ -29,7 +31,7 @@ export default class Receipt extends BaseEntity {
 	createTime: number
 
 	@Column({
-		name: 'payment_time',
+		name: 'delete_time',
 		type: 'bigint',
 		nullable: true,
 		transformer: {
@@ -37,32 +39,8 @@ export default class Receipt extends BaseEntity {
 			from: (value) => value == null ? value : Number(value),
 		},
 	})
-	@Expose({ name: 'payment_time' })
-	paymentTime: number
-
-	@Column({
-		name: 'ship_time',
-		type: 'bigint',
-		nullable: true,
-		transformer: {
-			to: (value) => value,
-			from: (value) => value == null ? value : Number(value),
-		},
-	})
-	@Expose({ name: 'ship_time' })
-	shipTime: number
-
-	@Column({
-		name: 'refund_time',
-		type: 'bigint',
-		nullable: true,
-		transformer: {
-			to: (value) => value,
-			from: (value) => value == null ? value : Number(value),
-		},
-	})
-	@Expose({ name: 'refund_time' })
-	refundTime: number
+	@Expose({ name: 'delete_time' })
+	deleteTime: number
 
 	@Column({ name: 'total_item_money', type: 'bigint' })
 	@Expose({ name: 'total_item_money' })
@@ -90,6 +68,10 @@ export default class Receipt extends BaseEntity {
 	@Type(() => Number)
 	totalMoney: number                                        // tổng tiền = tiền sản phẩm + surcharge - tiền giảm giá
 
+	@Column({ name: 'paid', default: 0 })
+	@Expose({ name: 'paid' })
+	paid: number                                           // tiền thanh toán
+
 	@Column({ name: 'debt', default: 0 })
 	@Expose({ name: 'debt' })
 	debt: number                                              // tiền nợ
@@ -106,4 +88,8 @@ export default class Receipt extends BaseEntity {
 	@ManyToOne((type) => Distributor, { createForeignKeyConstraints: false })
 	@JoinColumn({ name: 'distributor_id', referencedColumnName: 'id' })
 	distributor: Distributor
+
+	@Expose({ name: 'distributor_payments' })
+	@OneToMany(() => DistributorPayment, (distributorPayment) => distributorPayment.receipt)
+	distributorPayments: DistributorPayment[]
 }

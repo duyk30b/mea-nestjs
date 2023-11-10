@@ -79,10 +79,18 @@ export const convertViToEn = (root: string): string =>
 		.replace(/đ/g, 'd')
 		.replace(/Đ/g, 'D')
 
-export const formatNumber = (number: number, fixed = 3, part = 3, sec = ',', dec = '.') => {
-	const regex = '\\d(?=(\\d{' + part + '})+' + (fixed > 0 ? '\\D' : '$') + ')'
-	return number
-		.toFixed(fixed)
+// export const formatNumber = (number: number, fixed = 3, part = 3, sec = ',', dec = '.') => {
+// 	const regex = '\\d(?=(\\d{' + part + '})+' + (fixed > 0 ? '\\D' : '$') + ')'
+// 	return number
+// 		.toFixed(fixed)
+// 		.replace('.', dec)
+// 		.replace(new RegExp(regex, 'g'), '$&' + sec)
+// }
+
+export const formatNumber = (number: number, part = 3, sec = ',', dec = '.') => {
+	const numberStr = (number || 0).toString()
+	const regex = '\\d(?=(\\d{' + part + '})+' + (numberStr.includes('.') ? '\\D' : '$') + ')'
+	return numberStr
 		.replace('.', dec)
 		.replace(new RegExp(regex, 'g'), '$&' + sec)
 }

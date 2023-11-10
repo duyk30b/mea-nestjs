@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { valuesEnum } from '_libs/common/helpers/typescript.helper'
 import { DiscountType, InvoiceItemType } from '_libs/database/common/variable'
 import { Expose, Type } from 'class-transformer'
-import { IsDefined, IsEnum, IsNumber, Min, ValidateNested } from 'class-validator'
+import { IsDefined, IsEnum, IsNumber, IsString, Min, ValidateNested } from 'class-validator'
 import { UnitConversionQuery } from '../../api-product/request'
 
 export class InvoiceItemBody {
@@ -81,4 +81,9 @@ export class InvoiceItemBody {
 	@IsNumber()
 	@Min(1)
 	quantity: number
+
+	@ApiPropertyOptional({ name: 'hint_usage', example: 'Uống 2 lần/ngày sáng 1 viên, chiều 1 viên' })
+	@Expose({ name: 'hint_usage' })
+	@IsString()
+	hintUsage: string
 }

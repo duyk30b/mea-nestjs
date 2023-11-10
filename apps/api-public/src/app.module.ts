@@ -10,9 +10,9 @@ import { JwtExtendModule } from './components/jwt-extend/jwt-extend.module'
 import { DetectClientMiddleware } from './middleware/detect-client.middleware copy'
 import { ValidateTokenMiddleware } from './middleware/validate-token.middleware'
 import { ApiArrivalModule } from './modules/api-arrival/api-arrival.module'
-import { ApiCustomerDebtModule } from './modules/api-customer-debt/api-customer-debt.module'
+import { ApiCustomerPaymentModule } from './modules/api-customer-payment/api-customer-payment.module'
 import { ApiCustomerModule } from './modules/api-customer/api-customer.module'
-import { ApiDistributorDebtModule } from './modules/api-distributor-debt/api-distributor-debt.module'
+import { ApiDistributorPaymentModule } from './modules/api-distributor-payment/api-distributor-payment.module'
 import { ApiDistributorModule } from './modules/api-distributor/api-distributor.module'
 import { ApiEmployeeModule } from './modules/api-employee/api-employee.module'
 import { ApiInvoiceItemModule } from './modules/api-invoice-item/api-invoice-item.module'
@@ -55,9 +55,9 @@ import { AuthModule } from './modules/auth/auth.module'
 		AuthModule,
 		ApiArrivalModule,
 		ApiCustomerModule,
-		ApiCustomerDebtModule,
+		ApiCustomerPaymentModule,
 		ApiDistributorModule,
-		ApiDistributorDebtModule,
+		ApiDistributorPaymentModule,
 		ApiEmployeeModule,
 		ApiInvoiceModule,
 		ApiInvoiceItemModule,

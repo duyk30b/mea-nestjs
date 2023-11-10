@@ -41,18 +41,27 @@ export enum DebtType {
 	Refund = 3,
 }
 
+export enum PaymentType {
+	ReceiveRefund = -1,       // Nhận tiền hoàn trả
+	Prepayment = 0,           // Thanh toán trước mua hàng
+	ImmediatePayment = 1,     // Thanh toán ngay khi mua hàng 
+	PayDebt = 2,              // Trả nợ (thanh toán sau mua hàng )
+}
+
 export enum InvoiceStatus {
-	Refund = 0,
-	Draft = 1,
-	Process = 2,
-	Finish = 3
+	Refund = -1,
+	Draft = 0,
+	AwaitingShipment = 1, // Chờ gửi hàng
+	Debt = 2,
+	Success = 3
 }
 
 export enum ReceiptStatus {
-	Refund = 0,
-	Draft = 1,
-	Process = 2,
-	Finish = 3
+	Refund = -1,
+	Draft = 0,
+	AwaitingShipment = 1, // Chờ gửi hàng
+	Debt = 2,
+	Success = 3
 }
 
 export enum ProductMovementType {
@@ -78,5 +87,5 @@ export enum ArrivalType {
 }
 
 export type UnitType = { name: string, rate: number }
-export type SurchargeDetailsType = { key: string, name: string, money: number }
-export type ExpensesDetailsType = { key: string, name: string, money: number }
+export type SurchargeDetailType = { key: string, name: string, money: number }
+export type ExpensesDetailType = { key: string, name: string, money: number }

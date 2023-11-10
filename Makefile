@@ -10,6 +10,10 @@ upgrade:
 	git log --all --oneline --graph -10
 	git reset --hard origin/master
 	docker compose -f docker-compose.production.yml --env-file .env.production up -d --build
+	docker compose logs -f api-public
+
+logs:
+	docker compose logs -f api-public
 
 nginx-reload:
 	git fetch --all
@@ -30,5 +34,5 @@ backup-db:
 restore-db:
 	docker compose -f docker.db.yml exec mariadb sh -c '\
 		ls -la /backup; \
-		mariadb --user=medihome --password=Abc@12345 medihome_sql < /backup/2023-10-20_02-31-11.sql; \
+		mariadb --user=medihome --password=Abc@12345 medihome_sql < /restore/$$(ls -1 /restore); \
 	'

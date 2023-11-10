@@ -2,13 +2,12 @@ import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import {
-	Arrival, Customer, CustomerDebt, Diagnosis, Distributor, DistributorDebt, Employee,
+	Arrival, Customer, Diagnosis, Distributor, DistributorPayment, Employee,
 	Invoice, InvoiceItem, Organization, OrganizationSetting,
 	Procedure, Product, ProductBatch, ProductMovement, Receipt, ReceiptItem,
 } from '_libs/database/entities'
 import { RepositoryModule } from '_libs/database/repository'
 import { SqlModule } from '_libs/database/sql.module'
-import { BuiTrangApi } from './bs-buitrang/bui-trang.api'
 import { LongNguyenApi } from './long-nguyen/long-nguyen.api'
 import { SeedDataApi } from './seed-data.api'
 import { SeedDataCommand } from './seed-data.command'
@@ -33,9 +32,8 @@ import { TestApi } from './test-sql.api'
 		TypeOrmModule.forFeature([
 			Arrival,
 			Customer,
-			CustomerDebt,
 			Distributor,
-			DistributorDebt,
+			DistributorPayment,
 			Diagnosis,
 			Employee,
 			Invoice,
@@ -51,7 +49,7 @@ import { TestApi } from './test-sql.api'
 		]),
 		RepositoryModule,
 	],
-	controllers: [BuiTrangApi, LongNguyenApi, SeedDataApi, TestApi],
+	controllers: [LongNguyenApi, SeedDataApi, TestApi],
 	providers: [
 		InvoiceSeed,
 		CustomerSeed,

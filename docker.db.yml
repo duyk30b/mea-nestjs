@@ -31,6 +31,7 @@ services:
     volumes:
       - ./data/mariadb:/var/lib/mysql
       - ./data/backup:/backup
+      - ./data/restore:/restore
     environment:
       - MARIADB_ROOT_PASSWORD=Abc@12345
       - MARIADB_DATABASE=medihome_sql

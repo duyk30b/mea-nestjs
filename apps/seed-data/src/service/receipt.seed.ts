@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { randomEnum, randomItemsInArray, randomNumber, shuffleArray } from '_libs/common/helpers/random.helper'
 import { DiscountType } from '_libs/database/common/variable'
 import { Distributor, ProductBatch } from '_libs/database/entities'
-import { ReceiptInsertDto, ReceiptItemDto, ReceiptQuickRepository } from '_libs/database/repository'
+import { ReceiptInsertDto, ReceiptItemDto, ReceiptProcessRepository } from '_libs/database/repository'
 import { Repository } from 'typeorm'
 
 @Injectable()
@@ -11,7 +11,7 @@ export class ReceiptSeed {
 	constructor(
 		@InjectRepository(ProductBatch) private productBatchRepository: Repository<ProductBatch>,
 		@InjectRepository(Distributor) private distributorRepository: Repository<Distributor>,
-		private readonly receiptQuickRepository: ReceiptQuickRepository
+		private readonly receiptProcessRepository: ReceiptProcessRepository
 	) { }
 
 	fakeReceiptInsertDto(productBatches: ProductBatch[]): ReceiptInsertDto {
@@ -75,12 +75,12 @@ export class ReceiptSeed {
 			receiptInsertDto.distributorId = distributor.id
 			receiptInsertDto.createTime = createTime
 
-			const { receiptId } = await this.receiptQuickRepository.createDraft({ oid, receiptInsertDto })
+			const { receiptId } = await this.receiptProcessRepository.createDraft({ oid, receiptInsertDto })
 
 			if (i % 2 === 0) {
-				await this.receiptQuickRepository.startShipAndPayment({ oid, receiptId, shipTime })
+				await this.receiptProcessRepository.startShipAndPayment({ oid, receiptId, shipTime })
 				if (i % 4 === 0) {
-					await this.receiptQuickRepository.startRefund({ oid, receiptId, refundTime })
+					await this.receiptProcessRepository.startRefund({ oid, receiptId, refundTime })
 				}
 			}
 
@@ -89,7 +89,7 @@ export class ReceiptSeed {
 			// 	const r = randomNumber(1, 1000, 1)
 			// 	dto.totalMoney = r
 			// 	dto.receiptItems.forEach((item) => item.quantity = r)
-			// 	return this.receiptQuickRepository.createReceiptDraft(oid, dto, createTime)
+			// 	return this.receiptProcessRepository.createReceiptDraft(oid, dto, createTime)
 			// }))
 			// console.log('🚀 ~ file: purchase.seed.ts:83 ~ PurchaseSeed ~ start ~ createMultiDraft:', createMultiDraft)
 
@@ -98,17 +98,17 @@ export class ReceiptSeed {
 			// 	const r = 10 + index
 			// 	dto.totalMoney = r
 			// 	dto.receiptItems.forEach((item) => item.quantity = r)
-			// 	return this.receiptQuickRepository.updateReceiptDraft(oid, 10, dto)
+			// 	return this.receiptProcessRepository.updateReceiptDraft(oid, 10, dto)
 			// }))
 			// console.log('🚀 ~ file: purchase.seed.ts:83 ~ PurchaseSeed ~ start ~ draft:', updateMultiDraft)
 
 			// const paymentMultiDraft = await Promise.allSettled(Array.from(Array(20)).map((i, index) => {
-			// 	return this.receiptQuickRepository.paymentReceiptDraft(oid, 17, 1234123)
+			// 	return this.receiptProcessRepository.paymentReceiptDraft(oid, 17, 1234123)
 			// }))
 			// console.log('🚀 ~ file: purchase.seed.ts:83 ~ PurchaseSeed ~ start ~ draft:', paymentMultiDraft)
 
 			// const refundMultiDraft = await Promise.allSettled(Array.from(Array(20)).map((i, index) => {
-			// 	return this.receiptQuickRepository.refundReceipt(oid, 14, 1234123)
+			// 	return this.receiptProcessRepository.refundReceipt(oid, 14, 1234123)
 			// }))
 			// console.log('🚀 ~ file: purchase.seed.ts:83 ~ PurchaseSeed ~ start ~ draft:', refundMultiDraft)
 		}

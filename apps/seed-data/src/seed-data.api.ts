@@ -2,8 +2,8 @@ import { Controller, Get } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import {
-	Arrival, Customer, CustomerDebt, Distributor,
-	DistributorDebt, Invoice, InvoiceItem, Organization,
+	Arrival, Customer, Distributor,
+	DistributorPayment, Invoice, InvoiceItem, Organization,
 	OrganizationSetting, Product, ProductBatch,
 	ProductMovement,
 	Receipt, ReceiptItem,
@@ -51,7 +51,7 @@ export class SeedDataApi {
 	// 	await this.manager.clear(Customer)
 	// 	await this.manager.clear(CustomerDebt)
 	// 	await this.manager.clear(Distributor)
-	// 	await this.manager.clear(DistributorDebt)
+	// 	await this.manager.clear(DistributorPayment)
 	// 	await this.manager.clear(Product)
 	// 	await this.manager.clear(ProductBatch)
 	// 	await this.manager.clear(ProductMovement)
