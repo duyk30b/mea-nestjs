@@ -26,7 +26,7 @@ services:
       - NODE_ENV=${NODE_ENV:-local}
     ports:
       - "${API_PUBLIC_PORT:-20000}:${API_PUBLIC_PORT:-20000}"
-      - 9229:9229
+      - 29229:29229
 
   # event-dispatcher:
   #   container_name: mhc_event-dispatcher

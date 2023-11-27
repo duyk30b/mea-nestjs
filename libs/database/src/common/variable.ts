@@ -1,6 +1,6 @@
 export enum EGender {
-	Female = 0,
-	Male = 1,
+    Female = 0,
+    Male = 1,
 }
 // type TGenderKey = keyof typeof EGender ==> type: "Male" | "Female"
 // type TGenderValue = `${EGender}` ==> type (string): "Male" | "Female"
@@ -8,18 +8,18 @@ export enum EGender {
 // Object.values(EGender) ==> ["Male", "Female"]
 
 export enum ERole {
-	Root = 0,
-	Admin = 1,
-	User = 2
+    Root = 0,
+    Admin = 1,
+    User = 2,
 }
 // type TRoleKey = keyof typeof ERole ==> type: "Root" | "Admin" | "User"
-// type TRoleValue = `${ERole}` ==> type (string): "0" | "1" | "2" 
+// type TRoleValue = `${ERole}` ==> type (string): "0" | "1" | "2"
 // Object.keys(ERole ==> ["0", "1", "2", "Root", "Admin", "User"]
 // Object.values(ERole) ==> ["Root", "Admin", "User", 0, 1, 2]
 
 export enum EOrder {
-	ASC,
-	DESC
+    ASC,
+    DESC,
 }
 // type TOrderKey = keyof typeof EOrder ==> type: "ASC" | "DESC"
 // type TOrderValue = `${EOrder}` ==> type: "0" | "1"
@@ -27,65 +27,58 @@ export enum EOrder {
 // Object.values(EOrder) ==> ["ASC", "DESC", 0, 1]
 
 export enum DiscountType {
-	Percent = '%',
-	VND = 'VNĐ',
+    Percent = '%',
+    VND = 'VNĐ',
 }
 
 type EnumReverseKeyValue = {
-	[P in DiscountType]?: keyof typeof DiscountType;
+    [P in DiscountType]?: keyof typeof DiscountType
 }
 
 export enum DebtType {
-	Borrow = 1,
-	PayUp = 2,
-	Refund = 3,
+    Borrow = 1,
+    PayUp = 2,
+    Refund = 3,
 }
 
 export enum PaymentType {
-	ReceiveRefund = -1,       // Nhận tiền hoàn trả
-	Prepayment = 0,           // Thanh toán trước mua hàng
-	ImmediatePayment = 1,     // Thanh toán ngay khi mua hàng 
-	PayDebt = 2,              // Trả nợ (thanh toán sau mua hàng )
+    ReceiveRefund = -1, // Nhận tiền hoàn trả
+    Prepayment = 0, // Thanh toán trước mua hàng
+    ImmediatePayment = 1, // Thanh toán ngay khi mua hàng
+    PayDebt = 2, // Trả nợ (thanh toán sau mua hàng )
 }
 
 export enum InvoiceStatus {
-	Refund = -1,
-	Draft = 0,
-	AwaitingShipment = 1, // Chờ gửi hàng
-	Debt = 2,
-	Success = 3
+    Refund = -1,
+    Draft = 0,
+    AwaitingShipment = 1, // Chờ gửi hàng
+    Debt = 2,
+    Success = 3,
 }
 
 export enum ReceiptStatus {
-	Refund = -1,
-	Draft = 0,
-	AwaitingShipment = 1, // Chờ gửi hàng
-	Debt = 2,
-	Success = 3
-}
-
-export enum ProductMovementType {
-	Receipt = 1,
-	Invoice = 2,
+    Refund = -1,
+    Draft = 0,
+    AwaitingShipment = 1, // Chờ gửi hàng
+    Debt = 2,
+    Success = 3,
 }
 
 export enum InvoiceItemType {
-	ProductBatch = 1,
-	Procedure = 2,
+    ProductBatch = 1,
+    Procedure = 2,
 }
 
 export enum ArrivalStatus {
-	Refund = 0,
-	Draft = 1,
-	Process = 2,
-	Finish = 3
+    Refund = 0,
+    Draft = 1,
+    Process = 2,
+    Finish = 3,
 }
 
 export enum ArrivalType {
-	Invoice = 1,
-	Normal = 2,
+    Invoice = 1,
+    Normal = 2,
 }
 
-export type UnitType = { name: string, rate: number }
-export type SurchargeDetailType = { key: string, name: string, money: number }
-export type ExpensesDetailType = { key: string, name: string, money: number }
+export type UnitType = { name: string; rate: number }

@@ -12,62 +12,62 @@ import { ResetPasswordBody } from './request/reset-password.body'
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-	constructor(
-		private readonly authService: AuthService,
-		private readonly jwtExtendService: JwtExtendService
-	) { }
+    constructor(
+        private readonly authService: AuthService,
+        private readonly jwtExtendService: JwtExtendService
+    ) {}
 
-	@Post('register')
-	async register(@Body() registerDto: RegisterBody, @External() { ip }: TExternal) {
-		const employee = await this.authService.register(registerDto)
-		const { accessToken, refreshToken } = this.jwtExtendService.createTokenFromUser(employee, ip)
-		return {
-			user: employee,
-			access_token: accessToken,
-			refresh_token: refreshToken,
-		}
-	}
+    @Post('register')
+    async register(@Body() registerDto: RegisterBody, @External() { ip }: TExternal) {
+        const employee = await this.authService.register(registerDto)
+        const { accessToken, refreshToken } = this.jwtExtendService.createTokenFromUser(employee, ip)
+        return {
+            user: employee,
+            access_token: accessToken,
+            refresh_token: refreshToken,
+        }
+    }
 
-	@Post('login')
-	async login(@Body() loginDto: LoginBody, @External() { ip }: TExternal) {
-		const employee = await this.authService.login(loginDto)
-		const { accessToken, refreshToken } = this.jwtExtendService.createTokenFromUser(employee, ip)
-		return {
-			user: employee,
-			access_token: accessToken,
-			refresh_token: refreshToken,
-		}
-	}
+    @Post('login')
+    async login(@Body() loginDto: LoginBody, @External() { ip }: TExternal) {
+        const employee = await this.authService.login(loginDto)
+        const { accessToken, refreshToken } = this.jwtExtendService.createTokenFromUser(employee, ip)
+        return {
+            user: employee,
+            access_token: accessToken,
+            refresh_token: refreshToken,
+        }
+    }
 
-	@Post('login-demo')
-	async loginDemo(@External() { ip }: TExternal) {
-		const employee = await this.authService.loginDemo()
-		const { accessToken, refreshToken } = this.jwtExtendService.createTokenFromUser(employee, ip)
-		return {
-			user: employee,
-			access_token: accessToken,
-			refresh_token: refreshToken,
-		}
-	}
+    @Post('login-demo')
+    async loginDemo(@External() { ip }: TExternal) {
+        const employee = await this.authService.loginDemo()
+        const { accessToken, refreshToken } = this.jwtExtendService.createTokenFromUser(employee, ip)
+        return {
+            user: employee,
+            access_token: accessToken,
+            refresh_token: refreshToken,
+        }
+    }
 
-	@Post('logout')
-	async logout(@Param('id') id: string) {
-		// return this.authService.findOne(+id)
-	}
+    @Post('logout')
+    async logout(@Param('id') id: string) {
+        // return this.authService.findOne(+id)
+    }
 
-	@Post('forgot-password')
-	async forgotPassword(@Body() body: ForgotPasswordBody) {
-		return await this.authService.forgotPassword(body)
-	}
+    @Post('forgot-password')
+    async forgotPassword(@Body() body: ForgotPasswordBody) {
+        return await this.authService.forgotPassword(body)
+    }
 
-	@Post('reset-password')
-	async resetPassword(@Body() body: ResetPasswordBody) {
-		return await this.authService.resetPassword(body)
-	}
+    @Post('reset-password')
+    async resetPassword(@Body() body: ResetPasswordBody) {
+        return await this.authService.resetPassword(body)
+    }
 
-	@Post('refresh-token')
-	async grantAccessToken(@Body() refreshTokenDto: RefreshTokenBody, @External() { ip }: TExternal) {
-		const accessToken = await this.authService.grantAccessToken(refreshTokenDto.refreshToken, ip)
-		return { access_token: accessToken }
-	}
+    @Post('refresh-token')
+    async grantAccessToken(@Body() refreshTokenDto: RefreshTokenBody, @External() { ip }: TExternal) {
+        const accessToken = await this.authService.grantAccessToken(refreshTokenDto.refreshToken, ip)
+        return { access_token: accessToken }
+    }
 }

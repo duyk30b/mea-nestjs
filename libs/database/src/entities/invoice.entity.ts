@@ -1,124 +1,170 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import {
-	DiscountType, ExpensesDetailType,
-	InvoiceStatus, SurchargeDetailType,
-} from '../common/variable'
-import Arrival from './arrival.entity'
+import { DiscountType, InvoiceStatus } from '../common/variable'
 import CustomerPayment from './customer-payment.entity'
 import Customer from './customer.entity'
+import InvoiceExpense from './invoice-expense.entity'
 import InvoiceItem from './invoice-item.entity'
+import InvoiceSurcharge from './invoice-surcharge.entity'
 
-@Entity('invoice')
-@Index(['oid', 'arrivalId'])
-@Index('IDX_INVOICE__CUSTOMER_ID', ['oid', 'customerId'])
-@Index('IDX_INVOICE__CREATE_TIME', ['oid', 'createTime'])
+@Entity('Invoice')
+@Index('IDX_Invoice__oid_customerId', ['oid', 'customerId'])
+@Index('IDX_Invoice__oid_time', ['oid', 'time'])
 export default class Invoice extends BaseEntity {
-	@Column({ name: 'arrival_id', default: 0 })
-	@Expose({ name: 'arrival_id' })
-	arrivalId: number
+    @Column({ default: 0 })
+    @Expose()
+    arrivalId: number
 
-	@Column({ name: 'customer_id' })
-	@Expose({ name: 'customer_id' })
-	customerId: number
+    @Column({ nullable: false })
+    @Expose()
+    customerId: number
 
-	@Column({ name: 'status', type: 'tinyint', default: 1 })
-	@Expose({ name: 'status' })
-	status: InvoiceStatus
+    @Column({ type: 'tinyint', default: 1 })
+    @Expose()
+    status: InvoiceStatus
 
-	@Column({
-		name: 'create_time',
-		type: 'bigint',
-		nullable: true,
-		transformer: { to: (value) => value, from: (value) => value == null ? value : Number(value) },
-	})
-	@Expose({ name: 'create_time' })
-	createTime: number
+    @Column({
+        type: 'bigint',
+        nullable: true,
+        transformer: {
+            to: (value) => value,
+            from: (value) => (value == null ? value : Number(value)),
+        },
+    })
+    @Expose()
+    time: number
 
-	@Column({
-		name: 'delete_time',
-		type: 'bigint',
-		nullable: true,
-		transformer: {
-			to: (value) => value,
-			from: (value) => value == null ? value : Number(value),
-		},
-	})
-	@Expose({ name: 'delete_time' })
-	deleteTime: number
+    @Column({ type: 'datetime', nullable: true })
+    @Expose()
+    shipTime: Date
 
-	@Column({ name: 'total_cost_money' })
-	@Expose({ name: 'total_cost_money' })
-	totalCostMoney: number    						          // tổng tiền cost = tổng cost sản phẩm    
+    @Column({ type: 'smallint', nullable: true })
+    @Expose()
+    shipYear: number
 
-	@Column({ name: 'total_item_money' })
-	@Expose({ name: 'total_item_money' })
-	totalItemMoney: number                                    // totalItemProduct + totalItemProcedure
+    @Column({ type: 'smallint', nullable: true })
+    @Expose()
+    shipMonth: number // 01->12
 
-	@Column({ name: 'discount_money', default: 0 })
-	@Expose({ name: 'discount_money' })
-	discountMoney: number                                     // tiền giảm giá
+    @Column({ type: 'smallint', nullable: true })
+    @Expose()
+    shipDate: number
 
-	@Column({ name: 'discount_percent', default: 0 })
-	@Expose({ name: 'discount_percent' })
-	discountPercent: number                                   // % giảm giá
+    @Column({
+        type: 'bigint',
+        nullable: true,
+        transformer: {
+            to: (value) => value,
+            from: (value) => (value == null ? value : Number(value)),
+        },
+    })
+    @Expose()
+    deleteTime: number
 
-	@Column({ name: 'discount_type', type: 'enum', enum: DiscountType, default: DiscountType.VND })
-	@Expose({ name: 'discount_type' })
-	discountType: DiscountType                                // Loại giảm giá
+    @Column({
+        type: 'bigint',
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    })
+    @Expose()
+    itemsCostMoney: number // tổng tiền cost = tổng cost sản phẩm
 
-	@Column({ name: 'surcharge', default: 0 })
-	@Expose({ name: 'surcharge' })
-	surcharge: number                                         // Phụ phí
+    @Column({
+        type: 'bigint',
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    })
+    @Expose()
+    itemsActualMoney: number // totalItemProduct + totalItemProcedure
 
-	@Column({ name: 'surcharge_details', type: 'simple-json', default: '[]' })
-	@Expose({ name: 'surcharge_details' })
-	surchargeDetails: SurchargeDetailType[]                                  // Phụ phí chi tiết
+    @Column({
+        type: 'bigint',
+        default: 0,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    })
+    @Expose()
+    discountMoney: number // tiền giảm giá
 
-	@Column({ name: 'total_money' })
-	@Expose({ name: 'total_money' })
-	totalMoney: number                                        // Doanh thu = totalItemMoney + phụ phí - tiền giảm giá
+    @Column({ type: 'smallint', default: 0 })
+    @Expose()
+    discountPercent: number // % giảm giá
 
-	@Column({ name: 'expenses', default: 0 })                 // Chi phí (người bán trả): Ví dụ: chi phí ship người bán trả, chi phí thuê người trông, tiền vé xe ...
-	@Expose({ name: 'expenses' })                             // Mục này sinh ra để tính lãi cho chính xác, nghĩa là để trừ cả các chi phí sinh ra khi tạo đơn
-	expenses: number                                          // Mục này sẽ không hiện trong đơn hàng, khách hàng ko nhìn thấy
+    @Column({ type: 'enum', enum: DiscountType, default: DiscountType.VND })
+    @Expose()
+    discountType: DiscountType // Loại giảm giá
 
-	@Column({ name: 'expenses_details', type: 'simple-json', default: '[]' })
-	@Expose({ name: 'expenses_details' })
-	expensesDetails: ExpensesDetailType[]                                   // Chi phí
+    @Column({
+        default: 0,
+        type: 'bigint',
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    })
+    @Expose()
+    surcharge: number // Phụ phí
 
-	@Column({ name: 'profit' })
-	@Expose({ name: 'profit' })
-	profit: number                                            // tiền lãi = Doanh thu - Tiền cost - Chi phí
+    @Column({
+        type: 'bigint',
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    })
+    @Expose()
+    revenue: number // Doanh thu = itemsActualMoney + phụ phí - tiền giảm giá
 
-	@Column({ name: 'paid', default: 0 })
-	@Expose({ name: 'paid' })
-	paid: number                                              // tiền đã thanh toán
+    @Column({
+        type: 'bigint',
+        default: 0,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    }) // Chi phí (người bán trả): Ví dụ: chi phí ship người bán trả, chi phí thuê người trông, tiền vé xe ...
+    @Expose() // Mục này sinh ra để tính lãi cho chính xác, nghĩa là để trừ cả các chi phí sinh ra khi tạo đơn
+    expense: number // Mục này sẽ không hiện trong đơn hàng, khách hàng ko nhìn thấy
 
-	@Column({ name: 'debt', default: 0 })
-	@Expose({ name: 'debt' })
-	debt: number                                              // tiền nợ
+    @Column({
+        type: 'bigint',
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    })
+    @Expose()
+    profit: number // tiền lãi = Doanh thu - Tiền cost - Chi phí
 
-	@Column({ name: 'note', nullable: true })
-	@Expose({ name: 'note' })
-	note: string                                              // Ghi chú
+    @Column({
+        type: 'bigint',
+        default: 0,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    })
+    @Expose()
+    paid: number // tiền đã thanh toán
 
-	@Expose({ name: 'customer' })
-	@ManyToOne((type) => Customer, { createForeignKeyConstraints: false })
-	@JoinColumn({ name: 'customer_id', referencedColumnName: 'id' })
-	customer: Customer
+    @Column({
+        type: 'bigint',
+        default: 0,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    })
+    @Expose()
+    debt: number // tiền nợ
 
-	@Expose({ name: 'arrival' })
-	@ManyToOne((type) => Arrival, { createForeignKeyConstraints: false })
-	@JoinColumn({ name: 'arrival_id', referencedColumnName: 'id' })
-	arrival: Arrival
+    @Column({ nullable: true })
+    @Expose()
+    note: string // Ghi chú
 
-	@Expose({ name: 'invoice_items' })
-	@OneToMany(() => InvoiceItem, (invoiceItem) => invoiceItem.invoice)
-	invoiceItems: InvoiceItem[]
+    @Expose()
+    @ManyToOne((type) => Customer, { createForeignKeyConstraints: false })
+    @JoinColumn({ name: 'customerId', referencedColumnName: 'id' })
+    customer: Customer
 
-	@Expose({ name: 'customer_payments' })
-	@OneToMany(() => CustomerPayment, (customerPayment) => customerPayment.invoice)
-	customerPayments: CustomerPayment[]
+    // @Expose({ name: 'arrival' })
+    // @ManyToOne((type) => Arrival, { createForeignKeyConstraints: false })
+    // @JoinColumn({ name: 'arrival_id', referencedColumnName: 'id' })
+    // arrival: Arrival
+
+    @Expose()
+    @OneToMany(() => InvoiceItem, (invoiceItem) => invoiceItem.invoice)
+    invoiceItems: InvoiceItem[]
+
+    @Expose()
+    @OneToMany(() => InvoiceExpense, (invoiceExpense) => invoiceExpense.invoice)
+    invoiceExpenses: InvoiceExpense[]
+
+    @Expose()
+    @OneToMany(() => InvoiceSurcharge, (invoiceSurcharge) => invoiceSurcharge.invoice)
+    invoiceSurcharges: InvoiceSurcharge[]
+
+    @Expose()
+    @OneToMany(() => CustomerPayment, (customerPayment) => customerPayment.invoice)
+    customerPayments: CustomerPayment[]
 }

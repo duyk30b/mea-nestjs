@@ -9,6 +9,6 @@ WORKDIR /app
 COPY ["package.json", "package-lock.json", "./"]
 RUN npm install --production --silent
 COPY [".env", ".env.production", "tsconfig.json", "./"]
-COPY ./dist ./dist
 COPY ./assets ./assets
+COPY ./dist ./dist
 COPY ./libs ./libs

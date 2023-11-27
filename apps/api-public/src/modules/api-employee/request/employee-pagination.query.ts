@@ -1,5 +1,3 @@
-import { PaginationQuery } from 'apps/api-public/src/common/pagination.query'
+import { PaginationQuery } from 'apps/api-public/src/common/query'
 
-export class EmployeePaginationQuery extends PaginationQuery {
-
-}
+export class EmployeePaginationQuery extends PaginationQuery {}

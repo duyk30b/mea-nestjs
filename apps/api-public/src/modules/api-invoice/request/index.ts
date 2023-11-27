@@ -1,5 +1,5 @@
 export * from './invoice-draft-upsert.body'
 export * from './invoice-get.query'
-export * from './invoice-item.body'
+export * from './invoice-item-upsert.body'
 export * from './invoice-options.request'
 export * from './invoice-payment.body'

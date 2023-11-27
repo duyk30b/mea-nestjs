@@ -1,2 +1,4 @@
-export class ConditionOrganizationDto {
+export class OrganizationCondition {
+    id?: number
+    ids?: number[]
 }

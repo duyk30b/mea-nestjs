@@ -1,6 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import { RepositoryModule } from '_libs/database/repository'
+import { ScheduleModule } from '@nestjs/schedule'
+import { RepositoryModule } from '_libs/database/repository/repository.module'
 import { SqlModule } from '_libs/database/sql.module'
 import { HeaderResolver, I18nJsonLoader, I18nMiddleware, I18nModule, QueryResolver } from 'nestjs-i18n'
 import * as path from 'path'
@@ -9,7 +10,6 @@ import { HealthModule } from './components/health/health.module'
 import { JwtExtendModule } from './components/jwt-extend/jwt-extend.module'
 import { DetectClientMiddleware } from './middleware/detect-client.middleware copy'
 import { ValidateTokenMiddleware } from './middleware/validate-token.middleware'
-import { ApiArrivalModule } from './modules/api-arrival/api-arrival.module'
 import { ApiCustomerPaymentModule } from './modules/api-customer-payment/api-customer-payment.module'
 import { ApiCustomerModule } from './modules/api-customer/api-customer.module'
 import { ApiDistributorPaymentModule } from './modules/api-distributor-payment/api-distributor-payment.module'
@@ -23,63 +23,62 @@ import { ApiProductBatchModule } from './modules/api-product-batch/api-product-b
 import { ApiProductMovementModule } from './modules/api-product-movement/api-product-movement.module'
 import { ApiProductModule } from './modules/api-product/api-product.module'
 import { ApiReceiptModule } from './modules/api-receipt/api-receipt.module'
-import { ApiStatisticsModule } from './modules/api-statistics/api-statistics.module'
+import { ApiStatisticModule } from './modules/api-statistics/api-statistic.module'
 import { ApiUserModule } from './modules/api-user/api-user.module'
 import { AuthModule } from './modules/auth/auth.module'
 
 @Module({
-	imports: [
-		ConfigModule.forRoot({
-			envFilePath: [`.env.${process.env.NODE_ENV || 'local'}`, '.env'],
-			isGlobal: true,
-		}),
-		I18nModule.forRoot({
-			fallbackLanguage: 'vi',
-			loader: I18nJsonLoader,
-			loaderOptions: {
-				path: path.join(__dirname, '../../../assets/i18n/'),
-				watch: true,
-			},
-			resolvers: [
-				new QueryResolver(['lang', 'l']),
-				new HeaderResolver(['x-lang']),
-			],
-			typesOutputPath: path.join(__dirname, '../../../assets/generated/i18n.generated.ts'),
-		}),
-		SqlModule,
-		RepositoryModule,
-		HealthModule,
-		// SocketModule,
-		EmailModule,
-		JwtExtendModule,
-		AuthModule,
-		ApiArrivalModule,
-		ApiCustomerModule,
-		ApiCustomerPaymentModule,
-		ApiDistributorModule,
-		ApiDistributorPaymentModule,
-		ApiEmployeeModule,
-		ApiInvoiceModule,
-		ApiInvoiceItemModule,
-		ApiOrganizationModule,
-		ApiProductModule,
-		ApiProductBatchModule,
-		ApiProductMovementModule,
-		ApiProcedureModule,
-		ApiReceiptModule,
-		ApiStatisticsModule,
-		ApiUserModule,
-	],
-	providers: [],
+    imports: [
+        ConfigModule.forRoot({
+            envFilePath: [`.env.${process.env.NODE_ENV || 'local'}`, '.env'],
+            isGlobal: true,
+        }),
+        I18nModule.forRoot({
+            fallbackLanguage: 'vi',
+            loader: I18nJsonLoader,
+            loaderOptions: {
+                path: path.join(__dirname, '../../../assets/i18n/'),
+                watch: true,
+            },
+            resolvers: [new QueryResolver(['lang', 'l']), new HeaderResolver(['x-lang'])],
+            typesOutputPath: path.join(__dirname, '../../../assets/generated/i18n.generated.ts'),
+        }),
+        SqlModule,
+        RepositoryModule,
+        ScheduleModule.forRoot(),
+        HealthModule,
+        // SocketModule,
+        EmailModule,
+        JwtExtendModule,
+        AuthModule,
+        ApiCustomerModule,
+        ApiCustomerPaymentModule,
+        ApiDistributorModule,
+        ApiDistributorPaymentModule,
+        ApiEmployeeModule,
+        ApiInvoiceModule,
+        ApiInvoiceItemModule,
+        ApiOrganizationModule,
+        ApiProductModule,
+        ApiProductBatchModule,
+        ApiProductMovementModule,
+        ApiProcedureModule,
+        ApiReceiptModule,
+        ApiStatisticModule,
+        ApiUserModule,
+    ],
+    controllers: [],
+    providers: [],
 })
 export class AppModule implements NestModule {
-	configure(consumer: MiddlewareConsumer) {
-		consumer.apply(I18nMiddleware).forRoutes('*')
+    configure(consumer: MiddlewareConsumer) {
+        consumer.apply(I18nMiddleware).forRoutes('*')
 
-		consumer.apply(DetectClientMiddleware).forRoutes('*')
+        consumer.apply(DetectClientMiddleware).forRoutes('*')
 
-		consumer.apply(ValidateTokenMiddleware)
-			.exclude('auth/(.*)', '/', { path: 'health', method: RequestMethod.GET })
-			.forRoutes('*')
-	}
+        consumer
+            .apply(ValidateTokenMiddleware)
+            .exclude('auth/(.*)', { path: 'health', method: RequestMethod.GET })
+            .forRoutes('*')
+    }
 }

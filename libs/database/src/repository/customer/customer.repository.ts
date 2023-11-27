@@ -3,86 +3,95 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { convertViToEn } from '_libs/common/helpers/string.helper'
 import { NoExtraProperties } from '_libs/common/helpers/typescript.helper'
 import { escapeSearch } from '_libs/database/common/base.dto'
-import { FindOptionsWhere, In, Like, Repository, UpdateResult } from 'typeorm'
+import { FindOptionsWhere, In, Like, MoreThan, Not, Repository, UpdateResult } from 'typeorm'
 import { Customer } from '../../entities'
 import { CustomerCondition, CustomerOrder } from './customer.dto'
 
 @Injectable()
 export class CustomerRepository {
-	constructor(@InjectRepository(Customer) private customerRepository: Repository<Customer>) { }
+    constructor(@InjectRepository(Customer) private customerRepository: Repository<Customer>) {}
 
-	getWhereOptions(condition: CustomerCondition) {
-		const where: FindOptionsWhere<Customer> = {}
+    getWhereOptions(condition: CustomerCondition) {
+        const where: FindOptionsWhere<Customer> = {}
 
-		if (condition.oid != null) where.oid = condition.oid
-		if (condition.id != null) where.id = condition.id
-		if (condition.isActive != null) where.isActive = condition.isActive
+        if (condition.oid != null) where.oid = condition.oid
+        if (condition.id != null) where.id = condition.id
+        if (condition.isActive != null) where.isActive = condition.isActive
 
-		if (condition.ids) {
-			if (condition.ids.length === 0) condition.ids.push(0)
-			where.id = In(condition.ids)
-		}
+        if (condition.ids) {
+            if (condition.ids.length === 0) condition.ids.push(0)
+            where.id = In(condition.ids)
+        }
 
-		if (condition.fullName && Array.isArray(condition.fullName)) {
-			if (condition.fullName[0] === 'LIKE' && condition.fullName[1]) {
-				const text = escapeSearch(convertViToEn(condition.fullName[1]))
-				where.fullName = Like(`%${text}%`)
-			}
-		}
-		if (condition.phone && Array.isArray(condition.phone)) {
-			if (condition.phone[0] === 'LIKE' && condition.phone[1]) {
-				where.phone = Like(`%${escapeSearch(condition.phone[1])}%`)
-			}
-		}
+        if (condition.fullName && Array.isArray(condition.fullName)) {
+            if (condition.fullName[0] === 'LIKE' && condition.fullName[1]) {
+                const text = escapeSearch(convertViToEn(condition.fullName[1]))
+                where.fullName = Like(`%${text}%`)
+            }
+        }
+        if (condition.phone && Array.isArray(condition.phone)) {
+            if (condition.phone[0] === 'LIKE' && condition.phone[1]) {
+                where.phone = Like(`%${escapeSearch(condition.phone[1])}%`)
+            }
+        }
 
-		return where
-	}
+        if (Array.isArray(condition.debt)) {
+            if (condition.debt[0] === '>') {
+                where.debt = MoreThan(condition.debt[1])
+            }
+            if (condition.debt[0] === '!=') {
+                where.debt = Not(condition.debt[1])
+            }
+        }
 
-	async pagination(options: {
-		page: number,
-		limit: number,
-		condition?: CustomerCondition,
-		order?: CustomerOrder
-	}) {
-		const { limit, page, condition, order } = options
+        return where
+    }
 
-		const [data, total] = await this.customerRepository.findAndCount({
-			where: this.getWhereOptions(condition),
-			order,
-			take: limit,
-			skip: (page - 1) * limit,
-		})
+    async pagination(options: { page: number; limit: number; condition?: CustomerCondition; order?: CustomerOrder }) {
+        const { limit, page, condition, order } = options
+        const where = this.getWhereOptions(condition)
 
-		return { total, page, limit, data }
-	}
+        const [data, total] = await this.customerRepository.findAndCount({
+            where,
+            order,
+            take: limit,
+            skip: (page - 1) * limit,
+        })
 
-	async find(options: { limit?: number, condition?: CustomerCondition, order?: CustomerOrder }): Promise<Customer[]> {
-		const { limit, condition, order } = options
-		return await this.customerRepository.find({
-			where: this.getWhereOptions(condition),
-			order,
-			take: limit,
-		})
-	}
+        return { total, page, limit, data }
+    }
 
-	async findMany(condition: CustomerCondition): Promise<Customer[]> {
-		return await this.customerRepository.find({ where: this.getWhereOptions(condition) })
-	}
+    async find(options: { limit?: number; condition?: CustomerCondition; order?: CustomerOrder }): Promise<Customer[]> {
+        const { limit, condition, order } = options
+        const where = this.getWhereOptions(condition)
 
-	async findOne(condition: CustomerCondition, order?: CustomerOrder): Promise<Customer> {
-		return await this.customerRepository.findOne({
-			where: this.getWhereOptions(condition),
-			order,
-		})
-	}
+        return await this.customerRepository.find({
+            where,
+            order,
+            take: limit,
+        })
+    }
 
-	async insertOne<T extends Partial<Customer>>(dto: NoExtraProperties<Partial<Customer>, T>): Promise<Customer> {
-		const customer = this.customerRepository.create(dto)
-		return this.customerRepository.save(customer)
-	}
+    async findMany(condition: CustomerCondition): Promise<Customer[]> {
+        const where = this.getWhereOptions(condition)
+        return await this.customerRepository.find({ where })
+    }
 
-	async update(condition: CustomerCondition, dto: Partial<Omit<Customer, 'id' | 'oid'>>): Promise<UpdateResult> {
-		const where = this.getWhereOptions(condition)
-		return await this.customerRepository.update(where, dto)
-	}
+    async findOne(condition: CustomerCondition, order?: CustomerOrder): Promise<Customer> {
+        const where = this.getWhereOptions(condition)
+        return await this.customerRepository.findOne({
+            where,
+            order,
+        })
+    }
+
+    async insertOne<T extends Partial<Customer>>(dto: NoExtraProperties<Partial<Customer>, T>): Promise<Customer> {
+        const customer = this.customerRepository.create(dto)
+        return this.customerRepository.save(customer)
+    }
+
+    async update(condition: CustomerCondition, dto: Partial<Omit<Customer, 'id' | 'oid'>>): Promise<UpdateResult> {
+        const where = this.getWhereOptions(condition)
+        return await this.customerRepository.update(where, dto)
+    }
 }

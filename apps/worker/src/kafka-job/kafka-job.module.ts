@@ -4,10 +4,7 @@ import { KafkaJobProcessor } from './kafka-job.processor'
 import { KafkaJobService } from './kafka-job.service'
 
 @Module({
-	imports: [BullQueueModule.registerConsumer()],
-	providers: [
-		KafkaJobProcessor,
-		KafkaJobService,
-	],
+    imports: [BullQueueModule.registerConsumer()],
+    providers: [KafkaJobProcessor, KafkaJobService],
 })
-export class KafkaJobModule { }
+export class KafkaJobModule {}

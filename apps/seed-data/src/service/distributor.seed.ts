@@ -9,30 +9,33 @@ import { AddressData } from '../address/address.service'
 
 @Injectable()
 export class DistributorSeed {
-	constructor(@InjectRepository(Distributor) private readonly distributorRepository: Repository<Distributor>) { }
+    constructor(
+        @InjectRepository(Distributor)
+        private readonly distributorRepository: Repository<Distributor>
+    ) {}
 
-	async start(oid: number, number: number) {
-		const distributorsDto: Distributor[] = []
-		for (let i = 0; i < number; i++) {
-			const gender = randomEnum<EGender>(EGender)
-			const fullName = randomFullName(gender)
-			const address = AddressData.getRandomAddress()
+    async start(oid: number, number: number) {
+        const distributorsDto: Distributor[] = []
+        for (let i = 0; i < number; i++) {
+            const gender = randomEnum<EGender>(EGender)
+            const fullName = randomFullName(gender)
+            const address = AddressData.getRandomAddress()
 
-			const distributor = new Distributor()
+            const distributor = new Distributor()
 
-			distributor.oid = oid
-			distributor.fullName = fullName
-			distributor.fullName = fullName
-			distributor.phone = randomPhoneNumber()
-			distributor.addressProvince = address.province
-			distributor.addressDistrict = address.district
-			distributor.addressWard = address.ward
-			distributor.addressStreet = address.street
-			distributor.debt = 0
+            distributor.oid = oid
+            distributor.fullName = fullName
+            distributor.fullName = fullName
+            distributor.phone = randomPhoneNumber()
+            distributor.addressProvince = address.province
+            distributor.addressDistrict = address.district
+            distributor.addressWard = address.ward
+            distributor.addressStreet = address.street
+            distributor.debt = 0
 
-			distributorsDto.push(distributor)
-		}
-		// await this.distributorRepository.save(distributorsDto, { transaction: false })
-		await this.distributorRepository.insert(distributorsDto)
-	}
+            distributorsDto.push(distributor)
+        }
+        // await this.distributorRepository.save(distributorsDto, { transaction: false })
+        await this.distributorRepository.insert(distributorsDto)
+    }
 }

@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsPhone } from '_libs/common/validate/class-validator.custom'
+import { IsPhone } from '_libs/common/transform-validate/class-validator.custom'
 import { Expose } from 'class-transformer'
 import { IsDefined, MinLength, Validate } from 'class-validator'
 
 export class LoginBody {
-    @ApiProperty({ name: 'org_phone', example: '0986021190' })
-    @Expose({ name: 'org_phone' })
+    @ApiProperty({ example: '0986021190' })
+    @Expose()
     @IsDefined()
     @Validate(IsPhone)
     orgPhone: string

@@ -12,25 +12,25 @@ import { IdParam } from '../../common/swagger'
 @Roles(ERole.Admin)
 @Controller('employee')
 export class ApiEmployeeController {
-	constructor(private readonly apiEmployeeService: ApiEmployeeService) { }
+    constructor(private readonly apiEmployeeService: ApiEmployeeService) {}
 
-	@Get('pagination')
-	async pagination(@External() { oid }: TExternal, @Query() query: EmployeePaginationQuery) {
-		return await this.apiEmployeeService.pagination(oid, query)
-	}
+    @Get('pagination')
+    async pagination(@External() { oid }: TExternal, @Query() query: EmployeePaginationQuery) {
+        return await this.apiEmployeeService.pagination(oid, query)
+    }
 
-	@Get('detail/:id')
-	async detail(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-		return await this.apiEmployeeService.getOne(oid, id)
-	}
+    @Get('detail/:id')
+    async detail(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+        return await this.apiEmployeeService.getOne(oid, id)
+    }
 
-	// @Post('create')
-	// create(@External() { oid }: TExternal, @Body() createEmployeeDto: CreateEmployeeDto) {
-	// 	return this.apiEmployeeService.create(oid, createEmployeeDto)
-	// }
+    // @Post('create')
+    // create(@External() { oid }: TExternal, @Body() createEmployeeDto: CreateEmployeeDto) {
+    //     return this.apiEmployeeService.create(oid, createEmployeeDto)
+    // }
 
-	@Patch('update/:id')
-	async update(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: EmployeeUpdateBody) {
-		return await this.apiEmployeeService.updateOne(oid, id, body)
-	}
+    @Patch('update/:id')
+    async update(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: EmployeeUpdateBody) {
+        return await this.apiEmployeeService.updateOne(oid, id, body)
+    }
 }

@@ -9,34 +9,34 @@ import { convertViToEn } from '_libs/common/helpers/string.helper'
 
 @Injectable()
 export class CustomerSeed {
-	constructor(private readonly dataSource: DataSource) { }
+    constructor(private readonly dataSource: DataSource) {}
 
-	async start(oid: number, number: number) {
-		const customersDto: Customer[] = []
-		for (let i = 0; i < number; i++) {
-			const gender = randomEnum<EGender>(EGender)
-			const fullName = randomFullName(gender)
-			const address = AddressData.getRandomAddress()
+    async start(oid: number, number: number) {
+        const customersDto: Customer[] = []
+        for (let i = 0; i < number; i++) {
+            const gender = randomEnum<EGender>(EGender)
+            const fullName = randomFullName(gender)
+            const address = AddressData.getRandomAddress()
 
-			const customer = new Customer()
+            const customer = new Customer()
 
-			customer.oid = oid
-			customer.fullName = fullName
-			customer.fullName = fullName
-			customer.phone = randomPhoneNumber()
-			customer.birthday = randomDate('1965-03-28', '2020-12-29').getTime()
-			customer.gender = gender
-			customer.addressProvince = address.province
-			customer.addressDistrict = address.district
-			customer.addressWard = address.ward
-			customer.addressStreet = address.street
-			customer.healthHistory = faker.lorem.sentence()
-			customer.debt = 0
+            customer.oid = oid
+            customer.fullName = fullName
+            customer.fullName = fullName
+            customer.phone = randomPhoneNumber()
+            customer.birthday = randomDate('1965-03-28', '2020-12-29').getTime()
+            customer.gender = gender
+            customer.addressProvince = address.province
+            customer.addressDistrict = address.district
+            customer.addressWard = address.ward
+            customer.addressStreet = address.street
+            customer.healthHistory = faker.lorem.sentence()
+            customer.debt = 0
 
-			customersDto.push(customer)
-		}
+            customersDto.push(customer)
+        }
 
-		// await this.dataSource.getRepository(Customer).save(customersDto, { transaction: false })
-		await this.dataSource.getRepository(Customer).insert(customersDto)
-	}
+        // await this.dataSource.getRepository(Customer).save(customersDto, { transaction: false })
+        await this.dataSource.getRepository(Customer).insert(customersDto)
+    }
 }

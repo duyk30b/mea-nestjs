@@ -3,31 +3,31 @@ import { Expose } from 'class-transformer'
 import { IsBoolean, IsDefined, IsNumber, IsString } from 'class-validator'
 
 export class ProcedureCreateBody {
-	@ApiProperty({ name: 'name', example: 'Truyền dịch 500ml' })
-	@Expose({ name: 'name' })
-	@IsDefined()
-	@IsString()
-	name: string                                 // tên dịch vụ
+    @ApiProperty({ example: 'Truyền dịch 500ml' })
+    @Expose()
+    @IsDefined()
+    @IsString()
+    name: string // tên dịch vụ
 
-	@ApiPropertyOptional({ name: 'group', example: 'Tiêm truyền' })
-	@Expose({ name: 'group' })
-	@IsString()
-	group: string                                   // nhóm dịch vụ
+    @ApiPropertyOptional({ example: 'Tiêm truyền' })
+    @Expose()
+    @IsString()
+    group: string // nhóm dịch vụ
 
-	@ApiPropertyOptional({ name: 'price', example: 105000 })
-	@Expose({ name: 'price' })
-	@IsNumber()
-	price: number                                   // Giá dịch vụ
+    @ApiPropertyOptional({ example: 105000 })
+    @Expose()
+    @IsNumber()
+    price: number // Giá dịch vụ
 
-	@ApiProperty({ name: 'consumable_hint' })
-	@Expose({ name: 'consumable_hint' })
-	@IsString()
-	consumableHint: string                          // Vật tư tiêu hao sử dụng
+    @ApiProperty()
+    @Expose()
+    @IsString()
+    consumableHint: string // Vật tư tiêu hao sử dụng
 
-	@ApiPropertyOptional({ name: 'is_active', example: true })
-	@Expose({ name: 'is_active' })
-	@IsBoolean()
-	isActive: boolean
+    @ApiPropertyOptional({ example: true })
+    @Expose()
+    @IsBoolean()
+    isActive: boolean
 }
 
-export class ProcedureUpdateBody extends PartialType(ProcedureCreateBody) { }
+export class ProcedureUpdateBody extends PartialType(ProcedureCreateBody) {}

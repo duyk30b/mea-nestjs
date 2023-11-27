@@ -10,30 +10,30 @@ import { OrganizationUpdateBody } from './request/organization-update.body'
 // @Roles(ERole.Root)
 @Controller('organization')
 export class ApiOrganizationController {
-	constructor(private readonly apiOrganizationService: ApiOrganizationService) { }
+    constructor(private readonly apiOrganizationService: ApiOrganizationService) {}
 
-	@Get('detail')
-	async detail(@External() { oid }: TExternal) {
-		return await this.apiOrganizationService.findOne(+oid)
-	}
+    @Get('detail')
+    async detail(@External() { oid }: TExternal) {
+        return await this.apiOrganizationService.findOne(+oid)
+    }
 
-	@Patch('update')
-	async update(@External() { oid }: TExternal, @Body() body: OrganizationUpdateBody) {
-		return await this.apiOrganizationService.updateOne(oid, body)
-	}
+    @Patch('update')
+    async update(@External() { oid }: TExternal, @Body() body: OrganizationUpdateBody) {
+        return await this.apiOrganizationService.updateOne(oid, body)
+    }
 
-	@Get('settings/get')
-	async getSettings(@External() { oid }: TExternal) {
-		return await this.apiOrganizationService.getAllSettings(oid)
-	}
+    @Get('settings/get')
+    async getSettings(@External() { oid }: TExternal) {
+        return await this.apiOrganizationService.getAllSettings(oid)
+    }
 
-	@Post('settings/upsert/:type')
-	async upsertSetting(
-		@External() { oid }: TExternal,
-		@Param() { type }: OrganizationSettingUpdateParams,
-		@Body() body: OrganizationSettingUpdateBody
-	) {
-		await this.apiOrganizationService.upsertSetting(oid, type, body)
-		return { success: true }
-	}
+    @Post('settings/upsert/:type')
+    async upsertSetting(
+        @External() { oid }: TExternal,
+        @Param() { type }: OrganizationSettingUpdateParams,
+        @Body() body: OrganizationSettingUpdateBody
+    ) {
+        await this.apiOrganizationService.upsertSetting(oid, type, body)
+        return { success: true }
+    }
 }

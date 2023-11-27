@@ -1,62 +1,35 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "es2017",
-    "sourceMap": true,
-    "outDir": "./dist",
-    "baseUrl": "./",
-    "incremental": true,
-    "skipLibCheck": true,
-    "strictNullChecks": false,
-    "noImplicitAny": false,
-    "strictBindCallApply": false,
-    "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false,
-    "paths": {
-      "_libs/common": [
-        "libs/common/src"
-      ],
-      "_libs/common/*": [
-        "libs/common/src/*"
-      ],
-      "_libs/redis": [
-        "libs/redis/src"
-      ],
-      "_libs/redis/*": [
-        "libs/redis/src/*"
-      ],
-      "_libs/database": [
-        "libs/database/src"
-      ],
-      "_libs/database/*": [
-        "libs/database/src/*"
-      ],
-      "_libs/transporter": [
-        "libs/transporter/src"
-      ],
-      "_libs/transporter/*": [
-        "libs/transporter/src/*"
-      ],
-      "_libs/assets": [
-        "libs/assets/src"
-      ],
-      "_libs/assets/*": [
-        "libs/assets/src/*"
-      ]
-    }
-  },
-  "include": [
-    "apps/**/*.ts",
-    "libs/**/*.ts",
-    "assets/**/*.ts",
-    ".eslintrc.js"
-  ],
-  "exclude": [
-    "dist/"
-  ]
+    "compilerOptions": {
+        "module": "commonjs",
+        "declaration": true,
+        "removeComments": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
+        "target": "es2017",
+        "sourceMap": true,
+        "outDir": "./dist",
+        "baseUrl": "./",
+        "incremental": true,
+        "skipLibCheck": true,
+        "strictNullChecks": false,
+        "noImplicitAny": false,
+        "strictBindCallApply": false,
+        "forceConsistentCasingInFileNames": false,
+        "noFallthroughCasesInSwitch": false,
+        "paths": {
+            "_libs/common": ["libs/common/src"],
+            "_libs/common/*": ["libs/common/src/*"],
+            "_libs/redis": ["libs/redis/src"],
+            "_libs/redis/*": ["libs/redis/src/*"],
+            "_libs/database": ["libs/database/src"],
+            "_libs/database/*": ["libs/database/src/*"],
+            "_libs/transporter": ["libs/transporter/src"],
+            "_libs/transporter/*": ["libs/transporter/src/*"],
+            "_libs/assets": ["libs/assets/src"],
+            "_libs/assets/*": ["libs/assets/src/*"]
+        }
+    },
+    "include": ["apps/**/*.ts", "libs/**/*.ts", "assets/**/*.ts", ".eslintrc.cjs"],
+    "exclude": ["dist/"]
 }

@@ -3,8 +3,8 @@ import { ApiCustomerController } from './api-customer.controller'
 import { ApiCustomerService } from './api-customer.service'
 
 @Module({
-	imports: [],
-	controllers: [ApiCustomerController],
-	providers: [ApiCustomerService],
+    imports: [],
+    controllers: [ApiCustomerController],
+    providers: [ApiCustomerService],
 })
-export class ApiCustomerModule { }
+export class ApiCustomerModule {}

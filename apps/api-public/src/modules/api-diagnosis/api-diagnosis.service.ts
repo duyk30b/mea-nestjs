@@ -7,27 +7,27 @@
 
 // @Injectable()
 // export class ApiDiagnosisService {
-// 	constructor(
-// 		private readonly diagnosisService: DiagnosisService,
-// 		private readonly arrivalService: ArrivalService
-// 	) { }
+//     constructor(
+//         private readonly diagnosisService: DiagnosisService,
+//         private readonly arrivalService: ArrivalService
+//     ) { }
 
-// 	async createOne(oid: number, body: CreateDiagnosisBody) {
-// 		const arrival = await this.arrivalService.findOne({ id: body.arrivalId })
-// 		if (arrival.diagnosisId) throw new BusinessException(ErrorMessage.Diagnosis.ConflictArrival)
+//     async createOne(oid: number, body: CreateDiagnosisBody) {
+//         const arrival = await this.arrivalService.findOne({ id: body.arrivalId })
+//         if (arrival.diagnosisId) throw new BusinessException(ErrorMessage.Diagnosis.ConflictArrival)
 
-// 		const diagnosis = await this.diagnosisService.insertOne({ oid, ...body })
-// 		await this.arrivalService.update(
-// 			{ oid, id: body.arrivalId },
-// 			{ diagnosisId: diagnosis.id }
-// 		)
-// 		return diagnosis
-// 	}
+//         const diagnosis = await this.diagnosisService.insertOne({ oid, ...body })
+//         await this.arrivalService.update(
+//             { oid, id: body.arrivalId },
+//             { diagnosisId: diagnosis.id }
+//         )
+//         return diagnosis
+//     }
 
-// 	async updateOne(oid: number, id: number, body: UpdateDiagnosisBody) {
-// 		const { affected } = await this.diagnosisService.update({ id, oid }, body)
-// 		if (affected !== 1) throw new Error(ErrorMessage.Database.UpdateFailed)
+//     async updateOne(oid: number, id: number, body: UpdateDiagnosisBody) {
+//         const { affected } = await this.diagnosisService.update({ id, oid }, body)
+//         if (affected !== 1) throw new Error(ErrorMessage.Database.UpdateFailed)
 
-// 		return await this.diagnosisService.findOne({ id })
-// 	}
+//         return await this.diagnosisService.findOne({ id })
+//     }
 // }

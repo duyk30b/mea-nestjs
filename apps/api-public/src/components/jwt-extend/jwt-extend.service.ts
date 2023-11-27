@@ -2,92 +2,100 @@ import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { BusinessException } from '_libs/common/exception-filter/business-exception.filter'
-import Employee from '_libs/database/entities/employee.entity'
+import Employee from '_libs/database/entities/user.entity'
 import { IRefreshTokenPayload } from '../../common/constants'
 import { TExternal } from '../../common/request-external'
 import { JwtConfig } from '../../environments'
 
 @Injectable()
 export class JwtExtendService {
-	constructor(
-		@Inject(JwtConfig.KEY) private jwtConfig: ConfigType<typeof JwtConfig>,
-		private readonly jwtService: JwtService
-	) { }
+    constructor(
+        @Inject(JwtConfig.KEY) private jwtConfig: ConfigType<typeof JwtConfig>,
+        private readonly jwtService: JwtService
+    ) {}
 
-	createAccessToken(user: Employee, ip: string): { token: string, exp: number } {
-		const userPayload: TExternal = {
-			ip,
-			orgPhone: user.organization.phone,
-			oid: user.organization.id,
-			uid: user.id,
-			username: user.username,
-			role: user.role,
-		}
-		const exp = Date.now() + this.jwtConfig.accessTime
+    createAccessToken(user: Employee, ip: string): { token: string; exp: number } {
+        const userPayload: TExternal = {
+            ip,
+            orgPhone: user.organization.phone,
+            oid: user.organization.id,
+            uid: user.id,
+            username: user.username,
+            role: user.role,
+        }
+        const exp = Date.now() + this.jwtConfig.accessTime
 
-		const token = this.jwtService.sign({
-			exp: Math.floor(exp / 1000),
-			data: userPayload,
-		}, { secret: this.jwtConfig.accessKey })
-		return { token, exp }
-	}
+        const token = this.jwtService.sign(
+            {
+                exp: Math.floor(exp / 1000),
+                data: userPayload,
+            },
+            { secret: this.jwtConfig.accessKey }
+        )
+        return { token, exp }
+    }
 
-	createRefreshToken(user: Employee, ip: string): { token: string, exp: number } {
-		const userPayload: IRefreshTokenPayload = {
-			ip,
-			oid: user.organization.id,
-			uid: user.id,
-		}
-		const exp = Date.now() + this.jwtConfig.refreshTime
+    createRefreshToken(user: Employee, ip: string): { token: string; exp: number } {
+        const userPayload: IRefreshTokenPayload = {
+            ip,
+            oid: user.organization.id,
+            uid: user.id,
+        }
+        const exp = Date.now() + this.jwtConfig.refreshTime
 
-		const token = this.jwtService.sign({
-			exp: Math.floor(exp / 1000),
-			data: userPayload,
-		}, { secret: this.jwtConfig.refreshKey })
-		return { token, exp }
-	}
+        const token = this.jwtService.sign(
+            {
+                exp: Math.floor(exp / 1000),
+                data: userPayload,
+            },
+            { secret: this.jwtConfig.refreshKey }
+        )
+        return { token, exp }
+    }
 
-	createTokenFromUser(user: Employee, ip: string) {
-		const accessToken = this.createAccessToken(user, ip)
-		const refreshToken = this.createRefreshToken(user, ip)
-		return { accessToken, refreshToken }
-	}
+    createTokenFromUser(user: Employee, ip: string) {
+        const accessToken = this.createAccessToken(user, ip)
+        const refreshToken = this.createRefreshToken(user, ip)
+        return { accessToken, refreshToken }
+    }
 
-	verifyAccessToken(accessToken: string, ip: string): TExternal {
-		try {
-			const jwtPayload = this.jwtService.verify(accessToken, { secret: this.jwtConfig.accessKey })
+    verifyAccessToken(accessToken: string, ip: string): TExternal {
+        try {
+            const jwtPayload = this.jwtService.verify(accessToken, {
+                secret: this.jwtConfig.accessKey,
+            })
 
-			const data = jwtPayload.data as TExternal
-			// if (data.ip !== ip) throw new Error(ErrorMessage.Token.WrongIp) // accessToken allow change ip
+            const data = jwtPayload.data as TExternal
+            // if (data.ip !== ip) throw new Error(ErrorMessage.Token.WrongIp) // accessToken allow change ip
 
-			return data
-		} catch (error) {
-			if (error.name === 'TokenExpiredError') {
-				throw new BusinessException('common.Token.Expired', HttpStatus.UNAUTHORIZED)
-			}
-			else if (error.name === 'JsonWebTokenError') {
-				throw new BusinessException('common.Token.Invalid', HttpStatus.UNAUTHORIZED)
-			}
-			throw error
-		}
-	}
+            return data
+        } catch (error) {
+            if (error.name === 'TokenExpiredError') {
+                throw new BusinessException('common.Token.Expired', HttpStatus.UNAUTHORIZED)
+            } else if (error.name === 'JsonWebTokenError') {
+                throw new BusinessException('common.Token.Invalid', HttpStatus.UNAUTHORIZED)
+            }
+            throw error
+        }
+    }
 
-	verifyRefreshToken(refreshToken: string, ip: string): { oid: number, uid: number } {
-		try {
-			const jwtPayload = this.jwtService.verify(refreshToken, { secret: this.jwtConfig.refreshKey })
+    verifyRefreshToken(refreshToken: string, ip: string): { oid: number; uid: number } {
+        try {
+            const jwtPayload = this.jwtService.verify(refreshToken, {
+                secret: this.jwtConfig.refreshKey,
+            })
 
-			const data = jwtPayload.data as IRefreshTokenPayload
-			// if (data.ip !== ip) throw new Error(ErrorMessage.Token.WrongIp)
+            const data = jwtPayload.data as IRefreshTokenPayload
+            // if (data.ip !== ip) throw new Error(ErrorMessage.Token.WrongIp)
 
-			return data
-		} catch (error) {
-			if (error.name === 'TokenExpiredError') {
-				throw new BusinessException('common.Token.Expired', HttpStatus.UNAUTHORIZED)
-			}
-			else if (error.name === 'JsonWebTokenError') {
-				throw new BusinessException('common.Token.Invalid', HttpStatus.UNAUTHORIZED)
-			}
-			throw error
-		}
-	}
+            return data
+        } catch (error) {
+            if (error.name === 'TokenExpiredError') {
+                throw new BusinessException('common.Token.Expired', HttpStatus.UNAUTHORIZED)
+            } else if (error.name === 'JsonWebTokenError') {
+                throw new BusinessException('common.Token.Invalid', HttpStatus.UNAUTHORIZED)
+            }
+            throw error
+        }
+    }
 }

@@ -5,8 +5,8 @@
 // import { ApiDiagnosisService } from './api-arrival-diagnosis.service'
 
 // @Module({
-// 	imports: [DiagnosisModule, ArrivalModule],
-// 	controllers: [ApiDiagnosisController],
-// 	providers: [ApiDiagnosisService],
+//     imports: [DiagnosisModule, ArrivalModule],
+//     controllers: [ApiDiagnosisController],
+//     providers: [ApiDiagnosisService],
 // })
 // export class ApiDiagnosisModule { }

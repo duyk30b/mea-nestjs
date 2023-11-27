@@ -3,8 +3,8 @@ import { ApiOrganizationController } from './api-organization.controller'
 import { ApiOrganizationService } from './api-organization.service'
 
 @Module({
-	imports: [],
-	controllers: [ApiOrganizationController],
-	providers: [ApiOrganizationService],
+    imports: [],
+    controllers: [ApiOrganizationController],
+    providers: [ApiOrganizationService],
 })
-export class ApiOrganizationModule { }
+export class ApiOrganizationModule {}

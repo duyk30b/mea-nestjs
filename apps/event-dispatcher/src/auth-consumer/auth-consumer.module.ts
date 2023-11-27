@@ -5,11 +5,8 @@ import { AuthConsumerController } from './auth-consumer.controller'
 import { AuthConsumerService } from './auth-consumer.service'
 
 @Module({
-	imports: [
-		ConfigModule,
-		BullQueueModule.registerProducer(),
-	],
-	controllers: [AuthConsumerController],
-	providers: [AuthConsumerService],
+    imports: [ConfigModule, BullQueueModule.registerProducer()],
+    controllers: [AuthConsumerController],
+    providers: [AuthConsumerService],
 })
-export class AuthConsumerModule { }
+export class AuthConsumerModule {}

@@ -6,23 +6,23 @@ import { OrganizationUpdateBody } from './request/organization-update.body'
 
 @Injectable()
 export class ApiOrganizationService {
-	constructor(private organizationRepository: OrganizationRepository) { }
+    constructor(private organizationRepository: OrganizationRepository) {}
 
-	async findOne(id: number) {
-		return await this.organizationRepository.findOne(id)
-	}
+    async findOne(id: number) {
+        return await this.organizationRepository.findOne(id)
+    }
 
-	async updateOne(id: number, body: OrganizationUpdateBody) {
-		const { affected } = await this.organizationRepository.update(id, body)
-		if (affected !== 1) throw new Error('Database.UpdateFailed')
-		return await this.organizationRepository.findOne(id)
-	}
+    async updateOne(id: number, body: OrganizationUpdateBody) {
+        const { affected } = await this.organizationRepository.update(id, body)
+        if (affected !== 1) throw new Error('Database.UpdateFailed')
+        return await this.organizationRepository.findOne(id)
+    }
 
-	async getAllSettings(oid: number) {
-		return await this.organizationRepository.getAllSetting(oid)
-	}
+    async getAllSettings(oid: number) {
+        return await this.organizationRepository.getAllSetting(oid)
+    }
 
-	async upsertSetting(oid: number, type: OrganizationSettingType, body: OrganizationSettingUpdateBody) {
-		return await this.organizationRepository.upsertSetting(oid, type, body.data)
-	}
+    async upsertSetting(oid: number, type: OrganizationSettingType, body: OrganizationSettingUpdateBody) {
+        return await this.organizationRepository.upsertSetting(oid, type, body.data)
+    }
 }

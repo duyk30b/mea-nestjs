@@ -1,15 +1,15 @@
 import { ComparisonType } from '_libs/database/common/base.dto'
 
 export class EmployeeCondition {
-	oid?: number
-	id?: number
+    oid?: number
+    id?: number
 
-	ids?: number[]
+    ids?: number[]
 
-	fullName?: string | [ComparisonType, string]
-	phone?: string | [ComparisonType, string]
+    fullName?: string | [ComparisonType, string]
+    phone?: string | [ComparisonType, string]
 }
 
 export type EmployeeOrder = {
-	[P in 'id']?: 'ASC' | 'DESC'
+    [P in 'id']?: 'ASC' | 'DESC'
 }

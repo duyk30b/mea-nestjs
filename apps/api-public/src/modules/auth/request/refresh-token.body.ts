@@ -3,8 +3,8 @@ import { Expose } from 'class-transformer'
 import { IsDefined } from 'class-validator'
 
 export class RefreshTokenBody {
-    @ApiProperty({ name: 'refresh_token' })
-    @Expose({ name: 'refresh_token' })
+    @ApiProperty({ name: 'refreshToken' })
+    @Expose()
     @IsDefined()
     refreshToken: string
 }

@@ -3,9 +3,9 @@ import { ApiUserController } from './api-user.controller'
 import { ApiUserService } from './api-user.service'
 
 @Module({
-	imports: [],
-	controllers: [ApiUserController],
-	providers: [ApiUserService],
-	exports: [],
+    imports: [],
+    controllers: [ApiUserController],
+    providers: [ApiUserService],
+    exports: [],
 })
-export class ApiUserModule { }
+export class ApiUserModule {}

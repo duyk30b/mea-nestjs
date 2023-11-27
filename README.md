@@ -19,7 +19,7 @@
 1. Initialize database
 - Run Migration: `npm run migration:run`
 - Fake database: `npm run seed:data`
-- When change entity, with WINDOW create migration: `npm run migration:generate --name=change-db` (recommend) or `npm run migration:create --name=change-db`
+- When change entity, with WINDOW create migration: `npm run migration:generate --name=version_2_0` (recommend) or `npm run migration:create --name=change-db`
 - When revert migration: `npm run migration:revert`
 
 2. When build project: `npm run build api-public && npm run build assets`
@@ -70,3 +70,21 @@ docker compose -f docker.nginx.yml up -d
 - Create new app: `nest generate app my-app`
 - Create new library: `nest g library my-library`
 - Create new module: `nest g resource modules/my-module`
+
+## New Server CentOS 7
+1. Change password root: `sudo passwd root`
+2. Install Git and Pull Repository
+- Install Git: `yum install git -y`
+- Install SSH:
+ + `ls -al ~/.ssh`
+ + `ssh-keygen -t ecdsa -b 521 -C "duy@example.com"`
+ + `eval "$(ssh-agent -s)"`
+ + `cat ~/.ssh/id_ecdsa.pub`  ==> Copy and Insert to Github
+ + `ssh -T git@github.com`
+ + `git clone git@github.com:duyk30b/mh-nestjs.git`
+
+3. Install Docker
+4. Run docker-compose DB and Restore DB
+5. Run docker-compose app
+6. Setup SSL
+7. Run nginx

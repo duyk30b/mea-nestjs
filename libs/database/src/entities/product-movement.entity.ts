@@ -1,75 +1,86 @@
-import { Expose } from 'class-transformer'
+import { Expose, Type } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { ProductMovementType } from '../common/variable'
 import Invoice from './invoice.entity'
 import ProductBatch from './product-batch.entity'
 import Receipt from './receipt.entity'
 
-@Index(['oid', 'productId', 'createTime'])
-@Index(['oid', 'productBatchId', 'createTime'])
-@Entity('product_movement')
+export enum ProductMovementType {
+    Receipt = 1,
+    Invoice = 2,
+}
+
+@Index('IDX_ProductMovement__oid_productId_createTime', ['oid', 'productId', 'createTime'])
+@Index('IDX_ProductMovement__oid_productBatchId_createTime', ['oid', 'productBatchId', 'createTime'])
+@Entity('ProductMovement')
 export default class ProductMovement extends BaseEntity {
-	@Column({ name: 'product_id' })
-	@Expose({ name: 'product_id' })
-	productId: number
+    @Column()
+    @Expose()
+    productId: number
 
-	@Column({ name: 'product_batch_id' })
-	@Expose({ name: 'product_batch_id' })
-	productBatchId: number
+    @Column()
+    @Expose()
+    productBatchId: number
 
-	@Column({ name: 'reference_id' })                      // ID invoice hoặc ID receipt
-	@Expose({ name: 'reference_id' })
-	referenceId: number
+    @Column() // ID invoice hoặc ID receipt
+    @Expose()
+    referenceId: number
 
-	@Column({ name: 'type', type: 'tinyint' })
-	@Expose({ name: 'type' })
-	type: ProductMovementType
+    @Column({ type: 'smallint' })
+    @Expose()
+    type: ProductMovementType
 
-	@Column({ name: 'is_refund', type: 'boolean', default: false })
-	@Expose({ name: 'is_refund' })
-	isRefund: boolean
+    @Column({ type: 'boolean', default: false })
+    @Expose()
+    isRefund: boolean
 
-	@Column({ name: 'open_quantity' })
-	@Expose({ name: 'open_quantity' })
-	openQuantity: number                                  // Số lượng ban đầu
+    @Column()
+    @Expose()
+    openQuantity: number // Số lượng ban đầu
 
-	@Column({ name: 'number' })
-	@Expose({ name: 'number' })
-	number: number                                        // Số lượng +/-
+    @Column()
+    @Expose()
+    number: number // Số lượng +/-
 
-	@Column({ name: 'close_quantity' })
-	@Expose({ name: 'close_quantity' })
-	closeQuantity: number                                 // Số lượng sau thay đổi
+    @Column()
+    @Expose()
+    closeQuantity: number // Số lượng sau thay đổi
 
-	@Column({ name: 'price', default: 0 })
-	@Expose({ name: 'price' })
-	price: number                                        // Giá
+    @Column({
+        type: 'bigint',
+        default: 0,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    })
+    @Expose()
+    price: number // Giá
 
-	@Column({ name: 'total_money', default: 0 })
-	@Expose({ name: 'total_money' })
-	totalMoney: number                                   // Tổng tiền
+    @Column({
+        type: 'bigint',
+        default: 0,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    })
+    @Expose()
+    totalMoney: number // Tổng tiền
 
-	@Column({
-		name: 'create_time',
-		type: 'bigint',
-		transformer: { to: (value) => value, from: (value) => Number(value) },
-	})
-	@Expose({ name: 'create_time' })
-	createTime: number
+    @Column({
+        type: 'bigint',
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    })
+    @Expose()
+    createTime: number
 
-	@Expose({ name: 'product_batch' })
-	@ManyToOne((type) => ProductBatch, { createForeignKeyConstraints: false })
-	@JoinColumn({ name: 'product_batch_id', referencedColumnName: 'id' })
-	productBatch: ProductBatch
+    @Expose()
+    @ManyToOne((type) => ProductBatch, { createForeignKeyConstraints: false })
+    @JoinColumn({ name: 'productBatchId', referencedColumnName: 'id' })
+    productBatch: ProductBatch
 
-	@Expose({ name: 'invoice' })
-	@ManyToOne((type) => Invoice, { createForeignKeyConstraints: false })
-	@JoinColumn({ name: 'reference_id', referencedColumnName: 'id' })
-	invoice: Invoice
+    @Expose()
+    @ManyToOne((type) => Invoice, { createForeignKeyConstraints: false })
+    @JoinColumn({ name: 'referenceId', referencedColumnName: 'id' })
+    invoice: Invoice
 
-	@Expose({ name: 'receipt' })
-	@ManyToOne((type) => Receipt, { createForeignKeyConstraints: false })
-	@JoinColumn({ name: 'reference_id', referencedColumnName: 'id' })
-	receipt: Receipt
+    @Expose()
+    @ManyToOne((type) => Receipt, { createForeignKeyConstraints: false })
+    @JoinColumn({ name: 'referenceId', referencedColumnName: 'id' })
+    receipt: Receipt
 }

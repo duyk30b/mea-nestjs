@@ -1,61 +1,59 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
-import { SortQuery } from 'apps/api-public/src/common/pagination.query'
+import { transformComparisonQuery } from '_libs/common/transform-validate/class-transform.custom'
+import { ComparisonType } from '_libs/database/common/base.dto'
+import { SortQuery } from 'apps/api-public/src/common/query'
 import { Expose, Transform, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsNumber } from 'class-validator'
+import { IsArray, IsBoolean, IsIn, IsNumber } from 'class-validator'
 
 export class ProductBatchFilterQuery {
-	@ApiPropertyOptional({ name: 'filter[product_id]' })
-	@Expose({ name: 'product_id' })
-	@Type(() => Number)
-	@IsNumber()
-	productId: number
+    @ApiPropertyOptional({ name: 'filter[productId]' })
+    @Expose()
+    @Type(() => Number)
+    @IsNumber()
+    productId: number
 
-	@ApiPropertyOptional({ name: 'filter[quantity_zero]' })
-	@Expose({ name: 'quantity_zero' })
-	@Transform(({ value }) => {
-		if (['1', 'true'].includes(value)) return true
-		if (['0', 'false'].includes(value)) return false
-		return undefined
-	})
-	@IsBoolean()
-	quantityZero: boolean
+    @ApiPropertyOptional({ name: 'filter[quantity]', type: 'number', example: '["!=","0"]' })
+    @Expose()
+    @Transform(({ value }) => transformComparisonQuery(value, 'Number'))
+    @IsArray({ message: '$property validate failed: Example: ["!=","0"]' })
+    quantity: [ComparisonType, number]
 
-	@ApiPropertyOptional({ name: 'filter[overdue]' })
-	@Expose({ name: 'overdue' })
-	@Transform(({ value }) => {
-		if (['1', 'true'].includes(value)) return true
-		if (['0', 'false'].includes(value)) return false
-		return undefined
-	})
-	@IsBoolean()
-	overdue: boolean
+    @ApiPropertyOptional({ name: 'filter[isActive]' })
+    @Expose()
+    @Transform(({ value }) => {
+        if (['1', 'true'].includes(value)) return true
+        if (['0', 'false'].includes(value)) return false
+        return undefined
+    })
+    @IsBoolean()
+    isActive: boolean
 
-	@ApiPropertyOptional({ name: 'filter[is_active]' })
-	@Expose({ name: 'is_active' })
-	@Transform(({ value }) => {
-		if (['1', 'true'].includes(value)) return true
-		if (['0', 'false'].includes(value)) return false
-		return undefined
-	})
-	@IsBoolean()
-	isActive: boolean
+    @ApiPropertyOptional({
+        name: 'filter[expiryDate]',
+        type: 'string',
+        example: '[">","2023-11-12T19:12:37.355Z"]',
+    })
+    @Expose()
+    @Transform(({ value }) => transformComparisonQuery(value, 'Date'))
+    @IsArray({ message: '$property validate failed: Example: [">","2023-11-12T19:12:37.355Z"]' })
+    expiryDate: [ComparisonType, Date]
 }
 
 export class ProductBatchRelationQuery {
-	@ApiPropertyOptional({ name: 'relation[product]' })
-	@Expose({ name: 'product' })
-	@Transform(({ value }) => {
-		if (['1', 'true'].includes(value)) return true
-		if (['0', 'false'].includes(value)) return false
-		return undefined
-	})
-	@IsBoolean()
-	product: boolean
+    @ApiPropertyOptional({ name: 'relation[product]' })
+    @Expose()
+    @Transform(({ value }) => {
+        if (['1', 'true'].includes(value)) return true
+        if (['0', 'false'].includes(value)) return false
+        return undefined
+    })
+    @IsBoolean()
+    product: boolean
 }
 
 export class ProductBatchSortQuery extends SortQuery {
-	@ApiPropertyOptional({ name: 'sort[expiry_date]', enum: ['ASC', 'DESC'] })
-	@Expose({ name: 'expiry_date' })
-	@IsIn(['ASC', 'DESC'])
-	expiryDate: 'ASC' | 'DESC'
+    @ApiPropertyOptional({ name: 'sort[expiryDate]', enum: ['ASC', 'DESC'] })
+    @Expose()
+    @IsIn(['ASC', 'DESC'])
+    expiryDate: 'ASC' | 'DESC'
 }

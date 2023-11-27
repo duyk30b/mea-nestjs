@@ -8,10 +8,10 @@ import { ProductMovementPaginationQuery } from './request'
 @ApiBearerAuth('access-token')
 @Controller('product-movement')
 export class ApiProductMovementController {
-	constructor(private readonly apiProductMovementService: ApiProductMovementService) { }
+    constructor(private readonly apiProductMovementService: ApiProductMovementService) {}
 
-	@Get('pagination')
-	pagination(@External() { oid }: TExternal, @Query() query: ProductMovementPaginationQuery) {
-		return this.apiProductMovementService.pagination(oid, query)
-	}
+    @Get('pagination')
+    pagination(@External() { oid }: TExternal, @Query() query: ProductMovementPaginationQuery) {
+        return this.apiProductMovementService.pagination(oid, query)
+    }
 }

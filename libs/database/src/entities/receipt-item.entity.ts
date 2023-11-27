@@ -5,37 +5,37 @@ import { UnitType } from '../common/variable'
 import ProductBatch from './product-batch.entity'
 import Receipt from './receipt.entity'
 
-@Entity('receipt_item')
-@Index(['oid', 'productBatchId'])
-@Index(['oid', 'receiptId'])
+@Entity('ReceiptItem')
+@Index('IDX_ReceiptItem__oid_productBatchId', ['oid', 'productBatchId'])
+@Index('IDX_ReceiptItem__oid_receiptId', ['oid', 'receiptId'])
 export default class ReceiptItem extends BaseEntity {
-	@Column({ name: 'receipt_id' })
-	@Expose({ name: 'receipt_id' })
-	receiptId: number
+    @Column()
+    @Expose()
+    receiptId: number
 
-	@Column({ name: 'distributor_id' })
-	@Expose({ name: 'distributor_id' })
-	distributorId: number
+    @Column()
+    @Expose()
+    distributorId: number
 
-	@Column({ name: 'product_batch_id' })
-	@Expose({ name: 'product_batch_id' })
-	productBatchId: number
+    @Column()
+    @Expose()
+    productBatchId: number
 
-	@Column({ name: 'unit', type: 'simple-json', default: '{"name":"","rate":1}' })
-	@Expose({ name: 'unit' })
-	unit: UnitType
+    @Column({ name: 'unit', type: 'simple-json', default: '{"name":"","rate":1}' })
+    @Expose()
+    unit: UnitType
 
-	@Column({ name: 'quantity' })
-	@Expose({ name: 'quantity' })
-	quantity: number
+    @Column()
+    @Expose()
+    quantity: number
 
-	@Expose({ name: 'receipt' })
-	@ManyToOne((type) => Receipt, { createForeignKeyConstraints: false })
-	@JoinColumn({ name: 'receipt_id', referencedColumnName: 'id' })
-	receipt: Receipt
+    @Expose()
+    @ManyToOne((type) => Receipt, { createForeignKeyConstraints: false })
+    @JoinColumn({ name: 'receiptId', referencedColumnName: 'id' })
+    receipt: Receipt
 
-	@Expose({ name: 'product_batch' })
-	@ManyToOne((type) => ProductBatch, { createForeignKeyConstraints: false })
-	@JoinColumn({ name: 'product_batch_id', referencedColumnName: 'id' })
-	productBatch: ProductBatch
+    @Expose()
+    @ManyToOne((type) => ProductBatch, { createForeignKeyConstraints: false })
+    @JoinColumn({ name: 'productBatchId', referencedColumnName: 'id' })
+    productBatch: ProductBatch
 }

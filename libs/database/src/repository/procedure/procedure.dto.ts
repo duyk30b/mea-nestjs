@@ -1,14 +1,14 @@
 export interface ProcedureCondition {
-	id?: number
-	oid?: number
-	group?: string
-	isActive?: boolean
+    id?: number
+    oid?: number
+    group?: string
+    isActive?: boolean
 
-	ids?: number[]
+    ids?: number[]
 
-	searchText?: string
+    searchText?: string
 }
 
 export type ProcedureOrder = {
-	[P in 'id']?: 'ASC' | 'DESC'
+    [P in 'id']?: 'ASC' | 'DESC'
 }

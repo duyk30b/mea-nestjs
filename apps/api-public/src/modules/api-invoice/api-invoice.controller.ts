@@ -4,97 +4,110 @@ import { External, TExternal } from '../../common/request-external'
 import { IdParam } from '../../common/swagger'
 import { ApiInvoiceService } from './api-invoice.service'
 import {
-	InvoiceDraftCreateBody, InvoiceDraftUpdateBody,
-	InvoiceGetManyQuery, InvoiceGetOneQuery,
-	InvoicePaginationQuery, InvoicePaymentBody,
+    InvoiceDraftCreateBody,
+    InvoiceDraftUpdateBody,
+    InvoiceGetManyQuery,
+    InvoiceGetOneQuery,
+    InvoicePaginationQuery,
+    InvoicePaymentBody,
+    InvoiceSumDebtQuery,
 } from './request'
 
 @ApiTags('Invoice')
 @ApiBearerAuth('access-token')
 @Controller('invoice')
 export class ApiInvoiceController {
-	constructor(private readonly apiInvoiceService: ApiInvoiceService) { }
+    constructor(private readonly apiInvoiceService: ApiInvoiceService) {}
 
-	@Get('pagination')
-	async pagination(@External() { oid }: TExternal, @Query() query: InvoicePaginationQuery) {
-		return await this.apiInvoiceService.pagination(oid, query)
-	}
+    @Get('pagination')
+    async pagination(@External() { oid }: TExternal, @Query() query: InvoicePaginationQuery) {
+        return await this.apiInvoiceService.pagination(oid, query)
+    }
 
-	@Get('list')
-	async list(@External() { oid }: TExternal, @Query() query: InvoiceGetManyQuery) {
-		return await this.apiInvoiceService.getMany(oid, query)
-	}
+    @Get('list')
+    async list(@External() { oid }: TExternal, @Query() query: InvoiceGetManyQuery) {
+        return await this.apiInvoiceService.getMany(oid, query)
+    }
 
-	@Get('detail/:id')
-	async detail(@External() { oid }: TExternal, @Param() { id }: IdParam, @Query() query: InvoiceGetOneQuery) {
-		return await this.apiInvoiceService.getOne(oid, id, query)
-	}
+    @Get('detail/:id')
+    async detail(@External() { oid }: TExternal, @Param() { id }: IdParam, @Query() query: InvoiceGetOneQuery) {
+        return await this.apiInvoiceService.getOne(oid, id, query)
+    }
 
-	@Post('create-draft')
-	async createDraft(@External() { oid }: TExternal, @Body() body: InvoiceDraftCreateBody) {
-		return await this.apiInvoiceService.createDraft({ oid, body })
-	}
+    @Post('create-draft')
+    async createDraft(@External() { oid }: TExternal, @Body() body: InvoiceDraftCreateBody) {
+        return await this.apiInvoiceService.createDraft({ oid, body })
+    }
 
-	@Patch('update-draft/:id')
-	async updateDraft(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: InvoiceDraftUpdateBody) {
-		return await this.apiInvoiceService.updateDraft({
-			oid,
-			invoiceId: id,
-			body,
-		})
-	}
+    @Patch('update-draft/:id')
+    async updateDraft(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: InvoiceDraftUpdateBody) {
+        return await this.apiInvoiceService.updateDraft({
+            oid,
+            invoiceId: id,
+            body,
+        })
+    }
 
-	@Delete('destroy-draft/:id')
-	async destroyDraft(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-		return await this.apiInvoiceService.destroyDraft({
-			oid,
-			invoiceId: id,
-		})
-	}
+    @Delete('destroy-draft/:id')
+    async destroyDraft(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+        return await this.apiInvoiceService.destroyDraft({
+            oid,
+            invoiceId: id,
+        })
+    }
 
-	@Post('prepayment/:id')
-	async prepayment(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: InvoicePaymentBody) {
-		return await this.apiInvoiceService.prepayment({
-			oid,
-			invoiceId: id,
-			money: body.money,
-		})
-	}
+    @Post('prepayment/:id')
+    async prepayment(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: InvoicePaymentBody) {
+        return await this.apiInvoiceService.prepayment({
+            oid,
+            invoiceId: id,
+            money: body.money,
+        })
+    }
 
-	@Post('start-ship-and-payment/:id')
-	async startShipAndPayment(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: InvoicePaymentBody) {
-		return await this.apiInvoiceService.startShipAndPayment({
-			oid,
-			invoiceId: id,
-			time: Date.now(),
-			money: body.money,
-		})
-	}
+    @Post('start-ship-and-payment/:id')
+    async startShipAndPayment(
+        @External() { oid }: TExternal,
+        @Param() { id }: IdParam,
+        @Body() body: InvoicePaymentBody
+    ) {
+        return await this.apiInvoiceService.startShipAndPayment({
+            oid,
+            invoiceId: id,
+            time: Date.now(),
+            money: body.money,
+        })
+    }
 
-	@Post('pay-debt/:id')
-	async payDebt(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: InvoicePaymentBody) {
-		return await this.apiInvoiceService.payDebt({
-			oid,
-			invoiceId: id,
-			money: body.money,
-			time: Date.now(),
-		})
-	}
+    @Post('pay-debt/:id')
+    async payDebt(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: InvoicePaymentBody) {
+        return await this.apiInvoiceService.payDebt({
+            oid,
+            invoiceId: id,
+            money: body.money,
+            time: Date.now(),
+        })
+    }
 
-	@Post('start-refund/:id')
-	async startRefund(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-		return await this.apiInvoiceService.startRefund({
-			oid,
-			invoiceId: id,
-			time: Date.now(),
-		})
-	}
+    @Post('start-refund/:id')
+    async startRefund(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+        return await this.apiInvoiceService.startRefund({
+            oid,
+            invoiceId: id,
+            time: Date.now(),
+        })
+    }
 
-	@Delete('soft-delete-refund/:id')
-	async softDeleteRefund(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-		return await this.apiInvoiceService.softDeleteRefund({
-			oid,
-			invoiceId: id,
-		})
-	}
+    @Delete('soft-delete-refund/:id')
+    async softDeleteRefund(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+        return await this.apiInvoiceService.softDeleteRefund({
+            oid,
+            invoiceId: id,
+        })
+    }
+
+    @Get('sum-debt')
+    async sumDebt(@External() { oid }: TExternal, @Query() query: InvoiceSumDebtQuery) {
+        return await this.apiInvoiceService.sumDebt(oid, query)
+    }
 }

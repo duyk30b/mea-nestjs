@@ -1,52 +1,54 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
 
-@Entity('organization')
-@Index(['phone'], { unique: true })
-@Index(['email'], { unique: true })
+@Entity('Organization')
+@Index('IDX_Organization__phone', ['phone'], { unique: true })
+@Index('IDX_Organization__email', ['email'], { unique: true })
 export default class Organization {
-	@PrimaryGeneratedColumn({ name: 'id' })
-	@Expose({ name: 'id' })
-	id: number
+    @PrimaryGeneratedColumn()
+    @Expose()
+    id: number
 
-	@Column({ name: 'phone', type: 'char', length: 10, nullable: false })
-	@Expose({ name: 'phone' })
-	phone: string
+    @Column({ type: 'char', length: 10, nullable: false })
+    @Expose()
+    phone: string
 
-	@Column({ name: 'email', nullable: false })
-	@Expose({ name: 'email' })
-	email: string
+    @Column({ nullable: false })
+    @Expose()
+    email: string
 
-	@Column({ name: 'level', type: 'tinyint', default: 0 })
-	@Expose({ name: 'level' })
-	level: number
+    @Column({ type: 'smallint', default: 0 })
+    @Expose()
+    level: number
 
-	@Column({ name: 'organization_name', nullable: true })
-	@Expose({ name: 'organization_name' })
-	organizationName: string
+    @Column({ nullable: true })
+    @Expose()
+    organizationName: string
 
-	@Column({ name: 'address_province', nullable: true })
-	@Expose({ name: 'address_province' })
-	addressProvince: string
+    @Column({ nullable: true })
+    @Expose()
+    addressProvince: string
 
-	@Column({ name: 'address_district', nullable: true })
-	@Expose({ name: 'address_district' })
-	addressDistrict: string
+    @Column({ nullable: true })
+    @Expose()
+    addressDistrict: string
 
-	@Column({ name: 'address_ward', nullable: true })
-	@Expose({ name: 'address_ward' })
-	addressWard: string
+    @Column({ nullable: true })
+    @Expose()
+    addressWard: string
 
-	@Column({ name: 'address_street', nullable: true })
-	@Expose({ name: 'address_street' })
-	addressStreet: string
+    @Column({ nullable: true })
+    @Expose()
+    addressStreet: string
 
-	@Column({
-		name: 'create_time',
-		type: 'bigint',
-		nullable: true,
-		transformer: { to: (value) => value, from: (value) => value == null ? value : Number(value) },
-	})
-	@Expose({ name: 'create_time' })
-	createTime: number // Giờ vào khám
+    @Column({
+        type: 'bigint',
+        nullable: true,
+        transformer: {
+            to: (value) => value,
+            from: (value) => (value == null ? value : Number(value)),
+        },
+    })
+    @Expose()
+    createTime: number // Giờ vào khám
 }

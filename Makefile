@@ -1,14 +1,19 @@
-init:
-	git fetch --all
-	git log --all --oneline --graph -10
-	git reset --hard origin/master
+init-db:
 	docker compose -f docker.db.yml up -d
-	docker compose -f docker-compose.production.yml --env-file .env.production up -d --build
 
 upgrade:
+	make backup-db
 	git fetch --all
 	git log --all --oneline --graph -10
 	git reset --hard origin/master
+	docker compose -f docker-compose.production.yml --env-file .env.production up -d --build
+	docker compose logs -f api-public
+
+hotfix:
+	make backup-db
+	git fetch --all
+	git log --all --oneline --graph -10
+	git reset --hard origin/hotfix
 	docker compose -f docker-compose.production.yml --env-file .env.production up -d --build
 	docker compose logs -f api-public
 
@@ -27,12 +32,13 @@ backup-db:
 	docker compose -f docker.db.yml exec mariadb sh -c '\
 		mkdir -p backup; \
 		chmod -R 777 /backup; \
-		mariadb-dump --user=medihome --password=Abc@12345 --lock-tables --all-databases > /backup/$$(date +%Y-%m-%d_%H-%M-%S).sql; \
+		mariadb-dump --user=medihome --password=Abc12345 --lock-tables --all-databases > /backup/$$(date +%Y-%m-%d_%H-%M-%S).sql; \
 		ls -la /backup; \
 	'
 
 restore-db:
 	docker compose -f docker.db.yml exec mariadb sh -c '\
 		ls -la /backup; \
-		mariadb --user=medihome --password=Abc@12345 medihome_sql < /restore/$$(ls -1 /restore); \
+		mariadb --user=medihome --password=Abc12345 medihome_sql < /restore/$$(ls -1 /restore); \
 	'
+		

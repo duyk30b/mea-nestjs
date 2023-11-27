@@ -9,15 +9,15 @@
 // @ApiBearerAuth('access-token')
 // @Controller('arrival-diagnosis')
 // export class ApiDiagnosisController {
-// 	constructor(private readonly apiDiagnosisService: ApiDiagnosisService) { }
+//     constructor(private readonly apiDiagnosisService: ApiDiagnosisService) { }
 
-// 	@Post('create')
-// 	async createOne(@External() { oid }: TExternal, @Body() body: CreateDiagnosisBody) {
-// 		return await this.apiDiagnosisService.createOne(oid, body)
-// 	}
+//     @Post('create')
+//     async createOne(@External() { oid }: TExternal, @Body() body: CreateDiagnosisBody) {
+//         return await this.apiDiagnosisService.createOne(oid, body)
+//     }
 
-// 	@Patch('update/:id')
-// 	async updateOne(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: UpdateDiagnosisBody) {
-// 		return await this.apiDiagnosisService.updateOne(oid, id, body)
-// 	}
+//     @Patch('update/:id')
+//     async updateOne(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: UpdateDiagnosisBody) {
+//         return await this.apiDiagnosisService.updateOne(oid, id, body)
+//     }
 // }

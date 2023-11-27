@@ -6,75 +6,75 @@ import Invoice from './invoice.entity'
 import Procedure from './procedure.entity'
 import ProductBatch from './product-batch.entity'
 
-@Entity('invoice_item')
-@Index(['oid', 'invoiceId'])
-@Index(['oid', 'customerId', 'type'])
-@Index(['oid', 'referenceId'])
+@Entity('InvoiceItem')
+@Index('IDX_InvoiceItem__invoiceId', ['oid', 'invoiceId'])
+@Index('IDX_InvoiceItem__customerId_type', ['oid', 'customerId', 'type'])
+@Index('IDX_InvoiceItem__referenceId', ['oid', 'referenceId'])
 export default class InvoiceItem extends BaseEntity {
-	@Column({ name: 'invoice_id' })                        // Hóa đơn
-	@Expose({ name: 'invoice_id' })
-	invoiceId: number
+    @Column() // Hóa đơn
+    @Expose()
+    invoiceId: number
 
-	@Column({ name: 'customer_id' })
-	@Expose({ name: 'customer_id' })
-	customerId: number
+    @Column()
+    @Expose()
+    customerId: number
 
-	@Column({ name: 'reference_id' })                      // ID product_batch hoặc id procedure
-	@Expose({ name: 'reference_id' })
-	referenceId: number
+    @Column() // ID product_batch hoặc id procedure
+    @Expose()
+    referenceId: number
 
-	@Column({ name: 'type', type: 'tinyint' })
-	@Expose({ name: 'type' })
-	type: InvoiceItemType
+    @Column({ type: 'smallint' })
+    @Expose()
+    type: InvoiceItemType
 
-	@Column({ name: 'unit', type: 'simple-json', default: '{"name":"","rate":1}' })
-	@Expose({ name: 'unit' })
-	unit: UnitType
+    @Column({ type: 'simple-json', default: '{"name":"","rate":1}' })
+    @Expose()
+    unit: UnitType
 
-	@Column({ name: 'cost_price', nullable: true })
-	@Expose({ name: 'cost_price' })
-	costPrice: number                                   // Giá cost
+    @Column({ type: 'bigint', nullable: true, transformer: { to: (value) => value, from: (value) => Number(value) } })
+    @Expose()
+    costPrice: number // Giá cost
 
-	@Column({ name: 'expected_price', nullable: true })
-	@Expose({ name: 'expected_price' })
-	expectedPrice: number                                // Giá dự kiến
+    @Column({ type: 'bigint', nullable: true, transformer: { to: (value) => value, from: (value) => Number(value) } })
+    @Expose()
+    expectedPrice: number // Giá dự kiến
 
-	@Column({ name: 'discount_money', default: 0 })
-	@Expose({ name: 'discount_money' })
-	discountMoney: number                                // tiền giảm giá
+    @Column({ type: 'bigint', default: 0, transformer: { to: (value) => value, from: (value) => Number(value) } })
+    @Expose()
+    discountMoney: number // tiền giảm giá
 
-	@Column({ name: 'discount_percent', default: 0 })
-	@Expose({ name: 'discount_percent' })
-	discountPercent: number                              // % giảm giá
+    @Column({ type: 'smallint', default: 0 })
+    @Expose()
+    discountPercent: number // % giảm giá
 
-	@Column({ name: 'discount_type', type: 'enum', enum: DiscountType, default: DiscountType.VND })
-	@Expose({ name: 'discount_type' })
-	discountType: DiscountType                           // Loại giảm giá
+    @Column({ type: 'enum', enum: DiscountType, default: DiscountType.VND })
+    @Expose()
+    discountType: DiscountType // Loại giảm giá
 
-	@Column({ name: 'actual_price' })
-	@Expose({ name: 'actual_price' })
-	actualPrice: number                                  // Giá thực tế
+    @Column({ type: 'bigint', transformer: { to: (value) => value, from: (value) => Number(value) } })
+    @Expose()
+    actualPrice: number // Giá thực tế
 
-	@Column({ name: 'quantity', default: 0 })
-	@Expose({ name: 'quantity' })
-	quantity: number
+    @Column({ default: 0 })
+    @Expose()
+    quantity: number
 
-	@Column({ name: 'hint_usage', nullable: true })
-	@Expose({ name: 'hint_usage' })
-	hintUsage: string
+    @Column({ nullable: true })
+    @Expose()
+    hintUsage: string
 
-	@Expose({ name: 'invoice' })
-	@ManyToOne((type) => Invoice, { createForeignKeyConstraints: false })
-	@JoinColumn({ name: 'invoice_id', referencedColumnName: 'id' })
-	invoice: Invoice
+    @Expose()
+    @ManyToOne((type) => Invoice, { createForeignKeyConstraints: false })
+    @JoinColumn({ name: 'invoiceId', referencedColumnName: 'id' })
+    invoice: Invoice
 
-	@Expose({ name: 'product_batch' })
-	@ManyToOne((type) => ProductBatch, { createForeignKeyConstraints: false })
-	@JoinColumn({ name: 'reference_id', referencedColumnName: 'id' })
-	productBatch: ProductBatch
+    @Expose()
+    @ManyToOne((type) => ProductBatch, { createForeignKeyConstraints: false })
+    @JoinColumn({ name: 'referenceId', referencedColumnName: 'id' })
+    productBatch: ProductBatch
 
-	@Expose({ name: 'procedure' })
-	@ManyToOne((type) => Procedure, { createForeignKeyConstraints: false })
-	@JoinColumn({ name: 'reference_id', referencedColumnName: 'id' })
-	procedure: Procedure
+    @Expose()
+    @ManyToOne((type) => Procedure, { createForeignKeyConstraints: false })
+    @JoinColumn({ name: 'referenceId', referencedColumnName: 'id' })
+    procedure: Procedure
 }

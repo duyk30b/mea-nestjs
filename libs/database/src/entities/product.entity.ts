@@ -4,53 +4,53 @@ import { BaseEntity } from '../common/base.entity'
 import { UnitType } from '../common/variable'
 import ProductBatch from './product-batch.entity'
 
-@Entity('product')
-@Index(['oid', 'brandName'])
-@Index(['oid', 'substance'])
-@Index(['oid', 'group'])
-@Index(['oid', 'isActive'])
+@Entity('Product')
+@Index('IDX_Product__oid_brandName', ['oid', 'brandName'])
+@Index('IDX_Product__oid_substance', ['oid', 'substance'])
+@Index('IDX_Product__oid_group', ['oid', 'group'])
+@Index('IDX_Product__oid_isActive', ['oid', 'isActive'])
 export default class Product extends BaseEntity {
-	@Column({ name: 'brand_name' })
-	@Expose({ name: 'brand_name' })
-	brandName: string                                              // Tên biệt dược
+    @Column()
+    @Expose()
+    brandName: string // Tên biệt dược
 
-	@Column({ name: 'substance', nullable: true })
-	@Expose({ name: 'substance' })
-	substance: string                                              // Hoạt chất
+    @Column({ nullable: true })
+    @Expose()
+    substance: string // Hoạt chất
 
-	@Column({ name: 'quantity', default: 0 })
-	@Expose({ name: 'quantity' })
-	quantity: number
+    @Column({ default: 0 })
+    @Expose()
+    quantity: number
 
-	@Column({ name: 'group', nullable: true })
-	@Expose({ name: 'group' })
-	group: string                                                  // Nhóm thuốc: kháng sinh, dinh dưỡng ...
+    @Column({ nullable: true })
+    @Expose()
+    group: string // Nhóm thuốc: kháng sinh, dinh dưỡng ...
 
-	@Column({ name: 'unit', type: 'simple-json', default: '[]' })
-	@Expose({ name: 'unit' })
-	unit: UnitType[]                                               // Đơn vị tính: lọ, ống, vỉ
+    @Column({ type: 'simple-json', default: '[]' })
+    @Expose()
+    unit: UnitType[] // Đơn vị tính: lọ, ống, vỉ
 
-	@Column({ name: 'route', nullable: true })
-	@Expose({ name: 'route' })
-	route: string                                                  // Đường dùng: uống, tiêm, ...
+    @Column({ nullable: true })
+    @Expose()
+    route: string // Đường dùng: uống, tiêm, ...
 
-	@Column({ name: 'source', nullable: true })
-	@Expose({ name: 'source' })
-	source: string                                                 // Nguồn gốc: ... Ấn Độ, Ý, Pháp, ...
+    @Column({ nullable: true })
+    @Expose()
+    source: string // Nguồn gốc: ... Ấn Độ, Ý, Pháp, ...
 
-	@Column({ name: 'image', nullable: true })
-	@Expose({ name: 'image' })
-	image: string
+    @Column({ nullable: true })
+    @Expose()
+    image: string
 
-	@Column({ name: 'hint_usage', nullable: true })
-	@Expose({ name: 'hint_usage' })
-	hintUsage: string                                              // Gợi ý cách sử dụng
+    @Column({ nullable: true })
+    @Expose()
+    hintUsage: string // Gợi ý cách sử dụng
 
-	@Column({ name: 'is_active', type: 'boolean', default: true })
-	@Expose({ name: 'is_active' })
-	isActive: boolean
+    @Column({ type: 'boolean', default: true })
+    @Expose()
+    isActive: boolean
 
-	@Expose({ name: 'product_batches' })
-	@OneToMany(() => ProductBatch, (productBatch) => productBatch.product)
-	productBatches: ProductBatch[]
+    @Expose()
+    @OneToMany(() => ProductBatch, (productBatch) => productBatch.product)
+    productBatches: ProductBatch[]
 }

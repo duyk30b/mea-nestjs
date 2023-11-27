@@ -7,18 +7,18 @@ export const Roles = (...roles: ERole[]) => SetMetadata('roles_guard', roles)
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-	constructor(private reflector: Reflector) { }
+    constructor(private reflector: Reflector) {}
 
-	canActivate(context: ExecutionContext): boolean {
-		const requiredRoles = this.reflector.getAllAndOverride<ERole[]>('roles_guard', [
-			context.getHandler(),
-			context.getClass(),
-		])
-		if (!requiredRoles) return true
+    canActivate(context: ExecutionContext): boolean {
+        const requiredRoles = this.reflector.getAllAndOverride<ERole[]>('roles_guard', [
+            context.getHandler(),
+            context.getClass(),
+        ])
+        if (!requiredRoles) return true
 
-		const request: RequestExternal = context.switchToHttp().getRequest()
-		const { role } = request.external
+        const request: RequestExternal = context.switchToHttp().getRequest()
+        const { role } = request.external
 
-		return requiredRoles.includes(role)
-	}
+        return requiredRoles.includes(role)
+    }
 }

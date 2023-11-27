@@ -1,71 +1,74 @@
-import { Expose } from 'class-transformer'
+import { Expose, Type } from 'class-transformer'
 import { Column, Entity } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import { EGender } from '../common/variable'
 
-@Entity('customer')
+@Entity('Customer')
 export default class Customer extends BaseEntity {
-	@Column({ name: 'full_name' })
-	@Expose({ name: 'full_name' })
-	fullName: string
+    @Column()
+    @Expose()
+    fullName: string
 
-	@Column({ name: 'phone', type: 'char', length: 10, nullable: true })
-	@Expose({ name: 'phone' })
-	phone: string
+    @Column({ type: 'char', length: 10, nullable: true })
+    @Expose()
+    phone: string
 
-	@Column({
-		name: 'birthday',
-		type: 'bigint',
-		nullable: true,
-		transformer: {
-			to: (value) => value,
-			from: (value) => value == null ? value : Number(value),
-		},
-	})
-	@Expose({ name: 'birthday' })
-	birthday: number
+    @Column({
+        type: 'bigint',
+        nullable: true,
+        transformer: {
+            to: (value) => value,
+            from: (value) => (value == null ? value : Number(value)),
+        },
+    })
+    @Expose()
+    birthday: number
 
-	@Column({ name: 'gender', type: 'tinyint', nullable: true })
-	@Expose({ name: 'gender' })
-	gender: EGender
+    @Column({ type: 'smallint', nullable: true })
+    @Expose()
+    gender: EGender
 
-	@Column({ name: 'identity_card', nullable: true })
-	@Expose({ name: 'identity_card' })                                 // số căn cước
-	identityCard: string
+    @Column({ nullable: true })
+    @Expose() // số căn cước
+    identityCard: string
 
-	@Column({ name: 'address_province', nullable: true })
-	@Expose({ name: 'address_province' })
-	addressProvince: string
+    @Column({ nullable: true })
+    @Expose()
+    addressProvince: string
 
-	@Column({ name: 'address_district', nullable: true })
-	@Expose({ name: 'address_district' })
-	addressDistrict: string
+    @Column({ nullable: true })
+    @Expose()
+    addressDistrict: string
 
-	@Column({ name: 'address_ward', nullable: true })
-	@Expose({ name: 'address_ward' })
-	addressWard: string
+    @Column({ nullable: true })
+    @Expose()
+    addressWard: string
 
-	@Column({ name: 'address_street', nullable: true })
-	@Expose({ name: 'address_street' })
-	addressStreet: string
+    @Column({ nullable: true })
+    @Expose()
+    addressStreet: string
 
-	@Column({ name: 'relative', nullable: true })
-	@Expose({ name: 'relative' })                                      // người thân
-	relative: string
+    @Column({ nullable: true })
+    @Expose() // người thân
+    relative: string
 
-	@Column({ name: 'health_history', type: 'text', nullable: true })
-	@Expose({ name: 'health_history' })
-	healthHistory: string                                             // Tiền sử bệnh
+    @Column({ type: 'text', nullable: true })
+    @Expose()
+    healthHistory: string // Tiền sử bệnh
 
-	@Column({ name: 'debt', default: 0 })
-	@Expose({ name: 'debt' })
-	debt: number                                                      // tiền nợ
+    @Column({
+        type: 'bigint',
+        default: 0,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    })
+    @Expose()
+    debt: number // tiền nợ
 
-	@Column({ name: 'note', nullable: true })
-	@Expose({ name: 'note' })
-	note: string                                      // Ghi chú
+    @Column({ nullable: true })
+    @Expose()
+    note: string // Ghi chú
 
-	@Column({ name: 'is_active', type: 'boolean', default: true })
-	@Expose({ name: 'is_active' })
-	isActive: boolean
+    @Column({ type: 'boolean', default: true })
+    @Expose()
+    isActive: boolean
 }

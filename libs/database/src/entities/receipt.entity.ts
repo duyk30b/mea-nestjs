@@ -1,4 +1,4 @@
-import { Expose, Type } from 'class-transformer'
+import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import { DiscountType, ReceiptStatus } from '../common/variable'
@@ -6,90 +6,128 @@ import DistributorPayment from './distributor-payment.entity'
 import Distributor from './distributor.entity'
 import ReceiptItem from './receipt-item.entity'
 
-@Entity('receipt')
-@Index('IDX_RECEIPT__DISTRIBUTOR_ID', ['oid', 'distributorId'])
-@Index('IDX_RECEIPT__CREATE_TIME', ['oid', 'createTime'])
+@Entity('Receipt')
+@Index('IDX_Receipt__oid_distributorId', ['oid', 'distributorId'])
+@Index('IDX_Receipt__oid_time', ['oid', 'time'])
 export default class Receipt extends BaseEntity {
-	@Column({ name: 'distributor_id' })
-	@Expose({ name: 'distributor_id' })
-	distributorId: number
+    @Column()
+    @Expose()
+    distributorId: number
 
-	@Column({ name: 'status', type: 'tinyint' })
-	@Expose({ name: 'status' })
-	status: ReceiptStatus
+    @Column({ type: 'smallint' })
+    @Expose()
+    status: ReceiptStatus
 
-	@Column({
-		name: 'create_time',
-		type: 'bigint',
-		nullable: true,
-		transformer: {
-			to: (value) => value,
-			from: (value) => value == null ? value : Number(value),
-		},
-	})
-	@Expose({ name: 'create_time' })
-	createTime: number
+    @Column({
+        type: 'bigint',
+        nullable: true,
+        transformer: {
+            to: (value) => value,
+            from: (value) => (value == null ? value : Number(value)),
+        },
+    })
+    @Expose()
+    time: number
 
-	@Column({
-		name: 'delete_time',
-		type: 'bigint',
-		nullable: true,
-		transformer: {
-			to: (value) => value,
-			from: (value) => value == null ? value : Number(value),
-		},
-	})
-	@Expose({ name: 'delete_time' })
-	deleteTime: number
+    @Column({ type: 'datetime', nullable: true })
+    @Expose()
+    shipTime: Date
 
-	@Column({ name: 'total_item_money', type: 'bigint' })
-	@Expose({ name: 'total_item_money' })
-	@Type(() => Number)
-	totalItemMoney: number                                   // tiền sản phẩm
+    @Column({ type: 'smallint', nullable: true })
+    @Expose()
+    shipYear: number
 
-	@Column({ name: 'discount_money', default: 0 })
-	@Expose({ name: 'discount_money' })
-	discountMoney: number                                     // tiền giảm giá
+    @Column({ type: 'smallint', nullable: true })
+    @Expose()
+    shipMonth: number // 01->12
 
-	@Column({ name: 'discount_percent', default: 0 })
-	@Expose({ name: 'discount_percent' })
-	discountPercent: number                                   // % giảm giá
+    @Column({ type: 'smallint', nullable: true })
+    @Expose()
+    shipDate: number
 
-	@Column({ name: 'discount_type', type: 'enum', enum: DiscountType, default: DiscountType.VND })
-	@Expose({ name: 'discount_type' })
-	discountType: DiscountType                                // Loại giảm giá
+    @Column({
+        name: 'delete_time',
+        type: 'bigint',
+        nullable: true,
+        transformer: {
+            to: (value) => value,
+            from: (value) => (value == null ? value : Number(value)),
+        },
+    })
+    @Expose()
+    deleteTime: number
 
-	@Column({ name: 'surcharge', default: 0 })
-	@Expose({ name: 'surcharge' })
-	surcharge: number                                         // phụ phí: tiền phải trả thêm: như tiền ship, tiền vé, hao phí xăng dầu
+    @Column({
+        type: 'bigint',
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    })
+    @Expose()
+    itemsActualMoney: number // tiền sản phẩm
 
-	@Column({ name: 'total_money', type: 'bigint' })
-	@Expose({ name: 'total_money' })
-	@Type(() => Number)
-	totalMoney: number                                        // tổng tiền = tiền sản phẩm + surcharge - tiền giảm giá
+    @Column({
+        type: 'bigint',
+        default: 0,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    })
+    @Expose()
+    discountMoney: number // tiền giảm giá
 
-	@Column({ name: 'paid', default: 0 })
-	@Expose({ name: 'paid' })
-	paid: number                                           // tiền thanh toán
+    @Column({ type: 'tinyint', default: 0 })
+    @Expose()
+    discountPercent: number // % giảm giá
 
-	@Column({ name: 'debt', default: 0 })
-	@Expose({ name: 'debt' })
-	debt: number                                              // tiền nợ
+    @Column({ type: 'enum', enum: DiscountType, default: DiscountType.VND })
+    @Expose()
+    discountType: DiscountType // Loại giảm giá
 
-	@Column({ name: 'note', nullable: true })
-	@Expose({ name: 'note' })
-	note: string                                              // Ghi chú
+    @Column({
+        name: 'surcharge',
+        type: 'bigint',
+        default: 0,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    })
+    @Expose()
+    surcharge: number // phụ phí: tiền phải trả thêm: như tiền ship, tiền vé, hao phí xăng dầu
 
-	@Expose({ name: 'receipt_items' })
-	@OneToMany(() => ReceiptItem, (receiptItem) => receiptItem.receipt)
-	receiptItems: ReceiptItem[]
+    @Column({
+        type: 'bigint',
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    })
+    @Expose()
+    revenue: number // tổng tiền = tiền sản phẩm + surcharge - tiền giảm giá
 
-	@Expose({ name: 'distributor' })
-	@ManyToOne((type) => Distributor, { createForeignKeyConstraints: false })
-	@JoinColumn({ name: 'distributor_id', referencedColumnName: 'id' })
-	distributor: Distributor
+    @Column({
+        name: 'paid',
+        type: 'bigint',
+        default: 0,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    })
+    @Expose()
+    paid: number // tiền thanh toán
 
-	@Expose({ name: 'distributor_payments' })
-	@OneToMany(() => DistributorPayment, (distributorPayment) => distributorPayment.receipt)
-	distributorPayments: DistributorPayment[]
+    @Column({
+        name: 'debt',
+        type: 'bigint',
+        default: 0,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    })
+    @Expose()
+    debt: number // tiền nợ
+
+    @Column({ name: 'note', nullable: true })
+    @Expose()
+    note: string // Ghi chú
+
+    @Expose()
+    @OneToMany(() => ReceiptItem, (receiptItem) => receiptItem.receipt)
+    receiptItems: ReceiptItem[]
+
+    @Expose()
+    @ManyToOne((type) => Distributor, { createForeignKeyConstraints: false })
+    @JoinColumn({ name: 'distributorId', referencedColumnName: 'id' })
+    distributor: Distributor
+
+    @Expose()
+    @OneToMany(() => DistributorPayment, (distributorPayment) => distributorPayment.receipt)
+    distributorPayments: DistributorPayment[]
 }

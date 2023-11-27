@@ -3,43 +3,42 @@ import { Expose } from 'class-transformer'
 import { IsBoolean, IsDefined, IsNumber, IsString } from 'class-validator'
 
 export class ProductBatchInsertBody {
-	@ApiPropertyOptional({ name: 'product_id', example: 12 })
-	@Expose({ name: 'product_id' })
-	@IsNumber()
-	productId: number
+    @ApiPropertyOptional({ example: 12 })
+    @Expose()
+    @IsNumber()
+    productId: number
 
-	@ApiPropertyOptional({ name: 'batch', example: 'ABC12345' })
-	@Expose({ name: 'batch' })
-	@IsDefined()
-	@IsString()
-	batch: string
+    @ApiPropertyOptional({ example: 'ABC12345' })
+    @Expose()
+    @IsDefined()
+    @IsString()
+    batch: string
 
-	@ApiPropertyOptional({ name: 'expiry_date', example: 1679995369195 })
-	@Expose({ name: 'expiry_date' })
-	@IsNumber()
-	expiryDate: number
+    @ApiPropertyOptional({ example: 1679995369195 })
+    @Expose()
+    @IsNumber()
+    expiryDate: number
 
-	@ApiPropertyOptional({ name: 'cost_price', example: 20_000 })
-	@Expose({ name: 'cost_price' })
-	@IsDefined()
-	@IsNumber()
-	costPrice: number
+    @ApiPropertyOptional({ example: 20_000 })
+    @Expose()
+    @IsDefined()
+    @IsNumber()
+    costPrice: number
 
-	@ApiPropertyOptional({ name: 'retail_price', example: 59_000 })
-	@Expose({ name: 'retail_price' })
-	@IsNumber()
-	retailPrice: number
+    @ApiPropertyOptional({ example: 59_000 })
+    @Expose()
+    @IsNumber()
+    retailPrice: number
 
-	@ApiPropertyOptional({ name: 'wholesale_price', example: 45_000 })
-	@Expose({ name: 'wholesale_price' })
-	@IsNumber()
-	wholesalePrice: number
+    @ApiPropertyOptional({ example: 45_000 })
+    @Expose()
+    @IsNumber()
+    wholesalePrice: number
 
-	@ApiPropertyOptional({ name: 'is_active', example: true })
-	@Expose({ name: 'is_active' })
-	@IsBoolean()
-	isActive: boolean
+    @ApiPropertyOptional({ example: true })
+    @Expose()
+    @IsBoolean()
+    isActive: boolean
 }
 
-export class ProductBatchUpdateBody extends OmitType(ProductBatchInsertBody, ['costPrice', 'productId']) {
-}
+export class ProductBatchUpdateBody extends OmitType(ProductBatchInsertBody, ['costPrice', 'productId']) {}

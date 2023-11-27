@@ -5,17 +5,17 @@ import { RequestExternal, TExternal } from '../common/request-external'
 
 @Injectable()
 export class ValidateTokenMiddleware implements NestMiddleware {
-	constructor(private readonly jwtExtendService: JwtExtendService) { }
+    constructor(private readonly jwtExtendService: JwtExtendService) {}
 
-	async use(req: RequestExternal, res: Response, next: NextFunction) {
-		const authorization = req.header('Authorization') || ''
-		const [, accessToken] = authorization.split(' ')
+    async use(req: RequestExternal, res: Response, next: NextFunction) {
+        const authorization = req.header('Authorization') || ''
+        const [, accessToken] = authorization.split(' ')
 
-		const decode: TExternal = this.jwtExtendService.verifyAccessToken(accessToken, req.external.ip)
-		req.external = {
-			...req.external,
-			...decode,
-		}
-		next()
-	}
+        const decode: TExternal = this.jwtExtendService.verifyAccessToken(accessToken, req.external.ip)
+        req.external = {
+            ...req.external,
+            ...decode,
+        }
+        next()
+    }
 }

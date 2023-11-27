@@ -1,51 +1,56 @@
 import { Injectable } from '@nestjs/common'
 import { DistributorRepository } from '_libs/database/repository'
-import { DistributorCreateBody, DistributorGetManyQuery, DistributorPaginationQuery, DistributorUpdateBody } from './request'
+import {
+    DistributorCreateBody,
+    DistributorGetManyQuery,
+    DistributorPaginationQuery,
+    DistributorUpdateBody,
+} from './request'
 import { BusinessException } from '_libs/common/exception-filter/business-exception.filter'
 
 @Injectable()
 export class ApiDistributorService {
-	constructor(private readonly distributorRepository: DistributorRepository) { }
+    constructor(private readonly distributorRepository: DistributorRepository) {}
 
-	async pagination(oid: number, query: DistributorPaginationQuery) {
-		return await this.distributorRepository.pagination({
-			page: query.page,
-			limit: query.limit,
-			condition: {
-				oid,
-				isActive: query.filter?.isActive,
-				fullName: ['LIKE', query.filter?.fullName],
-				phone: ['LIKE', query.filter?.phone],
-			},
-			order: query.sort || { id: 'DESC' },
-		})
-	}
+    async pagination(oid: number, query: DistributorPaginationQuery) {
+        return await this.distributorRepository.pagination({
+            page: query.page,
+            limit: query.limit,
+            condition: {
+                oid,
+                isActive: query.filter?.isActive,
+                fullName: ['LIKE', query.filter?.fullName],
+                phone: ['LIKE', query.filter?.phone],
+            },
+            order: query.sort || { id: 'DESC' },
+        })
+    }
 
-	async getMany(oid: number, query: DistributorGetManyQuery) {
-		return await this.distributorRepository.find({
-			condition: {
-				oid,
-				isActive: query.filter?.isActive,
-				fullName: ['LIKE', query.filter?.fullName],
-				phone: ['LIKE', query.filter?.phone],
-			},
-			limit: query.limit,
-		})
-	}
+    async getMany(oid: number, query: DistributorGetManyQuery) {
+        return await this.distributorRepository.find({
+            condition: {
+                oid,
+                isActive: query.filter?.isActive,
+                fullName: ['LIKE', query.filter?.fullName],
+                phone: ['LIKE', query.filter?.phone],
+            },
+            limit: query.limit,
+        })
+    }
 
-	async getOne(oid: number, id: number) {
-		const distributor = await this.distributorRepository.findOne({ oid, id })
-		if (!distributor) throw new BusinessException('common.Distributor.NotExist')
-		return distributor
-	}
+    async getOne(oid: number, id: number) {
+        const distributor = await this.distributorRepository.findOne({ oid, id })
+        if (!distributor) throw new BusinessException('common.Distributor.NotExist')
+        return distributor
+    }
 
-	async createOne(oid: number, body: DistributorCreateBody) {
-		return await this.distributorRepository.insertOne({ oid, ...body })
-	}
+    async createOne(oid: number, body: DistributorCreateBody) {
+        return await this.distributorRepository.insertOne({ oid, ...body })
+    }
 
-	async updateOne(oid: number, id: number, body: DistributorUpdateBody) {
-		const { affected } = await this.distributorRepository.updateOne({ id, oid }, body)
-		if (affected !== 1) throw new Error('Database.UpdateFailed')
-		return await this.distributorRepository.findOne({ id })
-	}
+    async updateOne(oid: number, id: number, body: DistributorUpdateBody) {
+        const { affected } = await this.distributorRepository.updateOne({ id, oid }, body)
+        if (affected !== 1) throw new Error('Database.UpdateFailed')
+        return await this.distributorRepository.findOne({ id })
+    }
 }
