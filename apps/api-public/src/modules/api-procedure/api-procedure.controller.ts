@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
-import { IdParam } from '../../common/swagger'
 import { External, TExternal } from '../../common/request-external'
+import { IdParam } from '../../common/swagger'
 import { ApiProcedureService } from './api-procedure.service'
 import { ProcedureCreateBody, ProcedureGetManyQuery, ProcedurePaginationQuery, ProcedureUpdateBody } from './request'
 

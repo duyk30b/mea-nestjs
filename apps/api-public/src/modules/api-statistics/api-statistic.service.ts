@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
-import { InvoiceStatus } from '_libs/database/common/variable'
-import { Customer, Product } from '_libs/database/entities'
+import { DTimer } from '../../../../_libs/common/helpers/time.helper'
+import { InvoiceStatus } from '../../../../_libs/database/common/variable'
+import { Customer, Product } from '../../../../_libs/database/entities'
 import {
     CustomerRepository,
     InvoiceRepository,
@@ -8,10 +9,9 @@ import {
     ProductMovementRepository,
     ProductRepository,
     StatisticRepository,
-} from '_libs/database/repository'
+} from '../../../../_libs/database/repository'
 import { LimitQuery } from '../../common/query'
 import { StatisticTimeQuery, StatisticTopBestSellingQuery, StatisticTopCustomerBestInvoiceQuery } from './request'
-import { DTimer } from '_libs/common/helpers/time.helper'
 
 @Injectable()
 export class ApiStatisticService {
@@ -126,6 +126,14 @@ export class ApiStatisticService {
     async sumDebt(oid: number) {
         const result = await this.statisticRepository.sumDebt(oid)
         return { customerSumDebt: result }
+    }
+
+    async sumMoneyOrder(oid: number, query: StatisticTimeQuery) {
+        return {
+            invoice: await this.sumMoneyInvoice(oid, query),
+            receipt: await this.sumMoneyReceipt(oid, query),
+            other: await this.sumInvoiceSurchargeAndExpenses(oid, query),
+        }
     }
 
     async sumMoneyInvoice(oid: number, query: StatisticTimeQuery) {

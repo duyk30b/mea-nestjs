@@ -1,8 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { IsPhone } from '_libs/common/transform-validate/class-validator.custom'
-import { EGender } from '_libs/database/common/variable'
 import { Expose } from 'class-transformer'
 import { IsDefined, IsIn, IsNotEmpty, IsNumber, Validate } from 'class-validator'
+import { IsPhone } from '../../../../../_libs/common/transform-validate/class-validator.custom'
+import { EGender } from '../../../../../_libs/database/common/variable'
 
 export class UserUpdateInfoBody {
     @ApiProperty({ example: 'Phạm Hoàng Mai' })

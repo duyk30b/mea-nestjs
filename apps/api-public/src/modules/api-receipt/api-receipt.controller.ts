@@ -34,6 +34,16 @@ export class ApiReceiptController {
         return await this.apiReceiptService.getOne(oid, id, query)
     }
 
+    @Post('create-basic')
+    async createBasic(@External() { oid }: TExternal, @Body() body: ReceiptDraftCreateBody) {
+        return await this.apiReceiptService.createBasic({ oid, body })
+    }
+
+    @Patch('update-basic/:id')
+    async updateBasic(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: ReceiptDraftCreateBody) {
+        return await this.apiReceiptService.updateBasic({ oid, body, oldReceiptId: id, time: Date.now() })
+    }
+
     @Post('create-draft')
     async createDraft(@External() { oid }: TExternal, @Body() body: ReceiptDraftCreateBody) {
         return await this.apiReceiptService.createDraft({ oid, body })

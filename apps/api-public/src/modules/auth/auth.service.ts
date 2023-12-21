@@ -1,12 +1,32 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
-import { BusinessException } from '_libs/common/exception-filter/business-exception.filter'
-import { decrypt, encrypt } from '_libs/common/helpers/string.helper'
-import { ERole } from '_libs/database/common/variable'
-import Employee from '_libs/database/entities/user.entity'
-import Organization from '_libs/database/entities/organization.entity'
+import { InjectEntityManager } from '@nestjs/typeorm'
 import * as bcrypt from 'bcrypt'
-import { DataSource } from 'typeorm'
+import { DataSource, EntityManager } from 'typeorm'
+import { BusinessException } from '../../../../_libs/common/exception-filter/exception'
+import { decrypt, encrypt } from '../../../../_libs/common/helpers/string.helper'
+import { ERole } from '../../../../_libs/database/common/variable'
+import {
+    Customer,
+    CustomerPayment,
+    Distributor,
+    DistributorPayment,
+    Invoice,
+    InvoiceExpense,
+    InvoiceItem,
+    InvoiceSurcharge,
+    OrganizationSetting,
+    Procedure,
+    Product,
+    ProductBatch,
+    ProductMovement,
+    Receipt,
+    ReceiptItem,
+} from '../../../../_libs/database/entities'
+import { OrganizationSettingType } from '../../../../_libs/database/entities/organization-setting.entity'
+import Organization from '../../../../_libs/database/entities/organization.entity'
+import Employee from '../../../../_libs/database/entities/user.entity'
+import { OrganizationRepository } from '../../../../_libs/database/repository'
 import { EmailService } from '../../components/email/email.service'
 import { JwtExtendService } from '../../components/jwt-extend/jwt-extend.service'
 import { GlobalConfig, JwtConfig } from '../../environments'
@@ -14,7 +34,6 @@ import { ForgotPasswordBody } from './request/forgot-password.body'
 import { LoginBody } from './request/login.body'
 import { RegisterBody } from './request/register.body'
 import { ResetPasswordBody } from './request/reset-password.body'
-import { Customer, Distributor } from '_libs/database/entities'
 
 @Injectable()
 export class AuthService {
@@ -22,8 +41,10 @@ export class AuthService {
         @Inject(GlobalConfig.KEY) private globalConfig: ConfigType<typeof GlobalConfig>,
         @Inject(JwtConfig.KEY) private jwtConfig: ConfigType<typeof JwtConfig>,
         private dataSource: DataSource,
+        @InjectEntityManager() private manager: EntityManager,
         private jwtExtendService: JwtExtendService,
-        private emailService: EmailService
+        private emailService: EmailService,
+        private readonly organizationRepository: OrganizationRepository
     ) {}
 
     async register(registerDto: RegisterBody): Promise<Employee> {
@@ -59,21 +80,37 @@ export class AuthService {
             return employee
         })
 
-        await Promise.all([
-            this.dataSource.manager.insert(Customer, [
+        const oid = employee.oid
+        const [customerList, distributorList] = await Promise.all([
+            this.dataSource.manager.save(Customer, [
                 {
-                    oid: employee.oid,
+                    oid,
                     fullName: 'Khách lẻ',
                 },
                 {
-                    oid: employee.oid,
+                    oid,
                     fullName: 'Xuất thiếu',
                 },
             ]),
-            this.dataSource.manager.save(Distributor, {
-                oid: employee.oid,
-                fullName: 'Nhập thiếu',
-            }),
+            this.dataSource.manager.save(Distributor, [
+                {
+                    oid,
+                    fullName: 'Nhập thiếu',
+                },
+            ]),
+        ])
+
+        await Promise.all([
+            this.organizationRepository.upsertSetting(
+                oid,
+                OrganizationSettingType.SCREEN_INVOICE_UPSERT,
+                JSON.stringify({ customer: { idDefault: customerList[0].id } })
+            ),
+            this.organizationRepository.upsertSetting(
+                oid,
+                OrganizationSettingType.SCREEN_RECEIPT_UPSERT,
+                JSON.stringify({ distributor: { idDefault: distributorList[0].id } })
+            ),
         ])
 
         return employee
@@ -107,6 +144,24 @@ export class AuthService {
         return employee
     }
 
+    async refreshDemo() {
+        await this.manager.delete(Customer, { oid: 1 })
+        await this.manager.delete(CustomerPayment, { oid: 1 })
+        await this.manager.delete(Distributor, { oid: 1 })
+        await this.manager.delete(DistributorPayment, { oid: 1 })
+        await this.manager.delete(Invoice, { oid: 1 })
+        await this.manager.delete(InvoiceExpense, { oid: 1 })
+        await this.manager.delete(InvoiceItem, { oid: 1 })
+        await this.manager.delete(InvoiceSurcharge, { oid: 1 })
+        await this.manager.delete(OrganizationSetting, { oid: 1 })
+        await this.manager.delete(Procedure, { oid: 1 })
+        await this.manager.delete(Product, { oid: 1 })
+        await this.manager.delete(ProductBatch, { oid: 1 })
+        await this.manager.delete(ProductMovement, { oid: 1 })
+        await this.manager.delete(Receipt, { oid: 1 })
+        await this.manager.delete(ReceiptItem, { oid: 1 })
+    }
+
     async forgotPassword(body: ForgotPasswordBody): Promise<any> {
         const organization = await this.dataSource.manager.findOne(Organization, {
             where: { phone: body.orgPhone, email: body.email },
@@ -122,19 +177,19 @@ export class AuthService {
         if (!employee) throw new BusinessException('common.User.NotExist')
 
         const token = encodeURIComponent(encrypt(employee.password, this.jwtConfig.accessKey, 30 * 60 * 1000))
-        const link
-            = `${this.globalConfig.domain}/auth/reset-password`
-            + `?token=${token}&org_phone=${body.orgPhone}&username=${body.username}&ver=1`
+        const link =
+            `${this.globalConfig.domain}/auth/reset-password` +
+            `?token=${token}&org_phone=${body.orgPhone}&username=${body.username}&ver=1`
 
         await this.emailService.send({
             to: body.email,
-            subject: '[Medihome] - Quên mật khẩu',
+            subject: '[MEA] - Quên mật khẩu',
             from: 'medihome.vn@gmail.com',
             text: 'welcome', // plaintext body
             html:
-                '<p>Bạn nhận được yêu cầu reset mật khẩu. Nhấn vào đường link sau để cập nhật mật khẩu mới: </p>'
-                + `<p><a href="${link}' + recovery_token + '">${link}</a></p>`
-                + '<p>Link sẽ bị vô hiệu hóa sau 30 phút</p>',
+                '<p>Bạn nhận được yêu cầu reset mật khẩu. Nhấn vào đường link sau để cập nhật mật khẩu mới: </p>' +
+                `<p><a href="${link}' + recovery_token + '">${link}</a></p>` +
+                '<p>Link sẽ bị vô hiệu hóa sau 30 phút</p>',
         })
 
         return { success: true }

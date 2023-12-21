@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { ProcedureRepository } from '_libs/database/repository'
+import { ProcedureRepository } from '../../../../_libs/database/repository'
 import { ProcedureCreateBody, ProcedureGetManyQuery, ProcedurePaginationQuery, ProcedureUpdateBody } from './request'
 
 @Injectable()

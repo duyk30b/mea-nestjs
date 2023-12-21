@@ -1,6 +1,6 @@
 // import { Injectable } from '@nestjs/common'
-// import { ArrivalService } from '_libs/database/modules/arrival'
-// import { DiagnosisService } from '_libs/database/modules/diagnosis/diagnosis.service'
+// import { ArrivalService } from '../../../../../libs/database/src/modules/arrival'
+// import { DiagnosisService } from '../../../../../libs/database/src/modules/diagnosis/diagnosis.service'
 // import { BusinessException } from '../../exception-filters/business-exception.filter'
 // import { ErrorMessage } from '../../exception-filters/exception.const'
 // import { CreateDiagnosisBody, UpdateDiagnosisBody } from './request'

@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
 import { SortQuery } from 'apps/api-public/src/common/query'
 import { Expose, Transform } from 'class-transformer'
-import { IsBoolean, IsNotEmpty, IsString } from 'class-validator'
+import { IsIn, IsNotEmpty, IsString } from 'class-validator'
 
 export class ProcedureFilterQuery {
     @ApiPropertyOptional({ name: 'filter[searchText]' })
@@ -18,12 +18,12 @@ export class ProcedureFilterQuery {
     @ApiPropertyOptional({ name: 'filter[isActive]' })
     @Expose()
     @Transform(({ value }) => {
-        if (['1', 'true'].includes(value)) return true
-        if (['0', 'false'].includes(value)) return false
+        if (['1', 'true'].includes(value)) return 1
+        if (['0', 'false'].includes(value)) return 0
         return undefined
     })
-    @IsBoolean()
-    isActive: boolean
+    @IsIn([0, 1])
+    isActive: 0 | 1
 }
 
 export class ProcedureSortQuery extends SortQuery {}

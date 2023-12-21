@@ -1,11 +1,4 @@
-import { faker } from '@faker-js/faker'
 import { Injectable } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
-import { randomEnum, randomItemsInArray, randomNumber, shuffleArray } from '_libs/common/helpers/random.helper'
-import { DiscountType, InvoiceItemType } from '_libs/database/common/variable'
-import { Customer, Procedure, ProductBatch } from '_libs/database/entities'
-import { InvoiceItemDto, InvoiceDraftInsertDto } from '_libs/database/repository'
-import { Repository } from 'typeorm'
 
 @Injectable()
 export class InvoiceSeed {

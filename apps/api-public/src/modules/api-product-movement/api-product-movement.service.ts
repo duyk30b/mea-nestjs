@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common'
-import { uniqueArray } from '_libs/common/helpers/object.helper'
-import { ProductMovement } from '_libs/database/entities'
-import { ProductMovementType } from '_libs/database/entities/product-movement.entity'
+import { uniqueArray } from '../../../../_libs/common/helpers/object.helper'
+import { ProductMovement } from '../../../../_libs/database/entities'
+import { ProductMovementType } from '../../../../_libs/database/entities/product-movement.entity'
 import {
     InvoiceRepository,
     ProductBatchRepository,
     ProductMovementRepository,
     ReceiptRepository,
-} from '_libs/database/repository'
+} from '../../../../_libs/database/repository'
 import { ProductMovementPaginationQuery } from './request'
 
 @Injectable()

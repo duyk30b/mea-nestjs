@@ -2,7 +2,6 @@ init-db:
 	docker compose -f docker.db.yml up -d
 
 upgrade:
-	make backup-db
 	git fetch --all
 	git log --all --oneline --graph -10
 	git reset --hard origin/master
@@ -10,7 +9,6 @@ upgrade:
 	docker compose logs -f api-public
 
 hotfix:
-	make backup-db
 	git fetch --all
 	git log --all --oneline --graph -10
 	git reset --hard origin/hotfix
@@ -25,20 +23,34 @@ nginx-reload:
 	git log --all --oneline --graph -10
 	git reset --hard origin/master
 	docker compose -f docker.nginx.yml up -d
-	docker exec mhc_nginx nginx -t
-	docker exec mhc_nginx nginx -s reload
+	docker exec mc_nginx nginx -t
+	docker exec mc_nginx nginx -s reload
 
 backup-db: 
-	docker compose -f docker.db.yml exec mariadb sh -c '\
+	docker compose -f docker.db.yml exec postgres sh -c '\
 		mkdir -p backup; \
 		chmod -R 777 /backup; \
-		mariadb-dump --user=medihome --password=Abc12345 --lock-tables --all-databases > /backup/$$(date +%Y-%m-%d_%H-%M-%S).sql; \
+		pg_dump "dbname=mea_sql user=mea password=Abc12345" > /backup/$$(date +%Y-%m-%d_%H-%M-%S).sql; \
 		ls -la /backup; \
 	'
 
 restore-db:
+	docker compose -f docker.db.yml exec postgres sh -c '\
+		ls -la /restore; \
+		psql "dbname=mea_sql user=mea password=Abc12345" < /restore/$$(ls -1 /restore); \
+	'
+
+backup-mariadb: 
 	docker compose -f docker.db.yml exec mariadb sh -c '\
+		mkdir -p backup; \
+		chmod -R 777 /backup; \
+		mariadb-dump --user=mea --password=Abc12345 --lock-tables --all-databases > /backup/$$(date +%Y-%m-%d_%H-%M-%S).sql; \
 		ls -la /backup; \
-		mariadb --user=medihome --password=Abc12345 medihome_sql < /restore/$$(ls -1 /restore); \
+	'
+
+restore-mariadb:
+	docker compose -f docker.db.yml exec mariadb sh -c '\
+		ls -la /restore; \
+		mariadb --user=mea --password=Abc12345 mea_sql < /restore/$$(ls -1 /restore); \
 	'
 		

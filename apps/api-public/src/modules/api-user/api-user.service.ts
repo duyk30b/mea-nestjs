@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common'
-import { BusinessException } from '_libs/common/exception-filter/business-exception.filter'
-import { encrypt } from '_libs/common/helpers/string.helper'
-import { EmployeeRepository } from '_libs/database/repository'
 import * as bcrypt from 'bcrypt'
+import { BusinessException } from '../../../../_libs/common/exception-filter/exception'
+import { encrypt } from '../../../../_libs/common/helpers/string.helper'
+import { UserRepository } from '../../../../_libs/database/repository'
 import { UserChangePasswordBody } from './request/user-change-password.body'
 import { UserUpdateInfoBody } from './request/user-update-info.body'
 
 @Injectable()
 export class ApiUserService {
-    constructor(private readonly employeeRepository: EmployeeRepository) {}
+    constructor(private readonly employeeRepository: UserRepository) {}
 
     async me(oid: number, id: number) {
         return await this.employeeRepository.findOne({ oid, id })

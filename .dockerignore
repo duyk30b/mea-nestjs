@@ -1,4 +1,7 @@
 node_modules
+# Data MySQL
+data
+nginx
 
 # Git file
 .git
@@ -6,7 +9,7 @@ node_modules
 
 # Docker file
 Dockerfile*
-docker-compose*
+docker*
 
 # Logs
 logs
@@ -23,7 +26,5 @@ yarn-error.log*
 .vscode
 .editorconfig
 .eslintrc.*
+.prettierrc.*
 .nvmrc
-
-# Data MySQL
-data

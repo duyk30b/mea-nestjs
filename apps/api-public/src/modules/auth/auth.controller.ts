@@ -1,7 +1,7 @@
-import { Body, Controller, Param, Post } from '@nestjs/common'
+import { Body, Controller, Delete, Param, Post } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { JwtExtendService } from '../../components/jwt-extend/jwt-extend.service'
 import { External, TExternal } from '../../common/request-external'
+import { JwtExtendService } from '../../components/jwt-extend/jwt-extend.service'
 import { AuthService } from './auth.service'
 import { ForgotPasswordBody } from './request/forgot-password.body'
 import { LoginBody } from './request/login.body'
@@ -48,6 +48,11 @@ export class AuthController {
             access_token: accessToken,
             refresh_token: refreshToken,
         }
+    }
+
+    @Delete('refresh-demo')
+    async refreshDemo(@External() { ip }: TExternal) {
+        return await this.authService.refreshDemo()
     }
 
     @Post('logout')

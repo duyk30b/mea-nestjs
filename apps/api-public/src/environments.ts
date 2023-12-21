@@ -1,5 +1,4 @@
 import { registerAs } from '@nestjs/config'
-import { TypeOrmModuleOptions } from '@nestjs/typeorm'
 
 export const GlobalConfig = registerAs('global', () => ({ domain: process.env.DOMAIN }))
 

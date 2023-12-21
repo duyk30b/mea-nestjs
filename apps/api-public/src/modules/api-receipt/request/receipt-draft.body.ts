@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger'
-import { DiscountType } from '_libs/database/common/variable'
 import { Expose, Type } from 'class-transformer'
 import { IsDefined, IsEnum, IsNumber, IsString, ValidateNested } from 'class-validator'
+import { DiscountType } from '../../../../../_libs/database/common/variable'
 import { ReceiptItemBody } from './receipt-item.body'
 
 export class ReceiptDraftCreateBody {

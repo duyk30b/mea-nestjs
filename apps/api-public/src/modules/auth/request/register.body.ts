@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsGmail, IsPhone } from '_libs/common/transform-validate/class-validator.custom'
 import { Expose } from 'class-transformer'
 import { IsDefined, MinLength, Validate } from 'class-validator'
+import { IsGmail, IsPhone } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 
 export class RegisterBody {
     @ApiProperty({ example: 'example-2@gmail.com' })

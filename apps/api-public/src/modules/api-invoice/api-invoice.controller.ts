@@ -34,6 +34,16 @@ export class ApiInvoiceController {
         return await this.apiInvoiceService.getOne(oid, id, query)
     }
 
+    @Post('create-basic')
+    async createBasic(@External() { oid }: TExternal, @Body() body: InvoiceDraftCreateBody) {
+        return await this.apiInvoiceService.createBasic({ oid, body })
+    }
+
+    @Patch('update-basic/:id')
+    async updateBasic(@External() { oid }: TExternal, @Param() { id }: IdParam, @Body() body: InvoiceDraftCreateBody) {
+        return await this.apiInvoiceService.updateBasic({ oid, body, oldInvoiceId: id, time: Date.now() })
+    }
+
     @Post('create-draft')
     async createDraft(@External() { oid }: TExternal, @Body() body: InvoiceDraftCreateBody) {
         return await this.apiInvoiceService.createDraft({ oid, body })

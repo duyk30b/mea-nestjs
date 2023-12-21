@@ -1,10 +1,12 @@
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
+import { APP_GUARD } from '@nestjs/core'
 import { ScheduleModule } from '@nestjs/schedule'
-import { RepositoryModule } from '_libs/database/repository/repository.module'
-import { SqlModule } from '_libs/database/sql.module'
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 import { HeaderResolver, I18nJsonLoader, I18nMiddleware, I18nModule, QueryResolver } from 'nestjs-i18n'
 import * as path from 'path'
+import { RepositoryModule } from '../../_libs/database/repository/repository.module'
+import { SqlModule } from '../../_libs/database/sql.module'
 import { EmailModule } from './components/email/email.module'
 import { HealthModule } from './components/health/health.module'
 import { JwtExtendModule } from './components/jwt-extend/jwt-extend.module'
@@ -32,6 +34,10 @@ import { AuthModule } from './modules/auth/auth.module'
         ConfigModule.forRoot({
             envFilePath: [`.env.${process.env.NODE_ENV || 'local'}`, '.env'],
             isGlobal: true,
+        }),
+        ThrottlerModule.forRoot({
+            ttl: 5, // seconds
+            limit: 5, // mỗi request giống hệt nhau chỉ được phép gọi 5 lần trong 5s
         }),
         I18nModule.forRoot({
             fallbackLanguage: 'vi',
@@ -68,7 +74,12 @@ import { AuthModule } from './modules/auth/auth.module'
         ApiUserModule,
     ],
     controllers: [],
-    providers: [],
+    providers: [
+        {
+            provide: APP_GUARD,
+            useClass: ThrottlerGuard,
+        },
+    ],
 })
 export class AppModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {

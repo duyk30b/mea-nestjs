@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { External, TExternal } from '../../common/request-external'
 import { IdParam } from '../../common/swagger'
-import { TExternal, External } from '../../common/request-external'
 import { ApiArrivalService } from './api-arrival.service'
 import { ArrivalGetOneQuery, ArrivalPaginationQuery } from './request'
 

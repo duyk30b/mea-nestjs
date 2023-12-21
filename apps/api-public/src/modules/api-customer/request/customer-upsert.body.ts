@@ -1,8 +1,8 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger'
-import { IsPhone } from '_libs/common/transform-validate/class-validator.custom'
-import { EGender } from '_libs/database/common/variable'
 import { Expose } from 'class-transformer'
-import { IsBoolean, IsDefined, IsIn, IsNotEmpty, IsNumber, IsString, Validate } from 'class-validator'
+import { IsDefined, IsIn, IsNotEmpty, IsNumber, IsString, Validate } from 'class-validator'
+import { IsPhone } from '../../../../../_libs/common/transform-validate/class-validator.custom'
+import { EGender } from '../../../../../_libs/database/common/variable'
 
 export class CustomerCreateBody {
     @ApiProperty({ example: 'Phạm Hoàng Mai' })
@@ -65,10 +65,10 @@ export class CustomerCreateBody {
     @Expose()
     note: string
 
-    @ApiPropertyOptional({ example: true })
+    @ApiPropertyOptional({ example: 1 })
     @Expose()
-    @IsBoolean()
-    isActive: boolean
+    @IsIn([0, 1])
+    isActive: 0 | 1
 }
 
 export class CustomerUpdateBody extends PartialType(CustomerCreateBody) {}

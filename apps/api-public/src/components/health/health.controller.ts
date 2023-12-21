@@ -1,4 +1,5 @@
 import { Controller, Get } from '@nestjs/common'
+import { Cron, CronExpression } from '@nestjs/schedule'
 import { ApiTags } from '@nestjs/swagger'
 import {
     DiskHealthIndicator,
@@ -8,7 +9,6 @@ import {
     MemoryHealthIndicator,
     TypeOrmHealthIndicator,
 } from '@nestjs/terminus'
-import { Cron, CronExpression } from '@nestjs/schedule'
 
 @ApiTags('Health')
 @Controller('health')
@@ -29,7 +29,7 @@ export class HealthController {
         const thresholdPercent = process.platform === 'win32' ? 0.99 : 0.5
 
         return this.health.check([
-            // () => this.http.pingCheck('nestjs-docs', 'https://api.medihome.vn/document'),
+            // () => this.http.pingCheck('nestjs-docs', 'https://api.mea.vn/document'),
             () => this.db.pingCheck('database'),
             // () => this.disk.checkStorage('storage', { path: pathStorage, thresholdPercent }),
             // () => this.memory.checkHeap('memory_heap', 150 * 1024 * 1024),

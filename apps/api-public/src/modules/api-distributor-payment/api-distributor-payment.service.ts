@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
-import { DistributorPaymentRepository, DistributorRepository } from '_libs/database/repository'
+import { DistributorPaymentRepository, DistributorRepository } from '../../../../_libs/database/repository'
 import { DistributorPaymentPaginationQuery, DistributorPaymentPayDebtBody } from './request'
 
 @Injectable()

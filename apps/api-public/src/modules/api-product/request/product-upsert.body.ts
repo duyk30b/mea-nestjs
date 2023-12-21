@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger'
-import { Expose, Type } from 'class-transformer'
-import { IsArray, IsBoolean, IsDefined, IsNumber, IsString, ValidateNested } from 'class-validator'
+import { Expose, Transform } from 'class-transformer'
+import { IsBoolean, IsDefined, IsIn, IsNumber, IsString, validateSync } from 'class-validator'
 
 export class UnitConversionQuery {
     @Expose()
@@ -12,6 +12,10 @@ export class UnitConversionQuery {
     @IsDefined()
     @IsNumber()
     rate: number
+
+    @Expose()
+    @IsBoolean()
+    default: boolean
 }
 
 export class ProductCreateBody {
@@ -31,39 +35,44 @@ export class ProductCreateBody {
     @IsString()
     group: string // nhóm thuốc: kháng sinh, dinh dưỡng ...
 
-    // @ApiPropertyOptional({ name: 'unit', type: 'string', example: '[{"name":"Viên","rate":1}]' })
-    // @Expose({ name: 'unit' })
-    // @Transform(({ value }) => {
-    //     try {
-    //         const err = []
-    //         const result = JSON.parse(value).map((i: any) => {
-    //             const instance = Object.assign(new UnitConversionQuery(), i)
-    //             const validate = validateSync(instance, { whitelist: true, forbidNonWhitelisted: true })
-    //             if (validate.length) err.push(...validate)
-    //             return instance
-    //         })
-    //         if (err.length) return err
-    //         else return JSON.stringify(result)
-    //     }
-    //     catch (error) { return [error.message] }
-    // })
-    // @IsString({ message: 'Validate unit failed: Example: [{"name":"Viên","rate":1}]' })
-    // unit: string                                   // đơn vị tính: lọ, ống, vỉ
-
-    @ApiPropertyOptional({
-        type: UnitConversionQuery,
-        isArray: true,
-        example: [
-            { name: 'Viên', rate: 1 },
-            { name: 'Hộp', rate: 10 },
-        ],
+    @ApiPropertyOptional({ name: 'unit', type: 'string', example: '[{"name":"Viên","rate":1}]' })
+    @Expose({ name: 'unit' })
+    @Transform(({ value }) => {
+        try {
+            const err = []
+            const result = JSON.parse(value).map((i: any) => {
+                const instance = Object.assign(new UnitConversionQuery(), i)
+                const validate = validateSync(instance, {
+                    whitelist: true,
+                    forbidNonWhitelisted: true,
+                    skipMissingProperties: true,
+                })
+                if (validate.length) err.push(...validate)
+                return instance
+            })
+            if (err.length) return err
+            else return JSON.stringify(result)
+        } catch (error) {
+            return [error.message]
+        }
     })
-    @Expose()
-    @IsDefined()
-    @Type(() => UnitConversionQuery)
-    @IsArray()
-    @ValidateNested({ each: true })
-    unit: UnitConversionQuery[]
+    @IsString({ message: 'Validate unit failed: Example: [{"name":"Viên","rate":1}]' })
+    unit: string // đơn vị tính: lọ, ống, vỉ
+
+    // @ApiPropertyOptional({
+    //     type: UnitConversionQuery,
+    //     isArray: true,
+    //     example: [
+    //         { name: 'Viên', rate: 1 },
+    //         { name: 'Hộp', rate: 10 },
+    //     ],
+    // })
+    // @Expose()
+    // @IsDefined()
+    // @Type(() => UnitConversionQuery)
+    // @IsArray()
+    // @ValidateNested({ each: true })
+    // unit: UnitConversionQuery[]
 
     @ApiPropertyOptional({ example: 'Uống' })
     @Expose()
@@ -87,10 +96,10 @@ export class ProductCreateBody {
     @IsString()
     hintUsage: string // Nguồn gốc
 
-    @ApiPropertyOptional({ example: true })
+    @ApiPropertyOptional({ example: 1 })
     @Expose()
-    @IsBoolean()
-    isActive: boolean
+    @IsIn([0, 1])
+    isActive: 0 | 1
 }
 
 export class ProductUpdateBody extends PartialType(ProductCreateBody) {}

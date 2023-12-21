@@ -1,8 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
-import { valuesEnum } from '_libs/common/helpers/typescript.helper'
-import { ArrivalType } from '_libs/database/common/variable'
 import { Expose, Transform, Type } from 'class-transformer'
 import { IsArray, IsBoolean, IsIn, IsNumber } from 'class-validator'
+import { valuesEnum } from '../../../../../_libs/common/helpers/typescript.helper'
+import { ArrivalType } from '../../../../../_libs/database/common/variable'
 import { SortQuery } from '../../../common/query'
 
 export class ArrivalFilterQuery {

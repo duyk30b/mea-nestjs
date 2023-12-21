@@ -1,6 +1,6 @@
 import { ArgumentsHost, Catch, Logger, RpcExceptionFilter, ValidationError } from '@nestjs/common'
 import { KafkaContext, RpcException } from '@nestjs/microservices'
-import { from, Observable } from 'rxjs'
+import { Observable, from } from 'rxjs'
 
 export class KafkaException extends RpcException {
     private readonly title: string

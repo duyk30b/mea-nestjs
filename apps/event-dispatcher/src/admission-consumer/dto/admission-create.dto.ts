@@ -1,5 +1,5 @@
 import { Expose, Type } from 'class-transformer'
-import { IsDefined, IsNumber, ValidateNested } from 'class-validator'
+import { IsDefined, ValidateNested } from 'class-validator'
 import { KafkaMessageDto } from '../../kafka'
 
 export class ArrivalCreateData extends KafkaMessageDto {

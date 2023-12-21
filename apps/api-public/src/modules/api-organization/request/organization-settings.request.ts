@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { keysEnum } from '_libs/common/helpers/typescript.helper'
-import { OrganizationSettingType } from '_libs/database/entities/organization-setting.entity'
 import { Expose, Transform } from 'class-transformer'
 import { IsArray, IsEnum, IsIn, IsString } from 'class-validator'
+import { keysEnum } from '../../../../../_libs/common/helpers/typescript.helper'
+import { OrganizationSettingType } from '../../../../../_libs/database/entities/organization-setting.entity'
 
 export class OrganizationSettingGetQuery {
     // @ApiProperty({

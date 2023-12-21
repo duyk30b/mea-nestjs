@@ -4,7 +4,9 @@ import {
     InvoiceDraftUpdateDto,
     InvoiceProcessRepository,
     InvoiceRepository,
-} from '_libs/database/repository'
+    ProductBatchRepository,
+    ProductRepository,
+} from '../../../../_libs/database/repository'
 import {
     InvoiceDraftCreateBody,
     InvoiceDraftUpdateBody,
@@ -18,7 +20,9 @@ import {
 export class ApiInvoiceService {
     constructor(
         private readonly invoiceRepository: InvoiceRepository,
-        private readonly invoiceProcessRepository: InvoiceProcessRepository
+        private readonly invoiceProcessRepository: InvoiceProcessRepository,
+        private readonly productRepository: ProductRepository,
+        private readonly productBatchRepository: ProductBatchRepository
     ) {}
 
     async pagination(oid: number, query: InvoicePaginationQuery) {
@@ -72,13 +76,68 @@ export class ApiInvoiceService {
         )
     }
 
-    async createDraft(params: { oid: number; body: InvoiceDraftCreateBody }) {
+    async createBasic(params: { oid: number; body: InvoiceDraftCreateBody }) {
         const { oid, body } = params
         try {
-            return await this.invoiceProcessRepository.createDraft({
+            const { invoiceId } = await this.invoiceProcessRepository.createDraft({
                 oid,
                 invoiceInsertDto: InvoiceDraftInsertDto.from(body),
             })
+            const { productIds } = await this.invoiceProcessRepository.startShipAndPayment({
+                oid,
+                invoiceId,
+                time: Date.now(),
+                money: body.revenue,
+            })
+
+            const products = await this.productRepository.findMany({ ids: productIds, isActive: 1 })
+            const productBatches = await this.productBatchRepository.findMany({
+                productIds,
+                isActive: 1,
+            })
+            products.forEach((item) => {
+                item.productBatches = productBatches
+                    .filter((ma) => ma.productId === item.id)
+                    .sort((a, b) => ((a.expiryDate || 0) > (b.expiryDate || 0) ? 1 : -1))
+            })
+
+            return { invoiceId, products }
+        } catch (error: any) {
+            throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    async updateBasic(params: { oid: number; oldInvoiceId: number; time: number; body: InvoiceDraftUpdateBody }) {
+        const { oid, body, oldInvoiceId, time } = params
+        try {
+            await this.invoiceProcessRepository.startRefund({ oid, invoiceId: oldInvoiceId, time })
+            await this.invoiceProcessRepository.softDeleteRefund({ oid, invoiceId: oldInvoiceId })
+
+            const { invoiceId } = await this.invoiceProcessRepository.createDraft({
+                oid,
+                invoiceInsertDto: InvoiceDraftInsertDto.from(body),
+            })
+            const { productIds } = await this.invoiceProcessRepository.startShipAndPayment({
+                oid,
+                invoiceId,
+                time: Date.now(),
+                money: body.revenue,
+            })
+
+            return { invoiceId, productIds }
+        } catch (error: any) {
+            throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+        }
+    }
+
+    async createDraft(params: { oid: number; body: InvoiceDraftCreateBody }) {
+        const { oid, body } = params
+        try {
+            const { invoiceId } = await this.invoiceProcessRepository.createDraft({
+                oid,
+                invoiceInsertDto: InvoiceDraftInsertDto.from(body),
+            })
+            return { invoiceId }
         } catch (error: any) {
             throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
         }
@@ -87,11 +146,12 @@ export class ApiInvoiceService {
     async updateDraft(params: { oid: number; invoiceId: number; body: InvoiceDraftUpdateBody }) {
         const { oid, invoiceId, body } = params
         try {
-            return await this.invoiceProcessRepository.updateDraft({
+            await this.invoiceProcessRepository.updateDraft({
                 oid,
                 invoiceId,
                 invoiceUpdateDto: InvoiceDraftUpdateDto.from(body),
             })
+            return { invoiceId }
         } catch (error: any) {
             throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
         }
@@ -101,7 +161,7 @@ export class ApiInvoiceService {
         const { oid, invoiceId } = params
         try {
             await this.invoiceProcessRepository.destroyDraft({ oid, invoiceId })
-            return { success: true }
+            return { invoiceId }
         } catch (error: any) {
             throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
         }
@@ -109,20 +169,24 @@ export class ApiInvoiceService {
 
     async prepayment(params: { oid: number; invoiceId: number; money: number }) {
         const { oid, invoiceId, money } = params
-        await this.invoiceProcessRepository.prepayment({
-            oid,
-            invoiceId,
-            time: Date.now(),
-            money,
-        })
-        return { success: true }
+        try {
+            await this.invoiceProcessRepository.prepayment({
+                oid,
+                invoiceId,
+                time: Date.now(),
+                money,
+            })
+            return { invoiceId }
+        } catch (error) {
+            throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+        }
     }
 
     async startShipAndPayment(params: { oid: number; invoiceId: number; time: number; money: number }) {
         const { oid, invoiceId, time, money } = params
         try {
             await this.invoiceProcessRepository.startShipAndPayment({ oid, invoiceId, time, money })
-            return { success: true }
+            return { invoiceId }
         } catch (error: any) {
             throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
         }
@@ -132,7 +196,7 @@ export class ApiInvoiceService {
         const { oid, invoiceId, time, money } = params
         try {
             await this.invoiceProcessRepository.payDebt({ oid, invoiceId, time, money })
-            return { success: true }
+            return { invoiceId }
         } catch (error: any) {
             throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
         }
@@ -142,7 +206,7 @@ export class ApiInvoiceService {
         const { oid, invoiceId, time } = params
         try {
             await this.invoiceProcessRepository.startRefund({ oid, invoiceId, time })
-            return { success: true }
+            return { invoiceId }
         } catch (error: any) {
             throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
         }
@@ -152,7 +216,7 @@ export class ApiInvoiceService {
         const { oid, invoiceId } = params
         try {
             await this.invoiceProcessRepository.softDeleteRefund({ oid, invoiceId })
-            return { success: true }
+            return { invoiceId }
         } catch (error: any) {
             throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
         }

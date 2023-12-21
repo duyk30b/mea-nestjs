@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
-import { BusinessException } from '_libs/common/exception-filter/business-exception.filter'
-import { uniqueArray } from '_libs/common/helpers/object.helper'
-import { ProductBatchRepository, ProductRepository } from '_libs/database/repository'
+import { BusinessException } from '../../../../_libs/common/exception-filter/exception'
+import { uniqueArray } from '../../../../_libs/common/helpers/object.helper'
+import { ProductBatchRepository, ProductRepository } from '../../../../_libs/database/repository'
 import {
     ProductCreateBody,
     ProductGetManyQuery,
@@ -37,8 +37,8 @@ export class ApiProductService {
             const productIds = uniqueArray(data.map((item) => item.id))
             const productBatches = await this.productBatchRepository.findMany({
                 productIds,
-                quantity: ['!=', 0],
-                isActive: true,
+                // quantity: ['!=', 0], // cứ lấy hết số lượng 0, về frontend convert sau
+                isActive: 1,
             })
             data.forEach(
                 (item) =>
@@ -69,8 +69,8 @@ export class ApiProductService {
             const productIds = uniqueArray(products.map((item) => item.id))
             const productBatches = await this.productBatchRepository.findMany({
                 productIds,
-                quantity: ['!=', 0],
-                isActive: true,
+                quantity: filter?.productBatch?.quantity,
+                isActive: filter?.productBatch?.isActive,
             })
             products.forEach((item) => {
                 item.productBatches = productBatches

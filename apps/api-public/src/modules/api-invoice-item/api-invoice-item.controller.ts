@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common'
 import { Query } from '@nestjs/common/decorators/http/route-params.decorator'
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { External, TExternal } from '../../common/request-external'
 import { ApiInvoiceItemService } from './api-invoice-item.service'
 import { InvoiceItemPaginationQuery } from './request'

@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
-import { IsBoolean, IsDefined, IsNotEmpty, IsString, Validate } from 'class-validator'
-import { IsPhone } from '_libs/common/transform-validate/class-validator.custom'
+import { IsDefined, IsIn, IsNotEmpty, IsString, Validate } from 'class-validator'
+import { IsPhone } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 
 export class DistributorCreateBody {
     @ApiProperty({ example: 'Ngô Nhật Dương' })
@@ -39,10 +39,10 @@ export class DistributorCreateBody {
     @Expose()
     note: string
 
-    @ApiPropertyOptional({ example: true })
+    @ApiPropertyOptional({ example: 1 })
     @Expose()
-    @IsBoolean()
-    isActive: boolean
+    @IsIn([0, 1])
+    isActive: 0 | 1
 }
 
 export class DistributorUpdateBody extends PartialType(DistributorCreateBody) {}

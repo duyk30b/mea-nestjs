@@ -7,9 +7,9 @@ import {
     WebSocketGateway,
     WebSocketServer,
 } from '@nestjs/websockets'
-import { EmployeeRepository } from '_libs/database/repository'
 import { getClientIp } from 'request-ip'
 import { Server, Socket } from 'socket.io'
+import { UserRepository } from '../../../../_libs/database/repository'
 import { JwtExtendService } from '../jwt-extend/jwt-extend.service'
 import { SocketService } from './socket.service'
 import { SOCKET_EVENT } from './socket.variable'
@@ -27,7 +27,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     constructor(
         private readonly socketService: SocketService,
         private readonly jwtExtendService: JwtExtendService,
-        private readonly employeeRepository: EmployeeRepository
+        private readonly employeeRepository: UserRepository
     ) {}
 
     afterInit(io: Server) {

@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common'
-import { ERole } from '_libs/database/common/variable'
 import { Request } from 'express'
+import { ERole } from '../../../_libs/database/common/variable'
 
 export type TExternal = {
     ip: string

@@ -8,7 +8,6 @@ FROM node:16.18.1-alpine3.15 AS production
 WORKDIR /app
 COPY ["package.json", "package-lock.json", "./"]
 RUN npm install --production --silent
-COPY [".env", ".env.production", "tsconfig.json", "./"]
+COPY [".env", ".env.production", "tsconfig.json", "nest-cli.json", "./"]
 COPY ./assets ./assets
-COPY ./dist ./dist
-COPY ./libs ./libs
+COPY ./apps ./apps

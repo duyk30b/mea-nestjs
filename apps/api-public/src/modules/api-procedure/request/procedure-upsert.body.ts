@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
-import { IsBoolean, IsDefined, IsNumber, IsString } from 'class-validator'
+import { IsDefined, IsIn, IsNumber, IsString } from 'class-validator'
 
 export class ProcedureCreateBody {
     @ApiProperty({ example: 'Truyền dịch 500ml' })
@@ -24,10 +24,10 @@ export class ProcedureCreateBody {
     @IsString()
     consumableHint: string // Vật tư tiêu hao sử dụng
 
-    @ApiPropertyOptional({ example: true })
+    @ApiPropertyOptional({ example: 1 })
     @Expose()
-    @IsBoolean()
-    isActive: boolean
+    @IsIn([0, 1])
+    isActive: 0 | 1
 }
 
 export class ProcedureUpdateBody extends PartialType(ProcedureCreateBody) {}

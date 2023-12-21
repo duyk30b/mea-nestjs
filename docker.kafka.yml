@@ -1,25 +1,25 @@
-version: "3.3"
+version: "3.8"
 
 networks:
-  mh_network:
+  mn_network:
     driver: bridge
 
 services:
   zookeeper:
-    container_name: mhc_zookeeper
+    container_name: mc_zookeeper
     image: "bitnami/zookeeper:3.6.4"
     networks:
-      - mh_network
+      - mn_network
     ports:
       - "2181:2181"
     environment:
       - ALLOW_ANONYMOUS_LOGIN=yes
 
   kafka:
-    container_name: mhc_kafka
+    container_name: mc_kafka
     image: "bitnami/kafka:3.3.2"
     networks:
-      - mh_network
+      - mn_network
     depends_on:
       - zookeeper
     # volumes:
@@ -37,12 +37,12 @@ services:
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
 
   kafka-ui:
-    container_name: mhc_kafka-ui
+    container_name: mc_kafka-ui
     image: provectuslabs/kafka-ui
     depends_on:
       - kafka
     networks:
-      - mh_network
+      - mn_network
     ports:
       - "9090:8080"
     restart: unless-stopped

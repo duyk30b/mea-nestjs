@@ -1,8 +1,8 @@
 // import { faker } from '@faker-js/faker'
 // import { Injectable } from '@nestjs/common'
 // import { InjectRepository } from '@nestjs/typeorm'
-// import { randomBloodPressure, randomNumber } from '_libs/common/helpers/random.helper'
-// import { Arrival, Diagnosis } from '_libs/database/entities'
+// import { randomBloodPressure, randomNumber } from 'library/common/helpers/random.helper'
+// import { Arrival, Diagnosis } from 'library/database/entities'
 // import { DataSource, IsNull, Repository } from 'typeorm'
 
 // @Injectable()

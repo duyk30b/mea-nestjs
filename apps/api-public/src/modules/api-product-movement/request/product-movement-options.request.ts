@@ -1,9 +1,9 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
-import { valuesEnum } from '_libs/common/helpers/typescript.helper'
-import { ProductMovementType } from '_libs/database/entities/product-movement.entity'
 import { SortQuery } from 'apps/api-public/src/common/query'
 import { Expose, Transform, Type } from 'class-transformer'
 import { IsBoolean, IsEnum, IsNumber } from 'class-validator'
+import { valuesEnum } from '../../../../../_libs/common/helpers/typescript.helper'
+import { ProductMovementType } from '../../../../../_libs/database/entities/product-movement.entity'
 
 export class ProductMovementFilterQuery {
     @ApiPropertyOptional({ name: 'filter[productId]' })

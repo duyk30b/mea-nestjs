@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { uniqueArray } from '_libs/common/helpers/object.helper'
-import { ProductBatchRepository, ProductRepository } from '_libs/database/repository'
+import { uniqueArray } from '../../../../_libs/common/helpers/object.helper'
+import { ProductBatchRepository, ProductRepository } from '../../../../_libs/database/repository'
 import {
     ProductBatchGetManyQuery,
     ProductBatchGetOneQuery,

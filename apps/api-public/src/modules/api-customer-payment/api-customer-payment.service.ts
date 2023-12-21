@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
-import { CustomerPaymentRepository, CustomerRepository } from '_libs/database/repository'
+import { CustomerPaymentRepository, CustomerRepository } from '../../../../_libs/database/repository'
 import { CustomerPaymentPaginationQuery, CustomerPaymentPayDebtBody } from './request'
 
 @Injectable()

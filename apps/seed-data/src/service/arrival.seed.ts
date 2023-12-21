@@ -1,7 +1,7 @@
 // import { Injectable } from '@nestjs/common'
 // import { InjectRepository } from '@nestjs/typeorm'
-// import { randomItemsInArray } from '_libs/common/helpers/random.helper'
-// import { Arrival, Customer } from '_libs/database/entities'
+// import { randomItemsInArray } from 'library/common/helpers/random.helper'
+// import { Arrival, Customer } from 'library/database/entities'
 // import { Repository } from 'typeorm'
 
 // @Injectable()

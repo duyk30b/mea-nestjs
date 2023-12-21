@@ -1,7 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
-import { IsGmail } from '_libs/common/transform-validate/class-validator.custom'
-import { Expose, Transform } from 'class-transformer'
-import { IsString, Validate } from 'class-validator'
+import { Expose } from 'class-transformer'
+import { IsString } from 'class-validator'
 
 export class OrganizationUpdateBody {
     @ApiPropertyOptional({ example: 'Phòng khám đa khoa Việt Mỹ' })

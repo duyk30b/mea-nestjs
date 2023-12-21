@@ -834,7 +834,7 @@ export const productExampleData = [
         unit: 'Lọ',
         group: 'Thực Phẩm Chức Năng',
         route: 'Uống',
-        source: 'Nature\'s Way - Australia',
+        source: "Nature's Way - Australia",
         costPrice: 160,
         expiryDate: 1702339200000,
         retailPrice: 260,
@@ -1005,7 +1005,7 @@ export const productExampleData = [
         retailPrice: 5,
     },
     {
-        brandName: 'Modom\'S',
+        brandName: "Modom'S",
         substance: 'Domperidon 10mg',
         unit: '',
         group: 'Tiêu Hóa',
@@ -2314,7 +2314,7 @@ export const productExampleData = [
         retailPrice: 100,
     },
     {
-        brandName: 'Jack N\'Jill',
+        brandName: "Jack N'Jill",
         substance: 'kem đánh răng',
         unit: 'Tuýp',
         group: 'Khác',
@@ -2655,7 +2655,7 @@ export const productExampleData = [
         retailPrice: 320,
     },
     {
-        brandName: 'Ginkgo 6000 THOMPSON\'S',
+        brandName: "Ginkgo 6000 THOMPSON'S",
         substance: 'ginko 6000',
         unit: 'Lọ',
         group: 'Thực Phẩm Chức Năng',
@@ -2809,7 +2809,7 @@ export const productExampleData = [
         retailPrice: 230,
     },
     {
-        brandName: 'Vita gummies- nature\'s way',
+        brandName: "Vita gummies- nature's way",
         substance: 'Calcium phosphat 100mg+D3 200UI',
         unit: 'Lọ',
         group: 'Thực Phẩm Chức Năng',
@@ -3282,7 +3282,7 @@ export const productExampleData = [
         retailPrice: 160,
     },
     {
-        brandName: 'Vita gummies- nature\'s way vit C , Kẽm',
+        brandName: "Vita gummies- nature's way vit C , Kẽm",
         substance: 'vit C +kẽm',
         unit: 'Lọ',
         group: 'Dinh Dưỡng',

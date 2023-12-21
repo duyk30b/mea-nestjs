@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common'
-import { uniqueArray } from '_libs/common/helpers/object.helper'
-import { InvoiceItemType } from '_libs/database/common/variable'
-import { InvoiceItem } from '_libs/database/entities'
+import { uniqueArray } from '../../../../_libs/common/helpers/object.helper'
+import { InvoiceItemType } from '../../../../_libs/database/common/variable'
+import { InvoiceItem } from '../../../../_libs/database/entities'
 import {
     InvoiceItemRepository,
     InvoiceRepository,
     ProcedureRepository,
     ProductBatchRepository,
-} from '_libs/database/repository'
+} from '../../../../_libs/database/repository'
 import { InvoiceItemPaginationQuery } from './request'
 
 @Injectable()
@@ -48,9 +48,9 @@ export class ApiInvoiceItemService {
                 : [],
             relation?.productBatch && productBatchIds.length
                 ? this.productBatchRepository.findMany(
-                    { ids: productBatchIds },
-                    { product: !!relation?.productBatch?.product }
-                )
+                      { ids: productBatchIds },
+                      { product: !!relation?.productBatch?.product }
+                  )
                 : [],
             relation?.procedure && procedureIds.length ? this.procedureRepository.findMany({ ids: procedureIds }) : [],
         ])

@@ -46,6 +46,11 @@ export class ApiStatisticController {
         return this.apiStatisticService.sumDebt(oid)
     }
 
+    @Get('sum-money-order')
+    async sumMoneyOrder(@External() { oid }: TExternal, @Query() query: StatisticTimeQuery) {
+        return await this.apiStatisticService.sumMoneyOrder(oid, query)
+    }
+
     @Get('sum-money-invoice')
     async sumMoneyInvoice(@External() { oid }: TExternal, @Query() query: StatisticTimeQuery) {
         return await this.apiStatisticService.sumMoneyInvoice(oid, query)

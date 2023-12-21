@@ -1,11 +1,11 @@
 import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { ERole } from '_libs/database/common/variable'
+import { ERole } from '../../../../_libs/database/common/variable'
 import { External, TExternal } from '../../common/request-external'
+import { IdParam } from '../../common/swagger'
 import { Roles } from '../../guards/roles.guard'
 import { ApiEmployeeService } from './api-employee.service'
 import { EmployeePaginationQuery, EmployeeUpdateBody } from './request'
-import { IdParam } from '../../common/swagger'
 
 @ApiTags('Employee')
 @ApiBearerAuth('access-token')

@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger'
 import { PaginationQuery } from 'apps/api-public/src/common/query'
-import { Expose, Transform, Type } from 'class-transformer'
-import { IsInt, Max, Min, ValidateNested } from 'class-validator'
+import { Expose, Type } from 'class-transformer'
+import { IsInt, ValidateNested } from 'class-validator'
 import { ProcedureFilterQuery, ProcedureSortQuery } from './procedure-options.request'
 
 export class ProcedurePaginationQuery extends PaginationQuery {

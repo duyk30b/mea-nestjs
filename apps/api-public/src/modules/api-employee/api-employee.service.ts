@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common'
-import { EmployeeRepository } from '_libs/database/repository'
+import { UserRepository } from '../../../../_libs/database/repository'
 import { EmployeePaginationQuery, EmployeeUpdateBody } from './request'
 
 @Injectable()
 export class ApiEmployeeService {
-    constructor(private readonly employeeRepository: EmployeeRepository) {}
+    constructor(private readonly employeeRepository: UserRepository) {}
 
     async pagination(oid: number, query: EmployeePaginationQuery) {
         return await this.employeeRepository.pagination({

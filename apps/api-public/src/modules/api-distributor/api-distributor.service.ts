@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common'
-import { DistributorRepository } from '_libs/database/repository'
+import { BusinessException } from '../../../../_libs/common/exception-filter/exception'
+import { DistributorRepository } from '../../../../_libs/database/repository'
 import {
     DistributorCreateBody,
     DistributorGetManyQuery,
     DistributorPaginationQuery,
     DistributorUpdateBody,
 } from './request'
-import { BusinessException } from '_libs/common/exception-filter/business-exception.filter'
 
 @Injectable()
 export class ApiDistributorService {

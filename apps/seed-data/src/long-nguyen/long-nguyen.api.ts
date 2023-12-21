@@ -1,10 +1,7 @@
-import { Controller, Get } from '@nestjs/common'
+import { Controller } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { InjectEntityManager } from '@nestjs/typeorm'
-import { OrganizationSetting, Product, ProductBatch } from '_libs/database/entities'
-import { OrganizationSettingType } from '_libs/database/entities/organization-setting.entity'
 import { EntityManager } from 'typeorm'
-import { productExampleData, productGroupExampleData } from './product.example'
 
 @ApiTags('LongNguyen Data')
 @ApiBearerAuth('access-token')

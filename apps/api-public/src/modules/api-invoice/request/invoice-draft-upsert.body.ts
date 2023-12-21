@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger'
-import { DiscountType } from '_libs/database/common/variable'
 import { Expose, Type } from 'class-transformer'
 import { IsArray, IsDefined, IsEnum, IsNotEmpty, IsNumber, IsPositive, IsString, ValidateNested } from 'class-validator'
+import { DiscountType } from '../../../../../_libs/database/common/variable'
 import { InvoiceItemUpsertBody } from './invoice-item-upsert.body'
 
 export class InvoiceSurchargeDraft {

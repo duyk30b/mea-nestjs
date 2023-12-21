@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { BusinessException } from '_libs/common/exception-filter/business-exception.filter'
-import { CustomerRepository } from '_libs/database/repository'
+import { BusinessException } from '../../../../_libs/common/exception-filter/exception'
+import { CustomerRepository } from '../../../../_libs/database/repository'
 import {
     CustomerCreateBody,
     CustomerGetManyQuery,

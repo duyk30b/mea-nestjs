@@ -1,8 +1,8 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { valuesEnum } from '_libs/common/helpers/typescript.helper'
-import { DiscountType, InvoiceItemType } from '_libs/database/common/variable'
-import { Expose, Type } from 'class-transformer'
-import { IsDefined, IsEnum, IsNumber, IsString, Min, ValidateNested } from 'class-validator'
+import { Expose, Transform } from 'class-transformer'
+import { IsDefined, IsEnum, IsNumber, IsString, Min, validateSync } from 'class-validator'
+import { valuesEnum } from '../../../../../_libs/common/helpers/typescript.helper'
+import { DiscountType, InvoiceItemType } from '../../../../../_libs/database/common/variable'
 import { UnitConversionQuery } from '../../api-product/request'
 
 export class InvoiceItemUpsertBody {
@@ -21,26 +21,31 @@ export class InvoiceItemUpsertBody {
     @IsEnum(InvoiceItemType)
     type: InvoiceItemType
 
-    // @ApiPropertyOptional({ name: 'unit', type: 'string', example: '{"name":"Viên","rate":1}' })
-    // @Expose({ name: 'unit' })
-    // @Transform(({ value }) => {
-    //     try {
-    //         const instance = Object.assign(new UnitConversionQuery(), JSON.parse(value))
-    //         const validate = validateSync(instance, { whitelist: true, forbidNonWhitelisted: true })
-    //         if (validate.length) return validate
-    //         else return JSON.stringify(instance)
-    //     }
-    //     catch (error) { return [error.message] }
-    // })
-    // @IsString({ message: 'Validate unit failed: Example: {"name":"Viên","rate":1}' })
-    // unit: string                                   // đơn vị tính: lọ, ống, vỉ
+    @ApiPropertyOptional({ name: 'unit', type: 'string', example: '{"name":"Viên","rate":1}' })
+    @Expose({ name: 'unit' })
+    @Transform(({ value }) => {
+        try {
+            const instance = Object.assign(new UnitConversionQuery(), JSON.parse(value))
+            const validate = validateSync(instance, {
+                whitelist: true,
+                forbidNonWhitelisted: true,
+                skipMissingProperties: true,
+            })
+            if (validate.length) return validate
+            else return JSON.stringify(instance)
+        } catch (error) {
+            return [error.message]
+        }
+    })
+    @IsString({ message: 'Validate unit failed: Example: {"name":"Viên","rate":1}' })
+    unit: string // đơn vị tính: lọ, ống, vỉ
 
-    @ApiPropertyOptional({ type: UnitConversionQuery, example: { name: 'Viên', rate: 1 } })
-    @Expose()
-    @Type(() => UnitConversionQuery)
-    @IsDefined()
-    @ValidateNested({ each: true })
-    unit: UnitConversionQuery
+    // @ApiPropertyOptional({ type: UnitConversionQuery, example: { name: 'Viên', rate: 1 } })
+    // @Expose()
+    // @Type(() => UnitConversionQuery)
+    // @IsDefined()
+    // @ValidateNested({ each: true })
+    // unit: UnitConversionQuery
 
     @ApiPropertyOptional({ example: 12_000 })
     @Expose()
@@ -56,6 +61,7 @@ export class InvoiceItemUpsertBody {
 
     @ApiProperty({ example: 22_500 })
     @Expose()
+    @Transform(({ value }) => Math.round(value || 0))
     @IsDefined()
     @IsNumber()
     discountMoney: number
@@ -74,6 +80,7 @@ export class InvoiceItemUpsertBody {
 
     @ApiProperty({ example: 22_500 })
     @Expose()
+    @Transform(({ value }) => Math.round(value || 0))
     @IsDefined()
     @IsNumber()
     actualPrice: number

@@ -6,13 +6,13 @@ module.exports = {
         sourceType: 'module',
     },
     plugins: ['@typescript-eslint/eslint-plugin'],
-    extends: ['plugin:@typescript-eslint/recommended'],
+    extends: ['plugin:@typescript-eslint/recommended', 'plugin:prettier/recommended'],
     root: true,
     env: {
         node: true,
         jest: true,
     },
-    ignorePatterns: ['dist/*', 'src/generated/*'],
+    ignorePatterns: ['dist/*', 'src/generated/*', 'assets/*'],
     rules: {
         '@typescript-eslint/interface-name-prefix': 'off',
         '@typescript-eslint/explicit-function-return-type': 'off',
@@ -35,9 +35,9 @@ module.exports = {
                 ignoreStrings: true,
             },
         ],
-        'indent': [1, 4, { ignoredNodes: ['PropertyDefinition'] }],
+        'indent': [0, 4, { ignoredNodes: ['PropertyDefinition'] }],
         'semi': [1, 'never'], // dấu ; cuối dòng
-        'quotes': [1, 'single', { allowTemplateLiterals: true }],
+        'quotes': [1, 'single', { allowTemplateLiterals: true, avoidEscape: true }],
         'quote-props': [1, 'consistent-as-needed'], // dấu quote ở key của object -> dùng 1 cách nhất quán
         'arrow-parens': 1, // bắt buộc (a)=>{} thay vì a=>{}
         '@typescript-eslint/no-unused-vars': 0,
@@ -64,7 +64,7 @@ module.exports = {
         'array-bracket-spacing': [1, 'never'], // space trong array, eg: [ 1,2, 3 ] => [1,2, 3]
         'array-bracket-newline': [1, 'consistent'], // quy tắc xuống dòng với dấu [ và ] trong mảng
         'array-element-newline': [1, 'consistent'], // quy tắc xuống dòng với các item trong mảng
-        'operator-linebreak': [1, 'before'], // dấu ||, ?, +, = ở đầu dòng
+        'operator-linebreak': [0, 'before'], // dấu ||, ?, +, = ở đầu dòng
         'padded-blocks': [1, { blocks: 'never', classes: 'never' }], // Dòng trống sau { và trước }
         'padding-line-between-statements': [
             // quy tắc cách 1 dòng
@@ -80,6 +80,6 @@ module.exports = {
         'function-call-argument-newline': [1, 'consistent'], // quy tắc xuống dòng của các argument
         'nonblock-statement-body-position': [1, 'beside'], // không cho xuống dòng với if else không có {}
         'no-useless-escape': 1, // không cho viết ký tự bình thường thêm \ như "\a" -> "a"
-        'prefer-destructuring': [1, { object: true, array: true }], // Bắt buộc dùng destructuring
+        'prefer-destructuring': [0, { object: true, array: true }], // Bắt buộc dùng destructuring
     },
 }

@@ -1,10 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
-import { randomEnum, randomItemsInArray, randomNumber, shuffleArray } from '_libs/common/helpers/random.helper'
-import { DiscountType } from '_libs/database/common/variable'
-import { Distributor, ProductBatch } from '_libs/database/entities'
-import { ReceiptInsertDto, ReceiptItemDto, ReceiptProcessRepository } from '_libs/database/repository'
-import { Repository } from 'typeorm'
 
 @Injectable()
 export class ReceiptSeed {
