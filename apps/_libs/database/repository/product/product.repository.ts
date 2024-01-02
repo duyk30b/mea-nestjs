@@ -1,15 +1,18 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
-import { EntityManager, FindOptionsWhere, In, Not, Raw } from 'typeorm'
+import { DataSource, EntityManager, FindOptionsWhere, In, Not, Raw } from 'typeorm'
 import { convertViToEn } from '../../../common/helpers/string.helper'
 import { NoExtraProperties } from '../../../common/helpers/typescript.helper'
 import { escapeSearch } from '../../common/base.dto'
-import { Product } from '../../entities'
+import { Product, ProductBatch, ProductMovement } from '../../entities'
 import { ProductCondition, ProductOrder } from './product.dto'
 
 @Injectable()
 export class ProductRepository {
-    constructor(@InjectEntityManager() private manager: EntityManager) {}
+    constructor(
+        private dataSource: DataSource,
+        @InjectEntityManager() private manager: EntityManager
+    ) {}
 
     getWhereOptions(condition: ProductCondition = {}) {
         const where: FindOptionsWhere<Product> = {}
@@ -94,6 +97,43 @@ export class ProductRepository {
     ) {
         const where = this.getWhereOptions(condition)
         return await this.manager.update(Product, where, dto)
+    }
+
+    async delete(oid: number, productId: number) {
+        return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
+            const numberMovement = await manager.count(ProductMovement, {
+                where: { productId, oid },
+            })
+            if (numberMovement > 0) {
+                // nếu đã có giao dịch thì chỉ có thể xóa mềm
+                const updateResult = await manager.update(
+                    Product,
+                    <FindOptionsWhere<Product>>{
+                        oid,
+                        id: productId,
+                        quantity: 0,
+                    },
+                    { deletedAt: Date.now() }
+                )
+                if (updateResult.affected !== 1) {
+                    throw new Error('Xóa sản phẩm thất bại')
+                }
+            } else {
+                // nếu chưa có giao dịch thì xóa cứng
+                const deleteResult = await manager.delete(Product, <FindOptionsWhere<Product>>{
+                    oid,
+                    id: productId,
+                    quantity: 0,
+                })
+                if (deleteResult.affected !== 1) {
+                    throw new Error('Xóa sản phẩm thất bại')
+                }
+                await manager.delete(ProductBatch, <FindOptionsWhere<ProductBatch>>{
+                    oid,
+                    productId,
+                })
+            }
+        })
     }
 
     async calculateProductQuantity(options: { oid: number; productIds: number[] }) {

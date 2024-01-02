@@ -1,7 +1,7 @@
 import { Injectable, NestMiddleware } from '@nestjs/common'
 import { NextFunction, Response } from 'express'
 import { getClientIp } from 'request-ip'
-import { RequestExternal } from '../common/request-external'
+import { RequestExternal } from '../../../_libs/common/request/external.request'
 
 @Injectable()
 export class DetectClientMiddleware implements NestMiddleware {

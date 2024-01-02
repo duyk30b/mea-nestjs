@@ -1,4 +1,23 @@
-import { ComparisonType } from '../../database/common/base.dto'
+export const ComparisonType = [
+    '>',
+    'GT',
+    '>=',
+    'GTE',
+    '<',
+    'LT',
+    '<=',
+    'LTE',
+    '==',
+    'EQUAL',
+    '!=',
+    'NOT',
+    'IS_NULL',
+    'NOT_NULL',
+    'LIKE',
+    'IN',
+    'BETWEEN',
+] as const
+export type ComparisonType = (typeof ComparisonType)[number]
 
 export const transformComparisonQuery = (
     value: string,

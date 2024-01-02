@@ -1,10 +1,10 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception'
-import Employee from '../../../../_libs/database/entities/user.entity'
-import { IRefreshTokenPayload } from '../../common/constants'
-import { TExternal } from '../../common/request-external'
+import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
+import { TExternal } from '../../../../_libs/common/request/external.request'
+import { IRefreshTokenPayload } from '../../../../_libs/common/request/payload'
+import User from '../../../../_libs/database/entities/user.entity'
 import { JwtConfig } from '../../environments'
 
 @Injectable()
@@ -14,7 +14,7 @@ export class JwtExtendService {
         private readonly jwtService: JwtService
     ) {}
 
-    createAccessToken(user: Employee, ip: string): { token: string; exp: number } {
+    createAccessToken(user: User, ip: string): { token: string; exp: number } {
         const userPayload: TExternal = {
             ip,
             orgPhone: user.organization.phone,
@@ -35,7 +35,7 @@ export class JwtExtendService {
         return { token, exp }
     }
 
-    createRefreshToken(user: Employee, ip: string): { token: string; exp: number } {
+    createRefreshToken(user: User, ip: string): { token: string; exp: number } {
         const userPayload: IRefreshTokenPayload = {
             ip,
             oid: user.organization.id,
@@ -53,7 +53,7 @@ export class JwtExtendService {
         return { token, exp }
     }
 
-    createTokenFromUser(user: Employee, ip: string) {
+    createTokenFromUser(user: User, ip: string) {
         const accessToken = this.createAccessToken(user, ip)
         const refreshToken = this.createRefreshToken(user, ip)
         return { accessToken, refreshToken }

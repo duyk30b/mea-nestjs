@@ -41,7 +41,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         const ip = getClientIp(socket.client.request)
         try {
             const { oid, uid } = this.jwtExtendService.verifyRefreshToken(token, ip)
-            socket.data.user = await this.employeeRepository.findOneOrFail({ oid, id: uid })
+            socket.data.user = await this.employeeRepository.findOneBy({ oid, id: uid })
             socket.join(oid.toString())
             this.connections[uid] ||= []
             this.connections[uid].push(socket.id)

@@ -8,15 +8,15 @@
 // } from 'library/common/helpers/random.helper'
 // import { encrypt } from 'library/common/helpers/string.helper'
 // import { EGender, ERole } from 'library/database/common/variable'
-// import { Employee } from 'library/database/entities'
+// import { User } from 'library/database/entities'
 // import { DataSource } from 'typeorm'
 
 // @Injectable()
-// export class EmployeeSeed {
+// export class UserSeed {
 //     constructor(private readonly dataSource: DataSource) {}
 
 //     createFactory(oid: number, number: number) {
-//         const factoryList: Employee[] = []
+//         const factoryList: User[] = []
 //         for (let i = 0; i < number; i++) {
 //             const gender = randomEnum<EGender>(EGender)
 //             const fullName = randomFullName(gender)
@@ -25,7 +25,7 @@
 //             const password = '$2b$05$G17lx6yO8fK2iJK6tqX2XODsCrawFzSht5vJQjE7wlDJO0.4zxPxO' // Abc@123456'
 //             const secret = encrypt('Abc@123456', userName)
 
-//             const employee = new Employee()
+//             const employee = new User()
 
 //             employee.oid = oid
 //             employee.phone = randomPhoneNumber()
@@ -43,18 +43,18 @@
 //     }
 
 //     async start(oid: number, number: number) {
-//         const admin = new Employee()
+//         const admin = new User()
 //         admin.username = 'admin'
 //         admin.oid = oid
 //         admin.password = '$2b$05$G17lx6yO8fK2iJK6tqX2XODsCrawFzSht5vJQjE7wlDJO0.4zxPxO' // Abc@123456'
 //         admin.role = ERole.Admin
 //         await this.dataSource
-//             .getRepository(Employee)
+//             .getRepository(User)
 //             .upsert(admin, { skipUpdateIfNoValuesChanged: true, conflictPaths: {} })
 
 //         const employeesDto = this.createFactory(oid, number)
 
-//         // await this.dataSource.getRepository(Employee).save(employeesDto, { transaction: false })
-//         await this.dataSource.getRepository(Employee).insert(employeesDto)
+//         // await this.dataSource.getRepository(User).save(employeesDto, { transaction: false })
+//         await this.dataSource.getRepository(User).insert(employeesDto)
 //     }
 // }

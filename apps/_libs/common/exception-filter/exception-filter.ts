@@ -1,23 +1,38 @@
 import {
     ArgumentsHost,
     Catch,
-    ExceptionFilter as ExceptionFilterCommon,
+    ExceptionFilter,
     HttpStatus,
     Logger,
     NotFoundException,
+    ValidationError,
 } from '@nestjs/common'
 import { KafkaContext, NatsContext } from '@nestjs/microservices'
 import { ThrottlerException } from '@nestjs/throttler'
-import { I18nTranslations } from 'assets/generated/i18n.generated'
+import { I18nPath, I18nTranslations } from 'assets/generated/i18n.generated'
 import { Request, Response } from 'express'
 import { I18nContext } from 'nestjs-i18n'
 import { from } from 'rxjs'
-import { BusinessException, ValidationException } from './exception'
+
+export class ValidationException extends Error {
+    public errors: ValidationError[]
+    constructor(validationErrors: ValidationError[] = []) {
+        super('Validate Failed')
+        this.errors = validationErrors
+    }
+}
+
+export class BusinessException extends Error {
+    public statusCode: HttpStatus
+
+    constructor(message: I18nPath, statusCode = HttpStatus.BAD_REQUEST) {
+        super(message)
+        this.statusCode = statusCode
+    }
+}
 
 @Catch(Error)
-export class ExceptionFilter implements ExceptionFilterCommon {
-    constructor(private readonly logger = new Logger(ExceptionFilter.name)) {}
-
+export class ServerExceptionFilter implements ExceptionFilter {
     catch(exception: Error, host: ArgumentsHost) {
         let statusCode = HttpStatus.INTERNAL_SERVER_ERROR
         let { message } = exception
@@ -47,7 +62,7 @@ export class ExceptionFilter implements ExceptionFilterCommon {
             const request = ctx.getRequest<Request>()
 
             const { originalUrl, method, body } = request
-            this.logger.error(
+            Logger.error(
                 JSON.stringify({
                     message,
                     type: '[HTTP]',
@@ -56,13 +71,14 @@ export class ExceptionFilter implements ExceptionFilterCommon {
                     errors,
                     body,
                     external: (request as any).external,
-                })
+                }),
+                exception.name
             )
             response.status(statusCode).json({
                 statusCode,
                 errors,
                 message,
-                path: request.url,
+                path: originalUrl,
             })
         } else if (host.getType() === 'rpc') {
             if (res.constructor.name === 'NatsContext') {

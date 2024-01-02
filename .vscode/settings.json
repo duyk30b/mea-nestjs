@@ -14,9 +14,11 @@
     },
     "[typescript]": {
         "editor.defaultFormatter": "esbenp.prettier-vscode",
-        "editor.codeActionsOnSave": {
-            "source.organizeImports": "explicit"
-        }
+        "editor.codeActionsOnSave": [
+            "source.sortImports",
+            "source.formatDocument",
+            "source.fixAll"
+        ]
     },
     "search.smartCase": true,
     "javascript.preferences.quoteStyle": "single",

@@ -3,7 +3,8 @@ import { KafkaContext, NatsContext } from '@nestjs/microservices'
 import { Request } from 'express'
 import { Observable, throwError } from 'rxjs'
 import { catchError, tap } from 'rxjs/operators'
-import { ValidationException } from '../exception-filter/exception'
+import * as url from 'url'
+import { ValidationException } from '../exception-filter/exception-filter'
 
 @Injectable()
 export class AccessLogInterceptor implements NestInterceptor {
@@ -22,9 +23,11 @@ export class AccessLogInterceptor implements NestInterceptor {
             const ctx = context.switchToHttp()
             const request: Request = ctx.getRequest()
             const { originalUrl, method, body } = request
+            const urlParse = url.parse(originalUrl, true)
             message.type = '[API]'
             message.method = method
-            message.url = originalUrl
+            message.path = urlParse.pathname
+            message.query = urlParse.query
             message.className = className
             message.funcName = funcName
             message.external = (request as any).external
@@ -53,7 +56,7 @@ export class AccessLogInterceptor implements NestInterceptor {
                 if (showData) {
                     message.request = req
                 }
-                const topicInfo = {
+                message.topicInfo = {
                     topic: response.getTopic(),
                     partition: response.getPartition(),
                     offset: response.getMessage().offset,

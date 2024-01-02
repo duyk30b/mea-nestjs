@@ -23,7 +23,6 @@ import {
     CustomerPayment,
     Distributor,
     DistributorPayment,
-    Employee,
     Invoice,
     InvoiceExpense,
     InvoiceItem,
@@ -36,6 +35,7 @@ import {
     ProductMovement,
     Receipt,
     ReceiptItem,
+    User,
 } from '../entities'
 
 @Global()
@@ -46,7 +46,7 @@ import {
             CustomerPayment,
             Distributor,
             DistributorPayment,
-            Employee,
+            User,
             Invoice,
             InvoiceItem,
             InvoiceSurcharge,

@@ -32,9 +32,6 @@
     "Invoice": {
         "NotExist": "Invoice.NotExist"
     },
-    "Employee": {
-        "NotExist": "Employee.NotExist"
-    },
     "Distributor": {
         "NotExist": "Distributor.NotExist"
     }

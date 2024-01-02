@@ -1,93 +1,52 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { FindOptionsWhere, In, Like, Repository, UpdateResult } from 'typeorm'
-import { convertViToEn } from '../../../common/helpers/string.helper'
-import { NoExtraProperties } from '../../../common/helpers/typescript.helper'
-import { escapeSearch } from '../../common/base.dto'
-import { Distributor } from '../../entities'
-import { DistributorCondition, DistributorOrder } from './distributor.dto'
+import { DataSource, Repository } from 'typeorm'
+import { Distributor, Receipt } from '../../entities'
+import { BaseRepository } from '../base.repository'
 
 @Injectable()
-export class DistributorRepository {
-    constructor(@InjectRepository(Distributor) private distributorRepository: Repository<Distributor>) {}
+export class DistributorRepository extends BaseRepository<
+    Distributor,
+    { [P in 'id' | 'debt' | 'fullName']?: 'ASC' | 'DESC' },
+    { [P in 'invoice']?: boolean }
+> {
+    constructor(
+        private dataSource: DataSource,
+        @InjectRepository(Distributor) private distributorRepository: Repository<Distributor>
+    ) {
+        super(distributorRepository)
+    }
 
-    getWhereOptions(condition: DistributorCondition) {
-        const where: FindOptionsWhere<Distributor> = {}
-
-        if (condition.id != null) where.id = condition.id
-        if (condition.oid != null) where.oid = condition.oid
-        if (condition.isActive != null) where.isActive = condition.isActive
-
-        if (condition.ids) {
-            if (condition.ids.length === 0) condition.ids.push(0)
-            where.id = In(condition.ids)
-        }
-
-        if (condition.fullName && Array.isArray(condition.fullName)) {
-            if (condition.fullName[0] === 'LIKE' && condition.fullName[1]) {
-                const text = escapeSearch(convertViToEn(condition.fullName[1]))
-                where.fullName = Like(`%${text}%`)
+    async delete(oid: number, distributorId: number) {
+        return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
+            const numberReceipt = await manager.count(Receipt, {
+                where: { distributorId, oid },
+            })
+            if (numberReceipt > 0) {
+                // nếu đã có phiếu nhập thì chỉ có thể xóa mềm
+                const updateResult = await manager.update(
+                    Distributor,
+                    {
+                        oid,
+                        id: distributorId,
+                        debt: 0,
+                    },
+                    { deletedAt: Date.now() }
+                )
+                if (updateResult.affected !== 1) {
+                    throw new Error('Xóa nhà cung cấp thất bại')
+                }
+            } else {
+                // nếu nhà cung cấp này chưa có phiếu nào có thể xóa cứng
+                const deleteResult = await manager.delete(Distributor, {
+                    oid,
+                    id: distributorId,
+                    debt: 0,
+                })
+                if (deleteResult.affected !== 1) {
+                    throw new Error('Xóa nhà cung cấp thất bại')
+                }
             }
-        }
-        if (condition.phone && Array.isArray(condition.phone)) {
-            if (condition.phone[0] === 'LIKE' && condition.phone[1]) {
-                where.phone = Like(`%${escapeSearch(condition.phone[1])}%`)
-            }
-        }
-
-        return where
-    }
-
-    async pagination<T extends Partial<DistributorOrder>>(options: {
-        page: number
-        limit: number
-        condition?: DistributorCondition
-        order?: NoExtraProperties<DistributorOrder, T>
-    }) {
-        const { limit, page, condition, order } = options
-
-        const [data, total] = await this.distributorRepository.findAndCount({
-            where: this.getWhereOptions(condition),
-            order,
-            take: limit,
-            skip: (page - 1) * limit,
         })
-
-        return { total, page, limit, data }
-    }
-
-    async find(options: {
-        limit: number
-        condition?: DistributorCondition
-        order?: DistributorOrder
-    }): Promise<Distributor[]> {
-        return await this.distributorRepository.find({
-            where: this.getWhereOptions(options.condition),
-            order: options.order,
-            take: options.limit,
-        })
-    }
-
-    async findMany(condition: DistributorCondition): Promise<Distributor[]> {
-        return await this.distributorRepository.find({ where: this.getWhereOptions(condition) })
-    }
-
-    async findOne(condition: DistributorCondition): Promise<Distributor> {
-        return await this.distributorRepository.findOne({ where: this.getWhereOptions(condition) })
-    }
-
-    async insertOne<T extends Partial<Distributor>>(
-        dto: NoExtraProperties<Partial<Distributor>, T>
-    ): Promise<Distributor> {
-        const distributor = this.distributorRepository.create(dto)
-        return this.distributorRepository.save(distributor, { transaction: false })
-    }
-
-    async updateOne(
-        condition: DistributorCondition,
-        dto: Partial<Omit<Distributor, 'id' | 'oid'>>
-    ): Promise<UpdateResult> {
-        const where = this.getWhereOptions(condition)
-        return await this.distributorRepository.update(where, dto)
     }
 }
