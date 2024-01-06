@@ -1,4 +1,3 @@
-import { ConditionString } from 'apps/_libs/common/dto/condition-string'
 import { Expose, Type } from 'class-transformer'
 import { IsBoolean, IsEnum, IsNumber, ValidateNested } from 'class-validator'
 import { ConditionTimestamp } from '../../../../../_libs/common/dto/condition-timestamp'

@@ -1,6 +1,6 @@
-import { ConditionTimestamp } from 'apps/_libs/common/dto'
 import { Expose, Type } from 'class-transformer'
 import { IsBoolean, IsEnum, IsNumber, ValidateNested } from 'class-validator'
+import { ConditionTimestamp } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 import { ReceiptStatus } from '../../../../../_libs/database/common/variable'
 

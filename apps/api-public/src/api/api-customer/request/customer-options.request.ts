@@ -1,7 +1,7 @@
-import { ConditionTimestamp } from 'apps/_libs/common/dto/condition-timestamp'
 import { Expose, Type } from 'class-transformer'
 import { IsBoolean, IsIn, IsNotEmpty, IsString, ValidateNested } from 'class-validator'
 import { ConditionNumber } from '../../../../../_libs/common/dto/condition-number'
+import { ConditionTimestamp } from '../../../../../_libs/common/dto/condition-timestamp'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 
 export class CustomerRelationQuery {

@@ -1,6 +1,6 @@
-import { ConditionNumber, ConditionTimestamp } from 'apps/_libs/common/dto'
 import { Expose, Type } from 'class-transformer'
 import { IsBoolean, IsIn, IsNumber, ValidateNested } from 'class-validator'
+import { ConditionNumber, ConditionTimestamp } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 
 export class ProductBatchRelationQuery {

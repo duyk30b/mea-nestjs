@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { NoExtra } from 'apps/_libs/common/dto'
+import { NoExtra } from '../../../../_libs/common/dto'
 import { uniqueArray } from '../../../../_libs/common/helpers/object.helper'
 import { ProductBatch } from '../../../../_libs/database/entities'
 import { ProductBatchRepository, ProductRepository } from '../../../../_libs/database/repository'
