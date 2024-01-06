@@ -7,21 +7,7 @@ import { HeaderResolver, I18nJsonLoader, I18nMiddleware, I18nModule, QueryResolv
 import * as path from 'path'
 import { RepositoryModule } from '../../_libs/database/repository/repository.module'
 import { SqlModule } from '../../_libs/database/sql.module'
-import { ApiCustomerPaymentModule } from './api/api-customer-payment/api-customer-payment.module'
-import { ApiCustomerModule } from './api/api-customer/api-customer.module'
-import { ApiDistributorPaymentModule } from './api/api-distributor-payment/api-distributor-payment.module'
-import { ApiDistributorModule } from './api/api-distributor/api-distributor.module'
-import { ApiInvoiceItemModule } from './api/api-invoice-item/api-invoice-item.module'
-import { ApiInvoiceModule } from './api/api-invoice/api-invoice.module'
-import { ApiOrganizationModule } from './api/api-organization/api-organization.module'
-import { ApiProcedureModule } from './api/api-procedure/api-procedure.module'
-import { ApiProductBatchModule } from './api/api-product-batch/api-product-batch.module'
-import { ApiProductMovementModule } from './api/api-product-movement/api-product-movement.module'
-import { ApiProductModule } from './api/api-product/api-product.module'
-import { ApiReceiptModule } from './api/api-receipt/api-receipt.module'
-import { ApiStatisticModule } from './api/api-statistics/api-statistic.module'
-import { ApiUserModule } from './api/api-user/api-user.module'
-import { AuthModule } from './api/auth/auth.module'
+import { ApiModule } from './api/api.module'
 import { EmailModule } from './components/email/email.module'
 import { HealthModule } from './components/health/health.module'
 import { JwtExtendModule } from './components/jwt-extend/jwt-extend.module'
@@ -55,22 +41,8 @@ import { ValidateTokenMiddleware } from './middleware/validate-token.middleware'
         // SocketModule,
         EmailModule,
         JwtExtendModule,
-        AuthModule,
-        ApiCustomerModule,
-        ApiCustomerPaymentModule,
-        ApiDistributorModule,
-        ApiDistributorPaymentModule,
-        ApiUserModule,
-        ApiInvoiceModule,
-        ApiInvoiceItemModule,
-        ApiOrganizationModule,
-        ApiProductModule,
-        ApiProductBatchModule,
-        ApiProductMovementModule,
-        ApiProcedureModule,
-        ApiReceiptModule,
-        ApiStatisticModule,
-        ApiUserModule,
+
+        ApiModule,
     ],
     controllers: [],
     providers: [
