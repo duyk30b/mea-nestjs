@@ -1,57 +1,74 @@
-import { ApiPropertyOptional } from '@nestjs/swagger'
-import { Expose, Type } from 'class-transformer'
-import { IsInt, ValidateNested } from 'class-validator'
-import { PaginationQuery } from '../../../../../_libs/common/dto/query'
+import { ApiPropertyOptional, IntersectionType, PickType } from '@nestjs/swagger'
+import { Expose, Transform, plainToInstance } from 'class-transformer'
+import { IsObject, ValidateNested } from 'class-validator'
+import { LimitQuery, PaginationQuery } from '../../../../../_libs/common/dto/query'
 import {
     ProductBatchFilterQuery,
     ProductBatchRelationQuery,
     ProductBatchSortQuery,
 } from './product-batch-options.request'
 
-export class ProductBatchPaginationQuery extends PaginationQuery {
-    @ApiPropertyOptional({ type: ProductBatchFilterQuery })
+export class ProductBatchGetQuery {
+    @ApiPropertyOptional({ type: String, example: '{"invoices":true}' })
     @Expose()
-    @Type(() => ProductBatchFilterQuery)
-    @ValidateNested({ each: true })
-    filter: ProductBatchFilterQuery
-
-    @ApiPropertyOptional({ type: ProductBatchRelationQuery })
-    @Expose()
-    @Type(() => ProductBatchRelationQuery)
-    @ValidateNested({ each: true })
-    relation: ProductBatchRelationQuery
-
-    @ApiPropertyOptional({ type: ProductBatchSortQuery })
-    @Expose()
-    @Type(() => ProductBatchSortQuery)
-    @ValidateNested({ each: true })
-    sort: ProductBatchSortQuery
-}
-
-export class ProductBatchGetOneQuery {
-    @ApiPropertyOptional({ type: ProductBatchRelationQuery })
-    @Expose()
-    @Type(() => ProductBatchRelationQuery)
+    @Transform(({ value }) => {
+        try {
+            if (!value) return undefined // return undefined để không validate nữa
+            const plain = JSON.parse(value)
+            return plainToInstance(ProductBatchRelationQuery, plain, {
+                exposeUnsetFields: false,
+                excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
+            })
+        } catch (error) {
+            return error.message
+        }
+    })
+    @IsObject()
     @ValidateNested({ each: true })
     relation: ProductBatchRelationQuery
+
+    @ApiPropertyOptional({ type: String, example: '{"isActive":1,"debt":{"GT":1500000}}' })
+    @Expose()
+    @Transform(({ value }) => {
+        try {
+            if (!value) return undefined // return undefined để không validate nữa
+            const plain = JSON.parse(value)
+            return plainToInstance(ProductBatchFilterQuery, plain, {
+                exposeUnsetFields: false,
+                excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
+            })
+        } catch (error) {
+            return error.message
+        }
+    })
+    @IsObject()
+    @ValidateNested({ each: true })
+    filter?: ProductBatchFilterQuery
+
+    @ApiPropertyOptional({ type: String, example: '{"id":"ASC"}' })
+    @Expose()
+    @Transform(({ value }) => {
+        try {
+            if (!value) return undefined // return undefined để không validate nữa
+            const plain = JSON.parse(value)
+            return plainToInstance(ProductBatchSortQuery, plain, {
+                exposeUnsetFields: false,
+                excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
+            })
+        } catch (error) {
+            return error.message
+        }
+    })
+    @IsObject()
+    @ValidateNested({ each: true })
+    sort?: ProductBatchSortQuery
 }
 
-export class ProductBatchGetManyQuery {
-    @ApiPropertyOptional({ example: 10 })
-    @Expose()
-    @Type(() => Number)
-    @IsInt()
-    limit: number
+export class ProductBatchPaginationQuery extends IntersectionType(ProductBatchGetQuery, PaginationQuery) {}
 
-    @ApiPropertyOptional({ type: ProductBatchFilterQuery })
-    @Expose()
-    @Type(() => ProductBatchFilterQuery)
-    @ValidateNested({ each: true })
-    filter: ProductBatchFilterQuery
+export class ProductBatchGetManyQuery extends IntersectionType(
+    PickType(ProductBatchGetQuery, ['filter', 'relation']),
+    LimitQuery
+) {}
 
-    @ApiPropertyOptional({ type: ProductBatchRelationQuery })
-    @Expose()
-    @Type(() => ProductBatchRelationQuery)
-    @ValidateNested({ each: true })
-    relation: ProductBatchRelationQuery
-}
+export class ProductBatchGetOneQuery extends PickType(ProductBatchGetQuery, ['relation']) {}

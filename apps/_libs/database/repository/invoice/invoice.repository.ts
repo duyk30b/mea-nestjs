@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
+import { ConditionType } from 'apps/_libs/common/dto/base-condition'
 import { EntityManager, Repository } from 'typeorm'
 import { InvoiceItemType } from '../../common/variable'
 import { Invoice } from '../../entities'
-import { BaseCondition, BaseRepository } from '../base.repository'
+import { BaseSqlRepository } from '../base-sql.repository'
 
 @Injectable()
-export class InvoiceRepository extends BaseRepository<
+export class InvoiceRepository extends BaseSqlRepository<
     Invoice,
     { [P in 'id']?: 'ASC' | 'DESC' },
     { [P in 'customer']?: boolean }
@@ -67,7 +68,7 @@ export class InvoiceRepository extends BaseRepository<
         return invoice
     }
 
-    async sumDebt(condition: BaseCondition<Invoice>): Promise<number> {
+    async sumDebt(condition: ConditionType<Invoice>): Promise<number> {
         const where = this.getWhereOptions(condition)
         const { sum } = await this.manager
             .createQueryBuilder(Invoice, 'invoice')

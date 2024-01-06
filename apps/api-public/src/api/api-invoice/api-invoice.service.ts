@@ -90,9 +90,9 @@ export class ApiInvoiceService {
                 money: body.revenue,
             })
 
-            const products = await this.productRepository.findMany({ ids: productIds, isActive: 1 })
-            const productBatches = await this.productBatchRepository.findMany({
-                productIds,
+            const products = await this.productRepository.findManyBy({ id: { IN: productIds }, isActive: 1 })
+            const productBatches = await this.productBatchRepository.findManyBy({
+                productId: { IN: productIds },
                 isActive: 1,
             })
             products.forEach((item) => {

@@ -44,9 +44,9 @@ export class ApiStatisticService {
         })
 
         const productIds = data.map((i) => i.productId)
-        const productList = await this.productRepository.findMany({
+        const productList = await this.productRepository.findManyBy({
             oid,
-            ids: productIds,
+            id: { IN: productIds },
         })
         const productMap: Record<string, Product> = {}
         productList.forEach((i) => (productMap[i.id] = i))
@@ -66,7 +66,7 @@ export class ApiStatisticService {
     async topProductHighCostMoney(oid: number, { limit }: LimitQuery) {
         const data = await this.statisticRepository.topProductHighCostMoney({ oid, limit })
         const productIds = data.map((i) => i.productId)
-        const productList = await this.productRepository.findMany({ ids: productIds })
+        const productList = await this.productRepository.findManyBy({ id: { IN: productIds } })
         const productMap: Record<string, Product> = {}
         productList.forEach((i) => (productMap[i.id] = i))
 

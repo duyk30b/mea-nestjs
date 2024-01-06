@@ -62,7 +62,7 @@ export class ApiDistributorService {
     }
 
     async deleteOne(oid: number, id: number) {
-        await this.distributorRepository.delete(oid, id)
+        await this.distributorRepository.delete({ oid, id })
         return { success: true }
     }
 }

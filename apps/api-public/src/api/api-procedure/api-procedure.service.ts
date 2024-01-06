@@ -49,7 +49,7 @@ export class ApiProcedureService {
     }
 
     async deleteOne(oid: number, id: number) {
-        await this.procedureService.delete(oid, id)
+        await this.procedureService.delete({ oid, id })
         return { success: true }
     }
 }

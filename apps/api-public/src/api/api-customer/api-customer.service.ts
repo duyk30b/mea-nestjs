@@ -64,7 +64,7 @@ export class ApiCustomerService {
     }
 
     async deleteOne(oid: number, id: number) {
-        await this.customerRepository.delete(oid, id)
+        await this.customerRepository.delete({ oid, id })
         return { success: true }
     }
 }

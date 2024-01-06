@@ -1,59 +1,23 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { DataSource, FindOptionsWhere, In, MoreThanOrEqual, Repository } from 'typeorm'
+import { DataSource, MoreThanOrEqual, Repository } from 'typeorm'
 import { formatNumber } from '../../../common/helpers/string.helper'
 import { InvoiceStatus, PaymentType } from '../../common/variable'
 import { Customer, CustomerPayment, Invoice } from '../../entities'
-import { CustomerPaymentCondition, CustomerPaymentOrder } from './customer-payment.dto'
+import { BaseSqlRepository } from '../base-sql.repository'
 
 @Injectable()
-export class CustomerPaymentRepository {
+export class CustomerPaymentRepository extends BaseSqlRepository<
+    CustomerPayment,
+    { [P in 'id']?: 'ASC' | 'DESC' },
+    { [P in 'customer']?: boolean }
+> {
     constructor(
         private dataSource: DataSource,
         @InjectRepository(CustomerPayment)
         private readonly customerPaymentRepository: Repository<CustomerPayment>
-    ) {}
-
-    getWhereOptions(condition: CustomerPaymentCondition = {}) {
-        const where: FindOptionsWhere<CustomerPayment> = {}
-        if (condition.id != null) where.id = condition.id
-        if (condition.oid != null) where.oid = condition.oid
-        if (condition.customerId != null) where.customerId = condition.customerId
-
-        if (condition.ids) {
-            if (condition.ids.length === 0) condition.ids.push(0)
-            where.id = In(condition.ids)
-        }
-
-        return where
-    }
-
-    async pagination(options: {
-        page: number
-        limit: number
-        condition: CustomerPaymentCondition
-        order: CustomerPaymentOrder
-    }) {
-        const { limit, page, condition, order } = options
-
-        const [data, total] = await this.customerPaymentRepository.findAndCount({
-            where: this.getWhereOptions(condition),
-            order,
-            take: limit,
-            skip: (page - 1) * limit,
-        })
-
-        return { total, page, limit, data }
-    }
-
-    async findMany(condition: CustomerPaymentCondition): Promise<CustomerPayment[]> {
-        const where = this.getWhereOptions(condition)
-        return await this.customerPaymentRepository.find({ where })
-    }
-
-    async findOne(condition: CustomerPaymentCondition): Promise<CustomerPayment> {
-        const where = this.getWhereOptions(condition)
-        return await this.customerPaymentRepository.findOne({ where })
+    ) {
+        super(customerPaymentRepository)
     }
 
     async startPayDebt(options: {

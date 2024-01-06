@@ -38,7 +38,7 @@ export class ApiReceiptService {
                 deleteTime,
             },
             relation: { distributor: query.relation?.distributor },
-            order: query.sort || { id: 'DESC' },
+            sort: query.sort || { id: 'DESC' },
         })
     }
 
@@ -46,28 +46,28 @@ export class ApiReceiptService {
         const { relation, limit } = query
         const { time, deleteTime, distributorId, status } = query.filter || {}
 
-        return await this.receiptRepository.findMany(
-            {
+        return await this.receiptRepository.findMany({
+            condition: {
                 oid,
                 distributorId,
                 status,
                 time,
                 deleteTime,
             },
-            { distributor: relation?.distributor },
-            limit
-        )
+            limit,
+            relation: { distributor: relation?.distributor },
+        })
     }
 
     async getOne(oid: number, id: number, { relation }: ReceiptGetOneQuery) {
-        return await this.receiptRepository.findOne(
-            { oid, id },
-            {
+        return await this.receiptRepository.findOne({
+            condition: { oid, id },
+            relation: {
                 distributor: !!relation?.distributor,
                 distributorPayments: !!relation?.distributorPayments,
-                receiptItems: !!relation?.receiptItems,
-            }
-        )
+                receiptItems: relation?.receiptItems ? { productBatch: { product: true } } : false,
+            },
+        })
     }
 
     async queryOne(oid: number, id: number, { relation }: ReceiptGetOneQuery) {
@@ -95,9 +95,9 @@ export class ApiReceiptService {
                 money: body.revenue,
             })
 
-            const products = await this.productRepository.findMany({ ids: productIds, isActive: 1 })
-            const productBatches = await this.productBatchRepository.findMany({
-                productIds,
+            const products = await this.productRepository.findManyBy({ id: { IN: productIds }, isActive: 1 })
+            const productBatches = await this.productBatchRepository.findManyBy({
+                productId: { IN: productIds },
                 isActive: 1,
             })
             products.forEach((item) => {

@@ -1,13 +1,9 @@
 import { Injectable } from '@nestjs/common'
+import { NoExtra } from 'apps/_libs/common/dto'
 import { uniqueArray } from '../../../../_libs/common/helpers/object.helper'
+import { ProductBatch } from '../../../../_libs/database/entities'
 import { ProductBatchRepository, ProductRepository } from '../../../../_libs/database/repository'
-import {
-    ProductBatchGetManyQuery,
-    ProductBatchGetOneQuery,
-    ProductBatchInsertBody,
-    ProductBatchPaginationQuery,
-    ProductBatchUpdateBody,
-} from './request'
+import { ProductBatchGetManyQuery, ProductBatchGetOneQuery, ProductBatchPaginationQuery } from './request'
 
 @Injectable()
 export class ApiProductBatchService {
@@ -28,12 +24,12 @@ export class ApiProductBatchService {
                 isActive: filter?.isActive,
                 expiryDate: filter?.expiryDate,
             },
-            order: sort || { id: 'DESC' },
+            sort: sort || { id: 'DESC' },
         })
 
         if (relation?.product && data.length) {
             const productIds = uniqueArray(data.map((i) => i.productId))
-            const products = await this.productRepository.findMany({ ids: productIds })
+            const products = await this.productRepository.findManyBy({ id: { IN: productIds } })
             data.forEach((i) => (i.product = products.find((j) => j.id === i.productId)))
         }
 
@@ -41,7 +37,7 @@ export class ApiProductBatchService {
     }
 
     async getList(oid: number, query: ProductBatchGetManyQuery) {
-        const productBatches = await this.productBatchRepository.find({
+        const productBatches = await this.productBatchRepository.findMany({
             condition: {
                 oid,
                 productId: query.filter?.productId,
@@ -51,9 +47,9 @@ export class ApiProductBatchService {
             limit: query.limit,
         })
         if (query.relation?.product && productBatches.length) {
-            const products = await this.productRepository.findMany({
+            const products = await this.productRepository.findManyBy({
                 oid,
-                ids: uniqueArray(productBatches.map((item) => item.productId)),
+                id: { IN: uniqueArray(productBatches.map((item) => item.productId)) },
             })
             productBatches.forEach((item) => {
                 item.product = products.find((pr) => pr.id === item.productId)
@@ -63,28 +59,33 @@ export class ApiProductBatchService {
     }
 
     async getOne(oid: number, id: number, query: ProductBatchGetOneQuery) {
-        const productBatch = await this.productBatchRepository.findOne(
-            { oid, id },
-            { product: query.relation?.product }
-        )
+        const productBatch = await this.productBatchRepository.findOne({
+            condition: { oid, id },
+            relation: { product: query.relation?.product },
+        })
         return productBatch
     }
 
-    async createOne(oid: number, body: ProductBatchInsertBody) {
-        const productBatch = await this.productBatchRepository.insertOne(oid, body)
+    async createOne<T extends Partial<Omit<ProductBatch, 'id' | 'oid' | 'quantity'>> & { productId: number }>(
+        oid: number,
+        body: NoExtra<Partial<Omit<ProductBatch, 'id' | 'oid' | 'quantity'>>, T>
+    ) {
+        const productBatch = await this.productBatchRepository.insertOne({ ...body, oid })
         return productBatch
     }
 
-    async updateOne(oid: number, id: number, body: ProductBatchUpdateBody) {
-        const { affected } = await this.productBatchRepository.update({ id, oid }, body)
-        if (affected !== 1) throw new Error('Database.UpdateFailed')
-
-        const productBatch = await this.productBatchRepository.findOne({ id, oid })
+    async updateOne<T extends Partial<Omit<ProductBatch, 'id' | 'oid' | 'quantity'>>>(
+        oid: number,
+        id: number,
+        body: NoExtra<Partial<Omit<ProductBatch, 'id' | 'oid' | 'quantity' | 'productId'>>, T>
+    ) {
+        await this.productBatchRepository.update({ id, oid }, body)
+        const productBatch = await this.productBatchRepository.findOneBy({ id, oid })
         return productBatch
     }
 
     async deleteOne(oid: number, id: number) {
-        await this.productBatchRepository.delete(oid, id)
+        await this.productBatchRepository.delete({ oid, id })
         return { success: true }
     }
 }

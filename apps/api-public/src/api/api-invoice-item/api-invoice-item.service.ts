@@ -31,7 +31,7 @@ export class ApiInvoiceItemService {
                 referenceId: filter?.referenceId,
                 type: filter?.type,
             },
-            order: sort || { id: 'DESC' },
+            sort: sort || { id: 'DESC' },
         })
 
         const invoiceIds = uniqueArray(data.map((i) => i.invoiceId))
@@ -50,10 +50,10 @@ export class ApiInvoiceItemService {
                   })
                 : [],
             relation?.productBatch && productBatchIds.length
-                ? this.productBatchRepository.findMany(
-                      { ids: productBatchIds },
-                      { product: !!relation?.productBatch?.product }
-                  )
+                ? this.productBatchRepository.findMany({
+                      condition: { id: { IN: productBatchIds } },
+                      relation: { product: !!relation?.productBatch?.product },
+                  })
                 : [],
             relation?.procedure && procedureIds.length
                 ? this.procedureRepository.findManyBy({ id: { IN: procedureIds } })

@@ -33,7 +33,7 @@
 //     return str.toLowerCase().replace(/[?%\\_]/gi, (x) => '\\' + x)
 // }
 
-// export abstract class BaseRepository<T> {
+// export abstract class BaseSqlRepository<T> {
 //     private repository: Repository<T>
 //     private _TABLE: string
 

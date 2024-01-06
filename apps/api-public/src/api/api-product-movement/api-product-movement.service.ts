@@ -44,10 +44,16 @@ export class ApiProductMovementService {
                   })
                 : [],
             receiptIds.length
-                ? this.receiptRepository.findMany({ ids: uniqueArray(receiptIds) }, { distributor: true })
+                ? this.receiptRepository.findMany({
+                      condition: { id: { IN: uniqueArray(receiptIds) } },
+                      relation: { distributor: true },
+                  })
                 : [],
             productBatchIds.length
-                ? this.productBatchRepository.findMany({ ids: uniqueArray(productBatchIds) }, { product: false })
+                ? this.productBatchRepository.findMany({
+                      condition: { id: { IN: uniqueArray(productBatchIds) } },
+                      relation: { product: false },
+                  })
                 : [],
         ])
 

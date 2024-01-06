@@ -1,27 +1,8 @@
 import { OmitType, PartialType } from '@nestjs/swagger'
 import { plainToInstance } from 'class-transformer'
 import { NoExtraProperties } from '../../../common/helpers/typescript.helper'
-import { ComparisonType } from '../../common/base.dto'
-import { ReceiptStatus } from '../../common/variable'
 import { Receipt, ReceiptItem } from '../../entities'
 
-export interface ReceiptCondition {
-    id?: number
-    oid?: number
-    distributorId?: number
-    status?: ReceiptStatus
-
-    ids?: number[]
-    distributorIds?: number[]
-    statuses?: ReceiptStatus[]
-
-    time?: number | [ComparisonType, Date?, Date?]
-    deleteTime?: number | [ComparisonType, Date?, Date?]
-}
-
-export type ReceiptOrder = {
-    [P in 'id']?: 'ASC' | 'DESC'
-}
 export class ReceiptItemDto extends PartialType(OmitType(ReceiptItem, ['receiptId', 'receipt'])) {
     unit: string
     quantity: number

@@ -27,17 +27,16 @@ export class ApiProductService {
                 oid,
                 group: filter?.group,
                 isActive: filter?.isActive,
-                searchText: filter?.searchText,
                 quantity: filter?.quantity,
             },
-            order: sort || { id: 'DESC' },
+            sort: sort || { id: 'DESC' },
         })
 
         if (relation?.productBatches && data.length) {
             const productIds = uniqueArray(data.map((item) => item.id))
-            const productBatches = await this.productBatchRepository.findMany({
-                productIds,
-                // quantity: ['!=', 0], // cứ lấy hết số lượng 0, về frontend convert sau
+            const productBatches = await this.productBatchRepository.findManyBy({
+                productId: { IN: productIds },
+                // quantity: { NOT: 0 }, // cứ lấy hết số lượng 0, về frontend convert sau
                 isActive: 1,
             })
             data.forEach(
@@ -54,12 +53,11 @@ export class ApiProductService {
     async getList(oid: number, query: ProductGetManyQuery) {
         const { filter, limit, relation } = query
 
-        const products = await this.productRepository.find({
+        const products = await this.productRepository.findMany({
             condition: {
                 oid,
                 isActive: filter?.isActive,
                 group: filter?.group,
-                searchText: filter?.searchText,
                 quantity: filter?.quantity,
             },
             limit,
@@ -67,8 +65,8 @@ export class ApiProductService {
 
         if (relation?.productBatches && products.length) {
             const productIds = uniqueArray(products.map((item) => item.id))
-            const productBatches = await this.productBatchRepository.findMany({
-                productIds,
+            const productBatches = await this.productBatchRepository.findManyBy({
+                id: { IN: productIds },
                 quantity: filter?.productBatch?.quantity,
                 isActive: filter?.productBatch?.isActive,
             })
@@ -82,15 +80,15 @@ export class ApiProductService {
     }
 
     async getOne(oid: number, id: number, query: ProductGetOneQuery) {
-        const product = await this.productRepository.findOne({ oid, id })
+        const product = await this.productRepository.findOneBy({ oid, id })
         if (!product) {
             throw new BusinessException('common.Product.NotExist')
         }
         if (query.relation?.productBatches) {
-            const batches = await this.productBatchRepository.findMany({
+            const batches = await this.productBatchRepository.findManyBy({
                 oid,
                 productId: product.id,
-                quantity: ['!=', 0],
+                quantity: { '!=': 0 },
             })
             product.productBatches = batches.sort((a, b) => {
                 return (a.expiryDate || 0) > (b.expiryDate || 0) ? 1 : -1
@@ -100,17 +98,16 @@ export class ApiProductService {
     }
 
     async createOne(oid: number, body: ProductCreateBody) {
-        return await this.productRepository.insertOne(oid, body)
+        return await this.productRepository.insertOne({ ...body, oid })
     }
 
     async updateOne(oid: number, id: number, body: ProductUpdateBody) {
-        const { affected } = await this.productRepository.update({ id, oid }, body)
-        if (affected !== 1) throw new Error('Database.UpdateFailed')
-        return await this.productRepository.findOne({ id })
+        await this.productRepository.update({ id, oid }, body)
+        return await this.productRepository.findOneBy({ id })
     }
 
     async deleteOne(oid: number, id: number) {
-        await this.productRepository.delete(oid, id)
+        await this.productRepository.delete({ oid, id })
         return { success: true }
     }
 }
