@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
+import { escapeSearch } from '../../../../_libs/common/dto'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { escapeSearch } from '../../../../_libs/database/common/base.dto'
 import { CustomerRepository } from '../../../../_libs/database/repository'
 import {
     CustomerCreateBody,

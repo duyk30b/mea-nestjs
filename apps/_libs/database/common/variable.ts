@@ -80,5 +80,3 @@ export enum ArrivalType {
     Invoice = 1,
     Normal = 2,
 }
-
-export type UnitType = { name: string; rate: number }
