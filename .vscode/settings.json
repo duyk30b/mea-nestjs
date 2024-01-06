@@ -45,6 +45,7 @@
         "redislabs",
         "taskkill",
         "typeorm",
+        "virtuals",
         "websockets"
     ]
 }
