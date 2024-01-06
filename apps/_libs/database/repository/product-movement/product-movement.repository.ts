@@ -1,40 +1,21 @@
 import { Injectable } from '@nestjs/common'
-import { InjectEntityManager } from '@nestjs/typeorm'
-import { EntityManager, FindOptionsWhere } from 'typeorm'
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
+import { EntityManager, Repository } from 'typeorm'
 import { ProductMovement } from '../../entities'
 import { ProductMovementType } from '../../entities/product-movement.entity'
-import { ProductMovementCondition, ProductMovementOrder } from './product-movement.dto'
+import { BaseSqlRepository } from '../base-sql.repository'
 
 @Injectable()
-export class ProductMovementRepository {
-    constructor(@InjectEntityManager() private manager: EntityManager) {}
-
-    getWhereOptions(condition: ProductMovementCondition = {}) {
-        const where: FindOptionsWhere<ProductMovement> = {}
-        if (condition.oid != null) where.oid = condition.oid
-        if (condition.productId != null) where.productId = condition.productId
-        if (condition.productBatchId != null) where.productBatchId = condition.productBatchId
-        if (condition.type != null) where.type = condition.type
-
-        return where
-    }
-
-    async pagination(options: {
-        page: number
-        limit: number
-        condition?: ProductMovementCondition
-        order?: ProductMovementOrder
-    }) {
-        const { limit, page, condition, order } = options
-
-        const [data, total] = await this.manager.findAndCount(ProductMovement, {
-            where: this.getWhereOptions(condition),
-            order,
-            take: limit,
-            skip: (page - 1) * limit,
-        })
-
-        return { total, page, limit, data }
+export class ProductMovementRepository extends BaseSqlRepository<
+    ProductMovement,
+    { [P in 'id']?: 'ASC' | 'DESC' },
+    { [P in 'product']?: boolean }
+> {
+    constructor(
+        @InjectEntityManager() private manager: EntityManager,
+        @InjectRepository(ProductMovement) private productMovementRepository: Repository<ProductMovement>
+    ) {
+        super(productMovementRepository)
     }
 
     async queryOne(

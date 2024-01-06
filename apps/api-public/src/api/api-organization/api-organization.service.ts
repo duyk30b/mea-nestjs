@@ -20,7 +20,7 @@ export class ApiOrganizationService {
 
     async info(id: number) {
         const [organization, allSettings] = await Promise.all([
-            this.organizationRepository.findOne(id),
+            this.organizationRepository.findOneById(id),
             this.organizationRepository.getAllSetting(id),
         ])
         const settings: Record<string, string> = {}
@@ -49,9 +49,8 @@ export class ApiOrganizationService {
     }
 
     async updateOne(id: number, body: OrganizationUpdateBody) {
-        const { affected } = await this.organizationRepository.update(id, body)
-        if (affected !== 1) throw new Error('Database.UpdateFailed')
-        return await this.organizationRepository.findOne(id)
+        await this.organizationRepository.update({ id }, body)
+        return await this.organizationRepository.findOneById(id)
     }
 
     async upsertSetting(oid: number, type: OrganizationSettingType, body: OrganizationSettingUpdateBody) {

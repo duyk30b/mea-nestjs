@@ -29,7 +29,7 @@ export class ApiProductMovementService {
                 productBatchId: query.filter?.productBatchId,
                 type: query.filter?.type,
             },
-            order: query.sort || { id: 'DESC' },
+            sort: query.sort || { id: 'DESC' },
         })
 
         const invoiceIds = data.filter((i) => i.type === ProductMovementType.Invoice).map((i) => i.referenceId)
