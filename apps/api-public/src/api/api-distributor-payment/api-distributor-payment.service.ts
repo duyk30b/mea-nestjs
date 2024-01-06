@@ -17,7 +17,7 @@ export class ApiDistributorPaymentService {
                 oid,
                 distributorId: query.filter?.distributorId,
             },
-            order: query.sort || { id: 'DESC' },
+            sort: query.sort || { id: 'DESC' },
         })
     }
 

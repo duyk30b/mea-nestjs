@@ -10,7 +10,7 @@ export class UserRepository extends BaseSqlRepository<
     { [P in 'id' | 'fullName']?: 'ASC' | 'DESC' },
     { [P in 'organization']?: boolean }
 > {
-    constructor(@InjectRepository(User) private employeeRepository: Repository<User>) {
-        super(employeeRepository)
+    constructor(@InjectRepository(User) private userRepository: Repository<User>) {
+        super(userRepository)
     }
 }

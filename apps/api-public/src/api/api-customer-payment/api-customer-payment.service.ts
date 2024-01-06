@@ -17,7 +17,7 @@ export class ApiCustomerPaymentService {
                 oid,
                 customerId: query.filter?.customerId,
             },
-            order: query.sort || { id: 'DESC' },
+            sort: query.sort || { id: 'DESC' },
         })
     }
 
