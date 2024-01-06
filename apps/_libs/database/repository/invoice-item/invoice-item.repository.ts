@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { InjectEntityManager } from '@nestjs/typeorm'
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, EntityManager, Repository } from 'typeorm'
 import { InvoiceItemType } from '../../common/variable'
 import { InvoiceItem } from '../../entities'
@@ -14,6 +14,7 @@ export class InvoiceItemRepository extends BaseSqlRepository<
     constructor(
         private dataSource: DataSource,
         @InjectEntityManager() private manager: EntityManager,
+        @InjectRepository(InvoiceItem)
         private readonly invoiceItemRepository: Repository<InvoiceItem>
     ) {
         super(invoiceItemRepository)
