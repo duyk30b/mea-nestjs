@@ -6,7 +6,6 @@
     "editor.wordWrap": "off",
     "workbench.editor.wrapTabs": true,
     "window.title": "${rootName}",
-    "typescript.inlayHints.parameterNames.enabled": "literals",
     "editor.inlayHints.fontSize": 10,
     "workbench.colorCustomizations": {
         "editorInlayHint.background": "#4d4d4d99",
@@ -29,6 +28,7 @@
     "typescript.format.semicolons": "remove",
     "typescript.updateImportsOnFileMove.enabled": "always",
     "typescript.preferences.importModuleSpecifier": "relative",
+    "typescript.inlayHints.parameterNames.enabled": "literals",
     "git.allowForcePush": true,
     "cSpell.language": "en,vi",
     "cSpell.words": [
