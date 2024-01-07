@@ -1,21 +1,6 @@
-import {
-    And,
-    Between,
-    Equal,
-    FindOptionsOrder,
-    FindOptionsRelations,
-    FindOptionsWhere,
-    In,
-    IsNull,
-    LessThan,
-    LessThanOrEqual,
-    Like,
-    MoreThan,
-    Not,
-    Raw,
-    Repository,
-} from 'typeorm'
-import { ConditionAnd, ConditionType, NoExtra } from '../../common/dto/base-condition'
+import { FindOptionsOrder, FindOptionsRelations, Repository } from 'typeorm'
+import { ConditionAnd, ConditionType } from '../../common/dto/base-condition'
+import { NoExtra } from '../../common/helpers/typescript.helper'
 import { BaseSqlCondition } from './base-sql.condition'
 
 export abstract class BaseSqlRepository<
@@ -30,12 +15,12 @@ export abstract class BaseSqlRepository<
         this.repository = repository
     }
 
-    async pagination(options: {
+    async pagination<S extends _SORT, R extends _RELATION>(options: {
         page: number
         limit: number
         condition?: ConditionType<_ENTITY>
-        sort?: _SORT
-        relation?: _RELATION
+        sort?: NoExtra<_SORT, S>
+        relation?: NoExtra<_RELATION, R>
         relationLoadStrategy?: 'query' | 'join'
     }) {
         const { limit, page, condition } = options
@@ -55,11 +40,11 @@ export abstract class BaseSqlRepository<
         return { total, page, limit, data }
     }
 
-    async findMany(options: {
+    async findMany<S extends _SORT, R extends _RELATION>(options: {
         condition: ConditionType<_ENTITY>
         limit?: number
-        sort?: _SORT
-        relation?: _RELATION
+        sort?: NoExtra<_SORT, S>
+        relation?: NoExtra<_RELATION, R>
         relationLoadStrategy?: 'query' | 'join'
     }): Promise<_ENTITY[]> {
         const where = this.getWhereOptions(options.condition)
@@ -84,10 +69,10 @@ export abstract class BaseSqlRepository<
         return await this.findManyBy({ id: { IN: ids } } as any)
     }
 
-    async findOne(options: {
+    async findOne<S extends _SORT, R extends _RELATION>(options: {
         condition: ConditionType<_ENTITY>
-        sort?: _SORT
-        relation?: _RELATION
+        sort?: NoExtra<_SORT, S>
+        relation?: NoExtra<_RELATION, R>
         relationLoadStrategy?: 'query' | 'join'
     }): Promise<_ENTITY> {
         const where = this.getWhereOptions(options.condition)

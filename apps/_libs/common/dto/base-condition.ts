@@ -24,11 +24,6 @@ export type ConditionAnd<T> = {
 }
 export type ConditionType<T> = ConditionAnd<T> | ConditionAnd<T>[]
 
-export type Impossible<K extends keyof any> = {
-    [P in K]: never
-}
-export type NoExtra<T, U extends T = T> = U & Impossible<Exclude<keyof U, keyof T>>
-
 export const escapeSearch = (str = '') => {
     return str.toLowerCase().replace(/[?%\\_]/gi, (x) => '\\' + x)
 }

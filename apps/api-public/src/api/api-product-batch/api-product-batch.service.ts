@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { NoExtra } from '../../../../_libs/common/dto'
 import { uniqueArray } from '../../../../_libs/common/helpers/object.helper'
+import { NoExtra } from '../../../../_libs/common/helpers/typescript.helper'
 import { ProductBatch } from '../../../../_libs/database/entities'
 import { ProductBatchRepository, ProductRepository } from '../../../../_libs/database/repository'
 import { ProductBatchGetManyQuery, ProductBatchGetOneQuery, ProductBatchPaginationQuery } from './request'

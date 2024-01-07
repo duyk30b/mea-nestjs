@@ -26,4 +26,12 @@ export class ProcedureFilterQuery {
     isActive: 0 | 1
 }
 
-export class ProcedureSortQuery extends SortQuery {}
+export class ProcedureSortQuery extends SortQuery {
+    @Expose()
+    @IsIn(['ASC', 'DESC'])
+    name: 'ASC' | 'DESC'
+
+    @Expose()
+    @IsIn(['ASC', 'DESC'])
+    price: 'ASC' | 'DESC'
+}

@@ -1,6 +1,6 @@
 import { OmitType, PartialType } from '@nestjs/swagger'
 import { plainToInstance } from 'class-transformer'
-import { NoExtraProperties } from '../../../common/helpers/typescript.helper'
+import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { Invoice, InvoiceExpense, InvoiceItem, InvoiceSurcharge } from '../../entities'
 
 export class InvoiceItemDto extends PartialType(
@@ -40,10 +40,10 @@ export class InvoiceDraftInsertDto extends PartialType(
         Q extends InvoiceSurchargeDto,
         X extends InvoiceExpenseDto,
     >(
-        plain: NoExtraProperties<InvoiceDraftInsertDto, T> & {
-            invoiceItems?: NoExtraProperties<InvoiceItemDto, K>[]
-            invoiceSurcharges?: NoExtraProperties<InvoiceSurchargeDto, Q>[]
-            invoiceExpenses?: NoExtraProperties<InvoiceExpenseDto, X>[]
+        plain: NoExtra<InvoiceDraftInsertDto, T> & {
+            invoiceItems?: NoExtra<InvoiceItemDto, K>[]
+            invoiceSurcharges?: NoExtra<InvoiceSurchargeDto, Q>[]
+            invoiceExpenses?: NoExtra<InvoiceExpenseDto, X>[]
         }
     ): InvoiceDraftInsertDto {
         const instance = plainToInstance(InvoiceDraftInsertDto, plain, {
@@ -104,10 +104,10 @@ export class InvoiceDraftUpdateDto extends PartialType(
         Q extends InvoiceSurchargeDto,
         X extends InvoiceExpenseDto,
     >(
-        plain: NoExtraProperties<InvoiceDraftUpdateDto, T> & {
-            invoiceItems?: NoExtraProperties<InvoiceItemDto, K>[]
-            invoiceSurcharges?: NoExtraProperties<InvoiceSurchargeDto, Q>[]
-            invoiceExpenses?: NoExtraProperties<InvoiceExpenseDto, X>[]
+        plain: NoExtra<InvoiceDraftUpdateDto, T> & {
+            invoiceItems?: NoExtra<InvoiceItemDto, K>[]
+            invoiceSurcharges?: NoExtra<InvoiceSurchargeDto, Q>[]
+            invoiceExpenses?: NoExtra<InvoiceExpenseDto, X>[]
         }
     ): InvoiceDraftUpdateDto {
         const instance = plainToInstance(InvoiceDraftUpdateDto, plain, {
