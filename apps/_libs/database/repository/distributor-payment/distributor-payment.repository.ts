@@ -1,59 +1,23 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { DataSource, FindOptionsWhere, In, MoreThanOrEqual, Repository } from 'typeorm'
+import { DataSource, MoreThanOrEqual, Repository } from 'typeorm'
 import { formatNumber } from '../../../common/helpers/string.helper'
 import { PaymentType, ReceiptStatus } from '../../common/variable'
 import { Distributor, DistributorPayment, Receipt } from '../../entities'
-import { DistributorPaymentCondition, DistributorPaymentOrder } from './distributor-payment.dto'
+import { PostgreSqlRepository } from '../postgresql.repository'
 
 @Injectable()
-export class DistributorPaymentRepository {
+export class DistributorPaymentRepository extends PostgreSqlRepository<
+    DistributorPayment,
+    { [P in 'id']?: 'ASC' | 'DESC' },
+    { [P in 'distributor']?: boolean }
+> {
     constructor(
         private dataSource: DataSource,
         @InjectRepository(DistributorPayment)
         private readonly distributorPaymentRepository: Repository<DistributorPayment>
-    ) {}
-
-    getWhereOptions(condition: DistributorPaymentCondition = {}) {
-        const where: FindOptionsWhere<DistributorPayment> = {}
-        if (condition.id != null) where.id = condition.id
-        if (condition.oid != null) where.oid = condition.oid
-        if (condition.distributorId != null) where.distributorId = condition.distributorId
-
-        if (condition.ids) {
-            if (condition.ids.length === 0) condition.ids.push(0)
-            where.id = In(condition.ids)
-        }
-
-        return where
-    }
-
-    async pagination(options: {
-        page: number
-        limit: number
-        condition?: DistributorPaymentCondition
-        order?: DistributorPaymentOrder
-    }) {
-        const { limit, page, condition, order } = options
-
-        const [data, total] = await this.distributorPaymentRepository.findAndCount({
-            where: this.getWhereOptions(condition),
-            order,
-            take: limit,
-            skip: (page - 1) * limit,
-        })
-
-        return { total, page, limit, data }
-    }
-
-    async findMany(condition: DistributorPaymentCondition): Promise<DistributorPayment[]> {
-        const where = this.getWhereOptions(condition)
-        return await this.distributorPaymentRepository.find({ where })
-    }
-
-    async findOne(condition: DistributorPaymentCondition): Promise<DistributorPayment> {
-        const where = this.getWhereOptions(condition)
-        return await this.distributorPaymentRepository.findOne({ where })
+    ) {
+        super(distributorPaymentRepository)
     }
 
     async startPayDebt(options: {
@@ -102,6 +66,7 @@ export class DistributorPaymentRepository {
                     Receipt,
                     {
                         id: receiptId,
+                        distributorId,
                         oid,
                         status: ReceiptStatus.Debt,
                         debt: MoreThanOrEqual(money),

@@ -32,10 +32,10 @@
     "Invoice": {
         "NotExist": "Hóa đơn không tồn tại"
     },
-    "Employee": {
-        "NotExist": "Employee không tồn tại"
-    },
     "Distributor": {
         "NotExist": "Nhà cung cấp không tồn tại"
+    },
+    "Procedure": {
+        "NotExist": "Dịch vụ không tồn tại"
     }
 }

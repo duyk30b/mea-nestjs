@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable, SetMetadata } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
+import { RequestExternal } from '../../../_libs/common/request/external.request'
 import { ERole } from '../../../_libs/database/common/variable'
-import { RequestExternal } from '../common/request-external'
 
 export const Roles = (...roles: ERole[]) => SetMetadata('roles_guard', roles)
 

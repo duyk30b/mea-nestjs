@@ -48,6 +48,39 @@ export default class Product extends BaseEntity {
     @Expose()
     isActive: 0 | 1
 
+    @Column({
+        type: 'bigint',
+        nullable: true,
+        transformer: {
+            to: (value) => value,
+            from: (value) => (value == null ? value : Number(value)),
+        },
+    })
+    @Expose()
+    createdAt: number
+
+    @Column({
+        type: 'bigint',
+        nullable: true,
+        transformer: {
+            to: (value) => value,
+            from: (value) => (value == null ? value : Number(value)),
+        },
+    })
+    @Expose()
+    updatedAt: number
+
+    @Column({
+        type: 'bigint',
+        nullable: true,
+        transformer: {
+            to: (value) => value,
+            from: (value) => (value == null ? value : Number(value)),
+        },
+    })
+    @Expose()
+    deletedAt: number
+
     @Expose()
     @OneToMany(() => ProductBatch, (productBatch) => productBatch.product)
     productBatches: ProductBatch[]

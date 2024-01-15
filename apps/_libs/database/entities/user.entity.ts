@@ -50,6 +50,39 @@ export default class User extends BaseEntity {
     @Expose()
     isActive: 0 | 1
 
+    @Column({
+        type: 'bigint',
+        nullable: true,
+        transformer: {
+            to: (value) => value,
+            from: (value) => (value == null ? value : Number(value)),
+        },
+    })
+    @Expose()
+    createdAt: number
+
+    @Column({
+        type: 'bigint',
+        nullable: true,
+        transformer: {
+            to: (value) => value,
+            from: (value) => (value == null ? value : Number(value)),
+        },
+    })
+    @Expose()
+    updatedAt: number
+
+    @Column({
+        type: 'bigint',
+        nullable: true,
+        transformer: {
+            to: (value) => value,
+            from: (value) => (value == null ? value : Number(value)),
+        },
+    })
+    @Expose()
+    deletedAt: number
+
     @ManyToOne((type) => Organization, { createForeignKeyConstraints: false })
     @JoinColumn({ name: 'oid', referencedColumnName: 'id' })
     @Expose()

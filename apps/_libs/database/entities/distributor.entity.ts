@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity } from 'typeorm'
+import { Column, DeepPartial, Entity } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 
 @Entity('Distributor')
@@ -43,4 +43,37 @@ export default class Distributor extends BaseEntity {
     @Column({ type: 'smallint', default: 1 })
     @Expose()
     isActive: 0 | 1
+
+    @Column({
+        type: 'bigint',
+        nullable: true,
+        transformer: {
+            to: (value) => value,
+            from: (value) => (value == null ? value : Number(value)),
+        },
+    })
+    @Expose()
+    createdAt: number
+
+    @Column({
+        type: 'bigint',
+        nullable: true,
+        transformer: {
+            to: (value) => value,
+            from: (value) => (value == null ? value : Number(value)),
+        },
+    })
+    @Expose()
+    updatedAt: number
+
+    @Column({
+        type: 'bigint',
+        nullable: true,
+        transformer: {
+            to: (value) => value,
+            from: (value) => (value == null ? value : Number(value)),
+        },
+    })
+    @Expose()
+    deletedAt: number
 }

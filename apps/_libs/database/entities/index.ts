@@ -14,14 +14,13 @@ import ProductMovement from './product-movement.entity'
 import Product from './product.entity'
 import ReceiptItem from './receipt-item.entity'
 import Receipt from './receipt.entity'
-import Employee from './user.entity'
+import User from './user.entity'
 
 export {
     Customer,
     CustomerPayment,
     Distributor,
     DistributorPayment,
-    Employee,
     Invoice,
     InvoiceExpense,
     InvoiceItem,
@@ -34,4 +33,5 @@ export {
     ProductMovement,
     Receipt,
     ReceiptItem,
+    User,
 }

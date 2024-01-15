@@ -36,10 +36,10 @@ export type I18nTranslations = {
         "Invoice": {
             "NotExist": string;
         };
-        "Employee": {
+        "Distributor": {
             "NotExist": string;
         };
-        "Distributor": {
+        "Procedure": {
             "NotExist": string;
         };
     };

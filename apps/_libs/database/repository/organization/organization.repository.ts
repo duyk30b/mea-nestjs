@@ -1,43 +1,22 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { FindOptionsWhere, In, Repository, UpdateResult } from 'typeorm'
-import { NoExtraProperties } from '../../../common/helpers/typescript.helper'
+import { In, Repository } from 'typeorm'
 import { Organization, OrganizationSetting } from '../../entities'
 import { OrganizationSettingType } from '../../entities/organization-setting.entity'
-import { OrganizationCondition } from './organization.dto'
+import { PostgreSqlRepository } from '../postgresql.repository'
 
 @Injectable()
-export class OrganizationRepository {
+export class OrganizationRepository extends PostgreSqlRepository<
+    Organization,
+    { [P in 'id']?: 'ASC' | 'DESC' },
+    { [P in 'product']?: boolean }
+> {
     constructor(
         @InjectRepository(Organization) private organizationRepository: Repository<Organization>,
         @InjectRepository(OrganizationSetting)
         private organizationSettingRepository: Repository<OrganizationSetting>
-    ) {}
-
-    getWhereOptions(condition: OrganizationCondition) {
-        const where: FindOptionsWhere<Organization> = {}
-        if (condition.id != null) where.id = condition.id
-        if (condition.ids) {
-            if (condition.ids.length === 0) condition.ids.push(0)
-            where.id = In(condition.ids)
-        }
-        return where
-    }
-
-    async findOne(oid: number): Promise<Organization> {
-        return await this.organizationRepository.findOne({ where: { id: oid } })
-    }
-
-    async findMany(condition: OrganizationCondition): Promise<Organization[]> {
-        const where = this.getWhereOptions(condition)
-        return await this.organizationRepository.find({ where })
-    }
-
-    async update<T extends Partial<Organization>>(
-        oid: number,
-        dto: NoExtraProperties<Partial<Omit<Organization, 'id' | 'phone'>>, T>
-    ): Promise<UpdateResult> {
-        return await this.organizationRepository.update({ id: oid }, dto)
+    ) {
+        super(organizationRepository)
     }
 
     async getAllSetting(oid: number) {

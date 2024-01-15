@@ -1,7 +1,7 @@
 import { Injectable, NestMiddleware } from '@nestjs/common'
 import { NextFunction, Response } from 'express'
+import { RequestExternal, TExternal } from '../../../_libs/common/request/external.request'
 import { JwtExtendService } from '../components/jwt-extend/jwt-extend.service'
-import { RequestExternal, TExternal } from '../common/request-external'
 
 @Injectable()
 export class ValidateTokenMiddleware implements NestMiddleware {

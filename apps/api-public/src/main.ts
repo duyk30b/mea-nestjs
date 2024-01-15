@@ -1,14 +1,13 @@
 import { ClassSerializerInterceptor, Logger, ValidationError, ValidationPipe } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { NestFactory, Reflector } from '@nestjs/core'
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import helmet from 'helmet'
 import * as requestIp from 'request-ip'
-import { ValidationException } from '../../_libs/common/exception-filter/exception'
-import { ExceptionFilter } from '../../_libs/common/exception-filter/exception-filter'
+import { ServerExceptionFilter, ValidationException } from '../../_libs/common/exception-filter/exception-filter'
 import { AccessLogInterceptor } from '../../_libs/common/interceptor/access-log.interceptor'
 import { TimeoutInterceptor } from '../../_libs/common/interceptor/timeout.interceptor'
 import { AppModule } from './app.module'
-import { configSwagger } from './common/swagger'
 import { RolesGuard } from './guards/roles.guard'
 
 async function bootstrap() {
@@ -30,7 +29,7 @@ async function bootstrap() {
         })
     )
 
-    app.useGlobalFilters(new ExceptionFilter())
+    app.useGlobalFilters(new ServerExceptionFilter())
 
     app.useGlobalGuards(new RolesGuard(app.get(Reflector)))
 
@@ -60,7 +59,16 @@ async function bootstrap() {
     const SQL_DATABASE = configService.get<string>('SQL_DATABASE')
 
     if (NODE_ENV !== 'production') {
-        configSwagger(app)
+        const config = new DocumentBuilder()
+            .setTitle('Simple API')
+            .setDescription('MEA API use Swagger')
+            .setVersion('1.0')
+            .addBearerAuth({ type: 'http', description: 'Access token' }, 'access-token')
+            .build()
+        const document = SwaggerModule.createDocument(app, config)
+        SwaggerModule.setup('documents', app, document, {
+            swaggerOptions: { persistAuthorization: true },
+        })
     }
 
     await app.listen(API_PUBLIC_PORT, () => {
