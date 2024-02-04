@@ -1,54 +1,95 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import User from './user.entity'
 
 @Entity('Organization')
 @Index('IDX_Organization__phone', ['phone'], { unique: true })
 @Index('IDX_Organization__email', ['email'], { unique: true })
 export default class Organization {
-    @PrimaryGeneratedColumn()
-    @Expose()
-    id: number
+  @Expose()
+  @PrimaryGeneratedColumn()
+  id: number
 
-    @Column({ type: 'char', length: 10, nullable: false })
-    @Expose()
-    phone: string
+  @Expose()
+  @Column({ type: 'char', length: 10, nullable: false })
+  phone: string
 
-    @Column({ type: 'character varying', length: 255, nullable: false })
-    @Expose()
-    email: string
+  @Expose()
+  @Column({ type: 'character varying', length: 255, nullable: false })
+  email: string
 
-    @Column({ type: 'smallint', default: 0 })
-    @Expose()
-    level: number
+  @Expose()
+  @Column({ type: 'smallint', default: 0 })
+  level: number
 
-    @Column({ type: 'character varying', length: 255, nullable: true })
-    @Expose()
-    organizationName: string
+  @Expose()
+  @Column({ type: 'character varying', length: 255, nullable: true })
+  name: string
 
-    @Column({ type: 'character varying', length: 255, nullable: true })
-    @Expose()
-    addressProvince: string
+  @Expose()
+  @Column({ type: 'character varying', length: 255, nullable: true })
+  addressProvince: string
 
-    @Column({ type: 'character varying', length: 255, nullable: true })
-    @Expose()
-    addressDistrict: string
+  @Expose()
+  @Column({ type: 'character varying', length: 255, nullable: true })
+  addressDistrict: string
 
-    @Column({ type: 'character varying', length: 255, nullable: true })
-    @Expose()
-    addressWard: string
+  @Expose()
+  @Column({ type: 'character varying', length: 255, nullable: true })
+  addressWard: string
 
-    @Column({ type: 'character varying', length: 255, nullable: true })
-    @Expose()
-    addressStreet: string
+  @Expose()
+  @Column({ type: 'character varying', length: 255, nullable: true })
+  addressStreet: string
 
-    @Column({
-        type: 'bigint',
-        nullable: true,
-        transformer: {
-            to: (value) => value,
-            from: (value) => (value == null ? value : Number(value)),
-        },
-    })
-    @Expose()
-    createTime: number // Giờ vào khám
+  @Column({ type: 'text', default: '[]' })
+  @Expose()
+  permissionIds: string
+
+  @Expose()
+  @Column({
+    type: 'bigint',
+    default: () => '(EXTRACT(epoch FROM now()) * (1000))',
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  createdAt: number
+
+  @Expose()
+  @Column({
+    type: 'bigint',
+    default: () => '(EXTRACT(epoch FROM now()) * (1000))',
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  updatedAt: number
+
+  @Expose()
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  deletedAt: number
+
+  @Column({ type: 'smallint', default: 1 })
+  @Expose()
+  isActive: 0 | 1
+
+  @Expose()
+  @OneToMany(() => User, (user) => user.organization)
+  users: User[]
 }
+
+export type OrganizationInsertType = Omit<
+  Organization,
+  'id' | 'users' | 'createdAt' | 'updatedAt' | 'deletedAt'
+>
+export type OrganizationUpdateType = Omit<Organization, 'id' | 'users' | 'createdAt' | 'updatedAt'>

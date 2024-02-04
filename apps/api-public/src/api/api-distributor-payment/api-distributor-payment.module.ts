@@ -3,8 +3,8 @@ import { ApiDistributorPaymentController } from './api-distributor-payment.contr
 import { ApiDistributorPaymentService } from './api-distributor-payment.service'
 
 @Module({
-    imports: [],
-    controllers: [ApiDistributorPaymentController],
-    providers: [ApiDistributorPaymentService],
+  imports: [],
+  controllers: [ApiDistributorPaymentController],
+  providers: [ApiDistributorPaymentService],
 })
 export class ApiDistributorPaymentModule {}

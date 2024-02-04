@@ -1,28 +1,87 @@
-import { ApiPropertyOptional } from '@nestjs/swagger'
-import { Expose, Type } from 'class-transformer'
-import { IsNumber, ValidateNested } from 'class-validator'
-import { PaginationQuery, SortQuery } from '../../../../../_libs/common/dto/query'
+import { ApiPropertyOptional, IntersectionType, PickType } from '@nestjs/swagger'
+import { Expose, Transform, plainToInstance } from 'class-transformer'
+import { IsObject, ValidateNested } from 'class-validator'
+import { LimitQuery, PaginationQuery } from '../../../../../_libs/common/dto/query'
+import {
+  CustomerPaymentFilterQuery,
+  CustomerPaymentRelationQuery,
+  CustomerPaymentSortQuery,
+} from './customer-payment.options'
 
-class CustomerPaymentFilterQuery {
-    @ApiPropertyOptional({ name: 'filter[customer_id]', example: 12 })
-    @Expose()
-    @Type(() => Number)
-    @IsNumber()
-    customerId: number
+export class CustomerPaymentGetQuery {
+  @ApiPropertyOptional({ type: String, example: JSON.stringify(<CustomerPaymentRelationQuery>{}) })
+  @Expose()
+  @Transform(({ value }) => {
+    try {
+      if (!value) return undefined // return undefined để không validate nữa
+      const plain = JSON.parse(value)
+      return plainToInstance(CustomerPaymentRelationQuery, plain, {
+        exposeUnsetFields: false,
+        excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
+      })
+    } catch (error) {
+      return error.message
+    }
+  })
+  @IsObject()
+  @ValidateNested({ each: true })
+  relation: CustomerPaymentRelationQuery
+
+  @ApiPropertyOptional({
+    type: String,
+    example: JSON.stringify(<CustomerPaymentFilterQuery>{
+      customerId: 1,
+    }),
+  })
+  @Expose()
+  @Transform(({ value }) => {
+    try {
+      if (!value) return undefined // return undefined để không validate nữa
+      const plain = JSON.parse(value)
+      return plainToInstance(CustomerPaymentFilterQuery, plain, {
+        exposeUnsetFields: false,
+        excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
+      })
+    } catch (error) {
+      return error.message
+    }
+  })
+  @IsObject()
+  @ValidateNested({ each: true })
+  filter?: CustomerPaymentFilterQuery
+
+  @ApiPropertyOptional({
+    type: String,
+    example: JSON.stringify(<CustomerPaymentSortQuery>{
+      id: 'ASC',
+    }),
+  })
+  @Expose()
+  @Transform(({ value }) => {
+    try {
+      if (!value) return undefined // return undefined để không validate nữa
+      const plain = JSON.parse(value)
+      return plainToInstance(CustomerPaymentSortQuery, plain, {
+        exposeUnsetFields: false,
+        excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
+      })
+    } catch (error) {
+      return error.message
+    }
+  })
+  @IsObject()
+  @ValidateNested({ each: true })
+  sort?: CustomerPaymentSortQuery
 }
 
-export class CustomerPaymentSortQuery extends SortQuery {}
+export class CustomerPaymentPaginationQuery extends IntersectionType(
+  CustomerPaymentGetQuery,
+  PaginationQuery
+) {}
 
-export class CustomerPaymentPaginationQuery extends PaginationQuery {
-    @ApiPropertyOptional({ type: CustomerPaymentFilterQuery })
-    @Expose()
-    @Type(() => CustomerPaymentFilterQuery)
-    @ValidateNested({ each: true })
-    filter: CustomerPaymentFilterQuery
+export class CustomerPaymentGetManyQuery extends IntersectionType(
+  PickType(CustomerPaymentGetQuery, ['filter', 'relation']),
+  LimitQuery
+) {}
 
-    @ApiPropertyOptional({ type: CustomerPaymentSortQuery })
-    @Expose()
-    @Type(() => CustomerPaymentSortQuery)
-    @ValidateNested({ each: true })
-    sort: CustomerPaymentSortQuery
-}
+export class CustomerPaymentGetOneQuery extends PickType(CustomerPaymentGetQuery, ['relation']) {}

@@ -1,10 +1,10 @@
 export interface ITestJob {
-    data: any
+  data: any
 }
 
 export interface IKafkaJob {
-    messageId: string
-    kafkaEvent: string
-    data: Record<string, any>
-    createdTime: number
+  messageId: string
+  kafkaEvent: string
+  data: Record<string, any>
+  createdTime: number
 }

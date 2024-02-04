@@ -1,81 +1,98 @@
+import helmet from '@fastify/helmet'
 import { ClassSerializerInterceptor, Logger, ValidationError, ValidationPipe } from '@nestjs/common'
-import { ConfigService } from '@nestjs/config'
 import { NestFactory, Reflector } from '@nestjs/core'
+import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
-import helmet from 'helmet'
 import * as requestIp from 'request-ip'
-import { ServerExceptionFilter, ValidationException } from '../../_libs/common/exception-filter/exception-filter'
+import {
+  ServerExceptionFilter,
+  ValidationException,
+} from '../../_libs/common/exception-filter/exception-filter'
 import { AccessLogInterceptor } from '../../_libs/common/interceptor/access-log.interceptor'
 import { TimeoutInterceptor } from '../../_libs/common/interceptor/timeout.interceptor'
+import { TransformResponseInterceptor } from '../../_libs/common/interceptor/transform-response.interceptor'
 import { AppModule } from './app.module'
-import { RolesGuard } from './guards/roles.guard'
+import { GlobalConfig } from './environments'
+import { RootGuard } from './guards/root.guard'
 
 async function bootstrap() {
-    const logger = new Logger('bootstrap')
+  const logger = new Logger('bootstrap')
+  const fastifyAdapter = new FastifyAdapter()
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  fastifyAdapter.register(require('@fastify/multipart'), {
+    attachFieldsToBody: true,
+    addToBody: true,
+  })
+  const app = await NestFactory.create<NestFastifyApplication>(AppModule, fastifyAdapter, {
+    logger: ['error', 'warn', 'log', 'debug'],
+  })
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  app.register(require('@fastify/cors'), { origin: '*' })
 
-    const app = await NestFactory.create(AppModule)
-    app.useLogger(['log', 'error', 'warn', 'debug', 'verbose'])
-    app.use(helmet())
-    app.enableCors()
+  await app.register(helmet)
+  app.use(requestIp.mw())
 
-    app.use(requestIp.mw())
-
-    app.useGlobalInterceptors(
-        new AccessLogInterceptor(),
-        new TimeoutInterceptor(),
-        new ClassSerializerInterceptor(app.get(Reflector), {
-            excludeExtraneousValues: true,
-            exposeUnsetFields: false,
-        })
-    )
-
-    app.useGlobalFilters(new ServerExceptionFilter())
-
-    app.useGlobalGuards(new RolesGuard(app.get(Reflector)))
-
-    app.useGlobalPipes(
-        new ValidationPipe({
-            validationError: { target: false, value: false },
-            skipMissingProperties: true, // no validate field undefined
-            whitelist: true, // no field not in DTO
-            forbidNonWhitelisted: true, // exception when field not in DTO
-            transform: true, // use for DTO
-            transformOptions: {
-                excludeExtraneousValues: false, // exclude field not in class DTO => no
-                exposeUnsetFields: false, // expose field undefined in DTO => no
-            },
-            exceptionFactory: (errors: ValidationError[] = []) => new ValidationException(errors),
-        })
-    )
-
-    const configService = app.get(ConfigService)
-    const NODE_ENV = configService.get<string>('NODE_ENV') || 'local'
-    const API_PUBLIC_HOST = configService.get<string>('API_PUBLIC_HOST') || 'localhost'
-    const API_PUBLIC_PORT = configService.get<string>('API_PUBLIC_PORT')
-
-    const SQL_TYPE = configService.get<string>('SQL_TYPE')
-    const SQL_HOST = configService.get<string>('SQL_HOST')
-    const SQL_PORT = configService.get<string>('SQL_PORT')
-    const SQL_DATABASE = configService.get<string>('SQL_DATABASE')
-
-    if (NODE_ENV !== 'production') {
-        const config = new DocumentBuilder()
-            .setTitle('Simple API')
-            .setDescription('MEA API use Swagger')
-            .setVersion('1.0')
-            .addBearerAuth({ type: 'http', description: 'Access token' }, 'access-token')
-            .build()
-        const document = SwaggerModule.createDocument(app, config)
-        SwaggerModule.setup('documents', app, document, {
-            swaggerOptions: { persistAuthorization: true },
-        })
-    }
-
-    await app.listen(API_PUBLIC_PORT, () => {
-        logger.debug(`🚀 ===== [API] Server document: http://${API_PUBLIC_HOST}:${API_PUBLIC_PORT}/documents =====`)
-        logger.debug(`🚀 ===== [SQL] Database: jdbc:${SQL_TYPE}://${SQL_HOST}:${SQL_PORT}/${SQL_DATABASE} =====`)
-        logger.debug(`🚀 ===== [TIME] Timezone Offset ${new Date().getTimezoneOffset()} =====`)
+  app.useGlobalInterceptors(
+    new AccessLogInterceptor(),
+    new TimeoutInterceptor(),
+    new TransformResponseInterceptor(),
+    new ClassSerializerInterceptor(app.get(Reflector), {
+      excludeExtraneousValues: true,
+      exposeUnsetFields: false,
     })
-}
+  )
 
+  app.useGlobalFilters(new ServerExceptionFilter())
+
+  app.useGlobalGuards(new RootGuard(app.get(Reflector)))
+
+  app.useGlobalPipes(
+    new ValidationPipe({
+      validationError: { target: false, value: false },
+      skipMissingProperties: true, // no validate field undefined
+      whitelist: true, // no field not in DTO
+      forbidNonWhitelisted: true, // exception when field not in DTO
+      transform: true, // use for DTO
+      transformOptions: {
+        excludeExtraneousValues: false, // exclude field not in class DTO => no
+        exposeUnsetFields: false, // expose field undefined in DTO => no
+      },
+      exceptionFactory: (errors: ValidationError[] = []) => new ValidationException(errors),
+    })
+  )
+
+  const {
+    NODE_VERSION,
+    NODE_ENV,
+    API_PUBLIC_HOST,
+    API_PUBLIC_PORT,
+    SQL_TYPE,
+    SQL_HOST,
+    SQL_PORT,
+    SQL_DATABASE,
+  } = GlobalConfig()
+
+  if (NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('Simple API')
+      .setDescription('MEA API use Swagger')
+      .setVersion('1.0')
+      .addBearerAuth({ type: 'http', description: 'Access token' }, 'access-token')
+      .build()
+    const document = SwaggerModule.createDocument(app, config)
+    SwaggerModule.setup('documents', app, document, {
+      swaggerOptions: { persistAuthorization: true },
+    })
+  }
+  await app.listen(API_PUBLIC_PORT, '0.0.0.0', () => {
+    logger.debug(
+      `🚀 ===== [API] Server document: http://${API_PUBLIC_HOST}:${API_PUBLIC_PORT}/documents/ =====`
+    )
+    logger.debug(
+      `🚀 ===== [SQL] Database: jdbc:${SQL_TYPE}://${SQL_HOST}:${SQL_PORT}/${SQL_DATABASE} =====`
+    )
+    logger.debug(`🚀 ===== [TIME] Timezone: offset ${new Date().getTimezoneOffset()} =====`)
+    logger.debug(`🚀 ===== [NODE] NodeJS version: ${NODE_VERSION} =====`)
+  })
+}
 bootstrap()

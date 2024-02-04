@@ -8,15 +8,15 @@ import { DistributorPaymentPaginationQuery, DistributorPaymentPayDebtBody } from
 @ApiBearerAuth('access-token')
 @Controller('distributor-payment')
 export class ApiDistributorPaymentController {
-    constructor(private readonly apiDistributorPaymentService: ApiDistributorPaymentService) {}
+  constructor(private readonly apiDistributorPaymentService: ApiDistributorPaymentService) {}
 
-    @Get('pagination')
-    pagination(@External() { oid }: TExternal, @Query() query: DistributorPaymentPaginationQuery) {
-        return this.apiDistributorPaymentService.pagination(oid, query)
-    }
+  @Get('pagination')
+  pagination(@External() { oid }: TExternal, @Query() query: DistributorPaymentPaginationQuery) {
+    return this.apiDistributorPaymentService.pagination(oid, query)
+  }
 
-    @Post('pay-debt')
-    startPayDebt(@External() { oid }: TExternal, @Body() body: DistributorPaymentPayDebtBody) {
-        return this.apiDistributorPaymentService.startPayDebt(oid, body)
-    }
+  @Post('pay-debt')
+  startPayDebt(@External() { oid }: TExternal, @Body() body: DistributorPaymentPayDebtBody) {
+    return this.apiDistributorPaymentService.startPayDebt(oid, body)
+  }
 }

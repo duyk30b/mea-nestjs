@@ -1,10 +1,10 @@
 import { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class initPostgres1702313319849 implements MigrationInterface {
-    name = 'initPostgres1702313319849'
+  name = 'initPostgres1702313319849'
 
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
             CREATE TABLE "Customer" (
                 "oid" integer NOT NULL,
                 "id" SERIAL NOT NULL,
@@ -25,7 +25,7 @@ export class initPostgres1702313319849 implements MigrationInterface {
                 CONSTRAINT "PK_60596e16740e1fa20dbf0154ec7" PRIMARY KEY ("id")
             )
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE TABLE "InvoiceExpense" (
                 "oid" integer NOT NULL,
                 "id" SERIAL NOT NULL,
@@ -36,10 +36,10 @@ export class initPostgres1702313319849 implements MigrationInterface {
                 CONSTRAINT "PK_85b52fa6ce4a86c5a086cfb37d5" PRIMARY KEY ("id")
             )
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE INDEX "IDX_InvoiceExpense__invoiceId" ON "InvoiceExpense" ("oid", "invoiceId")
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE TABLE "Procedure" (
                 "oid" integer NOT NULL,
                 "id" SERIAL NOT NULL,
@@ -51,7 +51,7 @@ export class initPostgres1702313319849 implements MigrationInterface {
                 CONSTRAINT "PK_3e2a7fe9e5fe891d676042f1f8b" PRIMARY KEY ("id")
             )
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE TABLE "Product" (
                 "oid" integer NOT NULL,
                 "id" SERIAL NOT NULL,
@@ -68,16 +68,16 @@ export class initPostgres1702313319849 implements MigrationInterface {
                 CONSTRAINT "PK_9fc040db7872192bbc26c515710" PRIMARY KEY ("id")
             )
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE INDEX "IDX_Product__oid_group" ON "Product" ("oid", "group")
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE INDEX "IDX_Product__oid_substance" ON "Product" ("oid", "substance")
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE INDEX "IDX_Product__oid_brandName" ON "Product" ("oid", "brandName")
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE TABLE "ProductBatch" (
                 "oid" integer NOT NULL,
                 "id" SERIAL NOT NULL,
@@ -92,10 +92,10 @@ export class initPostgres1702313319849 implements MigrationInterface {
                 CONSTRAINT "PK_946fbf0439b45dc5d867ac1788d" PRIMARY KEY ("id")
             )
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE INDEX "IDX_ProductBatch__oid_productId" ON "ProductBatch" ("oid", "productId")
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE TABLE "InvoiceItem" (
                 "oid" integer NOT NULL,
                 "id" SERIAL NOT NULL,
@@ -115,16 +115,16 @@ export class initPostgres1702313319849 implements MigrationInterface {
                 CONSTRAINT "PK_fe59f574f9f138df4b52fb7ee7a" PRIMARY KEY ("id")
             )
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE INDEX "IDX_InvoiceItem__referenceId" ON "InvoiceItem" ("oid", "referenceId")
         `)
-        await queryRunner.query(`
-            CREATE INDEX "IDX_InvoiceItem__customerId_type" ON "InvoiceItem" ("oid", "customerId", "type")
-        `)
-        await queryRunner.query(`
+    await queryRunner.query(`
+      CREATE INDEX "IDX_InvoiceItem__customerId_type" ON "InvoiceItem" ("oid", "customerId", "type")
+    `)
+    await queryRunner.query(`
             CREATE INDEX "IDX_InvoiceItem__invoiceId" ON "InvoiceItem" ("oid", "invoiceId")
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE TABLE "InvoiceSurcharge" (
                 "oid" integer NOT NULL,
                 "id" SERIAL NOT NULL,
@@ -135,10 +135,10 @@ export class initPostgres1702313319849 implements MigrationInterface {
                 CONSTRAINT "PK_7e4dd54ddb4b2e7cbbd9411ca47" PRIMARY KEY ("id")
             )
         `)
-        await queryRunner.query(`
-            CREATE INDEX "IDX_InvoiceSurcharge__invoiceId" ON "InvoiceSurcharge" ("oid", "invoiceId")
-        `)
-        await queryRunner.query(`
+    await queryRunner.query(`
+      CREATE INDEX "IDX_InvoiceSurcharge__invoiceId" ON "InvoiceSurcharge" ("oid", "invoiceId")
+    `)
+    await queryRunner.query(`
             CREATE TABLE "Invoice" (
                 "oid" integer NOT NULL,
                 "id" SERIAL NOT NULL,
@@ -166,13 +166,13 @@ export class initPostgres1702313319849 implements MigrationInterface {
                 CONSTRAINT "PK_0ead03cb5a20e5a5cc4d6defbe6" PRIMARY KEY ("id")
             )
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE INDEX "IDX_Invoice__oid_time" ON "Invoice" ("oid", "time")
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE INDEX "IDX_Invoice__oid_customerId" ON "Invoice" ("oid", "customerId")
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE TABLE "CustomerPayment" (
                 "oid" integer NOT NULL,
                 "id" SERIAL NOT NULL,
@@ -191,13 +191,13 @@ export class initPostgres1702313319849 implements MigrationInterface {
                 CONSTRAINT "PK_6ad6ff939ec685a555ba130e91b" PRIMARY KEY ("id")
             )
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE INDEX "IDX_CustomerPayment__invoiceId" ON "CustomerPayment" ("oid", "invoiceId")
         `)
-        await queryRunner.query(`
-            CREATE INDEX "IDX_CustomerPayment__customerId" ON "CustomerPayment" ("oid", "customerId")
-        `)
-        await queryRunner.query(`
+    await queryRunner.query(`
+      CREATE INDEX "IDX_CustomerPayment__customerId" ON "CustomerPayment" ("oid", "customerId")
+    `)
+    await queryRunner.query(`
             CREATE TABLE "Distributor" (
                 "oid" integer NOT NULL,
                 "id" SERIAL NOT NULL,
@@ -213,7 +213,7 @@ export class initPostgres1702313319849 implements MigrationInterface {
                 CONSTRAINT "PK_737b15b84f8d592f19f2ebe44c1" PRIMARY KEY ("id")
             )
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE TABLE "ReceiptItem" (
                 "oid" integer NOT NULL,
                 "id" SERIAL NOT NULL,
@@ -226,13 +226,13 @@ export class initPostgres1702313319849 implements MigrationInterface {
                 CONSTRAINT "PK_63dbeaf2451849f0f8b492ea3e5" PRIMARY KEY ("id")
             )
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE INDEX "IDX_ReceiptItem__oid_receiptId" ON "ReceiptItem" ("oid", "receiptId")
         `)
-        await queryRunner.query(`
-            CREATE INDEX "IDX_ReceiptItem__oid_productBatchId" ON "ReceiptItem" ("oid", "productBatchId")
-        `)
-        await queryRunner.query(`
+    await queryRunner.query(`
+      CREATE INDEX "IDX_ReceiptItem__oid_productBatchId" ON "ReceiptItem" ("oid", "productBatchId")
+    `)
+    await queryRunner.query(`
             CREATE TABLE "Receipt" (
                 "oid" integer NOT NULL,
                 "id" SERIAL NOT NULL,
@@ -256,13 +256,13 @@ export class initPostgres1702313319849 implements MigrationInterface {
                 CONSTRAINT "PK_83a8032351433085916cc8318b0" PRIMARY KEY ("id")
             )
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE INDEX "IDX_Receipt__oid_time" ON "Receipt" ("oid", "time")
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE INDEX "IDX_Receipt__oid_distributorId" ON "Receipt" ("oid", "distributorId")
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE TABLE "DistributorPayment" (
                 "oid" integer NOT NULL,
                 "id" SERIAL NOT NULL,
@@ -281,13 +281,14 @@ export class initPostgres1702313319849 implements MigrationInterface {
                 CONSTRAINT "PK_8d73835f7daa04601034352cdbf" PRIMARY KEY ("id")
             )
         `)
-        await queryRunner.query(`
-            CREATE INDEX "IDX_DistributorPayment__receiptId" ON "DistributorPayment" ("oid", "receiptId")
-        `)
-        await queryRunner.query(`
-            CREATE INDEX "IDX_DistributorPayment__distributorId" ON "DistributorPayment" ("oid", "distributorId")
-        `)
-        await queryRunner.query(`
+    await queryRunner.query(`
+      CREATE INDEX "IDX_DistributorPayment__receiptId" ON "DistributorPayment" ("oid", "receiptId")
+    `)
+    await queryRunner.query(`
+      CREATE INDEX "IDX_DistributorPayment__distributorId"
+        ON "DistributorPayment" ("oid", "distributorId")
+    `)
+    await queryRunner.query(`
             CREATE TABLE "Organization" (
                 "id" SERIAL NOT NULL,
                 "phone" character(10) NOT NULL,
@@ -302,13 +303,13 @@ export class initPostgres1702313319849 implements MigrationInterface {
                 CONSTRAINT "PK_67bcafc78935cd441a054c6d4ea" PRIMARY KEY ("id")
             )
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE UNIQUE INDEX "IDX_Organization__email" ON "Organization" ("email")
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE UNIQUE INDEX "IDX_Organization__phone" ON "Organization" ("phone")
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE TABLE "OrganizationSetting" (
                 "oid" integer NOT NULL,
                 "id" SERIAL NOT NULL,
@@ -317,10 +318,10 @@ export class initPostgres1702313319849 implements MigrationInterface {
                 CONSTRAINT "PK_af7a055340404ea37600febbbb4" PRIMARY KEY ("id")
             )
         `)
-        await queryRunner.query(`
-            CREATE UNIQUE INDEX "IDX_OrganizationSetting__type" ON "OrganizationSetting" ("oid", "type")
-        `)
-        await queryRunner.query(`
+    await queryRunner.query(`
+      CREATE UNIQUE INDEX "IDX_OrganizationSetting__type" ON "OrganizationSetting" ("oid", "type")
+    `)
+    await queryRunner.query(`
             CREATE TABLE "ProductMovement" (
                 "oid" integer NOT NULL,
                 "id" SERIAL NOT NULL,
@@ -339,15 +340,15 @@ export class initPostgres1702313319849 implements MigrationInterface {
                 CONSTRAINT "PK_ed9aaf7e7fa157ec0b56d21a6e1" PRIMARY KEY ("id")
             )
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE INDEX "IDX_ProductMovement__oid_productBatchId_createTime" 
                 ON "ProductMovement" ("oid", "productBatchId", "createTime")
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE INDEX "IDX_ProductMovement__oid_productId_createTime" 
                 ON "ProductMovement" ("oid", "productId", "createTime")
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE TABLE "User" (
                 "oid" integer NOT NULL,
                 "id" SERIAL NOT NULL,
@@ -363,137 +364,137 @@ export class initPostgres1702313319849 implements MigrationInterface {
                 CONSTRAINT "PK_9862f679340fb2388436a5ab3e4" PRIMARY KEY ("id")
             )
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE UNIQUE INDEX "IDX_EMPLOYEE__OID_USERNAME" ON "User" ("oid", "username")
         `)
-    }
+  }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_EMPLOYEE__OID_USERNAME"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE "User"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_ProductMovement__oid_productId_createTime"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_ProductMovement__oid_productBatchId_createTime"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE "ProductMovement"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_OrganizationSetting__type"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE "OrganizationSetting"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_Organization__phone"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_Organization__email"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE "Organization"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_DistributorPayment__distributorId"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_DistributorPayment__receiptId"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE "DistributorPayment"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_Receipt__oid_distributorId"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_Receipt__oid_time"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE "Receipt"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_ReceiptItem__oid_productBatchId"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_ReceiptItem__oid_receiptId"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE "ReceiptItem"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE "Distributor"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_CustomerPayment__customerId"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_CustomerPayment__invoiceId"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE "CustomerPayment"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_Invoice__oid_customerId"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_Invoice__oid_time"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE "Invoice"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_InvoiceSurcharge__invoiceId"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE "InvoiceSurcharge"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_InvoiceItem__invoiceId"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_InvoiceItem__customerId_type"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_InvoiceItem__referenceId"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE "InvoiceItem"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_ProductBatch__oid_productId"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE "ProductBatch"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_Product__oid_brandName"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_Product__oid_substance"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_Product__oid_group"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE "Product"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE "Procedure"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP INDEX "public"."IDX_InvoiceExpense__invoiceId"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE "InvoiceExpense"
         `)
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TABLE "Customer"
         `)
-    }
+  }
 }

@@ -9,10 +9,10 @@ import { InvoiceItemPaginationQuery } from './request'
 @ApiBearerAuth('access-token')
 @Controller('invoice-item')
 export class ApiInvoiceItemController {
-    constructor(private readonly apiInvoiceItemService: ApiInvoiceItemService) {}
+  constructor(private readonly apiInvoiceItemService: ApiInvoiceItemService) {}
 
-    @Get('pagination')
-    async pagination(@External() { oid }: TExternal, @Query() query: InvoiceItemPaginationQuery) {
-        return await this.apiInvoiceItemService.pagination(oid, query)
-    }
+  @Get('pagination')
+  async pagination(@External() { oid }: TExternal, @Query() query: InvoiceItemPaginationQuery) {
+    return await this.apiInvoiceItemService.pagination(oid, query)
+  }
 }

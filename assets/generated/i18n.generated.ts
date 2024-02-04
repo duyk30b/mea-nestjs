@@ -3,8 +3,17 @@
 import { Path } from "nestjs-i18n";
 export type I18nTranslations = {
     "common": {
+        "Success": string;
+    };
+    "error": {
+        "Database": {
+            "NotFound": string;
+            "UpdateFailed": string;
+            "DeleteFailed": string;
+        };
         "Token": {
             "Expired": string;
+            "Empty": string;
             "Invalid": string;
             "WrongIp": string;
         };
@@ -20,6 +29,11 @@ export type I18nTranslations = {
         "User": {
             "NotExist": string;
             "WrongPassword": string;
+            "WrongRole": string;
+        };
+        "Role": {
+            "NotExist": string;
+            "Inactive": string;
         };
         "Organization": {
             "NotExist": string;

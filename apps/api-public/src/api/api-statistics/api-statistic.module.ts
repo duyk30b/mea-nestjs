@@ -3,8 +3,8 @@ import { ApiStatisticController } from './api-statistic.controller'
 import { ApiStatisticService } from './api-statistic.service'
 
 @Module({
-    imports: [],
-    controllers: [ApiStatisticController],
-    providers: [ApiStatisticService],
+  imports: [],
+  controllers: [ApiStatisticController],
+  providers: [ApiStatisticService],
 })
 export class ApiStatisticModule {}

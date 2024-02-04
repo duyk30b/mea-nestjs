@@ -1,21 +1,21 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common'
-import { Request } from 'express'
-import { ERole } from '../../database/common/variable'
+import { FastifyRequest } from 'fastify'
 
 export type TExternal = {
-    ip: string
-    oid?: number
-    uid?: number
-    username?: string
-    role?: ERole
-    orgPhone?: string
+  ip: string
+  oid?: number
+  uid?: number
+  username?: string
+  roleId?: number
+  orgPhone?: string
 }
 
-export interface RequestExternal extends Request {
-    external: TExternal
+export interface RequestExternal extends FastifyRequest {
+  external: TExternal
 }
 
 export const External = createParamDecorator((data: unknown, ctx: ExecutionContext) => {
-    const request: RequestExternal = ctx.switchToHttp().getRequest()
-    return request.external
+  const request = ctx.switchToHttp().getRequest()
+  const requestExternal: RequestExternal = request.raw // fastify phải vào raw mới lấy đc request
+  return requestExternal.external
 })

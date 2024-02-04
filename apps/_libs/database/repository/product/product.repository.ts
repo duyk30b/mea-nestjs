@@ -6,21 +6,21 @@ import { PostgreSqlRepository } from '../postgresql.repository'
 
 @Injectable()
 export class ProductRepository extends PostgreSqlRepository<
-    Product,
-    { [P in 'id' | 'quantity' | 'fullName']?: 'ASC' | 'DESC' },
-    { [P in 'productBatches']?: boolean }
+  Product,
+  { [P in 'id' | 'quantity' | 'fullName']?: 'ASC' | 'DESC' },
+  { [P in 'productBatches']?: boolean }
 > {
-    constructor(
-        private dataSource: DataSource,
-        @InjectEntityManager() private manager: EntityManager,
-        @InjectRepository(Product) private procedureRepository: Repository<Product>
-    ) {
-        super(procedureRepository)
-    }
+  constructor(
+    private dataSource: DataSource,
+    @InjectEntityManager() private manager: EntityManager,
+    @InjectRepository(Product) private procedureRepository: Repository<Product>
+  ) {
+    super(procedureRepository)
+  }
 
-    async calculateProductQuantity(options: { oid: number; productIds: number[] }) {
-        const { oid, productIds } = options
-        await this.manager.query(`
+  async calculateProductQuantity(options: { oid: number; productIds: number[] }) {
+    const { oid, productIds } = options
+    await this.manager.query(`
             UPDATE  "Product" "product" 
             SET     "quantity" = "spb"."sumQuantity"
             FROM    ( 
@@ -32,5 +32,5 @@ export class ProductRepository extends PostgreSqlRepository<
                         AND "product"."id" IN (${productIds.toString()})
                         AND "product"."oid" = ${oid}
         `)
-    }
+  }
 }

@@ -4,30 +4,30 @@ import { SortQuery } from '../../../../../_libs/common/dto/query'
 import { ProductMovementType } from '../../../../../_libs/database/entities/product-movement.entity'
 
 export class ProductMovementRelationQuery {
-    @Expose()
-    @IsBoolean()
-    productBatch: boolean
+  @Expose()
+  @IsBoolean()
+  productBatch: boolean
 
-    @Expose()
-    @IsBoolean()
-    invoice: boolean
+  @Expose()
+  @IsBoolean()
+  invoice: boolean
 
-    @Expose()
-    @IsBoolean()
-    receipt: boolean
+  @Expose()
+  @IsBoolean()
+  receipt: boolean
 }
 export class ProductMovementFilterQuery {
-    @Expose()
-    @IsNumber()
-    productId: number
+  @Expose()
+  @IsNumber()
+  productId: number
 
-    @Expose()
-    @IsNumber()
-    productBatchId: number
+  @Expose()
+  @IsNumber()
+  productBatchId: number
 
-    @Expose()
-    @IsEnum(ProductMovementType)
-    type: ProductMovementType
+  @Expose()
+  @IsEnum(ProductMovementType)
+  type: ProductMovementType
 }
 
 export class ProductMovementSortQuery extends SortQuery {}

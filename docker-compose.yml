@@ -5,10 +5,11 @@ networks:
     driver: bridge
 
 volumes:
-  mv_node_modules:
+  mv_api_public:
+
 
 services:
-  api-public:
+  api_public:
     container_name: mc_api_public_${NODE_ENV:-local}
     image: mi_${NODE_ENV:-local}:1.0.0
     restart: unless-stopped
@@ -20,14 +21,13 @@ services:
       target: ${NODE_ENV:-local}
     volumes:
       - ./:/app/
-      - mv_node_modules:/app/node_modules/
+      - mv_api_public:/app/node_modules/
     command: [ "sh", "-c", "npm run debug api-public" ]
     environment:
       - NODE_ENV=${NODE_ENV:-local}
     ports:
       - "${API_PUBLIC_PORT:-20000}:${API_PUBLIC_PORT:-20000}"
       - 29229:29229
-
   # event-dispatcher:
   #   container_name: mc_event-dispatcher
   #   image: mi_nestjs_${NODE_ENV:-local}:1.0.0

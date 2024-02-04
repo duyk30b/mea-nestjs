@@ -1,37 +1,40 @@
-import { ApiPropertyOptional } from '@nestjs/swagger'
-import { Expose, Transform } from 'class-transformer'
-import { IsIn, IsNotEmpty, IsString } from 'class-validator'
+import { Expose, Type } from 'class-transformer'
+import { IsBoolean, IsIn, IsNotEmpty, IsNumber, IsString, ValidateNested } from 'class-validator'
+import { ConditionTimestamp } from '../../../../../_libs/common/dto/condition-timestamp'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 
-export class UserRelationQuery {}
+export class UserRelationQuery {
+  @Expose()
+  @IsBoolean()
+  role: boolean
+}
 
 export class UserFilterQuery {
-    @ApiPropertyOptional({ name: 'filter[isActive]', example: 1 })
-    @Expose()
-    @Transform(({ value }) => {
-        if (['1', 'true'].includes(value)) return 1
-        if (['0', 'false'].includes(value)) return 0
-        return undefined
-    })
-    @IsIn([0, 1])
-    isActive: 0 | 1
+  @Expose()
+  @IsNotEmpty()
+  @IsString()
+  searchText: string
 
-    @ApiPropertyOptional({ name: 'filter[fullName]' })
-    @Expose()
-    @IsNotEmpty()
-    @IsString()
-    fullName: string
+  @Expose()
+  @IsNumber()
+  roleId: number
 
-    @ApiPropertyOptional({ name: 'filter[phone]' })
-    @Expose()
-    @IsNotEmpty()
-    @IsString()
-    phone: string
+  @Expose()
+  @IsIn([0, 1])
+  isActive: 0 | 1
+
+  @Expose()
+  @Type(() => ConditionTimestamp)
+  @ValidateNested({ each: true })
+  updatedAt: ConditionTimestamp
 }
 
 export class UserSortQuery extends SortQuery {
-    @ApiPropertyOptional({ name: 'sort[fullName]', enum: ['ASC', 'DESC'], example: 'DESC' })
-    @Expose()
-    @IsIn(['ASC', 'DESC'])
-    fullName: 'ASC' | 'DESC'
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  phone: 'ASC' | 'DESC'
+
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  username: 'ASC' | 'DESC'
 }

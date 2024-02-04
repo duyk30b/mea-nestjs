@@ -3,22 +3,22 @@ import { IsDefined, ValidateNested } from 'class-validator'
 import { KafkaMessageDto } from '../../kafka'
 
 export class ArrivalCreateData extends KafkaMessageDto {
-    @Expose({ name: 'oid' })
-    @IsDefined()
-    @Type(() => Number)
-    oid: number
+  @Expose({ name: 'oid' })
+  @IsDefined()
+  @Type(() => Number)
+  oid: number
 
-    @Expose({ name: 'arrival_id' })
-    @IsDefined()
-    @Type(() => Number)
-    arrivalId: number
+  @Expose({ name: 'arrival_id' })
+  @IsDefined()
+  @Type(() => Number)
+  arrivalId: number
 }
 
 export class ArrivalCreateDto extends KafkaMessageDto {
-    @Expose()
-    @ValidateNested({ each: true })
-    @Type(() => ArrivalCreateData)
-    data: ArrivalCreateData
+  @Expose()
+  @ValidateNested({ each: true })
+  @Type(() => ArrivalCreateData)
+  data: ArrivalCreateData
 }
 
 // Example:

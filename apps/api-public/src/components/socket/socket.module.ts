@@ -5,8 +5,8 @@ import { SocketService } from './socket.service'
 
 @Global()
 @Module({
-    imports: [JwtExtendModule],
-    providers: [SocketGateway, SocketService],
-    exports: [SocketService],
+  imports: [JwtExtendModule],
+  providers: [SocketGateway, SocketService],
+  exports: [SocketService],
 })
 export class SocketModule {}

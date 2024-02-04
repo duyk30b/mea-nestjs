@@ -1,25 +1,87 @@
-import { ApiPropertyOptional } from '@nestjs/swagger'
-import { Expose, Type } from 'class-transformer'
-import { ValidateNested } from 'class-validator'
-import { PaginationQuery } from '../../../../../_libs/common/dto/query'
-import { InvoiceItemFilterQuery, InvoiceItemRelationQuery, InvoiceItemSortQuery } from './invoice-item-options.request'
+import { ApiPropertyOptional, IntersectionType, PickType } from '@nestjs/swagger'
+import { Expose, Transform, plainToInstance } from 'class-transformer'
+import { IsObject, ValidateNested } from 'class-validator'
+import { LimitQuery, PaginationQuery } from '../../../../../_libs/common/dto/query'
+import {
+  InvoiceItemFilterQuery,
+  InvoiceItemRelationQuery,
+  InvoiceItemSortQuery,
+} from './invoice-item-options.request'
 
-export class InvoiceItemPaginationQuery extends PaginationQuery {
-    @ApiPropertyOptional({ type: InvoiceItemFilterQuery })
-    @Expose()
-    @Type(() => InvoiceItemFilterQuery)
-    @ValidateNested({ each: true })
-    filter: InvoiceItemFilterQuery
+export class InvoiceItemGetQuery {
+  @ApiPropertyOptional({ type: String, example: JSON.stringify(<InvoiceItemRelationQuery>{}) })
+  @Expose()
+  @Transform(({ value }) => {
+    try {
+      if (!value) return undefined // return undefined để không validate nữa
+      const plain = JSON.parse(value)
+      return plainToInstance(InvoiceItemRelationQuery, plain, {
+        exposeUnsetFields: false,
+        excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
+      })
+    } catch (error) {
+      return error.message
+    }
+  })
+  @IsObject()
+  @ValidateNested({ each: true })
+  relation: InvoiceItemRelationQuery
 
-    @ApiPropertyOptional({ type: InvoiceItemRelationQuery })
-    @Expose()
-    @Type(() => InvoiceItemRelationQuery)
-    @ValidateNested({ each: true })
-    relation: InvoiceItemRelationQuery
+  @ApiPropertyOptional({
+    type: String,
+    example: JSON.stringify(<InvoiceItemFilterQuery>{
+      customerId: 1,
+    }),
+  })
+  @Expose()
+  @Transform(({ value }) => {
+    try {
+      if (!value) return undefined // return undefined để không validate nữa
+      const plain = JSON.parse(value)
+      return plainToInstance(InvoiceItemFilterQuery, plain, {
+        exposeUnsetFields: false,
+        excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
+      })
+    } catch (error) {
+      return error.message
+    }
+  })
+  @IsObject()
+  @ValidateNested({ each: true })
+  filter?: InvoiceItemFilterQuery
 
-    @ApiPropertyOptional({ type: InvoiceItemSortQuery })
-    @Expose()
-    @Type(() => InvoiceItemSortQuery)
-    @ValidateNested({ each: true })
-    sort: InvoiceItemSortQuery
+  @ApiPropertyOptional({
+    type: String,
+    example: JSON.stringify(<InvoiceItemSortQuery>{
+      id: 'ASC',
+    }),
+  })
+  @Expose()
+  @Transform(({ value }) => {
+    try {
+      if (!value) return undefined // return undefined để không validate nữa
+      const plain = JSON.parse(value)
+      return plainToInstance(InvoiceItemSortQuery, plain, {
+        exposeUnsetFields: false,
+        excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
+      })
+    } catch (error) {
+      return error.message
+    }
+  })
+  @IsObject()
+  @ValidateNested({ each: true })
+  sort?: InvoiceItemSortQuery
 }
+
+export class InvoiceItemPaginationQuery extends IntersectionType(
+  InvoiceItemGetQuery,
+  PaginationQuery
+) {}
+
+export class InvoiceItemGetManyQuery extends IntersectionType(
+  PickType(InvoiceItemGetQuery, ['filter', 'relation']),
+  LimitQuery
+) {}
+
+export class InvoiceItemGetOneQuery extends PickType(InvoiceItemGetQuery, ['relation']) {}

@@ -4,22 +4,22 @@ import { IsDate, IsDefined, IsIn } from 'class-validator'
 import { LimitQuery } from '../../../../../_libs/common/dto/query'
 
 export class StatisticTimeQuery extends LimitQuery {
-    @ApiProperty()
-    @Expose()
-    @Type(() => Date)
-    @IsDefined()
-    @IsDate()
-    fromTime: Date
+  @ApiProperty()
+  @Expose()
+  @Type(() => Date)
+  @IsDefined()
+  @IsDate()
+  fromTime: Date
 
-    @ApiProperty()
-    @Expose()
-    @Type(() => Date)
-    @IsDefined()
-    @IsDate()
-    toTime: Date
+  @ApiProperty()
+  @Expose()
+  @Type(() => Date)
+  @IsDefined()
+  @IsDate()
+  toTime: Date
 
-    @ApiPropertyOptional()
-    @Expose()
-    @IsIn(['date', 'month'])
-    timeType: 'date' | 'month'
+  @ApiPropertyOptional()
+  @Expose()
+  @IsIn(['date', 'month'])
+  timeType: 'date' | 'month'
 }

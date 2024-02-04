@@ -5,8 +5,8 @@ import { JwtConfig } from '../../environments'
 import { JwtExtendService } from './jwt-extend.service'
 
 @Module({
-    imports: [ConfigModule.forFeature(JwtConfig), JwtModule],
-    providers: [JwtExtendService],
-    exports: [JwtExtendService],
+  imports: [ConfigModule.forFeature(JwtConfig), JwtModule],
+  providers: [JwtExtendService],
+  exports: [JwtExtendService],
 })
 export class JwtExtendModule {}

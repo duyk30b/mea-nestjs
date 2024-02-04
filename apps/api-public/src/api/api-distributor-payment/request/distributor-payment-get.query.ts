@@ -1,40 +1,92 @@
-import { ApiPropertyOptional } from '@nestjs/swagger'
-import { Expose, Type } from 'class-transformer'
-import { IsNumber, ValidateNested } from 'class-validator'
-import { PaginationQuery, SortQuery } from '../../../../../_libs/common/dto/query'
+import { ApiPropertyOptional, IntersectionType, PickType } from '@nestjs/swagger'
+import { Expose, Transform, plainToInstance } from 'class-transformer'
+import { IsObject, ValidateNested } from 'class-validator'
+import { LimitQuery, PaginationQuery } from '../../../../../_libs/common/dto/query'
+import {
+  DistributorPaymentFilterQuery,
+  DistributorPaymentRelationQuery,
+  DistributorPaymentSortQuery,
+} from './distributor-payment.options'
 
-class DistributorPaymentFilterQuery {
-    @ApiPropertyOptional({ name: 'filter[distributorId]', example: 12 })
-    @Expose()
-    @Type(() => Number)
-    @IsNumber()
-    distributorId: number
+export class DistributorPaymentGetQuery {
+  @ApiPropertyOptional({
+    type: String,
+    example: JSON.stringify(<DistributorPaymentRelationQuery>{}),
+  })
+  @Expose()
+  @Transform(({ value }) => {
+    try {
+      if (!value) return undefined // return undefined để không validate nữa
+      const plain = JSON.parse(value)
+      return plainToInstance(DistributorPaymentRelationQuery, plain, {
+        exposeUnsetFields: false,
+        excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
+      })
+    } catch (error) {
+      return error.message
+    }
+  })
+  @IsObject()
+  @ValidateNested({ each: true })
+  relation: DistributorPaymentRelationQuery
+
+  @ApiPropertyOptional({
+    type: String,
+    example: JSON.stringify(<DistributorPaymentFilterQuery>{
+      distributorId: 1,
+    }),
+  })
+  @Expose()
+  @Transform(({ value }) => {
+    try {
+      if (!value) return undefined // return undefined để không validate nữa
+      const plain = JSON.parse(value)
+      return plainToInstance(DistributorPaymentFilterQuery, plain, {
+        exposeUnsetFields: false,
+        excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
+      })
+    } catch (error) {
+      return error.message
+    }
+  })
+  @IsObject()
+  @ValidateNested({ each: true })
+  filter?: DistributorPaymentFilterQuery
+
+  @ApiPropertyOptional({
+    type: String,
+    example: JSON.stringify(<DistributorPaymentSortQuery>{
+      id: 'ASC',
+    }),
+  })
+  @Expose()
+  @Transform(({ value }) => {
+    try {
+      if (!value) return undefined // return undefined để không validate nữa
+      const plain = JSON.parse(value)
+      return plainToInstance(DistributorPaymentSortQuery, plain, {
+        exposeUnsetFields: false,
+        excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
+      })
+    } catch (error) {
+      return error.message
+    }
+  })
+  @IsObject()
+  @ValidateNested({ each: true })
+  sort?: DistributorPaymentSortQuery
 }
 
-export class DistributorPaymentSortQuery extends SortQuery {}
+export class DistributorPaymentPaginationQuery extends IntersectionType(
+  DistributorPaymentGetQuery,
+  PaginationQuery
+) {}
 
-// export class DistributorPaymentSortQuery {
-//     @Expose({ name: 'column' })
-//     @IsDefined()
-//     @IsIn(Object.keys(DistributorPaymentColumnSort))
-//     column: keyof typeof DistributorPaymentColumnSort
+export class DistributorPaymentGetManyQuery extends IntersectionType(
+  PickType(DistributorPaymentGetQuery, ['filter', 'relation']),
+  LimitQuery
+) {}
 
-//     @Expose({ name: 'value' })
-//     @IsDefined()
-//     @IsIn(['ASC', 'DESC'])
-//     value: 'ASC' | 'DESC'
-// }
-
-export class DistributorPaymentPaginationQuery extends PaginationQuery {
-    @ApiPropertyOptional({ type: DistributorPaymentFilterQuery })
-    @Expose()
-    @Type(() => DistributorPaymentFilterQuery)
-    @ValidateNested({ each: true })
-    filter: DistributorPaymentFilterQuery
-
-    @ApiPropertyOptional({ type: DistributorPaymentSortQuery })
-    @Expose()
-    @Type(() => DistributorPaymentSortQuery)
-    @ValidateNested({ each: true })
-    sort: DistributorPaymentSortQuery
-}
+export class DistributorPaymentGetOneQuery extends PickType(DistributorPaymentGetQuery, [
+  'relation',
+]) {}

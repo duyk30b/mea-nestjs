@@ -5,7 +5,7 @@ networks:
     driver: bridge
 
 services:
-  api-public:
+  api_public:
     container_name: mc_api_public_production
     image: mi_production:1.0.0
     restart: unless-stopped

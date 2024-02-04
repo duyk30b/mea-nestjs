@@ -6,14 +6,14 @@ import { PostgreSqlRepository } from '../postgresql.repository'
 
 @Injectable()
 export class CustomerRepository extends PostgreSqlRepository<
-    Customer,
-    { [P in 'id' | 'debt' | 'fullName']?: 'ASC' | 'DESC' },
-    { [P in keyof Customer]?: never }
+  Customer,
+  { [P in 'id' | 'debt' | 'fullName']?: 'ASC' | 'DESC' },
+  { [P in keyof Customer]?: never }
 > {
-    constructor(
-        private dataSource: DataSource,
-        @InjectRepository(Customer) private customerRepository: Repository<Customer>
-    ) {
-        super(customerRepository)
-    }
+  constructor(
+    private dataSource: DataSource,
+    @InjectRepository(Customer) private customerRepository: Repository<Customer>
+  ) {
+    super(customerRepository)
+  }
 }
