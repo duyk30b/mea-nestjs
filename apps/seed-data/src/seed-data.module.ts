@@ -5,7 +5,7 @@
 //     Customer,
 //     Distributor,
 //     DistributorPayment,
-//     Employee,
+//     User,
 //     Invoice,
 //     InvoiceItem,
 //     Organization,
@@ -23,7 +23,7 @@
 // import { SeedDataCommand } from './seed-data.command'
 // import { CustomerSeed } from './service/customer.seed'
 // import { DistributorSeed } from './service/distributor.seed'
-// import { EmployeeSeed } from './service/employee.seed'
+// import { UserSeed } from './service/employee.seed'
 // import { InvoiceSeed } from './service/invoice.seed'
 // import { OrganizationSeed } from './service/organization.seed'
 // import { ProcedureSeed } from './service/procedure.seed'
@@ -42,7 +42,7 @@
 //             Customer,
 //             Distributor,
 //             DistributorPayment,
-//             Employee,
+//             User,
 //             Invoice,
 //             InvoiceItem,
 //             Organization,
@@ -60,7 +60,7 @@
 //         InvoiceSeed,
 //         CustomerSeed,
 //         DistributorSeed,
-//         EmployeeSeed,
+//         UserSeed,
 //         OrganizationSeed,
 //         ProcedureSeed,
 //         ReceiptSeed,

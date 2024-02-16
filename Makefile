@@ -6,17 +6,24 @@ upgrade:
 	git log --all --oneline --graph -10
 	git reset --hard origin/master
 	docker compose -f docker-compose.production.yml --env-file .env.production up -d --build
-	docker compose logs -f api-public
+	docker compose logs -f api_public
 
 hotfix:
 	git fetch --all
 	git log --all --oneline --graph -10
 	git reset --hard origin/hotfix
 	docker compose -f docker-compose.production.yml --env-file .env.production up -d --build
-	docker compose logs -f api-public
+	docker compose logs -f api_public
 
+up:
+	docker compose up -d
+	docker compose logs -f api_public
+
+down:
+	docker compose down
+	
 logs:
-	docker compose logs -f api-public
+	docker compose logs -f api_public
 
 nginx-reload:
 	git fetch --all

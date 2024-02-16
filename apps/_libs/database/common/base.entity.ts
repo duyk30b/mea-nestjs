@@ -2,11 +2,11 @@ import { Exclude, Expose } from 'class-transformer'
 import { Column, PrimaryGeneratedColumn } from 'typeorm'
 
 export class BaseEntity {
-    @Column({ name: 'oid' })
-    @Exclude()
-    oid: number
+  @Column({ name: 'oid' })
+  @Exclude()
+  oid: number
 
-    @PrimaryGeneratedColumn({ name: 'id' })
-    @Expose({ name: 'id' })
-    id: number
+  @PrimaryGeneratedColumn({ name: 'id' })
+  @Expose({ name: 'id' })
+  id: number
 }

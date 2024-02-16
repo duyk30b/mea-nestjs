@@ -1,6 +1,6 @@
 // import { Injectable } from '@nestjs/common'
 // import { Organization, OrganizationSetting } from 'library/database/entities'
-// import { OrganizationSettingType } from 'library/database/entities/organization-setting.entity'
+// import { ScreenSettingKey } from 'library/database/entities/organization-setting.entity'
 // import { DataSource } from 'typeorm'
 // import { productGroupExampleData } from '../long-nguyen/product.example'
 
@@ -20,7 +20,7 @@
 
 //         const orgProductGroupSetting = this.dataSource.manager.create(OrganizationSetting, {
 //             oid,
-//             type: OrganizationSettingType.PRODUCT_GROUP,
+//             type: ScreenSettingKey.PRODUCT_GROUP,
 //             data: JSON.stringify(productGroupExampleData),
 //         })
 //         return await this.dataSource

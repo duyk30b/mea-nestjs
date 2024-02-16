@@ -1,95 +1,81 @@
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common'
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { APP_GUARD } from '@nestjs/core'
 import { ScheduleModule } from '@nestjs/schedule'
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
-import { HeaderResolver, I18nJsonLoader, I18nMiddleware, I18nModule, QueryResolver } from 'nestjs-i18n'
+import {
+  HeaderResolver,
+  I18nJsonLoader,
+  I18nMiddleware,
+  I18nModule,
+  QueryResolver,
+} from 'nestjs-i18n'
 import * as path from 'path'
 import { RepositoryModule } from '../../_libs/database/repository/repository.module'
 import { SqlModule } from '../../_libs/database/sql.module'
+import { CacheManagerModule } from '../../_libs/transporter/cache-manager/cache-manager.module'
+import { ApiModule } from './api/api.module'
+import { AppController } from './app.controller'
+import { AppService } from './app.service'
+import { AuthModule } from './auth/auth.module'
+import { JwtExtendModule } from './auth/jwt-extend/jwt-extend.module'
 import { EmailModule } from './components/email/email.module'
 import { HealthModule } from './components/health/health.module'
-import { JwtExtendModule } from './components/jwt-extend/jwt-extend.module'
+import { PermissionGuard } from './guards/permission.guard'
 import { DetectClientMiddleware } from './middleware/detect-client.middleware copy'
-import { ValidateTokenMiddleware } from './middleware/validate-token.middleware'
-import { ApiCustomerPaymentModule } from './modules/api-customer-payment/api-customer-payment.module'
-import { ApiCustomerModule } from './modules/api-customer/api-customer.module'
-import { ApiDistributorPaymentModule } from './modules/api-distributor-payment/api-distributor-payment.module'
-import { ApiDistributorModule } from './modules/api-distributor/api-distributor.module'
-import { ApiEmployeeModule } from './modules/api-employee/api-employee.module'
-import { ApiInvoiceItemModule } from './modules/api-invoice-item/api-invoice-item.module'
-import { ApiInvoiceModule } from './modules/api-invoice/api-invoice.module'
-import { ApiOrganizationModule } from './modules/api-organization/api-organization.module'
-import { ApiProcedureModule } from './modules/api-procedure/api-procedure.module'
-import { ApiProductBatchModule } from './modules/api-product-batch/api-product-batch.module'
-import { ApiProductMovementModule } from './modules/api-product-movement/api-product-movement.module'
-import { ApiProductModule } from './modules/api-product/api-product.module'
-import { ApiReceiptModule } from './modules/api-receipt/api-receipt.module'
-import { ApiStatisticModule } from './modules/api-statistics/api-statistic.module'
-import { ApiUserModule } from './modules/api-user/api-user.module'
-import { AuthModule } from './modules/auth/auth.module'
+import { RootModule } from './root/root.module'
 
 @Module({
-    imports: [
-        ConfigModule.forRoot({
-            envFilePath: [`.env.${process.env.NODE_ENV || 'local'}`, '.env'],
-            isGlobal: true,
-        }),
-        ThrottlerModule.forRoot({
-            ttl: 5, // seconds
-            limit: 5, // mỗi request giống hệt nhau chỉ được phép gọi 5 lần trong 5s
-        }),
-        I18nModule.forRoot({
-            fallbackLanguage: 'vi',
-            loader: I18nJsonLoader,
-            loaderOptions: {
-                path: path.join(__dirname, '../../../assets/i18n/'),
-                watch: true,
-            },
-            resolvers: [new QueryResolver(['lang', 'l']), new HeaderResolver(['x-lang'])],
-            typesOutputPath: path.join(__dirname, '../../../assets/generated/i18n.generated.ts'),
-        }),
-        SqlModule,
-        RepositoryModule,
-        ScheduleModule.forRoot(),
-        HealthModule,
-        // SocketModule,
-        EmailModule,
-        JwtExtendModule,
-        AuthModule,
-        ApiCustomerModule,
-        ApiCustomerPaymentModule,
-        ApiDistributorModule,
-        ApiDistributorPaymentModule,
-        ApiEmployeeModule,
-        ApiInvoiceModule,
-        ApiInvoiceItemModule,
-        ApiOrganizationModule,
-        ApiProductModule,
-        ApiProductBatchModule,
-        ApiProductMovementModule,
-        ApiProcedureModule,
-        ApiReceiptModule,
-        ApiStatisticModule,
-        ApiUserModule,
-    ],
-    controllers: [],
-    providers: [
-        {
-            provide: APP_GUARD,
-            useClass: ThrottlerGuard,
-        },
-    ],
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: [`.env.${process.env.NODE_ENV || 'local'}`, '.env'],
+      isGlobal: true,
+    }),
+    ThrottlerModule.forRoot([{ ttl: 5000, limit: 5 }]),
+    I18nModule.forRoot({
+      fallbackLanguage: 'vi',
+      loader: I18nJsonLoader,
+      loaderOptions: {
+        path: path.join(__dirname, '../../../assets/i18n/'),
+        watch: true,
+      },
+      resolvers: [new QueryResolver(['lang', 'l']), new HeaderResolver(['x-lang'])],
+      typesOutputPath: path.join(__dirname, '../../../assets/generated/i18n.generated.ts'),
+    }),
+    SqlModule,
+    RepositoryModule,
+    ScheduleModule.forRoot(),
+    HealthModule,
+    // SocketModule,
+    EmailModule,
+    JwtExtendModule,
+
+    CacheManagerModule,
+
+    AuthModule,
+    ApiModule,
+    RootModule,
+  ],
+  controllers: [AppController],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PermissionGuard,
+    },
+    AppService,
+  ],
 })
 export class AppModule implements NestModule {
-    configure(consumer: MiddlewareConsumer) {
-        consumer.apply(I18nMiddleware).forRoutes('*')
-
-        consumer.apply(DetectClientMiddleware).forRoutes('*')
-
-        consumer
-            .apply(ValidateTokenMiddleware)
-            .exclude('auth/(.*)', { path: 'health', method: RequestMethod.GET })
-            .forRoutes('*')
-    }
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(I18nMiddleware).forRoutes('*')
+    consumer.apply(DetectClientMiddleware).forRoutes('*')
+    // consumer
+    //   .apply(ValidateTokenMiddleware)
+    //   .exclude('auth/(.*)', '/documents/(.*)', { path: 'health', method: RequestMethod.GET })
+    //   .forRoutes('*')
+  }
 }

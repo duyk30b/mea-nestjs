@@ -1,27 +1,29 @@
 export const keysEnum = (e: Record<string, any>) => {
-    return Object.keys(e).filter((key) => isNaN(parseInt(key)))
+  return Object.keys(e).filter((key) => isNaN(parseInt(key)))
 }
 
 export const valuesEnum = (e: Record<string, any>) => {
-    return keysEnum(e).map((key) => e[key])
+  return keysEnum(e).map((key) => e[key])
 }
 
 export const objectEnum = (e: Record<string, any>) => {
-    return keysEnum(e).reduce(
-        (acc, key) => {
-            acc[key] = e[key]
-            return acc
-        },
-        {} as Record<string, any>
-    )
+  return keysEnum(e).reduce(
+    (acc, key) => {
+      acc[key] = e[key]
+      return acc
+    },
+    {} as Record<string, any>
+  )
 }
 
 export type Impossible<K extends keyof any> = {
-    [P in K]: never
+  [P in K]: never
 }
-export type NoExtraProperties<T, U extends T = T> = U extends Array<infer V>
-    ? NoExtraProperties<V>[]
-    : U & Impossible<Exclude<keyof U, keyof T>>
+export type NoExtra<T, U extends T = T> = U & Impossible<Exclude<keyof U, keyof T>>
+
+// export type NoExtra<T, U extends T = T> = U extends Array<infer V>
+//     ? NoExtraProperties<V>[]
+//     : U & Impossible<Exclude<keyof U, keyof T>>
 
 // https://stackoverflow.com/questions/49580725/is-it-possible-to-restrict-typescript-object-to-contain-only-properties-defined
 

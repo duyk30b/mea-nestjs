@@ -1,67 +1,32 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { FindOptionsWhere, In, Repository, UpdateResult } from 'typeorm'
-import { NoExtraProperties } from '../../../common/helpers/typescript.helper'
+import { Repository } from 'typeorm'
 import { Organization, OrganizationSetting } from '../../entities'
-import { OrganizationSettingType } from '../../entities/organization-setting.entity'
-import { OrganizationCondition } from './organization.dto'
+import { OrganizationInsertType, OrganizationUpdateType } from '../../entities/organization.entity'
+import { PostgreSqlRepository } from '../postgresql.repository'
 
 @Injectable()
-export class OrganizationRepository {
-    constructor(
-        @InjectRepository(Organization) private organizationRepository: Repository<Organization>,
-        @InjectRepository(OrganizationSetting)
-        private organizationSettingRepository: Repository<OrganizationSetting>
-    ) {}
+export class OrganizationRepository extends PostgreSqlRepository<
+  Organization,
+  { [P in 'id']?: 'ASC' | 'DESC' },
+  { [P in 'users']?: boolean },
+  OrganizationInsertType,
+  OrganizationUpdateType
+> {
+  private dataMap: Record<string, Organization> = {}
 
-    getWhereOptions(condition: OrganizationCondition) {
-        const where: FindOptionsWhere<Organization> = {}
-        if (condition.id != null) where.id = condition.id
-        if (condition.ids) {
-            if (condition.ids.length === 0) condition.ids.push(0)
-            where.id = In(condition.ids)
-        }
-        return where
-    }
+  constructor(
+    @InjectRepository(Organization) private organizationRepository: Repository<Organization>,
+    @InjectRepository(OrganizationSetting)
+    private organizationSettingRepository: Repository<OrganizationSetting>
+  ) {
+    super(organizationRepository)
+  }
 
-    async findOne(oid: number): Promise<Organization> {
-        return await this.organizationRepository.findOne({ where: { id: oid } })
+  async getOneFromCache(id: number) {
+    if (!this.dataMap[id]) {
+      this.dataMap[id] = await this.findOneById(id)
     }
-
-    async findMany(condition: OrganizationCondition): Promise<Organization[]> {
-        const where = this.getWhereOptions(condition)
-        return await this.organizationRepository.find({ where })
-    }
-
-    async update<T extends Partial<Organization>>(
-        oid: number,
-        dto: NoExtraProperties<Partial<Omit<Organization, 'id' | 'phone'>>, T>
-    ): Promise<UpdateResult> {
-        return await this.organizationRepository.update({ id: oid }, dto)
-    }
-
-    async getAllSetting(oid: number) {
-        return await this.organizationSettingRepository.find({
-            select: { type: true, data: true },
-            where: { oid },
-        })
-    }
-
-    async getSettings(oid: number, types: OrganizationSettingType[]) {
-        return await this.organizationSettingRepository.find({
-            select: { type: true, data: true },
-            where: { oid, type: In(types) },
-        })
-    }
-
-    async upsertSetting(oid: number, type: OrganizationSettingType, data: string) {
-        const dto = this.organizationSettingRepository.create({ oid, type, data })
-        return await this.organizationSettingRepository
-            .createQueryBuilder()
-            .insert()
-            .into(OrganizationSetting)
-            .values(dto)
-            .orUpdate(['data'], ['oid', 'type'])
-            .execute()
-    }
+    return this.dataMap[id]
+  }
 }

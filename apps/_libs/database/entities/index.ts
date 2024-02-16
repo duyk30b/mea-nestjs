@@ -14,24 +14,26 @@ import ProductMovement from './product-movement.entity'
 import Product from './product.entity'
 import ReceiptItem from './receipt-item.entity'
 import Receipt from './receipt.entity'
-import Employee from './user.entity'
+import Role from './role.entity'
+import User from './user.entity'
 
 export {
-    Customer,
-    CustomerPayment,
-    Distributor,
-    DistributorPayment,
-    Employee,
-    Invoice,
-    InvoiceExpense,
-    InvoiceItem,
-    InvoiceSurcharge,
-    Organization,
-    OrganizationSetting,
-    Procedure,
-    Product,
-    ProductBatch,
-    ProductMovement,
-    Receipt,
-    ReceiptItem,
+  Customer,
+  CustomerPayment,
+  Distributor,
+  DistributorPayment,
+  Invoice,
+  InvoiceExpense,
+  InvoiceItem,
+  InvoiceSurcharge,
+  Organization,
+  OrganizationSetting,
+  Procedure,
+  Product,
+  ProductBatch,
+  ProductMovement,
+  Receipt,
+  ReceiptItem,
+  Role,
+  User,
 }

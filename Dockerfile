@@ -1,10 +1,10 @@
-FROM node:16.18.1-alpine3.15 AS local
+FROM node:18.19.0-alpine AS local
 WORKDIR /app
 COPY ["package.json", "package-lock.json", "./"]
 RUN npm install
 COPY . .
 
-FROM node:16.18.1-alpine3.15 AS production
+FROM node:18.19.0-alpine AS production
 WORKDIR /app
 COPY ["package.json", "package-lock.json", "./"]
 RUN npm install --production --silent

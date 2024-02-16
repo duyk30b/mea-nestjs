@@ -3,9 +3,26 @@
 import { Path } from "nestjs-i18n";
 export type I18nTranslations = {
     "common": {
+        "Success": string;
+        "Forbidden": string;
+        "ForbiddenPermission": string;
+        "AccountInactive": string;
+        "ApiInactive": string;
+        "ForgotPassword": {
+            "Success": string;
+        };
+    };
+    "error": {
+        "Database": {
+            "NotFound": string;
+            "UpdateFailed": string;
+            "DeleteFailed": string;
+        };
         "Token": {
             "Expired": string;
+            "Empty": string;
             "Invalid": string;
+            "NoInCache": string;
             "WrongIp": string;
         };
         "Register": {
@@ -20,6 +37,11 @@ export type I18nTranslations = {
         "User": {
             "NotExist": string;
             "WrongPassword": string;
+            "WrongRole": string;
+        };
+        "Role": {
+            "NotExist": string;
+            "Inactive": string;
         };
         "Organization": {
             "NotExist": string;
@@ -36,10 +58,10 @@ export type I18nTranslations = {
         "Invoice": {
             "NotExist": string;
         };
-        "Employee": {
+        "Distributor": {
             "NotExist": string;
         };
-        "Distributor": {
+        "Procedure": {
             "NotExist": string;
         };
     };

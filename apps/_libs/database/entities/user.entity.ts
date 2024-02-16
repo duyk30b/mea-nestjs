@@ -1,57 +1,121 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
-import { EGender, ERole } from '../common/variable'
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { EGender } from '../common/variable'
+import Device from './device'
 import Organization from './organization.entity'
+import Role from './role.entity'
+
+export enum UserGroup {
+  ROOT = 'ROOT',
+}
 
 @Entity('User')
-@Index('IDX_EMPLOYEE__OID_USERNAME', ['oid', 'username'], { unique: true })
-export default class User extends BaseEntity {
-    @Column({ type: 'char', length: 10, nullable: true })
-    @Expose()
-    phone: string
+export default class User {
+  @Expose()
+  @Column()
+  oid: number
 
-    @Column({ type: 'character varying', length: 255 })
-    @Expose()
-    username: string
+  @Expose()
+  @PrimaryGeneratedColumn()
+  id: number
 
-    @Column({ type: 'character varying', length: 255 })
-    @Exclude()
-    password: string
+  @Expose()
+  @Column({ type: 'char', length: 10, nullable: true })
+  phone: string
 
-    @Column({ type: 'character varying', length: 255, nullable: true })
-    @Exclude()
-    secret: string
+  @Expose()
+  @Column({ type: 'character varying', length: 255 })
+  username: string
 
-    @Column({ type: 'smallint', default: ERole.User })
-    @Expose()
-    role: ERole
+  @Exclude()
+  @Column({ name: 'hashPassword', type: 'character varying', length: 255 })
+  hashPassword: string
 
-    @Column({ type: 'character varying', length: 255, nullable: true })
-    @Expose()
-    fullName: string
+  @Expose({ groups: [UserGroup.ROOT] })
+  @Column({ type: 'character varying', length: 255, nullable: true })
+  secret: string
 
-    @Column({
-        type: 'bigint',
-        nullable: true,
-        transformer: {
-            to: (value) => value,
-            from: (value) => (value == null ? value : Number(value)),
-        },
-    })
-    @Expose()
-    birthday: number
+  @Expose()
+  @Column({ type: 'integer', default: 1 })
+  roleId: number
 
-    @Column({ type: 'smallint', nullable: true })
-    @Expose()
-    gender: EGender
+  @Expose()
+  @Column({ type: 'character varying', length: 255, nullable: true })
+  fullName: string
 
-    @Column({ type: 'smallint', default: 1 })
-    @Expose()
-    isActive: 0 | 1
+  @Expose()
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  birthday: number
 
-    @ManyToOne((type) => Organization, { createForeignKeyConstraints: false })
-    @JoinColumn({ name: 'oid', referencedColumnName: 'id' })
-    @Expose()
-    organization: Organization
+  @Expose()
+  @Column({ type: 'smallint', nullable: true })
+  gender: EGender
+
+  @Expose()
+  @Column({ type: 'smallint', default: 1 })
+  isActive: 0 | 1
+
+  @Expose()
+  @Column({
+    type: 'bigint',
+    default: () => '(EXTRACT(epoch FROM now()) * (1000))',
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  createdAt: number
+
+  @Expose()
+  @Column({
+    type: 'bigint',
+    default: () => '(EXTRACT(epoch FROM now()) * (1000))',
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  updatedAt: number
+
+  @Expose()
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  deletedAt: number
+
+  @Expose()
+  @ManyToOne((type) => Organization, (organization) => organization.users, {
+    createForeignKeyConstraints: false,
+  })
+  @JoinColumn({ name: 'oid', referencedColumnName: 'id' })
+  organization: Organization
+
+  @Expose()
+  @ManyToOne((type) => Role, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'roleId', referencedColumnName: 'id' })
+  role: Role
+
+  @Expose()
+  devices: Device[]
 }
+
+export type UserInsertType = Omit<
+  User,
+  'id' | 'role' | 'organization' | 'devices' | 'createdAt' | 'updatedAt' | 'deletedAt'
+>
+export type UserUpdateType = Omit<
+  User,
+  'oid' | 'id' | 'role' | 'organization' | 'devices' | 'createdAt' | 'updatedAt'
+>

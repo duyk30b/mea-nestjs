@@ -4,7 +4,7 @@
 // import { AddressData } from './address/address.service'
 // import { CustomerSeed } from './service/customer.seed'
 // import { DistributorSeed } from './service/distributor.seed'
-// import { EmployeeSeed } from './service/employee.seed'
+// import { UserSeed } from './service/employee.seed'
 // import { InvoiceSeed } from './service/invoice.seed'
 // import { OrganizationSeed } from './service/organization.seed'
 // import { ProcedureSeed } from './service/procedure.seed'
@@ -18,7 +18,7 @@
 //     constructor(
 //         private readonly dataSource: DataSource,
 //         private readonly organizationSeed: OrganizationSeed,
-//         private readonly employeeSeed: EmployeeSeed,
+//         private readonly employeeSeed: UserSeed,
 //         private readonly distributorSeed: DistributorSeed,
 //         private readonly customerSeed: CustomerSeed,
 //         private readonly productSeed: ProductSeed,
