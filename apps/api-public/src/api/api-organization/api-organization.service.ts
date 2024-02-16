@@ -1,11 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { OrganizationSettingType } from '../../../../_libs/database/entities/organization-setting.entity'
-import {
-  CustomerRepository,
-  DistributorRepository,
-  OrganizationRepository,
-} from '../../../../_libs/database/repository'
+import { ScreenSettingKey } from '../../../../_libs/database/entities/organization-setting.entity'
+import { OrganizationRepository } from '../../../../_libs/database/repository'
+import { OrganizationSettingRepository } from '../../../../_libs/database/repository/organization-setting/organization-setting.repository'
 import { OrganizationSettingUpdateBody } from './request/organization-settings.request'
 import { OrganizationUpdateBody } from './request/organization-update.body'
 
@@ -15,45 +12,15 @@ export class ApiOrganizationService {
 
   constructor(
     private readonly organizationRepository: OrganizationRepository,
-    private readonly distributorRepository: DistributorRepository,
-    private readonly customerRepository: CustomerRepository
+    private readonly organizationSettingRepository: OrganizationSettingRepository
   ) {}
 
-  async info(id: number): Promise<BaseResponse> {
-    const [organization, allSettings] = await Promise.all([
-      this.organizationRepository.findOneById(id),
-      this.organizationRepository.getAllSetting(id),
-    ])
-    const settings: Record<string, string> = {}
-    allSettings.forEach((i) => (settings[i.type] = i.data))
-
-    let distributorDefault: any
-    let customerDefault: any
-    try {
-      const screenReceipt = JSON.parse(
-        settings[OrganizationSettingType.SCREEN_RECEIPT_UPSERT] || '{}'
-      )
-      const screenInvoice = JSON.parse(
-        settings[OrganizationSettingType.SCREEN_INVOICE_UPSERT] || '{}'
-      )
-
-      const distributorId = screenReceipt.distributor?.idDefault
-      const customerId = screenInvoice.customer?.idDefault
-
-      const data = await Promise.all([
-        distributorId ? this.distributorRepository.findOneBy({ oid: id, id: distributorId }) : {},
-        customerId ? this.customerRepository.findOneBy({ oid: id, id: customerId }) : {},
-      ])
-      distributorDefault = data[0]
-      customerDefault = data[1]
-    } catch (error) {
-      this.logger.error(error)
-    }
-
-    return { data: { organization, settings, distributorDefault, customerDefault } }
+  async getInfo(oid: number): Promise<BaseResponse> {
+    const data = await this.organizationRepository.findOneById(oid)
+    return { data }
   }
 
-  async updateOne(id: number, body: OrganizationUpdateBody): Promise<BaseResponse> {
+  async updateInfo(id: number, body: OrganizationUpdateBody): Promise<BaseResponse> {
     await this.organizationRepository.update({ id }, body)
     const data = await this.organizationRepository.findOneById(id)
     return { data }
@@ -61,10 +28,10 @@ export class ApiOrganizationService {
 
   async upsertSetting(
     oid: number,
-    type: OrganizationSettingType,
+    type: ScreenSettingKey,
     body: OrganizationSettingUpdateBody
   ): Promise<BaseResponse> {
-    const data = await this.organizationRepository.upsertSetting(oid, type, body.data)
+    const data = await this.organizationSettingRepository.upsertSetting(oid, type, body.data)
     return { data }
   }
 }

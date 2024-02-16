@@ -242,11 +242,11 @@ export class ApiInvoiceService {
     }
   }
 
-  async sumDebt(oid: number, { filter }: InvoiceSumDebtQuery): Promise<BaseResponse> {
-    const invoiceSumDebt = await this.invoiceRepository.sumDebt({
+  async sumInvoiceDebt(oid: number, { filter }: InvoiceSumDebtQuery): Promise<BaseResponse> {
+    const sum = await this.invoiceRepository.sumInvoiceDebt({
       oid,
       time: filter?.time,
     })
-    return { data: { invoiceSumDebt } }
+    return { data: { sumInvoiceDebt: sum } }
   }
 }

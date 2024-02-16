@@ -4,6 +4,13 @@ import { Path } from "nestjs-i18n";
 export type I18nTranslations = {
     "common": {
         "Success": string;
+        "Forbidden": string;
+        "ForbiddenPermission": string;
+        "AccountInactive": string;
+        "ApiInactive": string;
+        "ForgotPassword": {
+            "Success": string;
+        };
     };
     "error": {
         "Database": {
@@ -15,6 +22,7 @@ export type I18nTranslations = {
             "Expired": string;
             "Empty": string;
             "Invalid": string;
+            "NoInCache": string;
             "WrongIp": string;
         };
         "Register": {

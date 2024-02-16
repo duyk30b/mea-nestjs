@@ -1,16 +1,14 @@
-import { CanActivate, ExecutionContext, Injectable, SetMetadata } from '@nestjs/common'
+import { CanActivate, ExecutionContext, HttpStatus, Injectable, SetMetadata } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
+import { BusinessException } from '../../../_libs/common/exception-filter/exception-filter'
 import { RequestExternal } from '../../../_libs/common/request/external.request'
-import { Role } from '../../../_libs/database/entities'
-import Permission, {
-  PermissionId,
-  PermissionStatus,
-} from '../../../_libs/database/entities/permission.entity'
+import Permission, { PermissionId } from '../../../_libs/database/entities/permission.entity'
+import { OrganizationRepository, UserRepository } from '../../../_libs/database/repository'
 import { PermissionRepository } from '../../../_libs/database/repository/permission/permission.repository'
 import { RoleRepository } from '../../../_libs/database/repository/role/role.repository'
 
 export const PERMISSION_GUARD = 'PERMISSION_GUARD'
-export const IsPermission = (permissionId: PermissionId) =>
+export const HasPermission = (permissionId: PermissionId) =>
   SetMetadata(PERMISSION_GUARD, permissionId)
 
 @Injectable()
@@ -18,7 +16,9 @@ export class PermissionGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private readonly roleRepository: RoleRepository,
-    private readonly permissionRepository: PermissionRepository
+    private readonly permissionRepository: PermissionRepository,
+    private readonly organizationRepository: OrganizationRepository,
+    private readonly userRepository: UserRepository
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -30,34 +30,69 @@ export class PermissionGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest()
     const requestExternal: RequestExternal = request.raw // Fastify phải đọc trong Raw
-    const { roleId } = requestExternal.external
+    const { uid, oid } = requestExternal.external
 
-    if (roleId === 0) return true // RoleID = 0 là ROOT được xem mọi API
+    if (uid == null || oid == null) {
+      throw new BusinessException('error.Token.Invalid', {}, HttpStatus.UNAUTHORIZED)
+    }
 
-    const permissionAll = await this.permissionRepository.findManyBy({})
-    const PermissionDataMap: Record<string, Permission> = {}
-    permissionAll.forEach((i) => (PermissionDataMap[i.id] = i))
+    // Get data để check
+    const [users, permissionMap] = await Promise.all([
+      this.userRepository.findMany({
+        relationLoadStrategy: 'join',
+        relation: { organization: true, role: true },
+        condition: { oid, id: uid },
+      }),
+      this.permissionRepository.getMapFromCache(),
+    ])
+    const user = users[0]
 
-    const permission = PermissionDataMap[permissionId]
+    const permission = permissionMap[permissionId]
     const pathIdArr = permission.pathId.split('.').map((i) => Number(i))
 
-    let publicCheck = false
+    // Nếu user, role, org inactive thì false
+    if (
+      !user ||
+      !user.isActive ||
+      !user.organization ||
+      !user.organization.isActive ||
+      user.role?.isActive === 0 // với roleId = 0 | 1  thì không có role
+    ) {
+      throw new BusinessException('common.AccountInactive', {}, HttpStatus.FORBIDDEN)
+    }
+
+    // ROOT: oid = 0 được xem mọi API, kể cả API inActive
+    if (user.oid === 0) return true
+
+    // Kiểm tra API có bị inActive
     for (let i = 0; i < pathIdArr.length; i++) {
       const id = pathIdArr[i]
-      const curPermission = PermissionDataMap[id]
-      if (curPermission.status === PermissionStatus.PUBLIC) {
-        publicCheck = true
-      } else if (curPermission.status === PermissionStatus.BLOCK) {
-        return false // chỉ cần 1 thằng block thì là false
+      const curPermission = permissionMap[id]
+      if (!curPermission.isActive) {
+        return false // chỉ cần 1 thằng inActive thì là false
       }
     }
-    if (publicCheck) return true // nếu có public thì pass
 
-    const role: Role = await this.roleRepository.findOneById(roleId)
-    if (!role) {
-      return false
+    // Check Org ko có quyền thì out
+    const organizationPermissionIds: number[] = JSON.parse(user.organization.permissionIds || '[]')
+    if (!organizationPermissionIds.includes(permission.rootId)) {
+      throw new BusinessException(
+        'common.ForbiddenPermission',
+        { permission: permission.name },
+        HttpStatus.FORBIDDEN
+      )
     }
-    const rolePermissionIds: number[] = JSON.parse(role.permissionIds)
-    return pathIdArr.some((pid) => rolePermissionIds.includes(pid)) // role chỉ cần chứa 1 permissionId là pass
+
+    // Check Role ko có quyền thì out
+    if (user.roleId === 1) return true
+    const rolePermissionIds: number[] = JSON.parse(user.role.permissionIds || '[]')
+    if (!pathIdArr.some((pid) => rolePermissionIds.includes(pid))) {
+      throw new BusinessException(
+        'common.ForbiddenPermission',
+        { permission: permission.name },
+        HttpStatus.FORBIDDEN
+      )
+    }
+    return true
   }
 }

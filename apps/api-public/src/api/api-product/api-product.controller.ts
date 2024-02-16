@@ -2,6 +2,8 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestj
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
+import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { HasPermission } from '../../guards/permission.guard'
 import { ApiProductService } from './api-product.service'
 import {
   ProductCreateBody,
@@ -18,16 +20,19 @@ export class ApiProductController {
   constructor(private readonly apiProductService: ApiProductService) {}
 
   @Get('pagination')
+  @HasPermission(PermissionId.PRODUCT_READ)
   pagination(@External() { oid }: TExternal, @Query() query: ProductPaginationQuery) {
     return this.apiProductService.pagination(oid, query)
   }
 
   @Get('list')
+  @HasPermission(PermissionId.PRODUCT_READ)
   async list(@External() { oid }: TExternal, @Query() query: ProductGetManyQuery) {
     return await this.apiProductService.getList(oid, query)
   }
 
   @Get('detail/:id')
+  @HasPermission(PermissionId.PRODUCT_READ)
   async detail(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -37,11 +42,13 @@ export class ApiProductController {
   }
 
   @Post('create')
+  @HasPermission(PermissionId.PRODUCT_CREATE)
   async create(@External() { oid }: TExternal, @Body() body: ProductCreateBody) {
     return await this.apiProductService.createOne(oid, body)
   }
 
   @Patch('update/:id')
+  @HasPermission(PermissionId.PRODUCT_UPDATE)
   async update(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -51,6 +58,7 @@ export class ApiProductController {
   }
 
   @Delete('delete/:id')
+  @HasPermission(PermissionId.PRODUCT_DELETE)
   @ApiParam({ name: 'id', example: 1 })
   async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiProductService.deleteOne(oid, id)

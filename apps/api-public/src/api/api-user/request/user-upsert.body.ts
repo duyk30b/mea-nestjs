@@ -60,4 +60,4 @@ export class UserCreateBody {
   isActive: 0 | 1
 }
 
-export class UserUpdateBody extends OmitType(UserCreateBody, ['username']) {}
+export class UserUpdateBody extends OmitType(UserCreateBody, ['username', 'password']) {}

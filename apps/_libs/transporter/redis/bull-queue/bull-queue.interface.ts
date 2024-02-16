@@ -1,10 +1,11 @@
-export interface ITestJob {
-  data: any
+export interface IQueueMessage {
+  data: Record<string, any>
+  messageId: string
+  createTime: string
 }
 
-export interface IKafkaJob {
-  messageId: string
-  kafkaEvent: string
-  data: Record<string, any>
-  createdTime: number
+export type IPingQueueMessage = IQueueMessage
+
+export interface IItemStockMovementMessage extends IQueueMessage {
+  groupKey: string
 }

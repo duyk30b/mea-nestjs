@@ -1,8 +1,7 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity, Index } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
+import { Exclude, Expose } from 'class-transformer'
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
 
-export enum OrganizationSettingType {
+export enum ScreenSettingKey {
   SYSTEM_SETTING = 'SYSTEM_SETTING',
 
   PRODUCT_GROUP = 'PRODUCT_GROUP',
@@ -43,12 +42,23 @@ export enum OrganizationSettingType {
 
 @Entity('OrganizationSetting')
 @Index('IDX_OrganizationSetting__type', ['oid', 'type'], { unique: true })
-export default class OrganizationSetting extends BaseEntity {
+export default class OrganizationSetting {
+  @Column({ name: 'oid' })
+  @Exclude()
+  oid: number
+
+  @PrimaryGeneratedColumn({ name: 'id' })
+  @Expose({ name: 'id' })
+  id: number
+
   @Column({ type: 'character varying', length: 255 })
   @Expose({ name: 'type' })
-  type: OrganizationSettingType
+  type: ScreenSettingKey
 
   @Column({ name: 'data', type: 'text' })
   @Expose({ name: 'data' })
   data: string // Dạng JSON
 }
+
+export type OrganizationSettingInsertType = Omit<OrganizationSetting, 'id' | 'users'>
+export type OrganizationSettingUpdateType = Omit<OrganizationSetting, 'id' | 'oid'>

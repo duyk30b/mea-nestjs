@@ -39,6 +39,7 @@ import {
   User,
 } from '../entities'
 import Permission from '../entities/permission.entity'
+import { OrganizationSettingRepository } from './organization-setting/organization-setting.repository'
 import { PermissionRepository } from './permission/permission.repository'
 import { RoleRepository } from './role/role.repository'
 
@@ -76,6 +77,7 @@ import { RoleRepository } from './role/role.repository'
     InvoiceProcessRepository,
     InvoiceItemRepository,
     OrganizationRepository,
+    OrganizationSettingRepository,
     PermissionRepository,
     ProcedureRepository,
     ProductRepository,
@@ -96,6 +98,7 @@ import { RoleRepository } from './role/role.repository'
     InvoiceProcessRepository,
     InvoiceItemRepository,
     OrganizationRepository,
+    OrganizationSettingRepository,
     PermissionRepository,
     ProductRepository,
     ProcedureRepository,

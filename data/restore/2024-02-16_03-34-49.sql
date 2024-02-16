@@ -492,12 +492,16 @@ CREATE TABLE public."Organization" (
     phone character(10) NOT NULL,
     email character varying(255) NOT NULL,
     level smallint DEFAULT 0 NOT NULL,
-    "organizationName" character varying(255),
+    name character varying(255),
     "addressProvince" character varying(255),
     "addressDistrict" character varying(255),
     "addressWard" character varying(255),
     "addressStreet" character varying(255),
-    "createTime" bigint
+    "permissionIds" text DEFAULT '[]'::text NOT NULL,
+    "createdAt" bigint DEFAULT (EXTRACT(epoch FROM now()) * (1000)::numeric) NOT NULL,
+    "updatedAt" bigint DEFAULT (EXTRACT(epoch FROM now()) * (1000)::numeric) NOT NULL,
+    "deletedAt" bigint,
+    "isActive" smallint DEFAULT '1'::smallint NOT NULL
 );
 
 
@@ -559,6 +563,46 @@ ALTER SEQUENCE public."Organization_id_seq" OWNER TO mea;
 --
 
 ALTER SEQUENCE public."Organization_id_seq" OWNED BY public."Organization".id;
+
+
+--
+-- Name: Permission; Type: TABLE; Schema: public; Owner: mea
+--
+
+CREATE TABLE public."Permission" (
+    id integer NOT NULL,
+    level smallint NOT NULL,
+    code character varying(255) NOT NULL,
+    name character varying(255) NOT NULL,
+    "parentId" smallint DEFAULT '0'::smallint NOT NULL,
+    "pathId" character varying(255) NOT NULL,
+    "rootId" smallint DEFAULT '0'::smallint NOT NULL,
+    "isActive" smallint DEFAULT '1'::smallint NOT NULL
+);
+
+
+ALTER TABLE public."Permission" OWNER TO mea;
+
+--
+-- Name: Permission_id_seq; Type: SEQUENCE; Schema: public; Owner: mea
+--
+
+CREATE SEQUENCE public."Permission_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Permission_id_seq" OWNER TO mea;
+
+--
+-- Name: Permission_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: mea
+--
+
+ALTER SEQUENCE public."Permission_id_seq" OWNED BY public."Permission".id;
 
 
 --
@@ -833,6 +877,46 @@ ALTER SEQUENCE public."Receipt_id_seq" OWNED BY public."Receipt".id;
 
 
 --
+-- Name: Role; Type: TABLE; Schema: public; Owner: mea
+--
+
+CREATE TABLE public."Role" (
+    oid integer NOT NULL,
+    id integer NOT NULL,
+    name character varying(255) NOT NULL,
+    "permissionIds" text DEFAULT '[]'::text NOT NULL,
+    "isActive" smallint DEFAULT '1'::smallint NOT NULL,
+    "createdAt" bigint DEFAULT (EXTRACT(epoch FROM now()) * (1000)::numeric) NOT NULL,
+    "updatedAt" bigint DEFAULT (EXTRACT(epoch FROM now()) * (1000)::numeric) NOT NULL,
+    "deletedAt" bigint
+);
+
+
+ALTER TABLE public."Role" OWNER TO mea;
+
+--
+-- Name: Role_id_seq; Type: SEQUENCE; Schema: public; Owner: mea
+--
+
+CREATE SEQUENCE public."Role_id_seq"
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public."Role_id_seq" OWNER TO mea;
+
+--
+-- Name: Role_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: mea
+--
+
+ALTER SEQUENCE public."Role_id_seq" OWNED BY public."Role".id;
+
+
+--
 -- Name: User; Type: TABLE; Schema: public; Owner: mea
 --
 
@@ -841,16 +925,16 @@ CREATE TABLE public."User" (
     id integer NOT NULL,
     phone character(10),
     username character varying(255) NOT NULL,
-    password character varying(255) NOT NULL,
+    "hashPassword" character varying(255) NOT NULL,
     secret character varying(255),
-    role smallint DEFAULT 2 NOT NULL,
     "fullName" character varying(255),
     birthday bigint,
     gender smallint,
     "isActive" smallint DEFAULT 1 NOT NULL,
     "createdAt" bigint DEFAULT (EXTRACT(epoch FROM now()) * (1000)::numeric) NOT NULL,
     "updatedAt" bigint DEFAULT (EXTRACT(epoch FROM now()) * (1000)::numeric) NOT NULL,
-    "deletedAt" bigint
+    "deletedAt" bigint,
+    "roleId" integer DEFAULT 1 NOT NULL
 );
 
 
@@ -984,6 +1068,13 @@ ALTER TABLE ONLY public."OrganizationSetting" ALTER COLUMN id SET DEFAULT nextva
 
 
 --
+-- Name: Permission id; Type: DEFAULT; Schema: public; Owner: mea
+--
+
+ALTER TABLE ONLY public."Permission" ALTER COLUMN id SET DEFAULT nextval('public."Permission_id_seq"'::regclass);
+
+
+--
 -- Name: Procedure id; Type: DEFAULT; Schema: public; Owner: mea
 --
 
@@ -1026,6 +1117,13 @@ ALTER TABLE ONLY public."ReceiptItem" ALTER COLUMN id SET DEFAULT nextval('publi
 
 
 --
+-- Name: Role id; Type: DEFAULT; Schema: public; Owner: mea
+--
+
+ALTER TABLE ONLY public."Role" ALTER COLUMN id SET DEFAULT nextval('public."Role_id_seq"'::regclass);
+
+
+--
 -- Name: User id; Type: DEFAULT; Schema: public; Owner: mea
 --
 
@@ -1063,7 +1161,6 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 2	120	Bs Hằng nn	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	121	Bs Hồng	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Da liễu QN	1	1705334390037	1705334390037	\N
 2	122	Bs Hồng Vân	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
-2	124	Bs Khuê	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	125	Bs Khánh Ngọc	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	126	Bs Kim Dung	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	127	Bs Kiều Hạnh	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
@@ -1127,7 +1224,8 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 6	1053	r	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 2	109	Bs Chu Quỳnh	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	175	C Khánh Ngọc	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705549567351	\N
-2	179	C Nhường cem xu	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	1073000		1	1705334390037	1705681994751	\N
+2	179	C Nhường cem xu	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1707091608047	\N
+2	124	Bs Khuê	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1707266078782	\N
 2	119	Bs Hằng	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	123	Bs Jung Su	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705730704369	\N
 2	191	C Yến Huế	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
@@ -1168,12 +1266,10 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 2	240	Chị Phương Duyên zalo	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	241	Chị Phương thuê drager	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	243	Chị Quỳnh Lê	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Bạn Trà My k34d	1	1705334390037	1705334390037	\N
-2	245	Chị Thi Phạm	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	866000	Fb bạn My	1	1705334390037	1705334390037	\N
 2	246	Chị Thuỷ Đông Ngàn	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	247	Chị Thảo	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Phông	1	1705334390037	1705334390037	\N
 2	248	Chị Thảo Nhân	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	249	Chị Trang Bùi	0979061349	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
-2	250	Chị Trang bạn Yến Đào	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	251	Chị Trang xinh	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Anh Huỳnh	1	1705334390037	1705334390037	\N
 2	252	Chị Trương Thị Thục Loan	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	253	Chị Trịnh Thu	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
@@ -1202,11 +1298,12 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 2	212	Chị Hoa Huệ	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705682898934	\N
 2	203	Chị Dung VM	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	215	Chị Hà Vũ	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Fb bạn My	1	1705334390037	1705934158169	\N
-2	225	Chị Lan Anh T4	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Tầng 4 đảo cầu vồng	1	1705334390037	1705334390037	\N
+2	244	Chị Thanh Thu	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Fb Rèm Thanh Thu	1	1705334390037	1706452652645	\N
 2	190	C Yến	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	230	Chị Lệ Nhu	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Tứ Xuyên	1	1705334390037	1705334390037	\N
 2	194	Chavy nguyễn JP	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	4185000		1	1705334390037	1705731633652	\N
-2	244	Chị Thanh Thu	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	1075000	Fb Rèm Thanh Thu	1	1705334390037	1705334390037	\N
+2	225	Chị Lan Anh T4	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Tầng 4 đảo cầu vồng	1	1705334390037	1706706895297	\N
+2	245	Chị Thi Phạm	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	386000	Fb bạn My	1	1705334390037	1707793181811	\N
 2	217	Chị Hường Tây kì	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	202	Chị Dung Mí	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705566449098	\N
 2	239	Chị Nhàn VM	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705730726021	\N
@@ -1226,11 +1323,9 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 2	288	Em Anh Trần	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	289	Em Bích pkvm	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	290	Em Bạn Thanh Anh	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
-2	292	Em Hoa Doan	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	669200	Fb	1	1705334390037	1705334390037	\N
 2	293	Em Hoàng Yến fb	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	295	Em Huyền cute	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	296	Em Huyền điều dưỡng zalo	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
-2	297	Em Huệ Đà nẵng	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Fb nguyễn băng băng	1	1705334390037	1705334390037	\N
 2	298	Em Hà Đinh	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	300	Em Hạnh	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	301	Em Hạnh (bạn Phương)	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	20 Bùi Xương Trạch	1	1705334390037	1705334390037	\N
@@ -1249,7 +1344,6 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 2	319	Em Tuyết Phùng	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	320	Em Vân Hải	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Aeon	1	1705334390037	1705334390037	\N
 2	322	Em Đỗ Tuyển	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Hưng Yên	1	1705334390037	1705334390037	\N
-2	323	Fami Nguyen	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	324	Giang Bông	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	325	Giang Hương Ialy	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	326	Ha Hong fb	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
@@ -1283,21 +1377,23 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 2	359	Lê Thuỷ	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	361	Lò Thị Yến Du	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	362	Lưu Hoàng Kim	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
+2	291	Em Cúc Spa	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	4186300	Ilaly	1	1705334390037	1706592926099	\N
 2	360	Lê Yến Phương	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	352	Linh Phùng	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	277	Dương A1	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	318	Em Trang Trần	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Mụn	1	1705334390037	1705334390037	\N
 2	357	Lê Huế	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	308	Em Mận	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
-2	294	Em Huyền Xynh	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	871200		1	1705334390037	1705933948944	\N
+2	323	Fami Nguyen	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1707405345852	\N
 2	299	Em Hương Hạ	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	275	Dì thuyên	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	170000		1	1705334390037	1705334390037	\N
 2	339	Hằng Moonri 	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	315	Em Thanh Anh	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
-2	302	Em Hảo tỉ	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	4095730		1	1705334390037	1705334390037	\N
-2	291	Em Cúc Spa	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	3759400	Ilaly	1	1705334390037	1705727442271	\N
+2	292	Em Hoa Doan	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Fb	1	1705334390037	1707405570307	\N
+2	294	Em Huyền Xynh	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1707091613514	\N
 2	358	Lê Huế	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	K34C	1	1705334390037	1705334390037	\N
 2	329	Hoài Cao Thi	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Fb	1	1705334390037	1706020786757	\N
+2	302	Em Hảo tỉ	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1707091588612	\N
 2	363	Lưu Hoàng Phi JP	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	364	Lưu hoàng phi jp	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	365	Lương minion	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
@@ -1370,19 +1466,19 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 2	447	Trâm Hý JP	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	448	Trả Thắm	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	449	Trần An	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Bạn Phương	1	1705334390037	1705334390037	\N
-2	450	Trần Ánh Ngọc	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	A1	1	1705334390037	1705334390037	\N
 2	412	Oanh vũ	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	K34a fb	1	1705334390037	1705334390037	\N
 2	416	Phượng HUP	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
+2	444	Trang Nguyễn	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Fb Trang Nguyễn	1	1705334390037	1706342201687	\N
 2	409	Ngọc thảo	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Fb	1	1705334390037	1705334390037	\N
-2	367	Mai Anh	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Bs - Trung	1	1705334390037	1705334390037	\N
-2	411	Như Như	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	1222000		1	1705334390037	1705682399935	\N
-2	425	Quyền Trần	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705549683940	\N
+2	411	Như Như	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1706883062306	\N
+2	425	Quyền Trần	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1707396566056	\N
+2	450	Trần Ánh Ngọc	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	A1	1	1705334390037	1707186234123	\N
 2	388	Nguyễn Lan FB	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	428	Ruby Thư	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	K34D	1	1705334390037	1705334390037	\N
 2	446	Trang Vũ (Chí Minh)	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
-2	444	Trang Nguyễn	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	485000	Fb Trang Nguyễn	1	1705334390037	1705835543746	\N
 2	401	Nguyễn Đắc Trà My	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	K34D	1	1705334390037	1705740440424	\N
 2	405	Ngọc Minh	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705933967422	\N
+2	367	Mai Anh	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Bs - Trung	1	1705334390037	1706986501009	\N
 2	451	Tui	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	452	Tuyến A1	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	453	Tuấn Anh fb	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
@@ -1394,7 +1490,6 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 2	460	Võ Ngọc Hân	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	461	Vũ Hà - mụn	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Hưng Yên	1	1705334390037	1705334390037	\N
 2	462	Vũ Thảo	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	YHP - K34A	1	1705334390037	1705334390037	\N
-2	463	Xuất thiếu	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 2	464	Đinh Ánh Nguyệt	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Đà nẵng	1	1705334390037	1705334390037	\N
 2	466	Đặng T.Tâm 	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	FB	1	1705334390037	1705334390037	\N
 2	467	Đặng Thuỷ K34D	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
@@ -1466,6 +1561,7 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 4	537	đặng lâm vũ	\N	410202000000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 4	538	phạm thị hương	\N	-63187200000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 2	456	Tô Thị Linh	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Zalo	1	1705334390037	1705549766241	\N
+2	463	Xuất thiếu	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1707792568674	\N
 4	539	chung thanh nhi	\N	915123600000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 4	540	võ văn lợi	\N	946659600000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 4	541	đặng minh hiền	\N	1072890000000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -1556,8 +1652,7 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 4	629	cô trinh	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 4	630	vũ đình thái	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 4	631	rạch abces	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-2	544	Chị Thuỳ Linh	\N	\N	\N	\N	Tỉnh Hải Dương	Huyện Tứ Kỳ	\N	\N	\N	\N	500000	\N	1	1705334390037	1705334390037	\N
-2	569	Trinh Clara	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705741064870	\N
+2	569	Trinh Clara	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1707091621087	\N
 4	632	chị vân	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 4	633	trần thiên bảo	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 4	634	đỗ đức hoàn	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -1602,7 +1697,6 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 4	673	anh thái- viêm lồi cầu ngoài	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 2	674	Bs Mai Phan	\N	\N	0	\N	Tỉnh Hưng Yên	Huyện Khoái Châu	Thị trấn Khoái Châu	nhà số 6 ngách 10 ngõ 63 nguyễn Khoái	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 2	675	Gà Điệp	\N	\N	0	\N	Tỉnh Quảng Ninh	Thành phố Cẩm Phả	Phường Cẩm Thạch	1042 đường trần Phú	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-2	676	Chị Sương	\N	\N	0	\N	Tỉnh Phú Thọ	Thành phố Việt Trì	Xã Thanh Đình	Khu 7	\N	\N	204000	\N	1	1705334390037	1705334390037	\N
 2	677	Vũ Hồng Thu	\N	\N	0	\N	Thành phố Hà Nội	Huyện Gia Lâm	Xã Đa Tốn	S109 vinhome ocean park	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 2	678	Trúc Quỳnh	\N	\N	0	\N	Tỉnh Thái Nguyên	Thành phố Thái Nguyên	Phường Phan Đình Phùng	39/446 phan đình phùng	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 2	679	Bs Cao Mai Anh	\N	\N	0	\N	\N	\N	\N	Bv Việt Tiệp	\N	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -1786,7 +1880,6 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 4	862	gãy xương ngón 5	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 1	863	nguyễn thị a	\N	1639242000000	\N	\N	\N	\N	\N	đông mật	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 1	864	Nguyễn Văn B	\N	\N	\N	\N	Thành phố Hà Nội	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	865	Khách lẻ	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	866	Xuất thiếu	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 3	867	C tuyền 	\N	\N	\N	\N	Thành phố Hải Phòng	Quận Kiến An	\N	18 ngõ đoàn kết 	Vũ ngọc tuyền	\N	0	\N	1	1705334390037	1705334390037	\N
 3	868	Cô Tâm đường đà nẵng	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -1811,16 +1904,14 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 6	888	Bạn Hoàng Hải Đăng	0869927505	1619938800000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 1	880	Chị Mai Mỹ Đình	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2000000	\N	1	1705334390037	1705561057331	\N
 3	852	Bạn may	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705901322512	\N
+6	865	Khách lẻ	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1707461509129	\N
 6	891	Đăng Quang( Bắp) con mẹ Thảo	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	892	Trí Bảo( Bon) con mẹ Huyền	0988064710	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	893	ku con mẹ My	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	894	kim Ngân con mẹ Oanh	0344376083	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	895	Kim Ngân con mẹ Lan Oanh	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 4	896	phạm thị huê 1936	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 3	897	C hậu chiến thắng	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 3	898	C huyền xương	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 3	899	E trang trần	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-3	900	C Hương bạn may	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1300000	\N	1	1705334390037	1705334390037	\N
 3	901	C hương spa	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 3	902	Hương bạn may	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 2	903	Chị Ái TK	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -1842,11 +1933,9 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 4	920	khâu vết thương 2 ca	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 2	922	Phạm Trúc Mai	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 2	923	Em Phạm LInh	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-2	924	Chị Nhung Kawaii	0963368960	\N	\N	\N	\N	\N	\N	Cty TNHH Shindengen VN, Lô D-4 KCN Thăng Long 2, Liêu xá, Yên Mỹ, Hưng Yên	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 2	925	Thu Trang VM	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 4	926	bó bột	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 4	927	gãy trên 2 lồi cầu	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-1	928	Anh Vỹ	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	2000000	\N	1	1705334390037	1705334390037	\N
 6	930	duy mạnh con mẹ lý-  VPQ, VTG có dịch	0969194199	\N	1	\N	\N	\N	\N	yên hòa	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	931	bùi minh hằng con mẹ phương - VHC	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	932	bảo nhi con mẹ oanh 	0985052972	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -1854,7 +1943,6 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 6	934	bảo châu con mẹ linh- VTG (P) phồng mủ, VH	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 7	936	Đỗ Thị Thanh Hương (chị Hương Quỳnh)	0985992999	\N	0	\N	Tỉnh Vĩnh Phúc	Huyện Vĩnh Tường	Xã Vũ Di	Cây xăng Đức Thịnh, cầu Vũ Di	\N	\N	195000	\N	1	1705334390037	1705334390037	\N
 6	937	anh thư con mẹ lan - VPQ, V thanh quản, sốt	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	938	minh khôi con mẹ ánh	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	939	khánh an con mẹ loan- klai VPQ đỡ, VTG 2 bên còn dịch 	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	942	phương con mẹ oanh 	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	943	phương con mẹ oanh - VHC	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -1881,14 +1969,19 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 6	969	Bạn Tâm	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	970	Minh nhật con mẹ linh	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	950	gia hưng con mẹ lý - cúm A, vmh 	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705825817877	\N
-6	953	nam con mẹ toan 	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	305000	\N	1	1705334390037	1706018943089	\N
-6	940	khoa con mẹ trang - VTPQ, sốt	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	421000	\N	1	1705334390037	1706185972427	\N
+6	940	khoa con mẹ trang - VTPQ, sốt	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1706702494771	\N
+1	928	Anh Vỹ	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	1950000	\N	1	1705334390037	1706791240423	\N
 2	948	Chị Dung TX	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705549754523	\N
 2	921	Mỹ Chi Lê	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	954	đạt con mẹ toan 	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	644000	\N	1	1705334390037	1706188915889	\N
+6	953	nam con mẹ toan 	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1707219941940	\N
 6	941	sâu con mẹ nhung 	0981574180	1665730800000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	890	Thảo Vy( Gạo) con mẹ Thảo	0969936988	\N	0	\N	\N	\N	\N	\N	\N	\N	420000	\N	1	1705334390037	1706273940675	\N
+3	900	C Hương bạn may	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1706279106903	\N
+6	954	đạt con mẹ toan 	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1707219938695	\N
 2	908	Cô giáo Đoan Trang	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1706057578797	\N
+6	890	Thảo Vy( Gạo) con mẹ Thảo	0969936988	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1706361831938	\N
+6	895	Kim Ngân con mẹ Lan Oanh	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	125000	\N	1	1705334390037	1707742128957	\N
+6	938	minh khôi con mẹ ánh	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1706873478277	\N
+6	894	kim Ngân con mẹ Oanh	0344376083	\N	0	\N	\N	\N	\N	\N	\N	\N	345000	\N	1	1705334390037	1707742133761	\N
 6	971	Huyền con mẹ Lan Ngọc	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	973	Bống con mẹ Trang sơn	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 9	977	Khách lẻ	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -1905,7 +1998,6 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 6	990	Đức con mẹ tú- VTG 2 bên phồng mủ, VMH (28/11)	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	992	doãn hải my con mẹ thủy	\N	1697007600000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	994	diệp chi con mẹ vân chương - Thủy đậu	\N	1574060400000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	996	trâm anh con mẹ diệp - VMH virus 	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	997	Đức long con mẹ tình	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1000	tôm con mẹ lý- cúm A	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1001	na con mẹ ánh	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -1922,7 +2014,6 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 6	1015	Bạn Tuấn Phong con mẹ Oanh	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1016	BS LONG	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1017	Bạn Hải Nam con mẹ Hương	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	1019	Bạn Diệu Anh	\N	\N	0	\N	\N	\N	\N	thôn phú hậu 	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1020	nguyễn quý toàn con mẹ  linh	\N	1665903600000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1025	bon con mẹ huyền nam 	\N	1594278000000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1026	c huyền nam 	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -1942,35 +2033,35 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 6	1044	nguyên vũ con mẹ linh 	\N	1671519600000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1045	sâu con mẹ hoan	\N	1572678000000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1046	bảo ngọc con bố Văn	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	1047	phương linh con mẹ oanh	0344376083	1457852400000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1051	ánh dương con mẹ phương	\N	1637996400000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	987	diệp anh con mẹ hiền gấu 	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	974	Bạn linh con mẹ Trang Quyết	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	0	1705334390037	1705334390037	\N
 6	975	Bạn Trường An con mẹ Trang Quyết	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	991	Bạn Nguyễn Xuân Phúc con mẹ yến 	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	1035	Nam khánh con mẹ Hương	\N	1492585200000	1	\N	\N	\N	\N	\N	\N	\N	235000	\N	1	1705334390037	1705334390037	\N
+6	996	trâm anh con mẹ diệp	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	85000	\N	1	1705334390037	1707919572492	\N
 6	998	quỳnh chi con mẹ thúy - VMH 	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	983	Bạn Phở con mẹ Nhung VIệt	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	150000	\N	1	1705334390037	1705334390037	\N
-6	1048	nguyễn minh khôi con mẹ dung trần 	0987957192	1589785200000	1	\N	\N	\N	\N	\N	\N	\N	685000	\N	1	1705334390037	1705334390037	\N
+6	1023	đức anh con mẹ hà tẹt	\N	1660374000000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1707313732603	\N
+6	1013	bạn Toan thường	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1707219934022	\N
 6	1042	duy nam con mẹ sâm tuyên 	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	1023	đức anh con mẹ hà tẹt	\N	1660374000000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1706272572916	\N
-6	1049	thùy anh con mẹ huế (e gái nhật)	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	170000	\N	1	1705334390037	1705497420928	\N
+6	1047	phương linh con mẹ oanh	0344376083	1457852400000	0	\N	\N	\N	\N	\N	\N	\N	160000	\N	1	1705334390037	1707742139814	\N
 6	1022	nhật con mẹ huế 	\N	1605078000000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-2	1029	Bong Pham	\N	\N	\N	\N	\N	\N	\N	Số nhà 73 ngô quyền thôn 2 xã tra đa Pleiku	Em Cúc	\N	0	\N	1	1705334390037	1705334390037	\N
+6	1048	nguyễn minh khôi con mẹ dung trần 	0987957192	1589785200000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1707218126314	\N
 6	1033	phương anh con mẹ Hồng	0867549095	1685602800000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1024	linh chi con mẹ ánh tuấn	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1012	 Lê Quý Long con mẹ hoa	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1018	Linh Đan con mẹ ánh tuấn	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1002	thỏ con mẹ trang biên - VHC	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	976	nguyễn trần bảo duy con mẹ thu	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	1013	bạn Toan thường	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	440000	\N	1	1705334390037	1705408443888	\N
+2	1029	Bong Pham	\N	\N	\N	\N	\N	\N	\N	Số nhà 73 ngô quyền thôn 2 xã tra đa Pleiku	Em Cúc	\N	0	\N	1	1705334390037	1707266094516	\N
 6	993	nguyễn tiến đức con mẹ hương tâm 	\N	1687762800000	1	\N	\N	\N	\N	\N	\N	\N	158000	\N	1	1705334390037	1705334390037	\N
 6	1050	huyền trang con mẹ huyền	0362365768	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705492111363	\N
 6	999	Chí kiên (thóc) con mẹ hương công	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1706273883025	\N
+6	1035	Nam khánh con mẹ Hương	\N	1492585200000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1707313906330	\N
 6	972	Khách mua hang	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705580182094	\N
+6	983	Bạn Phở con mẹ Nhung VIệt	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1707214577536	\N
+6	1049	thùy anh con mẹ huế (e gái nhật)	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	155000	\N	1	1705334390037	1707914405717	\N
 6	1055	gia lôc con mẹ hà 	\N	1663743600000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1056	bạn  Bùi Minh Chính	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	1057	Bạn Gấu con mẹ thảo	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	270000	\N	1	1705334390037	1705334390037	\N
 6	1060	bùi đăng khoa con bố dũng	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1061	vũ thúy anh con mẹ thảo 	0374517599	1605596400000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1062	nguyễn minh khuê con mẹ cúc 	\N	1699945200000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -1978,7 +2069,6 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 6	1068	trần phạm bảo khánh con mẹ kim tuyến 	0961889954	1668841200000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1069	uyển nhi con mẹ thảo vi	0378837857	1608015600000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1070	ngọc toàn con mẹ thắng 	\N	1518850800000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	1071	nguyễn bảo linh con mẹ thùy 	0349380612	1584774000000	0	\N	\N	\N	\N	\N	\N	\N	145000	\N	1	1705334390037	1705334390037	\N
 6	1073	trí dũng con mẹ hạnh 	\N	1615446000000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1075	bùi khánh vy con mẹ ly	\N	1679295600000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1079	hải quang con mẹ linh ( e đăng )	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -2001,18 +2091,20 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 6	1078	bạn Đạt con mẹ liễu sơn 	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1077	bùi thị thùy linh con mẹ cúc ( e gái gia huy)	\N	1683874800000	0	\N	\N	\N	\N	\N	\N	\N	880000	\N	1	1705334390037	1705334390037	\N
 6	1076	gia huy con mẹ cúc 	0338205790	1638255600000	1	\N	\N	\N	\N	\N	\N	\N	450000	\N	1	1705334390037	1705334390037	\N
-6	1067	phùng minh trí con mẹ nguyệt	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	294000	\N	1	1705334390037	1705334390037	\N
-6	1064	đức con mẹ tình lai 	\N	1466838000000	1	\N	\N	\N	\N	\N	\N	\N	355000	\N	1	1705334390037	1705334390037	\N
 2	1074	Chị Nguyệt dcv	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1059	phan minh khôi con mẹ lệ thu 	0353949635	1667372400000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1066	tủm con mẹ linh tiến	\N	1573542000000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 2	1094	Ngân Anh Fb	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1054	thỏ con mẹ hoài 	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 2	1095	Em Phương Dung Tk	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	1072	c hương trường 	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	620000	\N	1	1705334390037	1705334390037	\N
 6	1058	bún con mẹ nhung việt 	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1086	thành con mẹ hương tâm ( e đức)	\N	1640070000000	1	\N	\N	\N	\N	\N	\N	\N	1014000	\N	1	1705334390037	1705334390037	\N
 6	1063	phương linh con mẹ Trang quyết	\N	1593154800000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705495197106	\N
+6	1064	đức con mẹ tình lai 	\N	1466838000000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1706358617225	\N
+6	1057	Bạn Gấu con mẹ thảo	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1706711249811	\N
+6	1067	phùng minh trí con mẹ nguyệt	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1706712277889	\N
+6	1072	c hương trường 	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1707043458883	\N
+6	1071	nguyễn bảo linh con mẹ thùy 	0349380612	1584774000000	0	\N	\N	\N	\N	\N	\N	\N	35000	\N	1	1705334390037	1707314101760	\N
 2	1099	Em Nguyễn Phương Liên	0394178316	\N	0	\N	\N	\N	\N	số 77 LK22 KDT vân canh hoài đức hà nội	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1103	Vy con mẹ uyên	\N	1511420400000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 3	1110	Trần Yên	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -2028,29 +2120,39 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 6	1207	Long con mẹ Linh Lương	\N	1584601200000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1217	đặng đức duy con mẹ huyền	0966011714	1678604400000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 2	1226	Dr Quy Vũ	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	1236	mẹ c toan thường 	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	560000	\N	1	1705410543329	1705410598080	\N
 6	1243	Bạn Hải Đăng cháu bá Ngọt	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705580250487	1705580250487	\N
 6	1251	trịnh gia hân con mẹ vân	0368637972	1434351600000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706007905519	1706007905519	\N
 6	889	bống con mẹ trang biên 	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	843000	\N	1	1705334390037	1706198146196	\N
+6	1276	Bạn Diệp Anh con mẹ Thơm	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706877225139	1706877225139	\N
+2	924	Chị Nhung Kawaii	0963368960	\N	\N	\N	\N	\N	\N	Cty TNHH Shindengen VN, Lô D-4 KCN Thăng Long 2, Liêu xá, Yên Mỹ, Hưng Yên	\N	\N	0	\N	1	1705334390037	1706974911538	\N
+6	1284	nhật anh con mẹ hòa	\N	1453705200000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707045301528	1707045301528	\N
+6	1236	mẹ c toan thường 	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705410543329	1707219930562	\N
+6	1293	minh khánh con mẹ thủy	\N	1696834800000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707374497839	1707374497839	\N
+6	1303	vũ thanh huyền con ẹm sáu	\N	1565938800000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707903404358	1707903404358	\N
 6	1104	đức duy con mẹ Vy	\N	1564210800000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1121	bảo châu con mẹ hương 	\N	1373353200000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1149	bùi đăng khôi con mẹ Vinh	\N	1681628400000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1159	Bạn Hải Yến	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1169	gia minh con mẹ yến 	0368152344	1613977200000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1130	Bạn Sáng con mẹ Lan	\N	1444806000000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	1178	Bạn Gia Hân con mẹ Nguyệt	\N	1468566000000	0	\N	\N	\N	\N	\N	\N	\N	180000	\N	1	1705334390037	1705334390037	\N
 2	426	Quỳnh Trang VM	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 6	1188	oanh con mẹ Tình Việt Hưng	\N	1510988400000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	1198	vũ minh khang con mẹ tình	\N	1424156400000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	1111	gia khiêm con mẹ Nhung	0962238055	1657090800000	1	\N	\N	\N	\N	\N	\N	\N	515000	\N	1	1705334390037	1705334390037	\N
 6	1208	nguyễn hoàng phát con mẹ huệ	0349870969	1690441200000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1218	mẹ thu ( mẹ bạn bảo duy) 	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 2	1227	BS Tất	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1237	vũ mạnh tuấn con mẹ thanh 	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705410839831	1705410839831	\N
 2	935	Chị Ngô Bình Minh	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705549333194	\N
 2	238	Chị Nhài VM	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705740305558	\N
-2	233	Chị Nguyên xu xu	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Anh Long	1	1705334390037	1706020763811	\N
 6	1259	nguyễn dũng khoa em chị dung	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706271342327	1706271342327	\N
+6	1178	Bạn Gia Hân con mẹ Nguyệt	\N	1468566000000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1706712150180	\N
+6	1111	gia khiêm con mẹ Nhung	0962238055	1657090800000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1706712202661	\N
+6	1277	khánh ngọc con mẹ liễu	\N	1551510000000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706948841961	1706948841961	\N
+2	233	Chị Nguyên xu xu	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Anh Long	1	1705334390037	1706974924501	\N
+6	1198	vũ minh khang con mẹ tình	\N	1424156400000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1707043433694	\N
+2	250	Chị Trang bạn Yến Đào	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1707186197408	\N
+6	1268	bùi anh Dũng con mẹ phượng 	0965726065	1682665200000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706613516602	1707300162773	\N
+6	1294	duy con mẹ nga Nam	\N	1585638000000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707397968523	1707397968523	\N
+6	1304	bá hiền	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707914024724	1707914024724	\N
 3	1112	C Nga ngọc việt	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1122	bá Năng	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 2	144	Bs Thu Phương K34D	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
@@ -2070,6 +2172,11 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 6	1160	Bạn Bột con mẹ linh Tuấn anh	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705927659011	\N
 2	176	C Mai Hương	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1706089959439	\N
 6	1260	nguyễn dũng khoa em chị dung	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706271361657	1706271361657	\N
+6	1269	thiều quang hưng con mẹ nhàn 	0396085841	1586156400000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706613924957	1706613924957	\N
+6	1278	quân con bố thanh hương	\N	1178089200000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706950019792	1706967479591	\N
+6	1285	phong con mẹ diệu ly	\N	1548918000000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707211834972	1707211834972	\N
+6	1295	gia hân con mẹ thảo	\N	1667631600000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707457624490	1707457624490	\N
+6	1305	chị thắm	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1708002100294	1708002100294	\N
 3	1113	C Hương Giang tóc	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1123	hà anh con mẹ hà tẹt 	\N	1534921200000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 3	1132	C Tâm tóc	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -2080,15 +2187,19 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 2	1161	Em Thanh Bình - Mụn	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1190	xuân trường con mẹ hòa thủy 	0971940997	1554274800000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1200	lê quỳnh như con mẹ nga	0378811051	1551769200000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	1229	Bạn Gia Huy con mẹ Linh Trường	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 2	104	B Nguyễn Lan Phương	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705334390037	\N
 6	1239	sushi con mẹ cúc 	0963428974	1665385200000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705491032026	1705491032026	\N
 6	1210	c trang biên	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	20000	\N	1	1705334390037	1705494703977	\N
 2	469	Đỗ Kim Cúc	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705542556988	\N
 6	1244	nguyễn ngọc diệp con mẹ khổng Huyền	\N	1791615600000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705714583140	1705714583140	\N
-2	321	Em Yến JP	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1705740626859	\N
 6	1252	thùy anh ( kẹo ) con mẹ thảo	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706101688851	1706101688851	\N
 6	1261	c hương nghĩa	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706271538073	1706271538073	\N
+6	1229	Bạn Gia Huy con mẹ Linh Trường	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1706617965273	\N
+6	1270	quỳnh trang con mẹ ánh 	0981291866	1631689200000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706621912253	1706621912253	\N
+6	1019	Bạn Diệu Anh con mẹ nga 	0378811051	1677913200000	0	\N	\N	\N	\N	thôn phú hậu 	\N	\N	0	\N	1	1705334390037	1706961011792	\N
+6	1286	lê hoàng quân con mẹ mơ ( anh bạn trang ) 	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707218690445	1707218711344	\N
+2	321	Em Yến JP	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1707266087324	\N
+6	1296	nhung con mẹ linh lương	\N	1363676400000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707481708936	1707481708936	\N
 6	1105	minh anh con mẹ thảo	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 3	1114	C lệ mỹ	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1133	nam khánh con mẹ hương nghĩa	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -2107,7 +2218,11 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 2	189	C Võ Xuân	0935707447	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Dạ nhờ c ship giúp e về 586 nguyễn hữu thọ, khuê trung, cẩm lệ, đà nẵng	1	1705334390037	1706089941959	\N
 6	1253	mai anh con mẹ yến	\N	1502262000000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706104181283	1706104181283	\N
 6	1262	anh tuấn anh 	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706271980459	1706271980459	\N
-6	1124	sóc con mẹ hương	\N	1555657200000	1	\N	\N	\N	\N	\N	\N	\N	700000	\N	1	1705334390037	1706273415691	\N
+6	1271	vũ minh phúc con mẹ Thanh	\N	1620198000000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706695372682	1706695372682	\N
+6	1279	a sơn chồng c liễu	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706963669221	1706965189040	\N
+6	1287	thảo vy con mẹ lụa	\N	1553324400000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707222511387	1707222511387	\N
+6	1124	sóc con mẹ hương	\N	1555657200000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1707313575197	\N
+6	1297	nguyễn phương thảo con mẹ anh	0395206773	1638860400000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707738814459	1707738814459	\N
 6	1106	mạnh trường con mẹ Hằng	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 11	1115	Nguyễn Văn Dũng	0912219159	\N	\N	\N	Tỉnh Hải Dương	Huyện Kim Thành	Xã Cộng Hòa	So 1	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1021	lê nguyễn phương linh con mẹ hương	\N	1410850800000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -2123,9 +2238,14 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 2	1221	Em Hằng Nguyễn đồ gỗ	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1212	dương đăng khoa con mẹ hiền -T12/2022	0976071833	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1240	nam khánh con mẹ thư 	\N	1499065200000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705493064418	1705493064418	\N
-2	1231	Em Hải Yến	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705549261155	\N
 6	1246	Bạn Phạm Lê Nguyên Vũ con mẹ hoài	0333568965	1691996400000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705753473812	1705753473812	\N
 3	1254	E Dung Hoàng	0564588888	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706108574240	1706108599921	\N
+6	1263	bá xuyên lượng	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706358397041	1706358397041	\N
+6	1280	bảo khang con mẹ mỹ( anh bảo khôi ) 	0964728096	1593846000000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706963984476	1706963984476	\N
+2	1231	Em Hải Yến	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1706974849351	\N
+6	1288	ba gái 	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707225523448	1707225523448	\N
+6	1272	bác chiến loan	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706695428086	1707276836942	\N
+6	1298	quỳnh như con mẹ nga	\N	1551769200000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707741168500	1707741168500	\N
 6	1107	mít con mẹ huế tuấn	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 11	1116	trần thị chung	0969123456	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1135	trà my con mẹ hoa 	\N	1528959600000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -2143,7 +2263,12 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 2	1241	Minh Trang FB	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705539207507	1705740371441	\N
 6	1125	bảo khôi con mẹ mỹ	0964728096	1657090800000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1706013881838	\N
 3	1255	Vũ Nhật Hồng	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706112408883	1706112408883	\N
-6	1247	Chị Hương(mẹ sóc)	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	564000	\N	1	1705754528745	1706273412371	\N
+6	1281	nguyễn kim hương con mẹ liễu sơn	\N	1301468400000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706964876152	1706964876152	\N
+6	1264	đạt con cô tám lương	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706359990777	1707223910656	\N
+6	1289	ánh dương con mẹ ánh tiến	\N	1539586800000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707302798927	1707302798927	\N
+6	1247	Chị Hương(mẹ sóc)	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705754528745	1707313549649	\N
+6	1273	phúc con mẹ Nga Nam	\N	1468220400000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706702232517	1707398079569	\N
+6	1299	nguyễn hoàng điệp con bố trung	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707876953938	1707876953938	\N
 13	1126	Khách lẻ	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 13	1127	Xuất thiếu	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 2	1117	Cô Minh	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -2158,11 +2283,17 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 6	1214	diệu linh con mẹ hoan long 	\N	1344927600000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1233	nguyễn an nhiên con mẹ cúc 	0973211620	1588662000000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 2	1223	THư đạt	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705542690071	\N
-2	312	Em Phương Mạnh	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	210000		1	1705334390037	1705549646360	\N
 6	1136	anh nhật con mẹ hoa 	\N	1663743600000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705579052672	\N
 6	1248	Bạn Minh nhật con mẹ hiền	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705755885908	1705755885908	\N
 6	1174	Bạn Quý  Đăng con mẹ Hiền	0986533465	1681196400000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1706013633689	\N
 3	1256	Em vợ Bs Tùng ( Tuấn Anh )	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706112637576	1706112637576	\N
+6	1265	cô tám lương	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706360422264	1706360422264	\N
+2	544	Chị Thuỳ Linh	\N	\N	\N	\N	Tỉnh Hải Dương	Huyện Tứ Kỳ	\N	\N	\N	\N	0	\N	1	1705334390037	1706708590670	\N
+2	676	Chị Sương	\N	\N	0	\N	Tỉnh Phú Thọ	Thành phố Việt Trì	Xã Thanh Đình	Khu 7	\N	\N	0	\N	1	1705334390037	1706708595895	\N
+2	1282	Trịnh Tâm	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706973280596	1706973280596	\N
+2	312	Em Phương Mạnh	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0		1	1705334390037	1707091624670	\N
+3	1290	Kiên em	\N	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707323446113	1707323446113	\N
+6	1300	ngọc con bố Vân Thơm	\N	1548486000000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707881878558	1707881878558	\N
 6	1101	phương chi con mẹ trâm 	0398298665	1605510000000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1118	lưu thị quỳnh như con mẹ tống	0336163447	1670569200000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 2	836	Chị Thu Lan	\N	\N	\N	\N	\N	\N	\N	\N	Bạn Tuyết A1	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -2173,14 +2304,19 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 6	1185	nguyễn gia huy con mẹ nga	\N	1676185200000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1195	bé 1,5 tháng	\N	\N	1	\N	\N	\N	\N	đẽn	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1137	đăng khôi con mẹ vy	\N	1677481200000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	995	minh châu con mẹ dung trần 	\N	1642748400000	0	\N	\N	\N	\N	\N	\N	\N	1552000	\N	1	1705334390037	1705334390037	\N
 6	1205	c yến hstc	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1215	phương linh cháu bá ngọt	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1234	lucky con mẹ hậu	0989605611	1704438000000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705400821373	1705400821373	\N
 2	1224	B Phương Linh fb	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705549543959	\N
-1	929	Chị Hòa Hải Dương	\N	\N	\N	\N	Tỉnh Hải Dương	Huyện Kim Thành	\N	\N	\N	\N	1300000	\N	1	1705334390037	1705561428217	\N
 6	1249	Bạn Đức Lâm con mẹ  việt	0963105767	\N	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705841476003	1705841476003	\N
 6	1257	ngọc diệp con mẹ việt( chị bạn đức lâm ) 	\N	1506927600000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706187746358	1706187746358	\N
+6	1266	diêp anh con mẹ liên(sdt bà) 	0343726257	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706524881089	1706711029461	\N
+6	1274	lê minh khang con mẹ tình lai 	\N	1385881200000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706785586997	1706785586997	\N
+1	929	Chị Hòa Hải Dương	\N	\N	\N	\N	Tỉnh Hải Dương	Huyện Kim Thành	\N	\N	\N	\N	1200000	\N	1	1705334390037	1706791231187	\N
+2	297	Em Huệ Đà nẵng	          	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	Fb nguyễn băng băng	1	1705334390037	1707186230168	\N
+6	995	minh châu con mẹ dung trần 	\N	1642748400000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1707218108056	\N
+6	1291	khoa con mẹ ngân	\N	1587279600000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707356353598	1707356353598	\N
+6	1301	trường con mẹ thơm vân	\N	1625814000000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707881983399	1707881983399	\N
 6	1102	nhã con mẹ trang	\N	1629356400000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 3	1109	C Nga chị Ng Bình Nguyên	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1119	sơn tùng con mẹ loan 	\N	1664002800000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
@@ -2195,11 +2331,16 @@ COPY public."Customer" (oid, id, "fullName", phone, birthday, gender, "identityC
 6	1216	nguyễn huyền diệu con mẹ phượng 	0974789587	1646031600000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
 6	1196	dương con mợ THuận	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	70000	\N	1	1705334390037	1705334390037	\N
 2	1225	E mỹ duyên (trại vực)	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705334390037	1705334390037	\N
-6	1235	ngát	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	104000	\N	1	1705409675490	1705409796050	\N
 6	1242	Bạn Nguyễn Phương Nhi con mẹ  Lan anh	0389690686	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705575326210	1705575326210	\N
 6	1250	Bạn Phương Thùy 	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705925454856	1705925454856	\N
-6	1157	lạc con mẹ Tình	\N	\N	1	\N	\N	\N	\N	\N	hàng xóm	\N	310000	\N	1	1705334390037	1706010785073	\N
 6	1258	đức duy con mẹ uyên ( em bạn VY)	0971439701	1564210800000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706188125826	1706188163130	\N
+6	1267	nguyễn tuấn anh con mẹ toàn 	0963329698	1321513200000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706532229163	1706532229163	\N
+6	1157	lạc con mẹ Tình	\N	\N	1	\N	\N	\N	\N	\N	hàng xóm	\N	0	\N	1	1705334390037	1706711634342	\N
+6	1275	Bạn Nguyễn Hoàng Dương con bố Trung	0372551209	1572246000000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706869589796	1706869589796	\N
+2	1283	Vân Anh CH32	\N	\N	\N	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1706975217849	1706975217849	\N
+6	1235	ngát	\N	\N	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1705409675490	1707226386172	\N
+6	1292	an nhiên con mẹ ly	\N	1683529200000	0	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707360610870	1707360610870	\N
+6	1302	nguyễn nhật minh	\N	1702450800000	1	\N	\N	\N	\N	\N	\N	\N	0	\N	1	1707891445359	1707891445359	\N
 \.
 
 
@@ -3717,6 +3858,7 @@ COPY public."CustomerPayment" (oid, id, "customerId", "invoiceId", type, "time",
 2	1689	109	2813	2	1703602450758	100000	-100000	0		100000	\N	100000	0
 3	1690	526	3033	1	1703604501021	0	0	0	\N	6500000	\N	6500000	0
 2	1691	1108	2953	2	1703639660075	100000	-100000	0		100000	\N	100000	0
+6	3016	1284	3721	0	1707045497519	0	0	0	\N	170000	\N	0	0
 6	1695	1023	3027	1	1703673127739	0	0	0	\N	0	\N	0	0
 6	1696	1047	3035	0	1703682898993	0	0	0	\N	40000	\N	0	0
 6	1697	1047	3035	1	1703682900340	0	0	0	\N	0	\N	0	0
@@ -4808,6 +4950,582 @@ COPY public."CustomerPayment" (oid, id, "customerId", "invoiceId", type, "time",
 6	2780	1125	3604	1	1706275291200	0	0	0	\N	0	\N	0	0
 6	2781	996	3603	0	1706275396849	0	0	0	\N	275000	\N	0	0
 6	2782	996	3603	1	1706275398291	0	0	0	\N	0	\N	0	0
+3	2783	900	2578	2	1706279106903	1300000	-1300000	0	\N	1300000	\N	1300000	0
+2	2784	444	3502	2	1706342201686	485000	-485000	0	\N	485000	\N	485000	0
+2	2785	123	3605	0	1706342229009	0	0	0	\N	321000	\N	0	0
+2	2786	123	3605	1	1706342232509	0	0	0	\N	0	\N	0	0
+2	2787	225	3606	1	1706349309464	0	917000	917000	\N	0	\N	917000	917000
+2	2788	225	3606	-1	1706349316949	917000	-917000	0	\N	0	\N	917000	0
+2	2789	225	3607	1	1706349346042	0	957000	957000	\N	0	\N	957000	957000
+6	2790	1120	3608	0	1706357794808	0	0	0	\N	450000	\N	0	0
+6	2791	1120	3608	1	1706357795933	0	0	0	\N	0	\N	0	0
+6	2792	1263	3609	0	1706358528690	0	0	0	\N	329000	\N	0	0
+6	2793	1263	3609	1	1706358529778	0	0	0	\N	0	\N	0	0
+6	2794	1064	3333	2	1706358617224	355000	-355000	0	\N	355000	\N	355000	0
+6	2795	1239	3610	0	1706358902060	0	0	0	\N	160000	\N	0	0
+6	2796	1239	3610	1	1706358903330	0	0	0	\N	0	\N	0	0
+6	2797	987	3611	0	1706359038216	0	0	0	\N	150000	\N	0	0
+6	2798	987	3611	1	1706359039210	0	0	0	\N	0	\N	0	0
+6	2799	1265	3613	0	1706360448926	0	0	0	\N	35000	\N	0	0
+6	2800	890	3602	2	1706361831920	420000	-420000	0	\N	420000	\N	420000	0
+6	2801	890	3614	0	1706361913084	0	0	0	\N	230000	\N	0	0
+6	2802	890	3614	1	1706361914411	0	0	0	\N	0	\N	0	0
+3	2803	526	3615	1	1706372054554	0	0	0	\N	8500000	\N	8500000	0
+6	2804	1265	3613	1	1706440495876	0	0	0	\N	0	\N	0	0
+6	2805	1104	3589	0	1706440547827	0	0	0	\N	10000	\N	0	0
+6	2806	1104	3589	1	1706440548735	0	0	0	\N	0	\N	0	0
+6	2807	1079	3577	1	1706440567842	0	0	0	\N	0	\N	0	0
+6	2808	1166	3616	0	1706444970460	0	0	0	\N	245000	\N	0	0
+6	2809	1166	3616	1	1706444971416	0	0	0	\N	0	\N	0	0
+2	2810	244	3421	2	1706452652643	1075000	-1075000	0		1075000	\N	1075000	0
+6	2811	1120	3617	1	1706524208333	0	0	0	\N	0	\N	0	0
+6	2812	938	3618	1	1706524760129	0	80000	80000	\N	0	\N	80000	80000
+6	2813	1266	3619	1	1706525012382	0	390000	390000	\N	0	\N	390000	390000
+6	2814	1166	3620	1	1706528820282	0	0	0	\N	0	\N	0	0
+6	2815	1166	3620	-1	1706528953694	0	0	0	\N	0	\N	0	0
+6	2816	1166	3621	1	1706528953743	0	0	0	\N	30000	\N	30000	0
+6	2817	1063	3622	0	1706530023379	0	0	0	\N	120000	\N	0	0
+6	2818	1063	3622	1	1706530024132	0	0	0	\N	0	\N	0	0
+6	2819	970	3623	0	1706530230668	0	0	0	\N	110000	\N	0	0
+6	2820	970	3623	1	1706530231477	0	0	0	\N	0	\N	0	0
+6	2821	1168	3624	0	1706531478814	0	0	0	\N	150000	\N	0	0
+6	2822	1168	3624	1	1706531479587	0	0	0	\N	0	\N	0	0
+6	2823	1267	3625	0	1706532877536	0	0	0	\N	150000	\N	0	0
+6	2824	1267	3625	1	1706533036408	0	0	0	\N	0	\N	0	0
+6	2825	953	3626	1	1706533448670	305000	70000	375000	\N	0	\N	70000	70000
+6	2826	954	3627	1	1706533466552	644000	0	644000	\N	0	\N	0	0
+6	2827	947	3628	0	1706534189725	0	0	0	\N	482000	\N	0	0
+6	2828	947	3628	1	1706534190488	0	0	0	\N	0	\N	0	0
+6	2829	971	3629	0	1706534652987	0	0	0	\N	160000	\N	0	0
+6	2830	971	3629	1	1706534653719	0	0	0	\N	0	\N	0	0
+6	2831	866	3630	0	1706534724234	0	0	0	\N	240000	\N	0	0
+6	2832	866	3630	1	1706534725269	0	0	0	\N	0	\N	0	0
+2	2833	1231	3631	1	1706592575446	0	1300650	1300650	\N	0	\N	1300650	1300650
+2	2834	425	3632	1	1706592731514	0	705000	705000	\N	0	\N	705000	705000
+2	2835	291	3633	1	1706592926098	3759400	426900	4186300	\N	0	\N	426900	426900
+2	2836	924	3634	1	1706593027993	0	855000	855000	\N	0	\N	855000	855000
+6	2837	1014	3636	0	1706613547769	0	0	0	\N	240000	\N	0	0
+6	2838	1014	3636	1	1706613548603	0	0	0	\N	0	\N	0	0
+6	2839	1268	3637	0	1706613808700	0	0	0	\N	328000	\N	0	0
+6	2840	1268	3637	1	1706613809648	0	0	0	\N	0	\N	0	0
+6	2841	1269	3638	0	1706613984048	0	0	0	\N	130000	\N	0	0
+6	2842	1269	3638	1	1706613984877	0	0	0	\N	0	\N	0	0
+6	2843	1142	3639	0	1706614327176	0	0	0	\N	285000	\N	0	0
+6	2844	1142	3639	1	1706614328420	0	0	0	\N	0	\N	0	0
+6	2845	1023	3640	1	1706614562353	0	210000	210000	\N	0	\N	210000	210000
+6	2846	975	3641	0	1706614730189	0	0	0	\N	175000	\N	0	0
+6	2847	975	3641	1	1706614733226	0	0	0	\N	0	\N	0	0
+6	2848	999	3642	0	1706615017172	0	0	0	\N	30000	\N	0	0
+6	2849	999	3642	1	1706615018311	0	0	0	\N	0	\N	0	0
+6	2850	1230	3643	0	1706615272743	0	0	0	\N	110000	\N	0	0
+6	2851	1230	3643	1	1706615273524	0	0	0	\N	0	\N	0	0
+6	2852	970	3623	-1	1706615305321	0	0	0	\N	-110000	\N	0	0
+6	2853	1230	3643	-1	1706615467363	0	0	0	\N	-110000	\N	0	0
+6	2854	1230	3645	0	1706615535644	0	0	0	\N	110000	\N	0	0
+6	2855	1230	3645	1	1706615536436	0	0	0	\N	0	\N	0	0
+6	2856	1229	3644	1	1706617961508	0	425000	425000	\N	0	\N	425000	425000
+6	2857	1229	3644	2	1706617965272	425000	-425000	0	\N	425000	\N	425000	0
+6	2858	983	3646	0	1706618115516	150000	0	150000	\N	330000	\N	0	0
+6	2859	983	3646	1	1706618147696	150000	0	150000	\N	0	\N	0	0
+6	2860	998	3647	0	1706618793752	0	0	0	\N	260000	\N	0	0
+6	2861	998	3647	1	1706618794713	0	0	0	\N	0	\N	0	0
+6	2862	1264	3612	0	1706618801117	0	0	0	\N	539000	\N	0	0
+6	2863	1264	3612	1	1706618802416	0	0	0	\N	0	\N	0	0
+6	2864	996	3648	1	1706618872186	0	176000	176000	\N	0	\N	176000	176000
+6	2865	1264	3649	1	1706619022028	0	140000	140000	\N	0	\N	140000	140000
+6	2866	866	3650	0	1706620164292	0	0	0	\N	57200	\N	0	0
+6	2867	866	3650	1	1706620165081	0	0	0	\N	0	\N	0	0
+6	2868	1270	3651	0	1706622522628	0	0	0	\N	330000	\N	0	0
+6	2869	1270	3651	1	1706622524974	0	0	0	\N	0	\N	0	0
+6	2870	1271	3652	0	1706695389363	0	0	0	\N	220000	\N	0	0
+6	2871	1271	3652	1	1706695391285	0	0	0	\N	0	\N	0	0
+6	2872	1272	3653	1	1706695500697	0	205000	205000	\N	0	\N	205000	205000
+6	2873	1019	3654	0	1706698814140	0	0	0	\N	160000	\N	0	0
+6	2874	1019	3654	1	1706698815951	0	0	0	\N	0	\N	0	0
+6	2875	1166	3655	0	1706701015619	0	0	0	\N	160000	\N	0	0
+6	2876	1166	3655	1	1706701017031	0	0	0	\N	0	\N	0	0
+6	2877	1273	3656	0	1706702337240	0	0	0	\N	190000	\N	0	0
+6	2878	1273	3656	1	1706702338631	0	80000	80000	\N	0	\N	80000	80000
+6	2879	940	3657	0	1706702478647	421000	0	421000	\N	30000	\N	0	0
+6	2880	940	3583	2	1706702494769	421000	-421000	0	\N	421000	\N	421000	0
+6	2881	994	3658	0	1706702823569	0	0	0	\N	185000	\N	0	0
+6	2882	994	3658	1	1706702824933	0	0	0	\N	0	\N	0	0
+6	2883	1120	3659	0	1706705018797	0	0	0	\N	100000	\N	0	0
+6	2884	1120	3659	1	1706705020238	0	0	0	\N	0	\N	0	0
+6	2885	1120	3660	0	1706705081475	0	0	0	\N	120000	\N	0	0
+6	2886	1120	3660	1	1706705083050	0	0	0	\N	0	\N	0	0
+2	2887	233	3661	1	1706706836434	0	429000	429000	\N	0	\N	429000	429000
+2	2888	302	3635	1	1706706884426	4095730	800000	4895730	\N	0	\N	800000	800000
+2	2889	225	3607	2	1706706895296	957000	-957000	0	\N	957000	\N	957000	0
+2	2890	367	3663	1	1706707541693	0	1139000	1139000	\N	0	\N	1139000	1139000
+2	2891	321	3506	1	1706708092517	0	725000	725000	\N	0	\N	725000	725000
+2	2892	321	3665	1	1706708217024	725000	493000	1218000	\N	0	\N	493000	493000
+2	2893	544	3367	2	1706708590667	500000	-500000	0		500000	\N	500000	0
+2	2894	676	2062	2	1706708595894	204000	-204000	0		204000	\N	204000	0
+6	2895	964	3666	0	1706710744280	0	0	0	\N	245000	\N	0	0
+6	2896	964	3666	1	1706710745550	0	0	0	\N	0	\N	0	0
+6	2897	1266	3619	2	1706711029460	390000	-390000	0		390000	\N	390000	0
+6	2898	1157	3288	2	1706711100333	310000	-30000	280000	\N	30000	\N	30000	0
+6	2899	1157	3565	2	1706711109174	280000	-30000	250000	\N	30000	\N	30000	0
+6	2900	1057	2764	2	1706711249790	270000	-270000	0	\N	270000	\N	270000	0
+6	2901	1157	3110	2	1706711634326	250000	-250000	0	\N	250000	\N	250000	0
+6	2902	1178	3175	2	1706712150165	180000	-180000	0	\N	180000	\N	180000	0
+6	2903	1067	2794	2	1706712157564	294000	-234000	60000	\N	234000	\N	234000	0
+6	2904	1111	3326	2	1706712202659	515000	-515000	0	\N	515000	\N	515000	0
+6	2905	1067	3284	2	1706712277888	60000	-60000	0	\N	60000	\N	60000	0
+6	2906	1073	3667	0	1706774278018	0	0	0	\N	190000	\N	0	0
+6	2907	1073	3667	1	1706774279717	0	0	0	\N	0	\N	0	0
+6	2908	940	3657	1	1706784872309	0	0	0	\N	0	\N	0	0
+6	2909	866	3668	0	1706785429567	0	0	0	\N	330000	\N	0	0
+6	2910	866	3668	1	1706785430269	0	0	0	\N	0	\N	0	0
+6	2911	1274	3669	0	1706785712927	0	0	0	\N	102000	\N	0	0
+6	2912	1274	3669	1	1706785713683	0	0	0	\N	0	\N	0	0
+6	2913	983	3238	2	1706787943117	150000	-150000	0	\N	150000	\N	150000	0
+6	2914	1058	3670	0	1706787981899	0	0	0	\N	328000	\N	0	0
+6	2915	1058	3670	1	1706787982591	0	0	0	\N	0	\N	0	0
+1	2916	929	2511	2	1706791231185	1300000	-100000	1200000		100000	\N	1300000	1200000
+1	2917	928	2509	2	1706791240422	2000000	-50000	1950000		50000	\N	2000000	1950000
+6	2918	1156	3671	0	1706857138471	0	0	0	\N	230000	\N	0	0
+6	2919	1156	3671	1	1706857139907	0	0	0	\N	0	\N	0	0
+6	2920	1275	3673	0	1706869725972	0	0	0	\N	310000	\N	0	0
+6	2921	1275	3673	1	1706869728274	0	0	0	\N	0	\N	0	0
+6	2922	1268	3672	1	1706869754284	0	66000	66000	\N	0	\N	66000	66000
+6	2923	1198	3674	1	1706873139579	0	380000	380000	\N	0	\N	380000	380000
+6	2924	938	3618	2	1706873478254	80000	-80000	0	\N	80000	\N	80000	0
+6	2925	938	3675	0	1706873527159	0	0	0	\N	210000	\N	0	0
+6	2926	938	3675	1	1706873528137	0	0	0	\N	0	\N	0	0
+6	2927	1079	3676	0	1706874708268	0	0	0	\N	275000	\N	0	0
+6	2928	1079	3676	1	1706874709791	0	0	0	\N	0	\N	0	0
+6	2929	986	3677	0	1706874717053	0	0	0	\N	80000	\N	0	0
+6	2930	986	3677	1	1706874718212	0	0	0	\N	0	\N	0	0
+6	2931	1263	3678	0	1706875329654	0	0	0	\N	70000	\N	0	0
+6	2932	1263	3678	1	1706875330771	0	0	0	\N	0	\N	0	0
+6	2933	1014	3679	1	1706875402968	0	0	0	\N	0	\N	0	0
+6	2934	996	3648	2	1706876554396	176000	-176000	0	\N	176000	\N	176000	0
+6	2935	996	3680	0	1706876562215	0	0	0	\N	244000	\N	0	0
+6	2936	996	3680	1	1706876563505	0	0	0	\N	0	\N	0	0
+6	2937	1230	3681	0	1706876812565	0	0	0	\N	220000	\N	0	0
+6	2938	1230	3681	1	1706876814248	0	0	0	\N	0	\N	0	0
+6	2939	1253	3682	0	1706877026111	0	0	0	\N	185000	\N	0	0
+6	2940	1253	3682	1	1706877027471	0	0	0	\N	0	\N	0	0
+6	2941	1276	3683	0	1706877343038	0	0	0	\N	230000	\N	0	0
+6	2942	1276	3683	1	1706877344220	0	0	0	\N	0	\N	0	0
+6	2943	999	3684	0	1706877716246	0	0	0	\N	180000	\N	0	0
+6	2944	999	3684	1	1706877724144	0	0	0	\N	0	\N	0	0
+6	2945	972	3685	0	1706877800475	0	0	0	\N	546000	\N	0	0
+6	2946	972	3685	1	1706877801821	0	0	0	\N	0	\N	0	0
+2	2947	411	3478	2	1706883062305	1222000	-1222000	0	\N	1222000	\N	1222000	0
+6	2948	1277	3687	0	1706948887234	0	0	0	\N	240000	\N	0	0
+6	2949	1277	3687	1	1706948888462	0	0	0	\N	0	\N	0	0
+6	2950	1152	3686	0	1706948929909	0	0	0	\N	210000	\N	0	0
+3	2951	653	3689	1	1706954940469	0	0	0	\N	2200000	\N	2200000	0
+6	2952	932	3690	0	1706955239865	0	0	0	\N	180000	\N	0	0
+6	2953	932	3690	1	1706955241542	0	0	0	\N	0	\N	0	0
+6	2954	998	3691	0	1706955404331	0	0	0	\N	20000	\N	0	0
+6	2955	998	3691	1	1706955405466	0	0	0	\N	0	\N	0	0
+6	2956	1278	3688	1	1706955511794	0	225000	225000	\N	0	\N	225000	225000
+6	2957	995	2957	2	1706956181315	1552000	-375000	1177000		375000	Trả 1,552,000 vào 5 đơn nợ: [2957,3070,3114,3248,3314]	375000	0
+6	2958	995	3070	2	1706956181315	1177000	-160000	1017000		160000	Trả 1,552,000 vào 5 đơn nợ: [2957,3070,3114,3248,3314]	160000	0
+6	2959	995	3114	2	1706956181315	1017000	-270000	747000		270000	Trả 1,552,000 vào 5 đơn nợ: [2957,3070,3114,3248,3314]	270000	0
+6	2960	995	3248	2	1706956181315	747000	-362000	385000		362000	Trả 1,552,000 vào 5 đơn nợ: [2957,3070,3114,3248,3314]	362000	0
+6	2961	995	3314	2	1706956181315	385000	-385000	0		385000	Trả 1,552,000 vào 5 đơn nợ: [2957,3070,3114,3248,3314]	385000	0
+6	2962	995	3692	0	1706956618502	0	0	0	\N	665000	\N	0	0
+6	2963	995	3692	-1	1706956672578	0	0	0	\N	-665000	\N	0	0
+6	2964	995	3693	1	1706956747484	0	665000	665000	\N	0	\N	665000	665000
+6	2965	1168	3694	0	1706960937700	0	0	0	\N	235000	\N	0	0
+6	2966	1168	3694	1	1706960938364	0	0	0	\N	0	\N	0	0
+6	2967	991	3695	0	1706962809104	0	0	0	\N	455000	\N	0	0
+6	2968	991	3695	1	1706962810097	0	0	0	\N	0	\N	0	0
+6	2969	1239	3696	0	1706962843930	0	0	0	\N	355000	\N	0	0
+6	2970	1239	3696	1	1706962844631	0	0	0	\N	0	\N	0	0
+6	2971	1239	3697	0	1706962990244	0	0	0	\N	20000	\N	0	0
+6	2972	1239	3697	1	1706962991496	0	0	0	\N	0	\N	0	0
+6	2973	964	3698	0	1706963551264	0	0	0	\N	60000	\N	0	0
+6	2974	964	3698	1	1706963552101	0	0	0	\N	0	\N	0	0
+6	2975	1279	3699	1	1706964037476	0	180000	180000	\N	0	\N	180000	180000
+6	2976	1125	3700	0	1706964043285	0	0	0	\N	80000	\N	0	0
+6	2977	1125	3700	1	1706964044381	0	0	0	\N	0	\N	0	0
+6	2978	1264	3701	1	1706964619124	140000	425000	565000	\N	0	\N	425000	425000
+6	2979	1142	3702	0	1706964757728	0	0	0	\N	120000	\N	0	0
+6	2980	1142	3702	1	1706964758447	0	0	0	\N	0	\N	0	0
+6	2981	975	3703	1	1706964841195	0	0	0	\N	0	\N	0	0
+6	2982	1281	3704	0	1706965146600	0	0	0	\N	330000	\N	0	0
+6	2983	1281	3704	1	1706965147294	0	0	0	\N	0	\N	0	0
+6	2984	1280	3705	0	1706965164632	0	0	0	\N	310000	\N	0	0
+6	2985	1280	3705	1	1706965165832	0	0	0	\N	0	\N	0	0
+6	2986	1279	3699	2	1706965189039	180000	-180000	0	\N	180000	\N	180000	0
+6	2987	947	3706	1	1706966171054	0	0	0	\N	0	\N	0	0
+6	2988	1278	3688	2	1706967479590	225000	-225000	0		225000	\N	225000	0
+2	2989	250	3707	1	1706972169204	0	842400	842400	\N	0	\N	842400	842400
+2	2990	323	3664	1	1706972891189	0	630000	630000	\N	0	\N	630000	630000
+2	2991	245	3708	1	1706972949336	866000	480000	1346000	\N	0	\N	480000	480000
+2	2992	104	3709	0	1706973042719	0	0	0	\N	475000	\N	0	0
+2	2993	104	3709	1	1706973043589	0	0	0	\N	0	\N	0	0
+2	2994	1282	3710	0	1706973285365	0	0	0	\N	400000	\N	0	0
+2	2995	1282	3710	1	1706973286430	0	0	0	\N	0	\N	0	0
+2	2996	450	3712	1	1706973461381	0	420000	420000	\N	0	\N	420000	420000
+2	2997	297	3713	1	1706973491329	0	450000	450000	\N	0	\N	450000	450000
+2	2998	124	3714	1	1706974311601	0	670000	670000	\N	0	\N	670000	670000
+2	2999	569	3711	1	1706974404919	0	575000	575000	\N	0	\N	575000	575000
+2	3000	1029	3715	1	1706974552705	0	959000	959000	\N	0	\N	959000	959000
+2	3001	1231	3631	2	1706974849350	1300650	-1300650	0		1300650	\N	1300650	0
+2	3002	924	3634	2	1706974911538	855000	-855000	0		855000	\N	855000	0
+2	3003	233	3661	2	1706974924500	429000	-429000	0		429000	\N	429000	0
+2	3004	428	3716	0	1706975057814	0	0	0	\N	180000	\N	0	0
+2	3005	428	3716	1	1706975058812	0	0	0	\N	0	\N	0	0
+2	3006	1283	3717	0	1706975224977	0	0	0	\N	266860	\N	0	0
+2	3007	1283	3717	1	1706975225843	0	0	0	\N	0	\N	0	0
+2	3008	367	3663	2	1706986501006	1139000	-1139000	0		1139000	\N	1139000	0
+6	3009	1198	3674	2	1707043433693	380000	-380000	0		380000	\N	380000	0
+6	3010	1072	3109	2	1707043458881	620000	-620000	0		620000	\N	620000	0
+6	3011	1152	3686	1	1707044567253	0	0	0	\N	0	\N	0	0
+6	3012	1280	3719	0	1707044652490	0	0	0	\N	300000	\N	0	0
+6	3013	1280	3719	1	1707044653394	0	0	0	\N	0	\N	0	0
+6	3014	1176	3720	0	1707045253300	0	0	0	\N	245000	\N	0	0
+6	3015	1176	3720	1	1707045253941	0	0	0	\N	0	\N	0	0
+6	3017	1284	3721	1	1707045498730	0	0	0	\N	0	\N	0	0
+6	3018	866	3722	1	1707045898971	0	0	0	\N	0	\N	0	0
+3	3019	731	3723	1	1707054699274	0	0	0	\N	1500000	\N	1500000	0
+2	3020	302	2331	2	1707091588595	4895730	-297000	4598730		297000	Trả 4,895,730 vào 8 đơn nợ: [2331,2406,2524,2811,2945,2974,3396,3635]	297000	0
+2	3021	302	2406	2	1707091588595	4598730	-226000	4372730		226000	Trả 4,895,730 vào 8 đơn nợ: [2331,2406,2524,2811,2945,2974,3396,3635]	226000	0
+2	3022	302	2524	2	1707091588595	4372730	-1020980	3351750		1020980	Trả 4,895,730 vào 8 đơn nợ: [2331,2406,2524,2811,2945,2974,3396,3635]	1020980	0
+2	3023	302	2811	2	1707091588595	3351750	-651000	2700750		651000	Trả 4,895,730 vào 8 đơn nợ: [2331,2406,2524,2811,2945,2974,3396,3635]	651000	0
+2	3024	302	2945	2	1707091588595	2700750	-120000	2580750		120000	Trả 4,895,730 vào 8 đơn nợ: [2331,2406,2524,2811,2945,2974,3396,3635]	120000	0
+2	3025	302	2974	2	1707091588595	2580750	-240000	2340750		240000	Trả 4,895,730 vào 8 đơn nợ: [2331,2406,2524,2811,2945,2974,3396,3635]	240000	0
+2	3026	302	3396	2	1707091588595	2340750	-1540750	800000		1540750	Trả 4,895,730 vào 8 đơn nợ: [2331,2406,2524,2811,2945,2974,3396,3635]	1540750	0
+2	3027	302	3635	2	1707091588595	800000	-800000	0		800000	Trả 4,895,730 vào 8 đơn nợ: [2331,2406,2524,2811,2945,2974,3396,3635]	800000	0
+2	3028	179	3479	2	1707091608046	1073000	-1073000	0		1073000	\N	1073000	0
+2	3029	294	3538	2	1707091613513	871200	-871200	0		871200	\N	871200	0
+2	3030	569	3711	2	1707091621086	575000	-575000	0		575000	\N	575000	0
+2	3031	312	3480	2	1707091624670	210000	-210000	0		210000	\N	210000	0
+2	3032	225	3724	0	1707099945201	0	0	0	\N	820000	\N	0	0
+2	3033	225	3724	1	1707099950217	0	0	0	\N	0	\N	0	0
+6	3034	983	3725	1	1707135269601	0	200000	200000	\N	0	\N	200000	200000
+2	3035	250	3707	2	1707186197407	842400	-842400	0		842400	\N	842400	0
+2	3036	297	3713	2	1707186230168	450000	-450000	0		450000	\N	450000	0
+2	3037	450	3712	2	1707186234121	420000	-420000	0		420000	\N	420000	0
+6	3038	937	3726	0	1707206904178	0	0	0	\N	365000	\N	0	0
+6	3039	937	3726	1	1707206905413	0	0	0	\N	0	\N	0	0
+6	3040	1157	3727	0	1707207555615	0	0	0	\N	185000	\N	0	0
+6	3041	1157	3727	1	1707207556813	0	0	0	\N	0	\N	0	0
+6	3042	999	3728	0	1707208627600	0	0	0	\N	365000	\N	0	0
+6	3043	999	3728	1	1707208682931	0	0	0	\N	0	\N	0	0
+6	3044	1041	3729	0	1707211796482	0	0	0	\N	280000	\N	0	0
+6	3045	1041	3729	1	1707211798017	0	0	0	\N	0	\N	0	0
+6	3046	1285	3730	0	1707211979000	0	0	0	\N	260000	\N	0	0
+6	3047	1285	3730	1	1707211982077	0	0	0	\N	0	\N	0	0
+6	3048	1075	3731	0	1707211986809	0	0	0	\N	320000	\N	0	0
+6	3049	1075	3731	1	1707211987875	0	0	0	\N	0	\N	0	0
+6	3050	1058	3732	0	1707214491095	0	0	0	\N	145000	\N	0	0
+6	3051	1058	3732	1	1707214491792	0	0	0	\N	0	\N	0	0
+6	3052	983	3725	2	1707214577535	200000	-200000	0	\N	200000	\N	200000	0
+6	3053	1234	3733	0	1707216695944	0	0	0	\N	30000	\N	0	0
+6	3054	1234	3733	1	1707216696890	0	0	0	\N	0	\N	0	0
+6	3055	938	3734	1	1707216907350	0	0	0	\N	0	\N	0	0
+6	3056	1019	3735	0	1707217788311	0	0	0	\N	250000	\N	0	0
+6	3057	1019	3735	1	1707217789255	0	0	0	\N	0	\N	0	0
+6	3058	995	3693	2	1707218108055	665000	-665000	0	\N	665000	\N	665000	0
+6	3059	1048	3071	2	1707218126313	685000	-340000	345000		340000	Trả 685,000 vào 3 đơn nợ: [3071,3189,3192]	340000	0
+6	3060	1048	3189	2	1707218126313	345000	-325000	20000		325000	Trả 685,000 vào 3 đơn nợ: [3071,3189,3192]	325000	0
+6	3061	1048	3192	2	1707218126313	20000	-20000	0		20000	Trả 685,000 vào 3 đơn nợ: [3071,3189,3192]	20000	0
+6	3062	995	3736	0	1707218139153	0	0	0	\N	100000	\N	0	0
+6	3063	995	3736	1	1707218139989	0	0	0	\N	0	\N	0	0
+6	3064	959	3737	0	1707218641408	0	0	0	\N	235000	\N	0	0
+6	3065	959	3737	1	1707218642116	0	0	0	\N	0	\N	0	0
+6	3066	1286	3738	0	1707219127614	0	0	0	\N	490000	\N	0	0
+6	3067	1286	3738	1	1707219129001	0	0	0	\N	0	\N	0	0
+6	3068	1168	3739	0	1707219381172	0	0	0	\N	90000	\N	0	0
+6	3069	1168	3739	1	1707219381808	0	0	0	\N	0	\N	0	0
+6	3070	1236	3448	2	1707219930561	560000	-560000	0		560000	\N	560000	0
+6	3071	1013	3409	2	1707219934021	440000	-440000	0		440000	\N	440000	0
+6	3072	954	3453	2	1707219938694	644000	-90000	554000		90000	Trả 644,000 vào 3 đơn nợ: [3453,3551,3591]	90000	0
+6	3073	954	3551	2	1707219938694	554000	-369000	185000		369000	Trả 644,000 vào 3 đơn nợ: [3453,3551,3591]	369000	0
+6	3074	954	3591	2	1707219938694	185000	-185000	0		185000	Trả 644,000 vào 3 đơn nợ: [3453,3551,3591]	185000	0
+6	3075	953	3454	2	1707219941939	375000	-90000	285000		90000	Trả 375,000 vào 4 đơn nợ: [3454,3552,3567,3626]	90000	0
+6	3076	953	3552	2	1707219941939	285000	-185000	100000		185000	Trả 375,000 vào 4 đơn nợ: [3454,3552,3567,3626]	185000	0
+6	3077	953	3567	2	1707219941939	100000	-30000	70000		30000	Trả 375,000 vào 4 đơn nợ: [3454,3552,3567,3626]	30000	0
+6	3078	953	3626	2	1707219941939	70000	-70000	0		70000	Trả 375,000 vào 4 đơn nợ: [3454,3552,3567,3626]	70000	0
+6	3079	953	3740	0	1707219949749	0	0	0	\N	90000	\N	0	0
+6	3080	953	3740	1	1707219950420	0	0	0	\N	0	\N	0	0
+6	3081	954	3741	0	1707219956008	0	0	0	\N	30000	\N	0	0
+6	3082	954	3741	1	1707219957118	0	0	0	\N	0	\N	0	0
+6	3083	1032	3743	0	1707220179729	0	0	0	\N	30000	\N	0	0
+6	3084	1032	3743	1	1707220181358	0	0	0	\N	0	\N	0	0
+6	3085	955	3742	0	1707220185595	0	0	0	\N	240000	\N	0	0
+6	3086	955	3742	1	1707220186269	0	0	0	\N	0	\N	0	0
+6	3087	1051	3744	0	1707220296740	0	0	0	\N	105000	\N	0	0
+6	3088	1051	3744	1	1707220297865	0	0	0	\N	0	\N	0	0
+6	3089	1018	3745	0	1707221244816	0	0	0	\N	310000	\N	0	0
+6	3090	1018	3745	1	1707221245614	0	0	0	\N	0	\N	0	0
+6	3091	894	3746	0	1707222451381	0	0	0	\N	275000	\N	0	0
+6	3092	894	3746	1	1707222453051	0	0	0	\N	0	\N	0	0
+6	3093	1047	3747	0	1707222458415	0	0	0	\N	150000	\N	0	0
+6	3094	1047	3747	1	1707222459687	0	0	0	\N	0	\N	0	0
+6	3095	1287	3748	0	1707222721098	0	0	0	\N	410000	\N	0	0
+6	3096	1287	3748	1	1707222721683	0	0	0	\N	0	\N	0	0
+6	3097	1152	3749	0	1707223104535	0	0	0	\N	70000	\N	0	0
+6	3098	1152	3749	1	1707223105221	0	0	0	\N	0	\N	0	0
+6	3099	1277	3750	0	1707223114514	0	0	0	\N	70000	\N	0	0
+6	3100	1277	3750	1	1707223115166	0	0	0	\N	0	\N	0	0
+6	3101	1182	3751	0	1707223493373	0	0	0	\N	265000	\N	0	0
+6	3102	1182	3751	1	1707223494049	0	0	0	\N	0	\N	0	0
+6	3103	1111	3752	0	1707223602372	0	0	0	\N	90000	\N	0	0
+6	3104	1111	3752	1	1707223603903	0	0	0	\N	0	\N	0	0
+6	3105	1264	3753	0	1707223902918	565000	0	565000	\N	49000	\N	0	0
+6	3106	1264	3753	1	1707223903684	565000	0	565000	\N	0	\N	0	0
+6	3107	1264	3649	2	1707223910655	565000	-140000	425000		140000	Trả 565,000 vào 2 đơn nợ: [3649,3701]	140000	0
+6	3108	1264	3701	2	1707223910655	425000	-425000	0		425000	Trả 565,000 vào 2 đơn nợ: [3649,3701]	425000	0
+6	3109	1120	3756	0	1707225639815	0	0	0	\N	60000	\N	0	0
+6	3110	1120	3756	1	1707225640714	0	0	0	\N	0	\N	0	0
+6	3111	1288	3755	0	1707225703635	0	0	0	\N	230000	\N	0	0
+6	3112	1288	3755	1	1707225704305	0	0	0	\N	0	\N	0	0
+6	3113	1230	3754	0	1707225742985	0	0	0	\N	260000	\N	0	0
+6	3114	1230	3754	1	1707225744175	0	0	0	\N	0	\N	0	0
+6	3115	1067	3757	0	1707226078953	0	0	0	\N	415000	\N	0	0
+6	3116	1067	3757	1	1707226080025	0	0	0	\N	0	\N	0	0
+6	3117	1235	3440	2	1707226386171	104000	-104000	0		104000	\N	104000	0
+6	3118	1164	3758	0	1707230397746	0	0	0	\N	350000	\N	0	0
+6	3119	1164	3758	1	1707230432061	0	0	0	\N	0	\N	0	0
+2	3120	245	2333	2	1707266072532	1346000	-480000	866000		480000	\N	866000	386000
+2	3121	124	3714	2	1707266078781	670000	-670000	0		670000	\N	670000	0
+2	3122	321	3506	2	1707266087323	1218000	-725000	493000		725000	Trả 1,218,000 vào 2 đơn nợ: [3506,3665]	725000	0
+2	3123	321	3665	2	1707266087323	493000	-493000	0		493000	Trả 1,218,000 vào 2 đơn nợ: [3506,3665]	493000	0
+2	3124	1029	3715	2	1707266094505	959000	-959000	0		959000	\N	959000	0
+6	3125	1082	3759	0	1707267623736	0	0	0	\N	60000	\N	0	0
+6	3126	1082	3759	1	1707267625374	0	0	0	\N	0	\N	0	0
+6	3127	1272	3653	2	1707276836941	205000	-205000	0	\N	205000	\N	205000	0
+6	3128	1272	3760	1	1707276860791	0	0	0	\N	320000	\N	320000	0
+6	3129	1202	3761	0	1707294097759	0	0	0	\N	110000	\N	0	0
+6	3130	1202	3761	1	1707294099080	0	0	0	\N	0	\N	0	0
+6	3131	1002	3762	0	1707299087311	0	0	0	\N	26000	\N	0	0
+6	3132	1002	3762	1	1707299088521	0	0	0	\N	0	\N	0	0
+6	3133	1268	3763	0	1707300156662	66000	0	66000	\N	66000	\N	0	0
+6	3134	1268	3672	2	1707300162772	66000	-66000	0	\N	66000	\N	66000	0
+6	3135	1071	3764	1	1707301139857	145000	35000	180000	\N	0	\N	35000	35000
+6	3136	964	3765	0	1707301983236	0	0	0	\N	265000	\N	0	0
+6	3137	964	3765	1	1707301984206	0	0	0	\N	0	\N	0	0
+6	3138	949	3766	0	1707302546190	0	0	0	\N	309000	\N	0	0
+6	3139	949	3766	1	1707302549411	0	0	0	\N	0	\N	0	0
+6	3140	1289	3767	0	1707302860976	0	0	0	\N	450000	\N	0	0
+6	3141	1289	3767	1	1707302863160	0	0	0	\N	0	\N	0	0
+6	3142	1064	3768	0	1707305052729	0	0	0	\N	170000	\N	0	0
+6	3143	1064	3768	1	1707305053749	0	0	0	\N	0	\N	0	0
+6	3144	1284	3769	0	1707305312308	0	0	0	\N	60000	\N	0	0
+6	3145	1284	3769	1	1707305313949	0	0	0	\N	0	\N	0	0
+6	3146	1239	3770	0	1707306148950	0	0	0	\N	340000	\N	0	0
+6	3147	1239	3770	1	1707306150430	0	0	0	\N	0	\N	0	0
+6	3148	1011	3771	0	1707306722285	0	0	0	\N	210000	\N	0	0
+6	3149	1011	3771	1	1707306723357	0	0	0	\N	0	\N	0	0
+6	3150	1007	3772	0	1707307803130	0	0	0	\N	365000	\N	0	0
+6	3151	1007	3772	1	1707307804156	0	0	0	\N	0	\N	0	0
+6	3152	1078	3773	0	1707311928414	0	0	0	\N	303000	\N	0	0
+6	3153	1078	3773	1	1707311929655	0	0	0	\N	0	\N	0	0
+6	3154	1247	3774	1	1707313326754	564000	140000	704000	\N	0	\N	140000	140000
+6	3155	1124	3775	1	1707313451796	700000	180000	880000	\N	0	\N	180000	180000
+6	3156	1247	3525	2	1707313549630	704000	-190000	514000		190000	Trả 704,000 vào 3 đơn nợ: [3525,3601,3774]	190000	0
+6	3157	1247	3601	2	1707313549630	514000	-374000	140000		374000	Trả 704,000 vào 3 đơn nợ: [3525,3601,3774]	374000	0
+6	3158	1247	3774	2	1707313549630	140000	-140000	0		140000	Trả 704,000 vào 3 đơn nợ: [3525,3601,3774]	140000	0
+6	3159	1124	3353	2	1707313575196	880000	-310000	570000		310000	Trả 880,000 vào 4 đơn nợ: [3353,3524,3598,3775]	310000	0
+6	3160	1124	3524	2	1707313575196	570000	-245000	325000		245000	Trả 880,000 vào 4 đơn nợ: [3353,3524,3598,3775]	245000	0
+6	3161	1124	3598	2	1707313575196	325000	-145000	180000		145000	Trả 880,000 vào 4 đơn nợ: [3353,3524,3598,3775]	145000	0
+6	3162	1124	3775	2	1707313575196	180000	-180000	0		180000	Trả 880,000 vào 4 đơn nợ: [3353,3524,3598,3775]	180000	0
+6	3163	1023	3640	2	1707313732602	210000	-210000	0		210000	\N	210000	0
+6	3164	1035	3037	2	1707313906329	235000	-235000	0		235000	\N	235000	0
+6	3165	1071	2892	2	1707314101759	180000	-145000	35000	\N	145000	\N	145000	0
+6	3166	997	3777	0	1707354939208	0	0	0	\N	275000	\N	0	0
+6	3167	997	3777	1	1707354939999	0	0	0	\N	0	\N	0	0
+6	3168	1136	3778	0	1707355849148	0	0	0	\N	170000	\N	0	0
+6	3169	1136	3778	1	1707355850690	0	0	0	\N	0	\N	0	0
+6	3170	1291	3779	0	1707356423058	0	0	0	\N	365000	\N	0	0
+6	3171	1291	3779	1	1707356424593	0	0	0	\N	0	\N	0	0
+6	3172	1292	3780	0	1707360861372	0	0	0	\N	365000	\N	0	0
+6	3173	1292	3780	1	1707360862959	0	0	0	\N	0	\N	0	0
+6	3174	1257	3782	0	1707361136033	0	0	0	\N	270000	\N	0	0
+6	3175	1249	3781	0	1707361148212	0	0	0	\N	305000	\N	0	0
+6	3176	1249	3781	1	1707361149213	0	0	0	\N	0	\N	0	0
+6	3177	999	3783	0	1707361560610	0	0	0	\N	80000	\N	0	0
+6	3178	999	3783	1	1707361561813	0	0	0	\N	0	\N	0	0
+6	3179	1257	3782	1	1707361699736	0	0	0	\N	0	\N	0	0
+6	3180	1003	3784	0	1707370929800	0	0	0	\N	249000	\N	0	0
+6	3181	1003	3784	1	1707370931161	0	0	0	\N	0	\N	0	0
+6	3182	1293	3785	0	1707374715300	0	0	0	\N	305000	\N	0	0
+6	3183	1293	3785	1	1707374716544	0	0	0	\N	0	\N	0	0
+6	3184	941	3786	0	1707388589540	0	0	0	\N	390000	\N	0	0
+6	3185	941	3786	1	1707388645503	0	0	0	\N	0	\N	0	0
+6	3186	1023	3787	0	1707391131249	0	0	0	\N	635000	\N	0	0
+6	3187	1023	3787	1	1707391133042	0	0	0	\N	0	\N	0	0
+6	3188	938	3788	0	1707391291977	0	0	0	\N	50000	\N	0	0
+6	3189	938	3788	1	1707391292826	0	0	0	\N	0	\N	0	0
+6	3190	1018	3789	0	1707391837231	0	0	0	\N	245000	\N	0	0
+6	3191	1018	3789	1	1707391838486	0	0	0	\N	0	\N	0	0
+6	3192	1049	3790	0	1707393715873	170000	0	170000	\N	245000	\N	0	0
+6	3193	1049	3790	1	1707393718390	170000	0	170000	\N	0	\N	0	0
+6	3194	1049	3475	2	1707393740642	170000	-170000	0		170000	\N	170000	0
+6	3195	987	3791	0	1707394435536	0	0	0	\N	485000	\N	0	0
+6	3196	987	3791	1	1707394436730	0	0	0	\N	0	\N	0	0
+6	3197	1032	3792	0	1707396315883	0	0	0	\N	275000	\N	0	0
+6	3198	1032	3792	1	1707396317424	0	0	0	\N	0	\N	0	0
+6	3199	955	3793	0	1707396399326	0	0	0	\N	130000	\N	0	0
+6	3200	955	3793	1	1707396401451	0	0	0	\N	0	\N	0	0
+6	3201	953	3794	0	1707396546516	0	0	0	\N	100000	\N	0	0
+6	3202	953	3794	1	1707396547690	0	0	0	\N	0	\N	0	0
+2	3203	425	3632	2	1707396566055	705000	-705000	0		705000	\N	705000	0
+6	3204	1294	3795	0	1707398071041	0	0	0	\N	230000	\N	0	0
+6	3205	1273	3656	2	1707398079568	80000	-80000	0		80000	\N	80000	0
+2	3206	323	3664	2	1707405345851	630000	-630000	0		630000	\N	630000	0
+2	3207	292	2372	2	1707405570306	669200	-669200	0		669200	\N	669200	0
+6	3208	1294	3795	1	1707443915246	0	0	0	\N	0	\N	0	0
+6	3209	954	3797	0	1707444019441	0	0	0	\N	185000	\N	0	0
+6	3210	954	3797	1	1707444020526	0	0	0	\N	0	\N	0	0
+6	3211	953	3796	0	1707444058824	0	0	0	\N	210000	\N	0	0
+6	3212	953	3796	1	1707444060357	0	0	0	\N	0	\N	0	0
+6	3213	1157	3798	0	1707444388373	0	0	0	\N	185000	\N	0	0
+6	3214	1157	3798	1	1707444389288	0	0	0	\N	0	\N	0	0
+6	3215	1295	3800	0	1707457714454	0	0	0	\N	295000	\N	0	0
+6	3216	1295	3800	1	1707457730321	0	0	0	\N	0	\N	0	0
+6	3217	984	3801	0	1707458552495	0	0	0	\N	115000	\N	0	0
+6	3218	984	3801	1	1707458553925	0	0	0	\N	0	\N	0	0
+6	3219	865	3802	1	1707461504986	0	350000	350000	\N	0	\N	350000	350000
+6	3220	865	3802	2	1707461509127	350000	-350000	0	\N	350000	\N	350000	0
+6	3221	983	3803	0	1707462182517	0	0	0	\N	215000	\N	0	0
+6	3222	1058	3804	0	1707462226379	0	0	0	\N	20000	\N	0	0
+6	3223	1058	3804	1	1707462227347	0	0	0	\N	0	\N	0	0
+6	3224	983	3803	1	1707467822222	0	0	0	\N	0	\N	0	0
+6	3225	959	3805	0	1707468035688	0	0	0	\N	60000	\N	0	0
+6	3226	959	3805	1	1707468037029	0	0	0	\N	0	\N	0	0
+6	3227	1239	3806	0	1707480371107	0	0	0	\N	115000	\N	0	0
+6	3228	1239	3806	1	1707480372323	0	0	0	\N	0	\N	0	0
+6	3229	1296	3807	0	1707481865341	0	0	0	\N	320000	\N	0	0
+6	3230	1296	3807	1	1707481866910	0	0	0	\N	0	\N	0	0
+6	3231	1264	3808	0	1707483186422	0	0	0	\N	170000	\N	0	0
+6	3232	1264	3808	1	1707483188817	0	0	0	\N	0	\N	0	0
+6	3233	996	3809	0	1707483441571	0	0	0	\N	665000	\N	0	0
+6	3234	996	3809	1	1707483442621	0	0	0	\N	0	\N	0	0
+6	3235	1288	3810	0	1707484459523	0	0	0	\N	120000	\N	0	0
+6	3236	1288	3810	1	1707484461543	0	0	0	\N	0	\N	0	0
+6	3237	1291	3811	0	1707561986789	0	0	0	\N	155000	\N	0	0
+6	3238	1291	3811	1	1707561987915	0	0	0	\N	0	\N	0	0
+6	3239	1291	3812	0	1707562415317	0	0	0	\N	205000	\N	0	0
+6	3240	1291	3812	1	1707562416217	0	0	0	\N	0	\N	0	0
+6	3241	1297	3813	0	1707739039433	0	0	0	\N	275000	\N	0	0
+6	3242	1297	3813	1	1707739045956	0	0	0	\N	0	\N	0	0
+6	3243	1135	3815	0	1707739947408	0	0	0	\N	235000	\N	0	0
+6	3244	1135	3815	1	1707739949198	0	0	0	\N	0	\N	0	0
+6	3245	1136	3814	0	1707739953576	0	0	0	\N	75000	\N	0	0
+6	3246	1136	3814	1	1707739955162	0	0	0	\N	0	\N	0	0
+6	3247	999	3816	0	1707740442513	0	0	0	\N	250000	\N	0	0
+6	3248	999	3816	1	1707740444233	0	0	0	\N	0	\N	0	0
+6	3249	955	3817	0	1707740812098	0	0	0	\N	245000	\N	0	0
+6	3250	955	3817	1	1707740813252	0	0	0	\N	0	\N	0	0
+6	3251	1019	3818	0	1707741224153	0	0	0	\N	160000	\N	0	0
+6	3252	1019	3818	1	1707741225781	0	0	0	\N	0	\N	0	0
+6	3253	1298	3819	0	1707741230375	0	0	0	\N	100000	\N	0	0
+6	3254	1298	3819	1	1707741236482	0	0	0	\N	0	\N	0	0
+6	3255	959	3820	0	1707741406584	0	0	0	\N	155000	\N	0	0
+6	3256	959	3820	1	1707741407615	0	0	0	\N	0	\N	0	0
+6	3257	895	3823	1	1707742128956	0	125000	125000	\N	0	\N	125000	125000
+6	3258	894	3822	1	1707742133758	0	345000	345000	\N	0	\N	345000	345000
+6	3259	1047	3821	1	1707742139813	0	160000	160000	\N	0	\N	160000	160000
+6	3260	970	3824	0	1707742388844	0	0	0	\N	20000	\N	0	0
+6	3261	970	3824	1	1707742390619	0	0	0	\N	0	\N	0	0
+6	3262	1239	3825	0	1707742676046	0	0	0	\N	80000	\N	0	0
+6	3263	1239	3825	1	1707742677080	0	0	0	\N	0	\N	0	0
+6	3264	1253	3826	0	1707743311237	0	0	0	\N	50000	\N	0	0
+6	3265	1253	3826	1	1707743313105	0	0	0	\N	0	\N	0	0
+6	3266	1169	3827	0	1707743319307	0	0	0	\N	335000	\N	0	0
+6	3267	1169	3827	1	1707743320235	0	0	0	\N	0	\N	0	0
+6	3268	1163	3829	0	1707743804743	0	0	0	\N	200000	\N	0	0
+6	3269	1145	3828	0	1707743810971	0	0	0	\N	245000	\N	0	0
+6	3270	1145	3828	1	1707743811748	0	0	0	\N	0	\N	0	0
+6	3271	1163	3829	1	1707743814248	0	0	0	\N	0	\N	0	0
+6	3272	984	3830	0	1707745256880	0	0	0	\N	368000	\N	0	0
+6	3273	984	3830	1	1707745258232	0	0	0	\N	0	\N	0	0
+6	3274	984	3831	0	1707745818786	0	0	0	\N	185000	\N	0	0
+6	3275	984	3831	1	1707745819878	0	0	0	\N	0	\N	0	0
+6	3276	941	3832	0	1707746832916	0	0	0	\N	245000	\N	0	0
+6	3277	941	3832	1	1707746833744	0	0	0	\N	0	\N	0	0
+6	3278	954	3833	0	1707747032435	0	0	0	\N	245000	\N	0	0
+6	3279	954	3833	1	1707747033698	0	0	0	\N	0	\N	0	0
+2	3280	463	3834	1	1707792565013	0	4021286	4021286	\N	0	\N	4021286	4021286
+2	3281	463	3834	2	1707792568673	4021286	-4021286	0	\N	4021286	\N	4021286	0
+2	3282	463	3835	0	1707793134893	0	0	0	\N	2346000	\N	0	0
+2	3283	463	3835	1	1707793136415	0	0	0	\N	0	\N	0	0
+2	3284	304	3718	0	1707793171849	0	0	0	\N	100000	\N	0	0
+2	3285	304	3718	1	1707793172752	0	0	0	\N	0	\N	0	0
+2	3286	245	3708	2	1707793181810	866000	-480000	386000	\N	480000	\N	480000	0
+2	3287	425	3378	0	1707793206103	0	0	0	\N	285000	\N	0	0
+2	3288	425	3378	1	1707793207551	0	0	0	\N	0	\N	0	0
+2	3289	242	3662	0	1707793242204	0	0	0	\N	1124000	\N	0	0
+2	3290	242	3662	1	1707793243243	0	0	0	\N	0	\N	0	0
+2	3291	425	3378	-1	1707794641891	0	0	0	\N	-285000	\N	0	0
+2	3292	463	3836	0	1707797478883	0	0	0	\N	4395000	\N	0	0
+2	3293	463	3836	1	1707797480470	0	0	0	\N	0	\N	0	0
+2	3294	463	3837	0	1707797773207	0	0	0	\N	106000	\N	0	0
+2	3295	463	3837	1	1707797774745	0	0	0	\N	0	\N	0	0
+6	3296	993	3839	0	1707875951904	158000	0	158000	\N	355000	\N	0	0
+6	3297	993	3839	1	1707875952847	158000	0	158000	\N	0	\N	0	0
+6	3298	1086	3838	0	1707875958572	1014000	0	1014000	\N	315000	\N	0	0
+6	3299	1086	3838	1	1707875959516	1014000	0	1014000	\N	0	\N	0	0
+6	3300	1299	3842	0	1707877174372	0	0	0	\N	200000	\N	0	0
+6	3301	1299	3842	1	1707877175769	0	0	0	\N	0	\N	0	0
+6	3302	1299	3841	0	1707877181052	0	0	0	\N	381000	\N	0	0
+6	3303	1299	3841	1	1707877181921	0	0	0	\N	0	\N	0	0
+6	3304	1275	3840	0	1707877186940	0	0	0	\N	370000	\N	0	0
+6	3305	1275	3840	1	1707877217990	0	0	0	\N	0	\N	0	0
+6	3306	1098	3843	0	1707878864203	0	0	0	\N	455000	\N	0	0
+6	3307	1098	3843	1	1707878865155	0	0	0	\N	0	\N	0	0
+6	3308	1041	3844	0	1707879690870	0	0	0	\N	1100000	\N	0	0
+6	3309	1041	3844	1	1707879691751	0	0	0	\N	0	\N	0	0
+6	3310	1157	3845	0	1707880784834	0	0	0	\N	30000	\N	0	0
+6	3311	1157	3845	1	1707880785611	0	0	0	\N	0	\N	0	0
+6	3312	1300	3846	0	1707882045485	0	0	0	\N	670000	\N	0	0
+6	3313	1300	3846	1	1707882046463	0	0	0	\N	0	\N	0	0
+6	3314	1301	3847	0	1707882050417	0	0	0	\N	280000	\N	0	0
+6	3315	1301	3847	1	1707882051146	0	0	0	\N	0	\N	0	0
+6	3316	1048	3849	0	1707882566852	0	0	0	\N	265000	\N	0	0
+6	3317	1048	3849	1	1707882568182	0	0	0	\N	0	\N	0	0
+6	3318	995	3848	0	1707882573828	0	0	0	\N	100000	\N	0	0
+6	3319	995	3848	1	1707882574945	0	0	0	\N	0	\N	0	0
+6	3320	1302	3850	0	1707891534451	0	0	0	\N	320000	\N	0	0
+6	3321	1302	3850	1	1707891537686	0	0	0	\N	0	\N	0	0
+6	3322	1054	3851	0	1707895708357	0	0	0	\N	245000	\N	0	0
+6	3323	1054	3851	1	1707895712954	0	0	0	\N	0	\N	0	0
+3	3324	1114	3852	1	1707901789950	0	0	0	\N	2000000	\N	2000000	0
+6	3325	1303	3853	0	1707903634745	0	0	0	\N	335000	\N	0	0
+6	3326	1303	3853	1	1707903677809	0	0	0	\N	0	\N	0	0
+6	3327	1303	3854	0	1707905906904	0	0	0	\N	100000	\N	0	0
+6	3328	1303	3854	1	1707905907993	0	0	0	\N	0	\N	0	0
+6	3329	941	3855	0	1707906976450	0	0	0	\N	180000	\N	0	0
+6	3330	941	3855	1	1707906977976	0	0	0	\N	0	\N	0	0
+6	3331	1103	3856	0	1707913897368	0	0	0	\N	590000	\N	0	0
+6	3332	1103	3856	1	1707914013764	0	0	0	\N	0	\N	0	0
+6	3333	1304	3857	0	1707914073754	0	0	0	\N	235000	\N	0	0
+6	3334	1304	3857	1	1707914074761	0	0	0	\N	0	\N	0	0
+6	3335	1049	3858	1	1707914405716	0	155000	155000	\N	0	\N	155000	155000
+6	3336	996	3859	1	1707919572491	0	85000	85000	\N	0	\N	85000	85000
+6	3337	1295	3860	0	1707943610255	0	0	0	\N	415000	\N	0	0
+6	3338	1295	3860	1	1707943611435	0	0	0	\N	0	\N	0	0
+6	3339	1160	3861	0	1707994829913	0	0	0	\N	155000	\N	0	0
+6	3340	1160	3861	1	1707994831074	0	0	0	\N	0	\N	0	0
+6	3341	1023	3862	0	1707998875301	0	0	0	\N	30000	\N	0	0
+6	3342	1023	3862	1	1707998876312	0	0	0	\N	0	\N	0	0
+6	3343	1305	3863	0	1708002203359	0	0	0	\N	230000	\N	0	0
+6	3344	1305	3863	1	1708002204715	0	0	0	\N	0	\N	0	0
+6	3345	955	3864	0	1708002803157	0	0	0	\N	455000	\N	0	0
+6	3346	955	3864	1	1708002804827	0	0	0	\N	0	\N	0	0
+6	3347	976	3865	0	1708003530483	0	0	0	\N	265000	\N	0	0
+6	3348	976	3865	1	1708003531575	0	0	0	\N	0	\N	0	0
+6	3349	976	3866	0	1708003535454	0	0	0	\N	365000	\N	0	0
+6	3350	976	3866	1	1708003536449	0	0	0	\N	0	\N	0	0
+6	3351	1182	3867	0	1708004439288	0	0	0	\N	330000	\N	0	0
+6	3352	1182	3867	1	1708004440141	0	0	0	\N	0	\N	0	0
+6	3353	1182	3868	0	1708004606845	0	0	0	\N	120000	\N	0	0
+6	3354	1182	3868	1	1708004608228	0	0	0	\N	0	\N	0	0
+6	3355	954	3869	0	1708004882740	0	0	0	\N	100000	\N	0	0
+6	3356	954	3869	1	1708004883985	0	0	0	\N	0	\N	0	0
+6	3357	954	3869	-1	1708005036652	0	0	0	\N	-100000	\N	0	0
+6	3358	954	3870	1	1708005036724	0	0	0	\N	180000	\N	180000	0
+1	3359	963	3871	1	1708021540664	0	0	0	\N	40500000	\N	40500000	0
 \.
 
 
@@ -5203,6 +5921,42 @@ COPY public."DistributorPayment" (oid, id, "distributorId", "receiptId", type, "
 6	442	165	1069	1	0	0	0	1706007446329	\N	3000000	\N	3000000	0
 6	443	165	1070	1	0	0	0	1706178114252	\N	9740000	\N	9740000	0
 6	444	165	1071	1	0	0	0	1706276996048	\N	16890000	\N	16890000	0
+2	445	122	1072	1	0	0	0	1706349429675	\N	900000	\N	900000	0
+2	446	132	1073	1	0	0	0	1706349616558	\N	340000	\N	340000	0
+6	447	165	1074	1	0	0	0	1706534689543	\N	2400000	\N	2400000	0
+6	448	165	1075	1	0	0	0	1706620550074	\N	5103000	\N	5103000	0
+2	449	132	1076	1	0	0	0	1706707507743	\N	810000	\N	810000	0
+2	450	132	1077	1	0	0	0	1706707948361	\N	380000	\N	380000	0
+2	451	129	1078	1	0	0	0	1706708120774	\N	445000	\N	445000	0
+6	452	165	1079	1	0	0	0	1706785390185	\N	1920000	\N	1920000	0
+2	453	135	1080	1	0	0	0	1706972730615	\N	3095000	\N	3095000	0
+2	454	132	1081	1	0	0	0	1706973146012	\N	906000	\N	906000	0
+1	455	153	1082	1	0	0	0	1707014575450	\N	80000	\N	80000	0
+1	456	153	1083	1	0	0	0	1707014710625	\N	30000	\N	30000	0
+1	457	153	1084	1	0	0	0	1707014799730	\N	35000	\N	35000	0
+1	458	153	1085	1	0	0	0	1707015943378	\N	30000	\N	30000	0
+1	459	153	1086	1	0	0	0	1707016026183	\N	200000	\N	200000	0
+1	460	153	1087	1	0	0	0	1707016352313	\N	200000	\N	200000	0
+1	461	153	1088	1	0	0	0	1707016588189	\N	10000	\N	10000	0
+1	462	153	1089	1	0	0	0	1707016840966	\N	15000	\N	15000	0
+1	463	153	1090	1	0	0	0	1707016914610	\N	15000	\N	15000	0
+1	464	153	1091	1	0	0	0	1707017162076	\N	5000	\N	5000	0
+1	465	153	1092	1	0	0	0	1707017231932	\N	5000	\N	5000	0
+1	466	153	1093	1	0	0	0	1707017704517	\N	15000	\N	15000	0
+1	467	153	1094	1	0	0	0	1707017736496	\N	5000	\N	5000	0
+1	468	153	1095	1	0	0	0	1707018014908	\N	5000	\N	5000	0
+1	469	153	1096	1	0	0	0	1707018061692	\N	5000	\N	5000	0
+1	470	153	1097	1	0	0	0	1707032851217	\N	5000	\N	5000	0
+1	471	153	1098	1	0	0	0	1707067031955	\N	2000	\N	2000	0
+1	472	153	1099	1	0	0	0	1707067059201	\N	2000	\N	2000	0
+1	473	153	1100	1	0	0	0	1707093068642	\N	200000	\N	200000	0
+1	474	153	1101	1	0	0	0	1707093189529	\N	200000	\N	200000	0
+6	475	165	1102	1	0	0	0	1707214824932	\N	960000	\N	960000	0
+6	476	165	1103	1	0	0	0	1707215093430	\N	2592000	\N	2592000	0
+2	477	135	1104	1	0	0	0	1707793593387	\N	516000	\N	516000	0
+2	478	135	1105	1	0	0	0	1707794453848	\N	7015922	\N	7015922	0
+2	479	135	1106	1	0	0	0	1707794714578	\N	785000	\N	785000	0
+2	480	135	1107	1	0	0	0	1707797567432	\N	2201000	\N	2201000	0
 \.
 
 
@@ -7033,7 +7787,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 4	2059	0	694	3	78000	78000	0	0	72000	150000	0	72000	0		1695290281228	150000	\N	2023	9	21	2023-09-21 09:58:02+00	%
 4	2060	0	695	3	76000	76000	0	0	124000	200000	0	124000	0		1695292301704	200000	\N	2023	9	21	2023-09-21 10:31:42+00	%
 4	2061	0	696	3	39000	442000	0	0	158000	600000	0	561000	0		1695295614287	600000	\N	2023	9	21	2023-09-21 11:26:55+00	%
-2	2062	0	676	2	130000	179000	0	0	25000	204000	0	74000	204000	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1695307600886	0	\N	2023	9	21	2023-09-21 14:46:41+00	%
 2	2063	0	233	-1	841400	1058000	0	0	20000	1078000	0	236600	0		1695315275351	0	\N	2023	9	21	2023-09-21 16:54:36+00	%
 2	2064	0	360	3	190000	360000	0	0	0	360000	28000	142000	0	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1695315377361	360000	\N	2023	9	21	2023-09-21 16:56:18+00	%
 2	2065	0	177	3	160000	270000	0	0	0	270000	0	110000	0		1695315447245	270000	\N	2023	9	21	2023-09-21 16:57:28+00	%
@@ -7285,9 +8038,7 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 2	2328	0	339	3	717000	1036750	0	0	0	1036750	25000	294750	0	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1698983604429	1036750	\N	2023	11	3	2023-11-03 03:53:25+00	%
 2	2329	0	837	3	414000	815000	0	0	0	815000	25000	376000	0		1698984710182	815000	\N	2023	11	3	2023-11-03 04:11:51+00	%
 2	2330	0	291	3	297700	366400	0	0	35000	401400	0	103700	0	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1698984860137	401400	\N	2023	11	3	2023-11-03 04:14:21+00	%
-2	2331	0	302	2	262350	297000	0	0	0	297000	0	34650	297000	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1698984953953	0	\N	2023	11	3	2023-11-03 04:15:54+00	%
 2	2332	0	285	3	1218400	1575280	0	0	0	1575280	0	356880	0		1698985058990	1575280	\N	2023	11	3	2023-11-03 04:17:39+00	%
-2	2333	0	245	2	280000	395000	0	0	0	395000	28000	87000	866000	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1698985324436	-471000	\N	2023	11	3	2023-11-03 04:22:05+00	%
 2	2334	0	189	3	359000	510000	0	0	20000	530000	0	171000	0	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1698985465497	530000	\N	2023	11	3	2023-11-03 04:24:26+00	%
 2	2335	0	273	3	225000	270000	0	0	0	270000	0	45000	0		1698996710187	270000	\N	2023	11	3	2023-11-03 07:31:51+00	%
 2	2336	0	207	3	2073649	2649180	0	0	0	2649180	0	575531	0		1698997231818	2649180	\N	2023	11	3	2023-11-03 07:40:32+00	%
@@ -7314,6 +8065,7 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 4	2358	0	850	3	21000	21000	0	0	329000	350000	0	329000	0		1699321063973	350000	\N	2023	11	7	2023-11-07 01:37:44+00	%
 2	2359	0	851	3	275000	495000	0	0	15000	510000	0	235000	0		1699323990849	510000	\N	2023	11	7	2023-11-07 02:26:31+00	%
 2	2360	0	190	3	6083400	6153200	0	0	0	6153200	0	69800	0		1699347123646	6153200	\N	2023	11	7	2023-11-07 08:52:04+00	%
+2	2333	0	245	2	280000	395000	0	0	0	395000	28000	87000	386000	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1698985324436	9000	\N	2023	11	3	2023-11-03 04:22:05+00	%
 2	2361	0	298	3	385000	650000	0	0	0	650000	20000	245000	0		1699347571711	650000	\N	2023	11	7	2023-11-07 08:59:32+00	%
 2	2362	0	425	3	350000	510000	0	0	15000	525000	0	175000	0	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1699347622922	525000	\N	2023	11	7	2023-11-07 09:00:23+00	%
 2	2363	0	212	3	762000	884000	0	0	0	884000	0	122000	0	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1699347798833	884000	\N	2023	11	7	2023-11-07 09:03:19+00	%
@@ -7325,7 +8077,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 2	2369	0	104	3	822250	1126250	0	0	0	1126250	0	304000	0	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1699450975351	1126250	\N	2023	11	8	2023-11-08 13:42:56+00	%
 2	2370	0	856	3	899000	1454000	0	0	0	1454000	0	555000	0	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1699451611424	1454000	\N	2023	11	8	2023-11-08 13:53:32+00	%
 2	2371	0	250	3	1612000	1950000	0	0	0	1950000	0	338000	0	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1699452040196	1950000	\N	2023	11	8	2023-11-08 14:00:41+00	%
-2	2372	0	292	2	510440	669200	0	0	0	669200	0	158760	669200	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1699452263409	0	\N	2023	11	8	2023-11-08 14:04:24+00	%
 2	2373	0	207	3	434000	516000	0	0	0	516000	0	82000	0		1699452505862	516000	\N	2023	11	8	2023-11-08 14:08:26+00	%
 2	2374	0	207	2	2398640	2848980	0	0	0	2848980	0	450340	1665160	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1699452837771	1183820	\N	2023	11	8	2023-11-08 14:13:58+00	%
 2	2375	0	857	3	427300	710000	210000	29	0	500000	0	72700	0		1699453253173	500000	\N	2023	11	8	2023-11-08 14:20:54+00	VNĐ
@@ -7359,7 +8110,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 1	2403	0	859	2	810000	2500000	0	0	0	2500000	0	1690000	2325000		1699849663671	175000	\N	2023	11	13	2023-11-13 04:27:44+00	%
 4	2404	0	879	3	21000	21000	0	0	129000	150000	0	129000	0		1699875359512	150000	\N	2023	11	13	2023-11-13 11:36:00+00	%
 2	2405	0	294	3	306000	320000	0	0	0	320000	0	14000	0		1699888305797	320000	\N	2023	11	13	2023-11-13 15:11:46+00	%
-2	2406	0	302	2	227000	226000	0	0	0	226000	0	-1000	226000		1699888595562	0	\N	2023	11	13	2023-11-13 15:16:36+00	%
 1	2407	0	880	3	7000000	16000000	800000	5	300000	15500000	500000	8000000	0	Khách hàng khó tính	1699892291609	15500000	\N	2023	11	13	2023-11-13 16:18:12+00	VNĐ
 3	3573	0	1256	3	0	1000000	0	0	0	1000000	0	1000000	0	\N	1706112643967	1000000	\N	2024	1	24	2024-01-24 16:10:43.967+00	%
 3	2410	0	666	3	0	9000000	0	0	0	9000000	0	9000000	0		1699877274788	9000000	\N	2023	11	13	2023-11-13 12:07:55+00	%
@@ -7399,6 +8149,7 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 2	2448	0	905	3	180000	230000	0	0	0	230000	0	50000	0		1700719676215	230000	\N	2023	11	23	2023-11-23 06:07:57+00	%
 2	2449	0	291	3	911700	1185400	0	0	0	1185400	0	273700	0		1700719728349	1185400	\N	2023	11	23	2023-11-23 06:08:49+00	%
 3	2436	0	852	3	0	3900000	0	0	0	3900000	0	3900000	0		1700547722106	3900000	\N	2023	11	21	2023-11-21 06:22:03+00	%
+2	2406	0	302	3	227000	226000	0	0	0	226000	0	-1000	0		1699888595562	226000	\N	2023	11	13	2023-11-13 15:16:36+00	%
 2	2450	0	906	3	284000	310000	0	0	30000	340000	0	56000	0		1700719916439	340000	\N	2023	11	23	2023-11-23 06:11:57+00	%
 2	2451	0	907	3	30000	55000	0	0	60000	115000	0	85000	0		1700720486476	115000	\N	2023	11	23	2023-11-23 06:21:27+00	%
 2	2452	0	908	3	37000	65000	0	0	0	65000	0	28000	0		1700721245655	65000	\N	2023	11	23	2023-11-23 06:34:06+00	%
@@ -7457,7 +8208,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 2	2506	0	291	3	1183500	1528200	0	0	0	1528200	0	344700	0		1701161549719	1528200	\N	2023	11	28	2023-11-28 08:52:29+00	%
 2	2507	0	326	3	1349000	1550000	0	0	15000	1565000	0	216000	0		1701160813027	1565000	\N	2023	11	28	2023-11-28 08:40:13+00	%
 1	2508	0	928	3	460000	1900000	50000	2	120000	1970000	320000	1190000	0	Aha	1701104748412	1970000	\N	2023	11	28	2023-11-27 17:05:48+00	VNĐ
-1	2509	0	928	2	857000	2750000	50000	1	120000	2820000	320000	1643000	2000000	Aha	1701104829821	820000	\N	2023	11	28	2023-11-27 17:07:09+00	VNĐ
 1	2510	0	929	-1	10275000	20000000	2000000	10	600000	18600000	2000000	6325000	0		1701134196006	0	\N	2023	11	28	2023-11-28 01:16:36+00	%
 2	2512	0	204	3	1150000	1550000	0	0	15000	1565000	0	415000	0		1701160866974	1565000	\N	2023	11	28	2023-11-28 08:41:06+00	%
 2	2513	0	856	3	40000	55000	0	0	10000	65000	0	25000	0		1701161599578	65000	\N	2023	11	28	2023-11-28 08:53:19+00	%
@@ -7468,7 +8218,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 7	2521	0	936	2	135000	195000	0	0	0	195000	0	60000	195000		1701254691990	0	\N	2023	11	29	2023-11-29 10:44:51+00	%
 1	2522	0	858	0	1621000	5010000	0	0	100000	5110000	0	3489000	0		1701254316376	0	\N	\N	\N	\N	\N	%
 2	2523	0	318	3	446000	651200	0	0	0	651200	0	205200	0		1701255299018	651200	\N	2023	11	29	2023-11-29 10:54:59+00	%
-2	2524	0	302	2	946650	1020980	0	0	0	1020980	0	74330	1020980		1701325242282	0	\N	2023	11	30	2023-11-30 06:20:42+00	%
 2	2525	0	294	3	1250000	1475000	0	0	0	1475000	0	225000	0		1701344704474	1475000	\N	2023	11	30	2023-11-30 11:45:04+00	%
 2	2526	0	360	3	178000	250000	0	0	0	250000	0	72000	0		1701344695454	250000	\N	2023	11	30	2023-11-30 11:44:55+00	%
 6	2527	0	937	3	160500	271000	0	0	0	271000	0	110500	0		1701348612421	271000	\N	2023	11	30	2023-11-30 12:50:12+00	%
@@ -7486,7 +8235,9 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	2530	0	940	3	283500	400000	0	0	0	400000	0	116500	0		1701352064282	400000	\N	2023	11	30	2023-11-30 13:47:44+00	%
 2	2518	0	104	3	204000	360000	0	0	0	360000	15000	141000	0		1701235159369	360000	\N	2023	11	29	2023-11-29 05:19:19+00	%
 6	2539	0	950	3	416000	690000	0	0	0	690000	0	274000	0		1701435074803	690000	\N	2023	12	1	2023-12-01 12:51:14+00	%
-1	2511	0	929	2	1690000	2900000	145000	5	150000	2905000	10000	1205000	1300000		1701134555495	1605000	\N	2023	11	28	2023-11-28 01:22:35+00	%
+1	2509	0	928	2	857000	2750000	50000	1	120000	2820000	320000	1643000	1950000	Aha	1701104829821	870000	\N	2023	11	28	2023-11-27 17:07:09+00	VNĐ
+1	2511	0	929	2	1690000	2900000	145000	5	150000	2905000	10000	1205000	1200000		1701134555495	1705000	\N	2023	11	28	2023-11-28 01:22:35+00	%
+2	2524	0	302	3	946650	1020980	0	0	0	1020980	0	74330	0		1701325242282	1020980	\N	2023	11	30	2023-11-30 06:20:42+00	%
 6	2542	0	953	3	287000	540000	0	0	0	540000	0	253000	0		1701435340800	540000	\N	2023	12	1	2023-12-01 12:55:40+00	%
 6	2543	0	954	3	32000	90000	0	0	0	90000	0	58000	0		1701435401678	90000	\N	2023	12	1	2023-12-01 12:56:41+00	%
 6	2544	0	956	3	131000	285000	0	0	0	285000	0	154000	0		1701435547756	285000	\N	2023	12	1	2023-12-01 12:59:07+00	%
@@ -7521,7 +8272,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 9	2575	0	977	3	66000	100000	0	0	0	100000	0	34000	0		1701580543742	100000	\N	2023	12	3	2023-12-03 05:15:43+00	%
 3	2576	0	981	3	0	5000000	2000000	40	0	3000000	0	3000000	0		1701581455586	3000000	\N	2023	12	3	2023-12-03 05:30:55+00	VNĐ
 3	2577	0	982	3	0	5000000	500000	10	0	4500000	800000	3700000	0		1701581541637	4500000	\N	2023	12	3	2023-12-03 05:32:21+00	VNĐ
-3	2578	0	900	2	0	1500000	0	0	0	1500000	0	1500000	1300000		1701581598136	200000	\N	2023	12	3	2023-12-03 05:33:18+00	VNĐ
 9	2579	0	977	3	56000	65000	0	0	0	65000	0	9000	0		1701585033368	65000	\N	2023	12	3	2023-12-03 06:30:33+00	%
 9	2580	0	977	0	73500	88000	0	0	0	88000	0	14500	0		1701585687228	0	\N	\N	\N	\N	\N	%
 9	2581	0	977	3	27800	41000	0	0	0	41000	0	13200	0		1701591385835	41000	\N	2023	12	3	2023-12-03 08:16:25+00	%
@@ -7704,7 +8454,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	2747	0	1050	3	0	30000	0	0	0	30000	0	30000	0	uống amoxiclav, Atessen, khí dung 	1702209901899	30000	\N	2023	12	10	2023-12-10 12:05:01+00	%
 6	3575	0	964	3	54000	150000	0	0	0	150000	0	96000	0	VMH	1706177987162	150000	\N	2024	1	25	2024-01-25 10:19:47.162+00	%
 6	2763	0	992	3	13000	50000	0	0	0	50000	0	37000	0	\N	1702299220008	50000	\N	2023	12	11	2023-12-11 12:53:40+00	%
-6	2764	0	1057	2	151000	270000	0	0	0	270000	0	119000	270000	VPQ,	1702299875046	0	\N	2023	12	11	2023-12-11 13:04:35+00	%
 6	2765	0	938	3	58950	125000	0	0	0	125000	0	66050	0	VM	1702378103208	125000	\N	2023	12	12	2023-12-12 10:48:23+00	%
 6	2768	0	1059	-1	88000	298000	0	0	0	298000	0	210000	0	\N	1702378929619	0	1702722920432	2023	12	12	2023-12-12 11:02:09+00	%
 6	2769	0	1041	3	118000	145000	0	0	0	145000	0	27000	0	khám lại VPQ đỡ chậm, VMH đỡ	1702378993963	145000	\N	2023	12	12	2023-12-12 11:03:13+00	%
@@ -7731,7 +8480,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	2791	0	1023	3	262000	390000	0	0	0	390000	0	128000	0	mua thuốc	1702548430243	390000	\N	2023	12	14	2023-12-14 10:07:10+00	%
 6	2792	0	988	3	200000	440000	0	0	0	440000	0	240000	0	VHC, cúm A +	1702548479953	440000	\N	2023	12	14	2023-12-14 10:07:59+00	%
 6	2793	0	1066	3	255500	451000	0	0	0	451000	0	195500	0	VPQ co thắt ( mượn máy KD) 	1702548618024	451000	\N	2023	12	14	2023-12-14 10:10:18+00	%
-6	2794	0	1067	2	153000	234000	0	0	0	234000	0	81000	234000	VTPQ, VMH	1702552042263	0	\N	2023	12	14	2023-12-14 11:07:22+00	%
 6	2795	0	938	3	114620	175000	0	0	0	175000	0	60380	0	klai VM đỡ, VPQ 	1702552455163	175000	\N	2023	12	14	2023-12-14 11:14:15+00	%
 6	2796	0	1068	3	120000	410000	0	0	0	410000	0	290000	0	VPQP , VTG(P) có dịch, cúm A	1702553450062	410000	\N	2023	12	14	2023-12-14 11:30:50+00	%
 6	2797	0	1070	3	161000	300000	0	0	0	300000	0	139000	0	VH liên cầu 	1702554099669	300000	\N	2023	12	14	2023-12-14 11:41:39+00	%
@@ -7745,11 +8493,12 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	2785	0	1064	3	76500	147000	0	0	0	147000	0	70500	0	VH liên cầu	1702470185986	147000	\N	2023	12	13	2023-12-13 12:23:05+00	%
 6	2767	0	983	3	161000	310000	0	0	0	310000	0	149000	0	VHC mủ 	1702378415554	310000	\N	2023	12	12	2023-12-12 10:53:35+00	%
 6	2766	0	1058	3	10000	50000	0	0	0	50000	0	40000	0	VMH 	1702378417891	50000	\N	2023	12	12	2023-12-12 10:53:37+00	%
+6	2764	0	1057	3	151000	270000	0	0	0	270000	0	119000	0	VPQ,	1702299875046	270000	\N	2023	12	11	2023-12-11 13:04:35+00	%
+6	2794	0	1067	3	153000	234000	0	0	0	234000	0	81000	0	VTPQ, VMH	1702552042263	234000	\N	2023	12	14	2023-12-14 11:07:22+00	%
 6	2806	0	1073	3	168000	250000	0	0	0	250000	0	82000	0	táo bón	1702560669014	250000	\N	2023	12	14	2023-12-14 13:31:09+00	%
 2	2807	0	320	3	774000	1083600	0	0	0	1083600	0	309600	0	\N	1702573139412	1083600	\N	2023	12	14	2023-12-14 16:58:59+00	%
 2	2808	0	294	3	988350	1078200	0	0	0	1078200	0	89850	0	\N	1702627805402	1078200	\N	2023	12	15	2023-12-15 08:10:05+00	%
 2	2809	0	294	3	3292350	3658900	0	0	0	3658900	0	366550	0	\N	1702572483771	3658900	\N	2023	12	14	2023-12-14 16:48:03+00	%
-2	2811	0	302	2	609000	651000	0	0	0	651000	0	42000	651000	\N	1702573152038	0	\N	2023	12	14	2023-12-14 16:59:12+00	%
 6	2815	0	989	3	87000	150000	0	0	0	150000	0	63000	0	klai còn nấm , viêm kết ,mạc	1702636759058	150000	\N	2023	12	15	2023-12-15 10:39:19+00	%
 6	2816	0	985	3	116000	220000	0	0	0	220000	0	104000	0	VMH virus 	1702636953075	220000	\N	2023	12	15	2023-12-15 10:42:33+00	%
 6	2817	0	1054	3	157000	210000	0	0	0	210000	0	53000	0	klai đỡ	1702638261513	210000	\N	2023	12	15	2023-12-15 11:04:21+00	%
@@ -7788,6 +8537,7 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 2	2812	0	427	-1	75000	97500	0	0	0	97500	0	22500	0	\N	1702572866744	0	1703592020340	\N	\N	\N	\N	%
 2	2810	0	176	3	278000	405650	0	0	0	405650	20000	107650	0	\N	1702627794383	405650	\N	2023	12	15	2023-12-15 08:09:54+00	%
 2	2813	0	109	3	80000	80000	0	0	20000	100000	11000	9000	0	\N	1702572911871	100000	\N	2023	12	14	2023-12-14 16:55:11+00	%
+2	2811	0	302	3	609000	651000	0	0	0	651000	0	42000	0	\N	1702573152038	651000	\N	2023	12	14	2023-12-14 16:59:12+00	%
 6	2850	0	891	3	26000	60000	0	0	0	60000	0	34000	0	VMH, VTPQ 	1702818704581	60000	\N	2023	12	17	2023-12-17 13:11:44+00	%
 6	2851	0	947	3	284000	496000	0	0	0	496000	0	212000	0	\N	1702820409698	496000	\N	2023	12	17	2023-12-17 13:40:09+00	%
 2	2852	0	175	3	282000	349200	0	0	20000	369200	25000	62200	0	\N	1702973748714	369200	\N	2023	12	19	2023-12-19 08:15:48+00	%
@@ -7826,13 +8576,11 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	2888	0	1070	3	118000	145000	0	0	0	145000	0	27000	0	khám lại đỡ	1703071523234	145000	\N	2023	12	20	2023-12-20 11:25:23+00	%
 6	3586	0	1257	3	36000	110000	0	0	0	110000	0	74000	0	VM	1706187836705	110000	\N	2024	1	25	2024-01-25 13:03:56.705+00	%
 6	2891	0	938	3	32000	60000	0	0	0	60000	0	28000	0	\N	1703074465143	60000	\N	2023	12	20	2023-12-20 12:14:25+00	%
-6	2892	0	1071	2	118000	145000	0	0	0	145000	0	27000	145000	klai VTG (T) còn ít dịch	1703075270586	0	\N	2023	12	20	2023-12-20 12:27:50+00	%
 6	2890	0	1054	-1	66000	150000	0	0	0	150000	0	84000	0	klai VTG ứ dịch 2 bên	1703074328325	0	\N	2023	12	20	2023-12-20 12:12:08+00	%
 6	2874	0	1063	3	347000	600000	0	0	0	600000	0	253000	0	mua thuốc	1702985689218	600000	\N	2023	12	19	2023-12-19 11:34:49+00	%
 6	2887	0	1013	3	213000	345000	0	0	0	345000	0	132000	0	Viêm mũi xoang	1703070732216	345000	\N	2023	12	20	2023-12-20 11:12:12+00	%
 6	2894	0	955	3	10000	50000	0	0	0	50000	0	40000	0	VH	1703078806101	50000	\N	2023	12	20	2023-12-20 13:26:46+00	%
 6	2895	0	1078	3	115000	185000	0	0	0	185000	0	70000	0	khám lại VH đỡ	1703079295212	185000	\N	2023	12	20	2023-12-20 13:34:55+00	%
-6	3577	0	1079	0	0	0	0	0	0	0	0	0	0	klai VTG ổn dừng ks 	1706179560309	0	\N	\N	\N	\N	\N	%
 2	2907	0	295	3	240000	0	0	0	0	0	0	-240000	0	\N	1703127055947	0	\N	2023	12	21	2023-12-21 02:50:55+00	%
 6	2908	0	997	3	182000	330000	0	0	0	330000	0	148000	0	VM mủ, VHC	1703157868649	330000	\N	2023	12	21	2023-12-21 11:24:28+00	%
 6	2909	0	1080	3	36000	100000	0	0	0	100000	0	64000	0	VH xung huyết	1703157897305	100000	\N	2023	12	21	2023-12-21 11:24:57+00	%
@@ -7880,6 +8628,8 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	2936	0	1047	3	83160	190000	0	0	0	190000	0	106840	0	VHC	1703249780161	190000	\N	2023	12	22	2023-12-22 12:56:20.161+00	%
 6	3587	0	1249	3	23160	60000	0	0	0	60000	0	36840	0	klai VH đỡ , VM 	1706187847560	60000	\N	2024	1	25	2024-01-25 13:04:07.56+00	%
 6	2937	0	1086	2	225500	315000	0	0	0	315000	0	89500	315000	klai VMH, VTG đỡ, VPQ	1703249854830	0	\N	2023	12	22	2023-12-22 12:57:34.83+00	%
+6	2957	0	995	3	192000	375000	0	0	0	375000	0	183000	0	VTGt VPQ gần phổi	1703330768717	375000	\N	2023	12	23	2023-12-23 11:26:08.717+00	%
+2	2945	0	302	3	112000	120000	0	0	0	120000	0	8000	0	\N	1703252628652	120000	\N	2023	12	22	2023-12-22 13:43:48.652+00	%
 2	2920	0	681	3	188000	290000	0	0	0	290000	30000	72000	0	\N	1703251484787	290000	\N	2023	12	22	2023-12-22 13:24:44.787+00	%
 6	2948	0	1076	3	89000	249500	0	0	0	249500	0	160500	0	khám lại ổn	1703302149276	249500	\N	2023	12	23	2023-12-23 03:29:09.276+00	%
 6	2939	0	994	3	66000	90000	0	0	0	90000	0	24000	0	\N	1703251589308	90000	\N	2023	12	22	2023-12-22 13:26:29.308+00	%
@@ -7889,8 +8639,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	2949	0	1077	3	0	10000	0	0	0	10000	0	10000	0	khám lại viêm tai giữa con dịch 2 bên	1703302203793	10000	\N	2023	12	23	2023-12-23 03:30:03.793+00	%
 6	2943	0	894	3	90000	195000	0	0	0	195000	0	105000	0	cúm A	1703251758243	195000	\N	2023	12	22	2023-12-22 13:29:18.243+00	%
 6	2935	0	1066	3	436160	740000	0	0	0	740000	0	303840	0	Viêm amydal mủ, VPQ	1703249734649	740000	\N	2023	12	22	2023-12-22 12:55:34.649+00	%
-6	2957	0	995	2	192000	375000	0	0	0	375000	0	183000	375000	VTGt VPQ gần phổi	1703330768717	0	\N	2023	12	23	2023-12-23 11:26:08.717+00	%
-2	2945	0	302	2	112000	120000	0	0	0	120000	0	8000	120000	\N	1703252628652	0	\N	2023	12	22	2023-12-22 13:43:48.652+00	%
 6	2946	0	1105	3	36160	130000	0	0	0	130000	0	93840	0	viêm phế quản , viêm mũi họng cấp, đang uống augbactam	1703295320531	130000	\N	2023	12	23	2023-12-23 01:35:20.531+00	%
 6	2952	0	1107	3	207000	470000	0	0	0	470000	0	263000	0	viêm họng cấp	1703318346336	470000	\N	2023	12	23	2023-12-23 07:59:06.336+00	%
 3	2958	0	1109	3	0	4000000	0	0	0	4000000	0	4000000	0	\N	1703331052585	4000000	\N	2023	12	23	2023-12-23 11:30:52.585+00	%
@@ -7906,7 +8654,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 11	2971	0	1030	3	7600	10000	0	0	0	10000	0	2400	0	\N	1703422918790	10000	\N	2023	12	24	2023-12-24 13:01:58.79+00	%
 11	2972	0	1115	3	15200	22000	0	0	0	22000	0	6800	0	\N	1703423456137	22000	\N	2023	12	24	2023-12-24 13:10:56.137+00	%
 11	2973	0	1116	3	22800	60000	0	0	0	60000	0	37200	0	\N	1703423839522	60000	\N	2023	12	24	2023-12-24 13:17:19.522+00	%
-2	2974	0	302	2	224000	240000	0	0	0	240000	0	16000	240000	\N	1703428865289	0	\N	2023	12	24	2023-12-24 14:41:05.289+00	%
 2	2964	0	315	3	164000	290000	0	0	20000	310000	22000	124000	0	\N	1703429555686	310000	\N	2023	12	24	2023-12-24 14:52:35.686+00	%
 2	2954	0	357	3	40000	100000	0	0	0	100000	0	60000	0	\N	1703429567139	100000	\N	2023	12	24	2023-12-24 14:52:47.139+00	%
 2	2942	0	104	3	210000	360000	0	0	20000	380000	0	170000	0	\N	1703252503183	380000	\N	2023	12	22	2023-12-22 13:41:43.183+00	%
@@ -7979,7 +8726,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3035	0	1047	3	24000	40000	0	0	0	40000	0	16000	0	\N	1703682900340	40000	\N	2023	12	27	2023-12-27 13:15:00.34+00	%
 6	3036	0	1133	3	121000	210000	0	0	0	210000	0	89000	0	VPQ, VMH	1703683488297	210000	\N	2023	12	27	2023-12-27 13:24:48.297+00	%
 6	3048	0	1023	3	135000	220000	0	0	0	220000	0	85000	0	VM, VHC	1703763851741	220000	\N	2023	12	28	2023-12-28 11:44:11.741+00	%
-6	3037	0	1035	2	143800	235000	0	0	0	235000	0	91200	235000	\N	1703683906388	0	\N	2023	12	27	2023-12-27 13:31:46.388+00	%
 6	3043	0	1120	3	205000	310000	0	0	0	310000	0	105000	0	klai VTPQ nhiều đờm thêm ks	1703761942349	310000	\N	2023	12	28	2023-12-28 11:12:22.349+00	%
 6	3040	0	986	3	176160	268000	0	0	0	268000	0	91840	0	khám lai tai khỏi, VPQP đỡ	1703761366707	268000	\N	2023	12	28	2023-12-28 11:02:46.707+00	%
 6	3041	0	1079	3	50000	100000	0	0	0	100000	0	50000	0	klai đỡ	1703761375584	100000	\N	2023	12	28	2023-12-28 11:02:55.584+00	%
@@ -7997,16 +8743,16 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3039	0	1137	3	320700	537000	0	0	0	537000	0	216300	0	VTPQ, VH	1703760860957	537000	\N	2023	12	28	2023-12-28 10:54:20.957+00	%
 2	3031	0	580	3	263000	455000	0	0	30000	485000	30000	192000	0	\N	1703813691477	485000	\N	2023	12	29	2023-12-29 01:34:51.477+00	%
 6	3054	0	1139	3	26000	90000	0	0	0	90000	0	64000	0	VM virus	1703767658483	90000	\N	2023	12	28	2023-12-28 12:47:38.483+00	%
+6	3070	0	995	3	73160	160000	0	0	0	160000	0	86840	0	klai đỡ	1703856641508	160000	\N	2023	12	29	2023-12-29 13:30:41.508+00	%
+6	3071	0	1048	3	194770	340000	0	0	0	340000	0	145230	0	VPQ	1703856652428	340000	\N	2023	12	29	2023-12-29 13:30:52.428+00	%
 6	3055	0	991	3	183500	333000	0	0	0	333000	0	149500	0	VTPQ co thắt/ TD hen	1703768296445	333000	\N	2023	12	28	2023-12-28 12:58:16.445+00	%
 6	3081	0	1144	3	115160	260000	0	0	0	260000	0	144840	0	Viêm phế quản - viêm tai giữa  mủ bên trái- viêm mũi họng	1703906798379	260000	\N	2023	12	30	2023-12-30 03:26:38.379+00	%
 6	3056	0	941	3	125000	180000	0	0	0	180000	0	55000	0	klai VTG 2 bên ứ dịch thêm ks, họng đỡ	1703770275697	180000	\N	2023	12	28	2023-12-28 13:31:15.697+00	%
 6	3069	0	1080	3	116000	228000	0	0	0	228000	0	112000	0	VPQ, VH	1703849952016	228000	\N	2023	12	29	2023-12-29 11:39:12.016+00	%
 2	3057	0	463	3	1600000	1600000	0	0	0	1600000	0	0	0	\N	1703813312318	1600000	\N	2023	12	29	2023-12-29 01:28:32.318+00	%
-6	3070	0	995	2	73160	160000	0	0	0	160000	0	86840	160000	klai đỡ	1703856641508	0	\N	2023	12	29	2023-12-29 13:30:41.508+00	%
 2	3059	0	294	3	1600000	1650000	0	0	0	1650000	5000	45000	0	\N	1703813764711	1650000	\N	2023	12	29	2023-12-29 01:36:04.711+00	%
 2	3015	0	294	3	3787740	4184450	0	0	0	4184450	0	396710	0	\N	1703590293649	4184450	\N	2023	12	26	2023-12-26 11:31:33.649+00	%
 2	3013	0	427	3	250000	347500	0	0	0	347500	0	97500	0	\N	1703589684963	347500	\N	2023	12	26	2023-12-26 11:21:24.963+00	%
-6	3071	0	1048	2	194770	340000	0	0	0	340000	0	145230	340000	VPQ	1703856652428	0	\N	2023	12	29	2023-12-29 13:30:52.428+00	%
 2	3064	0	1141	3	1865670	2730000	0	0	0	2730000	0	864330	0	\N	1703842345617	2730000	\N	2023	12	29	2023-12-29 09:32:25.617+00	%
 6	3065	0	1033	3	175660	323000	0	0	0	323000	0	147340	0	VTPQ, VTG (P) ứ dịch, VMH 	1703846579526	323000	\N	2023	12	29	2023-12-29 10:42:59.526+00	%
 6	3066	0	964	3	0	30000	0	0	0	30000	0	30000	0	VMH	1703846587260	30000	\N	2023	12	29	2023-12-29 10:43:07.26+00	%
@@ -8038,7 +8784,9 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 2	3061	0	352	3	1457140	2212600	0	0	0	2212600	40000	715460	0	\N	1704452412557	2212600	\N	2024	1	5	2024-01-05 11:00:12.557+00	%
 2	3058	0	215	3	287000	387600	0	0	0	387600	30000	70600	0	\N	1703813659707	387600	\N	2023	12	29	2023-12-29 01:34:19.707+00	%
 6	3580	0	1168	3	118000	145000	0	0	0	145000	0	27000	0	klai VTG (T) ứ mủ 	1706182029670	145000	\N	2024	1	25	2024-01-25 11:27:09.67+00	%
+6	3114	0	995	3	180000	270000	0	0	0	270000	0	90000	0	\N	1704016533130	270000	\N	2023	12	31	2023-12-31 09:55:33.13+00	%
 6	3095	0	972	3	30000	60000	0	0	0	60000	0	30000	0	\N	1703935353251	60000	\N	2023	12	30	2023-12-30 11:22:33.251+00	%
+6	3109	0	1072	3	271060	620000	0	0	0	620000	0	348940	0	thủy đậu	1704005695802	620000	\N	2023	12	31	2023-12-31 06:54:55.802+00	%
 6	3120	0	972	3	36000	60000	0	0	0	60000	0	24000	0	\N	1704024062632	60000	\N	2023	12	31	2023-12-31 12:01:02.632+00	%
 6	3096	0	1007	3	50000	100000	0	0	0	100000	0	50000	0	có tiến triển tốt, uống thêm ks	1703937258465	100000	\N	2023	12	30	2023-12-30 11:54:18.465+00	%
 6	3107	0	1156	3	215160	355000	0	0	0	355000	0	139840	0	viêm mũi họng/ TD covid	1703999656855	355000	\N	2023	12	31	2023-12-31 05:14:16.855+00	%
@@ -8049,10 +8797,8 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3100	0	957	3	4207740	4184440	0	0	0	4184440	0	-23300	0	\N	1703944017270	4184440	\N	2023	12	30	2023-12-30 13:46:57.27+00	%
 6	3115	0	1158	3	149770	240000	0	0	0	240000	0	90230	0	viêm phế quản/ covid	1704017430556	240000	\N	2023	12	31	2023-12-31 10:10:30.556+00	%
 6	3101	0	1153	3	309000	465000	0	0	0	465000	0	156000	0	Cúm A	1703982643354	465000	\N	2023	12	31	2023-12-31 00:30:43.354+00	%
-6	3109	0	1072	2	271060	620000	0	0	0	620000	0	348940	620000	thủy đậu	1704005695802	0	\N	2023	12	31	2023-12-31 06:54:55.802+00	%
 6	3102	0	1154	3	150000	250000	0	0	0	250000	0	100000	0	viêm họng liên cầu	1703986341586	250000	\N	2023	12	31	2023-12-31 01:32:21.586+00	%
 6	3103	0	1155	3	207500	368000	0	0	0	368000	0	160500	0	viêm loét miệng	1703987534080	368000	\N	2023	12	31	2023-12-31 01:52:14.08+00	%
-6	3110	0	1157	2	150000	250000	0	0	0	250000	0	100000	250000	viêm họng liên cầu	1704012593815	0	\N	2023	12	31	2023-12-31 08:49:53.815+00	%
 6	3104	0	947	3	135000	140000	0	0	0	140000	0	5000	0	\N	1703990011213	140000	\N	2023	12	31	2023-12-31 02:33:31.213+00	%
 6	3105	0	1042	3	317160	580000	0	0	0	580000	0	262840	0	Nam- viêm phế quản- viêm mũi họng- Nhi viêm phế quản viêm mũi họng, quyên viêm mũi họng	1703991163590	580000	\N	2023	12	31	2023-12-31 02:52:43.59+00	%
 6	2735	0	1042	3	875000	1075000	0	0	0	1075000	0	200000	0		1702126611096	1075000	\N	2023	12	9	2023-12-09 12:56:51+00	%
@@ -8061,7 +8807,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3111	0	1145	3	101500	123000	0	0	0	123000	0	21500	0	sốt virus	1704014143392	123000	\N	2023	12	31	2023-12-31 09:15:43.392+00	%
 6	3123	0	1047	3	51600	90000	0	0	0	90000	0	38400	0	uống tiếp ks 3 ngày nữa	1704029016101	90000	\N	2023	12	31	2023-12-31 13:23:36.101+00	%
 6	3112	0	964	3	230360	386000	0	0	0	386000	0	155640	0	khám lại đỡ	1704015582335	386000	\N	2023	12	31	2023-12-31 09:39:42.335+00	%
-6	3114	0	995	2	180000	270000	0	0	0	270000	0	90000	270000	\N	1704016533130	0	\N	2023	12	31	2023-12-31 09:55:33.13+00	%
 6	3113	0	998	3	5000	10000	0	0	0	10000	0	5000	0	VPQ đổi kháng sinh Klacid	1704016552155	10000	\N	2023	12	31	2023-12-31 09:55:52.155+00	%
 6	3121	0	1003	3	22000	70000	0	0	0	70000	0	48000	0	viêm mũi	1704025546160	70000	\N	2023	12	31	2023-12-31 12:25:46.16+00	%
 6	3118	0	1142	3	94500	120000	0	0	0	120000	0	25500	0	viêm họng xung huyết	1704021320602	120000	\N	2023	12	31	2023-12-31 11:15:20.602+00	%
@@ -8079,7 +8824,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3125	0	1160	3	16200	30000	0	0	0	30000	0	13800	0	\N	1704029683264	30000	\N	2023	12	31	2023-12-31 13:34:43.264+00	%
 2	3126	0	202	3	500000	592800	0	0	30000	622800	30000	92800	0	\N	1704036041443	622800	\N	2023	12	31	2023-12-31 15:20:41.443+00	%
 6	3134	0	1164	3	23160	60000	0	0	0	60000	0	36840	0	viêm mũi họng virus	1704076550301	60000	\N	2024	1	1	2024-01-01 02:35:50.301+00	%
-6	3589	0	1104	0	5000	10000	0	0	0	10000	0	5000	0	\N	1706188876083	0	\N	\N	\N	\N	\N	%
 6	3135	0	1137	3	218500	355000	0	0	0	355000	0	136500	0	viêm tiểu phế quản bội nhiễm	1704100456413	355000	\N	2024	1	1	2024-01-01 09:14:16.413+00	%
 6	3581	0	1138	3	148500	270000	0	0	0	270000	0	121500	0	VPQ nhiều đờm 	1706184711437	270000	\N	2024	1	25	2024-01-25 12:11:51.437+00	%
 6	3147	0	1169	3	273600	505000	0	0	0	505000	0	231400	0	sốt, viêm phổi/TD mycoplasma	1704196742726	505000	\N	2024	1	2	2024-01-02 11:59:02.726+00	%
@@ -8120,11 +8864,11 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 2	3162	0	456	3	120000	200000	0	0	35000	235000	35000	80000	0	\N	1704452238311	235000	\N	2024	1	5	2024-01-05 10:57:18.311+00	%
 2	3164	0	569	3	159000	244000	0	0	0	244000	0	85000	0	\N	1704382185498	244000	\N	2024	1	4	2024-01-04 15:29:45.498+00	%
 6	3174	0	941	3	54000	80000	0	0	0	80000	0	26000	0	\N	1704368640553	80000	\N	2024	1	4	2024-01-04 11:44:00.553+00	%
+6	3175	0	1178	3	88000	180000	0	0	0	180000	0	92000	0	đau đầu	1704369123617	180000	\N	2024	1	4	2024-01-04 11:52:03.617+00	%
 6	3196	0	1156	3	187000	295000	0	0	0	295000	0	108000	0	VTG (T) ứ dịch , VMH U aug 250	1704452480290	295000	\N	2024	1	5	2024-01-05 11:01:20.29+00	%
-6	3175	0	1178	2	88000	180000	0	0	0	180000	0	92000	180000	đau đầu	1704369123617	0	\N	2024	1	4	2024-01-04 11:52:03.617+00	%
+6	3189	0	1048	3	219540	325000	0	0	0	325000	0	105460	0	klai đỡ 	1704449536172	325000	\N	2024	1	5	2024-01-05 10:12:16.172+00	%
 6	3176	0	1152	3	220000	383000	0	0	0	383000	0	163000	0	VTPQ khò khè,VTGt 	1704370304533	383000	\N	2024	1	4	2024-01-04 12:11:44.533+00	%
 6	3178	0	1179	3	128000	230000	0	0	0	230000	0	102000	0	\N	1704371476720	230000	\N	2024	1	4	2024-01-04 12:31:16.72+00	%
-6	3189	0	1048	2	219540	325000	0	0	0	325000	0	105460	325000	klai đỡ 	1704449536172	0	\N	2024	1	5	2024-01-05 10:12:16.172+00	%
 6	3177	0	1149	-1	360700	556000	0	0	0	556000	0	195300	0	VTPQ khò khè, VHC, VMH	1704371190583	0	1704372176179	2024	1	4	2024-01-04 12:26:30.583+00	%
 6	3180	0	1149	3	360700	556000	0	0	0	556000	0	195300	0	VTPQ khò khè, VHC, VMH, mượn máy khí  dung	1704372176196	556000	\N	2024	1	4	2024-01-04 12:42:56.196+00	%
 6	3203	0	1166	3	70000	110000	0	0	0	110000	0	40000	0	klai đỡ	1704453914885	110000	\N	2024	1	5	2024-01-05 11:25:14.885+00	%
@@ -8138,7 +8882,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3185	0	1163	3	118000	145000	0	0	0	145000	0	27000	0	VPQ, tôm uống cùng ks Klacid	1704374965851	145000	\N	2024	1	4	2024-01-04 13:29:25.851+00	%
 6	3186	0	957	3	340000	0	0	0	0	0	0	-340000	0	thuốc hết hạn	1704376517595	0	\N	2024	1	4	2024-01-04 13:55:17.595+00	%
 3	3187	0	492	0	0	2200000	0	0	0	2200000	0	2200000	0	\N	1704378958458	0	\N	\N	\N	\N	\N	%
-6	3192	0	1048	2	10000	20000	0	0	0	20000	0	10000	20000	\N	1704451539545	0	\N	2024	1	5	2024-01-05 10:45:39.545+00	%
 6	3193	0	1119	3	235000	340000	0	0	0	340000	0	105000	0	sốt virus , U tiếp aug	1704451587802	340000	\N	2024	1	5	2024-01-05 10:46:27.802+00	%
 6	3206	0	1033	3	77000	151000	0	0	0	151000	0	74000	0	klai VTPQ khò khè, tai khỏi, VMH đổi ks 	1704454686111	151000	\N	2024	1	5	2024-01-05 11:38:06.111+00	%
 6	3195	0	1143	3	50000	100000	0	0	0	100000	0	50000	0	khám lại tai đỡ	1704452312173	100000	\N	2024	1	5	2024-01-05 10:58:32.173+00	%
@@ -8160,8 +8903,10 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 2	3198	0	104	3	286000	460000	0	0	20000	480000	20000	174000	0	\N	1704452884102	480000	\N	2024	1	5	2024-01-05 11:08:04.102+00	%
 2	3201	0	360	3	388000	500000	0	0	0	500000	0	112000	0	\N	1704858550316	500000	\N	2024	1	10	2024-01-10 03:49:10.316+00	%
 2	3200	0	123	3	815000	886250	0	0	0	886250	0	71250	0	\N	1704453126227	886250	\N	2024	1	5	2024-01-05 11:12:06.227+00	%
+6	3238	0	983	3	85000	150000	0	0	0	150000	0	65000	0	\N	1704609541758	150000	\N	2024	1	7	2024-01-07 06:39:01.758+00	%
 6	3228	0	1150	3	144000	205000	0	0	0	205000	0	61000	0	klai VPQ đỡ, viêm a đỡ 	1704539884208	205000	\N	2024	1	6	2024-01-06 11:18:04.208+00	%
 6	3144	0	1150	3	120500	150000	0	0	0	150000	0	29500	0	VPQ khò khè hơn, Viêm A đỡ thêm ks 	1704194767543	150000	\N	2024	1	2	2024-01-02 11:26:07.543+00	%
+6	3248	0	995	3	223500	362000	0	0	0	362000	0	138500	0	VTPQ, VMH	1704626221691	362000	\N	2024	1	7	2024-01-07 11:17:01.691+00	%
 6	3218	0	1049	3	0	10000	0	0	0	10000	0	10000	0	viêm tai giữa ứ mủ 2 bên- uống ks sandoz	1704525763610	10000	\N	2024	1	6	2024-01-06 07:22:43.61+00	%
 6	3219	0	1009	3	90000	130000	0	0	0	130000	0	40000	0	viêm phế quản co thắt	1704530432298	130000	\N	2024	1	6	2024-01-06 08:40:32.298+00	%
 6	3229	0	1189	3	54000	70000	0	0	0	70000	0	16000	0	tiêu chảy 	1704542673478	70000	\N	2024	1	6	2024-01-06 12:04:33.478+00	%
@@ -8182,11 +8927,9 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3233	0	1154	3	95000	152000	0	0	0	152000	0	57000	0	klai họng đỡ, VMC	1704549140013	152000	\N	2024	1	6	2024-01-06 13:52:20.013+00	%
 6	3241	0	1195	3	211000	345000	0	0	0	345000	0	134000	0	viêm mũi họng cấp	1704616515667	345000	\N	2024	1	7	2024-01-07 08:35:15.667+00	%
 6	3234	0	1191	3	74400	150000	0	0	0	150000	0	75600	0	VHC	1704549146943	150000	\N	2024	1	6	2024-01-06 13:52:26.943+00	%
-6	3238	0	983	2	85000	150000	0	0	0	150000	0	65000	150000	\N	1704609541758	0	\N	2024	1	7	2024-01-07 06:39:01.758+00	%
 6	3247	0	1044	3	181000	290000	0	0	0	290000	0	109000	0	VPQ, VMH 	1704625759134	290000	\N	2024	1	7	2024-01-07 11:09:19.134+00	%
 6	3243	0	1196	3	135000	200000	0	0	0	200000	0	65000	0	\N	1704618517371	200000	\N	2024	1	7	2024-01-07 09:08:37.371+00	%
 6	3246	0	1078	3	31000	100000	0	0	0	100000	0	69000	0	VMH	1704624640007	100000	\N	2024	1	7	2024-01-07 10:50:40.007+00	%
-6	3248	0	995	2	223500	362000	0	0	0	362000	0	138500	362000	VTPQ, VMH	1704626221691	0	\N	2024	1	7	2024-01-07 11:17:01.691+00	%
 6	3250	0	866	3	19000	30000	0	0	0	30000	0	11000	0	\N	1704626745977	30000	\N	2024	1	7	2024-01-07 11:25:45.977+00	%
 6	3249	0	972	3	19000	30000	0	0	0	30000	0	11000	0	ngát	1704626722462	30000	\N	2024	1	7	2024-01-07 11:25:22.462+00	%
 6	3251	0	1075	3	26000	90000	0	0	0	90000	0	64000	0	VMH 	1704627689070	90000	\N	2024	1	7	2024-01-07 11:41:29.07+00	%
@@ -8202,6 +8945,7 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 2	3236	0	312	3	160000	210000	0	0	0	210000	0	50000	0	\N	1704857861394	210000	\N	2024	1	10	2024-01-10 03:37:41.394+00	%
 6	3582	0	1174	3	0	0	0	0	0	0	0	0	0	klai phế quản ổn dừng ks 	1706184882373	0	\N	2024	1	25	2024-01-25 12:14:42.373+00	%
 6	3255	0	1077	2	146000	245000	0	0	0	245000	0	99000	245000	VTG ứ dịch (T) 	1704631282370	0	\N	2024	1	7	2024-01-07 12:41:22.37+00	%
+6	3284	0	1067	3	26000	60000	0	0	0	60000	0	34000	0	\N	1704799864446	60000	\N	2024	1	9	2024-01-09 11:31:04.446+00	%
 6	3256	0	941	3	281000	500000	0	0	0	500000	0	219000	0	klai VTG 2 bên ứ dịch, VMH	1704631721535	500000	\N	2024	1	7	2024-01-07 12:48:41.535+00	%
 6	3257	0	1066	3	174000	330000	0	0	0	330000	0	156000	0	VPQ co thắt 	1704633904184	330000	\N	2024	1	7	2024-01-07 13:25:04.184+00	%
 6	3269	0	1086	2	85000	160000	0	0	0	160000	0	75000	160000	viêm tai giữa 2 bên	1704717522578	0	\N	2024	1	8	2024-01-08 12:38:42.578+00	%
@@ -8227,11 +8971,9 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3279	0	1076	2	54000	70000	0	0	0	70000	0	16000	70000	\N	1704797013864	0	\N	2024	1	9	2024-01-09 10:43:33.864+00	%
 6	3280	0	1156	3	183140	270000	0	0	0	270000	0	86860	0	VTG tiến triển tốt 	1704797484957	270000	\N	2024	1	9	2024-01-09 10:51:24.957+00	%
 6	3283	0	1012	3	431000	785000	0	0	0	785000	0	354000	0	cúm A+,	1704799159333	785000	\N	2024	1	9	2024-01-09 11:19:19.333+00	%
-6	3284	0	1067	2	26000	60000	0	0	0	60000	0	34000	60000	\N	1704799864446	0	\N	2024	1	9	2024-01-09 11:31:04.446+00	%
 6	3285	0	1202	3	36000	70000	0	0	0	70000	0	34000	0	\N	1704801983463	70000	\N	2024	1	9	2024-01-09 12:06:23.463+00	%
 6	3286	0	1203	3	10000	20000	0	0	0	20000	0	10000	0	\N	1704805219080	20000	\N	2024	1	9	2024-01-09 13:00:19.08+00	%
 6	3289	0	1024	3	0	0	0	0	0	0	0	0	0	VHC Đang uống aug 7/1	1704882382536	0	\N	2024	1	10	2024-01-10 10:26:22.536+00	%
-6	3288	0	1157	2	0	30000	0	0	0	30000	0	30000	30000	VHC	1704882213636	0	\N	2024	1	10	2024-01-10 10:23:33.636+00	%
 6	3265	0	1018	3	0	30000	0	0	0	30000	0	30000	0	VMH virus	1704712979029	30000	\N	2024	1	8	2024-01-08 11:22:59.029+00	%
 6	3290	0	1018	3	199200	240000	0	0	0	240000	0	40800	0	klai VHC	1704882458618	240000	\N	2024	1	10	2024-01-10 10:27:38.618+00	%
 6	3262	0	1024	3	216000	310000	0	0	0	310000	0	94000	0	VMH cấp , sốt Virus	1704712495755	310000	\N	2024	1	8	2024-01-08 11:14:55.755+00	%
@@ -8242,8 +8984,11 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 2	3287	0	425	3	305000	406000	0	0	0	406000	20000	81000	0	\N	1704858728559	406000	\N	2024	1	10	2024-01-10 03:52:08.559+00	%
 6	3281	0	1160	3	400000	480000	0	0	0	480000	0	80000	0	\N	1704797850005	480000	\N	2024	1	9	2024-01-09 10:57:30.005+00	%
 6	3294	0	940	3	271000	420000	0	0	0	420000	0	149000	0	VMH Virus	1704885084088	420000	\N	2024	1	10	2024-01-10 11:11:24.088+00	%
+6	3333	0	1064	3	202000	355000	0	0	0	355000	0	153000	0	VHC 	1705057630967	355000	\N	2024	1	12	2024-01-12 11:07:10.967+00	%
 6	3302	0	941	3	188000	310000	0	0	0	310000	0	122000	0	VTG đỡ , VTPQ 	1704888888974	310000	\N	2024	1	10	2024-01-10 12:14:48.974+00	%
 6	3295	0	986	3	234000	405000	0	0	0	405000	0	171000	0	klai VPQ co thắt đỡ	1704885455253	405000	\N	2024	1	10	2024-01-10 11:17:35.253+00	%
+6	3326	0	1111	3	348500	515000	0	0	0	515000	0	166500	0	viêm mũi họng- cúm A	1705047478336	515000	\N	2024	1	12	2024-01-12 08:17:58.336+00	%
+6	3314	0	995	3	303000	385000	0	0	0	385000	0	82000	0	adeno	1704898508077	385000	\N	2024	1	10	2024-01-10 14:55:08.077+00	%
 6	3296	0	1079	3	136000	240000	0	0	0	240000	0	104000	0	klai VM mủ đỡ	1704885485261	240000	\N	2024	1	10	2024-01-10 11:18:05.261+00	%
 6	3297	0	1204	3	120000	215000	0	0	0	215000	0	95000	0	VPQ, sốt	1704885500548	215000	\N	2024	1	10	2024-01-10 11:18:20.548+00	%
 6	3307	0	1066	3	198000	300000	0	0	0	300000	0	102000	0	\N	1704890789227	300000	\N	2024	1	10	2024-01-10 12:46:29.227+00	%
@@ -8265,7 +9010,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3317	0	938	3	20840	30000	0	0	0	30000	0	9160	0	khám lại VTG (T) đỡ	1704969966828	30000	\N	2024	1	11	2024-01-11 10:46:06.828+00	%
 6	3312	0	1154	3	15000	30000	0	0	0	30000	0	15000	0	\N	1704893925011	30000	\N	2024	1	10	2024-01-10 13:38:45.011+00	%
 6	3313	0	947	3	190000	270000	0	0	0	270000	0	80000	0	\N	1704894933303	270000	\N	2024	1	10	2024-01-10 13:55:33.303+00	%
-6	3314	0	995	2	303000	385000	0	0	0	385000	0	82000	385000	adeno	1704898508077	0	\N	2024	1	10	2024-01-10 14:55:08.077+00	%
 6	3319	0	1051	3	67000	110000	0	0	0	110000	0	43000	0	klai VTG ứ dịch (T), VMH , VPQ đỡ 	1704972242276	110000	\N	2024	1	11	2024-01-11 11:24:02.276+00	%
 6	3325	0	1207	3	424000	630000	0	0	0	630000	0	206000	0	viêm họng cấp- cúm A	1705045785062	630000	\N	2024	1	12	2024-01-12 07:49:45.062+00	%
 6	3320	0	1202	3	111000	200000	0	0	0	200000	0	89000	0	VTPQ, VMH 	1704974068159	200000	\N	2024	1	11	2024-01-11 11:54:28.159+00	%
@@ -8273,15 +9017,15 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3323	0	1206	3	28100	30000	0	0	0	30000	0	1900	0	\N	1704978893263	30000	\N	2024	1	11	2024-01-11 13:14:53.263+00	%
 6	3324	0	1092	3	208000	289000	0	0	0	289000	0	81000	0	VHC	1704980020169	289000	\N	2024	1	11	2024-01-11 13:33:40.169+00	%
 6	3328	0	1208	3	285500	490000	0	0	0	490000	0	204500	0	VTPQ,  VTG ứ mủ 2 bên	1705054614272	490000	\N	2024	1	12	2024-01-12 10:16:54.272+00	%
-6	3326	0	1111	2	348500	515000	0	0	0	515000	0	166500	515000	viêm mũi họng- cúm A	1705047478336	0	\N	2024	1	12	2024-01-12 08:17:58.336+00	%
 6	3327	0	1201	3	18200	34500	0	0	0	34500	0	16300	0	khám lại tai p mủ, tai trái còn dịch	1705050894235	34500	\N	2024	1	12	2024-01-12 09:14:54.235+00	%
 6	3329	0	1209	3	100000	200000	0	0	0	200000	0	100000	0	VM xoang, VTG (T) ứ dịch	1705055458195	200000	\N	2024	1	12	2024-01-12 10:30:58.195+00	%
 6	3332	0	1182	3	103800	215000	0	0	0	215000	0	111200	0	Viêm da 	1705056272996	215000	\N	2024	1	12	2024-01-12 10:44:32.996+00	%
-6	3333	0	1064	2	202000	355000	0	0	0	355000	0	153000	355000	VHC 	1705057630967	0	\N	2024	1	12	2024-01-12 11:07:10.967+00	%
 6	3331	0	1002	3	413000	625000	0	0	0	625000	0	212000	0	cúm A, VHC	1705055775417	625000	\N	2024	1	12	2024-01-12 10:36:15.417+00	%
 6	3330	0	889	3	36000	100000	0	0	0	100000	0	64000	0	VMH	1705055758948	100000	\N	2024	1	12	2024-01-12 10:35:58.948+00	%
 6	3318	0	1174	3	17000	30000	0	0	0	30000	0	13000	0	mua	1704970002042	30000	\N	2024	1	11	2024-01-11 10:46:42.042+00	%
 6	3334	0	1210	3	141300	335000	0	0	0	335000	0	193700	0	VM xoang mủ , VTG (P) ứ dịch, VHC 	1705058474745	335000	\N	2024	1	12	2024-01-12 11:21:14.745+00	%
+2	3367	0	544	3	345000	1200000	700000	58	0	500000	0	155000	0	\N	1705160994801	500000	\N	2024	1	13	2024-01-13 15:49:54.801+00	VNĐ
+6	3353	0	1124	3	174000	310000	0	0	0	310000	0	136000	0	VPQ, 	1705145258228	310000	\N	2024	1	13	2024-01-13 11:27:38.228+00	%
 6	3335	0	1210	3	19000	30000	0	0	0	30000	0	11000	0	\N	1705058598777	30000	\N	2024	1	12	2024-01-12 11:23:18.777+00	%
 6	3337	0	1018	3	198000	305000	0	0	0	305000	0	107000	0	VPQ nhiều đờm, VH chưa đỡ	1705061100977	305000	\N	2024	1	12	2024-01-12 12:05:00.977+00	%
 6	3348	0	1149	3	90000	130000	0	0	0	130000	0	40000	0	khám lại ổn	1705137802782	130000	\N	2024	1	13	2024-01-13 09:23:22.782+00	%
@@ -8299,7 +9043,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3347	0	883	3	244000	365000	0	0	0	365000	0	121000	0	viêm họng liên cầu	1705132765518	365000	\N	2024	1	13	2024-01-13 07:59:25.518+00	%
 6	3357	0	1216	3	236000	440000	0	0	0	440000	0	204000	0	Cúm A + 	1705148174513	440000	\N	2024	1	13	2024-01-13 12:16:14.513+00	%
 6	3352	0	1051	3	146000	245000	0	0	0	245000	0	99000	0	mua thuốc	1705145116251	245000	\N	2024	1	13	2024-01-13 11:25:16.251+00	%
-6	3353	0	1124	2	174000	310000	0	0	0	310000	0	136000	310000	VPQ, 	1705145258228	0	\N	2024	1	13	2024-01-13 11:27:38.228+00	%
 6	3361	0	1218	3	286000	560000	0	0	0	560000	0	274000	0	cúm A,VM xoang (uống ks 13/1)	1705151118577	560000	\N	2024	1	13	2024-01-13 13:05:18.577+00	%
 6	3354	0	1024	3	0	0	0	0	0	0	0	0	0	klai VTG 2 bên ứ dịch , VMH ( Klacid+ bostocef) cùng chị	1705146042469	0	\N	2024	1	13	2024-01-13 11:40:42.469+00	%
 6	3355	0	1166	3	0	0	0	0	0	0	0	0	0	klai VTG , VM đỡ U tiếp	1705146118804	0	\N	2024	1	13	2024-01-13 11:41:58.804+00	%
@@ -8310,7 +9053,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3362	0	976	3	341200	560000	0	0	0	560000	0	218800	0	VTG ứ dịch 2 bên , cúm A+( đag u azismile )	1705151125498	560000	\N	2024	1	13	2024-01-13 13:05:25.498+00	%
 6	3363	0	1219	3	257900	387000	0	0	0	387000	0	129100	0	VHC, VIêm hạch góc hàm (T) 	1705152020810	387000	\N	2024	1	13	2024-01-13 13:20:20.81+00	%
 2	3368	0	321	-1	65000	85000	0	0	0	85000	0	20000	0	\N	1705161186460	0	1705161056804	\N	\N	\N	\N	%
-2	3367	0	544	2	345000	1200000	700000	58	0	500000	0	155000	500000	\N	1705160994801	0	\N	2024	1	13	2024-01-13 15:49:54.801+00	VNĐ
 2	3370	0	275	2	145000	160000	0	0	10000	170000	0	25000	170000	\N	1705161171587	0	\N	2024	1	13	2024-01-13 15:52:51.587+00	%
 2	3372	0	465	3	1114800	1300000	0	0	20000	1320000	21000	184200	0	\N	1705161366381	1320000	\N	2024	1	13	2024-01-13 15:56:06.381+00	%
 2	3366	0	388	3	123000	190000	0	0	15000	205000	11000	71000	0	\N	1705160936703	205000	\N	2024	1	13	2024-01-13 15:48:56.703+00	%
@@ -8321,20 +9063,19 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 2	3373	0	935	3	862030	1321250	0	0	0	1321250	35000	424220	0	\N	1705161644549	1321250	\N	2024	1	13	2024-01-13 16:00:44.549+00	%
 2	3371	0	948	3	251000	280000	0	0	0	280000	0	29000	0	\N	1705161243697	280000	\N	2024	1	13	2024-01-13 15:54:03.697+00	%
 2	3369	0	321	3	130000	170000	0	0	0	170000	0	40000	0	\N	1705161093280	170000	\N	2024	1	13	2024-01-13 15:51:33.28+00	%
-6	3583	0	940	2	234000	421000	0	0	0	421000	0	187000	421000	VPQ co thắt , VMH 	1706185972426	0	\N	2024	1	25	2024-01-25 12:32:52.426+00	%
 6	3405	0	1168	3	81000	170000	0	0	0	170000	0	89000	0	VTG 2 bên còn dịch	1705230602872	170000	\N	2024	1	14	2024-01-14 11:10:02.872+00	%
+2	3396	0	302	3	1459000	1540750	0	0	0	1540750	0	81750	0	\N	1705166957308	1540750	\N	2024	1	14	2024-01-13 17:29:17.308+00	%
+6	3409	0	1013	3	303000	440000	0	0	0	440000	0	137000	0	VH mủ, 	1705231570469	440000	\N	2024	1	14	2024-01-14 11:26:10.469+00	%
 6	3401	0	1123	3	213000	285000	0	0	0	285000	0	72000	0	viêm phế quản co thắt	1705227843608	285000	\N	2024	1	14	2024-01-14 10:24:03.608+00	%
 2	3377	0	291	2	1290000	2190000	700000	31	0	1490000	0	200000	1490000	\N	1705162157513	0	\N	2024	1	13	2024-01-13 16:09:17.513+00	VNĐ
-2	3378	0	425	0	245000	285000	0	0	0	285000	0	40000	0	\N	1705162349955	0	\N	\N	\N	\N	\N	%
+2	3378	0	425	-1	245000	285000	0	0	0	285000	0	40000	0	\N	1707793207551	0	1707794653611	2024	2	13	2024-02-13 03:00:07.551+00	%
 2	3394	0	1226	3	680000	900000	0	0	20000	920000	35000	205000	0	\N	1705166211236	920000	\N	2024	1	14	2024-01-13 17:16:51.236+00	%
 2	3384	0	909	0	35000	30000	0	0	15000	45000	0	10000	0	\N	1705165196715	0	\N	\N	\N	\N	\N	%
 6	3402	0	997	3	182700	321000	0	0	0	321000	0	138300	0	tay chân miệng 	1705228538589	321000	\N	2024	1	14	2024-01-14 10:35:38.589+00	%
-2	3396	0	302	2	1459000	1540750	0	0	0	1540750	0	81750	1540750	\N	1705166957308	0	\N	2024	1	14	2024-01-13 17:29:17.308+00	%
 6	3403	0	986	3	39500	87000	0	0	0	87000	0	47500	0	\N	1705229705241	87000	\N	2024	1	14	2024-01-14 10:55:05.241+00	%
 2	3399	0	153	3	2104210	0	0	0	0	0	0	-2104210	0	\N	1705167310687	0	\N	2024	1	14	2024-01-13 17:35:10.687+00	%
 6	3406	0	889	3	86000	180000	0	0	0	180000	0	94000	0	VPQ<VMH	1705230800415	180000	\N	2024	1	14	2024-01-14 11:13:20.415+00	%
 6	3404	0	1079	3	146000	238000	0	0	0	238000	0	92000	0	tiến triển tốt, uống thêm 3ngay	1705229714154	238000	\N	2024	1	14	2024-01-14 10:55:14.154+00	%
-6	3409	0	1013	2	303000	440000	0	0	0	440000	0	137000	440000	VH mủ, 	1705231570469	0	\N	2024	1	14	2024-01-14 11:26:10.469+00	%
 6	3408	0	1228	3	215000	380000	0	0	0	380000	0	165000	0	VH virus, cúm A+	1705231584224	380000	\N	2024	1	14	2024-01-14 11:26:24.224+00	%
 6	3407	0	972	3	0	30000	0	0	0	30000	0	30000	0	\N	1705230880341	30000	\N	2024	1	14	2024-01-14 11:14:40.341+00	%
 6	3412	0	1007	3	456000	770000	0	0	0	770000	0	314000	0	VTPQ, VH	1705233859229	770000	\N	2024	1	14	2024-01-14 12:04:19.229+00	%
@@ -8366,8 +9107,12 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 2	3382	0	197	3	155000	210000	0	0	15000	225000	11000	59000	0	\N	1705164948972	225000	\N	2024	1	13	2024-01-13 16:55:48.972+00	%
 2	3376	0	189	3	315000	478000	0	0	0	478000	13000	150000	0	\N	1705161866598	478000	\N	2024	1	13	2024-01-13 16:04:26.598+00	%
 6	3434	0	1207	3	124000	200000	0	0	0	200000	0	76000	0	klai họng còn viêm , VMui	1705319229899	200000	\N	2024	1	15	2024-01-15 11:47:09.899+00	%
+2	3421	0	244	3	780000	1075000	0	0	0	1075000	0	295000	0	\N	1705247396552	1075000	\N	2024	1	14	2024-01-14 15:49:56.552+00	%
+6	3448	0	1236	3	289900	560000	0	0	0	560000	0	270100	0	cúm A, VH 	1705410598073	560000	\N	2024	1	16	2024-01-16 13:09:58.073+00	%
+6	3453	0	954	3	26000	90000	0	0	0	90000	0	64000	0	VPQ, VMH 	1705411043437	90000	\N	2024	1	16	2024-01-16 13:17:23.437+00	%
 6	3094	0	954	3	81660	140000	0	0	0	140000	0	58340	0	VPQ, Nam đạt cùng uống long đờm	1703934056561	140000	\N	2023	12	30	2023-12-30 11:00:56.561+00	%
-2	3421	0	244	2	780000	1075000	0	0	0	1075000	0	295000	1075000	\N	1705247396552	0	\N	2024	1	14	2024-01-14 15:49:56.552+00	%
+6	3454	0	953	3	26000	90000	0	0	0	90000	0	64000	0	VPQ, VMH	1705411083869	90000	\N	2024	1	16	2024-01-16 13:18:03.869+00	%
+6	3440	0	1235	3	104000	104000	0	0	0	104000	0	0	0	\N	1705409796048	104000	\N	2024	1	16	2024-01-16 12:56:36.048+00	%
 2	2022	0	308	3	673000	1140000	0	0	0	1140000	0	467000	0	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1695101148667	1140000	\N	2023	9	19	2023-09-19 05:25:49+00	%
 2	3388	0	1221	3	160000	240000	0	0	0	240000	0	80000	0	\N	1705165668620	240000	\N	2024	1	14	2024-01-13 17:07:48.62+00	%
 6	3435	0	1078	3	315000	540000	0	0	0	540000	0	225000	0	cúm A, VM mủ , VPQ	1705320915653	540000	\N	2024	1	15	2024-01-15 12:15:15.653+00	%
@@ -8377,7 +9122,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3426	0	1232	3	230000	300000	0	0	0	300000	0	70000	0	\N	1705314057406	300000	\N	2024	1	15	2024-01-15 10:20:57.406+00	%
 6	3429	0	1233	3	210000	290000	0	0	0	290000	0	80000	0	sốt virus	1705314487519	290000	\N	2024	1	15	2024-01-15 10:28:07.519+00	%
 6	3431	0	1016	3	21000	100000	0	0	0	100000	0	79000	0	\N	1705318059770	100000	\N	2024	1	15	2024-01-15 11:27:39.77+00	%
-6	3440	0	1235	2	104000	104000	0	0	0	104000	0	0	104000	\N	1705409796048	0	\N	2024	1	16	2024-01-16 12:56:36.048+00	%
 6	3432	0	1086	2	34000	59000	0	0	0	59000	0	25000	59000	khám lại VTG 2 bên ứ dịch	1705318244030	0	\N	2024	1	15	2024-01-15 11:30:44.03+00	%
 6	3433	0	993	2	78400	158000	0	0	0	158000	0	79600	158000	côn trùng đốt 	1705318255184	0	\N	2024	1	15	2024-01-15 11:30:55.184+00	%
 6	3444	0	1169	3	111000	194000	0	0	0	194000	0	83000	0	VTPQ	1705410326913	194000	\N	2024	1	16	2024-01-16 13:05:26.913+00	%
@@ -8392,12 +9136,9 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3445	0	947	3	240000	360000	0	0	0	360000	0	120000	0	\N	1705410416543	360000	\N	2024	1	16	2024-01-16 13:06:56.543+00	%
 6	3450	0	1202	3	0	0	0	0	0	0	0	0	0	klai VTPQ đỡ, VMH uống tiếp ks 3 ngày	1705410728918	0	\N	2024	1	16	2024-01-16 13:12:08.918+00	%
 6	3446	0	1079	3	45000	120000	0	0	0	120000	0	75000	0	VTG mủ (T)	1705410473765	120000	\N	2024	1	16	2024-01-16 13:07:53.765+00	%
-6	3448	0	1236	2	289900	560000	0	0	0	560000	0	270100	560000	cúm A, VH 	1705410598073	0	\N	2024	1	16	2024-01-16 13:09:58.073+00	%
 6	3449	0	1156	3	80000	165000	0	0	0	165000	0	85000	0	VTG ứ dịch (T)	1705410683741	165000	\N	2024	1	16	2024-01-16 13:11:23.741+00	%
 6	3451	0	1018	3	0	0	0	0	0	0	0	0	0	klai VPQ đỡ, còn VH 	1705410767378	0	\N	2024	1	16	2024-01-16 13:12:47.378+00	%
 6	3452	0	1237	3	191000	307000	0	0	0	307000	0	116000	0	VH	1705410998803	307000	\N	2024	1	16	2024-01-16 13:16:38.803+00	%
-6	3453	0	954	2	26000	90000	0	0	0	90000	0	64000	90000	VPQ, VMH 	1705411043437	0	\N	2024	1	16	2024-01-16 13:17:23.437+00	%
-6	3454	0	953	2	26000	90000	0	0	0	90000	0	64000	90000	VPQ, VMH	1705411083869	0	\N	2024	1	16	2024-01-16 13:18:03.869+00	%
 6	3428	0	999	3	66000	90000	0	0	0	90000	0	24000	0	VMH	1705314190451	90000	\N	2024	1	15	2024-01-15 10:23:10.451+00	%
 2	3423	0	1231	3	1058000	1360600	0	0	0	1360600	25000	277600	0	\N	1705323547323	1360600	\N	2024	1	15	2024-01-15 12:59:07.323+00	%
 2	3424	0	1222	3	164000	0	0	0	0	0	0	-164000	0	\N	1705535794601	0	\N	2024	1	18	2024-01-17 23:56:34.601+00	%
@@ -8409,7 +9150,11 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3455	0	954	3	10000	20000	0	0	0	20000	0	10000	0	\N	1705411106430	20000	\N	2024	1	16	2024-01-16 13:18:26.43+00	%
 6	3469	0	1210	2	12450	20000	0	0	0	20000	0	7550	20000	klai VN xoang đỡ, VTG ứ dịch , trào ngược dạ dày  	1705494703976	0	\N	2024	1	17	2024-01-17 12:31:43.976+00	%
 6	3456	0	1025	3	0	30000	0	0	0	30000	0	30000	0	VPQ ( uống long đờm )	1705412218293	30000	\N	2024	1	16	2024-01-16 13:36:58.293+00	%
+2	3478	0	411	3	750000	1222000	0	0	0	1222000	0	472000	0	\N	1705682399934	1222000	\N	2024	1	19	2024-01-19 16:39:59.934+00	%
+2	3479	0	179	3	839250	1048000	0	0	25000	1073000	28000	205750	0	\N	1705681994750	1073000	\N	2024	1	19	2024-01-19 16:33:14.75+00	%
 6	3457	0	1207	3	120000	185000	0	0	0	185000	0	65000	0	\N	1705412371048	185000	\N	2024	1	16	2024-01-16 13:39:31.048+00	%
+2	3480	0	312	3	292000	280000	0	0	0	280000	0	-12000	0	\N	1705537498238	280000	\N	2024	1	18	2024-01-18 00:24:58.238+00	%
+6	3475	0	1049	3	90000	170000	0	0	0	170000	0	80000	0	VMH, VTG ứ mủ (P), Viêm thành óng tai vỡ mủ (T) , uống ks sandoz) 	1705497420927	170000	\N	2024	1	17	2024-01-17 13:17:00.927+00	%
 6	3458	0	1238	3	284200	350000	0	0	0	350000	0	65800	0	VHC, sốt, covit +	1705412460173	350000	\N	2024	1	16	2024-01-16 13:41:00.173+00	%
 6	3486	0	1232	3	21000	30000	0	0	0	30000	0	9000	0	theo dõi viêm da cơ địa	1705575733269	30000	\N	2024	1	18	2024-01-18 11:02:13.269+00	%
 6	3459	0	866	3	45000	100000	0	0	0	100000	0	55000	0	\N	1705413099052	100000	\N	2024	1	16	2024-01-16 13:51:39.052+00	%
@@ -8420,7 +9165,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3470	0	889	2	120000	185000	0	0	0	185000	0	65000	185000	VPQ đỡ UỐng ks cùng chị	1705494908978	0	\N	2024	1	17	2024-01-17 12:35:08.978+00	%
 6	3463	0	1239	3	174000	320000	0	0	0	320000	0	146000	0	VTg (T) ứ dịch đục, VMH	1705491501466	320000	\N	2024	1	17	2024-01-17 11:38:21.466+00	%
 6	3464	0	1111	3	162000	305000	0	0	0	305000	0	143000	0	VPQ 	1705491876072	305000	\N	2024	1	17	2024-01-17 11:44:36.072+00	%
-6	3475	0	1049	2	90000	170000	0	0	0	170000	0	80000	170000	VMH, VTG ứ mủ (P), Viêm thành óng tai vỡ mủ (T) , uống ks sandoz) 	1705497420927	0	\N	2024	1	17	2024-01-17 13:17:00.927+00	%
 6	3465	0	1050	3	154000	260000	0	0	0	260000	0	106000	0	Viêm loét miệng họng / tay chân miệng 	1705492093682	260000	\N	2024	1	17	2024-01-17 11:48:13.682+00	%
 6	2751	0	1050	3	0	120000	0	0	0	120000	0	120000	0		1702210532315	120000	\N	2023	12	10	2023-12-10 12:15:32+00	%
 6	3466	0	1070	3	166000	300000	0	0	0	300000	0	134000	0	VPQ, VMH	1705494938398	300000	\N	2024	1	17	2024-01-17 12:35:38.398+00	%
@@ -8432,7 +9176,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 1	2408	0	880	3	2000000	9000000	0	0	0	9000000	0	7000000	0		1699893295676	9000000	\N	2023	11	13	2023-11-13 16:34:56+00	%
 1	2409	0	880	2	810000	2500000	0	0	0	2500000	0	1690000	2000000		1699893562270	500000	\N	2023	11	13	2023-11-13 16:39:23+00	%
 6	3477	0	987	3	54600	70000	0	0	0	70000	0	15400	0	Klai VPQ đỡ ,nôn	1705498937371	70000	\N	2024	1	17	2024-01-17 13:42:17.371+00	%
-2	3480	0	312	2	292000	280000	0	0	0	280000	0	-12000	210000	\N	1705537498238	70000	\N	2024	1	18	2024-01-18 00:24:58.238+00	%
 6	3485	0	1208	3	0	0	0	0	0	0	0	0	0	VTPQ ổn còn ít khò khè, VTGt ứ dịch, đã trả máy khí dung	1705574866986	0	\N	2024	1	18	2024-01-18 10:47:46.986+00	%
 6	3484	0	1233	3	120000	215000	0	0	0	215000	0	95000	0	VPQ  	1705574445462	215000	\N	2024	1	18	2024-01-18 10:40:45.462+00	%
 6	3474	0	1174	3	85000	120000	0	0	0	120000	0	35000	0	mua thuốc 	1705497301942	120000	\N	2024	1	17	2024-01-17 13:15:01.942+00	%
@@ -8442,16 +9185,15 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3490	0	1168	3	173000	255000	0	0	0	255000	0	82000	0	VTG 2 bên còn dịch trong	1705577377935	255000	\N	2024	1	18	2024-01-18 11:29:37.935+00	%
 6	3491	0	1136	3	160000	277000	0	0	0	277000	0	117000	0	viêm mũi mủ	1705579048287	277000	\N	2024	1	18	2024-01-18 11:57:28.287+00	%
 2	3482	0	238	3	290000	363750	0	0	0	363750	0	73750	0	\N	1705681134708	363750	\N	2024	1	19	2024-01-19 16:18:54.708+00	%
-2	3479	0	179	2	839250	1048000	0	0	25000	1073000	28000	205750	1073000	\N	1705681994750	0	\N	2024	1	19	2024-01-19 16:33:14.75+00	%
-2	3478	0	411	2	750000	1222000	0	0	0	1222000	0	472000	1222000	\N	1705682399934	0	\N	2024	1	19	2024-01-19 16:39:59.934+00	%
 2	3481	0	1241	3	90000	110000	0	0	17000	127000	11000	26000	0	\N	1705539244396	127000	\N	2024	1	18	2024-01-18 00:54:04.396+00	%
 2	3483	0	321	3	355000	546000	0	0	0	546000	0	191000	0	\N	1705566589906	546000	\N	2024	1	18	2024-01-18 08:29:49.906+00	%
 6	3584	0	970	3	42000	66000	0	0	0	66000	0	24000	0	klai VPQ do	1706186147609	66000	\N	2024	1	25	2024-01-25 12:35:47.609+00	%
-2	3506	0	321	0	279000	429000	0	0	0	429000	0	150000	0	\N	1705681398314	0	\N	\N	\N	\N	\N	%
+6	3525	0	1247	3	120000	190000	0	0	0	190000	0	70000	0	VH, VPQ	1705754724289	190000	\N	2024	1	20	2024-01-20 12:45:24.289+00	%
 6	3493	0	1243	-1	121000	151000	0	0	0	151000	0	30000	0	VPQ co thắt	1705580354709	0	1705580462919	2024	1	18	2024-01-18 12:19:14.709+00	%
 6	3494	0	1243	3	122000	183000	0	0	0	183000	0	61000	0	VPQ co thắt	1705580462946	183000	\N	2024	1	18	2024-01-18 12:21:02.946+00	%
 6	3519	0	965	3	42000	66000	0	0	0	66000	0	24000	0	VTPQ tiến triển tốt	1705746976785	66000	\N	2024	1	20	2024-01-20 10:36:16.785+00	%
 6	3492	0	972	-1	465000	810000	0	0	0	810000	0	345000	0	\N	1705580179059	0	1705580627530	2024	1	18	2024-01-18 12:16:19.059+00	%
+6	3524	0	1124	3	192000	245000	0	0	0	245000	0	53000	0	VPQ tiến triển chậm	1705754715771	245000	\N	2024	1	20	2024-01-20 12:45:15.771+00	%
 6	3495	0	972	3	465000	810000	0	0	0	810000	0	345000	0	\N	1705580627547	810000	\N	2024	1	18	2024-01-18 12:23:47.547+00	%
 6	3496	0	955	3	0	0	0	0	0	0	0	0	0	VPQ tiến triển tốt	1705580946759	0	\N	2024	1	18	2024-01-18 12:29:06.759+00	%
 6	3497	0	932	3	32000	80000	0	0	0	80000	0	48000	0	VTGp còn ít dịch,VTPQ tiến triển tốt	1705583502181	80000	\N	2024	1	18	2024-01-18 13:11:42.181+00	%
@@ -8474,8 +9216,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3521	0	987	3	104000	192000	0	0	0	192000	0	88000	0	tiến triển tốt uống thuốc thêm 3ngay	1705751504551	192000	\N	2024	1	20	2024-01-20 11:51:44.551+00	%
 6	3526	0	1123	3	46000	110000	0	0	0	110000	0	64000	0	\N	1705755360589	110000	\N	2024	1	20	2024-01-20 12:56:00.589+00	%
 6	3522	0	1246	3	135000	220000	0	0	0	220000	0	85000	0	sốt virus 	1705753602504	220000	\N	2024	1	20	2024-01-20 12:26:42.504+00	%
-6	3524	0	1124	2	192000	245000	0	0	0	245000	0	53000	245000	VPQ tiến triển chậm	1705754715771	0	\N	2024	1	20	2024-01-20 12:45:15.771+00	%
-6	3525	0	1247	2	120000	190000	0	0	0	190000	0	70000	190000	VH, VPQ	1705754724289	0	\N	2024	1	20	2024-01-20 12:45:24.289+00	%
 6	3527	0	1063	3	443000	625000	0	0	0	625000	0	182000	0	VPQ tiến triển chậm	1705755728308	625000	\N	2024	1	20	2024-01-20 13:02:08.308+00	%
 6	3529	0	1248	3	120000	275000	0	0	0	275000	0	155000	0	VHC, cúm A+	1705756163000	275000	\N	2024	1	20	2024-01-20 13:09:23+00	%
 6	3528	0	975	3	20000	60000	0	0	0	60000	0	40000	0	VPQ  tiến triển chậm 	1705755735679	60000	\N	2024	1	20	2024-01-20 13:02:15.679+00	%
@@ -8485,7 +9225,6 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3533	0	1169	3	373000	585000	0	0	0	585000	0	212000	0	khám lại đỡ	1705799612188	585000	\N	2024	1	21	2024-01-21 01:13:32.188+00	%
 2	3509	0	219	3	1500000	1660000	0	0	0	1660000	0	160000	0	\N	1705682360816	1660000	\N	2024	1	19	2024-01-19 16:39:20.816+00	%
 6	3514	0	1160	3	100000	120000	0	0	0	120000	0	20000	0	\N	1705727482387	120000	\N	2024	1	20	2024-01-20 05:11:22.387+00	%
-2	3502	0	444	2	274000	465000	0	0	20000	485000	0	211000	485000	\N	1705835543744	0	\N	2024	1	21	2024-01-21 11:12:23.744+00	%
 2	3507	0	405	3	300000	305000	0	0	22000	327000	22000	5000	0	\N	1705681813416	327000	\N	2024	1	19	2024-01-19 16:30:13.416+00	%
 2	3505	0	329	3	330000	460000	0	0	30000	490000	35000	125000	0	\N	1705679725587	490000	\N	2024	1	19	2024-01-19 15:55:25.587+00	%
 2	3503	0	176	3	454000	725000	0	0	0	725000	30000	241000	0	\N	1705835526693	725000	\N	2024	1	21	2024-01-21 11:12:06.693+00	%
@@ -8493,8 +9232,12 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3536	0	1023	3	66000	90000	0	0	0	90000	0	24000	0	vêm mũi	1705824279610	90000	\N	2024	1	21	2024-01-21 08:04:39.61+00	%
 6	3544	0	999	3	47000	125000	0	0	0	125000	0	78000	0	VM	1705841654527	125000	\N	2024	1	21	2024-01-21 12:54:14.527+00	%
 6	3535	0	1062	3	252600	360000	0	0	0	360000	0	107400	0	viêm tiểu phế quản	1705823467648	360000	\N	2024	1	21	2024-01-21 07:51:07.648+00	%
+6	3565	0	1157	3	0	30000	0	0	0	30000	0	30000	0	VMH	1706010785073	30000	\N	2024	1	23	2024-01-23 11:53:05.073+00	%
 6	3548	0	1063	3	153500	242000	0	0	0	242000	0	88500	0	\N	1705924081418	242000	\N	2024	1	22	2024-01-22 11:48:01.418+00	%
-2	3538	0	294	2	600000	871200	0	0	0	871200	0	271200	871200	\N	1705933948943	0	\N	2024	1	22	2024-01-22 14:32:28.943+00	%
+2	3538	0	294	3	600000	871200	0	0	0	871200	0	271200	0	\N	1705933948943	871200	\N	2024	1	22	2024-01-22 14:32:28.943+00	%
+6	3551	0	954	3	202320	369000	0	0	0	369000	0	166680	0	VTGp có  phồng dịch độ 4, VPQ	1705926529737	369000	\N	2024	1	22	2024-01-22 12:28:49.737+00	%
+6	3552	0	953	3	120000	185000	0	0	0	185000	0	65000	0	VPQ còn đờm	1705926622801	185000	\N	2024	1	22	2024-01-22 12:30:22.801+00	%
+6	3567	0	953	3	22000	30000	0	0	0	30000	0	8000	0	\N	1706018943089	30000	\N	2024	1	23	2024-01-23 14:09:03.089+00	%
 6	3539	0	1079	3	36000	60000	0	0	0	60000	0	24000	0	VTGt còn ít dịch 	1705836845864	60000	\N	2024	1	21	2024-01-21 11:34:05.864+00	%
 6	3549	0	1249	3	10000	40000	0	0	0	40000	0	30000	0	\N	1705925008772	40000	\N	2024	1	22	2024-01-22 12:03:28.772+00	%
 6	3540	0	986	3	250000	400000	0	0	0	400000	0	150000	0	\N	1705836905227	400000	\N	2024	1	21	2024-01-21 11:35:05.227+00	%
@@ -8503,12 +9246,10 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3550	0	1250	3	128000	225000	0	0	0	225000	0	97000	0	VPQ, Viêm họng 	1705925876620	225000	\N	2024	1	22	2024-01-22 12:17:56.62+00	%
 6	3543	0	955	3	43160	100000	0	0	0	100000	0	56840	0	VPQ  tiến triển tốt	1705841419398	100000	\N	2024	1	21	2024-01-21 12:50:19.398+00	%
 6	3545	0	1249	3	212000	365000	0	0	0	365000	0	153000	0	thủy đậu bội nhiễm,  VH liên cầu, 	1705842342570	365000	\N	2024	1	21	2024-01-21 13:05:42.57+00	%
-6	3551	0	954	2	202320	369000	0	0	0	369000	0	166680	369000	VTGp có  phồng dịch độ 4, VPQ	1705926529737	0	\N	2024	1	22	2024-01-22 12:28:49.737+00	%
 6	3546	0	1016	3	120000	185000	0	0	0	185000	0	65000	0	cho mèo	1705843551321	185000	\N	2024	1	21	2024-01-21 13:25:51.321+00	%
 3	2364	0	852	3	0	14700000	200000	1	0	14500000	0	14500000	0	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1699350930204	14500000	\N	2023	11	7	2023-11-07 09:55:31+00	VNĐ
 6	3547	0	1191	3	120000	230000	0	0	0	230000	0	110000	0	sốt,  mủ  ngón tay 	1705922976463	230000	\N	2024	1	22	2024-01-22 11:29:36.463+00	%
 2	3556	0	196	0	709000	810000	0	0	0	810000	11000	90000	0	\N	1705934997384	0	\N	\N	\N	\N	\N	%
-6	3552	0	953	2	120000	185000	0	0	0	185000	0	65000	185000	VPQ còn đờm	1705926622801	0	\N	2024	1	22	2024-01-22 12:30:22.801+00	%
 6	3553	0	1125	3	146000	275000	0	0	0	275000	0	129000	0	VHong,  VPQ đờm	1705926854941	275000	\N	2024	1	22	2024-01-22 12:34:14.941+00	%
 6	3566	0	1217	3	203000	330000	0	0	0	330000	0	127000	0	VMH 	1706013241850	330000	\N	2024	1	23	2024-01-23 12:34:01.85+00	%
 6	3554	0	1160	3	52000	100000	0	0	0	100000	0	48000	0	\N	1705927637279	100000	\N	2024	1	22	2024-01-22 12:47:17.279+00	%
@@ -8518,9 +9259,7 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3562	0	1014	3	350500	525000	0	0	0	525000	0	174500	0	VMH cấp mủ	1706009895899	525000	\N	2024	1	23	2024-01-23 11:38:15.899+00	%
 6	3560	0	1251	3	226580	360000	0	0	0	360000	0	133420	0	Viêm VA mạn , trào ngược dạ dày (nexium 7V)	1706008739974	360000	\N	2024	1	23	2024-01-23 11:18:59.974+00	%
 6	3563	0	1136	3	59000	114000	0	0	0	114000	0	55000	0	klai VM đỡ, họng đỡ viêm	1706010177633	114000	\N	2024	1	23	2024-01-23 11:42:57.633+00	%
-6	3565	0	1157	2	0	30000	0	0	0	30000	0	30000	30000	VMH	1706010785073	0	\N	2024	1	23	2024-01-23 11:53:05.073+00	%
 2	2263	0	233	3	315000	396900	0	0	0	396900	0	81900	0	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1697986789926	396900	\N	2023	10	22	2023-10-22 14:59:50+00	%
-6	3567	0	953	2	22000	30000	0	0	0	30000	0	8000	30000	\N	1706018943089	0	\N	2024	1	23	2024-01-23 14:09:03.089+00	%
 2	3557	0	908	-1	108000	125000	0	0	0	125000	0	17000	0	\N	1706057573321	0	\N	2024	1	24	2024-01-24 00:52:53.321+00	%
 2	3558	0	433	3	476000	699000	0	0	20000	719000	0	243000	0	\N	1706057562991	719000	\N	2024	1	24	2024-01-24 00:52:42.991+00	%
 6	3568	0	1252	3	41160	120000	0	0	0	120000	0	78840	0	viêm mũi	1706101750239	120000	\N	2024	1	24	2024-01-24 13:09:10.239+00	%
@@ -8529,8 +9268,8 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 3	3571	0	1254	3	0	5000000	0	0	0	5000000	0	5000000	0	\N	1706108687973	5000000	\N	2024	1	24	2024-01-24 15:04:47.973+00	%
 6	3588	0	1258	3	173000	315000	0	0	0	315000	0	142000	0	VPQ co thắt , VMH cấp 	1706188592532	315000	\N	2024	1	25	2024-01-25 13:16:32.532+00	%
 6	3590	0	1258	3	5000	10000	0	0	0	10000	0	5000	0	\N	1706188721685	10000	\N	2024	1	25	2024-01-25 13:18:41.685+00	%
-6	3591	0	954	2	120000	185000	0	0	0	185000	0	65000	185000	klai VTG đỡ (DDS(nam +đạt ))	1706188915889	0	\N	2024	1	25	2024-01-25 13:21:55.889+00	%
 6	3592	0	889	2	201200	315000	0	0	0	315000	0	113800	315000	cúm a/ tai giữa có dịch	1706198146195	0	\N	2024	1	25	2024-01-25 15:55:46.195+00	%
+6	3591	0	954	3	120000	185000	0	0	0	185000	0	65000	0	klai VTG đỡ (DDS(nam +đạt ))	1706188915889	185000	\N	2024	1	25	2024-01-25 13:21:55.889+00	%
 6	3593	0	866	3	180000	180000	0	0	0	180000	0	0	0	\N	1706266490148	180000	\N	2024	1	26	2024-01-26 10:54:50.148+00	%
 6	3594	0	1155	3	270000	400000	0	0	0	400000	0	130000	0	mua 	1706269252172	400000	\N	2024	1	26	2024-01-26 11:40:52.172+00	%
 6	3595	0	1164	3	19000	40000	0	0	0	40000	0	21000	0	\N	1706271224561	40000	\N	2024	1	26	2024-01-26 12:13:44.561+00	%
@@ -8539,11 +9278,293 @@ COPY public."Invoice" (oid, id, "arrivalId", "customerId", status, "itemsCostMon
 6	3600	0	1023	3	15000	30000	0	0	0	30000	0	15000	0	\N	1706272546021	30000	\N	2024	1	26	2024-01-26 12:35:46.021+00	%
 6	3537	0	1023	3	66000	90000	0	0	0	90000	0	24000	0	\N	1705825743827	90000	\N	2024	1	21	2024-01-21 08:29:03.827+00	%
 6	3559	0	1023	3	120000	195000	0	0	0	195000	0	75000	0	klai VM, VH nhiều 	1706007128282	195000	\N	2024	1	23	2024-01-23 10:52:08.282+00	%
-6	3601	0	1247	2	205380	374000	0	0	0	374000	0	168620	374000	herpep môi, Viêm mũi xoang 	1706273412370	0	\N	2024	1	26	2024-01-26 12:50:12.37+00	%
-6	3598	0	1124	2	118000	145000	0	0	0	145000	0	27000	145000	klai vPQ đỡ	1706273415690	0	\N	2024	1	26	2024-01-26 12:50:15.69+00	%
-6	3602	0	890	2	252000	420000	0	0	0	420000	0	168000	420000	\N	1706273940675	0	\N	2024	1	26	2024-01-26 12:59:00.675+00	%
+6	3589	0	1104	3	5000	10000	0	0	0	10000	0	5000	0	\N	1706440548735	10000	\N	2024	1	28	2024-01-28 11:15:48.735+00	%
+6	3608	0	1120	3	258000	450000	0	0	0	450000	0	192000	0	viem TPQ/ Viêm tai giữa ứ mủ 2 bên	1706357795933	450000	\N	2024	1	27	2024-01-27 12:16:35.933+00	%
+6	3609	0	1263	3	163916	329000	0	0	0	329000	0	165084	0	viêm mũi xoang mủ	1706358529778	329000	\N	2024	1	27	2024-01-27 12:28:49.778+00	%
 6	3604	0	1125	3	173000	330000	0	0	0	330000	0	157000	0	khám lại, viêm tai giữa mủ bên T/ vpq	1706275291200	330000	\N	2024	1	26	2024-01-26 13:21:31.2+00	%
+6	3577	0	1079	3	0	0	0	0	0	0	0	0	0	klai VTG ổn dừng ks 	1706440567842	0	\N	2024	1	28	2024-01-28 11:16:07.842+00	%
 6	3603	0	996	3	146000	275000	0	0	0	275000	0	129000	0	VMH cấp, VPQ	1706275398291	275000	\N	2024	1	26	2024-01-26 13:23:18.291+00	%
+3	2578	0	900	3	0	1500000	0	0	0	1500000	0	1500000	0		1701581598136	1500000	\N	2023	12	3	2023-12-03 05:33:18+00	VNĐ
+2	3502	0	444	3	274000	465000	0	0	20000	485000	0	211000	0	\N	1705835543744	485000	\N	2024	1	21	2024-01-21 11:12:23.744+00	%
+6	3610	0	1239	3	71500	160000	0	0	0	160000	0	88500	0	tay chân miệng	1706358903330	160000	\N	2024	1	27	2024-01-27 12:35:03.33+00	%
+2	3605	0	123	3	321000	321000	0	0	0	321000	0	0	0	\N	1706342232509	321000	\N	2024	1	27	2024-01-27 07:57:12.509+00	%
+2	3606	0	225	-1	230000	467000	0	0	450000	917000	70000	617000	0	\N	1706349309464	0	\N	2024	1	27	2024-01-27 09:55:09.464+00	%
+6	3611	0	987	3	78000	150000	0	0	0	150000	0	72000	0	khám lại ổn	1706359039210	150000	\N	2024	1	27	2024-01-27 12:37:19.21+00	%
+6	3602	0	890	3	252000	420000	0	0	0	420000	0	168000	0	\N	1706273940675	420000	\N	2024	1	26	2024-01-26 12:59:00.675+00	%
+6	3614	0	890	3	155000	230000	0	0	0	230000	0	75000	0	\N	1706361914411	230000	\N	2024	1	27	2024-01-27 13:25:14.411+00	%
+3	3615	0	526	3	0	8500000	0	0	0	8500000	0	8500000	0	\N	1706372054554	8500000	\N	2024	1	27	2024-01-27 16:14:14.554+00	%
+6	3613	0	1265	3	22000	35000	0	0	0	35000	0	13000	0	\N	1706440495876	35000	\N	2024	1	28	2024-01-28 11:14:55.876+00	%
+6	3616	0	1166	3	146000	245000	0	0	0	245000	0	99000	0	\N	1706444971416	245000	\N	2024	1	28	2024-01-28 12:29:31.416+00	%
+6	3617	0	1120	3	0	0	0	0	0	0	0	0	0	klai VTG ứ mủ 2 bên , VTPQ đỡ	1706524208333	0	\N	2024	1	29	2024-01-29 10:30:08.333+00	%
+6	3622	0	1063	3	82200	120000	0	0	0	120000	0	37800	0	còn VPQ 	1706530024132	120000	\N	2024	1	29	2024-01-29 12:07:04.132+00	%
+6	3620	0	1166	-1	0	0	0	0	0	0	0	0	0	VTG (T) ứ mủ , VPQ	1706528820282	0	1706528953729	2024	1	29	2024-01-29 11:47:00.282+00	%
+6	3621	0	1166	3	21000	30000	0	0	0	30000	0	9000	0	VTG (T) ứ mủ , VPQ	1706528953743	30000	\N	2024	1	29	2024-01-29 11:49:13.743+00	%
+6	3625	0	1267	3	48000	150000	0	0	0	150000	0	102000	0	VPQ	1706533036408	150000	\N	2024	1	29	2024-01-29 12:57:16.408+00	%
+6	3624	0	1168	3	80000	150000	0	0	0	150000	0	70000	0	klai VTG 2 bên ứ mủ , VMH 	1706531479587	150000	\N	2024	1	29	2024-01-29 12:31:19.587+00	%
+6	3627	0	954	3	0	0	0	0	0	0	0	0	0	KLAI VTG (P) tiến triển chậm (uống cifokid từ hnay )	1706533466552	0	\N	2024	1	29	2024-01-29 13:04:26.552+00	%
+6	3628	0	947	3	482000	482000	0	0	0	482000	0	0	0	\N	1706534190488	482000	\N	2024	1	29	2024-01-29 13:16:30.488+00	%
+6	3629	0	971	3	68000	160000	0	0	0	160000	0	92000	0	VMH	1706534653719	160000	\N	2024	1	29	2024-01-29 13:24:13.719+00	%
+6	3630	0	866	3	240000	240000	0	0	0	240000	0	0	0	\N	1706534725269	240000	\N	2024	1	29	2024-01-29 13:25:25.269+00	%
+2	3607	0	225	3	257000	507000	0	0	450000	957000	70000	630000	0	\N	1706349346042	957000	\N	2024	1	27	2024-01-27 09:55:46.042+00	%
+6	3612	0	1264	3	354660	539000	0	0	0	539000	0	184340	0	viêm mũi xoang cấp mủ	1706618802416	539000	\N	2024	1	30	2024-01-30 12:46:42.416+00	%
+6	3619	0	1266	3	260000	390000	0	0	0	390000	0	130000	0	\N	1706525012382	390000	\N	2024	1	29	2024-01-29 10:43:32.382+00	%
+6	3618	0	938	3	40000	80000	0	0	0	80000	0	40000	0	VMH virus	1706524760129	80000	\N	2024	1	29	2024-01-29 10:39:20.129+00	%
+6	3626	0	953	3	26000	70000	0	0	0	70000	0	44000	0	VMH	1706533448670	70000	\N	2024	1	29	2024-01-29 13:04:08.67+00	%
+6	3601	0	1247	3	205380	374000	0	0	0	374000	0	168620	0	herpep môi, Viêm mũi xoang 	1706273412370	374000	\N	2024	1	26	2024-01-26 12:50:12.37+00	%
+6	3598	0	1124	3	118000	145000	0	0	0	145000	0	27000	0	klai vPQ đỡ	1706273415690	145000	\N	2024	1	26	2024-01-26 12:50:15.69+00	%
+6	3651	0	1270	3	157000	330000	0	0	0	330000	0	173000	0	VMH virus 	1706622524974	330000	\N	2024	1	30	2024-01-30 13:48:44.974+00	%
+6	3645	0	1230	3	68000	110000	0	0	0	110000	0	42000	0	klai VPQ, VMH	1706615536436	110000	\N	2024	1	30	2024-01-30 11:52:16.436+00	%
+2	3633	0	291	2	315000	396900	0	0	30000	426900	30000	81900	426900	\N	1706592926098	0	\N	2024	1	30	2024-01-30 05:35:26.098+00	%
+6	3648	0	996	3	112000	176000	0	0	0	176000	0	64000	0	klai VPQ  VMH đỡ chậm đổi ks 	1706618872186	176000	\N	2024	1	30	2024-01-30 12:47:52.186+00	%
+6	3652	0	1271	3	83000	220000	0	0	0	220000	0	137000	0	viêm mũi họng	1706695391285	220000	\N	2024	1	31	2024-01-31 10:03:11.285+00	%
+6	3636	0	1014	3	169000	240000	0	0	0	240000	0	71000	0	klai VMh đỡ, VPQ đổi ks 	1706613548603	240000	\N	2024	1	30	2024-01-30 11:19:08.603+00	%
+6	3637	0	1268	3	175000	328000	0	0	0	328000	0	153000	0	VTG ứ mủ (T) , VMH 	1706613809648	328000	\N	2024	1	30	2024-01-30 11:23:29.648+00	%
+6	3644	0	1229	3	261000	425000	0	0	0	425000	0	164000	0	aderno +, viêm hogj	1706617961508	425000	\N	2024	1	30	2024-01-30 12:32:41.508+00	%
+6	3638	0	1269	3	55500	130000	0	0	0	130000	0	74500	0	viêm kết mạc	1706613984877	130000	\N	2024	1	30	2024-01-30 11:26:24.877+00	%
+6	3639	0	1142	3	146000	285000	0	0	0	285000	0	139000	0	VPQ, VMH 	1706614328420	285000	\N	2024	1	30	2024-01-30 11:32:08.42+00	%
+6	3646	0	983	3	161000	330000	0	0	0	330000	0	169000	0	viêm phế quản,viêm mũi họng	1706618147696	330000	\N	2024	1	30	2024-01-30 12:35:47.696+00	%
+6	3641	0	975	3	118000	175000	0	0	0	175000	0	57000	0	VPQ 	1706614733226	175000	\N	2024	1	30	2024-01-30 11:38:53.226+00	%
+6	3583	0	940	3	234000	421000	0	0	0	421000	0	187000	0	VPQ co thắt , VMH 	1706185972426	421000	\N	2024	1	25	2024-01-25 12:32:52.426+00	%
+6	3642	0	999	3	10000	30000	0	0	0	30000	0	20000	0	VMH	1706615018311	30000	\N	2024	1	30	2024-01-30 11:43:38.311+00	%
+6	3647	0	998	3	162000	260000	0	0	0	260000	0	98000	0	klai VPQ đỡ chậm đổi ks , VMH 	1706618794713	260000	\N	2024	1	30	2024-01-30 12:46:34.713+00	%
+6	3623	0	970	-1	68000	110000	0	0	0	110000	0	42000	0	klai VPQ đỡ, VMH	1706530231477	0	\N	2024	1	29	2024-01-29 12:10:31.477+00	%
+6	3650	0	866	3	57200	57200	0	0	0	57200	0	0	0	\N	1706620165081	57200	\N	2024	1	30	2024-01-30 13:09:25.081+00	%
+6	3654	0	1019	3	70000	160000	0	0	0	160000	0	90000	0	viêm họng cấp	1706698815951	160000	\N	2024	1	31	2024-01-31 11:00:15.951+00	%
+6	3660	0	1120	3	74500	120000	0	0	0	120000	0	45500	0	\N	1706705083050	120000	\N	2024	1	31	2024-01-31 12:44:43.05+00	%
+6	3655	0	1166	3	130500	160000	0	0	0	160000	0	29500	0	khám lại 	1706701017031	160000	\N	2024	1	31	2024-01-31 11:36:57.031+00	%
+6	3658	0	994	3	128000	185000	0	0	0	185000	0	57000	0	viêm phế quản	1706702824933	185000	\N	2024	1	31	2024-01-31 12:07:04.933+00	%
+6	3659	0	1120	3	50000	100000	0	0	0	100000	0	50000	0	viêm tai giữa ứ mủ 2 bên tiến triển chậm, VTPQ	1706705020238	100000	\N	2024	1	31	2024-01-31 12:43:40.238+00	%
+2	2062	0	676	3	130000	179000	0	0	25000	204000	0	74000	0	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1695307600886	204000	\N	2023	9	21	2023-09-21 14:46:41+00	%
+6	3288	0	1157	3	0	30000	0	0	0	30000	0	30000	0	VHC	1704882213636	30000	\N	2024	1	10	2024-01-10 10:23:33.636+00	%
+6	3666	0	964	3	146000	245000	0	0	0	245000	0	99000	0	viêm mũi họng	1706710745550	245000	\N	2024	1	31	2024-01-31 14:19:05.55+00	%
+6	3110	0	1157	3	150000	250000	0	0	0	250000	0	100000	0	viêm họng liên cầu	1704012593815	250000	\N	2023	12	31	2023-12-31 08:49:53.815+00	%
+6	3657	0	940	3	15000	30000	0	0	0	30000	0	15000	0	khám lại	1706784872309	30000	\N	2024	2	1	2024-02-01 10:54:32.309+00	%
+6	3643	0	1230	-1	68000	110000	0	0	0	110000	0	42000	0	klai VPQ đỡ, VMH 	1706615273524	0	1706876624969	2024	1	30	2024-01-30 11:47:53.524+00	%
+2	3631	0	1231	3	962300	1300650	0	0	0	1300650	30000	308350	0	\N	1706592575446	1300650	\N	2024	1	30	2024-01-30 05:29:35.446+00	%
+2	3634	0	924	3	633300	815000	0	0	40000	855000	40000	181700	0	\N	1706593027993	855000	\N	2024	1	30	2024-01-30 05:37:07.993+00	%
+2	3661	0	233	3	318000	429000	0	0	0	429000	30000	81000	0	\N	1706706836434	429000	\N	2024	1	31	2024-01-31 13:13:56.434+00	%
+2	3663	0	367	3	1139000	1139000	0	0	0	1139000	0	0	0	\N	1706707541693	1139000	\N	2024	1	31	2024-01-31 13:25:41.693+00	%
+2	3635	0	302	3	716000	800000	0	0	0	800000	0	84000	0	\N	1706706884426	800000	\N	2024	1	31	2024-01-31 13:14:44.426+00	%
+2	3665	0	321	3	445000	493000	0	0	0	493000	0	48000	0	\N	1706708217024	493000	\N	2024	1	31	2024-01-31 13:36:57.024+00	%
+6	3653	0	1272	3	130200	205000	0	0	0	205000	0	74800	0	viêm họng	1706695500697	205000	\N	2024	1	31	2024-01-31 10:05:00.697+00	%
+6	3640	0	1023	3	137000	210000	0	0	0	210000	0	73000	0	khám lại VM mủ , VH 	1706614562353	210000	\N	2024	1	30	2024-01-30 11:36:02.353+00	%
+2	3632	0	425	3	560000	685000	0	0	20000	705000	20000	125000	0	\N	1706592731514	705000	\N	2024	1	30	2024-01-30 05:32:11.514+00	%
+6	3656	0	1273	3	163660	270000	0	0	0	270000	0	106340	0	viêm mũi xoang	1706702338631	270000	\N	2024	1	31	2024-01-31 11:58:58.631+00	%
+2	3664	0	323	3	355000	610000	0	0	20000	630000	24000	251000	0	\N	1706972891189	630000	\N	2024	2	3	2024-02-03 15:08:11.189+00	%
+2	3662	0	242	3	610000	1124000	0	0	0	1124000	30000	484000	0	\N	1707793243243	1124000	\N	2024	2	13	2024-02-13 03:00:43.243+00	%
+6	3667	0	1073	3	115000	190000	0	0	0	190000	0	75000	0	tay chân miệng	1706774279717	190000	\N	2024	2	1	2024-02-01 07:57:59.717+00	%
+6	3668	0	866	3	330000	330000	0	0	0	330000	0	0	0	lỗi phần mềm 	1706785430269	330000	\N	2024	2	1	2024-02-01 11:03:50.269+00	%
+6	3690	0	932	3	122000	180000	0	0	0	180000	0	58000	0	tay chân miệng	1706955241542	180000	\N	2024	2	3	2024-02-03 10:14:01.542+00	%
+6	3669	0	1274	3	61500	102000	0	0	0	102000	0	40500	0	nhiệt miệng 	1706785713683	102000	\N	2024	2	1	2024-02-01 11:08:33.683+00	%
+6	3681	0	1230	3	106000	220000	0	0	0	220000	0	114000	0	VPQ	1706876814248	220000	\N	2024	2	2	2024-02-02 12:26:54.248+00	%
+6	3670	0	1058	3	206000	328000	0	0	0	328000	0	122000	0	mua	1706787982591	328000	\N	2024	2	1	2024-02-01 11:46:22.591+00	%
+6	3671	0	1156	3	134040	230000	0	0	0	230000	0	95960	0	viêm tai giữa T	1706857139907	230000	\N	2024	2	2	2024-02-02 06:58:59.907+00	%
+6	3673	0	1275	3	166000	310000	0	0	0	310000	0	144000	0	\N	1706869728274	310000	\N	2024	2	2	2024-02-02 10:28:48.274+00	%
+6	3682	0	1253	3	120000	185000	0	0	0	185000	0	65000	0	viêm họng liên cầu	1706877027471	185000	\N	2024	2	2	2024-02-02 12:30:27.471+00	%
+6	3675	0	938	3	131420	210000	0	0	0	210000	0	78580	0	Tai 2 bên có dịch, VHC	1706873528137	210000	\N	2024	2	2	2024-02-02 11:32:08.137+00	%
+6	3683	0	1276	3	126000	230000	0	0	0	230000	0	104000	0	Sốt virus	1706877344220	230000	\N	2024	2	2	2024-02-02 12:35:44.22+00	%
+6	3676	0	1079	3	146000	275000	0	0	0	275000	0	129000	0	VH liên cầu, 	1706874709791	275000	\N	2024	2	2	2024-02-02 11:51:49.791+00	%
+6	3677	0	986	3	36000	80000	0	0	0	80000	0	44000	0	\N	1706874718212	80000	\N	2024	2	2	2024-02-02 11:51:58.212+00	%
+6	3691	0	998	3	10000	20000	0	0	0	20000	0	10000	0	klai VPQ đỡ	1706955405466	20000	\N	2024	2	3	2024-02-03 10:16:45.466+00	%
+6	3678	0	1263	3	27000	70000	0	0	0	70000	0	43000	0	\N	1706875330771	70000	\N	2024	2	2	2024-02-02 12:02:10.771+00	%
+6	3684	0	999	3	92000	180000	0	0	0	180000	0	88000	0	\N	1706877724144	180000	\N	2024	2	2	2024-02-02 12:42:04.144+00	%
+6	3679	0	1014	3	0	0	0	0	0	0	0	0	0	uống tiếp ks 2 ngày nữa	1706875402968	0	\N	2024	2	2	2024-02-02 12:03:22.968+00	%
+6	3680	0	996	3	139000	244000	0	0	0	244000	0	105000	0	VPQ tiến triển tốt	1706876563505	244000	\N	2024	2	2	2024-02-02 12:22:43.505+00	%
+6	3685	0	972	3	540000	546000	0	0	0	546000	0	6000	0	\N	1706877801821	546000	\N	2024	2	2	2024-02-02 12:43:21.821+00	%
+6	3700	0	1125	3	40000	80000	0	0	0	80000	0	40000	0	klai VTG ứ mủ đổi ks 	1706964044381	80000	\N	2024	2	3	2024-02-03 12:40:44.381+00	%
+6	3687	0	1277	3	26000	240000	0	0	0	240000	0	214000	0	viêm mũi họng	1706948888462	240000	\N	2024	2	3	2024-02-03 08:28:08.462+00	%
+2	3707	0	250	3	497700	842400	0	0	0	842400	22000	322700	0	\N	1706972169204	842400	\N	2024	2	3	2024-02-03 14:56:09.204+00	%
+6	3695	0	991	3	262000	455000	0	0	0	455000	0	193000	0	VMh	1706962810097	455000	\N	2024	2	3	2024-02-03 12:20:10.097+00	%
+3	3689	0	653	3	0	2200000	0	0	0	2200000	0	2200000	0	\N	1706954940469	2200000	\N	2024	2	3	2024-02-03 10:09:00.469+00	%
+6	3692	0	995	-1	378000	665000	0	0	0	665000	0	287000	0	VTG ứ mủ (T) , VMH	1706956459090	0	\N	\N	\N	\N	\N	%
+6	3698	0	964	3	22000	60000	0	0	0	60000	0	38000	0	klai còn viêm họng 	1706963552101	60000	\N	2024	2	3	2024-02-03 12:32:32.101+00	%
+6	3694	0	1168	3	166000	235000	0	0	0	235000	0	69000	0	klai VTG còn dịch 	1706960938364	235000	\N	2024	2	3	2024-02-03 11:48:58.364+00	%
+6	3696	0	1239	3	196000	355000	0	0	0	355000	0	159000	0	VPQ co thắt , VTG có dịch T	1706962844631	355000	\N	2024	2	3	2024-02-03 12:20:44.631+00	%
+6	3697	0	1239	3	10000	20000	0	0	0	20000	0	10000	0	\N	1706962991496	20000	\N	2024	2	3	2024-02-03 12:23:11.496+00	%
+6	3702	0	1142	3	74500	120000	0	0	0	120000	0	45500	0	klai VPQ co thắt 	1706964758447	120000	\N	2024	2	3	2024-02-03 12:52:38.447+00	%
+6	3703	0	975	3	0	0	0	0	0	0	0	0	0	klai VPQ đỡ uống tiếp	1706964841195	0	\N	2024	2	3	2024-02-03 12:54:01.195+00	%
+6	3704	0	1281	3	173000	330000	0	0	0	330000	0	157000	0	VPQ 	1706965147294	330000	\N	2024	2	3	2024-02-03 12:59:07.294+00	%
+6	3699	0	1279	3	136500	180000	0	0	0	180000	0	43500	0	đau mỏi người 	1706964037476	180000	\N	2024	2	3	2024-02-03 12:40:37.476+00	%
+6	3705	0	1280	3	166000	310000	0	0	0	310000	0	144000	0	VMH cấp	1706965165832	310000	\N	2024	2	3	2024-02-03 12:59:25.832+00	%
+6	3688	0	1278	3	147000	225000	0	0	0	225000	0	78000	0	viêm VA, viêm tai giữa T	1706955511794	225000	\N	2024	2	3	2024-02-03 10:18:31.794+00	%
+6	3706	0	947	3	1106000	0	0	0	0	0	0	-1106000	0	\N	1706966171054	0	\N	2024	2	3	2024-02-03 13:16:11.054+00	%
+6	3674	0	1198	3	204000	380000	0	0	0	380000	0	176000	0	chân tay miệng, VPQ 	1706873139579	380000	\N	2024	2	2	2024-02-02 11:25:39.579+00	%
+6	3693	0	995	3	378000	665000	0	0	0	665000	0	287000	0	VTG ứ mủ (T) , VMH 	1706956747484	665000	\N	2024	2	3	2024-02-03 10:39:07.484+00	%
+6	3701	0	1264	3	262660	425000	0	0	0	425000	0	162340	0	klai VMXoang còn nhiều mủ 	1706964619124	425000	\N	2024	2	3	2024-02-03 12:50:19.124+00	%
+6	3672	0	1268	3	42000	66000	0	0	0	66000	0	24000	0	VTGt đỡ 	1706869754284	66000	\N	2024	2	2	2024-02-02 10:29:14.284+00	%
+2	3709	0	104	3	350000	450000	0	0	25000	475000	30000	95000	0	\N	1706973043589	475000	\N	2024	2	3	2024-02-03 15:10:43.589+00	%
+3	3723	0	731	3	0	1500000	0	0	0	1500000	0	1500000	0	\N	1707054699274	1500000	\N	2024	2	4	2024-02-04 13:51:39.274+00	%
+2	3710	0	1282	3	315000	400000	0	0	0	400000	0	85000	0	\N	1706973286430	400000	\N	2024	2	3	2024-02-03 15:14:46.43+00	%
+2	2331	0	302	3	262350	297000	0	0	0	297000	0	34650	0	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1698984953953	297000	\N	2023	11	3	2023-11-03 04:15:54+00	%
+2	2974	0	302	3	224000	240000	0	0	0	240000	0	16000	0	\N	1703428865289	240000	\N	2023	12	24	2023-12-24 14:41:05.289+00	%
+2	3711	0	569	3	383000	545000	0	0	30000	575000	30000	162000	0	\N	1706974404919	575000	\N	2024	2	3	2024-02-03 15:33:24.919+00	%
+2	3724	0	225	3	624000	820000	0	0	0	820000	0	196000	0	\N	1707099950217	820000	\N	2024	2	5	2024-02-05 02:25:50.217+00	%
+2	3716	0	428	3	110000	180000	0	0	0	180000	0	70000	0	\N	1706975058812	180000	\N	2024	2	3	2024-02-03 15:44:18.812+00	%
+2	3717	0	1283	3	273000	266860	0	0	0	266860	0	-6140	0	\N	1706975225843	266860	\N	2024	2	3	2024-02-03 15:47:05.843+00	%
+6	3686	0	1152	3	125040	210000	0	0	0	210000	0	84960	0	viêm tai giữa T , viêm mũi hog	1707044567253	210000	\N	2024	2	4	2024-02-04 11:02:47.253+00	%
+2	3713	0	297	3	330000	450000	0	0	0	450000	0	120000	0	\N	1706973491329	450000	\N	2024	2	3	2024-02-03 15:18:11.329+00	%
+6	3719	0	1280	3	230000	300000	0	0	0	300000	0	70000	0	\N	1707044653394	300000	\N	2024	2	4	2024-02-04 11:04:13.394+00	%
+2	3712	0	450	3	330000	420000	0	0	0	420000	0	90000	0	\N	1706973461381	420000	\N	2024	2	3	2024-02-03 15:17:41.381+00	%
+6	3720	0	1176	3	142000	245000	0	0	0	245000	0	103000	0	\N	1707045253941	245000	\N	2024	2	4	2024-02-04 11:14:13.941+00	%
+6	3721	0	1284	3	91000	170000	0	0	0	170000	0	79000	0	\N	1707045498730	170000	\N	2024	2	4	2024-02-04 11:18:18.73+00	%
+6	3722	0	866	3	201000	0	0	0	0	0	0	-201000	0	phần mềm lỗi	1707045898971	0	\N	2024	2	4	2024-02-04 11:24:58.971+00	%
+6	3726	0	937	3	212000	365000	0	0	0	365000	0	153000	0	viêm phế quản, viêm mũi họng	1707206905413	365000	\N	2024	2	6	2024-02-06 08:08:25.413+00	%
+6	3730	0	1285	3	25000	260000	0	0	0	260000	0	235000	0	viêm phế quản	1707211982077	260000	\N	2024	2	6	2024-02-06 09:33:02.077+00	%
+6	3727	0	1157	3	120000	185000	0	0	0	185000	0	65000	0	viêm mũi họng cấp	1707207556813	185000	\N	2024	2	6	2024-02-06 08:19:16.813+00	%
+6	3734	0	938	3	0	0	0	0	0	0	0	0	0	klai tai còn ít dịch , VH đỡ	1707216907350	0	\N	2024	2	6	2024-02-06 10:55:07.35+00	%
+6	3728	0	999	3	220500	365000	0	0	0	365000	0	144500	0	viêm tiểu phế quản	1707208682931	365000	\N	2024	2	6	2024-02-06 08:38:02.931+00	%
+6	3729	0	1041	3	165000	280000	0	0	0	280000	0	115000	0	\N	1707211798017	280000	\N	2024	2	6	2024-02-06 09:29:58.017+00	%
+6	3731	0	1075	3	177000	320000	0	0	0	320000	0	143000	0	viêm phế quản , viêm mũi họng	1707211987875	320000	\N	2024	2	6	2024-02-06 09:33:07.875+00	%
+6	3732	0	1058	3	118000	145000	0	0	0	145000	0	27000	0	khám lại còn viêm họng , VPQ đỡ thêm ks 	1707214491792	145000	\N	2024	2	6	2024-02-06 10:14:51.792+00	%
+6	3725	0	983	3	99000	200000	0	0	0	200000	0	101000	0	\N	1707135269601	200000	\N	2024	2	5	2024-02-05 12:14:29.601+00	%
+6	3737	0	959	3	144000	235000	0	0	0	235000	0	91000	0	VPQ, VMH 	1707218642116	235000	\N	2024	2	6	2024-02-06 11:24:02.116+00	%
+6	3733	0	1234	3	0	30000	0	0	0	30000	0	30000	0	VMH virus 	1707216696890	30000	\N	2024	2	6	2024-02-06 10:51:36.89+00	%
+6	3735	0	1019	3	106000	250000	0	0	0	250000	0	144000	0	VPQ 	1707217789255	250000	\N	2024	2	6	2024-02-06 11:09:49.255+00	%
+6	3192	0	1048	3	10000	20000	0	0	0	20000	0	10000	0	\N	1704451539545	20000	\N	2024	1	5	2024-01-05 10:45:39.545+00	%
+6	3740	0	953	3	26000	90000	0	0	0	90000	0	64000	0	VMH cấp 	1707219950420	90000	\N	2024	2	6	2024-02-06 11:45:50.42+00	%
+6	3736	0	995	3	50000	100000	0	0	0	100000	0	50000	0	klai tai trái còn mủ , VMH 	1707218139989	100000	\N	2024	2	6	2024-02-06 11:15:39.989+00	%
+6	3738	0	1286	3	267000	490000	0	0	0	490000	0	223000	0	VH cấp 	1707219129001	490000	\N	2024	2	6	2024-02-06 11:32:09.001+00	%
+6	3739	0	1168	3	48000	90000	0	0	0	90000	0	42000	0	klai VTG 2 bên còn ít dịch 	1707219381808	90000	\N	2024	2	6	2024-02-06 11:36:21.808+00	%
+6	3741	0	954	3	0	30000	0	0	0	30000	0	30000	0	VMH cấp	1707219957118	30000	\N	2024	2	6	2024-02-06 11:45:57.118+00	%
+6	3743	0	1032	3	0	30000	0	0	0	30000	0	30000	0	VMH 	1707220181358	30000	\N	2024	2	6	2024-02-06 11:49:41.358+00	%
+6	3742	0	955	3	128000	240000	0	0	0	240000	0	112000	0	VMH 	1707220186269	240000	\N	2024	2	6	2024-02-06 11:49:46.269+00	%
+6	3744	0	1051	3	30800	105000	0	0	0	105000	0	74200	0	Viêm da 	1707220297865	105000	\N	2024	2	6	2024-02-06 11:51:37.865+00	%
+6	3745	0	1018	3	166000	310000	0	0	0	310000	0	144000	0	VMH cấp	1707221245614	310000	\N	2024	2	6	2024-02-06 12:07:25.614+00	%
+2	3714	0	124	3	530000	650000	0	0	20000	670000	30000	110000	0	\N	1706974311601	670000	\N	2024	2	3	2024-02-03 15:31:51.601+00	%
+2	3715	0	1029	3	676450	959000	0	0	0	959000	35000	247550	0	\N	1706974552705	959000	\N	2024	2	3	2024-02-03 15:35:52.705+00	%
+2	3718	0	304	3	60000	100000	0	0	0	100000	0	40000	0	\N	1707793172752	100000	\N	2024	2	13	2024-02-13 02:59:32.752+00	%
+6	3746	0	894	3	148000	275000	0	0	0	275000	0	127000	0	VH mủ , VM 	1707222453051	275000	\N	2024	2	6	2024-02-06 12:27:33.051+00	%
+6	3772	0	1007	3	241000	365000	0	0	0	365000	0	124000	0	viêm tiểu phế quản, viêm tai giữa T	1707307804156	365000	\N	2024	2	7	2024-02-07 12:10:04.156+00	%
+6	3747	0	1047	3	65000	150000	0	0	0	150000	0	85000	0	VMH cấp 	1707222459687	150000	\N	2024	2	6	2024-02-06 12:27:39.687+00	%
+6	3759	0	1082	3	26000	60000	0	0	0	60000	0	34000	0	\N	1707267625374	60000	\N	2024	2	7	2024-02-07 01:00:25.374+00	%
+6	3748	0	1287	3	232000	410000	0	0	0	410000	0	178000	0	VMH cấp 	1707222721683	410000	\N	2024	2	6	2024-02-06 12:32:01.683+00	%
+6	3749	0	1152	3	54000	70000	0	0	0	70000	0	16000	0	KHÁM LẠI ĐỠ	1707223105221	70000	\N	2024	2	6	2024-02-06 12:38:25.221+00	%
+6	3760	0	1272	3	230000	320000	0	0	0	320000	0	90000	0	\N	1707276860791	320000	\N	2024	2	7	2024-02-07 03:34:20.791+00	%
+6	3750	0	1277	3	36000	70000	0	0	0	70000	0	34000	0	klai VMH đỡ 	1707223115166	70000	\N	2024	2	6	2024-02-06 12:38:35.166+00	%
+6	3751	0	1182	3	163000	265000	0	0	0	265000	0	102000	0	VMH , VPQ 	1707223494049	265000	\N	2024	2	6	2024-02-06 12:44:54.049+00	%
+6	3768	0	1064	3	91000	170000	0	0	0	170000	0	79000	0	viêm mũi họng, viêm phế quản	1707305053749	170000	\N	2024	2	7	2024-02-07 11:24:13.749+00	%
+6	3752	0	1111	3	26000	90000	0	0	0	90000	0	64000	0	VMH 	1707223603903	90000	\N	2024	2	6	2024-02-06 12:46:43.903+00	%
+6	3761	0	1202	3	39000	110000	0	0	0	110000	0	71000	0	viêm mũi họng	1707294099080	110000	\N	2024	2	7	2024-02-07 08:21:39.08+00	%
+6	3753	0	1264	3	35596	49000	0	0	0	49000	0	13404	0	khám lại đỡ 	1707223903684	49000	\N	2024	2	6	2024-02-06 12:51:43.684+00	%
+6	3649	0	1264	3	52000	140000	0	0	0	140000	0	88000	0	klai Viêm mũi xoang đỡ chậm	1706619022028	140000	\N	2024	1	30	2024-01-30 12:50:22.028+00	%
+6	3756	0	1120	3	30000	60000	0	0	0	60000	0	30000	0	khám lại đỡ	1707225640714	60000	\N	2024	2	6	2024-02-06 13:20:40.714+00	%
+6	3755	0	1288	3	122000	230000	0	0	0	230000	0	108000	0	VH cấp 	1707225704305	230000	\N	2024	2	6	2024-02-06 13:21:44.305+00	%
+6	3762	0	1002	3	8000	26000	0	0	0	26000	0	18000	0	\N	1707299088521	26000	\N	2024	2	7	2024-02-07 09:44:48.521+00	%
+6	3754	0	1230	3	141500	260000	0	0	0	260000	0	118500	0	VTPQ	1707225744175	260000	\N	2024	2	6	2024-02-06 13:22:24.175+00	%
+6	3757	0	1067	3	235000	415000	0	0	0	415000	0	180000	0	VTG mủ (P) , VMH 	1707226080025	415000	\N	2024	2	6	2024-02-06 13:28:00.025+00	%
+6	3763	0	1268	1	42000	66000	0	0	0	66000	0	24000	0	vtg đỡ	1707300394715	66000	\N	\N	\N	\N	\N	%
+6	3758	0	1164	3	184500	350000	0	0	0	350000	0	165500	0	viêm mũi họng, vtg P	1707230432061	350000	\N	2024	2	6	2024-02-06 14:40:32.061+00	%
+2	3506	0	321	3	469000	705000	0	0	20000	725000	30000	226000	0	\N	1706708092517	725000	\N	2024	1	31	2024-01-31 13:34:52.517+00	%
+6	3764	0	1071	2	27000	35000	0	0	0	35000	0	8000	35000	\N	1707301139857	0	\N	2024	2	7	2024-02-07 10:18:59.857+00	%
+6	3769	0	1284	3	34400	60000	0	0	0	60000	0	25600	0	khám lại ổn	1707305313949	60000	\N	2024	2	7	2024-02-07 11:28:33.949+00	%
+6	3765	0	964	3	159000	265000	0	0	0	265000	0	106000	0	viêm phế quản	1707301984206	265000	\N	2024	2	7	2024-02-07 10:33:04.206+00	%
+6	3766	0	949	3	156000	309000	0	0	0	309000	0	153000	0	\N	1707302549411	309000	\N	2024	2	7	2024-02-07 10:42:29.411+00	%
+6	3767	0	1289	3	151000	450000	0	0	0	450000	0	299000	0	viêm họng cấp	1707302863160	450000	\N	2024	2	7	2024-02-07 10:47:43.16+00	%
+6	3773	0	1078	3	188000	303000	0	0	0	303000	0	115000	0	viêm phế quản co thắt	1707311929655	303000	\N	2024	2	7	2024-02-07 13:18:49.655+00	%
+6	3770	0	1239	3	120000	340000	0	0	0	340000	0	220000	0	viêm phế quản co thắt, tai ổn	1707306150430	340000	\N	2024	2	7	2024-02-07 11:42:30.43+00	%
+6	3771	0	1011	3	106000	210000	0	0	0	210000	0	104000	0	viêm phế quản, viêm họng cấp	1707306723357	210000	\N	2024	2	7	2024-02-07 11:52:03.357+00	%
+6	3774	0	1247	3	54000	140000	0	0	0	140000	0	86000	0	viêm mũ xoang cấp	1707313326754	140000	\N	2024	2	7	2024-02-07 13:42:06.754+00	%
+6	3775	0	1124	3	0	180000	0	0	0	180000	0	180000	0	viêm mũi họng mủ	1707313451796	180000	\N	2024	2	7	2024-02-07 13:44:11.796+00	%
+6	3037	0	1035	3	143800	235000	0	0	0	235000	0	91200	0	\N	1703683906388	235000	\N	2023	12	27	2023-12-27 13:31:46.388+00	%
+6	2892	0	1071	3	118000	145000	0	0	0	145000	0	27000	0	klai VTG (T) còn ít dịch	1703075270586	145000	\N	2023	12	20	2023-12-20 12:27:50+00	%
+3	3776	0	1290	0	0	4800000	0	0	0	4800000	0	4800000	0	\N	1707323695472	0	\N	\N	\N	\N	\N	%
+6	3778	0	1136	3	96000	170000	0	0	0	170000	0	74000	0	viêm mũi họng mủ	1707355850690	170000	\N	2024	2	8	2024-02-08 01:30:50.69+00	%
+6	3777	0	997	3	142000	275000	0	0	0	275000	0	133000	0	viêm mũi họng	1707354939999	275000	\N	2024	2	8	2024-02-08 01:15:39.999+00	%
+6	3779	0	1291	3	246000	365000	0	0	0	365000	0	119000	0	viêm mũi họng cấp	1707356424593	365000	\N	2024	2	8	2024-02-08 01:40:24.593+00	%
+6	3780	0	1292	3	255200	365000	0	0	0	365000	0	109800	0	viêm họng cấp mủ	1707360862959	365000	\N	2024	2	8	2024-02-08 02:54:22.959+00	%
+6	3782	0	1257	3	166000	270000	0	0	0	270000	0	104000	0	viêm mũi họng	1707361699736	270000	\N	2024	2	8	2024-02-08 03:08:19.736+00	%
+6	3781	0	1249	3	168000	305000	0	0	0	305000	0	137000	0	viêm mũi mủ, viêm họng cấp	1707361149213	305000	\N	2024	2	8	2024-02-08 02:59:09.213+00	%
+6	3795	0	1294	3	101000	230000	0	0	0	230000	0	129000	0	viêm mũi họng	1707443915246	230000	\N	2024	2	9	2024-02-09 01:58:35.246+00	%
+6	3783	0	999	3	44500	80000	0	0	0	80000	0	35500	0	khám lại	1707361561813	80000	\N	2024	2	8	2024-02-08 03:06:01.813+00	%
+6	3784	0	1003	3	126500	249000	0	0	0	249000	0	122500	0	viêm phế quản, viêm họng cấp	1707370931161	249000	\N	2024	2	8	2024-02-08 05:42:11.161+00	%
+6	3785	0	1293	3	180200	305000	0	0	0	305000	0	124800	0	viêm mũi họng, tai trái có dịch	1707374716544	305000	\N	2024	2	8	2024-02-08 06:45:16.544+00	%
+6	3786	0	941	3	217000	390000	0	0	0	390000	0	173000	0	\N	1707388645503	390000	\N	2024	2	8	2024-02-08 10:37:25.503+00	%
+6	3797	0	954	3	120000	185000	0	0	0	185000	0	65000	0	viêm tai giữa mủ P, viêm mũi họng mủ	1707444020526	185000	\N	2024	2	9	2024-02-09 02:00:20.526+00	%
+6	3787	0	1023	3	383000	635000	0	0	0	635000	0	252000	0	viêm họng	1707391133042	635000	\N	2024	2	8	2024-02-08 11:18:53.042+00	%
+6	3808	0	1264	3	102000	170000	0	0	0	170000	0	68000	0	đỡ	1707483188817	170000	\N	2024	2	9	2024-02-09 12:53:08.817+00	%
+6	3788	0	938	3	40000	50000	0	0	0	50000	0	10000	0	\N	1707391292826	50000	\N	2024	2	8	2024-02-08 11:21:32.826+00	%
+6	3804	0	1058	3	10000	20000	0	0	0	20000	0	10000	0	khám lại, u ks novafex + klacid	1707462227347	20000	\N	2024	2	9	2024-02-09 07:03:47.347+00	%
+6	3789	0	1018	3	154000	245000	0	0	0	245000	0	91000	0	viêm phế quản, viêm mũi họng	1707391838486	245000	\N	2024	2	8	2024-02-08 11:30:38.486+00	%
+6	3796	0	953	3	138000	210000	0	0	0	210000	0	72000	0	viêm mũi họng mủ	1707444060357	210000	\N	2024	2	9	2024-02-09 02:01:00.357+00	%
+6	3790	0	1049	3	146000	245000	0	0	0	245000	0	99000	0	\N	1707393718390	245000	\N	2024	2	8	2024-02-08 12:01:58.39+00	%
+6	3791	0	987	3	299000	485000	0	0	0	485000	0	186000	0	viêm phế quản, viêm họng cấp,viêm loét miệng	1707394436730	485000	\N	2024	2	8	2024-02-08 12:13:56.73+00	%
+6	3803	0	983	3	154000	215000	0	0	0	215000	0	61000	0	\N	1707467822222	215000	\N	2024	2	9	2024-02-09 08:37:02.222+00	%
+6	3798	0	1157	3	120000	185000	0	0	0	185000	0	65000	0	khám lại	1707444389288	185000	\N	2024	2	9	2024-02-09 02:06:29.288+00	%
+6	3792	0	1032	3	161000	275000	0	0	0	275000	0	114000	0	VPQ	1707396317424	275000	\N	2024	2	8	2024-02-08 12:45:17.424+00	%
+6	3799	0	964	0	289500	404000	0	0	0	404000	0	114500	0	viêm phế quản	1707445129336	0	\N	\N	\N	\N	\N	%
+6	3793	0	955	3	90000	130000	0	0	0	130000	0	40000	0	khám lại ổn	1707396401451	130000	\N	2024	2	8	2024-02-08 12:46:41.451+00	%
+6	3794	0	953	3	68000	100000	0	0	0	100000	0	32000	0	\N	1707396547690	100000	\N	2024	2	8	2024-02-08 12:49:07.69+00	%
+2	2372	0	292	3	510440	669200	0	0	0	669200	0	158760	0	Cập nhật hệ thống: Dồn hết số nợ còn lại vào đơn này	1699452263409	669200	\N	2023	11	8	2023-11-08 14:04:24+00	%
+6	3800	0	1295	3	146000	295000	0	0	0	295000	0	149000	0	viêm mũi họng	1707457730321	295000	\N	2024	2	9	2024-02-09 05:48:50.321+00	%
+6	3805	0	959	3	26000	60000	0	0	0	60000	0	34000	0	khám lại ổn	1707468037029	60000	\N	2024	2	9	2024-02-09 08:40:37.029+00	%
+6	3801	0	984	3	82500	115000	0	0	0	115000	0	32500	0	viêm loét miệng	1707458553925	115000	\N	2024	2	9	2024-02-09 06:02:33.925+00	%
+6	3802	0	865	3	260000	350000	0	0	0	350000	0	90000	0	\N	1707461504986	350000	\N	2024	2	9	2024-02-09 06:51:44.986+00	%
+6	3809	0	996	3	474000	665000	0	0	0	665000	0	191000	0	khám lại	1707483442621	665000	\N	2024	2	9	2024-02-09 12:57:22.621+00	%
+6	3806	0	1239	3	69500	115000	0	0	0	115000	0	45500	0	khám lại VTPQ	1707480372323	115000	\N	2024	2	9	2024-02-09 12:06:12.323+00	%
+6	3807	0	1296	3	166000	320000	0	0	0	320000	0	154000	0	viêm mũi họng	1707481866910	320000	\N	2024	2	9	2024-02-09 12:31:06.91+00	%
+6	3812	0	1291	3	144000	205000	0	0	0	205000	0	61000	0	khám lại viêm phế quản	1707562416217	205000	\N	2024	2	10	2024-02-10 10:53:36.217+00	%
+6	3810	0	1288	3	41000	120000	0	0	0	120000	0	79000	0	\N	1707484461543	120000	\N	2024	2	9	2024-02-09 13:14:21.543+00	%
+6	3811	0	1291	3	128000	155000	0	0	0	155000	0	27000	0	viêm phế quản	1707561987915	155000	\N	2024	2	10	2024-02-10 10:46:27.915+00	%
+6	3816	0	999	3	163000	250000	0	0	0	250000	0	87000	0	viêm mũi xoang, viêm họng	1707740444233	250000	\N	2024	2	12	2024-02-12 12:20:44.233+00	%
+6	3813	0	1297	3	142000	275000	0	0	0	275000	0	133000	0	viêm mũi họng cấp	1707739045956	275000	\N	2024	2	12	2024-02-12 11:57:25.956+00	%
+6	3815	0	1135	3	154000	235000	0	0	0	235000	0	81000	0	viêm phế quản	1707739949198	235000	\N	2024	2	12	2024-02-12 12:12:29.198+00	%
+6	3814	0	1136	3	40000	75000	0	0	0	75000	0	35000	0	khám lại	1707739955162	75000	\N	2024	2	12	2024-02-12 12:12:35.162+00	%
+6	3817	0	955	3	146000	245000	0	0	0	245000	0	99000	0	viêm phế quản	1707740813252	245000	\N	2024	2	12	2024-02-12 12:26:53.252+00	%
+6	3818	0	1019	3	80000	160000	0	0	0	160000	0	80000	0	khám lại ổn	1707741225781	160000	\N	2024	2	12	2024-02-12 12:33:45.781+00	%
+6	3819	0	1298	3	28500	100000	0	0	0	100000	0	71500	0	viêm mũi họng, uống ks bostocef	1707741236482	100000	\N	2024	2	12	2024-02-12 12:33:56.482+00	%
+6	3820	0	959	3	128000	155000	0	0	0	155000	0	27000	0	khám lại ổn	1707741407615	155000	\N	2024	2	12	2024-02-12 12:36:47.615+00	%
+2	3834	0	463	3	4021286	4021286	0	0	0	4021286	0	0	0	\N	1707792565013	4021286	\N	2024	2	13	2024-02-13 02:49:25.013+00	%
+6	3823	0	895	2	65500	125000	0	0	0	125000	0	59500	125000	mẹ oanh 	1707742128956	0	\N	2024	2	12	2024-02-12 12:48:48.956+00	%
+6	3822	0	894	2	234000	345000	0	0	0	345000	0	111000	345000	khám lại, viêm phế quản, viêm họng mủ	1707742133758	0	\N	2024	2	12	2024-02-12 12:48:53.758+00	%
+6	3821	0	1047	2	85900	160000	0	0	0	160000	0	74100	160000	khám lại ổn	1707742139813	0	\N	2024	2	12	2024-02-12 12:48:59.813+00	%
+6	3840	0	1275	3	106000	370000	0	0	0	370000	0	264000	0	viêm phế quản , viêm tai giữa mủ T, dịch P	1707877217990	370000	\N	2024	2	14	2024-02-14 02:20:17.99+00	%
+6	3824	0	970	3	5900	20000	0	0	0	20000	0	14100	0	ổn	1707742390619	20000	\N	2024	2	12	2024-02-12 12:53:10.619+00	%
+2	3835	0	463	3	2346000	2346000	0	0	0	2346000	0	0	0	\N	1707793136415	2346000	\N	2024	2	13	2024-02-13 02:58:56.415+00	%
+6	3825	0	1239	3	40000	80000	0	0	0	80000	0	40000	0	viêm TPQ	1707742677080	80000	\N	2024	2	12	2024-02-12 12:57:57.08+00	%
+2	3708	0	245	3	350000	450000	0	0	30000	480000	30000	100000	0	\N	1706972949336	480000	\N	2024	2	3	2024-02-03 15:09:09.336+00	%
+6	3826	0	1253	3	24900	50000	0	0	0	50000	0	25100	0	viêm mũi	1707743313105	50000	\N	2024	2	12	2024-02-12 13:08:33.105+00	%
+6	3827	0	1169	3	172000	335000	0	0	0	335000	0	163000	0	viêm phế quản, viêm họng cấp	1707743320235	335000	\N	2024	2	12	2024-02-12 13:08:40.235+00	%
+2	3836	0	463	3	4294240	4395000	0	0	0	4395000	0	100760	0	\N	1707797480470	4395000	\N	2024	2	13	2024-02-13 04:11:20.47+00	%
+6	3828	0	1145	3	146000	245000	0	0	0	245000	0	99000	0	viêm phế quản, viêm mũi	1707743811748	245000	\N	2024	2	12	2024-02-12 13:16:51.748+00	%
+6	3829	0	1163	3	118000	200000	0	0	0	200000	0	82000	0	viêm mũi họng	1707743814248	200000	\N	2024	2	12	2024-02-12 13:16:54.248+00	%
+6	3830	0	984	3	199500	368000	0	0	0	368000	0	168500	0	viêm tiểu phế quản	1707745258232	368000	\N	2024	2	12	2024-02-12 13:40:58.232+00	%
+6	3847	0	1301	3	26000	280000	0	0	0	280000	0	254000	0	viêm mũi họng	1707882051146	280000	\N	2024	2	14	2024-02-14 03:40:51.146+00	%
+6	3831	0	984	3	137000	185000	0	0	0	185000	0	48000	0	\N	1707745819878	185000	\N	2024	2	12	2024-02-12 13:50:19.878+00	%
+2	3837	0	463	3	106000	106000	0	0	0	106000	0	0	0	\N	1707797774745	106000	\N	2024	2	13	2024-02-13 04:16:14.745+00	%
+6	3832	0	941	3	146000	245000	0	0	0	245000	0	99000	0	\N	1707746833744	245000	\N	2024	2	12	2024-02-12 14:07:13.744+00	%
+6	3833	0	954	3	146000	245000	0	0	0	245000	0	99000	0	khám lại	1707747033698	245000	\N	2024	2	12	2024-02-12 14:10:33.698+00	%
+6	3843	0	1098	3	293000	455000	0	0	0	455000	0	162000	0	viêm tai giữa ứ mủ 2 bên, viêm phế quản	1707878865155	455000	\N	2024	2	14	2024-02-14 02:47:45.155+00	%
+6	3839	0	993	3	276000	355000	0	0	0	355000	0	79000	0	viêm mũi mủ, viêm họng cấp	1707875952847	355000	\N	2024	2	14	2024-02-14 01:59:12.847+00	%
+6	3838	0	1086	3	196000	315000	0	0	0	315000	0	119000	0	viêm tai giưã mr 2 bên, viêm mũi họng	1707875959516	315000	\N	2024	2	14	2024-02-14 01:59:19.516+00	%
+6	3844	0	1041	3	740000	1100000	0	0	0	1100000	0	360000	0	viêm TPQ	1707879691751	1100000	\N	2024	2	14	2024-02-14 03:01:31.751+00	%
+6	3842	0	1299	3	86000	200000	0	0	0	200000	0	114000	0	\N	1707877175769	200000	\N	2024	2	14	2024-02-14 02:19:35.769+00	%
+6	3841	0	1299	3	107000	381000	0	0	0	381000	0	274000	0	viêm phế quản, viêm mũi họng	1707877181921	381000	\N	2024	2	14	2024-02-14 02:19:41.921+00	%
+6	3850	0	1302	3	188000	320000	0	0	0	320000	0	132000	0	viêm mũi họng virus	1707891537686	320000	\N	2024	2	14	2024-02-14 06:18:57.686+00	%
+6	3845	0	1157	3	17500	30000	0	0	0	30000	0	12500	0	\N	1707880785611	30000	\N	2024	2	14	2024-02-14 03:19:45.611+00	%
+6	3849	0	1048	3	163000	265000	0	0	0	265000	0	102000	0	viêm phế quản	1707882568182	265000	\N	2024	2	14	2024-02-14 03:49:28.182+00	%
+6	3846	0	1300	3	451000	670000	0	0	0	670000	0	219000	0	viêm mũi họng cấp	1707882046463	670000	\N	2024	2	14	2024-02-14 03:40:46.463+00	%
+6	3848	0	995	3	50000	100000	0	0	0	100000	0	50000	0	viêm tai giữa T còn ít dịch mủ	1707882574945	100000	\N	2024	2	14	2024-02-14 03:49:34.945+00	%
+6	3851	0	1054	3	146000	245000	0	0	0	245000	0	99000	0	viêm mũi họng cấp	1707895712954	245000	\N	2024	2	14	2024-02-14 07:28:32.954+00	%
+3	3852	0	1114	3	0	2000000	0	0	0	2000000	0	2000000	0	\N	1707901789950	2000000	\N	2024	2	14	2024-02-14 09:09:49.95+00	%
+6	3853	0	1303	3	228400	335000	0	0	0	335000	0	106600	0	viêm phế quản, viêm mũi họng	1707903677809	335000	\N	2024	2	14	2024-02-14 09:41:17.809+00	%
+6	3854	0	1303	3	27900	100000	0	0	0	100000	0	72100	0	\N	1707905907993	100000	\N	2024	2	14	2024-02-14 10:18:27.993+00	%
+6	3855	0	941	3	160000	180000	0	0	0	180000	0	20000	0	\N	1707906977976	180000	\N	2024	2	14	2024-02-14 10:36:17.976+00	%
+6	3856	0	1103	3	358000	590000	0	0	0	590000	0	232000	0	viêm mũi họng, viêm phế quản	1707914013764	590000	\N	2024	2	14	2024-02-14 12:33:33.764+00	%
+6	3857	0	1304	3	157500	235000	0	0	0	235000	0	77500	0	viêm họng	1707914074761	235000	\N	2024	2	14	2024-02-14 12:34:34.761+00	%
+6	3858	0	1049	2	128000	155000	0	0	0	155000	0	27000	155000	viêm tai giữa ứ mủ 2 bên	1707914405716	0	\N	2024	2	14	2024-02-14 12:40:05.716+00	%
+6	3859	0	996	2	66000	85000	0	0	0	85000	0	19000	85000	\N	1707919572491	0	\N	2024	2	14	2024-02-14 14:06:12.491+00	%
+6	3860	0	1295	3	272500	415000	0	0	0	415000	0	142500	0	viêm tiểu phế quản- mượn máy khí dung	1707943611435	415000	\N	2024	2	15	2024-02-14 20:46:51.435+00	%
+6	3861	0	1160	3	104000	155000	0	0	0	155000	0	51000	0	\N	1707994831074	155000	\N	2024	2	15	2024-02-15 11:00:31.074+00	%
+6	3862	0	1023	3	15000	30000	0	0	0	30000	0	15000	0	\N	1707998876312	30000	\N	2024	2	15	2024-02-15 12:07:56.312+00	%
+6	3863	0	1305	3	99000	230000	0	0	0	230000	0	131000	0	viêm mũi xoang mủ/ viêm tai giữa mủ 2 bên	1708002204715	230000	\N	2024	2	15	2024-02-15 13:03:24.715+00	%
+6	3864	0	955	3	291000	455000	0	0	0	455000	0	164000	0	khám lại	1708002804827	455000	\N	2024	2	15	2024-02-15 13:13:24.827+00	%
+6	3865	0	976	3	162000	265000	0	0	0	265000	0	103000	0	mẹ, viêm họng cấp	1708003531575	265000	\N	2024	2	15	2024-02-15 13:25:31.575+00	%
+6	3866	0	976	3	228500	365000	0	0	0	365000	0	136500	0	viêm phế quản, viêm mũi họng	1708003536449	365000	\N	2024	2	15	2024-02-15 13:25:36.449+00	%
+6	3867	0	1182	3	142000	330000	0	0	0	330000	0	188000	0	viêm tai giữa ứ mủ bên P, viêm mũi họng cấp	1708004440141	330000	\N	2024	2	15	2024-02-15 13:40:40.141+00	%
+6	3868	0	1182	3	82980	120000	0	0	0	120000	0	37020	0	\N	1708004608228	120000	\N	2024	2	15	2024-02-15 13:43:28.228+00	%
+6	3869	0	954	-1	50000	100000	0	0	0	100000	0	50000	0	tai còn ít dịch	1708004883985	0	1708005036709	2024	2	15	2024-02-15 13:48:03.985+00	%
+6	3870	0	954	3	86000	180000	0	0	0	180000	0	94000	0	tai còn ít dịch	1708005036724	180000	\N	2024	2	15	2024-02-15 13:50:36.724+00	%
+1	3871	0	963	3	20250000	40500000	0	0	0	40500000	0	20250000	0	\N	1708021540664	40500000	\N	2024	2	16	2024-02-15 18:25:40.664+00	%
 \.
 
 
@@ -8644,6 +9665,22 @@ COPY public."InvoiceExpense" (oid, id, "invoiceId", key, name, money) FROM stdin
 2	104	3503	_unknown	Ship	30000
 2	106	3556	_unknown	Ship	11000
 3	108	3572	_unknown	Khác	2800000
+2	109	3606	_unknown	Ship	70000
+2	110	3607	_unknown	Ship	70000
+2	111	3631	_unknown	Ship	30000
+2	112	3632	_unknown	Ship	20000
+2	113	3633	_unknown	Ship	30000
+2	114	3634	_unknown	Ship	40000
+2	115	3661	_unknown	Ship	30000
+2	116	3662	_unknown	Ship	30000
+2	117	3506	_unknown	Ship	30000
+2	118	3707	_unknown	Ship	22000
+2	119	3664	_unknown	Ship	24000
+2	120	3708	_unknown	Ship	30000
+2	121	3709	_unknown	Ship	30000
+2	122	3714	_unknown	Ship	30000
+2	123	3711	_unknown	Ship	30000
+2	124	3715	_unknown	Ship	35000
 \.
 
 
@@ -15667,6 +16704,7 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 6	9027	2887	1013	2804	1	{"name":"Lọ","rate":1}	148000	190000	0	0	190000	1		%
 6	9028	2887	1013	2872	1	{"name":"Gói","rate":1}	2600	5000	0	0	5000	15		%
 6	9029	2888	1070	2723	1	{"name":"Lọ","rate":1}	118000	145000	0	0	145000	1		%
+6	11893	3833	954	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
 6	9031	2890	1054	2748	1	{"name":"Gói","rate":1}	11000	20000	0	0	20000	6		%
 6	9032	2890	1054	302	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
 6	9033	2891	938	2640	1	{"name":"Lọ","rate":1}	32000	60000	0	0	60000	1		%
@@ -15675,7 +16713,13 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 6	9036	2894	955	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
 6	9037	2894	955	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	2		%
 6	9038	2895	1078	3034	1	{"name":"Lọ","rate":1}	115000	185000	0	0	185000	1		%
+6	11894	3833	954	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
 2	9040	2897	277	3069	1	{"name":"","rate":1}	40000	369000	0	0	369000	1		%
+6	11958	3845	1157	2835	1	{"name":"Chiếc","rate":1}	17500	30000	0	0	30000	1		%
+3	11976	3852	1114	318	2	{"name":"Lần","rate":1}	0	3000000	1000000	33	2000000	1	\N	VNĐ
+6	11991	3858	1049	3185	1	{"name":"Lọ","rate":1}	128000	155000	0	0	155000	1		%
+6	12006	3861	1160	2504	1	{"name":"Viên","rate":1}	3800	5000	0	0	5000	5		%
+6	12007	3861	1160	2854	1	{"name":"Viên","rate":1}	8500	13000	0	0	13000	10		%
 2	9049	2903	312	3069	1	{"name":"","rate":1}	40000	369000	369000	100	0	1		%
 2	9053	2906	443	2874	1	{"name":"Chai","rate":1}	297700	458000	45800	10	412200	1		%
 2	9054	2907	295	1336	1	{"name":"Hộp","rate":1}	120000	230000	230000	100	0	2		%
@@ -15708,6 +16752,7 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 6	9081	2915	1013	3060	1	{"name":"Tuýp","rate":1}	17800	30000	0	0	30000	1		%
 6	9082	2915	1013	2752	1	{"name":"Lọ","rate":1}	66000	90000	0	0	90000	1		%
 6	9083	2916	954	3032	1	{"name":"Lọ","rate":1}	135000	220000	0	0	220000	1		%
+2	11895	3834	463	3168	1	{"name":"Hộp","rate":1}	60000	60000	0	0	60000	6		%
 2	9087	2919	232	1200	1	{"name":"Chai","rate":1}	278000	427000	85400	20	341600	1		%
 2	9100	2922	1099	2387	1	{"name":"Chai","rate":1}	57000	110000	10000	9	100000	1		VNĐ
 2	9101	2922	1099	1219	1	{"name":"Hộp","rate":1}	82000	130000	25000	19	105000	1		VNĐ
@@ -15774,6 +16819,7 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 6	9167	2937	1086	2756	1	{"name":"Ống","rate":1}	10500	13000	0	0	13000	5		%
 6	9168	2937	1086	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
 6	9169	2937	1086	2715	1	{"name":"Lọ","rate":1}	125000	150000	0	0	150000	1		%
+2	11896	3834	463	1414	1	{"name":"Hộp","rate":1}	97000	97000	0	0	97000	2		%
 2	9171	2920	681	1364	1	{"name":"Hộp","rate":1}	188000	290000	0	0	290000	1		%
 2	9172	2898	281	2376	1	{"name":"Hộp","rate":1}	123000	210000	20000	10	190000	1		VNĐ
 2	9173	2898	281	1336	1	{"name":"Hộp","rate":1}	120000	230000	57500	25	172500	2		%
@@ -15783,9 +16829,11 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 6	9177	2941	1104	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
 6	9178	2941	1104	2643	1	{"name":"Lọ","rate":1}	28000	60000	0	0	60000	1		%
 6	9179	2941	1104	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	9	Uống 2 lần/ngày ,sáng- chiều	%
+2	11897	3834	463	1941	1	{"name":"Hộp","rate":1}	60000	60000	0	0	60000	9		%
 6	9181	2943	894	2870	1	{"name":"Viên","rate":1}	30000	65000	0	0	65000	3		%
 2	9182	2942	104	1361	1	{"name":"Hộp","rate":1}	75000	180000	45000	25	135000	2		VNĐ
 2	9183	2942	104	1577	1	{"name":"Hộp","rate":1}	60000	90000	0	0	90000	1		%
+2	11898	3834	463	3037	1	{"name":"Hộp","rate":1}	70000	70000	0	0	70000	1		%
 2	9185	2945	302	1437	1	{"name":"Hộp","rate":1}	112000	168000	48000	29	120000	1		VNĐ
 6	9186	2946	1105	308	2	{"name":"Lần","rate":1}	0	20000	0	0	20000	1	\N	%
 6	9187	2946	1105	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
@@ -15833,6 +16881,7 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 6	9231	2963	1043	2827	1	{"name":"Lọ","rate":1}	13000	20000	0	0	20000	1	nhỏ mũi 3-4 lần/ ngày mỗi bên 2-3 giọt	%
 6	9232	2963	1043	3059	1	{"name":"Lọ","rate":1}	23160	60000	0	0	60000	1		%
 6	9233	2963	1043	3032	1	{"name":"Lọ","rate":1}	135000	220000	0	0	220000	1		%
+2	11899	3834	463	2344	1	{"name":"Hộp","rate":1}	75000	75000	0	0	75000	2		%
 2	9235	2965	598	2387	1	{"name":"Chai","rate":1}	57000	110000	10000	9	100000	2		VNĐ
 6	9236	2966	1035	3061	1	{"name":"Tuýp","rate":1}	8800	15000	0	0	15000	1		%
 6	9237	2966	1035	2684	1	{"name":"Viên","rate":1}	200	1000	0	0	1000	9		%
@@ -15844,6 +16893,10 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 11	9243	2972	1115	3084	1	{"name":"Viên","rate":1}	760	1000	-100	-10	1100	20		VNĐ
 11	9244	2973	1116	3084	1	{"name":"Viên","rate":1}	760	1000	-1000	-100	2000	30		VNĐ
 2	9245	2974	302	1437	1	{"name":"Hộp","rate":1}	112000	168000	48000	29	120000	2		VNĐ
+2	11900	3834	463	2315	1	{"name":"","rate":1}	37000	37000	0	0	37000	1		%
+2	11901	3834	463	1328	1	{"name":"Chai","rate":1}	52000	52000	0	0	52000	3		%
+2	11902	3834	463	1213	1	{"name":"Chai","rate":1}	312000	312000	0	0	312000	1		%
+2	11903	3834	463	3049	1	{"name":"Chai","rate":1}	129000	129000	0	0	129000	2		%
 2	9250	2975	329	2375	1	{"name":"Chai","rate":1}	200000	528000	110000	21	418000	1		VNĐ
 2	9251	2975	329	3035	1	{"name":"Hộp","rate":1}	329450	599000	74000	12	525000	1		VNĐ
 2	9252	2975	329	1951	1	{"name":"Hộp","rate":1}	207000	309000	18540	6	290460	2		%
@@ -15852,6 +16905,8 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 2	9255	2976	308	1437	1	{"name":"Hộp","rate":1}	112000	168000	18000	11	150000	3		VNĐ
 2	9256	2977	1117	2388	1	{"name":"Hộp","rate":1}	18000	40000	0	0	40000	1		%
 2	9257	2977	1117	2849	1	{"name":"Hộp","rate":1}	285000	390000	39000	10	351000	1		%
+2	11904	3834	463	2375	1	{"name":"Chai","rate":1}	200000	200000	0	0	200000	3		%
+2	11905	3834	463	1256	1	{"name":"Hộp","rate":1}	182000	182000	0	0	182000	1		%
 2	9260	2978	299	2851	1	{"name":"Hộp","rate":1}	265000	325000	60000	18	265000	1		VNĐ
 2	9261	2978	299	2849	1	{"name":"Hộp","rate":1}	285000	390000	100000	26	290000	1		VNĐ
 2	9262	2979	935	3078	1	{"name":"","rate":1}	170000	345000	69000	20	276000	1		%
@@ -15871,6 +16926,7 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 2	9276	2982	463	2263	1	{"name":"Hộp","rate":1}	35000	120000	88000	73	32000	2		VNĐ
 2	9277	2982	463	1855	1	{"name":"Cái","rate":1}	20000	30000	10000	33	20000	7		VNĐ
 2	9278	2982	463	1198	1	{"name":"Chai","rate":1}	1000	269000	268000	99	1000	3		VNĐ
+2	11906	3834	463	2251	1	{"name":"Hộp","rate":1}	381	381	0	0	381	6		%
 2	9279	2982	463	2158	1	{"name":"Hộp","rate":1}	180000	430000	250000	58	180000	2		VNĐ
 2	9280	2982	463	1303	1	{"name":"Hộp","rate":1}	8000	35000	27000	77	8000	10		VNĐ
 2	9281	2982	463	1393	1	{"name":"Hộp","rate":1}	40000	80000	40000	50	40000	16		VNĐ
@@ -15945,6 +17001,8 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 6	9354	2999	1006	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
 6	9355	3000	1111	2750	1	{"name":"Ống","rate":1}	5400	7000	0	0	7000	10		%
 6	9356	3001	891	2718	1	{"name":"Lọ","rate":1}	50000	100000	0	0	100000	1	Uống 2 lần/ngày , sáng - chiều , bảo quản ngăn mát tủ lạnh	%
+2	11907	3834	463	1250	1	{"name":"Hộp","rate":1}	276000	276000	0	0	276000	2		%
+2	11908	3834	463	2408	1	{"name":"Hộp","rate":1}	290000	290000	0	0	290000	1		%
 6	9359	3002	1124	2758	1	{"name":"Chai","rate":1}	8000	10000	0	0	10000	1		%
 6	9360	3002	1124	3059	1	{"name":"Lọ","rate":1}	23160	60000	0	0	60000	1		%
 6	9361	3002	1124	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
@@ -15965,6 +17023,9 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 2	9376	3006	339	2874	1	{"name":"Chai","rate":1}	297700	458000	91600	20	366400	1		%
 2	9377	3006	339	3082	1	{"name":"Hộp","rate":1}	222300	342000	68400	20	273600	1		%
 2	9378	3007	109	1462	1	{"name":"Hộp","rate":1}	335000	549000	27450	5	521550	1		%
+2	11909	3834	463	1253	1	{"name":"Hộp","rate":1}	318000	318000	0	0	318000	1		%
+6	11959	3846	1300	2672	1	{"name":"Lọ","rate":1}	285000	400000	0	0	400000	1		%
+6	11960	3846	1300	2872	1	{"name":"Gói","rate":1}	2600	5000	0	0	5000	10		%
 2	9382	3009	836	2766	1	{"name":"","rate":1}	10000	25000	25000	100	0	1		%
 2	9383	3009	836	3090	1	{"name":"","rate":1}	1584000	3168000	792000	25	2376000	1		%
 2	9384	3009	836	1357	1	{"name":"Hộp","rate":1}	775000	1550000	387500	25	1162500	1		%
@@ -15972,8 +17033,15 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 2	9386	3008	318	2353	1	{"name":"Hộp","rate":1}	315000	567000	97000	17	470000	1		VNĐ
 2	9387	3008	318	1691	1	{"name":"Hộp","rate":1}	1000	100000	100000	100	0	1		%
 2	9388	3008	318	1323	1	{"name":"Chai","rate":1}	312000	495000	99000	20	396000	1		%
+6	11961	3846	1300	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	10	Uống 2 lần/ngày ,sáng- chiều	%
+6	11977	3853	1303	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11978	3853	1303	2754	1	{"name":"Gói","rate":1}	6200	10000	0	0	10000	12		%
+6	11979	3853	1303	3185	1	{"name":"Lọ","rate":1}	128000	155000	0	0	155000	1		%
 2	9393	3011	463	1420	1	{"name":"Hộp","rate":1}	53000	75000	18750	25	56250	1		%
 2	9394	3011	463	1288	1	{"name":"Hộp","rate":1}	56000	75000	18750	25	56250	3		%
+6	11992	3859	996	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	1		%
+6	11993	3859	996	3129	1	{"name":"Lọ","rate":1}	61000	75000	0	0	75000	1		%
+6	12008	3862	1023	2645	1	{"name":"Gói","rate":1}	2500	5000	0	0	5000	6		%
 2	9398	3010	935	3093	1	{"name":"Hộp","rate":1}	56000	120000	45000	38	75000	2		VNĐ
 2	9399	3010	935	3087	1	{"name":"","rate":1}	128240	229000	40000	17	189000	1		VNĐ
 2	9400	3010	935	1255	1	{"name":"Túi","rate":1}	11000	25000	7000	28	18000	10		VNĐ
@@ -16050,6 +17118,9 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 6	9489	3030	1131	2447	1	{"name":"Lọ","rate":1}	36000	70000	0	0	70000	1		%
 6	9490	3030	1131	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	5	Uống 2 lần/ngày ,sáng- chiều	%
 6	9491	3030	1131	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+2	11910	3835	463	3174	1	{"name":"","rate":1}	105000	105000	0	0	105000	1		%
+2	11911	3835	463	2875	1	{"name":"","rate":1}	115000	115000	0	0	115000	15		%
+2	11912	3835	463	1233	1	{"name":"Hộp","rate":1}	180000	180000	0	0	180000	1		%
 3	9495	3033	526	243	2	{"name":"Lần","rate":1}	0	7500000	1000000	13	6500000	1	\N	VNĐ
 3	9496	3034	1132	318	2	{"name":"Lần","rate":1}	0	3000000	0	0	3000000	1	\N	%
 6	9497	3035	1047	2739	1	{"name":"Viên","rate":1}	6000	10000	0	0	10000	4		%
@@ -16121,10 +17192,19 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 2	9563	3031	580	2848	1	{"name":"Hộp","rate":1}	155000	320000	0	0	320000	1		%
 2	9564	3012	1029	1400	1	{"name":"Hộp","rate":1}	60000	96000	0	0	96000	1		%
 2	9565	3012	1029	2396	1	{"name":"Tuýp","rate":1}	149000	298000	29800	10	268200	1		%
+2	11913	3835	463	1242	1	{"name":"Hộp","rate":1}	1000	1000	0	0	1000	1		%
 2	9567	3059	294	1244	1	{"name":"Hộp","rate":1}	1600000	2500000	850000	34	1650000	1		VNĐ
 2	9568	3060	225	3083	1	{"name":"Hộp","rate":1}	108000	150000	30000	20	120000	1		%
 2	9569	3060	225	1336	1	{"name":"","rate":1}	120000	230000	69000	30	161000	2	Uống 2 viên sau ăn tối	%
 2	9570	3060	225	3037	1	{"name":"","rate":1}	70000	360000	162000	45	198000	1	Uống 2 viên chia sáng tối	%
+2	11914	3835	463	1462	1	{"name":"Hộp","rate":1}	335000	335000	0	0	335000	1		%
+6	11962	3847	1301	308	2	{"name":"Lần","rate":1}	0	20000	0	0	20000	1	\N	%
+6	11963	3847	1301	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11964	3847	1301	2872	1	{"name":"Gói","rate":1}	2600	5000	0	0	5000	10		%
+6	11965	3847	1301	2795	1	{"name":"Lọ","rate":1}	0	180000	0	0	180000	1		%
+6	11980	3854	1303	2478	1	{"name":"Lọ","rate":1}	22000	30000	0	0	30000	1		%
+6	11981	3854	1303	303	2	{"name":"Lần","rate":1}	0	50000	0	0	50000	1	\N	%
+6	11982	3854	1303	3058	1	{"name":"Viên","rate":1}	590	2000	0	0	2000	10		%
 2	9584	3064	1141	3035	1	{"name":"Hộp","rate":1}	329450	599000	79000	13	520000	1		VNĐ
 2	9585	3064	1141	2277	1	{"name":"Hộp","rate":1}	846220	1459000	209000	14	1250000	1		VNĐ
 2	9586	3064	1141	1267	1	{"name":"Hộp","rate":1}	690000	1150000	190000	17	960000	1		VNĐ
@@ -16160,6 +17240,19 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 2	9616	3076	203	2766	1	{"name":"","rate":1}	10000	25000	25000	100	0	1		%
 2	9617	3076	203	2391	1	{"name":"Hộp","rate":1}	195000	325000	30000	9	295000	1		VNĐ
 2	9618	3077	1141	3104	1	{"name":"","rate":1}	1300000	1600000	100000	6	1500000	1		VNĐ
+2	11915	3836	463	1524	1	{"name":"Chai","rate":1}	170000	170000	0	0	170000	2		%
+2	11916	3836	463	2763	1	{"name":"Hộp","rate":1}	340000	340000	0	0	340000	1		%
+2	11917	3836	463	2762	1	{"name":"Hộp","rate":1}	530000	530000	0	0	530000	2		%
+2	11918	3836	463	3087	1	{"name":"","rate":1}	128240	229000	0	0	229000	1		VNĐ
+2	11919	3836	463	2620	1	{"name":"Hộp","rate":1}	125000	125000	0	0	125000	1		%
+2	11920	3836	463	1222	1	{"name":"Hộp","rate":1}	70000	70000	0	0	70000	1		%
+2	11921	3836	463	1823	1	{"name":"Hộp","rate":1}	1000	1000	0	0	1000	1		%
+2	11922	3836	463	2055	1	{"name":"Hộp","rate":1}	720000	720000	0	0	720000	1		%
+2	11923	3836	463	1246	1	{"name":"Hộp","rate":1}	381000	381000	0	0	381000	1		%
+2	11924	3836	463	3188	1	{"name":"Hộp","rate":1}	170000	170000	0	0	170000	1		%
+2	11925	3836	463	1583	1	{"name":"Chai","rate":1}	153000	153000	0	0	153000	1		%
+2	11926	3836	463	3093	1	{"name":"Hộp","rate":1}	56000	56000	0	0	56000	1		%
+2	11927	3836	463	2338	1	{"name":"","rate":1}	375000	375000	0	0	375000	2		%
 2	9633	3079	1140	1606	1	{"name":"Hộp","rate":1}	32000	55000	15000	27	40000	1		VNĐ
 2	9634	3079	1140	2315	1	{"name":"","rate":1}	37000	75000	0	0	75000	1		%
 2	9635	3079	1140	3099	1	{"name":"","rate":1}	6000	8000	0	0	8000	10		%
@@ -16437,6 +17530,9 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 6	9922	3161	1173	3060	1	{"name":"Tuýp","rate":1}	17800	30000	0	0	30000	1		%
 6	9923	3161	1173	3058	1	{"name":"Viên","rate":1}	590	2000	0	0	2000	10		%
 6	9924	3161	1173	2713	1	{"name":"Viên","rate":1}	3700	7000	0	0	7000	10		%
+2	11928	3837	463	1420	1	{"name":"Hộp","rate":1}	53000	53000	0	0	53000	2		%
+6	11966	3848	995	2437	1	{"name":"Gói","rate":1}	10000	20000	0	0	20000	5		%
+6	11983	3855	941	3196	1	{"name":"Lọ","rate":1}	40000	45000	0	0	45000	4		%
 6	9929	3165	1062	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
 6	9930	3165	1062	2624	1	{"name":"Ống","rate":1}	10000	13000	0	0	13000	5		%
 6	9931	3165	1062	2756	1	{"name":"Ống","rate":1}	10500	16000	0	0	16000	5		%
@@ -16453,6 +17549,11 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 6	9942	3167	1174	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
 6	9943	3167	1174	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	6	Uống 2 lần/ngày ,sáng- chiều	%
 6	9944	3167	1174	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	12009	3863	1305	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	12010	3863	1305	2708	1	{"name":"Viên","rate":1}	1200	2000	0	0	2000	10		%
+6	12011	3863	1305	2504	1	{"name":"Viên","rate":1}	3800	5000	0	0	5000	10		%
+6	12012	3863	1305	2685	1	{"name":"Lọ","rate":1}	19000	30000	0	0	30000	1		%
+6	12013	3863	1305	2742	1	{"name":"Viên","rate":1}	3000	10000	0	0	10000	10		%
 6	9950	3169	1137	2756	1	{"name":"Ống","rate":1}	10500	16000	0	0	16000	5		%
 6	9951	3169	1137	2543	1	{"name":"Ống","rate":1}	4400	8000	0	0	8000	5		%
 6	9952	3169	1137	2748	1	{"name":"Gói","rate":1}	11000	18000	0	0	18000	6		%
@@ -16580,6 +17681,9 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 2	10082	3200	123	3042	1	{"name":"Hộp","rate":1}	325000	525000	183750	35	341250	1		%
 2	10083	3201	360	1219	1	{"name":"Hộp","rate":1}	82000	130000	30000	23	100000	4		VNĐ
 2	10084	3201	360	2314	1	{"name":"Chai","rate":1}	60000	110000	10000	9	100000	1		VNĐ
+6	11929	3838	1086	2882	1	{"name":"Ống","rate":1}	5000	7000	0	0	7000	10		%
+6	11930	3838	1086	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11931	3838	1086	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
 6	10088	3203	1166	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	5	Uống 2 lần/ngày ,sáng- chiều	%
 6	10089	3204	976	3137	1	{"name":"Lọ","rate":1}	25000	60000	0	0	60000	1		%
 6	10090	3204	976	2819	1	{"name":"Tuýp","rate":1}	26500	30000	0	0	30000	1		%
@@ -16663,6 +17767,9 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 6	10168	3233	1154	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	6	Uống 2 lần/ngày ,sáng- chiều	%
 6	10169	3234	1191	2754	1	{"name":"Gói","rate":1}	6200	10000	0	0	10000	12		%
 6	10170	3234	1191	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11932	3839	993	3123	1	{"name":"Cái","rate":1}	100000	120000	0	0	120000	1		%
+6	11933	3839	993	2478	1	{"name":"Lọ","rate":1}	22000	30000	0	0	30000	1		%
+6	11934	3839	993	2872	1	{"name":"Gói","rate":1}	2600	5000	0	0	5000	10		%
 6	10174	3238	983	2753	1	{"name":"Gói","rate":1}	8500	15000	0	0	15000	10		%
 6	10175	3239	1193	3123	1	{"name":"Cái","rate":1}	100000	120000	0	0	120000	1		%
 6	10176	3239	1193	3131	1	{"name":"Vỉ","rate":1}	16500	30000	0	0	30000	1		%
@@ -16729,6 +17836,7 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 6	10239	3257	1066	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
 6	10240	3257	1066	2746	1	{"name":"Viên","rate":1}	4000	6000	0	0	6000	30		%
 6	10241	3257	1066	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11935	3839	993	3185	1	{"name":"Lọ","rate":1}	128000	155000	0	0	155000	1		%
 6	10243	3259	932	3133	1	{"name":"Lọ","rate":1}	10500	15000	0	0	15000	1		%
 6	10244	3259	932	2657	1	{"name":"Lọ","rate":1}	135000	190000	0	0	190000	1		%
 6	10245	3259	932	2693	1	{"name":"Gói","rate":1}	2500	5000	0	0	5000	6		%
@@ -16952,6 +18060,10 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 6	10479	3332	1182	3061	1	{"name":"Tuýp","rate":1}	8800	15000	0	0	15000	1		%
 6	10480	3332	1182	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
 6	10481	3332	1182	2644	1	{"name":"Ống","rate":1}	4000	5000	0	0	5000	10		%
+6	11936	3840	1275	2730	1	{"name":"Gói","rate":1}	8000	13000	0	0	13000	10		%
+6	11937	3840	1275	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11938	3840	1275	2795	1	{"name":"Lọ","rate":1}	0	180000	0	0	180000	1		%
+6	11967	3849	1048	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	1		%
 6	10486	3333	1064	2686	1	{"name":"Lọ","rate":1}	70000	105000	0	0	105000	1		%
 6	10487	3333	1064	2490	1	{"name":"Hộp","rate":1}	11000	20000	0	0	20000	1		%
 6	10488	3333	1064	2447	1	{"name":"Lọ","rate":1}	36000	70000	0	0	70000	1		%
@@ -17180,6 +18292,11 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 2	10727	3421	244	1603	1	{"name":"Hộp","rate":1}	220000	415000	150000	36	265000	1		VNĐ
 2	10728	3421	244	2375	1	{"name":"Chai","rate":1}	200000	528000	178000	34	350000	1		VNĐ
 2	10729	3421	244	2374	1	{"name":"Hộp","rate":1}	360000	980000	520000	53	460000	1		VNĐ
+6	11939	3841	1299	2691	1	{"name":"Gói","rate":1}	2500	5000	0	0	5000	10		%
+6	11940	3841	1299	2730	1	{"name":"Gói","rate":1}	8000	13000	0	0	13000	7		%
+6	11941	3841	1299	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11942	3841	1299	2795	1	{"name":"Lọ","rate":1}	0	180000	0	0	180000	1		%
+6	11968	3849	1048	2637	1	{"name":"Ống","rate":1}	3800	7000	0	0	7000	10		%
 2	10736	3424	1222	1291	1	{"name":"Hộp","rate":1}	164000	380000	380000	100	0	1		%
 6	10737	3425	964	2684	1	{"name":"Viên","rate":1}	200	1000	0	0	1000	7		%
 6	10738	3425	964	2644	1	{"name":"Ống","rate":1}	4000	5000	0	0	5000	10		%
@@ -17328,11 +18445,14 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 2	10888	3478	411	3162	1	{"name":"","rate":1}	0	17000	17000	100	0	10		%
 2	10889	3478	411	3161	1	{"name":"","rate":1}	242000	440000	20000	5	420000	1		VNĐ
 2	10890	3478	411	1253	1	{"name":"Hộp","rate":1}	318000	529000	69000	13	460000	1		VNĐ
+6	11943	3842	1299	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	2		%
+6	11944	3842	1299	2702	1	{"name":"Viên","rate":1}	1100	2000	0	0	2000	20		%
 2	10893	3480	312	1197	1	{"name":"Hộp","rate":1}	160000	280000	70000	25	210000	1		VNĐ
 2	10894	3480	312	1595	1	{"name":"Chai","rate":1}	36000	60000	60000	100	0	2		%
 2	10895	3480	312	2314	1	{"name":"Chai","rate":1}	60000	110000	40000	36	70000	1		VNĐ
 2	10896	3481	1241	1282	1	{"name":"Hộp","rate":1}	50000	100000	30000	30	70000	1		VNĐ
 2	10897	3481	1241	1230	1	{"name":"Tuýp","rate":1}	40000	105000	65000	62	40000	1		VNĐ
+6	11945	3842	1299	2710	1	{"name":"Viên","rate":1}	1200	2000	0	0	2000	20		%
 2	10899	3483	321	2766	1	{"name":"","rate":1}	10000	25000	8000	32	17000	3		VNĐ
 2	10900	3483	321	3162	1	{"name":"","rate":1}	0	17000	2000	12	15000	5		VNĐ
 2	10901	3483	321	3043	1	{"name":"Chai","rate":1}	325000	525000	105000	20	420000	1		%
@@ -17378,8 +18498,17 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 6	10941	3501	1160	2555	1	{"name":"Lọ","rate":1}	66000	90000	0	0	90000	1		%
 2	10942	3502	444	1770	1	{"name":"Hộp","rate":1}	130000	220000	25000	11	195000	1		VNĐ
 2	10943	3502	444	1220	1	{"name":"Hộp","rate":1}	72000	180000	45000	25	135000	2		VNĐ
+6	11946	3842	1299	2742	1	{"name":"Viên","rate":1}	3000	10000	0	0	10000	10		%
+6	11969	3849	1048	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11984	3856	1103	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11985	3856	1103	2872	1	{"name":"Gói","rate":1}	2600	5000	0	0	5000	20		%
+6	11986	3856	1103	3119	1	{"name":"Lọ","rate":1}	66000	90000	0	0	90000	1		%
 2	10949	3505	329	3162	1	{"name":"","rate":1}	0	17000	17000	100	0	1		%
 2	10950	3505	329	3176	1	{"name":"Hộp","rate":1}	330000	700000	240000	34	460000	1		VNĐ
+6	11987	3856	1103	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	2		%
+6	12000	3860	1295	2610	1	{"name":"Chiếc","rate":1}	17000	30000	0	0	30000	1		%
+6	11947	3843	1098	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11948	3843	1098	2478	1	{"name":"Lọ","rate":1}	22000	30000	0	0	30000	1		%
 2	10962	3504	294	3094	1	{"name":"Hộp","rate":1}	355000	546000	191100	35	354900	3		%
 2	10963	3504	294	3169	1	{"name":"Hộp","rate":1}	904580	1459000	466880	32	992120	1		%
 2	10964	3504	294	1267	1	{"name":"Hộp","rate":1}	690000	1150000	402500	35	747500	1		%
@@ -17388,8 +18517,6 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 2	10967	3504	294	3035	1	{"name":"Hộp","rate":1}	329450	599000	239600	40	359400	2		%
 2	10970	3482	238	1842	1	{"name":"Chai","rate":1}	160000	265000	66250	25	198750	1		%
 2	10971	3482	238	1770	1	{"name":"Hộp","rate":1}	130000	220000	55000	25	165000	1		%
-2	10972	3506	321	3083	1	{"name":"Hộp","rate":1}	108000	150000	25000	17	125000	1		VNĐ
-2	10973	3506	321	2343	1	{"name":"Hộp","rate":1}	171000	380000	76000	20	304000	1		%
 2	10975	3507	405	1457	1	{"name":"Hộp","rate":1}	300000	400000	95000	24	305000	1		VNĐ
 2	10979	3479	179	3170	1	{"name":"Tuýp","rate":1}	320000	485000	97000	20	388000	1		%
 2	10980	3479	179	3086	1	{"name":"Hộp","rate":1}	220000	290000	10000	3	280000	1		VNĐ
@@ -17466,6 +18593,7 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 6	11060	3537	1023	2555	1	{"name":"Lọ","rate":1}	66000	90000	0	0	90000	1		%
 2	11061	3503	176	1272	1	{"name":"Hộp","rate":1}	160000	320000	40000	13	280000	1		VNĐ
 2	11062	3503	176	1269	1	{"name":"Hộp","rate":1}	294000	490000	45000	9	445000	1		VNĐ
+6	11949	3843	1098	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
 6	11064	3539	1079	2729	1	{"name":"Gói","rate":1}	12000	20000	0	0	20000	3		%
 6	11065	3540	986	2750	1	{"name":"Ống","rate":1}	5400	7000	0	0	7000	10		%
 6	11066	3540	986	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
@@ -17655,6 +18783,633 @@ COPY public."InvoiceItem" (oid, id, "invoiceId", "customerId", "referenceId", ty
 6	11273	3603	996	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
 6	11274	3603	996	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
 6	11275	3603	996	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+2	11276	3605	123	2765	1	{"name":"Hộp","rate":1}	321000	321000	0	0	321000	1		%
+2	11277	3606	225	2344	1	{"name":"Hộp","rate":1}	75000	380000	185000	49	195000	1		VNĐ
+2	11278	3606	225	2848	1	{"name":"Hộp","rate":1}	155000	320000	48000	15	272000	1		%
+2	11279	3607	225	2403	1	{"name":"","rate":1}	27000	50000	10000	20	40000	1		VNĐ
+2	11280	3607	225	2344	1	{"name":"Hộp","rate":1}	75000	380000	185000	49	195000	1		VNĐ
+2	11281	3607	225	2848	1	{"name":"Hộp","rate":1}	155000	320000	48000	15	272000	1		%
+6	11282	3608	1120	2720	1	{"name":"Lọ","rate":1}	67000	110000	0	0	110000	1		%
+6	11283	3608	1120	2724	1	{"name":"Lọ","rate":1}	80000	160000	0	0	160000	1		%
+6	11284	3608	1120	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11285	3608	1120	2757	1	{"name":"Ống","rate":1}	4400	8000	0	0	8000	5		%
+6	11286	3608	1120	3100	1	{"name":"Ống","rate":1}	12600	16000	0	0	16000	5		%
+6	11287	3609	1263	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11288	3609	1263	2709	1	{"name":"Viên","rate":1}	3800	5000	0	0	5000	5		%
+6	11289	3609	1263	2803	1	{"name":"Gói","rate":1}	2766	4000	0	0	4000	26		%
+6	11290	3609	1263	2710	1	{"name":"Viên","rate":1}	1200	2000	0	0	2000	20		%
+6	11291	3609	1263	2742	1	{"name":"Viên","rate":1}	3000	10000	0	0	10000	10		%
+6	11292	3609	1263	2685	1	{"name":"Lọ","rate":1}	19000	30000	0	0	30000	1		%
+6	11293	3610	1239	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11294	3610	1239	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	4		%
+6	11295	3610	1239	2819	1	{"name":"Tuýp","rate":1}	26500	30000	0	0	30000	1		%
+6	11296	3610	1239	3137	1	{"name":"Lọ","rate":1}	25000	60000	0	0	60000	1		%
+6	11297	3611	987	2843	1	{"name":"Tuýp","rate":1}	78000	150000	0	0	150000	1		%
+6	11298	3612	1264	2829	1	{"name":"Lọ","rate":1}	33000	50000	0	0	50000	1		%
+6	11299	3612	1264	3132	1	{"name":"Lọ","rate":1}	22500	50000	0	0	50000	1		%
+6	11300	3612	1264	2803	1	{"name":"Gói","rate":1}	2766	4000	0	0	4000	10		%
+6	11301	3612	1264	3123	1	{"name":"Cái","rate":1}	100000	120000	0	0	120000	1		%
+6	11302	3612	1264	2685	1	{"name":"Lọ","rate":1}	19000	30000	0	0	30000	1		%
+6	11303	3612	1264	2737	1	{"name":"Viên","rate":1}	3500	7000	0	0	7000	7		%
+6	11304	3612	1264	2711	1	{"name":"Viên","rate":1}	500	2000	0	0	2000	10		%
+6	11305	3612	1264	2709	1	{"name":"Viên","rate":1}	3800	5000	0	0	5000	10		%
+6	11306	3612	1264	2854	1	{"name":"Viên","rate":1}	8500	13000	0	0	13000	10		%
+6	11307	3613	1265	2708	1	{"name":"Viên","rate":1}	1200	2000	0	0	2000	10		%
+6	11308	3613	1265	2700	1	{"name":"Viên","rate":1}	1000	1500	0	0	1500	10		%
+6	11309	3614	890	2569	1	{"name":"Tuýp","rate":1}	155000	230000	0	0	230000	1		%
+3	11310	3615	526	253	2	{"name":"Lần","rate":1}	0	2000000	0	0	2000000	1	\N	%
+3	11311	3615	526	243	2	{"name":"Lần","rate":1}	0	7500000	1000000	13	6500000	1	\N	VNĐ
+6	11312	3616	1166	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11313	3616	1166	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11314	3617	1120	301	2	{"name":"Lần","rate":1}	0	30000	30000	100	0	1	\N	VNĐ
+6	11315	3618	938	2812	1	{"name":"Ống","rate":1}	8000	10000	0	0	10000	5		%
+6	11316	3618	938	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11317	3619	1266	3071	1	{"name":"Lọ","rate":1}	65000	120000	0	0	120000	1		%
+6	11318	3619	1266	2568	1	{"name":"Tuýp","rate":1}	195000	270000	0	0	270000	1		%
+6	11319	3620	1166	301	2	{"name":"Lần","rate":1}	0	30000	30000	100	0	1	\N	VNĐ
+6	11320	3621	1166	2831	1	{"name":"Tuýp","rate":1}	21000	30000	0	0	30000	1		%
+6	11321	3622	1063	2727	1	{"name":"Gói","rate":1}	13700	20000	0	0	20000	6		%
+6	11322	3623	970	2812	1	{"name":"Ống","rate":1}	8000	10000	0	0	10000	5		%
+6	11323	3623	970	2643	1	{"name":"Lọ","rate":1}	28000	60000	0	0	60000	1		%
+6	11324	3624	1168	2443	1	{"name":"Gói","rate":1}	8000	15000	0	0	15000	10		%
+6	11325	3625	1267	2710	1	{"name":"Viên","rate":1}	1200	2000	0	0	2000	20		%
+6	11326	3625	1267	2742	1	{"name":"Viên","rate":1}	3000	10000	0	0	10000	8		%
+6	11327	3625	1267	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11328	3626	953	301	2	{"name":"Lần","rate":1}	0	30000	20000	67	10000	1	\N	VNĐ
+6	11329	3626	953	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11330	3627	954	301	2	{"name":"Lần","rate":1}	0	30000	30000	100	0	1	\N	VNĐ
+6	11331	3628	947	3119	1	{"name":"Lọ","rate":1}	66000	90000	24000	27	66000	2		VNĐ
+6	11332	3628	947	2651	1	{"name":"Lọ","rate":1}	175000	280000	105000	38	175000	2		VNĐ
+6	11333	3629	971	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11334	3629	971	2739	1	{"name":"Viên","rate":1}	6000	10000	0	0	10000	7		%
+6	11335	3629	971	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11336	3630	866	2724	1	{"name":"Lọ","rate":1}	80000	160000	80000	50	80000	3		VNĐ
+2	11337	3631	1231	3162	1	{"name":"","rate":1}	0	17000	17000	100	0	10		%
+2	11338	3631	1231	3161	1	{"name":"","rate":1}	242000	440000	44000	10	396000	1		%
+2	11339	3631	1231	1219	1	{"name":"Hộp","rate":1}	82000	130000	25000	19	105000	1		VNĐ
+2	11340	3631	1231	2621	1	{"name":"Hộp","rate":1}	323300	529000	79350	15	449650	1		%
+2	11341	3631	1231	2353	1	{"name":"Hộp","rate":1}	315000	567000	217000	38	350000	1		VNĐ
+6	11950	3843	1098	2715	1	{"name":"Lọ","rate":1}	125000	150000	0	0	150000	1		%
+6	11951	3843	1098	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+2	11344	3632	425	1556	1	{"name":"Hộp","rate":1}	245000	500000	215000	43	285000	1		VNĐ
+2	11345	3632	425	2390	1	{"name":"Hộp","rate":1}	315000	500000	100000	20	400000	1		VNĐ
+6	11970	3850	1302	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+2	11347	3633	291	2353	1	{"name":"Hộp","rate":1}	315000	567000	170100	30	396900	1		%
+2	11348	3634	924	2398	1	{"name":"","rate":1}	310000	410000	30000	7	380000	1		VNĐ
+2	11349	3634	924	2621	1	{"name":"Hộp","rate":1}	323300	529000	94000	18	435000	1		VNĐ
+6	11971	3850	1302	2812	1	{"name":"Ống","rate":1}	8000	10000	0	0	10000	5		%
+6	11972	3850	1302	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11352	3636	1014	2882	1	{"name":"Ống","rate":1}	5000	7000	0	0	7000	5		%
+6	11353	3636	1014	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11354	3636	1014	2723	1	{"name":"Lọ","rate":1}	118000	145000	0	0	145000	1		%
+6	11355	3637	1268	2828	1	{"name":"Lọ","rate":1}	6500	10000	0	0	10000	4		%
+6	11356	3637	1268	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11357	3637	1268	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	4	Uống 2 lần/ngày ,sáng- chiều	%
+6	11358	3637	1268	2720	1	{"name":"Lọ","rate":1}	67000	110000	0	0	110000	1		%
+6	11359	3637	1268	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11360	3638	1269	2829	1	{"name":"Lọ","rate":1}	33000	50000	0	0	50000	1		%
+6	11361	3638	1269	3132	1	{"name":"Lọ","rate":1}	22500	50000	0	0	50000	1		%
+6	11362	3638	1269	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11363	3639	1142	300	2	{"name":"Lần","rate":1}	0	10000	0	0	10000	1	\N	%
+6	11364	3639	1142	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11365	3639	1142	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11366	3639	1142	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11367	3640	1023	2727	1	{"name":"Gói","rate":1}	13700	20000	0	0	20000	10		%
+6	11368	3640	1023	300	2	{"name":"Lần","rate":1}	0	10000	0	0	10000	1	\N	%
+6	11369	3641	975	2723	1	{"name":"Lọ","rate":1}	118000	145000	0	0	145000	1		%
+6	11370	3641	975	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11973	3850	1302	3159	1	{"name":"Lọ","rate":1}	122000	180000	0	0	180000	1		%
+6	11373	3642	999	300	2	{"name":"Lần","rate":1}	0	10000	0	0	10000	1	\N	%
+6	11374	3642	999	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	2		%
+6	11377	3643	1230	2812	1	{"name":"Ống","rate":1}	8000	10000	0	0	10000	5		%
+6	11378	3643	1230	2643	1	{"name":"Lọ","rate":1}	28000	60000	0	0	60000	1		%
+6	11380	3645	1230	2812	1	{"name":"Ống","rate":1}	8000	10000	0	0	10000	5		%
+6	11381	3645	1230	2643	1	{"name":"Lọ","rate":1}	28000	60000	0	0	60000	1		%
+6	11386	3644	1229	3123	1	{"name":"Cái","rate":1}	100000	120000	0	0	120000	1		%
+6	11387	3644	1229	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11388	3644	1229	2642	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11389	3644	1229	2691	1	{"name":"Gói","rate":1}	2500	5000	0	0	5000	6		%
+6	11390	3644	1229	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11391	3646	983	300	2	{"name":"Lần","rate":1}	0	10000	0	0	10000	1	\N	%
+6	11392	3646	983	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11393	3646	983	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11394	3646	983	2721	1	{"name":"Lọ","rate":1}	68000	120000	0	0	120000	1		%
+6	11395	3646	983	2720	1	{"name":"Lọ","rate":1}	67000	110000	0	0	110000	1		%
+6	11396	3647	998	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11397	3647	998	2856	1	{"name":"Bộ","rate":1}	18000	25000	0	0	25000	1		%
+6	11398	3647	998	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11399	3647	998	2723	1	{"name":"Lọ","rate":1}	118000	145000	0	0	145000	1		%
+6	11400	3648	996	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	8	Uống 2 lần/ngày ,sáng- chiều	%
+6	11401	3649	1264	2702	1	{"name":"Viên","rate":1}	1100	2000	0	0	2000	20		%
+6	11402	3649	1264	2742	1	{"name":"Viên","rate":1}	3000	10000	0	0	10000	10		%
+6	11403	3650	866	2743	1	{"name":"Viên","rate":1}	2600	5000	2400	48	2600	22		VNĐ
+6	11404	3651	1270	2650	1	{"name":"Lọ","rate":1}	135000	240000	0	0	240000	1		%
+6	11405	3651	1270	2641	1	{"name":"Lọ","rate":1}	22000	60000	0	0	60000	1		%
+6	11406	3651	1270	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11407	3652	1271	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	1		%
+6	11408	3652	1271	2642	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11409	3652	1271	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11410	3652	1271	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11411	3652	1271	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11412	3653	1272	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11413	3653	1272	2700	1	{"name":"Viên","rate":1}	1000	1500	0	0	1500	10		%
+6	11414	3653	1272	3131	1	{"name":"Vỉ","rate":1}	16500	30000	0	0	30000	1		%
+6	11415	3653	1272	3095	1	{"name":"Vỉ","rate":1}	3700	10000	0	0	10000	1		%
+6	11416	3653	1272	3123	1	{"name":"Cái","rate":1}	100000	120000	0	0	120000	1		%
+6	11417	3654	1019	308	2	{"name":"Lần","rate":1}	0	20000	0	0	20000	1	\N	%
+6	11418	3654	1019	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11419	3654	1019	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	5	Uống 2 lần/ngày ,sáng- chiều	%
+6	11420	3655	1166	2683	1	{"name":"Viên","rate":1}	500	1000	0	0	1000	5		%
+6	11421	3655	1166	3185	1	{"name":"Lọ","rate":1}	128000	155000	0	0	155000	1		%
+6	11422	3656	1273	2872	1	{"name":"Gói","rate":1}	2600	5000	0	0	5000	10		%
+6	11423	3656	1273	2736	1	{"name":"Viên","rate":1}	3100	5000	0	0	5000	10		%
+6	11424	3656	1273	2685	1	{"name":"Lọ","rate":1}	19000	30000	0	0	30000	1		%
+6	11425	3656	1273	2803	1	{"name":"Gói","rate":1}	2766	4000	0	0	4000	10		%
+6	11426	3656	1273	2739	1	{"name":"Viên","rate":1}	6000	10000	0	0	10000	10		%
+6	11427	3657	940	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	3		%
+6	11952	3844	1041	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11429	3658	994	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11430	3658	994	3185	1	{"name":"Lọ","rate":1}	128000	155000	0	0	155000	1		%
+6	11431	3659	1120	2437	1	{"name":"Gói","rate":1}	10000	20000	0	0	20000	5		%
+6	11432	3660	1120	2757	1	{"name":"Ống","rate":1}	4400	8000	0	0	8000	5		%
+6	11433	3660	1120	3177	1	{"name":"Ống","rate":1}	10500	16000	0	0	16000	5		%
+2	11434	3661	233	1253	1	{"name":"Hộp","rate":1}	318000	529000	100000	19	429000	1		VNĐ
+2	11435	3635	302	1941	1	{"name":"Hộp","rate":1}	60000	90000	30000	33	60000	1		VNĐ
+2	11436	3635	302	3188	1	{"name":"Hộp","rate":1}	170000	398000	188000	47	210000	1		VNĐ
+2	11437	3635	302	3040	1	{"name":"","rate":1}	150000	300000	130000	43	170000	1		VNĐ
+2	11438	3635	302	1437	1	{"name":"Hộp","rate":1}	112000	168000	48000	29	120000	3		VNĐ
+2	11439	3662	242	1250	1	{"name":"Hộp","rate":1}	276000	460000	46000	10	414000	1		VNĐ
+2	11440	3662	242	2322	1	{"name":"Hộp","rate":1}	55000	155000	0	0	155000	2		%
+2	11441	3662	242	2314	1	{"name":"Chai","rate":1}	60000	110000	10000	9	100000	2		VNĐ
+2	11442	3662	242	1328	1	{"name":"Chai","rate":1}	52000	110000	10000	9	100000	2		VNĐ
+6	11953	3844	1041	2677	1	{"name":"Lọ","rate":1}	390000	520000	0	0	520000	1		%
+6	11954	3844	1041	2746	1	{"name":"Viên","rate":1}	4000	6000	0	0	6000	30		%
+2	11446	3663	367	3193	1	{"name":"","rate":1}	690000	1150000	460000	40	690000	1		%
+2	11447	3663	367	2383	1	{"name":"Hộp","rate":1}	95000	195000	100000	51	95000	1		VNĐ
+2	11448	3663	367	2314	1	{"name":"Chai","rate":1}	60000	110000	50000	45	60000	1		VNĐ
+2	11449	3663	367	1269	1	{"name":"Hộp","rate":1}	294000	490000	196000	40	294000	1		%
+2	11453	3506	321	1782	1	{"name":"Hộp","rate":1}	180000	280000	20000	7	260000	1		VNĐ
+2	11454	3506	321	2084	1	{"name":"Túi","rate":1}	10000	25000	9000	36	16000	1		VNĐ
+2	11455	3506	321	3083	1	{"name":"Hộp","rate":1}	108000	150000	25000	17	125000	1		VNĐ
+2	11456	3506	321	2343	1	{"name":"Hộp","rate":1}	171000	380000	76000	20	304000	1		%
+2	11457	3665	321	3163	1	{"name":"Hộp","rate":1}	445000	580000	87000	15	493000	1		%
+6	11458	3666	964	2642	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11459	3666	964	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11460	3667	1073	3137	1	{"name":"Lọ","rate":1}	25000	60000	0	0	60000	1		%
+6	11461	3667	1073	2656	1	{"name":"Vỉ","rate":1}	90000	130000	0	0	130000	1		%
+6	11462	3668	866	3119	1	{"name":"Lọ","rate":1}	66000	90000	24000	27	66000	5		VNĐ
+6	11463	3669	1274	2820	1	{"name":"Gói","rate":1}	10000	12000	0	0	12000	1		%
+6	11464	3669	1274	2819	1	{"name":"Tuýp","rate":1}	26500	30000	0	0	30000	1		%
+6	11465	3669	1274	3137	1	{"name":"Lọ","rate":1}	25000	60000	0	0	60000	1		%
+6	11466	3670	1058	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	2		%
+6	11467	3670	1058	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	14	Uống 2 lần/ngày ,sáng- chiều	%
+6	11468	3671	1156	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11469	3671	1156	2789	1	{"name":"Tuýp","rate":1}	4500	10000	0	0	10000	2		%
+6	11470	3671	1156	2871	1	{"name":"Gói","rate":1}	10420	15000	0	0	15000	12		%
+6	11471	3672	1268	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	3	Uống 2 lần/ngày ,sáng- chiều	%
+6	11472	3673	1275	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11473	3673	1275	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	10	Uống 2 lần/ngày ,sáng- chiều	%
+6	11474	3673	1275	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11475	3674	1198	3136	1	{"name":"Lọ","rate":1}	28000	60000	0	0	60000	1		%
+6	11476	3674	1198	2799	1	{"name":"Viên","rate":1}	6500	10000	0	0	10000	10		%
+6	11477	3674	1198	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11478	3674	1198	2854	1	{"name":"Viên","rate":1}	8500	13000	0	0	13000	10		%
+6	11479	3674	1198	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11480	3675	938	3180	1	{"name":"Gói","rate":1}	11000	15000	0	0	15000	11		%
+6	11481	3675	938	2871	1	{"name":"Gói","rate":1}	10420	15000	0	0	15000	1		%
+6	11482	3675	938	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11483	3676	1079	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11484	3676	1079	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11485	3676	1079	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11486	3677	986	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11487	3677	986	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	2		%
+6	11488	3678	1263	2710	1	{"name":"Viên","rate":1}	1200	2000	0	0	2000	10		%
+6	11489	3678	1263	2742	1	{"name":"Viên","rate":1}	3000	10000	0	0	10000	5		%
+6	11490	3679	1014	301	2	{"name":"Lần","rate":1}	0	30000	30000	100	0	1	\N	VNĐ
+6	11491	3680	996	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11492	3680	996	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	7	Uống 2 lần/ngày ,sáng- chiều	%
+6	11493	3680	996	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	3		%
+6	11494	3681	1230	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11495	3681	1230	2498	1	{"name":"Lọ","rate":1}	80000	160000	0	0	160000	1		%
+6	11496	3682	1253	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11497	3683	1276	2656	1	{"name":"Vỉ","rate":1}	90000	130000	0	0	130000	1		%
+6	11498	3683	1276	2447	1	{"name":"Lọ","rate":1}	36000	70000	0	0	70000	1		%
+6	11499	3683	1276	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11500	3684	999	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11501	3684	999	2642	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11502	3684	999	3119	1	{"name":"Lọ","rate":1}	66000	90000	0	0	90000	1		%
+6	11503	3685	972	2750	1	{"name":"Ống","rate":1}	5400	7000	1540	22	5460	100		VNĐ
+6	11504	3686	1152	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11505	3686	1152	2871	1	{"name":"Gói","rate":1}	10420	15000	0	0	15000	12		%
+6	11506	3687	1277	2642	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11507	3687	1277	2795	1	{"name":"Lọ","rate":1}	0	180000	0	0	180000	1		%
+6	11508	3688	1278	2685	1	{"name":"Lọ","rate":1}	19000	30000	0	0	30000	1		%
+6	11509	3688	1278	2709	1	{"name":"Viên","rate":1}	3800	5000	0	0	5000	5		%
+6	11510	3688	1278	2710	1	{"name":"Viên","rate":1}	1200	2000	0	0	2000	20		%
+6	11511	3688	1278	2854	1	{"name":"Viên","rate":1}	8500	13000	0	0	13000	10		%
+3	11512	3689	653	241	2	{"name":"Lần","rate":1}	0	2500000	300000	12	2200000	1	\N	VNĐ
+6	11513	3690	932	3159	1	{"name":"Lọ","rate":1}	122000	180000	0	0	180000	1		%
+6	11514	3691	998	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	2		%
+6	11515	3692	995	3146	1	{"name":"Lọ","rate":1}	19000	35000	0	0	35000	1		%
+6	11516	3692	995	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	2		%
+6	11517	3692	995	2720	1	{"name":"Lọ","rate":1}	67000	110000	0	0	110000	1		%
+6	11518	3692	995	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	2		%
+6	11519	3692	995	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11520	3693	995	3146	1	{"name":"Lọ","rate":1}	19000	35000	0	0	35000	1		%
+6	11521	3693	995	2720	1	{"name":"Lọ","rate":1}	67000	110000	0	0	110000	1		%
+6	11522	3693	995	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	2		%
+6	11523	3693	995	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	2		%
+6	11524	3693	995	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11525	3694	1168	2443	1	{"name":"Gói","rate":1}	8000	15000	0	0	15000	6		%
+6	11526	3694	1168	2723	1	{"name":"Lọ","rate":1}	118000	145000	0	0	145000	1		%
+6	11527	3695	991	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11528	3695	991	2746	1	{"name":"Viên","rate":1}	4000	6000	0	0	6000	30		%
+6	11529	3695	991	2641	1	{"name":"Lọ","rate":1}	22000	60000	0	0	60000	1		%
+6	11530	3695	991	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11531	3696	1239	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	2		%
+6	11532	3696	1239	2746	1	{"name":"Viên","rate":1}	4000	6000	0	0	6000	10		%
+6	11533	3696	1239	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11534	3696	1239	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11535	3696	1239	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11536	3697	1239	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	2		%
+6	11537	3698	964	2641	1	{"name":"Lọ","rate":1}	22000	60000	0	0	60000	1		%
+6	11538	3699	1279	3131	1	{"name":"Vỉ","rate":1}	16500	30000	0	0	30000	1		%
+6	11539	3699	1279	2701	1	{"name":"Viên","rate":1}	1000	1500	0	0	1500	20		%
+6	11540	3699	1279	3123	1	{"name":"Cái","rate":1}	100000	120000	0	0	120000	1		%
+6	11541	3700	1125	2437	1	{"name":"Gói","rate":1}	10000	20000	0	0	20000	4		%
+6	11542	3701	1264	2803	1	{"name":"Gói","rate":1}	2766	4000	0	0	4000	10		%
+6	11543	3701	1264	2733	1	{"name":"Viên","rate":1}	15000	20000	0	0	20000	10		%
+6	11544	3701	1264	2710	1	{"name":"Viên","rate":1}	1200	2000	0	0	2000	20		%
+6	11545	3701	1264	2708	1	{"name":"Viên","rate":1}	1200	2000	0	0	2000	10		%
+6	11546	3701	1264	2709	1	{"name":"Viên","rate":1}	3800	5000	0	0	5000	5		%
+6	11547	3701	1264	2742	1	{"name":"Viên","rate":1}	3000	10000	0	0	10000	10		%
+6	11548	3702	1142	3177	1	{"name":"Ống","rate":1}	10500	16000	0	0	16000	5		%
+6	11549	3702	1142	2757	1	{"name":"Ống","rate":1}	4400	8000	0	0	8000	5		%
+6	11550	3703	975	301	2	{"name":"Lần","rate":1}	0	30000	30000	100	0	1	\N	VNĐ
+6	11551	3704	1281	2872	1	{"name":"Gói","rate":1}	2600	5000	0	0	5000	20		%
+6	11552	3704	1281	3054	1	{"name":"Viên","rate":1}	9000	15000	0	0	15000	10		%
+6	11553	3704	1281	2736	1	{"name":"Viên","rate":1}	3100	5000	0	0	5000	10		%
+6	11554	3704	1281	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11555	3705	1280	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11556	3705	1280	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	10	Uống 2 lần/ngày ,sáng- chiều	%
+6	11557	3705	1280	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11558	3706	947	2632	1	{"name":"Hộp","rate":1}	266000	350000	350000	100	0	1		VNĐ
+6	11559	3706	947	2678	1	{"name":"Lọ","rate":1}	420000	550000	550000	100	0	2		VNĐ
+2	11562	3707	250	2375	1	{"name":"Chai","rate":1}	200000	528000	105600	20	422400	1		%
+2	11563	3707	250	2874	1	{"name":"Chai","rate":1}	297700	458000	38000	8	420000	1		VNĐ
+2	11564	3664	323	3195	1	{"name":"Chai","rate":1}	155000	270000	10000	3	260000	1		VNĐ
+2	11565	3664	323	2302	1	{"name":"Hộp","rate":1}	200000	325000	-25000	-8	350000	1		VNĐ
+2	11566	3708	245	1279	1	{"name":"Hộp","rate":1}	350000	860000	410000	48	450000	1		VNĐ
+2	11567	3709	104	1279	1	{"name":"Hộp","rate":1}	350000	860000	410000	48	450000	1		VNĐ
+2	11568	3710	1282	3079	1	{"name":"Hộp","rate":1}	315000	600000	200000	33	400000	1		VNĐ
+2	11570	3712	450	3176	1	{"name":"Hộp","rate":1}	330000	700000	280000	40	420000	1		VNĐ
+2	11571	3713	297	3176	1	{"name":"Hộp","rate":1}	330000	700000	250000	36	450000	1		VNĐ
+2	11572	3714	124	1930	1	{"name":"Hộp","rate":1}	265000	407000	82000	20	325000	2		VNĐ
+2	11575	3711	569	1586	1	{"name":"Hộp","rate":1}	188000	375000	100000	26	275000	1		VNĐ
+2	11576	3711	569	1229	1	{"name":"Hộp","rate":1}	195000	350000	80000	23	270000	1		VNĐ
+2	11577	3715	1029	1256	1	{"name":"Hộp","rate":1}	182000	260000	0	0	260000	1		%
+2	11578	3715	1029	1282	1	{"name":"Hộp","rate":1}	50000	100000	0	0	100000	1		%
+2	11579	3715	1029	2875	1	{"name":"","rate":1}	115000	400000	400000	100	0	1		%
+2	11580	3715	1029	3035	1	{"name":"Hộp","rate":1}	329450	599000	0	0	599000	1		%
+2	11581	3716	428	2335	1	{"name":"Chai","rate":1}	110000	210000	30000	14	180000	1		VNĐ
+2	11582	3717	1283	1583	1	{"name":"Chai","rate":1}	153000	231000	78540	34	152460	1		%
+2	11583	3717	1283	2314	1	{"name":"Chai","rate":1}	60000	110000	52800	48	57200	2		%
+2	11584	3718	304	2314	1	{"name":"Chai","rate":1}	60000	110000	10000	9	100000	1		VNĐ
+6	11585	3719	1280	2542	1	{"name":"Lọ","rate":1}	230000	300000	0	0	300000	1		%
+6	11586	3720	1176	2641	1	{"name":"Lọ","rate":1}	22000	60000	0	0	60000	1		%
+6	11587	3720	1176	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11588	3721	1284	2872	1	{"name":"Gói","rate":1}	2600	5000	0	0	5000	10		%
+6	11589	3721	1284	2711	1	{"name":"Viên","rate":1}	500	2000	0	0	2000	10		%
+6	11590	3721	1284	2739	1	{"name":"Viên","rate":1}	6000	10000	0	0	10000	10		%
+6	11591	3722	866	2720	1	{"name":"Lọ","rate":1}	67000	110000	110000	100	0	3		VNĐ
+3	11592	3723	731	251	2	{"name":"Lần","rate":1}	0	3000000	1500000	50	1500000	1	\N	%
+2	11593	3724	225	1437	1	{"name":"Hộp","rate":1}	112000	168000	8000	4	160000	2		VNĐ
+2	11594	3724	225	2269	1	{"name":"","rate":1}	280000	380000	60000	16	320000	1		VNĐ
+2	11595	3724	225	1271	1	{"name":"Tuýp","rate":1}	120000	239000	59000	25	180000	1		VNĐ
+6	11596	3725	983	300	2	{"name":"Lần","rate":1}	0	10000	0	0	10000	1	\N	%
+6	11597	3725	983	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	1		%
+6	11598	3725	983	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11599	3725	983	2721	1	{"name":"Lọ","rate":1}	68000	120000	0	0	120000	1		%
+6	11600	3726	937	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11601	3726	937	3119	1	{"name":"Lọ","rate":1}	66000	90000	0	0	90000	1		%
+6	11602	3726	937	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11603	3726	937	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11604	3727	1157	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11605	3728	999	2757	1	{"name":"Ống","rate":1}	4400	8000	0	0	8000	5		%
+6	11606	3728	999	3177	1	{"name":"Ống","rate":1}	10500	16000	0	0	16000	5		%
+6	11607	3728	999	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11608	3728	999	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11609	3729	1041	3146	1	{"name":"Lọ","rate":1}	19000	35000	0	0	35000	1		%
+6	11610	3729	1041	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11611	3729	1041	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11612	3730	1285	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11613	3730	1285	2645	1	{"name":"Gói","rate":1}	2500	5000	0	0	5000	10		%
+6	11614	3730	1285	2795	1	{"name":"Lọ","rate":1}	0	180000	0	0	180000	1		%
+6	11619	3731	1075	2856	1	{"name":"Bộ","rate":1}	18000	25000	0	0	25000	1		%
+6	11620	3731	1075	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11621	3731	1075	2911	1	{"name":"Lọ","rate":1}	13000	20000	0	0	20000	1	nhỏ mũi 3-4 lần/ ngày mỗi bên 2-3 giọt	%
+6	11622	3731	1075	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11623	3731	1075	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11624	3732	1058	2723	1	{"name":"Lọ","rate":1}	118000	145000	0	0	145000	1		%
+6	11625	3733	1234	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11626	3734	938	301	2	{"name":"Lần","rate":1}	0	30000	30000	100	0	1	\N	VNĐ
+6	11627	3735	1019	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11628	3735	1019	2498	1	{"name":"Lọ","rate":1}	80000	160000	0	0	160000	1		%
+6	11629	3735	1019	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11630	3736	995	2437	1	{"name":"Gói","rate":1}	10000	20000	0	0	20000	5		%
+6	11631	3737	959	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11632	3737	959	2723	1	{"name":"Lọ","rate":1}	118000	145000	0	0	145000	1		%
+6	11633	3737	959	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11634	3738	1286	2750	1	{"name":"Ống","rate":1}	5400	7000	0	0	7000	10		%
+6	11635	3738	1286	2650	1	{"name":"Lọ","rate":1}	135000	240000	0	0	240000	1		%
+6	11636	3738	1286	2779	1	{"name":"Ống","rate":1}	3900	7500	0	0	7500	20		%
+6	11637	3738	1286	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11638	3739	1168	2443	1	{"name":"Gói","rate":1}	8000	15000	0	0	15000	6		%
+6	11639	3740	953	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11640	3740	953	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11641	3741	954	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11642	3742	955	2656	1	{"name":"Vỉ","rate":1}	90000	130000	0	0	130000	1		%
+6	11643	3742	955	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	2		%
+6	11644	3742	955	3136	1	{"name":"Lọ","rate":1}	28000	60000	0	0	60000	1		%
+6	11645	3742	955	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11646	3743	1032	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11647	3744	1051	3061	1	{"name":"Tuýp","rate":1}	8800	15000	0	0	15000	1		%
+6	11648	3744	1051	2641	1	{"name":"Lọ","rate":1}	22000	60000	0	0	60000	1		%
+6	11649	3744	1051	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11650	3745	1018	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	10	Uống 2 lần/ngày ,sáng- chiều	%
+6	11651	3745	1018	2642	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11652	3745	1018	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11653	3746	894	3136	1	{"name":"Lọ","rate":1}	28000	60000	0	0	60000	1		%
+6	11654	3746	894	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11655	3746	894	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11656	3747	1047	2711	1	{"name":"Viên","rate":1}	500	2000	0	0	2000	10		%
+6	11657	3747	1047	2739	1	{"name":"Viên","rate":1}	6000	10000	0	0	10000	10		%
+6	11658	3747	1047	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11659	3748	1287	3119	1	{"name":"Lọ","rate":1}	66000	90000	0	0	90000	1		%
+6	11660	3748	1287	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11661	3748	1287	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	10	Uống 2 lần/ngày ,sáng- chiều	%
+6	11662	3748	1287	300	2	{"name":"Lần","rate":1}	0	10000	0	0	10000	1	\N	%
+6	11663	3748	1287	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11664	3749	1152	2750	1	{"name":"Ống","rate":1}	5400	7000	0	0	7000	10		%
+6	11665	3750	1277	2447	1	{"name":"Lọ","rate":1}	36000	70000	0	0	70000	1		%
+6	11666	3751	1182	2642	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11667	3751	1182	2723	1	{"name":"Lọ","rate":1}	118000	145000	0	0	145000	1		%
+6	11668	3751	1182	2685	1	{"name":"Lọ","rate":1}	19000	30000	0	0	30000	1		%
+6	11669	3751	1182	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11670	3752	1111	2642	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11671	3752	1111	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11672	3753	1264	2803	1	{"name":"Gói","rate":1}	2766	4000	0	0	4000	6		%
+6	11673	3753	1264	2504	1	{"name":"Viên","rate":1}	3800	5000	0	0	5000	5		%
+6	11674	3754	1230	2757	1	{"name":"Ống","rate":1}	4400	8000	0	0	8000	5		%
+6	11675	3754	1230	3177	1	{"name":"Ống","rate":1}	10500	16000	0	0	16000	5		%
+6	11676	3754	1230	2720	1	{"name":"Lọ","rate":1}	67000	110000	0	0	110000	1		%
+6	11677	3754	1230	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11678	3755	1288	2707	1	{"name":"Viên","rate":1}	1500	3000	0	0	3000	10		%
+6	11679	3755	1288	2702	1	{"name":"Viên","rate":1}	1100	2000	0	0	2000	20		%
+6	11680	3755	1288	2854	1	{"name":"Viên","rate":1}	8500	13000	0	0	13000	10		%
+6	11681	3755	1288	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11682	3756	1120	2437	1	{"name":"Gói","rate":1}	10000	20000	0	0	20000	3		%
+6	11683	3757	1067	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11684	3757	1067	2478	1	{"name":"Lọ","rate":1}	22000	30000	0	0	30000	1		%
+6	11685	3757	1067	2720	1	{"name":"Lọ","rate":1}	67000	110000	0	0	110000	1		%
+6	11686	3757	1067	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11687	3757	1067	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11688	3758	1164	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	1		%
+6	11689	3758	1164	3132	1	{"name":"Lọ","rate":1}	22500	50000	0	0	50000	1		%
+6	11690	3758	1164	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11691	3758	1164	2720	1	{"name":"Lọ","rate":1}	67000	110000	0	0	110000	1		%
+6	11692	3758	1164	2443	1	{"name":"Gói","rate":1}	8000	15000	0	0	15000	8		%
+6	11693	3759	1082	2642	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11694	3760	1272	2897	1	{"name":"Lọ","rate":1}	230000	320000	0	0	320000	1		%
+6	11695	3761	1202	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11696	3761	1202	2911	1	{"name":"Lọ","rate":1}	13000	20000	0	0	20000	1	nhỏ mũi 3-4 lần/ ngày mỗi bên 2-3 giọt	%
+6	11697	3761	1202	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11698	3762	1002	2683	1	{"name":"Viên","rate":1}	500	1000	0	0	1000	6		%
+6	11699	3762	1002	2711	1	{"name":"Viên","rate":1}	500	2000	0	0	2000	10		%
+6	11700	3763	1268	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	3	Uống 2 lần/ngày ,sáng- chiều	%
+6	11701	3764	1071	2750	1	{"name":"Ống","rate":1}	5400	7000	0	0	7000	5		%
+6	11702	3765	964	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11703	3765	964	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	3		%
+6	11704	3765	964	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11705	3765	964	2723	1	{"name":"Lọ","rate":1}	118000	145000	0	0	145000	1		%
+6	11706	3766	949	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11707	3766	949	2650	1	{"name":"Lọ","rate":1}	135000	240000	0	0	240000	1		%
+6	11708	3766	949	3131	1	{"name":"Vỉ","rate":1}	16500	30000	0	0	30000	1		%
+6	11709	3766	949	2683	1	{"name":"Viên","rate":1}	500	1000	0	0	1000	9		%
+6	11710	3767	1289	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11711	3767	1289	2795	1	{"name":"Lọ","rate":1}	0	180000	0	0	180000	1		%
+6	11712	3767	1289	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11713	3767	1289	2836	1	{"name":"Lọ","rate":1}	125000	180000	0	0	180000	1		%
+6	11714	3768	1064	2711	1	{"name":"Viên","rate":1}	500	2000	0	0	2000	10		%
+6	11715	3768	1064	2739	1	{"name":"Viên","rate":1}	6000	10000	0	0	10000	10		%
+6	11716	3768	1064	2872	1	{"name":"Gói","rate":1}	2600	5000	0	0	5000	10		%
+6	11717	3769	1284	2739	1	{"name":"Viên","rate":1}	6000	10000	0	0	10000	4		%
+6	11718	3769	1284	2872	1	{"name":"Gói","rate":1}	2600	5000	0	0	5000	4		%
+6	11721	3770	1239	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	2		%
+6	11722	3770	1239	2904	1	{"name":"Chai","rate":1}	0	140000	0	0	140000	1		%
+6	11723	3770	1239	2748	1	{"name":"Gói","rate":1}	11000	18000	0	0	18000	10		%
+6	11724	3771	1011	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11725	3771	1011	2872	1	{"name":"Gói","rate":1}	2600	5000	0	0	5000	10		%
+6	11726	3771	1011	2730	1	{"name":"Gói","rate":1}	8000	13000	0	0	13000	10		%
+6	11727	3772	1007	2750	1	{"name":"Ống","rate":1}	5400	7000	0	0	7000	10		%
+6	11728	3772	1007	2720	1	{"name":"Lọ","rate":1}	67000	110000	0	0	110000	1		%
+6	11729	3772	1007	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11730	3773	1078	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11731	3773	1078	2683	1	{"name":"Viên","rate":1}	500	1000	0	0	1000	8		%
+6	11732	3773	1078	2746	1	{"name":"Viên","rate":1}	4000	6000	0	0	6000	10		%
+6	11733	3773	1078	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11734	3773	1078	2723	1	{"name":"Lọ","rate":1}	118000	145000	0	0	145000	1		%
+6	11735	3774	1247	2710	1	{"name":"Viên","rate":1}	1200	2000	0	0	2000	20		%
+6	11736	3774	1247	2742	1	{"name":"Viên","rate":1}	3000	10000	0	0	10000	10		%
+6	11737	3775	1124	2795	1	{"name":"Lọ","rate":1}	0	180000	0	0	180000	1		%
+3	11739	3776	1290	247	2	{"name":"Lần","rate":1}	0	8000000	3200000	40	4800000	1	\N	VNĐ
+6	11740	3777	997	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11741	3777	997	2641	1	{"name":"Lọ","rate":1}	22000	60000	0	0	60000	1		%
+6	11742	3777	997	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11744	3778	1136	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11745	3778	1136	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	5	Uống 2 lần/ngày ,sáng- chiều	%
+6	11746	3779	1291	3123	1	{"name":"Cái","rate":1}	100000	120000	0	0	120000	1		%
+6	11747	3779	1291	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11748	3779	1291	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11749	3780	1292	2447	1	{"name":"Lọ","rate":1}	36000	70000	0	0	70000	1		%
+6	11750	3780	1292	3123	1	{"name":"Cái","rate":1}	100000	120000	0	0	120000	1		%
+6	11751	3780	1292	2697	1	{"name":"Ống","rate":1}	3000	5000	0	0	5000	5		%
+6	11752	3780	1292	2871	1	{"name":"Gói","rate":1}	10420	15000	0	0	15000	10		%
+6	11753	3781	1249	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11754	3781	1249	2478	1	{"name":"Lọ","rate":1}	22000	30000	0	0	30000	1		%
+6	11755	3781	1249	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11756	3781	1249	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11757	3782	1257	2872	1	{"name":"Gói","rate":1}	2600	5000	0	0	5000	10		%
+6	11758	3782	1257	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	10	Uống 2 lần/ngày ,sáng- chiều	%
+6	11759	3783	999	3132	1	{"name":"Lọ","rate":1}	22500	50000	0	0	50000	1		%
+6	11760	3783	999	2478	1	{"name":"Lọ","rate":1}	22000	30000	0	0	30000	1		%
+6	11761	3784	1003	2683	1	{"name":"Viên","rate":1}	500	1000	0	0	1000	5		%
+6	11762	3784	1003	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11763	3784	1003	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11764	3784	1003	2883	1	{"name":"Gói","rate":1}	14000	22000	0	0	22000	7	Uống 2 lần/ngày ,sáng- chiều	%
+6	11765	3785	1293	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11766	3785	1293	2624	1	{"name":"Ống","rate":1}	10000	13000	0	0	13000	5		%
+6	11767	3785	1293	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11768	3785	1293	2871	1	{"name":"Gói","rate":1}	10420	15000	0	0	15000	10		%
+6	11769	3786	941	2647	1	{"name":"Lọ","rate":1}	195000	330000	0	0	330000	1		%
+6	11770	3786	941	2641	1	{"name":"Lọ","rate":1}	22000	60000	0	0	60000	1		%
+6	11771	3787	1023	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11772	3787	1023	2656	1	{"name":"Vỉ","rate":1}	90000	130000	0	0	130000	1		%
+6	11773	3787	1023	2645	1	{"name":"Gói","rate":1}	2500	5000	0	0	5000	10		%
+6	11774	3787	1023	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11775	3787	1023	3136	1	{"name":"Lọ","rate":1}	28000	60000	0	0	60000	1		%
+6	11776	3787	1023	2746	1	{"name":"Viên","rate":1}	4000	6000	0	0	6000	30		%
+6	11777	3788	938	2812	1	{"name":"Ống","rate":1}	8000	10000	0	0	10000	5		%
+6	11778	3789	1018	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11779	3789	1018	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11780	3789	1018	3185	1	{"name":"Lọ","rate":1}	128000	155000	0	0	155000	1		%
+6	11781	3790	1049	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11782	3790	1049	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11783	3791	987	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11784	3791	987	3137	1	{"name":"Lọ","rate":1}	25000	60000	0	0	60000	1		%
+6	11785	3791	987	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11786	3791	987	2746	1	{"name":"Viên","rate":1}	4000	6000	0	0	6000	30		%
+6	11787	3791	987	3185	1	{"name":"Lọ","rate":1}	128000	155000	0	0	155000	1		%
+6	11790	3792	1032	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	3		%
+6	11791	3792	1032	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11792	3792	1032	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11793	3793	955	2656	1	{"name":"Vỉ","rate":1}	90000	130000	0	0	130000	1		%
+6	11794	3794	953	2612	1	{"name":"Lọ","rate":1}	68000	100000	0	0	100000	1		%
+6	11795	3795	1294	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	1		%
+6	11796	3795	1294	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11797	3795	1294	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11798	3795	1294	2728	1	{"name":"Gói","rate":1}	7000	13000	0	0	13000	10		%
+6	11800	3797	954	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11801	3796	953	2856	1	{"name":"Bộ","rate":1}	18000	25000	0	0	25000	1		%
+6	11802	3796	953	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11803	3798	1157	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11804	3799	964	2683	1	{"name":"Viên","rate":1}	500	1000	0	0	1000	9		%
+6	11805	3799	964	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	4		%
+6	11806	3799	964	2727	1	{"name":"Gói","rate":1}	13700	20000	0	0	20000	10		%
+6	11807	3799	964	3185	1	{"name":"Lọ","rate":1}	128000	155000	0	0	155000	1		%
+6	11808	3800	1295	308	2	{"name":"Lần","rate":1}	0	20000	0	0	20000	1	\N	%
+6	11809	3800	1295	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11810	3800	1295	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11811	3800	1295	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11812	3801	984	2504	1	{"name":"Viên","rate":1}	3800	5000	0	0	5000	5		%
+6	11813	3801	984	2773	1	{"name":"Viên","rate":1}	5500	7000	0	0	7000	5		%
+6	11814	3801	984	2703	1	{"name":"Vỉ","rate":1}	6000	15000	0	0	15000	1		%
+6	11815	3801	984	2704	1	{"name":"Vỉ","rate":1}	15000	20000	0	0	20000	2		%
+6	11816	3802	865	2661	1	{"name":"Lọ","rate":1}	260000	350000	0	0	350000	1		%
+6	11817	3803	983	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11818	3803	983	3185	1	{"name":"Lọ","rate":1}	128000	155000	0	0	155000	1		%
+6	11819	3804	1058	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	2		%
+6	11820	3805	959	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11821	3806	1239	2683	1	{"name":"Viên","rate":1}	500	1000	0	0	1000	5		%
+6	11822	3806	1239	2720	1	{"name":"Lọ","rate":1}	67000	110000	0	0	110000	1		%
+6	11823	3807	1296	2642	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11824	3807	1296	2728	1	{"name":"Gói","rate":1}	7000	13000	0	0	13000	20		%
+6	11825	3808	1264	2710	1	{"name":"Viên","rate":1}	1200	2000	0	0	2000	10		%
+6	11826	3808	1264	2733	1	{"name":"Viên","rate":1}	15000	20000	0	0	20000	5		%
+6	11827	3808	1264	2742	1	{"name":"Viên","rate":1}	3000	10000	0	0	10000	5		%
+6	11828	3809	996	2836	1	{"name":"Lọ","rate":1}	125000	180000	0	0	180000	1		%
+6	11829	3809	996	2568	1	{"name":"Tuýp","rate":1}	195000	270000	0	0	270000	1		%
+6	11830	3809	996	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11831	3809	996	3185	1	{"name":"Lọ","rate":1}	128000	155000	0	0	155000	1		%
+6	11832	3810	1288	2702	1	{"name":"Viên","rate":1}	1100	2000	0	0	2000	10		%
+6	11833	3810	1288	2742	1	{"name":"Viên","rate":1}	3000	10000	0	0	10000	10		%
+6	11834	3811	1291	3185	1	{"name":"Lọ","rate":1}	128000	155000	0	0	155000	1		%
+6	11835	3812	1291	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11836	3812	1291	2758	1	{"name":"Chai","rate":1}	8000	10000	0	0	10000	2		%
+6	11837	3812	1291	3185	1	{"name":"Lọ","rate":1}	128000	155000	0	0	155000	1		%
+6	11838	3813	1297	2641	1	{"name":"Lọ","rate":1}	22000	60000	0	0	60000	1		%
+6	11839	3813	1297	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11840	3813	1297	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11841	3814	1136	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	4		%
+6	11842	3814	1136	300	2	{"name":"Lần","rate":1}	0	10000	0	0	10000	1	\N	%
+6	11843	3814	1136	2644	1	{"name":"Ống","rate":1}	4000	5000	0	0	5000	5		%
+6	11844	3815	1135	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11845	3815	1135	2872	1	{"name":"Gói","rate":1}	2600	5000	0	0	5000	10		%
+6	11846	3815	1135	3185	1	{"name":"Lọ","rate":1}	128000	155000	0	0	155000	1		%
+6	11847	3816	999	2490	1	{"name":"Hộp","rate":1}	11000	20000	0	0	20000	1		%
+6	11848	3816	999	2825	1	{"name":"Tuýp","rate":1}	36000	50000	0	0	50000	1		%
+6	11849	3816	999	2708	1	{"name":"Viên","rate":1}	1200	2000	0	0	2000	10		%
+6	11850	3816	999	2854	1	{"name":"Viên","rate":1}	8500	13000	0	0	13000	10		%
+6	11851	3816	999	2685	1	{"name":"Lọ","rate":1}	19000	30000	0	0	30000	1		%
+6	11852	3817	955	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11853	3817	955	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11854	3818	1019	2498	1	{"name":"Lọ","rate":1}	80000	160000	0	0	160000	1		%
+6	11855	3819	1298	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11856	3819	1298	2711	1	{"name":"Viên","rate":1}	500	2000	0	0	2000	5		%
+6	11857	3819	1298	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11858	3820	959	3185	1	{"name":"Lọ","rate":1}	128000	155000	0	0	155000	1		%
+6	11859	3821	1047	3058	1	{"name":"Viên","rate":1}	590	2000	0	0	2000	10		%
+6	11860	3821	1047	2872	1	{"name":"Gói","rate":1}	2600	5000	0	0	5000	10		%
+6	11861	3821	1047	2739	1	{"name":"Viên","rate":1}	6000	10000	0	0	10000	9		%
+6	11862	3822	894	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11863	3822	894	2449	1	{"name":"Gói","rate":1}	8000	13000	0	0	13000	10		%
+6	11864	3822	894	3185	1	{"name":"Lọ","rate":1}	128000	155000	0	0	155000	1		%
+6	11865	3823	895	2701	1	{"name":"Viên","rate":1}	1000	1500	0	0	1500	10		%
+6	11866	3823	895	3131	1	{"name":"Vỉ","rate":1}	16500	30000	0	0	30000	1		%
+6	11867	3823	895	2490	1	{"name":"Hộp","rate":1}	11000	20000	0	0	20000	1		%
+6	11868	3823	895	3136	1	{"name":"Lọ","rate":1}	28000	60000	0	0	60000	1		%
+6	11869	3824	970	3058	1	{"name":"Viên","rate":1}	590	2000	0	0	2000	10		%
+6	11870	3825	1239	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	2		%
+6	11871	3825	1239	2437	1	{"name":"Gói","rate":1}	10000	20000	0	0	20000	3		%
+6	11872	3826	1253	2685	1	{"name":"Lọ","rate":1}	19000	30000	0	0	30000	1		%
+6	11873	3826	1253	3058	1	{"name":"Viên","rate":1}	590	2000	0	0	2000	10		%
+6	11874	3827	1169	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11875	3827	1169	2642	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11876	3827	1169	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	11877	3827	1169	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11878	3828	1145	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11879	3828	1145	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11880	3829	1163	3119	1	{"name":"Lọ","rate":1}	66000	90000	0	0	90000	1		%
+6	11881	3829	1163	2642	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11882	3829	1163	2872	1	{"name":"Gói","rate":1}	2600	5000	0	0	5000	10		%
+6	11883	3830	984	2683	1	{"name":"Viên","rate":1}	500	1000	0	0	1000	3		%
+6	11884	3830	984	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11885	3830	984	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11886	3830	984	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11887	3830	984	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11888	3831	984	2703	1	{"name":"Vỉ","rate":1}	6000	15000	0	0	15000	1		%
+6	11889	3831	984	2504	1	{"name":"Viên","rate":1}	3800	5000	0	0	5000	20		%
+6	11890	3831	984	2773	1	{"name":"Viên","rate":1}	5500	7000	0	0	7000	10		%
+6	11891	3832	941	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11892	3832	941	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11955	3844	1041	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11956	3844	1041	2720	1	{"name":"Lọ","rate":1}	67000	110000	0	0	110000	1		%
+6	11957	3844	1041	2727	1	{"name":"Gói","rate":1}	13700	20000	0	0	20000	10		%
+6	11974	3851	1054	2642	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	11975	3851	1054	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	11988	3857	1304	2707	1	{"name":"Viên","rate":1}	1500	3000	0	0	3000	5		%
+6	11989	3857	1304	2755	1	{"name":"Viên","rate":1}	5000	10000	0	0	10000	10		%
+6	11990	3857	1304	3123	1	{"name":"Cái","rate":1}	100000	120000	0	0	120000	1		%
+6	12001	3860	1295	2757	1	{"name":"Ống","rate":1}	4400	8000	0	0	8000	5		%
+6	12002	3860	1295	3177	1	{"name":"Ống","rate":1}	10500	16000	0	0	16000	5		%
+6	12003	3860	1295	2491	1	{"name":"Gói","rate":1}	2700	5000	0	0	5000	10		%
+6	12004	3860	1295	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	12005	3860	1295	3185	1	{"name":"Lọ","rate":1}	128000	155000	0	0	155000	1		%
+6	12014	3864	955	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	2		%
+6	12015	3864	955	2639	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	12016	3864	955	3122	1	{"name":"Lọ","rate":1}	120000	185000	0	0	185000	1		%
+6	12017	3864	955	2781	1	{"name":"Lọ","rate":1}	135000	190000	0	0	190000	1		%
+6	12023	3866	976	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	12024	3866	976	2638	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	12025	3866	976	2757	1	{"name":"Ống","rate":1}	4400	8000	0	0	8000	5		%
+6	12026	3866	976	3177	1	{"name":"Ống","rate":1}	10500	16000	0	0	16000	5		%
+6	12027	3866	976	3185	1	{"name":"Lọ","rate":1}	128000	155000	0	0	155000	1		%
+6	12028	3865	976	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	2		%
+6	12029	3865	976	2702	1	{"name":"Viên","rate":1}	1100	2000	0	0	2000	20		%
+6	12030	3865	976	2504	1	{"name":"Viên","rate":1}	3800	5000	0	0	5000	5		%
+6	12031	3865	976	2707	1	{"name":"Viên","rate":1}	1500	3000	0	0	3000	10		%
+6	12032	3865	976	2490	1	{"name":"Hộp","rate":1}	11000	20000	0	0	20000	1		%
+6	12033	3865	976	2854	1	{"name":"Viên","rate":1}	8500	13000	0	0	13000	10		%
+6	12034	3867	1182	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	4		%
+6	12035	3867	1182	301	2	{"name":"Lần","rate":1}	0	30000	0	0	30000	1	\N	%
+6	12036	3867	1182	2641	1	{"name":"Lọ","rate":1}	22000	60000	0	0	60000	1		%
+6	12037	3867	1182	2437	1	{"name":"Gói","rate":1}	10000	20000	0	0	20000	10		%
+6	12038	3868	1182	2803	1	{"name":"Gói","rate":1}	2766	4000	0	0	4000	30		%
+6	12039	3869	954	2718	1	{"name":"Lọ","rate":1}	50000	100000	0	0	100000	1	Uống 2 lần/ngày , sáng - chiều , bảo quản ngăn mát tủ lạnh	%
+6	12040	3870	954	2769	1	{"name":"Gói","rate":1}	5000	10000	0	0	10000	2		%
+6	12041	3870	954	3134	1	{"name":"Lọ","rate":1}	26000	60000	0	0	60000	1		%
+6	12042	3870	954	2718	1	{"name":"Lọ","rate":1}	50000	100000	0	0	100000	1	Uống 2 lần/ngày , sáng - chiều , bảo quản ngăn mát tủ lạnh	%
+1	12043	3871	963	2861	1	{"name":"","rate":1}	450000	900000	0	0	900000	45		%
 \.
 
 
@@ -17736,6 +19491,17 @@ COPY public."InvoiceSurcharge" (oid, id, "invoiceId", key, name, money) FROM std
 2	92	3511	_unknown	Khác	20000
 2	93	3515	_unknown	Khác	20000
 2	96	3558	_unknown	Khác	20000
+2	97	3606	_unknown	Khác	450000
+2	98	3607	_unknown	Khác	450000
+2	100	3632	_unknown	Khác	20000
+2	101	3633	_unknown	Khác	30000
+2	102	3634	_unknown	Khác	40000
+2	103	3506	_unknown	Khác	20000
+2	104	3664	_unknown	Khác	20000
+2	105	3708	_unknown	Khác	30000
+2	106	3709	_unknown	Khác	25000
+2	107	3714	_unknown	Khác	20000
+2	108	3711	_unknown	Khác	30000
 \.
 
 
@@ -17743,20 +19509,20 @@ COPY public."InvoiceSurcharge" (oid, id, "invoiceId", key, name, money) FROM std
 -- Data for Name: Organization; Type: TABLE DATA; Schema: public; Owner: mea
 --
 
-COPY public."Organization" (id, phone, email, level, "organizationName", "addressProvince", "addressDistrict", "addressWard", "addressStreet", "createTime") FROM stdin;
-2	0968100994	buitrang05081994@gmail.com	1	Da liễu thẩm mỹ bs Bùi Trang	Thành phố Hà Nội	Quận Long Biên	Phường Thạch Bàn	8	\N
-3	0916299616	elenahaiyen@gmail.com	1	Dạ Yến Vũ	\N	\N	\N	\N	\N
-4	0396962047	damquanbvbr@gmail.com	1	Phòng Khám Cơ Xương Khớp BS Quân	\N	\N	\N	\N	\N
-5	0379615345	bsloan1612@gmail.com	1	\N	\N	\N	\N	\N	\N
-7	0389979282	lehue2802@gmail.com	1	Lê Huế_SPKH	Tỉnh Vĩnh Phúc	Huyện Tam Dương	Xã Đồng Tĩnh	Khu 6	\N
-8	0906881508	ledangdai.dr@gmail.com	1	Phòng khám bác sĩ Lê Đăng Đại	Tỉnh Hải Dương	\N	\N	\N	\N
-9	0398208578	0398208578@gmail.com	1	Tạp hóa chị Hồng	Thành phố Hà Nội	\N	\N	\N	\N
-11	0983364383	0983364383@gmail.com	1	\N	\N	\N	\N	\N	\N
-12	0866547802	0866547802@gmail.com	1	\N	\N	\N	\N	\N	\N
-13	0358932032	chuthiquynh180993@gmail.com	1	Bs Quỳnh	\N	\N	\N	\N	\N
-6	0362090292	phongkhambsnguyen@gmail.com	1	Phòng khám BS Nguyên	\N	\N	\N	\N	\N
-0	0986021190	duyk30b@gmail.com	0	ROOT	\N	\N	\N	\N	\N
-1	0376899866	duycodecom@gmail.com	1	Cơ sở DEMO	\N	\N	\N	\N	\N
+COPY public."Organization" (id, phone, email, level, name, "addressProvince", "addressDistrict", "addressWard", "addressStreet", "permissionIds", "createdAt", "updatedAt", "deletedAt", "isActive") FROM stdin;
+4	0396962047	damquanbvbr@gmail.com	1	Phòng Khám Cơ Xương Khớp BS Quân	\N	\N	\N	\N	[]	1706629421934	1706629421934	\N	1
+5	0379615345	bsloan1612@gmail.com	1	\N	\N	\N	\N	\N	[]	1706629421934	1706629421934	\N	1
+7	0389979282	lehue2802@gmail.com	1	Lê Huế_SPKH	Tỉnh Vĩnh Phúc	Huyện Tam Dương	Xã Đồng Tĩnh	Khu 6	[]	1706629421934	1706629421934	\N	1
+8	0906881508	ledangdai.dr@gmail.com	1	Phòng khám bác sĩ Lê Đăng Đại	Tỉnh Hải Dương	\N	\N	\N	[]	1706629421934	1706629421934	\N	1
+9	0398208578	0398208578@gmail.com	1	Tạp hóa chị Hồng	Thành phố Hà Nội	\N	\N	\N	[]	1706629421934	1706629421934	\N	1
+11	0983364383	0983364383@gmail.com	1	\N	\N	\N	\N	\N	[]	1706629421934	1706629421934	\N	1
+12	0866547802	0866547802@gmail.com	1	\N	\N	\N	\N	\N	[]	1706629421934	1706629421934	\N	1
+13	0358932032	chuthiquynh180993@gmail.com	1	Bs Quỳnh	\N	\N	\N	\N	[]	1706629421934	1706629421934	\N	1
+0	0986021190	duyk30b@gmail.com	0	ROOT	\N	\N	\N	\N	[]	1706629421934	1706629421934	\N	1
+1	0376899866	duycodecom@gmail.com	1	Cơ sở DEMO	\N	\N	\N	\N	[1,10,2,3,4,5,6,7,8,9]	1706629421934	1706629421934	\N	1
+2	0968100994	buitrang05081994@gmail.com	1	Da liễu thẩm mỹ bs Bùi Trang	Thành phố Hà Nội	Quận Long Biên	Phường Thạch Bàn	8	[1,10,2,3,4,5,6,7,8,9]	1706629421934	1706629421934	\N	1
+3	0916299616	elenahaiyen@gmail.com	1	Dạ Yến Vũ	\N	\N	\N	\N	[1,10,2,3,4,5,6,7,8,9]	1706629421934	1706629421934	\N	1
+6	0362090292	phongkhambsnguyen@gmail.com	1	Phòng khám BS Nguyên	\N	\N	\N	\N	[1,10,2,3,4,5,6,7,8,9]	1706629421934	1706629421934	\N	1
 \.
 
 
@@ -17775,7 +19541,6 @@ COPY public."OrganizationSetting" (oid, id, type, data) FROM stdin;
 4	15	PRODUCT_GROUP	{"1":"Kháng sinh - Kháng Virus","2":"Dị ứng","3":"Thần Kinh","4":"Tiêu Hóa","5":"Cơ Xương Khớp","6":"Giảm Đau - Hạ Sốt","8":"Thực Phẩm Chức Năng","9":"Dinh Dưỡng","10":"Hô hấp","11":"Tim Mạch","12":"Da Liễu","llek3c99":"vật tư"}
 2	16	SCREEN_CUSTOMER_LIST	{"table":{"detail":true,"phone":true,"gender":false,"birthday":false,"address":false,"note":false,"isActive":false,"action":false},"upsert":{"address":true}}
 2	17	SCREEN_DISTRIBUTOR_LIST	{"table":{"detail":true,"phone":false,"address":false,"note":false,"isActive":false,"action":false},"upsert":{"address":true}}
-2	19	SCREEN_PRODUCT_LIST	{"table":{"detail":true,"substance":true,"group":true,"unit":false,"batch":true,"expiryDate":true,"costPrice":true,"wholesalePrice":true,"retailPrice":true,"isActive":true,"action":true},"upsert":{"substance":true,"group":true,"unit":true,"source":true,"route":true,"hintUsage":true}}
 2	35	SCREEN_INVOICE_DETAIL	{"invoiceItems":{"detail":true,"substance":true,"batch":false,"expiryDate":false,"unit":false,"discount":true,"expectedPrice":true},"paymentInfo":{"totalItemMoney":true,"surcharge":true,"discount":true,"payment":true,"debt":true},"invoiceProcessType":2,"moneyDivisionFormat":1000}
 5	61	PRODUCT_UNIT	["Lọ","Vỉ","Viên","Tuýp","Túi","Chai","Ống","Chiếc","Hộp","Miếng"]
 5	63	PRODUCT_ROUTE	["Uống","Bôi","Ngậm","Tiêm","Xịt"]
@@ -17792,6 +19557,7 @@ COPY public."OrganizationSetting" (oid, id, type, data) FROM stdin;
 1	227	INVOICE_EXPENSES_DETAIL	{"_unknown":"Khác","brokers":"Hoa hồng","package":"Đóng gói","losrelay":"thuế"}
 6	230	SCREEN_PROCEDURE_LIST	{"table":{"detail":true,"group":true,"status":false,"action":true},"upsert":{}}
 6	231	SYSTEM_SETTING	{"moneyDivisionFormat":1}
+2	19	SCREEN_PRODUCT_LIST	{"detail":true,"substance":true,"group":true,"unit":false,"batch":true,"expiryDate":true,"costPrice":true,"wholesalePrice":true,"retailPrice":true,"isActive":true,"action":true}
 6	244	SCREEN_RECEIPT_UPSERT	{"receiptItemInput":{"batch":false,"expiryDate":true,"expectedPrice":true,"retailPrice":true,"wholesalePrice":false},"receiptItemsTable":{"detail":true,"substance":true,"batch":false,"expiryDate":true,"unit":true},"distributor":{"idDefault":1},"paymentInfo":{"itemsActualMoney":false,"discount":true,"surcharge":true},"save":{"createBasicAndReceiptNew":false,"createBasicAndReceiptDetail":false,"createDraft":true}}
 2	247	INVOICE_EXPENSE_DETAIL	{"_unknown":"Ship","brokers":"Hoa hồng","package":"Đóng gói"}
 1	248	SCREEN_RECEIPT_DETAIL	{"receiptItemsTable":{"substance":true,"detail":true,"batch":true,"expiryDate":true,"unit":true},"paymentInfo":{"itemsActualMoney":true,"discount":true,"surcharge":true,"paid":true,"debt":true},"receiptProcessType":1}
@@ -17821,6 +19587,82 @@ COPY public."OrganizationSetting" (oid, id, type, data) FROM stdin;
 3	353	SCREEN_CUSTOMER_UPSERT	{"phone":true,"birthday":true,"gender":true,"identityCard":false,"address":true,"relative":true}
 2	21	SCREEN_RECEIPT_UPSERT	{"receiptItemInput":{"batch":true,"expiryDate":true,"expectedPrice":true,"retailPrice":true,"wholesalePrice":false},"receiptItemsTable":{"allowDuplicateItem":true,"detail":true,"substance":false,"batch":false,"expiryDate":true,"unit":false},"distributor":{"idDefault":1},"paymentInfo":{"itemsActualMoney":true,"discount":true,"surcharge":true},"save":{"createBasicAndNew":false,"createBasicAndDetail":false,"createDraft":true}}
 2	22	SCREEN_INVOICE_UPSERT	{"invoiceItemInput":{"searchType":"PRODUCT_BATCH","searchHasZeroQuantity":false,"customAfterSearch":true,"hintUsage":true,"expectedPrice":true,"retailPrice":true,"wholesalePrice":true,"costPrice":true,"quantity":true,"discount":true,"actualPrice":true},"invoiceItemsTable":{"allowOverQuantity":false,"allowDuplicateItem":true,"detail":true,"substance":false,"unit":false,"batch":true,"expiryDate":true,"hintUsage":false,"discount":true,"expectedPrice":true,"editActualPrice":true},"customer":{"idDefault":1},"paymentInfo":{"itemsActualMoney":false,"discount":true,"surcharge":true,"expense":true,"profit":true},"other":{"expense":false},"save":{"createBasicAndNew":false,"createBasicAndDetail":false,"createDraft":true}}
+\.
+
+
+--
+-- Data for Name: Permission; Type: TABLE DATA; Schema: public; Owner: mea
+--
+
+COPY public."Permission" (id, level, code, name, "parentId", "pathId", "rootId", "isActive") FROM stdin;
+1	1	ORGANIZATION	Quản lý cơ sở (Admin)	0	1	1	1
+100	2	ORGANIZATION_UPDATE_INFO	Sửa thông tin cơ sở	1	1.100	1	1
+101	2	ORGANIZATION_SETTING_SCREEN	Cài đặt màn hình	1	1.101	1	1
+2	1	ROLE	Quản lý vai trò	0	2	2	1
+200	2	ROLE_READ	Xem vai trò	2	2.200	2	1
+201	2	ROLE_CREATE	Thêm vai trò	2	2.201	2	1
+202	2	ROLE_UPDATE	Sửa vai trò	2	2.202	2	1
+203	2	ROLE_DELETE	Xóa vai trò	2	2.203	2	1
+3	1	USER	Quản lý nhân viên	0	3	3	1
+300	2	USER_READ	Xem nhân viên	3	3.300	3	1
+301	2	USER_CREATE	Thêm nhân viên	3	3.301	3	1
+302	2	USER_UPDATE	Sửa nhân viên	3	3.302	3	1
+303	2	USER_DELETE	Xóa nhân viên	3	3.303	3	1
+304	2	USER_DEVICE_LOGOUT	Đăng xuất thiết bị	3	3.304	3	1
+4	1	PRODUCT	Quản lý sản phẩm	0	4	4	1
+400	2	PRODUCT_READ	Xem sản phẩm	4	4.400	4	1
+401	2	PRODUCT_CREATE	Thêm sản phẩm	4	4.401	4	1
+402	2	PRODUCT_UPDATE	Sửa sản phẩm	4	4.402	4	1
+403	2	PRODUCT_DELETE	Xóa sản phẩm	4	4.403	4	1
+410	2	PRODUCT_BATCH_READ	Xem lô hàng	4	4.410	4	1
+414	2	PRODUCT_BATCH_READ_COST_PRICE	Xem giá nhập	4	4.414	4	1
+411	2	PRODUCT_BATCH_CREATE	Thêm lô hàng	4	4.411	4	1
+412	2	PRODUCT_BATCH_UPDATE	Sửa lô hàng	4	4.412	4	1
+413	2	PRODUCT_BATCH_DELETE	Xóa lô hàng	4	4.413	4	1
+420	2	PRODUCT_MOVEMENT_READ	Xem lịch sử nhập xuất	4	4.420	4	1
+5	1	DISTRIBUTOR	Quản lý nhà cung cấp	0	5	5	1
+500	2	DISTRIBUTOR_READ	Xem nhà cung cấp	5	5.500	5	1
+501	2	DISTRIBUTOR_CREATE	Thêm nhà cung cấp	5	5.501	5	1
+502	2	DISTRIBUTOR_UPDATE	Sửa nhà cung cấp	5	5.502	5	1
+503	2	DISTRIBUTOR_DELETE	Xóa nhà cung cấp	5	5.503	5	1
+510	2	DISTRIBUTOR_PAYMENT_READ	Xem lịch sử thanh toán	5	5.510	5	1
+511	2	DISTRIBUTOR_PAYMENT_PAY_DEBT	Thực hiện trả nợ	5	5.511	5	1
+6	1	CUSTOMER	Quản lý khách hàng	0	6	6	1
+600	2	CUSTOMER_READ	Xem khách hàng	6	6.600	6	1
+601	2	CUSTOMER_CREATE	Thêm khách hàng	6	6.601	6	1
+602	2	CUSTOMER_UPDATE	Sửa khách hàng	6	6.602	6	1
+603	2	CUSTOMER_DELETE	Xóa khách hàng	6	6.603	6	1
+610	2	CUSTOMER_PAYMENT_READ	Xem lịch sử thanh toán	6	6.610	6	1
+611	2	CUSTOMER_PAYMENT_PAY_DEBT	Thực hiện trả nợ	6	6.611	6	1
+7	1	PROCEDURE	Quản lý dịch vụ	0	7	7	1
+700	2	PROCEDURE_READ	Xem dịch vụ	7	7.700	7	1
+701	2	PROCEDURE_CREATE	Thêm dịch vụ	7	7.701	7	1
+702	2	PROCEDURE_UPDATE	Sửa dịch vụ	7	7.702	7	1
+703	2	PROCEDURE_DELETE	Xóa dịch vụ	7	7.703	7	1
+8	1	RECEIPT	Quản lý phiếu nhập	0	8	8	1
+800	2	RECEIPT_READ	Xem phiếu nhập	8	8.800	8	1
+801	2	RECEIPT_CREATE_DRAFT	Tạo phiếu nhập nháp	8	8.801	8	1
+802	2	RECEIPT_UPDATE_DRAFT	Sửa phiếu nhập nháp	8	8.802	8	1
+803	2	RECEIPT_PREPAYMENT	Thanh toán trước	8	8.803	8	1
+804	2	RECEIPT_SHIP	Nhận hàng	8	8.804	8	1
+805	2	RECEIPT_PAY_DEBT	Trả nợ phiếu nhập	8	8.805	8	1
+806	2	RECEIPT_REFUND	Hoàn trả	8	8.806	8	1
+807	2	RECEIPT_DELETE	Xóa phiếu nhập	8	8.807	8	1
+9	1	INVOICE	Quản lý hóa đơn	0	9	9	1
+900	2	INVOICE_READ	Xem hóa đơn	9	9.900	9	1
+901	2	INVOICE_CREATE_DRAFT	Tạo hóa đơn nháp	9	9.901	9	1
+902	2	INVOICE_UPDATE_DRAFT	Sửa hóa đơn nháp	9	9.902	9	1
+903	2	INVOICE_PREPAYMENT	Thanh toán trước	9	9.903	9	1
+904	2	INVOICE_SHIP	Gửi hàng	9	9.904	9	1
+905	2	INVOICE_PAY_DEBT	Trả nợ hóa đơn	9	9.905	9	1
+906	2	INVOICE_REFUND	Hoàn trả	9	9.906	9	1
+907	2	INVOICE_DELETE	Xóa hóa đơn	9	9.907	9	1
+10	1	STATISTIC	Quản lý thống kê	0	10	10	1
+1000	2	STATISTIC_PRODUCT	Xem thống kê sản phẩm	10	10.1000	10	1
+1001	2	STATISTIC_PROCEDURE	Xem thống kê dịch vụ	10	10.1001	10	1
+1002	2	STATISTIC_CUSTOMER	Xem thống kê khách hàng	10	10.1002	10	1
+1003	2	STATISTIC_RECEIPT	Xem thống kê phiếu nhập	10	10.1003	10	1
+1004	2	STATISTIC_INVOICE	Xem thống kê hóa đơn	10	10.1004	10	1
 \.
 
 
@@ -17936,7 +19778,6 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	354	Acnetin-A:  Tretinoin 0,05% Thái	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	355	Adaferin 0,1% 15g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	356	Adclin	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	361	Aret - tretinoin 0,025% 20g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	2	1705334390037	1705334390037	\N
 2	362	Azaduo 15g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	363	Azaroin 15g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	364	Azithromycin 500mg	\N	1	[{"name":"Cái","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
@@ -17955,7 +19796,6 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	381	Bọt vệ sinh Ziaja 250ml TD	\N	3	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	382	Bổ phổi Bumble 30 viên	\N	4	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	383	Caucasian night fullsize	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	384	Cedibest 30 viên	\N	4	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	4	1705334390037	1705334390037	\N
 2	385	Chuốt dài mi DHC	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	386	Chấm mụn Dermacos chứa bùn hoạt tính 15ml TD	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	387	Chấm mụn viêm Epiduo 15g TD	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
@@ -17969,8 +19809,9 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	399	D79 GSV cream 15g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	17	1705334390037	1705334390037	\N
 2	400	Ddvs Intima xanh lam nhạt 200ml XT	\N	6	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	401	Ddvs Intima xanh lam nhạt 500ml XT	\N	6	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
+2	350	AHA 8% Neostrata 100ml XT	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1707794453883	\N
 2	404	Dưỡng mi Long Lashes 3ml	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	394	Cushion Renoderm	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	2	1705334390037	1705741299872	\N
+2	418	Dầu gội Radical Med xanh 300ml XT	\N	3	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1706972891216	\N
 2	406	Dưỡng thể Eucerin body lotion SPF7 250ml	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	408	Dưỡng thể trắng da Vaseline 330ml	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	411	Dưỡng ẩm phục hồi da INNO Skinrepair 60g	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
@@ -17980,21 +19821,22 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	415	Dầu dưỡng tóc Argan 100ml Xanh ngọc hương Baby power	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	416	Dầu gội Olexrs 960ml 	\N	3	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	417	Dầu gội PantheCure 200ml TD	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	418	Dầu gội Radical Med xanh 300ml XT	\N	3	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	352	Acnederm 20g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705835543771	\N
 2	393	Collagen thuỷ phân dạng uống Elasten hộp 28 ống	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	374	Botox 	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
-2	390	Cicalfate aven 100ml XT	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
-2	407	Dưỡng thể Eucerin pH5 250ml	\N	5	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	2	1705334390037	1705334390037	\N
+2	361	Aret - tretinoin 0,025% 20g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	2	1705334390037	1707793243268	\N
+2	390	Cicalfate aven 100ml XT	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1707792565075	\N
 2	403	Differin 0,1% 30g XT	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	350	AHA 8% Neostrata 100ml XT	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
+2	407	Dưỡng thể Eucerin pH5 250ml	\N	5	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1707797480501	\N
 2	532	Kem dưỡng phục hồi da Cell Cream Histolab 50ml	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
+2	357	Akneyask gel 30g - Adap 0.1%	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	9	1705334390037	1706974552730	\N
 2	378	Bông tẩy trang Skinlovers 150m	\N	3	[{"name":"Túi","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1706149218650	\N
 2	359	Aret - Tretinoin 0,05% 20g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	358	Amelix 40g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705680985577	\N
 2	360	Aret - Tretinoin 0,1% 20g 	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	389	Chấm mụn viêm Gelacmeigel 15g - Metro 1%	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1706149218650	\N
-2	357	Akneyask gel 30g - Adap 0.1%	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	10	1705334390037	1705539244425	\N
+2	394	Cushion Renoderm	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1706973491347	\N
+2	384	Cedibest 30 viên	\N	4	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	2	1705334390037	1707792565075	\N
 11	1602	Betaserc	betahistine dihydrochloride 16mg	3	[{"name":"Viên","rate":1,"default":true}]	Uống	hà lan	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 2	420	Dầu gội Radical Med đỏ 300ml XT	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	421	Dầu gội Snowclear 50ml	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
@@ -18019,12 +19861,11 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	450	KCN CNP nâng tông	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	452	KCN Eucerin Oil control 50ml XT	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	453	KCN Farmona 50g TD	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	455	KCN Fixderma SHADOW Spf30 75g TD	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
+2	461	KCN LRP vạch vàng 50ml TD	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1706342232535	\N
 2	457	KCN Goodndoc Spf50 50ml	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	458	KCN Heliocare Water gel 50ml XT	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	459	KCN Image Spf50 170g 	\N	1	[{"name":"Tuýp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	460	KCN LRP tuýp vàng BHA da mụn 50ml TD	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	461	KCN LRP vạch vàng 50ml TD	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	462	KCN LRP vạch vàng 50ml tặng xịt khoáng 50ml XT	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	465	KCN Martiderm 40ml XT	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	466	KCN Obagi Vitamin C Suncare Spf30 48g	\N	8	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
@@ -18043,26 +19884,26 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	482	Kem Biotrade Anaut Active 30ml	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	483	Kem Dermafactory Tranexamic acid 6% 30ml	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	484	Kem chân Fixderma 60g TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	485	Kem chân ziaja	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	486	Kem dưỡng Ava ngày 50ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	487	Kem dưỡng Ava đêm 50ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	488	Kem dưỡng Avene Cicalfate 40ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	489	Kem dưỡng B5 Cream LRP 100ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	490	Kem dưỡng B5 Cream LRP 100ml XT	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
-2	451	KCN Eucerin Oil control 50ml TD	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	2	1705334390037	1705334390037	\N
+2	485	Kem chân ziaja	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1707794453883	\N
 2	835	Tẩy trang Bioderma hồng 500ml TD	\N	10	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	429	Fendexi Forte 10g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	4	1705334390037	1705334390037	\N
 2	448	KCN Beta 50ml TD	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	432	Gel lau rửa sinh lí Ziaja 200ml	\N	6	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	424	Enoti	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	18	1705334390037	1705334390037	\N
 2	470	KCN Tenamyd trà xanh 70ml TD	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705680985577	\N
-2	436	Huyết thanh chống nắng Tenamyd 70ml TD	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	2	1705334390037	1705334390037	\N
+2	490	Kem dưỡng B5 Cream LRP 100ml XT	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1706592731569	\N
 2	479	Kcn eucerin CC 50ml TD	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	422	Dầu tắm Bioderma Atoderm 1L TD	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	445	Imudulin 10ml x 20 ống	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705682360842	\N
 2	463	KCN LRP vạch xanh 50ml TD	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	428	Femic Gold hộp 50 viên	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1706149218650	\N
+2	451	KCN Eucerin Oil control 50ml TD	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1707793136444	\N
 2	440	Huyết tương phục hồi da Evenswiss 50ml TD	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705731633686	\N
+2	428	Femic Gold hộp 50 viên	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	5	1705334390037	1707792565075	\N
+2	436	Huyết thanh chống nắng Tenamyd 70ml TD	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1706592926145	\N
+2	455	KCN Fixderma SHADOW Spf30 75g TD	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1707794714603	\N
 2	492	Kem dưỡng B5 gel LRP 40ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	497	Kem dưỡng Bioderma Hydra TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	498	Kem dưỡng Bioderma Pore Refiner 30ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
@@ -18081,21 +19922,18 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	514	Kem dưỡng Keracnyl PP 40ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	516	Kem dưỡng Lô hội Fixderma 60g TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	518	Kem dưỡng Neutrogena hydro boost aqua gel 50ml XT	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	519	Kem dưỡng Obagi Hydrate 20g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	520	Kem dưỡng Pharmaform 50ml	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	521	Kem dưỡng SVR Active 40ml Td	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	522	Kem dưỡng SVR Mat pore 40ml XT	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	523	Kem dưỡng Wellmaxx gel 50ml	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	524	Kem dưỡng Ziaja Ure 10% 100ml Td	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	525	Kem dưỡng Ziaja Ure 3% 50ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	526	Kem dưỡng da dầu mụn Rejuve 50ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	527	Kem dưỡng da mụn Ava 50ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	528	Kem dưỡng da nhạy cảm Eucerin Aquaporin 50ml	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	529	Kem dưỡng giảm đỏ DERMEDIC Angio T 40ml XT	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	530	Kem dưỡng keracnyl PP 40ml XT	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	531	Kem dưỡng kiềm dầu se lỗ chân lông Bioderma Pore refiner 30ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	535	Kem dưỡng trắng body Usolab Light cream 250ml	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
-2	517	Kem dưỡng Neutriderm 125 ml	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
+2	519	Kem dưỡng Obagi Hydrate 20g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1707794641918	\N
 2	537	Kem dưỡng trị mụn Duo+ 40ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	538	Kem dưỡng trị rạn Strianix-p	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	539	Kem dưỡng ziaja Ure 15% 100ml XT	\N	5	[{"name":"Tuýp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
@@ -18118,7 +19956,7 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	533	Kem dưỡng phục hồi da Skin Repair 60ml XT	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	495	Kem dưỡng Bioderma Atoderm 45ml TD	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1706149218650	\N
 2	506	Kem dưỡng Eucerin Lipo Balance 50g	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
-2	510	Kem dưỡng Goodndoc Lô Hội 50g	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
+2	510	Kem dưỡng Goodndoc Lô Hội 50g	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	4	1705334390037	1707793593418	\N
 11	1617	FIXNAT 200	Cefpodoxime 200mg	1	[{"name":"Viên","rate":1,"default":true}]	Uống	hasan	\N	Uống 2 lần/ngày sau ăn, sáng2 viên, chiều2viên	1	0	1705334390037	1705334390037	\N
 2	496	Kem dưỡng Bioderma Cicabio 40ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	494	Kem dưỡng Bielenda xanh lá 50ml XT	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
@@ -18126,10 +19964,10 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	542	Kem dưỡng ẩm Alvextra 100ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	508	Kem dưỡng Fenomen C 50ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	547	Kem mắt Biotopix 15g TD	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
+2	535	Kem dưỡng trắng body Usolab Light cream 250ml	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1707797480501	\N
 2	515	Kem dưỡng Keracnyl pp tặng srm 40ml XT	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705681813450	\N
+2	525	Kem dưỡng Ziaja Ure 3% 50ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1706974311626	\N
 2	559	Kem trị thâm mắt Ziaja 15ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	560	Kem trị thâm nám Skarfix 20ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	10	1705334390037	1705334390037	\N
-2	561	Kem đặc trị mụn nám Caucasian day - night minisize	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	562	Kem đặc trị thâm nám Obagi số 3fx	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	563	Klenzit C 15g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	565	Lotion Ava da dầu mụn 200ml TD	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
@@ -18137,13 +19975,11 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	567	Lăn nách Etiaxil đỏ da thường TD	\N	3	[{"name":"Lọ","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	568	Medrol 16mg	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	570	Megaduo plus gel 15g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	571	Men phụ khoa Optibac tím	\N	4	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	575	Meso nám Md Ceutical 1 ống	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	576	Mini KCN LRP saka 3ml	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	579	Minoxidil 5% Bailleul	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	580	Motbi 70g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	581	Mytret - Tretinoin 0.1% 15g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	582	Máy rửa mặt nâng cơ	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	583	Máy đo Oxy máu và nhịp tim A2	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 11	1604	heptaminol 187,8mg	heptaminol	3	[{"name":"Viên","rate":1,"default":true}]	Uống	dược đồng tháp	\N	Uống 2 lần/ngày sau ăn, sáng 2viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
 2	585	Mặt nạ BNBG cam dưỡng trắng	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
@@ -18181,21 +20017,22 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	621	Retacnyl 0,025%	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	622	Retacnyl 0,05% 30g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	623	Retinol 0,5% ZO 50ml TD	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	624	Retinol 0.5% OBAGI 28g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	625	Retinol 1.0 Pharmafo	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	626	Retinol 1.0% FUSION 30ml 	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	627	Retinol 1.0% OBAGI 28g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	628	Retinol 2.0 Kyunglab 	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	629	Rosecana 30 viên	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	630	SRM Aderma 200ml XT	\N	9	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	578	Minoxidil 2% Bailleul 60ml	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
+2	578	Minoxidil 2% Bailleul 60ml	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1706973286458	\N
 2	593	Mặt nạ Vita Tee Trea 	\N	3	[{"name":"Cái","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	577	Mini KCN LRP vạch xanh	\N	8	[{"name":"Tuýp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	569	Megaduo gel 15g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	11	1705334390037	1706057578818	\N
 2	595	Mặt nạ Volayon xanh lá 500g	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	564	Klenzit MS gel 15g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	574	Meso Xeroskin-ID 2,5ml 	\N	1	[{"name":"Lọ","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1706149218650	\N
 2	572	Meso Inno Vitamin Complex 5ml	\N	1	[{"name":"Lọ","rate":1}]	\N	\N	\N	\N	1	2	1705334390037	1705682636803	\N
+2	569	Megaduo gel 15g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	10	1705334390037	1706708092544	\N
+2	560	Kem trị thâm nám Skarfix 20ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	2	1705334390037	1707792565075	\N
+2	624	Retinol 0.5% OBAGI 28g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1707797567459	\N
 2	633	SRM Cerave SA 236ml XT	\N	9	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	634	SRM Cerave Xanh lá 236ml XT	\N	9	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	635	SRM Cerave xanh lam 236ml XT	\N	9	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
@@ -18206,7 +20043,6 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	640	SRM Dermacos da dầu mụn 150ml TD	\N	9	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	641	SRM Dermacos da dầu mụn 50ml XT	\N	9	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	642	SRM Eucerin PH5 100ml TD	\N	9	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	643	SRM Eucerin PH5 400ml TD	\N	9	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	644	SRM Eucerin da dầu 400ml TD	\N	9	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	645	SRM Hanko 150ml TD	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	646	SRM LRP da dầu 200ml TD	\N	9	[{"name":"Tuýp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
@@ -18247,7 +20083,6 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	685	Sample srm bioderma 8ml	\N	9	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	686	Sample tẩy trang Ivatherm 25ml	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	687	Sample tẩy trang sáng da Ganier 50ml TD	\N	10	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	689	Serum Ava Collagen 30ml Tad	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	690	Serum Ava Retinol 0,5 TD	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	691	Serum Ava SOS 30ml	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	692	Serum Ava Tế bào gốc 30ml TD	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
@@ -18257,16 +20092,16 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	699	Serum B5 Timeless 30ml	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	700	Serum B9 JA 20ml TD	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	701	Serum B9 Vic derma 30ml	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	702	Serum Bielenda xanh lá 30ml XT	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	697	Serum B5 Pharmaform 30ml Tà	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	2	1705334390037	1705334390037	\N
+2	697	Serum B5 Pharmaform 30ml Tà	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1707793136444	\N
 2	631	SRM Ava Acne Control 150ml TD	\N	9	[{"name":"Tuýp","rate":1}]	\N	\N	\N	\N	1	8	1705334390037	1705334390037	\N
-2	409	Dưỡng ẩm BIODERMA CICABIO 40ml XT	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705727442300	\N
 2	651	SRM SVR da dầu 400ml TD 	\N	9	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 3	1593	Hoa Quả	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	694	Serum Avo Niacinamide 20% 30ml	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	1645	Kem vitamin E Úc 300ml	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	2	1705334390037	1705334390037	\N
 2	632	SRM Betacephil 125ml	\N	9	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705537498273	\N
 2	693	Serum Ava Vitamin C 30ml TD	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1706057563020	\N
+2	643	SRM Eucerin PH5 400ml TD	\N	9	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1707797567459	\N
+2	702	Serum Bielenda xanh lá 30ml XT	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1706974404942	\N
 2	703	Serum Dermafactory Niacinamide 20% 30ml	\N	7	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	708	Serum Goodndoc Vitamin C 16.5% 30ml	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	709	Serum HA + B5 Avo skinlab 30ml TD	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
@@ -18292,7 +20127,6 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	733	Serum SMAS HA Plus 100ml TD	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	734	Serum SVR Niacinamide 30ml TD	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	735	Serum SVR niacinamide 30ml XT	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	736	Serum Sumdfine B5 50ml	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	738	Serum THE ORDINARY HA B5 30ml	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	740	Serum Three out clear mờ thâm sáng da và cấp ẩm 50ml	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	741	Serum Tranx Kyunglab 30ml	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
@@ -18329,7 +20163,8 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	742	Serum Vichy M89 Probiotic 50ml	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	766	Srm Babe 200ml TD	\N	9	[{"name":"Tuýp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	710	Serum HA ava 30ml TD	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
-2	732	Serum Pharmaform C12 LAA 30ml	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	4	1705334390037	1705682399965	\N
+2	736	Serum Sumdfine B5 50ml	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1707794453883	\N
+2	732	Serum Pharmaform C12 LAA 30ml	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	3	1705334390037	1706708092544	\N
 2	705	Serum Eucerin 2in1 trắng da 30ml TD	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705680985577	\N
 2	744	Serum Vitamin C -AHA Pharmaform 30ml TD	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	3	1705334390037	1705835526735	\N
 2	768	Srm Bioderma da dầu 45ml TD	\N	9	[{"name":"Tuýp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1706149218650	\N
@@ -18341,7 +20176,6 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	780	Sáp tẩy trang Clinique	\N	10	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	781	Số 5fx	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	782	Sữa dưỡng ẩm chống mất nước Dermafirm CM 120g	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	783	Sữa rửa da sinh lí ziaja 400ml 	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	786	Sữa tắm Eucerin pH5 400ml TD	\N	6	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	787	Sữa tắm sáp cam Ziaja 500ml TD	\N	6	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	788	Sữa tắm trắng Usolab 250ml	\N	6	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
@@ -18382,28 +20216,26 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	831	Tăng đề kháng cho bé Thymo Zinckida 10ml x 20 ống	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	832	Tăng đề khấng Thymoglucan 30v	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	834	Tẩy trang AVENE da nhạy cảm 500ml XT	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	836	Tẩy trang Bioderma hồng 500ml XT	\N	10	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	838	Tẩy trang Bioderma xanh 500ml XT	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	840	Tẩy trang Dermedic da nhạy cảm 500ml XT	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 11	1619	Cefuoxim500mg	Cefuoxime axetil	1	[{"name":"Viên","rate":1,"default":true}]	Uống	vidipha	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 2	837	Tẩy trang Bioderma xanh 500ml TD	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705566589940	\N
 2	807	Toner Dr Pepti	\N	11	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	784	Sữa rửa mặt - tắm gội Vinatid 150ml	\N	9	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	8	1705334390037	1705334390037	\N
+2	785	Sữa tắm Dr Euzaphil 300ml	\N	1	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1707794453883	\N
 2	777	Srm SVR da dầu 200ml TD	\N	9	[{"name":"Tuýp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	842	Tẩy trang Ganier hồng 400ml TD	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 11	1634	Green hair	chống rụng tóc	8	[{"name":"Viên","rate":1,"default":true}]	Uống	hoa sen	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 2	1646	Kem nẻ Dexeryl 250g	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705334390037	1706057563020	\N
-2	812	Toner Manuka 200ml XT	\N	11	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	4	1705334390037	1705334390037	\N
+2	784	Sữa rửa mặt - tắm gội Vinatid 150ml	\N	9	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	6	1705334390037	1707793593418	\N
 2	817	Tretiheal - Tretinoin 0,05% 	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	803	Tinh dầu hoa anh thảo Úc	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	785	Sữa tắm Dr Euzaphil 300ml	\N	1	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705682133506	\N
+2	410	Dưỡng ẩm dạng nhũ tương MED ATOPY 400ml TD	\N	5	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1706972169238	\N
+2	783	Sữa rửa da sinh lí ziaja 400ml 	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1707797480501	\N
 2	810	Toner LRP da nhạy cảm 200ml TD	\N	11	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705681994779	\N
-2	410	Dưỡng ẩm dạng nhũ tương MED ATOPY 400ml TD	\N	5	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705727442300	\N
+2	836	Tẩy trang Bioderma hồng 500ml XT	\N	10	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1706972891216	\N
+2	812	Toner Manuka 200ml XT	\N	11	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	3	1705334390037	1706975058833	\N
 2	843	Tẩy trang Ganier sáng da 400ml TD	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	844	Tẩy trang Ganier xanh 400ml TD	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	845	Tẩy trang LRP trắng 200ml TD	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	848	Tẩy trang Loreal hồng 400ml	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	850	Tẩy trang Loreal xanh lam đậm 400ml TD	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	2	1705334390037	1705334390037	\N
 2	851	Tẩy trang SVR xanh lá 400ml TD	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	852	Tẩy trang Simple 200ml TD	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	853	Vaselin nhãn xanh	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
@@ -18452,19 +20284,19 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 4	912	hapacol 0.25g		6	[{"name":"Gói","rate":1}]	Uống				1	48	1705334390037	1705334390037	\N
 4	913	hapacol 0,15g		5	[{"name":"Gói","rate":1}]	Uống				1	15	1705334390037	1705334390037	\N
 4	914	parracetamol 0,325g		6	[{"name":"Viên","rate":1}]	Uống				1	106	1705334390037	1705334390037	\N
-2	849	Tẩy trang Loreal xanh lam nhạt 400ml TD	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
-2	902	Ủ mụn 50ml	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	4	1705334390037	1705334390037	\N
+2	867	Viên uống bổ sung Calci và DHA CalciumDHA 30 viên	\N	4	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	5	1705334390037	1707099950266	\N
 2	876	Viên uống tăng đề kháng Thymomodulin Xanh Lam 120mg	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 11	1620	Omeprazole delayed -release	Omeprazole 20mg	4	[{"name":"Viên","rate":1,"default":true}]	Uống	ấn độ	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 2	855	Vertucid gel 15g: adap + clinda	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	891	Xịt họng keo ong	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	886	Xịt body hương xoài	\N	3	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	867	Viên uống bổ sung Calci và DHA CalciumDHA 30 viên	\N	4	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	10	1705334390037	1705334390037	\N
-2	858	Viên uống Biocystin 30 viên	\N	4	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705835543771	\N
+2	902	Ủ mụn 50ml	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	3	1705334390037	1706707541724	\N
 2	892	Xịt khoáng LRP 50ml TD	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	846	Tẩy trang LRP trắng 400ml TD	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	875	Viên uống tăng đề kháng Thymomodulin 120mg VÀNG	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705682360842	\N
 2	862	Viên uống Isonace 10mg	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	2	1705334390037	1705334390037	\N
+2	850	Tẩy trang Loreal xanh lam đậm 400ml TD	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1707792565075	\N
+2	848	Tẩy trang Loreal hồng 400ml	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1707794453883	\N
 4	915	triaminolon		5	[{"name":"Lọ","rate":1}]	Tiêm				1	2	1705334390037	1705334390037	\N
 4	916	voltaren 0,075g		6	[{"name":"Lọ","rate":1}]	Tiêm				1	7	1705334390037	1705334390037	\N
 4	917	chi nylon 4.0		llek3c99	[{"name":"sợi","rate":1}]					1	3	1705334390037	1705334390037	\N
@@ -18501,7 +20333,6 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 4	948	bột nhựa 3 inch			[{"name":"Cuộn","rate":1}]					1	15	1705334390037	1705334390037	\N
 2	949	Dầu massage bé Ziaja 270ml TD			[{"name":"","rate":1}]					1	0	1705334390037	1705334390037	\N
 2	950	Srm Bioderma 200ml da dầu TD			[{"name":"","rate":1}]					1	1	1705334390037	1705334390037	\N
-2	955	KCN Dermashare 70g XT			[{"name":"","rate":1}]					1	1	1705334390037	1705334390037	\N
 2	956	Thanh lăn mắt Ava			[{"name":"","rate":1}]					1	0	1705334390037	1705334390037	\N
 2	957	Thanh lăn mắt Ava			[{"name":"","rate":1}]					1	0	1705334390037	1705334390037	\N
 6	1606	Loperamid	\N	4	[{"name":"Viên","rate":1,"default":true}]	\N	\N	\N	\N	1	200	1705334390037	1705334390037	\N
@@ -18536,9 +20367,9 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	954	Mặt nạ Kyunglab			[{"name":"","rate":1}]					1	13	1705334390037	1705680985577	\N
 2	959	Serum mụn Pharmaform BHA2% + Bakuchiol 30ml TD			[{"name":"","rate":1}]					1	4	1705334390037	1705535952617	\N
 2	952	Tretiheal 0,025%			[{"name":"","rate":1}]					1	3	1705334390037	1705334390037	\N
-2	974	Raileza 120ml trị chất rận			[{"name":"","rate":1}]					1	7	1705334390037	1705334390037	\N
+2	955	KCN Dermashare 70g XT			[{"name":"","rate":1}]					1	0	1705334390037	1707099950266	\N
+2	986	Kcn Heliocare Minral 50ml Xat			[{"name":"","rate":1}]					1	0	1705334390037	1707797480501	\N
 2	958	Srm Bioderma xanh da dầu 200ml tuýp TD			[{"name":"","rate":1}]					1	0	1705334390037	1705334390037	\N
-2	986	Kcn Heliocare Minral 50ml Xat			[{"name":"","rate":1}]					1	2	1705334390037	1705712555553	\N
 6	1650	Sorbitol 5g	Sorbitol 	4	[{"name":"Gói","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705748561198	1705748561198	\N
 2	994	Biotrade active cream 30ml			[{"name":"","rate":1}]					1	0	1705334390037	1705334390037	\N
 2	995	Ủ mụn Histolab 1200ml			[{"name":"","rate":1}]					1	0	1705334390037	1705334390037	\N
@@ -18596,22 +20427,21 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	1048	Kcn Shield EX			[{"name":"","rate":1}]					1	0	1705334390037	1705334390037	\N
 6	1062	Peginpol	polyethylenglycol	4	[{"name":"Gói","rate":1}]	Uống	italya			1	40	1705334390037	1705334390037	\N
 2	998	Biotrade acnaut cream 15ml			[{"name":"","rate":1}]					1	0	1705334390037	1705334390037	\N
-2	1049	Skinogen 30g			[{"name":"","rate":1}]					1	1	1705334390037	1706149218650	\N
 11	1622	ZAROMAX 500	Azithromycin 500mg	1	[{"name":"Viên","rate":1,"default":true}]	Uống	dược hậu giang	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 2	1004	Sữa dưỡng ẩm Dermafirm M4			[{"name":"","rate":1}]					1	0	1705334390037	1705334390037	\N
+2	1049	Skinogen 30g			[{"name":"","rate":1}]					1	0	1705334390037	1706593028029	\N
 2	1050	Xerolys 10% 200ml			[{"name":"","rate":1}]					1	0	1705334390037	1706149218650	\N
 6	1064	Imochild	Beta-Glucan+Gluconate+Phosphate+D3+B1+B2+B6+PP+Lysin+Taurine	8	[{"name":"Lọ","rate":1}]	Uống	Italya			0	0	1705334390037	1705334390037	\N
-6	1065	Livertonic	Silymarin+Hovenia Dulcis Extract	8	[{"name":"Hộp","rate":1}]	Uống	Anh			1	1	1705334390037	1705334390037	\N
 6	1066	TilTarol	FOS+ Calci hydroxyd	8	[{"name":"Hộp","rate":1}]	Uống	Việt Nam			0	0	1705334390037	1705334390037	\N
 6	1070	NORVA GOLD	Thông Đỏ- Citicolin	8	[{"name":"Hộp","rate":1}]	Uống	VN			1	8	1705334390037	1705334390037	\N
-6	1119	Gadopax	D-glucan, VIT C, kẽm, VIT D,	8	[{"name":"Lọ","rate":1}]	Uống	Slovenia			1	12	1705334390037	1705928504213	\N
+2	1648	Serum HA B5 ABO 30ml TD	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	1	1705334390037	1706592575478	\N
 6	1072	LACTO MAB	Fructoligosacaridos,lactobacillus, Bifidobacterium	4	[{"name":"Gói","rate":1}]	Uống	ESPANA			0	0	1705334390037	1705334390037	\N
 6	1073	BIOGAIA- NHỰA	Biogaia 5ml	4	[{"name":"Lọ","rate":1}]	Uống	Nga			1	1	1705334390037	1705334390037	\N
-6	1074	BIOGAIA- Thủy tinh	Biogaia 5ml	4	[{"name":"Lọ","rate":1}]	Uống	NGA			1	3	1705334390037	1705334390037	\N
 6	1075	Faskid	Vitamin D3	8	[{"name":"Lọ","rate":1}]	Uống	Thụy Sĩ			0	0	1705334390037	1705334390037	\N
 6	1076	Bioisland DHA- Kids	DHa	8	[{"name":"Lọ","rate":1}]	Uống	Australia			1	5	1705334390037	1705334390037	\N
 6	1079	Ostelin D3 Kids	D3	8	[{"name":"Lọ","rate":1}]	Uống	Australia			0	0	1705334390037	1705334390037	\N
 6	1080	Imochild D3- K2 Mk-7	D3+K2	8	[{"name":"Lọ","rate":1}]	Uống	Tây ban nha			0	0	1705334390037	1705334390037	\N
+6	1119	Gadopax	D-glucan, VIT C, kẽm, VIT D,	8	[{"name":"Lọ","rate":1}]	Uống	Slovenia			1	10	1705334390037	1706534190517	\N
 6	1083	Novofido	Protiotic	4	[{"name":"Lọ","rate":1}]	Uống	VN			0	0	1705334390037	1705334390037	\N
 6	1084	IROC	sắt,folic acid, vitamin C	8	[{"name":"Lọ","rate":1}]	Uống	Italya			1	0	1705334390037	1705334390037	\N
 6	1087	CAIUNIK	Lipocal, magie, D3, K2	8	[{"name":"Lọ","rate":1}]	Uống	Italya			1	0	1705334390037	1705334390037	\N
@@ -18624,8 +20454,6 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 6	1097	Bepanthen		12	[{"name":"Tuýp","rate":1}]	Bôi	NGA			1	2	1705334390037	1705334390037	\N
 6	1098	PregnaCare Breast-feeding(Bú)	DHA, Brain, Eyes	8	[{"name":"Hộp","rate":1}]	Uống	England			1	2	1705334390037	1705334390037	\N
 6	1099	Pregnacare Max	omega-3, DHA, Brain, eye	8	[{"name":"Hộp","rate":1}]	Uống	England			1	2	1705334390037	1705334390037	\N
-6	1100	BlackMores Glucosamine 	Glucosamine	8	[{"name":"Lọ","rate":1}]	Uống	Australia			1	2	1705334390037	1705334390037	\N
-6	1101	BlackMores  Hoa Anh Thảo	evening primrose oil	8	[{"name":"Lọ","rate":1}]	Uống	Australia			1	1	1705334390037	1705334390037	\N
 6	1102	BlackMores BIO ZInC	Zinc	8	[{"name":"Lọ","rate":1}]	Uống	Australia			1	0	1705334390037	1705334390037	\N
 6	1086	BONE CAL	Calcium, d3, k2	8	[{"name":"Lọ","rate":1}]	Uống	Italya			1	2	1705334390037	1705334390037	\N
 6	1104	Fenugreek	Fenugreek Extract	8	[{"name":"Lọ","rate":1}]	Uống	Ireland			1	0	1705334390037	1705334390037	\N
@@ -18634,7 +20462,6 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 6	1107	Elevit Hồng		8	[{"name":"Vỉ","rate":1}]	Uống	New Zealand			1	6	1705334390037	1705334390037	\N
 6	1108	Vita Gold	Linh chi, đông trùng hạ thảo 	8	[{"name":"Lọ","rate":1}]	Uống	VN			1	0	1705334390037	1705334390037	\N
 11	1623	Clindastad 150	Clindamycin 150mg	1	[{"name":"Viên","rate":1,"default":true}]	Uống	STELLA	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
-6	1110	Thompson Ginkgo 6000	Ginkogo Biloba	8	[{"name":"Lọ","rate":1}]	Uống	Australia			1	3	1705334390037	1705334390037	\N
 6	1111	HealthyCare Ginkgo 2000	Ginkgo Biloba	8	[{"name":"Lọ","rate":1}]	Uống	Australia			1	5	1705334390037	1705334390037	\N
 6	1113	Prospan gói	Cao lá thường xuân	8	[{"name":"Gói","rate":1},{"name":"Hộp","rate":21}]	Uống				1	63	1705334390037	1705334390037	\N
 11	1636	TA MIN	Munti vitamin B	8	[{"name":"Viên","rate":1,"default":true}]	Uống	tâm dược sài gòn	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
@@ -18653,117 +20480,124 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 6	1115	SMH PRO AG+	Nano bạc	8	[{"name":"Lọ","rate":1}]	Súc miệng	HDược VN			1	12	1705334390037	1705334390037	\N
 6	1092	Magie-D	Calium, MK7	8	[{"name":"Lọ","rate":1}]	Uống	VN			0	0	1705334390037	1705334390037	\N
 6	1078	Fe-Max	Sắt 	8	[{"name":"Lọ","rate":1}]	Xịt	Slovenia			1	23	1705334390037	1705334390037	\N
-6	1077	Vitami D3+K2 MK7	D3+ K2	8	[{"name":"Lọ","rate":1}]	Uống	Berlin			1	4	1705334390037	1705334390037	\N
+6	1101	BlackMores  Hoa Anh Thảo	evening primrose oil	8	[{"name":"Lọ","rate":1}]	Uống	Australia			1	0	1705334390037	1707879692278	\N
 6	1090	HealthyPlex D3K2	D3,K2	8	[{"name":"Lọ","rate":1}]	Uống	Italya			1	14	1705334390037	1705334390037	\N
 6	1067	VItamin C Selenzin	VItamin C	8	[{"name":"Ống","rate":1},{"name":"Hộp","rate":20}]	Uống	Việt Nam			1	300	1705334390037	1705334390037	\N
-6	1608	Drimy	\N	8	[{"name":"Vỉ","rate":1,"default":true}]	\N	\N	\N	\N	1	22	1705334390037	1705334390037	\N
-6	1112	PROSPAN lọ	Cao lá thường Xuân	8	[{"name":"Lọ","rate":1}]	Uống				1	1	1705334390037	1705334390037	\N
+6	1074	BIOGAIA- Thủy tinh	Biogaia 5ml	4	[{"name":"Lọ","rate":1}]	Uống	NGA			1	2	1705334390037	1707461505022	\N
+6	1077	Vitami D3+K2 MK7	D3+ K2	8	[{"name":"Lọ","rate":1}]	Uống	Berlin			1	3	1705334390037	1707044653418	\N
 6	1651	ACEVIZ	Acetylcysteine 200mg	10	[{"name":"Gói","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705748619918	1705748619918	\N
 6	1068	BIDOCARE	Hồng  yến	8	[{"name":"Lọ","rate":1}]	Uống	VN			1	36	1705334390037	1705833103654	\N
-2	1648	Serum HA B5 ABO 30ml TD	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	2	1705334390037	1705741277472	\N
+6	1112	PROSPAN lọ	Cao lá thường Xuân	8	[{"name":"Lọ","rate":1}]	Uống				1	6	1705334390037	1706620550110	\N
 6	1069	BIDOCHI- Yến Kids	Hồng yến	8	[{"name":"Lọ","rate":1}]	Uống	VN			1	12	1705334390037	1706010710313	\N
+6	1608	Drimy	\N	8	[{"name":"Vỉ","rate":1,"default":true}]	\N	\N	\N	\N	1	18	1705334390037	1707742128998	\N
+6	1110	Thompson Ginkgo 6000	Ginkogo Biloba	8	[{"name":"Lọ","rate":1}]	Uống	Australia			1	2	1705334390037	1707882046489	\N
+6	1162	Hapacol 250	Paracetamol 250mg	6	[{"name":"Gói","rate":1}]	Uống	DHG			1	590	1705334390037	1707877181936	\N
 6	1131	Bioisland ZinC kids	zinC	8	[{"name":"Lọ","rate":1}]	Uống	Australia			1	0	1705334390037	1705334390037	\N
-6	1139	Mekocetin 0.5mg	Betamethason 0.5mg	2	[{"name":"Viên","rate":1}]	Uống	VN			1	403	1705334390037	1706185972459	\N
+6	1177	Montenuzyd 10	Montelukast 10mg	10	[{"name":"Viên","rate":1}]	Uống	Ấn độ			1	255	1705334390037	1706873139610	\N
 6	1136	Crestor 10mg	Rosuvastatin 	11	[{"name":"Viên","rate":1}]	Uống	AstraZeneca			1	0	1705334390037	1705334390037	\N
 6	1137	Nexium Mups 20mg	Esomeprazole 20mg	4	[{"name":"Viên","rate":1}]	Uống	astraZeneca			1	0	1705334390037	1705334390037	\N
 6	1138	Metronidazol 250mg	Metronidazol 250mg	1	[{"name":"Viên","rate":1}]	Uống	VN			1	0	1705334390037	1705334390037	\N
 6	1140	Efferalgan 80mg	Paracetamol 80mg	6	[{"name":"Viên","rate":1}]	Uống	VN			1	70	1705334390037	1705334390037	\N
 6	1141	Efferalgan 150mg	Paracetamol 150mg	6	[{"name":"Viên","rate":1}]	Uống	VN			1	110	1705334390037	1705334390037	\N
 6	1142	Panalgan  Effer 500	Paracetamol 500mg	6	[{"name":"Viên","rate":1}]	Uống	VN			1	4	1705334390037	1705334390037	\N
-6	1163	Vitamin 3B	B1,B6,B12	8	[{"name":"Vỉ","rate":1}]	Uống	Dược phúc vinh			1	107	1705334390037	1705334390037	\N
 6	1147	Fascapin-10	Nifedipin 10mg	11	[{"name":"Viên","rate":1}]	Uống	DP TW 2			1	200	1705334390037	1705334390037	\N
 6	1148	Stadovas 5mg	amolodipine 5mg	11	[{"name":"Viên","rate":1}]	Uống	stella			1	50	1705334390037	1705334390037	\N
-6	1149	Medrol 16mg	MethylPrenisolne 16mg	2	[{"name":"Viên","rate":1}]	Uống	pfizer			1	34	1705334390037	1705925876667	\N
-6	1154	Panadol Extra	Paracetamol 500mg, Caffeine 65mg	6	[{"name":"Viên","rate":1},{"name":"Vỉ","rate":10}]	Uống	DHG			1	70	1705334390037	1705334390037	\N
+6	1178	Sinlumont 4	Montelukast 4mg	10	[{"name":"Viên","rate":1}]	Uống	OPV pharm			1	2930	1705334390037	1707879692278	\N
+2	1649	Mặt nạ LXR cấp ẩm, căng bóng da	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	34	1705334390037	1706592575478	\N
 6	1135	Atheren	Alimemazine 5mg	10	[{"name":"Viên","rate":1}]	Uống	VN			1	350	1705334390037	1705924081445	\N
 6	1143	Hapacol 80mg	Paracetamol 80mg	6	[{"name":"Gói","rate":1}]	Uống	DHG			1	562	1705334390037	1705334390037	\N
 6	1160	Clopheniramin4	Clopheniramin 4mg	2	[{"name":"Vỉ","rate":1}]	Uống	DHG			1	0	1705334390037	1705334390037	\N
-6	1189	Xịt mũi Wizosone	Mometason furoat 0.05%	10	[{"name":"Lọ","rate":1}]	Xịt	DK pharma			1	8	1705334390037	1706008740001	\N
+6	1167	Usdeslor	Desloratadin 5mg	2	[{"name":"Viên","rate":1}]	Uống	Hv pharma			1	130	1705334390037	1708003531601	\N
 6	1165	Loratadine	Loratadine 10mg	2	[{"name":"Viên","rate":1}]	Uống	Traphaco			1	0	1705334390037	1705334390037	\N
-6	1609	Moxikune	moxifloxacin	10	[{"name":"Lọ","rate":1,"default":true}]	\N	\N	\N	\N	1	20	1705334390037	1705334390037	\N
 6	1168	PT Micolin	Citicolin natri 100mg	8	[{"name":"Vỉ","rate":1}]	Uống	Dược MInh An 			1	0	1705334390037	1705334390037	\N
 6	1169	GinSil	Piracetam 400mg/5ml	3	[{"name":"Ống","rate":1}]	Uống	CPC1HN			1	0	1705334390037	1705334390037	\N
 6	1170	Neurocetam-800	Piracetam 800mg		[{"name":"Viên","rate":1}]	Uống	Ấn độ			1	0	1705334390037	1705334390037	\N
 6	1171	Infogos	inline, fructo, galacto	4	[{"name":"Gói","rate":1}]	Uống	Dược ĐNA			1	0	1705334390037	1705334390037	\N
 6	1172	Novolax Drops	chất xơ	4	[{"name":"Lọ","rate":1}]	Uống	VN			1	0	1705334390037	1705334390037	\N
-6	1162	Hapacol 250	Paracetamol 250mg	6	[{"name":"Gói","rate":1}]	Uống	DHG			1	606	1705334390037	1706271758691	\N
 6	1175	AT syrup ZinC	Kẽm gluconate	4	[{"name":"Ống","rate":1}]	Uống	an nhiên pharma			1	240	1705334390037	1705334390037	\N
 6	1176	Bronlucas 5	Montelukast 5mg	10	[{"name":"Viên","rate":1}]	Uống	korea united pharm			1	270	1705334390037	1705334390037	\N
-6	1153	Acetylcystein	Acetylcystein 200mg	10	[{"name":"Viên","rate":1},{"name":"Vỉ","rate":10}]	Uống	khapharco			1	90	1705334390037	1706273412412	\N
+6	1146	Bufecol	Ibuprofen 100mg/5ml	6	[{"name":"Ống","rate":1}]	Uống	VN			1	455	1705334390037	1707875959534	\N
 6	1182	Fluconazole 150mg	Fluconazole 150mg		[{"name":"Hộp","rate":1}]	Uống	stella			1	22	1705334390037	1705334390037	\N
 6	1183	Alzental	Albendazol 400mg		[{"name":"Viên","rate":1}]	Uống	shinpoong daewoo(HQ)			1	0	1705334390037	1705334390037	\N
 6	1184	Safaria 	metronidazol 225mg, chloramphenicole 100mg, nysatatin 75mg		[{"name":"Viên","rate":1}]	Đặt 	LTD pharma			1	0	1705334390037	1705334390037	\N
 1	1185	đông trùng hạ thảo			[{"name":"Lọ","rate":1}]	Uống			8-10 sợi/ngày	1	199000	1705334390037	1705334390037	\N
-6	1151	Terpin Codein 100	terpin hydrat, codein phosphat	10	[{"name":"Viên","rate":1},{"name":"Vỉ","rate":10}]	Uống	Dp Cửu long			1	170	1705334390037	1705833103654	\N
+6	1653	imunoglukan 120ml	food supplement natural imuniglukan and vitamin C 	8	[{"name":"Lọ","rate":1,"default":true}]	Uống	\N	\N	\N	1	5	1706620358028	1706620550110	\N
 6	1190	Mome- Air	Mometason furoat 0.05%	10	[{"name":"Lọ","rate":1}]	Xịt	Âns độ			1	0	1705334390037	1705334390037	\N
 6	1191	Nebusal hồng	NaCl 1.9%	10	[{"name":"Lọ","rate":1}]	Xịt	CPC1HN			1	1	1705334390037	1705334390037	\N
 6	1192	Nebusal  xanh	NaCl 2.3%	10	[{"name":"Lọ","rate":1}]	Xịt	CPC1HN			0	0	1705334390037	1705334390037	\N
 11	1637	Snow clear	ketoconazole 5ml	1	[{"name":"Gói","rate":1,"default":true}]	gội	MEPAP	\N	GỘI dưới da đầu1 lần/ngày	1	0	1705334390037	1705334390037	\N
-2	1373	Serum B5 LRP Hyalu 10ml			[{"name":"","rate":1}]					1	36	1705334390037	1705679542515	\N
 11	1624	cinarizin 25mg	cinarizin 25mg	3	[{"name":"Viên","rate":1,"default":true}]	Uống	hà tây	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
-6	1178	Sinlumont 4	Montelukast 4mg	10	[{"name":"Viên","rate":1}]	Uống	OPV pharm			1	3070	1705334390037	1706276996084	\N
+6	1161	Pallas	Paracetamol 250mg/5ml	6	[{"name":"Ống","rate":1}]	Uống	an thiên pharma			1	130	1705334390037	1707360862986	\N
 6	1187	Alegin	Ectocin 2%	10	[{"name":"Lọ","rate":1}]	Xịt	Novacare			1	6	1705334390037	1705334390037	\N
-6	1177	Montenuzyd 10	Montelukast 10mg	10	[{"name":"Viên","rate":1}]	Uống	Ấn độ			1	265	1705334390037	1706184711474	\N
-6	1146	Bufecol	Ibuprofen 100mg/5ml	6	[{"name":"Ống","rate":1}]	Uống	VN			1	470	1705334390037	1706198146237	\N
-6	1156	Paracetamol 	Paracetamol  500mg	6	[{"name":"Viên","rate":1},{"name":"Vỉ","rate":10}]	Uống	Mekophar			1	140	1705334390037	1705410998853	\N
+6	1139	Mekocetin 0.5mg	Betamethason 0.5mg	2	[{"name":"Viên","rate":1}]	Uống	VN			1	362	1705334390037	1707745258258	\N
+6	1173	Natrulax	Chất xơ hòa tan	4	[{"name":"Ống","rate":1},{"name":"Hộp","rate":20}]	Uống	HDpharma			1	240	1705334390037	1707219129028	\N
+6	1156	Paracetamol 	Paracetamol  500mg	6	[{"name":"Viên","rate":1},{"name":"Vỉ","rate":10}]	Uống	Mekophar			1	110	1705334390037	1707742128998	\N
 6	1150	Ibumed 400	Ibuprofen 400mg	6	[{"name":"Viên","rate":1}]	Uống	ABbott			1	90	1705334390037	1705334390037	\N
 6	1181	Tẩy giun Socola		4	[{"name":"Viên","rate":1}]	Uống	NewZealand			1	100	1705334390037	1705334390037	\N
-6	1161	Pallas	Paracetamol 250mg/5ml	6	[{"name":"Ống","rate":1}]	Uống	an thiên pharma			1	135	1705334390037	1705334390037	\N
-2	1649	Mặt nạ LXR cấp ẩm, căng bóng da	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	44	1705334390037	1705731234631	\N
-6	1167	Usdeslor	Desloratadin 5mg	2	[{"name":"Viên","rate":1}]	Uống	Hv pharma			1	155	1705334390037	1705334390037	\N
-6	1173	Natrulax	Chất xơ hòa tan	4	[{"name":"Ống","rate":1},{"name":"Hộp","rate":20}]	Uống	HDpharma			1	260	1705334390037	1705334390037	\N
+6	1609	Moxikune	moxifloxacin	10	[{"name":"Lọ","rate":1,"default":true}]	\N	\N	\N	\N	1	16	1705334390037	1707361561841	\N
+6	1154	Panadol Extra	Paracetamol 500mg, Caffeine 65mg	6	[{"name":"Viên","rate":1},{"name":"Vỉ","rate":10}]	Uống	DHG			1	50	1705334390037	1706695500736	\N
+6	1189	Xịt mũi Wizosone	Mometason furoat 0.05%	10	[{"name":"Lọ","rate":1}]	Xịt	DK pharma			1	7	1705334390037	1708002804852	\N
+2	1373	Serum B5 LRP Hyalu 10ml			[{"name":"","rate":1}]					1	19	1705334390037	1707793136444	\N
+6	1151	Terpin Codein 100	terpin hydrat, codein phosphat	10	[{"name":"Viên","rate":1},{"name":"Vỉ","rate":10}]	Uống	Dp Cửu long			1	80	1705334390037	1708003531601	\N
+6	1153	Acetylcystein	Acetylcystein 200mg	10	[{"name":"Viên","rate":1},{"name":"Vỉ","rate":10}]	Uống	khapharco			1	150	1705334390037	1707877175799	\N
+6	1163	Vitamin 3B	B1,B6,B12	8	[{"name":"Vỉ","rate":1}]	Uống	Dược phúc vinh			1	105	1705334390037	1707458553954	\N
+6	1657	dung dịch sát khuẩn povidone - idodine	povidone - idodine	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	10	1707215022719	1707215093462	\N
 6	1132	IMMUBRON		4	[{"name":"Vỉ","rate":1}]	Uống	ITALYA			1	19	1705334390037	1705334390037	\N
+6	1149	Medrol 16mg	MethylPrenisolne 16mg	2	[{"name":"Viên","rate":1}]	Uống	pfizer			1	49	1705334390037	1708003531601	\N
 6	1193	Nasal Cool( Rửa mũi xoang)		10	[{"name":"Hộp","rate":1}]	Xịt	Kichilachi			1	0	1705334390037	1705334390037	\N
-6	1248	Lyfomin 	Fosfomycin 400mg	1	[{"name":"Gói","rate":1}]	Uống				1	357	1705334390037	1705334390037	\N
+6	1242	LevoDHG 500	Levofloxacin 500mg	1	[{"name":"Viên","rate":1}]	Uống	DHG			1	317	1705334390037	1708002204742	\N
 6	1196	DKsalt	NaCl 0.9%	10	[{"name":"Lọ","rate":1}]	Xịt	DK pharma			1	0	1705334390037	1705334390037	\N
 11	1625	DOXIMPAK 200	Cefpodoxim	1	[{"name":"Viên","rate":1,"default":true}]	Uống	usa	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
-6	1198	Zensalbu	Salbutamol 2.5mg/2.5ml	10	[{"name":"Ống","rate":1}]	Khí dung	CPC1HN			1	341	1705334390037	1706185972459	\N
-6	1249	Aziphar 100	Azithromycin 100mg	1	[{"name":"Gói","rate":1}]	Uống	mekophar			1	38	1705334390037	1705334390037	\N
-6	1226	Bostocef	Cefdinir 125mg/5ml	1	[{"name":"Lọ","rate":1}]	Uống	boston pharma			1	9	1705334390037	1706275291226	\N
-2	790	TDC Tảo biển 75ml TD	\N	2	[{"name":"Tuýp","rate":1}]	\N	\N	\N	\N	1	4	1705334390037	1705334390037	\N
-6	1241	LevoDHG	Levofloxacin 250mg	1	[{"name":"Viên","rate":1}]	Uống	DHG			1	22	1705334390037	1706184711474	\N
-6	1605	augmentin DDS	PD Amoxiclav	1	[{"name":"Lọ","rate":1,"default":true}]	Uống	\N	\N	\N	1	81	1705334390037	1706275398340	\N
+6	1198	Zensalbu	Salbutamol 2.5mg/2.5ml	10	[{"name":"Ống","rate":1}]	Khí dung	CPC1HN			1	306	1705334390037	1708003536473	\N
+6	1201	AT Fexofenadin 	Fexofenadone HCL 30mg/5ml	2	[{"name":"Ống","rate":1}]	Uống	Dược an nhiên			1	200	1705334390037	1707739955177	\N
+6	1216	Zitromax	azithromycin 200mg/5ml	1	[{"name":"Lọ","rate":1}]	Uống	pfizer- Italy			1	0	1705334390037	1707878865186	\N
+6	1223	Novafex 37.5ml	Cefixime 100mg/5ml	1	[{"name":"Lọ","rate":1}]	Uống	Mekophar			1	18	1705334390037	1707135269632	\N
+6	1209	Hatadin	Desloratadine 2.5mg/5ml	2	[{"name":"Lọ","rate":1}]	Uống	Dược Apimed			1	30	1705334390037	1706615536470	\N
 6	1215	Tolsus	Trimethoprim 40mg, sulfamethoxazol 200mg	4	[{"name":"Lọ","rate":1}]	Uống	Thái lan			1	11	1705334390037	1705334390037	\N
 6	1217	Augmentin ES	amoxycillin 600mmg, clavulanic acid 4209mg	1	[{"name":"Lọ","rate":1}]	Uống	GSk-London			1	4	1705334390037	1705334390037	\N
 6	1218			1	[{"name":"","rate":1}]					0	0	1705334390037	1705334390037	\N
 6	1221	Quincef 125mg/5ml	Cefuroxime 125mg/5ml	1	[{"name":"Lọ","rate":1}]	Uống	Mekophar			1	10	1705334390037	1705334390037	\N
-6	1223	Novafex 37.5ml	Cefixime 100mg/5ml	1	[{"name":"Lọ","rate":1}]	Uống	Mekophar			1	20	1705334390037	1705334390037	\N
 6	1227	Alphatrypa	Alpha Chymotrysin 4200IU		[{"name":"Viên","rate":1}]	Uống	pharbaco central-VN			1	0	1705334390037	1705334390037	\N
 6	1224	Novafex 60ml	Cefixime 100mg/5ml	1	[{"name":"Lọ","rate":1}]	Uống	mekophar			1	8	1705334390037	1705334390037	\N
 6	1231	Cefixim 200	Cefixim 200mg	1	[{"name":"Viên","rate":1}]	Uống	VPC pharimexco			1	80	1705334390037	1705334390037	\N
 6	1232	Lodegal- Cipro	Ciprofloxacin 500mg	1	[{"name":"Viên","rate":1}]	Uống	dược Phương Đông			1	90	1705334390037	1705334390037	\N
 6	1233	Niflad ES	amoxicilin 600mg, Clavulanic Acid 42.9mg	1	[{"name":"Viên","rate":1}]	Uống	Dược Imexpharm			0	0	1705334390037	1705334390037	\N
 6	1234	Atmuzyn 400	amoxicilin 400mg, clavulanic acid 57mg	1	[{"name":"Viên","rate":1}]	Uống	DHT Hataphar			1	270	1705334390037	1705334390037	\N
-6	1238	Clarithromycin 250mg	Clarithromycin 250mg	1	[{"name":"Viên","rate":1}]	Uống	Stella			1	100	1705334390037	1705334390037	\N
+6	1246	Ceftitoz	Ceftibuten 90mg	1	[{"name":"Gói","rate":1}]	Uống				1	18	1705334390037	1707879692278	\N
 6	1237	Dentimex	Cefdinir 300mg	1	[{"name":"Viên","rate":1},{"name":"Vỉ","rate":10}]	Uống	Dopharma			1	140	1705334390037	1705334390037	\N
 6	1239	OpeCipro	CiproFloxacin 500	1	[{"name":"Viên","rate":1}]	Uống	OPV Pharma			1	65	1705334390037	1705334390037	\N
 6	1240	UBVIX	Levofloxacin 500mg	1	[{"name":"Viên","rate":1}]	Uống	Roussel  VN			1	30	1705334390037	1705334390037	\N
-6	1203	Acemuc 200	Acetylcysteine 200mg	10	[{"name":"Gói","rate":1}]	Uống	Sanofi			1	599	1705334390037	1705927637311	\N
+2	790	TDC Tảo biển 75ml TD	\N	2	[{"name":"Tuýp","rate":1}]	\N	\N	\N	\N	1	3	1705334390037	1707099950266	\N
 6	1251	Hagimox 	amocilin 500mg	1	[{"name":"Vỉ","rate":1}]	Uống	DHG			1	12	1705334390037	1705334390037	\N
 6	1252	Flagyl 250	Metronidazole 250mg	1	[{"name":"Viên","rate":1}]	Uống	Sanofi			1	100	1705334390037	1705334390037	\N
 6	1253	Azitnic 500	Azithromycin 500mg	1	[{"name":"Viên","rate":1},{"name":"","rate":10}]	Uống				1	4	1705334390037	1705334390037	\N
-6	1254	Parutan	Cefditoren 200mg	1	[{"name":"Viên","rate":1}]	Uống	Dược Hà Tây			1	357	1705334390037	1705334390037	\N
-6	1216	Zitromax	azithromycin 200mg/5ml	1	[{"name":"Lọ","rate":1}]	Uống	pfizer- Italy			1	1	1705334390037	1705334390037	\N
-6	1246	Ceftitoz	Ceftibuten 90mg	1	[{"name":"Gói","rate":1}]	Uống				1	44	1705334390037	1705924081445	\N
-6	1204	Acemuc 100	Acetylcysteine 100mg	10	[{"name":"Gói","rate":1}]	Uống	Sanofi			1	571	1705334390037	1706272546067	\N
+6	1220	Vigentin 	amoxicillin 500mg, clavulanic acid 62.5mg	1	[{"name":"Gói","rate":1}]	Uống	Dược trung ương 1			1	96	1705334390037	1707903677865	\N
+6	1241	LevoDHG	Levofloxacin 250mg	1	[{"name":"Viên","rate":1}]	Uống	DHG			1	0	1705334390037	1706620165102	\N
 6	1212	Motilium 60ml	Suspension 1mg, domepridone 1mg	4	[{"name":"Lọ","rate":1}]	Uống	Thái lan			1	1	1705334390037	1705334390037	\N
-6	1219	Fleming 70ml	amoxicillin 400mg, clavulanic acid 57mg	1	[{"name":"Lọ","rate":1}]	Uống	Paradigm- ấn độ			1	35	1705334390037	1706007446355	\N
-6	1200	Thụt Stiprol 3g	Glycerol 2.25g	4	[{"name":"Tuýp","rate":1}]	Thụt hậu môn	Dược Hà tĩnh			1	48	1705334390037	1706271224626	\N
-6	1610	Cooltalu	\N	8	[{"name":"Lọ","rate":1,"default":true}]	\N	\N	\N	\N	1	41	1705334390037	1706177987190	\N
-6	1250	Cifokid	Ciprofloxacin 250mg	1	[{"name":"Gói","rate":1}]	Uống	USP			1	1040	1705334390037	1705922976490	\N
+6	1204	Acemuc 100	Acetylcysteine 100mg	10	[{"name":"Gói","rate":1}]	Uống	Sanofi			1	545	1705334390037	1707998876342	\N
+6	1226	Bostocef	Cefdinir 125mg/5ml	1	[{"name":"Lọ","rate":1}]	Uống	boston pharma			1	32	1705334390037	1707741225804	\N
+6	1607	Oflovid nhỏ	Ofloxacin 0.3%	1	[{"name":"Lọ","rate":1,"default":true}]	nhỏ 	\N	\N	\N	1	0	1705334390037	1707919572532	\N
+6	1249	Aziphar 100	Azithromycin 100mg	1	[{"name":"Gói","rate":1}]	Uống	mekophar			1	11	1705334390037	1707877218053	\N
+6	1200	Thụt Stiprol 3g	Glycerol 2.25g	4	[{"name":"Tuýp","rate":1}]	Thụt hậu môn	Dược Hà tĩnh			1	46	1705334390037	1706857139940	\N
 6	1091	Kids Smart Drop DHA	DHA	8	[{"name":"Lọ","rate":1}]	Uống	Australia			1	1	1705334390037	1705757476885	\N
 2	1647	SRM SVR da dầu 55ml TD	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	5	1705334390037	1705334390037	\N
-6	1220	Vigentin 	amoxicillin 500mg, clavulanic acid 62.5mg	1	[{"name":"Gói","rate":1}]	Uống	Dược trung ương 1			1	108	1705334390037	1706271758691	\N
+6	1203	Acemuc 200	Acetylcysteine 200mg	10	[{"name":"Gói","rate":1}]	Uống	Sanofi			1	445	1705334390037	1707914013833	\N
 6	1244	Glencinone 125	Cefdinir 125mg	1	[{"name":"Viên","rate":1}]	Uống	Dược 150 Cophavina			1	180	1705334390037	1705334390037	\N
-6	1199	Ngậm Mekotricin	Tyrothricin 1mg	10	[{"name":"Hộp","rate":1}]	Ngậm	mekophar			1	17	1705334390037	1706104231619	\N
-6	1194	SRK Saltmax 		10	[{"name":"Gói","rate":1},{"name":"Hộp","rate":30}]	Pha xịt rửa	Dược QTe Việt Sinh			1	180	1705334390037	1706273412412	\N
-6	1209	Hatadin	Desloratadine 2.5mg/5ml	2	[{"name":"Lọ","rate":1}]	Uống	Dược Apimed			1	31	1705334390037	1706013241883	\N
+2	974	Raileza 120ml trị chất rận			[{"name":"","rate":1}]					1	6	1705334390037	1707792565075	\N
+6	1250	Cifokid	Ciprofloxacin 250mg	1	[{"name":"Gói","rate":1}]	Uống	USP			1	1005	1705334390037	1708004440176	\N
+6	1248	Lyfomin 	Fosfomycin 400mg	1	[{"name":"Gói","rate":1}]	Uống				1	347	1705334390037	1707306150453	\N
 6	1230	Acyclovir 200mg	Acyclovir 200mg	1	[{"name":"Viên","rate":1}]	Uống	stella			1	175	1705334390037	1705493278033	\N
 2	688	Serum AZE Pharmaform 30ml	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705731633686	\N
+6	1605	augmentin DDS	PD Amoxiclav	1	[{"name":"Lọ","rate":1,"default":true}]	Uống	\N	\N	\N	1	40	1705334390037	1708002804852	\N
 6	1229	Acyclovir 800mg	Acyclovir 800mg	1	[{"name":"Viên","rate":1}]	Uống	Stella			1	68	1705334390037	1706273412412	\N
-6	1201	AT Fexofenadin 	Fexofenadone HCL 30mg/5ml	2	[{"name":"Ống","rate":1}]	Uống	Dược an nhiên			1	205	1705334390037	1705334390037	\N
-6	1607	Oflovid nhỏ	Ofloxacin 0.3%	1	[{"name":"Lọ","rate":1,"default":true}]	nhỏ 	\N	\N	\N	1	1	1705334390037	1705579048317	\N
-6	1242	LevoDHG	Levofloxacin 500mg	1	[{"name":"Viên","rate":1}]	Uống	DHG			1	405	1705334390037	1706273412412	\N
+6	1654	faskit D3	vitamin D3	8	[{"name":"Lọ","rate":1,"default":true}]	Uống	\N	\N	\N	1	6	1706620496283	1706620550110	\N
+6	1199	Ngậm Mekotricin	Tyrothricin 1mg	10	[{"name":"Hộp","rate":1}]	Ngậm	mekophar			1	14	1705334390037	1708003531601	\N
+6	1238	Clarithromycin 250mg	Clarithromycin 250mg	1	[{"name":"Viên","rate":1}]	Uống	Stella			1	80	1705334390037	1706965147334	\N
+6	1194	SRK Saltmax 		10	[{"name":"Gói","rate":1},{"name":"Hộp","rate":30}]	Pha xịt rửa	Dược QTe Việt Sinh			1	88	1705334390037	1708004608250	\N
+6	1254	Parutan	Cefditoren 200mg	1	[{"name":"Viên","rate":1}]	Uống	Dược Hà Tây			1	342	1705334390037	1707483188843	\N
+6	1610	Cooltalu	\N	8	[{"name":"Lọ","rate":1,"default":true}]	\N	\N	\N	\N	1	36	1705334390037	1707742128998	\N
+2	445	Imudulin 10ml x 20 ống	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	4	1705334390037	1707794714603	\N
+6	1219	Fleming 70ml	amoxicillin 400mg, clavulanic acid 57mg	1	[{"name":"Lọ","rate":1}]	Uống	Paradigm- ấn độ			1	28	1705334390037	1707882051165	\N
 6	1611	Thanh Nhiệt Giải Độc Gan	\N	\N	[{"name":"Ống","rate":1,"default":true},{"name":"Hộp","rate":20}]	\N	\N	\N	\N	1	580	1705334390037	1705334390037	\N
 6	1257	Foribat 80	Febuxostat 80mg	5	[{"name":"Viên","rate":1},{"name":"hộp","rate":30}]	Uống	medisun			1	0	1705334390037	1705334390037	\N
 6	1258	No-spa 	Drotaverine HCl 40mg	4	[{"name":"Viên","rate":1}]	Uống	sanofi			1	60	1705334390037	1705334390037	\N
@@ -18782,7 +20616,7 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 6	1280	Rotunda	Rotudin 30mg		[{"name":"Vỉ","rate":1}]	Uống	Dược trung ương 2			1	6	1705334390037	1705334390037	\N
 6	1281	Test Covid			[{"name":"","rate":1}]					0	0	1705334390037	1705334390037	\N
 6	1282	Test covid-FLuA/B			[{"name":"","rate":1}]					0	0	1705334390037	1705334390037	\N
-6	1323	Bàn chải Kichi hồng			[{"name":"Chiếc","rate":1}]	Vệ sinh răng miệng 				1	29	1705334390037	1705334390037	\N
+6	1286	Thekatadaxan	neomycin, dexamethason		[{"name":"Lọ","rate":1}]	Nhỏ tai, mũi, mắt				1	12	1705334390037	1707905908019	\N
 6	1287	Dung dịch nhỏ mũi 	Methyl- Suflonyl methane		[{"name":"Lọ","rate":1}]	Nhỏ mũi				0	0	1705334390037	1705334390037	\N
 6	1291	Bioforte DuO		4	[{"name":"Ống","rate":1}]	Uống				1	0	1705334390037	1705334390037	\N
 6	1293	Ciprofloxacin 	Ciprofloxacin 0.3%		[{"name":"Lọ","rate":1}]	Nhỏ mắt, tai				1	8	1705334390037	1705334390037	\N
@@ -18805,22 +20639,22 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 6	1318	Baby Smile			[{"name":"Gói","rate":1},{"name":"Hộp","rate":30}]	vệ sinh miệng				1	180	1705334390037	1705334390037	\N
 6	1320	Laforin NL			[{"name":"Lọ","rate":1}]	Súc miệng				1	2	1705334390037	1705334390037	\N
 6	1273	Antacil		4	[{"name":"Vỉ","rate":1}]	Uống				1	22	1705334390037	1706008740001	\N
-6	1286	Thekatadaxan	neomycin, dexamethason		[{"name":"Lọ","rate":1}]	Nhỏ tai, mũi, mắt				1	18	1705334390037	1706188592567	\N
+6	1309	Salonpans Gel  30g		5	[{"name":"Tuýp","rate":1}]	Bôi				1	2	1705334390037	1707740444262	\N
 6	1324	Bàn chải Julia			[{"name":"Chiếc","rate":1}]	vệ sinh răng miệng 				0	0	1705334390037	1705334390037	\N
 6	1297	Eylevox	Levoflocin hydrate 5mg/ml		[{"name":"Lọ","rate":1}]	nhỏ mắt, mũi, tai	Samil			1	0	1705334390037	1705334390037	\N
 6	1319	Bactronil 	Mupirocin 2%		[{"name":"Tuýp","rate":1}]	Bôi				1	10	1705334390037	1705925312669	\N
-6	1302	Promethazin 	Promethazin HCl 2%	12	[{"name":"Tuýp","rate":1}]	Bôi				1	7	1705334390037	1705334390037	\N
 6	1300	Metrogyl Denta 	Metronidazole Gel 10mg		[{"name":"Tuýp","rate":1}]	Bôi				1	12	1705334390037	1705334390037	\N
-6	1288	Hylaform 0.1%			[{"name":"Lọ","rate":1}]	Nhỏ mắt 	CPC1HN			1	15	1705334390037	1705334390037	\N
+6	1288	Hylaform 0.1%			[{"name":"Lọ","rate":1}]	Nhỏ mắt 	CPC1HN			1	13	1705334390037	1706618802441	\N
 6	1310	Daktarin Gel	Miconazole 200mg	12	[{"name":"Tuýp","rate":1}]	Bôi				1	6	1705334390037	1705334390037	\N
 6	1274	Simethicone	Simethicone 1g/15ml	4	[{"name":"Lọ","rate":1}]	Uống	stella			1	2	1705334390037	1705334390037	\N
 6	1306	Betamethason 	Betamethason dipropionat 0.064%	12	[{"name":"Tuýp","rate":1}]	Bôi				1	6	1705334390037	1705334390037	\N
 6	1270	Smecta	Diosmectite 3g	4	[{"name":"Gói","rate":1}]	Uống				1	109	1705334390037	1705334390037	\N
-6	1307	Zytee			[{"name":"Tuýp","rate":1}]	Bôi				1	16	1705334390037	1705928504213	\N
-6	1284	NaCl nhỏ mắt	NaCl 0.9%	10	[{"name":"Lọ","rate":1}]	Nhỏ-Rửa	Dược quang minh 			1	32	1705334390037	1706009895943	\N
+6	1302	Promethazin 	Promethazin HCl 2%	12	[{"name":"Tuýp","rate":1}]	Bôi				1	6	1705334390037	1707220297885	\N
+6	1284	NaCl nhỏ mắt	NaCl 0.9%	10	[{"name":"Lọ","rate":1}]	Nhỏ-Rửa	Dược quang minh 			1	28	1705334390037	1706613809676	\N
+6	1307	Zytee			[{"name":"Tuýp","rate":1}]	Bôi				1	14	1705334390037	1706785713711	\N
 6	1275	Debridat	Trimebutine 100mg	4	[{"name":"Viên","rate":1}]	Uống	pfizer			1	54	1705334390037	1705412460205	\N
 6	1267	Hidrasec 30mg	Racecadotril 30mg	4	[{"name":"Gói","rate":1}]	Uống	ABbott			1	16	1705334390037	1705334390037	\N
-6	1309	Salonpans Gel  30g		5	[{"name":"Tuýp","rate":1}]	Bôi				1	3	1705334390037	1705334390037	\N
+6	1323	Bàn chải Kichi hồng			[{"name":"Chiếc","rate":1}]	Vệ sinh răng miệng 				1	28	1705334390037	1707880785637	\N
 6	1264	Mobic 	Meloxicam 7.5mg	5	[{"name":"Viên","rate":1}]	Uống				1	100	1705334390037	1705497681122	\N
 6	1266	Duphalac 	Lactulose 	4	[{"name":"Gói","rate":1}]	Uống				1	40	1705334390037	1705334390037	\N
 6	1308	Acyclovir Cream	Acyclovir 250mg	1	[{"name":"Tuýp","rate":1}]	Bôi	stella			1	4	1705334390037	1705493278033	\N
@@ -18834,10 +20668,8 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 6	1334	Sữa tắm gội Mũm Mĩm 			[{"name":"Chai","rate":1}]					1	4	1705334390037	1705334390037	\N
 6	1335	DD Clim Care 100ml			[{"name":"Chai","rate":1}]					1	2	1705334390037	1705334390037	\N
 6	1339	KĐR Bee			[{"name":"Tuýp","rate":1}]					0	0	1705334390037	1705334390037	\N
-6	1342	Ostelin bầu		8	[{"name":"Lọ","rate":1}]	Uống	Australia			1	2	1705334390037	1705334390037	\N
 6	1344	Mutilium SR	Domeperidon 1mg	4	[{"name":"Lọ","rate":1},{"name":"","rate":10}]	Uống	Thái Lan			1	1	1705334390037	1705334390037	\N
 6	1347	Xịt Vape 			[{"name":"Chai","rate":1}]	Xịt				1	4	1705334390037	1705334390037	\N
-6	1348	Xịt răng Midkid			[{"name":"Lọ","rate":1}]	Xịt				1	9	1705334390037	1705334390037	\N
 6	1349			12	[{"name":"","rate":1}]					0	0	1705334390037	1705334390037	\N
 6	1377	amoxiclav sandoz	amoxicillin trihidrat	1	[{"name":"Lọ","rate":1}]	Uống				1	0	1705334390037	1705334390037	\N
 11	1627	A PHA- Bevagyl	acetyl spiramycin 100.000 ui /metronidazol 125mg	1	[{"name":"Viên","rate":1,"default":true}]	Uống	duọc hà nội	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều2 viên	1	0	1705334390037	1705334390037	\N
@@ -18857,10 +20689,8 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 1	1378	Nem chua rán			[{"name":"Cái","rate":1,"default":false},{"name":"Hộp","rate":5,"default":true}]					1	61	1705334390037	1705334390037	\N
 1	1379	Chân gà			[{"name":"Kg","rate":1,"default":false},{"name":"Hộp","rate":5,"default":true}]					1	16	1705334390037	1705334390037	\N
 1	1380	Tavanic 500mg			[{"name":"Viên","rate":1},{"name":"","rate":10}]					1	998	1705334390037	1705334390037	\N
-1	1381	Panadol 500mg			[{"name":"Viên","rate":1},{"name":"Vỉ","rate":10},{"name":"Hộp","rate":100}]					1	1490	1705334390037	1705334390037	\N
 6	1382	Lăn muỗi Muhi			[{"name":"Lọ","rate":1}]	Bôi				1	3	1705334390037	1705334390037	\N
 6	1383	Bôi muỗi muhi			[{"name":"Tuýp","rate":1}]					1	2	1705334390037	1705334390037	\N
-6	1384	St Balea(đức)			[{"name":"Chai","rate":1}]					1	5	1705334390037	1705334390037	\N
 6	1387	Dầu tắm Ziaja			[{"name":"Lọ","rate":1}]					1	2	1705334390037	1705334390037	\N
 6	1388	Haginir 300	Cefdinir 300	1	[{"name":"Viên","rate":1}]	Uống				0	0	1705334390037	1705334390037	\N
 6	1390	Cifpa	ciprofloxacin 500	1	[{"name":"Viên","rate":1},{"name":"Vỉ","rate":10}]	Uống				1	200	1705334390037	1705334390037	\N
@@ -18874,15 +20704,16 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 6	1386	Xịt họng Bipoli			[{"name":"Lọ","rate":1}]					1	1	1705334390037	1705334390037	\N
 6	1365	Xịt họng Bipoly		10	[{"name":"Lọ","rate":1}]	Xịt				0	2	1705334390037	1705334390037	\N
 6	1285	Elossy	Xylometazoline 0.05%		[{"name":"Lọ","rate":1}]	Nhỏ	DK pharma			1	20	1705334390037	1706009175735	\N
+6	1340	KĐR  Jack			[{"name":"Tuýp","rate":1}]					1	3	1705334390037	1706359039239	\N
 2	1363	Gói Pre-peel Md Ceutical			[{"name":"","rate":1}]					1	5	1705334390037	1705334390037	\N
 6	1325	Nhiệt kế thủy ngân 			[{"name":"Chiếc","rate":1}]	Kẹp nách 				1	19	1705334390037	1706271758691	\N
 6	1358	Magie-D		8	[{"name":"Lọ","rate":1}]	Uống				1	4	1705334390037	1706181131701	\N
 6	1327	Dưỡng ẩm Ziaja AZS 400ml			[{"name":"Lọ","rate":1}]	dưỡng ẩm tay chân 				1	3	1705334390037	1706273940703	\N
-6	1351	Ziaja 15%		12	[{"name":"Tuýp","rate":1}]	Bôi				1	9	1705334390037	1705334390037	\N
+1	1381	Panadol 500mg			[{"name":"Viên","rate":1},{"name":"Vỉ","rate":10},{"name":"Hộp","rate":100}]					1	1510	1705334390037	1707014710652	\N
 6	1345	Lusca		12	[{"name":"Tuýp","rate":1}]	Bôi				0	1	1705334390037	1705334390037	\N
 6	1336	DDVS Girl			[{"name":"Chai","rate":1}]					0	2	1705334390037	1705334390037	\N
-6	1340	KĐR  Jack			[{"name":"Tuýp","rate":1}]					1	4	1705334390037	1705334390037	\N
-6	1389	Haginir 300	Cefdinir 300	1	[{"name":"Viên","rate":1},{"name":"Vỉ","rate":10}]	Uống				1	200	1705334390037	1705334390037	\N
+6	1351	Ziaja 15%		12	[{"name":"Tuýp","rate":1}]	Bôi				1	8	1705334390037	1706361914437	\N
+6	1342	Ostelin bầu		8	[{"name":"Lọ","rate":1}]	Uống	Australia			1	1	1705334390037	1707276860816	\N
 6	1326	Nhiệt kế điện tử Microlife			[{"name":"Chiếc","rate":1}]	Bắn trán				1	1	1705334390037	1705334390037	\N
 6	1364	Betadin Xanh 			[{"name":"Lọ","rate":1}]					1	4	1705334390037	1705334390037	\N
 2	1367	Peel LightA chiết 3g			[{"name":"","rate":1}]					1	0	1705334390037	1705334390037	\N
@@ -18893,6 +20724,8 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	739	Serum THE ORDINARY Niacinamide 10% + ZinC 1%  30ml XT	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705712555553	\N
 6	1352	Bioderma Tím		12	[{"name":"Tuýp","rate":1}]	Bôi				1	1	1705334390037	1705334390037	\N
 6	1385	Dưỡng ẩm Dexeryl bé			[{"name":"Tuýp","rate":1}]					1	0	1705334390037	1706187277786	\N
+6	1384	St Balea(đức)			[{"name":"Chai","rate":1}]					1	4	1705334390037	1707306150453	\N
+6	1348	Xịt răng Midkid			[{"name":"Lọ","rate":1}]	Xịt				1	7	1705334390037	1707483442649	\N
 9	1398	Xúc xích winner			[{"name":"Gói","rate":1}]					1	15	1705334390037	1705334390037	\N
 9	1399	Viên chiên			[{"name":"Gói","rate":1}]					1	29	1705334390037	1705334390037	\N
 9	1400	Sủi cảo			[{"name":"Gói","rate":1}]					1	10	1705334390037	1705334390037	\N
@@ -18981,8 +20814,6 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 9	1483	Bọc gấu			[{"name":"Túi","rate":1}]					1	91	1705334390037	1705334390037	\N
 9	1484	tất adidas ngắn			[{"name":"lố","rate":1}]					1	8	1705334390037	1705334390037	\N
 9	1485	Bờm			[{"name":"Cái","rate":1}]					1	29	1705334390037	1705334390037	\N
-1	1487	Mặt nạ dưỡng ẩm			[{"name":"Cái","rate":1}]					1	500	1705334390037	1705334390037	\N
-1	1488	Dầu gió bạc hà			[{"name":"Tuýp","rate":1}]					1	200	1705334390037	1705334390037	\N
 9	1490	kệ 4 tầng			[{"name":"cái","rate":1,"default":true}]					1	4	1705334390037	1705334390037	\N
 9	1491	thảm học sinh			[{"name":"cái","rate":1,"default":true}]					1	10	1705334390037	1705334390037	\N
 9	1493	omai việt quất			[{"name":"Túi","rate":1,"default":true}]					1	20	1705334390037	1705334390037	\N
@@ -18996,10 +20827,8 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 9	1501	cốc chia vạch			[{"name":"cái","rate":1,"default":true}]					1	10	1705334390037	1705334390037	\N
 9	1502	thảm xốp			[{"name":"cái","rate":1,"default":true}]					1	40	1705334390037	1705334390037	\N
 9	1503	tất đùi cao			[{"name":"đôi","rate":1,"default":true}]					1	29	1705334390037	1705334390037	\N
-2	1505	Kem dưỡng Zelove XT			[{"name":"","rate":1,"default":true}]					1	2	1705334390037	1705334390037	\N
 12	1507	Dermacos			[{"name":"","rate":1,"default":true}]					1	4	1705334390037	1705334390037	\N
 12	1508	Vertucid 			[{"name":"","rate":1,"default":true}]					1	5	1705334390037	1705334390037	\N
-2	446	Isotisun 20	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 6	1510	lucas papaw ointment	carica papaya, fresh fruit	12	[{"name":"Tuýp","rate":1,"default":true}]	Bôi	\N	\N	\N	1	3	1705334390037	1705334390037	\N
 2	1511	Serum Oh!oh niacinamide 20% 30ml TD	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 5	1512	Acnicare gel dưỡng ẩm giảm mụn, ngăn ngừa mụn	\N	5	[{"name":"Tuýp","rate":1,"default":true}]	\N	\N	\N	Bôi 2 lần/ngày sáng tối 	1	0	1705334390037	1705334390037	\N
@@ -19007,44 +20836,48 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 5	1514	Biotrade	\N	lo15b3m3	[{"name":"Hộp","rate":1,"default":true}]	Uống	\N	\N	uống ngày 1 viên sau ăn sáng	1	0	1705334390037	1705334390037	\N
 5	1516	Peel Celestetic Pure peel 50ml	\N	lqelr7sn	[{"name":"Lọ","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 5	1517	Peel Celestetic Whitening peel + 50ml	\N	\N	[{"name":"Lọ","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-6	1353	Clarithromycin 500	Clarithromycin 500	1	[{"name":"Viên","rate":1}]	Uống				1	70	1705334390037	1705334390037	\N
+2	446	Isotisun 20	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1706349346067	\N
+6	1292	SosLac	betamethason Clotrimazol, gentamicin	12	[{"name":"Tuýp","rate":1}]	Bôi				1	17	1705334390037	1706528953768	\N
 2	795	TDCHH BHA 2% OBAGI 148ml	\N	2	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
+6	1353	Clarithromycin 500	Clarithromycin 500	1	[{"name":"Viên","rate":1}]	Uống				1	63	1705334390037	1706618802441	\N
+2	1505	Kem dưỡng Zelove XT			[{"name":"","rate":1,"default":true}]					1	1	1705334390037	1706706884462	\N
 2	1506	Toner Dermedic Normacne 200ml TD			[{"name":"","rate":1,"default":true}]					1	6	1705334390037	1705510120050	\N
+2	1655	Nia20 Evenswiss 	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1706707470844	1706707541724	\N
+6	1343	Bôi nhiệt Oracotia			[{"name":"Gói","rate":1}]	Bôi				1	40	1705334390037	1706785713711	\N
 6	1504	M-Amoxi Clav 70ml	Amoxicilin  400mg, Clavulanate acid 57mg	1	[{"name":"Lọ","rate":1,"default":true}]	Uống				1	0	1705334390037	1705334390037	\N
 6	1486	DD Clim Care 60ml			[{"name":"Chai","rate":1}]					0	0	1705334390037	1705334390037	\N
-1	1492	Chai dưỡng ẩm Hudx			[{"name":"Chai","rate":1,"default":false},{"name":"Hộp","rate":5,"default":true}]					1	35	1705334390037	1705561567051	\N
 6	1489	Ivyra	Ibuprobufen 100mg/5ml	6	[{"name":"Lọ","rate":1}]	Uống				0	6	1705334390037	1705334390037	\N
 2	1515	Sữa dưỡng ẩm ngựa ziaja 300ml TD	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705334390037	1705739914987	\N
-6	1354	Hút mũi mẹ con			[{"name":"Bộ","rate":1},{"name":"","rate":10}]					1	16	1705334390037	1705758892270	\N
-6	1292	SosLac	betamethason Clotrimazol, gentamicin	12	[{"name":"Tuýp","rate":1}]	Bôi				1	18	1705334390037	1705758892270	\N
 6	1276	Mutecium-M	Domperidone 10mg	4	[{"name":"Viên","rate":1,"default":false},{"name":"Vỉ","rate":1,"default":true}]	Uống	mekophar			1	438	1705334390037	1705758892270	\N
-6	1343	Bôi nhiệt Oracotia			[{"name":"Gói","rate":1}]	Bôi				1	41	1705334390037	1705758892270	\N
-6	1640	oflomax	ofloxacin 0.3%	\N	[{"name":"Lọ","rate":1,"default":true}]	\N	\N	\N	\N	1	4	1705334390037	1705841654554	\N
+1	1487	Mặt nạ dưỡng ẩm			[{"name":"Cái","rate":1}]					1	517	1705334390037	1707067059216	\N
 6	1509	DDVS Saugella	\N	\N	[{"name":"Lọ","rate":1,"default":true}]	\N	\N	\N	\N	1	3	1705334390037	1706187277786	\N
+1	1492	Chai dưỡng ẩm Hudx			[{"name":"Chai","rate":1,"default":false},{"name":"Hộp","rate":5,"default":true}]					1	57	1705334390037	1707093189552	\N
+6	1640	oflomax	ofloxacin 0.3%	\N	[{"name":"Lọ","rate":1,"default":true}]	\N	\N	\N	\N	1	3	1705334390037	1707211798041	\N
+6	1354	Hút mũi mẹ con			[{"name":"Bộ","rate":1},{"name":"","rate":10}]					1	13	1705334390037	1707444060390	\N
+2	1658	Tẩy trang Loreal dầu  nước 400ml TD	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	4	1707793910450	1707794453883	\N
+1	1488	Dầu gió bạc hà			[{"name":"Tuýp","rate":1}]					1	224	1705334390037	1707032851246	\N
 2	824	Triluma Ấn 15g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 11	1569	Methionine	Methionine	4	[{"name":"Viên","rate":1,"default":true}]	Uống	dược tp hồ chí minh	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 11	1576	Klamentin	amoxicillin500mg--clavulanic acid 62.5mg	1	[{"name":"Gói","rate":1,"default":true}]	Uống	dược hậu giang	\N	Uống 2 lần/ngày sau ăn, sáng 1gói, chiều 1gói	1	0	1705334390037	1705334390037	\N
-6	1247	Pemolip	Cefditoren 50mg	1	[{"name":"Gói","rate":1}]	Uống				1	603	1705334390037	1706178114289	\N
 11	1581	DiamicronMR	Gliclazide 30mg	9	[{"name":"Viên","rate":1,"default":true}]	Uống	cộng hoà pháp	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 11	1587	NENI 800MG	Piracetam800mg	3	[{"name":"Viên","rate":1,"default":true}]	Uống	dược hậu giang	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 2	1562	Sữa tắm bé Cetaphil 400ml	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	584	Mặt nạ B5 EGF căng bóng, phục hồi da	\N	3	[{"name":"Túi","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
+6	1179	Progermila	Bacillus calusii	4	[{"name":"Ống","rate":1}]	Uống	CPC1HN			1	665	1705334390037	1707307804181	\N
 11	1520	amociclin 500 mg	amociclin	1	[{"name":"Viên","rate":1,"default":true},{"name":"Vỉ","rate":10},{"name":"Hộp","rate":100}]	Uống	hà tây	\N	\N	1	940	1705334390037	1705334390037	\N
 11	1594	Brom acent	anti inflamatory	1	[{"name":"Viên","rate":1,"default":true}]	Uống	dược ACENT ĐỨC	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
 11	1600	mộc hoa trắng HT	Berberin clorid 5mg/cao mộc hoa trắng136mg	4	[{"name":"Viên","rate":1,"default":true}]	Uống	dược hà tĩnh	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
 2	973	KCN DBH			[{"name":"","rate":1}]					1	0	1705334390037	1705334390037	\N
-6	1179	Progermila	Bacillus calusii	4	[{"name":"Ống","rate":1}]	Uống	CPC1HN			1	800	1705334390037	1706272012732	\N
-6	1206	Arolox 15ml	Ambroxol HCl 6mg/ml	10	[{"name":"Lọ","rate":1}]	Uống	bangladesh			1	30	1705334390037	1706275291226	\N
-6	1213	Nhiệt Smile 	VIT C 1000mg, PP 80mg	8	[{"name":"Lọ","rate":1}]	Uống	dược olympia			1	60	1705334390037	1705928504213	\N
+6	1346	Muối Vàng		10	[{"name":"Ống","rate":1}]	vệ sinh mũi				1	95	1705334390037	1707891537723	\N
 2	1518	Timinol	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-6	1235	Fleming 1g	Amoxicilin 875mg, clavulanic acid 125mg	1	[{"name":"Viên","rate":1}]	Uống	Paradigm			1	368	1705334390037	1706006597525	\N
+6	1188	FreeNOSE	NaCl 1.3%	10	[{"name":"Lọ","rate":1}]	Xịt	novacare			1	24	1705334390037	1707914013833	\N
 11	1612	Hasanclar 500mg	clarithrommycin 500mg	1	[{"name":"Viên","rate":1,"default":true}]	Uống	hasan	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 13	1523	F1 quy kem 	\N	9	[{"name":"Hộp","rate":1,"default":true}]	Uống	Mỹ	\N	\N	1	0	1705334390037	1705334390037	\N
 2	972	Kem dưỡng Obagi Hydrate luxe 50g			[{"name":"","rate":1}]					1	0	1705334390037	1705334390037	\N
-2	536	Kem dưỡng trắng da cấp ẩm Kyunglab Ultra hydrating 50ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	3	1705334390037	1705731633686	\N
-6	1346	Muối Vàng		10	[{"name":"Ống","rate":1}]	vệ sinh mũi				1	15	1705334390037	1706013241883	\N
-6	1205	Arolox 60ml	Ambroxol HCl 15mg/5ml	10	[{"name":"Lọ","rate":1}]	Uống	bangladesh			1	79	1705334390037	1706275398340	\N
+6	1205	Arolox 60ml	Ambroxol HCl 15mg/5ml	10	[{"name":"Lọ","rate":1}]	Uống	bangladesh			1	59	1705334390037	1708002804852	\N
+6	1235	Fleming 1g	Amoxicilin 875mg, clavulanic acid 125mg	1	[{"name":"Viên","rate":1}]	Uống	Paradigm			1	298	1705334390037	1708003531601	\N
+6	1206	Arolox 15ml	Ambroxol HCl 6mg/ml	10	[{"name":"Lọ","rate":1}]	Uống	bangladesh			1	7	1705334390037	1708005036741	\N
 6	1145	Ivyra	Ibuprofen 100mg/5ml	6	[{"name":"Lọ","rate":1}]	Uống	VN			1	33	1705334390037	1706276996084	\N
+2	584	Mặt nạ B5 EGF căng bóng, phục hồi da	\N	3	[{"name":"Túi","rate":1}]	\N	\N	\N	\N	1	19	1705334390037	1706708092544	\N
 11	1527	cephalexin500mg	\N	\N	[{"name":"Viên","rate":1,"default":true}]	\N	\N	\N	\N	0	0	1705334390037	1705334390037	\N
 11	1534	nhiệt miệng bạch mai	bm	1	[{"name":"Viên","rate":1,"default":true}]	Uống	bạch mai	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
 11	1541	Coldacmin	paracetamol 325--chlorpheniramin2mg	6	[{"name":"Viên","rate":1,"default":true}]	Uống	hậu giang	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
@@ -19052,26 +20885,31 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 11	1555	Cefdinir125	Cefdinir125mg	1	[{"name":"Gói","rate":1,"default":true}]	Uống	dược cửu long	\N	Uống 2 lần/ngày sau ăn, sáng 1gói chiều 1 gói	1	0	1705334390037	1705334390037	\N
 6	1639	DHA 125	dầu cá ngừ 500mg, DHA 125mg	8	[{"name":"Lọ","rate":1,"default":true}]	Uống	\N	\N	\N	1	3	1705334390037	1705334390037	\N
 6	1638	oresol gold	glucose khan 4g , natri clorid 0.7g,natricitrat 0.59, kali clorid 0.29	8	[{"name":"Gói","rate":1,"default":true}]	Uống	\N	\N	pha 1 gói với 200ml nước sôi để nguội uống từ từ trong 24h	1	300	1705334390037	1705334390037	\N
-6	1188	FreeNOSE	NaCl 1.3%	10	[{"name":"Lọ","rate":1}]	Xịt	novacare			1	12	1705334390037	1705833103654	\N
+6	1213	Nhiệt Smile 	VIT C 1000mg, PP 80mg	8	[{"name":"Lọ","rate":1}]	Uống	dược olympia			1	56	1705334390037	1707394436756	\N
+2	536	Kem dưỡng trắng da cấp ẩm Kyunglab Ultra hydrating 50ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	12	1705334390037	1707794453883	\N
+6	1247	Pemolip	Cefditoren 50mg	1	[{"name":"Gói","rate":1}]	Uống				1	573	1705334390037	1707230432123	\N
 2	658	Sample Bioderma Cicabio 5ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	970	Tẩy da chết Eucerin da mụn 100ml TD			[{"name":"","rate":1}]					1	0	1705334390037	1705334390037	\N
 2	953	KCN Sunpre vàng nhạt 60ml TD			[{"name":"","rate":1}]					1	0	1705334390037	1705334390037	\N
 2	671	Sample Image Vital C ACE serum 3ml	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	605	PLC Re 0,3 + Bakuchiol 2,0 30ml TD	\N	1	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	991	Son dưỡng môi SkinClinic			[{"name":"","rate":1}]					1	4	1705334390037	1705334390037	\N
-2	993	Bông tẩy trang Miniso 1000 miếng			[{"name":"","rate":1}]					1	1	1705334390037	1705334390037	\N
-2	402	Derma forte 15g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	7	1705334390037	1705739896011	\N
+6	1197	Zensonid	Budesonid 0.5mg/2ml	10	[{"name":"Ống","rate":1}]	Khí dung	CPC1HN			1	330	1705334390037	1708003536473	\N
+2	993	Bông tẩy trang Miniso 1000 miếng			[{"name":"","rate":1}]					1	0	1705334390037	1706349346067	\N
+6	1225	Klacid	Clarithromycin125mg/5ml	1	[{"name":"Lọ","rate":1}]	Uống	Abbot			1	14	1705334390037	1708003536473	\N
+6	1271	Mecosol 	Esomeprazol 40mg	4	[{"name":"Viên","rate":1}]	Uống	mediplantex			1	125	1705334390037	1707745819908	\N
 2	1524	Kem dưỡng Iluma	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	764	Son fixderma	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	2	1705334390037	1705334390037	\N
+2	402	Derma forte 15g	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	6	1705334390037	1706592575478	\N
 6	1641	núm vệ sinh mũi + 1 xilanh	\N	\N	[{"name":"cái","rate":1,"default":true}]	Xịt	\N	\N	\N	1	96	1705334390037	1705334390037	\N
-6	1130	Anaferon Lọ		8	[{"name":"Lọ","rate":1}]	Uống	NGA			1	20	1705334390037	1706013241883	\N
 11	1528	cephalexin 500mg	cephalexin500mg	1	[{"name":"Viên","rate":1,"default":true}]	Uống	hà tây 850 viên	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
 2	901	Ủ môi Laneige 3g	\N	3	[{"name":"Lọ","rate":1}]	\N	\N	\N	\N	1	6	1705334390037	1706057563020	\N
+6	1133	Anaferon vỉ		8	[{"name":"Vỉ","rate":1}]	Uống	Nga			1	110	1705334390037	1707396401474	\N
+2	409	Dưỡng ẩm BIODERMA CICABIO 40ml XT	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1706708092544	\N
 11	1535	trimeseptol	sulfamethoxazol 400mg--trimethoprim	1	[{"name":"Viên","rate":1,"default":true}]	Uống	hà đông hà nội	\N	Uống 2 lần/ngày sau ăn, sáng 2viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
 11	1542	Vomina plus	dimenhydrinate 50mg	3	[{"name":"Viên","rate":1,"default":true}]	Uống	medipharco	\N	Uống 1 viên trước khi lên xe 1giờ	1	0	1705334390037	1705334390037	\N
 11	1549	Auclanityl250/31.25mg	amoxicilin250mg--acid clavulanic31.25mg	1	[{"name":"Gói","rate":1,"default":true}]	Uống	dược phẩm tiền giang	\N	Uống 2 lần/ngày sau ăn, sáng 1 gói, chiều 1gói	1	0	1705334390037	1705334390037	\N
 11	1556	Debridat100mg	trimebutine	4	[{"name":"Viên","rate":1,"default":true}]	Uống	cộng hoà pháp	\N	Uống2 lần/ngày sau ăn, sáng 2 viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
-6	1197	Zensonid	Budesonid 0.5mg/2ml	10	[{"name":"Ống","rate":1}]	Khí dung	CPC1HN			1	365	1705334390037	1706185972459	\N
+2	1659	Trixamic PMP 30ml	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	2	1707794262197	1707794453883	\N
 11	1613	MIDUC	Itraconazole 100mg	1	[{"name":"Viên","rate":1,"default":true}]	Uống	Ấn độ	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 11	1563	Rotundin 30mg	Rotundin 30mg	3	[{"name":"Viên","rate":1,"default":true}]	Uống	dược tâm phát	\N	Uống 2 viên lúc 20 giờ	1	0	1705334390037	1705334390037	\N
 11	1570	Peritol	cyproheptadin hydroclorid 4mg	3	[{"name":"Viên","rate":1,"default":true}]	Uống	hung ga ry	\N	Uống 1 viên 	1	0	1705334390037	1705334390037	\N
@@ -19079,21 +20917,16 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 11	1628	DR dukrocin 13g	purifred water ,propylen	1	[{"name":"Tuýp","rate":1,"default":true}]	Bôi	anh ,mỹ, tây ban nha	\N	Bôi dưới da 3 lần/ngày	1	0	1705334390037	1705334390037	\N
 11	1582	Ginkgo blloba	Ginkgo blloba extra q10	3	[{"name":"Viên","rate":1,"default":true}]	Uống	medi usa	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 11	1588	Cavinton 5mg	Vinpocetin5mg	3	[{"name":"Viên","rate":1,"default":true}]	Uống	hunggary	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
-6	1133	Anaferon vỉ		8	[{"name":"Vỉ","rate":1}]	Uống	Nga			1	115	1705334390037	1705833103654	\N
 11	1595	Augmentin	amoxicilin 500mg/acid clavulanic 125mg	1	[{"name":"Viên","rate":1,"default":true}]	Uống	vương quốc anh	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 11	1601	Tanganil 500mg	acetyl  -leucine500mg	3	[{"name":"Viên","rate":1,"default":true}]	Uống	cộng hoà pháp	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều2 viên	1	0	1705334390037	1705334390037	\N
-6	1059	Cefdiri 250mg	cefprozil 250mg	1	[{"name":"Gói","rate":1}]	Uống	VN		Uống 2 lần/ngày ,sáng- chiều	1	230	1705334390037	1706186147635	\N
-6	1225	Klacid	Clarithromycin125mg/5ml	1	[{"name":"Lọ","rate":1}]	Uống	Abbot			1	39	1705334390037	1706273415710	\N
-6	1271	Mecosol 	Esomeprazol 40mg	4	[{"name":"Viên","rate":1}]	Uống	mediplantex			1	140	1705334390037	1705497681122	\N
-6	1222	Azismile 	Azithromycin 200mg/5ml	1	[{"name":"Lọ","rate":1}]	Uống	hàn quốc 			1	12	1705334390037	1706275291226	\N
+2	764	Son fixderma	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1707797774770	\N
+6	1222	Azismile 	Azithromycin 200mg/5ml	1	[{"name":"Lọ","rate":1}]	Uống	hàn quốc 			1	0	1705334390037	1707879692278	\N
+6	1059	Cefdiri 250mg	cefprozil 250mg	1	[{"name":"Gói","rate":1}]	Uống	VN		Uống 2 lần/ngày ,sáng- chiều	1	117	1705334390037	1707882046489	\N
+6	1130	Anaferon Lọ		8	[{"name":"Lọ","rate":1}]	Uống	NGA			1	18	1705334390037	1707891537723	\N
 2	960	Biotrade acnaut lotion 10ml			[{"name":"","rate":1}]					1	3	1705334390037	1705731633686	\N
-2	847	Tẩy trang LRP xanh da dầu 400ml TD	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 11	1614	Griseofulvin 500mg	Griseofulvin 500mg	1	[{"name":"Viên","rate":1,"default":true}]	Uống	vidipha	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 11	1629	ZIN C	Khoáng chất và vitamin	8	[{"name":"Lọ","rate":1,"default":true}]	Uống	dược oshil	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
-2	405	Dưỡng môi Fixderma	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	1525	Sữa tắm gội Eucerin pH5 400ml	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-6	1529	amlodipin 5mg	amlodipine besilate	11	[{"name":"Vỉ","rate":1,"default":true}]	Uống	\N	\N	\N	1	30	1705334390037	1705334390037	\N
-2	866	Viên uống bổ gan Silydetox 60 viên	\N	4	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	5	1705334390037	1705334390037	\N
 11	1536	ginkgo biloba q10	ginkgo biloba extra 360mg	8	[{"name":"Viên","rate":1,"default":true}]	Uống	dược phẩm medi u s a	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 11	1543	Zaromax 200	Azithromycin200mg	1	[{"name":"Gói","rate":1,"default":true}]	Uống	dược hậu giang	\N	Uống 2 lần/ngày sau ăn, sáng 1 gói chiều 1 gói	1	0	1705334390037	1705334390037	\N
 11	1550	Klamentin500/62.5	amoxicilin 500mg/acidclavulanic62.5mg	1	[{"name":"Gói","rate":1,"default":true}]	Uống	dược hậu giang	\N	Uống 2 lần/ngày sau ăn, sáng 1 gói, chiều 1gói	1	0	1705334390037	1705334390037	\N
@@ -19106,10 +20939,21 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 11	1596	Dopegyt 250mg	Methyldopa	3	[{"name":"Viên","rate":1,"default":true}]	Uống	hung ga ry	\N	Uống 1 viên khi  cao huyết áp	1	0	1705334390037	1705334390037	\N
 2	456	KCN Fixderma SHADOW Spf50 Cream 75g	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705731633686	\N
 6	1642	Test fluA/B	\N	\N	[{"name":"Bộ","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705334390037	1705758892270	\N
-2	707	Serum Goodndoc B5 Hydra 30ml	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	2	1705334390037	1705835526735	\N
+6	1529	amlodipin 5mg	amlodipine besilate	11	[{"name":"Vỉ","rate":1,"default":true}]	Uống	\N	\N	\N	1	29	1705334390037	1706695500736	\N
+2	707	Serum Goodndoc B5 Hydra 30ml	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1706707541724	\N
+2	803	Tinh dầu hoa anh thảo Úc	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1706708217047	\N
+2	847	Tẩy trang LRP xanh da dầu 400ml TD	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1707792565075	\N
+2	866	Viên uống bổ gan Silydetox 60 viên	\N	4	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1707792565075	\N
+2	858	Viên uống Biocystin 30 viên	\N	4	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	6	1705334390037	1707794453883	\N
+2	849	Tẩy trang Loreal xanh lam nhạt 400ml TD	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	2	1705334390037	1707794453883	\N
+2	405	Dưỡng môi Fixderma	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1707797480501	\N
 11	1615	Rodogyl	spiramycin/ metronidazol	1	[{"name":"Viên","rate":1,"default":true}]	Uống	sanofi s p a	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 2	1519	Codeage Collagen Cam	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
+2	654	SRM Skin GSV 200ml	\N	9	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	26	1705334390037	1707794453883	\N
+2	561	Kem đặc trị mụn nám Caucasian day - night minisize	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1707797480501	\N
 11	1630	Viên giải rượu ME -21	ME 21	8	[{"name":"Viên","rate":1,"default":true}]	Uống	DƯỢC Á CHÂU	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
+2	517	Kem dưỡng Neutriderm 125 ml	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1707797480501	\N
+2	582	Máy rửa mặt nâng cơ	\N	3	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1707797480501	\N
 11	1537	Presdilon 0,5mg	Dexamethason acetat	1	[{"name":"Viên","rate":1,"default":true}]	Uống	dược phẩm hà tây	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
 11	1544	Augmentin250mg	amoxicillil 250mg--acid clavulanic 31.25mg	1	[{"name":"Gói","rate":1,"default":true}]	Uống	cộng hoà pháp	\N	Uống 2 lần/ngày sau ăn, sáng 1gói, chiều 1gói	1	0	1705334390037	1705334390037	\N
 11	1551	Hafenthyl supra 160mg	Fenofibrate 160mg	9	[{"name":"Viên","rate":1,"default":true}]	Uống	hasan bình dương	\N	Uống 1 viên, sau ăn	1	0	1705334390037	1705334390037	\N
@@ -19117,16 +20961,17 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 11	1565	Cloromis F	bacitracin 500 IU --Polymyxin 10.000 UI	1	[{"name":"Lọ","rate":1,"default":true}]	Bôi	dược tw hà nội	\N	Bôi dưới da 2 lần/ngày	1	0	1705334390037	1705334390037	\N
 11	1572	Cinanarizin 25mg	Cinanarizin 25mg	3	[{"name":"Viên","rate":1,"default":true}]	Uống	dược Quảng bình	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
 11	1579	Diclofenac	Diclofenac 50mg	6	[{"name":"Viên","rate":1,"default":true}]	Uống	ấn độ	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
+2	571	Men phụ khoa Optibac tím	\N	4	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1707797567459	\N
 11	1584	Agilosart -H100/25	losartan kali 100mg/ hydroclothiazid 25mg	3	[{"name":"Viên","rate":1,"default":true}]	Uống	dược an giang	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 6	1590	inflagic	betamethasone + dexchlorpheniramin	2	[{"name":"Ống","rate":1,"default":true}]	Uống	việt nam	\N	\N	1	30	1705334390037	1705334390037	\N
 11	1597	AMLOR	Amlodipine 5mg	3	[{"name":"Viên","rate":1,"default":true}]	Uống	cộng hoà pháp	\N	Uống 1 viên khi cao huyết áp	1	0	1705334390037	1705334390037	\N
+6	1166	Fexofenadin 60-HV	Fexofenadin HCl 60mg	2	[{"name":"Viên","rate":1},{"name":"Vỉ","rate":10}]	Uống	HV pharma			1	62	1705334390037	1708002204742	\N
 2	808	Toner Klairs 180ml TD	\N	11	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	2	1705334390037	1705334390037	\N
 6	1558	dismolan 5ml	N acetylcystein	10	[{"name":"Ống","rate":1,"default":true}]	Uống	\N	\N	\N	1	20	1705334390037	1705334390037	\N
-6	1166	Fexofenadin 60-HV	Fexofenadin HCl 60mg	2	[{"name":"Viên","rate":1},{"name":"Vỉ","rate":10}]	Uống	HV pharma			1	102	1705334390037	1705410998853	\N
-2	654	SRM Skin GSV 200ml	\N	9	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	5	1705334390037	1705537498273	\N
 2	454	KCN Farmona 50g XT	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705537498273	\N
 2	776	Srm LRP AP+ 200ml TD	\N	9	[{"name":"Tuýp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705681994779	\N
-2	839	Tẩy trang Dermedic da nhạy cảm 500ml TD	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	15	1705334390037	1705933948987	\N
+6	1389	Haginir 300	Cefdinir 300	1	[{"name":"Viên","rate":1},{"name":"Vỉ","rate":10}]	Uống				1	190	1705334390037	1706965147334	\N
+2	839	Tẩy trang Dermedic da nhạy cảm 500ml TD	\N	10	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	11	1705334390037	1707792565075	\N
 6	1559	Ambroxen 100mg	ambroxol HCL 15mg/5ml	10	[{"name":"Ống","rate":1,"default":true}]	Uống	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	468	KCN Sumdfine 50ml 	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	2	1705334390037	1705334390037	\N
 2	419	Dầu gội Radical Med đỏ 300ml TD	\N	3	[{"name":"Chai","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
@@ -19134,53 +20979,55 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 11	1538	Alphachymotrypsin	chymotrypsin 4200 đv u s p	1	[{"name":"Viên","rate":1,"default":true}]	Uống	tân   phú  tp hồ chí minh	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
 11	1545	Augmentin 500mg	amoxicillil 500mg--acid clavulanic 62.5mg	1	[{"name":"Gói","rate":1,"default":true}]	Uống	cộng hoà pháp	\N	Uống 2 lần/ngày sau ăn, sáng 1 gói, chiều 1 gói	1	0	1705334390037	1705334390037	\N
 11	1552	Kefcin 125	cefaclor 125mg	1	[{"name":"Gói","rate":1,"default":true}]	Uống	dược hậu giang	\N	Uống 2 lần/ngày sau ăn, sáng 1gói, chiều 1 gói	1	0	1705334390037	1705334390037	\N
-6	1058	Synergex Forte ( 475mg/5ml)	Amoxicillin 400mg + clavulanic 57,5mg /5ml	1	[{"name":"Lọ","rate":1}]	Uống	Bangladesh		Uống 2 lần/ngày , sáng - chiều , bảo quản ngăn mát tủ lạnh	1	23	1705334390037	1705833103654	\N
 11	1631	ĐÔNG TRÙNG hạ thảo	ĐÔNG TRÙNG hạ thảo	8	[{"name":"Viên","rate":1,"default":true}]	Uống	dược hải ninh	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 11	1566	Ofloxacin 200mg	Ofloxacin 200mg	1	[{"name":"Viên","rate":1,"default":true}]	Uống	ấn độ	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
-6	1060	Dung dịch nhỏ mũi	Methyl-Sulfonyl methane	10	[{"name":"Lọ","rate":1},{"name":"","rate":10}]	Nhỏ			nhỏ mũi 3-4 lần/ ngày mỗi bên 2-3 giọt	1	21	1705334390037	1706101750273	\N
 11	1573	Elthon	Ltoprid hdrochlorid 50mg	4	[{"name":"Viên","rate":1,"default":true}]	Uống	hàn quốc	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều2 viên	1	0	1705334390037	1705334390037	\N
 11	1580	Dehatacil 0,5mg	dexamethason acetat 0,5 mg	1	[{"name":"Viên","rate":1,"default":true}]	Uống	dược  hà tây	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
 2	1616	Tẩy trang Oh Oh 500ml	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705334390037	1706149218650	\N
 11	1585	Hafenthyl 160mg	fenofibrate 160mg	9	[{"name":"Viên","rate":1,"default":true}]	Uống	bình dương	\N	Uống 1 viên sau ăn	1	0	1705334390037	1705334390037	\N
 6	1134	Tamiflu	Tamiflu 	1	[{"name":"Viên","rate":1}]	Uống	Nga			1	171	1705334390037	1706276996084	\N
+6	1065	Livertonic	Silymarin+Hovenia Dulcis Extract	8	[{"name":"Hộp","rate":1}]	Uống	Anh			1	0	1705334390037	1706966171081	\N
 11	1598	COVERAM5MG	Peridopril arginine/amlodipine	3	[{"name":"Viên","rate":1,"default":true}]	Uống	cộng hoà ailen/lreland	\N	Uống 1 viên khi cao huyết áp	1	0	1705334390037	1705334390037	\N
+6	1100	BlackMores Glucosamine 	Glucosamine	8	[{"name":"Lọ","rate":1}]	Uống	Australia			1	0	1705334390037	1706966171081	\N
+6	1060	Dung dịch nhỏ mũi	Methyl-Sulfonyl methane	10	[{"name":"Lọ","rate":1},{"name":"","rate":10}]	Nhỏ			nhỏ mũi 3-4 lần/ ngày mỗi bên 2-3 giọt	1	19	1705334390037	1707294099106	\N
+2	737	Serum Sáng da mờ thâm Pharmaform 30ml	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	2	1705334390037	1707794453883	\N
+6	1058	Synergex Forte ( 475mg/5ml)	Amoxicillin 400mg + clavulanic 57,5mg /5ml	1	[{"name":"Lọ","rate":1}]	Uống	Bangladesh		Uống 2 lần/ngày , sáng - chiều , bảo quản ngăn mát tủ lạnh	1	22	1705334390037	1708005036741	\N
 6	1591	bấm tai	\N	\N	[{"name":"Chiếc","rate":1,"default":true}]	\N	\N	\N	\N	1	13	1705334390037	1705334390037	\N
-2	737	Serum Sáng da mờ thâm Pharmaform 30ml	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
+1	1370	Nhũ tương HYde			[{"name":"","rate":1}]					1	7	1705334390037	1708021540711	\N
 2	720	Serum Mediphar B5 30ml	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 2	1531	Minoxidil 20ml tách lẻ	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-1	1370	Nhũ tương HYde			[{"name":"","rate":1}]					1	52	1705334390037	1705544071934	\N
-6	1350	Ziaja 3%		12	[{"name":"Tuýp","rate":1}]	Bôi				1	13	1705334390037	1705334390037	\N
+6	1063	Nebianax 3%	flaconcini 	10	[{"name":"Ống","rate":1}]	Nhỏ	Italya			1	155	1705334390037	1707374716573	\N
 6	1157	Halixol viên	Ambroxol HCl 30mg	10	[{"name":"Viên","rate":1}]	Uống	EGis- Hugary			1	40	1705334390037	1706184711474	\N
 2	464	KCN Martiderm 40ml TD	\N	8	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-6	1236	Cadiroxim 500	Cefuroxime 500mg	1	[{"name":"Viên","rate":1}]	Uống	Uspharma			1	212	1705334390037	1705334390037	\N
+6	1114	Hadocort-D	Neomycin, dexamethason, xylometazolin	10	[{"name":"Lọ","rate":1}]	Xịt	Dược Hà Tây VN			1	7	1705334390037	1708002204742	\N
 2	1521	Rilastil Aqua gel 72h 40ml	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
+6	1164	Vitamin PP	Vitamin PP 50mg		[{"name":"Vỉ","rate":1}]	Uống	Traphaco			1	23	1705334390037	1707745819908	\N
 11	1632	viên khớp vai gáy	JOINT	8	[{"name":"Viên","rate":1,"default":true}]	Uống	HẢI LINH	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
+2	1539	Dầu gôi Snowlear gói	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705334390037	1707794714603	\N
 6	1071	HISU GOLD	Yến Sào	8	[{"name":"Ống","rate":1},{"name":"Hộp","rate":20}]	Uống	VN			1	0	1705334390037	1705334390037	\N
-6	1063	Nebianax 3%	flaconcini 	10	[{"name":"Ống","rate":1}]	Nhỏ	Italya			1	160	1705334390037	1705334390037	\N
-6	1144	Hapacol 150mg	Paracetamol 150mg	6	[{"name":"Gói","rate":1}]	Uống	DHG			1	487	1705334390037	1706198146237	\N
-6	1125	HealthyPlex Immune Junior	Beta glucan	8	[{"name":"Lọ","rate":1}]	Uống	Italya			1	10	1705334390037	1705580627566	\N
-2	1539	Dầu gôi Snowlear gói	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	-5	1705334390037	1705334390037	\N
-6	1392	Vaselin Balea Đức			[{"name":"Lọ","rate":1}]	Bôi				1	2	1705334390037	1705334390037	\N
-6	1560	test covid, RSV, ADV, FLu	Covid,RSV,ADV,FLU	10	[{"name":"Cái","rate":1,"default":true}]		\N	\N	\N	1	23	1705334390037	1706271758691	\N
+6	1350	Ziaja 3%		12	[{"name":"Tuýp","rate":1}]	Bôi				1	11	1705334390037	1707483442649	\N
+6	1321	Zozo			[{"name":"Chai","rate":1}]	Uống				1	93	1705334390037	1707562416240	\N
+6	1560	test covid, RSV, ADV, FLu	Covid,RSV,ADV,FLU	10	[{"name":"Cái","rate":1,"default":true}]		\N	\N	\N	1	15	1705334390037	1707914074790	\N
+6	1125	HealthyPlex Immune Junior	Beta glucan	8	[{"name":"Lọ","rate":1}]	Uống	Italya			1	9	1705334390037	1707388645560	\N
+6	1236	Cadiroxim 500	Cefuroxime 500mg	1	[{"name":"Viên","rate":1}]	Uống	Uspharma			1	202	1705334390037	1707914074790	\N
+6	1392	Vaselin Balea Đức			[{"name":"Lọ","rate":1}]	Bôi				1	1	1705334390037	1706525012411	\N
 6	1180	Zentomyces	sacharomyces boulardii	4	[{"name":"Gói","rate":1}]	Uống	Mebiphar			1	294	1705334390037	1705833103654	\N
 6	1174	AtilairSac	MOntelukast 4mg	10	[{"name":"Gói","rate":1},{"name":"Hộp","rate":30}]	Uống	an nhiên pharma			1	325	1705334390037	1705833103654	\N
+6	1195	Saltmax Spay	NaCl 0.9%	10	[{"name":"Lọ","rate":1}]	Xịt	Dược QTe Việt Sinh			1	40	1705334390037	1707396547713	\N
 2	1643	Son Atrid	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	10	1705334390037	1705334390037	\N
 6	1283	TEST ADV/FLU/RSV 			[{"name":"","rate":1}]					1	0	1705334390037	1705334390037	\N
 11	1532	metronidzol 250mg	metronidzo	1	[{"name":"Viên","rate":1,"default":true}]	Uống	hà đông hà nội	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
-6	1123	Pactol Kids PETIT	multivitamin	8	[{"name":"Lọ","rate":1}]	Uống	Tây Ban Nha			1	3	1705334390037	1705749095040	\N
+2	689	Serum Ava Collagen 30ml Tad	\N	7	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1706974404942	\N
 11	1546	AUGMENTIN	amoxicillil 500mg--acid clavulanic 125mg	1	[{"name":"Viên","rate":1,"default":true}]	Uống	vương quốc Anh	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 11	1553	Lipitor10mg	atorvastatin10mg	9	[{"name":"Viên","rate":1,"default":true}]	Uống	germany đức	\N	Uống 1 viên , sau ăn	1	0	1705334390037	1705334390037	\N
-6	1321	Zozo			[{"name":"Chai","rate":1}]	Uống				1	95	1705334390037	1706273940703	\N
 6	1255	Augmentin 500mg	amoxicilin 500mg, clavulanic acid 62.5mg	1	[{"name":"Gói","rate":1}]	Uống	GSK			1	137	1705334390037	1705925312669	\N
-6	1214	Euprovit	Cao lá thường xuân	10	[{"name":"Lọ","rate":1}]	Uống	Euprovit			1	36	1705334390037	1705926529772	\N
-6	1152	Clanoz	Loratadine 10mg	2	[{"name":"Viên","rate":1}]	Uống	DHG			1	565	1705334390037	1705755360624	\N
-6	1355	Mask khí dung			[{"name":"Chiếc","rate":1}]					1	15	1705334390037	1705334390037	\N
+6	1144	Hapacol 150mg	Paracetamol 150mg	6	[{"name":"Gói","rate":1}]	Uống	DHG			1	477	1705334390037	1707943611473	\N
+6	1355	Mask khí dung			[{"name":"Chiếc","rate":1}]					1	14	1705334390037	1707943611473	\N
+6	1214	Euprovit	Cao lá thường xuân	10	[{"name":"Lọ","rate":1}]	Uống	Euprovit			1	33	1705334390037	1707360862986	\N
 11	1567	Serapid	Flunarizine 5mg	3	[{"name":"Viên","rate":1,"default":true}]	Uống	hàn quốc	\N	Uống 1 viên khi ăn tối	1	0	1705334390037	1705334390037	\N
 11	1574	CIPROFLOXACIN 500MG	CIPROFLOXACIN 500MG	1	[{"name":"Viên","rate":1,"default":true}]	Uống	hàn quốc	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 6	1210	Sonamux	bromelain 200mg	10	[{"name":"Ống","rate":1},{"name":"Hộp","rate":10}]	Uống	Dược QTe Dolexphar			1	550	1705334390037	1705334390037	\N
-6	1164	Vitamin PP	Vitamin PP 50mg		[{"name":"Vỉ","rate":1}]	Uống	Traphaco			1	25	1705334390037	1705334390037	\N
 6	1158	Paracetamol- Tramadol 	Paracetamol 325mg- Tramadol 37.5mg	6	[{"name":"Viên","rate":1}]	Uống				1	90	1705334390037	1705334390037	\N
-6	1195	Saltmax Spay	NaCl 0.9%	10	[{"name":"Lọ","rate":1}]	Xịt	Dược QTe Việt Sinh			1	41	1705334390037	1705334390037	\N
 6	1155	GreenPam 	Thymomodulin 80mg		[{"name":"Viên","rate":1}]	Uống	Medica Korea			1	130	1705334390037	1705334390037	\N
 6	1228	Climdamycin EG	clindamycin  300mg	1	[{"name":"Viên","rate":1}]	Uống	Pymepharco			1	290	1705334390037	1705334390037	\N
 6	1082	Ferrodue	sắt	8	[{"name":"Lọ","rate":1}]	Uống	Italya			1	9	1705334390037	1705334390037	\N
@@ -19188,7 +21035,8 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 6	1109	ESTROgain		8	[{"name":"Hộp","rate":1}]	Uống	vương quốc anh 			1	2	1705334390037	1705334390037	\N
 6	1277	Miamax	Bromelain50mg, Rutin 50mg		[{"name":"Viên","rate":1}]	Uống				1	180	1705334390037	1705334390037	\N
 6	1129	Hydrosol	VItamin A, B1, B6, D2, C	8	[{"name":"Lọ","rate":1}]	Uống	FANCE			1	4	1705334390037	1705334390037	\N
-6	1114	Hadocort-D	Neomycin, dexamethason, xylometazolin	10	[{"name":"Lọ","rate":1}]	Xịt	Dược Hà Tây VN			1	15	1705334390037	1705334390037	\N
+6	1123	Pactol Kids PETIT	multivitamin	8	[{"name":"Lọ","rate":1}]	Uống	Tây Ban Nha			1	0	1705334390037	1707302549439	\N
+6	1152	Clanoz	Loratadine 10mg	2	[{"name":"Viên","rate":1}]	Uống	DHG			1	470	1705334390037	1707905908019	\N
 2	376	Bông tẩy trang Ipek 150 miếng	\N	3	[{"name":"Túi","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1706149218650	\N
 2	353	Acnequidt chấm mụn viêm 20ml	\N	1	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1706149218650	\N
 2	380	Bông tẩy trang Tetra Pháp 500 miếng	\N	3	[{"name":"Túi","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1706149218650	\N
@@ -19198,19 +21046,19 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 2	968	Intima xanh đậm 250ml			[{"name":"","rate":1}]					1	0	1705334390037	1706149218650	\N
 11	1568	Famcin 300	Rifampicin 300mg	1	[{"name":"Viên","rate":1,"default":true}]	Uống	dược an giang	\N	Uống 1 lần/ngày sau ăn, sáng 2 viên, 	1	0	1705334390037	1705334390037	\N
 11	1575	Salbutamol bp 4mg	Salbutam4mg	2	[{"name":"Viên","rate":1,"default":true}]	Uống	ấn  độ	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều2 viên	1	0	1705334390037	1705334390037	\N
-6	1202	AT Essen 	Oxomemazine HCl 1.6mg/5ml, Guaifenesin 33.33mg/5ml	10	[{"name":"Lọ","rate":1}]	Uống	Dược an nhiên			1	110	1705334390037	1706188592567	\N
+6	1314	muối hồng			[{"name":"Ống","rate":1}]	nhỏ vệ sinh mũi				1	244	1705334390037	1706620550110	\N
+6	1652	buồng đệm thông minh 	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	6	1706276601071	1706620550110	\N
 2	351	AHA10% PLC Body lotion 210ml	\N	2	[{"name":"Tuýp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
-2	833	Tẩy da chết body Dove 225ml	\N	2	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 2	869	Viên uống nội tiết nữ Oliga Queen 30 viên	\N	4	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 6	1186	Saltmax+++	NaCl 2.3%	10	[{"name":"Lọ","rate":1}]	Xịt	Dược Qte VIệt Sinh			1	29	1705334390037	1705334390037	\N
-2	1522	Dưỡng môi babe	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	1	1705334390037	1705334390037	\N
 6	1103	BlackMores Iron 	SẮT ll	8	[{"name":"Lọ","rate":1}]	Uống	Australia			1	0	1705334390037	1705334390037	\N
 11	1586	Penicilin. V KALI	Penicilin. 1.000.000 iu	1	[{"name":"Viên","rate":1,"default":true}]	Uống	dược bình dương	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
-6	1322	Kẹo chipchip Ichnhi			[{"name":"Gói","rate":1}]	Kẹo Nhai				1	257	1705334390037	1706271224626	\N
-6	1652	buồng đệm thông minh 	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1706276601071	1706276601071	\N
-6	1245	Cefurovid	Cefuroxim 125mg	1	[{"name":"Gói","rate":1}]	Uống				1	30	1705334390037	1705334390037	\N
-6	1256	Augmentin 250	amoxicilin 250mg, clavulanic acid 31.25mg	1	[{"name":"Gói","rate":1}]	Uống	GSK			1	121	1705334390037	1705925312669	\N
-6	1243	Glencinone 250mg	Cefdinir 250mg	1	[{"name":"Viên","rate":1}]	Uống	Dược 150 Cophavina			1	110	1705334390037	1705334390037	\N
+6	1211	Thanh Khí Plus	cao lá thường  xuân 	10	[{"name":"Ống","rate":1},{"name":"Hộp","rate":10}]	Uống	Dược QTe  Canada VN			1	80	1705334390037	1707882568205	\N
+6	1290	ZinCaP	Cefuroxim 125mg	1	[{"name":"Gói","rate":1}]	Uống				1	286	1705334390037	1707742133778	\N
+6	1243	Glencinone 250mg	Cefdinir 250mg	1	[{"name":"Viên","rate":1}]	Uống	Dược 150 Cophavina			1	50	1705334390037	1707742139832	\N
+6	1256	Augmentin 250	amoxicilin 250mg, clavulanic acid 31.25mg	1	[{"name":"Gói","rate":1}]	Uống	GSK			1	65	1705334390037	1707374716573	\N
+6	1208	Allor	Loratadine  5mg	2	[{"name":"Lọ","rate":1}]	Uống	india			1	113	1705334390037	1707895712981	\N
+6	1656	yến sào nam dược kids DHA 	yến , DHA 	8	[{"name":"Lọ","rate":1,"default":true}]	Uống	\N	\N	\N	1	20	1707214760514	1707906978001	\N
 3	1592	Đạm	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	10	1705334390037	1705334390037	\N
 11	1526	cephalexin	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	0	0	1705334390037	1705334390037	\N
 11	1533	dehatacil 0,5mg	dexamethason	1	[{"name":"Viên","rate":1,"default":true}]	Uống	hà tây	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều 2 viên	1	0	1705334390037	1705334390037	\N
@@ -19218,15 +21066,16 @@ COPY public."Product" (oid, id, "brandName", substance, "group", unit, route, so
 11	1547	Clorpheniramin4mg	Clorpheniramin maleate 4mg	2	[{"name":"Viên","rate":1,"default":true}]	Uống	dhg pharma	\N	Uống 2 lần/ngày sau ăn, sáng 2 viên, chiều2viên	1	0	1705334390037	1705334390037	\N
 11	1554	Cefakid	cephalexin250mg	1	[{"name":"Gói","rate":1,"default":true}]	Uống	dược phú yên	\N	Uống 2 lần/ngày sau ăn, sáng 1 gói, chiều 1 gói	1	0	1705334390037	1705334390037	\N
 11	1599	amlodipin 5mg	amlodipin 5mg	3	[{"name":"Viên","rate":1,"default":true}]	Uống	dược pharma usa	\N	Uống 1 viên khi cao huyết áp	1	0	1705334390037	1705334390037	\N
-6	1207	Best GSV	Betamethasone 3mg, dexclorpheniramin  maleat 24mg	2	[{"name":"Lọ","rate":1}]	Uống	GSV JSC			1	20	1705334390037	1706010710313	\N
 2	1561	Viên uống trị nám transino trắng 240v	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705334390037	1705334390037	\N
 11	1633	ALA 100MG	Giảm đường huyết	8	[{"name":"Viên","rate":1,"default":true}]	Uống	hải linh	\N	Uống 2 lần/ngày sau ăn, sáng 1 viên, chiều 1 viên	1	0	1705334390037	1705334390037	\N
 2	1644	Kem tay Vaselin	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	4	1705334390037	1706149218650	\N
-6	1314	muối hồng			[{"name":"Ống","rate":1}]	nhỏ vệ sinh mũi				1	44	1705334390037	1705669663438	\N
-2	534	Kem dưỡng rau má Goodndoc 50ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	12	1705334390037	1705682399965	\N
-6	1211	Thanh Khí Plus	cao lá thường  xuân 	10	[{"name":"Ống","rate":1},{"name":"Hộp","rate":10}]	Uống	Dược QTe  Canada VN			1	90	1705334390037	1705334390037	\N
-6	1208	Allor	Loratadine  5mg	2	[{"name":"Lọ","rate":1}]	Uống	india			1	126	1705334390037	1706187836730	\N
-6	1290	ZinCaP	Cefuroxim 125mg	1	[{"name":"Gói","rate":1}]	Uống				1	296	1705334390037	1705758892270	\N
+2	534	Kem dưỡng rau má Goodndoc 50ml TD	\N	5	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	8	1705334390037	1707792565075	\N
+2	1522	Dưỡng môi babe	\N	\N	[{"name":"","rate":1,"default":true}]	\N	\N	\N	\N	1	0	1705334390037	1707797480501	\N
+6	1202	AT Essen 	Oxomemazine HCl 1.6mg/5ml, Guaifenesin 33.33mg/5ml	10	[{"name":"Lọ","rate":1}]	Uống	Dược an nhiên			1	84	1705334390037	1708003536473	\N
+2	833	Tẩy da chết body Dove 225ml	\N	2	[{"name":"Hộp","rate":1}]	\N	\N	\N	\N	1	0	1705334390037	1707797480501	\N
+6	1245	Cefurovid	Cefuroxim 125mg	1	[{"name":"Gói","rate":1}]	Uống				1	0	1705334390037	1707481866936	\N
+6	1207	Best GSV	Betamethasone 3mg, dexclorpheniramin  maleat 24mg	2	[{"name":"Lọ","rate":1}]	Uống	GSV JSC			1	11	1705334390037	1708004440176	\N
+6	1322	Kẹo chipchip Ichnhi			[{"name":"Gói","rate":1}]	Kẹo Nhai				1	588	1705334390037	1708005036741	\N
 \.
 
 
@@ -19238,11 +21087,9 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1192	446		1765756800000	130000	170000	320000	0	1	1705334390037	1705334390037	\N
 2	1194	416		\N	175000	185000	255000	0	1	1705334390037	1705334390037	\N
 2	1195	397		\N	220000	230000	305000	0	1	1705334390037	1705334390037	\N
-2	1201	643		1747440000000	184000	195000	279000	-2	1	1705334390037	1705334390037	\N
 2	1202	868		\N	397000	475000	709000	0	1	1705334390037	1705334390037	\N
 2	1203	544		\N	193000	200000	350000	0	1	1705334390037	1705334390037	\N
 2	1204	490		\N	310000	320000	400000	0	1	1705334390037	1705334390037	\N
-2	1205	648		\N	295000	315000	425000	1	1	1705334390037	1705334390037	\N
 2	1206	401		1730419200000	160000	170000	260000	0	1	1705334390037	1705334390037	\N
 2	1207	647		\N	375000	387000	595000	0	1	1705334390037	1705334390037	\N
 2	1208	777		\N	247000	258000	380000	0	1	1705334390037	1705334390037	\N
@@ -19253,13 +21100,11 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1215	778		1706745600000	80000	100000	489000	0	1	1705334390037	1705334390037	\N
 2	1216	888		1706745600000	80000	100000	369000	0	1	1705334390037	1705334390037	\N
 2	1218	576		\N	10000	12000	20000	0	1	1705334390037	1705334390037	\N
-2	1222	783		\N	70000	120000	499000	1	1	1705334390037	1705334390037	\N
 2	1223	866		1746489600000	80000	85000	360000	0	1	1705334390037	1705334390037	\N
 2	1224	775		\N	840000	924000	1680000	0	1	1705334390037	1705334390037	\N
 2	1225	366		\N	63000	85000	150000	0	1	1705334390037	1705334390037	\N
 2	1226	403		\N	145000	160000	280000	0	1	1705334390037	1705334390037	\N
 2	1227	803		\N	390000	420000	525000	0	1	1705334390037	1705334390037	\N
-2	1229	702		\N	195000	205000	350000	0	1	1705334390037	1705334390037	\N
 2	1231	497		\N	289000	298000	425000	0	1	1705334390037	1705334390037	\N
 2	1232	802		\N	599000	735000	1050000	0	1	1705334390037	1705334390037	\N
 2	1234	796		\N	224000	239000	399000	0	1	1705334390037	1705334390037	\N
@@ -19267,15 +21112,12 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1236	498		\N	323000	333000	475000	0	1	1705334390037	1705334390037	\N
 2	1237	698		\N	400000	475000	1200000	0	1	1705334390037	1705334390037	\N
 2	1241	392		\N	20000	30000	50000	0	1	1705334390037	1705334390037	\N
-2	1242	455		1719792000000	1000	185000	255000	1	1	1705334390037	1705334390037	\N
 2	1245	472		\N	420000	435000	750000	3	1	1705334390037	1705334390037	\N
-2	1246	535		\N	381000	408000	680000	1	1	1705334390037	1705334390037	\N
 2	1247	412		\N	115000	125000	160000	0	1	1705334390037	1705334390037	\N
 2	1248	423		\N	115000	125000	160000	0	1	1705334390037	1705334390037	\N
 2	1249	439		\N	495000	525000	825000	0	1	1705334390037	1705334390037	\N
 2	1252	688		\N	225000	248000	450000	0	1	1705334390037	1705334390037	\N
 2	1254	860		\N	2000	2000	4000	0	1	1705334390037	1705334390037	\N
-2	1256	560		1735689600000	182000	195000	260000	4	1	1705334390037	1705334390037	\N
 2	1257	358		1825027200000	690000	748000	1150000	0	1	1705334390037	1705334390037	\N
 2	1258	783		1698796800000	70000	120000	499000	0	1	1705334390037	1705334390037	\N
 2	1261	759		\N	333000	380000	640000	3	1	1705334390037	1705334390037	\N
@@ -19287,7 +21129,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1270	393		\N	1620000	1800000	2500000	0	1	1705334390037	1705334390037	\N
 2	1273	554		\N	750000	800000	1350000	0	1	1705334390037	1705334390037	\N
 2	1274	480		\N	390000	402000	649000	0	1	1705334390037	1705334390037	\N
-2	1275	784		1777766400000	60000	65000	110000	0	1	1705334390037	1705334390037	\N
 2	1277	566		\N	160000	180000	250000	0	1	1705334390037	1705334390037	\N
 2	1278	718		\N	327000	348000	536000	0	1	1705334390037	1705334390037	\N
 2	1280	390		\N	280000	290000	380000	0	1	1705334390037	1705334390037	\N
@@ -19298,23 +21139,24 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1286	569		1772323200000	110000	115000	150000	0	1	1705334390037	1705334390037	\N
 2	1287	620		\N	135000	140000	200000	0	1	1705334390037	1705334390037	\N
 2	1244	393		\N	1600000	1800000	2500000	1	1	1705334390037	1705334390037	\N
-2	1213	847		\N	312000	322000	495000	1	1	1705334390037	1705334390037	\N
+2	1269	707		1790233200000	294000	325000	490000	1	1	1705334390037	1707796171183	\N
 2	1200	410		1735689600000	278000	290000	427000	0	1	1705334390037	1705334390037	\N
-2	1221	506		\N	178000	188000	269000	1	1	1705334390037	1705334390037	\N
-2	1219	402		\N	82000	86000	130000	6	1	1705334390037	1705739895970	\N
-2	1253	534		1772323200000	318000	328000	529000	10	1	1705334390037	1705682399935	\N
+2	1205	648		1743490800000	295000	315000	425000	1	1	1705334390037	1707795957434	\N
+2	1242	455		1719792000000	1000	185000	255000	0	1	1705334390037	1707793136416	\N
+2	1222	783		\N	70000	120000	499000	0	1	1705334390037	1707797480471	\N
 2	1198	886		1706745600000	1000	10000	269000	0	1	1705334390037	1705334390037	\N
 2	1217	577		1727740800000	10000	12000	20000	0	1	1705334390037	1705334390037	\N
 2	1199	403		1735689600000	145000	160000	280000	0	1	1705334390037	1705334390037	\N
 2	1212	776		\N	306000	315000	485000	0	1	1705334390037	1705334390037	\N
 2	1288	405		1714521600000	56000	60000	75000	0	1	1705334390037	1705334390037	\N
-2	1233	697		\N	180000	216000	360000	2	1	1705334390037	1705334390037	\N
-2	1250	510		\N	276000	286000	460000	1	1	1705334390037	1705334390037	\N
-2	1228	494		\N	220000	230000	350000	1	1	1705334390037	1705334390037	\N
+2	1228	494		1772348400000	220000	230000	350000	1	1	1705334390037	1707795628304	\N
+2	1229	702		\N	195000	205000	350000	1	1	1705334390037	1706974404920	\N
+2	1221	506		1754031600000	178000	188000	269000	1	1	1705334390037	1707795683819	\N
+2	1219	402		\N	82000	86000	130000	5	1	1705334390037	1706592575447	\N
 2	1196	903		\N	135000	145000	175000	0	1	1705334390037	1706149218613	\N
 2	1239	704		\N	236000	266000	380000	0	1	1705334390037	1705334390037	\N
 2	1262	360		1711929600000	65000	80000	180000	0	1	1705334390037	1705334390037	\N
-2	1279	394		\N	350000	410000	860000	0	1	1705334390037	1705741299841	\N
+2	1279	394		\N	350000	410000	860000	0	1	1705334390037	1706973043591	\N
 2	1197	454		1772323200000	160000	180000	280000	0	1	1705334390037	1705537498239	\N
 2	1240	610		\N	280000	350000	500000	0	1	1705334390037	1705334390037	\N
 2	1267	358		\N	690000	748000	1150000	0	1	1705334390037	1705680985533	\N
@@ -19322,12 +21164,16 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1243	456		1730419200000	221000	230000	315000	1	1	1705334390037	1705535952593	\N
 2	1260	732		\N	190000	209000	380000	-1	1	1705334390037	1705682399935	\N
 2	1251	409		\N	180000	190000	280000	0	1	1705334390037	1705727442271	\N
-2	1269	707		\N	294000	325000	490000	2	1	1705334390037	1705835526694	\N
+2	1250	510		\N	276000	286000	460000	4	1	1705334390037	1707793593388	\N
 2	1220	858		\N	72000	85000	180000	1	1	1705334390037	1705835543746	\N
+2	1275	784		1777766400000	60000	65000	110000	3	1	1705334390037	1707793593388	\N
+2	1213	847		\N	312000	322000	495000	0	1	1705334390037	1707792565013	\N
+2	1233	697		1774335600000	180000	216000	360000	1	1	1705334390037	1707796104826	\N
+2	1246	535		\N	381000	408000	680000	0	1	1705334390037	1707797480471	\N
+2	1201	643		1747440000000	184000	195000	279000	0	1	1705334390037	1707797567433	\N
 2	1290	698		\N	430000	475000	1200000	0	1	1705334390037	1705334390037	\N
 2	1292	509		1727740800000	115000	120000	180000	0	1	1705334390037	1705334390037	\N
 2	1294	651		1754006400000	351000	362000	540000	0	1	1705334390037	1705334390037	\N
-2	1295	455		\N	80000	185000	255000	-1	1	1705334390037	1705334390037	\N
 2	1296	778		1698796800000	50000	100000	489000	0	1	1705334390037	1705334390037	\N
 2	1297	783		1698796800000	100000	120000	499000	0	1	1705334390037	1705334390037	\N
 2	1299	737		1768176000000	195000	205000	390000	0	1	1705334390037	1705334390037	\N
@@ -19404,9 +21250,8 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1383	436		1802736000000	305000	380000	567000	0	1	1705334390037	1705334390037	\N
 2	1384	370		\N	153000	165000	300000	0	1	1705334390037	1705334390037	\N
 2	1385	411		\N	540000	1235000	1900000	0	1	1705334390037	1705334390037	\N
-2	1328	784		1777766400000	52000	65000	110000	9	1	1705334390037	1705334390037	\N
+2	1328	784		1777766400000	52000	65000	110000	4	1	1705334390037	1707793243244	\N
 2	1336	862		1716595200000	120000	150000	230000	2	1	1705334390037	1705334390037	\N
-2	1293	445		1740787200000	75000	85000	360000	-9	1	1705334390037	1705682360817	\N
 2	1303	658		\N	8000	10000	35000	0	1	1705334390037	1705334390037	\N
 2	1291	493		1741305600000	164000	190000	380000	0	1	1705334390037	1705535794602	\N
 2	1323	846		1756684800000	312000	332000	495000	1	1	1705334390037	1705334390037	\N
@@ -19416,6 +21261,8 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1377	817		1711929600000	35000	70000	120000	0	1	1705334390037	1705334390037	\N
 2	1289	495		1738368000000	1000	100000	195000	0	1	1705334390037	1706149218613	\N
 2	1330	693		1759276800000	190000	209000	380000	1	1	1705334390037	1706057562992	\N
+2	1293	445		1740787200000	75000	85000	360000	0	1	1705334390037	1707794714579	\N
+2	1295	455		\N	80000	185000	255000	0	1	1705334390037	1707794714579	\N
 2	1386	902		\N	135000	160000	250000	0	1	1705334390037	1705334390037	\N
 2	1387	398		\N	170000	190000	336000	0	1	1705334390037	1705334390037	\N
 2	1388	425		\N	190000	250000	2150000	0	1	1705334390037	1705334390037	\N
@@ -19428,7 +21275,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1396	670		\N	40000	50000	80000	0	1	1705334390037	1705334390037	\N
 2	1397	425		1698796800000	190000	250000	2150000	0	1	1705334390037	1705334390037	\N
 2	1398	410		\N	278000	290000	427000	0	1	1705334390037	1705334390037	\N
-2	1399	646		\N	257000	265000	395000	1	1	1705334390037	1705334390037	\N
 2	1401	436		1802736000000	325000	380000	567000	0	1	1705334390037	1705334390037	\N
 2	1402	824		\N	200000	350000	700000	0	1	1705334390037	1705334390037	\N
 2	1403	802		\N	578000	735000	1050000	0	1	1705334390037	1705334390037	\N
@@ -19442,7 +21288,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1411	383		\N	1080000	1200000	1849000	0	1	1705334390037	1705334390037	\N
 2	1412	614		\N	600000	300000	480000	0	1	1705334390037	1705334390037	\N
 2	1413	614		\N	240000	300000	480000	0	1	1705334390037	1705334390037	\N
-2	1414	384		1758412800000	97000	105000	145000	4	1	1705334390037	1705334390037	\N
 2	1415	548		\N	165000	175000	255000	0	1	1705334390037	1705334390037	\N
 2	1417	437		1761955200000	650000	750000	1500000	0	1	1705334390037	1705334390037	\N
 2	1418	559		1722470400000	100000	115000	200000	0	1	1705334390037	1705334390037	\N
@@ -19502,14 +21347,16 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1480	684		\N	15000	20000	40000	0	1	1705334390037	1705334390037	\N
 2	1393	671		\N	40000	50000	80000	0	1	1705334390037	1705334390037	\N
 2	1481	542		\N	90000	95000	150000	0	1	1705334390037	1705334390037	\N
-2	1462	451		1756252800000	335000	373000	549000	2	1	1705334390037	1705334390037	\N
+2	1399	646		1735714800000	257000	265000	395000	1	1	1705334390037	1707795931168	\N
 2	1468	380		\N	75000	90000	130000	0	1	1705334390037	1706149218613	\N
 2	1400	855		\N	60000	65000	96000	0	1	1705334390037	1705334390037	\N
 2	1428	651		\N	351000	362000	540000	-1	1	1705334390037	1705334390037	\N
+2	1414	384		1758412800000	97000	105000	145000	2	1	1705334390037	1707792565013	\N
 2	1482	436		1802736000000	315000	380000	567000	0	1	1705334390037	1705334390037	\N
 2	1454	479		1738368000000	335000	357000	549000	0	1	1705334390037	1705334390037	\N
 2	1450	564		1727222400000	69000	75000	120000	0	1	1705334390037	1705334390037	\N
 2	1457	515		1748736000000	300000	310000	400000	1	1	1705334390037	1705681813416	\N
+2	1462	451		1756252800000	335000	373000	549000	1	1	1705334390037	1707793136416	\N
 2	1483	806		\N	220000	267000	470000	0	1	1705334390037	1705334390037	\N
 2	1484	541		1698796800000	110000	115000	180000	0	1	1705334390037	1705334390037	\N
 2	1485	737		\N	195000	205000	390000	0	1	1705334390037	1705334390037	\N
@@ -19527,7 +21374,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1498	733		\N	400000	446000	1200000	0	1	1705334390037	1705334390037	\N
 2	1499	611		\N	910000	1050000	1750000	0	1	1705334390037	1705334390037	\N
 2	1500	789		\N	140000	160000	279000	0	1	1705334390037	1705334390037	\N
-2	1501	571		\N	375000	400000	430000	-1	1	1705334390037	1705334390037	\N
 2	1503	387		\N	145000	175000	235000	0	1	1705334390037	1705334390037	\N
 2	1504	534		\N	318000	328000	529000	0	1	1705334390037	1705334390037	\N
 2	1505	811		\N	130000	140000	320000	0	1	1705334390037	1705334390037	\N
@@ -19547,7 +21393,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1521	836		\N	245000	300000	350000	0	1	1705334390037	1705334390037	\N
 2	1522	745		\N	1250000	1403000	2550000	0	1	1705334390037	1705334390037	\N
 2	1523	461		1743465600000	307000	320000	495000	0	1	1705334390037	1705334390037	\N
-2	1524	643		\N	170000	195000	279000	2	1	1705334390037	1705334390037	\N
 2	1526	858		1759363200000	72000	85000	180000	0	1	1705334390037	1705334390037	\N
 2	1527	371		\N	397000	500000	860000	0	1	1705334390037	1705334390037	\N
 2	1528	481		\N	540000	575000	830000	0	1	1705334390037	1705334390037	\N
@@ -19555,7 +21400,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1530	427		\N	120000	145000	220000	0	1	1705334390037	1705334390037	\N
 2	1531	399		1735776000000	60000	65000	100000	0	1	1705334390037	1705334390037	\N
 2	1532	813		\N	245000	250000	350000	0	1	1705334390037	1705334390037	\N
-2	1533	736		\N	1000	390000	650000	0	1	1705334390037	1705334390037	\N
 2	1534	468		\N	248000	250000	550000	0	1	1705334390037	1705334390037	\N
 2	1535	807		\N	235000	250000	325000	0	1	1705334390037	1705334390037	\N
 2	1536	738		\N	175000	185000	285000	0	1	1705334390037	1705334390037	\N
@@ -19578,7 +21422,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1553	396		\N	680000	720000	1360000	0	1	1705334390037	1705334390037	\N
 2	1554	603		\N	700000	0	1150000	0	1	1705334390037	1705334390037	\N
 2	1555	746		\N	148000	177000	295000	0	1	1705334390037	1705334390037	\N
-2	1556	519		\N	245000	275000	500000	1	1	1705334390037	1705334390037	\N
 2	1557	810		\N	279000	285000	450000	0	1	1705334390037	1705334390037	\N
 2	1558	760		\N	130000	140000	200000	0	1	1705334390037	1705334390037	\N
 2	1559	702		\N	165000	205000	350000	0	1	1705334390037	1705334390037	\N
@@ -19604,12 +21447,14 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1577	428		\N	60000	67000	90000	0	1	1705334390037	1706149218613	\N
 2	1494	605		1730419200000	595000	1019000	1699000	0	1	1705334390037	1705334390037	\N
 2	1512	885		\N	287000	310000	456000	0	1	1705334390037	1705334390037	\N
+2	1524	643		\N	170000	195000	279000	0	1	1705334390037	1707797480471	\N
 2	1502	720		1730332800000	263000	315000	495000	0	1	1705334390037	1705334390037	\N
+2	1501	571		\N	375000	400000	430000	0	1	1705334390037	1707797567433	\N
+2	1556	519		\N	245000	275000	500000	0	1	1705334390037	1707794641892	\N
 2	1580	643		\N	184000	195000	279000	0	1	1705334390037	1705334390037	\N
 2	1582	673		\N	30000	35000	80000	0	1	1705334390037	1705334390037	\N
 2	1584	682		\N	30000	35000	90000	0	1	1705334390037	1705334390037	\N
 2	1585	606		\N	250000	300000	519000	0	1	1705334390037	1705334390037	\N
-2	1586	689		\N	188000	206000	375000	0	1	1705334390037	1705334390037	\N
 2	1587	685		\N	8000	12000	35000	0	1	1705334390037	1705334390037	\N
 2	1588	692		\N	335000	367000	667000	0	1	1705334390037	1705334390037	\N
 2	1589	693		\N	190000	209000	380000	0	1	1705334390037	1705334390037	\N
@@ -19620,7 +21465,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1594	552		1750636800000	77000	85000	160000	1	1	1705334390037	1705334390037	\N
 2	1597	584		\N	12000	12000	25000	0	1	1705334390037	1705334390037	\N
 2	1598	714		1755993600000	301000	350000	700000	0	1	1705334390037	1705334390037	\N
-2	1599	569		1758672000000	95000	115000	150000	0	1	1705334390037	1705334390037	\N
 2	1600	500		1754006400000	190000	220000	290000	0	1	1705334390037	1705334390037	\N
 2	1602	761		\N	40000	45000	80000	0	1	1705334390037	1705334390037	\N
 2	1604	493		1751500800000	164000	190000	380000	0	1	1705334390037	1705334390037	\N
@@ -19700,6 +21544,7 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1581	402		1688860800000	82000	86000	130000	1	1	1705334390037	1705547958119	\N
 2	1603	706		1735689600000	220000	245000	415000	0	1	1705334390037	1705334390037	\N
 2	1596	739		\N	155000	180000	275000	0	1	1705334390037	1705712555522	\N
+2	1599	569		1758672000000	95000	115000	150000	0	1	1705334390037	1707795056174	1707795056159
 2	1677	861		1746403200000	410000	450000	900000	0	1	1705334390037	1705334390037	\N
 2	1678	624		1714521600000	794000	923000	1620000	0	1	1705334390037	1705334390037	\N
 2	1679	711		\N	366000	383000	563000	0	1	1705334390037	1705334390037	\N
@@ -19710,7 +21555,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1684	837		1722470400000	347000	350000	495000	0	1	1705334390037	1705334390037	\N
 2	1685	650		1717200000000	105000	140000	210000	0	1	1705334390037	1705334390037	\N
 2	1686	570		\N	100000	108000	185000	0	1	1705334390037	1705334390037	\N
-2	1687	569		1689465600000	95000	115000	150000	0	1	1705334390037	1705334390037	\N
 2	1688	488		1704067200000	250000	300000	385000	0	1	1705334390037	1705334390037	\N
 2	1689	872		1709251200000	150000	210000	480000	0	1	1705334390037	1705334390037	\N
 2	1690	484		1682899200000	1000	50000	195000	0	1	1705334390037	1705334390037	\N
@@ -19793,6 +21637,7 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1772	896		\N	240000	250000	350000	0	1	1705334390037	1705334390037	\N
 2	1773	634		\N	265000	390000	380000	0	1	1705334390037	1705334390037	\N
 2	1719	891		\N	58000	65000	86000	0	1	1705334390037	1705334390037	\N
+2	1687	569		1689465600000	95000	115000	150000	0	1	1705334390037	1707795042947	1707795042941
 2	1703	374		\N	750000	750000	750000	1	1	1705334390037	1705334390037	\N
 2	1691	892		1706745600000	1000	2000	100000	1	1	1705334390037	1705334390037	\N
 2	1774	638		\N	390000	405000	505000	0	1	1705334390037	1705334390037	\N
@@ -19803,7 +21648,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1779	849		\N	114000	120000	210000	0	1	1705334390037	1705334390037	\N
 2	1780	848		\N	114000	120000	210000	0	1	1705334390037	1705334390037	\N
 2	1781	361		\N	90000	82000	182000	0	1	1705334390037	1705334390037	\N
-2	1782	409		1722470400000	180000	190000	280000	0	1	1705334390037	1705334390037	\N
 2	1783	621		\N	245000	255000	345000	0	1	1705334390037	1705334390037	\N
 2	1784	734		1725148800000	429000	487000	695000	0	1	1705334390037	1705334390037	\N
 2	1785	654		1736640000000	60000	70000	110000	0	1	1705334390037	1705334390037	\N
@@ -19843,9 +21687,7 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1820	852		\N	90000	100000	150000	0	1	1705334390037	1705334390037	\N
 2	1821	653		\N	100000	110000	162000	0	1	1705334390037	1705334390037	\N
 2	1822	815		\N	79000	100000	162000	0	1	1705334390037	1705334390037	\N
-2	1823	582		\N	1000	100000	250000	1	1	1705334390037	1705334390037	\N
 2	1824	408		\N	1000	100000	150000	0	1	1705334390037	1705334390037	\N
-2	1825	348		\N	450000	450000	900000	0	1	1705334390037	1705334390037	\N
 2	1826	510		1725667200000	276000	286000	460000	0	1	1705334390037	1705334390037	\N
 2	1827	385		\N	283000	309000	350000	0	1	1705334390037	1705334390037	\N
 2	1828	759		\N	339000	380000	640000	0	1	1705334390037	1705334390037	\N
@@ -19890,6 +21732,9 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1869	861		1704153600000	400000	450000	900000	0	1	1705334390037	1705334390037	\N
 2	1870	753		1682899200000	775000	853000	1550000	0	1	1705334390037	1705334390037	\N
 2	1806	795		\N	480000	556000	960000	0	1	1705334390037	1705334390037	\N
+2	1825	348		\N	450000	450000	900000	0	1	1705334390037	1707797201098	1707797201080
+2	1782	409		1722470400000	180000	190000	280000	0	1	1705334390037	1706708092518	\N
+2	1823	582		\N	1000	100000	250000	0	1	1705334390037	1707797480471	\N
 2	1871	355		1714521600000	150000	160000	210000	0	1	1705334390037	1705334390037	\N
 2	1872	461		1722470400000	307000	320000	495000	0	1	1705334390037	1705334390037	\N
 2	1873	798		1734134400000	120000	140000	160000	0	1	1705334390037	1705334390037	\N
@@ -19933,7 +21778,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1912	702		1709251200000	185000	205000	350000	0	1	1705334390037	1705334390037	\N
 2	1913	607		\N	2100000	2275000	3500000	0	1	1705334390037	1705334390037	\N
 2	1914	608		\N	1230000	1333000	2050000	0	1	1705334390037	1705334390037	\N
-2	1915	569		1688428800000	99000	115000	150000	0	1	1705334390037	1705334390037	\N
 2	1916	434		\N	39000	43000	58000	0	1	1705334390037	1705334390037	\N
 2	1917	566		1683244800000	170000	180000	250000	0	1	1705334390037	1705334390037	\N
 2	1918	451		\N	325000	373000	549000	0	1	1705334390037	1705334390037	\N
@@ -19948,7 +21792,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1927	524		\N	220000	230000	440000	0	1	1705334390037	1705334390037	\N
 2	1928	456		1711929600000	221000	230000	315000	0	1	1705334390037	1705334390037	\N
 2	1929	550		1659312000000	1000	100000	300000	0	1	1705334390037	1705334390037	\N
-2	1930	525		1680307200000	265000	273000	407000	0	1	1705334390037	1705334390037	\N
 2	1931	534		1737331200000	318000	328000	529000	0	1	1705334390037	1705334390037	\N
 2	1932	477		1677628800000	745000	790000	1490000	0	1	1705334390037	1705334390037	\N
 2	1933	555		1654041600000	1000	100000	399000	0	1	1705334390037	1705334390037	\N
@@ -19959,15 +21802,12 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1938	445		\N	85000	85000	360000	0	1	1705334390037	1705334390037	\N
 2	1939	831		\N	95000	100000	190000	0	1	1705334390037	1705334390037	\N
 2	1940	867		1723852800000	112000	125000	168000	0	1	1705334390037	1705334390037	\N
-2	1941	428		1718496000000	60000	67000	90000	0	1	1705334390037	1705334390037	\N
 2	1942	899		\N	90000	100000	150000	0	1	1705334390037	1705334390037	\N
 2	1943	874		\N	83000	88000	250000	0	1	1705334390037	1705334390037	\N
 2	1944	836		1719792000000	235000	300000	350000	0	1	1705334390037	1705334390037	\N
 2	1945	583		\N	100000	120000	199000	0	1	1705334390037	1705334390037	\N
 2	1946	828		\N	70000	85000	160000	0	1	1705334390037	1705334390037	\N
 2	1947	714		\N	315000	350000	700000	0	1	1705334390037	1705334390037	\N
-2	1948	569		1688428800000	95000	115000	150000	0	1	1705334390037	1705334390037	\N
-2	1949	569		1688428800000	98000	115000	150000	0	1	1705334390037	1705334390037	\N
 2	1950	571		\N	430000	400000	430000	0	1	1705334390037	1705334390037	\N
 2	1952	826		\N	73000	90000	160000	0	1	1705334390037	1705334390037	\N
 2	1953	650		1696118400000	120000	140000	210000	0	1	1705334390037	1705334390037	\N
@@ -19986,6 +21826,9 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1966	808		1729900800000	220000	231000	385000	0	1	1705334390037	1705334390037	\N
 2	1967	827		\N	70000	80000	180000	0	1	1705334390037	1705334390037	\N
 2	1904	876		\N	75000	80000	150000	0	1	1705334390037	1705334390037	\N
+2	1949	569		1688428800000	98000	115000	150000	0	1	1705334390037	1707795033005	1707795033004
+2	1930	525		1680307200000	265000	273000	407000	0	1	1705334390037	1706974311601	\N
+2	1948	569		1688428800000	95000	115000	150000	0	1	1705334390037	1707795035542	1707795035541
 2	1968	835		1709251200000	350000	360000	512000	0	1	1705334390037	1705334390037	\N
 2	1969	496		1733011200000	235000	240000	345000	0	1	1705334390037	1705334390037	\N
 2	1970	837		1722470400000	337000	350000	495000	0	1	1705334390037	1705334390037	\N
@@ -20005,7 +21848,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	1984	530		1709251200000	280000	290000	380000	0	1	1705334390037	1705334390037	\N
 2	1985	700		1733011200000	660000	670000	1110000	0	1	1705334390037	1705334390037	\N
 2	1986	795		1714521600000	509000	556000	960000	0	1	1705334390037	1705334390037	\N
-2	1987	347		\N	347000	495000	495000	0	1	1705334390037	1705334390037	\N
 2	1988	400		1688169600000	85000	90000	170000	0	1	1705334390037	1705334390037	\N
 2	1989	401		1688169600000	160000	170000	260000	0	1	1705334390037	1705334390037	\N
 2	1990	469		1789257600000	340000	350000	530000	0	1	1705334390037	1705334390037	\N
@@ -20070,7 +21912,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	2052	637		\N	395000	405000	505000	0	1	1705334390037	1705334390037	\N
 2	2053	500		1714521600000	215000	220000	290000	0	1	1705334390037	1705334390037	\N
 2	2054	451		\N	350000	373000	549000	0	1	1705334390037	1705334390037	\N
-2	2055	561		\N	720000	780000	1200000	1	1	1705334390037	1705334390037	\N
 2	2057	851		1714521600000	284000	315000	450000	0	1	1705334390037	1705334390037	\N
 2	2058	466		1717200000000	300000	580000	1600000	0	1	1705334390037	1705334390037	\N
 2	2059	799		1687564800000	24000	30000	54000	0	1	1705334390037	1705334390037	\N
@@ -20080,6 +21921,8 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	2064	883		1675209600000	80000	88000	180000	0	1	1705334390037	1705334390037	\N
 2	2056	558		\N	186000	202000	310000	0	1	1705334390037	1705334390037	\N
 2	2033	376		1775952000000	26000	27000	35000	0	1	1705334390037	1706149218613	\N
+2	1987	347		\N	347000	495000	495000	0	1	1705334390037	1707797189507	1707797189488
+2	2055	561		\N	720000	780000	1200000	0	1	1705334390037	1707797480471	\N
 2	2065	633		\N	310000	318000	420000	0	1	1705334390037	1705334390037	\N
 2	2066	796		1719705600000	197000	239000	399000	0	1	1705334390037	1705334390037	\N
 2	2067	389		1753401600000	15000	15000	35000	0	1	1705334390037	1705334390037	\N
@@ -20099,7 +21942,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	2081	789		1701388800000	154000	160000	279000	0	1	1705334390037	1705334390037	\N
 2	2082	509		1709251200000	110000	120000	180000	0	1	1705334390037	1705334390037	\N
 2	2083	646		1711929600000	239000	265000	395000	0	1	1705334390037	1705334390037	\N
-2	2084	584		1718409600000	10000	12000	25000	0	1	1705334390037	1705334390037	\N
 2	2085	369		1672531200000	105000	110000	250000	0	1	1705334390037	1705334390037	\N
 2	2086	457		1707264000000	236000	250000	380000	0	1	1705334390037	1705334390037	\N
 2	2087	626		1751328000000	645000	710000	1290000	0	1	1705334390037	1705334390037	\N
@@ -20210,7 +22052,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	2193	655		1682899200000	330000	340000	440000	0	1	1705334390037	1705334390037	\N
 2	2194	845		1706745600000	228000	236000	350000	0	1	1705334390037	1705334390037	\N
 2	2195	460		1704067200000	322000	336000	495000	0	1	1705334390037	1705334390037	\N
-2	2196	569		1688860800000	114000	115000	150000	0	1	1705334390037	1705334390037	\N
 2	2197	763		1672531200000	385000	423000	770000	0	1	1705334390037	1705334390037	\N
 2	2198	381		1672531200000	195000	205000	300000	0	1	1705334390037	1705334390037	\N
 2	2199	734		1704067200000	429000	487000	695000	0	1	1705334390037	1705334390037	\N
@@ -20263,7 +22104,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 4	2247	948		\N	0	0	0	15	1	1705334390037	1705334390037	\N
 4	2248	942		\N	0	0	0	17	1	1705334390037	1705334390037	\N
 2	2249	764		1748710800000	35	49	75	0	1	1705334390037	1705334390037	\N
-2	2251	560		1735664400000	381	408	680	6	1	1705334390037	1705334390037	\N
 2	2252	351		1743440400000	360	523	950	0	1	1705334390037	1705334390037	\N
 2	2253	949	Lỗi	1706720400000	70	90	450	0	1	1705334390037	1705334390037	\N
 2	2254	950		\N	292	301	430	0	1	1705334390037	1705334390037	\N
@@ -20272,15 +22112,14 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	2258	567		\N	0	0	0	0	1	1705334390037	1705334390037	\N
 2	2259	613		\N	0	0	0	0	1	1705334390037	1705334390037	\N
 2	2260	727		\N	0	0	0	0	1	1705334390037	1705334390037	\N
+2	2196	569		1688860800000	114000	115000	150000	0	1	1705334390037	1707795029821	1707795029820
 2	2264	953		\N	531	558	900	0	1	1705334390037	1705334390037	\N
 2	2265	954		\N	12	14	25	0	1	1705334390037	1705334390037	\N
 2	2266	955		1776963600000	280	290	380	0	1	1705334390037	1705334390037	\N
 2	2268	954		\N	12000	14000	25000	0	1	1705334390037	1705334390037	\N
-2	2269	955		1776963600000	280000	290000	380000	1	1	1705334390037	1705334390037	\N
 2	2270	957		\N	258	284	516	0	1	1705334390037	1705334390037	\N
 2	2271	958		\N	221	228	325	0	1	1705334390037	1705334390037	\N
 2	2272	778		1706720400000	70	90	160	0	1	1705334390037	1705334390037	\N
-2	2273	624		1764522000000	729000	842000	1620000	-2	1	1705334390037	1705334390037	\N
 2	2275	778		1706720400000	70000	85000	489000	0	1	1705334390037	1705334390037	\N
 2	2278	720		1771002000000	262350	282150	495000	0	1	1705334390037	1705334390037	\N
 2	2279	358		1825002000000	690000	713000	1150000	0	1	1705334390037	1705334390037	\N
@@ -20300,7 +22139,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	2297	966		\N	396500	434625	762500	0	1	1705334390037	1705334390037	\N
 2	2298	967		\N	351000	384750	675000	0	1	1705334390037	1705334390037	\N
 2	2299	836		\N	200000	220000	325000	0	1	1705334390037	1705334390037	\N
-2	2302	836		\N	200000	240000	325000	1	1	1705334390037	1705334390037	\N
 2	2303	957		\N	258000	284000	516000	0	1	1705334390037	1705334390037	\N
 2	2304	969		\N	168000	180000	320000	0	1	1705334390037	1705334390037	\N
 2	2306	393		1756659600000	1600000	1650000	2500000	0	1	1705334390037	1705334390037	\N
@@ -20313,7 +22151,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	2319	790		1730394000000	119500	143400	239000	0	1	1705334390037	1705334390037	\N
 2	2320	846		1767200400000	311850	321750	495000	0	1	1705334390037	1705334390037	\N
 2	2321	499		1743440400000	290000	300000	390000	0	1	1705334390037	1705334390037	\N
-2	2322	361		1748710800000	55000	70000	155000	2	1	1705334390037	1705334390037	\N
 2	2324	841		1780246800000	123300	135000	200000	0	1	1705334390037	1705334390037	\N
 4	2325	977		\N	0	0	0	11	1	1705334390037	1705334390037	\N
 2	2327	979		1704042000000	200000	210000	1150000	0	1	1705334390037	1705334390037	\N
@@ -20329,8 +22166,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	2339	986		\N	420000	420000	680000	0	1	1705334390037	1705334390037	\N
 2	2341	846		\N	282150	307000	495000	0	1	1705334390037	1705334390037	\N
 2	2342	795		\N	480000	528000	960000	0	1	1705334390037	1705334390037	\N
-2	2343	732		\N	171000	209000	380000	5	1	1705334390037	1705334390037	\N
-2	2344	866		\N	75000	85000	380000	3	1	1705334390037	1705334390037	\N
 2	2345	795		\N	470400	499200	960000	0	1	1705334390037	1705334390037	\N
 2	2346	988		\N	561640	576000	739000	0	1	1705334390037	1705334390037	\N
 2	2347	989		\N	1000	50000	60000	0	1	1705334390037	1705334390037	\N
@@ -20343,51 +22178,50 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	2356	993		\N	25000	30000	35000	0	1	1705334390037	1705334390037	\N
 2	2357	502		\N	280000	290000	490000	0	1	1705334390037	1705334390037	\N
 2	2358	410		\N	297000	307000	458000	0	1	1705334390037	1705334390037	\N
-2	2353	436		1821200400000	315000	350000	567000	2	1	1705334390037	1705334390037	\N
+2	2353	436		1821200400000	315000	350000	567000	0	1	1705334390037	1706592926099	\N
 2	2311	954		1782925200000	1	12000	25000	0	1	1705334390037	1705334390037	\N
 2	2263	405		1748710800000	35000	55000	120000	0	1	1705334390037	1705334390037	\N
 2	2280	737		1774976400000	175500	214500	390000	0	1	1705334390037	1705334390037	\N
 2	2312	972		\N	935000	935000	1700000	0	1	1705334390037	1705334390037	\N
 2	2277	705		1771520400000	846220	875400	1459000	0	1	1705334390037	1705334390037	\N
 2	2261	952		1714496400000	35000	55000	120000	3	1	1705334390037	1705334390037	\N
-2	2338	986		\N	375000	390000	680000	2	1	1705334390037	1705712555522	\N
+2	2273	624		1764522000000	729000	842000	1620000	0	1	1705334390037	1707797567433	\N
 2	2283	959		1786208400000	144000	176000	320000	4	1	1705334390037	1705535952593	\N
 2	2305	351		\N	360000	532000	950000	0	1	1705334390037	1705334390037	\N
 2	2326	978		1730394000000	3000	4000	8000	0	1	1705334390037	1705731633652	\N
 2	2276	766		1845997200000	244530	257400	429000	1	1	1705334390037	1705334390037	\N
+2	2314	654		\N	60000	75000	110000	0	1	1705334390037	1707793593388	\N
 2	2308	710		1782838800000	222000	244000	444000	1	1	1705334390037	1705334390037	\N
-2	2335	812		1746032400000	110000	140000	210000	4	1	1705334390037	1705334390037	\N
+2	2340	987		1782975600000	136800	156750	285000	2	1	1705334390037	1707795353901	\N
 2	2300	595		\N	510000	570000	1500000	1	1	1705334390037	1705334390037	\N
 2	2274	958		1743440400000	221000	228000	325000	0	1	1705334390037	1705334390037	\N
-2	2340	987		\N	136800	156750	285000	2	1	1705334390037	1705334390037	\N
-2	2315	974		\N	37000	48000	75000	7	1	1705334390037	1705334390037	\N
-2	2314	654		\N	60000	75000	110000	5	1	1705334390037	1705537498239	\N
+2	2338	986		\N	375000	390000	680000	0	1	1705334390037	1707797480471	\N
+2	2322	361		1748710800000	55000	70000	155000	0	1	1705334390037	1707793243244	\N
+2	2343	732		\N	171000	209000	380000	4	1	1705334390037	1706708092518	\N
 2	2296	574		\N	435500	477000	837500	0	1	1705334390037	1706149218613	\N
 2	2301	968		\N	65000	70000	120000	0	1	1705334390037	1706149218613	\N
+2	2269	955		1776963600000	280000	290000	380000	0	1	1705334390037	1707099950219	\N
+2	2302	836		\N	200000	240000	325000	0	1	1705334390037	1706972891189	\N
+2	2335	812		1746032400000	110000	140000	210000	3	1	1705334390037	1706975058813	\N
 2	2359	461		\N	321000	331700	535000	0	1	1705334390037	1705334390037	\N
 2	2361	994		\N	552330	581670	969000	0	1	1705334390037	1705334390037	\N
 2	2362	995		\N	1125000	1250000	2500000	0	1	1705334390037	1705334390037	\N
-2	2363	996		\N	255000	305000	540000	1	1	1705334390037	1705334390037	\N
 2	2364	773		\N	217710	229000	369000	0	1	1705334390037	1705334390037	\N
 2	2365	997		\N	462000	550000	1100000	0	1	1705334390037	1705334390037	\N
 2	2367	999		\N	150000	165000	300000	0	1	1705334390037	1705334390037	\N
 2	2368	724		\N	200000	220000	325000	0	1	1705334390037	1705334390037	\N
 2	2377	774		\N	210000	225000	310000	0	1	1705334390037	1705334390037	\N
 2	2378	402		\N	85000	90000	110000	0	1	1705334390037	1705334390037	\N
-2	2380	999		\N	150000	165000	300000	1	1	1705334390037	1705334390037	\N
 2	2381	554		\N	750000	790000	1390000	0	1	1705334390037	1705334390037	\N
 2	2382	402		\N	82000	88000	105000	0	1	1705334390037	1705334390037	\N
-2	2383	902		\N	95000	105000	195000	4	1	1705334390037	1705334390037	\N
 2	2385	1006		\N	585000	585000	785000	0	1	1705334390037	1705334390037	\N
 2	2389	1021		\N	280000	350000	1250000	0	1	1705334390037	1705334390037	\N
-2	2390	490		\N	315000	325000	500000	1	1	1705334390037	1705334390037	\N
 2	2395	1047		\N	1861750	2048000	3723500	0	1	1705334390037	1705334390037	\N
 2	2401	446		\N	160000	180000	320000	-1	1	1705334390037	1705334390037	\N
 4	2402	921		\N	0	0	0	0	1	1705334390037	1705334390037	\N
 2	2405	1051		\N	385000	395000	650000	1	1	1705334390037	1705334390037	\N
 2	2406	1052		\N	4530000	468100	7550000	0	1	1705334390037	1705334390037	\N
 2	2407	833		\N	125000	135000	200000	0	1	1705334390037	1705334390037	\N
-2	2408	390		\N	290000	300000	390000	1	1	1705334390037	1705334390037	\N
 2	2409	536		\N	335440	359400	599000	0	1	1705334390037	1705334390037	\N
 2	2410	1053		\N	140000	150000	230000	0	1	1705334390037	1705334390037	\N
 1	2413	1055	X02ssD	\N	500	2000	5000	20780	1	1705334390037	1705334390037	\N
@@ -20434,21 +22268,26 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	2374	547		\N	360000	500000	980000	1	1	1705334390037	1705334390037	\N
 2	2400	410		\N	297700	320000	458000	0	1	1705334390037	1705334390037	\N
 2	2366	998		\N	239400	247380	399000	0	1	1705334390037	1705334390037	\N
-6	2447	1214		1769965200000	36000	0	70000	36	1	1705334390037	1705926529738	\N
+6	2449	1290		1777482000000	8000	0	13000	286	1	1705334390037	1707742133761	\N
 1	2412	1054	As02	\N	300	2000	7000	9249	1	1705334390037	1705334390037	\N
 2	2372	1003		\N	22000	25000	40000	0	1	1705334390037	1706149218613	\N
 2	2360	463		\N	321000	331700	535000	0	1	1705334390037	1705334390037	\N
+2	2390	490		\N	315000	325000	500000	0	1	1705334390037	1706592731515	\N
 2	2388	424		\N	18000	25000	40000	8	1	1705334390037	1705334390037	\N
 2	2376	352		\N	123000	130000	210000	0	1	1705334390037	1705334390037	\N
 2	2386	855		\N	60000	75000	96000	0	1	1705334390037	1705334390037	\N
-2	2375	839		\N	200000	264000	528000	15	1	1705334390037	1705933948944	\N
+6	2447	1214		1769965200000	36000	0	70000	33	1	1705334390037	1707360862960	\N
 2	2397	1048		\N	360000	370000	590000	0	1	1705334390037	1705334390037	\N
-6	2437	1250		1790701200000	10000	0	20000	-4	1	1705334390037	1705410473766	\N
-2	2398	1049		\N	310000	320000	410000	1	1	1705334390037	1706149218613	\N
+2	2383	902		\N	95000	105000	195000	3	1	1705334390037	1706707541694	\N
+2	2375	839		1769929200000	200000	264000	528000	11	1	1705334390037	1707794988867	\N
 2	2399	879		\N	55000	65000	110000	0	1	1705334390037	1706149218613	\N
 2	2379	688		\N	202500	247500	450000	0	1	1705334390037	1705680985533	\N
 2	2404	1050		\N	288600	310800	444000	0	1	1705334390037	1706149218613	\N
-6	2449	1290		1777482000000	8000	0	13000	296	1	1705334390037	1705749095005	\N
+2	2398	1049		\N	310000	320000	410000	0	1	1705334390037	1706593027994	\N
+2	2363	996		1725174000000	255000	305000	540000	1	1	1705334390037	1707797008590	\N
+6	2437	1250		1790701200000	10000	0	20000	-39	1	1705334390037	1708004440142	\N
+2	2408	390		\N	290000	300000	390000	0	1	1705334390037	1707792565013	\N
+2	2380	999		1767250800000	150000	165000	300000	1	1	1705334390037	1707797044394	\N
 6	2469	1176		1745082000000	5200	0	7000	0	1	1705334390037	1705334390037	\N
 6	2470	1247		1757955600000	8500	0	15000	0	1	1705334390037	1705334390037	\N
 6	2471	1209		1739034000000	28000	0	60000	0	1	1705334390037	1705334390037	\N
@@ -20482,7 +22321,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 6	2512	1098		1777482000000	340000	0	400000	0	1	1705334390037	1705334390037	\N
 6	2513	1099		1780074000000	293000	0	380000	0	1	1705334390037	1705334390037	\N
 6	2514	1113		1771520400000	9190	0	11905	0	1	1705334390037	1705334390037	\N
-6	2515	1112		1767027600000	185000	0	250000	0	1	1705334390037	1705334390037	\N
 6	2516	1107		1738688400000	93000	0	115000	0	1	1705334390037	1705334390037	\N
 6	2517	1085		1739552400000	385000	0	460000	0	1	1705334390037	1705334390037	\N
 6	2518	1073		1738170000000	220000	0	300000	0	1	1705334390037	1705334390037	\N
@@ -20520,15 +22358,16 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 6	2563	1345		1782752400000	85000	0	140000	0	1	1705334390037	1705334390037	\N
 6	2564	1346		1714410000000	7000	0	10000	0	1	1705334390037	1705334390037	\N
 6	2565	1347		1790701200000	98000	0	150000	0	1	1705334390037	1705334390037	\N
-6	2490	1199		1780074000000	11000	0	20000	17	1	1705334390037	1706104231594	\N
-6	2478	1286		1757696400000	22000	0	30000	18	1	1705334390037	1706188592532	\N
+6	2478	1286		1757696400000	22000	0	30000	12	1	1705334390037	1707905907994	\N
 6	2533	1158		1730221200000	55000	0	70000	90	1	1705334390037	1705334390037	\N
 6	2530	1197		1756054800000	10500	0	13000	0	1	1705334390037	1705754098599	\N
+6	2515	1112		1767027600000	185000	0	250000	5	1	1705334390037	1706620550075	\N
 6	2523	1181		1774803600000	14050	0	15000	100	1	1705334390037	1705334390037	\N
+6	2490	1199		1780074000000	11000	0	20000	14	1	1705334390037	1708003531576	\N
 6	2480	1225		1755104400000	118000	0	145000	0	1	1705334390037	1705833103602	\N
-6	2504	1149		1758042000000	3800	0	5000	0	1	1705334390037	1705409796050	\N
 6	2495	1203		1734627600000	2600	0	5000	0	1	1705334390037	1705833103602	\N
 6	2484	1307		1727197200000	24000	0	30000	0	1	1705334390037	1705758892216	\N
+6	2504	1149		1758042000000	3800	0	5000	40	1	1705334390037	1708003531576	\N
 6	2496	1235		1732208400000	8500	0	13000	0	1	1705334390037	1705833103602	\N
 6	2532	1179		1778259600000	5460	0	7000	0	1	1705334390037	1705833103602	\N
 6	2486	1292		1747674000000	21000	0	30000	0	1	1705334390037	1705758892216	\N
@@ -20536,7 +22375,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 6	2487	1285		1739984400000	6000	0	10000	0	1	1705334390037	1705758892216	\N
 6	2566	1348		1740157200000	125000	0	180000	0	1	1705334390037	1705334390037	\N
 6	2567	1327		1730221200000	220000	0	350000	0	1	1705334390037	1705334390037	\N
-6	2569	1351		1761757200000	155000	0	230000	9	1	1705334390037	1705334390037	\N
 6	2570	1352		1724950800000	230000	0	300000	0	1	1705334390037	1705334390037	\N
 6	2571	1333		1745946000000	135000	0	230000	0	1	1705334390037	1705334390037	\N
 6	2572	1147		1774717200000	1000	0	5000	0	1	1705334390037	1705334390037	\N
@@ -20580,7 +22418,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 6	2627	1069		\N	33000	0	50000	0	1	1705334390037	1705334390037	\N
 6	2628	1068		1732899600000	40000	0	60000	36	1	1705334390037	1705334390037	\N
 6	2630	1070		1735750800000	150000	0	230000	8	1	1705334390037	1705334390037	\N
-6	2632	1065		1764435600000	266000	0	350000	1	1	1705334390037	1705334390037	\N
 6	2635	1214		1796576400000	36000	0	60000	0	1	1705334390037	1705334390037	\N
 6	2640	1206		1716310800000	32000	0	60000	0	1	1705334390037	1705334390037	\N
 6	2648	1122		1767027600000	175000	0	295000	14	1	1705334390037	1705334390037	\N
@@ -20588,31 +22425,33 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 6	2653	1124		1759165200000	175000	0	275000	11	1	1705334390037	1705334390037	\N
 6	2654	1126		1785344400000	85000	0	150000	12	1	1705334390037	1705334390037	\N
 6	2660	1073		1735837200000	220000	0	300000	1	1	1705334390037	1705334390037	\N
-6	2661	1074		1719680400000	260000	0	350000	3	1	1705334390037	1705334390037	\N
-6	2612	1195		1785949200000	68000	0	100000	2	1	1705334390037	1705334390037	\N
+6	2661	1074		1719680400000	260000	0	350000	2	1	1705334390037	1707461504987	\N
 6	2631	1069		1735059600000	33000	0	50000	0	1	1705334390037	1705334390037	\N
-6	2644	1201		1740157200000	4000	0	5000	205	1	1705334390037	1705334390037	\N
+2	2620	833		\N	125000	135000	250000	0	1	1705334390037	1707797480471	\N
 6	2583	1145		1732467600000	63000	0	70000	30	1	1705334390037	1706276996049	\N
-6	2568	1350		1759165200000	195000	0	270000	13	1	1705334390037	1705334390037	\N
+6	2643	1209		1739034000000	28000	0	60000	30	1	1705334390037	1706615536437	\N
+6	2569	1351		1761757200000	155000	0	230000	8	1	1705334390037	1706361914412	\N
 6	2633	1213		1745946000000	35000	0	70000	0	1	1705334390037	1705334390037	\N
-6	2651	1119		1770829200000	175000	0	280000	12	1	1705334390037	1705928504185	\N
+6	2656	1133		1761757200000	90000	0	130000	110	1	1705334390037	1707396401452	\N
 6	2629	1071		1704387600000	4250	0	6000	0	1	1705334390037	1705334390037	\N
 6	2588	1354		1839603600000	18000	0	25000	0	1	1705334390037	1705758892216	\N
-2	2620	833		\N	125000	135000	250000	1	1	1705334390037	1705334390037	\N
+6	2637	1211		1752080400000	3800	0	7000	80	1	1705334390037	1707882568182	\N
 6	2634	1067		1739293200000	3500	0	5000	300	1	1705334390037	1705334390037	\N
-6	2643	1209		1739034000000	28000	0	60000	31	1	1705334390037	1706013241850	\N
+6	2651	1119		1770829200000	175000	0	280000	10	1	1705334390037	1706534190489	\N
 6	2649	1128		1760634000000	210000	0	295000	6	1	1705334390037	1705334390037	\N
-6	2637	1211		1752080400000	3800	0	7000	90	1	1705334390037	1705334390037	\N
 6	2636	1210		1767373200000	5400	0	9000	550	1	1705334390037	1705334390037	\N
-6	2624	1063		1788022800000	10000	0	13000	160	1	1705334390037	1705334390037	\N
+6	2647	1125		1748538000000	195000	0	330000	9	1	1705334390037	1707388645519	\N
 6	2597	1123		1711731600000	135000	0	240000	0	1	1705334390037	1705580627488	\N
+6	2644	1201		1740157200000	4000	0	5000	200	1	1705334390037	1707739955163	\N
 6	2614	1145		1732467600000	28000	0	70000	3	1	1705334390037	1705334390037	\N
 6	2623	1062		1745946000000	10200	0	13000	40	1	1705334390037	1705334390037	\N
 6	2657	1130		1756486800000	135000	0	190000	0	1	1705334390037	1706013241850	\N
-6	2656	1133		1761757200000	90000	0	130000	115	1	1705334390037	1705334390037	\N
+6	2650	1123		1711731600000	135000	0	240000	0	1	1705334390037	1707302549412	\N
+6	2632	1065		1764435600000	266000	0	350000	0	1	1705334390037	1706966171055	\N
+6	2624	1063		1788022800000	10000	0	13000	155	1	1705334390037	1707374716545	\N
 6	2579	1230		1793466000000	1360	0	5000	-20	1	1705334390037	1705493278004	\N
-6	2647	1125		1748538000000	195000	0	330000	10	1	1705334390037	1705580627547	\N
-6	2650	1123		1711731600000	135000	0	240000	3	1	1705334390037	1705749095005	\N
+6	2612	1195		1785949200000	68000	0	100000	1	1	1705334390037	1707396547691	\N
+6	2568	1350		1759165200000	195000	0	270000	11	1	1705334390037	1707483442622	\N
 6	2592	1213		1743958800000	35000	0	70000	0	1	1705334390037	1705833103602	\N
 6	2595	1130		1780074000000	135000	0	190000	0	1	1705334390037	1705833103602	\N
 6	2604	1068		1733936400000	40000	0	60000	0	1	1705334390037	1705833103602	\N
@@ -20621,11 +22460,8 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 6	2668	1076		1777482000000	265000	0	350000	5	1	1705334390037	1705334390037	\N
 6	2669	1359		1753808400000	390000	0	450000	3	1	1705334390037	1705334390037	\N
 6	2671	1097		1748538000000	100000	0	150000	2	1	1705334390037	1705334390037	\N
-6	2672	1110		1759165200000	285000	0	400000	3	1	1705334390037	1705334390037	\N
 6	2673	1111		1738170000000	150000	0	230000	5	1	1705334390037	1705334390037	\N
 6	2674	1107		1740934800000	93000	0	150000	6	1	1705334390037	1705334390037	\N
-6	2677	1101		1747242000000	390000	0	520000	1	1	1705334390037	1705334390037	\N
-6	2678	1100		1784480400000	420000	0	550000	2	1	1705334390037	1705334390037	\N
 6	2679	1099		1780074000000	293000	0	380000	2	1	1705334390037	1705334390037	\N
 6	2680	1098		1780074000000	340000	0	400000	2	1	1705334390037	1705334390037	\N
 6	2682	1113		1780074000000	9190	0	13000	63	1	1705334390037	1705334390037	\N
@@ -20634,16 +22470,13 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 6	2690	1140		1781802000000	2600	0	5000	70	1	1705334390037	1705334390037	\N
 6	2695	1141		1779642000000	3000	0	5000	0	1	1705334390037	1705334390037	\N
 6	2696	1142		1738170000000	3000	0	5000	4	1	1705334390037	1705334390037	\N
-6	2700	1154		1761757200000	1000	0	1500	70	1	1705334390037	1705334390037	\N
 6	2705	1148		1802278800000	800	0	5000	50	1	1705334390037	1705334390037	\N
 6	2706	1147		1774717200000	1000	0	5000	200	1	1705334390037	1705334390037	\N
 6	2712	1230		1793466000000	2000	0	5000	0	1	1705334390037	1705334390037	\N
 6	2716	1217		1745946000000	135000	0	200000	4	1	1705334390037	1705334390037	\N
 6	2717	1059		1760374800000	14000	0	22000	0	1	1705334390037	1705334390037	\N
 6	2719	1221		1765386000000	35000	0	70000	10	1	1705334390037	1705334390037	\N
-6	2721	1223		1751734800000	68000	0	120000	20	1	1705334390037	1705334390037	\N
 6	2725	1215		1738515600000	35000	0	50000	11	1	1705334390037	1705334390037	\N
-6	2733	1254		1750870800000	15000	0	20000	357	1	1705334390037	1705334390037	\N
 6	2734	1253		1780678800000	3500	0	15000	4	1	1705334390037	1705334390037	\N
 6	2735	1252		1751734800000	2700	0	5000	100	1	1705334390037	1705334390037	\N
 6	2740	1237		1766422800000	7000	0	10000	140	1	1705334390037	1705334390037	\N
@@ -20653,49 +22486,52 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 6	2747	1195		1787331600000	62000	0	100000	39	1	1705334390037	1705334390037	\N
 2	2759	1361		\N	280000	320000	1250000	0	1	1705334390037	1705334390037	\N
 2	2760	636		\N	361000	374000	440000	0	1	1705334390037	1705334390037	\N
-6	2691	1162		1773594000000	2500	0	5000	606	1	1705334390037	1706271758663	\N
+6	2730	1249		1730048400000	8000	0	13000	11	1	1705334390037	1707877218009	\N
 6	2687	1116		1772902800000	60000	0	90000	8	1	1705334390037	1705334390037	\N
-6	2715	1216		1732813200000	125000	0	150000	1	1	1705334390037	1705334390037	\N
+6	2672	1110		1759165200000	285000	0	400000	2	1	1705334390037	1707882046464	\N
 6	2686	1115		1772902800000	70000	0	105000	12	1	1705334390037	1705334390037	\N
 6	2693	1143		1771520400000	2500	0	5000	562	1	1705334390037	1705334390037	\N
-6	2748	1248		1735146000000	11000	0	18000	357	1	1705334390037	1705334390037	\N
+6	2754	1220		1759856400000	6200	0	10000	-24	1	1705334390037	1707903677823	\N
+6	2715	1216		1732813200000	125000	0	150000	0	1	1705334390037	1707878865156	\N
 6	2699	1150		1757091600000	1000	0	2000	90	1	1705334390037	1705334390037	\N
 6	2751	1187		1753808400000	125000	0	150000	6	1	1705334390037	1705334390037	\N
-6	2754	1220		1759856400000	6200	0	10000	-12	1	1705334390037	1706271758663	\N
+6	2685	1114		1773594000000	19000	0	30000	7	1	1705334390037	1708002204716	\N
 6	2670	1085		1738515600000	385000	0	480000	3	1	1705334390037	1705334390037	\N
 6	2722	1224		1758128400000	110000	0	180000	8	1	1705334390037	1705334390037	\N
-6	2750	1179		\N	5400	0	7000	800	1	1705334390037	1706272012708	\N
-6	2685	1114		1773594000000	19000	0	30000	15	1	1705334390037	1705334390037	\N
+6	2718	1058		1732122000000	50000	0	100000	22	1	1705334390037	1708005036725	\N
+6	2700	1154		1761757200000	1000	0	1500	50	1	1705334390037	1706695500698	\N
 6	2665	1358		1761757200000	152000	0	200000	4	1	1705334390037	1706181131674	\N
-6	2723	1225		1753290000000	118000	0	145000	9	1	1705334390037	1706273415691	\N
+6	2703	1164		1734022800000	6000	0	15000	23	1	1705334390037	1707745819879	\N
 6	2731	1256		\N	11000	0	15000	0	1	1705334390037	1705334390037	\N
-6	2704	1163		1739034000000	15000	0	20000	107	1	1705334390037	1705334390037	\N
+6	2742	1242		1767978000000	3000	0	10000	317	1	1705334390037	1708002204716	\N
 6	2681	1112		1767027600000	185000	0	250000	1	1	1705334390037	1705334390037	\N
-6	2720	1222		1772298000000	67000	0	110000	12	1	1705334390037	1706275291201	\N
+6	2721	1223		1751734800000	68000	0	120000	18	1	1705334390037	1707135269601	\N
+6	2697	1161		1797267600000	3000	0	5000	130	1	1705334390037	1707360862960	\N
 6	2698	1146		1736096400000	3000	0	5000	0	1	1705334390037	1705833103602	\N
-6	2724	1226		1772989200000	80000	0	160000	9	1	1705334390037	1706275291201	\N
-6	2703	1164		1734022800000	6000	0	15000	25	1	1705334390037	1705334390037	\N
+6	2701	1156		1758214800000	1000	0	1500	110	1	1705334390037	1707742128957	\N
+6	2733	1254		1750870800000	15000	0	20000	342	1	1705334390037	1707483188818	\N
 6	2666	1090		1743267600000	195000	0	295000	14	1	1705334390037	1705334390037	\N
 6	2675	1109		1751216400000	310000	0	450000	2	1	1705334390037	1705334390037	\N
 6	2676	1103		1719680400000	130000	0	200000	0	1	1705334390037	1705334390037	\N
 6	2738	1244		1744563600000	5000	0	8000	180	1	1705334390037	1705334390037	\N
 6	2694	1159		1757782800000	4000	0	7000	80	1	1705334390037	1705334390037	\N
-6	2730	1249		1730048400000	8000	0	13000	38	1	1705334390037	1705334390037	\N
-6	2718	1058		1732122000000	50000	0	100000	23	1	1705334390037	1705334390037	\N
-6	2743	1241		1765990800000	2600	0	5000	22	1	1705334390037	1706184711438	\N
-6	2746	1178		1764694800000	4000	0	6000	3070	1	1705334390037	1706276996049	\N
-6	2701	1156		1758214800000	1000	0	1500	140	1	1705334390037	1705410998804	\N
-6	2683	1139		1771347600000	500	0	1000	403	1	1705334390037	1706185972427	\N
-6	2742	1242		1767978000000	3000	0	10000	405	1	1705334390037	1706273412371	\N
-6	2711	1152		1775754000000	500	0	2000	55	1	1705334390037	1705755360590	\N
+6	2723	1225		1753290000000	118000	0	145000	0	1	1705334390037	1707311929657	\N
+6	2711	1152		1775754000000	500	0	2000	0	1	1705334390037	1707741236483	\N
+6	2678	1100		1784480400000	420000	0	550000	0	1	1705334390037	1706966171055	\N
+6	2677	1101		1747242000000	390000	0	520000	0	1	1705334390037	1707879691774	\N
+6	2691	1162		1773594000000	2500	0	5000	590	1	1705334390037	1707877181922	\N
+6	2724	1226		1772989200000	80000	0	160000	5	1	1705334390037	1706534725270	\N
+6	2683	1139		1771347600000	500	0	1000	362	1	1705334390037	1707745258232	\N
+6	2720	1222		1772298000000	67000	0	110000	0	1	1705334390037	1707879691774	\N
 6	2684	1135		1783789200000	200	0	1000	350	1	1705334390037	1705924081418	\N
-6	2697	1161		1797267600000	3000	0	5000	135	1	1705334390037	1705334390037	\N
-6	2727	1246		1728320400000	13700	0	20000	44	1	1705334390037	1705924081418	\N
+6	2704	1163		1739034000000	15000	0	20000	105	1	1705334390037	1707458553925	\N
+6	2727	1246		1728320400000	13700	0	20000	18	1	1705334390037	1707879691774	\N
+6	2743	1241		1765990800000	2600	0	5000	0	1	1705334390037	1706620165081	\N
+6	2748	1248		1735146000000	11000	0	18000	347	1	1705334390037	1707306150430	\N
+6	2750	1179		\N	5400	0	7000	665	1	1705334390037	1707307804157	\N
+6	2746	1178		1764694800000	4000	0	6000	2930	1	1705334390037	1707879691774	\N
 2	2761	753		1730394000000	620000	697500	1550000	0	1	1705334390037	1705334390037	\N
-2	2762	624		1761930000000	530000	648000	1620000	2	1	1705334390037	1705334390037	\N
-2	2763	571		\N	340000	375000	480000	1	1	1705334390037	1705334390037	\N
 2	2764	1362		\N	434000	487500	750000	0	1	1705334390037	1705334390037	\N
-2	2765	461		\N	321000	348000	535000	1	1	1705334390037	1705334390037	\N
 6	2768	1318		1736528400000	2700	0	4000	180	1	1705334390037	1705334390037	\N
 6	2770	1333		1740762000000	155000	0	230000	15	1	1705334390037	1705334390037	\N
 6	2771	1251		1776358800000	12000	0	20000	12	1	1705334390037	1705334390037	\N
@@ -20711,7 +22547,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 6	2792	1127		1725296400000	92000	0	150000	21	1	1705334390037	1705334390037	\N
 6	2793	1175		1738342800000	6000	0	10000	240	1	1705334390037	1705334390037	\N
 6	2794	1235		1732208400000	8500	0	13000	0	1	1705334390037	1705334390037	\N
-6	2795	1219		1732467600000	0	0	180000	5	1	1705334390037	1705334390037	\N
 6	2796	1231		1745686800000	1550	0	300	80	1	1705334390037	1705334390037	\N
 6	2800	1176		1745082000000	5200	0	7000	270	1	1705334390037	1705334390037	\N
 6	2801	1268		1738170000000	5000	0	7000	90	1	1705334390037	1705334390037	\N
@@ -20728,57 +22563,58 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 6	2832	1293		1785949200000	29000	0	35000	8	1	1705334390037	1705334390037	\N
 6	2833	1296		1788886800000	55000	0	90000	6	1	1705334390037	1705334390037	\N
 6	2834	1295		1785344400000	55000	0	90000	1	1	1705334390037	1705334390037	\N
-6	2836	1348		1749661200000	125000	0	180000	9	1	1705334390037	1705334390037	\N
 6	2837	1298		1785949200000	33000	0	50000	10	1	1705334390037	1705334390037	\N
 6	2838	1320		1752944400000	58000	0	90000	2	1	1705334390037	1705334390037	\N
 6	2840	1365		1766768400000	54000	0	100000	2	1	1705334390037	1705334390037	\N
 6	2844	1336		1785949200000	130000	0	190000	2	1	1705334390037	1705334390037	\N
 6	2845	1347		1779210000000	98000	0	150000	4	1	1705334390037	1705334390037	\N
 2	2853	625		\N	191520	219000	399000	0	1	1705334390037	1705334390037	\N
-6	2831	1292		1785949200000	21000	0	30000	18	1	1705334390037	1705334390037	\N
-6	2769	1322		1756314000000	5000	0	10000	257	1	1705334390037	1706271224562	\N
-6	2829	1288		1772125200000	33000	0	50000	15	1	1705334390037	1705334390037	\N
+6	2820	1343		1788627600000	10000	0	12000	40	1	1705334390037	1706785713684	\N
+6	2843	1340		1762534800000	78000	0	150000	3	1	1705334390037	1706359039211	\N
+6	2789	1200		1758819600000	4500	0	10000	46	1	1705334390037	1706857139908	\N
 2	2852	1367		\N	170000	200000	300000	0	1	1705334390037	1705334390037	\N
 6	2839	1341		1817485200000	75000	0	130000	3	1	1705334390037	1705334390037	\N
 2	2766	954		\N	10000	11000	25000	13	1	1705334390037	1705680985533	\N
 6	2815	1310		1781542800000	45000	0	65000	6	1	1705334390037	1705334390037	\N
 6	2798	1180		1732381200000	3000	0	6000	294	1	1705334390037	1705334390037	\N
-6	2819	1307		1783530000000	26500	0	30000	16	1	1705334390037	1705928504185	\N
+6	2769	1322		1756314000000	5000	0	10000	588	1	1705334390037	1708005036725	\N
 6	2841	1366		1784480400000	180000	0	270000	3	1	1705334390037	1705334390037	\N
 2	2849	390		\N	285000	295000	390000	0	1	1705334390037	1705334390037	\N
 2	2851	807		\N	265000	275000	325000	0	1	1705334390037	1705334390037	\N
 2	2767	1363		\N	20000	20000	20000	5	1	1705334390037	1705334390037	\N
-6	2781	1189		1754413200000	135000	0	190000	8	1	1705334390037	1706008739976	\N
-6	2854	1235		1751439600000	8500	0	13000	68	1	1705334390037	1705925876620	\N
+6	2856	1354		1839740400000	18000	0	25000	13	1	1705334390037	1707444060358	\N
 6	2830	1289		1788368400000	54000	0	100000	15	1	1705334390037	1705334390037	\N
 6	2810	1286		1748883600000	21000	0	30000	0	1	1705334390037	1705334390037	\N
 6	2806	1364		1746464400000	62000	0	70000	4	1	1705334390037	1705334390037	\N
 6	2827	1060		1782752400000	13000	0	20000	0	1	1705334390037	1705334390037	\N
-6	2825	1309		1789837200000	36000	0	50000	3	1	1705334390037	1705334390037	\N
+6	2835	1323		1814288400000	17500	0	30000	28	1	1705334390037	1707880785612	\N
 6	2814	1300		1783011600000	36000	0	65000	12	1	1705334390037	1705334390037	\N
 6	2855	1174		1736751600000	4000	0	6000	325	1	1705334390037	1705334390037	\N
 6	2790	1327		1730221200000	220000	0	350000	3	1	1705334390037	1706273940675	\N
 6	2813	1306		1748883600000	30000	0	50000	6	1	1705334390037	1705334390037	\N
-6	2856	1354		1839740400000	18000	0	25000	16	1	1705334390037	1705334390037	\N
+6	2829	1288		1772125200000	33000	0	50000	13	1	1705334390037	1706618802417	\N
 6	2786	1275		1780419600000	3100	0	5000	54	1	1705334390037	1705412460174	\N
 6	2778	1277		1755795600000	1000	0	2000	180	1	1705334390037	1705334390037	\N
-6	2828	1284		1782320400000	6500	0	10000	2	1	1705334390037	1706009895899	\N
-6	2820	1343		1788627600000	10000	0	12000	41	1	1705334390037	1705334390037	\N
+6	2779	1173		1779987600000	3900	0	7500	240	1	1705334390037	1707219129002	\N
+6	2799	1177		1745082000000	6500	0	10000	255	1	1705334390037	1706873139580	\N
 2	2850	902		\N	76000	100000	250000	0	1	1705334390037	1705334390037	\N
 6	2809	1274		1748797200000	35000	0	50000	2	1	1705334390037	1705334390037	\N
 6	2775	1276		1776877200000	2100	0	10000	438	1	1705334390037	1705334390037	\N
-2	2848	446		\N	155000	170000	320000	2	1	1705334390037	1705334390037	\N
-6	2812	1346		1780419600000	8000	0	10000	15	1	1705334390037	1706013241850	\N
+6	2828	1284		1782320400000	6500	0	10000	-2	1	1705334390037	1706613809649	\N
+6	2831	1292		1785949200000	21000	0	30000	17	1	1705334390037	1706528953744	\N
 6	2791	1338		1755277200000	28000	0	40000	11	1	1705334390037	1705334390037	\N
-6	2843	1340		1762534800000	78000	0	150000	4	1	1705334390037	1705334390037	\N
-6	2773	1271		1754067600000	5500	0	7000	140	1	1705334390037	1705497681097	\N
-6	2835	1323		1814288400000	17500	0	30000	29	1	1705334390037	1705334390037	\N
-6	2799	1177		1745082000000	6500	0	10000	265	1	1705334390037	1706184711438	\N
-6	2779	1173		1779987600000	3900	0	7500	260	1	1705334390037	1705334390037	\N
+2	2762	624		1761930000000	530000	648000	1620000	0	1	1705334390037	1707797480471	\N
+2	2765	461		\N	321000	348000	535000	0	1	1705334390037	1706342232510	\N
+6	2825	1309		1789837200000	36000	0	50000	2	1	1705334390037	1707740444234	\N
+6	2795	1219		1732467600000	0	0	180000	-2	1	1705334390037	1707882051147	\N
+6	2836	1348		1749661200000	125000	0	180000	7	1	1705334390037	1707483442622	\N
 6	2817	1319		1777741200000	20000	0	40000	5	1	1705334390037	1705334390037	\N
 6	2797	1290		1779728400000	8000	0	13000	0	1	1705334390037	1705758892216	\N
+2	2848	446		\N	155000	170000	320000	1	1	1705334390037	1706349346043	\N
 6	2777	1264		1746810000000	7500	0	15000	100	1	1705334390037	1705497681097	\N
-6	2789	1200		1758819600000	4500	0	10000	48	1	1705334390037	1706271224562	\N
+6	2773	1271		1754067600000	5500	0	7000	125	1	1705334390037	1707745819879	\N
+6	2812	1346		1780419600000	8000	0	10000	95	1	1705334390037	1707891537687	\N
+6	2781	1189		1754413200000	135000	0	190000	7	1	1705334390037	1708002804828	\N
 1	2858	1368		1986447600000	80000	100000	200000	985	1	1705334390037	1705334390037	\N
 1	2859	1368		1891753200000	150000	180000	250000	23	1	1705334390037	1705334390037	\N
 1	2860	1369	X08	1891753200000	85000	120000	200000	1150	1	1705334390037	1705334390037	\N
@@ -20799,17 +22635,14 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 1	2886	1379		\N	53000000	56000000	60000000	16	1	1705334390037	1705334390037	\N
 1	2887	1378		1643785200000	34000000	40000	50000	16	1	1705334390037	1705334390037	\N
 1	2890	1054		\N	0	0	0	0	1	1705334390037	1705334390037	\N
-1	2891	1381	KH023	1738479600000	1500	0	3000	1490	1	1705334390037	1705334390037	\N
 1	2892	1380	KH098	2082178800000	20000	0	50000	998	1	1705334390037	1705334390037	\N
 6	2895	1345		1760079600000	85000	0	140000	1	1	1705334390037	1705334390037	\N
 6	2896	1344		1752994800000	55000	0	60000	1	1	1705334390037	1705334390037	\N
-6	2897	1342		1761807600000	230000	0	320000	2	1	1705334390037	1705334390037	\N
 6	2898	1302		1775026800000	8000	0	15000	0	1	1705334390037	1705334390037	\N
 6	2899	1329		1767078000000	135000	0	210000	4	1	1705334390037	1705334390037	\N
 6	2901	1382		1793948400000	80000	0	140000	3	1	1705334390037	1705334390037	\N
 6	2902	1383		1796540400000	135000	0	195000	2	1	1705334390037	1705334390037	\N
 6	2903	1331		1791270000000	143000	0	210000	1	1	1705334390037	1705334390037	\N
-6	2904	1384		1781938800000	0	0	140000	5	1	1705334390037	1705334390037	\N
 6	2906	1330		1785740400000	140000	0	210000	1	1	1705334390037	1705334390037	\N
 6	2910	1387		1783321200000	180000	0	230000	2	1	1705334390037	1705334390037	\N
 6	2913	1391		1796540400000	0	0	100000	24	1	1705334390037	1705334390037	\N
@@ -20857,20 +22690,22 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 9	2957	1431		\N	210000	0	28000	10	1	1705334390037	1705334390037	\N
 9	2958	1432		\N	14000	0	20000	98	1	1705334390037	1705334390037	\N
 6	2909	1386		1790665200000	54000	0	100000	1	1	1705334390037	1705334390037	\N
-2	2874	410		\N	297700	320600	458000	1	1	1705334390037	1705727442271	\N
+1	2891	1381	KH023	1738479600000	1500	0	3000	1510	1	1705334390037	1707014710626	\N
 6	2900	1341		1784098800000	75000	0	150000	0	1	1705334390037	1705334390037	\N
 6	2908	1326		1796540400000	0	0	890000	1	1	1705334390037	1705334390037	\N
-1	2861	1370		\N	450000	550000	900000	2	1	1705334390037	1705544071902	\N
+1	2861	1370		\N	450000	550000	900000	-43	1	1705334390037	1708021540665	\N
 6	2884	1377		1788246000000	125000	0	140000	0	1	1705334390037	1705334390037	\N
 6	2907	1325		1789887600000	0	0	25000	19	1	1705334390037	1706271758663	\N
-6	2872	1203		1748156400000	2600	0	5000	299	1	1705334390037	1705927637280	\N
-2	2864	532		\N	290400	330000	660000	1	1	1705334390037	1705334390037	\N
+6	2897	1342		1761807600000	230000	0	320000	1	1	1705334390037	1707276860792	\N
+6	2882	1146		1740812400000	5000	0	7000	455	1	1705334390037	1707875959516	\N
 6	2893	1351		1761807600000	195000	0	270000	0	1	1705334390037	1705334390037	\N
 6	2894	1350		1767078000000	155000	0	230000	0	1	1705334390037	1705334390037	\N
 6	2870	1134		1822374000000	30000	0	65000	171	1	1705334390037	1706276996049	\N
-6	2871	1256		1749711600000	10420	0	15000	1	1	1705334390037	1705334390037	\N
+2	2864	532		1783926000000	290400	330000	660000	1	1	1705334390037	1707795782208	\N
+2	2874	410		\N	297700	320600	458000	0	1	1705334390037	1706972169205	\N
 6	2905	1385		1788418800000	110000	0	150000	0	1	1705334390037	1706187277755	\N
-6	2882	1146		1740812400000	5000	0	7000	470	1	1705334390037	1706198146196	\N
+6	2871	1256		1749711600000	10420	0	15000	-44	1	1705334390037	1707374716545	\N
+6	2904	1384		1781938800000	0	0	140000	4	1	1705334390037	1707306150430	\N
 9	2959	1433		\N	25000	0	33000	10	1	1705334390037	1705334390037	\N
 9	2960	1434		\N	9000	0	15000	20	1	1705334390037	1705334390037	\N
 9	2961	1435		\N	20000	0	25000	300	1	1705334390037	1705334390037	\N
@@ -20925,8 +22760,6 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 9	3010	1483		\N	5500	8000	10000	91	1	1705334390037	1705334390037	\N
 9	3011	1484		\N	0	55000	55000	8	1	1705334390037	1705334390037	\N
 9	3012	1485		\N	14000	17000	17000	29	1	1705334390037	1705334390037	\N
-1	3013	1487		\N	2000	0	5000	500	1	1705334390037	1705334390037	\N
-1	3014	1488		\N	5000	0	8000	200	1	1705334390037	1705334390037	\N
 6	3017	1390		1791270000000	0	0	7000	200	1	1705334390037	1705334390037	\N
 9	3018	1490		\N	38000	0	45000	4	1	1705334390037	1705334390037	\N
 9	3019	1491		\N	21000	0	30000	10	1	1705334390037	1705334390037	\N
@@ -20942,13 +22775,10 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 9	3030	1502		\N	58000	0	75000	40	1	1705334390037	1705334390037	\N
 9	3031	1503		\N	18000	0	25000	29	1	1705334390037	1705334390037	\N
 6	3033	1105		1745996400000	505000	0	505000	2	1	1705334390037	1705334390037	\N
-2	3036	569		\N	120000	125000	180000	0	1	1705334390037	1705334390037	\N
 2	3038	445		\N	60000	65000	360000	0	1	1705334390037	1705334390037	\N
 2	3039	836		\N	235000	250000	325000	0	1	1705334390037	1705334390037	\N
-2	3040	1505		\N	150000	200000	300000	2	1	1705334390037	1705334390037	\N
 2	3044	1506		\N	158400	176000	352000	4	1	1705334390037	1705334390037	\N
 2	3046	789		1725174000000	162000	181000	279000	2	1	1705334390037	1705334390037	\N
-2	3049	850		\N	129000	140000	219000	2	1	1705334390037	1705334390037	\N
 12	3050	1507		\N	127	0	350	0	1	1705334390037	1705334390037	\N
 12	3051	1508		\N	60	0	150	0	1	1705334390037	1705334390037	\N
 12	3052	1508		\N	60000	0	150000	5	1	1705334390037	1705334390037	\N
@@ -20957,12 +22787,17 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	3043	837		\N	325000	350000	525000	0	1	1705334390037	1705566589907	\N
 6	3015	1212		1752994800000	55000	0	60000	1	1	1705334390037	1705334390037	\N
 2	3041	517		\N	190000	200000	380000	0	1	1705334390037	1705334390037	\N
-6	3054	1389		1735542000000	9000	0	15000	200	1	1705334390037	1705334390037	\N
+1	3020	1492		\N	40000	50000	70000	57	1	1705334390037	1707093189530	\N
 6	3034	1504		1789282800000	115000	0	185000	0	1	1705334390037	1705334390037	\N
 6	3016	1489		\N	32000	0	70000	6	1	1705334390037	1705334390037	\N
 2	3045	973		\N	1000000	1080000	1600000	0	1	1705334390037	1705334390037	\N
 2	3042	835		\N	325000	350000	525000	0	1	1705334390037	1705334390037	\N
-1	3020	1492		\N	40000	50000	70000	35	1	1705334390037	1705561567026	\N
+1	3014	1488		\N	5000	0	8000	224	1	1705334390037	1707032851218	\N
+6	3054	1389		1735542000000	9000	0	15000	190	1	1705334390037	1706965147295	\N
+1	3013	1487		\N	2000	0	5000	517	1	1705334390037	1707067059202	\N
+2	3049	850		\N	129000	140000	219000	0	1	1705334390037	1707792565013	\N
+2	3036	569		\N	120000	125000	180000	0	1	1705334390037	1707795019839	1707795019821
+2	3040	1505		1761980400000	150000	200000	300000	1	1	1705334390037	1707797075577	\N
 2	3056	364		\N	9000	10000	12000	0	1	1705334390037	1705334390037	\N
 6	3057	1230		1808809200000	1265	0	5000	0	1	1705334390037	1705334390037	\N
 6	3066	1510		1777618800000	100000	0	150000	3	1	1705334390037	1705334390037	\N
@@ -20972,38 +22807,37 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 6	3074	1316		1758870000000	85000	0	120000	1	1	1705334390037	1705334390037	\N
 6	3075	1317		1758870000000	80000	0	120000	2	1	1705334390037	1705334390037	\N
 2	1276	496		\N	235000	240000	345000	0	1	1705334390037	1705334390037	\N
-6	3061	1302		1791788400000	8800	0	15000	7	1	1705334390037	1705334390037	\N
+6	2758	1321		\N	8000	0	10000	93	1	1705334390037	1707562416218	\N
 2	3077	824		\N	210000	300000	700000	1	1	1705334390037	1705334390037	\N
 6	3064	1509		1759302000000	127000	0	190000	3	1	1705334390037	1706187277755	\N
-2	1437	867		\N	112000	125000	168000	10	1	1705334390037	1705334390037	\N
-2	2857	533		\N	420000	460000	699000	1	1	1705334390037	1705334390037	\N
-2	2621	534		\N	323300	328000	529000	2	1	1705334390037	1705334390037	\N
+6	2736	1238		1771261200000	3100	0	5000	80	1	1705334390037	1706965147295	\N
 2	1759	630		\N	215000	220000	280000	0	1	1705334390037	1705334390037	\N
 2	3103	885		\N	250000	283000	456000	0	1	1705334390037	1705334390037	\N
-6	2736	1238		1771261200000	3100	0	5000	100	1	1705334390037	1705334390037	\N
-2	2323	849		1769878800000	134000	145000	219000	1	1	1705334390037	1705334390037	\N
+6	3061	1302		1791788400000	8800	0	15000	6	1	1705334390037	1707220297866	\N
+2	3099	1539		\N	6000	6500	8000	0	1	1705334390037	1707794714579	\N
 6	2826	1285		1773766800000	7000	0	10000	4	1	1705334390037	1706009175709	\N
 6	3070	1486		1759215600000	60000	0	95000	0	1	1705334390037	1705334390037	\N
 6	2692	1144		1778950800000	2600	0	5000	117	1	1705334390037	1705334390037	\N
 6	2846	1297		1749920400000	55000	0	80000	0	1	1705334390037	1705334390037	\N
 2	3082	432		\N	222300	232000	342000	0	1	1705334390037	1705334390037	\N
-6	3058	1152		\N	590	0	2000	70	1	1705334390037	1705334390037	\N
+2	3037	866		\N	70000	85000	360000	1	1	1705334390037	1707792565013	\N
 6	3101	1558		1741849200000	2600	0	5000	20	1	1705334390037	1705334390037	\N
-6	3095	1529		1793430000000	3700	0	10000	30	1	1705334390037	1705334390037	\N
-2	3037	866		\N	70000	85000	360000	2	1	1705334390037	1705334390037	\N
+2	2323	849		1769878800000	134000	145000	219000	2	1	1705334390037	1707794453849	\N
+2	2875	1373		\N	115000	125000	400000	0	1	1705334390037	1707793136416	\N
 11	3084	1520		\N	760	0	1000	940	1	1705334390037	1705334390037	\N
 6	2912	1283		1798527600000	0	0	120000	0	1	1705334390037	1705334390037	\N
 2	1995	500		1725148800000	210000	220000	290000	1	1	1705334390037	1705334390037	\N
-6	3071	1392		1759215600000	65000	0	120000	2	1	1705334390037	1705334390037	\N
-2	1951	869		\N	207000	226000	309000	1	1	1705334390037	1705334390037	\N
+6	3063	1314		1780297200000	2600	0	3500	244	1	1705334390037	1706620550075	\N
+2	3088	651		1775026800000	345600	351000	540000	1	1	1705334390037	1707797408537	\N
 2	2044	508		1698796800000	423000	436000	650000	0	1	1705334390037	1705334390037	\N
-6	2758	1321		\N	8000	0	10000	95	1	1705334390037	1706273940675	\N
+6	2491	1144		1764954000000	2700	0	5000	360	1	1705334390037	1707943611436	\N
 2	3091	1525		\N	175000	185500	265000	0	1	1705334390037	1705334390037	\N
 2	3069	1515		1711954800000	40000	100000	369000	0	1	1705334390037	1705739914957	\N
-2	3079	578		\N	315000	350000	600000	0	1	1705334390037	1705334390037	\N
+2	3079	578		\N	315000	350000	600000	0	1	1705334390037	1706973286432	\N
 2	3067	573		\N	497000	570000	950000	0	1	1705334390037	1706149218613	\N
 2	2287	960		\N	140000	167000	250000	3	1	1705334390037	1705731633652	\N
-2	3083	569		\N	108000	115000	150000	11	1	1705334390037	1706057578797	\N
+2	2403	993		\N	27000	35000	50000	0	1	1705334390037	1706349346043	\N
+2	1420	764		1714521600000	53000	57000	75000	0	1	1705334390037	1707797774746	\N
 2	3076	972		\N	901000	935000	1700000	0	1	1705334390037	1705334390037	\N
 2	3078	1518		\N	170000	190000	345000	0	1	1705334390037	1705334390037	\N
 2	1416	901		1744329600000	28000	38000	60000	0	1	1705334390037	1705334390037	\N
@@ -21013,59 +22847,53 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	2267	953		\N	531000	558000	900000	0	1	1705334390037	1705334390037	\N
 2	2307	970		1753981200000	249000	261000	389000	0	1	1705334390037	1705334390037	\N
 2	2350	991		\N	180000	250000	360000	4	1	1705334390037	1705334390037	\N
-2	2403	993		\N	27000	35000	50000	1	1	1705334390037	1705334390037	\N
-2	1420	764		1714521600000	53000	57000	75000	2	1	1705334390037	1705334390037	\N
+6	3058	1152		\N	590	0	2000	30	1	1705334390037	1707905907994	\N
 6	3102	1559		1779606000000	4977	0	7000	0	1	1705334390037	1705334390037	\N
 2	1364	500		\N	188000	220000	290000	-1	1	1705334390037	1705334390037	\N
-2	1583	407		\N	153000	166000	231000	2	1	1705334390037	1705334390037	\N
 2	3081	1519		\N	980200	1000000	1690000	0	1	1705334390037	1705334390037	\N
-2	3088	651		\N	345600	351000	540000	1	1	1705334390037	1705334390037	\N
+2	1583	407		\N	153000	166000	231000	0	1	1705334390037	1707797480471	\N
 2	1357	753		\N	775000	853000	1550000	0	1	1705334390037	1705334390037	\N
 2	3090	1524		\N	1584000	1679000	3168000	0	1	1705334390037	1705334390037	\N
 2	3089	777		\N	209000	247000	380000	0	1	1705334390037	1705334390037	\N
 2	1238	350		\N	440000	480000	780000	0	1	1705334390037	1705334390037	\N
-2	3087	1522		\N	128240	137400	229000	1	1	1705334390037	1705334390037	\N
-2	3093	405		\N	56000	56000	120000	1	1	1705334390037	1705334390037	\N
 2	3097	742		\N	624000	643500	999000	0	1	1705334390037	1705334390037	\N
 2	2373	1004		1767200400000	415800	567000	1890000	0	1	1705334390037	1705334390037	\N
 2	1345	468		\N	225000	250000	550000	2	1	1705334390037	1705334390037	\N
 2	3086	500		\N	220000	220000	290000	0	1	1705334390037	1705681994751	\N
 6	3060	1308		1755673200000	17800	0	30000	1	1	1705334390037	1705334390037	\N
-6	2491	1144		1764954000000	2700	0	5000	370	1	1705334390037	1706198146196	\N
 2	1525	419		\N	329000	329000	506000	0	1	1705334390037	1705334390037	\N
 6	3096	1530		1768460400000	62000	0	90000	11	1	1705334390037	1705334390037	\N
 6	3059	1206		1735974000000	23160	0	60000	0	1	1705334390037	1706187847561	\N
+6	3071	1392		1759215600000	65000	0	120000	1	1	1705334390037	1706525012383	\N
 6	2842	1352		1817485200000	230000	0	300000	1	1	1705334390037	1705334390037	\N
-2	3035	536		\N	329450	359400	599000	3	1	1705334390037	1705731633652	\N
+2	1437	867		\N	112000	125000	168000	5	1	1705334390037	1707099950219	\N
 2	1255	584		\N	11000	12000	25000	0	1	1705334390037	1705334390037	\N
-2	3099	1539		\N	6000	6500	8000	-5	1	1705334390037	1705334390037	\N
+2	3094	470		1831273200000	355000	360000	546000	1	1	1705334390037	1707795562931	\N
 2	3092	998		\N	223440	239400	399000	0	1	1705334390037	1705334390037	\N
 6	3065	1337		\N	68	0	100000	2	1	1705334390037	1705334390037	\N
+2	2621	534		\N	323300	328000	529000	0	1	1705334390037	1706593027994	\N
 2	2877	1375		\N	272000	297000	495000	0	1	1705334390037	1705334390037	\N
-6	3063	1314		1780297200000	2600	0	3500	44	1	1705334390037	1705669663396	\N
-2	2875	1373		\N	115000	125000	400000	16	1	1705334390037	1705334390037	\N
+6	3095	1529		1793430000000	3700	0	10000	29	1	1705334390037	1706695500698	\N
+2	2857	533		1838185200000	420000	460000	699000	1	1	1705334390037	1707795818405	\N
 2	3105	1562		\N	238000	238000	290000	0	1	1705334390037	1705334390037	\N
 2	3104	1561		\N	1300000	1350000	1600000	0	1	1705334390037	1705334390037	\N
 2	2387	654		\N	57000	65000	110000	0	1	1705334390037	1705334390037	\N
 6	2822	1308		1784480400000	15000	0	30000	3	1	1705334390037	1705493278004	\N
-2	3094	470		\N	355000	360000	546000	1	1	1705334390037	1705680985533	\N
 2	3085	1521		\N	494000	535000	760000	0	1	1705334390037	1705334390037	\N
 2	3098	1531		\N	105000	115000	200000	0	1	1705334390037	1705334390037	\N
 6	2752	1188		1760288400000	66000	0	90000	0	1	1705334390037	1705334390037	\N
-6	2542	1077		1718384400000	230000	0	300000	4	1	1705334390037	1705334390037	\N
 6	2552	1078		1727888400000	222666	0	320000	23	1	1705334390037	1705334390037	\N
 6	2662	1082		1730221200000	172000	0	260000	9	1	1705334390037	1705334390037	\N
-6	2707	1167		1763053200000	1500	0	3000	155	1	1705334390037	1705334390037	\N
 6	2726	1228		1767027600000	930	0	5000	290	1	1705334390037	1705334390037	\N
 6	3107	1155		\N	3000	0	6000	130	1	1705334390037	1705334390037	\N
 6	2658	1132		1753808400000	116000	0	150000	19	1	1705334390037	1705334390037	\N
 6	2749	1186		1772557200000	68000	0	100000	29	1	1705334390037	1705334390037	\N
 6	2802	1267		1743267600000	6000	0	10000	16	1	1705334390037	1705334390037	\N
 6	2847	1129		1746464400000	118000	0	150000	4	1	1705334390037	1705334390037	\N
-2	3161	1648		\N	242000	264000	440000	2	1	1705334390037	1705741277437	\N
+6	3131	1608		1785654000000	16500	0	30000	18	1	1705334390037	1707742128957	\N
+6	3159	1130		1788246000000	122000	0	180000	18	1	1705334390037	1707891537687	\N
 6	2713	1229		1806339600000	3700	0	7000	68	1	1705334390037	1706273412371	\N
-6	3132	1609		1760511600000	22500	0	50000	20	1	1705334390037	1705334390037	\N
-6	3134	1206		1735974000000	26000	0	60000	30	1	1705334390037	1706275291201	\N
+2	1271	790		\N	120000	143000	239000	3	1	1705334390037	1707099950219	\N
 2	3149	901		\N	34000	40000	70000	6	1	1705334390037	1706057562992	\N
 6	3116	1188		1791702000000	66	0	90	0	1	1705334390037	1705334390037	\N
 6	3118	1188		1791702000000	66	0	90	0	1	1705334390037	1705334390037	\N
@@ -21075,18 +22903,18 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	3160	1647		\N	35000	50000	111000	5	1	1705334390037	1705334390037	\N
 6	3135	1270		1774162800000	3766	0	5000	60	1	1705334390037	1705334390037	\N
 6	2732	1255		1733590800000	16600	0	20000	17	1	1705334390037	1705823467649	\N
-6	3131	1608		1785654000000	16500	0	30000	22	1	1705334390037	1705334390037	\N
+6	3137	1213		1787814000000	25000	0	60000	56	1	1705334390037	1707394436731	\N
 6	3062	1230		1808809200000	1389	0	5000	195	1	1705334390037	1705334390037	\N
-6	2739	1243		1744563600000	6000	0	10000	110	1	1705334390037	1705334390037	\N
+6	2641	1207		1754758800000	22000	0	60000	11	1	1705334390037	1708004440142	\N
 6	3125	1606		1763276400000	280	0	1000	200	1	1705334390037	1705334390037	\N
 6	3127	1152		1790665200000	675	0	2000	440	1	1705334390037	1705334390037	\N
 3	3121	1592		\N	122	0	300000	10	1	1705334390037	1705334390037	\N
 6	3128	1284		1814252400000	5500	0	10000	30	1	1705334390037	1705334390037	\N
 6	2544	1197		1755622800000	10500	0	13000	0	1	1705334390037	1705334390037	\N
 6	2756	1197		1756054800000	10500	0	16000	0	1	1705334390037	1705334390037	\N
-6	2641	1207		1754758800000	22000	0	60000	20	1	1705334390037	1706010710287	\N
+6	2702	1151		1811264400000	1100	0	2000	80	1	1705334390037	1708003531576	\N
 6	3158	1069		1760079600000	33000	0	50000	12	1	1705334390037	1706010710287	\N
-6	2709	1149		1758042000000	3800	0	5000	34	1	1705334390037	1705925876620	\N
+6	2642	1208		1737651600000	26000	0	60000	113	1	1705334390037	1707895712955	\N
 6	2663	1086		1748538000000	180000	0	320000	2	1	1705334390037	1705334390037	\N
 2	1507	694		\N	264000	288000	480000	0	1	1705334390037	1705334390037	\N
 6	2714	1157		1830618000000	500	0	2000	40	1	1705334390037	1706184711438	\N
@@ -21100,56 +22928,53 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 2	3048	842		\N	112000	130000	200000	0	1	1705334390037	1705334390037	\N
 6	2729	1250		1789405200000	12000	0	20000	1044	1	1705334390037	1705922976464	\N
 6	3144	1638		1742713200000	1000	0	2500	300	1	1705334390037	1705334390037	\N
-6	2642	1208		1737651600000	26000	0	60000	126	1	1705334390037	1706187836705	\N
+6	2708	1166		1763571600000	1200	0	2000	62	1	1705334390037	1708002204716	\N
 6	3106	1560		1764745200000	100000	0	120000	0	1	1705334390037	1705758892216	\N
 6	3032	1377		1796022000000	135000	0	220000	0	1	1705334390037	1705334390037	\N
 6	3145	1639		1788418800000	93000	0	150000	3	1	1705334390037	1705334390037	\N
-6	3119	1188		1791702000000	66000	0	90000	12	1	1705334390037	1705334390037	\N
+2	3163	803		\N	445000	450000	580000	0	1	1705334390037	1706708217025	\N
 6	2543	1198		1723914000000	4400	0	8000	0	1	1705334390037	1705754098599	\N
-6	2737	1353		1771261200000	3500	0	7000	70	1	1705334390037	1705334390037	\N
-6	3137	1213		1787814000000	25000	0	60000	60	1	1705334390037	1705928504185	\N
-6	3159	1130		1788246000000	122000	0	180000	20	1	1705334390037	1705334390037	\N
+2	3150	808		1783062000000	240000	250000	370000	2	1	1705334390037	1707795249367	\N
+6	2542	1077		1718384400000	230000	0	300000	3	1	1705334390037	1707044653395	\N
+6	2911	1060		1784444400000	13000	0	20000	19	1	1705334390037	1707294099081	\N
 2	3157	1646		\N	230000	240000	350000	0	1	1705334390037	1706057562992	\N
-6	2645	1204		1728147600000	2500	0	5000	271	1	1705334390037	1706272546022	\N
+6	2739	1243		1744563600000	6000	0	10000	50	1	1705334390037	1707742139814	\N
+6	3119	1188		1791702000000	66000	0	90000	0	1	1705334390037	1707914013788	\N
 6	3147	1641		1824015600000	2000	0	10000	96	1	1705334390037	1705334390037	\N
 2	3143	1616		\N	200000	200000	590000	0	1	1705334390037	1706149218613	\N
-6	2755	1236		1757178000000	5000	0	10000	212	1	1705334390037	1705334390037	\N
+6	3129	1607		1783148400000	61000	0	75000	0	1	1705334390037	1707919572492	\N
 6	3124	1266		1730271600000	4750	0	10000	40	1	1705334390037	1705334390037	\N
-6	2911	1060		1784444400000	13000	0	20000	21	1	1705334390037	1706101750240	\N
+2	3161	1648		1772089200000	242000	264000	440000	1	1	1705334390037	1707797140145	\N
 2	3152	1643		\N	33000	35000	60000	10	1	1705334390037	1705334390037	\N
-6	3136	1610		1783062000000	28000	0	60000	41	1	1705334390037	1706177987163	\N
-6	2702	1151		1811264400000	1100	0	2000	170	1	1705334390037	1705334390037	\N
+6	2709	1149		1758042000000	3800	0	5000	9	1	1705334390037	1706964619124	\N
+6	3136	1610		1783062000000	28000	0	60000	36	1	1705334390037	1707742128957	\N
 2	3153	1644		\N	38000	40000	70000	4	1	1705334390037	1706149218613	\N
-2	3150	808		\N	240000	250000	370000	2	1	1705334390037	1705334390037	\N
 6	2753	1247		1757955600000	8500	0	15000	3	1	1705334390037	1706009175709	\N
-6	3129	1607		1783148400000	61000	0	75000	1	1	1705334390037	1705579048288	\N
+6	2737	1353		1771261200000	3500	0	7000	63	1	1705334390037	1706618802417	\N
+6	2610	1355		1785344400000	17000	0	30000	14	1	1705334390037	1707943611436	\N
 6	3120	1591		1860217200000	90000	0	115000	13	1	1705334390037	1705334390037	\N
-6	2708	1166		1763571600000	1200	0	2000	102	1	1705334390037	1705410998804	\N
+6	2645	1204		1728147600000	2500	0	5000	245	1	1705334390037	1707998876313	\N
+6	2707	1167		1763053200000	1500	0	3000	130	1	1705334390037	1708003531576	\N
 6	3148	1642		\N	45000	0	100000	0	1	1705334390037	1705758892216	\N
 2	3142	464		\N	435000	500000	1350000	0	1	1705334390037	1705334390037	\N
-2	1271	790		\N	120000	143000	239000	4	1	1705334390037	1705334390037	\N
 2	3140	705		\N	933760	948000	1459000	0	1	1705334390037	1705334390037	\N
-2	3162	1649		\N	0	8000	17000	44	1	1705334390037	1705731234603	\N
+6	2728	1245		1720198800000	7000	0	13000	0	1	1705334390037	1707481866911	\N
 2	3151	380		\N	115000	115000	200000	0	1	1705334390037	1705334390037	\N
-2	3163	803		\N	445000	450000	580000	0	1	1705334390037	1705334390037	\N
-6	2728	1245		1720198800000	7000	0	13000	30	1	1705334390037	1705334390037	\N
 2	3164	688		\N	216000	230000	450000	0	1	1705334390037	1705731633652	\N
-6	2610	1355		1785344400000	17000	0	30000	15	1	1705334390037	1705334390037	\N
 2	3166	1506		\N	140000	170000	352000	2	1	1705509923026	1705510120013	\N
-2	3168	445		\N	60000	80000	195000	10	1	1705509983833	1705510120013	\N
+2	3188	517		\N	170000	0	398000	0	1	1706349537931	1707797480471	\N
 6	3186	1235		1760079600000	8500	0	13000	300	1	1706006589011	1706006597499	\N
 6	2420	1059	031022	1760374800000	14000	16000	22000	0	1	1705334390037	1705833103602	\N
 2	1595	632		1748736000000	36000	46000	60000	0	1	1705334390037	1705537498239	\N
-2	1282	357		1747612800000	50000	65000	100000	10	1	1705334390037	1705539244397	\N
 6	2434	1208		1738170000000	27000	0	60000	0	1	1705334390037	1705833103602	\N
 6	2439	1205		1738170000000	26000	0	60000	0	1	1705334390037	1705833103602	\N
 6	2454	1174		\N	4000	0	6000	0	1	1705334390037	1705833103602	\N
 6	2534	1151		1758819600000	1245	0	2000	0	1	1705334390037	1705833103602	\N
 6	2607	1180		1732381200000	4000	0	7000	0	1	1705334390037	1705833103602	\N
 2	3175	394		\N	330000	0	460000	0	1	1705679423824	1705679423824	\N
-2	3174	1373		\N	105000	0	400000	20	1	1705679393317	1705679542487	\N
+2	3174	1373		1775026800000	105000	0	400000	19	1	1705679393317	1707794903454	\N
 6	2617	1133		1761757200000	95000	0	130000	0	1	1705334390037	1705833103602	\N
-2	3176	394		\N	330000	0	700000	2	1	1705679509943	1705679725588	\N
+2	3176	394		\N	330000	0	700000	0	1	1705679509943	1706973491330	\N
 2	3169	705		\N	904580	1000000	1459000	0	1	1705510096874	1705680985533	\N
 6	2646	1203		1734627600000	2600	0	5000	0	1	1705334390037	1705833103602	\N
 2	3170	776		\N	320000	330000	485000	0	1	1705510159487	1705681994751	\N
@@ -21161,9 +22986,9 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 6	2659	1134		\N	50000	0	80000	0	1	1705334390037	1705833103602	\N
 6	2537	1321		1785344400000	8000	0	10000	0	1	1705334390037	1705833103602	\N
 6	2440	1206		1717002000000	35000	0	60000	0	1	1705334390037	1705833103602	\N
-6	2498	1226		1772989200000	80000	0	160000	0	1	1705334390037	1705833103602	\N
+6	2819	1307		1783530000000	26500	0	30000	14	1	1705334390037	1706785713684	\N
 6	2465	1222		1772298000000	68000	0	110000	0	1	1705334390037	1705833103602	\N
-6	3177	1197		1764658800000	10500	0	16000	360	1	1705747745410	1705748237644	\N
+6	2638	1202		1740848400000	26000	0	60000	84	1	1705334390037	1708003536450	\N
 6	2555	1188		1787850000000	66000	0	90000	0	1	1705334390037	1705833103602	\N
 2	1272	744		\N	160000	177000	320000	-1	1	1705334390037	1705835526694	\N
 2	1770	352		1725148800000	130000	140000	220000	0	1	1705334390037	1705835543746	\N
@@ -21175,29 +23000,72 @@ COPY public."ProductBatch" (oid, id, "productId", batch, "expiryDate", "costPric
 6	2507	1322		1793293200000	5000	0	10000	0	1	1705334390037	1705758892216	\N
 6	2788	1273		1803661200000	8600	0	20000	22	1	1705334390037	1706008739976	\N
 6	2551	1343		1743786000000	9400	0	12000	0	1	1705334390037	1705758892216	\N
-6	2803	1194		1770656400000	2766	0	4000	180	1	1705334390037	1706273412371	\N
-6	2757	1198		1791306000000	4400	0	8000	96	1	1705334390037	1706185972427	\N
-6	3146	1640		1760079600000	19000	0	35000	4	1	1705334390037	1705841654528	\N
+6	3132	1609		1760511600000	22500	0	50000	16	1	1705334390037	1707361561814	\N
+6	2639	1205		1737738000000	26000	0	60000	59	1	1705334390037	1708002804828	\N
 6	3179	1255		1757055600000	17583	0	20000	120	1	1705925019351	1705925312638	\N
-6	3180	1256		1753426800000	11000	0	15000	120	1	1705925073620	1705925312638	\N
+6	3146	1640		1760079600000	19000	0	35000	3	1	1705334390037	1707211798018	\N
 6	3181	1204		1757228400000	2033	0	5000	300	1	1705925107160	1705925312638	\N
 6	3182	1203		1759302000000	2733	0	5000	300	1	1705925137462	1705925312638	\N
 6	3183	1220		1763881200000	3916	0	10000	120	1	1705925193987	1705925312638	\N
 6	3184	1319		1761634800000	38000	0	50000	5	1	1705925233127	1705925312638	\N
-6	3185	1225		1758351600000	128000	0	155000	30	1	1705925264929	1705925312638	\N
-6	2639	1205		1737738000000	26000	0	60000	79	1	1705334390037	1706275398292	\N
-6	2443	1247		1759165200000	8000	0	15000	600	1	1705334390037	1706178114253	\N
-6	3100	1197		1764658800000	12600	0	16000	5	1	1705334390037	1706185972427	\N
+6	2883	1059		\N	14000	0	22000	117	1	1705334390037	1707882046464	\N
+6	3123	1560		1743663600000	100000	0	120000	15	1	1705334390037	1707914074762	\N
 2	1230	768		\N	40000	45000	105000	0	1	1705334390037	1706149218613	\N
 2	1259	353		1761350400000	40000	50000	60000	1	1	1705334390037	1706149218613	\N
 2	1369	591		\N	1000	18000	42000	0	1	1705334390037	1706149218613	\N
 2	1381	467		1769385600000	135000	150000	230000	0	1	1705334390037	1706149218613	\N
 2	2063	389		1714694400000	15000	15000	35000	0	1	1705334390037	1706149218613	\N
-6	3122	1605		1782889200000	120000	0	185000	81	1	1705334390037	1706275398292	\N
-6	2883	1059		\N	14000	0	22000	230	1	1705334390037	1706186147610	\N
-6	3123	1560		1743663600000	100000	0	120000	23	1	1705334390037	1706271758663	\N
-6	2710	1153		1740934800000	1200	0	2000	90	1	1705334390037	1706273412371	\N
-6	2638	1202		1740848400000	26000	0	60000	110	1	1705334390037	1706188592532	\N
+6	2710	1153		1740934800000	1200	0	2000	150	1	1705334390037	1707877175770	\N
+6	3180	1256		1753426800000	11000	0	15000	109	1	1705925073620	1706873528138	\N
+6	2498	1226		1772989200000	80000	0	160000	27	1	1705334390037	1707741225782	\N
+2	1282	357		1747612800000	50000	65000	100000	9	1	1705334390037	1706974552706	\N
+6	2803	1194		1770656400000	2766	0	4000	88	1	1705334390037	1708004608229	\N
+6	3100	1197		1764658800000	12600	0	16000	0	1	1705334390037	1706357795934	\N
+2	3162	1649		\N	0	8000	17000	34	1	1705334390037	1706592575447	\N
+2	1941	428		1718496000000	60000	67000	90000	5	1	1705334390037	1707792565013	\N
+6	3189	1653		1748674800000	250000	0	325000	5	1	1706620389942	1706620550075	\N
+6	3190	1652		1893481200000	168000	0	280000	6	1	1706620444606	1706620550075	\N
+6	3191	1654		1740812400000	100000	0	150000	6	1	1706620531887	1706620550075	\N
+6	2854	1235		1751439600000	8500	0	13000	-2	1	1705334390037	1708003531576	\N
+6	2757	1198		1791306000000	4400	0	8000	61	1	1705334390037	1708003536450	\N
+2	3192	361		\N	60000	0	155000	2	1	1706707398608	1706707507744	\N
+2	3168	445		\N	60000	80000	195000	4	1	1705509983833	1707792565013	\N
+6	2443	1247		1759165200000	8000	0	15000	570	1	1705334390037	1707230432078	\N
+6	3185	1225		1758351600000	128000	0	155000	14	1	1705925264929	1708003536450	\N
+2	3193	1655		\N	690000	0	1150000	0	1	1706707482120	1706707541694	\N
+2	2084	584		1718409600000	10000	12000	25000	19	1	1705334390037	1706708092518	\N
+2	3083	569		\N	108000	115000	150000	10	1	1705334390037	1706708092518	\N
+6	3194	1188		1760338800000	80000	0	90000	24	1	1706785381382	1706785390187	\N
+2	3195	418		\N	155000	0	270000	1	1	1706972456881	1706972891189	\N
+6	3197	1657		1763622000000	6000	0	10000	10	1	1707215070450	1707215093431	\N
+2	3198	485		1740812400000	115420	0	199000	1	1	1707793810577	1707794453849	\N
+2	3199	848		1774681200000	126000	0	200000	1	1	1707793888435	1707794453849	\N
+2	3200	1658		1769929200000	126000	0	210000	4	1	1707793931935	1707794453849	\N
+2	3201	654		1794294000000	57000	0	110000	26	1	1707793999979	1707794453849	\N
+2	3202	858		1794034800000	72000	0	180000	5	1	1707794045589	1707794453849	\N
+2	3203	350		\N	450000	0	720000	1	1	1707794112056	1707794453849	\N
+2	3204	785		1759561200000	159000	0	265000	1	1	1707794218746	1707794453849	\N
+2	3205	1659		1792652400000	1	0	560000	2	1	1707794319371	1707794453849	\N
+2	3206	737		1796281200000	195000	0	390000	2	1	1707794403321	1707794453849	\N
+2	3035	536		1789887600000	329450	359400	599000	12	1	1705334390037	1707794951561	\N
+2	1915	569		1688428800000	99000	115000	150000	0	1	1705334390037	1707795038287	1707795038285
+2	1586	689		1754031600000	188000	206000	375000	1	1	1705334390037	1707796040046	\N
+2	1533	736		1781247600000	1000	390000	650000	1	1	1705334390037	1707796227892	\N
+2	1951	869		1788850800000	207000	226000	309000	1	1	1705334390037	1707796941746	\N
+2	2763	571		\N	340000	375000	480000	0	1	1705334390037	1707797480471	\N
+2	3087	1522		\N	128240	137400	229000	0	1	1705334390037	1707797480471	\N
+2	3093	405		\N	56000	56000	120000	0	1	1705334390037	1707797480471	\N
+6	3196	1656		1768028400000	40000	0	45000	20	1	1707214819807	1707906977977	\N
+6	2872	1203		1748156400000	2600	0	5000	145	1	1705334390037	1707914013788	\N
+6	2755	1236		1757178000000	5000	0	10000	202	1	1705334390037	1707914074762	\N
+2	1253	534		1772323200000	318000	328000	529000	8	1	1705334390037	1707792565013	\N
+2	1256	560		1735689600000	182000	195000	260000	2	1	1705334390037	1707792565013	\N
+2	2251	560		1735664400000	381	408	680	0	1	1705334390037	1707792565013	\N
+2	2315	974		\N	37000	48000	75000	6	1	1705334390037	1707792565013	\N
+2	2344	866		\N	75000	85000	380000	0	1	1705334390037	1707792565013	\N
+6	3122	1605		1782889200000	120000	0	185000	40	1	1705334390037	1708002804828	\N
+6	3177	1197		1764658800000	10500	0	16000	330	1	1705747745410	1708003536450	\N
+6	3134	1206		1735974000000	26000	0	60000	7	1	1705334390037	1708005036725	\N
 \.
 
 
@@ -32422,6 +34290,695 @@ COPY public."ProductMovement" (oid, id, "productId", "productBatchId", "referenc
 6	14015	1134	2870	1071	1	0	71	100	171	30000	3000000	1706276996048	{"name":"Viên","rate":1}
 6	14016	1145	2583	1071	1	0	0	30	30	63000	1890000	1706276996048	{"name":"Lọ","rate":1}
 6	14017	1178	2746	1071	1	0	70	3000	3070	4000	12000000	1706276996048	{"name":"Viên","rate":1}
+2	14018	461	2765	3605	2	0	1	-1	0	321000	321000	1706342232509	{"name":"Hộp","rate":1}
+2	14019	446	2848	3606	2	0	2	-1	1	272000	272000	1706349309464	{"name":"Hộp","rate":1}
+2	14020	866	2344	3606	2	0	3	-1	2	195000	195000	1706349309464	{"name":"Hộp","rate":1}
+2	14021	446	2848	3606	2	1	1	1	2	272000	-272000	1706349316949	{"name":"Hộp","rate":1}
+2	14022	866	2344	3606	2	1	2	1	3	195000	-195000	1706349316949	{"name":"Hộp","rate":1}
+2	14023	446	2848	3607	2	0	2	-1	1	272000	272000	1706349346042	{"name":"Hộp","rate":1}
+2	14024	866	2344	3607	2	0	3	-1	2	195000	195000	1706349346042	{"name":"Hộp","rate":1}
+2	14025	993	2403	3607	2	0	1	-1	0	40000	40000	1706349346042	{"name":"","rate":1}
+2	14026	428	1941	1072	1	0	0	15	15	60000	900000	1706349429675	{"name":"Hộp","rate":1}
+2	14027	517	3188	1073	1	0	0	2	2	170000	340000	1706349616558	{"name":"Hộp","rate":1}
+6	14028	1197	3100	3608	2	0	5	-5	0	16000	80000	1706357795933	{"name":"Ống","rate":1}
+6	14029	1198	2757	3608	2	0	96	-5	91	8000	40000	1706357795933	{"name":"Ống","rate":1}
+6	14030	1202	2638	3608	2	0	110	-1	109	60000	60000	1706357795933	{"name":"Lọ","rate":1}
+6	14031	1226	2724	3608	2	0	9	-1	8	160000	160000	1706357795933	{"name":"Lọ","rate":1}
+6	14032	1222	2720	3608	2	0	12	-1	11	110000	110000	1706357795933	{"name":"Lọ","rate":1}
+6	14033	1114	2685	3609	2	0	15	-1	14	30000	30000	1706358529778	{"name":"Lọ","rate":1}
+6	14034	1242	2742	3609	2	0	405	-10	395	10000	100000	1706358529778	{"name":"Viên","rate":1}
+6	14035	1153	2710	3609	2	0	90	-20	70	2000	40000	1706358529778	{"name":"Viên","rate":1}
+6	14036	1194	2803	3609	2	0	180	-26	154	4000	104000	1706358529778	{"name":"Gói","rate":1}
+6	14037	1149	2709	3609	2	0	34	-5	29	5000	25000	1706358529778	{"name":"Viên","rate":1}
+6	14038	1213	3137	3610	2	0	60	-1	59	60000	60000	1706358903330	{"name":"Lọ","rate":1}
+6	14039	1307	2819	3610	2	0	16	-1	15	30000	30000	1706358903330	{"name":"Tuýp","rate":1}
+6	14040	1322	2769	3610	2	0	257	-4	253	10000	40000	1706358903330	{"name":"Gói","rate":1}
+6	14041	1340	2843	3611	2	0	4	-1	3	150000	150000	1706359039210	{"name":"Tuýp","rate":1}
+6	14042	1351	2569	3614	2	0	9	-1	8	230000	230000	1706361914411	{"name":"Tuýp","rate":1}
+6	14043	1154	2700	3613	2	0	70	-10	60	1500	15000	1706440495876	{"name":"Viên","rate":1}
+6	14044	1166	2708	3613	2	0	102	-10	92	2000	20000	1706440495876	{"name":"Viên","rate":1}
+6	14045	1322	2769	3589	2	0	253	-1	252	10000	10000	1706440548735	{"name":"Gói","rate":1}
+6	14046	1605	3122	3616	2	0	81	-1	80	185000	185000	1706444971416	{"name":"Lọ","rate":1}
+6	14047	1202	2638	3616	2	0	109	-1	108	60000	60000	1706444971416	{"name":"Lọ","rate":1}
+6	14048	1346	2812	3618	2	0	15	-5	10	10000	50000	1706524760129	{"name":"Ống","rate":1}
+6	14049	1350	2568	3619	2	0	13	-1	12	270000	270000	1706525012382	{"name":"Tuýp","rate":1}
+6	14050	1392	3071	3619	2	0	2	-1	1	120000	120000	1706525012382	{"name":"Lọ","rate":1}
+6	14051	1292	2831	3621	2	0	18	-1	17	30000	30000	1706528953743	{"name":"Tuýp","rate":1}
+6	14052	1246	2727	3622	2	0	44	-6	38	20000	120000	1706530024132	{"name":"Gói","rate":1}
+6	14053	1209	2643	3623	2	0	31	-1	30	60000	60000	1706530231477	{"name":"Lọ","rate":1}
+6	14054	1346	2812	3623	2	0	10	-5	5	10000	50000	1706530231477	{"name":"Ống","rate":1}
+6	14055	1247	2443	3624	2	0	600	-10	590	15000	150000	1706531479587	{"name":"Gói","rate":1}
+6	14056	1242	2742	3625	2	0	395	-8	387	10000	80000	1706533036408	{"name":"Viên","rate":1}
+6	14057	1153	2710	3625	2	0	70	-20	50	2000	40000	1706533036408	{"name":"Viên","rate":1}
+6	14058	1206	3134	3626	2	0	30	-1	29	60000	60000	1706533448670	{"name":"Lọ","rate":1}
+6	14059	1119	2651	3628	2	0	12	-2	10	175000	350000	1706534190488	{"name":"Lọ","rate":1}
+6	14060	1188	3119	3628	2	0	12	-2	10	66000	132000	1706534190488	{"name":"Lọ","rate":1}
+6	14061	1243	2739	3629	2	0	110	-7	103	10000	70000	1706534653719	{"name":"Viên","rate":1}
+6	14062	1205	2639	3629	2	0	79	-1	78	60000	60000	1706534653719	{"name":"Lọ","rate":1}
+6	14063	1226	2498	1074	1	0	0	30	30	80000	2400000	1706534689543	{"name":"Lọ","rate":1}
+6	14064	1226	2724	3630	2	0	8	-3	5	80000	240000	1706534725269	{"name":"Lọ","rate":1}
+2	14065	436	2353	3631	2	0	2	-1	1	350000	350000	1706592575446	{"name":"Hộp","rate":1}
+2	14066	534	2621	3631	2	0	2	-1	1	449650	449650	1706592575446	{"name":"Hộp","rate":1}
+2	14067	402	1219	3631	2	0	6	-1	5	105000	105000	1706592575446	{"name":"Hộp","rate":1}
+2	14068	1648	3161	3631	2	0	2	-1	1	396000	396000	1706592575446	{"name":"","rate":1}
+2	14069	1649	3162	3631	2	0	44	-10	34	0	0	1706592575446	{"name":"","rate":1}
+2	14070	490	2390	3632	2	0	1	-1	0	400000	400000	1706592731514	{"name":"Hộp","rate":1}
+2	14071	519	1556	3632	2	0	1	-1	0	285000	285000	1706592731514	{"name":"Hộp","rate":1}
+2	14072	436	2353	3633	2	0	1	-1	0	396900	396900	1706592926098	{"name":"Hộp","rate":1}
+2	14073	534	2621	3634	2	0	1	-1	0	435000	435000	1706593027993	{"name":"Hộp","rate":1}
+2	14074	1049	2398	3634	2	0	1	-1	0	380000	380000	1706593027993	{"name":"","rate":1}
+6	14075	1225	2723	3636	2	0	9	-1	8	145000	145000	1706613548603	{"name":"Lọ","rate":1}
+6	14076	1202	2638	3636	2	0	108	-1	107	60000	60000	1706613548603	{"name":"Lọ","rate":1}
+6	14077	1146	2882	3636	2	0	470	-5	465	7000	35000	1706613548603	{"name":"Ống","rate":1}
+6	14078	1222	2720	3637	2	0	11	-1	10	110000	110000	1706613809648	{"name":"Lọ","rate":1}
+6	14079	1059	2883	3637	2	0	230	-4	226	22000	88000	1706613809648	{"name":"Gói","rate":1}
+6	14080	1206	3134	3637	2	0	29	-1	28	60000	60000	1706613809648	{"name":"Lọ","rate":1}
+6	14081	1284	2828	3637	2	0	2	-4	-2	10000	40000	1706613809648	{"name":"Lọ","rate":1}
+6	14082	1609	3132	3638	2	0	20	-1	19	50000	50000	1706613984877	{"name":"Lọ","rate":1}
+6	14083	1288	2829	3638	2	0	15	-1	14	50000	50000	1706613984877	{"name":"Lọ","rate":1}
+6	14084	1605	3122	3639	2	0	80	-1	79	185000	185000	1706614328420	{"name":"Lọ","rate":1}
+6	14085	1202	2638	3639	2	0	107	-1	106	60000	60000	1706614328420	{"name":"Lọ","rate":1}
+6	14086	1246	2727	3640	2	0	38	-10	28	20000	200000	1706614562353	{"name":"Gói","rate":1}
+6	14087	1225	2723	3641	2	0	8	-1	7	145000	145000	1706614733226	{"name":"Lọ","rate":1}
+6	14088	1322	2769	3642	2	0	252	-2	250	10000	20000	1706615018311	{"name":"Gói","rate":1}
+6	14089	1209	2643	3643	2	0	30	-1	29	60000	60000	1706615273524	{"name":"Lọ","rate":1}
+6	14090	1346	2812	3643	2	0	5	-5	0	10000	50000	1706615273524	{"name":"Ống","rate":1}
+6	14091	1209	2643	3623	2	1	29	1	30	60000	-60000	1706615305321	{"name":"Lọ","rate":1}
+6	14092	1346	2812	3623	2	1	0	5	5	10000	-50000	1706615305321	{"name":"Ống","rate":1}
+6	14093	1209	2643	3643	2	1	30	1	31	60000	-60000	1706615467363	{"name":"Lọ","rate":1}
+6	14094	1346	2812	3643	2	1	5	5	10	10000	-50000	1706615467363	{"name":"Ống","rate":1}
+6	14095	1209	2643	3645	2	0	31	-1	30	60000	60000	1706615536436	{"name":"Lọ","rate":1}
+6	14096	1346	2812	3645	2	0	10	-5	5	10000	50000	1706615536436	{"name":"Ống","rate":1}
+6	14097	1162	2691	3644	2	0	606	-6	600	5000	30000	1706617961508	{"name":"Gói","rate":1}
+6	14098	1208	2642	3644	2	0	126	-1	125	60000	60000	1706617961508	{"name":"Lọ","rate":1}
+6	14099	1605	3122	3644	2	0	79	-1	78	185000	185000	1706617961508	{"name":"Lọ","rate":1}
+6	14100	1560	3123	3644	2	0	23	-1	22	120000	120000	1706617961508	{"name":"Cái","rate":1}
+6	14101	1222	2720	3646	2	0	10	-1	9	110000	110000	1706618147696	{"name":"Lọ","rate":1}
+6	14102	1223	2721	3646	2	0	20	-1	19	120000	120000	1706618147696	{"name":"Lọ","rate":1}
+6	14103	1202	2638	3646	2	0	106	-1	105	60000	60000	1706618147696	{"name":"Lọ","rate":1}
+6	14104	1225	2723	3647	2	0	7	-1	6	145000	145000	1706618794713	{"name":"Lọ","rate":1}
+6	14105	1202	2638	3647	2	0	105	-1	104	60000	60000	1706618794713	{"name":"Lọ","rate":1}
+6	14106	1354	2856	3647	2	0	16	-1	15	25000	25000	1706618794713	{"name":"Bộ","rate":1}
+6	14107	1235	2854	3612	2	0	68	-10	58	13000	130000	1706618802416	{"name":"Viên","rate":1}
+6	14108	1149	2709	3612	2	0	29	-10	19	5000	50000	1706618802416	{"name":"Viên","rate":1}
+6	14109	1152	2711	3612	2	0	55	-10	45	2000	20000	1706618802416	{"name":"Viên","rate":1}
+6	14110	1353	2737	3612	2	0	70	-7	63	7000	49000	1706618802416	{"name":"Viên","rate":1}
+6	14111	1114	2685	3612	2	0	14	-1	13	30000	30000	1706618802416	{"name":"Lọ","rate":1}
+6	14112	1560	3123	3612	2	0	22	-1	21	120000	120000	1706618802416	{"name":"Cái","rate":1}
+6	14113	1194	2803	3612	2	0	154	-10	144	4000	40000	1706618802416	{"name":"Gói","rate":1}
+6	14114	1609	3132	3612	2	0	19	-1	18	50000	50000	1706618802416	{"name":"Lọ","rate":1}
+6	14115	1288	2829	3612	2	0	14	-1	13	50000	50000	1706618802416	{"name":"Lọ","rate":1}
+6	14116	1059	2883	3648	2	0	226	-8	218	22000	176000	1706618872186	{"name":"Gói","rate":1}
+6	14117	1242	2742	3649	2	0	387	-10	377	10000	100000	1706619022028	{"name":"Viên","rate":1}
+6	14118	1151	2702	3649	2	0	170	-20	150	2000	40000	1706619022028	{"name":"Viên","rate":1}
+6	14119	1241	2743	3650	2	0	22	-22	0	2600	57200	1706620165081	{"name":"Viên","rate":1}
+6	14120	1314	3063	1075	1	0	44	200	244	2600	520000	1706620550074	{"name":"Ống","rate":1}
+6	14121	1346	2812	1075	1	0	5	100	105	8000	800000	1706620550074	{"name":"Ống","rate":1}
+6	14122	1112	2515	1075	1	0	0	5	5	185000	925000	1706620550074	{"name":"Lọ","rate":1}
+6	14123	1653	3189	1075	1	0	0	5	5	250000	1250000	1706620550074	{"name":"Lọ","rate":1}
+6	14124	1652	3190	1075	1	0	0	6	6	168000	1008000	1706620550074	{"name":"","rate":1}
+6	14125	1654	3191	1075	1	0	0	6	6	100000	600000	1706620550074	{"name":"Lọ","rate":1}
+6	14126	1207	2641	3651	2	0	20	-1	19	60000	60000	1706622524974	{"name":"Lọ","rate":1}
+6	14127	1123	2650	3651	2	0	3	-1	2	240000	240000	1706622524974	{"name":"Lọ","rate":1}
+6	14128	1206	3134	3652	2	0	28	-1	27	60000	60000	1706695391285	{"name":"Lọ","rate":1}
+6	14129	1205	2639	3652	2	0	78	-1	77	60000	60000	1706695391285	{"name":"Lọ","rate":1}
+6	14130	1208	2642	3652	2	0	125	-1	124	60000	60000	1706695391285	{"name":"Lọ","rate":1}
+6	14131	1322	2769	3652	2	0	250	-1	249	10000	10000	1706695391285	{"name":"Gói","rate":1}
+6	14132	1560	3123	3653	2	0	21	-1	20	120000	120000	1706695500697	{"name":"Cái","rate":1}
+6	14133	1529	3095	3653	2	0	30	-1	29	10000	10000	1706695500697	{"name":"Vỉ","rate":1}
+6	14134	1608	3131	3653	2	0	22	-1	21	30000	30000	1706695500697	{"name":"Vỉ","rate":1}
+6	14135	1154	2700	3653	2	0	60	-10	50	1500	15000	1706695500697	{"name":"Viên","rate":1}
+6	14136	1059	2883	3654	2	0	218	-5	213	22000	110000	1706698815951	{"name":"Gói","rate":1}
+6	14137	1225	3185	3655	2	0	30	-1	29	155000	155000	1706701017031	{"name":"Lọ","rate":1}
+6	14138	1139	2683	3655	2	0	403	-5	398	1000	5000	1706701017031	{"name":"Viên","rate":1}
+6	14139	1243	2739	3656	2	0	103	-10	93	10000	100000	1706702338631	{"name":"Viên","rate":1}
+6	14140	1194	2803	3656	2	0	144	-10	134	4000	40000	1706702338631	{"name":"Gói","rate":1}
+6	14141	1114	2685	3656	2	0	13	-1	12	30000	30000	1706702338631	{"name":"Lọ","rate":1}
+6	14142	1238	2736	3656	2	0	100	-10	90	5000	50000	1706702338631	{"name":"Viên","rate":1}
+6	14143	1203	2872	3656	2	0	299	-10	289	5000	50000	1706702338631	{"name":"Gói","rate":1}
+6	14144	1225	3185	3658	2	0	29	-1	28	155000	155000	1706702824933	{"name":"Lọ","rate":1}
+6	14145	1250	2437	3659	2	0	-4	-5	-9	20000	100000	1706705020238	{"name":"Gói","rate":1}
+6	14146	1197	3177	3660	2	0	360	-5	355	16000	80000	1706705083050	{"name":"Ống","rate":1}
+6	14147	1198	2757	3660	2	0	91	-5	86	8000	40000	1706705083050	{"name":"Ống","rate":1}
+2	14148	534	1253	3661	2	0	10	-1	9	429000	429000	1706706836434	{"name":"Hộp","rate":1}
+2	14149	867	1437	3635	2	0	10	-3	7	120000	360000	1706706884426	{"name":"Hộp","rate":1}
+2	14150	1505	3040	3635	2	0	2	-1	1	170000	170000	1706706884426	{"name":"","rate":1}
+2	14151	517	3188	3635	2	0	2	-1	1	210000	210000	1706706884426	{"name":"Hộp","rate":1}
+2	14152	428	1941	3635	2	0	15	-1	14	60000	60000	1706706884426	{"name":"Hộp","rate":1}
+2	14153	361	3192	1076	1	0	0	2	2	60000	120000	1706707507743	{"name":"Hộp","rate":1}
+2	14154	1655	3193	1076	1	0	0	1	1	690000	690000	1706707507743	{"name":"","rate":1}
+2	14155	707	1269	3663	2	0	2	-1	1	294000	294000	1706707541693	{"name":"Hộp","rate":1}
+2	14156	654	2314	3663	2	0	5	-1	4	60000	60000	1706707541693	{"name":"Chai","rate":1}
+2	14157	902	2383	3663	2	0	4	-1	3	95000	95000	1706707541693	{"name":"Hộp","rate":1}
+2	14158	1655	3193	3663	2	0	1	-1	0	690000	690000	1706707541693	{"name":"","rate":1}
+2	14159	409	1782	1077	1	0	0	1	1	180000	180000	1706707948361	{"name":"Hộp","rate":1}
+2	14160	584	2084	1077	1	0	0	20	20	10000	200000	1706707948361	{"name":"Túi","rate":1}
+2	14161	732	2343	3506	2	0	5	-1	4	304000	304000	1706708092517	{"name":"Hộp","rate":1}
+2	14162	569	3083	3506	2	0	11	-1	10	125000	125000	1706708092517	{"name":"Hộp","rate":1}
+2	14163	584	2084	3506	2	0	20	-1	19	16000	16000	1706708092517	{"name":"Túi","rate":1}
+2	14164	409	1782	3506	2	0	1	-1	0	260000	260000	1706708092517	{"name":"Hộp","rate":1}
+2	14165	803	3163	1078	1	0	0	1	1	445000	445000	1706708120774	{"name":"Hộp","rate":1}
+2	14166	803	3163	3665	2	0	1	-1	0	493000	493000	1706708217024	{"name":"Hộp","rate":1}
+6	14167	1605	3122	3666	2	0	78	-1	77	185000	185000	1706710745550	{"name":"Lọ","rate":1}
+6	14168	1208	2642	3666	2	0	124	-1	123	60000	60000	1706710745550	{"name":"Lọ","rate":1}
+6	14169	1133	2656	3667	2	0	115	-1	114	130000	130000	1706774279717	{"name":"Vỉ","rate":1}
+6	14170	1213	3137	3667	2	0	59	-1	58	60000	60000	1706774279717	{"name":"Lọ","rate":1}
+6	14171	1322	2769	3657	2	0	249	-3	246	10000	30000	1706784872309	{"name":"Gói","rate":1}
+6	14172	1188	3194	1079	1	0	0	24	24	80000	1920000	1706785390185	{"name":"Lọ","rate":1}
+6	14173	1188	3119	3668	2	0	10	-5	5	66000	330000	1706785430269	{"name":"Lọ","rate":1}
+6	14174	1213	3137	3669	2	0	58	-1	57	60000	60000	1706785713683	{"name":"Lọ","rate":1}
+6	14175	1307	2819	3669	2	0	15	-1	14	30000	30000	1706785713683	{"name":"Tuýp","rate":1}
+6	14176	1343	2820	3669	2	0	41	-1	40	12000	12000	1706785713683	{"name":"Gói","rate":1}
+6	14177	1059	2883	3670	2	0	213	-14	199	22000	308000	1706787982591	{"name":"Gói","rate":1}
+6	14178	1322	2769	3670	2	0	246	-2	244	10000	20000	1706787982591	{"name":"Gói","rate":1}
+6	14179	1256	2871	3671	2	0	1	-12	-11	15000	180000	1706857139907	{"name":"Gói","rate":1}
+6	14180	1200	2789	3671	2	0	48	-2	46	10000	20000	1706857139907	{"name":"Tuýp","rate":1}
+6	14181	1205	2639	3673	2	0	77	-1	76	60000	60000	1706869728274	{"name":"Lọ","rate":1}
+6	14182	1059	2883	3673	2	0	199	-10	189	22000	220000	1706869728274	{"name":"Gói","rate":1}
+6	14183	1059	2883	3672	2	0	189	-3	186	22000	66000	1706869754284	{"name":"Gói","rate":1}
+6	14184	1235	2854	3674	2	0	58	-10	48	13000	130000	1706873139579	{"name":"Viên","rate":1}
+6	14185	1202	2638	3674	2	0	104	-1	103	60000	60000	1706873139579	{"name":"Lọ","rate":1}
+6	14186	1177	2799	3674	2	0	265	-10	255	10000	100000	1706873139579	{"name":"Viên","rate":1}
+6	14187	1610	3136	3674	2	0	41	-1	40	60000	60000	1706873139579	{"name":"Lọ","rate":1}
+6	14188	1256	2871	3675	2	0	-11	-1	-12	15000	15000	1706873528137	{"name":"Gói","rate":1}
+6	14189	1256	3180	3675	2	0	120	-11	109	15000	165000	1706873528137	{"name":"Gói","rate":1}
+6	14190	1605	3122	3676	2	0	77	-1	76	185000	185000	1706874709791	{"name":"Lọ","rate":1}
+6	14191	1206	3134	3676	2	0	27	-1	26	60000	60000	1706874709791	{"name":"Lọ","rate":1}
+6	14192	1322	2769	3677	2	0	244	-2	242	10000	20000	1706874718212	{"name":"Gói","rate":1}
+6	14193	1206	3134	3677	2	0	26	-1	25	60000	60000	1706874718212	{"name":"Lọ","rate":1}
+6	14194	1242	2742	3678	2	0	377	-5	372	10000	50000	1706875330771	{"name":"Viên","rate":1}
+6	14195	1153	2710	3678	2	0	50	-10	40	2000	20000	1706875330771	{"name":"Viên","rate":1}
+6	14196	1322	2769	3680	2	0	242	-3	239	10000	30000	1706876563505	{"name":"Gói","rate":1}
+6	14197	1059	2883	3680	2	0	186	-7	179	22000	154000	1706876563505	{"name":"Gói","rate":1}
+6	14198	1205	2639	3680	2	0	76	-1	75	60000	60000	1706876563505	{"name":"Lọ","rate":1}
+6	14199	1226	2498	3681	2	0	30	-1	29	160000	160000	1706876814248	{"name":"Lọ","rate":1}
+6	14200	1202	2638	3681	2	0	103	-1	102	60000	60000	1706876814248	{"name":"Lọ","rate":1}
+6	14201	1605	3122	3682	2	0	76	-1	75	185000	185000	1706877027471	{"name":"Lọ","rate":1}
+6	14202	1214	2447	3683	2	0	36	-1	35	70000	70000	1706877344220	{"name":"Lọ","rate":1}
+6	14203	1133	2656	3683	2	0	114	-1	113	130000	130000	1706877344220	{"name":"Vỉ","rate":1}
+6	14204	1188	3119	3684	2	0	5	-1	4	90000	90000	1706877724144	{"name":"Lọ","rate":1}
+6	14205	1208	2642	3684	2	0	123	-1	122	60000	60000	1706877724144	{"name":"Lọ","rate":1}
+6	14206	1179	2750	3685	2	0	800	-100	700	5460	546000	1706877801821	{"name":"Ống","rate":1}
+6	14207	1219	2795	3687	2	0	5	-1	4	180000	180000	1706948888462	{"name":"Lọ","rate":1}
+6	14208	1208	2642	3687	2	0	122	-1	121	60000	60000	1706948888462	{"name":"Lọ","rate":1}
+6	14209	1130	3159	3690	2	0	20	-1	19	180000	180000	1706955241542	{"name":"Lọ","rate":1}
+6	14210	1322	2769	3691	2	0	239	-2	237	10000	20000	1706955405466	{"name":"Gói","rate":1}
+6	14211	1235	2854	3688	2	0	48	-10	38	13000	130000	1706955511794	{"name":"Viên","rate":1}
+6	14212	1153	2710	3688	2	0	40	-20	20	2000	40000	1706955511794	{"name":"Viên","rate":1}
+6	14213	1149	2709	3688	2	0	19	-5	14	5000	25000	1706955511794	{"name":"Viên","rate":1}
+6	14214	1114	2685	3688	2	0	12	-1	11	30000	30000	1706955511794	{"name":"Lọ","rate":1}
+6	14215	1605	3122	3692	2	1	75	2	77	185000	-370000	1706956672578	{"name":"Lọ","rate":1}
+6	14216	1222	2720	3692	2	1	9	1	10	110000	-110000	1706956672578	{"name":"Lọ","rate":1}
+6	14217	1206	3134	3692	2	1	25	2	27	60000	-120000	1706956672578	{"name":"Lọ","rate":1}
+6	14218	1640	3146	3692	2	1	4	1	5	35000	-35000	1706956672578	{"name":"Lọ","rate":1}
+6	14219	1605	3122	3693	2	0	77	-2	75	185000	370000	1706956747484	{"name":"Lọ","rate":1}
+6	14220	1206	3134	3693	2	0	27	-2	25	60000	120000	1706956747484	{"name":"Lọ","rate":1}
+6	14221	1222	2720	3693	2	0	10	-1	9	110000	110000	1706956747484	{"name":"Lọ","rate":1}
+6	14222	1640	3146	3693	2	0	5	-1	4	35000	35000	1706956747484	{"name":"Lọ","rate":1}
+6	14223	1225	2723	3694	2	0	6	-1	5	145000	145000	1706960938364	{"name":"Lọ","rate":1}
+6	14224	1247	2443	3694	2	0	590	-6	584	15000	90000	1706960938364	{"name":"Gói","rate":1}
+6	14225	1207	2641	3695	2	0	19	-1	18	60000	60000	1706962810097	{"name":"Lọ","rate":1}
+6	14226	1178	2746	3695	2	0	3070	-30	3040	6000	180000	1706962810097	{"name":"Viên","rate":1}
+6	14227	1605	3122	3695	2	0	75	-1	74	185000	185000	1706962810097	{"name":"Lọ","rate":1}
+6	14228	1605	3122	3696	2	0	74	-1	73	185000	185000	1706962844631	{"name":"Lọ","rate":1}
+6	14229	1202	2638	3696	2	0	102	-1	101	60000	60000	1706962844631	{"name":"Lọ","rate":1}
+6	14230	1178	2746	3696	2	0	3040	-10	3030	6000	60000	1706962844631	{"name":"Viên","rate":1}
+6	14231	1322	2769	3696	2	0	237	-2	235	10000	20000	1706962844631	{"name":"Gói","rate":1}
+6	14232	1322	2769	3697	2	0	235	-2	233	10000	20000	1706962991496	{"name":"Gói","rate":1}
+6	14233	1207	2641	3698	2	0	18	-1	17	60000	60000	1706963552101	{"name":"Lọ","rate":1}
+6	14234	1560	3123	3699	2	0	20	-1	19	120000	120000	1706964037476	{"name":"Cái","rate":1}
+6	14235	1156	2701	3699	2	0	140	-20	120	1500	30000	1706964037476	{"name":"Viên","rate":1}
+6	14236	1608	3131	3699	2	0	21	-1	20	30000	30000	1706964037476	{"name":"Vỉ","rate":1}
+6	14237	1250	2437	3700	2	0	-9	-4	-13	20000	80000	1706964044381	{"name":"Gói","rate":1}
+6	14238	1242	2742	3701	2	0	372	-10	362	10000	100000	1706964619124	{"name":"Viên","rate":1}
+6	14239	1149	2709	3701	2	0	14	-5	9	5000	25000	1706964619124	{"name":"Viên","rate":1}
+6	14240	1166	2708	3701	2	0	92	-10	82	2000	20000	1706964619124	{"name":"Viên","rate":1}
+6	14241	1153	2710	3701	2	0	20	-20	0	2000	40000	1706964619124	{"name":"Viên","rate":1}
+6	14242	1254	2733	3701	2	0	357	-10	347	20000	200000	1706964619124	{"name":"Viên","rate":1}
+6	14243	1194	2803	3701	2	0	134	-10	124	4000	40000	1706964619124	{"name":"Gói","rate":1}
+6	14244	1198	2757	3702	2	0	86	-5	81	8000	40000	1706964758447	{"name":"Ống","rate":1}
+6	14245	1197	3177	3702	2	0	355	-5	350	16000	80000	1706964758447	{"name":"Ống","rate":1}
+6	14246	1238	2736	3704	2	0	90	-10	80	5000	50000	1706965147294	{"name":"Viên","rate":1}
+6	14247	1389	3054	3704	2	0	200	-10	190	15000	150000	1706965147294	{"name":"Viên","rate":1}
+6	14248	1203	2872	3704	2	0	289	-20	269	5000	100000	1706965147294	{"name":"Gói","rate":1}
+6	14249	1205	2639	3705	2	0	75	-1	74	60000	60000	1706965165832	{"name":"Lọ","rate":1}
+6	14250	1059	2883	3705	2	0	179	-10	169	22000	220000	1706965165832	{"name":"Gói","rate":1}
+6	14251	1100	2678	3706	2	0	2	-2	0	0	0	1706966171054	{"name":"Lọ","rate":1}
+6	14252	1065	2632	3706	2	0	1	-1	0	0	0	1706966171054	{"name":"Hộp","rate":1}
+2	14253	410	2874	3707	2	0	1	-1	0	420000	420000	1706972169204	{"name":"Chai","rate":1}
+2	14254	839	2375	3707	2	0	15	-1	14	422400	422400	1706972169204	{"name":"Chai","rate":1}
+2	14255	418	3195	1080	1	0	0	2	2	155000	310000	1706972730615	{"name":"Chai","rate":1}
+2	14256	702	1229	1080	1	0	0	2	2	195000	390000	1706972730615	{"name":"Hộp","rate":1}
+2	14257	394	1279	1080	1	0	0	2	2	350000	700000	1706972730615	{"name":"Hộp","rate":1}
+2	14258	510	1250	1080	1	0	1	5	6	276000	1380000	1706972730615	{"name":"Hộp","rate":1}
+2	14259	578	3079	1080	1	0	0	1	1	315000	315000	1706972730615	{"name":"Hộp","rate":1}
+2	14260	836	2302	3664	2	0	1	-1	0	350000	350000	1706972891189	{"name":"Hộp","rate":1}
+2	14261	418	3195	3664	2	0	2	-1	1	260000	260000	1706972891189	{"name":"Chai","rate":1}
+2	14262	394	1279	3708	2	0	2	-1	1	450000	450000	1706972949336	{"name":"Hộp","rate":1}
+2	14263	394	1279	3709	2	0	1	-1	0	450000	450000	1706973043589	{"name":"Hộp","rate":1}
+2	14264	689	1586	1081	1	0	0	2	2	188000	376000	1706973146012	{"name":"Hộp","rate":1}
+2	14265	525	1930	1081	1	0	0	2	2	265000	530000	1706973146012	{"name":"Hộp","rate":1}
+2	14266	578	3079	3710	2	0	1	-1	0	400000	400000	1706973286430	{"name":"Hộp","rate":1}
+2	14267	394	3176	3712	2	0	2	-1	1	420000	420000	1706973461381	{"name":"Hộp","rate":1}
+2	14268	394	3176	3713	2	0	1	-1	0	450000	450000	1706973491329	{"name":"Hộp","rate":1}
+2	14269	525	1930	3714	2	0	2	-2	0	325000	650000	1706974311601	{"name":"Hộp","rate":1}
+2	14270	702	1229	3711	2	0	2	-1	1	270000	270000	1706974404919	{"name":"Hộp","rate":1}
+2	14271	689	1586	3711	2	0	2	-1	1	275000	275000	1706974404919	{"name":"Hộp","rate":1}
+2	14272	536	3035	3715	2	0	3	-1	2	599000	599000	1706974552705	{"name":"Hộp","rate":1}
+2	14273	1373	2875	3715	2	0	16	-1	15	0	0	1706974552705	{"name":"","rate":1}
+2	14274	357	1282	3715	2	0	10	-1	9	100000	100000	1706974552705	{"name":"Hộp","rate":1}
+2	14275	560	1256	3715	2	0	4	-1	3	260000	260000	1706974552705	{"name":"Hộp","rate":1}
+2	14276	812	2335	3716	2	0	4	-1	3	180000	180000	1706975058812	{"name":"Chai","rate":1}
+2	14277	654	2314	3717	2	0	4	-2	2	57200	114400	1706975225843	{"name":"Chai","rate":1}
+2	14278	407	1583	3717	2	0	2	-1	1	152460	152460	1706975225843	{"name":"Chai","rate":1}
+1	14279	1492	3020	1082	1	0	35	2	37	40000	80000	1707014575450	{"name":"Chai","rate":1}
+1	14280	1381	2891	1083	1	0	1490	20	1510	1500	30000	1707014710625	{"name":"Viên","rate":1}
+1	14281	1488	3014	1084	1	0	200	7	207	5000	35000	1707014799730	{"name":"Tuýp","rate":1}
+1	14282	1487	3013	1085	1	0	500	15	515	2000	30000	1707015943378	{"name":"Cái","rate":1}
+1	14283	1492	3020	1086	1	0	37	5	42	40000	200000	1707016026183	{"name":"Hộp","rate":5}
+1	14284	1492	3020	1087	1	0	42	5	47	40000	200000	1707016352313	{"name":"Hộp","rate":5}
+1	14285	1488	3014	1088	1	0	207	2	209	5000	10000	1707016588189	{"name":"Tuýp","rate":1}
+1	14286	1488	3014	1089	1	0	209	3	212	5000	15000	1707016840966	{"name":"Tuýp","rate":1}
+1	14287	1488	3014	1090	1	0	212	3	215	5000	15000	1707016914610	{"name":"Tuýp","rate":1}
+1	14288	1488	3014	1091	1	0	215	1	216	5000	5000	1707017162076	{"name":"Tuýp","rate":1}
+1	14289	1488	3014	1092	1	0	216	1	217	5000	5000	1707017231932	{"name":"Tuýp","rate":1}
+1	14290	1488	3014	1093	1	0	217	3	220	5000	15000	1707017704517	{"name":"Tuýp","rate":1}
+1	14291	1488	3014	1094	1	0	220	1	221	5000	5000	1707017736496	{"name":"Tuýp","rate":1}
+1	14292	1488	3014	1095	1	0	221	1	222	5000	5000	1707018014908	{"name":"Tuýp","rate":1}
+1	14293	1488	3014	1096	1	0	222	1	223	5000	5000	1707018061692	{"name":"Tuýp","rate":1}
+1	14294	1488	3014	1097	1	0	223	1	224	5000	5000	1707032851217	{"name":"Tuýp","rate":1}
+6	14295	1256	2871	3686	2	0	-12	-12	-24	15000	180000	1707044567253	{"name":"Gói","rate":1}
+6	14296	1077	2542	3719	2	0	4	-1	3	300000	300000	1707044653394	{"name":"Lọ","rate":1}
+6	14297	1605	3122	3720	2	0	73	-1	72	185000	185000	1707045253941	{"name":"Lọ","rate":1}
+6	14298	1207	2641	3720	2	0	17	-1	16	60000	60000	1707045253941	{"name":"Lọ","rate":1}
+6	14299	1243	2739	3721	2	0	93	-10	83	10000	100000	1707045498730	{"name":"Viên","rate":1}
+6	14300	1152	2711	3721	2	0	45	-10	35	2000	20000	1707045498730	{"name":"Viên","rate":1}
+6	14301	1203	2872	3721	2	0	269	-10	259	5000	50000	1707045498730	{"name":"Gói","rate":1}
+6	14302	1222	2720	3722	2	0	9	-3	6	0	0	1707045898971	{"name":"Lọ","rate":1}
+1	14303	1487	3013	1098	1	0	515	1	516	2000	2000	1707067031955	{"name":"Cái","rate":1}
+1	14304	1487	3013	1099	1	0	516	1	517	2000	2000	1707067059201	{"name":"Cái","rate":1}
+1	14305	1492	3020	1100	1	0	47	5	52	40000	200000	1707093068642	{"name":"Hộp","rate":5}
+1	14306	1492	3020	1101	1	0	52	5	57	40000	200000	1707093189529	{"name":"Hộp","rate":5}
+2	14307	790	1271	3724	2	0	4	-1	3	180000	180000	1707099950217	{"name":"Tuýp","rate":1}
+2	14308	955	2269	3724	2	0	1	-1	0	320000	320000	1707099950217	{"name":"","rate":1}
+2	14309	867	1437	3724	2	0	7	-2	5	160000	320000	1707099950217	{"name":"Hộp","rate":1}
+6	14310	1223	2721	3725	2	0	19	-1	18	120000	120000	1707135269601	{"name":"Lọ","rate":1}
+6	14311	1202	2638	3725	2	0	101	-1	100	60000	60000	1707135269601	{"name":"Lọ","rate":1}
+6	14312	1322	2769	3725	2	0	233	-1	232	10000	10000	1707135269601	{"name":"Gói","rate":1}
+6	14313	1605	3122	3726	2	0	72	-1	71	185000	185000	1707206905413	{"name":"Lọ","rate":1}
+6	14314	1206	3134	3726	2	0	25	-1	24	60000	60000	1707206905413	{"name":"Lọ","rate":1}
+6	14315	1188	3119	3726	2	0	4	-1	3	90000	90000	1707206905413	{"name":"Lọ","rate":1}
+6	14316	1605	3122	3727	2	0	71	-1	70	185000	185000	1707207556813	{"name":"Lọ","rate":1}
+6	14317	1605	3122	3728	2	0	70	-1	69	185000	185000	1707208682931	{"name":"Lọ","rate":1}
+6	14318	1202	2638	3728	2	0	100	-1	99	60000	60000	1707208682931	{"name":"Lọ","rate":1}
+6	14319	1197	3177	3728	2	0	350	-5	345	16000	80000	1707208682931	{"name":"Ống","rate":1}
+6	14320	1198	2757	3728	2	0	81	-5	76	8000	40000	1707208682931	{"name":"Ống","rate":1}
+6	14321	1605	3122	3729	2	0	69	-1	68	185000	185000	1707211798017	{"name":"Lọ","rate":1}
+6	14322	1206	3134	3729	2	0	24	-1	23	60000	60000	1707211798017	{"name":"Lọ","rate":1}
+6	14323	1640	3146	3729	2	0	4	-1	3	35000	35000	1707211798017	{"name":"Lọ","rate":1}
+6	14324	1219	2795	3730	2	0	4	-1	3	180000	180000	1707211982077	{"name":"Lọ","rate":1}
+6	14325	1204	2645	3730	2	0	271	-10	261	5000	50000	1707211982077	{"name":"Gói","rate":1}
+6	14326	1605	3122	3731	2	0	68	-1	67	185000	185000	1707211987875	{"name":"Lọ","rate":1}
+6	14327	1206	3134	3731	2	0	23	-1	22	60000	60000	1707211987875	{"name":"Lọ","rate":1}
+6	14328	1060	2911	3731	2	0	21	-1	20	20000	20000	1707211987875	{"name":"Lọ","rate":1}
+6	14329	1354	2856	3731	2	0	15	-1	14	25000	25000	1707211987875	{"name":"Bộ","rate":1}
+6	14330	1225	2723	3732	2	0	5	-1	4	145000	145000	1707214491792	{"name":"Lọ","rate":1}
+6	14331	1656	3196	1102	1	0	0	24	24	40000	960000	1707214824932	{"name":"Lọ","rate":1}
+6	14332	1322	2769	1103	1	0	232	390	622	5000	1950000	1707215093430	{"name":"Gói","rate":1}
+6	14333	1149	2504	1103	1	0	0	90	90	3800	342000	1707215093430	{"name":"Viên","rate":1}
+6	14334	1153	2710	1103	1	0	0	200	200	1200	240000	1707215093430	{"name":"Viên","rate":1}
+6	14335	1657	3197	1103	1	0	0	10	10	6000	60000	1707215093430	{"name":"","rate":1}
+6	14336	1226	2498	3735	2	0	29	-1	28	160000	160000	1707217789255	{"name":"Lọ","rate":1}
+6	14337	1202	2638	3735	2	0	99	-1	98	60000	60000	1707217789255	{"name":"Lọ","rate":1}
+6	14338	1250	2437	3736	2	0	-13	-5	-18	20000	100000	1707218139989	{"name":"Gói","rate":1}
+6	14339	1225	2723	3737	2	0	4	-1	3	145000	145000	1707218642116	{"name":"Lọ","rate":1}
+6	14340	1202	2638	3737	2	0	98	-1	97	60000	60000	1707218642116	{"name":"Lọ","rate":1}
+6	14341	1173	2779	3738	2	0	260	-20	240	7500	150000	1707219129001	{"name":"Ống","rate":1}
+6	14342	1123	2650	3738	2	0	2	-1	1	240000	240000	1707219129001	{"name":"Lọ","rate":1}
+6	14343	1179	2750	3738	2	0	700	-10	690	7000	70000	1707219129001	{"name":"Ống","rate":1}
+6	14344	1247	2443	3739	2	0	584	-6	578	15000	90000	1707219381808	{"name":"Gói","rate":1}
+6	14345	1206	3134	3740	2	0	22	-1	21	60000	60000	1707219950420	{"name":"Lọ","rate":1}
+6	14346	1610	3136	3742	2	0	40	-1	39	60000	60000	1707220186269	{"name":"Lọ","rate":1}
+6	14347	1322	2769	3742	2	0	622	-2	620	10000	20000	1707220186269	{"name":"Gói","rate":1}
+6	14348	1133	2656	3742	2	0	113	-1	112	130000	130000	1707220186269	{"name":"Vỉ","rate":1}
+6	14349	1207	2641	3744	2	0	16	-1	15	60000	60000	1707220297865	{"name":"Lọ","rate":1}
+6	14350	1302	3061	3744	2	0	7	-1	6	15000	15000	1707220297865	{"name":"Tuýp","rate":1}
+6	14351	1208	2642	3745	2	0	121	-1	120	60000	60000	1707221245614	{"name":"Lọ","rate":1}
+6	14352	1059	2883	3745	2	0	169	-10	159	22000	220000	1707221245614	{"name":"Gói","rate":1}
+6	14353	1605	3122	3746	2	0	67	-1	66	185000	185000	1707222453051	{"name":"Lọ","rate":1}
+6	14354	1610	3136	3746	2	0	39	-1	38	60000	60000	1707222453051	{"name":"Lọ","rate":1}
+6	14355	1243	2739	3747	2	0	83	-10	73	10000	100000	1707222459687	{"name":"Viên","rate":1}
+6	14356	1152	2711	3747	2	0	35	-10	25	2000	20000	1707222459687	{"name":"Viên","rate":1}
+6	14357	1059	2883	3748	2	0	159	-10	149	22000	220000	1707222721683	{"name":"Gói","rate":1}
+6	14358	1205	2639	3748	2	0	74	-1	73	60000	60000	1707222721683	{"name":"Lọ","rate":1}
+6	14359	1188	3119	3748	2	0	3	-1	2	90000	90000	1707222721683	{"name":"Lọ","rate":1}
+6	14360	1179	2750	3749	2	0	690	-10	680	7000	70000	1707223105221	{"name":"Ống","rate":1}
+6	14361	1214	2447	3750	2	0	35	-1	34	70000	70000	1707223115166	{"name":"Lọ","rate":1}
+6	14362	1114	2685	3751	2	0	11	-1	10	30000	30000	1707223494049	{"name":"Lọ","rate":1}
+6	14363	1225	2723	3751	2	0	3	-1	2	145000	145000	1707223494049	{"name":"Lọ","rate":1}
+6	14364	1208	2642	3751	2	0	120	-1	119	60000	60000	1707223494049	{"name":"Lọ","rate":1}
+6	14365	1208	2642	3752	2	0	119	-1	118	60000	60000	1707223603903	{"name":"Lọ","rate":1}
+6	14366	1149	2504	3753	2	0	90	-5	85	5000	25000	1707223903684	{"name":"Viên","rate":1}
+6	14367	1194	2803	3753	2	0	124	-6	118	4000	24000	1707223903684	{"name":"Gói","rate":1}
+6	14368	1250	2437	3756	2	0	-18	-3	-21	20000	60000	1707225640714	{"name":"Gói","rate":1}
+6	14369	1235	2854	3755	2	0	38	-10	28	13000	130000	1707225704305	{"name":"Viên","rate":1}
+6	14370	1151	2702	3755	2	0	150	-20	130	2000	40000	1707225704305	{"name":"Viên","rate":1}
+6	14371	1167	2707	3755	2	0	155	-10	145	3000	30000	1707225704305	{"name":"Viên","rate":1}
+6	14372	1222	2720	3754	2	0	6	-1	5	110000	110000	1707225744175	{"name":"Lọ","rate":1}
+6	14373	1197	3177	3754	2	0	345	-5	340	16000	80000	1707225744175	{"name":"Ống","rate":1}
+6	14374	1198	2757	3754	2	0	76	-5	71	8000	40000	1707225744175	{"name":"Ống","rate":1}
+6	14375	1605	3122	3757	2	0	66	-1	65	185000	185000	1707226080025	{"name":"Lọ","rate":1}
+6	14376	1222	2720	3757	2	0	5	-1	4	110000	110000	1707226080025	{"name":"Lọ","rate":1}
+6	14377	1286	2478	3757	2	0	18	-1	17	30000	30000	1707226080025	{"name":"Lọ","rate":1}
+6	14378	1206	3134	3757	2	0	21	-1	20	60000	60000	1707226080025	{"name":"Lọ","rate":1}
+6	14379	1247	2443	3758	2	0	578	-8	570	15000	120000	1707230432061	{"name":"Gói","rate":1}
+6	14380	1222	2720	3758	2	0	4	-1	3	110000	110000	1707230432061	{"name":"Lọ","rate":1}
+6	14381	1206	3134	3758	2	0	20	-1	19	60000	60000	1707230432061	{"name":"Lọ","rate":1}
+6	14382	1609	3132	3758	2	0	18	-1	17	50000	50000	1707230432061	{"name":"Lọ","rate":1}
+6	14383	1322	2769	3758	2	0	620	-1	619	10000	10000	1707230432061	{"name":"Gói","rate":1}
+6	14384	1208	2642	3759	2	0	118	-1	117	60000	60000	1707267625374	{"name":"Lọ","rate":1}
+6	14385	1342	2897	3760	2	0	2	-1	1	320000	320000	1707276860791	{"name":"Lọ","rate":1}
+6	14386	1206	3134	3761	2	0	19	-1	18	60000	60000	1707294099080	{"name":"Lọ","rate":1}
+6	14387	1060	2911	3761	2	0	20	-1	19	20000	20000	1707294099080	{"name":"Lọ","rate":1}
+6	14388	1152	2711	3762	2	0	25	-10	15	2000	20000	1707299088521	{"name":"Viên","rate":1}
+6	14389	1139	2683	3762	2	0	398	-6	392	1000	6000	1707299088521	{"name":"Viên","rate":1}
+6	14390	1179	2750	3764	2	0	680	-5	675	7000	35000	1707301139857	{"name":"Ống","rate":1}
+6	14391	1225	2723	3765	2	0	2	-1	1	145000	145000	1707301984206	{"name":"Lọ","rate":1}
+6	14392	1202	2638	3765	2	0	97	-1	96	60000	60000	1707301984206	{"name":"Lọ","rate":1}
+6	14393	1322	2769	3765	2	0	619	-3	616	10000	30000	1707301984206	{"name":"Gói","rate":1}
+6	14394	1139	2683	3766	2	0	392	-9	383	1000	9000	1707302549411	{"name":"Viên","rate":1}
+6	14395	1608	3131	3766	2	0	20	-1	19	30000	30000	1707302549411	{"name":"Vỉ","rate":1}
+6	14396	1123	2650	3766	2	0	1	-1	0	240000	240000	1707302549411	{"name":"Lọ","rate":1}
+6	14397	1348	2836	3767	2	0	9	-1	8	180000	180000	1707302863160	{"name":"Lọ","rate":1}
+6	14398	1205	2639	3767	2	0	73	-1	72	60000	60000	1707302863160	{"name":"Lọ","rate":1}
+6	14399	1219	2795	3767	2	0	3	-1	2	180000	180000	1707302863160	{"name":"Lọ","rate":1}
+6	14400	1203	2872	3768	2	0	259	-10	249	5000	50000	1707305053749	{"name":"Gói","rate":1}
+6	14401	1243	2739	3768	2	0	73	-10	63	10000	100000	1707305053749	{"name":"Viên","rate":1}
+6	14402	1152	2711	3768	2	0	15	-10	5	2000	20000	1707305053749	{"name":"Viên","rate":1}
+6	14403	1203	2872	3769	2	0	249	-4	245	5000	20000	1707305313949	{"name":"Gói","rate":1}
+6	14404	1243	2739	3769	2	0	63	-4	59	10000	40000	1707305313949	{"name":"Viên","rate":1}
+6	14405	1248	2748	3770	2	0	357	-10	347	18000	180000	1707306150430	{"name":"Gói","rate":1}
+6	14406	1384	2904	3770	2	0	5	-1	4	140000	140000	1707306150430	{"name":"Chai","rate":1}
+6	14407	1322	2769	3770	2	0	616	-2	614	10000	20000	1707306150430	{"name":"Gói","rate":1}
+6	14408	1249	2730	3771	2	0	38	-10	28	13000	130000	1707306723357	{"name":"Gói","rate":1}
+6	14409	1203	2872	3771	2	0	245	-10	235	5000	50000	1707306723357	{"name":"Gói","rate":1}
+6	14410	1605	3122	3772	2	0	65	-1	64	185000	185000	1707307804156	{"name":"Lọ","rate":1}
+6	14411	1222	2720	3772	2	0	3	-1	2	110000	110000	1707307804156	{"name":"Lọ","rate":1}
+6	14412	1179	2750	3772	2	0	675	-10	665	7000	70000	1707307804156	{"name":"Ống","rate":1}
+6	14413	1225	2723	3773	2	0	1	-1	0	145000	145000	1707311929655	{"name":"Lọ","rate":1}
+6	14414	1202	2638	3773	2	0	96	-1	95	60000	60000	1707311929655	{"name":"Lọ","rate":1}
+6	14415	1178	2746	3773	2	0	3030	-10	3020	6000	60000	1707311929655	{"name":"Viên","rate":1}
+6	14416	1139	2683	3773	2	0	383	-8	375	1000	8000	1707311929655	{"name":"Viên","rate":1}
+6	14417	1242	2742	3774	2	0	362	-10	352	10000	100000	1707313326754	{"name":"Viên","rate":1}
+6	14418	1153	2710	3774	2	0	200	-20	180	2000	40000	1707313326754	{"name":"Viên","rate":1}
+6	14419	1219	2795	3775	2	0	2	-1	1	180000	180000	1707313451796	{"name":"Lọ","rate":1}
+6	14420	1605	3122	3777	2	0	64	-1	63	185000	185000	1707354939999	{"name":"Lọ","rate":1}
+6	14421	1207	2641	3777	2	0	15	-1	14	60000	60000	1707354939999	{"name":"Lọ","rate":1}
+6	14422	1059	2883	3778	2	0	149	-5	144	22000	110000	1707355850690	{"name":"Gói","rate":1}
+6	14423	1206	3134	3778	2	0	18	-1	17	60000	60000	1707355850690	{"name":"Lọ","rate":1}
+6	14424	1605	3122	3779	2	0	63	-1	62	185000	185000	1707356424593	{"name":"Lọ","rate":1}
+6	14425	1206	3134	3779	2	0	17	-1	16	60000	60000	1707356424593	{"name":"Lọ","rate":1}
+6	14426	1560	3123	3779	2	0	19	-1	18	120000	120000	1707356424593	{"name":"Cái","rate":1}
+6	14427	1256	2871	3780	2	0	-24	-10	-34	15000	150000	1707360862959	{"name":"Gói","rate":1}
+6	14428	1161	2697	3780	2	0	135	-5	130	5000	25000	1707360862959	{"name":"Ống","rate":1}
+6	14429	1560	3123	3780	2	0	18	-1	17	120000	120000	1707360862959	{"name":"Cái","rate":1}
+6	14430	1214	2447	3780	2	0	34	-1	33	70000	70000	1707360862959	{"name":"Lọ","rate":1}
+6	14431	1605	3122	3781	2	0	62	-1	61	185000	185000	1707361149213	{"name":"Lọ","rate":1}
+6	14432	1205	2639	3781	2	0	72	-1	71	60000	60000	1707361149213	{"name":"Lọ","rate":1}
+6	14433	1286	2478	3781	2	0	17	-1	16	30000	30000	1707361149213	{"name":"Lọ","rate":1}
+6	14434	1286	2478	3783	2	0	16	-1	15	30000	30000	1707361561813	{"name":"Lọ","rate":1}
+6	14435	1609	3132	3783	2	0	17	-1	16	50000	50000	1707361561813	{"name":"Lọ","rate":1}
+6	14436	1059	2883	3782	2	0	144	-10	134	22000	220000	1707361699736	{"name":"Gói","rate":1}
+6	14437	1203	2872	3782	2	0	235	-10	225	5000	50000	1707361699736	{"name":"Gói","rate":1}
+6	14438	1059	2883	3784	2	0	134	-7	127	22000	154000	1707370931161	{"name":"Gói","rate":1}
+6	14439	1206	3134	3784	2	0	16	-1	15	60000	60000	1707370931161	{"name":"Lọ","rate":1}
+6	14440	1139	2683	3784	2	0	375	-5	370	1000	5000	1707370931161	{"name":"Viên","rate":1}
+6	14441	1256	2871	3785	2	0	-34	-10	-44	15000	150000	1707374716544	{"name":"Gói","rate":1}
+6	14442	1206	3134	3785	2	0	15	-1	14	60000	60000	1707374716544	{"name":"Lọ","rate":1}
+6	14443	1063	2624	3785	2	0	160	-5	155	13000	65000	1707374716544	{"name":"Ống","rate":1}
+6	14444	1207	2641	3786	2	0	14	-1	13	60000	60000	1707388645503	{"name":"Lọ","rate":1}
+6	14445	1125	2647	3786	2	0	10	-1	9	330000	330000	1707388645503	{"name":"Lọ","rate":1}
+6	14446	1178	2746	3787	2	0	3020	-30	2990	6000	180000	1707391133042	{"name":"Viên","rate":1}
+6	14447	1610	3136	3787	2	0	38	-1	37	60000	60000	1707391133042	{"name":"Lọ","rate":1}
+6	14448	1605	3122	3787	2	0	61	-1	60	185000	185000	1707391133042	{"name":"Lọ","rate":1}
+6	14449	1204	2645	3787	2	0	261	-10	251	5000	50000	1707391133042	{"name":"Gói","rate":1}
+6	14450	1133	2656	3787	2	0	112	-1	111	130000	130000	1707391133042	{"name":"Vỉ","rate":1}
+6	14451	1346	2812	3788	2	0	105	-5	100	10000	50000	1707391292826	{"name":"Ống","rate":1}
+6	14452	1225	3185	3789	2	0	28	-1	27	155000	155000	1707391838486	{"name":"Lọ","rate":1}
+6	14453	1205	2639	3789	2	0	71	-1	70	60000	60000	1707391838486	{"name":"Lọ","rate":1}
+6	14454	1605	3122	3790	2	0	60	-1	59	185000	185000	1707393718390	{"name":"Lọ","rate":1}
+6	14455	1205	2639	3790	2	0	70	-1	69	60000	60000	1707393718390	{"name":"Lọ","rate":1}
+6	14456	1225	3185	3791	2	0	27	-1	26	155000	155000	1707394436730	{"name":"Lọ","rate":1}
+6	14457	1178	2746	3791	2	0	2990	-30	2960	6000	180000	1707394436730	{"name":"Viên","rate":1}
+6	14458	1202	2638	3791	2	0	95	-1	94	60000	60000	1707394436730	{"name":"Lọ","rate":1}
+6	14459	1213	3137	3791	2	0	57	-1	56	60000	60000	1707394436730	{"name":"Lọ","rate":1}
+6	14460	1605	3122	3792	2	0	59	-1	58	185000	185000	1707396317424	{"name":"Lọ","rate":1}
+6	14461	1205	2639	3792	2	0	69	-1	68	60000	60000	1707396317424	{"name":"Lọ","rate":1}
+6	14462	1322	2769	3792	2	0	614	-3	611	10000	30000	1707396317424	{"name":"Gói","rate":1}
+6	14463	1133	2656	3793	2	0	111	-1	110	130000	130000	1707396401451	{"name":"Vỉ","rate":1}
+6	14464	1195	2612	3794	2	0	2	-1	1	100000	100000	1707396547690	{"name":"Lọ","rate":1}
+6	14465	1245	2728	3795	2	0	30	-10	20	13000	130000	1707443915246	{"name":"Gói","rate":1}
+6	14466	1205	2639	3795	2	0	68	-1	67	60000	60000	1707443915246	{"name":"Lọ","rate":1}
+6	14467	1322	2769	3795	2	0	611	-1	610	10000	10000	1707443915246	{"name":"Gói","rate":1}
+6	14468	1605	3122	3797	2	0	58	-1	57	185000	185000	1707444020526	{"name":"Lọ","rate":1}
+6	14469	1605	3122	3796	2	0	57	-1	56	185000	185000	1707444060357	{"name":"Lọ","rate":1}
+6	14470	1354	2856	3796	2	0	14	-1	13	25000	25000	1707444060357	{"name":"Bộ","rate":1}
+6	14471	1605	3122	3798	2	0	56	-1	55	185000	185000	1707444389288	{"name":"Lọ","rate":1}
+6	14472	1605	3122	3800	2	0	55	-1	54	185000	185000	1707457730321	{"name":"Lọ","rate":1}
+6	14473	1206	3134	3800	2	0	14	-1	13	60000	60000	1707457730321	{"name":"Lọ","rate":1}
+6	14474	1163	2704	3801	2	0	107	-2	105	20000	40000	1707458553925	{"name":"Vỉ","rate":1}
+6	14475	1164	2703	3801	2	0	25	-1	24	15000	15000	1707458553925	{"name":"Vỉ","rate":1}
+6	14476	1271	2773	3801	2	0	140	-5	135	7000	35000	1707458553925	{"name":"Viên","rate":1}
+6	14477	1149	2504	3801	2	0	85	-5	80	5000	25000	1707458553925	{"name":"Viên","rate":1}
+6	14478	1074	2661	3802	2	0	3	-1	2	350000	350000	1707461504986	{"name":"Lọ","rate":1}
+6	14479	1322	2769	3804	2	0	610	-2	608	10000	20000	1707462227347	{"name":"Gói","rate":1}
+6	14480	1225	3185	3803	2	0	26	-1	25	155000	155000	1707467822222	{"name":"Lọ","rate":1}
+6	14481	1202	2638	3803	2	0	94	-1	93	60000	60000	1707467822222	{"name":"Lọ","rate":1}
+6	14482	1202	2638	3805	2	0	93	-1	92	60000	60000	1707468037029	{"name":"Lọ","rate":1}
+6	14483	1222	2720	3806	2	0	2	-1	1	110000	110000	1707480372323	{"name":"Lọ","rate":1}
+6	14484	1139	2683	3806	2	0	370	-5	365	1000	5000	1707480372323	{"name":"Viên","rate":1}
+6	14485	1245	2728	3807	2	0	20	-20	0	13000	260000	1707481866910	{"name":"Gói","rate":1}
+6	14486	1208	2642	3807	2	0	117	-1	116	60000	60000	1707481866910	{"name":"Lọ","rate":1}
+6	14487	1242	2742	3808	2	0	352	-5	347	10000	50000	1707483188817	{"name":"Viên","rate":1}
+6	14488	1254	2733	3808	2	0	347	-5	342	20000	100000	1707483188817	{"name":"Viên","rate":1}
+6	14489	1153	2710	3808	2	0	180	-10	170	2000	20000	1707483188817	{"name":"Viên","rate":1}
+6	14490	1225	3185	3809	2	0	25	-1	24	155000	155000	1707483442621	{"name":"Lọ","rate":1}
+6	14491	1202	2638	3809	2	0	92	-1	91	60000	60000	1707483442621	{"name":"Lọ","rate":1}
+6	14492	1350	2568	3809	2	0	12	-1	11	270000	270000	1707483442621	{"name":"Tuýp","rate":1}
+6	14493	1348	2836	3809	2	0	8	-1	7	180000	180000	1707483442621	{"name":"Lọ","rate":1}
+6	14494	1242	2742	3810	2	0	347	-10	337	10000	100000	1707484461543	{"name":"Viên","rate":1}
+6	14495	1151	2702	3810	2	0	130	-10	120	2000	20000	1707484461543	{"name":"Viên","rate":1}
+6	14496	1225	3185	3811	2	0	24	-1	23	155000	155000	1707561987915	{"name":"Lọ","rate":1}
+6	14497	1225	3185	3812	2	0	23	-1	22	155000	155000	1707562416217	{"name":"Lọ","rate":1}
+6	14498	1321	2758	3812	2	0	95	-2	93	10000	20000	1707562416217	{"name":"Chai","rate":1}
+6	14499	1605	3122	3813	2	0	54	-1	53	185000	185000	1707739045956	{"name":"Lọ","rate":1}
+6	14500	1207	2641	3813	2	0	13	-1	12	60000	60000	1707739045956	{"name":"Lọ","rate":1}
+6	14501	1225	3185	3815	2	0	22	-1	21	155000	155000	1707739949198	{"name":"Lọ","rate":1}
+6	14502	1203	2872	3815	2	0	225	-10	215	5000	50000	1707739949198	{"name":"Gói","rate":1}
+6	14503	1201	2644	3814	2	0	205	-5	200	5000	25000	1707739955162	{"name":"Ống","rate":1}
+6	14504	1322	2769	3814	2	0	608	-4	604	10000	40000	1707739955162	{"name":"Gói","rate":1}
+6	14505	1114	2685	3816	2	0	10	-1	9	30000	30000	1707740444233	{"name":"Lọ","rate":1}
+6	14506	1235	2854	3816	2	0	28	-10	18	13000	130000	1707740444233	{"name":"Viên","rate":1}
+6	14507	1166	2708	3816	2	0	82	-10	72	2000	20000	1707740444233	{"name":"Viên","rate":1}
+6	14508	1309	2825	3816	2	0	3	-1	2	50000	50000	1707740444233	{"name":"Tuýp","rate":1}
+6	14509	1199	2490	3816	2	0	17	-1	16	20000	20000	1707740444233	{"name":"Hộp","rate":1}
+6	14510	1605	3122	3817	2	0	53	-1	52	185000	185000	1707740813252	{"name":"Lọ","rate":1}
+6	14511	1205	2639	3817	2	0	67	-1	66	60000	60000	1707740813252	{"name":"Lọ","rate":1}
+6	14512	1226	2498	3818	2	0	28	-1	27	160000	160000	1707741225781	{"name":"Lọ","rate":1}
+6	14513	1205	2639	3819	2	0	66	-1	65	60000	60000	1707741236482	{"name":"Lọ","rate":1}
+6	14514	1152	2711	3819	2	0	5	-5	0	2000	10000	1707741236482	{"name":"Viên","rate":1}
+6	14515	1225	3185	3820	2	0	21	-1	20	155000	155000	1707741407615	{"name":"Lọ","rate":1}
+6	14516	1610	3136	3823	2	0	37	-1	36	60000	60000	1707742128956	{"name":"Lọ","rate":1}
+6	14517	1199	2490	3823	2	0	16	-1	15	20000	20000	1707742128956	{"name":"Hộp","rate":1}
+6	14518	1608	3131	3823	2	0	19	-1	18	30000	30000	1707742128956	{"name":"Vỉ","rate":1}
+6	14519	1156	2701	3823	2	0	120	-10	110	1500	15000	1707742128956	{"name":"Viên","rate":1}
+6	14520	1225	3185	3822	2	0	20	-1	19	155000	155000	1707742133758	{"name":"Lọ","rate":1}
+6	14521	1290	2449	3822	2	0	296	-10	286	13000	130000	1707742133758	{"name":"Gói","rate":1}
+6	14522	1205	2639	3822	2	0	65	-1	64	60000	60000	1707742133758	{"name":"Lọ","rate":1}
+6	14523	1243	2739	3821	2	0	59	-9	50	10000	90000	1707742139813	{"name":"Viên","rate":1}
+6	14524	1203	2872	3821	2	0	215	-10	205	5000	50000	1707742139813	{"name":"Gói","rate":1}
+6	14525	1152	3058	3821	2	0	70	-10	60	2000	20000	1707742139813	{"name":"Viên","rate":1}
+6	14526	1152	3058	3824	2	0	60	-10	50	2000	20000	1707742390619	{"name":"Viên","rate":1}
+6	14527	1250	2437	3825	2	0	-21	-3	-24	20000	60000	1707742677080	{"name":"Gói","rate":1}
+6	14528	1322	2769	3825	2	0	604	-2	602	10000	20000	1707742677080	{"name":"Gói","rate":1}
+6	14529	1152	3058	3826	2	0	50	-10	40	2000	20000	1707743313105	{"name":"Viên","rate":1}
+6	14530	1114	2685	3826	2	0	9	-1	8	30000	30000	1707743313105	{"name":"Lọ","rate":1}
+6	14531	1605	3122	3827	2	0	52	-1	51	185000	185000	1707743320235	{"name":"Lọ","rate":1}
+6	14532	1208	2642	3827	2	0	116	-1	115	60000	60000	1707743320235	{"name":"Lọ","rate":1}
+6	14533	1202	2638	3827	2	0	91	-1	90	60000	60000	1707743320235	{"name":"Lọ","rate":1}
+6	14534	1605	3122	3828	2	0	51	-1	50	185000	185000	1707743811748	{"name":"Lọ","rate":1}
+6	14535	1202	2638	3828	2	0	90	-1	89	60000	60000	1707743811748	{"name":"Lọ","rate":1}
+6	14536	1203	2872	3829	2	0	205	-10	195	5000	50000	1707743814248	{"name":"Gói","rate":1}
+6	14537	1208	2642	3829	2	0	115	-1	114	60000	60000	1707743814248	{"name":"Lọ","rate":1}
+6	14538	1188	3119	3829	2	0	2	-1	1	90000	90000	1707743814248	{"name":"Lọ","rate":1}
+6	14539	1605	3122	3830	2	0	50	-1	49	185000	185000	1707745258232	{"name":"Lọ","rate":1}
+6	14540	1206	3134	3830	2	0	13	-1	12	60000	60000	1707745258232	{"name":"Lọ","rate":1}
+6	14541	1206	3134	3830	2	0	12	-1	11	60000	60000	1707745258232	{"name":"Lọ","rate":1}
+6	14542	1202	2638	3830	2	0	89	-1	88	60000	60000	1707745258232	{"name":"Lọ","rate":1}
+6	14543	1139	2683	3830	2	0	365	-3	362	1000	3000	1707745258232	{"name":"Viên","rate":1}
+6	14544	1271	2773	3831	2	0	135	-10	125	7000	70000	1707745819878	{"name":"Viên","rate":1}
+6	14545	1149	2504	3831	2	0	80	-20	60	5000	100000	1707745819878	{"name":"Viên","rate":1}
+6	14546	1164	2703	3831	2	0	24	-1	23	15000	15000	1707745819878	{"name":"Vỉ","rate":1}
+6	14547	1605	3122	3832	2	0	49	-1	48	185000	185000	1707746833744	{"name":"Lọ","rate":1}
+6	14548	1206	3134	3832	2	0	11	-1	10	60000	60000	1707746833744	{"name":"Lọ","rate":1}
+6	14549	1605	3122	3833	2	0	48	-1	47	185000	185000	1707747033698	{"name":"Lọ","rate":1}
+6	14550	1205	2639	3833	2	0	64	-1	63	60000	60000	1707747033698	{"name":"Lọ","rate":1}
+2	14551	534	1253	3834	2	0	9	-1	8	318000	318000	1707792565013	{"name":"Hộp","rate":1}
+2	14552	390	2408	3834	2	0	1	-1	0	290000	290000	1707792565013	{"name":"Hộp","rate":1}
+2	14553	510	1250	3834	2	0	6	-2	4	276000	552000	1707792565013	{"name":"Hộp","rate":1}
+2	14554	560	2251	3834	2	0	6	-6	0	381	2286	1707792565013	{"name":"Hộp","rate":1}
+2	14555	560	1256	3834	2	0	3	-1	2	182000	182000	1707792565013	{"name":"Hộp","rate":1}
+2	14556	839	2375	3834	2	0	14	-3	11	200000	600000	1707792565013	{"name":"Chai","rate":1}
+2	14557	850	3049	3834	2	0	2	-2	0	129000	258000	1707792565013	{"name":"Chai","rate":1}
+2	14558	847	1213	3834	2	0	1	-1	0	312000	312000	1707792565013	{"name":"Chai","rate":1}
+2	14559	784	1328	3834	2	0	9	-3	6	52000	156000	1707792565013	{"name":"Chai","rate":1}
+2	14560	974	2315	3834	2	0	7	-1	6	37000	37000	1707792565013	{"name":"","rate":1}
+2	14561	866	2344	3834	2	0	2	-2	0	75000	150000	1707792565013	{"name":"Hộp","rate":1}
+2	14562	866	3037	3834	2	0	2	-1	1	70000	70000	1707792565013	{"name":"Hộp","rate":1}
+2	14563	428	1941	3834	2	0	14	-9	5	60000	540000	1707792565013	{"name":"Hộp","rate":1}
+2	14564	384	1414	3834	2	0	4	-2	2	97000	194000	1707792565013	{"name":"Hộp","rate":1}
+2	14565	445	3168	3834	2	0	10	-6	4	60000	360000	1707792565013	{"name":"Hộp","rate":1}
+2	14566	451	1462	3835	2	0	2	-1	1	335000	335000	1707793136415	{"name":"Hộp","rate":1}
+2	14567	455	1242	3835	2	0	1	-1	0	1000	1000	1707793136415	{"name":"Hộp","rate":1}
+2	14568	697	1233	3835	2	0	2	-1	1	180000	180000	1707793136415	{"name":"Hộp","rate":1}
+2	14569	1373	2875	3835	2	0	15	-15	0	115000	1725000	1707793136415	{"name":"","rate":1}
+2	14570	1373	3174	3835	2	0	20	-1	19	105000	105000	1707793136415	{"name":"","rate":1}
+2	14571	654	2314	3718	2	0	2	-1	1	100000	100000	1707793172752	{"name":"Chai","rate":1}
+2	14572	519	1556	3378	2	0	0	-1	-1	285000	285000	1707793207551	{"name":"Hộp","rate":1}
+2	14573	784	1328	3662	2	0	6	-2	4	100000	200000	1707793243243	{"name":"Chai","rate":1}
+2	14574	654	2314	3662	2	0	1	-2	-1	100000	200000	1707793243243	{"name":"Chai","rate":1}
+2	14575	361	2322	3662	2	0	2	-2	0	155000	310000	1707793243243	{"name":"Hộp","rate":1}
+2	14576	510	1250	3662	2	0	4	-1	3	414000	414000	1707793243243	{"name":"Hộp","rate":1}
+2	14577	510	1250	1104	1	0	3	1	4	276000	276000	1707793593387	{"name":"Hộp","rate":1}
+2	14578	654	2314	1104	1	0	-1	1	0	60000	60000	1707793593387	{"name":"Chai","rate":1}
+2	14579	784	1275	1104	1	0	0	3	3	60000	180000	1707793593387	{"name":"Chai","rate":1}
+2	14580	536	3035	1105	1	0	2	10	12	329450	3294500	1707794453848	{"name":"Hộp","rate":1}
+2	14581	485	3198	1105	1	0	0	1	1	115420	115420	1707794453848	{"name":"Hộp","rate":1}
+2	14582	849	2323	1105	1	0	1	1	2	134000	134000	1707794453848	{"name":"Chai","rate":1}
+2	14583	848	3199	1105	1	0	0	1	1	126000	126000	1707794453848	{"name":"Hộp","rate":1}
+2	14584	1658	3200	1105	1	0	0	4	4	126000	504000	1707794453848	{"name":"","rate":1}
+2	14585	654	3201	1105	1	0	0	26	26	57000	1482000	1707794453848	{"name":"Chai","rate":1}
+2	14586	858	3202	1105	1	0	0	5	5	72000	360000	1707794453848	{"name":"Hộp","rate":1}
+2	14587	350	3203	1105	1	0	0	1	1	450000	450000	1707794453848	{"name":"Hộp","rate":1}
+2	14588	785	3204	1105	1	0	0	1	1	159000	159000	1707794453848	{"name":"Chai","rate":1}
+2	14589	1659	3205	1105	1	0	0	2	2	1	2	1707794453848	{"name":"","rate":1}
+2	14590	737	3206	1105	1	0	0	2	2	195000	390000	1707794453848	{"name":"Hộp","rate":1}
+2	14591	736	1533	1105	1	0	0	1	1	1000	1000	1707794453848	{"name":"Hộp","rate":1}
+2	14592	519	1556	3378	2	1	-1	1	0	285000	-285000	1707794641891	{"name":"Hộp","rate":1}
+2	14593	445	1293	1106	1	0	-9	9	0	75000	675000	1707794714578	{"name":"Hộp","rate":1}
+2	14594	1539	3099	1106	1	0	-5	5	0	6000	30000	1707794714578	{"name":"","rate":1}
+2	14595	455	1295	1106	1	0	-1	1	0	80000	80000	1707794714578	{"name":"Hộp","rate":1}
+2	14596	986	2338	3836	2	0	2	-2	0	375000	750000	1707797480470	{"name":"","rate":1}
+2	14597	405	3093	3836	2	0	1	-1	0	56000	56000	1707797480470	{"name":"Hộp","rate":1}
+2	14598	407	1583	3836	2	0	1	-1	0	153000	153000	1707797480470	{"name":"Chai","rate":1}
+2	14599	517	3188	3836	2	0	1	-1	0	170000	170000	1707797480470	{"name":"Hộp","rate":1}
+2	14600	535	1246	3836	2	0	1	-1	0	381000	381000	1707797480470	{"name":"Hộp","rate":1}
+2	14601	561	2055	3836	2	0	1	-1	0	720000	720000	1707797480470	{"name":"Hộp","rate":1}
+2	14602	582	1823	3836	2	0	1	-1	0	1000	1000	1707797480470	{"name":"Hộp","rate":1}
+2	14603	783	1222	3836	2	0	1	-1	0	70000	70000	1707797480470	{"name":"Hộp","rate":1}
+2	14604	833	2620	3836	2	0	1	-1	0	125000	125000	1707797480470	{"name":"Hộp","rate":1}
+2	14605	1522	3087	3836	2	0	1	-1	0	229000	229000	1707797480470	{"name":"","rate":1}
+2	14606	624	2762	3836	2	0	2	-2	0	530000	1060000	1707797480470	{"name":"Hộp","rate":1}
+2	14607	571	2763	3836	2	0	1	-1	0	340000	340000	1707797480470	{"name":"Hộp","rate":1}
+2	14608	643	1524	3836	2	0	2	-2	0	170000	340000	1707797480470	{"name":"Chai","rate":1}
+2	14609	624	2273	1107	1	0	-2	2	0	729000	1458000	1707797567432	{"name":"Hộp","rate":1}
+2	14610	643	1201	1107	1	0	-2	2	0	184000	368000	1707797567432	{"name":"Chai","rate":1}
+2	14611	571	1501	1107	1	0	-1	1	0	375000	375000	1707797567432	{"name":"Hộp","rate":1}
+2	14612	764	1420	3837	2	0	2	-2	0	53000	106000	1707797774745	{"name":"Hộp","rate":1}
+6	14613	1225	3185	3839	2	0	19	-1	18	155000	155000	1707875952847	{"name":"Lọ","rate":1}
+6	14614	1203	2872	3839	2	0	195	-10	185	5000	50000	1707875952847	{"name":"Gói","rate":1}
+6	14615	1286	2478	3839	2	0	15	-1	14	30000	30000	1707875952847	{"name":"Lọ","rate":1}
+6	14616	1560	3123	3839	2	0	17	-1	16	120000	120000	1707875952847	{"name":"Cái","rate":1}
+6	14617	1605	3122	3838	2	0	47	-1	46	185000	185000	1707875959516	{"name":"Lọ","rate":1}
+6	14618	1206	3134	3838	2	0	10	-1	9	60000	60000	1707875959516	{"name":"Lọ","rate":1}
+6	14619	1146	2882	3838	2	0	465	-10	455	7000	70000	1707875959516	{"name":"Ống","rate":1}
+6	14620	1242	2742	3842	2	0	337	-10	327	10000	100000	1707877175769	{"name":"Viên","rate":1}
+6	14621	1153	2710	3842	2	0	170	-20	150	2000	40000	1707877175769	{"name":"Viên","rate":1}
+6	14622	1151	2702	3842	2	0	120	-20	100	2000	40000	1707877175769	{"name":"Viên","rate":1}
+6	14623	1322	2769	3842	2	0	602	-2	600	10000	20000	1707877175769	{"name":"Gói","rate":1}
+6	14624	1219	2795	3841	2	0	1	-1	0	180000	180000	1707877181921	{"name":"Lọ","rate":1}
+6	14625	1205	2639	3841	2	0	63	-1	62	60000	60000	1707877181921	{"name":"Lọ","rate":1}
+6	14626	1249	2730	3841	2	0	28	-7	21	13000	91000	1707877181921	{"name":"Gói","rate":1}
+6	14627	1162	2691	3841	2	0	600	-10	590	5000	50000	1707877181921	{"name":"Gói","rate":1}
+6	14628	1219	2795	3840	2	0	0	-1	-1	180000	180000	1707877217990	{"name":"Lọ","rate":1}
+6	14629	1205	2639	3840	2	0	62	-1	61	60000	60000	1707877217990	{"name":"Lọ","rate":1}
+6	14630	1249	2730	3840	2	0	21	-10	11	13000	130000	1707877217990	{"name":"Gói","rate":1}
+6	14631	1605	3122	3843	2	0	46	-1	45	185000	185000	1707878865155	{"name":"Lọ","rate":1}
+6	14632	1216	2715	3843	2	0	1	-1	0	150000	150000	1707878865155	{"name":"Lọ","rate":1}
+6	14633	1205	2639	3843	2	0	61	-1	60	60000	60000	1707878865155	{"name":"Lọ","rate":1}
+6	14634	1286	2478	3843	2	0	14	-1	13	30000	30000	1707878865155	{"name":"Lọ","rate":1}
+6	14635	1246	2727	3844	2	0	28	-10	18	20000	200000	1707879691751	{"name":"Gói","rate":1}
+6	14636	1222	2720	3844	2	0	1	-1	0	110000	110000	1707879691751	{"name":"Lọ","rate":1}
+6	14637	1202	2638	3844	2	0	88	-1	87	60000	60000	1707879691751	{"name":"Lọ","rate":1}
+6	14638	1178	2746	3844	2	0	2960	-30	2930	6000	180000	1707879691751	{"name":"Viên","rate":1}
+6	14639	1101	2677	3844	2	0	1	-1	0	520000	520000	1707879691751	{"name":"Lọ","rate":1}
+6	14640	1323	2835	3845	2	0	29	-1	28	30000	30000	1707880785611	{"name":"Chiếc","rate":1}
+6	14641	1059	2883	3846	2	0	127	-10	117	22000	220000	1707882046463	{"name":"Gói","rate":1}
+6	14642	1203	2872	3846	2	0	185	-10	175	5000	50000	1707882046463	{"name":"Gói","rate":1}
+6	14643	1110	2672	3846	2	0	3	-1	2	400000	400000	1707882046463	{"name":"Lọ","rate":1}
+6	14644	1219	2795	3847	2	0	-1	-1	-2	180000	180000	1707882051146	{"name":"Lọ","rate":1}
+6	14645	1203	2872	3847	2	0	175	-10	165	5000	50000	1707882051146	{"name":"Gói","rate":1}
+6	14646	1605	3122	3849	2	0	45	-1	44	185000	185000	1707882568182	{"name":"Lọ","rate":1}
+6	14647	1211	2637	3849	2	0	90	-10	80	7000	70000	1707882568182	{"name":"Ống","rate":1}
+6	14648	1322	2769	3849	2	0	600	-1	599	10000	10000	1707882568182	{"name":"Gói","rate":1}
+6	14649	1250	2437	3848	2	0	-24	-5	-29	20000	100000	1707882574945	{"name":"Gói","rate":1}
+6	14650	1130	3159	3850	2	0	19	-1	18	180000	180000	1707891537686	{"name":"Lọ","rate":1}
+6	14651	1206	3134	3850	2	0	9	-1	8	60000	60000	1707891537686	{"name":"Lọ","rate":1}
+6	14652	1346	2812	3850	2	0	100	-5	95	10000	50000	1707891537686	{"name":"Ống","rate":1}
+6	14653	1605	3122	3851	2	0	44	-1	43	185000	185000	1707895712954	{"name":"Lọ","rate":1}
+6	14654	1208	2642	3851	2	0	114	-1	113	60000	60000	1707895712954	{"name":"Lọ","rate":1}
+6	14655	1225	3185	3853	2	0	18	-1	17	155000	155000	1707903677809	{"name":"Lọ","rate":1}
+6	14656	1220	2754	3853	2	0	-12	-12	-24	10000	120000	1707903677809	{"name":"Gói","rate":1}
+6	14657	1202	2638	3853	2	0	87	-1	86	60000	60000	1707903677809	{"name":"Lọ","rate":1}
+6	14658	1152	3058	3854	2	0	40	-10	30	2000	20000	1707905907993	{"name":"Viên","rate":1}
+6	14659	1286	2478	3854	2	0	13	-1	12	30000	30000	1707905907993	{"name":"Lọ","rate":1}
+6	14660	1656	3196	3855	2	0	24	-4	20	45000	180000	1707906977976	{"name":"Lọ","rate":1}
+6	14661	1605	3122	3856	2	0	43	-2	41	185000	370000	1707914013764	{"name":"Lọ","rate":1}
+6	14662	1188	3119	3856	2	0	1	-1	0	90000	90000	1707914013764	{"name":"Lọ","rate":1}
+6	14663	1203	2872	3856	2	0	165	-20	145	5000	100000	1707914013764	{"name":"Gói","rate":1}
+6	14664	1560	3123	3857	2	0	16	-1	15	120000	120000	1707914074761	{"name":"Cái","rate":1}
+6	14665	1236	2755	3857	2	0	212	-10	202	10000	100000	1707914074761	{"name":"Viên","rate":1}
+6	14666	1167	2707	3857	2	0	145	-5	140	3000	15000	1707914074761	{"name":"Viên","rate":1}
+6	14667	1225	3185	3858	2	0	17	-1	16	155000	155000	1707914405716	{"name":"Lọ","rate":1}
+6	14668	1607	3129	3859	2	0	1	-1	0	75000	75000	1707919572491	{"name":"Lọ","rate":1}
+6	14669	1322	2769	3859	2	0	599	-1	598	10000	10000	1707919572491	{"name":"Gói","rate":1}
+6	14670	1225	3185	3860	2	0	16	-1	15	155000	155000	1707943611435	{"name":"Lọ","rate":1}
+6	14671	1202	2638	3860	2	0	86	-1	85	60000	60000	1707943611435	{"name":"Lọ","rate":1}
+6	14672	1144	2491	3860	2	0	370	-10	360	5000	50000	1707943611435	{"name":"Gói","rate":1}
+6	14673	1197	3177	3860	2	0	340	-5	335	16000	80000	1707943611435	{"name":"Ống","rate":1}
+6	14674	1198	2757	3860	2	0	71	-5	66	8000	40000	1707943611435	{"name":"Ống","rate":1}
+6	14675	1355	2610	3860	2	0	15	-1	14	30000	30000	1707943611435	{"name":"Chiếc","rate":1}
+6	14676	1235	2854	3861	2	0	18	-10	8	13000	130000	1707994831074	{"name":"Viên","rate":1}
+6	14677	1149	2504	3861	2	0	60	-5	55	5000	25000	1707994831074	{"name":"Viên","rate":1}
+6	14678	1204	2645	3862	2	0	251	-6	245	5000	30000	1707998876312	{"name":"Gói","rate":1}
+6	14679	1242	2742	3863	2	0	327	-10	317	10000	100000	1708002204715	{"name":"Viên","rate":1}
+6	14680	1114	2685	3863	2	0	8	-1	7	30000	30000	1708002204715	{"name":"Lọ","rate":1}
+6	14681	1149	2504	3863	2	0	55	-10	45	5000	50000	1708002204715	{"name":"Viên","rate":1}
+6	14682	1166	2708	3863	2	0	72	-10	62	2000	20000	1708002204715	{"name":"Viên","rate":1}
+6	14683	1189	2781	3864	2	0	8	-1	7	190000	190000	1708002804827	{"name":"Lọ","rate":1}
+6	14684	1605	3122	3864	2	0	41	-1	40	185000	185000	1708002804827	{"name":"Lọ","rate":1}
+6	14685	1205	2639	3864	2	0	60	-1	59	60000	60000	1708002804827	{"name":"Lọ","rate":1}
+6	14686	1322	2769	3864	2	0	598	-2	596	10000	20000	1708002804827	{"name":"Gói","rate":1}
+6	14687	1235	2854	3865	2	0	8	-10	-2	13000	130000	1708003531575	{"name":"Viên","rate":1}
+6	14688	1199	2490	3865	2	0	15	-1	14	20000	20000	1708003531575	{"name":"Hộp","rate":1}
+6	14689	1167	2707	3865	2	0	140	-10	130	3000	30000	1708003531575	{"name":"Viên","rate":1}
+6	14690	1149	2504	3865	2	0	45	-5	40	5000	25000	1708003531575	{"name":"Viên","rate":1}
+6	14691	1151	2702	3865	2	0	100	-20	80	2000	40000	1708003531575	{"name":"Viên","rate":1}
+6	14692	1322	2769	3865	2	0	596	-2	594	10000	20000	1708003531575	{"name":"Gói","rate":1}
+6	14693	1225	3185	3866	2	0	15	-1	14	155000	155000	1708003536449	{"name":"Lọ","rate":1}
+6	14694	1197	3177	3866	2	0	335	-5	330	16000	80000	1708003536449	{"name":"Ống","rate":1}
+6	14695	1198	2757	3866	2	0	66	-5	61	8000	40000	1708003536449	{"name":"Ống","rate":1}
+6	14696	1202	2638	3866	2	0	85	-1	84	60000	60000	1708003536449	{"name":"Lọ","rate":1}
+6	14697	1250	2437	3867	2	0	-29	-10	-39	20000	200000	1708004440141	{"name":"Gói","rate":1}
+6	14698	1207	2641	3867	2	0	12	-1	11	60000	60000	1708004440141	{"name":"Lọ","rate":1}
+6	14699	1322	2769	3867	2	0	594	-4	590	10000	40000	1708004440141	{"name":"Gói","rate":1}
+6	14700	1194	2803	3868	2	0	118	-30	88	4000	120000	1708004608228	{"name":"Gói","rate":1}
+6	14701	1058	2718	3869	2	0	23	-1	22	100000	100000	1708004883985	{"name":"Lọ","rate":1}
+6	14702	1058	2718	3869	2	1	22	1	23	100000	-100000	1708005036652	{"name":"Lọ","rate":1}
+6	14703	1058	2718	3870	2	0	23	-1	22	100000	100000	1708005036724	{"name":"Lọ","rate":1}
+6	14704	1206	3134	3870	2	0	8	-1	7	60000	60000	1708005036724	{"name":"Lọ","rate":1}
+6	14705	1322	2769	3870	2	0	590	-2	588	10000	20000	1708005036724	{"name":"Gói","rate":1}
+1	14706	1370	2861	3871	2	0	2	-45	-43	900000	40500000	1708021540664	{"name":"","rate":1}
 \.
 
 
@@ -33201,6 +35758,10 @@ COPY public."Receipt" (oid, id, "distributorId", status, "itemsActualMoney", "di
 2	1043	149	3	1697000	0	0	30000	1727000	0	\N	1705323911183	1727000	\N	2024	1	15	2024-01-15 13:05:11.183+00	%
 6	1053	165	3	340000	0	0	0	340000	0	\N	1705580569808	340000	\N	2024	1	18	2024-01-18 12:22:49.808+00	%
 6	1063	165	3	35000	0	0	0	35000	0	\N	1705754173260	35000	\N	2024	1	20	2024-01-20 12:36:13.26+00	%
+2	1073	132	3	340000	0	0	0	340000	0	\N	1706349616558	340000	\N	2024	1	27	2024-01-27 10:00:16.558+00	%
+1	1083	153	3	30000	0	0	0	30000	0	\N	1707014710625	30000	\N	2024	2	4	2024-02-04 02:45:10.625+00	%
+1	1093	153	3	15000	0	0	0	15000	0	\N	1707017704517	15000	\N	2024	2	4	2024-02-04 03:35:04.517+00	%
+6	1103	165	3	2592000	0	0	0	2592000	0	\N	1707215093430	2592000	\N	2024	2	6	2024-02-06 10:24:53.43+00	%
 2	994	135	3	544000	0	0	26000	570000	0	\N	1703214932822	570000	\N	2023	12	22	2023-12-22 03:15:32.822+00	%
 2	1004	105	3	710000	0	0	0	710000	0	\N	1703590249933	710000	\N	2023	12	26	2023-12-26 11:30:49.933+00	%
 6	1014	165	3	16038118	0	0	0	16038118	0	\N	1703944004327	16038118	\N	2023	12	30	2023-12-30 13:46:44.327+00	%
@@ -33209,6 +35770,10 @@ COPY public."Receipt" (oid, id, "distributorId", status, "itemsActualMoney", "di
 6	1044	165	3	12000000	0	0	0	12000000	0	\N	1705409569358	12000000	\N	2024	1	16	2024-01-16 12:52:49.358+00	%
 6	1054	155	3	70000	0	0	0	70000	0	\N	1705581083779	70000	\N	2024	1	18	2024-01-18 12:31:23.779+00	%
 6	1064	165	3	81375	0	0	0	81375	0	\N	1705756717681	81375	\N	2024	1	20	2024-01-20 13:18:37.681+00	%
+6	1074	165	3	2400000	0	0	0	2400000	0	\N	1706534689543	2400000	\N	2024	1	29	2024-01-29 13:24:49.543+00	%
+1	1084	153	3	35000	0	0	0	35000	0	\N	1707014799730	35000	\N	2024	2	4	2024-02-04 02:46:39.73+00	%
+1	1094	153	3	5000	0	0	0	5000	0	\N	1707017736496	5000	\N	2024	2	4	2024-02-04 03:35:36.496+00	%
+2	1104	135	3	516000	0	0	0	516000	0	\N	1707793593387	516000	\N	2024	2	13	2024-02-13 03:06:33.387+00	%
 2	995	132	3	4237900	0	0	35000	4272900	0	\N	1703252450834	4272900	\N	2023	12	22	2023-12-22 13:40:50.834+00	%
 6	1005	165	-1	793000	0	0	0	793000	0	\N	1703769407226	0	\N	2023	12	28	2023-12-28 13:16:47.226+00	%
 6	1015	165	3	3924000	0	0	0	3924000	0	\N	1703944155482	3924000	\N	2023	12	30	2023-12-30 13:49:15.482+00	%
@@ -33217,6 +35782,10 @@ COPY public."Receipt" (oid, id, "distributorId", status, "itemsActualMoney", "di
 2	1045	132	3	2383830	0	0	90000	2473830	0	\N	1705510120010	2473830	\N	2024	1	17	2024-01-17 16:48:40.01+00	%
 6	1055	165	-1	5592000	0	0	0	5592000	0	\N	1705670295306	0	1705747829946	2024	1	19	2024-01-19 13:18:15.306+00	%
 6	1065	165	3	689600	0	0	0	689600	0	\N	1705758892214	689600	\N	2024	1	20	2024-01-20 13:54:52.214+00	%
+6	1075	165	3	5103000	0	0	0	5103000	0	\N	1706620550074	5103000	\N	2024	1	30	2024-01-30 13:15:50.074+00	%
+1	1085	153	3	30000	0	0	0	30000	0	\N	1707015943378	30000	\N	2024	2	4	2024-02-04 03:05:43.378+00	%
+1	1095	153	3	5000	0	0	0	5000	0	\N	1707018014908	5000	\N	2024	2	4	2024-02-04 03:40:14.908+00	%
+2	1105	135	3	7015922	0	0	0	7015922	0	\N	1707794453848	7015922	\N	2024	2	13	2024-02-13 03:20:53.848+00	%
 2	996	122	3	2301000	0	0	0	2301000	0	\N	1703417695531	2301000	\N	2023	12	24	2023-12-24 11:34:55.531+00	%
 6	1006	165	3	855000	0	0	0	855000	0	\N	1703770349473	855000	\N	2023	12	28	2023-12-28 13:32:29.473+00	%
 6	1016	189	3	1293000	0	0	0	1293000	0	\N	1704016421063	1293000	\N	2023	12	31	2023-12-31 09:53:41.063+00	%
@@ -33225,6 +35794,10 @@ COPY public."Receipt" (oid, id, "distributorId", status, "itemsActualMoney", "di
 2	1046	120	3	320000	0	0	40000	360000	0	\N	1705510180494	360000	\N	2024	1	17	2024-01-17 16:49:40.494+00	%
 2	1056	132	3	1826000	0	0	30000	1856000	0	\N	1705674508586	1856000	\N	2024	1	19	2024-01-19 14:28:28.586+00	%
 6	1066	165	3	5064950	0	0	0	5064950	0	\N	1705833103601	5064950	\N	2024	1	21	2024-01-21 10:31:43.601+00	%
+2	1076	132	3	810000	0	0	0	810000	0	\N	1706707507743	810000	\N	2024	1	31	2024-01-31 13:25:07.743+00	%
+1	1086	153	3	200000	0	0	0	200000	0	\N	1707016026183	200000	\N	2024	2	4	2024-02-04 03:07:06.183+00	%
+1	1096	153	3	5000	0	0	0	5000	0	\N	1707018061692	5000	\N	2024	2	4	2024-02-04 03:41:01.692+00	%
+2	1106	135	3	785000	0	0	0	785000	0	\N	1707794714578	785000	\N	2024	2	13	2024-02-13 03:25:14.578+00	%
 11	997	175	3	760000	0	0	0	760000	0	\N	1703422856303	760000	\N	2023	12	24	2023-12-24 13:00:56.303+00	%
 2	1007	132	3	1245000	0	0	0	1245000	0	\N	1703813471171	1245000	\N	2023	12	29	2023-12-29 01:31:11.171+00	%
 6	1017	166	3	1530000	0	0	0	1530000	0	\N	1704016488230	1530000	\N	2023	12	31	2023-12-31 09:54:48.23+00	%
@@ -33233,6 +35806,10 @@ COPY public."Receipt" (oid, id, "distributorId", status, "itemsActualMoney", "di
 2	1047	124	3	480000	0	0	0	480000	0	\N	1705539500623	480000	\N	2024	1	18	2024-01-18 00:58:20.623+00	%
 2	1057	105	3	1420000	0	0	0	1420000	0	\N	1705679330734	1420000	\N	2024	1	19	2024-01-19 15:48:50.734+00	%
 6	1067	158	3	9359680	0	0	0	9359680	0	\N	1705925312637	9359680	\N	2024	1	22	2024-01-22 12:08:32.637+00	%
+2	1077	132	3	380000	0	0	0	380000	0	\N	1706707948361	380000	\N	2024	1	31	2024-01-31 13:32:28.361+00	%
+1	1087	153	3	200000	0	0	0	200000	0	\N	1707016352313	200000	\N	2024	2	4	2024-02-04 03:12:32.313+00	%
+1	1097	153	3	5000	0	0	0	5000	0	\N	1707032851217	5000	\N	2024	2	4	2024-02-04 07:47:31.217+00	%
+2	1107	135	3	2201000	0	0	0	2201000	0	\N	1707797567432	2201000	\N	2024	2	13	2024-02-13 04:12:47.432+00	%
 2	998	135	3	110013	0	0	0	110013	0	\N	1703495023826	110013	\N	2023	12	25	2023-12-25 09:03:43.826+00	%
 2	1008	135	3	90000	0	0	0	90000	0	\N	1703816601133	90000	\N	2023	12	29	2023-12-29 02:23:21.133+00	%
 3	1018	190	3	1220	0	0	0	1220	0	\N	1704047413230	1220	\N	2024	1	1	2023-12-31 18:30:13.23+00	%
@@ -33241,6 +35818,9 @@ COPY public."Receipt" (oid, id, "distributorId", status, "itemsActualMoney", "di
 1	1048	153	3	450000	0	0	0	450000	0	\N	1705542836171	450000	\N	2024	1	18	2024-01-18 01:53:56.171+00	%
 2	1058	114	3	3090000	0	0	30000	3120000	0	\N	1705679542487	3120000	\N	2024	1	19	2024-01-19 15:52:22.487+00	%
 6	1068	165	3	2550000	0	0	0	2550000	0	\N	1706006597498	2550000	\N	2024	1	23	2024-01-23 10:43:17.498+00	%
+2	1078	129	3	445000	0	0	0	445000	0	\N	1706708120774	445000	\N	2024	1	31	2024-01-31 13:35:20.774+00	%
+1	1088	153	3	10000	0	0	0	10000	0	\N	1707016588189	10000	\N	2024	2	4	2024-02-04 03:16:28.189+00	%
+1	1098	153	3	2000	0	0	0	2000	0	\N	1707067031955	2000	\N	2024	2	5	2024-02-04 17:17:11.955+00	%
 2	999	106	3	3308000	0	0	0	3308000	0	\N	1703515679758	3308000	\N	2023	12	25	2023-12-25 14:47:59.758+00	%
 6	1009	165	3	3439080	0	0	0	3439080	0	\N	1703856075911	3439080	\N	2023	12	29	2023-12-29 13:21:15.911+00	%
 6	1019	165	3	10480000	0	0	0	10480000	0	\N	1704287676144	10480000	\N	2024	1	3	2024-01-03 13:14:36.144+00	%
@@ -33249,6 +35829,9 @@ COPY public."Receipt" (oid, id, "distributorId", status, "itemsActualMoney", "di
 1	1049	153	3	450000	0	0	0	450000	0	\N	1705544071901	450000	\N	2024	1	18	2024-01-18 02:14:31.901+00	%
 6	1059	165	-1	5048900	0	0	0	5048900	0	\N	1705747808326	0	1705748244017	2024	1	20	2024-01-20 10:50:08.326+00	%
 6	1069	165	3	3000000	0	0	0	3000000	0	\N	1706007446329	3000000	\N	2024	1	23	2024-01-23 10:57:26.329+00	%
+6	1079	165	3	1920000	0	0	0	1920000	0	\N	1706785390185	1920000	\N	2024	2	1	2024-02-01 11:03:10.185+00	%
+1	1089	153	3	15000	0	0	0	15000	0	\N	1707016840966	15000	\N	2024	2	4	2024-02-04 03:20:40.966+00	%
+1	1099	153	3	2000	0	0	0	2000	0	\N	1707067059201	2000	\N	2024	2	5	2024-02-04 17:17:39.201+00	%
 2	1000	132	3	1503480	0	0	0	1503480	0	\N	1703515986043	1503480	\N	2023	12	25	2023-12-25 14:53:06.043+00	%
 2	1010	132	3	3700000	0	0	0	3700000	0	\N	1703865352935	3700000	\N	2023	12	29	2023-12-29 15:55:52.935+00	%
 6	1020	165	3	1500000	0	0	0	1500000	0	\N	1704287843854	1500000	\N	2024	1	3	2024-01-03 13:17:23.854+00	%
@@ -33257,6 +35840,9 @@ COPY public."Receipt" (oid, id, "distributorId", status, "itemsActualMoney", "di
 2	1050	132	3	82000	0	0	0	82000	0	\N	1705547958117	82000	\N	2024	1	18	2024-01-18 03:19:18.117+00	%
 6	1060	165	3	4662000	0	0	0	4662000	0	\N	1705748179814	4662000	\N	2024	1	20	2024-01-20 10:56:19.814+00	%
 6	1070	165	3	9740000	0	0	0	9740000	0	\N	1706178114252	9740000	\N	2024	1	25	2024-01-25 10:21:54.252+00	%
+2	1080	135	3	3095000	0	0	0	3095000	0	\N	1706972730615	3095000	\N	2024	2	3	2024-02-03 15:05:30.615+00	%
+1	1090	153	3	15000	0	0	0	15000	0	\N	1707016914610	15000	\N	2024	2	4	2024-02-04 03:21:54.61+00	%
+1	1100	153	3	200000	0	0	0	200000	0	\N	1707093068642	200000	\N	2024	2	5	2024-02-05 00:31:08.642+00	%
 2	1001	132	3	4123880	0	0	0	4123880	0	\N	1703588262704	4123880	\N	2023	12	26	2023-12-26 10:57:42.704+00	%
 2	1011	135	3	1300000	0	0	0	1300000	0	\N	1703865512404	1300000	\N	2023	12	29	2023-12-29 15:58:32.404+00	%
 6	1021	158	3	7998960	0	0	0	7998960	0	\N	1704369416514	7998960	\N	2024	1	4	2024-01-04 11:56:56.514+00	%
@@ -33265,6 +35851,9 @@ COPY public."Receipt" (oid, id, "distributorId", status, "itemsActualMoney", "di
 1	1051	153	3	200000	0	0	0	200000	0	\N	1705561468297	200000	\N	2024	1	18	2024-01-18 07:04:28.297+00	%
 6	1061	165	-1	52500	0	0	0	52500	0	\N	1705748307298	0	1705748479268	2024	1	20	2024-01-20 10:58:27.298+00	%
 6	1071	165	3	16890000	0	0	0	16890000	0	\N	1706276996048	16890000	\N	2024	1	26	2024-01-26 13:49:56.048+00	%
+2	1081	132	3	906000	0	0	0	906000	0	\N	1706973146012	906000	\N	2024	2	3	2024-02-03 15:12:26.012+00	%
+1	1091	153	3	5000	0	0	0	5000	0	\N	1707017162076	5000	\N	2024	2	4	2024-02-04 03:26:02.076+00	%
+1	1101	153	3	200000	0	0	0	200000	0	\N	1707093189529	200000	\N	2024	2	5	2024-02-05 00:33:09.529+00	%
 2	1002	135	3	168000	0	0	0	168000	0	\N	1703588915638	168000	\N	2023	12	26	2023-12-26 11:08:35.638+00	%
 2	1012	188	3	238000	0	0	0	238000	0	\N	1703865607420	238000	\N	2023	12	29	2023-12-29 16:00:07.42+00	%
 2	1022	132	3	7762000	0	0	0	7762000	0	\N	1704382527169	7762000	\N	2024	1	4	2024-01-04 15:35:27.169+00	%
@@ -33272,6 +35861,10 @@ COPY public."Receipt" (oid, id, "distributorId", status, "itemsActualMoney", "di
 2	1042	132	3	3960400	0	0	30000	3990400	0	\N	1705246726156	3990400	\N	2024	1	14	2024-01-14 15:38:46.156+00	%
 1	1052	153	3	200000	0	0	0	200000	0	\N	1705561567025	200000	\N	2024	1	18	2024-01-18 07:06:07.025+00	%
 6	1062	165	3	408900	0	0	0	408900	0	\N	1705754098598	408900	\N	2024	1	20	2024-01-20 12:34:58.598+00	%
+2	1072	122	3	900000	0	0	0	900000	0	\N	1706349429675	900000	\N	2024	1	27	2024-01-27 09:57:09.675+00	%
+1	1082	153	3	80000	0	0	0	80000	0	\N	1707014575450	80000	\N	2024	2	4	2024-02-04 02:42:55.45+00	%
+1	1092	153	3	5000	0	0	0	5000	0	\N	1707017231932	5000	\N	2024	2	4	2024-02-04 03:27:11.932+00	%
+6	1102	165	3	960000	0	0	0	960000	0	\N	1707214824932	960000	\N	2024	2	6	2024-02-06 10:20:24.932+00	%
 \.
 
 
@@ -35852,6 +38445,83 @@ COPY public."ReceiptItem" (oid, id, "receiptId", "productBatchId", unit, quantit
 6	6896	1071	2746	{"name":"Viên","rate":1}	3000	165	4000
 6	6897	1071	2583	{"name":"Lọ","rate":1}	30	165	63000
 6	6898	1071	2870	{"name":"Viên","rate":1}	100	165	30000
+2	6899	1072	1941	{"name":"Hộp","rate":1}	15	122	60000
+2	6900	1073	3188	{"name":"Hộp","rate":1}	2	132	170000
+6	6901	1074	2498	{"name":"Lọ","rate":1}	30	165	80000
+6	6902	1075	3191	{"name":"Lọ","rate":1}	6	165	100000
+6	6903	1075	3190	{"name":"","rate":1}	6	165	168000
+6	6904	1075	3189	{"name":"Lọ","rate":1}	5	165	250000
+6	6905	1075	2515	{"name":"Lọ","rate":1}	5	165	185000
+6	6906	1075	2812	{"name":"Ống","rate":1}	100	165	8000
+6	6907	1075	3063	{"name":"Ống","rate":1}	200	165	2600
+2	6908	1076	3193	{"name":"","rate":1}	1	132	690000
+2	6909	1076	3192	{"name":"Hộp","rate":1}	2	132	60000
+2	6910	1077	2084	{"name":"Túi","rate":1}	20	132	10000
+2	6911	1077	1782	{"name":"Hộp","rate":1}	1	132	180000
+2	6912	1078	3163	{"name":"Hộp","rate":1}	1	129	445000
+6	6913	1079	3194	{"name":"Lọ","rate":1}	24	165	80000
+2	6914	1080	3079	{"name":"Hộp","rate":1}	1	135	315000
+2	6915	1080	1250	{"name":"Hộp","rate":1}	5	135	276000
+2	6916	1080	1279	{"name":"Hộp","rate":1}	2	135	350000
+2	6917	1080	1229	{"name":"Hộp","rate":1}	2	135	195000
+2	6918	1080	3195	{"name":"Chai","rate":1}	2	135	155000
+2	6919	1081	1930	{"name":"Hộp","rate":1}	2	132	265000
+2	6920	1081	1586	{"name":"Hộp","rate":1}	2	132	188000
+1	6921	1082	3020	{"name":"Chai","rate":1}	2	153	40000
+1	6922	1083	2891	{"name":"Viên","rate":1}	20	153	1500
+1	6923	1084	3014	{"name":"Tuýp","rate":1}	7	153	5000
+1	6924	1085	3013	{"name":"Cái","rate":1}	15	153	2000
+1	6925	1086	3020	{"name":"Hộp","rate":5}	5	153	40000
+1	6926	1087	3020	{"name":"Hộp","rate":5}	5	153	40000
+1	6927	1088	3014	{"name":"Tuýp","rate":1}	2	153	5000
+1	6928	1089	3014	{"name":"Tuýp","rate":1}	3	153	5000
+1	6929	1090	3014	{"name":"Tuýp","rate":1}	3	153	5000
+1	6930	1091	3014	{"name":"Tuýp","rate":1}	1	153	5000
+1	6931	1092	3014	{"name":"Tuýp","rate":1}	1	153	5000
+1	6932	1093	3014	{"name":"Tuýp","rate":1}	3	153	5000
+1	6933	1094	3014	{"name":"Tuýp","rate":1}	1	153	5000
+1	6934	1095	3014	{"name":"Tuýp","rate":1}	1	153	5000
+1	6935	1096	3014	{"name":"Tuýp","rate":1}	1	153	5000
+1	6936	1097	3014	{"name":"Tuýp","rate":1}	1	153	5000
+1	6937	1098	3013	{"name":"Cái","rate":1}	1	153	2000
+1	6938	1099	3013	{"name":"Cái","rate":1}	1	153	2000
+1	6939	1100	3020	{"name":"Hộp","rate":5}	5	153	40000
+1	6940	1101	3020	{"name":"Hộp","rate":5}	5	153	40000
+6	6941	1102	3196	{"name":"Lọ","rate":1}	24	165	40000
+6	6942	1103	3197	{"name":"","rate":1}	10	165	6000
+6	6943	1103	2710	{"name":"Viên","rate":1}	200	165	1200
+6	6944	1103	2504	{"name":"Viên","rate":1}	90	165	3800
+6	6945	1103	2769	{"name":"Gói","rate":1}	390	165	5000
+2	6946	1104	1275	{"name":"Chai","rate":1}	3	135	60000
+2	6947	1104	2314	{"name":"Chai","rate":1}	1	135	60000
+2	6948	1104	1250	{"name":"Hộp","rate":1}	1	135	276000
+2	6949	1105	1533	{"name":"Hộp","rate":1}	1	135	1000
+2	6950	1105	3206	{"name":"Hộp","rate":1}	2	135	195000
+2	6951	1105	3205	{"name":"","rate":1}	2	135	1
+2	6952	1105	3204	{"name":"Chai","rate":1}	1	135	159000
+2	6953	1105	3203	{"name":"Hộp","rate":1}	1	135	450000
+2	6954	1105	3202	{"name":"Hộp","rate":1}	5	135	72000
+2	6955	1105	3201	{"name":"Chai","rate":1}	26	135	57000
+2	6956	1105	3200	{"name":"","rate":1}	4	135	126000
+2	6957	1105	3199	{"name":"Hộp","rate":1}	1	135	126000
+2	6958	1105	2323	{"name":"Chai","rate":1}	1	135	134000
+2	6959	1105	3198	{"name":"Hộp","rate":1}	1	135	115420
+2	6960	1105	3035	{"name":"Hộp","rate":1}	10	135	329450
+2	6961	1106	1295	{"name":"Hộp","rate":1}	1	135	80000
+2	6962	1106	3099	{"name":"","rate":1}	5	135	6000
+2	6963	1106	1293	{"name":"Hộp","rate":1}	9	135	75000
+2	6964	1107	1501	{"name":"Hộp","rate":1}	1	135	375000
+2	6965	1107	1201	{"name":"Chai","rate":1}	2	135	184000
+2	6966	1107	2273	{"name":"Hộp","rate":1}	2	135	729000
+\.
+
+
+--
+-- Data for Name: Role; Type: TABLE DATA; Schema: public; Owner: mea
+--
+
+COPY public."Role" (oid, id, name, "permissionIds", "isActive", "createdAt", "updatedAt", "deletedAt") FROM stdin;
+0	1	Admin	[]	1	1708021256078	1708021256078	\N
 \.
 
 
@@ -35859,20 +38529,20 @@ COPY public."ReceiptItem" (oid, id, "receiptId", "productBatchId", unit, quantit
 -- Data for Name: User; Type: TABLE DATA; Schema: public; Owner: mea
 --
 
-COPY public."User" (oid, id, phone, username, password, secret, role, "fullName", birthday, gender, "isActive", "createdAt", "updatedAt", "deletedAt") FROM stdin;
-1	1	\N	admin	$2b$05$G17lx6yO8fK2iJK6tqX2XODsCrawFzSht5vJQjE7wlDJO0.4zxPxO	\N	1	Tài khoản Demo	\N	1	1	1705334390037	1705334390037	\N
-2	52	\N	admin	$2b$05$SMiWGpn92ffTPftgEzFgEOd2iG09kh90LXG/QE3toga.hJd2E.duC	<uNN_b>iMfzl},Y#]S_CV^hgx_V	1	Bùi Trang	776019600000	0	1	1705334390037	1705334390037	\N
-3	53	\N	elenahaiyen	$2b$05$c.ICU6/YKvs0WMyCOBf4i.mEWHVhlxFyp3liU9EoGg2zV5jlzfGri	.%<<#OviJW/VXo}Q3PJzmGw0DG0!	1	\N	\N	\N	1	1705334390037	1705334390037	\N
-4	54	\N	admin	$2b$05$d3xG9djwEBGQ4MnJAdjhxOKfLJ6zRhC0AeEm/6pntxMbMUE6LCe0a	<uNN_b>"05q88)c"]S_CV^hgx_V	1	\N	\N	\N	1	1705334390037	1705334390037	\N
-5	55	\N	admin	$2b$05$bWAr6GzEtGi853UCp1cO6.Amk.r04.PlARfaaZcGzmki8YGW9X93u	<uNN_bdDJaz87!/j]t_(2-&]_	1	\N	\N	\N	1	1705334390037	1705334390037	\N
-7	57	\N	admin	$2b$05$M5.wr3ik4o/EjC4AIh7mweZaUFwDa1An7ZFCMpq0THPAz2BDPpZli	<uNN_bNQJa}/'#ky1Ms7$u}fPRj{[<QGJEBK<G	1	\N	\N	\N	1	1705334390037	1705334390037	\N
-8	58	\N	lddai	$2b$05$UUmzM2GsYEYEYd8o/dWSJ.f.BImICFocR1cTjbxCoDJTHM4uDr2zO	UdzzX:M2gtGV;OwvmeyuKp-	1	\N	\N	\N	1	1705334390037	1705334390037	\N
-9	59	\N	admin	$2b$05$ItztRPMvfKhEP0iuALQCOO8rFMTIeq/8gcRKmB3Kse/sOJgR6jm/a	<uNN_b!.r@Y8:"/)]G?y[/]	1	Chị Hồng	\N	\N	1	1705334390037	1705334390037	\N
-11	61	\N	hongthai	$2b$05$dRSBS.3fNsEECN5m6nydnuD/S41N7R0Bxwv6plmBuLxbaDrVMqLxO	CiTN<kc(9X"cUPH*RT_IZ6$	1	\N	\N	\N	1	1705334390037	1705334390037	\N
-12	62	\N	admin	$2b$05$aophp0.U7uNAfo.1F3IkHOnXcApiEAO7beATR57r1opNkBqLHH6Cq	<uNN_b!.r@Y8:"/)]G?y[/]	1	Hiền	\N	\N	1	1705334390037	1705334390037	\N
-13	63	\N	admin	$2b$05$11lnCEMRpEWg0DyAVLK5YOYJG35d4qlC.m7osuhg5Cs9LpVH3wbBe	<uNN_bFUoa8qs,byL?_PVryBOK*Vy	1	Bs Quỳnh	748335600000	0	1	1705334390037	1705334390037	\N
-6	56	\N	bsnguyen	$2b$05$TXRdGhRC8H2KrBfaN0XmX.SHpWVOiGJpQEtm3IexHMaH25NWOcCoO	{z!W};jW<'l,yq(8bG358MS3gXlt	1	BS Nguyên	\N	\N	1	1705334390037	1705334390037	\N
-0	0	\N	admin	$2b$05$rw/nAJQT.r7hfqYmtoU64.fsqzUQTeWm2WbcDlIcdYPxzbrg.Wj.u	<uNN_b(cO?1S}V7z#7e*b;j4Td<V;4	1	Ngô Duy	\N	\N	1	1705334390037	1706272666626	\N
+COPY public."User" (oid, id, phone, username, "hashPassword", secret, "fullName", birthday, gender, "isActive", "createdAt", "updatedAt", "deletedAt", "roleId") FROM stdin;
+2	52	\N	admin	$2b$05$SMiWGpn92ffTPftgEzFgEOd2iG09kh90LXG/QE3toga.hJd2E.duC	<uNN_b>iMfzl},Y#]S_CV^hgx_V	Bùi Trang	776019600000	0	1	1705334390037	1705334390037	\N	1
+3	53	\N	elenahaiyen	$2b$05$c.ICU6/YKvs0WMyCOBf4i.mEWHVhlxFyp3liU9EoGg2zV5jlzfGri	.%<<#OviJW/VXo}Q3PJzmGw0DG0!	\N	\N	\N	1	1705334390037	1705334390037	\N	1
+4	54	\N	admin	$2b$05$d3xG9djwEBGQ4MnJAdjhxOKfLJ6zRhC0AeEm/6pntxMbMUE6LCe0a	<uNN_b>"05q88)c"]S_CV^hgx_V	\N	\N	\N	1	1705334390037	1705334390037	\N	1
+5	55	\N	admin	$2b$05$bWAr6GzEtGi853UCp1cO6.Amk.r04.PlARfaaZcGzmki8YGW9X93u	<uNN_bdDJaz87!/j]t_(2-&]_	\N	\N	\N	1	1705334390037	1705334390037	\N	1
+7	57	\N	admin	$2b$05$M5.wr3ik4o/EjC4AIh7mweZaUFwDa1An7ZFCMpq0THPAz2BDPpZli	<uNN_bNQJa}/'#ky1Ms7$u}fPRj{[<QGJEBK<G	\N	\N	\N	1	1705334390037	1705334390037	\N	1
+8	58	\N	lddai	$2b$05$UUmzM2GsYEYEYd8o/dWSJ.f.BImICFocR1cTjbxCoDJTHM4uDr2zO	UdzzX:M2gtGV;OwvmeyuKp-	\N	\N	\N	1	1705334390037	1705334390037	\N	1
+9	59	\N	admin	$2b$05$ItztRPMvfKhEP0iuALQCOO8rFMTIeq/8gcRKmB3Kse/sOJgR6jm/a	<uNN_b!.r@Y8:"/)]G?y[/]	Chị Hồng	\N	\N	1	1705334390037	1705334390037	\N	1
+11	61	\N	hongthai	$2b$05$dRSBS.3fNsEECN5m6nydnuD/S41N7R0Bxwv6plmBuLxbaDrVMqLxO	CiTN<kc(9X"cUPH*RT_IZ6$	\N	\N	\N	1	1705334390037	1705334390037	\N	1
+12	62	\N	admin	$2b$05$aophp0.U7uNAfo.1F3IkHOnXcApiEAO7beATR57r1opNkBqLHH6Cq	<uNN_b!.r@Y8:"/)]G?y[/]	Hiền	\N	\N	1	1705334390037	1705334390037	\N	1
+13	63	\N	admin	$2b$05$11lnCEMRpEWg0DyAVLK5YOYJG35d4qlC.m7osuhg5Cs9LpVH3wbBe	<uNN_bFUoa8qs,byL?_PVryBOK*Vy	Bs Quỳnh	748335600000	0	1	1705334390037	1705334390037	\N	1
+6	56	\N	bsnguyen	$2b$05$TXRdGhRC8H2KrBfaN0XmX.SHpWVOiGJpQEtm3IexHMaH25NWOcCoO	{z!W};jW<'l,yq(8bG358MS3gXlt	BS Nguyên	\N	\N	1	1705334390037	1705334390037	\N	1
+0	0	\N	admin	$2b$05$rw/nAJQT.r7hfqYmtoU64.fsqzUQTeWm2WbcDlIcdYPxzbrg.Wj.u	<uNN_b(cO?1S}V7z#7e*b;j4Td<V;4	Ngô Duy	\N	\N	1	1705334390037	1706272666626	\N	1
+1	1	\N	admin	$2b$05$PrvEQ3u6FgQU4f5.T1K8euZGeSGrjwoRBX4xGhwKwBkQCBeGGFrcW	<uNN_b!.r@Y8:"/)]G?y[/]	Tài khoản Demo	\N	1	1	1705334390037	1706629642779	\N	1
 \.
 
 
@@ -35883,6 +38553,8 @@ COPY public."User" (oid, id, phone, username, password, secret, role, "fullName"
 COPY public.typeorm_migration (id, "timestamp", name) FROM stdin;
 1	1702313319849	initPostgres1702313319849
 8	1704082064570	AddTimestampColumnsAndTriggers1704082064570
+9	1706347158382	Version321706347158382
+10	1707974825881	PermissionIsActiveRootId1707974825881
 \.
 
 
@@ -35890,21 +38562,21 @@ COPY public.typeorm_migration (id, "timestamp", name) FROM stdin;
 -- Name: CustomerPayment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mea
 --
 
-SELECT pg_catalog.setval('public."CustomerPayment_id_seq"', 2782, true);
+SELECT pg_catalog.setval('public."CustomerPayment_id_seq"', 3359, true);
 
 
 --
 -- Name: Customer_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mea
 --
 
-SELECT pg_catalog.setval('public."Customer_id_seq"', 1262, true);
+SELECT pg_catalog.setval('public."Customer_id_seq"', 1305, true);
 
 
 --
 -- Name: DistributorPayment_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mea
 --
 
-SELECT pg_catalog.setval('public."DistributorPayment_id_seq"', 444, true);
+SELECT pg_catalog.setval('public."DistributorPayment_id_seq"', 480, true);
 
 
 --
@@ -35918,35 +38590,35 @@ SELECT pg_catalog.setval('public."Distributor_id_seq"', 190, true);
 -- Name: InvoiceExpense_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mea
 --
 
-SELECT pg_catalog.setval('public."InvoiceExpense_id_seq"', 108, true);
+SELECT pg_catalog.setval('public."InvoiceExpense_id_seq"', 124, true);
 
 
 --
 -- Name: InvoiceItem_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mea
 --
 
-SELECT pg_catalog.setval('public."InvoiceItem_id_seq"', 11275, true);
+SELECT pg_catalog.setval('public."InvoiceItem_id_seq"', 12043, true);
 
 
 --
 -- Name: InvoiceSurcharge_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mea
 --
 
-SELECT pg_catalog.setval('public."InvoiceSurcharge_id_seq"', 96, true);
+SELECT pg_catalog.setval('public."InvoiceSurcharge_id_seq"', 108, true);
 
 
 --
 -- Name: Invoice_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mea
 --
 
-SELECT pg_catalog.setval('public."Invoice_id_seq"', 3604, true);
+SELECT pg_catalog.setval('public."Invoice_id_seq"', 3871, true);
 
 
 --
 -- Name: OrganizationSetting_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mea
 --
 
-SELECT pg_catalog.setval('public."OrganizationSetting_id_seq"', 362, true);
+SELECT pg_catalog.setval('public."OrganizationSetting_id_seq"', 364, true);
 
 
 --
@@ -35954,6 +38626,13 @@ SELECT pg_catalog.setval('public."OrganizationSetting_id_seq"', 362, true);
 --
 
 SELECT pg_catalog.setval('public."Organization_id_seq"', 13, true);
+
+
+--
+-- Name: Permission_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mea
+--
+
+SELECT pg_catalog.setval('public."Permission_id_seq"', 1, false);
 
 
 --
@@ -35967,35 +38646,42 @@ SELECT pg_catalog.setval('public."Procedure_id_seq"', 321, true);
 -- Name: ProductBatch_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mea
 --
 
-SELECT pg_catalog.setval('public."ProductBatch_id_seq"', 3187, true);
+SELECT pg_catalog.setval('public."ProductBatch_id_seq"', 3206, true);
 
 
 --
 -- Name: ProductMovement_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mea
 --
 
-SELECT pg_catalog.setval('public."ProductMovement_id_seq"', 14017, true);
+SELECT pg_catalog.setval('public."ProductMovement_id_seq"', 14706, true);
 
 
 --
 -- Name: Product_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mea
 --
 
-SELECT pg_catalog.setval('public."Product_id_seq"', 1652, true);
+SELECT pg_catalog.setval('public."Product_id_seq"', 1659, true);
 
 
 --
 -- Name: ReceiptItem_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mea
 --
 
-SELECT pg_catalog.setval('public."ReceiptItem_id_seq"', 6898, true);
+SELECT pg_catalog.setval('public."ReceiptItem_id_seq"', 6966, true);
 
 
 --
 -- Name: Receipt_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mea
 --
 
-SELECT pg_catalog.setval('public."Receipt_id_seq"', 1071, true);
+SELECT pg_catalog.setval('public."Receipt_id_seq"', 1107, true);
+
+
+--
+-- Name: Role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mea
+--
+
+SELECT pg_catalog.setval('public."Role_id_seq"', 1, false);
 
 
 --
@@ -36009,7 +38695,23 @@ SELECT pg_catalog.setval('public."User_id_seq"', 63, true);
 -- Name: typeorm_migration_id_seq; Type: SEQUENCE SET; Schema: public; Owner: mea
 --
 
-SELECT pg_catalog.setval('public.typeorm_migration_id_seq', 8, true);
+SELECT pg_catalog.setval('public.typeorm_migration_id_seq', 10, true);
+
+
+--
+-- Name: Role PK_9309532197a7397548e341e5536; Type: CONSTRAINT; Schema: public; Owner: mea
+--
+
+ALTER TABLE ONLY public."Role"
+    ADD CONSTRAINT "PK_9309532197a7397548e341e5536" PRIMARY KEY (id);
+
+
+--
+-- Name: Permission PK_96c82eedac1e126a1aa90eb0285; Type: CONSTRAINT; Schema: public; Owner: mea
+--
+
+ALTER TABLE ONLY public."Permission"
+    ADD CONSTRAINT "PK_96c82eedac1e126a1aa90eb0285" PRIMARY KEY (id);
 
 
 --
@@ -36182,13 +38884,6 @@ CREATE INDEX "IDX_DistributorPayment__distributorId" ON public."DistributorPayme
 --
 
 CREATE INDEX "IDX_DistributorPayment__receiptId" ON public."DistributorPayment" USING btree (oid, "receiptId");
-
-
---
--- Name: IDX_EMPLOYEE__OID_USERNAME; Type: INDEX; Schema: public; Owner: mea
---
-
-CREATE UNIQUE INDEX "IDX_EMPLOYEE__OID_USERNAME" ON public."User" USING btree (oid, username);
 
 
 --

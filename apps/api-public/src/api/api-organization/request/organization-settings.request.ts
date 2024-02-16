@@ -2,15 +2,15 @@ import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
 import { IsArray, IsEnum, IsIn, IsString } from 'class-validator'
 import { keysEnum } from '../../../../../_libs/common/helpers/typescript.helper'
-import { OrganizationSettingType } from '../../../../../_libs/database/entities/organization-setting.entity'
+import { ScreenSettingKey } from '../../../../../_libs/database/entities/organization-setting.entity'
 
 export class OrganizationSettingGetQuery {
   // @ApiProperty({
   //     name: 'types[]',
   //     example: [
-  //         OrganizationSettingType.PRODUCT_GROUP,
-  //         OrganizationSettingType.PRODUCT_ROUTE,
-  //         OrganizationSettingType.PRODUCT_UNIT,
+  //         ScreenSettingKey.PRODUCT_GROUP,
+  //         ScreenSettingKey.PRODUCT_ROUTE,
+  //         ScreenSettingKey.PRODUCT_UNIT,
   //     ],
   //     type: Number,
   //     isArray: true,
@@ -22,8 +22,8 @@ export class OrganizationSettingGetQuery {
 
   @ApiProperty({
     type: 'string',
-    example: JSON.stringify(keysEnum(OrganizationSettingType)),
-    description: JSON.stringify(keysEnum(OrganizationSettingType)),
+    example: JSON.stringify(keysEnum(ScreenSettingKey)),
+    description: JSON.stringify(keysEnum(ScreenSettingKey)),
   })
   @Transform(({ value }) => {
     try {
@@ -34,15 +34,15 @@ export class OrganizationSettingGetQuery {
   })
   @Expose()
   @IsArray()
-  @IsIn(keysEnum(OrganizationSettingType), { each: true })
-  types: OrganizationSettingType[]
+  @IsIn(keysEnum(ScreenSettingKey), { each: true })
+  types: ScreenSettingKey[]
 }
 
 export class OrganizationSettingUpdateParams {
-  @ApiProperty({ enum: OrganizationSettingType, example: OrganizationSettingType.PRODUCT_GROUP })
+  @ApiProperty({ enum: ScreenSettingKey, example: ScreenSettingKey.PRODUCT_GROUP })
   @Expose()
-  @IsEnum(OrganizationSettingType)
-  type: OrganizationSettingType
+  @IsEnum(ScreenSettingKey)
+  type: ScreenSettingKey
 }
 
 export class OrganizationSettingUpdateBody {

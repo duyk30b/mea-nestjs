@@ -80,7 +80,7 @@ export class PermissionPaginationQuery extends IntersectionType(
 ) {}
 
 export class PermissionGetManyQuery extends IntersectionType(
-  PickType(PermissionGetQuery, ['filter', 'relation']),
+  PickType(PermissionGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
 ) {}
 

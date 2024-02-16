@@ -13,7 +13,16 @@ export class RoleRepository extends PostgreSqlRepository<
   RoleInsertType,
   RoleUpdateType
 > {
+  private dataMap: Record<string, Role> = {}
+
   constructor(@InjectRepository(Role) private roleRepository: Repository<Role>) {
     super(roleRepository)
+  }
+
+  async getOneFromCache(id: number) {
+    if (!this.dataMap[id]) {
+      this.dataMap[id] = await this.findOneById(id)
+    }
+    return this.dataMap[id]
   }
 }

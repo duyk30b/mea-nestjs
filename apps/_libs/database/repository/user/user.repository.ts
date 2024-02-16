@@ -13,7 +13,16 @@ export class UserRepository extends PostgreSqlRepository<
   UserInsertType,
   UserUpdateType
 > {
+  private dataMap: Record<string, User> = {}
+
   constructor(@InjectRepository(User) private userRepository: Repository<User>) {
     super(userRepository)
+  }
+
+  async getOneFromCache(id: number) {
+    if (!this.dataMap[id]) {
+      this.dataMap[id] = await this.findOneById(id)
+    }
+    return this.dataMap[id]
   }
 }

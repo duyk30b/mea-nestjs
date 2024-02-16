@@ -3,11 +3,11 @@ import { FastifyRequest } from 'fastify'
 
 export type TExternal = {
   ip: string
+  os: string
+  browser: string
+  mobile: 1 | 0
   oid?: number
   uid?: number
-  username?: string
-  roleId?: number
-  orgPhone?: string
 }
 
 export interface RequestExternal extends FastifyRequest {

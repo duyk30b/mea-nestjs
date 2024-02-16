@@ -15,6 +15,13 @@ hotfix:
 	docker compose -f docker-compose.production.yml --env-file .env.production up -d --build
 	docker compose logs -f api_public
 
+up:
+	docker compose up -d
+	docker compose logs -f api_public
+
+down:
+	docker compose down
+	
 logs:
 	docker compose logs -f api_public
 

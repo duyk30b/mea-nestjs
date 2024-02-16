@@ -1,3 +1,4 @@
+import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import { ClassSerializerInterceptor, Logger, ValidationError, ValidationPipe } from '@nestjs/common'
 import { NestFactory, Reflector } from '@nestjs/core'
@@ -14,20 +15,16 @@ import { TransformResponseInterceptor } from '../../_libs/common/interceptor/tra
 import { AppModule } from './app.module'
 import { GlobalConfig } from './environments'
 import { RootGuard } from './guards/root.guard'
+import { UserGuard } from './guards/user.guard.'
 
 async function bootstrap() {
   const logger = new Logger('bootstrap')
+
   const fastifyAdapter = new FastifyAdapter()
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  fastifyAdapter.register(require('@fastify/multipart'), {
-    attachFieldsToBody: true,
-    addToBody: true,
-  })
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, fastifyAdapter, {
     logger: ['error', 'warn', 'log', 'debug'],
   })
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  app.register(require('@fastify/cors'), { origin: '*' })
+  app.register(cors, { origin: '*' })
 
   await app.register(helmet)
   app.use(requestIp.mw())
@@ -44,7 +41,7 @@ async function bootstrap() {
 
   app.useGlobalFilters(new ServerExceptionFilter())
 
-  app.useGlobalGuards(new RootGuard(app.get(Reflector)))
+  app.useGlobalGuards(new UserGuard(app.get(Reflector)), new RootGuard(app.get(Reflector)))
 
   app.useGlobalPipes(
     new ValidationPipe({

@@ -25,7 +25,7 @@ export class StatisticRepository {
     return data[0]
   }
 
-  async sumDebt(oid: number): Promise<number> {
+  async sumCustomerDebt(oid: number): Promise<number> {
     const { sum } = await this.manager
       .createQueryBuilder(Customer, 'customer')
       .select('SUM(debt)', 'sum')

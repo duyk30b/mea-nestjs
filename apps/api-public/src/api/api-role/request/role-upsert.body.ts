@@ -1,11 +1,11 @@
 import { ApiPropertyOptional, PartialType } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
-import { IsIn, IsNotEmpty, IsString } from 'class-validator'
+import { IsDefined, IsIn, IsNotEmpty, IsString } from 'class-validator'
 
 export class RoleCreateBody {
   @ApiPropertyOptional({ example: 'Bán hàng' })
   @Expose()
-  @IsNotEmpty()
+  @IsDefined()
   @IsString()
   name: string // Hoạt chất
 

@@ -12,6 +12,7 @@ import { KafkaContext, NatsContext } from '@nestjs/microservices'
 import { ThrottlerException } from '@nestjs/throttler'
 import { I18nPath, I18nTranslations } from 'assets/generated/i18n.generated'
 import { Response } from 'express'
+import { FastifyReply, FastifyRequest } from 'fastify'
 import { I18nContext } from 'nestjs-i18n'
 import { from } from 'rxjs'
 import * as url from 'url'
@@ -29,7 +30,7 @@ export class BusinessException extends Error {
   public statusCode: HttpStatus
   public args?: Record<string, string | number>
 
-  constructor(message: I18nPath, statusCode = HttpStatus.BAD_REQUEST, args = {}) {
+  constructor(message: I18nPath, args = {}, statusCode = HttpStatus.BAD_REQUEST) {
     super(message)
     this.statusCode = statusCode
     this.args = args
@@ -42,7 +43,10 @@ export class ServerExceptionFilter implements ExceptionFilter {
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR
     let { message } = exception
     const { stack } = exception
+    Logger.error(stack)
+
     const errors: any[] = (exception as any).errors || []
+    const i18n = I18nContext.current<I18nTranslations>(host)
 
     switch (exception['constructor'].name) {
       case ValidationException.name: {
@@ -50,7 +54,6 @@ export class ServerExceptionFilter implements ExceptionFilter {
         break
       }
       case BusinessException.name: {
-        const i18n = I18nContext.current<I18nTranslations>(host)
         message = i18n.translate(exception.message as any, {
           args: (exception as BusinessException).args,
         })
@@ -67,6 +70,7 @@ export class ServerExceptionFilter implements ExceptionFilter {
       }
       case ForbiddenException.name: {
         statusCode = HttpStatus.FORBIDDEN
+        message = i18n.translate('common.Forbidden')
         break
       }
     }
@@ -75,7 +79,7 @@ export class ServerExceptionFilter implements ExceptionFilter {
 
     if (host.getType() === 'http') {
       const ctx = host.switchToHttp()
-      const response = ctx.getResponse<Response>()
+      const response = ctx.getResponse<FastifyReply>()
       const request = ctx.getRequest()
       const requestExternal: RequestExternal = request.raw
 
@@ -83,6 +87,7 @@ export class ServerExceptionFilter implements ExceptionFilter {
       const urlParse = url.parse(originalUrl, true)
       Logger.error(
         JSON.stringify({
+          statusCode,
           message,
           type: '[HTTP]',
           method,
@@ -95,11 +100,12 @@ export class ServerExceptionFilter implements ExceptionFilter {
         exception.name
       )
 
-      response.status(statusCode).send({
+      return response.code(statusCode).send({
         statusCode,
         errors,
         message,
         path: originalUrl,
+        time: new Date().toISOString(),
       })
     } else if (host.getType() === 'rpc') {
       if (res.constructor.name === 'NatsContext') {

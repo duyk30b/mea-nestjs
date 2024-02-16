@@ -7,8 +7,18 @@ import { BullQueueService } from './bull-queue.service'
 import { QUEUE_EVENT } from './bull-queue.variable'
 
 const QUEUES: BullModuleOptions[] = [
-  { name: QUEUE_EVENT.TEST_JOB },
-  { name: QUEUE_EVENT.KAFKA_JOB },
+  {
+    name: QUEUE_EVENT.PING,
+    defaultJobOptions: { attempts: 3, removeOnComplete: true },
+  },
+  {
+    name: QUEUE_EVENT.DEMO,
+    defaultJobOptions: { attempts: 3, removeOnComplete: true },
+  },
+  {
+    name: QUEUE_EVENT.ITEM_STOCK_MOVEMENT,
+    limiter: { max: 1, duration: 200, groupKey: 'groupKey' },
+  },
 ]
 
 @Module({})
@@ -17,7 +27,6 @@ export class BullQueueModule {
     return {
       module: BullQueueModule,
       imports: [
-        ConfigModule.forFeature(RedisConfig),
         BullModule.forRootAsync({
           imports: [ConfigModule.forFeature(RedisConfig)],
           inject: [RedisConfig.KEY],
@@ -26,9 +35,11 @@ export class BullQueueModule {
               redis: {
                 host: redisConfig.host,
                 port: redisConfig.port,
+                password: redisConfig.password,
                 db: +redisConfig.db,
               },
               defaultJobOptions: { removeOnComplete: true },
+              prefix: 'item-stock-planning',
             }
             return bullConfig
           },
@@ -41,6 +52,7 @@ export class BullQueueModule {
     const base = BullQueueModule.register()
     base.providers = [...(base.providers || []), BullQueueService]
     base.exports = [...(base.exports || []), BullQueueService]
+    base.global = true
     return base
   }
 

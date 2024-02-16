@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
+import { arrayToKeyValue } from '../../../common/helpers/object.helper'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
 import Permission, {
   PermissionInsertType,
@@ -16,6 +17,9 @@ export class PermissionRepository extends PostgreSqlRepository<
   PermissionInsertType,
   PermissionUpdateType
 > {
+  private newest = true
+  private dataMap: Record<string, Permission> = {}
+
   constructor(@InjectRepository(Permission) private permissionRepository: Repository<Permission>) {
     super(permissionRepository)
   }
@@ -28,9 +32,22 @@ export class PermissionRepository extends PostgreSqlRepository<
       .insert()
       .into(Permission)
       .values(data)
-      .orUpdate(['level', 'code', 'name', 'parentId', 'status', 'pathId'], ['id'])
+      .orUpdate(['level', 'code', 'name', 'parentId', 'rootId', 'pathId', 'isActive'], ['id'])
       .execute()
 
     return { idsEffect: insertResult.identifiers.map((i) => i.id) }
+  }
+
+  setNewest(data: boolean) {
+    this.newest = data
+  }
+
+  async getMapFromCache() {
+    if (this.newest) {
+      const dataList = await this.findManyBy({})
+      this.dataMap = arrayToKeyValue(dataList, 'id')
+      this.newest = false
+    }
+    return this.dataMap
   }
 }

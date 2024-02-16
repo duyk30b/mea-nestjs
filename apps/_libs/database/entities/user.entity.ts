@@ -1,9 +1,13 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
 import { EGender } from '../common/variable'
+import Device from './device'
 import Organization from './organization.entity'
 import Role from './role.entity'
+
+export enum UserGroup {
+  ROOT = 'ROOT',
+}
 
 @Entity('User')
 export default class User {
@@ -27,7 +31,7 @@ export default class User {
   @Column({ name: 'hashPassword', type: 'character varying', length: 255 })
   hashPassword: string
 
-  @Expose()
+  @Expose({ groups: [UserGroup.ROOT] })
   @Column({ type: 'character varying', length: 255, nullable: true })
   secret: string
 
@@ -102,13 +106,16 @@ export default class User {
   @ManyToOne((type) => Role, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'roleId', referencedColumnName: 'id' })
   role: Role
+
+  @Expose()
+  devices: Device[]
 }
 
 export type UserInsertType = Omit<
   User,
-  'id' | 'role' | 'organization' | 'createdAt' | 'updatedAt' | 'deletedAt'
+  'id' | 'role' | 'organization' | 'devices' | 'createdAt' | 'updatedAt' | 'deletedAt'
 >
 export type UserUpdateType = Omit<
   User,
-  'oid' | 'id' | 'role' | 'organization' | 'createdAt' | 'updatedAt'
+  'oid' | 'id' | 'role' | 'organization' | 'devices' | 'createdAt' | 'updatedAt'
 >

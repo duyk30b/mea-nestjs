@@ -18,7 +18,7 @@ export class LongNguyenApi {
   //     console.log('🚀 ======== SEED: organization config ========')
   //     const orgProductGroupSetting = this.manager.create(OrganizationSetting, {
   //         oid,
-  //         type: OrganizationSettingType.PRODUCT_GROUP,
+  //         type: ScreenSettingKey.PRODUCT_GROUP,
   //         data: JSON.stringify(productGroupExampleData),
   //     })
   //     await this.manager.save(OrganizationSetting, orgProductGroupSetting)

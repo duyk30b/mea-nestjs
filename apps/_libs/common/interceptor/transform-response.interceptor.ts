@@ -29,9 +29,9 @@ export class TransformResponseInterceptor implements NestInterceptor {
         message: i18n.translate(response?.message || 'common.Success', {
           args: response?.args || {},
         }),
-        data: response?.data,
-        meta: response?.meta,
         time: new Date().toISOString(),
+        meta: response?.meta,
+        data: response?.data,
       }))
     )
   }

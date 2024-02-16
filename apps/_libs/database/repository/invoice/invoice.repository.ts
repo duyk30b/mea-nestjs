@@ -73,7 +73,7 @@ export class InvoiceRepository extends PostgreSqlRepository<
     return invoice
   }
 
-  async sumDebt(condition: BaseCondition<Invoice>): Promise<number> {
+  async sumInvoiceDebt(condition: BaseCondition<Invoice>): Promise<number> {
     const where = this.getWhereOptions(condition)
     const { sum } = await this.manager
       .createQueryBuilder(Invoice, 'invoice')

@@ -140,8 +140,8 @@ export class ApiStatisticService {
     return { data: topData }
   }
 
-  async sumDebt(oid: number): Promise<BaseResponse> {
-    const customerSumDebt = await this.statisticRepository.sumDebt(oid)
+  async sumCustomerDebt(oid: number): Promise<BaseResponse> {
+    const customerSumDebt = await this.statisticRepository.sumCustomerDebt(oid)
     return { data: { customerSumDebt } }
   }
 

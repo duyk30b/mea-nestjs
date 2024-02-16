@@ -2,8 +2,7 @@ import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { TExternal } from '../../../../_libs/common/request/external.request'
-import { IRefreshTokenPayload } from '../../../../_libs/common/request/payload'
+import { IAccessTokenPayload, IRefreshTokenPayload } from '../../../../_libs/common/request/payload'
 import User from '../../../../_libs/database/entities/user.entity'
 import { JwtConfig } from '../../environments'
 
@@ -15,13 +14,9 @@ export class JwtExtendService {
   ) {}
 
   createAccessToken(user: User, ip: string) {
-    const userPayload: TExternal = {
-      ip,
+    const userPayload: IAccessTokenPayload = {
       oid: user.organization.id,
       uid: user.id,
-      username: user.username,
-      roleId: user.roleId,
-      orgPhone: user.organization.phone,
     }
     const exp = Date.now() + this.jwtConfig.accessTime
 
@@ -37,7 +32,6 @@ export class JwtExtendService {
 
   createRefreshToken(user: User, ip: string) {
     const userPayload: IRefreshTokenPayload = {
-      ip,
       oid: user.organization.id,
       uid: user.id,
     }
@@ -59,21 +53,21 @@ export class JwtExtendService {
     return { accessToken, refreshToken, accessExp, refreshExp }
   }
 
-  verifyAccessToken(accessToken: string, ip: string): TExternal {
+  verifyAccessToken(accessToken: string, ip: string): IAccessTokenPayload {
     try {
       const jwtPayload = this.jwtService.verify(accessToken, {
         secret: this.jwtConfig.accessKey,
       })
 
-      const data = jwtPayload.data as TExternal
+      const data = jwtPayload.data as IAccessTokenPayload
       // if (data.ip !== ip) throw new Error(ErrorMessage.Token.WrongIp) // accessToken allow change ip
 
       return data
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
-        throw new BusinessException('error.Token.Expired', HttpStatus.UNAUTHORIZED)
+        throw new BusinessException('error.Token.Expired', {}, HttpStatus.UNAUTHORIZED)
       } else if (error.name === 'JsonWebTokenError') {
-        throw new BusinessException('error.Token.Invalid', HttpStatus.UNAUTHORIZED)
+        throw new BusinessException('error.Token.Invalid', {}, HttpStatus.UNAUTHORIZED)
       }
       throw error
     }
@@ -91,9 +85,9 @@ export class JwtExtendService {
       return data
     } catch (error) {
       if (error.name === 'TokenExpiredError') {
-        throw new BusinessException('error.Token.Expired', HttpStatus.UNAUTHORIZED)
+        throw new BusinessException('error.Token.Expired', {}, HttpStatus.UNAUTHORIZED)
       } else if (error.name === 'JsonWebTokenError') {
-        throw new BusinessException('error.Token.Invalid', HttpStatus.UNAUTHORIZED)
+        throw new BusinessException('error.Token.Invalid', {}, HttpStatus.UNAUTHORIZED)
       }
       throw error
     }

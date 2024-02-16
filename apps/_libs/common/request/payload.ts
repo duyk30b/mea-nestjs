@@ -1,5 +1,9 @@
+export interface IAccessTokenPayload {
+  uid: number
+  oid: number
+}
+
 export interface IRefreshTokenPayload {
-  ip: string
   uid: number
   oid: number
 }

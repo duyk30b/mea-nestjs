@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common'
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { APP_GUARD } from '@nestjs/core'
 import { ScheduleModule } from '@nestjs/schedule'
@@ -13,15 +13,17 @@ import {
 import * as path from 'path'
 import { RepositoryModule } from '../../_libs/database/repository/repository.module'
 import { SqlModule } from '../../_libs/database/sql.module'
+import { CacheManagerModule } from '../../_libs/transporter/cache-manager/cache-manager.module'
 import { ApiModule } from './api/api.module'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
+import { AuthModule } from './auth/auth.module'
+import { JwtExtendModule } from './auth/jwt-extend/jwt-extend.module'
 import { EmailModule } from './components/email/email.module'
 import { HealthModule } from './components/health/health.module'
-import { JwtExtendModule } from './components/jwt-extend/jwt-extend.module'
 import { PermissionGuard } from './guards/permission.guard'
 import { DetectClientMiddleware } from './middleware/detect-client.middleware copy'
-import { ValidateTokenMiddleware } from './middleware/validate-token.middleware'
+import { RootModule } from './root/root.module'
 
 @Module({
   imports: [
@@ -48,7 +50,11 @@ import { ValidateTokenMiddleware } from './middleware/validate-token.middleware'
     EmailModule,
     JwtExtendModule,
 
+    CacheManagerModule,
+
+    AuthModule,
     ApiModule,
+    RootModule,
   ],
   controllers: [AppController],
   providers: [
@@ -67,9 +73,9 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(I18nMiddleware).forRoutes('*')
     consumer.apply(DetectClientMiddleware).forRoutes('*')
-    consumer
-      .apply(ValidateTokenMiddleware)
-      .exclude('auth/(.*)', '/documents/(.*)', { path: 'health', method: RequestMethod.GET })
-      .forRoutes('*')
+    // consumer
+    //   .apply(ValidateTokenMiddleware)
+    //   .exclude('auth/(.*)', '/documents/(.*)', { path: 'health', method: RequestMethod.GET })
+    //   .forRoutes('*')
   }
 }

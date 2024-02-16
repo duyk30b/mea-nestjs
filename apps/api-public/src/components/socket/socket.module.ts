@@ -1,5 +1,5 @@
 import { Global, Module } from '@nestjs/common'
-import { JwtExtendModule } from '../jwt-extend/jwt-extend.module'
+import { JwtExtendModule } from '../../auth/jwt-extend/jwt-extend.module'
 import { SocketGateway } from './socket.gateway'
 import { SocketService } from './socket.service'
 

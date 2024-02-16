@@ -4,8 +4,10 @@ import { BusinessException } from '../../../../_libs/common/exception-filter/exc
 import { encrypt } from '../../../../_libs/common/helpers/string.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { User } from '../../../../_libs/database/entities'
+import Device from '../../../../_libs/database/entities/device'
 import { UserRepository } from '../../../../_libs/database/repository'
 import { RoleRepository } from '../../../../_libs/database/repository/role/role.repository'
+import { CacheTokenService } from '../../../../_libs/transporter/cache-manager/cache-token.service'
 import { RootUserPaginationQuery } from './request/root-user-get.query'
 import { RootUserCreateBody, RootUserUpdateBody } from './request/root-user-upsert.body'
 
@@ -15,7 +17,8 @@ export class ApiRootUserService {
 
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly roleRepository: RoleRepository
+    private readonly roleRepository: RoleRepository,
+    private readonly cacheTokenService: CacheTokenService
   ) {}
 
   async pagination(query: RootUserPaginationQuery): Promise<BaseResponse> {
@@ -31,6 +34,24 @@ export class ApiRootUserService {
       },
       sort: sort || { id: 'DESC' },
     })
+
+    for (let i = 0; i < data.length; i++) {
+      const user = data[i]
+      const tokenData = await this.cacheTokenService.getToken({
+        oid: user.oid,
+        userId: user.id,
+      })
+      user.devices = tokenData.map((t) => {
+        const device = new Device()
+        device.code = t.code
+        device.ip = t.ip
+        device.os = t.os
+        device.browser = t.browser
+        device.mobile = t.mobile
+        return device
+      })
+    }
+
     return {
       data,
       meta: { total, page, limit },
@@ -113,5 +134,15 @@ export class ApiRootUserService {
     }
     const data = await this.userRepository.findOneById(id)
     return { data }
+  }
+
+  async deviceLogout(options: { oid: number; userId: number; code: string }) {
+    const { oid, userId, code } = options
+    const result = await this.cacheTokenService.removeDevice({
+      oid,
+      userId,
+      code,
+    })
+    return { data: result }
   }
 }

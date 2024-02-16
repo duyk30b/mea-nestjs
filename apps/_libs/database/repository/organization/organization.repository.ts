@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { In, Repository } from 'typeorm'
+import { Repository } from 'typeorm'
 import { Organization, OrganizationSetting } from '../../entities'
-import { OrganizationSettingType } from '../../entities/organization-setting.entity'
 import { OrganizationInsertType, OrganizationUpdateType } from '../../entities/organization.entity'
 import { PostgreSqlRepository } from '../postgresql.repository'
 
@@ -14,6 +13,8 @@ export class OrganizationRepository extends PostgreSqlRepository<
   OrganizationInsertType,
   OrganizationUpdateType
 > {
+  private dataMap: Record<string, Organization> = {}
+
   constructor(
     @InjectRepository(Organization) private organizationRepository: Repository<Organization>,
     @InjectRepository(OrganizationSetting)
@@ -22,28 +23,10 @@ export class OrganizationRepository extends PostgreSqlRepository<
     super(organizationRepository)
   }
 
-  async getAllSetting(oid: number) {
-    return await this.organizationSettingRepository.find({
-      select: { type: true, data: true },
-      where: { oid },
-    })
-  }
-
-  async getSettings(oid: number, types: OrganizationSettingType[]) {
-    return await this.organizationSettingRepository.find({
-      select: { type: true, data: true },
-      where: { oid, type: In(types) },
-    })
-  }
-
-  async upsertSetting(oid: number, type: OrganizationSettingType, data: string) {
-    const dto = this.organizationSettingRepository.create({ oid, type, data })
-    return await this.organizationSettingRepository
-      .createQueryBuilder()
-      .insert()
-      .into(OrganizationSetting)
-      .values(dto)
-      .orUpdate(['data'], ['oid', 'type'])
-      .execute()
+  async getOneFromCache(id: number) {
+    if (!this.dataMap[id]) {
+      this.dataMap[id] = await this.findOneById(id)
+    }
+    return this.dataMap[id]
   }
 }

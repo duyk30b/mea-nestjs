@@ -13,7 +13,11 @@
   },
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.codeActionsOnSave": ["source.sortImports", "source.formatDocument", "source.fixAll"]
+    "editor.codeActionsOnSave": [
+      "source.sortImports",
+      "source.formatDocument",
+      "source.fixAll.eslint"
+    ]
   },
   "search.smartCase": true,
   "javascript.preferences.quoteStyle": "single",
@@ -37,6 +41,7 @@
     "jdbc",
     "kafkajs",
     "letsencrypt",
+    "middie",
     "nats",
     "nestjs",
     "Partitioner",

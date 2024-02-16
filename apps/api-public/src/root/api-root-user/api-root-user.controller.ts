@@ -1,15 +1,28 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  SerializeOptions,
+} from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto'
+import { UserGroup } from '../../../../_libs/database/entities/user.entity'
 import { IsRoot } from '../../guards/root.guard'
 import { ApiRootUserService } from './api-root-user.service'
+import { DeviceLogoutBody } from './request/device-logout.query'
 import { RootUserPaginationQuery } from './request/root-user-get.query'
 import { RootUserCreateBody, RootUserUpdateBody } from './request/root-user-upsert.body'
 
+@Controller('root')
 @ApiTags('Root')
 @ApiBearerAuth('access-token')
 @IsRoot() // ===== Controller dành riêng cho ROOT =====
-@Controller('root')
+@SerializeOptions({ groups: [UserGroup.ROOT] })
 export class ApiRootUserController {
   constructor(private readonly apiRootUserService: ApiRootUserService) {}
 
@@ -33,5 +46,14 @@ export class ApiRootUserController {
   @ApiParam({ name: 'id', example: 1 })
   async userDeleteOne(@Param() { id }: IdParam) {
     return await this.apiRootUserService.deleteOne(id)
+  }
+
+  @Post('user/device-logout/:id')
+  deviceLogout(@Param() { id }: IdParam, @Body() body: DeviceLogoutBody) {
+    return this.apiRootUserService.deviceLogout({
+      oid: body.oid,
+      userId: +id,
+      code: body.code,
+    })
   }
 }
