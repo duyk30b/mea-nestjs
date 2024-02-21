@@ -43,9 +43,9 @@ export class ApiProductService {
       const productBatches = await this.productBatchRepository.findManyBy({
         productId: { IN: productIds },
         // quantity: { NOT: 0 }, // cứ lấy hết số lượng 0, về frontend convert sau
-        isActive: 1,
         deletedAt: { IS_NULL: true },
       })
+
       data.forEach((item) => {
         item.productBatches = productBatches
           .filter((ma) => ma.productId === item.id)
@@ -82,7 +82,6 @@ export class ApiProductService {
       const productBatches = await this.productBatchRepository.findManyBy({
         id: { IN: productIds },
         quantity: filter?.productBatch?.quantity,
-        isActive: filter?.productBatch?.isActive,
         deletedAt: { IS_NULL: true },
       })
       products.forEach((item) => {

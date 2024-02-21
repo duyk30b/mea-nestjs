@@ -5,6 +5,8 @@ import Product from './product.entity'
 
 @Entity('ProductBatch')
 @Index('IDX_ProductBatch__oid_productId', ['oid', 'productId'])
+@Index('IDX_ProductBatch__oid_updatedAt', ['oid', 'updatedAt'])
+@Index('IDX_ProductBatch__quantity', ['quantity'])
 export default class ProductBatch extends BaseEntity {
   @Column()
   @Expose()
@@ -61,10 +63,6 @@ export default class ProductBatch extends BaseEntity {
   @Column({ default: 0 })
   @Expose()
   quantity: number
-
-  @Column({ type: 'smallint', default: 1 })
-  @Expose()
-  isActive: 0 | 1
 
   @Column({
     type: 'bigint',

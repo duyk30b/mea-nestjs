@@ -1,12 +1,10 @@
-import { Body, Controller, Delete, Param, Post } from '@nestjs/common'
+import { Body, Controller, Delete, Post } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { JwtExtendService } from '../jwt-extend/jwt-extend.service'
 import { ApiAuthService } from './api-auth.service'
 import { ForgotPasswordBody } from './request/forgot-password.body'
 import { LoginBody } from './request/login.body'
 import { RefreshTokenBody } from './request/refresh-token.body'
-import { RegisterBody } from './request/register.body'
 import { ResetPasswordBody } from './request/reset-password.body'
 
 @ApiTags('Auth')

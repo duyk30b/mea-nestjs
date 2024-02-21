@@ -38,11 +38,6 @@ export class ProductBatchInsertBody {
   @Transform(({ value }) => Math.round(value || 0))
   @IsNumber()
   wholesalePrice: number
-
-  @ApiPropertyOptional({ example: 1 })
-  @Expose()
-  @IsIn([0, 1])
-  isActive: 0 | 1
 }
 
 export class ProductBatchUpdateBody extends OmitType(ProductBatchInsertBody, [
