@@ -6,56 +6,53 @@
 // import Diagnosis from './diagnosis.entity'
 // import Invoice from './invoice.entity'
 
-// @Entity('arrival')
+// @Entity('Arrival')
 // @Index(['oid'])
 // @Index('IDX_ARRIVAL___OID__START_TIME', ['oid', 'startTime'])
 // @Index('IDX_ARRIVAL___OID__CUSTOMER_ID__START_TIME', ['oid', 'customerId', 'startTime'])
 // export default class Arrival extends BaseEntity {
-//     @Column({ name: 'customer_id', nullable: true })
-//     @Expose({ name: 'customer_id' })
-//     customerId: number
+//   @Column({ name: 'customer_id', nullable: true })
+//   @Expose({ name: 'customer_id' })
+//   customerId: number
 
-//     @Column({ name: 'type', type: 'tinyint', default: 0 })
-//     @Expose({ name: 'type' })
-//     type: ArrivalType
+//   // @Column({ type: 'smallint', default: 1 })
+//   // @Expose()
+//   // diagnosisStatus: DiagnosisStatus
 
-//     @Column({ name: 'status', type: 'tinyint', default: 0 })
-//     @Expose({ name: 'status' })
-//     status: ArrivalStatus
+//   // @Column({ type: 'smallint', default: 1 })
+//   // @Expose()
+//   // paymentStatus: PaymentStatus
 
-//     @Column({
-//         name: 'start_time',
-//         type: 'bigint',
-//         nullable: true,
-//         transformer: {
-//             to: (value) => value,
-//             from: (value) => value == null ? value : Number(value),
-//         },
-//     })
-//     @Expose({ name: 'start_time' })
-//     startTime: number // Giờ vào khám
+//   @Column({
+//     type: 'bigint',
+//     default: () => '(EXTRACT(epoch FROM now()) * (1000))',
+//     transformer: {
+//       to: (value) => value,
+//       from: (value) => (value == null ? value : Number(value)),
+//     },
+//   })
+//   @Expose()
+//   startTime: number
 
-//     @Column({
-//         name: 'end_time',
-//         type: 'bigint',
-//         nullable: true,
-//         transformer: {
-//             to: (value) => value,
-//             from: (value) => value == null ? value : Number(value),
-//         },
-//     })
-//     @Expose({ name: 'end_time' })
-//     endTime: number // Giờ kết thúc khám
+//   @Column({
+//     type: 'bigint',
+//     transformer: {
+//       to: (value) => value,
+//       from: (value) => (value == null ? value : Number(value)),
+//     },
+//   })
+//   @Expose()
+//   endTime: number
 
-//     @ManyToOne((type) => Customer, { createForeignKeyConstraints: false })
-//     @JoinColumn({ name: 'customer_id', referencedColumnName: 'id' })
-//     @Expose({ name: 'customer' })
-//     customer: Customer
+//   @ManyToOne((type) => Customer, { createForeignKeyConstraints: false })
+//   @JoinColumn({ name: 'customer_id', referencedColumnName: 'id' })
+//   @Expose({ name: 'customer' })
+//   customer: Customer
 
-//     @Expose({ name: 'invoices' })
-//     @OneToMany(() => Invoice, (invoice) => invoice.arrival)
-//     invoices: Invoice[]
+//   // @Expose({ name: 'invoices' })
+//   // @OneToMany(() => Invoice, (invoice) => invoice.arrival)
+//   // invoices: Invoice[]
 
-//     @Expose({ name: 'diagnosis' })
-//     diagnosis: Diagnosis
+//   @Expose({ name: 'diagnosis' })
+//   diagnosis: Diagnosis
 // }
