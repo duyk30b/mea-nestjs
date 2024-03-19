@@ -48,7 +48,7 @@ import { RootModule } from './root/root.module'
     JwtExtendModule,
     HealthModule,
     EmailModule,
-    CronJobModule,
+    // CronJobModule,
 
     CacheManagerModule,
 
