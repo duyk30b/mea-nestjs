@@ -2,13 +2,16 @@ import { Injectable } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, EntityManager, Repository } from 'typeorm'
 import { Product } from '../../entities'
+import { ProductInsertType, ProductUpdateType } from '../../entities/product.entity'
 import { PostgreSqlRepository } from '../postgresql.repository'
 
 @Injectable()
 export class ProductRepository extends PostgreSqlRepository<
   Product,
   { [P in 'id' | 'quantity' | 'fullName']?: 'ASC' | 'DESC' },
-  { [P in 'productBatches']?: boolean }
+  { [P in 'productBatches']?: boolean },
+  ProductInsertType,
+  ProductUpdateType
 > {
   constructor(
     private dataSource: DataSource,

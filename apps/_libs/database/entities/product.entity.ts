@@ -44,6 +44,50 @@ export default class Product extends BaseEntity {
   @Expose()
   hintUsage: string // Gợi ý cách sử dụng
 
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  lastExpiryDate: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  lastCostPrice: number // Giá nhập
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  lastWholesalePrice: number // Giá bán sỉ
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  lastRetailPrice: number // Giá bán lẻ
+
   @Column({ type: 'smallint', default: 1 })
   @Expose()
   isActive: 0 | 1
@@ -85,3 +129,22 @@ export default class Product extends BaseEntity {
   @OneToMany(() => ProductBatch, (productBatch) => productBatch.product)
   productBatches: ProductBatch[]
 }
+
+export type ProductInsertType = Omit<
+  Product,
+  | 'id'
+  | 'quantity'
+  | 'lastExpiryDate'
+  | 'lastCostPrice'
+  | 'lastWholesalePrice'
+  | 'lastRetailPrice'
+  | 'productBatches'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'deletedAt'
+>
+
+export type ProductUpdateType = Omit<
+  Product,
+  'oid' | 'id' | 'productBatches' | 'createdAt' | 'updatedAt'
+>

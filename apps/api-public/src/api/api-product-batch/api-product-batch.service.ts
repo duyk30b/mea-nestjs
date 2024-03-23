@@ -84,8 +84,18 @@ export class ApiProductBatchService {
 
   async createOne(oid: number, body: ProductBatchInsertBody): Promise<BaseResponse> {
     const id = await this.productBatchRepository.insertOne({ ...body, oid })
-    const data = await this.productBatchRepository.findOneById(id)
-    return { data }
+    const productEffected = await this.productRepository.update(
+      { oid, id: body.productId },
+      {
+        lastExpiryDate: body.expiryDate,
+        lastCostPrice: body.costPrice,
+        lastWholesalePrice: body.wholesalePrice,
+        lastRetailPrice: body.retailPrice,
+      }
+    )
+
+    const productBatch = await this.productBatchRepository.findOneById(id)
+    return { data: productBatch }
   }
 
   async updateOne(oid: number, id: number, body: ProductBatchUpdateBody): Promise<BaseResponse> {
