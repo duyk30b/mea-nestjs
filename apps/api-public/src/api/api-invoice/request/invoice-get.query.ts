@@ -67,7 +67,7 @@ export class InvoiceGetQuery {
 export class InvoicePaginationQuery extends IntersectionType(InvoiceGetQuery, PaginationQuery) {}
 
 export class InvoiceGetManyQuery extends IntersectionType(
-  PickType(InvoiceGetQuery, ['filter', 'relation']),
+  PickType(InvoiceGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
 ) {}
 

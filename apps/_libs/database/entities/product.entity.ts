@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, OneToMany } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import ProductBatch from './product-batch.entity'
+import Batch from './batch.entity'
 
 @Entity('Product')
 @Index('IDX_Product__oid_brandName', ['oid', 'brandName'])
@@ -16,9 +16,23 @@ export default class Product extends BaseEntity {
   @Expose()
   substance: string // Hoạt chất
 
-  @Column({ default: 0 })
+  @Column({
+    type: 'decimal',
+    default: 0,
+    precision: 10,
+    scale: 3,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
   @Expose()
   quantity: number
+
+  @Column({ default: 1, type: 'smallint' })
+  @Expose()
+  hasManageQuantity: number
+
+  @Column({ default: 0, type: 'smallint' })
+  @Expose()
+  hasManageBatches: number
 
   @Column({ type: 'character varying', length: 255, nullable: true })
   @Expose()
@@ -43,6 +57,50 @@ export default class Product extends BaseEntity {
   @Column({ type: 'character varying', length: 255, nullable: true })
   @Expose()
   hintUsage: string // Gợi ý cách sử dụng
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  costAmount: number // Tổng nhập
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  costPrice: number // Giá nhập
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  wholesalePrice: number // Giá bán sỉ
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  retailPrice: number // Giá bán lẻ
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()
@@ -82,6 +140,16 @@ export default class Product extends BaseEntity {
   deletedAt: number
 
   @Expose()
-  @OneToMany(() => ProductBatch, (productBatch) => productBatch.product)
-  productBatches: ProductBatch[]
+  @OneToMany(() => Batch, (batch) => batch.product)
+  batches: Batch[]
 }
+
+export type ProductInsertType = Omit<
+  Product,
+  'id' | 'quantity' | 'costAmount' | 'batches' | 'createdAt' | 'updatedAt' | 'deletedAt'
+>
+
+export type ProductUpdateType = Omit<
+  Product,
+  'oid' | 'id' | 'quantity' | 'costAmount' | 'batches' | 'createdAt' | 'updatedAt'
+>

@@ -1,16 +1,15 @@
 import { Controller, Get, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { LimitQuery } from '../../../../_libs/common/dto/query'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
 import { HasPermission } from '../../guards/permission.guard'
 import { ApiStatisticService } from './api-statistic.service'
 import {
-  StatisticMonthQuery,
   StatisticTimeQuery,
   StatisticTopBestSellingQuery,
   StatisticTopCustomerBestInvoiceQuery,
 } from './request'
+import { StatisticProductHighMoneyQuery } from './request/statistic-top-product-high-money.query'
 
 @ApiTags('Statistic')
 @ApiBearerAuth('access-token')
@@ -33,10 +32,13 @@ export class ApiStatisticController {
     return await this.apiStatisticService.topProductBestSelling(oid, query)
   }
 
-  @Get('top-product-high-cost-money')
+  @Get('top-product-high-money')
   @HasPermission(PermissionId.STATISTIC_PRODUCT)
-  async topProductHighCostMoney(@External() { oid }: TExternal, @Query() query: LimitQuery) {
-    return await this.apiStatisticService.topProductHighCostMoney(oid, query)
+  async topProductHighSumRetailMoney(
+    @External() { oid }: TExternal,
+    @Query() query: StatisticProductHighMoneyQuery
+  ) {
+    return await this.apiStatisticService.topProductHighMoney(oid, query)
   }
 
   @Get('top-procedure-best-selling')
@@ -63,11 +65,6 @@ export class ApiStatisticController {
     return this.apiStatisticService.sumCustomerDebt(oid)
   }
 
-  // @Get('sum-money-order')
-  // async sumMoneyOrder(@External() { oid }: TExternal, @Query() query: StatisticTimeQuery) {
-  //   return await this.apiStatisticService.sumMoneyOrder(oid, query)
-  // }
-
   @Get('sum-money-invoice')
   @HasPermission(PermissionId.STATISTIC_INVOICE)
   async sumMoneyInvoice(@External() { oid }: TExternal, @Query() query: StatisticTimeQuery) {
@@ -85,9 +82,4 @@ export class ApiStatisticController {
   async sumInvoiceSurcharge(@External() { oid }: TExternal, @Query() query: StatisticTimeQuery) {
     return await this.apiStatisticService.sumInvoiceSurchargeAndExpenses(oid, query)
   }
-
-  // @Get('revenue-month')
-  // async revenueMonth(@External() { oid }: TExternal, @Query() query: StatisticMonthQuery) {
-  //   return await this.apiStatisticService.revenueMonth(oid, query.year, query.month)
-  // }
 }

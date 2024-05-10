@@ -5,15 +5,13 @@ import { encrypt } from '../../../../_libs/common/helpers/string.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { Customer, Distributor, Role } from '../../../../_libs/database/entities'
 import { ScreenSettingKey } from '../../../../_libs/database/entities/organization-setting.entity'
-import {
-  CustomerRepository,
-  DistributorRepository,
-  OrganizationRepository,
-  UserRepository,
-} from '../../../../_libs/database/repository'
+import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
+import { DistributorRepository } from '../../../../_libs/database/repository/distributor/distributor.repository'
 import { OrganizationSettingRepository } from '../../../../_libs/database/repository/organization-setting/organization-setting.repository'
+import { OrganizationRepository } from '../../../../_libs/database/repository/organization/organization.repository'
 import { PermissionRepository } from '../../../../_libs/database/repository/permission/permission.repository'
 import { RoleRepository } from '../../../../_libs/database/repository/role/role.repository'
+import { UserRepository } from '../../../../_libs/database/repository/user/user.repository'
 import { UserChangePasswordBody, UserUpdateInfoBody } from './request'
 
 @Injectable()

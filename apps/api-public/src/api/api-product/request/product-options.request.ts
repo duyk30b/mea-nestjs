@@ -7,10 +7,10 @@ import { SortQuery } from '../../../../../_libs/common/dto/query'
 export class ProductRelationQuery {
   @Expose()
   @IsBoolean()
-  productBatches: boolean
+  batches: boolean
 }
 
-export class ProductBatchFilterQuery {
+export class BatchFilterQuery {
   @Expose()
   @Type(() => ConditionNumber)
   @ValidateNested({ each: true })
@@ -28,9 +28,9 @@ export class ProductBatchFilterQuery {
 
 export class ProductFilterQuery {
   @Expose()
-  @Type(() => ProductBatchFilterQuery)
+  @Type(() => BatchFilterQuery)
   @ValidateNested({ each: true })
-  productBatch: ProductBatchFilterQuery
+  batches: BatchFilterQuery
 
   @Expose()
   @IsNotEmpty()
@@ -64,4 +64,8 @@ export class ProductSortQuery extends SortQuery {
   @Expose()
   @IsIn(['ASC', 'DESC'])
   quantity: 'ASC' | 'DESC'
+
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  costAmount: 'ASC' | 'DESC'
 }

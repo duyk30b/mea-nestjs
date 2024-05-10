@@ -21,7 +21,7 @@ export default class DistributorPayment extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  time: number
+  createdAt: number
 
   @Column({ type: 'smallint' })
   @Expose()
@@ -82,3 +82,5 @@ export default class DistributorPayment extends BaseEntity {
   @JoinColumn({ name: 'receiptId', referencedColumnName: 'id' })
   receipt: Receipt
 }
+
+export type DistributorPaymentInsertType = Omit<DistributorPayment, 'id' | 'receipt'>

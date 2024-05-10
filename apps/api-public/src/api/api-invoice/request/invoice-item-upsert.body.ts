@@ -10,11 +10,23 @@ export class InvoiceItemUpsertBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  referenceId: number
+  productId: number
+
+  @ApiProperty({ example: 12 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  batchId: number
+
+  @ApiProperty({ example: 12 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  procedureId: number
 
   @ApiPropertyOptional({
     enum: valuesEnum(InvoiceItemType),
-    example: InvoiceItemType.ProductBatch,
+    example: InvoiceItemType.Batch,
   })
   @Expose()
   @IsDefined()
@@ -53,6 +65,12 @@ export class InvoiceItemUpsertBody {
   @IsNumber()
   costPrice: number
 
+  @ApiPropertyOptional({ example: 12_000 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  costAmount: number
+
   @ApiProperty({ example: 25_000 })
   @Expose()
   @IsDefined()
@@ -89,7 +107,6 @@ export class InvoiceItemUpsertBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  @Min(1)
   quantity: number
 
   @ApiPropertyOptional({ example: 'Uống 2 lần/ngày sáng 1 viên, chiều 1 viên' })

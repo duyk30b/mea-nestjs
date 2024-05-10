@@ -36,7 +36,8 @@
     "ConflictArrival": "Diagnosis không tồn tại"
   },
   "Product": {
-    "NotExist": "Sản phẩm không tồn tại"
+    "NotExist": "Sản phẩm không tồn tại",
+    "ConflictManageQuantity": "Sản phẩm đã có số lượng không thể hủy theo dõi tồn kho"
   },
   "Customer": {
     "NotExist": "Khách hàng không tồn tại"

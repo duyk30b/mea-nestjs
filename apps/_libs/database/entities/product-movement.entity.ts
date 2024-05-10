@@ -1,30 +1,17 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
+import { MovementType } from '../common/variable'
 import Invoice from './invoice.entity'
-import ProductBatch from './product-batch.entity'
+import Product from './product.entity'
 import Receipt from './receipt.entity'
 
-export enum ProductMovementType {
-  Receipt = 1,
-  Invoice = 2,
-}
-
-@Index('IDX_ProductMovement__oid_productId_createTime', ['oid', 'productId', 'createTime'])
-@Index('IDX_ProductMovement__oid_productBatchId_createTime', [
-  'oid',
-  'productBatchId',
-  'createTime',
-])
+@Index('IDX_ProductMovement__oid_productId_createdAt', ['oid', 'productId', 'createdAt'])
 @Entity('ProductMovement')
 export default class ProductMovement extends BaseEntity {
   @Column()
   @Expose()
   productId: number
-
-  @Column()
-  @Expose()
-  productBatchId: number
 
   @Column() // ID invoice hoặc ID receipt
   @Expose()
@@ -32,27 +19,45 @@ export default class ProductMovement extends BaseEntity {
 
   @Column({ type: 'smallint' })
   @Expose()
-  type: ProductMovementType
+  type: MovementType
 
   @Column({ type: 'smallint', default: 0 })
   @Expose()
   isRefund: 0 | 1
 
-  @Column()
+  @Column({
+    type: 'decimal',
+    default: 0,
+    precision: 10,
+    scale: 3,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
   @Expose()
-  openQuantity: number // Số lượng ban đầu
+  openQuantity: number
 
-  @Column()
+  @Column({
+    type: 'decimal',
+    default: 0,
+    precision: 10,
+    scale: 3,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
   @Expose()
-  number: number // Số lượng +/-
+  quantity: number
+
+  @Column({
+    type: 'decimal',
+    default: 0,
+    precision: 10,
+    scale: 3,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  closeQuantity: number
 
   @Column({ type: 'varchar', length: 255, default: '{"name":"","rate":1}' })
   @Expose()
   unit: string
-
-  @Column()
-  @Expose()
-  closeQuantity: number // Số lượng sau thay đổi
 
   @Column({
     type: 'bigint',
@@ -68,19 +73,35 @@ export default class ProductMovement extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  totalMoney: number // Tổng tiền
+  openCostAmount: number // Tổng tiền
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  costAmount: number // Tổng tiền
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  closeCostAmount: number // Tổng tiền
 
   @Column({
     type: 'bigint',
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  createTime: number
+  createdAt: number
 
   @Expose()
-  @ManyToOne((type) => ProductBatch, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'productBatchId', referencedColumnName: 'id' })
-  productBatch: ProductBatch
+  @ManyToOne((type) => Product, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'productId', referencedColumnName: 'id' })
+  product: Product
 
   @Expose()
   @ManyToOne((type) => Invoice, { createForeignKeyConstraints: false })
@@ -92,3 +113,8 @@ export default class ProductMovement extends BaseEntity {
   @JoinColumn({ name: 'referenceId', referencedColumnName: 'id' })
   receipt: Receipt
 }
+
+export type ProductMovementInsertType = Omit<
+  ProductMovement,
+  'id' | 'product' | 'invoice' | 'receipt'
+>

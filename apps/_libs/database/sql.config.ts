@@ -2,7 +2,7 @@ import { registerAs } from '@nestjs/config'
 import { TypeOrmModuleOptions } from '@nestjs/typeorm'
 
 export const SqlConfig = registerAs(
-  'mariadb',
+  'postgres',
   (): TypeOrmModuleOptions => ({
     type: process.env.SQL_TYPE as 'mariadb' | 'mysql' | 'postgres',
     host: process.env.SQL_HOST,

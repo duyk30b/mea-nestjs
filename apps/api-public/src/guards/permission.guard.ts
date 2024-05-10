@@ -2,10 +2,11 @@ import { CanActivate, ExecutionContext, HttpStatus, Injectable, SetMetadata } fr
 import { Reflector } from '@nestjs/core'
 import { BusinessException } from '../../../_libs/common/exception-filter/exception-filter'
 import { RequestExternal } from '../../../_libs/common/request/external.request'
-import Permission, { PermissionId } from '../../../_libs/database/entities/permission.entity'
-import { OrganizationRepository, UserRepository } from '../../../_libs/database/repository'
+import { PermissionId } from '../../../_libs/database/entities/permission.entity'
+import { OrganizationRepository } from '../../../_libs/database/repository/organization/organization.repository'
 import { PermissionRepository } from '../../../_libs/database/repository/permission/permission.repository'
 import { RoleRepository } from '../../../_libs/database/repository/role/role.repository'
+import { UserRepository } from '../../../_libs/database/repository/user/user.repository'
 
 export const PERMISSION_GUARD = 'PERMISSION_GUARD'
 export const HasPermission = (permissionId: PermissionId) =>

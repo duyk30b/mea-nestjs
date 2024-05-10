@@ -1,7 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { APP_GUARD } from '@nestjs/core'
-import { ScheduleModule } from '@nestjs/schedule'
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 import {
   HeaderResolver,
@@ -21,6 +20,7 @@ import { AuthModule } from './auth/auth.module'
 import { JwtExtendModule } from './auth/jwt-extend/jwt-extend.module'
 import { EmailModule } from './components/email/email.module'
 import { HealthModule } from './components/health/health.module'
+import { CronJobModule } from './cron-job/cron-job.module'
 import { PermissionGuard } from './guards/permission.guard'
 import { DetectClientMiddleware } from './middleware/detect-client.middleware copy'
 import { RootModule } from './root/root.module'
@@ -44,11 +44,11 @@ import { RootModule } from './root/root.module'
     }),
     SqlModule,
     RepositoryModule,
-    ScheduleModule.forRoot(),
-    HealthModule,
-    // SocketModule,
-    EmailModule,
+
     JwtExtendModule,
+    HealthModule,
+    EmailModule,
+    // CronJobModule,
 
     CacheManagerModule,
 

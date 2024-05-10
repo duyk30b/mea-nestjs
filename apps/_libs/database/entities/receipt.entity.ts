@@ -8,7 +8,7 @@ import ReceiptItem from './receipt-item.entity'
 
 @Entity('Receipt')
 @Index('IDX_Receipt__oid_distributorId', ['oid', 'distributorId'])
-@Index('IDX_Receipt__oid_time', ['oid', 'time'])
+@Index('IDX_Receipt__oid_startedAt', ['oid', 'startedAt'])
 export default class Receipt extends BaseEntity {
   @Column()
   @Expose()
@@ -17,21 +17,6 @@ export default class Receipt extends BaseEntity {
   @Column({ type: 'smallint' })
   @Expose()
   status: ReceiptStatus
-
-  @Column({
-    type: 'bigint',
-    nullable: true,
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
-  @Expose()
-  time: number
-
-  @Column({ type: 'timestamp with time zone', nullable: true })
-  @Expose()
-  shipTime: Date
 
   @Column({ type: 'smallint', nullable: true })
   @Expose()
@@ -44,18 +29,6 @@ export default class Receipt extends BaseEntity {
   @Column({ type: 'smallint', nullable: true })
   @Expose()
   shipDate: number
-
-  @Column({
-    name: 'delete_time',
-    type: 'bigint',
-    nullable: true,
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
-  @Expose()
-  deleteTime: number
 
   @Column({
     type: 'bigint',
@@ -117,6 +90,39 @@ export default class Receipt extends BaseEntity {
   @Column({ type: 'character varying', length: 255, nullable: true })
   @Expose()
   note: string // Ghi chú
+
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  startedAt: number
+
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  shippedAt: number
+
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  deletedAt: number
 
   @Expose()
   @OneToMany(() => ReceiptItem, (receiptItem) => receiptItem.receipt)

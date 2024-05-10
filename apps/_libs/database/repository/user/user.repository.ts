@@ -8,7 +8,7 @@ import { PostgreSqlRepository } from '../postgresql.repository'
 @Injectable()
 export class UserRepository extends PostgreSqlRepository<
   User,
-  { [P in 'id' | 'fullName' | 'phone']?: 'ASC' | 'DESC' },
+  { [P in 'id' | 'oid' | 'fullName' | 'phone']?: 'ASC' | 'DESC' },
   { [P in 'organization' | 'role']?: boolean },
   UserInsertType,
   UserUpdateType

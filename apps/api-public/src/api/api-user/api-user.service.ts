@@ -5,7 +5,7 @@ import { encrypt } from '../../../../_libs/common/helpers/string.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { User } from '../../../../_libs/database/entities'
 import Device from '../../../../_libs/database/entities/device'
-import { UserRepository } from '../../../../_libs/database/repository'
+import { UserRepository } from '../../../../_libs/database/repository/user/user.repository'
 import { CacheTokenService } from '../../../../_libs/transporter/cache-manager/cache-token.service'
 import {
   UserCreateBody,

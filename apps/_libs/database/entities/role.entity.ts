@@ -44,17 +44,6 @@ export default class Role {
   })
   @Expose()
   updatedAt: number
-
-  @Column({
-    type: 'bigint',
-    nullable: true,
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
-  @Expose()
-  deletedAt: number
 }
 
 export type RoleInsertType = Omit<Role, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>

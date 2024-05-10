@@ -1,13 +1,13 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { ReceiptProcessRepository } from '../../../../_libs/database/repository/receipt/receipt-process.repository'
+import { ReceiptRefund } from '../../../../_libs/database/repository/receipt/receipt-refund'
+import { ReceiptShipAndPayment } from '../../../../_libs/database/repository/receipt/receipt-ship-and-payment'
 import {
-  ProductBatchRepository,
-  ProductRepository,
   ReceiptInsertDto,
-  ReceiptProcessRepository,
-  ReceiptRepository,
   ReceiptUpdateDto,
-} from '../../../../_libs/database/repository'
+} from '../../../../_libs/database/repository/receipt/receipt.dto'
+import { ReceiptRepository } from '../../../../_libs/database/repository/receipt/receipt.repository'
 import {
   ReceiptDraftCreateBody,
   ReceiptDraftUpdateBody,
@@ -21,13 +21,13 @@ export class ApiReceiptService {
   constructor(
     private readonly receiptRepository: ReceiptRepository,
     private readonly receiptProcessRepository: ReceiptProcessRepository,
-    private readonly productRepository: ProductRepository,
-    private readonly productBatchRepository: ProductBatchRepository
+    private readonly receiptShipAndPayment: ReceiptShipAndPayment,
+    private readonly receiptRefund: ReceiptRefund
   ) {}
 
   async pagination(oid: number, query: ReceiptPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, sort, relation } = query
-    const { time, deleteTime, distributorId } = query.filter || {}
+    const { startedAt, deletedAt, distributorId } = query.filter || {}
 
     const { total, data } = await this.receiptRepository.pagination({
       page: query.page,
@@ -36,8 +36,8 @@ export class ApiReceiptService {
         oid,
         distributorId,
         status: query.filter?.status,
-        time,
-        deleteTime,
+        startedAt,
+        deletedAt,
       },
       relation: { distributor: query.relation?.distributor },
       sort: query.sort || { id: 'DESC' },
@@ -50,15 +50,15 @@ export class ApiReceiptService {
 
   async getMany(oid: number, query: ReceiptGetManyQuery): Promise<BaseResponse> {
     const { relation, limit } = query
-    const { time, deleteTime, distributorId, status } = query.filter || {}
+    const { startedAt, deletedAt, distributorId, status } = query.filter || {}
 
     const receiptList = await this.receiptRepository.findMany({
       condition: {
         oid,
         distributorId,
         status,
-        time,
-        deleteTime,
+        startedAt,
+        deletedAt,
       },
       limit,
       relation: { distributor: relation?.distributor },
@@ -72,7 +72,7 @@ export class ApiReceiptService {
       relation: {
         distributor: !!relation?.distributor,
         distributorPayments: !!relation?.distributorPayments,
-        receiptItems: relation?.receiptItems ? { productBatch: { product: true } } : false,
+        receiptItems: relation?.receiptItems ? { batch: true, product: true } : false,
       },
     })
     return { data: receipt }
@@ -84,7 +84,7 @@ export class ApiReceiptService {
       {
         distributor: !!relation?.distributor,
         distributorPayments: !!relation?.distributorPayments,
-        receiptItems: !!relation?.receiptItems && { productBatch: true },
+        receiptItems: relation?.receiptItems ? { batch: true, product: true } : false,
       }
     )
     return { data: receipt }
@@ -97,7 +97,7 @@ export class ApiReceiptService {
         oid,
         receiptInsertDto: ReceiptInsertDto.from(body),
       })
-      await this.receiptProcessRepository.startShipAndPayment({
+      await this.receiptShipAndPayment.startShipAndPayment({
         oid,
         receiptId,
         time: Date.now(),
@@ -118,14 +118,14 @@ export class ApiReceiptService {
   }): Promise<BaseResponse> {
     const { oid, body, oldReceiptId, time } = params
     try {
-      await this.receiptProcessRepository.startRefund({ oid, receiptId: oldReceiptId, time })
+      await this.receiptRefund.startRefund({ oid, receiptId: oldReceiptId, time })
       await this.receiptProcessRepository.softDeleteRefund({ oid, receiptId: oldReceiptId })
 
       const { receiptId } = await this.receiptProcessRepository.createDraft({
         oid,
         receiptInsertDto: ReceiptInsertDto.from(body),
       })
-      await this.receiptProcessRepository.startShipAndPayment({
+      await this.receiptShipAndPayment.startShipAndPayment({
         oid,
         receiptId,
         time: Date.now(),
@@ -206,7 +206,7 @@ export class ApiReceiptService {
   }): Promise<BaseResponse> {
     const { oid, receiptId, time, money } = params
     try {
-      await this.receiptProcessRepository.startShipAndPayment({ oid, receiptId, time, money })
+      await this.receiptShipAndPayment.startShipAndPayment({ oid, receiptId, time, money })
       return { data: { receiptId } }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
@@ -235,7 +235,7 @@ export class ApiReceiptService {
   }): Promise<BaseResponse> {
     const { oid, receiptId, time } = params
     try {
-      await this.receiptProcessRepository.startRefund({ oid, receiptId, time })
+      await this.receiptRefund.startRefund({ oid, receiptId, time })
       return { data: { receiptId } }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)

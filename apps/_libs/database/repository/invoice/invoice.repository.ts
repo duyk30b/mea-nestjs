@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, Repository } from 'typeorm'
 import { BaseCondition } from '../../../common/dto'
-import { InvoiceItemType } from '../../common/variable'
 import { Invoice } from '../../entities'
 import { PostgreSqlRepository } from '../postgresql.repository'
 
@@ -26,7 +25,7 @@ export class InvoiceRepository extends PostgreSqlRepository<
       customerPayments?: boolean
       invoiceExpenses?: boolean
       invoiceSurcharges?: boolean
-      invoiceItems?: { procedure?: boolean; productBatch?: { product?: boolean } }
+      invoiceItems?: { procedure?: boolean; batch?: boolean; product?: boolean } | false
     }
   ): Promise<Invoice> {
     let query = this.manager
@@ -46,27 +45,24 @@ export class InvoiceRepository extends PostgreSqlRepository<
     }
     if (relation?.invoiceItems) {
       query = query.leftJoinAndSelect('invoice.invoiceItems', 'invoiceItem')
-    }
-    if (relation?.invoiceItems?.procedure) {
-      query = query.leftJoinAndSelect(
-        'invoiceItem.procedure',
-        'procedure',
-        'invoiceItem.type = :typeProcedure',
-        {
-          typeProcedure: InvoiceItemType.Procedure,
-        }
-      )
-    }
-    if (relation?.invoiceItems?.productBatch) {
-      query = query.leftJoinAndSelect(
-        'invoiceItem.productBatch',
-        'productBatch',
-        'invoiceItem.type = :typeProductBatch',
-        { typeProductBatch: InvoiceItemType.ProductBatch }
-      )
-    }
-    if (relation?.invoiceItems?.productBatch?.product) {
-      query = query.leftJoinAndSelect('productBatch.product', 'product')
+      if (relation?.invoiceItems?.procedure) {
+        query = query.leftJoinAndSelect(
+          'invoiceItem.procedure',
+          'procedure',
+          'invoiceItem.procedureId != 0'
+        )
+      }
+      if (relation?.invoiceItems?.batch) {
+        query = query.leftJoinAndSelect('invoiceItem.batch', 'batch', 'invoiceItem.batchId != 0')
+      }
+
+      if (relation?.invoiceItems.product) {
+        query = query.leftJoinAndSelect(
+          'invoiceItem.product',
+          'product',
+          'invoiceItem.productId != 0'
+        )
+      }
     }
 
     const invoice = await query.getOne()

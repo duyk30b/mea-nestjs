@@ -31,18 +31,18 @@ export class InvoiceFilterQuery {
   customerId: number
 
   @Expose()
-  @Type(() => ConditionTimestamp)
-  @ValidateNested({ each: true })
-  time: ConditionTimestamp
-
-  @Expose()
-  @Type(() => ConditionTimestamp)
-  @ValidateNested({ each: true })
-  deleteTime: ConditionTimestamp
-
-  @Expose()
   @IsEnum(InvoiceStatus)
   status: InvoiceStatus
+
+  @Expose()
+  @Type(() => ConditionTimestamp)
+  @ValidateNested({ each: true })
+  startedAt: ConditionTimestamp
+
+  @Expose()
+  @Type(() => ConditionTimestamp)
+  @ValidateNested({ each: true })
+  deletedAt: ConditionTimestamp
 }
 
 export class InvoiceSortQuery extends SortQuery {}

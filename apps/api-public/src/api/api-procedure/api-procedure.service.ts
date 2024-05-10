@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { ProcedureRepository } from '../../../../_libs/database/repository'
+import { ProcedureRepository } from '../../../../_libs/database/repository/procedure/procedure.repository'
 import {
   ProcedureCreateBody,
   ProcedureGetManyQuery,

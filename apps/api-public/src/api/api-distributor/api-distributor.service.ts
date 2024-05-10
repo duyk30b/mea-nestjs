@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common'
-import { escapeSearch } from '../../../../_libs/common/dto'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { DistributorRepository } from '../../../../_libs/database/repository'
+import { DistributorRepository } from '../../../../_libs/database/repository/distributor/distributor.repository'
 import {
   DistributorCreateBody,
   DistributorGetManyQuery,

@@ -1,9 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import {
-  CustomerPaymentRepository,
-  CustomerRepository,
-} from '../../../../_libs/database/repository'
+import { CustomerPaymentRepository } from '../../../../_libs/database/repository/customer/customer-payment.repository'
+import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
 import { CustomerPaymentPaginationQuery, CustomerPaymentPayDebtBody } from './request'
 
 @Injectable()

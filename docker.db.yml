@@ -1,4 +1,4 @@
-version: "3.8"
+version: '3.8'
 
 networks:
   mn_network:
@@ -69,21 +69,29 @@ services:
   #     - "23306:3306"
 
   # mongo:
-  #   image: mongo:6.0.2
+  #   image: mongo:7.0.5
   #   container_name: mc_mongo
   #   restart: unless-stopped
   #   networks:
   #     - mn_network
   #   volumes:
   #     - ./data/mongo:/data/db
+  #   command: mongod --replSet rs0
+  #   healthcheck:
+  #     test: |
+  #       mongosh --eval "try { rs.status().ok } catch (e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] }).ok }"
+  #     start_period: 0s
+  #     interval: 500ms
+  #     timeout: 5s
+  #     retries: 5
   #   environment:
-  #     MONGO_INITDB_ROOT_USERNAME: root
-  #     MONGO_INITDB_ROOT_PASSWORD: mea2024
+  #     MONGO_INITDB_ROOT_USERNAME: mea
+  #     MONGO_INITDB_ROOT_PASSWORD: Abc12345
   #   ports:
   #     - 27017:27017
 
   # mongo-express:
-  #   image: mongo-express:0.54
+  #   image: mongo-express:1.0.2-20
   #   container_name: mc_mongo_express
   #   restart: unless-stopped
   #   depends_on:
@@ -93,9 +101,9 @@ services:
   #   ports:
   #     - 28081:8081
   #   environment:
-  #     ME_CONFIG_MONGODB_ADMINUSERNAME: root
-  #     ME_CONFIG_MONGODB_ADMINPASSWORD: mea2024
-  #     ME_CONFIG_MONGODB_URL: mongodb://root:mea2024@mongo:27017/
+  #     ME_CONFIG_MONGODB_ADMINUSERNAME: mea
+  #     ME_CONFIG_MONGODB_ADMINPASSWORD: Abc12345
+  #     ME_CONFIG_MONGODB_URL: mongodb://mea:Abc12345@mongo:27017/
 
   # redis:
   #   container_name: mc_redis

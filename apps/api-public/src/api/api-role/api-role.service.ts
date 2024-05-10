@@ -67,12 +67,11 @@ export class ApiRoleService {
     return { data }
   }
 
-  async deleteOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.roleRepository.update({ oid, id }, { deletedAt: Date.now() })
+  async destroyOne(oid: number, id: number): Promise<BaseResponse> {
+    const affected = await this.roleRepository.delete({ oid, id })
     if (affected === 0) {
       throw new BusinessException('error.Database.DeleteFailed')
     }
-    const data = await this.roleRepository.findOneById(id)
-    return { data }
+    return { data: id }
   }
 }

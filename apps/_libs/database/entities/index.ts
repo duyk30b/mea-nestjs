@@ -1,3 +1,5 @@
+import BatchMovement from './batch-movement.entity'
+import Batch from './batch.entity'
 import CustomerPayment from './customer-payment.entity'
 import Customer from './customer.entity'
 import DistributorPayment from './distributor-payment.entity'
@@ -9,7 +11,6 @@ import Invoice from './invoice.entity'
 import OrganizationSetting from './organization-setting.entity'
 import Organization from './organization.entity'
 import Procedure from './procedure.entity'
-import ProductBatch from './product-batch.entity'
 import ProductMovement from './product-movement.entity'
 import Product from './product.entity'
 import ReceiptItem from './receipt-item.entity'
@@ -18,6 +19,8 @@ import Role from './role.entity'
 import User from './user.entity'
 
 export {
+  Batch,
+  BatchMovement,
   Customer,
   CustomerPayment,
   Distributor,
@@ -30,7 +33,6 @@ export {
   OrganizationSetting,
   Procedure,
   Product,
-  ProductBatch,
   ProductMovement,
   Receipt,
   ReceiptItem,

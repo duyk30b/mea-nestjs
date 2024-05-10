@@ -22,7 +22,7 @@ export class ReceiptDraftCreateBody {
   @Expose()
   @Type(() => Number)
   @IsNumber()
-  time: number
+  startedAt: number
 
   @ApiPropertyOptional({ example: 50_000 })
   @Expose()

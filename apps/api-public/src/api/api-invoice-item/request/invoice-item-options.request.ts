@@ -9,8 +9,12 @@ export class InvoiceItemRelationQuery {
   procedure: boolean
 
   @Expose()
-  @IsObject()
-  productBatch: { product: boolean }
+  @IsBoolean()
+  batch: boolean
+
+  @Expose()
+  @IsBoolean()
+  product: boolean
 
   @Expose()
   @IsObject()
@@ -20,7 +24,15 @@ export class InvoiceItemRelationQuery {
 export class InvoiceItemFilterQuery {
   @Expose()
   @IsNumber()
-  referenceId: number
+  productId: number
+
+  @Expose()
+  @IsNumber()
+  batchId: number
+
+  @Expose()
+  @IsNumber()
+  procedureId: number
 
   @Expose()
   @IsNumber()

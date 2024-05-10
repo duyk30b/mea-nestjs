@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { ScreenSettingKey } from '../../../../_libs/database/entities/organization-setting.entity'
-import { OrganizationRepository } from '../../../../_libs/database/repository'
 import { OrganizationSettingRepository } from '../../../../_libs/database/repository/organization-setting/organization-setting.repository'
+import { OrganizationRepository } from '../../../../_libs/database/repository/organization/organization.repository'
 import { OrganizationSettingUpdateBody } from './request/organization-settings.request'
 import { OrganizationUpdateBody } from './request/organization-update.body'
 

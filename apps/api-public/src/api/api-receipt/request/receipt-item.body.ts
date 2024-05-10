@@ -8,7 +8,13 @@ export class ReceiptItemBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  productBatchId: number
+  productId: number
+
+  @ApiPropertyOptional({ example: 52 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  batchId: number
 
   @ApiPropertyOptional({ name: 'unit', type: 'string', example: '{"name":"Viên","rate":1}' })
   @Expose({ name: 'unit' })
@@ -46,6 +52,5 @@ export class ReceiptItemBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  @Min(1)
   quantity: number
 }

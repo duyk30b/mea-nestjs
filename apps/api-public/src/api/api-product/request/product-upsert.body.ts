@@ -30,6 +30,25 @@ export class ProductCreateBody {
   @IsString()
   substance: string // Hoạt chất
 
+  @ApiPropertyOptional({ example: 20_000 })
+  @Expose()
+  @Transform(({ value }) => Math.round(value || 0))
+  @IsDefined()
+  @IsNumber()
+  costPrice: number
+
+  @ApiPropertyOptional({ example: 59_000 })
+  @Expose()
+  @Transform(({ value }) => Math.round(value || 0))
+  @IsNumber()
+  retailPrice: number
+
+  @ApiPropertyOptional({ example: 45_000 })
+  @Expose()
+  @Transform(({ value }) => Math.round(value || 0))
+  @IsNumber()
+  wholesalePrice: number
+
   @ApiPropertyOptional({ example: '2' })
   @Expose()
   @IsString()
@@ -95,6 +114,16 @@ export class ProductCreateBody {
   @Expose()
   @IsString()
   hintUsage: string // Nguồn gốc
+
+  @ApiPropertyOptional({ example: 1 })
+  @Expose()
+  @IsIn([0, 1])
+  hasManageQuantity: 0 | 1
+
+  @ApiPropertyOptional({ example: 0 })
+  @Expose()
+  @IsIn([0, 1])
+  hasManageBatches: 0 | 1
 
   @ApiPropertyOptional({ example: 1 })
   @Expose()

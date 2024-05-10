@@ -1,11 +1,13 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import ProductBatch from './product-batch.entity'
+import Batch from './batch.entity'
+import Product from './product.entity'
 import Receipt from './receipt.entity'
 
 @Entity('ReceiptItem')
-@Index('IDX_ReceiptItem__oid_productBatchId', ['oid', 'productBatchId'])
+@Index('IDX_ReceiptItem__oid_batchId', ['oid', 'batchId'])
+@Index('IDX_ReceiptItem__oid_productId', ['oid', 'productId'])
 @Index('IDX_ReceiptItem__oid_receiptId', ['oid', 'receiptId'])
 export default class ReceiptItem extends BaseEntity {
   @Column()
@@ -16,9 +18,13 @@ export default class ReceiptItem extends BaseEntity {
   @Expose()
   distributorId: number
 
+  @Column({ default: 0 })
+  @Expose()
+  productId: number
+
   @Column()
   @Expose()
-  productBatchId: number
+  batchId: number
 
   @Column({ type: 'varchar', length: 255, default: '{"name":"","rate":1}' })
   @Expose()
@@ -32,7 +38,13 @@ export default class ReceiptItem extends BaseEntity {
   @Expose()
   costPrice: number // Giá cost
 
-  @Column()
+  @Column({
+    type: 'decimal',
+    default: 0,
+    precision: 10,
+    scale: 3,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
   @Expose()
   quantity: number
 
@@ -42,7 +54,12 @@ export default class ReceiptItem extends BaseEntity {
   receipt: Receipt
 
   @Expose()
-  @ManyToOne((type) => ProductBatch, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'productBatchId', referencedColumnName: 'id' })
-  productBatch: ProductBatch
+  @ManyToOne((type) => Batch, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'batchId', referencedColumnName: 'id' })
+  batch: Batch
+
+  @Expose()
+  @ManyToOne((type) => Product, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'productId', referencedColumnName: 'id' })
+  product: Product
 }

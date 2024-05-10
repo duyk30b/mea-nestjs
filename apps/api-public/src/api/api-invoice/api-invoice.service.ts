@@ -1,11 +1,13 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { InvoiceProcessRepository } from '../../../../_libs/database/repository/invoice/invoice-process.repository'
+import { InvoiceRefund } from '../../../../_libs/database/repository/invoice/invoice-refund'
+import { InvoiceShipAndPayment } from '../../../../_libs/database/repository/invoice/invoice-ship-and-payment'
 import {
   InvoiceDraftInsertDto,
   InvoiceDraftUpdateDto,
-  InvoiceProcessRepository,
-  InvoiceRepository,
-} from '../../../../_libs/database/repository'
+} from '../../../../_libs/database/repository/invoice/invoice.dto'
+import { InvoiceRepository } from '../../../../_libs/database/repository/invoice/invoice.repository'
 import {
   InvoiceDraftCreateBody,
   InvoiceDraftUpdateBody,
@@ -19,12 +21,14 @@ import {
 export class ApiInvoiceService {
   constructor(
     private readonly invoiceRepository: InvoiceRepository,
-    private readonly invoiceProcessRepository: InvoiceProcessRepository
+    private readonly invoiceProcessRepository: InvoiceProcessRepository,
+    private readonly invoiceShipAndPayment: InvoiceShipAndPayment,
+    private readonly invoiceRefund: InvoiceRefund
   ) {}
 
   async pagination(oid: number, query: InvoicePaginationQuery): Promise<BaseResponse> {
     const { page, limit, sort, filter, relation } = query
-    const { time, deleteTime, customerId, status } = query.filter || {}
+    const { startedAt, deletedAt, customerId, status } = query.filter || {}
 
     const { data, total } = await this.invoiceRepository.pagination({
       page,
@@ -33,8 +37,8 @@ export class ApiInvoiceService {
         oid,
         customerId,
         status,
-        time,
-        deleteTime,
+        startedAt,
+        deletedAt,
       },
       relation: { customer: relation?.customer },
       sort: sort || { id: 'DESC' },
@@ -46,19 +50,20 @@ export class ApiInvoiceService {
   }
 
   async getMany(oid: number, query: InvoiceGetManyQuery): Promise<BaseResponse> {
-    const { relation, limit } = query
-    const { time, deleteTime, customerId, status } = query.filter || {}
+    const { relation, limit, sort } = query
+    const { startedAt, deletedAt, customerId, status } = query.filter || {}
 
     const data = await this.invoiceRepository.findMany({
       condition: {
         oid,
         customerId,
         status,
-        time,
-        deleteTime,
+        startedAt,
+        deletedAt,
       },
       relation: { customer: relation?.customer },
       limit,
+      sort: sort || { id: 'DESC' },
     })
     return { data }
   }
@@ -71,10 +76,9 @@ export class ApiInvoiceService {
         customerPayments: !!relation?.customerPayments,
         invoiceExpenses: !!relation?.invoiceExpenses,
         invoiceSurcharges: !!relation?.invoiceSurcharges,
-        invoiceItems: relation?.invoiceItems && {
-          procedure: true,
-          productBatch: { product: true },
-        },
+        invoiceItems: relation?.invoiceItems
+          ? { procedure: true, batch: true, product: true }
+          : false,
       }
     )
     return { data }
@@ -87,7 +91,7 @@ export class ApiInvoiceService {
         oid,
         invoiceInsertDto: InvoiceDraftInsertDto.from(body),
       })
-      await this.invoiceProcessRepository.startShipAndPayment({
+      await this.invoiceShipAndPayment.startShipAndPayment({
         oid,
         invoiceId,
         time: Date.now(),
@@ -108,14 +112,14 @@ export class ApiInvoiceService {
   }): Promise<BaseResponse> {
     const { oid, body, oldInvoiceId, time } = params
     try {
-      await this.invoiceProcessRepository.startRefund({ oid, invoiceId: oldInvoiceId, time })
+      await this.invoiceRefund.startRefund({ oid, invoiceId: oldInvoiceId, time })
       await this.invoiceProcessRepository.softDeleteRefund({ oid, invoiceId: oldInvoiceId })
 
       const { invoiceId } = await this.invoiceProcessRepository.createDraft({
         oid,
         invoiceInsertDto: InvoiceDraftInsertDto.from(body),
       })
-      await this.invoiceProcessRepository.startShipAndPayment({
+      await this.invoiceShipAndPayment.startShipAndPayment({
         oid,
         invoiceId,
         time: Date.now(),
@@ -196,7 +200,7 @@ export class ApiInvoiceService {
   }): Promise<BaseResponse> {
     const { oid, invoiceId, time, money } = params
     try {
-      await this.invoiceProcessRepository.startShipAndPayment({ oid, invoiceId, time, money })
+      await this.invoiceShipAndPayment.startShipAndPayment({ oid, invoiceId, time, money })
       return { data: { invoiceId } }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
@@ -225,7 +229,7 @@ export class ApiInvoiceService {
   }): Promise<BaseResponse> {
     const { oid, invoiceId, time } = params
     try {
-      await this.invoiceProcessRepository.startRefund({ oid, invoiceId, time })
+      await this.invoiceRefund.startRefund({ oid, invoiceId, time })
       return { data: { invoiceId } }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
@@ -245,7 +249,7 @@ export class ApiInvoiceService {
   async sumInvoiceDebt(oid: number, { filter }: InvoiceSumDebtQuery): Promise<BaseResponse> {
     const sum = await this.invoiceRepository.sumInvoiceDebt({
       oid,
-      time: filter?.time,
+      startedAt: filter?.startedAt,
     })
     return { data: { sumInvoiceDebt: sum } }
   }

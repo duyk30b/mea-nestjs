@@ -6,7 +6,8 @@ import { Receipt, ReceiptItem } from '../../entities'
 export class ReceiptItemDto extends PartialType(OmitType(ReceiptItem, ['receiptId', 'receipt'])) {
   unit: string
   quantity: number
-  productBatchId: number
+  batchId: number
+  productId: number
 }
 
 export class ReceiptInsertDto extends PartialType(

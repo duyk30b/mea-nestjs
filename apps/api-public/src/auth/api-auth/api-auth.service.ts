@@ -7,40 +7,17 @@ import { BusinessException } from '../../../../_libs/common/exception-filter/exc
 import { decrypt, encrypt } from '../../../../_libs/common/helpers/string.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { TExternal } from '../../../../_libs/common/request/external.request'
-import {
-  Customer,
-  CustomerPayment,
-  Distributor,
-  DistributorPayment,
-  Invoice,
-  InvoiceExpense,
-  InvoiceItem,
-  InvoiceSurcharge,
-  OrganizationSetting,
-  Procedure,
-  Product,
-  ProductBatch,
-  ProductMovement,
-  Receipt,
-  ReceiptItem,
-} from '../../../../_libs/database/entities'
-import { ScreenSettingKey } from '../../../../_libs/database/entities/organization-setting.entity'
-import Organization from '../../../../_libs/database/entities/organization.entity'
 import User from '../../../../_libs/database/entities/user.entity'
-import {
-  CustomerRepository,
-  DistributorRepository,
-  OrganizationRepository,
-  UserRepository,
-} from '../../../../_libs/database/repository'
-import { CacheManagerService } from '../../../../_libs/transporter/cache-manager/cache-manager.service'
+import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
+import { DistributorRepository } from '../../../../_libs/database/repository/distributor/distributor.repository'
+import { OrganizationRepository } from '../../../../_libs/database/repository/organization/organization.repository'
+import { UserRepository } from '../../../../_libs/database/repository/user/user.repository'
 import { CacheTokenService } from '../../../../_libs/transporter/cache-manager/cache-token.service'
 import { EmailService } from '../../components/email/email.service'
 import { GlobalConfig, JwtConfig } from '../../environments'
 import { JwtExtendService } from '../jwt-extend/jwt-extend.service'
 import { ForgotPasswordBody } from './request/forgot-password.body'
 import { LoginBody } from './request/login.body'
-import { RegisterBody } from './request/register.body'
 import { ResetPasswordBody } from './request/reset-password.body'
 
 @Injectable()
@@ -209,26 +186,6 @@ export class ApiAuthService {
         refreshExp: token.refreshExp,
       },
     }
-  }
-
-  async refreshDemo(): Promise<BaseResponse> {
-    await this.manager.delete(Customer, { oid: 1 })
-    await this.manager.delete(CustomerPayment, { oid: 1 })
-    await this.manager.delete(Distributor, { oid: 1 })
-    await this.manager.delete(DistributorPayment, { oid: 1 })
-    await this.manager.delete(Invoice, { oid: 1 })
-    await this.manager.delete(InvoiceExpense, { oid: 1 })
-    await this.manager.delete(InvoiceItem, { oid: 1 })
-    await this.manager.delete(InvoiceSurcharge, { oid: 1 })
-    await this.manager.delete(OrganizationSetting, { oid: 1 })
-    await this.manager.delete(Procedure, { oid: 1 })
-    await this.manager.delete(Product, { oid: 1 })
-    await this.manager.delete(ProductBatch, { oid: 1 })
-    await this.manager.delete(ProductMovement, { oid: 1 })
-    await this.manager.delete(Receipt, { oid: 1 })
-    await this.manager.delete(ReceiptItem, { oid: 1 })
-
-    return { data: true }
   }
 
   async forgotPassword(body: ForgotPasswordBody): Promise<BaseResponse> {

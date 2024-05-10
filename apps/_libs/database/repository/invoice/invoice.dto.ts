@@ -4,11 +4,10 @@ import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { Invoice, InvoiceExpense, InvoiceItem, InvoiceSurcharge } from '../../entities'
 
 export class InvoiceItemDto extends PartialType(
-  OmitType(InvoiceItem, ['invoiceId', 'procedure', 'productBatch', 'invoice'])
+  OmitType(InvoiceItem, ['invoiceId', 'procedure', 'batch', 'invoice'])
 ) {
   unit: string
   quantity: number
-  referenceId: number
 }
 
 export class InvoiceSurchargeDto extends PartialType(

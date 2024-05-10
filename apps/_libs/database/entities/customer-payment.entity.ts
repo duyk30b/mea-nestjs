@@ -21,7 +21,7 @@ export default class CustomerPayment extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  time: number
+  createdAt: number
 
   @Column({ type: 'smallint' })
   @Expose()
@@ -84,3 +84,5 @@ export default class CustomerPayment extends BaseEntity {
   @JoinColumn({ name: 'invoiceId', referencedColumnName: 'id' })
   invoice: Invoice
 }
+
+export type CustomerPaymentInsertType = Omit<CustomerPayment, 'id' | 'invoice'>

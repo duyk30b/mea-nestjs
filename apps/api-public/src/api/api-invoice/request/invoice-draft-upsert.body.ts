@@ -66,7 +66,7 @@ export class InvoiceDraftCreateBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  time: number
+  startedAt: number
 
   @ApiProperty({ example: 750_000 })
   @Expose()

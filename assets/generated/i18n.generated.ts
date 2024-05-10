@@ -51,6 +51,7 @@ export type I18nTranslations = {
         };
         "Product": {
             "NotExist": string;
+            "ConflictManageQuantity": string;
         };
         "Customer": {
             "NotExist": string;

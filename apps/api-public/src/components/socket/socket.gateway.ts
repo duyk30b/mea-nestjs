@@ -9,7 +9,7 @@ import {
 } from '@nestjs/websockets'
 import { getClientIp } from 'request-ip'
 import { Server, Socket } from 'socket.io'
-import { UserRepository } from '../../../../_libs/database/repository'
+import { UserRepository } from '../../../../_libs/database/repository/user/user.repository'
 import { JwtExtendService } from '../../auth/jwt-extend/jwt-extend.service'
 import { SocketService } from './socket.service'
 import { SOCKET_EVENT } from './socket.variable'

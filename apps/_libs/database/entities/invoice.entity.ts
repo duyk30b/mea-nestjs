@@ -10,7 +10,7 @@ import InvoiceSurcharge from './invoice-surcharge.entity'
 
 @Entity('Invoice')
 @Index('IDX_Invoice__oid_customerId', ['oid', 'customerId'])
-@Index('IDX_Invoice__oid_time', ['oid', 'time'])
+@Index('IDX_Invoice__oid_startedAt', ['oid', 'startedAt'])
 export default class Invoice extends BaseEntity {
   @Column({ default: 0 })
   @Expose()
@@ -24,21 +24,6 @@ export default class Invoice extends BaseEntity {
   @Expose()
   status: InvoiceStatus
 
-  @Column({
-    type: 'bigint',
-    nullable: true,
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
-  @Expose()
-  time: number
-
-  @Column({ type: 'timestamp with time zone', nullable: true })
-  @Expose()
-  shipTime: Date
-
   @Column({ type: 'smallint', nullable: true })
   @Expose()
   shipYear: number
@@ -50,17 +35,6 @@ export default class Invoice extends BaseEntity {
   @Column({ type: 'smallint', nullable: true })
   @Expose()
   shipDate: number
-
-  @Column({
-    type: 'bigint',
-    nullable: true,
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
-  @Expose()
-  deleteTime: number
 
   @Column({
     type: 'bigint',
@@ -141,6 +115,39 @@ export default class Invoice extends BaseEntity {
   @Column({ type: 'character varying', length: 255, nullable: true })
   @Expose()
   note: string // Ghi chú
+
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  startedAt: number
+
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  shippedAt: number
+
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  deletedAt: number
 
   @Expose()
   @ManyToOne((type) => Customer, { createForeignKeyConstraints: false })

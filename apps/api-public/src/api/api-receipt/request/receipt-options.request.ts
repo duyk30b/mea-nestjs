@@ -24,18 +24,18 @@ export class ReceiptFilterQuery {
   distributorId: number
 
   @Expose()
-  @Type(() => ConditionTimestamp)
-  @ValidateNested({ each: true })
-  time: ConditionTimestamp
-
-  @Expose()
-  @Type(() => ConditionTimestamp)
-  @ValidateNested({ each: true })
-  deleteTime: ConditionTimestamp
-
-  @Expose()
   @IsEnum(ReceiptStatus)
   status: ReceiptStatus
+
+  @Expose()
+  @Type(() => ConditionTimestamp)
+  @ValidateNested({ each: true })
+  startedAt: ConditionTimestamp
+
+  @Expose()
+  @Type(() => ConditionTimestamp)
+  @ValidateNested({ each: true })
+  deletedAt: ConditionTimestamp
 }
 
 export class ReceiptSortQuery extends SortQuery {}

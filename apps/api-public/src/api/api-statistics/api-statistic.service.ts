@@ -1,31 +1,26 @@
 import { Injectable } from '@nestjs/common'
-import { LimitQuery } from '../../../../_libs/common/dto/query'
+import { LimitQuery } from '../../../../_libs/common/dto'
 import { DTimer } from '../../../../_libs/common/helpers/time.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { InvoiceStatus } from '../../../../_libs/database/common/variable'
 import { Customer, Product } from '../../../../_libs/database/entities'
-import {
-  CustomerRepository,
-  InvoiceRepository,
-  ProductBatchRepository,
-  ProductMovementRepository,
-  ProductRepository,
-  StatisticRepository,
-} from '../../../../_libs/database/repository'
+import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
+import { InvoiceRepository } from '../../../../_libs/database/repository/invoice/invoice.repository'
+import { ProductRepository } from '../../../../_libs/database/repository/product/product.repository'
+import { StatisticRepository } from '../../../../_libs/database/repository/statistic/statistic.repository'
 import {
   StatisticTimeQuery,
   StatisticTopBestSellingQuery,
   StatisticTopCustomerBestInvoiceQuery,
 } from './request'
+import { StatisticProductHighMoneyQuery } from './request/statistic-top-product-high-money.query'
 
 @Injectable()
 export class ApiStatisticService {
   constructor(
     private readonly statisticRepository: StatisticRepository,
     private readonly invoiceRepository: InvoiceRepository,
-    private readonly productBatchRepository: ProductBatchRepository,
     private readonly productRepository: ProductRepository,
-    private readonly productMovementRepository: ProductMovementRepository,
     private readonly customerRepository: CustomerRepository
   ) {}
 
@@ -33,7 +28,7 @@ export class ApiStatisticService {
     const data = await this.statisticRepository.sumWarehouse(oid)
     return {
       data: {
-        totalCostMoney: Number(data.totalCostMoney),
+        totalCostAmount: Number(data.totalCostAmount),
         totalRetailMoney: Number(data.totalRetailMoney),
       },
     }
@@ -64,7 +59,7 @@ export class ApiStatisticService {
     const topData = data.map((i) => ({
       productId: i.productId,
       sumQuantity: i.sumQuantity,
-      sumCostMoney: i.sumCostMoney,
+      sumCostAmount: i.sumCostAmount,
       sumActualMoney: i.sumActualMoney,
       sumProfit: i.sumProfit,
       product: productMap[i.productId],
@@ -73,19 +68,17 @@ export class ApiStatisticService {
     return { data: topData }
   }
 
-  async topProductHighCostMoney(oid: number, { limit }: LimitQuery): Promise<BaseResponse> {
-    const data = await this.statisticRepository.topProductHighCostMoney({ oid, limit })
-    const productIds = data.map((i) => i.productId)
-    const productList = await this.productRepository.findManyBy({ id: { IN: productIds } })
-    const productMap: Record<string, Product> = {}
-    productList.forEach((i) => (productMap[i.id] = i))
-
-    const topData = data.map((i) => ({
-      ...i,
-      product: productMap[i.productId],
-    }))
-
-    return { data: topData }
+  async topProductHighMoney(
+    oid: number,
+    query: StatisticProductHighMoneyQuery
+  ): Promise<BaseResponse> {
+    const { orderBy, limit } = query
+    const data = await this.statisticRepository.topProductHighMoney({
+      oid,
+      limit,
+      orderBy,
+    })
+    return { data }
   }
 
   async topProcedureBestSelling(
@@ -359,11 +352,11 @@ export class ApiStatisticService {
 
     const invoices = await this.invoiceRepository.findManyBy({
       oid,
-      time: { BETWEEN: [startMonth, endMonth] },
+      startedAt: { BETWEEN: [startMonth, endMonth] },
       status: { IN: [InvoiceStatus.Debt, InvoiceStatus.Success] },
     })
     invoices.forEach((invoice) => {
-      const date = new Date(invoice.time + 7 * 60 * 60 * 1000).getUTCDate()
+      const date = new Date(invoice.startedAt + 7 * 60 * 60 * 1000).getUTCDate()
       data[date - 1].revenue += invoice.revenue
       data[date - 1].profit += invoice.profit
     })

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
-import { DataSource, EntityManager, Repository } from 'typeorm'
+import { EntityManager, Repository } from 'typeorm'
 import { Receipt } from '../../entities'
 import { PostgreSqlRepository } from '../postgresql.repository'
 
@@ -9,11 +9,10 @@ export class ReceiptRepository extends PostgreSqlRepository<
   Receipt,
   { [P in 'id' | 'distributorId']?: 'ASC' | 'DESC' },
   { [P in 'distributor' | 'distributorPayments']?: boolean } & {
-    receiptItems?: { productBatch?: { product?: boolean } } | false
+    receiptItems?: { batch?: boolean; product?: boolean } | false
   }
 > {
   constructor(
-    private dataSource: DataSource,
     @InjectEntityManager() private manager: EntityManager,
     @InjectRepository(Receipt) private receiptRepository: Repository<Receipt>
   ) {
@@ -25,7 +24,7 @@ export class ReceiptRepository extends PostgreSqlRepository<
     relation?: {
       distributor?: boolean
       distributorPayments?: boolean
-      receiptItems?: { productBatch?: boolean }
+      receiptItems?: { batch?: boolean; product?: boolean } | false
     }
   ): Promise<Receipt> {
     let query = this.manager
@@ -33,17 +32,22 @@ export class ReceiptRepository extends PostgreSqlRepository<
       .where('receipt.id = :id', { id: condition.id })
       .andWhere('receipt.oid = :oid', { oid: condition.oid })
 
-    if (relation?.distributor) query = query.leftJoinAndSelect('receipt.distributor', 'distributor')
+    if (relation?.distributor) {
+      query = query.leftJoinAndSelect('receipt.distributor', 'distributor')
+    }
+
     if (relation?.distributorPayments) {
       query = query.leftJoinAndSelect('invoice.distributorPayments', 'distributorPayment')
     }
+
     if (relation?.receiptItems) {
       query = query.leftJoinAndSelect('receipt.receiptItems', 'receiptItem')
-    }
-    if (relation?.receiptItems?.productBatch) {
-      query = query
-        .leftJoinAndSelect('receiptItem.productBatch', 'productBatch')
-        .leftJoinAndSelect('productBatch.product', 'product')
+      if (relation?.receiptItems?.batch) {
+        query = query.leftJoinAndSelect('receiptItem.batch', 'batch')
+      }
+      if (relation?.receiptItems?.product) {
+        query = query.leftJoinAndSelect('receiptItem.product', 'product')
+      }
     }
 
     const receipt = await query.getOne()

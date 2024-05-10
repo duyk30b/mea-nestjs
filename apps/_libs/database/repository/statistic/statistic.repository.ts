@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
-import { Between, EntityManager, In } from 'typeorm'
+import { Between, DataSource, EntityManager, In } from 'typeorm'
+import { PlainObjectToNewEntityTransformer } from 'typeorm/query-builder/transformer/PlainObjectToNewEntityTransformer'
 import { InvoiceItemType, InvoiceStatus, ReceiptStatus } from '../../common/variable'
 import {
   Customer,
@@ -8,21 +9,43 @@ import {
   InvoiceExpense,
   InvoiceItem,
   InvoiceSurcharge,
+  Product,
   Receipt,
 } from '../../entities'
 
 @Injectable()
 export class StatisticRepository {
-  constructor(@InjectEntityManager() private manager: EntityManager) {}
+  constructor(
+    private dataSource: DataSource,
+    @InjectEntityManager() private manager: EntityManager
+  ) {}
 
-  async sumWarehouse(oid: number): Promise<{ totalCostMoney: string; totalRetailMoney: string }> {
+  async sumWarehouse(oid: number): Promise<{ totalCostAmount: string; totalRetailMoney: string }> {
     const data: any[] = await this.manager.query(`
-            SELECT SUM("costPrice" * "quantity") AS "totalCostMoney", 
+            SELECT SUM("costAmount") AS "totalCostAmount", 
                 SUM("retailPrice" * "quantity") AS "totalRetailMoney"
-            FROM "ProductBatch"
+            FROM "Product"
             WHERE "oid" = ${oid}
         `)
     return data[0]
+  }
+
+  async topProductHighMoney(options: {
+    oid: number
+    limit: number
+    orderBy: 'sumRetailMoney' | 'quantity' | 'costAmount'
+  }) {
+    const { oid, limit, orderBy } = options
+    const data: any[] = await this.manager.query(`
+            SELECT *, 
+                ("retailPrice" * "quantity") AS "sumRetailMoney"
+            FROM "Product"
+            WHERE "oid" = ${oid}
+            ORDER BY "${orderBy}" DESC
+            LIMIT ${limit}
+        `)
+
+    return data
   }
 
   async sumCustomerDebt(oid: number): Promise<number> {
@@ -32,28 +55,6 @@ export class StatisticRepository {
       .where({ oid })
       .getRawOne()
     return Number(sum)
-  }
-
-  async topProductHighCostMoney(options: { oid: number; limit: number }) {
-    const { oid, limit } = options
-    const data: any[] = await this.manager.query(`
-            SELECT "productId", 
-                SUM("costPrice" * "quantity") AS "sumCostMoney", 
-                SUM("retailPrice" * "quantity") AS "sumRetailMoney",
-                SUM("quantity") AS "sumQuantity"
-            FROM "ProductBatch"
-            WHERE "oid" = ${oid}
-            GROUP BY "productId"
-            ORDER BY "sumCostMoney" DESC
-            LIMIT ${limit}
-        `)
-
-    return data.map((i) => ({
-      productId: i.productId as number,
-      sumCostMoney: Number(i.sumCostMoney),
-      sumRetailMoney: Number(i.sumRetailMoney),
-      sumQuantity: Number(i.sumQuantity),
-    }))
   }
 
   async topProductBestSelling(options: {
@@ -68,22 +69,21 @@ export class StatisticRepository {
     let query = this.manager
       .createQueryBuilder(InvoiceItem, 'invoiceItem')
       .leftJoinAndSelect('invoiceItem.invoice', 'invoice')
-      .leftJoinAndSelect('invoiceItem.productBatch', 'productBatch')
+      .leftJoinAndSelect('invoiceItem.product', 'product')
+      // .leftJoinAndSelect('invoiceItem.productBatch', 'productBatch')
       .where('invoiceItem.oid = :oid', { oid })
-      .andWhere('invoiceItem.type = :typeProductBatch', {
-        typeProductBatch: InvoiceItemType.ProductBatch,
-      })
-      .andWhere('invoice.time BETWEEN :fromTime AND :toTime', { fromTime, toTime })
+      .andWhere('invoiceItem.productId != 0')
+      .andWhere('invoice.startedAt BETWEEN :fromTime AND :toTime', { fromTime, toTime })
       .andWhere('invoice.status IN (:...status)', {
         status: [InvoiceStatus.Debt, InvoiceStatus.Success],
       })
-      .groupBy('productBatch.productId')
-      .select('productBatch.productId', 'productId')
+      .groupBy('invoiceItem.productId')
+      .select('invoiceItem.productId', 'productId')
       .addSelect('SUM(invoiceItem.quantity)', 'sumQuantity')
       .addSelect('SUM(invoiceItem.quantity * invoiceItem.actualPrice)', 'sumActualMoney')
-      .addSelect('SUM(invoiceItem.quantity * invoiceItem.costPrice)', 'sumCostMoney')
+      .addSelect('SUM(invoiceItem.costAmount)', 'sumCostAmount')
       .addSelect(
-        'SUM(invoiceItem.quantity * (invoiceItem.actualPrice - invoiceItem.costPrice))',
+        'SUM(invoiceItem.quantity * invoiceItem.actualPrice - invoiceItem.costAmount)',
         'sumProfit'
       )
       .limit(limit)
@@ -101,7 +101,7 @@ export class StatisticRepository {
     return data.map((i) => ({
       productId: i.productId as number,
       sumQuantity: Number(i.sumQuantity),
-      sumCostMoney: Number(i.sumCostMoney),
+      sumCostAmount: Number(i.sumCostAmount),
       sumActualMoney: Number(i.sumActualMoney),
       sumProfit: Number(i.sumProfit),
     }))
@@ -121,10 +121,10 @@ export class StatisticRepository {
       .leftJoinAndSelect('invoiceItem.invoice', 'invoice')
       .leftJoinAndSelect('invoiceItem.procedure', 'procedure')
       .where('invoiceItem.oid = :oid', { oid })
-      .andWhere('invoiceItem.type = :typeProductBatch', {
-        typeProductBatch: InvoiceItemType.Procedure,
+      .andWhere('invoiceItem.type = :typeProcedure', {
+        typeProcedure: InvoiceItemType.Procedure,
       })
-      .andWhere('invoice.time BETWEEN :fromTime AND :toTime', { fromTime, toTime })
+      .andWhere('invoice.startedAt BETWEEN :fromTime AND :toTime', { fromTime, toTime })
       .andWhere('invoice.status IN (:...status)', {
         status: [InvoiceStatus.Debt, InvoiceStatus.Success],
       })
@@ -172,7 +172,7 @@ export class StatisticRepository {
       .createQueryBuilder(Invoice, 'invoice')
       .where({
         oid,
-        time: Between(fromTime.getTime(), toTime.getTime()),
+        startedAt: Between(fromTime.getTime(), toTime.getTime()),
         status: In([InvoiceStatus.Debt, InvoiceStatus.Success]),
       })
       .groupBy('invoice.customerId')
@@ -222,7 +222,7 @@ export class StatisticRepository {
       .where({
         oid,
         status: In([InvoiceStatus.Debt, InvoiceStatus.Success]),
-        time: Between(fromTime, toTime),
+        startedAt: Between(fromTime, toTime),
       })
       .select([
         '"shipYear"',
@@ -282,7 +282,7 @@ export class StatisticRepository {
       .where({
         oid,
         status: In([ReceiptStatus.Debt, ReceiptStatus.Success]),
-        time: Between(fromTime, toTime),
+        startedAt: Between(fromTime, toTime),
       })
       .select([
         '"shipYear"',
@@ -330,7 +330,7 @@ export class StatisticRepository {
       .andWhere('"invoice"."status" IN (:...status)', {
         status: [InvoiceStatus.Debt, InvoiceStatus.Success],
       })
-      .andWhere('"invoice"."time" BETWEEN :fromTime AND :toTime', { fromTime, toTime })
+      .andWhere('"invoice"."startedAt" BETWEEN :fromTime AND :toTime', { fromTime, toTime })
       .select([
         '"invoiceExpense"."key" as "key"',
         '"invoiceExpense"."name" as "name"',
@@ -380,7 +380,7 @@ export class StatisticRepository {
       .andWhere('"invoice"."status" IN (:...status)', {
         status: [InvoiceStatus.Debt, InvoiceStatus.Success],
       })
-      .andWhere('"invoice"."time" BETWEEN :fromTime AND :toTime', { fromTime, toTime })
+      .andWhere('"invoice"."startedAt" BETWEEN :fromTime AND :toTime', { fromTime, toTime })
       .select([
         '"invoiceSurcharge"."key" as "key"',
         '"invoiceSurcharge"."name" as "name"',

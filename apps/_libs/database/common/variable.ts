@@ -65,8 +65,10 @@ export enum ReceiptStatus {
 }
 
 export enum InvoiceItemType {
-  ProductBatch = 1,
+  Batch = 1,
   Procedure = 2,
+  Product = 3,
+  ProductNoManageQuantity = 4,
 }
 
 export enum ArrivalStatus {
@@ -79,4 +81,9 @@ export enum ArrivalStatus {
 export enum ArrivalType {
   Invoice = 1,
   Normal = 2,
+}
+
+export enum MovementType {
+  Receipt = 1,
+  Invoice = 2,
 }
