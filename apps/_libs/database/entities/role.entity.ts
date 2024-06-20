@@ -32,19 +32,19 @@ export default class Role {
     },
   })
   @Expose()
-  createdAt: number
-
-  @Column({
-    type: 'bigint',
-    default: () => '(EXTRACT(epoch FROM now()) * (1000))',
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
-  @Expose()
   updatedAt: number
 }
 
-export type RoleInsertType = Omit<Role, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>
-export type RoleUpdateType = Omit<Role, 'oid' | 'id' | 'createdAt' | 'updatedAt'>
+export type RoleRelationType = Pick<Role, never>
+
+export type RoleSortType = Pick<Role, 'oid' | 'id'>
+
+export type RoleInsertType = Omit<
+  Role,
+  keyof RoleRelationType | keyof Pick<Role, 'id' | 'updatedAt'>
+>
+
+export type RoleUpdateType = Omit<
+  Role,
+  keyof RoleRelationType | keyof Pick<Role, 'oid' | 'id' | 'updatedAt'>
+>

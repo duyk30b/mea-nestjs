@@ -7,7 +7,7 @@ import { SortQuery } from '../../../../../_libs/common/dto/query'
 export class ProductRelationQuery {
   @Expose()
   @IsBoolean()
-  batches: boolean
+  batchList: boolean
 }
 
 export class BatchFilterQuery {
@@ -30,7 +30,7 @@ export class ProductFilterQuery {
   @Expose()
   @Type(() => BatchFilterQuery)
   @ValidateNested({ each: true })
-  batches: BatchFilterQuery
+  batchList: BatchFilterQuery
 
   @Expose()
   @IsNotEmpty()

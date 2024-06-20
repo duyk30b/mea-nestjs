@@ -33,8 +33,8 @@ export class PermissionGuard implements CanActivate {
     const requestExternal: RequestExternal = request.raw // Fastify phải đọc trong Raw
     const { uid, oid } = requestExternal.external
 
-    if (uid == null || oid == null) {
-      throw new BusinessException('error.Token.Invalid', {}, HttpStatus.UNAUTHORIZED)
+    if (requestExternal.external.error) {
+      throw new BusinessException(requestExternal.external.error, {}, HttpStatus.UNAUTHORIZED)
     }
 
     // Get data để check

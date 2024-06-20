@@ -1,4 +1,6 @@
 {
+  "ValidateFailed": "Validate Failed: {obj}",
+  "SystemError": "Lỗi hệ thống",
   "Database": {
     "NotFound": "Không tìm thấy bản ghi",
     "UpdateFailed": "Lỗi cập nhật bản ghi",
@@ -37,7 +39,8 @@
   },
   "Product": {
     "NotExist": "Sản phẩm không tồn tại",
-    "ConflictManageQuantity": "Sản phẩm đã có số lượng không thể hủy theo dõi tồn kho"
+    "ConflictManageQuantity": "Sản phẩm có số lượng khác 0 không thể hủy theo dõi tồn kho",
+    "ConflictManageBatches": "Sản phẩm có số lượng khác 0 không thể thay đổi cách quản lý theo lô"
   },
   "Customer": {
     "NotExist": "Khách hàng không tồn tại"

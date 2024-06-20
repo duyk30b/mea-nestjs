@@ -1,17 +1,16 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { Between, DataSource, EntityManager, In } from 'typeorm'
-import { PlainObjectToNewEntityTransformer } from 'typeorm/query-builder/transformer/PlainObjectToNewEntityTransformer'
-import { InvoiceItemType, InvoiceStatus, ReceiptStatus } from '../../common/variable'
+import { InvoiceItemType, InvoiceStatus } from '../../common/variable'
 import {
   Customer,
   Invoice,
-  InvoiceExpense,
   InvoiceItem,
-  InvoiceSurcharge,
-  Product,
-  Receipt,
+  ProductMovement,
+  Visit,
+  VisitProcedure,
 } from '../../entities'
+import { VisitStatus } from '../../entities/visit.entity'
 
 @Injectable()
 export class StatisticRepository {
@@ -67,23 +66,19 @@ export class StatisticRepository {
     const { oid, fromTime, toTime, orderBy, limit } = options
 
     let query = this.manager
-      .createQueryBuilder(InvoiceItem, 'invoiceItem')
-      .leftJoinAndSelect('invoiceItem.invoice', 'invoice')
-      .leftJoinAndSelect('invoiceItem.product', 'product')
-      // .leftJoinAndSelect('invoiceItem.productBatch', 'productBatch')
-      .where('invoiceItem.oid = :oid', { oid })
-      .andWhere('invoiceItem.productId != 0')
-      .andWhere('invoice.startedAt BETWEEN :fromTime AND :toTime', { fromTime, toTime })
-      .andWhere('invoice.status IN (:...status)', {
-        status: [InvoiceStatus.Debt, InvoiceStatus.Success],
-      })
-      .groupBy('invoiceItem.productId')
-      .select('invoiceItem.productId', 'productId')
-      .addSelect('SUM(invoiceItem.quantity)', 'sumQuantity')
-      .addSelect('SUM(invoiceItem.quantity * invoiceItem.actualPrice)', 'sumActualMoney')
-      .addSelect('SUM(invoiceItem.costAmount)', 'sumCostAmount')
+      .createQueryBuilder(ProductMovement, 'productMovement')
+      .where('"productMovement".oid = :oid', { oid })
+      .andWhere('"productMovement"."createdAt" BETWEEN :fromTime AND :toTime', { fromTime, toTime })
+      .groupBy('"productMovement"."productId"')
+      .select('"productMovement"."productId"', 'productId')
+      .addSelect('SUM(-"productMovement"."quantity")', 'sumQuantity')
       .addSelect(
-        'SUM(invoiceItem.quantity * invoiceItem.actualPrice - invoiceItem.costAmount)',
+        'SUM(-"productMovement"."quantity" * "productMovement"."actualPrice")',
+        'sumActualMoney'
+      )
+      .addSelect('SUM(-"productMovement"."costAmount")', 'sumCostAmount')
+      .addSelect(
+        'SUM(-("productMovement".quantity * "productMovement"."actualPrice" - "productMovement"."costAmount"))',
         'sumProfit'
       )
       .limit(limit)
@@ -107,19 +102,18 @@ export class StatisticRepository {
     }))
   }
 
-  async topProcedureBestSelling(options: {
+  async topInvoiceProcedureBestSelling(options: {
     oid: number
     fromTime: number
     toTime: number
     limit: number
-    orderBy: 'sumActualMoney' | 'sumProfit' | 'sumQuantity'
+    orderBy: 'sumActualMoney' | 'sumQuantity'
   }) {
     const { oid, fromTime, toTime, orderBy, limit } = options
 
     let query = this.manager
       .createQueryBuilder(InvoiceItem, 'invoiceItem')
       .leftJoinAndSelect('invoiceItem.invoice', 'invoice')
-      .leftJoinAndSelect('invoiceItem.procedure', 'procedure')
       .where('invoiceItem.oid = :oid', { oid })
       .andWhere('invoiceItem.type = :typeProcedure', {
         typeProcedure: InvoiceItemType.Procedure,
@@ -128,22 +122,14 @@ export class StatisticRepository {
       .andWhere('invoice.status IN (:...status)', {
         status: [InvoiceStatus.Debt, InvoiceStatus.Success],
       })
-      .groupBy('procedure.id')
-      .select('procedure.id', 'procedureId')
-      .addSelect('procedure.name', 'procedureName')
-      .addSelect('SUM(invoiceItem.quantity)', 'sumQuantity')
-      .addSelect('SUM(invoiceItem.quantity * invoiceItem.actualPrice)', 'sumActualMoney')
-      .addSelect('SUM(invoiceItem.quantity * invoiceItem.costPrice)', 'sumCostMoney')
-      .addSelect(
-        'SUM(invoiceItem.quantity * (invoiceItem.actualPrice - invoiceItem.costPrice))',
-        'sumProfit'
-      )
+      .groupBy('"invoiceItem"."procedureId"')
+      .select('"invoiceItem"."procedureId"', 'procedureId')
+      .addSelect('SUM("invoiceItem".quantity)', 'sumQuantity')
+      .addSelect('SUM("invoiceItem".quantity * "invoiceItem"."actualPrice")', 'sumActualMoney')
       .limit(limit)
 
     if (orderBy === 'sumActualMoney') {
       query = query.orderBy('"sumActualMoney"', 'DESC')
-    } else if (orderBy === 'sumProfit') {
-      query = query.orderBy('"sumProfit"', 'DESC')
     } else if (orderBy === 'sumQuantity') {
       query = query.orderBy('"sumQuantity"', 'DESC')
     }
@@ -152,11 +138,45 @@ export class StatisticRepository {
 
     return data.map((i) => ({
       procedureId: i.procedureId as number,
-      procedureName: i.procedureName as string,
       sumQuantity: Number(i.sumQuantity),
-      sumCostMoney: Number(i.sumCostMoney),
       sumActualMoney: Number(i.sumActualMoney),
-      sumProfit: Number(i.sumProfit),
+    }))
+  }
+
+  async topVisitProcedureBestSelling(options: {
+    oid: number
+    fromTime: number
+    toTime: number
+    limit: number
+    orderBy: 'sumActualMoney' | 'sumQuantity'
+  }) {
+    const { oid, fromTime, toTime, orderBy, limit } = options
+
+    let query = this.manager
+      .createQueryBuilder(VisitProcedure, 'visitProcedure')
+      .where('visitProcedure.oid = :oid', { oid })
+      .andWhere('"visitProcedure"."createdAt" BETWEEN :fromTime AND :toTime', { fromTime, toTime })
+      .groupBy('"visitProcedure"."procedureId"')
+      .select('"visitProcedure"."procedureId"', 'procedureId')
+      .addSelect('SUM("visitProcedure".quantity)', 'sumQuantity')
+      .addSelect(
+        'SUM("visitProcedure".quantity * "visitProcedure"."actualPrice")',
+        'sumActualMoney'
+      )
+      .limit(limit)
+
+    if (orderBy === 'sumActualMoney') {
+      query = query.orderBy('"sumActualMoney"', 'DESC')
+    } else if (orderBy === 'sumQuantity') {
+      query = query.orderBy('"sumQuantity"', 'DESC')
+    }
+
+    const data = await query.getRawMany()
+
+    return data.map((i) => ({
+      procedureId: i.procedureId as number,
+      sumQuantity: Number(i.sumQuantity),
+      sumActualMoney: Number(i.sumActualMoney),
     }))
   }
 
@@ -165,7 +185,7 @@ export class StatisticRepository {
     fromTime: Date
     toTime: Date
     limit: number
-    orderBy: 'sumRevenue' | 'sumProfit' | 'countInvoice'
+    orderBy: 'sumTotalMoney' | 'sumProfit' | 'countInvoice'
   }) {
     const { oid, fromTime, toTime, orderBy, limit } = options
     let query = this.manager
@@ -175,19 +195,19 @@ export class StatisticRepository {
         startedAt: Between(fromTime.getTime(), toTime.getTime()),
         status: In([InvoiceStatus.Debt, InvoiceStatus.Success]),
       })
-      .groupBy('invoice.customerId')
-      .select('invoice.customerId', 'customerId')
-      .addSelect('SUM(invoice.itemsCostMoney)', 'sumItemCost')
-      .addSelect('SUM(invoice.itemsActualMoney)', 'sumItemActual')
-      .addSelect('SUM(invoice.expense)', 'sumExpense')
-      .addSelect('SUM(invoice.revenue)', 'sumRevenue')
-      .addSelect('SUM(invoice.debt)', 'sumDebt')
-      .addSelect('SUM(invoice.profit)', 'sumProfit')
+      .groupBy('"invoice"."customerId"')
+      .select('"invoice"."customerId"', 'customerId')
+      .addSelect('SUM("invoice"."totalCostAmount")', 'sumTotalCostAmount')
+      .addSelect('SUM("invoice"."itemsActualMoney")', 'sumItemActual')
+      .addSelect('SUM("invoice"."expense")', 'sumExpense')
+      .addSelect('SUM("invoice"."totalMoney")', 'sumTotalMoney')
+      .addSelect('SUM("invoice"."debt")', 'sumDebt')
+      .addSelect('SUM("invoice"."profit")', 'sumProfit')
       .addSelect('COUNT(*)', 'countInvoice')
       .limit(limit)
 
-    if (orderBy === 'sumRevenue') {
-      query = query.orderBy('"sumRevenue"', 'DESC')
+    if (orderBy === 'sumTotalMoney') {
+      query = query.orderBy('"sumTotalMoney"', 'DESC')
     } else if (orderBy === 'sumProfit') {
       query = query.orderBy('"sumProfit"', 'DESC')
     } else if (orderBy === 'countInvoice') {
@@ -197,219 +217,56 @@ export class StatisticRepository {
     const data = await query.getRawMany()
     return data.map((i) => ({
       customerId: i.customerId as number,
-      sumItemCost: Number(i.sumItemCost),
+      sumTotalCostAmount: Number(i.sumTotalCostAmount),
       sumItemActual: Number(i.sumItemActual),
       sumExpense: Number(i.sumExpense),
-      sumRevenue: Number(i.sumRevenue),
+      sumTotalMoney: Number(i.sumTotalMoney),
       sumDebt: Number(i.sumDebt),
       sumProfit: Number(i.sumProfit),
       countInvoice: Number(i.countInvoice),
     }))
   }
 
-  async sumMoneyInvoice(options: {
+  async topCustomerBestVisit(options: {
     oid: number
     fromTime: Date
     toTime: Date
-    timeType: 'date' | 'month'
+    limit: number
+    orderBy: 'sumTotalMoney' | 'sumProfit' | 'countVisit'
   }) {
-    const { oid, timeType } = options
-    const fromTime = options.fromTime.getTime()
-    const toTime = options.toTime.getTime()
-
+    const { oid, fromTime, toTime, orderBy, limit } = options
     let query = this.manager
-      .createQueryBuilder(Invoice, 'invoice')
+      .createQueryBuilder(Visit, 'visit')
       .where({
         oid,
-        status: In([InvoiceStatus.Debt, InvoiceStatus.Success]),
-        startedAt: Between(fromTime, toTime),
+        startedAt: Between(fromTime.getTime(), toTime.getTime()),
+        visitStatus: In([VisitStatus.Debt, VisitStatus.Completed]),
       })
-      .select([
-        '"shipYear"',
-        '"shipMonth"',
-        'SUM("itemsCostMoney") AS "sumItemsCost"',
-        'SUM("itemsActualMoney") AS "sumItemsActual"',
-        'SUM("itemsActualMoney" - "itemsCostMoney") AS "sumItemsProfit"',
-        'SUM("surcharge") AS "sumSurcharge"',
-        'SUM("discountMoney") AS "sumDiscountMoney"',
-        'SUM("expense") AS "sumExpense"',
-        'SUM("revenue") AS "sumRevenue"',
-        'SUM("profit") AS "sumProfit"',
-        'SUM("debt") AS "sumDebt"',
-        'COUNT(*) AS "countInvoice"',
-      ])
-    if (timeType === 'date') {
-      query = query
-        .addSelect('invoice.shipDate', 'shipDate')
-        .groupBy('"shipYear"')
-        .addGroupBy('"shipMonth"')
-        .addGroupBy('"shipDate"')
-    } else if (timeType === 'month') {
-      query = query.groupBy('"shipYear"').addGroupBy('"shipMonth"')
+      .groupBy('"visit"."customerId"')
+      .select('"visit"."customerId"', 'customerId')
+      .addSelect('SUM("visit"."totalCostAmount")', 'sumTotalCostAmount')
+      .addSelect('SUM("visit"."totalMoney")', 'sumTotalMoney')
+      .addSelect('SUM("visit"."debt")', 'sumDebt')
+      .addSelect('SUM("visit"."profit")', 'sumProfit')
+      .addSelect('COUNT(*)', 'countVisit')
+      .limit(limit)
+
+    if (orderBy === 'sumTotalMoney') {
+      query = query.orderBy('"sumTotalMoney"', 'DESC')
+    } else if (orderBy === 'sumProfit') {
+      query = query.orderBy('"sumProfit"', 'DESC')
+    } else if (orderBy === 'countVisit') {
+      query = query.orderBy('"countVisit"', 'DESC')
     }
 
     const data = await query.getRawMany()
     return data.map((i) => ({
-      oid,
-      shipYear: i.shipYear as number,
-      shipMonth: i.shipMonth as number,
-      shipDate: i.shipDate as number,
-      sumItemsCost: Number(i.sumItemsCost),
-      sumItemsActual: Number(i.sumItemsActual),
-      sumItemsProfit: Number(i.sumItemsProfit),
-      sumSurcharge: Number(i.sumSurcharge),
-      sumDiscountMoney: Number(i.sumDiscountMoney),
-      sumExpense: Number(i.sumExpense),
-      sumRevenue: Number(i.sumRevenue),
-      sumProfit: Number(i.sumProfit),
+      customerId: i.customerId as number,
+      sumTotalCostAmount: Number(i.sumTotalCostAmount),
+      sumTotalMoney: Number(i.sumTotalMoney),
       sumDebt: Number(i.sumDebt),
-      countInvoice: Number(i.countInvoice),
-    }))
-  }
-
-  async sumMoneyReceipt(options: {
-    oid: number
-    fromTime: Date
-    toTime: Date
-    timeType: 'date' | 'month'
-  }) {
-    const { oid, timeType } = options
-    const fromTime = options.fromTime.getTime()
-    const toTime = options.toTime.getTime()
-
-    let query = this.manager
-      .createQueryBuilder(Receipt, 'receipt')
-      .where({
-        oid,
-        status: In([ReceiptStatus.Debt, ReceiptStatus.Success]),
-        startedAt: Between(fromTime, toTime),
-      })
-      .select([
-        '"shipYear"',
-        '"shipMonth"',
-        'SUM("revenue") AS "sumRevenue"',
-        'COUNT(*) AS "countReceipt"',
-      ])
-
-    if (timeType === 'date') {
-      query = query
-        .addSelect('receipt.shipDate', 'shipDate')
-        .groupBy('"shipYear"')
-        .addGroupBy('"shipMonth"')
-        .addGroupBy('"shipDate"')
-    } else if (timeType === 'month') {
-      query = query.groupBy('"shipYear"').addGroupBy('"shipMonth"')
-    }
-
-    const dataList = await query.getRawMany()
-
-    return dataList.map((i) => ({
-      oid,
-      shipYear: i.shipYear as number,
-      shipMonth: i.shipMonth as number,
-      shipDate: i.shipDate as number,
-      sumRevenue: Number(i.sumRevenue),
-      countReceipt: Number(i.countReceipt),
-    }))
-  }
-
-  async sumInvoiceExpense(options: {
-    oid: number
-    fromTime: Date
-    toTime: Date
-    timeType: 'date' | 'month'
-  }) {
-    const { oid, timeType } = options
-    const fromTime = options.fromTime.getTime()
-    const toTime = options.toTime.getTime()
-
-    let query = this.manager
-      .createQueryBuilder(InvoiceExpense, 'invoiceExpense')
-      .leftJoinAndSelect('invoiceExpense.invoice', 'invoice')
-      .where('"invoiceExpense"."oid" = :oid', { oid })
-      .andWhere('"invoice"."status" IN (:...status)', {
-        status: [InvoiceStatus.Debt, InvoiceStatus.Success],
-      })
-      .andWhere('"invoice"."startedAt" BETWEEN :fromTime AND :toTime', { fromTime, toTime })
-      .select([
-        '"invoiceExpense"."key" as "key"',
-        '"invoiceExpense"."name" as "name"',
-        '"invoice"."shipYear" AS "shipYear"',
-        '"invoice"."shipMonth" AS "shipMonth"',
-        'SUM("invoiceExpense"."money") AS "sumMoney"',
-      ])
-      .groupBy('"invoiceExpense"."key"')
-      .addGroupBy('"invoiceExpense"."name"')
-
-    if (timeType === 'date') {
-      query = query
-        .addSelect('invoice.shipDate', 'shipDate')
-        .addGroupBy('"shipYear"')
-        .addGroupBy('"shipMonth"')
-        .addGroupBy('"shipDate"')
-    } else if (timeType === 'month') {
-      query = query.addGroupBy('"shipYear"').addGroupBy('"shipMonth"')
-    }
-    const data = await query.getRawMany()
-
-    return data.map((i) => ({
-      oid,
-      shipYear: i.shipYear as number,
-      shipMonth: i.shipMonth as number,
-      shipDate: i.shipDate as number,
-      sumMoney: Number(i.sumMoney),
-      key: i.key as string,
-      name: i.name as string,
-    }))
-  }
-
-  async sumInvoiceSurcharge(options: {
-    oid: number
-    fromTime: Date
-    toTime: Date
-    timeType: 'date' | 'month'
-  }) {
-    const { oid, timeType } = options
-    const fromTime = options.fromTime.getTime()
-    const toTime = options.toTime.getTime()
-
-    let query = this.manager
-      .createQueryBuilder(InvoiceSurcharge, 'invoiceSurcharge')
-      .leftJoinAndSelect('invoiceSurcharge.invoice', 'invoice')
-      .where('"invoiceSurcharge"."oid" = :oid', { oid })
-      .andWhere('"invoice"."status" IN (:...status)', {
-        status: [InvoiceStatus.Debt, InvoiceStatus.Success],
-      })
-      .andWhere('"invoice"."startedAt" BETWEEN :fromTime AND :toTime', { fromTime, toTime })
-      .select([
-        '"invoiceSurcharge"."key" as "key"',
-        '"invoiceSurcharge"."name" as "name"',
-        '"invoice"."shipYear" AS "shipYear"',
-        '"invoice"."shipMonth" AS "shipMonth"',
-        'SUM("invoiceSurcharge"."money") AS "sumMoney"',
-      ])
-      .groupBy('"invoiceSurcharge"."key"')
-      .addGroupBy('"invoiceSurcharge"."name"')
-
-    if (timeType === 'date') {
-      query = query
-        .addSelect('invoice.shipDate', 'shipDate')
-        .addGroupBy('"shipYear"')
-        .addGroupBy('"shipMonth"')
-        .addGroupBy('"shipDate"')
-    } else if (timeType === 'month') {
-      query = query.addGroupBy('"shipYear"').addGroupBy('"shipMonth"')
-    }
-    const data = await query.getRawMany()
-
-    return data.map((i) => ({
-      oid,
-      shipYear: i.shipYear as number,
-      shipMonth: i.shipMonth as number,
-      shipDate: i.shipDate as number,
-      sumMoney: Number(i.sumMoney),
-      key: i.key as string,
-      name: i.name as string,
+      sumProfit: Number(i.sumProfit),
+      countVisit: Number(i.countVisit),
     }))
   }
 }

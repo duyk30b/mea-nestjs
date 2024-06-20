@@ -41,7 +41,7 @@ export const randomFullName = (gender?: EGender, hasMiddle = true): string => {
   ])
   let middleName = '',
     lastName = ''
-  if (!gender) gender = randomEnum(EGender)
+  if (gender == null) gender = randomEnum(EGender)
 
   if (gender === EGender.Female) {
     middleName = randomItemsInArray([

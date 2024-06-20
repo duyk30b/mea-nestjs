@@ -2,6 +2,7 @@ import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import Invoice from './invoice.entity'
+import Visit from './visit.entity'
 
 @Entity('InvoiceSurcharge')
 @Index('IDX_InvoiceSurcharge__invoiceId', ['oid', 'invoiceId'])
@@ -30,4 +31,13 @@ export default class InvoiceSurcharge extends BaseEntity {
   @ManyToOne((type) => Invoice, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'invoiceId', referencedColumnName: 'id' })
   invoice: Invoice
+
+  @Expose()
+  @ManyToOne((type) => Visit, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'invoiceId', referencedColumnName: 'id' })
+  visit: Visit
 }
+
+export type InvoiceSurchargeInsertType = Omit<InvoiceSurcharge, 'id' | 'invoice' | 'visit'>
+
+export type InvoiceSurchargeUpdateType = Omit<InvoiceSurcharge, 'oid' | 'id' | 'invoice' | 'visit'>

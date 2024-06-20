@@ -4,7 +4,12 @@ import { External, TExternal } from '../../../../_libs/common/request/external.r
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
 import { HasPermission } from '../../guards/permission.guard'
 import { ApiCustomerPaymentService } from './api-customer-payment.service'
-import { CustomerPaymentPaginationQuery, CustomerPaymentPayDebtBody } from './request'
+import {
+  CustomerPaymentGetManyQuery,
+  CustomerPaymentPaginationQuery,
+  CustomerPaymentPayDebtBody,
+  VoucherDebtListQuery,
+} from './request'
 
 @ApiTags('Customer Payment')
 @ApiBearerAuth('access-token')
@@ -16,6 +21,18 @@ export class ApiCustomerPaymentController {
   @HasPermission(PermissionId.CUSTOMER_PAYMENT_READ)
   pagination(@External() { oid }: TExternal, @Query() query: CustomerPaymentPaginationQuery) {
     return this.apiCustomerPaymentService.pagination(oid, query)
+  }
+
+  @Get('list')
+  @HasPermission(PermissionId.CUSTOMER_PAYMENT_READ)
+  async list(@External() { oid }: TExternal, @Query() query: CustomerPaymentGetManyQuery) {
+    return await this.apiCustomerPaymentService.getMany(oid, query)
+  }
+
+  @Get('voucher-debt-list')
+  @HasPermission(PermissionId.CUSTOMER_PAYMENT_READ)
+  async voucherDebtList(@External() { oid }: TExternal, @Query() query: VoucherDebtListQuery) {
+    return await this.apiCustomerPaymentService.voucherDebtList(oid, query.customerId)
   }
 
   @Post('pay-debt')

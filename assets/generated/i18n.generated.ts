@@ -6,6 +6,7 @@ export type I18nTranslations = {
         "Success": string;
         "Forbidden": string;
         "ForbiddenPermission": string;
+        "TooManyRequests": string;
         "AccountInactive": string;
         "ApiInactive": string;
         "ForgotPassword": {
@@ -13,6 +14,8 @@ export type I18nTranslations = {
         };
     };
     "error": {
+        "ValidateFailed": string;
+        "SystemError": string;
         "Database": {
             "NotFound": string;
             "UpdateFailed": string;
@@ -52,6 +55,7 @@ export type I18nTranslations = {
         "Product": {
             "NotExist": string;
             "ConflictManageQuantity": string;
+            "ConflictManageBatches": string;
         };
         "Customer": {
             "NotExist": string;

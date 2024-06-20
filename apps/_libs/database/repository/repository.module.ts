@@ -22,31 +22,60 @@ import {
   User,
 } from '../entities'
 import Permission from '../entities/permission.entity'
-import { BatchMovementRepository } from './batch/bat-movement.repository'
+import VisitBatch from '../entities/visit-batch.entity'
+import VisitDiagnosis from '../entities/visit-diagnosis.entity'
+import VisitProcedure from '../entities/visit-procedure.entity'
+import VisitProduct from '../entities/visit-product.entity'
+import Visit from '../entities/visit.entity'
+import { BatchMovementRepository } from './batch-movement/bat-movement.repository'
 import { BatchRepository } from './batch/batch.repository'
-import { CustomerPaymentRepository } from './customer/customer-payment.repository'
+import { CustomerPaymentRepository } from './customer-payment/customer-payment.repository'
 import { CustomerRepository } from './customer/customer.repository'
-import { DistributorPaymentRepository } from './distributor/distributor-payment.repository'
+import { DistributorPaymentRepository } from './distributor-payment/distributor-payment.repository'
 import { DistributorRepository } from './distributor/distributor.repository'
 import { InvoiceItemRepository } from './invoice-item/invoice-item.repository'
-import { InvoiceProcessRepository } from './invoice/invoice-process.repository'
-import { InvoiceRefund } from './invoice/invoice-refund'
-import { InvoiceShipAndPayment } from './invoice/invoice-ship-and-payment'
+import { InvoiceDraft } from './invoice/invoice-draft'
+import { InvoicePayDebt } from './invoice/invoice-pay-debt'
+import { InvoicePrepayment } from './invoice/invoice-prepayment'
+import { InvoiceRefundPrepayment } from './invoice/invoice-refund-prepayment'
+import { InvoiceReturnProduct } from './invoice/invoice-return-product'
+import { InvoiceSendProductAndPayment } from './invoice/invoice-send-product-and-payment'
 import { InvoiceRepository } from './invoice/invoice.repository'
 import { OrganizationSettingRepository } from './organization-setting/organization-setting.repository'
 import { OrganizationRepository } from './organization/organization.repository'
 import { PermissionRepository } from './permission/permission.repository'
 import { ProcedureRepository } from './procedure/procedure.repository'
-import { ProductMovementRepository } from './product/product-movement.repository'
+import { ProductMovementRepository } from './product-movement/product-movement.repository'
 import { ProductRepository } from './product/product.repository'
 import { ReceiptItemRepository } from './receipt-item/receipt-item.repository'
-import { ReceiptProcessRepository } from './receipt/receipt-process.repository'
-import { ReceiptRefund } from './receipt/receipt-refund'
-import { ReceiptShipAndPayment } from './receipt/receipt-ship-and-payment'
+import { ReceiptDraft } from './receipt/receipt-draft'
+import { ReceiptPayDebt } from './receipt/receipt-pay-debt'
+import { ReceiptPrepayment } from './receipt/receipt-prepayment'
+import { ReceiptRefundPrepayment } from './receipt/receipt-refund-prepayment'
+import { ReceiptReturnProduct } from './receipt/receipt-return-product'
+import { ReceiptSendProductAndPayment } from './receipt/receipt-send-product-and-payment'
 import { ReceiptRepository } from './receipt/receipt.repository'
 import { RoleRepository } from './role/role.repository'
+import { StatisticInvoiceRepository } from './statistic/statistic-invoice.repository'
+import { StatisticReceiptRepository } from './statistic/statistic-receipt.repository'
+import { StatisticVisitRepository } from './statistic/statistic-visit.repository'
 import { StatisticRepository } from './statistic/statistic.repository'
 import { UserRepository } from './user/user.repository'
+import { VisitBatchRepository } from './visit-batch/visit-batch.repository'
+import { VisitDiagnosisRepository } from './visit-diagnosis/visit-diagnosis.repository'
+import { VisitProcedureRepository } from './visit-procedure/visit-procedure.repository'
+import { VisitProductRepository } from './visit-product/visit-product.repository'
+import { VisitClose } from './visit/visit-close'
+import { VisitItemsMoney } from './visit/visit-items-money'
+import { VisitPayDebt } from './visit/visit-pay-debt'
+import { VisitPrepayment } from './visit/visit-prepayment'
+import { VisitRefundOverpaid } from './visit/visit-refund-overpaid'
+import { VisitReopen } from './visit/visit-reopen'
+import { VisitReplaceVisitProcedureList } from './visit/visit-replace-procedure-list'
+import { VisitReplaceVisitProductList } from './visit/visit-replace-product-list'
+import { VisitReturnProduct } from './visit/visit-return-product'
+import { VisitSendProduct } from './visit/visit-send-product'
+import { VisitRepository } from './visit/visit.repository'
 
 @Global()
 @Module({
@@ -72,6 +101,11 @@ import { UserRepository } from './user/user.repository'
       ReceiptItem,
       Role,
       User,
+      Visit,
+      VisitDiagnosis,
+      VisitProcedure,
+      VisitProduct,
+      VisitBatch,
     ]),
   ],
   providers: [
@@ -81,10 +115,13 @@ import { UserRepository } from './user/user.repository'
     CustomerPaymentRepository,
     DistributorRepository,
     DistributorPaymentRepository,
+    InvoiceDraft,
+    InvoicePayDebt,
+    InvoicePrepayment,
+    InvoiceRefundPrepayment,
+    InvoiceReturnProduct,
+    InvoiceSendProductAndPayment,
     InvoiceRepository,
-    InvoiceProcessRepository,
-    InvoiceShipAndPayment,
-    InvoiceRefund,
     InvoiceItemRepository,
     OrganizationRepository,
     OrganizationSettingRepository,
@@ -92,14 +129,35 @@ import { UserRepository } from './user/user.repository'
     ProcedureRepository,
     ProductRepository,
     ProductMovementRepository,
+    ReceiptDraft,
+    ReceiptPayDebt,
+    ReceiptPrepayment,
+    ReceiptRefundPrepayment,
+    ReceiptReturnProduct,
+    ReceiptSendProductAndPayment,
     ReceiptRepository,
-    ReceiptProcessRepository,
-    ReceiptShipAndPayment,
-    ReceiptRefund,
     ReceiptItemRepository,
     RoleRepository,
     StatisticRepository,
+    StatisticReceiptRepository,
+    StatisticInvoiceRepository,
+    StatisticVisitRepository,
     UserRepository,
+    VisitClose,
+    VisitItemsMoney,
+    VisitPayDebt,
+    VisitPrepayment,
+    VisitRefundOverpaid,
+    VisitReopen,
+    VisitReplaceVisitProcedureList,
+    VisitReplaceVisitProductList,
+    VisitReturnProduct,
+    VisitSendProduct,
+    VisitRepository,
+    VisitDiagnosisRepository,
+    VisitProcedureRepository,
+    VisitProductRepository,
+    VisitBatchRepository,
   ],
   exports: [
     BatchRepository,
@@ -108,10 +166,13 @@ import { UserRepository } from './user/user.repository'
     CustomerPaymentRepository,
     DistributorRepository,
     DistributorPaymentRepository,
+    InvoiceDraft,
+    InvoicePayDebt,
+    InvoicePrepayment,
+    InvoiceRefundPrepayment,
+    InvoiceReturnProduct,
+    InvoiceSendProductAndPayment,
     InvoiceRepository,
-    InvoiceProcessRepository,
-    InvoiceShipAndPayment,
-    InvoiceRefund,
     InvoiceItemRepository,
     OrganizationRepository,
     OrganizationSettingRepository,
@@ -121,12 +182,34 @@ import { UserRepository } from './user/user.repository'
     ProductMovementRepository,
     ReceiptRepository,
     RoleRepository,
-    ReceiptProcessRepository,
-    ReceiptShipAndPayment,
-    ReceiptRefund,
+    ReceiptDraft,
+    ReceiptPayDebt,
+    ReceiptPrepayment,
+    ReceiptRefundPrepayment,
+    ReceiptReturnProduct,
+    ReceiptSendProductAndPayment,
+    ReceiptRepository,
     ReceiptItemRepository,
     StatisticRepository,
+    StatisticReceiptRepository,
+    StatisticInvoiceRepository,
+    StatisticVisitRepository,
     UserRepository,
+    VisitClose,
+    VisitItemsMoney,
+    VisitPayDebt,
+    VisitPrepayment,
+    VisitRefundOverpaid,
+    VisitReopen,
+    VisitReplaceVisitProcedureList,
+    VisitReplaceVisitProductList,
+    VisitReturnProduct,
+    VisitSendProduct,
+    VisitRepository,
+    VisitDiagnosisRepository,
+    VisitProcedureRepository,
+    VisitProductRepository,
+    VisitBatchRepository,
   ],
 })
 export class RepositoryModule {}

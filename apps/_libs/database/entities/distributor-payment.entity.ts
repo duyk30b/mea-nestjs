@@ -5,8 +5,8 @@ import { PaymentType } from '../common/variable'
 import Receipt from './receipt.entity'
 
 @Entity('DistributorPayment')
-@Index('IDX_DistributorPayment__distributorId', ['oid', 'distributorId'])
-@Index('IDX_DistributorPayment__receiptId', ['oid', 'receiptId'])
+@Index('IDX_DistributorPayment__oid_distributorId', ['oid', 'distributorId'])
+@Index('IDX_DistributorPayment__oid_receiptId', ['oid', 'receiptId'])
 export default class DistributorPayment extends BaseEntity {
   @Column()
   @Expose()
@@ -25,7 +25,7 @@ export default class DistributorPayment extends BaseEntity {
 
   @Column({ type: 'smallint' })
   @Expose()
-  type: PaymentType
+  paymentType: PaymentType
 
   @Column({
     type: 'bigint',
@@ -46,28 +46,14 @@ export default class DistributorPayment extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  distributorOpenDebt: number // Công nợ đầu kỳ
+  openDebt: number // Công nợ đầu kỳ
 
   @Column({
     type: 'bigint',
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose() // openDebt + debit = closeDebt
-  distributorCloseDebt: number // Công nợ cuối kỳ
-
-  @Column({
-    type: 'bigint',
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose()
-  receiptOpenDebt: number // Công nợ đầu kỳ
-
-  @Column({
-    type: 'bigint',
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose() // openDebt + debit = closeDebt
-  receiptCloseDebt: number // Công nợ cuối kỳ
+  closeDebt: number // Công nợ cuối kỳ
 
   @Column({ type: 'character varying', length: 255, nullable: true })
   @Expose()

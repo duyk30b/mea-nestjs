@@ -12,10 +12,6 @@ import InvoiceSurcharge from './invoice-surcharge.entity'
 @Index('IDX_Invoice__oid_customerId', ['oid', 'customerId'])
 @Index('IDX_Invoice__oid_startedAt', ['oid', 'startedAt'])
 export default class Invoice extends BaseEntity {
-  @Column({ default: 0 })
-  @Expose()
-  arrivalId: number
-
   @Column({ nullable: false })
   @Expose()
   customerId: number
@@ -26,22 +22,22 @@ export default class Invoice extends BaseEntity {
 
   @Column({ type: 'smallint', nullable: true })
   @Expose()
-  shipYear: number
+  year: number
 
   @Column({ type: 'smallint', nullable: true })
   @Expose()
-  shipMonth: number // 01->12
+  month: number // 01->12
 
   @Column({ type: 'smallint', nullable: true })
   @Expose()
-  shipDate: number
+  date: number
 
   @Column({
     type: 'bigint',
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  itemsCostMoney: number // tổng tiền cost = tổng cost sản phẩm
+  totalCostAmount: number // tổng tiền cost = tổng cost sản phẩm
 
   @Column({
     type: 'bigint',
@@ -79,7 +75,7 @@ export default class Invoice extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  revenue: number // Doanh thu = itemsActualMoney + phụ phí - tiền giảm giá
+  totalMoney: number // Doanh thu = itemsActualMoney + phụ phí - tiền giảm giá
 
   @Column({
     type: 'bigint',
@@ -136,7 +132,7 @@ export default class Invoice extends BaseEntity {
     },
   })
   @Expose()
-  shippedAt: number
+  endedAt: number
 
   @Column({
     type: 'bigint',
@@ -172,6 +168,49 @@ export default class Invoice extends BaseEntity {
   invoiceSurcharges: InvoiceSurcharge[]
 
   @Expose()
-  @OneToMany(() => CustomerPayment, (customerPayment) => customerPayment.invoice)
+  @OneToMany(() => CustomerPayment, (customerPayment) => customerPayment.visit)
   customerPayments: CustomerPayment[]
+
+  static fromRaw(raw: { [P in keyof Invoice]: any }) {
+    if (!raw) return null
+    const entity = new Invoice()
+    Object.assign(entity, raw)
+
+    entity.totalCostAmount = Number(raw.totalCostAmount)
+    entity.itemsActualMoney = Number(raw.itemsActualMoney)
+    entity.discountMoney = Number(raw.discountMoney)
+    entity.discountPercent = Number(raw.discountPercent)
+
+    entity.surcharge = Number(raw.surcharge)
+    entity.totalMoney = Number(raw.totalMoney)
+    entity.expense = Number(raw.expense)
+    entity.profit = Number(raw.profit)
+    entity.paid = Number(raw.paid)
+    entity.debt = Number(raw.debt)
+
+    entity.startedAt = raw.startedAt == null ? raw.startedAt : Number(raw.startedAt)
+    entity.endedAt = raw.endedAt == null ? raw.endedAt : Number(raw.endedAt)
+    entity.deletedAt = raw.deletedAt == null ? raw.deletedAt : Number(raw.deletedAt)
+
+    return entity
+  }
+
+  static fromRaws(raws: { [P in keyof Invoice]: any }[]) {
+    return raws.map((i) => Invoice.fromRaw(i))
+  }
 }
+
+export type InvoiceRelationType = Pick<
+  Invoice,
+  'customer' | 'invoiceItems' | 'invoiceExpenses' | 'invoiceSurcharges' | 'customerPayments'
+>
+
+export type InvoiceInsertType = Omit<
+  Invoice,
+  keyof InvoiceRelationType | keyof Pick<Invoice, 'id' | 'deletedAt'>
+>
+
+export type InvoiceUpdateType = Omit<
+  Invoice,
+  keyof InvoiceRelationType | keyof Pick<Invoice, 'id' | 'oid' | 'customerId'>
+>

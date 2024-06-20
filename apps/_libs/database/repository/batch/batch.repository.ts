@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, EntityManager, Repository } from 'typeorm'
+import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { Batch } from '../../entities'
-import { BatchInsertType, BatchUpdateType } from '../../entities/batch.entity'
+import { BatchInsertType, BatchRelationType, BatchUpdateType } from '../../entities/batch.entity'
 import { PostgreSqlRepository } from '../postgresql.repository'
 
 @Injectable()
 export class BatchRepository extends PostgreSqlRepository<
   Batch,
   { [P in 'id' | 'expiryDate']?: 'ASC' | 'DESC' },
-  { [P in 'product']?: boolean },
+  { [P in keyof BatchRelationType]?: boolean },
   BatchInsertType,
   BatchUpdateType
 > {
@@ -19,6 +20,20 @@ export class BatchRepository extends PostgreSqlRepository<
     @InjectRepository(Batch) private batchRepository: Repository<Batch>
   ) {
     super(batchRepository)
+  }
+
+  async insertOneAndReturnEntity<X extends Partial<BatchInsertType>>(
+    data: NoExtra<Partial<BatchInsertType>, X>
+  ): Promise<Batch> {
+    const raw = await this.insertOneAndReturnRaw(data)
+    return Batch.fromRaw(raw)
+  }
+
+  async insertOneFullFieldAndReturnEntity<X extends BatchInsertType>(
+    data: NoExtra<BatchInsertType, X>
+  ): Promise<Batch> {
+    const raw = await this.insertOneFullFieldAndReturnRaw(data)
+    return Batch.fromRaw(raw)
   }
 
   // async delete(oid: number, id: number) {

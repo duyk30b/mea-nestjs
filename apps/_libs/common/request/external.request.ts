@@ -1,5 +1,6 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common'
 import { FastifyRequest } from 'fastify'
+import { I18nPath } from '../../../../assets/generated/i18n.generated'
 
 export type TExternal = {
   ip: string
@@ -8,6 +9,7 @@ export type TExternal = {
   mobile: 1 | 0
   oid?: number
   uid?: number
+  error?: I18nPath
 }
 
 export interface RequestExternal extends FastifyRequest {

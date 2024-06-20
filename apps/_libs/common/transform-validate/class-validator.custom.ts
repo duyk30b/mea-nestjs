@@ -1,8 +1,11 @@
 import {
   ValidationArguments,
+  ValidationOptions,
   ValidatorConstraint,
   ValidatorConstraintInterface,
+  registerDecorator,
 } from 'class-validator'
+import { stringEnum, valuesEnum } from '../helpers/typescript.helper'
 
 @ValidatorConstraint({ name: 'isPhone', async: false })
 export class IsPhone implements ValidatorConstraintInterface {
@@ -26,5 +29,50 @@ export class IsGmail implements ValidatorConstraintInterface {
 
   defaultMessage(args: ValidationArguments) {
     return '$property must be a gmail address !'
+  }
+}
+
+export function IsNumberGreaterThan(options: number, validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      name: 'isNumberGreaterThan',
+      target: object.constructor,
+      propertyName,
+      constraints: [options],
+      options: validationOptions,
+      validator: {
+        validate(value: any, args: ValidationArguments) {
+          const [options] = args.constraints
+          return typeof value === 'number' && value > options
+        },
+        defaultMessage(args: ValidationArguments) {
+          const [options] = args.constraints
+          return `$property ($value) must be a number and greater than ${options}`
+        },
+      },
+    })
+  }
+}
+
+export function IsEnumValue(options: object, validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      name: 'isEnumValue',
+      target: object.constructor,
+      propertyName,
+      constraints: [options],
+      options: validationOptions,
+      validator: {
+        validate(value: any, args: ValidationArguments) {
+          const [options] = args.constraints
+          const valueOptions = valuesEnum(options)
+          return valueOptions.includes(value)
+        },
+        defaultMessage(args: ValidationArguments) {
+          const [options] = args.constraints
+          return `$property ($value) must be an enum ${stringEnum(options)}`
+        },
+      },
+    })
   }
 }

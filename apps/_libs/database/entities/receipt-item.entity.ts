@@ -26,10 +26,6 @@ export default class ReceiptItem extends BaseEntity {
   @Expose()
   batchId: number
 
-  @Column({ type: 'varchar', length: 255, default: '{"name":"","rate":1}' })
-  @Expose()
-  unit: string
-
   @Column({
     type: 'bigint',
     default: 0,
@@ -48,6 +44,10 @@ export default class ReceiptItem extends BaseEntity {
   @Expose()
   quantity: number
 
+  @Column({ type: 'smallint', default: 1 })
+  @Expose()
+  unitRate: number
+
   @Expose()
   @ManyToOne((type) => Receipt, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'receiptId', referencedColumnName: 'id' })
@@ -62,4 +62,31 @@ export default class ReceiptItem extends BaseEntity {
   @ManyToOne((type) => Product, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'productId', referencedColumnName: 'id' })
   product: Product
+
+  static fromRaw(raw: { [P in keyof ReceiptItem]: any }) {
+    if (!raw) return null
+    const entity = new ReceiptItem()
+    Object.assign(entity, raw)
+
+    entity.costPrice = Number(raw.costPrice)
+    entity.quantity = Number(raw.quantity)
+
+    return entity
+  }
+
+  static fromRaws(raws: { [P in keyof ReceiptItem]: any }[]) {
+    return raws.map((i) => ReceiptItem.fromRaw(i))
+  }
 }
+
+export type ReceiptItemRelationType = Pick<ReceiptItem, 'receipt' | 'batch' | 'product'>
+
+export type ReceiptItemInsertType = Omit<
+  ReceiptItem,
+  keyof ReceiptItemRelationType | keyof Pick<ReceiptItem, 'id'>
+>
+
+export type ReceiptItemUpdateType = Omit<
+  ReceiptItem,
+  keyof ReceiptItemRelationType | keyof Pick<ReceiptItem, 'id' | 'oid' | 'distributorId'>
+>

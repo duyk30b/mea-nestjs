@@ -3,19 +3,28 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
 import { HasPermission } from '../../guards/permission.guard'
+import { ApiStatisticInvoiceService } from './api-statistic-invoice.service'
+import { ApiStatisticReceiptService } from './api-statistic-receipt.service'
+import { ApiStatisticVisitService } from './api-statistic-visit.service'
 import { ApiStatisticService } from './api-statistic.service'
 import {
+  StatisticProductHighMoneyQuery,
   StatisticTimeQuery,
   StatisticTopBestSellingQuery,
   StatisticTopCustomerBestInvoiceQuery,
+  StatisticTopCustomerBestVisitQuery,
 } from './request'
-import { StatisticProductHighMoneyQuery } from './request/statistic-top-product-high-money.query'
 
 @ApiTags('Statistic')
 @ApiBearerAuth('access-token')
 @Controller('statistic')
 export class ApiStatisticController {
-  constructor(private readonly apiStatisticService: ApiStatisticService) {}
+  constructor(
+    private readonly apiStatisticService: ApiStatisticService,
+    private readonly apiStatisticReceiptService: ApiStatisticReceiptService,
+    private readonly apiStatisticInvoiceService: ApiStatisticInvoiceService,
+    private readonly apiStatisticVisitService: ApiStatisticVisitService
+  ) {}
 
   @Get('sum-warehouse')
   @HasPermission(PermissionId.STATISTIC_PRODUCT)
@@ -41,13 +50,22 @@ export class ApiStatisticController {
     return await this.apiStatisticService.topProductHighMoney(oid, query)
   }
 
-  @Get('top-procedure-best-selling')
+  @Get('top-invoice-procedure-best-selling')
   @HasPermission(PermissionId.STATISTIC_PROCEDURE)
-  async topProcedureHighActualMoney(
+  async topInvoiceProcedureBestSelling(
     @External() { oid }: TExternal,
     @Query() query: StatisticTopBestSellingQuery
   ) {
-    return await this.apiStatisticService.topProcedureBestSelling(oid, query)
+    return await this.apiStatisticService.topInvoiceProcedureBestSelling(oid, query)
+  }
+
+  @Get('top-visit-procedure-best-selling')
+  @HasPermission(PermissionId.STATISTIC_PROCEDURE)
+  async topVisitProcedureBestSelling(
+    @External() { oid }: TExternal,
+    @Query() query: StatisticTopBestSellingQuery
+  ) {
+    return await this.apiStatisticService.topVisitProcedureBestSelling(oid, query)
   }
 
   @Get('top-customer-best-invoice')
@@ -59,27 +77,36 @@ export class ApiStatisticController {
     return await this.apiStatisticService.topCustomerBestInvoice(oid, query)
   }
 
+  @Get('top-customer-best-visit')
+  @HasPermission(PermissionId.STATISTIC_CUSTOMER)
+  async topCustomerBestVisit(
+    @External() { oid }: TExternal,
+    @Query() query: StatisticTopCustomerBestVisitQuery
+  ) {
+    return await this.apiStatisticService.topCustomerBestVisit(oid, query)
+  }
+
   @Get('sum-customer-debt')
   @HasPermission(PermissionId.STATISTIC_CUSTOMER)
   sumCustomerDebt(@External() { oid }: TExternal) {
     return this.apiStatisticService.sumCustomerDebt(oid)
   }
 
-  @Get('sum-money-invoice')
-  @HasPermission(PermissionId.STATISTIC_INVOICE)
-  async sumMoneyInvoice(@External() { oid }: TExternal, @Query() query: StatisticTimeQuery) {
-    return await this.apiStatisticService.sumMoneyInvoice(oid, query)
+  @Get('statistic-receipt')
+  @HasPermission(PermissionId.STATISTIC_VISIT)
+  async statisticReceipt(@External() { oid }: TExternal, @Query() query: StatisticTimeQuery) {
+    return await this.apiStatisticReceiptService.statisticReceipt(oid, query)
   }
 
-  @Get('sum-money-receipt')
-  @HasPermission(PermissionId.STATISTIC_RECEIPT)
-  async sumMoneyReceipt(@External() { oid }: TExternal, @Query() query: StatisticTimeQuery) {
-    return await this.apiStatisticService.sumMoneyReceipt(oid, query)
+  @Get('statistic-invoice')
+  @HasPermission(PermissionId.STATISTIC_VISIT)
+  async statisticInvoice(@External() { oid }: TExternal, @Query() query: StatisticTimeQuery) {
+    return await this.apiStatisticInvoiceService.statisticInvoice(oid, query)
   }
 
-  @Get('sum-invoice-surcharge-and-expense')
-  @HasPermission(PermissionId.STATISTIC_INVOICE)
-  async sumInvoiceSurcharge(@External() { oid }: TExternal, @Query() query: StatisticTimeQuery) {
-    return await this.apiStatisticService.sumInvoiceSurchargeAndExpenses(oid, query)
+  @Get('statistic-visit')
+  @HasPermission(PermissionId.STATISTIC_VISIT)
+  async statisticVisit(@External() { oid }: TExternal, @Query() query: StatisticTimeQuery) {
+    return await this.apiStatisticVisitService.statisticVisit(oid, query)
   }
 }

@@ -38,17 +38,19 @@ export default class InvoiceItem extends BaseEntity {
   @Expose()
   type: InvoiceItemType
 
-  @Column({ type: 'varchar', length: 255, default: '{"name":"","rate":1}' })
-  @Expose()
-  unit: string
-
   @Column({
-    type: 'bigint',
-    nullable: true,
+    type: 'decimal',
+    default: 0,
+    precision: 10,
+    scale: 3,
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  costPrice: number // Giá cost
+  quantity: number
+
+  @Column({ type: 'smallint', default: 1 })
+  @Expose()
+  unitRate: number
 
   @Column({
     type: 'bigint',
@@ -90,16 +92,6 @@ export default class InvoiceItem extends BaseEntity {
   @Expose()
   actualPrice: number // Giá thực tế
 
-  @Column({
-    type: 'decimal',
-    default: 0,
-    precision: 10,
-    scale: 3,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose()
-  quantity: number
-
   @Column({ type: 'character varying', length: 255, nullable: true })
   @Expose()
   hintUsage: string
@@ -115,12 +107,46 @@ export default class InvoiceItem extends BaseEntity {
   batch: Batch
 
   @Expose()
+  @ManyToOne((type) => Product, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'productId', referencedColumnName: 'id' })
+  product: Product
+
+  @Expose()
   @ManyToOne((type) => Procedure, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'procedureId', referencedColumnName: 'id' })
   procedure: Procedure
 
-  @Expose()
-  @ManyToOne((type) => Product, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'productId', referencedColumnName: 'id' })
-  product: Product
+  static fromRaw(raw: { [P in keyof InvoiceItem]: any }) {
+    if (!raw) return null
+    const entity = new InvoiceItem()
+    Object.assign(entity, raw)
+
+    entity.quantity = Number(raw.quantity)
+    entity.costAmount = Number(raw.costAmount)
+    entity.expectedPrice = Number(raw.expectedPrice)
+    entity.discountMoney = Number(raw.discountMoney)
+    entity.discountPercent = Number(raw.discountPercent)
+    entity.actualPrice = Number(raw.actualPrice)
+
+    return entity
+  }
+
+  static fromRaws(raws: { [P in keyof InvoiceItem]: any }[]) {
+    return raws.map((i) => InvoiceItem.fromRaw(i))
+  }
 }
+
+export type InvoiceItemRelationType = Pick<
+  InvoiceItem,
+  'invoice' | 'batch' | 'product' | 'procedure'
+>
+
+export type InvoiceItemInsertType = Omit<
+  InvoiceItem,
+  keyof InvoiceItemRelationType | keyof Pick<InvoiceItem, 'id'>
+>
+
+export type InvoiceItemUpdateType = Omit<
+  InvoiceItem,
+  keyof InvoiceItemRelationType | keyof Pick<InvoiceItem, 'id' | 'oid'>
+>

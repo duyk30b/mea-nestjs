@@ -27,7 +27,7 @@ export class InvoiceRepository extends PostgreSqlRepository<
       invoiceSurcharges?: boolean
       invoiceItems?: { procedure?: boolean; batch?: boolean; product?: boolean } | false
     }
-  ): Promise<Invoice> {
+  ): Promise<Invoice | null> {
     let query = this.manager
       .createQueryBuilder(Invoice, 'invoice')
       .where('invoice.id = :id', { id: condition.id })

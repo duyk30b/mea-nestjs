@@ -60,7 +60,7 @@ export class ReceiptSeed {
   //         receiptInsertDto.createTime = createTime
   //         const { receiptId } = await this.receiptProcessRepository.createDraft({ oid, receiptInsertDto })
   //         if (i % 2 === 0) {
-  //             await this.receiptProcessRepository.startShipAndPayment({ oid, receiptId, shipTime })
+  //             await this.receiptProcessRepository.startSendProductAndPayment({ oid, receiptId, shipTime })
   //             if (i % 4 === 0) {
   //                 await this.receiptProcessRepository.startRefund({ oid, receiptId, refundTime })
   //             }

@@ -20,10 +20,11 @@ import { AuthModule } from './auth/auth.module'
 import { JwtExtendModule } from './auth/jwt-extend/jwt-extend.module'
 import { EmailModule } from './components/email/email.module'
 import { HealthModule } from './components/health/health.module'
-import { CronJobModule } from './cron-job/cron-job.module'
+import { EventListenerModule } from './event-listener/event-listener.module'
 import { PermissionGuard } from './guards/permission.guard'
 import { DetectClientMiddleware } from './middleware/detect-client.middleware copy'
 import { RootModule } from './root/root.module'
+import { SocketModule } from './socket/socket.module'
 
 @Module({
   imports: [
@@ -50,6 +51,8 @@ import { RootModule } from './root/root.module'
     EmailModule,
     // CronJobModule,
 
+    EventListenerModule,
+    SocketModule,
     CacheManagerModule,
 
     AuthModule,

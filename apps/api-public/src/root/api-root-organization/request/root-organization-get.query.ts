@@ -81,7 +81,7 @@ export class RootOrganizationPaginationQuery extends IntersectionType(
 ) {}
 
 export class RootOrganizationGetManyQuery extends IntersectionType(
-  PickType(RootOrganizationGetQuery, ['filter', 'relation']),
+  PickType(RootOrganizationGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
 ) {}
 

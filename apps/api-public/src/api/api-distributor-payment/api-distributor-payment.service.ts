@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { DistributorPaymentRepository } from '../../../../_libs/database/repository/distributor/distributor-payment.repository'
+import { DistributorPaymentRepository } from '../../../../_libs/database/repository/distributor-payment/distributor-payment.repository'
 import { DistributorRepository } from '../../../../_libs/database/repository/distributor/distributor.repository'
 import { DistributorPaymentPaginationQuery, DistributorPaymentPayDebtBody } from './request'
 
@@ -20,7 +20,7 @@ export class ApiDistributorPaymentService {
         oid,
         distributorId: filter?.distributorId,
       },
-      sort: sort || { id: 'DESC' },
+      sort,
     })
 
     return {

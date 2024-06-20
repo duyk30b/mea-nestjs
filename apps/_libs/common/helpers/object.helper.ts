@@ -20,3 +20,9 @@ export const arrayToKeyArray = <T>(array: T[], property: keyof T) => {
   })
   return object
 }
+
+export const checkDuplicate = <T>(array: T[], property: keyof T) => {
+  const arrayProperty = array.map((item) => item[property])
+  const arrayPropertyUnique = Array.from(new Set(arrayProperty))
+  return array.length !== arrayPropertyUnique.length
+}

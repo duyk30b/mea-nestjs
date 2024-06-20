@@ -9,7 +9,7 @@ import {
 } from './procedure-options.request'
 
 export class ProcedureGetQuery {
-  @ApiPropertyOptional({ type: String, example: '{"invoices":true}' })
+  @ApiPropertyOptional({ type: String, example: JSON.stringify(<ProcedureRelationQuery>{}) })
   @Expose()
   @Transform(({ value }) => {
     try {
@@ -23,11 +23,14 @@ export class ProcedureGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   relation: ProcedureRelationQuery
 
-  @ApiPropertyOptional({ type: String, example: '{"isActive":1,"debt":{"GT":1500000}}' })
+  @ApiPropertyOptional({
+    type: String,
+    example: JSON.stringify(<ProcedureFilterQuery>{ isActive: 1 }),
+  })
   @Expose()
   @Transform(({ value }) => {
     try {
@@ -41,11 +44,11 @@ export class ProcedureGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   filter?: ProcedureFilterQuery
 
-  @ApiPropertyOptional({ type: String, example: '{"id":"ASC"}' })
+  @ApiPropertyOptional({ type: String, example: JSON.stringify(<ProcedureSortQuery>{ id: 'ASC' }) })
   @Expose()
   @Transform(({ value }) => {
     try {
@@ -59,7 +62,7 @@ export class ProcedureGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   sort?: ProcedureSortQuery
 }
@@ -70,7 +73,7 @@ export class ProcedurePaginationQuery extends IntersectionType(
 ) {}
 
 export class ProcedureGetManyQuery extends IntersectionType(
-  PickType(ProcedureGetQuery, ['filter', 'relation']),
+  PickType(ProcedureGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
 ) {}
 

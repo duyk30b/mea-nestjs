@@ -1,20 +1,25 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { PaymentType } from '../common/variable'
+import { PaymentType, VoucherType } from '../common/variable'
+import Customer from './customer.entity'
 import Invoice from './invoice.entity'
+import Visit from './visit.entity'
 
 @Entity('CustomerPayment')
-@Index('IDX_CustomerPayment__customerId', ['oid', 'customerId'])
-@Index('IDX_CustomerPayment__invoiceId', ['oid', 'invoiceId'])
+@Index('IDX_CustomerPayment__oid_customerId', ['oid', 'customerId'])
 export default class CustomerPayment extends BaseEntity {
   @Column()
   @Expose()
   customerId: number
 
-  @Column()
+  @Column() // ID visit hoặc ID receipt
   @Expose()
-  invoiceId: number
+  voucherId: number
+
+  @Column({ type: 'smallint', default: 0 })
+  @Expose()
+  voucherType: VoucherType
 
   @Column({
     type: 'bigint',
@@ -25,7 +30,7 @@ export default class CustomerPayment extends BaseEntity {
 
   @Column({ type: 'smallint' })
   @Expose()
-  type: PaymentType
+  paymentType: PaymentType
 
   @Column({
     name: 'paid',
@@ -48,28 +53,14 @@ export default class CustomerPayment extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  customerOpenDebt: number // Công nợ đầu kỳ
+  openDebt: number // Công nợ đầu kỳ
 
   @Column({
     type: 'bigint',
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose() // openDebt + debit = closeDebt
-  customerCloseDebt: number // Công nợ cuối kỳ
-
-  @Column({
-    type: 'bigint',
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose()
-  invoiceOpenDebt: number // Công nợ đầu kỳ
-
-  @Column({
-    type: 'bigint',
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose() // openDebt + debit = closeDebt
-  invoiceCloseDebt: number // Công nợ cuối kỳ
+  closeDebt: number // Công nợ cuối kỳ
 
   @Column({ type: 'character varying', length: 255, nullable: true })
   @Expose()
@@ -80,9 +71,54 @@ export default class CustomerPayment extends BaseEntity {
   description: string
 
   @Expose()
+  @ManyToOne((type) => Customer, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'customerId', referencedColumnName: 'id' })
+  customer: Customer
+
+  @Expose()
   @ManyToOne((type) => Invoice, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'invoiceId', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
   invoice: Invoice
+
+  @Expose()
+  @ManyToOne((type) => Visit, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
+  visit: Visit
+
+  static fromRaw(raw: { [P in keyof CustomerPayment]: any }) {
+    if (!raw) return null
+    const entity = new CustomerPayment()
+    Object.assign(entity, raw)
+
+    entity.createdAt = Number(raw.createdAt)
+    entity.paid = Number(raw.paid)
+    entity.debit = Number(raw.debit)
+    entity.openDebt = Number(raw.openDebt)
+    entity.closeDebt = Number(raw.closeDebt)
+
+    return entity
+  }
+
+  static fromRaws(raws: { [P in keyof CustomerPayment]: any }[]) {
+    return raws.map((i) => CustomerPayment.fromRaw(i))
+  }
 }
 
-export type CustomerPaymentInsertType = Omit<CustomerPayment, 'id' | 'invoice'>
+// import { ViewColumn, ViewEntity } from 'typeorm'
+
+// @ViewEntity({
+//   name: 'view_customer_payment',
+//   expression: `
+//       SELECT *,
+//           TO_TIMESTAMP("createdAt" / 1000.0) AS "createdTime"
+//       FROM "CustomerPayment";
+//     `,
+// })
+// export class ViewCustomerPayment {}
+
+export type CustomerPaymentRelationType = Pick<CustomerPayment, 'customer' | 'invoice' | 'visit'>
+
+export type CustomerPaymentInsertType = Omit<
+  CustomerPayment,
+  'id' | keyof CustomerPaymentRelationType
+>

@@ -23,7 +23,7 @@ export class InvoiceItemGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   relation: InvoiceItemRelationQuery
 
@@ -46,7 +46,7 @@ export class InvoiceItemGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   filter?: InvoiceItemFilterQuery
 
@@ -69,7 +69,7 @@ export class InvoiceItemGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   sort?: InvoiceItemSortQuery
 }
@@ -80,7 +80,7 @@ export class InvoiceItemPaginationQuery extends IntersectionType(
 ) {}
 
 export class InvoiceItemGetManyQuery extends IntersectionType(
-  PickType(InvoiceItemGetQuery, ['filter', 'relation']),
+  PickType(InvoiceItemGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
 ) {}
 

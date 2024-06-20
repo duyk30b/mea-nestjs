@@ -22,7 +22,7 @@ export class UserGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   relation: UserRelationQuery
 
@@ -48,7 +48,7 @@ export class UserGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   filter?: UserFilterQuery
 
@@ -73,7 +73,7 @@ export class UserGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   sort?: UserSortQuery
 }
@@ -81,7 +81,7 @@ export class UserGetQuery {
 export class UserPaginationQuery extends IntersectionType(UserGetQuery, PaginationQuery) {}
 
 export class UserGetManyQuery extends IntersectionType(
-  PickType(UserGetQuery, ['filter', 'relation']),
+  PickType(UserGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
 ) {}
 

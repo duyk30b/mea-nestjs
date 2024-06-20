@@ -1,11 +1,14 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { MovementType } from '../common/variable'
+import { VoucherType } from '../common/variable'
 import Batch from './batch.entity'
+import Customer from './customer.entity'
+import Distributor from './distributor.entity'
 import Invoice from './invoice.entity'
 import Product from './product.entity'
 import Receipt from './receipt.entity'
+import Visit from './visit.entity'
 
 @Index('IDX_BatchMovement__oid_productId_batchId_createdAt', [
   'oid',
@@ -23,17 +26,25 @@ export default class BatchMovement extends BaseEntity {
   @Expose()
   batchId: number
 
-  @Column() // ID invoice hoặc ID receipt
+  @Column() // ID visit hoặc ID receipt
   @Expose()
-  referenceId: number
+  voucherId: number
 
   @Column({ type: 'smallint' })
   @Expose()
-  type: MovementType
+  voucherType: VoucherType
+
+  @Column({ default: 0 }) // ID customer hoặc ID distributor
+  @Expose()
+  contactId: number
 
   @Column({ type: 'smallint', default: 0 })
   @Expose()
   isRefund: 0 | 1
+
+  @Column({ type: 'smallint', default: 1 })
+  @Expose()
+  unitRate: number
 
   @Column({
     type: 'decimal',
@@ -65,9 +76,13 @@ export default class BatchMovement extends BaseEntity {
   @Expose()
   closeQuantity: number
 
-  @Column({ type: 'varchar', length: 255, default: '{"name":"","rate":1}' })
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
   @Expose()
-  unit: string
+  actualPrice: number // Giá
 
   @Column({
     type: 'bigint',
@@ -75,31 +90,7 @@ export default class BatchMovement extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  price: number // Giá
-
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose()
-  openCostAmount: number // Tổng tiền
-
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose()
-  costAmount: number // Tổng tiền
-
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose()
-  closeCostAmount: number // Tổng tiền
+  expectedPrice: number // Giá
 
   @Column({
     type: 'bigint',
@@ -119,17 +110,32 @@ export default class BatchMovement extends BaseEntity {
   batch: Batch
 
   @Expose()
+  @ManyToOne((type) => Receipt, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
+  receipt: Receipt
+
+  @Expose()
   @ManyToOne((type) => Invoice, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'referenceId', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
   invoice: Invoice
 
   @Expose()
-  @ManyToOne((type) => Receipt, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'referenceId', referencedColumnName: 'id' })
-  receipt: Receipt
+  @ManyToOne((type) => Visit, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
+  visit: Visit
+
+  @Expose()
+  @ManyToOne((type) => Visit, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'contactId', referencedColumnName: 'id' })
+  distributor: Distributor
+
+  @Expose()
+  @ManyToOne((type) => Visit, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'contactId', referencedColumnName: 'id' })
+  customer: Customer
 }
 
 export type BatchMovementInsertType = Omit<
   BatchMovement,
-  'id' | 'product' | 'batch' | 'invoice' | 'receipt'
+  'id' | 'product' | 'batch' | 'receipt' | 'invoice' | 'visit' | 'distributor' | 'customer'
 >

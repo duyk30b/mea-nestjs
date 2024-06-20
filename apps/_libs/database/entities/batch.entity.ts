@@ -38,17 +38,6 @@ export default class Batch extends BaseEntity {
   costPrice: number // Giá nhập
 
   @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
-  @Expose()
-  costAmount: number // Tổng tiền nhập
-
-  @Column({
     type: 'decimal',
     default: 0,
     precision: 10,
@@ -67,30 +56,39 @@ export default class Batch extends BaseEntity {
     },
   })
   @Expose()
-  createdAt: number
-
-  @Column({
-    type: 'bigint',
-    default: () => '(EXTRACT(epoch FROM now()) * (1000))',
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
-  @Expose()
   updatedAt: number
 
   @Expose()
   @ManyToOne((type) => Product, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'productId', referencedColumnName: 'id' })
   product: Product
+
+  static fromRaw(raw: { [P in keyof Batch]: any }) {
+    if (!raw) return null
+    const entity = new Batch()
+    Object.assign(entity, raw)
+
+    entity.expiryDate = raw.expiryDate == null ? raw.expiryDate : Number(raw.expiryDate)
+    entity.costPrice = Number(raw.costPrice)
+    entity.quantity = Number(raw.quantity)
+
+    entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)
+
+    return entity
+  }
+
+  static fromRaws(raws: { [P in keyof Batch]: any }[]) {
+    return raws.map((i) => Batch.fromRaw(i))
+  }
 }
 
+export type BatchRelationType = Pick<Batch, 'product'>
 export type BatchInsertType = Omit<
   Batch,
-  'id' | 'quantity' | 'product' | 'costAmount' | 'createdAt' | 'updatedAt' | 'deletedAt'
+  keyof BatchRelationType | keyof Pick<Batch, 'id' | 'quantity' | 'updatedAt'>
 >
+
 export type BatchUpdateType = Omit<
   Batch,
-  'oid' | 'id' | 'quantity' | 'product' | 'createdAt' | 'updatedAt'
+  keyof BatchRelationType | keyof Pick<Batch, 'id' | 'oid' | 'quantity' | 'productId'>
 >

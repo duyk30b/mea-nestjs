@@ -1,7 +1,8 @@
 import { Expose, Type } from 'class-transformer'
-import { IsBoolean, IsEnum, IsNumber, ValidateNested } from 'class-validator'
+import { IsBoolean, IsNumber, ValidateNested } from 'class-validator'
 import { ConditionTimestamp } from '../../../../../_libs/common/dto/condition-timestamp'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
+import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { InvoiceStatus } from '../../../../../_libs/database/common/variable'
 
 export class InvoiceRelationQuery {
@@ -31,7 +32,7 @@ export class InvoiceFilterQuery {
   customerId: number
 
   @Expose()
-  @IsEnum(InvoiceStatus)
+  @IsEnumValue(InvoiceStatus)
   status: InvoiceStatus
 
   @Expose()

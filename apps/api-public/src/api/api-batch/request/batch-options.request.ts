@@ -1,6 +1,10 @@
-import { Expose, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsNumber, ValidateNested } from 'class-validator'
-import { ConditionNumber, ConditionTimestamp } from '../../../../../_libs/common/dto'
+import { Expose, Transform, Type } from 'class-transformer'
+import { IsBoolean, IsIn, IsOptional, ValidateNested } from 'class-validator'
+import {
+  ConditionNumber,
+  ConditionTimestamp,
+  transformConditionNumber,
+} from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 
 export class BatchRelationQuery {
@@ -10,8 +14,9 @@ export class BatchRelationQuery {
 }
 export class BatchFilterQuery {
   @Expose()
-  @IsNumber()
-  productId: number
+  @Transform(transformConditionNumber)
+  @IsOptional()
+  productId: number | ConditionNumber
 
   @Expose()
   @Type(() => ConditionNumber)

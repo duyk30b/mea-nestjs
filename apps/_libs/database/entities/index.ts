@@ -17,6 +17,11 @@ import ReceiptItem from './receipt-item.entity'
 import Receipt from './receipt.entity'
 import Role from './role.entity'
 import User from './user.entity'
+import VisitBatch from './visit-batch.entity'
+import VisitDiagnosis from './visit-diagnosis.entity'
+import VisitProcedure from './visit-procedure.entity'
+import VisitProduct from './visit-product.entity'
+import Visit from './visit.entity'
 
 export {
   Batch,
@@ -38,4 +43,9 @@ export {
   ReceiptItem,
   Role,
   User,
+  Visit,
+  VisitBatch,
+  VisitDiagnosis,
+  VisitProcedure,
+  VisitProduct,
 }

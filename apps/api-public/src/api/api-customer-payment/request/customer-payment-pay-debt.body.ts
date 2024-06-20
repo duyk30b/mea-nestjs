@@ -1,23 +1,36 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsNumber, IsString, ValidateNested } from 'class-validator'
+import { IsArray, IsDefined, IsInt, IsString, ValidateNested } from 'class-validator'
+import { IsNumberGreaterThan } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 
 export class InvoicePayments {
   @Expose()
   @IsDefined()
-  @IsNumber()
+  @IsInt()
   invoiceId: number
 
   @Expose()
   @IsDefined()
-  @IsNumber()
+  @IsNumberGreaterThan(0)
+  money: number
+}
+
+export class VisitPayments {
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  visitId: number
+
+  @Expose()
+  @IsDefined()
+  @IsNumberGreaterThan(0)
   money: number
 }
 export class CustomerPaymentPayDebtBody {
   @ApiProperty({ example: 12 })
   @Expose()
   @IsDefined()
-  @IsNumber()
+  @IsInt()
   customerId: number
 
   @ApiPropertyOptional({ example: 'Khách hàng còn bo thêm tiền' })
@@ -25,7 +38,7 @@ export class CustomerPaymentPayDebtBody {
   @IsString()
   note: string
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     type: InvoicePayments,
     isArray: true,
     example: [
@@ -38,5 +51,20 @@ export class CustomerPaymentPayDebtBody {
   @Type(() => InvoicePayments)
   @IsArray()
   @ValidateNested({ each: true })
-  invoicePayments: InvoicePayments[] // Phụ phí
+  invoicePaymentList: InvoicePayments[] // Phụ phí
+
+  @ApiProperty({
+    type: InvoicePayments,
+    isArray: true,
+    example: [
+      { visitId: 12, money: 10000 },
+      { visitId: 13, money: 200000 },
+    ],
+  })
+  @Expose()
+  @IsDefined()
+  @Type(() => VisitPayments)
+  @IsArray()
+  @ValidateNested({ each: true })
+  visitPaymentList: VisitPayments[] // Phụ phí
 }

@@ -39,7 +39,7 @@ export class ApiUserService {
           : undefined,
         updatedAt: filter?.updatedAt,
       },
-      sort: sort || { id: 'DESC' },
+      sort,
     })
 
     for (let i = 0; i < data.length; i++) {

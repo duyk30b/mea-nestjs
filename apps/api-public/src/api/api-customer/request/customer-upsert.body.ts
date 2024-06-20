@@ -63,6 +63,7 @@ export class CustomerCreateBody {
 
   @ApiPropertyOptional({ example: 'Khách hàng không' })
   @Expose()
+  @IsString()
   note: string
 
   @ApiPropertyOptional({ example: 1 })

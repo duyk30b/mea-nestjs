@@ -16,8 +16,4 @@ export class RoleFilterQuery {
   updatedAt: ConditionTimestamp
 }
 
-export class RoleSortQuery extends SortQuery {
-  @Expose()
-  @IsIn(['ASC', 'DESC'])
-  code: 'ASC' | 'DESC'
-}
+export class RoleSortQuery extends SortQuery {}

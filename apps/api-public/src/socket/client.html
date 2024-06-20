@@ -1,0 +1,141 @@
+<html>
+
+<head>
+    <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"></script>
+    <style>
+        table {
+            border-collapse: collapse;
+        }
+
+        td,
+        th {
+            border: 1px solid;
+            padding: 5px 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Login</h2>
+    <input id="ipHost" list="hosts" onfocus="this.value=''" value="http://localhost:20000" /> <br /><br />
+    <datalist id="hosts">
+        <option value="http://localhost:20000">
+        <option value="https://api.mea.vn">
+    </datalist>
+    <input id="ipOrgPhone" value="0376899866" />
+    <input id="ipUsername" value="admin" />
+    <input id="ipPassword" value="123456789" />
+    <button id="btnLogin">Login</button>
+    <br /><br />
+
+    <textarea id="txtToken" cols="100" rows="4"></textarea><br /><br />
+    <h2>Socket</h2>
+    <button id="btnSocketConnect">Connect Socket</button>
+    <button id="btnSocketDisconnect">Disconnect Socket</button>
+    <button id="btnSocketReconnect">Reconnect Socket</button> <br />
+    <br />
+
+    <h4>Listen Event</h4>
+    <table>
+        <thead>
+            <th>Event</th>
+            <th>Message</th>
+        </thead>
+        <tbody>
+            <tr>
+                <td>connect/disconnect</td>
+                <td id="eventConnect"></td>
+            </tr>
+            <tr>
+                <td>SERVER_EMIT_DEMO</td>
+                <td id="serverEmitDemo"></td>
+            </tr>
+            <tr>
+                <td>SERVER_EMIT_VISIT_CREATE</td>
+                <td id="serverEmitVisitNew"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <h4>Emit Event</h4>
+    <table>
+        <thead>
+            <th>Event</th>
+            <th>Data</th>
+            <th></th>
+        </thead>
+        <tbody>
+            <tr>
+                <td>CLIENT_EMIT_VISIT_CREATE</td>
+                <td id="ipVisitCreate" contenteditable="true">example</td>
+                <td><button id="btnEmitVisitCreate">Emit</button></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        let socket
+
+        btnLogin.onclick = async () => {
+            const response = await fetch(
+                `${ipHost.value}/auth/login`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        orgPhone: ipOrgPhone.value,
+                        username: ipUsername.value,
+                        password: ipPassword.value,
+                    }),
+                }
+            )
+            const data = await response.json()
+            txtToken.value = data.data.refreshToken
+        }
+
+        btnSocketConnect.onclick = () => {
+            socket = io(`${ipHost.value}`, {
+                transports: ['websocket'],
+                auth: { token: txtToken.value },
+            })
+
+            socket.on("connect", () => {
+                eventConnect.innerText = "Socket Connected"
+                console.log("🚀 ===== [Socket] Connected =====")
+            })
+
+            socket.on("disconnect", () => {
+                eventConnect.innerText = "Socket Disconnected"
+                console.log("🚀 ===== [Socket] Disconnected =====")
+            })
+
+            socket.on("SERVER_EMIT_DEMO", (data) => {
+                console.log('🚀 ~ file: client.html:99 ~ socket.on ~ data', data)
+                serverEmitDemo.innerText = `${data.dataDemo}`
+            })
+
+            socket.on("SERVER_EMIT_VISIT_CREATE", (data) => {
+                console.log('🚀 ~ file: client.html:99 ~ socket.on ~ data', data)
+                serverEmitVisitNew.innerText = `${data}`
+            })
+
+        }
+
+        btnSocketDisconnect.onclick = () => {
+            socket.disconnect()
+        }
+
+        btnSocketReconnect.onclick = () => {
+            socket.auth.token = txtToken.value
+            socket.connect()
+        }
+
+        btnEmitVisitCreate.onclick = () => {
+            socket.emit("CLIENT_EMIT_VISIT_CREATE", ipVisitCreate.innerText, (response) =>
+                console.log(response)
+            )
+        }
+    </script>
+</body>
+
+</html>

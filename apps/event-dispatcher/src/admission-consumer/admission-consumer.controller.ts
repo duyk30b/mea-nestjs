@@ -6,11 +6,11 @@
 // export class ArrivalConsumerController {
 //     constructor(private readonly arrivalConsumerService: ArrivalConsumerService) {}
 
-//     @KafkaTopic(KAFKA_EVENT.ADMISSION_CREATE)
+//     @KafkaTopic(KAFKA_EVENT.VISIT_CREATE)
 //     async handleArrivalCreate(@Payload() payload: ArrivalCreateDto, @MessageId() messageId: string) {
 //         await this.arrivalConsumerService.handleArrivalMessage({
 //             messageId,
-//             kafkaEvent: KAFKA_EVENT.ADMISSION_CREATE,
+//             kafkaEvent: KAFKA_EVENT.VISIT_CREATE,
 //             data: payload.data,
 //             createdTime: payload.createdTime,
 //         })

@@ -19,7 +19,7 @@ export class RoleGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   relation: RoleRelationQuery
 
@@ -43,7 +43,7 @@ export class RoleGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   filter?: RoleFilterQuery
 
@@ -67,7 +67,7 @@ export class RoleGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   sort?: RoleSortQuery
 }
@@ -75,7 +75,7 @@ export class RoleGetQuery {
 export class RolePaginationQuery extends IntersectionType(RoleGetQuery, PaginationQuery) {}
 
 export class RoleGetManyQuery extends IntersectionType(
-  PickType(RoleGetQuery, ['filter', 'relation']),
+  PickType(RoleGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
 ) {}
 

@@ -17,8 +17,15 @@
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
-    "paths": {},
+    "paths": {}
   },
-  "include": ["apps/**/*.ts", "libs/**/*.ts", "assets/**/*.ts", ".eslintrc.cjs"],
-  "exclude": ["dist/"],
+  "include": [
+    "apps/**/*.ts",
+    "libs/**/*.ts",
+    "assets/**/*.ts",
+    ".eslintrc.cjs"
+  ],
+  "exclude": [
+    "dist/"
+  ]
 }

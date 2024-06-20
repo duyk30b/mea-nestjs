@@ -23,7 +23,7 @@ export class PermissionGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   relation: PermissionRelationQuery
 
@@ -46,7 +46,7 @@ export class PermissionGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   filter?: PermissionFilterQuery
 
@@ -69,7 +69,7 @@ export class PermissionGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   sort?: PermissionSortQuery
 }

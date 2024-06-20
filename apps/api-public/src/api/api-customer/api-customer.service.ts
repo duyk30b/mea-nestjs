@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
+import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   CustomerCreateBody,
   CustomerGetManyQuery,
@@ -12,7 +13,10 @@ import {
 
 @Injectable()
 export class ApiCustomerService {
-  constructor(private readonly customerRepository: CustomerRepository) {}
+  constructor(
+    private readonly socketEmitService: SocketEmitService,
+    private readonly customerRepository: CustomerRepository
+  ) {}
 
   async pagination(oid: number, query: CustomerPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, sort, relation } = query
@@ -30,7 +34,7 @@ export class ApiCustomerService {
         debt: filter?.debt,
         updatedAt: filter?.updatedAt,
       },
-      sort: sort || { id: 'DESC' },
+      sort,
     })
     return {
       data,
@@ -62,15 +66,18 @@ export class ApiCustomerService {
   }
 
   async createOne(oid: number, body: CustomerCreateBody): Promise<BaseResponse> {
-    const id = await this.customerRepository.insertOne({ oid, ...body })
-    const data = await this.customerRepository.findOneById(id)
-    return { data }
+    const customer = await this.customerRepository.insertOneAndReturnEntity({ oid, ...body })
+    this.socketEmitService.customerUpsert(oid, { customer })
+    return { data: customer }
   }
 
   async updateOne(oid: number, id: number, body: CustomerUpdateBody): Promise<BaseResponse> {
-    const affected = await this.customerRepository.update({ oid, id }, body)
-    const data = await this.customerRepository.findOneBy({ oid, id })
-    return { data }
+    const [customer] = await this.customerRepository.updateAndReturnEntity({ oid, id }, body)
+    if (!customer) {
+      throw new BusinessException('error.Database.UpdateFailed')
+    }
+    this.socketEmitService.customerUpsert(oid, { customer })
+    return { data: customer }
   }
 
   async deleteOne(oid: number, id: number): Promise<BaseResponse> {

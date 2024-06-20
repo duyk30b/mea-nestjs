@@ -23,7 +23,7 @@ export class CustomerPaymentGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   relation: CustomerPaymentRelationQuery
 
@@ -46,7 +46,7 @@ export class CustomerPaymentGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   filter?: CustomerPaymentFilterQuery
 
@@ -69,7 +69,7 @@ export class CustomerPaymentGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   sort?: CustomerPaymentSortQuery
 }
@@ -80,7 +80,7 @@ export class CustomerPaymentPaginationQuery extends IntersectionType(
 ) {}
 
 export class CustomerPaymentGetManyQuery extends IntersectionType(
-  PickType(CustomerPaymentGetQuery, ['filter', 'relation']),
+  PickType(CustomerPaymentGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
 ) {}
 

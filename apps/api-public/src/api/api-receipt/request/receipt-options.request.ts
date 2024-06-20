@@ -1,7 +1,8 @@
 import { Expose, Type } from 'class-transformer'
-import { IsBoolean, IsEnum, IsNumber, ValidateNested } from 'class-validator'
+import { IsBoolean, IsNumber, ValidateNested } from 'class-validator'
 import { ConditionTimestamp } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
+import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { ReceiptStatus } from '../../../../../_libs/database/common/variable'
 
 export class ReceiptRelationQuery {
@@ -24,7 +25,7 @@ export class ReceiptFilterQuery {
   distributorId: number
 
   @Expose()
-  @IsEnum(ReceiptStatus)
+  @IsEnumValue(ReceiptStatus)
   status: ReceiptStatus
 
   @Expose()

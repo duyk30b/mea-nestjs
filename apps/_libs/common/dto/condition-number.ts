@@ -1,5 +1,12 @@
-import { Expose } from 'class-transformer'
-import { IsArray, IsBoolean, IsNumber } from 'class-validator'
+import { Expose, TransformFnParams, plainToInstance } from 'class-transformer'
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
+  IsBoolean,
+  IsNumber,
+  validateSync,
+} from 'class-validator'
 
 export class ConditionNumber {
   @Expose()
@@ -60,9 +67,40 @@ export class ConditionNumber {
 
   @Expose()
   @IsArray()
+  @ArrayMinSize(1)
+  @IsNumber({}, { each: true })
   'IN'?: number[]
 
   @Expose()
   @IsArray()
+  @IsNumber({}, { each: true })
+  @ArrayMinSize(2)
+  @ArrayMaxSize(2)
   'BETWEEN'?: [number, number]
+}
+
+export const transformConditionNumber = ({ value, key }: TransformFnParams) => {
+  if (!value) {
+    return
+  }
+  if (typeof value === 'number') {
+    return value
+  } else if (typeof value === 'object') {
+    const instance = plainToInstance(ConditionNumber, value, {
+      exposeUnsetFields: false,
+      excludeExtraneousValues: false,
+    })
+    const validate = validateSync(instance, {
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      skipMissingProperties: true,
+    })
+    if (validate.length) {
+      const validateMessage = JSON.stringify(validate.map((i) => i.constraints))
+      throw new Error(`${key} ConditionNumber failed: ${validateMessage}`)
+    }
+    return instance
+  } else {
+    throw new Error(`${key} must be a Number or condition of Number`)
+  }
 }

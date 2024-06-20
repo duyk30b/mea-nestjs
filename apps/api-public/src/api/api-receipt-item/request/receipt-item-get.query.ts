@@ -23,7 +23,7 @@ export class ReceiptItemGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   relation: ReceiptItemRelationQuery
 
@@ -46,7 +46,7 @@ export class ReceiptItemGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   filter?: ReceiptItemFilterQuery
 
@@ -69,7 +69,7 @@ export class ReceiptItemGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   sort?: ReceiptItemSortQuery
 }
@@ -80,7 +80,7 @@ export class ReceiptItemPaginationQuery extends IntersectionType(
 ) {}
 
 export class ReceiptItemGetManyQuery extends IntersectionType(
-  PickType(ReceiptItemGetQuery, ['filter', 'relation']),
+  PickType(ReceiptItemGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
 ) {}
 
