@@ -16,6 +16,13 @@ export const objectEnum = (e: Record<string, any>) => {
   )
 }
 
+export const stringEnum = (e: Record<string, any>) => {
+  const str = keysEnum(e)
+    .map((key) => `${key}:${e[key]}`)
+    .join(', ')
+  return `{ ${str} }`
+}
+
 export type Impossible<K extends keyof any> = {
   [P in K]: never
 }

@@ -26,7 +26,7 @@ export class ApiRoleService {
         isActive: filter?.isActive,
         updatedAt: filter?.updatedAt,
       },
-      sort: sort || { id: 'DESC' },
+      sort,
     })
 
     return {

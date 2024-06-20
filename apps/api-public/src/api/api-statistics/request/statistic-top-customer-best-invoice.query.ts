@@ -5,10 +5,10 @@ import { StatisticTimeQuery } from './statistic-time.query'
 
 export class StatisticTopCustomerBestInvoiceQuery extends StatisticTimeQuery {
   @ApiPropertyOptional({
-    enum: ['sumRevenue', 'sumProfit', 'countInvoice'],
-    example: 'sumRevenue',
+    enum: ['sumTotalMoney', 'sumProfit', 'countInvoice'],
+    example: 'sumTotalMoney',
   })
   @Expose()
-  @IsIn(['sumRevenue', 'sumProfit', 'countInvoice'])
-  orderBy: 'sumRevenue' | 'sumProfit' | 'countInvoice'
+  @IsIn(['sumTotalMoney', 'sumProfit', 'countInvoice'])
+  orderBy: 'sumTotalMoney' | 'sumProfit' | 'countInvoice'
 }

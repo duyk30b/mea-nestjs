@@ -32,7 +32,7 @@ export class ApiRootUserService {
         oid: filter?.oid,
         roleId: filter?.roleId,
       },
-      sort: sort || { id: 'DESC' },
+      sort,
     })
 
     for (let i = 0; i < data.length; i++) {

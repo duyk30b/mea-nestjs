@@ -32,7 +32,7 @@ export class ApiBatchService {
         expiryDate: filter?.expiryDate,
         updatedAt: filter?.updatedAt,
       },
-      sort: sort || { id: 'DESC' },
+      sort,
     })
 
     if (relation?.product && data.length) {
@@ -48,7 +48,7 @@ export class ApiBatchService {
   }
 
   async getList(oid: number, query: BatchGetManyQuery): Promise<BaseResponse> {
-    const { limit, filter, relation } = query
+    const { limit, filter, relation, sort } = query
 
     const batches = await this.batchRepository.findMany({
       // relation,
@@ -56,9 +56,11 @@ export class ApiBatchService {
         oid,
         productId: filter?.productId,
         quantity: filter?.quantity,
+        expiryDate: filter?.expiryDate,
         updatedAt: filter?.updatedAt,
       },
       limit,
+      sort: sort || undefined,
     })
     if (relation?.product && batches.length) {
       const products = await this.productRepository.findManyBy({

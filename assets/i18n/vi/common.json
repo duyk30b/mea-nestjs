@@ -2,6 +2,7 @@
   "Success": "Thành công",
   "Forbidden": "Bạn không có quyền truy cập",
   "ForbiddenPermission": "Bạn không có quyền: {permission}",
+  "TooManyRequests": "Quá nhiều thao tác",
   "AccountInactive": "Tài khoản của bạn đang bị khóa",
   "ApiInactive": "Link truy cập đã bị khóa",
   "ForgotPassword": {

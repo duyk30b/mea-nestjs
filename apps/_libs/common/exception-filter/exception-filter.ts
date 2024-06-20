@@ -21,7 +21,17 @@ import { RequestExternal } from '../request/external.request'
 export class ValidationException extends Error {
   public errors: ValidationError[]
   constructor(validationErrors: ValidationError[] = []) {
-    super('Validate Failed')
+    const getMessageError = (validate: ValidationError[]) => {
+      return validate
+        .map((i) => {
+          if (i.constraints) return Object.values(i.constraints).join('. ')
+          if (i.children) return getMessageError(i.children)
+          return '---------'
+        })
+        .join('. ')
+    }
+    const msg = getMessageError(validationErrors)
+    super(msg)
     this.errors = validationErrors
   }
 }
@@ -62,6 +72,7 @@ export class ServerExceptionFilter implements ExceptionFilter {
       }
       case ThrottlerException.name: {
         statusCode = HttpStatus.TOO_MANY_REQUESTS
+        message = i18n.translate('common.TooManyRequests')
         break
       }
       case NotFoundException.name: {

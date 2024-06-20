@@ -1,7 +1,10 @@
-import { Expose } from 'class-transformer'
-import { IsBoolean, IsEnum, IsNumber, IsObject } from 'class-validator'
+import { Expose, Transform, TransformFnParams } from 'class-transformer'
+import { IsBoolean, IsNumber, IsObject, IsOptional } from 'class-validator'
+import { createConditionEnum, transformConditionEnum } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 import { InvoiceItemType } from '../../../../../_libs/database/common/variable'
+
+const ConditionEnumInvoiceItemType = createConditionEnum(InvoiceItemType)
 
 export class InvoiceItemRelationQuery {
   @Expose()
@@ -39,8 +42,9 @@ export class InvoiceItemFilterQuery {
   customerId: number
 
   @Expose()
-  @IsEnum(InvoiceItemType)
-  type: InvoiceItemType
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, InvoiceItemType))
+  @IsOptional()
+  type: InvoiceItemType | InstanceType<typeof ConditionEnumInvoiceItemType>
 }
 
 export class InvoiceItemSortQuery extends SortQuery {}

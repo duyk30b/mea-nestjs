@@ -1,5 +1,6 @@
-import { CanActivate, ExecutionContext, Injectable, SetMetadata } from '@nestjs/common'
+import { CanActivate, ExecutionContext, HttpStatus, Injectable, SetMetadata } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
+import { BusinessException } from '../../../_libs/common/exception-filter/exception-filter'
 import { RequestExternal } from '../../../_libs/common/request/external.request'
 
 export const ROOT_GUARD = 'ROOT_GUARD'
@@ -18,6 +19,9 @@ export class RootGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest()
     const requestExternal: RequestExternal = request.raw // Fastify phải đọc trong Raw
+    if (requestExternal.external.error) {
+      throw new BusinessException(requestExternal.external.error, {}, HttpStatus.UNAUTHORIZED)
+    }
     return requestExternal.external.oid === 0 // ROOT có oid = 0
   }
 }

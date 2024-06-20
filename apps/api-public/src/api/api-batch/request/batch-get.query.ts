@@ -5,7 +5,10 @@ import { LimitQuery, PaginationQuery } from '../../../../../_libs/common/dto/que
 import { BatchFilterQuery, BatchRelationQuery, BatchSortQuery } from './batch-options.request'
 
 export class BatchGetQuery {
-  @ApiPropertyOptional({ type: String, example: '{"invoices":true}' })
+  @ApiPropertyOptional({
+    type: String,
+    example: JSON.stringify(<BatchRelationQuery>{ product: true }),
+  })
   @Expose()
   @Transform(({ value }) => {
     try {
@@ -19,11 +22,14 @@ export class BatchGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   relation: BatchRelationQuery
 
-  @ApiPropertyOptional({ type: String, example: '{"isActive":1,"debt":{"GT":1500000}}' })
+  @ApiPropertyOptional({
+    type: String,
+    example: JSON.stringify(<BatchFilterQuery>{ isActive: 1, quantity: { GT: 10 } }),
+  })
   @Expose()
   @Transform(({ value }) => {
     try {
@@ -37,11 +43,11 @@ export class BatchGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   filter?: BatchFilterQuery
 
-  @ApiPropertyOptional({ type: String, example: '{"id":"ASC"}' })
+  @ApiPropertyOptional({ type: String, example: JSON.stringify(<BatchSortQuery>{ id: 'ASC' }) })
   @Expose()
   @Transform(({ value }) => {
     try {
@@ -55,7 +61,7 @@ export class BatchGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   sort?: BatchSortQuery
 }
@@ -63,7 +69,7 @@ export class BatchGetQuery {
 export class BatchPaginationQuery extends IntersectionType(BatchGetQuery, PaginationQuery) {}
 
 export class BatchGetManyQuery extends IntersectionType(
-  PickType(BatchGetQuery, ['filter', 'relation']),
+  PickType(BatchGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
 ) {}
 

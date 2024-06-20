@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
-import { IsArray, IsEnum, IsIn, IsString } from 'class-validator'
+import { IsArray, IsIn, IsString } from 'class-validator'
 import { keysEnum } from '../../../../../_libs/common/helpers/typescript.helper'
+import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { ScreenSettingKey } from '../../../../../_libs/database/entities/organization-setting.entity'
 
 export class OrganizationSettingGetQuery {
@@ -41,7 +42,7 @@ export class OrganizationSettingGetQuery {
 export class OrganizationSettingUpdateParams {
   @ApiProperty({ enum: ScreenSettingKey, example: ScreenSettingKey.PRODUCT_GROUP })
   @Expose()
-  @IsEnum(ScreenSettingKey)
+  @IsEnumValue(ScreenSettingKey)
   type: ScreenSettingKey
 }
 

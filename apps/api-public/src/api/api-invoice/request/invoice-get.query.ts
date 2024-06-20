@@ -23,7 +23,7 @@ export class InvoiceGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   relation: InvoiceRelationQuery
 
@@ -41,7 +41,7 @@ export class InvoiceGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   filter: InvoiceFilterQuery
 
@@ -59,7 +59,7 @@ export class InvoiceGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   sort: InvoiceSortQuery
 }

@@ -1,25 +1,38 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { MovementType } from '../common/variable'
+import { VoucherType } from '../common/variable'
+import Customer from './customer.entity'
+import Distributor from './distributor.entity'
 import Invoice from './invoice.entity'
 import Product from './product.entity'
 import Receipt from './receipt.entity'
+import Visit from './visit.entity'
 
-@Index('IDX_ProductMovement__oid_productId_createdAt', ['oid', 'productId', 'createdAt'])
 @Entity('ProductMovement')
+@Index('IDX_ProductMovement__oid_productId_id', ['oid', 'productId', 'id'])
+@Index('IDX_ProductMovement__oid_contactId_voucherType_id', [
+  'oid',
+  'contactId',
+  'voucherType',
+  'id',
+])
 export default class ProductMovement extends BaseEntity {
   @Column()
   @Expose()
   productId: number
 
-  @Column() // ID invoice hoặc ID receipt
+  @Column() // ID visit hoặc ID receipt
   @Expose()
-  referenceId: number
+  voucherId: number
+
+  @Column({ default: 0 }) // ID customer hoặc ID distributor
+  @Expose()
+  contactId: number
 
   @Column({ type: 'smallint' })
   @Expose()
-  type: MovementType
+  voucherType: VoucherType
 
   @Column({ type: 'smallint', default: 0 })
   @Expose()
@@ -55,9 +68,9 @@ export default class ProductMovement extends BaseEntity {
   @Expose()
   closeQuantity: number
 
-  @Column({ type: 'varchar', length: 255, default: '{"name":"","rate":1}' })
+  @Column({ type: 'smallint', default: 1 })
   @Expose()
-  unit: string
+  unitRate: number
 
   @Column({
     type: 'bigint',
@@ -65,7 +78,7 @@ export default class ProductMovement extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  price: number // Giá
+  actualPrice: number // Giá
 
   @Column({
     type: 'bigint',
@@ -73,7 +86,15 @@ export default class ProductMovement extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  openCostAmount: number // Tổng tiền
+  expectedPrice: number // Giá
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  openCostAmount: number // Tổng vốn
 
   @Column({
     type: 'bigint',
@@ -89,7 +110,7 @@ export default class ProductMovement extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  closeCostAmount: number // Tổng tiền
+  closeCostAmount: number // Tổng vốn
 
   @Column({
     type: 'bigint',
@@ -104,17 +125,39 @@ export default class ProductMovement extends BaseEntity {
   product: Product
 
   @Expose()
+  @ManyToOne((type) => Receipt, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
+  receipt: Receipt
+
+  @Expose()
   @ManyToOne((type) => Invoice, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'referenceId', referencedColumnName: 'id' })
+  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
   invoice: Invoice
 
   @Expose()
-  @ManyToOne((type) => Receipt, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'referenceId', referencedColumnName: 'id' })
-  receipt: Receipt
+  @ManyToOne((type) => Visit, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
+  visit: Visit
+
+  @Expose()
+  @ManyToOne((type) => Visit, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'contactId', referencedColumnName: 'id' })
+  distributor: Distributor
+
+  @Expose()
+  @ManyToOne((type) => Visit, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'contactId', referencedColumnName: 'id' })
+  customer: Customer
 }
+
+export type ProductMovementRelationType = Pick<
+  ProductMovement,
+  'product' | 'receipt' | 'invoice' | 'visit' | 'distributor' | 'customer'
+>
+
+export type ProductMovementSortType = Pick<ProductMovement, 'id'>
 
 export type ProductMovementInsertType = Omit<
   ProductMovement,
-  'id' | 'product' | 'invoice' | 'receipt'
+  keyof ProductMovementRelationType | keyof Pick<ProductMovement, 'id'>
 >

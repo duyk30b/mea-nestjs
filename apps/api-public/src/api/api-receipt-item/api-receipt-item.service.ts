@@ -6,11 +6,13 @@ import { BatchRepository } from '../../../../_libs/database/repository/batch/bat
 import { ProductRepository } from '../../../../_libs/database/repository/product/product.repository'
 import { ReceiptItemRepository } from '../../../../_libs/database/repository/receipt-item/receipt-item.repository'
 import { ReceiptRepository } from '../../../../_libs/database/repository/receipt/receipt.repository'
+import { SocketEmitService } from '../../socket/socket-emit.service'
 import { ProductAndBatchUpsertBody, ReceiptItemPaginationQuery } from './request'
 
 @Injectable()
 export class ApiReceiptItemService {
   constructor(
+    private readonly socketEmitService: SocketEmitService,
     private readonly receiptItemRepository: ReceiptItemRepository,
     private readonly receiptRepository: ReceiptRepository,
     private readonly batchRepository: BatchRepository,
@@ -29,7 +31,7 @@ export class ApiReceiptItemService {
         productId: filter?.productId,
         batchId: filter?.batchId,
       },
-      sort: sort || { id: 'DESC' },
+      sort,
     })
 
     return {
@@ -41,7 +43,7 @@ export class ApiReceiptItemService {
   async upsertProductAndBatch(oid: number, body: ProductAndBatchUpsertBody) {
     const data = { product: null, batch: null } as { product: Product; batch: Batch }
     if (body.product) {
-      const affected = await this.productRepository.update(
+      const productListUpdated = await this.productRepository.updateAndReturnEntity(
         { oid, id: body.product.productId },
         {
           costPrice: body.product.costPrice,
@@ -49,10 +51,9 @@ export class ApiReceiptItemService {
           retailPrice: body.product.retailPrice,
         }
       )
-      if (affected != 1) {
-        throw new BusinessException('error.Database.UpdateFailed')
-      }
-      data.product = await this.productRepository.findOneBy({ oid, id: body.product.productId })
+      const product = productListUpdated[0]
+      this.socketEmitService.productUpsert(oid, { product })
+      data.product = product
     }
     if (body.batch) {
       const batchList = await this.batchRepository.findManyBy({
@@ -65,8 +66,12 @@ export class ApiReceiptItemService {
       if (batchFind) {
         data.batch = batchFind
       } else {
-        const batchId = await this.batchRepository.insertOne({ ...body.batch, oid })
-        data.batch = await this.batchRepository.findOneById(batchId)
+        const batch = await this.batchRepository.insertOneFullFieldAndReturnEntity({
+          ...body.batch,
+          oid,
+        })
+        this.socketEmitService.batchUpsert(oid, { batch })
+        data.batch = batch
       }
     }
 

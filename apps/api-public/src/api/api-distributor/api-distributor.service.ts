@@ -29,7 +29,7 @@ export class ApiDistributorService {
         debt: filter?.debt,
         updatedAt: filter?.updatedAt,
       },
-      sort: sort || { id: 'DESC' },
+      sort,
     })
     return {
       data,

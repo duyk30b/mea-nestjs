@@ -6,13 +6,17 @@ import { PermissionId } from '../../../../_libs/database/entities/permission.ent
 import { HasPermission } from '../../guards/permission.guard'
 import { ApiInvoiceService } from './api-invoice.service'
 import {
-  InvoiceDraftCreateBody,
-  InvoiceDraftUpdateBody,
+  InvoiceDraftInsertBody,
   InvoiceGetManyQuery,
   InvoiceGetOneQuery,
   InvoicePaginationQuery,
-  InvoicePaymentBody,
+  InvoicePayDebtBody,
+  InvoicePrepaymentBody,
+  InvoiceRefundPrepaymentBody,
+  InvoiceReturnProductBody,
+  InvoiceSendProductAndPaymentBody,
   InvoiceSumDebtQuery,
+  InvoiceUpdateBody,
 } from './request'
 
 @ApiTags('Invoice')
@@ -43,45 +47,10 @@ export class ApiInvoiceController {
     return await this.apiInvoiceService.getOne(oid, id, query)
   }
 
-  @Post('create-basic')
-  @HasPermission(PermissionId.INVOICE)
-  async createBasic(@External() { oid }: TExternal, @Body() body: InvoiceDraftCreateBody) {
-    return await this.apiInvoiceService.createBasic({ oid, body })
-  }
-
-  @Patch('update-basic/:id')
-  @HasPermission(PermissionId.INVOICE)
-  async updateBasic(
-    @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: InvoiceDraftCreateBody
-  ) {
-    return await this.apiInvoiceService.updateBasic({
-      oid,
-      body,
-      oldInvoiceId: id,
-      time: Date.now(),
-    })
-  }
-
   @Post('create-draft')
   @HasPermission(PermissionId.INVOICE_CREATE_DRAFT)
-  async createDraft(@External() { oid }: TExternal, @Body() body: InvoiceDraftCreateBody) {
+  async createDraft(@External() { oid }: TExternal, @Body() body: InvoiceDraftInsertBody) {
     return await this.apiInvoiceService.createDraft({ oid, body })
-  }
-
-  @Patch('update-draft/:id')
-  @HasPermission(PermissionId.INVOICE_UPDATE_DRAFT)
-  async updateDraft(
-    @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: InvoiceDraftUpdateBody
-  ) {
-    return await this.apiInvoiceService.updateDraft({
-      oid,
-      invoiceId: id,
-      body,
-    })
   }
 
   @Delete('destroy-draft/:id')
@@ -98,7 +67,7 @@ export class ApiInvoiceController {
   async prepayment(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: InvoicePaymentBody
+    @Body() body: InvoicePrepaymentBody
   ) {
     return await this.apiInvoiceService.prepayment({
       oid,
@@ -107,14 +76,28 @@ export class ApiInvoiceController {
     })
   }
 
-  @Post('start-ship-and-payment/:id')
-  @HasPermission(PermissionId.INVOICE_SHIP)
-  async startShipAndPayment(
+  @Post('refund-prepayment/:id')
+  @HasPermission(PermissionId.INVOICE_REFUND_PREPAYMENT)
+  async refundPrepayment(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: InvoicePaymentBody
+    @Body() body: InvoiceRefundPrepaymentBody
   ) {
-    return await this.apiInvoiceService.startShipAndPayment({
+    return await this.apiInvoiceService.refundPrepayment({
+      oid,
+      invoiceId: id,
+      money: body.money,
+    })
+  }
+
+  @Post('send-product-and-payment/:id')
+  @HasPermission(PermissionId.INVOICE_SEND_PRODUCT)
+  async sendProductAndPayment(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam,
+    @Body() body: InvoiceSendProductAndPaymentBody
+  ) {
+    return await this.apiInvoiceService.sendProductAndPayment({
       oid,
       invoiceId: id,
       time: Date.now(),
@@ -127,7 +110,7 @@ export class ApiInvoiceController {
   async payDebt(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: InvoicePaymentBody
+    @Body() body: InvoicePayDebtBody
   ) {
     return await this.apiInvoiceService.payDebt({
       oid,
@@ -137,13 +120,18 @@ export class ApiInvoiceController {
     })
   }
 
-  @Post('start-refund/:id')
-  @HasPermission(PermissionId.INVOICE_REFUND)
-  async startRefund(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiInvoiceService.startRefund({
+  @Post('return-product/:id')
+  @HasPermission(PermissionId.INVOICE_RETURN_PRODUCT)
+  async returnProduct(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam,
+    @Body() body: InvoiceReturnProductBody
+  ) {
+    return await this.apiInvoiceService.returnProduct({
       oid,
       invoiceId: id,
       time: Date.now(),
+      money: body.money,
     })
   }
 
@@ -160,5 +148,40 @@ export class ApiInvoiceController {
   @HasPermission(PermissionId.INVOICE_READ)
   async sumInvoiceDebt(@External() { oid }: TExternal, @Query() query: InvoiceSumDebtQuery) {
     return await this.apiInvoiceService.sumInvoiceDebt(oid, query)
+  }
+
+  @Post('create-quick-invoice')
+  @HasPermission(PermissionId.INVOICE)
+  async createQuickInvoice(@External() { oid }: TExternal, @Body() body: InvoiceDraftInsertBody) {
+    return await this.apiInvoiceService.createQuickInvoice({ oid, body })
+  }
+
+  @Patch('update-invoice-draft-and-invoice-prepayment/:id')
+  @HasPermission(PermissionId.INVOICE_UPDATE_INVOICE_DRAFT_AND_INVOICE_PREPAYMENT)
+  async updateInvoiceDraftAndInvoicePrepayment(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam,
+    @Body() body: InvoiceUpdateBody
+  ) {
+    return await this.apiInvoiceService.updateInvoiceDraftAndInvoicePrepayment({
+      oid,
+      invoiceId: id,
+      body,
+    })
+  }
+
+  @Patch('update-invoice-debt-and-invoice-success/:id')
+  @HasPermission(PermissionId.INVOICE)
+  async updateBasic(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam,
+    @Body() body: InvoiceDraftInsertBody
+  ) {
+    return await this.apiInvoiceService.updateInvoiceDebtAndInvoiceSuccess({
+      oid,
+      body,
+      invoiceId: id,
+      time: Date.now(),
+    })
   }
 }

@@ -79,7 +79,7 @@ export class RootUserGetQuery {
 export class RootUserPaginationQuery extends IntersectionType(RootUserGetQuery, PaginationQuery) {}
 
 export class RootUserGetManyQuery extends IntersectionType(
-  PickType(RootUserGetQuery, ['filter', 'relation']),
+  PickType(RootUserGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
 ) {}
 

@@ -20,15 +20,15 @@ export default class Receipt extends BaseEntity {
 
   @Column({ type: 'smallint', nullable: true })
   @Expose()
-  shipYear: number
+  year: number
 
   @Column({ type: 'smallint', nullable: true })
   @Expose()
-  shipMonth: number // 01->12
+  month: number // 01->12
 
   @Column({ type: 'smallint', nullable: true })
   @Expose()
-  shipDate: number
+  date: number
 
   @Column({
     type: 'bigint',
@@ -67,7 +67,7 @@ export default class Receipt extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  revenue: number // tổng tiền = tiền sản phẩm + surcharge - tiền giảm giá
+  totalMoney: number // tổng tiền = tiền sản phẩm + surcharge - tiền giảm giá
 
   @Column({
     name: 'paid',
@@ -111,7 +111,7 @@ export default class Receipt extends BaseEntity {
     },
   })
   @Expose()
-  shippedAt: number
+  endedAt: number
 
   @Column({
     type: 'bigint',
@@ -136,4 +136,44 @@ export default class Receipt extends BaseEntity {
   @Expose()
   @OneToMany(() => DistributorPayment, (distributorPayment) => distributorPayment.receipt)
   distributorPayments: DistributorPayment[]
+
+  static fromRaw(raw: { [P in keyof Receipt]: any }) {
+    if (!raw) return null
+    const entity = new Receipt()
+    Object.assign(entity, raw)
+
+    entity.itemsActualMoney = Number(raw.itemsActualMoney)
+    entity.discountMoney = Number(raw.discountMoney)
+    entity.discountPercent = Number(raw.discountPercent)
+
+    entity.surcharge = Number(raw.surcharge)
+    entity.totalMoney = Number(raw.totalMoney)
+    entity.paid = Number(raw.paid)
+    entity.debt = Number(raw.debt)
+
+    entity.startedAt = raw.startedAt == null ? raw.startedAt : Number(raw.startedAt)
+    entity.endedAt = raw.endedAt == null ? raw.endedAt : Number(raw.endedAt)
+    entity.deletedAt = raw.deletedAt == null ? raw.deletedAt : Number(raw.deletedAt)
+
+    return entity
+  }
+
+  static fromRaws(raws: { [P in keyof Receipt]: any }[]) {
+    return raws.map((i) => Receipt.fromRaw(i))
+  }
 }
+
+export type ReceiptRelationType = Pick<
+  Receipt,
+  'distributor' | 'receiptItems' | 'distributorPayments'
+>
+
+export type ReceiptInsertType = Omit<
+  Receipt,
+  keyof ReceiptRelationType | keyof Pick<Receipt, 'id' | 'deletedAt'>
+>
+
+export type ReceiptUpdateType = Omit<
+  Receipt,
+  keyof ReceiptRelationType | keyof Pick<Receipt, 'id' | 'oid' | 'distributorId'>
+>

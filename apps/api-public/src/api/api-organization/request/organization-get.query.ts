@@ -28,7 +28,7 @@ export class OrganizationGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   relation: OrganizationRelationQuery
 
@@ -49,7 +49,7 @@ export class OrganizationGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   filter?: OrganizationFilterQuery
 
@@ -70,7 +70,7 @@ export class OrganizationGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   sort?: OrganizationSortQuery
 }
@@ -81,7 +81,7 @@ export class OrganizationPaginationQuery extends IntersectionType(
 ) {}
 
 export class OrganizationGetManyQuery extends IntersectionType(
-  PickType(OrganizationGetQuery, ['filter', 'relation']),
+  PickType(OrganizationGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
 ) {}
 

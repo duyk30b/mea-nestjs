@@ -9,7 +9,10 @@ import {
 } from './receipt-options.request'
 
 export class ReceiptGetQuery {
-  @ApiPropertyOptional({ type: String, example: '{"invoices":true}' })
+  @ApiPropertyOptional({
+    type: String,
+    example: JSON.stringify(<ReceiptRelationQuery>{ distributor: true, receiptItems: true }),
+  })
   @Expose()
   @Transform(({ value }) => {
     try {
@@ -23,11 +26,14 @@ export class ReceiptGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   relation: ReceiptRelationQuery
 
-  @ApiPropertyOptional({ type: String, example: '{"isActive":1,"debt":{"GT":1500000}}' })
+  @ApiPropertyOptional({
+    type: String,
+    example: JSON.stringify(<ReceiptFilterQuery>{ distributorId: 33 }),
+  })
   @Expose()
   @Transform(({ value }) => {
     try {
@@ -41,11 +47,11 @@ export class ReceiptGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   filter?: ReceiptFilterQuery
 
-  @ApiPropertyOptional({ type: String, example: '{"id":"ASC"}' })
+  @ApiPropertyOptional({ type: String, example: JSON.stringify(<ReceiptSortQuery>{ id: 'ASC' }) })
   @Expose()
   @Transform(({ value }) => {
     try {
@@ -59,7 +65,7 @@ export class ReceiptGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   sort?: ReceiptSortQuery
 }
@@ -67,7 +73,7 @@ export class ReceiptGetQuery {
 export class ReceiptPaginationQuery extends IntersectionType(ReceiptGetQuery, PaginationQuery) {}
 
 export class ReceiptGetManyQuery extends IntersectionType(
-  PickType(ReceiptGetQuery, ['filter', 'relation']),
+  PickType(ReceiptGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
 ) {}
 

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import {
+  Batch,
   Customer,
   CustomerPayment,
   Distributor,
@@ -14,7 +15,6 @@ import {
   OrganizationSetting,
   Procedure,
   Product,
-  ProductBatch,
   ProductMovement,
   Receipt,
   ReceiptItem,
@@ -43,7 +43,7 @@ import { TestApi } from './test-sql.api'
       Organization,
       OrganizationSetting,
       Product,
-      ProductBatch,
+      Batch,
       ProductMovement,
       Procedure,
       Receipt,

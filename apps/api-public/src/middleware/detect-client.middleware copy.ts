@@ -34,15 +34,24 @@ export class DetectClientMiddleware implements NestMiddleware {
     if (accessToken) {
       try {
         const decode: IAccessTokenPayload = this.jwtExtendService.verifyAccessToken(accessToken, ip)
+        Object.assign(dataExternal, decode)
+
         const checkTokenCache = await this.cacheTokenService.checkToken({
           oid: decode.oid,
           userId: decode.uid,
           accessToken,
         })
-        if (checkTokenCache) {
-          Object.assign(dataExternal, decode)
+
+        if (!checkTokenCache) {
+          if (process.env.NODE_ENV === 'production') {
+            dataExternal.error = 'error.Token.Expired'
+          } else {
+            // dataExternal.error = 'error.Token.Expired'
+          }
         }
-      } catch (error) {}
+      } catch (error) {
+        dataExternal.error = 'error.Token.Invalid'
+      }
     }
 
     const requestExternal = request as RequestExternal

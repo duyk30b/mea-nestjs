@@ -46,7 +46,7 @@ export class ApiRootOrganizationService {
       limit,
       relation,
       condition: {},
-      sort: sort || { id: 'DESC' },
+      sort,
     })
     return {
       data,

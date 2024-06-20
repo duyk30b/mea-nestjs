@@ -1,5 +1,5 @@
-import { Expose } from 'class-transformer'
-import { IsString } from 'class-validator'
+import { Expose, TransformFnParams, plainToInstance } from 'class-transformer'
+import { ArrayMinSize, IsArray, IsString, validateSync } from 'class-validator'
 
 export class ConditionString {
   @Expose()
@@ -31,6 +31,34 @@ export class ConditionString {
   'LIKE'?: string
 
   @Expose()
-  @IsString()
+  @IsArray()
+  @IsString({ each: true })
+  @ArrayMinSize(1)
   'IN'?: string[]
+}
+
+export const transformConditionString = ({ value, key }: TransformFnParams) => {
+  if (!value) {
+    return
+  }
+  if (typeof value === 'string') {
+    return value
+  } else if (typeof value === 'object') {
+    const instance = plainToInstance(ConditionString, value, {
+      exposeUnsetFields: false,
+      excludeExtraneousValues: false,
+    })
+    const validate = validateSync(instance, {
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      skipMissingProperties: true,
+    })
+    if (validate.length) {
+      const validateMessage = JSON.stringify(validate.map((i) => i.constraints))
+      throw new Error(`${key} ConditionString failed: ${validateMessage}`)
+    }
+    return instance
+  } else {
+    throw new Error(`${key} must be a String`)
+  }
 }

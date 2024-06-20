@@ -1,28 +1,37 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
+import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { ReceiptProcessRepository } from '../../../../_libs/database/repository/receipt/receipt-process.repository'
-import { ReceiptRefund } from '../../../../_libs/database/repository/receipt/receipt-refund'
-import { ReceiptShipAndPayment } from '../../../../_libs/database/repository/receipt/receipt-ship-and-payment'
-import {
-  ReceiptInsertDto,
-  ReceiptUpdateDto,
-} from '../../../../_libs/database/repository/receipt/receipt.dto'
+import { ReceiptStatus } from '../../../../_libs/database/common/variable'
+import { Batch, Distributor, Product } from '../../../../_libs/database/entities'
+import { DistributorPaymentRepository } from '../../../../_libs/database/repository/distributor-payment/distributor-payment.repository'
+import { ReceiptDraft } from '../../../../_libs/database/repository/receipt/receipt-draft'
+import { ReceiptPayDebt } from '../../../../_libs/database/repository/receipt/receipt-pay-debt'
+import { ReceiptPrepayment } from '../../../../_libs/database/repository/receipt/receipt-prepayment'
+import { ReceiptRefundPrepayment } from '../../../../_libs/database/repository/receipt/receipt-refund-prepayment'
+import { ReceiptReturnProduct } from '../../../../_libs/database/repository/receipt/receipt-return-product'
+import { ReceiptSendProductAndPayment } from '../../../../_libs/database/repository/receipt/receipt-send-product-and-payment'
 import { ReceiptRepository } from '../../../../_libs/database/repository/receipt/receipt.repository'
+import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
-  ReceiptDraftCreateBody,
-  ReceiptDraftUpdateBody,
+  ReceiptDraftInsertBody,
   ReceiptGetManyQuery,
   ReceiptGetOneQuery,
   ReceiptPaginationQuery,
+  ReceiptUpdateBody,
 } from './request'
 
 @Injectable()
 export class ApiReceiptService {
   constructor(
+    private readonly socketEmitService: SocketEmitService,
     private readonly receiptRepository: ReceiptRepository,
-    private readonly receiptProcessRepository: ReceiptProcessRepository,
-    private readonly receiptShipAndPayment: ReceiptShipAndPayment,
-    private readonly receiptRefund: ReceiptRefund
+    private readonly receiptDraft: ReceiptDraft,
+    private readonly receiptPrepayment: ReceiptPrepayment,
+    private readonly receiptRefundPrepayment: ReceiptRefundPrepayment,
+    private readonly receiptSendProductAndPayment: ReceiptSendProductAndPayment,
+    private readonly receiptPayDebt: ReceiptPayDebt,
+    private readonly receiptReturnProduct: ReceiptReturnProduct,
+    private readonly distributorPaymentRepository: DistributorPaymentRepository
   ) {}
 
   async pagination(oid: number, query: ReceiptPaginationQuery): Promise<BaseResponse> {
@@ -67,7 +76,7 @@ export class ApiReceiptService {
   }
 
   async getOne(oid: number, id: number, { relation }: ReceiptGetOneQuery): Promise<BaseResponse> {
-    const receipt = await this.receiptRepository.findOne({
+    const data = await this.receiptRepository.findOne({
       condition: { oid, id },
       relation: {
         distributor: !!relation?.distributor,
@@ -75,7 +84,10 @@ export class ApiReceiptService {
         receiptItems: relation?.receiptItems ? { batch: true, product: true } : false,
       },
     })
-    return { data: receipt }
+    if (!data) {
+      throw new BusinessException('error.Database.NotFound')
+    }
+    return { data }
   }
 
   async queryOne(oid: number, id: number, { relation }: ReceiptGetOneQuery): Promise<BaseResponse> {
@@ -90,60 +102,13 @@ export class ApiReceiptService {
     return { data: receipt }
   }
 
-  async createBasic(params: { oid: number; body: ReceiptDraftCreateBody }): Promise<BaseResponse> {
+  async createDraft(params: { oid: number; body: ReceiptDraftInsertBody }): Promise<BaseResponse> {
     const { oid, body } = params
     try {
-      const { receiptId } = await this.receiptProcessRepository.createDraft({
+      const { receiptId } = await this.receiptDraft.createDraft({
         oid,
-        receiptInsertDto: ReceiptInsertDto.from(body),
-      })
-      await this.receiptShipAndPayment.startShipAndPayment({
-        oid,
-        receiptId,
-        time: Date.now(),
-        money: body.revenue,
-      })
-
-      return { data: { receiptId } }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async updateBasic(params: {
-    oid: number
-    oldReceiptId: number
-    time: number
-    body: ReceiptDraftCreateBody
-  }): Promise<BaseResponse> {
-    const { oid, body, oldReceiptId, time } = params
-    try {
-      await this.receiptRefund.startRefund({ oid, receiptId: oldReceiptId, time })
-      await this.receiptProcessRepository.softDeleteRefund({ oid, receiptId: oldReceiptId })
-
-      const { receiptId } = await this.receiptProcessRepository.createDraft({
-        oid,
-        receiptInsertDto: ReceiptInsertDto.from(body),
-      })
-      await this.receiptShipAndPayment.startShipAndPayment({
-        oid,
-        receiptId,
-        time: Date.now(),
-        money: body.revenue,
-      })
-
-      return { data: { receiptId } }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async createDraft(params: { oid: number; body: ReceiptDraftCreateBody }): Promise<BaseResponse> {
-    const { oid, body } = params
-    try {
-      const { receiptId } = await this.receiptProcessRepository.createDraft({
-        oid,
-        receiptInsertDto: ReceiptInsertDto.from(body),
+        receiptInsertDto: body.receipt,
+        receiptItemListDto: body.receiptItemList,
       })
       return { data: { receiptId } }
     } catch (error: any) {
@@ -151,17 +116,18 @@ export class ApiReceiptService {
     }
   }
 
-  async updateDraft(params: {
+  async updateReceiptDraftAndReceiptPrepayment(params: {
     oid: number
     receiptId: number
-    body: ReceiptDraftUpdateBody
+    body: ReceiptUpdateBody
   }): Promise<BaseResponse> {
     const { oid, receiptId, body } = params
     try {
-      await this.receiptProcessRepository.updateDraft({
+      await this.receiptDraft.updateReceiptDraftAndReceiptPrepayment({
         oid,
         receiptId,
-        receiptUpdateDto: ReceiptUpdateDto.from(body),
+        receiptUpdateDto: body.receipt,
+        receiptItemListDto: body.receiptItemList,
       })
       return { data: { receiptId } }
     } catch (error: any) {
@@ -172,7 +138,7 @@ export class ApiReceiptService {
   async destroyDraft(params: { oid: number; receiptId: number }): Promise<BaseResponse> {
     const { oid, receiptId } = params
     try {
-      await this.receiptProcessRepository.destroyDraft({ oid, receiptId })
+      await this.receiptDraft.destroyDraft({ oid, receiptId })
       return { data: { receiptId } }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
@@ -186,19 +152,59 @@ export class ApiReceiptService {
   }): Promise<BaseResponse> {
     const { oid, receiptId, money } = params
     try {
-      await this.receiptProcessRepository.prepayment({
+      const { receiptBasic } = await this.receiptPrepayment.prepayment({
         oid,
         receiptId,
         time: Date.now(),
         money,
       })
-      return { data: { receiptId } }
+      const distributorPayments = await this.distributorPaymentRepository.findMany({
+        condition: {
+          oid,
+          distributorId: receiptBasic.distributorId,
+          receiptId,
+        },
+        sort: { id: 'ASC' },
+      })
+      return {
+        data: {
+          receiptBasic,
+          distributorPayments,
+        },
+      }
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
   }
 
-  async startShipAndPayment(params: {
+  async refundPrepayment(params: {
+    oid: number
+    receiptId: number
+    money: number
+  }): Promise<BaseResponse> {
+    const { oid, receiptId, money } = params
+    try {
+      const { receiptBasic } = await this.receiptRefundPrepayment.refundPrepayment({
+        oid,
+        receiptId,
+        time: Date.now(),
+        money,
+      })
+      const distributorPayments = await this.distributorPaymentRepository.findMany({
+        condition: {
+          oid,
+          distributorId: receiptBasic.distributorId,
+          receiptId,
+        },
+        sort: { id: 'ASC' },
+      })
+      return { data: { receiptBasic, distributorPayments } }
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+    }
+  }
+
+  async sendProductAndPayment(params: {
     oid: number
     receiptId: number
     time: number
@@ -206,8 +212,27 @@ export class ApiReceiptService {
   }): Promise<BaseResponse> {
     const { oid, receiptId, time, money } = params
     try {
-      await this.receiptShipAndPayment.startShipAndPayment({ oid, receiptId, time, money })
-      return { data: { receiptId } }
+      const result = await this.receiptSendProductAndPayment.sendProductAndPayment({
+        oid,
+        receiptId,
+        time,
+        money,
+      })
+      const distributorPayments = await this.distributorPaymentRepository.findMany({
+        condition: {
+          oid,
+          distributorId: result.receiptBasic.distributorId,
+          receiptId,
+        },
+        sort: { id: 'ASC' },
+      })
+      this.emitSocketAfterSendProductAndPayment(oid, result)
+      return {
+        data: {
+          receiptBasic: result.receiptBasic,
+          distributorPayments,
+        },
+      }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
@@ -221,22 +246,56 @@ export class ApiReceiptService {
   }): Promise<BaseResponse> {
     const { oid, receiptId, time, money } = params
     try {
-      await this.receiptProcessRepository.payDebt({ oid, receiptId, time, money })
-      return { data: { receiptId } }
+      const { distributor, receiptBasic } = await this.receiptPayDebt.payDebt({
+        oid,
+        receiptId,
+        time,
+        money,
+      })
+      const distributorPayments = await this.distributorPaymentRepository.findMany({
+        condition: {
+          oid,
+          distributorId: receiptBasic.distributorId,
+          receiptId,
+        },
+        sort: { id: 'ASC' },
+      })
+      this.socketEmitService.distributorUpsert(oid, { distributor })
+      return {
+        data: {
+          receiptBasic,
+          distributorPayments,
+        },
+      }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
   }
 
-  async startRefund(params: {
+  async returnProduct(params: {
     oid: number
     receiptId: number
     time: number
+    money: number
   }): Promise<BaseResponse> {
-    const { oid, receiptId, time } = params
+    const { oid, receiptId, time, money } = params
     try {
-      await this.receiptRefund.startRefund({ oid, receiptId, time })
-      return { data: { receiptId } }
+      const result = await this.receiptReturnProduct.returnProduct({ oid, receiptId, time, money })
+      const distributorPayments = await this.distributorPaymentRepository.findMany({
+        condition: {
+          oid,
+          distributorId: result.receiptBasic.distributorId,
+          receiptId,
+        },
+        sort: { id: 'ASC' },
+      })
+      this.emitSocketAfterSendProductAndPayment(oid, result)
+      return {
+        data: {
+          receiptBasic: result.receiptBasic,
+          distributorPayments,
+        },
+      }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
@@ -245,10 +304,86 @@ export class ApiReceiptService {
   async softDeleteRefund(params: { oid: number; receiptId: number }): Promise<BaseResponse> {
     const { oid, receiptId } = params
     try {
-      await this.receiptProcessRepository.softDeleteRefund({ oid, receiptId })
+      await this.receiptDraft.softDeleteRefund({ oid, receiptId })
       return { data: { receiptId } }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+    }
+  }
+
+  async createQuickReceipt(options: {
+    oid: number
+    body: ReceiptDraftInsertBody
+  }): Promise<BaseResponse> {
+    const { oid, body } = options
+    try {
+      const { receiptId } = await this.receiptDraft.createDraft({
+        oid,
+        receiptInsertDto: body.receipt,
+        receiptItemListDto: body.receiptItemList,
+      })
+      const result = await this.receiptSendProductAndPayment.sendProductAndPayment({
+        oid,
+        receiptId,
+        time: Date.now(),
+        money: body.receipt.totalMoney,
+      })
+      this.emitSocketAfterSendProductAndPayment(oid, result)
+      return { data: { receiptId } }
+    } catch (error: any) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+    }
+  }
+
+  async updateReceiptDebtAndReceiptSuccess(options: {
+    oid: number
+    receiptId: number
+    time: number
+    body: ReceiptUpdateBody
+  }): Promise<BaseResponse> {
+    const { oid, body, receiptId, time } = options
+    const oldReceipt = await this.receiptRepository.findOneById(receiptId)
+    try {
+      await this.receiptReturnProduct.returnProduct({
+        oid,
+        receiptId,
+        time,
+        money: oldReceipt.paid,
+        description: 'Hoàn trả để sửa đơn',
+      })
+      await this.receiptRepository.update({ oid, id: receiptId }, { status: ReceiptStatus.Draft })
+      await this.receiptDraft.updateReceiptDraftAndReceiptPrepayment({
+        oid,
+        receiptId,
+        receiptUpdateDto: body.receipt,
+        receiptItemListDto: body.receiptItemList,
+      })
+      const result = await this.receiptSendProductAndPayment.sendProductAndPayment({
+        oid,
+        receiptId,
+        time: Date.now(),
+        money: oldReceipt.paid,
+      })
+      this.emitSocketAfterSendProductAndPayment(oid, result)
+      return { data: { receiptId } }
+    } catch (error: any) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+    }
+  }
+
+  async emitSocketAfterSendProductAndPayment(
+    oid: number,
+    data: { distributor: Distributor; productList: Product[]; batchList: Batch[] }
+  ) {
+    const { distributor, productList, batchList } = data
+    if (distributor) {
+      this.socketEmitService.distributorUpsert(oid, { distributor })
+    }
+    if (productList.length) {
+      this.socketEmitService.productListUpdate(oid, { productList })
+    }
+    if (batchList.length) {
+      this.socketEmitService.batchListUpdate(oid, { batchList })
     }
   }
 }

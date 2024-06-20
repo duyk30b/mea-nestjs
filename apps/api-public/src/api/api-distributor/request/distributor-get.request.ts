@@ -23,7 +23,7 @@ export class DistributorGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   relation: DistributorRelationQuery
 
@@ -41,7 +41,7 @@ export class DistributorGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   filter?: DistributorFilterQuery
 
@@ -59,7 +59,7 @@ export class DistributorGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   sort?: DistributorSortQuery
 }
@@ -70,7 +70,7 @@ export class DistributorPaginationQuery extends IntersectionType(
 ) {}
 
 export class DistributorGetManyQuery extends IntersectionType(
-  PickType(DistributorGetQuery, ['filter', 'relation']),
+  PickType(DistributorGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
 ) {}
 

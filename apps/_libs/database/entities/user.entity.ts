@@ -71,17 +71,6 @@ export default class User {
       from: (value) => (value == null ? value : Number(value)),
     },
   })
-  createdAt: number
-
-  @Expose()
-  @Column({
-    type: 'bigint',
-    default: () => '(EXTRACT(epoch FROM now()) * (1000))',
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
   updatedAt: number
 
   @Expose()
@@ -111,11 +100,16 @@ export default class User {
   devices: Device[]
 }
 
+export type UserRelationType = Pick<User, 'organization' | 'role' | 'devices'>
+
+export type UserSortType = Pick<User, 'oid' | 'id' | 'phone' | 'username'>
+
 export type UserInsertType = Omit<
   User,
-  'id' | 'role' | 'organization' | 'devices' | 'createdAt' | 'updatedAt' | 'deletedAt'
+  keyof UserRelationType | keyof Pick<User, 'id' | 'updatedAt' | 'deletedAt'>
 >
+
 export type UserUpdateType = Omit<
   User,
-  'oid' | 'id' | 'role' | 'organization' | 'devices' | 'createdAt' | 'updatedAt'
+  keyof UserRelationType | keyof Pick<User, 'oid' | 'id' | 'updatedAt'>
 >

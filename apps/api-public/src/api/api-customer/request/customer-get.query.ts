@@ -23,7 +23,7 @@ export class CustomerGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   relation: CustomerRelationQuery
 
@@ -49,7 +49,7 @@ export class CustomerGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   filter?: CustomerFilterQuery
 
@@ -74,7 +74,7 @@ export class CustomerGetQuery {
       return error.message
     }
   })
-  @IsObject()
+  @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   sort?: CustomerSortQuery
 }
@@ -82,7 +82,7 @@ export class CustomerGetQuery {
 export class CustomerPaginationQuery extends IntersectionType(CustomerGetQuery, PaginationQuery) {}
 
 export class CustomerGetManyQuery extends IntersectionType(
-  PickType(CustomerGetQuery, ['filter', 'relation']),
+  PickType(CustomerGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
 ) {}
 

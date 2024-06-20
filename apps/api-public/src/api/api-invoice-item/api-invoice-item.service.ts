@@ -34,9 +34,10 @@ export class ApiInvoiceItemService {
       condition: {
         oid,
         customerId: filter?.customerId,
+        procedureId: filter?.procedureId,
         type: filter?.type,
       },
-      sort: sort || { id: 'DESC' },
+      sort,
     })
 
     const invoiceIds = uniqueArray(data.map((i) => i.invoiceId))

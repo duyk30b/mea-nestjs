@@ -1,4 +1,10 @@
-import { FindOptionsOrder, FindOptionsRelations, Repository } from 'typeorm'
+import {
+  FindOptionsOrder,
+  FindOptionsRelations,
+  InsertResult,
+  Repository,
+  UpdateResult,
+} from 'typeorm'
 import { BaseCondition } from '../../common/dto'
 import { NoExtra } from '../../common/helpers/typescript.helper'
 import { PostgreSqlCondition } from './postgresql.condition'
@@ -76,7 +82,7 @@ export abstract class PostgreSqlRepository<
     sort?: NoExtra<_SORT, S>
     relation?: NoExtra<_RELATION, R>
     relationLoadStrategy?: 'query' | 'join'
-  }): Promise<_ENTITY> {
+  }): Promise<_ENTITY | null> {
     const where = this.getWhereOptions(options.condition)
     const order = options.sort as FindOptionsOrder<_ENTITY>
     const relations = options.relation as FindOptionsRelations<_ENTITY>
@@ -106,8 +112,25 @@ export abstract class PostgreSqlRepository<
   }
 
   async insertManyFullField<X extends _INSERT>(data: NoExtra<_INSERT, X>[]): Promise<number[]> {
-    const insertResult = await this.repository.insert(data)
-    return insertResult.identifiers.map((i) => i.id)
+    return this.insertMany(data)
+  }
+
+  async insertManyAndReturnRaw<X extends Partial<_INSERT>>(
+    data: NoExtra<Partial<_INSERT>, X>[]
+  ): Promise<{ [P in keyof _ENTITY]: any }[]> {
+    const insertResult: InsertResult = await this.repository
+      .createQueryBuilder()
+      .insert()
+      .values(data)
+      .returning('*')
+      .execute()
+    return insertResult.raw
+  }
+
+  async insertManyFullFieldAndReturnRaws<X extends _INSERT>(
+    data: NoExtra<_INSERT, X>[]
+  ): Promise<{ [P in keyof _ENTITY]: any }[]> {
+    return this.insertManyAndReturnRaw(data)
   }
 
   async insertOne<X extends Partial<_INSERT>>(data: NoExtra<Partial<_INSERT>, X>): Promise<number> {
@@ -116,8 +139,25 @@ export abstract class PostgreSqlRepository<
   }
 
   async insertOneFullField<X extends _INSERT>(data: NoExtra<_INSERT, X>): Promise<number> {
-    const insertResult = await this.repository.insert(data)
-    return insertResult.identifiers[0].id
+    return this.insertOne(data)
+  }
+
+  async insertOneAndReturnRaw<X extends Partial<_INSERT>>(
+    data: NoExtra<Partial<_INSERT>, X>
+  ): Promise<{ [P in keyof _ENTITY]: any }> {
+    const insertResult: InsertResult = await this.repository
+      .createQueryBuilder()
+      .insert()
+      .values(data)
+      .returning('*')
+      .execute()
+    return insertResult.raw[0]
+  }
+
+  async insertOneFullFieldAndReturnRaw<X extends _INSERT>(
+    data: NoExtra<_INSERT, X>
+  ): Promise<{ [P in keyof _ENTITY]: any }> {
+    return this.insertOneAndReturnRaw(data)
   }
 
   async update<X extends Partial<_UPDATE>>(
@@ -127,6 +167,21 @@ export abstract class PostgreSqlRepository<
     const where = this.getWhereOptions(condition)
     const updateResult = await this.repository.update(where, data)
     return updateResult.affected
+  }
+
+  async updateAndReturnRaw<X extends Partial<_UPDATE>>(
+    condition: BaseCondition<_ENTITY>,
+    data: NoExtra<Partial<_UPDATE>, X>
+  ): Promise<{ [P in keyof _ENTITY]: any }[]> {
+    const where = this.getWhereOptions(condition)
+    const updateResult: UpdateResult = await this.repository
+      .createQueryBuilder()
+      .update()
+      .where(where)
+      .set(data)
+      .returning('*')
+      .execute()
+    return updateResult.raw
   }
 
   async delete(condition: BaseCondition<_ENTITY>) {
