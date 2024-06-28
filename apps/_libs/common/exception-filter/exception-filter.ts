@@ -92,24 +92,38 @@ export class ServerExceptionFilter implements ExceptionFilter {
       const ctx = host.switchToHttp()
       const response = ctx.getResponse<FastifyReply>()
       const request = ctx.getRequest()
-      const requestExternal: RequestExternal = request.raw
+      const { external }: RequestExternal = request.raw
 
       const { originalUrl, method, body } = request
       const urlParse = url.parse(originalUrl, true)
-      Logger.error(
-        JSON.stringify({
-          statusCode,
-          message,
-          type: '[HTTP]',
-          method,
-          path: urlParse.pathname,
-          query: urlParse.query,
-          errors,
-          body,
-          external: requestExternal.external,
-        }),
-        exception.name
-      )
+      const basicExternal = {
+        ip: external.ip,
+        browser: external.browser,
+        mobile: external.mobile,
+        uid: external.uid,
+        oid: external.oid,
+        rid: external.rid,
+        username: external.user?.username,
+        phone: external.organization?.phone,
+        email: external.organization?.email,
+      }
+
+      const logMessage = JSON.stringify({
+        statusCode,
+        message,
+        type: '[HTTP]',
+        method,
+        path: urlParse.pathname,
+        query: urlParse.query,
+        errors,
+        body,
+        external: basicExternal,
+      })
+      if (statusCode === 422) {
+        Logger.warn(logMessage, exception.name)
+      } else {
+        Logger.error(logMessage, exception.name)
+      }
 
       return response.code(statusCode).send({
         statusCode,

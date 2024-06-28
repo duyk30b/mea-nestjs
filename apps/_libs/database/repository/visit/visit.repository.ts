@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
-import { EntityManager, FindOptionsWhere, In, Repository, UpdateResult } from 'typeorm'
+import { EntityManager, FindOptionsWhere, Repository, UpdateResult } from 'typeorm'
 import { BaseCondition } from '../../../common/dto'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { Visit } from '../../entities'
@@ -36,6 +36,7 @@ export class VisitRepository extends PostgreSqlRepository<
       visitDiagnosis?: boolean
       visitProductList?: { product?: boolean } | false
       visitProcedureList?: { procedure?: boolean } | false
+      visitRadiologyList?: { radiology?: boolean; doctor?: boolean } | false
     }
   ): Promise<Visit | null> {
     let query = this.manager
@@ -74,6 +75,25 @@ export class VisitRepository extends PostgreSqlRepository<
       }
     }
 
+    if (relation?.visitRadiologyList) {
+      query = query.leftJoinAndSelect('visit.visitRadiologyList', 'visitRadiology')
+      query.addOrderBy('visitRadiology.id', 'ASC')
+      if (relation?.visitRadiologyList?.radiology) {
+        query = query.leftJoinAndSelect(
+          'visitRadiology.radiology',
+          'radiology',
+          'visitRadiology.radiologyId != 0'
+        )
+      }
+      if (relation?.visitRadiologyList?.doctor) {
+        query = query.leftJoinAndSelect(
+          'visitRadiology.doctor',
+          'doctor',
+          'visitRadiology.doctorId != 0'
+        )
+      }
+    }
+
     const visit = await query.getOne()
     return visit
   }
@@ -93,13 +113,36 @@ export class VisitRepository extends PostgreSqlRepository<
     return Visit.fromRaws(raws)
   }
 
+  async refreshRadiologyMoney(options: { oid: number; visitId: number }) {
+    const { oid, visitId } = options
+    const updateResult: [any[], number] = await this.manager.query(`
+        UPDATE  "Visit" "visit" 
+        SET     "radiologyMoney"  = "temp"."sumActualPrice",
+                "totalMoney"      = "visit"."totalMoney" - "visit"."radiologyMoney" 
+                                        + temp."sumActualPrice",
+                "debt"            = "visit"."debt" - "visit"."radiologyMoney" 
+                                        + temp."sumActualPrice"
+        FROM    ( 
+                SELECT "visitId", SUM("actualPrice") as "sumActualPrice"
+                    FROM "VisitRadiology" 
+                    WHERE "visitId" = (${visitId}) AND "oid" = ${oid}
+                    GROUP BY "visitId" 
+                ) AS "temp" 
+        WHERE   "visit"."id" = "temp"."visitId" 
+                    AND "visit"."oid" = ${oid}
+        RETURNING visit.*
+    `)
+    return Visit.fromRaws(updateResult[0])
+  }
+
   async updateItemsMoney(options: {
     oid: number
     visitId: number
     productsMoney?: number
     proceduresMoney?: number
+    radiologyMoney?: number
   }) {
-    const { oid, visitId, productsMoney, proceduresMoney } = options
+    const { oid, visitId, productsMoney, proceduresMoney, radiologyMoney } = options
 
     const whereVisit: FindOptionsWhere<Visit> = {
       oid,
@@ -107,14 +150,19 @@ export class VisitRepository extends PostgreSqlRepository<
       visitStatus: VisitStatus.InProgress,
     }
     const setVisit: { [P in keyof NoExtra<Partial<Visit>>]: Visit[P] | (() => string) } = {
-      visitStatus: VisitStatus.InProgress, // chuyển hết về trạng thái đang khám
       ...(productsMoney == null ? {} : { productsMoney }),
       ...(proceduresMoney == null ? {} : { proceduresMoney }),
+      ...(radiologyMoney == null ? {} : { radiologyMoney }),
       totalMoney: () =>
         `${proceduresMoney == null ? `"proceduresMoney"` : proceduresMoney}` +
         ` + ${productsMoney == null ? `"productsMoney"` : productsMoney}` +
+        ` + ${radiologyMoney == null ? `"radiologyMoney"` : radiologyMoney}` +
         ` - "discountMoney"`,
-      debt: 0,
+      debt: () =>
+        `${proceduresMoney == null ? `"proceduresMoney"` : proceduresMoney}` +
+        ` + ${productsMoney == null ? `"productsMoney"` : productsMoney}` +
+        ` + ${radiologyMoney == null ? `"radiologyMoney"` : radiologyMoney}` +
+        ` - "discountMoney" - "paid`,
     }
 
     const updateResult: UpdateResult = await this.visitRepository
@@ -130,9 +178,9 @@ export class VisitRepository extends PostgreSqlRepository<
   async updateProductMoneyWhenReturn(options: {
     oid: number
     visitId: number
-    productsMoney: number
+    productsMoneyReturn: number
   }) {
-    const { oid, visitId, productsMoney } = options
+    const { oid, visitId, productsMoneyReturn } = options
 
     const whereVisit: FindOptionsWhere<Visit> = {
       oid,
@@ -140,9 +188,9 @@ export class VisitRepository extends PostgreSqlRepository<
       visitStatus: VisitStatus.InProgress,
     }
     const setVisit: { [P in keyof NoExtra<Partial<Visit>>]: Visit[P] | (() => string) } = {
-      productsMoney,
-      totalMoney: () => `"proceduresMoney" + ${productsMoney} - "discountMoney"`,
-      debt: () => `proceduresMoney" + ${productsMoney} - "discountMoney" - paid`,
+      productsMoney: () => `"productsMoney" - ${productsMoneyReturn}`,
+      totalMoney: () => `"totalMoney" - ${productsMoneyReturn}`,
+      debt: () => `"debt" - ${productsMoneyReturn}`,
     }
 
     const updateResult: UpdateResult = await this.visitRepository

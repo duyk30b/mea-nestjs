@@ -1,8 +1,13 @@
-import { Body, Controller, Post } from '@nestjs/common'
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { Body, Controller, Param, Post, UploadedFiles, UseInterceptors } from '@nestjs/common'
+import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger'
+import { IdParam } from '../../../../_libs/common/dto'
+import { FileUploadDto } from '../../../../_libs/common/dto/file'
+import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
+import { FastifyFilesInterceptor } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
+import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
 import { ApiVisitDiagnosisService } from './api-visit-diagnosis.service'
-import { CreateVisitDiagnosisBody } from './request'
+import { VisitDiagnosisUpdateBody } from './request'
 
 @ApiTags('VisitDiagnosis')
 @ApiBearerAuth('access-token')
@@ -10,8 +15,16 @@ import { CreateVisitDiagnosisBody } from './request'
 export class ApiVisitDiagnosisController {
   constructor(private readonly apiVisitDiagnosisService: ApiVisitDiagnosisService) {}
 
-  @Post('create')
-  async createOne(@External() { oid }: TExternal, @Body() body: CreateVisitDiagnosisBody) {
-    return await this.apiVisitDiagnosisService.createOne(oid, body)
+  @Post('update/:id')
+  @HasPermission(PermissionId.VISIT_DIAGNOSIS)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FastifyFilesInterceptor('files', 10, {}))
+  async update(
+    @External() { oid }: TExternal,
+    @UploadedFiles() files: FileUploadDto[],
+    @Param() { id }: IdParam,
+    @Body() body: VisitDiagnosisUpdateBody
+  ) {
+    return await this.apiVisitDiagnosisService.updateOne({ oid, body, files, id })
   }
 }

@@ -3,6 +3,7 @@
   "SystemError": "Lỗi hệ thống",
   "Database": {
     "NotFound": "Không tìm thấy bản ghi",
+    "InsertFailed": "Lỗi tạo bản ghi mới",
     "UpdateFailed": "Lỗi cập nhật bản ghi",
     "DeleteFailed": "Lỗi xóa bản ghi"
   },

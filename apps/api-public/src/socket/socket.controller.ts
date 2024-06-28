@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { IsRoot } from '../../../_libs/common/guards/root.guard'
 import { External, TExternal } from '../../../_libs/common/request/external.request'
-import { IsRoot } from '../guards/root.guard'
 import { SocketEmitService } from './socket-emit.service'
 
 @Controller('socket')

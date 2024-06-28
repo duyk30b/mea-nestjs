@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IsRoot } from '../../guards/root.guard'
-import { IsUser } from '../../guards/user.guard.'
+import { IsRoot } from '../../../../_libs/common/guards/root.guard'
+import { IsUser } from '../../../../_libs/common/guards/user.guard.'
 import { ApiPermissionService } from './api-permission.service'
 import { PermissionGetManyQuery } from './request'
 

@@ -101,6 +101,48 @@ class VisitProcedureUpdateBody {
   actualPrice: number
 }
 
+class VisitRadiologyUpdateBody {
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  id: number
+
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  radiologyId: number
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @Transform(({ value }) => Math.round(value || 0))
+  @IsDefined()
+  @IsInt()
+  discountMoney: number
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  @Max(9999.99)
+  @Min(-9999.99)
+  discountPercent: number
+
+  @ApiProperty({ enum: valuesEnum(DiscountType), example: DiscountType.VND })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(DiscountType)
+  discountType: DiscountType
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @Transform(({ value }) => Math.round(value || 0))
+  @IsDefined()
+  @IsInt()
+  actualPrice: number
+}
+
 export class VisitUpdateVisitItemsMoneyBody {
   @ApiProperty({ example: 56 })
   @Expose()
@@ -123,4 +165,12 @@ export class VisitUpdateVisitItemsMoneyBody {
   @IsArray()
   @ValidateNested({ each: true })
   visitProcedureList: VisitProcedureUpdateBody[]
+
+  @ApiProperty({ type: VisitRadiologyUpdateBody, isArray: true })
+  @Expose()
+  @Type(() => VisitRadiologyUpdateBody)
+  @IsDefined()
+  @IsArray()
+  @ValidateNested({ each: true })
+  visitRadiologyList: VisitRadiologyUpdateBody[]
 }

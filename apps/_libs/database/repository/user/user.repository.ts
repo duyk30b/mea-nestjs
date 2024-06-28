@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
+import { BaseCondition } from '../../../common/dto'
+import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { User } from '../../entities'
 import {
   UserInsertType,
@@ -18,16 +20,29 @@ export class UserRepository extends PostgreSqlRepository<
   UserInsertType,
   UserUpdateType
 > {
-  private dataMap: Record<string, User> = {}
-
   constructor(@InjectRepository(User) private userRepository: Repository<User>) {
     super(userRepository)
   }
 
-  async getOneFromCache(id: number) {
-    if (!this.dataMap[id]) {
-      this.dataMap[id] = await this.findOneById(id)
-    }
-    return this.dataMap[id]
+  async insertOneFullFieldAndReturnEntity<X extends UserInsertType>(
+    data: NoExtra<UserInsertType, X>
+  ): Promise<User> {
+    const raw = await this.insertOneFullFieldAndReturnRaw(data)
+    return User.fromRaw(raw)
+  }
+
+  async insertOneAndReturnEntity<X extends Partial<UserInsertType>>(
+    data: NoExtra<Partial<UserInsertType>, X>
+  ): Promise<User> {
+    const raw = await this.insertOneAndReturnRaw(data)
+    return User.fromRaw(raw)
+  }
+
+  async updateAndReturnEntity<X extends Partial<UserUpdateType>>(
+    condition: BaseCondition<User>,
+    data: NoExtra<Partial<UserUpdateType>, X>
+  ): Promise<User[]> {
+    const raws = await this.updateAndReturnRaw(condition, data)
+    return User.fromRaws(raws)
   }
 }

@@ -6,6 +6,7 @@ networks:
 
 volumes:
   mv_api_public:
+  mv_file_service:
 
 
 services:
@@ -28,26 +29,10 @@ services:
     ports:
       - "${API_PUBLIC_PORT:-20000}:${API_PUBLIC_PORT:-20000}"
       - 29229:29229
-  # event-dispatcher:
-  #   container_name: mc_event-dispatcher
-  #   image: mi_nestjs_${NODE_ENV:-local}:1.0.0
-  #   restart: unless-stopped
-  #   networks:
-  #     - mn_network
-  #   build:
-  #     dockerfile: Dockerfile
-  #     context: "./"
-  #     target: ${NODE_ENV:-local}
-  #   volumes:
-  #     - ./:/app/
-  #     - mv_node_modules:/app/node_modules/
-  #   command: ["sh", "-c", "npm run dev event-dispatcher"]
-  #   environment:
-  #     - NODE_ENV=${NODE_ENV:-local}
 
-  # worker:
-  #   container_name: mc_worker
-  #   image: mi_nestjs_${NODE_ENV:-local}:1.0.0
+  # file_service:
+  #   container_name: mc_file_service_${NODE_ENV:-local}
+  #   image: mi_${NODE_ENV:-local}:1.0.0
   #   restart: unless-stopped
   #   networks:
   #     - mn_network
@@ -57,9 +42,45 @@ services:
   #     target: ${NODE_ENV:-local}
   #   volumes:
   #     - ./:/app/
-  #     - mv_node_modules:/app/node_modules/
-  #   command: ["sh", "-c", "npm run dev worker"]
+  #     - mv_file_service:/app/node_modules/
+  #   command: [ "sh", "-c", "npm run dev file-service" ]
   #   environment:
   #     - NODE_ENV=${NODE_ENV:-local}
   #   ports:
-  #     - "${WEBSOCKET_PORT:-7201}:${WEBSOCKET_PORT:-7201}"
+  #     - "${API_FILE_SERVICE:-20010}:${API_FILE_SERVICE:-20010}"
+      # - 29230:29229
+      # event-dispatcher:
+      #   container_name: mc_event-dispatcher
+      #   image: mi_nestjs_${NODE_ENV:-local}:1.0.0
+      #   restart: unless-stopped
+      #   networks:
+      #     - mn_network
+      #   build:
+      #     dockerfile: Dockerfile
+      #     context: "./"
+      #     target: ${NODE_ENV:-local}
+      #   volumes:
+      #     - ./:/app/
+      #     - mv_node_modules:/app/node_modules/
+      #   command: ["sh", "-c", "npm run dev event-dispatcher"]
+      #   environment:
+      #     - NODE_ENV=${NODE_ENV:-local}
+
+      # worker:
+      #   container_name: mc_worker
+      #   image: mi_nestjs_${NODE_ENV:-local}:1.0.0
+      #   restart: unless-stopped
+      #   networks:
+      #     - mn_network
+      #   build:
+      #     dockerfile: Dockerfile
+      #     context: "./"
+      #     target: ${NODE_ENV:-local}
+      #   volumes:
+      #     - ./:/app/
+      #     - mv_node_modules:/app/node_modules/
+      #   command: ["sh", "-c", "npm run dev worker"]
+      #   environment:
+      #     - NODE_ENV=${NODE_ENV:-local}
+      #   ports:
+      #     - "${WEBSOCKET_PORT:-7201}:${WEBSOCKET_PORT:-7201}"

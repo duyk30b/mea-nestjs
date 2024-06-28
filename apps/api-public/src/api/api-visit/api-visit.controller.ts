@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto'
+import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
-import { HasPermission } from '../../guards/permission.guard'
 import { ApiVisitService } from './api-visit.service'
 import {
   VisitGetManyQuery,
@@ -14,9 +14,9 @@ import {
   VisitRegisterWithNewCustomerBody,
   VisitReplacePrescriptionBody,
   VisitReplaceVisitProcedureListBody,
+  VisitReplaceVisitRadiologyListBody,
   VisitReturnProductListBody,
   VisitSendProductListBody,
-  VisitUpdateVisitDiagnosisBody,
   VisitUpdateVisitItemsMoneyBody,
 } from './request'
 
@@ -72,17 +72,8 @@ export class ApiVisitController {
     return await this.apiVisitService.startCheckup(oid, id)
   }
 
-  @Put('update-visit-diagnosis')
-  @HasPermission(PermissionId.VISIT_DIAGNOSIS)
-  async updateVisitDiagnosis(
-    @External() { oid }: TExternal,
-    @Body() body: VisitUpdateVisitDiagnosisBody
-  ) {
-    return await this.apiVisitService.updateVisitDiagnosis(oid, body)
-  }
-
   @Put('replace-visit-procedure-list')
-  @HasPermission(PermissionId.VISIT_PROCEDURES)
+  @HasPermission(PermissionId.VISIT_REPLACE_VISIT_PROCEDURE_LIST)
   async replaceVisitProcedureList(
     @External() { oid }: TExternal,
     @Body() body: VisitReplaceVisitProcedureListBody
@@ -97,6 +88,15 @@ export class ApiVisitController {
     @Body() body: VisitReplacePrescriptionBody
   ) {
     return await this.apiVisitService.replaceVisitPrescription(oid, body)
+  }
+
+  @Put('replace-visit-radiology-list')
+  @HasPermission(PermissionId.VISIT_REPLACE_VISIT_RADIOLOGY_LIST)
+  async replaceVisitRadiologyList(
+    @External() { oid }: TExternal,
+    @Body() body: VisitReplaceVisitRadiologyListBody
+  ) {
+    return await this.apiVisitService.replaceVisitRadiologyList(oid, body)
   }
 
   @Post('update-visit-items-money')

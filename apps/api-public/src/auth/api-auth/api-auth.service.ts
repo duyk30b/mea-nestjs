@@ -6,16 +6,17 @@ import { DataSource, EntityManager } from 'typeorm'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { decrypt, encrypt } from '../../../../_libs/common/helpers/string.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { JwtExtendService } from '../../../../_libs/common/jwt-extend/jwt-extend.service'
+import { JwtConfig } from '../../../../_libs/common/jwt-extend/jwt.config'
 import { TExternal } from '../../../../_libs/common/request/external.request'
 import User from '../../../../_libs/database/entities/user.entity'
 import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
 import { DistributorRepository } from '../../../../_libs/database/repository/distributor/distributor.repository'
 import { OrganizationRepository } from '../../../../_libs/database/repository/organization/organization.repository'
 import { UserRepository } from '../../../../_libs/database/repository/user/user.repository'
+import { GlobalConfig } from '../../../../_libs/environments'
 import { CacheTokenService } from '../../../../_libs/transporter/cache-manager/cache-token.service'
 import { EmailService } from '../../components/email/email.service'
-import { GlobalConfig, JwtConfig } from '../../environments'
-import { JwtExtendService } from '../jwt-extend/jwt-extend.service'
 import { ForgotPasswordBody } from './request/forgot-password.body'
 import { LoginBody } from './request/login.body'
 import { ResetPasswordBody } from './request/reset-password.body'
@@ -84,12 +85,12 @@ export class ApiAuthService {
   //   await Promise.all([
   //     this.organizationRepository.upsertSetting(
   //       oid,
-  //       ScreenSettingKey.SCREEN_INVOICE_UPSERT,
+  //       OrgSettingDataKey.SCREEN_INVOICE_UPSERT,
   //       JSON.stringify({ customer: { idDefault: customerIds[0] } })
   //     ),
   //     this.organizationRepository.upsertSetting(
   //       oid,
-  //       ScreenSettingKey.SCREEN_RECEIPT_UPSERT,
+  //       OrgSettingDataKey.SCREEN_RECEIPT_UPSERT,
   //       JSON.stringify({ distributor: { idDefault: distributorIds[0] } })
   //     ),
   //   ])
@@ -127,9 +128,9 @@ export class ApiAuthService {
 
     const token = this.jwtExtendService.createTokenFromUser(user, ip)
 
-    await this.cacheTokenService.newToken({
+    this.cacheTokenService.newToken({
       oid: user.oid,
-      userId: user.id,
+      uid: user.id,
       accessToken: token.accessToken,
       refreshToken: token.refreshToken,
       refreshExp: token.refreshExp,
@@ -156,7 +157,7 @@ export class ApiAuthService {
     const [user] = await this.dataSource.getRepository(User).find({
       relations: { organization: true, role: true },
       relationLoadStrategy: 'query', // dùng join+findOne thì bị lỗi 2 câu query
-      where: { id: 1, organization: { id: 1 } },
+      where: { id: 4, oid: 4 },
     })
     if (!user) throw new BusinessException('error.User.NotExist')
     if (!user.isActive || !user.organization?.isActive || user.role?.isActive === 0) {
@@ -165,9 +166,9 @@ export class ApiAuthService {
 
     const token = this.jwtExtendService.createTokenFromUser(user, ip)
 
-    await this.cacheTokenService.newToken({
+    this.cacheTokenService.newToken({
       oid: user.oid,
-      userId: user.id,
+      uid: user.id,
       accessToken: token.accessToken,
       refreshToken: token.refreshToken,
       refreshExp: token.refreshExp,
@@ -243,6 +244,9 @@ export class ApiAuthService {
     const hashPassword = await bcrypt.hash(body.password, 5)
     const secret = encrypt(body.password, body.username)
     await this.userRepository.update({ id: user.id }, { hashPassword, secret })
+
+    this.cacheTokenService.delAllTOken({ oid: user.oid, uid: user.id })
+
     return { data: true }
   }
 
@@ -257,9 +261,9 @@ export class ApiAuthService {
     if (!user) throw new BusinessException('error.User.NotExist')
     const token = this.jwtExtendService.createAccessToken(user, ip)
 
-    await this.cacheTokenService.updateToken({
+    this.cacheTokenService.updateToken({
       oid: user.oid,
-      userId: user.id,
+      uid: user.id,
       accessToken: token.accessToken,
       refreshToken,
       refreshExp: Date.now() + this.jwtConfig.refreshTime,
@@ -277,7 +281,7 @@ export class ApiAuthService {
   async logout(refreshToken: string, dataExternal: TExternal) {
     const { ip, os, browser, mobile } = dataExternal
     const { uid, oid } = this.jwtExtendService.verifyRefreshToken(refreshToken, ip)
-    await this.cacheTokenService.delToken({ oid, userId: uid, refreshToken })
+    this.cacheTokenService.delToken({ oid, uid, refreshToken })
     return { data: true }
   }
 }

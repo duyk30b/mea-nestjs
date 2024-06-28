@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common'
-import { CacheManagerService } from './cache-manager.service'
 
-export type TokenCache = {
-  code: string
+export type TokenDataType = {
+  code: string // code để làm đăng xuất vừa để biết thời gian đăng nhập của thiết bị
+  oid: number
+  uid: number
   accessToken: string
   refreshToken: string
   refreshExp: number
@@ -14,125 +15,81 @@ export type TokenCache = {
 
 @Injectable()
 export class CacheTokenService {
-  constructor(private cacheManagerService: CacheManagerService) {}
+  private cache: Record<string, TokenDataType[]> = {}
 
-  async newToken(options: {
-    oid: number
-    userId: number
-    refreshExp: number
-    accessToken: string
-    refreshToken: string
-    ip: string
-    os: string
-    browser: string
-    mobile: 1 | 0
-  }) {
-    const { oid, refreshExp, userId, accessToken, refreshToken, ip, os, mobile, browser } = options
-    const key = `TOKEN_${oid}_${userId}`
-    const dataPlain = await this.cacheManagerService.get(key)
-
-    let dataObject: TokenCache[] = JSON.parse((dataPlain as string) || '[]')
-    dataObject = dataObject.filter((i) => i.refreshExp > Date.now())
-
-    dataObject.push({
-      code: Date.now().toString(36),
-      accessToken,
-      refreshToken,
-      refreshExp,
-      ip,
-      os,
-      mobile,
-      browser,
-    })
-    await this.cacheManagerService.set(key, JSON.stringify(dataObject))
+  private getKey(data: { oid: number; uid: number }) {
+    return `TOKEN_${data.oid}_${data.uid}`
   }
 
-  async updateToken(options: {
-    oid: number
-    userId: number
-    ip: string
-    accessToken: string
-    refreshToken: string
-    refreshExp: number
-    os: string
-    browser: string
-    mobile: 1 | 0
-  }) {
-    const { oid, userId, accessToken, refreshToken, refreshExp, ip, os, mobile, browser } = options
-    const key = `TOKEN_${oid}_${userId}`
-    const dataPlain = await this.cacheManagerService.get(key)
+  private removeTokenExpires(data: { oid: number; uid: number }) {
+    const key = this.getKey(data)
+    if (!this.cache[key]) this.cache[key] = []
 
-    let dataObject: TokenCache[] = JSON.parse((dataPlain as string) || '[]')
-    dataObject = dataObject.filter((i) => i.refreshExp > Date.now())
+    this.cache[key] = this.cache[key].filter((i) => i.refreshExp > Date.now())
+  }
 
-    const curToken = dataObject.find((i) => i.refreshToken === refreshToken)
-    if (curToken) {
-      curToken.accessToken = accessToken
-    } else {
-      dataObject.push({
+  newToken(data: Omit<TokenDataType, 'code'>) {
+    const key = this.getKey(data)
+    if (!this.cache[key]) this.cache[key] = []
+    this.cache[key].push({
+      ...data,
+      code: Date.now().toString(36),
+    })
+  }
+
+  updateToken(data: Omit<TokenDataType, 'code'>) {
+    const key = this.getKey(data)
+    if (!this.cache[key]) this.cache[key] = []
+
+    const currentToken = this.cache[key].find((i) => i.refreshToken === data.refreshToken)
+    if (currentToken) {
+      Object.assign(currentToken, {
+        ...data,
         code: Date.now().toString(36),
-        accessToken,
-        refreshToken,
-        refreshExp,
-        ip,
-        os,
-        mobile,
-        browser,
+      })
+    } else {
+      this.cache[key].push({
+        ...data,
+        code: Date.now().toString(36),
       })
     }
-    await this.cacheManagerService.set(key, JSON.stringify(dataObject))
   }
 
-  async delToken(options: { oid: number; userId: number; refreshToken: string }) {
-    const { oid, userId, refreshToken } = options
-    const key = `TOKEN_${oid}_${userId}`
-    const dataPlain = await this.cacheManagerService.get(key)
-    const dataObject: TokenCache[] = JSON.parse((dataPlain as string) || '[]')
-
-    const indexToken = dataObject.findIndex((i) => i.refreshToken === refreshToken)
+  delToken(data: { oid: number; uid: number; refreshToken: string }) {
+    const key = this.getKey(data)
+    if (!this.cache[key]) this.cache[key] = []
+    const indexToken = this.cache[key].findIndex((i) => i.refreshToken === data.refreshToken)
     if (indexToken !== -1) {
-      dataObject.splice(indexToken, 1)
-      await this.cacheManagerService.set(key, JSON.stringify(dataObject))
+      this.cache[key].splice(indexToken, 1)
     }
   }
 
-  async checkToken(options: { oid: number; userId: number; accessToken: string }) {
-    const { oid, userId, accessToken } = options
-    const key = `TOKEN_${oid}_${userId}`
-    const dataPlain = await this.cacheManagerService.get(key)
-    const dataObject: TokenCache[] = JSON.parse((dataPlain as string) || '[]')
-
-    if (dataObject.length === 0) return false
-
-    for (const obj of dataObject) {
-      if (obj.accessToken === accessToken) {
-        return true
-      }
-    }
-    return false
+  delAllTOken(data: { oid: number; uid: number }) {
+    const key = this.getKey(data)
+    this.cache[key] = []
   }
 
-  async getToken(options: { oid: number; userId: number }) {
-    const { oid, userId } = options
-    const key = `TOKEN_${oid}_${userId}`
-    const dataPlain = await this.cacheManagerService.get(key)
-    const dataObject: TokenCache[] = JSON.parse((dataPlain as string) || '[]')
-
-    return dataObject
+  checkToken(data: { oid: number; uid: number; accessToken: string }) {
+    const key = this.getKey(data)
+    if (!this.cache[key]) this.cache[key] = []
+    this.removeTokenExpires({ oid: data.oid, uid: data.uid })
+    return this.cache[key].some((i) => i.accessToken === data.accessToken)
   }
 
-  async removeDevice(options: { oid: number; userId: number; code: string }) {
-    const { userId, oid, code } = options
+  getTokenList(data: { oid: number; uid: number }) {
+    const key = this.getKey(data)
+    if (!this.cache[key]) this.cache[key] = []
+    this.removeTokenExpires({ oid: data.oid, uid: data.uid })
+    return this.cache[key]
+  }
 
-    const key = `TOKEN_${oid}_${userId}`
-    const dataPlain = await this.cacheManagerService.get(key)
-    const dataObject: TokenCache[] = JSON.parse((dataPlain as string) || '[]')
+  removeDevice(data: { oid: number; uid: number; code: string }) {
+    const key = this.getKey(data)
+    if (!this.cache[key]) this.cache[key] = []
 
-    const indexToken = dataObject.findIndex((i) => i.code === code)
+    const indexToken = this.cache[key].findIndex((i) => i.code === data.code)
     if (indexToken !== -1) {
-      dataObject.splice(indexToken, 1)
-      await this.cacheManagerService.set(key, JSON.stringify(dataObject))
+      this.cache[key].splice(indexToken, 1)
     }
-    return true
   }
 }

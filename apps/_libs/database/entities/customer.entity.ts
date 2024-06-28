@@ -113,6 +113,16 @@ export default class Customer extends BaseEntity {
   }
 }
 
-export type CustomerInsertType = Omit<Customer, 'id' | 'updatedAt' | 'deletedAt'>
+export type CustomerRelationType = Pick<Customer, never>
 
-export type CustomerUpdateType = Omit<Customer, 'oid' | 'id' | 'updatedAt'>
+export type CustomerSortType = Pick<Customer, 'oid' | 'id'>
+
+export type CustomerInsertType = Omit<
+  Customer,
+  keyof CustomerRelationType | keyof Pick<Customer, 'id' | 'updatedAt' | 'deletedAt'>
+>
+
+export type CustomerUpdateType = Omit<
+  Customer,
+  keyof CustomerRelationType | keyof Pick<Customer, 'oid' | 'id'>
+>

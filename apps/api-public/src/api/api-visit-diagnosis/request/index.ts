@@ -1,1 +1,1 @@
-export * from './visit-diagnosis-upsert.body'
+export * from './visit-diagnosis-update.body'

@@ -7,6 +7,7 @@ import { User } from '../../../../_libs/database/entities'
 import Device from '../../../../_libs/database/entities/device'
 import { RoleRepository } from '../../../../_libs/database/repository/role/role.repository'
 import { UserRepository } from '../../../../_libs/database/repository/user/user.repository'
+import { CacheDataService } from '../../../../_libs/transporter/cache-manager/cache-data.service'
 import { CacheTokenService } from '../../../../_libs/transporter/cache-manager/cache-token.service'
 import { RootUserPaginationQuery } from './request/root-user-get.query'
 import { RootUserCreateBody, RootUserUpdateBody } from './request/root-user-upsert.body'
@@ -18,7 +19,8 @@ export class ApiRootUserService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly roleRepository: RoleRepository,
-    private readonly cacheTokenService: CacheTokenService
+    private readonly cacheTokenService: CacheTokenService,
+    private readonly cacheDataService: CacheDataService
   ) {}
 
   async pagination(query: RootUserPaginationQuery): Promise<BaseResponse> {
@@ -37,11 +39,11 @@ export class ApiRootUserService {
 
     for (let i = 0; i < data.length; i++) {
       const user = data[i]
-      const tokenData = await this.cacheTokenService.getToken({
+      const tokenList = this.cacheTokenService.getTokenList({
         oid: user.oid,
-        userId: user.id,
+        uid: user.id,
       })
-      user.devices = tokenData.map((t) => {
+      user.devices = tokenList.map((t) => {
         const device = new Device()
         device.code = t.code
         device.ip = t.ip
@@ -111,7 +113,7 @@ export class ApiRootUserService {
       hashPassword = await bcrypt.hash(password, 5)
       secret = encrypt(password, username)
     }
-    const affected = await this.userRepository.update(
+    const [user] = await this.userRepository.updateAndReturnEntity(
       { oid, id },
       {
         ...other,
@@ -120,27 +122,30 @@ export class ApiRootUserService {
         roleId,
       }
     )
-    if (affected === 0) {
+    if (!user) {
       throw new BusinessException('error.Database.UpdateFailed')
     }
-    const data = await this.userRepository.findOneBy({ id })
-    return { data }
+    this.cacheDataService.updateUser(user)
+    return { data: user }
   }
 
   async deleteOne(id: number): Promise<BaseResponse<User>> {
-    const affected = await this.userRepository.update({ id }, { deletedAt: Date.now() })
-    if (affected === 0) {
+    const [user] = await this.userRepository.updateAndReturnEntity(
+      { id },
+      { deletedAt: Date.now() }
+    )
+    if (!user) {
       throw new BusinessException('error.Database.DeleteFailed')
     }
-    const data = await this.userRepository.findOneById(id)
-    return { data }
+    this.cacheDataService.updateUser(user)
+    return { data: user }
   }
 
   async deviceLogout(options: { oid: number; userId: number; code: string }) {
     const { oid, userId, code } = options
     const result = await this.cacheTokenService.removeDevice({
       oid,
-      userId,
+      uid: userId,
       code,
     })
     return { data: result }

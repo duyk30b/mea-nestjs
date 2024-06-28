@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
-import { DataSource, EntityManager, InsertResult, Repository } from 'typeorm'
+import { DataSource, EntityManager, Repository } from 'typeorm'
 import { BaseCondition } from '../../../common/dto'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { VisitDiagnosis } from '../../entities'
 import {
   VisitDiagnosisInsertType,
+  VisitDiagnosisRelationType,
+  VisitDiagnosisSortType,
   VisitDiagnosisUpdateType,
 } from '../../entities/visit-diagnosis.entity'
 import { PostgreSqlRepository } from '../postgresql.repository'
@@ -13,8 +15,8 @@ import { PostgreSqlRepository } from '../postgresql.repository'
 @Injectable()
 export class VisitDiagnosisRepository extends PostgreSqlRepository<
   VisitDiagnosis,
-  { [P in 'id']?: 'ASC' | 'DESC' },
-  { [P in 'customer']?: boolean },
+  { [P in keyof VisitDiagnosisSortType]?: 'ASC' | 'DESC' },
+  { [P in keyof VisitDiagnosisRelationType]?: boolean },
   VisitDiagnosisInsertType,
   VisitDiagnosisUpdateType
 > {

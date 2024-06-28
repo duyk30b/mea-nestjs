@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { DataSource, FindOptionsWhere, UpdateResult } from 'typeorm'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { DiscountType } from '../../common/variable'
-import { Visit, VisitProcedure, VisitProduct } from '../../entities'
+import { Visit, VisitProcedure, VisitProduct, VisitRadiology } from '../../entities'
 import { VisitStatus } from '../../entities/visit.entity'
 
 @Injectable()
@@ -30,8 +30,22 @@ export class VisitItemsMoney {
       discountType: DiscountType
       actualPrice: number
     }[]
+    visitRadiologyUpdateList: {
+      id: number
+      radiologyId: number
+      discountMoney: number
+      discountPercent: number
+      discountType: DiscountType
+      actualPrice: number
+    }[]
   }) {
-    const { oid, visitId, visitProductUpdateList, visitProcedureUpdateList } = params
+    const {
+      oid,
+      visitId,
+      visitProductUpdateList,
+      visitProcedureUpdateList,
+      visitRadiologyUpdateList,
+    } = params
     const PREFIX = `visitId=${visitId} update items quantity and discount failed`
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
@@ -109,6 +123,35 @@ export class VisitItemsMoney {
         )
       }
 
+      // === 4. UPDATE RADIOLOGY_LIST ===
+      if (visitRadiologyUpdateList.length) {
+        await manager.query(
+          `
+            UPDATE "VisitRadiology" vp
+            SET "discountMoney"   = v."discountMoney",
+                "discountPercent" = v."discountPercent",
+                "discountType"    = v."discountType",
+                "actualPrice"     = v."actualPrice"
+            FROM (VALUES ` +
+            visitRadiologyUpdateList
+              .map((i) => {
+                return (
+                  `(${i.id}, ${visitId}, ${i.radiologyId}, ${i.discountMoney}, ` +
+                  ` ${i.discountPercent}, '${i.discountType}', ${i.actualPrice})`
+                )
+              })
+              .join(', ') +
+            `   ) AS v("id", "visitId", "radiologyId", "discountMoney", 
+                        "discountPercent", "discountType", "actualPrice"
+                        )
+            WHERE vp."id"             = v."id" 
+                AND vp."visitId"      = v."visitId"
+                AND vp."radiologyId"  = v."radiologyId" 
+                AND vp."oid"          = ${oid};    
+            `
+        )
+      }
+
       // === 4. QUERY NEW ===
       const visitProcedureList = await manager.find(VisitProcedure, {
         relations: { procedure: true },
@@ -122,6 +165,12 @@ export class VisitItemsMoney {
         where: { visitId },
         order: { id: 'ASC' },
       })
+      const visitRadiologyList = await manager.find(VisitRadiology, {
+        relations: { radiology: true },
+        relationLoadStrategy: 'join',
+        where: { visitId },
+        order: { id: 'ASC' },
+      })
 
       const proceduresMoney = visitProcedureList.reduce((acc, item) => {
         return acc + item.actualPrice * item.quantity
@@ -129,17 +178,23 @@ export class VisitItemsMoney {
       const productsMoney = visitProductList.reduce((acc, item) => {
         return acc + item.actualPrice * item.quantity
       }, 0)
+      const radiologyMoney = visitRadiologyList.reduce((acc, item) => {
+        return acc + item.actualPrice
+      }, 0)
       const totalCostAmount = visitProductList.reduce((acc, item) => {
         return acc + item.costAmount
       }, 0)
 
       // 4. UPDATE VISIT: MONEY
       const setVisit: { [P in keyof NoExtra<Partial<Visit>>]: Visit[P] | (() => string) } = {
+        totalCostAmount,
         proceduresMoney,
         productsMoney,
-        totalCostAmount,
-        totalMoney: () => `${proceduresMoney} + ${productsMoney} - "discountMoney"`,
-        debt: () => `${proceduresMoney} + ${productsMoney} - "discountMoney" - "paid"`,
+        radiologyMoney,
+        totalMoney: () =>
+          `${proceduresMoney} + ${productsMoney} + ${radiologyMoney} - "discountMoney"`,
+        debt: () =>
+          `${proceduresMoney} + ${productsMoney} + ${radiologyMoney} - "discountMoney" - "paid"`,
       }
       const visitUpdateResult: UpdateResult = await manager
         .createQueryBuilder()
@@ -153,7 +208,7 @@ export class VisitItemsMoney {
       }
       const visitBasic = Visit.fromRaw(visitUpdateResult.raw[0])
 
-      return { visitBasic, visitProcedureList, visitProductList }
+      return { visitBasic, visitProcedureList, visitProductList, visitRadiologyList }
     })
 
     return transaction

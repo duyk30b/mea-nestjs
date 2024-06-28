@@ -7,6 +7,7 @@ import Customer from './customer.entity'
 import VisitDiagnosis from './visit-diagnosis.entity'
 import VisitProcedure from './visit-procedure.entity'
 import VisitProduct from './visit-product.entity'
+import VisitRadiology from './visit-radiology.entity'
 
 export enum VisitStatus {
   Scheduled = 1, // Hẹn khám
@@ -68,6 +69,14 @@ export default class Visit extends BaseEntity {
   })
   @Expose()
   productsMoney: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  radiologyMoney: number
 
   @Column({
     type: 'bigint',
@@ -184,6 +193,10 @@ export default class Visit extends BaseEntity {
   @Expose()
   visitProcedureList: VisitProcedure[]
 
+  @OneToMany(() => VisitRadiology, (visitRadiology) => visitRadiology.visit)
+  @Expose()
+  visitRadiologyList: VisitRadiology[]
+
   @OneToMany(() => CustomerPayment, (customerPayment) => customerPayment.visit)
   @Expose()
   customerPayments: CustomerPayment[]
@@ -193,9 +206,12 @@ export default class Visit extends BaseEntity {
     const entity = new Visit()
     Object.assign(entity, raw)
 
+    entity.totalCostAmount = Number(raw.totalCostAmount)
+
     entity.proceduresMoney = Number(raw.proceduresMoney)
     entity.productsMoney = Number(raw.productsMoney)
-    entity.totalCostAmount = Number(raw.totalCostAmount)
+    entity.radiologyMoney = Number(raw.radiologyMoney)
+
     entity.discountMoney = Number(raw.discountMoney)
     entity.discountPercent = Number(raw.discountPercent)
 
@@ -206,6 +222,7 @@ export default class Visit extends BaseEntity {
 
     entity.registeredAt = raw.registeredAt == null ? raw.registeredAt : Number(raw.registeredAt)
     entity.startedAt = raw.startedAt == null ? raw.startedAt : Number(raw.startedAt)
+    entity.endedAt = raw.endedAt == null ? raw.endedAt : Number(raw.endedAt)
     entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)
 
     return entity
@@ -218,7 +235,12 @@ export default class Visit extends BaseEntity {
 
 export type VisitRelationType = Pick<
   Visit,
-  'customer' | 'visitDiagnosis' | 'visitProductList' | 'visitProcedureList' | 'customerPayments'
+  | 'customer'
+  | 'visitDiagnosis'
+  | 'visitProductList'
+  | 'visitProcedureList'
+  | 'visitRadiologyList'
+  | 'customerPayments'
 >
 
 export type VisitSortType = Pick<Visit, 'id' | 'customerId' | 'registeredAt'>

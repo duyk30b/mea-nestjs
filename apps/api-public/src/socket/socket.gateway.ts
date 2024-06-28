@@ -9,8 +9,8 @@ import {
 } from '@nestjs/websockets'
 import { getClientIp } from 'request-ip'
 import { Server, Socket } from 'socket.io'
-import { UserRepository } from '../../../_libs/database/repository/user/user.repository'
-import { JwtExtendService } from '../auth/jwt-extend/jwt-extend.service'
+import { JwtExtendService } from '../../../_libs/common/jwt-extend/jwt-extend.service'
+import { CacheDataService } from '../../../_libs/transporter/cache-manager/cache-data.service'
 import { SocketEmitService } from './socket-emit.service'
 import { SOCKET_EVENT } from './socket.variable'
 
@@ -27,7 +27,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   constructor(
     private readonly socketEmitService: SocketEmitService,
     private readonly jwtExtendService: JwtExtendService,
-    private readonly employeeRepository: UserRepository
+    private readonly cacheDataService: CacheDataService
   ) {}
 
   afterInit(io: Server) {
@@ -41,7 +41,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const ip = getClientIp(socket.client.request)
     try {
       const { oid, uid } = this.jwtExtendService.verifyRefreshToken(token, ip)
-      socket.data.user = await this.employeeRepository.findOneBy({ oid, id: uid })
+      socket.data.user = await this.cacheDataService.getUser(uid)
       socket.join(oid.toString())
       this.connections[uid] ||= []
       this.connections[uid].push(socket.id)

@@ -1,9 +1,9 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { Inject, Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common'
 import { ClientRedis } from '@nestjs/microservices'
 import Redlock, { Settings } from 'redlock'
 
 @Injectable()
-export class RedisLockService {
+export class RedisLockService implements OnModuleInit, OnModuleDestroy {
   private redisLock: any
   constructor(@Inject('REDIS_CLIENT_SERVICE') private redisClient: ClientRedis) {}
 
@@ -12,6 +12,10 @@ export class RedisLockService {
       const redis = await this.redisClient.createClient()
       this.redisLock = new Redlock([redis], { retryJitter: 200 })
     } catch (error) {}
+  }
+
+  onModuleDestroy() {
+    // this.redisClient.close()
   }
 
   async acquire(keys: string[], duration: number, settings?: Partial<Settings>) {

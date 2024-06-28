@@ -12,38 +12,44 @@ import { ApiPermissionModule } from './api-permission/api-permission.module'
 import { ApiProcedureModule } from './api-procedure/api-procedure.module'
 import { ApiProductMovementModule } from './api-product-movement/api-product-movement.module'
 import { ApiProductModule } from './api-product/api-product.module'
+import { ApiRadiologyModule } from './api-radiology/api-radiology.module'
 import { ApiReceiptItemModule } from './api-receipt-item/api-receipt-item.module'
 import { ApiReceiptModule } from './api-receipt/api-receipt.module'
 import { ApiRoleModule } from './api-role/api-role.module'
+import { ApiSettingModule } from './api-setting/api-setting.module'
 import { ApiStatisticModule } from './api-statistics/api-statistic.module'
 import { ApiUserModule } from './api-user/api-user.module'
 import { ApiVisitBatchModule } from './api-visit-batch/api-visit-batch.module'
 import { ApiVisitDiagnosisModule } from './api-visit-diagnosis/api-visit-diagnosis.module'
+import { ApiVisitRadiologyModule } from './api-visit-radiology/api-visit-radiology.module'
 import { ApiVisitModule } from './api-visit/api-visit.module'
 
 @Module({
   imports: [
-    ApiOrganizationModule,
-    ApiRoleModule,
-    ApiPermissionModule,
-    ApiUserModule,
+    ApiBatchModule,
+    ApiBatchMovementModule,
     ApiCustomerModule,
     ApiCustomerPaymentModule,
     ApiDistributorModule,
     ApiDistributorPaymentModule,
     ApiInvoiceModule,
     ApiInvoiceItemModule,
-    ApiProductModule,
-    ApiBatchModule,
-    ApiProductMovementModule,
-    ApiBatchMovementModule,
+    ApiOrganizationModule,
+    ApiPermissionModule,
     ApiProcedureModule,
+    ApiProductModule,
+    ApiProductMovementModule,
+    ApiRadiologyModule,
     ApiReceiptModule,
     ApiReceiptItemModule,
+    ApiRoleModule,
+    ApiSettingModule,
     ApiStatisticModule,
+    ApiUserModule,
     ApiVisitModule,
-    ApiVisitDiagnosisModule,
     ApiVisitBatchModule,
+    ApiVisitDiagnosisModule,
+    ApiVisitRadiologyModule,
   ],
   controllers: [],
   providers: [],

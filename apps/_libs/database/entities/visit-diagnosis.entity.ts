@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity, Index, OneToOne } from 'typeorm'
+import { Column, Entity, Index } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import Visit from './visit.entity'
+import Image from './image.entity'
 
 @Entity('VisitDiagnosis')
 @Index('IDX_VisitDiagnosis__oid_visitId', ['oid', 'visitId'])
@@ -30,9 +30,16 @@ export default class VisitDiagnosis extends BaseEntity {
   @Expose()
   vitalSigns: string
 
+  @Column({ type: 'varchar', length: 100, default: JSON.stringify([]) })
+  @Expose()
+  imageIds: string
+
   @Column({ type: 'text', default: '' })
   @Expose({})
   advice: string // Lời dặn của bác sĩ
+
+  @Expose()
+  imageList: Image[]
 
   static fromRaw(raw: { [P in keyof VisitDiagnosis]: any }) {
     if (!raw) return null
@@ -47,6 +54,16 @@ export default class VisitDiagnosis extends BaseEntity {
   }
 }
 
-export type VisitDiagnosisInsertType = Omit<VisitDiagnosis, 'id'>
+export type VisitDiagnosisRelationType = Pick<VisitDiagnosis, 'imageList'>
 
-export type VisitDiagnosisUpdateType = Omit<VisitDiagnosis, 'oid' | 'id'>
+export type VisitDiagnosisSortType = Pick<VisitDiagnosis, 'oid' | 'id' | 'visitId'>
+
+export type VisitDiagnosisInsertType = Omit<
+  VisitDiagnosis,
+  keyof VisitDiagnosisRelationType | keyof Pick<VisitDiagnosis, 'id'>
+>
+
+export type VisitDiagnosisUpdateType = Omit<
+  VisitDiagnosis,
+  keyof VisitDiagnosisRelationType | keyof Pick<VisitDiagnosis, 'oid' | 'id'>
+>

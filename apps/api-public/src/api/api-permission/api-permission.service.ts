@@ -1,15 +1,15 @@
 /* eslint-disable max-len */
 import { Injectable } from '@nestjs/common'
 import Permission, { PermissionId } from '../../../../_libs/database/entities/permission.entity'
-import { OrganizationRepository } from '../../../../_libs/database/repository/organization/organization.repository'
 import { PermissionRepository } from '../../../../_libs/database/repository/permission/permission.repository'
+import { CacheDataService } from '../../../../_libs/transporter/cache-manager/cache-data.service'
 import { PermissionGetManyQuery } from './request'
 
 @Injectable()
 export class ApiPermissionService {
   constructor(
     private readonly permissionRepository: PermissionRepository,
-    private readonly organizationRepository: OrganizationRepository
+    private readonly cacheDataService: CacheDataService
   ) {}
 
   async getMany(query: PermissionGetManyQuery) {
@@ -51,12 +51,12 @@ export class ApiPermissionService {
         rootId: PermissionId.ORGANIZATION,
       },
       {
-        id: PermissionId.ORGANIZATION_SETTING_SCREEN,
+        id: PermissionId.SETTING_UPSERT,
         level: 2,
-        code: PermissionId[PermissionId.ORGANIZATION_SETTING_SCREEN],
+        code: PermissionId[PermissionId.SETTING_UPSERT],
         isActive: 1,
-        pathId: `${PermissionId.ORGANIZATION}.${PermissionId.ORGANIZATION_SETTING_SCREEN}`,
-        name: 'Cài đặt màn hình',
+        pathId: `${PermissionId.ORGANIZATION}.${PermissionId.SETTING_UPSERT}`,
+        name: 'Chỉnh sửa cài đặt',
         parentId: PermissionId.ORGANIZATION,
         rootId: PermissionId.ORGANIZATION,
       },
@@ -68,7 +68,7 @@ export class ApiPermissionService {
         code: PermissionId[PermissionId.ROLE],
         isActive: 1,
         pathId: `${PermissionId.ROLE}`,
-        name: 'Quản lý vai trò',
+        name: 'Quản lý vai trò (Admin)',
         parentId: 0,
         rootId: PermissionId.ROLE,
       },
@@ -120,7 +120,7 @@ export class ApiPermissionService {
         code: PermissionId[PermissionId.USER],
         isActive: 1,
         pathId: `${PermissionId.USER}`,
-        name: 'Quản lý nhân viên',
+        name: 'Quản lý nhân viên (Admin)',
         parentId: 0,
         rootId: PermissionId.USER,
       },
@@ -483,6 +483,58 @@ export class ApiPermissionService {
         rootId: PermissionId.PROCEDURE,
       },
     ]
+    const permissionRadiology: Permission[] = [
+      {
+        id: PermissionId.RADIOLOGY,
+        level: 1,
+        code: PermissionId[PermissionId.RADIOLOGY],
+        isActive: 1,
+        pathId: `${PermissionId.RADIOLOGY}`,
+        name: 'Quản lý chẩn đoán hình ảnh',
+        parentId: 0,
+        rootId: PermissionId.RADIOLOGY,
+      },
+      {
+        id: PermissionId.RADIOLOGY_READ,
+        level: 2,
+        code: PermissionId[PermissionId.RADIOLOGY_READ],
+        isActive: 1,
+        pathId: `${PermissionId.RADIOLOGY}.${PermissionId.RADIOLOGY_READ}`,
+        name: 'Xem chẩn đoán hình ảnh',
+        parentId: PermissionId.RADIOLOGY,
+        rootId: PermissionId.RADIOLOGY,
+      },
+      {
+        id: PermissionId.RADIOLOGY_CREATE,
+        level: 2,
+        code: PermissionId[PermissionId.RADIOLOGY_CREATE],
+        isActive: 1,
+        pathId: `${PermissionId.RADIOLOGY}.${PermissionId.RADIOLOGY_CREATE}`,
+        name: 'Thêm chẩn đoán hình ảnh',
+        parentId: PermissionId.RADIOLOGY,
+        rootId: PermissionId.RADIOLOGY,
+      },
+      {
+        id: PermissionId.RADIOLOGY_UPDATE,
+        level: 2,
+        code: PermissionId[PermissionId.RADIOLOGY_UPDATE],
+        isActive: 1,
+        pathId: `${PermissionId.RADIOLOGY}.${PermissionId.RADIOLOGY_UPDATE}`,
+        name: 'Sửa chẩn đoán hình ảnh',
+        parentId: PermissionId.RADIOLOGY,
+        rootId: PermissionId.RADIOLOGY,
+      },
+      {
+        id: PermissionId.RADIOLOGY_DELETE,
+        level: 2,
+        code: PermissionId[PermissionId.RADIOLOGY_DELETE],
+        isActive: 1,
+        pathId: `${PermissionId.RADIOLOGY}.${PermissionId.RADIOLOGY_DELETE}`,
+        name: 'Xóa chẩn đoán hình ảnh',
+        parentId: PermissionId.RADIOLOGY,
+        rootId: PermissionId.RADIOLOGY,
+      },
+    ]
     const permissionReceipt: Permission[] = [
       {
         id: PermissionId.RECEIPT,
@@ -811,6 +863,16 @@ export class ApiPermissionService {
         rootId: PermissionId.VISIT,
       },
       {
+        id: PermissionId.VISIT_START_CHECKUP,
+        level: 2,
+        code: PermissionId[PermissionId.VISIT_START_CHECKUP],
+        isActive: 1,
+        pathId: `${PermissionId.VISIT}.${PermissionId.VISIT_START_CHECKUP}`,
+        name: 'Bắt đầu vào khám',
+        parentId: PermissionId.VISIT,
+        rootId: PermissionId.VISIT,
+      },
+      {
         id: PermissionId.VISIT_DIAGNOSIS,
         level: 2,
         code: PermissionId[PermissionId.VISIT_DIAGNOSIS],
@@ -821,12 +883,22 @@ export class ApiPermissionService {
         rootId: PermissionId.VISIT,
       },
       {
-        id: PermissionId.VISIT_PROCEDURES,
+        id: PermissionId.VISIT_REPLACE_VISIT_PROCEDURE_LIST,
         level: 2,
-        code: PermissionId[PermissionId.VISIT_PROCEDURES],
+        code: PermissionId[PermissionId.VISIT_REPLACE_VISIT_PROCEDURE_LIST],
         isActive: 1,
-        pathId: `${PermissionId.VISIT}.${PermissionId.VISIT_PROCEDURES}`,
+        pathId: `${PermissionId.VISIT}.${PermissionId.VISIT_REPLACE_VISIT_PROCEDURE_LIST}`,
         name: 'Chỉ định dịch vụ',
+        parentId: PermissionId.VISIT,
+        rootId: PermissionId.VISIT,
+      },
+      {
+        id: PermissionId.VISIT_REPLACE_VISIT_RADIOLOGY_LIST,
+        level: 2,
+        code: PermissionId[PermissionId.VISIT_REPLACE_VISIT_RADIOLOGY_LIST],
+        isActive: 1,
+        pathId: `${PermissionId.VISIT}.${PermissionId.VISIT_REPLACE_VISIT_RADIOLOGY_LIST}`,
+        name: 'Chỉ định CĐHA',
         parentId: PermissionId.VISIT,
         rootId: PermissionId.VISIT,
       },
@@ -920,7 +992,20 @@ export class ApiPermissionService {
         parentId: PermissionId.VISIT,
         rootId: PermissionId.VISIT,
       },
+      {
+        id: PermissionId.VISIT_RADIOLOGY_UPSERT,
+        level: 2,
+        code: PermissionId[PermissionId.VISIT_RADIOLOGY_UPSERT],
+        isActive: 1,
+        pathId: `${PermissionId.VISIT}.${PermissionId.VISIT_RADIOLOGY_UPSERT}`,
+        name: 'Thực hiện CĐHA',
+        parentId: PermissionId.VISIT,
+        rootId: PermissionId.VISIT,
+      },
     ]
+
+    await this.permissionRepository.delete({})
+
     const { idsEffect } = await this.permissionRepository.upsert([
       ...permissionOrganization,
       ...permissionRole,
@@ -929,12 +1014,14 @@ export class ApiPermissionService {
       ...permissionDistributor,
       ...permissionCustomer,
       ...permissionProcedure,
+      ...permissionRadiology,
       ...permissionReceipt,
       ...permissionInvoice,
       ...permissionStatistic,
       ...permissionVisit,
     ])
-    this.permissionRepository.setNewest(true)
+
+    this.cacheDataService.reloadPermission()
 
     return { data: { idsEffect } }
   }

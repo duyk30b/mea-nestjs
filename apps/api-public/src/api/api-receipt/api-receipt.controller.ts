@@ -2,9 +2,9 @@ import { Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common'
 import { Body, Query } from '@nestjs/common/decorators/http/route-params.decorator'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
+import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
-import { HasPermission } from '../../guards/permission.guard'
 import { ApiReceiptService } from './api-receipt.service'
 import {
   ReceiptDraftInsertBody,

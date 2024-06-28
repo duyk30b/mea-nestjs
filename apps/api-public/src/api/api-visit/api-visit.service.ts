@@ -1,12 +1,19 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import * as DOMPurify from 'isomorphic-dompurify'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { arrayToKeyArray, checkDuplicate } from '../../../../_libs/common/helpers/object.helper'
+import {
+  arrayToKeyArray,
+  arrayToKeyValue,
+  checkDuplicate,
+} from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { Image } from '../../../../_libs/database/entities'
 import { VisitProcedureInsertType } from '../../../../_libs/database/entities/visit-procedure.entity'
 import { VisitProductInsertType } from '../../../../_libs/database/entities/visit-product.entity'
+import { VisitRadiologyInsertBasicType } from '../../../../_libs/database/entities/visit-radiology.entity'
 import { VisitStatus } from '../../../../_libs/database/entities/visit.entity'
 import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
+import { ImageRepository } from '../../../../_libs/database/repository/image/image.repository'
 import { VisitBatchRepository } from '../../../../_libs/database/repository/visit-batch/visit-batch.repository'
 import { VisitDiagnosisRepository } from '../../../../_libs/database/repository/visit-diagnosis/visit-diagnosis.repository'
 import { VisitProductRepository } from '../../../../_libs/database/repository/visit-product/visit-product.repository'
@@ -16,8 +23,9 @@ import { VisitPayDebt } from '../../../../_libs/database/repository/visit/visit-
 import { VisitPrepayment } from '../../../../_libs/database/repository/visit/visit-prepayment'
 import { VisitRefundOverpaid } from '../../../../_libs/database/repository/visit/visit-refund-overpaid'
 import { VisitReopen } from '../../../../_libs/database/repository/visit/visit-reopen'
-import { VisitReplaceVisitProcedureList } from '../../../../_libs/database/repository/visit/visit-replace-procedure-list'
-import { VisitReplaceVisitProductList } from '../../../../_libs/database/repository/visit/visit-replace-product-list'
+import { VisitReplaceVisitProcedureList } from '../../../../_libs/database/repository/visit/visit-replace-visit-procedure-list'
+import { VisitReplaceVisitProductList } from '../../../../_libs/database/repository/visit/visit-replace-visit-product-list'
+import { VisitReplaceVisitRadiologyList } from '../../../../_libs/database/repository/visit/visit-replace-visit-radiology-list'
 import { VisitReturnProduct } from '../../../../_libs/database/repository/visit/visit-return-product'
 import { VisitSendProduct } from '../../../../_libs/database/repository/visit/visit-send-product'
 import { VisitRepository } from '../../../../_libs/database/repository/visit/visit.repository'
@@ -31,9 +39,9 @@ import {
   VisitRegisterWithNewCustomerBody,
   VisitReplacePrescriptionBody,
   VisitReplaceVisitProcedureListBody,
+  VisitReplaceVisitRadiologyListBody,
   VisitReturnProductListBody,
   VisitSendProductListBody,
-  VisitUpdateVisitDiagnosisBody,
   VisitUpdateVisitItemsMoneyBody,
 } from './request'
 
@@ -46,6 +54,7 @@ export class ApiVisitService {
     private readonly visitProductRepository: VisitProductRepository,
     private readonly visitSendProduct: VisitSendProduct,
     private readonly visitReplaceVisitProcedureList: VisitReplaceVisitProcedureList,
+    private readonly visitReplaceVisitRadiologyList: VisitReplaceVisitRadiologyList,
     private readonly visitReplaceVisitProductList: VisitReplaceVisitProductList,
     private readonly visitReturnProduct: VisitReturnProduct,
     private readonly visitPrepayment: VisitPrepayment,
@@ -55,7 +64,8 @@ export class ApiVisitService {
     private readonly visitRefundOverpaid: VisitRefundOverpaid,
     private readonly visitPayDebt: VisitPayDebt,
     private readonly customerRepository: CustomerRepository,
-    private readonly visitBatchRepository: VisitBatchRepository
+    private readonly visitBatchRepository: VisitBatchRepository,
+    private readonly imageRepository: ImageRepository
   ) {}
 
   async pagination(oid: number, query: VisitPaginationQuery): Promise<BaseResponse> {
@@ -112,11 +122,45 @@ export class ApiVisitService {
         visitDiagnosis: !!relation?.visitDiagnosis,
         visitProductList: relation?.visitProductList ? { product: true } : false,
         visitProcedureList: relation?.visitProcedureList ? { procedure: true } : false,
+        visitRadiologyList: relation?.visitRadiologyList
+          ? { radiology: true, doctor: true }
+          : false,
       }
     )
     if (!data) {
       throw new BusinessException('error.Database.NotFound')
     }
+    data.visitRadiologyList = data.visitRadiologyList || []
+    data.visitDiagnosis.imageList = []
+
+    const visitDiagnosisImageIds: number[] = JSON.parse(data.visitDiagnosis.imageIds)
+    const visitRadiologyImageIds: number[] = data.visitRadiologyList
+      .map((i) => JSON.parse(i.imageIds))
+      .flat()
+
+    const imageIds = [...visitDiagnosisImageIds, ...visitRadiologyImageIds]
+
+    let imageMap: Record<string, Image> = {}
+    if (imageIds.length > 0) {
+      const imageList = await this.imageRepository.findMany({
+        condition: { id: { IN: imageIds } },
+        sort: { id: 'ASC' },
+      })
+      imageMap = arrayToKeyValue(imageList, 'id')
+    }
+
+    // push để lấy image đúng thứ tự
+    visitDiagnosisImageIds.forEach((i) => {
+      data.visitDiagnosis.imageList.push(imageMap[i])
+    })
+    data.visitRadiologyList.forEach((visitRadiology) => {
+      const visitDiagnosisImageIds: number[] = JSON.parse(visitRadiology.imageIds)
+      visitRadiology.imageList = []
+      visitDiagnosisImageIds.forEach((i) => {
+        visitRadiology.imageList.push(imageMap[i])
+      })
+    })
+
     return { data }
   }
 
@@ -185,33 +229,6 @@ export class ApiVisitService {
     return { data: { visitBasic } }
   }
 
-  async updateVisitDiagnosis(oid: number, body: VisitUpdateVisitDiagnosisBody) {
-    const [visitDiagnosis] = await this.visitDiagnosisRepository.updateAndReturnEntity(
-      {
-        oid,
-        id: body.visitDiagnosisId,
-        visitId: body.visitId,
-      },
-      {
-        ...body.visitDiagnosis,
-        healthHistory: DOMPurify.sanitize(body.visitDiagnosis.healthHistory),
-        summary: DOMPurify.sanitize(body.visitDiagnosis.summary),
-      }
-    )
-    if (!visitDiagnosis) throw new BusinessException('error.Database.UpdateFailed')
-
-    await this.customerRepository.update(
-      { oid, id: body.customerId },
-      { healthHistory: body.visitDiagnosis.healthHistory }
-    )
-
-    this.socketEmitService.visitUpdateVisitDiagnosis(oid, {
-      visitId: visitDiagnosis.visitId,
-      visitDiagnosis,
-    })
-    return { data: true }
-  }
-
   async replaceVisitProcedureList(oid: number, body: VisitReplaceVisitProcedureListBody) {
     const { visitId, customerId } = body
     const result = await this.visitReplaceVisitProcedureList.replaceVisitProcedureList({
@@ -258,6 +275,30 @@ export class ApiVisitService {
     return { data: true }
   }
 
+  async replaceVisitRadiologyList(oid: number, body: VisitReplaceVisitRadiologyListBody) {
+    const { visitId, customerId } = body
+    const result = await this.visitReplaceVisitRadiologyList.replaceVisitRadiologyList({
+      oid,
+      visitId,
+      visitRadiologyListInsert: body.visitRadiologyList.map((i) => {
+        const data: VisitRadiologyInsertBasicType = {
+          ...i,
+          oid,
+          visitId,
+          customerId,
+        }
+        return data
+      }),
+    })
+
+    const { visitBasic, visitRadiologyList } = result
+
+    this.socketEmitService.visitUpdate(oid, { visitBasic })
+    this.socketEmitService.visitReplaceVisitRadiologyList(oid, { visitId, visitRadiologyList })
+
+    return { data: true }
+  }
+
   async updateVisitItemsMoney(oid: number, body: VisitUpdateVisitItemsMoneyBody) {
     const { visitId } = body
     const result = await this.visitItemsMoney.updateItemsMoney({
@@ -265,12 +306,14 @@ export class ApiVisitService {
       visitId,
       visitProductUpdateList: body.visitProductList,
       visitProcedureUpdateList: body.visitProcedureList,
+      visitRadiologyUpdateList: body.visitRadiologyList,
     })
 
-    const { visitBasic, visitProductList, visitProcedureList } = result
+    const { visitBasic, visitProductList, visitProcedureList, visitRadiologyList } = result
     this.socketEmitService.visitUpdate(oid, { visitBasic })
-    this.socketEmitService.visitReplaceVisitProcedureList(oid, { visitId, visitProcedureList })
     this.socketEmitService.visitReplaceVisitProductList(oid, { visitId, visitProductList })
+    this.socketEmitService.visitReplaceVisitProcedureList(oid, { visitId, visitProcedureList })
+    this.socketEmitService.visitReplaceVisitRadiologyList(oid, { visitId, visitRadiologyList })
     return { data: true }
   }
 

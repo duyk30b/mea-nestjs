@@ -4,14 +4,21 @@ import { DataSource, Repository } from 'typeorm'
 import { BaseCondition } from '../../../common/dto'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { Procedure } from '../../entities'
-import { ProcedureInsertType, ProcedureUpdateType } from '../../entities/procedure.entity'
+import {
+  ProcedureInsertType,
+  ProcedureRelationType,
+  ProcedureSortType,
+  ProcedureUpdateType,
+} from '../../entities/procedure.entity'
 import { PostgreSqlRepository } from '../postgresql.repository'
 
 @Injectable()
 export class ProcedureRepository extends PostgreSqlRepository<
   Procedure,
-  { [P in 'id' | 'name' | 'price']?: 'ASC' | 'DESC' },
-  { [P in '']?: boolean }
+  { [P in keyof ProcedureSortType]?: 'ASC' | 'DESC' },
+  { [P in keyof ProcedureRelationType]?: boolean },
+  ProcedureInsertType,
+  ProcedureUpdateType
 > {
   constructor(
     private dataSource: DataSource,

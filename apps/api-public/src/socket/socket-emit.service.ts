@@ -11,6 +11,7 @@ import {
   VisitDiagnosis,
   VisitProcedure,
   VisitProduct,
+  VisitRadiology,
 } from '../../../_libs/database/entities'
 import { SOCKET_EVENT } from './socket.variable'
 
@@ -60,6 +61,11 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.PROCEDURE_UPSERT, data)
   }
 
+  organizationSettingReload(oid: number) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SETTING_RELOAD)
+  }
+
   visitCreate(oid: number, data: { visit: Visit }) {
     if (!this.io) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.VISIT_CREATE, data)
@@ -97,5 +103,21 @@ export class SocketEmitService {
   ) {
     if (!this.io) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.VISIT_REPLACE_VISIT_PROCEDURE_LIST, data)
+  }
+
+  visitUpsertVisitRadiology(
+    oid: number,
+    data: { visitId: number; visitRadiology: VisitRadiology }
+  ) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.VISIT_UPSERT_VISIT_RADIOLOGY, data)
+  }
+
+  visitReplaceVisitRadiologyList(
+    oid: number,
+    data: { visitId: number; visitRadiologyList: VisitRadiology[] }
+  ) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.VISIT_REPLACE_VISIT_RADIOLOGY_LIST, data)
   }
 }

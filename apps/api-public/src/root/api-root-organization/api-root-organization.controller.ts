@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto'
-import { IsRoot } from '../../guards/root.guard'
+import { IsRoot } from '../../../../_libs/common/guards/root.guard'
 import { ApiRootOrganizationService } from './api-root-organization.service'
 import { RootOrganizationPaginationQuery } from './request/root-organization-get.query'
 import {

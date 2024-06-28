@@ -23,6 +23,10 @@ export class VisitRelationQuery {
   @Expose()
   @IsBoolean()
   visitDiagnosis: boolean
+
+  @Expose()
+  @IsBoolean()
+  visitRadiologyList: boolean
 }
 export class VisitFilterQuery {
   @Expose()

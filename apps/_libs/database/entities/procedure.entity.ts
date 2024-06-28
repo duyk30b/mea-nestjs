@@ -1,9 +1,16 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
+import { Exclude, Expose } from 'class-transformer'
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity('Procedure')
-export default class Procedure extends BaseEntity {
+export default class Procedure {
+  @Column({ name: 'oid' })
+  @Exclude()
+  oid: number
+
+  @PrimaryGeneratedColumn({ name: 'id' })
+  @Expose({ name: 'id' })
+  id: number
+
   @Column({ type: 'character varying', length: 255 })
   @Expose()
   name: string // Tên dịch vụ
@@ -64,6 +71,16 @@ export default class Procedure extends BaseEntity {
   }
 }
 
-export type ProcedureInsertType = Omit<Procedure, 'id' | 'updatedAt' | 'deletedAt'>
+export type ProcedureRelationType = Pick<Procedure, never>
 
-export type ProcedureUpdateType = Omit<Procedure, 'oid' | 'id' | 'updatedAt'>
+export type ProcedureSortType = Pick<Procedure, 'oid' | 'id' | 'name' | 'price'>
+
+export type ProcedureInsertType = Omit<
+  Procedure,
+  keyof ProcedureRelationType | keyof Pick<Procedure, 'id' | 'updatedAt' | 'deletedAt'>
+>
+
+export type ProcedureUpdateType = Omit<
+  Procedure,
+  keyof ProcedureRelationType | keyof Pick<Procedure, 'oid' | 'id' | 'updatedAt'>
+>
