@@ -5,16 +5,24 @@ import { DiscountType } from '../common/variable'
 import CustomerPayment from './customer-payment.entity'
 import Customer from './customer.entity'
 import VisitDiagnosis from './visit-diagnosis.entity'
+import VisitExpense from './visit-expense.entity'
 import VisitProcedure from './visit-procedure.entity'
 import VisitProduct from './visit-product.entity'
 import VisitRadiology from './visit-radiology.entity'
+import VisitSurcharge from './visit-surcharge.entity'
+
+export enum VisitType {
+  Store = 1, // Bán hàng
+  Clinic = 2, // Phòng khám
+}
 
 export enum VisitStatus {
-  Scheduled = 1, // Hẹn khám
+  Draft = 1, // Hẹn khám
   Waiting = 2, // Đợi khám
   InProgress = 3, // Đang khám,
   Debt = 4, // Nợ
   Completed = 5,
+  Cancel = 6,
 }
 
 @Entity('Visit')
@@ -25,6 +33,14 @@ export default class Visit extends BaseEntity {
   @Column()
   @Expose()
   customerId: number
+
+  @Column({ type: 'smallint', default: 1 })
+  @Expose()
+  visitType: VisitType
+
+  @Column({ type: 'smallint', default: 1 })
+  @Expose()
+  visitStatus: VisitStatus
 
   @Column({ type: 'smallint', nullable: true })
   @Expose()
@@ -37,10 +53,6 @@ export default class Visit extends BaseEntity {
   @Column({ type: 'smallint', nullable: true })
   @Expose()
   date: number
-
-  @Column({ type: 'smallint', default: 2 })
-  @Expose()
-  visitStatus: VisitStatus
 
   @Column({ type: 'smallint', default: 0 })
   @Expose()
@@ -101,12 +113,28 @@ export default class Visit extends BaseEntity {
   discountType: DiscountType // Loại giảm giá
 
   @Column({
+    default: 0,
+    type: 'bigint',
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  surcharge: number // Phụ phí
+
+  @Column({
     type: 'bigint',
     default: 0,
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
   totalMoney: number // Tổng tiền = itemsActualMoney + phụ phí - tiền giảm giá
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  }) // Chi phí (người bán trả): Ví dụ: chi phí ship người bán trả, chi phí thuê người trông, tiền vé xe ...
+  @Expose() // Mục này sinh ra để tính lãi cho chính xác, nghĩa là để trừ cả các chi phí sinh ra khi tạo đơn
+  expense: number // Mục này sẽ không hiện trong đơn hàng, khách hàng ko nhìn thấy
 
   @Column({
     type: 'bigint',
@@ -131,6 +159,10 @@ export default class Visit extends BaseEntity {
   })
   @Expose()
   debt: number // tiền nợ
+
+  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Expose()
+  note: string // Ghi chú
 
   @Column({
     type: 'bigint',
@@ -180,6 +212,10 @@ export default class Visit extends BaseEntity {
   @Expose()
   customer: Customer
 
+  @OneToMany(() => CustomerPayment, (customerPayment) => customerPayment.visit)
+  @Expose()
+  customerPaymentList: CustomerPayment[]
+
   @OneToOne(() => VisitDiagnosis, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'id', referencedColumnName: 'visitId' })
   @Expose()
@@ -197,9 +233,13 @@ export default class Visit extends BaseEntity {
   @Expose()
   visitRadiologyList: VisitRadiology[]
 
-  @OneToMany(() => CustomerPayment, (customerPayment) => customerPayment.visit)
   @Expose()
-  customerPayments: CustomerPayment[]
+  @OneToMany(() => VisitExpense, (visitExpense) => visitExpense.visit)
+  visitExpenseList: VisitExpense[]
+
+  @Expose()
+  @OneToMany(() => VisitSurcharge, (visitSurcharge) => visitSurcharge.visit)
+  visitSurchargeList: VisitSurcharge[]
 
   static fromRaw(raw: { [P in keyof Visit]: any }) {
     if (!raw) return null
@@ -219,6 +259,9 @@ export default class Visit extends BaseEntity {
     entity.profit = Number(raw.profit)
     entity.paid = Number(raw.paid)
     entity.debt = Number(raw.debt)
+
+    entity.surcharge = Number(raw.surcharge)
+    entity.expense = Number(raw.expense)
 
     entity.registeredAt = raw.registeredAt == null ? raw.registeredAt : Number(raw.registeredAt)
     entity.startedAt = raw.startedAt == null ? raw.startedAt : Number(raw.startedAt)
@@ -240,11 +283,13 @@ export type VisitRelationType = Pick<
   | 'visitProductList'
   | 'visitProcedureList'
   | 'visitRadiologyList'
-  | 'customerPayments'
+  | 'visitExpenseList'
+  | 'visitSurchargeList'
+  | 'customerPaymentList'
 >
 
 export type VisitSortType = Pick<Visit, 'id' | 'customerId' | 'registeredAt'>
 
-export type VisitInsertType = Pick<Visit, 'oid' | 'customerId' | 'registeredAt' | 'visitStatus'>
+export type VisitInsertType = Omit<Visit, keyof VisitRelationType | keyof Pick<Visit, 'id'>>
 
-export type VisitUpdateType = Pick<Visit, 'oid' | 'visitStatus' | 'startedAt'>
+export type VisitUpdateType = Omit<Visit, keyof VisitRelationType | keyof Pick<Visit, 'oid' | 'id'>>

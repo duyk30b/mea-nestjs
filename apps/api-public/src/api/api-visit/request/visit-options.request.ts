@@ -10,7 +10,7 @@ export class VisitRelationQuery {
 
   @Expose()
   @IsBoolean()
-  customerPayments: boolean
+  customerPaymentList: boolean
 
   @Expose()
   @IsBoolean()

@@ -4,6 +4,8 @@ import { IdParam } from '../../../../_libs/common/dto'
 import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { ApiVisitActionService } from './api-visit-action.service'
+import { ApiVisitClinicService } from './api-visit-clinic.service'
 import { ApiVisitService } from './api-visit.service'
 import {
   VisitGetManyQuery,
@@ -24,7 +26,11 @@ import {
 @ApiBearerAuth('access-token')
 @Controller('visit')
 export class ApiVisitController {
-  constructor(private readonly apiVisitService: ApiVisitService) {}
+  constructor(
+    private readonly apiVisitService: ApiVisitService,
+    private readonly apiVisitClinicService: ApiVisitClinicService,
+    private readonly apiVisitActionService: ApiVisitActionService
+  ) {}
 
   @Get('pagination')
   @HasPermission(PermissionId.VISIT_READ)
@@ -48,28 +54,28 @@ export class ApiVisitController {
     return await this.apiVisitService.getOne(oid, id, query)
   }
 
-  @Post('register-with-new-customer')
+  @Post('clinic/register-with-new-customer')
   @HasPermission(PermissionId.VISIT_CREATE)
   async registerWithNewUser(
     @External() { oid }: TExternal,
     @Body() body: VisitRegisterWithNewCustomerBody
   ) {
-    return await this.apiVisitService.registerWithNewUser(oid, body)
+    return await this.apiVisitClinicService.registerWithNewUser(oid, body)
   }
 
-  @Post('register-with-exist-customer')
+  @Post('clinic/register-with-exist-customer')
   @HasPermission(PermissionId.VISIT_CREATE)
   async registerWithExistUser(
     @External() { oid }: TExternal,
     @Body() body: VisitRegisterWithExistCustomerBody
   ) {
-    return await this.apiVisitService.registerWithExistUser(oid, body)
+    return await this.apiVisitClinicService.registerWithExistUser(oid, body)
   }
 
-  @Post(':id/start-checkup')
+  @Post('clinic/start-checkup/:id')
   @HasPermission(PermissionId.VISIT_START_CHECKUP)
   async startCheckup(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiVisitService.startCheckup(oid, id)
+    return await this.apiVisitClinicService.startCheckup(oid, id)
   }
 
   @Put('replace-visit-procedure-list')
@@ -78,7 +84,7 @@ export class ApiVisitController {
     @External() { oid }: TExternal,
     @Body() body: VisitReplaceVisitProcedureListBody
   ) {
-    return await this.apiVisitService.replaceVisitProcedureList(oid, body)
+    return await this.apiVisitActionService.replaceVisitProcedureList(oid, body)
   }
 
   @Put('replace-visit-prescription')
@@ -87,7 +93,7 @@ export class ApiVisitController {
     @External() { oid }: TExternal,
     @Body() body: VisitReplacePrescriptionBody
   ) {
-    return await this.apiVisitService.replaceVisitPrescription(oid, body)
+    return await this.apiVisitActionService.replaceVisitPrescription(oid, body)
   }
 
   @Put('replace-visit-radiology-list')
@@ -96,7 +102,7 @@ export class ApiVisitController {
     @External() { oid }: TExternal,
     @Body() body: VisitReplaceVisitRadiologyListBody
   ) {
-    return await this.apiVisitService.replaceVisitRadiologyList(oid, body)
+    return await this.apiVisitActionService.replaceVisitRadiologyList(oid, body)
   }
 
   @Post('update-visit-items-money')
@@ -105,13 +111,13 @@ export class ApiVisitController {
     @External() { oid }: TExternal,
     @Body() body: VisitUpdateVisitItemsMoneyBody
   ) {
-    return await this.apiVisitService.updateVisitItemsMoney(oid, body)
+    return await this.apiVisitActionService.updateVisitItemsMoney(oid, body)
   }
 
   @Post('send-product-list')
   @HasPermission(PermissionId.VISIT_SEND_PRODUCT)
   async sendProductList(@External() { oid }: TExternal, @Body() body: VisitSendProductListBody) {
-    return await this.apiVisitService.sendProductList(oid, body)
+    return await this.apiVisitActionService.sendProductList(oid, body)
   }
 
   @Post('return-product-list')
@@ -120,36 +126,36 @@ export class ApiVisitController {
     @External() { oid }: TExternal,
     @Body() body: VisitReturnProductListBody
   ) {
-    return await this.apiVisitService.returnProductList(oid, body)
+    return await this.apiVisitActionService.returnProductList(oid, body)
   }
 
   @Post('prepayment')
   @HasPermission(PermissionId.VISIT_PREPAYMENT)
   async prepayment(@External() { oid }: TExternal, @Body() body: VisitPaymentBody) {
-    return await this.apiVisitService.prepayment(oid, body)
+    return await this.apiVisitActionService.prepayment(oid, body)
   }
 
   @Post('refund-overpaid')
   @HasPermission(PermissionId.VISIT_REFUND_OVERPAID)
   async refundOverpaid(@External() { oid }: TExternal, @Body() body: VisitPaymentBody) {
-    return await this.apiVisitService.refundOverpaid(oid, body)
+    return await this.apiVisitActionService.refundOverpaid(oid, body)
   }
 
   @Post('close/:id')
   @HasPermission(PermissionId.VISIT_CLOSE)
   async close(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiVisitService.close(oid, id)
+    return await this.apiVisitActionService.close(oid, id)
   }
 
   @Post('pay-debt')
   @HasPermission(PermissionId.VISIT_PAY_DEBT)
   async payDebt(@External() { oid }: TExternal, @Body() body: VisitPaymentBody) {
-    return await this.apiVisitService.payDebt(oid, body)
+    return await this.apiVisitActionService.payDebt(oid, body)
   }
 
   @Post('reopen/:id')
   @HasPermission(PermissionId.VISIT_REOPEN)
   async reopen(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiVisitService.reopen(oid, id)
+    return await this.apiVisitActionService.reopen(oid, id)
   }
 }

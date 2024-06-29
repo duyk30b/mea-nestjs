@@ -30,6 +30,8 @@ import {
   VisitProduct,
   VisitRadiology,
 } from '../entities'
+import VisitExpense from '../entities/visit-expense.entity'
+import VisitSurcharge from '../entities/visit-surcharge.entity'
 import { BatchMovementRepository } from './batch-movement/bat-movement.repository'
 import { BatchRepository } from './batch/batch.repository'
 import { CustomerPaymentRepository } from './customer-payment/customer-payment.repository'
@@ -111,6 +113,8 @@ import { VisitRepository } from './visit/visit.repository'
       Setting,
       User,
       Visit,
+      VisitExpense,
+      VisitSurcharge,
       VisitBatch,
       VisitDiagnosis,
       VisitProcedure,

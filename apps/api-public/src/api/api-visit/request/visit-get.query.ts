@@ -9,7 +9,7 @@ export class VisitGetQuery {
     type: String,
     example: JSON.stringify(<VisitRelationQuery>{
       customer: true,
-      customerPayments: true,
+      customerPaymentList: true,
       visitDiagnosis: true,
       visitProductList: true,
       visitProcedureList: true,

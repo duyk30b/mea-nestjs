@@ -32,7 +32,7 @@ export class VisitRepository extends PostgreSqlRepository<
     condition: { id: number; oid: number },
     relation?: {
       customer?: boolean
-      customerPayments?: boolean
+      customerPaymentList?: boolean
       visitDiagnosis?: boolean
       visitProductList?: { product?: boolean } | false
       visitProcedureList?: { procedure?: boolean } | false
@@ -45,8 +45,8 @@ export class VisitRepository extends PostgreSqlRepository<
       .andWhere('visit.oid = :oid', { oid: condition.oid })
 
     if (relation?.customer) query = query.leftJoinAndSelect('visit.customer', 'customer')
-    if (relation?.customerPayments) {
-      query = query.leftJoinAndSelect('visit.customerPayments', 'customerPayment')
+    if (relation?.customerPaymentList) {
+      query = query.leftJoinAndSelect('visit.customerPaymentList', 'customerPayment')
       query.addOrderBy('customerPayment.id', 'ASC')
     }
     if (relation?.visitDiagnosis) {
