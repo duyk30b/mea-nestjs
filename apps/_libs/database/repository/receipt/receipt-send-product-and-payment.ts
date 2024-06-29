@@ -86,10 +86,12 @@ export class ReceiptSendProductAndPayment {
           costAmountSend: number
           openQuantity: number
           openCostAmount: number
+          costPrice: number
+          listPrice: number
         }
       > = {}
       for (let i = 0; i < receiptItemsProduct.length; i++) {
-        const { productId, quantity, costPrice } = receiptItemsProduct[i]
+        const { productId, quantity, costPrice, listPrice } = receiptItemsProduct[i]
         if (!productIdMap[productId]) {
           productIdMap[productId] = {
             productId,
@@ -97,6 +99,8 @@ export class ReceiptSendProductAndPayment {
             costAmountSend: 0,
             openQuantity: 0,
             openCostAmount: 0,
+            costPrice,
+            listPrice,
           }
         }
         productIdMap[productId].quantitySend += quantity
@@ -109,16 +113,20 @@ export class ReceiptSendProductAndPayment {
           productId: number
           quantitySend: number
           openQuantity: number
+          costPrice: number
+          listPrice: number
         }
       > = {}
       for (let i = 0; i < receiptItemsBatch.length; i++) {
-        const { batchId, productId, quantity } = receiptItemsBatch[i]
+        const { batchId, productId, quantity, costPrice, listPrice } = receiptItemsBatch[i]
         if (!batchIdMap[batchId]) {
           batchIdMap[batchId] = {
             batchId,
             productId,
             quantitySend: 0,
             openQuantity: 0,
+            costPrice,
+            listPrice,
           }
         }
         batchIdMap[batchId].quantitySend += quantity
@@ -189,14 +197,20 @@ export class ReceiptSendProductAndPayment {
           `
           UPDATE    "Product" "product"
           SET       "quantity" = "product"."quantity" + temp."quantitySend",
-                    "costAmount" = "product"."costAmount" + temp."costAmountSend"
+                    "costAmount" = "product"."costAmount" + temp."costAmountSend",
+                    "costPrice" = temp."costPrice",
+                    "retailPrice" = temp."listPrice"
           FROM (VALUES ` +
             productQuantityList
               .map((i) => {
-                return `(${i.productId}, ${i.quantitySend}, ${i.costAmountSend})`
+                return (
+                  `(${i.productId}, ${i.quantitySend}, ${i.costAmountSend}),` +
+                  ` ${i.costPrice}, ${i.listPrice}`
+                )
               })
               .join(', ') +
-            `   ) AS temp("productId", "quantitySend", "costAmountSend")
+            `   ) AS temp("productId", "quantitySend", "costAmountSend",
+                           "costPrice", "listPrice")
           WHERE     "product"."id" = temp."productId" 
                 AND "product"."oid" = ${oid}
                 AND "product"."hasManageQuantity" = 1 

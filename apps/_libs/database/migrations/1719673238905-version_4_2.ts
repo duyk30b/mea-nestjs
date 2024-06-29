@@ -74,6 +74,19 @@ export class Version421719673238905 implements MigrationInterface {
                 )
           `)
     }
+
+    if ('ReceiptItem') {
+      await queryRunner.query(`
+          ALTER TABLE "ReceiptItem"
+          ADD "listPrice" bigint NOT NULL DEFAULT '0'
+      `)
+      await queryRunner.query(`
+          UPDATE  "ReceiptItem" "ri"
+          SET     "listPrice" = product."retailPrice"
+          FROM    "Product" "product"
+          WHERE   "ri"."productId" = "product"."id"
+      `)
+    }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {}
