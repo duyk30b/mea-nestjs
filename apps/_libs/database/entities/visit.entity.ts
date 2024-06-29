@@ -28,7 +28,7 @@ export enum VisitStatus {
 @Entity('Visit')
 @Index('IDX_Visit__oid_registeredAt', ['oid', 'registeredAt'])
 @Index('IDX_Visit__oid_customerId', ['oid', 'customerId'])
-@Index('IDX_Visit__oid_debt', ['oid', 'visitStatus'])
+@Index('IDX_Visit__oid_visitStatus', ['oid', 'visitStatus'])
 export default class Visit extends BaseEntity {
   @Column()
   @Expose()

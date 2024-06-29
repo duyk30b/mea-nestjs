@@ -56,4 +56,10 @@ export class ApiBatchController {
   ) {
     return await this.apiBatchService.updateOne(oid, id, body)
   }
+
+  @Post('find-or-create')
+  @HasPermission(PermissionId.BATCH_CREATE)
+  async findOrCreate(@External() { oid }: TExternal, @Body() body: BatchInsertBody) {
+    return await this.apiBatchService.findOrCreateOne(oid, body)
+  }
 }
