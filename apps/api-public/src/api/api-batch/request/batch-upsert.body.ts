@@ -17,7 +17,7 @@ export class BatchInsertBody {
 
   @ApiPropertyOptional({ example: 1679995369195 })
   @Expose()
-  @IsDefined()
+  // @IsDefined() //expiryDate được phép null
   @IsInt()
   expiryDate: number
 
