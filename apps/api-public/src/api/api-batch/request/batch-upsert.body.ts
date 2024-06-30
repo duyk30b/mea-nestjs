@@ -1,4 +1,4 @@
-import { ApiPropertyOptional, OmitType } from '@nestjs/swagger'
+import { ApiPropertyOptional, OmitType, PickType } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
 import { IsDefined, IsInt, IsString } from 'class-validator'
 
@@ -26,6 +26,23 @@ export class BatchInsertBody {
   @IsDefined()
   @IsInt()
   costPrice: number
+
+  @ApiPropertyOptional({ example: 20_000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  wholesalePrice: number
+
+  @ApiPropertyOptional({ example: 20_000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  retailPrice: number
 }
 
-export class BatchUpdateBody extends OmitType(BatchInsertBody, ['productId']) {}
+export class BatchUpdateBody extends PickType(BatchInsertBody, [
+  'lotNumber',
+  'expiryDate',
+  'wholesalePrice',
+  'retailPrice',
+]) {}
