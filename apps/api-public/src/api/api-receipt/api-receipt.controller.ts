@@ -53,6 +53,41 @@ export class ApiReceiptController {
     return await this.apiReceiptService.createDraft({ oid, body })
   }
 
+  @Post('create-quick-receipt')
+  @HasPermission(PermissionId.RECEIPT)
+  async createQuickReceipt(@External() { oid }: TExternal, @Body() body: ReceiptDraftInsertBody) {
+    return await this.apiReceiptService.createQuickReceipt({ oid, body })
+  }
+
+  @Patch('update-receipt-draft-and-receipt-prepayment/:id')
+  @HasPermission(PermissionId.RECEIPT_UPDATE_RECEIPT_DRAFT_AND_RECEIPT_PREPAYMENT)
+  async updateReceiptDraftAndReceiptPrepayment(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam,
+    @Body() body: ReceiptUpdateBody
+  ) {
+    return await this.apiReceiptService.updateReceiptDraftAndReceiptPrepayment({
+      oid,
+      receiptId: id,
+      body,
+    })
+  }
+
+  @Patch('update-receipt-debt-and-receipt-success/:id')
+  @HasPermission(PermissionId.RECEIPT)
+  async updateBasic(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam,
+    @Body() body: ReceiptDraftInsertBody
+  ) {
+    return await this.apiReceiptService.updateReceiptDebtAndReceiptSuccess({
+      oid,
+      body,
+      receiptId: id,
+      time: Date.now(),
+    })
+  }
+
   @Delete('destroy-draft/:id')
   @HasPermission(PermissionId.RECEIPT_DELETE)
   async destroyDraft(@External() { oid }: TExternal, @Param() { id }: IdParam) {
@@ -139,40 +174,5 @@ export class ApiReceiptController {
   @HasPermission(PermissionId.RECEIPT_DELETE)
   async softDeleteRefund(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiReceiptService.softDeleteRefund({ oid, receiptId: id })
-  }
-
-  @Post('create-quick-receipt')
-  @HasPermission(PermissionId.RECEIPT)
-  async createQuickReceipt(@External() { oid }: TExternal, @Body() body: ReceiptDraftInsertBody) {
-    return await this.apiReceiptService.createQuickReceipt({ oid, body })
-  }
-
-  @Patch('update-receipt-draft-and-receipt-prepayment/:id')
-  @HasPermission(PermissionId.RECEIPT_UPDATE_RECEIPT_DRAFT_AND_RECEIPT_PREPAYMENT)
-  async updateReceiptDraftAndReceiptPrepayment(
-    @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: ReceiptUpdateBody
-  ) {
-    return await this.apiReceiptService.updateReceiptDraftAndReceiptPrepayment({
-      oid,
-      receiptId: id,
-      body,
-    })
-  }
-
-  @Patch('update-receipt-debt-and-receipt-success/:id')
-  @HasPermission(PermissionId.RECEIPT)
-  async updateBasic(
-    @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: ReceiptDraftInsertBody
-  ) {
-    return await this.apiReceiptService.updateReceiptDebtAndReceiptSuccess({
-      oid,
-      body,
-      receiptId: id,
-      time: Date.now(),
-    })
   }
 }

@@ -76,7 +76,7 @@ export class ApiReceiptService {
   }
 
   async getOne(oid: number, id: number, { relation }: ReceiptGetOneQuery): Promise<BaseResponse> {
-    const data = await this.receiptRepository.findOne({
+    const receipt = await this.receiptRepository.findOne({
       condition: { oid, id },
       relation: {
         distributor: !!relation?.distributor,
@@ -84,10 +84,10 @@ export class ApiReceiptService {
         receiptItems: relation?.receiptItems ? { batch: true, product: true } : false,
       },
     })
-    if (!data) {
+    if (!receipt) {
       throw new BusinessException('error.Database.NotFound')
     }
-    return { data }
+    return { data: { receipt } }
   }
 
   async queryOne(oid: number, id: number, { relation }: ReceiptGetOneQuery): Promise<BaseResponse> {
