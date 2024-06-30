@@ -37,10 +37,24 @@ export default class ReceiptItem extends BaseEntity {
   @Column({
     type: 'bigint',
     default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
   })
   @Expose()
-  listPrice: number // Giá cost
+  wholesalePrice: number // Giá bán sỉ
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  retailPrice: number // Giá bán lẻ
 
   @Column({
     type: 'decimal',
@@ -77,7 +91,8 @@ export default class ReceiptItem extends BaseEntity {
     Object.assign(entity, raw)
 
     entity.costPrice = Number(raw.costPrice)
-    entity.listPrice = Number(raw.listPrice)
+    entity.wholesalePrice = Number(raw.wholesalePrice)
+    entity.retailPrice = Number(raw.retailPrice)
     entity.quantity = Number(raw.quantity)
 
     return entity

@@ -87,11 +87,12 @@ export class ReceiptSendProductAndPayment {
           openQuantity: number
           openCostAmount: number
           costPrice: number
-          listPrice: number
+          wholesalePrice: number
+          retailPrice: number
         }
       > = {}
       for (let i = 0; i < receiptItemsProduct.length; i++) {
-        const { productId, quantity, costPrice, listPrice } = receiptItemsProduct[i]
+        const { productId, quantity, costPrice } = receiptItemsProduct[i]
         if (!productIdMap[productId]) {
           productIdMap[productId] = {
             productId,
@@ -100,7 +101,8 @@ export class ReceiptSendProductAndPayment {
             openQuantity: 0,
             openCostAmount: 0,
             costPrice,
-            listPrice,
+            wholesalePrice: receiptItemsProduct[i].wholesalePrice,
+            retailPrice: receiptItemsProduct[i].retailPrice,
           }
         }
         productIdMap[productId].quantitySend += quantity
@@ -114,11 +116,12 @@ export class ReceiptSendProductAndPayment {
           quantitySend: number
           openQuantity: number
           costPrice: number
-          listPrice: number
+          wholesalePrice: number
+          retailPrice: number
         }
       > = {}
       for (let i = 0; i < receiptItemsBatch.length; i++) {
-        const { batchId, productId, quantity, costPrice, listPrice } = receiptItemsBatch[i]
+        const { batchId, productId, quantity, costPrice } = receiptItemsBatch[i]
         if (!batchIdMap[batchId]) {
           batchIdMap[batchId] = {
             batchId,
@@ -126,7 +129,8 @@ export class ReceiptSendProductAndPayment {
             quantitySend: 0,
             openQuantity: 0,
             costPrice,
-            listPrice,
+            wholesalePrice: receiptItemsBatch[i].wholesalePrice,
+            retailPrice: receiptItemsBatch[i].retailPrice,
           }
         }
         batchIdMap[batchId].quantitySend += quantity
@@ -199,18 +203,19 @@ export class ReceiptSendProductAndPayment {
           SET       "quantity" = "product"."quantity" + temp."quantitySend",
                     "costAmount" = "product"."costAmount" + temp."costAmountSend",
                     "costPrice" = temp."costPrice",
-                    "retailPrice" = temp."listPrice"
+                    "wholesalePrice" = temp."wholesalePrice",
+                    "retailPrice" = temp."retailPrice"
           FROM (VALUES ` +
             productQuantityList
               .map((i) => {
                 return (
                   `(${i.productId}, ${i.quantitySend}, ${i.costAmountSend}),` +
-                  ` ${i.costPrice}, ${i.listPrice}`
+                  ` ${i.costPrice}, ${i.wholesalePrice}, ${i.retailPrice}`
                 )
               })
               .join(', ') +
             `   ) AS temp("productId", "quantitySend", "costAmountSend",
-                           "costPrice", "listPrice")
+                           "costPrice", "wholesalePrice", "retailPrice")
           WHERE     "product"."id" = temp."productId" 
                 AND "product"."oid" = ${oid}
                 AND "product"."hasManageQuantity" = 1 
@@ -234,14 +239,16 @@ export class ReceiptSendProductAndPayment {
         const batchUpdateResult: [any[], number] = await manager.query(
           `
           UPDATE    "Batch" "batch"
-          SET       "quantity" = "batch"."quantity" + temp."quantitySend"
+          SET       "quantity" = "batch"."quantity" + temp."quantitySend",
+                    "wholesalePrice" = temp."wholesalePrice",
+                    "retailPrice" = temp."retailPrice"
           FROM (VALUES ` +
             batchQuantityList
               .map((i) => {
-                return `(${i.batchId}, ${i.quantitySend})`
+                return `(${i.batchId}, ${i.quantitySend}, ${i.wholesalePrice}, ${i.retailPrice})`
               })
               .join(', ') +
-            `   ) AS temp("batchId", "quantitySend")
+            `   ) AS temp("batchId", "quantitySend", "wholesalePrice", "retailPrice")
           WHERE     "batch"."id" = temp."batchId" AND "batch"."oid" = ${oid}
           RETURNING "batch".*;        
           `

@@ -111,7 +111,8 @@ export class ApiBatchService {
     }
     const batch = await this.batchRepository.insertOneFullFieldAndReturnEntity({
       ...body,
-      listPrice: 0, // cập nhật sau khi nhập hàng
+      retailPrice: 0, // cập nhật sau khi nhập hàng
+      wholesalePrice: 0,
       oid,
     })
     this.socketEmitService.batchUpsert(oid, { batch })

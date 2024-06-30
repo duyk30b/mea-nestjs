@@ -54,11 +54,13 @@ export class Version421719673238905 implements MigrationInterface {
     if ('Batch') {
       await queryRunner.query(`
             ALTER TABLE "Batch"
-                ADD "listPrice" bigint NOT NULL DEFAULT '0'
+                ADD "wholesalePrice" bigint NOT NULL DEFAULT '0',
+                ADD "retailPrice" bigint NOT NULL DEFAULT '0'
         `)
       await queryRunner.query(`
             UPDATE  "Batch" "batch"
-            SET     "listPrice" = product."retailPrice"
+            SET     "wholesalePrice" = product."wholesalePrice",
+                    "retailPrice" = product."retailPrice"
             FROM    "Product" "product"
             WHERE   "batch"."productId" = "product"."id"
           `)
@@ -78,11 +80,13 @@ export class Version421719673238905 implements MigrationInterface {
     if ('ReceiptItem') {
       await queryRunner.query(`
           ALTER TABLE "ReceiptItem"
-          ADD "listPrice" bigint NOT NULL DEFAULT '0'
+              ADD "wholesalePrice" bigint NOT NULL DEFAULT '0',
+              ADD "retailPrice" bigint NOT NULL DEFAULT '0'
       `)
       await queryRunner.query(`
           UPDATE  "ReceiptItem" "ri"
-          SET     "listPrice" = product."retailPrice"
+          SET     "wholesalePrice" = product."wholesalePrice",
+                  "retailPrice" = product."retailPrice"
           FROM    "Product" "product"
           WHERE   "ri"."productId" = "product"."id"
       `)

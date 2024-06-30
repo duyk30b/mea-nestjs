@@ -38,7 +38,13 @@ export class ReceiptItemBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  listPrice: number
+  wholesalePrice: number
+
+  @ApiPropertyOptional({ example: 50_000 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  retailPrice: number
 
   @ApiProperty({ example: 4 })
   @Expose()
