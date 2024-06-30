@@ -62,7 +62,10 @@ export class ApiProcedureService {
   }
 
   async createOne(oid: number, body: ProcedureCreateBody): Promise<BaseResponse> {
-    const procedure = await this.procedureRepository.insertOneAndReturnEntity({ oid, ...body })
+    const procedure = await this.procedureRepository.insertOneFullFieldAndReturnEntity({
+      oid,
+      ...body,
+    })
     this.socketEmitService.procedureUpsert(oid, { procedure })
     return { data: procedure }
   }

@@ -23,10 +23,6 @@ export default class Procedure {
   @Expose()
   price: number // Giá dự kiến
 
-  @Column({ type: 'text', nullable: true })
-  @Expose()
-  consumableHint: string // Gợi ý vậy tư tiêu hao
-
   @Column({ type: 'smallint', default: 1 })
   @Expose()
   isActive: 0 | 1

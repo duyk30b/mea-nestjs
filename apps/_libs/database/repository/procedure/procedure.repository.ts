@@ -34,6 +34,13 @@ export class ProcedureRepository extends PostgreSqlRepository<
     return Procedure.fromRaw(raw)
   }
 
+  async insertOneFullFieldAndReturnEntity<X extends ProcedureInsertType>(
+    data: NoExtra<ProcedureInsertType, X>
+  ): Promise<Procedure> {
+    const raw = await this.insertOneFullFieldAndReturnRaw(data)
+    return Procedure.fromRaw(raw)
+  }
+
   async updateAndReturnEntity<X extends Partial<ProcedureUpdateType>>(
     condition: BaseCondition<Procedure>,
     data: NoExtra<Partial<ProcedureUpdateType>, X>
