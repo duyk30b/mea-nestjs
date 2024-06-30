@@ -1,12 +1,12 @@
 import { ApiPropertyOptional, OmitType } from '@nestjs/swagger'
-import { Expose, Transform } from 'class-transformer'
-import { IsDefined, IsNotEmpty, IsNumber, IsString } from 'class-validator'
+import { Expose } from 'class-transformer'
+import { IsDefined, IsInt, IsString } from 'class-validator'
 
 export class BatchInsertBody {
   @ApiPropertyOptional({ example: 12 })
   @Expose()
-  @IsNotEmpty()
-  @IsNumber()
+  @IsDefined()
+  @IsInt()
   productId: number
 
   @ApiPropertyOptional({ example: 'ABC12345' })
@@ -17,14 +17,14 @@ export class BatchInsertBody {
 
   @ApiPropertyOptional({ example: 1679995369195 })
   @Expose()
-  @IsNumber()
+  @IsDefined()
+  @IsInt()
   expiryDate: number
 
   @ApiPropertyOptional({ example: 20_000 })
   @Expose()
-  @Transform(({ value }) => Math.round(value || 0))
   @IsDefined()
-  @IsNumber()
+  @IsInt()
   costPrice: number
 }
 
