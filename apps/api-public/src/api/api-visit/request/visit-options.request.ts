@@ -14,6 +14,14 @@ export class VisitRelationQuery {
 
   @Expose()
   @IsBoolean()
+  visitSurchargeList: boolean
+
+  @Expose()
+  @IsBoolean()
+  visitExpenseList: boolean
+
+  @Expose()
+  @IsBoolean()
   visitProductList: boolean
 
   @Expose()

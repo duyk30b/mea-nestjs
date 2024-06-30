@@ -46,9 +46,9 @@ export class ApiRadiologyService {
   }
 
   async getOne(oid: number, id: number): Promise<BaseResponse> {
-    const data = await this.radiologyRepository.findOneBy({ oid, id })
-    if (!data) throw new BusinessException('error.Database.NotFound')
-    return { data }
+    const radiology = await this.radiologyRepository.findOneBy({ oid, id })
+    if (!radiology) throw new BusinessException('error.Database.NotFound')
+    return { data: { radiology } }
   }
 
   async createOne(oid: number, body: RadiologyCreateBody): Promise<BaseResponse> {
@@ -64,7 +64,7 @@ export class ApiRadiologyService {
     if (!radiology) {
       throw new BusinessException('error.Database.UpdateFailed')
     }
-    return { data: radiology }
+    return { data: { radiology } }
   }
 
   async deleteOne(oid: number, id: number): Promise<BaseResponse> {
@@ -72,7 +72,7 @@ export class ApiRadiologyService {
     if (affected === 0) {
       throw new BusinessException('error.Database.DeleteFailed')
     }
-    const data = await this.radiologyRepository.findOneById(id)
-    return { data }
+    const radiology = await this.radiologyRepository.findOneById(id)
+    return { data: { radiology } }
   }
 }

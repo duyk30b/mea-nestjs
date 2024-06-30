@@ -56,9 +56,9 @@ export class ApiProcedureService {
   }
 
   async getOne(oid: number, id: number): Promise<BaseResponse> {
-    const data = await this.procedureRepository.findOneBy({ oid, id })
-    if (!data) throw new BusinessException('error.Procedure.NotExist')
-    return { data }
+    const procedure = await this.procedureRepository.findOneBy({ oid, id })
+    if (!procedure) throw new BusinessException('error.Procedure.NotExist')
+    return { data: { procedure } }
   }
 
   async createOne(oid: number, body: ProcedureCreateBody): Promise<BaseResponse> {
@@ -67,7 +67,7 @@ export class ApiProcedureService {
       ...body,
     })
     this.socketEmitService.procedureUpsert(oid, { procedure })
-    return { data: procedure }
+    return { data: { procedure } }
   }
 
   async updateOne(oid: number, id: number, body: ProcedureUpdateBody): Promise<BaseResponse> {
@@ -76,7 +76,7 @@ export class ApiProcedureService {
       throw new BusinessException('error.Database.UpdateFailed')
     }
     this.socketEmitService.procedureUpsert(oid, { procedure })
-    return { data: procedure }
+    return { data: { procedure } }
   }
 
   async deleteOne(oid: number, id: number): Promise<BaseResponse> {
@@ -84,7 +84,7 @@ export class ApiProcedureService {
     if (affected === 0) {
       throw new BusinessException('error.Database.DeleteFailed')
     }
-    const data = await this.procedureRepository.findOneById(id)
-    return { data }
+    const procedure = await this.procedureRepository.findOneById(id)
+    return { data: { procedure } }
   }
 }

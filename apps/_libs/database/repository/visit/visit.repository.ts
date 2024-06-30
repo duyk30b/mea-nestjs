@@ -37,6 +37,8 @@ export class VisitRepository extends PostgreSqlRepository<
       visitProductList?: { product?: boolean } | false
       visitProcedureList?: { procedure?: boolean } | false
       visitRadiologyList?: { radiology?: boolean; doctor?: boolean } | false
+      visitExpenseList?: boolean
+      visitSurchargeList?: boolean
     }
   ): Promise<Visit | null> {
     let query = this.manager
@@ -48,6 +50,12 @@ export class VisitRepository extends PostgreSqlRepository<
     if (relation?.customerPaymentList) {
       query = query.leftJoinAndSelect('visit.customerPaymentList', 'customerPayment')
       query.addOrderBy('customerPayment.id', 'ASC')
+    }
+    if (relation?.visitExpenseList) {
+      query = query.leftJoinAndSelect('visit.visitExpenseList', 'visitExpenseList')
+    }
+    if (relation?.visitSurchargeList) {
+      query = query.leftJoinAndSelect('visit.visitSurchargeList', 'visitSurchargeList')
     }
     if (relation?.visitDiagnosis) {
       query = query.leftJoinAndSelect('visit.visitDiagnosis', 'visitDiagnosis')

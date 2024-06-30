@@ -97,6 +97,8 @@ export class ApiVisitService {
       {
         customer: !!relation?.customer,
         customerPaymentList: !!relation?.customerPaymentList,
+        visitSurchargeList: !!relation?.visitSurchargeList,
+        visitExpenseList: !!relation?.visitExpenseList,
         visitDiagnosis: !!relation?.visitDiagnosis,
         visitProductList: relation?.visitProductList ? { product: true } : false,
         visitProcedureList: relation?.visitProcedureList ? { procedure: true } : false,
