@@ -209,8 +209,8 @@ export class ReceiptSendProductAndPayment {
             productQuantityList
               .map((i) => {
                 return (
-                  `(${i.productId}, ${i.quantitySend}, ${i.costAmountSend}),` +
-                  ` ${i.costPrice}, ${i.wholesalePrice}, ${i.retailPrice}`
+                  `(${i.productId}, ${i.quantitySend}, ${i.costAmountSend},` +
+                  ` ${i.costPrice}, ${i.wholesalePrice}, ${i.retailPrice})`
                 )
               })
               .join(', ') +
