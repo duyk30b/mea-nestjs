@@ -1,15 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
-import { DataSource, EntityManager, FindOptionsWhere, In, InsertResult } from 'typeorm'
+import { DataSource, EntityManager, FindOptionsWhere, In } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
-import VisitBatch, { VisitBatchInsertType } from '../../../entities/visit-batch.entity'
 import VisitExpense, { VisitExpenseInsertType } from '../../../entities/visit-expense.entity'
 import VisitProcedure, { VisitProcedureInsertType } from '../../../entities/visit-procedure.entity'
 import VisitProduct, { VisitProductInsertType } from '../../../entities/visit-product.entity'
 import VisitSurcharge, { VisitSurchargeInsertType } from '../../../entities/visit-surcharge.entity'
 import Visit, { VisitInsertType, VisitStatus, VisitType } from '../../../entities/visit.entity'
 import {
-  InvoiceVisitBatchDraftType,
   InvoiceVisitDraftInsertType,
   InvoiceVisitDraftUpdateType,
   InvoiceVisitExpenseDraftType,
@@ -28,9 +26,7 @@ export class InvoiceVisitRepository {
   async createDraft<T extends InvoiceVisitDraftInsertType>(params: {
     oid: number
     visitDraftInsert: NoExtra<InvoiceVisitDraftInsertType, T>
-    visitProductDraftList: (InvoiceVisitProductDraftType & {
-      visitBatchDraftList: InvoiceVisitBatchDraftType[]
-    })[]
+    visitProductDraftList: InvoiceVisitProductDraftType[]
     visitProcedureDraftList: InvoiceVisitProcedureDraftType[]
     visitSurchargeDraftList: InvoiceVisitSurchargeDraftType[]
     visitExpenseDraftList: InvoiceVisitExpenseDraftType[]
@@ -67,41 +63,17 @@ export class InvoiceVisitRepository {
 
       if (visitProductDraftList.length) {
         const visitProductListInsert = visitProductDraftList.map((i) => {
-          const { visitBatchDraftList, ...vp } = i
           const visitProduct: NoExtra<VisitProductInsertType> = {
-            ...vp,
+            ...i,
             oid,
             visitId,
+            customerId: visitDraftInsert.customerId,
             isSent: 0,
-            quantityPrescription: vp.quantity,
+            quantityPrescription: i.quantity,
           }
           return visitProduct
         })
-        const vpInsertResult: InsertResult = await manager.insert(
-          VisitProduct,
-          visitProductListInsert
-        )
-        if (vpInsertResult.identifiers.length !== visitProductDraftList.length) {
-          throw new Error(`Create Visit ${visitId} failed: Insert VisitProductList error !!!`)
-        }
-
-        const visitBatchDraftList = visitProductDraftList
-          .map((i, vpIndex) => {
-            return i.visitBatchDraftList.map((j) => {
-              const visitBatch: NoExtra<VisitBatchInsertType> = {
-                ...j,
-                oid,
-                visitId,
-                productId: i.productId,
-                visitProductId: vpInsertResult.identifiers[vpIndex].id,
-              }
-              return visitBatch
-            })
-          })
-          .flat()
-        if (visitBatchDraftList.length) {
-          await manager.insert(VisitBatch, visitBatchDraftList)
-        }
+        await manager.insert(VisitProduct, visitProductListInsert)
       }
 
       if (visitProcedureDraftList) {
@@ -150,9 +122,7 @@ export class InvoiceVisitRepository {
     oid: number
     visitId: number
     visitDraftUpdate: NoExtra<InvoiceVisitDraftUpdateType, T>
-    visitProductDraftList: (InvoiceVisitProductDraftType & {
-      visitBatchDraftList: InvoiceVisitBatchDraftType[]
-    })[]
+    visitProductDraftList: InvoiceVisitProductDraftType[]
     visitProcedureDraftList: InvoiceVisitProcedureDraftType[]
     visitSurchargeDraftList: InvoiceVisitSurchargeDraftType[]
     visitExpenseDraftList: InvoiceVisitExpenseDraftType[]
@@ -187,48 +157,23 @@ export class InvoiceVisitRepository {
       const visit = Visit.fromRaw(visitUpdateResult.raw[0])
 
       await manager.delete(VisitProduct, { oid, visitId })
-      await manager.delete(VisitBatch, { oid, visitId })
       await manager.delete(VisitProcedure, { oid, visitId })
       await manager.delete(VisitSurcharge, { oid, visitId })
       await manager.delete(VisitExpense, { oid, visitId })
 
       if (visitProductDraftList.length) {
         const visitProductListInsert = visitProductDraftList.map((i) => {
-          const { visitBatchDraftList, ...vp } = i
           const visitProduct: NoExtra<VisitProductInsertType> = {
-            ...vp,
+            ...i,
             oid,
             visitId,
-            quantityPrescription: vp.quantity, // cho lấy số lượng kê đơn bằng số lượng bán
+            customerId: visit.customerId,
+            quantityPrescription: i.quantity, // cho lấy số lượng kê đơn bằng số lượng bán
             isSent: 0,
           }
           return visitProduct
         })
-        const vpInsertResult: InsertResult = await manager.insert(
-          VisitProduct,
-          visitProductListInsert
-        )
-        if (vpInsertResult.identifiers.length !== visitProductDraftList.length) {
-          throw new Error(`Update Visit ${visitId} failed: Insert VisitProductList error !!!`)
-        }
-
-        const visitBatchDraftList = visitProductDraftList
-          .map((i, vpIndex) => {
-            return i.visitBatchDraftList.map((j) => {
-              const visitBatch: NoExtra<VisitBatchInsertType> = {
-                ...j,
-                oid,
-                visitId,
-                productId: i.productId,
-                visitProductId: vpInsertResult.identifiers[vpIndex].id,
-              }
-              return visitBatch
-            })
-          })
-          .flat()
-        if (visitBatchDraftList.length) {
-          await manager.insert(VisitBatch, visitBatchDraftList)
-        }
+        await manager.insert(VisitProduct, visitProductListInsert)
       }
 
       if (visitProcedureDraftList.length) {

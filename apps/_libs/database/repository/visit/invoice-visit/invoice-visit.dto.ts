@@ -36,6 +36,7 @@ export type InvoiceVisitDraftUpdateType = Omit<
       Visit,
       | 'oid'
       | 'id'
+      | 'customerId' // không được update customerId
       | 'visitType'
       | 'visitStatus'
       | 'isSent'
@@ -53,13 +54,10 @@ export type InvoiceVisitDraftUpdateType = Omit<
 export type InvoiceVisitProductDraftType = Omit<
   VisitProduct,
   | keyof VisitProductRelationType
-  | keyof Pick<VisitProduct, 'oid' | 'id' | 'visitId' | 'isSent' | 'quantityPrescription'>
->
-
-export type InvoiceVisitBatchDraftType = Omit<
-  VisitBatch,
-  | keyof VisitBatchRelationType
-  | keyof Pick<VisitBatch, 'oid' | 'id' | 'visitId' | 'productId' | 'visitProductId'>
+  | keyof Pick<
+      VisitProduct,
+      'oid' | 'id' | 'visitId' | 'customerId' | 'isSent' | 'quantityPrescription'
+    >
 >
 
 export type InvoiceVisitProcedureDraftType = Omit<

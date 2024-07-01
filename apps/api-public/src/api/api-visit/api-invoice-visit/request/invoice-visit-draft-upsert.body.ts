@@ -159,10 +159,10 @@ export class InvoiceVisitInsertBody {
 export class InvoiceVisitDraftUpdate extends OmitType(InvoiceVisitDraftInsert, ['customerId']) {}
 
 export class InvoiceVisitUpdateBody extends OmitType(InvoiceVisitInsertBody, ['visitDraftInsert']) {
-  @ApiProperty({ type: InvoiceVisitDraftInsert })
+  @ApiProperty({ type: InvoiceVisitDraftUpdate })
   @Expose()
-  @Type(() => InvoiceVisitDraftInsert)
+  @Type(() => InvoiceVisitDraftUpdate)
   @IsDefined()
   @ValidateNested({ each: true })
-  visitDraftUpdate: InvoiceVisitDraftInsert
+  visitDraftUpdate: InvoiceVisitDraftUpdate
 }

@@ -2,6 +2,7 @@ import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import { DiscountType } from '../common/variable'
+import Batch from './batch.entity'
 import Product from './product.entity'
 import Visit from './visit.entity'
 
@@ -12,9 +13,17 @@ export default class VisitProduct extends BaseEntity {
   @Expose()
   visitId: number
 
+  @Column({ default: 0 })
+  @Expose()
+  customerId: number
+
   @Column()
   @Expose()
   productId: number
+
+  @Column({ default: 0 })
+  @Expose()
+  batchId: number
 
   @Column({ type: 'smallint', default: 0 })
   @Expose()
@@ -98,6 +107,11 @@ export default class VisitProduct extends BaseEntity {
   @JoinColumn({ name: 'productId', referencedColumnName: 'id' })
   product: Product
 
+  @Expose()
+  @ManyToOne((type) => Batch, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'batchId', referencedColumnName: 'id' })
+  batch: Batch
+
   static fromRaw(raw: { [P in keyof VisitProduct]: any }) {
     if (!raw) return null
     const entity = new VisitProduct()
@@ -118,7 +132,7 @@ export default class VisitProduct extends BaseEntity {
   }
 }
 
-export type VisitProductRelationType = Pick<VisitProduct, 'visit' | 'product'>
+export type VisitProductRelationType = Pick<VisitProduct, 'visit' | 'product' | 'batch'>
 
 export type VisitProductSortType = Pick<VisitProduct, 'oid' | 'id' | 'visitId' | 'productId'>
 
