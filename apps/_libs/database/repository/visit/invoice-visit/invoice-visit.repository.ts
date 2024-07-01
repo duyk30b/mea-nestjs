@@ -61,47 +61,55 @@ export class InvoiceVisitRepository {
         throw new Error(`Create Visit failed: Insert error ${JSON.stringify(visitInsertResult)}`)
       }
 
-      const visitProductListInsert = visitProductDraftList.map((i) => {
-        const visitProduct: VisitProductInsertType = {
-          ...i,
-          oid,
-          visitId,
-          isSent: 0,
-        }
-        return visitProduct
-      })
-      await manager.insert(VisitProduct, visitProductListInsert)
+      if (visitProductDraftList.length) {
+        const visitProductListInsert = visitProductDraftList.map((i) => {
+          const visitProduct: VisitProductInsertType = {
+            ...i,
+            oid,
+            visitId,
+            isSent: 0,
+          }
+          return visitProduct
+        })
+        await manager.insert(VisitProduct, visitProductListInsert)
+      }
 
-      const visitProcedureListInsert = visitProcedureDraftList.map((i) => {
-        const visitProcedure: VisitProcedureInsertType = {
-          ...i,
-          oid,
-          visitId,
-          customerId: visitDraftInsert.customerId,
-        }
-        return visitProcedure
-      })
-      await manager.insert(VisitProcedure, visitProcedureListInsert)
+      if (visitProcedureDraftList) {
+        const visitProcedureListInsert = visitProcedureDraftList.map((i) => {
+          const visitProcedure: VisitProcedureInsertType = {
+            ...i,
+            oid,
+            visitId,
+            customerId: visitDraftInsert.customerId,
+          }
+          return visitProcedure
+        })
+        await manager.insert(VisitProcedure, visitProcedureListInsert)
+      }
 
-      const visitSurchargeListInsert = visitSurchargeDraftList.map((i) => {
-        const visitSurcharge: VisitSurchargeInsertType = {
-          ...i,
-          oid,
-          visitId,
-        }
-        return visitSurcharge
-      })
-      await manager.insert(VisitSurcharge, visitSurchargeListInsert)
+      if (visitSurchargeDraftList.length) {
+        const visitSurchargeListInsert = visitSurchargeDraftList.map((i) => {
+          const visitSurcharge: VisitSurchargeInsertType = {
+            ...i,
+            oid,
+            visitId,
+          }
+          return visitSurcharge
+        })
+        await manager.insert(VisitSurcharge, visitSurchargeListInsert)
+      }
 
-      const visitExpenseListInsert = visitExpenseDraftList.map((i) => {
-        const visitExpense: VisitExpenseInsertType = {
-          ...i,
-          oid,
-          visitId,
-        }
-        return visitExpense
-      })
-      await manager.insert(VisitExpense, visitExpenseListInsert)
+      if (visitExpenseDraftList.length) {
+        const visitExpenseListInsert = visitExpenseDraftList.map((i) => {
+          const visitExpense: VisitExpenseInsertType = {
+            ...i,
+            oid,
+            visitId,
+          }
+          return visitExpense
+        })
+        await manager.insert(VisitExpense, visitExpenseListInsert)
+      }
 
       return { visitId }
     })
@@ -150,47 +158,55 @@ export class InvoiceVisitRepository {
       await manager.delete(VisitSurcharge, { oid, visitId })
       await manager.delete(VisitExpense, { oid, visitId })
 
-      const visitProductListInsert = visitProductDraftList.map((i) => {
-        const visitProduct: VisitProductInsertType = {
-          ...i,
-          oid,
-          visitId,
-          isSent: 0,
-        }
-        return visitProduct
-      })
-      await manager.insert(VisitProduct, visitProductListInsert)
+      if (visitProductDraftList.length) {
+        const visitProductListInsert = visitProductDraftList.map((i) => {
+          const visitProduct: VisitProductInsertType = {
+            ...i,
+            oid,
+            visitId,
+            isSent: 0,
+          }
+          return visitProduct
+        })
+        await manager.insert(VisitProduct, visitProductListInsert)
+      }
 
-      const visitProcedureListInsert = visitProcedureDraftList.map((i) => {
-        const visitProcedure: VisitProcedureInsertType = {
-          ...i,
-          oid,
-          visitId,
-          customerId: visit.customerId,
-        }
-        return visitProcedure
-      })
-      await manager.insert(VisitProcedure, visitProcedureListInsert)
+      if (visitProcedureDraftList.length) {
+        const visitProcedureListInsert = visitProcedureDraftList.map((i) => {
+          const visitProcedure: VisitProcedureInsertType = {
+            ...i,
+            oid,
+            visitId,
+            customerId: visit.customerId,
+          }
+          return visitProcedure
+        })
+        await manager.insert(VisitProcedure, visitProcedureListInsert)
+      }
 
-      const visitSurchargeListInsert = visitSurchargeDraftList.map((i) => {
-        const visitSurcharge: VisitSurchargeInsertType = {
-          ...i,
-          oid,
-          visitId,
-        }
-        return visitSurcharge
-      })
-      await manager.insert(VisitSurcharge, visitSurchargeListInsert)
+      if (visitSurchargeDraftList.length) {
+        const visitSurchargeListInsert = visitSurchargeDraftList.map((i) => {
+          const visitSurcharge: VisitSurchargeInsertType = {
+            ...i,
+            oid,
+            visitId,
+          }
+          return visitSurcharge
+        })
+        await manager.insert(VisitSurcharge, visitSurchargeListInsert)
+      }
 
-      const visitExpenseListInsert = visitExpenseDraftList.map((i) => {
-        const visitExpense: VisitExpenseInsertType = {
-          ...i,
-          oid,
-          visitId,
-        }
-        return visitExpense
-      })
-      await manager.insert(VisitExpense, visitExpenseListInsert)
+      if (visitExpenseDraftList.length) {
+        const visitExpenseListInsert = visitExpenseDraftList.map((i) => {
+          const visitExpense: VisitExpenseInsertType = {
+            ...i,
+            oid,
+            visitId,
+          }
+          return visitExpense
+        })
+        await manager.insert(VisitExpense, visitExpenseListInsert)
+      }
 
       return { visitId }
     })
