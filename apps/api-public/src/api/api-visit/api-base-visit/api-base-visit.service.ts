@@ -19,8 +19,7 @@ export class ApiBaseVisitService {
   ) {}
 
   async pagination(oid: number, query: VisitPaginationQuery): Promise<BaseResponse> {
-    const { page, limit, sort, relation } = query
-    const { startedAt, updatedAt, registeredAt, customerId } = query.filter || {}
+    const { page, limit, sort, relation, filter } = query
 
     const { data, total } = await this.visitRepository.pagination({
       page,
@@ -31,10 +30,12 @@ export class ApiBaseVisitService {
       },
       condition: {
         oid,
-        customerId,
-        registeredAt,
-        startedAt,
-        updatedAt,
+        visitStatus: filter?.visitStatus,
+        visitType: filter?.visitType,
+        customerId: filter?.customerId,
+        registeredAt: filter?.registeredAt,
+        startedAt: filter?.startedAt,
+        updatedAt: filter?.updatedAt,
       },
       sort,
     })
@@ -45,16 +46,17 @@ export class ApiBaseVisitService {
   }
 
   async getMany(oid: number, query: VisitGetManyQuery): Promise<BaseResponse> {
-    const { relation, limit, sort } = query
-    const { startedAt, updatedAt, customerId, registeredAt } = query.filter || {}
+    const { relation, limit, sort, filter } = query
 
     const data = await this.visitRepository.findMany({
       condition: {
         oid,
-        customerId,
-        registeredAt,
-        startedAt,
-        updatedAt,
+        visitStatus: filter?.visitStatus,
+        visitType: filter?.visitType,
+        customerId: filter?.customerId,
+        registeredAt: filter?.registeredAt,
+        startedAt: filter?.startedAt,
+        updatedAt: filter?.updatedAt,
       },
       relation: { customer: relation?.customer },
       limit,
