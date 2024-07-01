@@ -114,7 +114,6 @@ export class InvoiceVisitInsertBody {
   @Type(() => InvoiceVisitProductDraft)
   @IsDefined()
   @IsArray()
-  @ArrayMinSize(1)
   @ValidateNested({ each: true })
   visitProductDraftList: InvoiceVisitProductDraft[]
 
@@ -123,7 +122,6 @@ export class InvoiceVisitInsertBody {
   @Type(() => InvoiceVisitProcedureDraft)
   @IsDefined()
   @IsArray()
-  @ArrayMinSize(1)
   @ValidateNested({ each: true })
   visitProcedureDraftList: InvoiceVisitProcedureDraft[]
 
