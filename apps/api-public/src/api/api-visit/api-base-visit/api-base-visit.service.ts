@@ -85,7 +85,7 @@ export class ApiBaseVisitService {
       throw new BusinessException('error.Database.NotFound')
     }
 
-    if (data.visitRadiologyList || data.visitDiagnosis.imageList) {
+    if (data.visitRadiologyList || data.visitDiagnosis?.imageList) {
       data.visitRadiologyList = data.visitRadiologyList || []
       data.visitDiagnosis.imageList = []
 
