@@ -28,12 +28,6 @@ export class InvoiceVisitProductDraft {
   @IsNumberGreaterThan(0)
   quantity: number
 
-  @ApiProperty({ example: 4 })
-  @Expose()
-  @IsDefined()
-  @IsNumberGreaterThan(0)
-  quantityPrescription: number
-
   @ApiPropertyOptional({ example: 12_000 })
   @Expose()
   @IsDefined()

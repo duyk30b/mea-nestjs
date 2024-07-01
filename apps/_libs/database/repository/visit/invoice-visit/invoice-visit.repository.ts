@@ -73,6 +73,7 @@ export class InvoiceVisitRepository {
             oid,
             visitId,
             isSent: 0,
+            quantityPrescription: vp.quantity,
           }
           return visitProduct
         })
@@ -110,6 +111,7 @@ export class InvoiceVisitRepository {
             oid,
             visitId,
             customerId: visitDraftInsert.customerId,
+            createdAt: visitDraftInsert.registeredAt,
           }
           return visitProcedure
         })
@@ -197,6 +199,7 @@ export class InvoiceVisitRepository {
             ...vp,
             oid,
             visitId,
+            quantityPrescription: vp.quantity, // cho lấy số lượng kê đơn bằng số lượng bán
             isSent: 0,
           }
           return visitProduct
@@ -235,6 +238,7 @@ export class InvoiceVisitRepository {
             oid,
             visitId,
             customerId: visit.customerId,
+            createdAt: visit.registeredAt,
           }
           return visitProcedure
         })

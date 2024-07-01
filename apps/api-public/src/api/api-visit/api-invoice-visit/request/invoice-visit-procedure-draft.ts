@@ -52,10 +52,4 @@ export class InvoiceVisitProcedureDraft {
   @IsDefined()
   @IsNumber()
   actualPrice: number
-
-  @ApiProperty({ example: Date.now() })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  createdAt: number
 }
