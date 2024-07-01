@@ -1,4 +1,5 @@
-import { VisitProcedure, VisitProduct } from '../../../entities'
+import { VisitBatch, VisitProcedure, VisitProduct } from '../../../entities'
+import { VisitBatchRelationType } from '../../../entities/visit-batch.entity'
 import VisitExpense, { VisitExpenseRelationType } from '../../../entities/visit-expense.entity'
 import { VisitProcedureRelationType } from '../../../entities/visit-procedure.entity'
 import { VisitProductRelationType } from '../../../entities/visit-product.entity'
@@ -52,6 +53,12 @@ export type InvoiceVisitDraftUpdateType = Omit<
 export type InvoiceVisitProductDraftType = Omit<
   VisitProduct,
   keyof VisitProductRelationType | keyof Pick<VisitProduct, 'oid' | 'id' | 'visitId' | 'isSent'>
+>
+
+export type InvoiceVisitBatchDraftType = Omit<
+  VisitBatch,
+  | keyof VisitBatchRelationType
+  | keyof Pick<VisitBatch, 'oid' | 'id' | 'visitId' | 'productId' | 'visitProductId'>
 >
 
 export type InvoiceVisitProcedureDraftType = Omit<

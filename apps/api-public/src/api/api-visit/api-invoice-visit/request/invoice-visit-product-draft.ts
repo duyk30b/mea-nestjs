@@ -1,12 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { Expose, Transform } from 'class-transformer'
-import { IsDefined, IsNumber, IsString } from 'class-validator'
+import { Expose, Transform, Type } from 'class-transformer'
+import { IsArray, IsDefined, IsNumber, IsString, ValidateNested } from 'class-validator'
 import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
 import {
   IsEnumValue,
   IsNumberGreaterThan,
 } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
 import { DiscountType } from '../../../../../../_libs/database/common/variable'
+import { InvoiceVisitBatchDraft } from './invoice-visit-batch-draft'
 
 export class InvoiceVisitProductDraft {
   @ApiProperty({ example: 12 })
@@ -75,6 +76,14 @@ export class InvoiceVisitProductDraft {
   @Expose()
   @IsString()
   hintUsage: string
+
+  @ApiProperty({ type: InvoiceVisitBatchDraft, isArray: true })
+  @Expose()
+  @Type(() => InvoiceVisitBatchDraft)
+  @IsDefined()
+  @IsArray()
+  @ValidateNested({ each: true })
+  visitBatchDraftList: InvoiceVisitBatchDraft[]
 
   // @ApiPropertyOptional({ name: 'unit', type: 'string', example: '{"name":"Viên","rate":1}' })
   // @Expose({ name: 'unit' })
