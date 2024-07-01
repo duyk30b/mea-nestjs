@@ -290,6 +290,9 @@ export type VisitRelationType = Pick<
 
 export type VisitSortType = Pick<Visit, 'id' | 'customerId' | 'registeredAt'>
 
-export type VisitInsertType = Omit<Visit, keyof VisitRelationType | keyof Pick<Visit, 'id'>>
+export type VisitInsertType = Omit<
+  Visit,
+  keyof VisitRelationType | keyof Pick<Visit, 'id' | 'updatedAt'>
+>
 
 export type VisitUpdateType = Omit<Visit, keyof VisitRelationType | keyof Pick<Visit, 'oid' | 'id'>>

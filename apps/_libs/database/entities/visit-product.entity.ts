@@ -118,6 +118,16 @@ export default class VisitProduct extends BaseEntity {
   }
 }
 
-export type VisitProductInsertType = Omit<VisitProduct, 'id' | 'visit' | 'product'>
+export type VisitProductRelationType = Pick<VisitProduct, 'visit' | 'product'>
 
-export type VisitProductUpdateType = Omit<VisitProduct, 'oid' | 'id' | 'visit' | 'product'>
+export type VisitProductSortType = Pick<VisitProduct, 'oid' | 'id' | 'visitId' | 'productId'>
+
+export type VisitProductInsertType = Omit<
+  VisitProduct,
+  keyof VisitProductRelationType | keyof Pick<VisitProduct, 'id'>
+>
+
+export type VisitProductUpdateType = Omit<
+  VisitProduct,
+  keyof VisitProductRelationType | keyof Pick<VisitProduct, 'oid' | 'id'>
+>

@@ -73,6 +73,7 @@ import { VisitDiagnosisRepository } from './visit-diagnosis/visit-diagnosis.repo
 import { VisitProcedureRepository } from './visit-procedure/visit-procedure.repository'
 import { VisitProductRepository } from './visit-product/visit-product.repository'
 import { VisitRadiologyRepository } from './visit-radiology/visit-radiology.repository'
+import { InvoiceVisitRepository } from './visit/invoice-visit/invoice-visit.repository'
 import { VisitClose } from './visit/visit-close'
 import { VisitItemsMoney } from './visit/visit-items-money'
 import { VisitPayDebt } from './visit/visit-pay-debt'
@@ -160,6 +161,7 @@ import { VisitRepository } from './visit/visit.repository'
     StatisticVisitRepository,
     UserRepository,
     VisitClose,
+    InvoiceVisitRepository,
     VisitItemsMoney,
     VisitPayDebt,
     VisitPrepayment,
@@ -216,6 +218,7 @@ import { VisitRepository } from './visit/visit.repository'
     StatisticVisitRepository,
     UserRepository,
     VisitClose,
+    InvoiceVisitRepository,
     VisitItemsMoney,
     VisitPayDebt,
     VisitPrepayment,
