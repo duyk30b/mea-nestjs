@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import { IsDefined, IsNumber, IsPositive, ValidateNested } from 'class-validator'
-import { CustomerCreateBody } from '../../api-customer/request'
+import { CustomerCreateBody } from '../../../api-customer/request'
 
-export class VisitRegisterWithNewCustomerBody {
+export class ClinicVisitRegisterWithNewCustomerBody {
   @ApiProperty({ type: CustomerCreateBody })
   @Expose()
   @Type(() => CustomerCreateBody)
@@ -17,7 +17,7 @@ export class VisitRegisterWithNewCustomerBody {
   registeredAt: number
 }
 
-export class VisitRegisterWithExistCustomerBody {
+export class ClinicVisitRegisterWithExistCustomerBody {
   @ApiProperty({ example: 45 })
   @Expose()
   @IsDefined()

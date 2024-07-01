@@ -32,7 +32,7 @@ import { ApiVisitModule } from './api-visit/api-visit.module'
     ApiCustomerPaymentModule,
     ApiDistributorModule,
     ApiDistributorPaymentModule,
-    ApiInvoiceModule,
+    // ApiInvoiceModule,
     ApiInvoiceItemModule,
     ApiOrganizationModule,
     ApiPermissionModule,

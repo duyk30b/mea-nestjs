@@ -1,7 +1,4 @@
-export * from './visit-get.query'
-export * from './visit-options.request'
 export * from './visit-payment.body'
-export * from './visit-register.body'
 export * from './visit-replace-prescription.body'
 export * from './visit-replace-procedure-list.body'
 export * from './visit-replace-radiology-list.body'

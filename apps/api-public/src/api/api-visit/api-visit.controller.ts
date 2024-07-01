@@ -1,19 +1,12 @@
-import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common'
+import { Body, Controller, Param, Post, Put } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto'
 import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
 import { ApiVisitActionService } from './api-visit-action.service'
-import { ApiVisitClinicService } from './api-visit-clinic.service'
-import { ApiVisitService } from './api-visit.service'
 import {
-  VisitGetManyQuery,
-  VisitGetOneQuery,
-  VisitPaginationQuery,
   VisitPaymentBody,
-  VisitRegisterWithExistCustomerBody,
-  VisitRegisterWithNewCustomerBody,
   VisitReplacePrescriptionBody,
   VisitReplaceVisitProcedureListBody,
   VisitReplaceVisitRadiologyListBody,
@@ -26,57 +19,7 @@ import {
 @ApiBearerAuth('access-token')
 @Controller('visit')
 export class ApiVisitController {
-  constructor(
-    private readonly apiVisitService: ApiVisitService,
-    private readonly apiVisitClinicService: ApiVisitClinicService,
-    private readonly apiVisitActionService: ApiVisitActionService
-  ) {}
-
-  @Get('pagination')
-  @HasPermission(PermissionId.VISIT_READ)
-  async pagination(@External() { oid }: TExternal, @Query() query: VisitPaginationQuery) {
-    return await this.apiVisitService.pagination(oid, query)
-  }
-
-  @Get('list')
-  @HasPermission(PermissionId.VISIT_READ)
-  async list(@External() { oid }: TExternal, @Query() query: VisitGetManyQuery) {
-    return await this.apiVisitService.getMany(oid, query)
-  }
-
-  @Get('detail/:id')
-  @HasPermission(PermissionId.VISIT_READ)
-  async detail(
-    @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
-    @Query() query: VisitGetOneQuery
-  ) {
-    return await this.apiVisitService.getOne(oid, id, query)
-  }
-
-  @Post('clinic/register-with-new-customer')
-  @HasPermission(PermissionId.VISIT_CREATE)
-  async registerWithNewUser(
-    @External() { oid }: TExternal,
-    @Body() body: VisitRegisterWithNewCustomerBody
-  ) {
-    return await this.apiVisitClinicService.registerWithNewUser(oid, body)
-  }
-
-  @Post('clinic/register-with-exist-customer')
-  @HasPermission(PermissionId.VISIT_CREATE)
-  async registerWithExistUser(
-    @External() { oid }: TExternal,
-    @Body() body: VisitRegisterWithExistCustomerBody
-  ) {
-    return await this.apiVisitClinicService.registerWithExistUser(oid, body)
-  }
-
-  @Post('clinic/start-checkup/:id')
-  @HasPermission(PermissionId.VISIT_START_CHECKUP)
-  async startCheckup(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiVisitClinicService.startCheckup(oid, id)
-  }
+  constructor(private readonly apiVisitActionService: ApiVisitActionService) {}
 
   @Put('replace-visit-procedure-list')
   @HasPermission(PermissionId.VISIT_REPLACE_VISIT_PROCEDURE_LIST)

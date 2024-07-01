@@ -1,14 +1,17 @@
 import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { VisitStatus } from '../../../../_libs/database/entities/visit.entity'
-import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
-import { VisitDiagnosisRepository } from '../../../../_libs/database/repository/visit-diagnosis/visit-diagnosis.repository'
-import { VisitRepository } from '../../../../_libs/database/repository/visit/visit.repository'
-import { SocketEmitService } from '../../socket/socket-emit.service'
-import { VisitRegisterWithExistCustomerBody, VisitRegisterWithNewCustomerBody } from './request'
+import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
+import { VisitStatus } from '../../../../../_libs/database/entities/visit.entity'
+import { CustomerRepository } from '../../../../../_libs/database/repository/customer/customer.repository'
+import { VisitDiagnosisRepository } from '../../../../../_libs/database/repository/visit-diagnosis/visit-diagnosis.repository'
+import { VisitRepository } from '../../../../../_libs/database/repository/visit/visit.repository'
+import { SocketEmitService } from '../../../socket/socket-emit.service'
+import {
+  ClinicVisitRegisterWithExistCustomerBody,
+  ClinicVisitRegisterWithNewCustomerBody,
+} from './request/clinic-visit-register.body'
 
 @Injectable()
-export class ApiVisitClinicService {
+export class ApiClinicVisitService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
     private readonly visitRepository: VisitRepository,
@@ -17,7 +20,7 @@ export class ApiVisitClinicService {
     private readonly customerRepository: CustomerRepository
   ) {}
 
-  async registerWithNewUser(oid: number, body: VisitRegisterWithNewCustomerBody) {
+  async registerWithNewUser(oid: number, body: ClinicVisitRegisterWithNewCustomerBody) {
     const customer = await this.customerRepository.insertOneAndReturnEntity({
       oid,
       ...body.customer,
@@ -42,7 +45,7 @@ export class ApiVisitClinicService {
     return { data: visit }
   }
 
-  async registerWithExistUser(oid: number, body: VisitRegisterWithExistCustomerBody) {
+  async registerWithExistUser(oid: number, body: ClinicVisitRegisterWithExistCustomerBody) {
     const customer = await this.customerRepository.findOneById(body.customerId)
     const visit = await this.visitRepository.insertOneAndReturnEntity({
       oid,

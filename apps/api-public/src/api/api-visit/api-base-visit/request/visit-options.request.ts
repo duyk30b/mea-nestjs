@@ -1,7 +1,6 @@
 import { Expose, Type } from 'class-transformer'
 import { IsBoolean, IsIn, IsNumber, ValidateNested } from 'class-validator'
-import { ConditionTimestamp } from '../../../../../_libs/common/dto/condition-timestamp'
-import { SortQuery } from '../../../../../_libs/common/dto/query'
+import { ConditionTimestamp, SortQuery } from '../../../../../../_libs/common/dto'
 
 export class VisitRelationQuery {
   @Expose()
