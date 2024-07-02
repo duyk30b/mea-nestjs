@@ -31,14 +31,14 @@ export class ApiInvoiceVisitService {
     }
   }
 
-  async updateVisitDraftAndVisitPrepayment(params: {
+  async updateDraft(params: {
     oid: number
     visitId: number
     body: InvoiceVisitUpdateBody
   }): Promise<BaseResponse> {
     const { oid, visitId, body } = params
     try {
-      await this.invoiceVisitRepository.updateVisitDraftAndVisitPrepayment({
+      await this.invoiceVisitRepository.updateDraft({
         oid,
         visitId,
         visitDraftUpdate: body.visitDraftUpdate,

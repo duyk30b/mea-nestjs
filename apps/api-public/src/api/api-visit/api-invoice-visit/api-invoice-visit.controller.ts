@@ -17,19 +17,19 @@ export class ApiInvoiceVisitController {
   constructor(private readonly apiInvoiceVisitService: ApiInvoiceVisitService) {}
 
   @Post('create-draft')
-  @HasPermission(PermissionId.INVOICE_CREATE_DRAFT)
+  @HasPermission(PermissionId.INVOICE_DRAFT)
   async createDraft(@External() { oid }: TExternal, @Body() body: InvoiceVisitInsertBody) {
     return await this.apiInvoiceVisitService.createDraft({ oid, body })
   }
 
-  @Patch('update-visit-draft-and-visit-prepayment/:id')
-  @HasPermission(PermissionId.INVOICE_UPDATE_INVOICE_DRAFT_AND_INVOICE_PREPAYMENT)
-  async updateInvoiceDraftAndInvoicePrepayment(
+  @Patch('update-draft/:id')
+  @HasPermission(PermissionId.INVOICE_DRAFT)
+  async updateDraft(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
     @Body() body: InvoiceVisitUpdateBody
   ) {
-    return await this.apiInvoiceVisitService.updateVisitDraftAndVisitPrepayment({
+    return await this.apiInvoiceVisitService.updateDraft({
       oid,
       visitId: id,
       body,
@@ -37,7 +37,7 @@ export class ApiInvoiceVisitController {
   }
 
   @Delete('destroy-draft/:id')
-  @HasPermission(PermissionId.INVOICE_DELETE)
+  @HasPermission(PermissionId.INVOICE_DRAFT)
   async destroyDraft(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiInvoiceVisitService.destroyDraft({
       oid,

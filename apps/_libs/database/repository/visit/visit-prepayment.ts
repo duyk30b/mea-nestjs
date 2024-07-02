@@ -23,7 +23,7 @@ export class VisitPrepayment {
       const whereVisit: FindOptionsWhere<Visit> = {
         oid,
         id: visitId,
-        visitStatus: In([VisitStatus.Draft, VisitStatus.Waiting, VisitStatus.InProgress]),
+        visitStatus: In([VisitStatus.Waiting, VisitStatus.InProgress]),
       }
       const setVisit: { [P in keyof NoExtra<Partial<Visit>>]: Visit[P] | (() => string) } = {
         paid: () => `paid + ${money}`,

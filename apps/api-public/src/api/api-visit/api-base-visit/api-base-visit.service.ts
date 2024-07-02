@@ -74,7 +74,7 @@ export class ApiBaseVisitService {
         visitSurchargeList: !!relation?.visitSurchargeList,
         visitExpenseList: !!relation?.visitExpenseList,
         visitDiagnosis: !!relation?.visitDiagnosis,
-        visitProductList: relation?.visitProductList ? { product: true } : false,
+        visitProductList: relation?.visitProductList ? { product: true, batch: true } : false,
         visitProcedureList: relation?.visitProcedureList ? { procedure: true } : false,
         visitRadiologyList: relation?.visitRadiologyList
           ? { radiology: true, doctor: true }

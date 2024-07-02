@@ -118,7 +118,7 @@ export class InvoiceVisitRepository {
     })
   }
 
-  async updateVisitDraftAndVisitPrepayment<T extends InvoiceVisitDraftUpdateType>(params: {
+  async updateDraft<T extends InvoiceVisitDraftUpdateType>(params: {
     oid: number
     visitId: number
     visitDraftUpdate: NoExtra<InvoiceVisitDraftUpdateType, T>
@@ -141,7 +141,7 @@ export class InvoiceVisitRepository {
       const whereVisit: FindOptionsWhere<Visit> = {
         id: visitId,
         oid,
-        visitStatus: In([VisitStatus.Draft, VisitStatus.InProgress]),
+        visitStatus: In([VisitStatus.Draft]),
         isSent: 0,
       }
       const visitUpdateResult = await manager

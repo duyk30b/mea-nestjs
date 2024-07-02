@@ -34,7 +34,7 @@ export class VisitRepository extends PostgreSqlRepository<
       customer?: boolean
       customerPaymentList?: boolean
       visitDiagnosis?: boolean
-      visitProductList?: { product?: boolean } | false
+      visitProductList?: { product?: boolean; batch?: boolean } | false
       visitProcedureList?: { procedure?: boolean } | false
       visitRadiologyList?: { radiology?: boolean; doctor?: boolean } | false
       visitExpenseList?: boolean
@@ -69,6 +69,9 @@ export class VisitRepository extends PostgreSqlRepository<
           'product',
           'visitProduct.productId != 0'
         )
+      }
+      if (relation?.visitProductList.batch) {
+        query = query.leftJoinAndSelect('visitProduct.batch', 'batch', 'visitProduct.batchId != 0')
       }
     }
     if (relation?.visitProcedureList) {
