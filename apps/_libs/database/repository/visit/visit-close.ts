@@ -76,7 +76,7 @@ export class VisitClose {
           oid,
           customerId: visit.customerId,
           voucherId: visitId,
-          voucherType: VoucherType.Visit,
+          voucherType: VoucherType.Clinic,
           createdAt: time,
           paymentType: PaymentType.Close,
           paid: 0,

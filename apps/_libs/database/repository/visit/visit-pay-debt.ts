@@ -71,7 +71,7 @@ export class VisitPayDebt {
         oid,
         customerId: visit.customerId,
         voucherId: visitId,
-        voucherType: VoucherType.Visit,
+        voucherType: VoucherType.Clinic,
         createdAt: time,
         paymentType: PaymentType.PayDebt,
         paid: money,

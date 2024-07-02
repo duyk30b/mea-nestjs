@@ -1,52 +1,34 @@
 import { Injectable } from '@nestjs/common'
-import { DataSource, FindOptionsWhere, InsertResult, UpdateResult } from 'typeorm'
-import { arrayToKeyValue } from '../../../common/helpers/object.helper'
+import { DataSource, FindOptionsWhere, In, UpdateResult } from 'typeorm'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { VoucherType } from '../../common/variable'
 import { Batch, Product, Visit, VisitProduct } from '../../entities'
 import BatchMovement, { BatchMovementInsertType } from '../../entities/batch-movement.entity'
 import ProductMovement, { ProductMovementInsertType } from '../../entities/product-movement.entity'
-import VisitBatch, { VisitBatchInsertType } from '../../entities/visit-batch.entity'
 import { VisitStatus } from '../../entities/visit.entity'
 
 @Injectable()
 export class VisitSendProduct {
   constructor(private dataSource: DataSource) {}
 
-  async sendProductList(params: {
-    oid: number
-    visitId: number
-    time: number
-    visitProductSendList: {
-      visitProductId: number
-      productId: number
-      quantitySend: number
-      hasManageQuantity: 0 | 1
-      hasManageBatches: 0 | 1
-    }[]
-    visitBatchSendList: {
-      visitProductId: number
-      productId: number
-      batchId: number
-      quantitySend: number
-    }[]
-  }) {
-    const { oid, visitId, time, visitProductSendList, visitBatchSendList } = params
-    const PREFIX = `VisitId = ${visitId}, Send Product failed`
+  async sendProduct(params: { oid: number; visitId: number; time: number; money: number }) {
+    const { oid, visitId, time, money } = params
+    const PREFIX = `VisitId = ${visitId}, sendProductAndPayment failed`
 
-    if (!visitProductSendList.length) {
-      throw new Error(`${PREFIX}: visitProductSendList.length = 0`)
+    if (money < 0) {
+      throw new Error(`${PREFIX}: money = ${money}`)
     }
 
-    const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
+    return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. UPDATE STATUS for VISIT ===
       const whereVisit: FindOptionsWhere<Visit> = {
         oid,
         id: visitId,
-        visitStatus: VisitStatus.InProgress,
+        visitStatus: In([VisitStatus.Draft, VisitStatus.InProgress]),
       }
       const setVisit: { [P in keyof NoExtra<Partial<Visit>>]: Visit[P] | (() => string) } = {
         isSent: 1,
+        visitStatus: VisitStatus.InProgress,
       }
       const visitUpdateResult: UpdateResult = await manager
         .createQueryBuilder()
@@ -56,58 +38,29 @@ export class VisitSendProduct {
         .returning('*')
         .execute()
       if (visitUpdateResult.affected != 1) {
-        throw new Error(`${PREFIX}: Update Visit, affected = ${visitUpdateResult.affected}`)
+        throw new Error(`${PREFIX}: Update Visit failed: visitUpdateResult = ${visitUpdateResult}`)
       }
       const visit = Visit.fromRaw(visitUpdateResult.raw[0])
 
-      // === 2. UPDATE for VISIT_PRODUCT ===
-      const visitProductUpdateResult: [any[], number] = await manager.query(
-        `
-        UPDATE "VisitProduct" vp
-        SET "isSent" = 1
-        FROM (VALUES ` +
-          visitProductSendList
-            .map((i) => `(${i.visitProductId}, ${i.productId}, ${i.quantitySend})`)
-            .join(', ') +
-          `   ) AS temp("visitProductId", "productId", "quantitySend")
-        WHERE   vp."oid" = ${oid} 
-            AND vp."visitId" = ${visitId}
-            AND vp."id" = temp."visitProductId" 
-            AND vp."isSent" = 0
-            AND vp."productId" = temp."productId" 
-            AND vp."quantity" = temp."quantitySend"
-        RETURNING vp.*;    
-        `
-      )
-      if (visitProductUpdateResult[0].length != visitProductSendList.length) {
-        throw new Error(`${PREFIX}: Update VisitProduct, affected = ${visitProductUpdateResult[1]}`)
+      // === 2. UPDATE VISIT_PRODUCT ===
+      const whereVisitProduct: FindOptionsWhere<VisitProduct> = {
+        oid,
+        id: visitId,
+        isSent: 0,
       }
-      const visitProductList = VisitProduct.fromRaws(visitProductUpdateResult[0])
-      const visitProductMap = arrayToKeyValue(visitProductList, 'id')
-
-      // 3. === CREATE: VISIT_BATCH ===
-      let visitBatchList: VisitBatch[] = []
-      const visitBatchListDraft: VisitBatchInsertType[] = visitBatchSendList.map((i) => {
-        const visitBatchDraft: VisitBatchInsertType = {
-          oid,
-          visitId,
-          visitProductId: i.visitProductId,
-          productId: i.productId,
-          batchId: i.batchId,
-          quantity: i.quantitySend,
-        }
-        return visitBatchDraft
-      })
-      if (visitBatchListDraft.length) {
-        const visitBatchInsertResult: InsertResult = await manager
-          .createQueryBuilder()
-          .insert()
-          .into(VisitBatch)
-          .values(visitBatchListDraft)
-          .returning('*')
-          .execute()
-        visitBatchList = VisitBatch.fromRaws(visitBatchInsertResult.raw)
+      const setVisitProduct: {
+        [P in keyof NoExtra<Partial<VisitProduct>>]: VisitProduct[P] | (() => string)
+      } = {
+        isSent: 1,
       }
+      const visitProductListUpdateResult: UpdateResult = await manager
+        .createQueryBuilder()
+        .update(VisitProduct)
+        .where(whereVisitProduct)
+        .set(setVisitProduct)
+        .returning('*')
+        .execute()
+      visit.visitProductList = VisitProduct.fromRaws(visitProductListUpdateResult.raw)
 
       // 4. === CALCULATOR: số lượng lấy của product và batch ===
       const productIdMapValue: Record<
@@ -120,11 +73,8 @@ export class VisitSendProduct {
         }
       > = {}
       const batchIdMapValue: Record<string, { quantitySend: number; openQuantity: number }> = {}
-      for (let i = 0; i < visitProductSendList.length; i++) {
-        if (!visitProductSendList[i].hasManageQuantity) continue
-        const { productId, visitProductId } = visitProductSendList[i]
-        const { quantity, costAmount } = visitProductMap[visitProductId]
-
+      for (let i = 0; i < visit.visitProductList.length; i++) {
+        const { productId, batchId, quantity, costAmount } = visit.visitProductList[i]
         if (!productIdMapValue[productId]) {
           productIdMapValue[productId] = {
             quantitySend: 0,
@@ -135,15 +85,13 @@ export class VisitSendProduct {
         }
         productIdMapValue[productId].quantitySend += quantity
         productIdMapValue[productId].costAmountSend += costAmount
-      }
 
-      for (let i = 0; i < visitBatchSendList.length; i++) {
-        const { batchId, quantitySend } = visitBatchSendList[i]
-
-        if (!batchIdMapValue[batchId]) {
-          batchIdMapValue[batchId] = { quantitySend: 0, openQuantity: 0 }
+        if (batchId != 0) {
+          if (!batchIdMapValue[batchId]) {
+            batchIdMapValue[batchId] = { quantitySend: 0, openQuantity: 0 }
+          }
+          batchIdMapValue[batchId].quantitySend += quantity
         }
-        batchIdMapValue[batchId].quantitySend += quantitySend
       }
 
       // 5. === UPDATE for PRODUCT ===
@@ -152,29 +100,25 @@ export class VisitSendProduct {
       if (productIdEntriesValue.length) {
         const productUpdateResult: [any[], number] = await manager.query(
           `
-          UPDATE "Product" AS "product"
-          SET "quantity" = "product"."quantity" - temp."quantitySend",
-              "costAmount" = "product"."costAmount" - temp."costAmountSend"
-          FROM (VALUES ` +
+            UPDATE "Product" AS "product"
+            SET "quantity" = "product"."quantity" - temp."quantitySend",
+                "costAmount" = "product"."costAmount" - temp."costAmountSend"
+            FROM (VALUES ` +
             productIdEntriesValue
               .map(([productId, value]) => {
                 return `(${productId}, ${value.quantitySend}, ${value.costAmountSend})`
               })
               .join(', ') +
             `   ) AS temp("productId", "quantitySend", "costAmountSend")
-          WHERE   "product"."id" = temp."productId" 
-              AND "product"."oid" = ${oid} 
-              AND "product"."hasManageQuantity" = 1 
-              AND "product"."quantity" >= temp."quantitySend"    
-          RETURNING "product".*;   
+            WHERE   "product"."id" = temp."productId" 
+                AND "product"."oid" = ${oid} 
+                AND "product"."hasManageQuantity" = 1 
+            RETURNING "product".*;   
           `
         )
-        if (productUpdateResult[1] != productIdEntriesValue.length) {
-          throw new Error(`${PREFIX}: Update Product, affected = ${productUpdateResult[1]}`)
-        }
+        // Kết quả: cho phép số lượng âm, thằng nào không quản lý tồn kho không được update
         productList = Product.fromRaws(productUpdateResult[0])
       }
-      const productMap = arrayToKeyValue(productList, 'id')
 
       // 6. === UPDATE for BATCH ===
       let batchList: Batch[] = []
@@ -196,27 +140,14 @@ export class VisitSendProduct {
           RETURNING "batch".*;        
           `
         )
+        // Kết quả: "KHÔNG" cho phép số lượng âm
         if (batchUpdateResult[1] != batchIdEntriesSelect.length) {
           throw new Error(`${PREFIX}: Update Batch, affected = ${batchUpdateResult[1]}`)
         }
         batchList = Batch.fromRaws(batchUpdateResult[0])
       }
 
-      // 7. === VALIDATE: có thông tin product rồi, giờ validate lại DTO ===
-      for (let i = 0; i < visitProductSendList.length; i++) {
-        const visitProductDto = visitProductSendList[i]
-        const { productId } = visitProductSendList[i]
-        const product = productMap[productId]
-        if (!product) continue // vì những product không có hasManageQuantity ko được update số lượng nên không có
-        if (
-          product.hasManageQuantity != visitProductDto.hasManageQuantity ||
-          product.hasManageBatches != visitProductDto.hasManageBatches
-        ) {
-          throw new Error(`${PREFIX}: productId = ${productId} change manage batches`)
-        }
-      }
-
-      // 8. === CALCULATOR: số lượng ban đầu của product và batch ===
+      // 7. === CALCULATOR: số lượng ban đầu của product và batch ===
       productList.forEach((i) => {
         const currentMap = productIdMapValue[i.id]
         currentMap.openQuantity = i.quantity + currentMap.quantitySend
@@ -227,16 +158,17 @@ export class VisitSendProduct {
         currentMap.openQuantity = i.quantity + currentMap.quantitySend
       })
 
-      // 9. === CREATE: PRODUCT_MOVEMENT ===
-      const productMovementListDraft = visitProductList.map((visitProduct) => {
+      // 8. === CREATE: PRODUCT_MOVEMENT ===
+      const productMovementListDraft = visit.visitProductList.map((visitProduct) => {
         const currentMap = productIdMapValue[visitProduct.productId]
+        // nếu không có currentMap, nghĩa là product đó ko được update, vậy product đó hasManageQuantity = 0
 
         const draft: ProductMovementInsertType = {
           oid,
           productId: visitProduct.productId,
           voucherId: visitId,
           contactId: visit.customerId,
-          voucherType: VoucherType.Visit,
+          voucherType: VoucherType.Clinic,
           isRefund: 0,
           createdAt: time,
           unitRate: visitProduct.unitRate,
@@ -263,38 +195,40 @@ export class VisitSendProduct {
         await manager.insert(ProductMovement, productMovementListDraft)
       }
 
-      // 10. === CREATE: BATCH_MOVEMENT ===
-      const batchMovementsDraft: BatchMovementInsertType[] = []
-      visitBatchList.forEach((visitBatch) => {
-        const currentMap = batchIdMapValue[visitBatch.batchId]
-        const visitProduct = visitProductMap[visitBatch.visitProductId]
-        const draft: BatchMovementInsertType = {
-          oid,
-          productId: visitBatch.productId,
-          batchId: visitBatch.batchId,
-          voucherId: visitId,
-          contactId: visit.customerId,
-          voucherType: VoucherType.Visit,
-          isRefund: 0,
-          unitRate: visitProduct.unitRate,
-          openQuantity: currentMap.openQuantity,
-          quantity: -visitBatch.quantity,
-          closeQuantity: currentMap.openQuantity - visitBatch.quantity,
-          actualPrice: visitProduct.actualPrice,
-          expectedPrice: visitProduct.actualPrice,
-          createdAt: time,
-        }
-        batchMovementsDraft.push(draft)
-        // sau khi lấy rồi cần cập nhật before vì 1 sản phẩm có thể bán 2 số lượng với 2 giá khác nhau
-        currentMap.openQuantity = draft.closeQuantity // gán lại số lượng ban đầu vì draft đã lấy
-      })
-      if (batchMovementsDraft.length) {
-        await manager.insert(BatchMovement, batchMovementsDraft)
+      // 9. === CREATE: BATCH_MOVEMENT ===
+      const batchMovementListDraft = visit.visitProductList
+        .filter((i) => i.batchId !== 0)
+        .map((visitProduct) => {
+          const currentMap = batchIdMapValue[visitProduct.batchId]
+          if (!currentMap) {
+            throw new Error(`${PREFIX}: Not found ${visitProduct.batchId} when create movement`)
+          }
+          const draft: BatchMovementInsertType = {
+            oid,
+            productId: visitProduct.productId,
+            batchId: visitProduct.batchId,
+            voucherId: visitId,
+            contactId: visit.customerId,
+            voucherType: VoucherType.Clinic,
+            isRefund: 0,
+            unitRate: visitProduct.unitRate,
+            openQuantity: currentMap.openQuantity,
+            quantity: -visitProduct.quantity,
+            closeQuantity: currentMap.openQuantity - visitProduct.quantity,
+            actualPrice: visitProduct.actualPrice,
+            expectedPrice: visitProduct.expectedPrice,
+            createdAt: time,
+          }
+          // sau khi lấy rồi cần cập nhật before vì 1 sản phẩm có thể bán 2 số lượng với 2 giá khác nhau
+          currentMap.openQuantity = draft.closeQuantity // gán lại số lượng ban đầu vì draft đã lấy
+
+          return draft
+        })
+      if (batchMovementListDraft.length) {
+        await manager.insert(BatchMovement, batchMovementListDraft)
       }
 
-      return { visitBasic: visit, visitProductList, visitBatchList, productList, batchList }
+      return { visitBasic: visit, productList, batchList }
     })
-
-    return transaction
   }
 }

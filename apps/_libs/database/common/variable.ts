@@ -69,7 +69,7 @@ export enum InvoiceItemType {
 export enum VoucherType {
   Receipt = 1,
   Invoice = 2,
-  Visit = 3,
+  Clinic = 3,
 }
 
 export enum DeliveryStatus {

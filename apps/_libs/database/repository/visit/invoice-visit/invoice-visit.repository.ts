@@ -2,11 +2,12 @@ import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager, FindOptionsWhere, In } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
+import { VoucherType } from '../../../common/variable'
 import VisitExpense, { VisitExpenseInsertType } from '../../../entities/visit-expense.entity'
 import VisitProcedure, { VisitProcedureInsertType } from '../../../entities/visit-procedure.entity'
 import VisitProduct, { VisitProductInsertType } from '../../../entities/visit-product.entity'
 import VisitSurcharge, { VisitSurchargeInsertType } from '../../../entities/visit-surcharge.entity'
-import Visit, { VisitInsertType, VisitStatus, VisitType } from '../../../entities/visit.entity'
+import Visit, { VisitInsertType, VisitStatus } from '../../../entities/visit.entity'
 import {
   InvoiceVisitDraftInsertType,
   InvoiceVisitDraftUpdateType,
@@ -45,10 +46,10 @@ export class InvoiceVisitRepository {
         ...visitDraftInsert,
         oid,
         visitStatus: VisitStatus.Draft,
-        visitType: VisitType.Invoice,
+        voucherType: VoucherType.Invoice,
         isSent: 0,
         paid: 0,
-        debt: 0,
+        debt: visitDraftInsert.totalMoney,
         year: 0,
         month: 0,
         date: 0,
@@ -144,11 +145,16 @@ export class InvoiceVisitRepository {
         visitStatus: In([VisitStatus.Draft]),
         isSent: 0,
       }
+      const setVisit: { [P in keyof NoExtra<Partial<Visit>>]: Visit[P] | (() => string) } = {
+        ...visitDraftUpdate,
+        paid: 0,
+        debt: visitDraftUpdate.totalMoney,
+      }
       const visitUpdateResult = await manager
         .createQueryBuilder()
         .update(Visit)
         .where(whereVisit)
-        .set(visitDraftUpdate)
+        .set(setVisit)
         .returning('*')
         .execute()
       if (visitUpdateResult.affected !== 1) {

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { DataSource, FindOptionsWhere, In, UpdateResult } from 'typeorm'
+import { DataSource, FindOptionsWhere, In, InsertResult, UpdateResult } from 'typeorm'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { PaymentType, VoucherType } from '../../common/variable'
 import { Customer, CustomerPayment, Visit } from '../../entities'
@@ -18,7 +18,7 @@ export class VisitPrepayment {
       throw new Error(`${PREFIX}: money = ${money}`)
     }
 
-    const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
+    return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. INVOICE: update ===
       const whereVisit: FindOptionsWhere<Visit> = {
         oid,
@@ -54,7 +54,7 @@ export class VisitPrepayment {
         oid,
         customerId: visit.customerId,
         voucherId: visitId,
-        voucherType: VoucherType.Visit,
+        voucherType: VoucherType.Clinic,
         createdAt: time,
         paymentType: PaymentType.Prepayment,
         paid: money,
@@ -65,20 +65,34 @@ export class VisitPrepayment {
         description: '',
       }
 
-      const customerPaymentInsertResult = await manager.insert(
-        CustomerPayment,
-        customerPaymentInsert
-      )
-      const customerPaymentId: number = customerPaymentInsertResult.identifiers?.[0]?.id
-      if (!customerPaymentId) {
+      // const customerPaymentInsertResult = await manager.insert(
+      //   CustomerPayment,
+      //   customerPaymentInsert
+      // )
+      // const customerPaymentId: number = customerPaymentInsertResult.identifiers?.[0]?.id
+      // if (!customerPaymentId) {
+      //   throw new Error(
+      //     `${PREFIX}: Insert CustomerPayment failed: ${JSON.stringify(customerPaymentInsertResult)}`
+      //   )
+      // }
+
+      const customerPaymentInsertResult: InsertResult = await manager
+        .createQueryBuilder()
+        .insert()
+        .into(CustomerPayment)
+        .values(customerPaymentInsert)
+        .returning('*')
+        .execute()
+
+      const [customerPayment] = CustomerPayment.fromRaws(customerPaymentInsertResult.raw)
+
+      if (!customerPayment) {
         throw new Error(
           `${PREFIX}: Insert CustomerPayment failed: ${JSON.stringify(customerPaymentInsertResult)}`
         )
       }
 
-      return { visitBasic: visit }
+      return { visitBasic: visit, customerPayment }
     })
-
-    return transaction
   }
 }

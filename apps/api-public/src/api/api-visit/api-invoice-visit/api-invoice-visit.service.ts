@@ -1,7 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../../_libs/common/interceptor'
-import { VisitStatus, VisitType } from '../../../../../_libs/database/entities/visit.entity'
+import { VoucherType } from '../../../../../_libs/database/common/variable'
+import { VisitStatus } from '../../../../../_libs/database/entities/visit.entity'
 import { InvoiceVisitRepository } from '../../../../../_libs/database/repository/visit/invoice-visit/invoice-visit.repository'
 import { VisitPrepayment } from '../../../../../_libs/database/repository/visit/visit-prepayment'
 import { VisitRepository } from '../../../../../_libs/database/repository/visit/visit.repository'
@@ -68,12 +69,17 @@ export class ApiInvoiceVisitService {
     }
   }
 
-  async prepayment(oid: number, body: VisitPaymentBody) {
+  async prepayment(options: {
+    oid: number
+    visitId: number
+    body: VisitPaymentBody
+  }): Promise<BaseResponse> {
+    const { oid, visitId, body } = options
     try {
-      const oldVisit = await this.visitRepository.findOneById(body.visitId)
+      const oldVisit = await this.visitRepository.findOneById(visitId)
       if (oldVisit.visitStatus === VisitStatus.Draft) {
         const affected = await this.visitRepository.update(
-          { oid, id: body.visitId, visitType: VisitType.Invoice, visitStatus: VisitStatus.Draft },
+          { oid, id: visitId, voucherType: VoucherType.Invoice, visitStatus: VisitStatus.Draft },
           { visitStatus: VisitStatus.InProgress }
         )
         if (affected != 1) {
@@ -81,15 +87,50 @@ export class ApiInvoiceVisitService {
         }
       }
 
-      const { visitBasic } = await this.visitPrepayment.prepayment({
+      const { visitBasic, customerPayment } = await this.visitPrepayment.prepayment({
         oid,
-        visitId: body.visitId,
+        visitId,
         time: Date.now(),
         money: body.money,
       })
 
-      return { data: true }
+      return { data: { visitBasic, customerPayment } }
     } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+    }
+  }
+
+  async sendProductAndPayment(params: {
+    oid: number
+    visitId: number
+    time: number
+    money: number
+  }): Promise<BaseResponse> {
+    const { oid, visitId, time, money } = params
+    try {
+      const result = await this.invoiceSendProductAndPayment.sendProductAndPayment({
+        oid,
+        visitId,
+        time,
+        money,
+      })
+      const customerPayments = await this.customerPaymentRepository.findMany({
+        condition: {
+          oid,
+          customerId: result.invoiceBasic.customerId,
+          voucherId: invoiceId,
+          voucherType: VoucherType.Invoice,
+        },
+        sort: { id: 'ASC' },
+      })
+      this.emitSocketAfterSendProductAndPayment(oid, result)
+      return {
+        data: {
+          invoiceBasic: result.invoiceBasic,
+          customerPayments,
+        },
+      }
+    } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
   }

@@ -51,13 +51,13 @@ export class ApiProductMovementService {
     const invoiceIds = data
       .filter((i) => i.voucherType === VoucherType.Invoice)
       .map((i) => i.voucherId)
-    const visitIds = data.filter((i) => i.voucherType === VoucherType.Visit).map((i) => i.voucherId)
+    const visitIds = data.filter((i) => i.voucherType === VoucherType.Clinic).map((i) => i.voucherId)
 
     const distributorIds = data
       .filter((i) => i.voucherType === VoucherType.Receipt)
       .map((i) => i.contactId)
     const customerIds = data
-      .filter((i) => i.voucherType === VoucherType.Invoice || i.voucherType === VoucherType.Visit)
+      .filter((i) => i.voucherType === VoucherType.Invoice || i.voucherType === VoucherType.Clinic)
       .map((i) => i.contactId)
 
     const [receiptList, invoiceList, visitList, distributorList, customerList] = await Promise.all([
@@ -87,7 +87,7 @@ export class ApiProductMovementService {
         mov.invoice = invoiceList.find((iv) => iv.id === mov.voucherId)
         mov.customer = customerList.find((rc) => rc.id === mov.contactId)
       }
-      if (mov.voucherType === VoucherType.Visit) {
+      if (mov.voucherType === VoucherType.Clinic) {
         mov.visit = visitList.find((iv) => iv.id === mov.voucherId)
         mov.customer = customerList.find((rc) => rc.id === mov.contactId)
       }

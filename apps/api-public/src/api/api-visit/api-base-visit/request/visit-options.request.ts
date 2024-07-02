@@ -2,7 +2,8 @@ import { Expose, Type } from 'class-transformer'
 import { IsBoolean, IsIn, IsNumber, ValidateNested } from 'class-validator'
 import { ConditionTimestamp, SortQuery } from '../../../../../../_libs/common/dto'
 import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { VisitStatus, VisitType } from '../../../../../../_libs/database/entities/visit.entity'
+import { VoucherType } from '../../../../../../_libs/database/common/variable'
+import { VisitStatus } from '../../../../../../_libs/database/entities/visit.entity'
 
 export class VisitRelationQuery {
   @Expose()
@@ -43,8 +44,8 @@ export class VisitFilterQuery {
   visitStatus: VisitStatus
 
   @Expose()
-  @IsEnumValue(VisitType)
-  visitType: VisitType
+  @IsEnumValue(VoucherType)
+  voucherType: VoucherType
 
   @Expose()
   @IsNumber()

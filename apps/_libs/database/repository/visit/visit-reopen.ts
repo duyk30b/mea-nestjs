@@ -64,7 +64,7 @@ export class VisitReopen {
           oid,
           customerId: visit.customerId,
           voucherId: visitId,
-          voucherType: VoucherType.Visit,
+          voucherType: VoucherType.Clinic,
           createdAt: time,
           paymentType: PaymentType.Reopen,
           paid: 0,

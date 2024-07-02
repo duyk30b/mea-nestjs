@@ -55,7 +55,7 @@ export class VisitRefundOverpaid {
         oid,
         customerId: visit.customerId,
         voucherId: visitId,
-        voucherType: VoucherType.Visit,
+        voucherType: VoucherType.Clinic,
         createdAt: time,
         paymentType: PaymentType.ReceiveRefund,
         paid: -money,

@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { DiscountType } from '../common/variable'
+import { DiscountType, VoucherType } from '../common/variable'
 import CustomerPayment from './customer-payment.entity'
 import Customer from './customer.entity'
 import VisitDiagnosis from './visit-diagnosis.entity'
@@ -10,11 +10,6 @@ import VisitProcedure from './visit-procedure.entity'
 import VisitProduct from './visit-product.entity'
 import VisitRadiology from './visit-radiology.entity'
 import VisitSurcharge from './visit-surcharge.entity'
-
-export enum VisitType {
-  Invoice = 1, // Bán hàng
-  Clinic = 2, // Phòng khám
-}
 
 export enum VisitStatus {
   Draft = 1, // Hẹn khám
@@ -36,7 +31,7 @@ export default class Visit extends BaseEntity {
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()
-  visitType: VisitType
+  voucherType: VoucherType
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()

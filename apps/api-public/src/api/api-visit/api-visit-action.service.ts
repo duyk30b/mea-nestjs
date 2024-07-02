@@ -18,7 +18,7 @@ import { VisitReplaceVisitProcedureList } from '../../../../_libs/database/repos
 import { VisitReplaceVisitProductList } from '../../../../_libs/database/repository/visit/visit-replace-visit-product-list'
 import { VisitReplaceVisitRadiologyList } from '../../../../_libs/database/repository/visit/visit-replace-visit-radiology-list'
 import { VisitReturnProduct } from '../../../../_libs/database/repository/visit/visit-return-product'
-import { VisitSendProduct } from '../../../../_libs/database/repository/visit/visit-send-product'
+import { VisitSendProduct } from '../../../../_libs/database/repository/visit/visit-send-product.old'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   VisitPaymentBody,

@@ -48,7 +48,26 @@ export class ApiInvoiceVisitController {
 
   @Post('prepayment')
   @HasPermission(PermissionId.INVOICE_PREPAYMENT)
-  async prepayment(@External() { oid }: TExternal, @Body() body: VisitPaymentBody) {
-    return await this.apiInvoiceVisitService.prepayment(oid, body)
+  async prepayment(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam,
+    @Body() body: VisitPaymentBody
+  ) {
+    return await this.apiInvoiceVisitService.prepayment({ oid, visitId: id, body })
+  }
+
+  @Post('send-product-and-payment/:id')
+  @HasPermission(PermissionId.INVOICE_SEND_PRODUCT)
+  async sendProductAndPayment(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam,
+    @Body() body: VisitPaymentBody
+  ) {
+    return await this.apiInvoiceVisitService.sendProductAndPayment({
+      oid,
+      visitId: id,
+      time: Date.now(),
+      money: body.money,
+    })
   }
 }

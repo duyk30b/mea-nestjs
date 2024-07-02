@@ -146,7 +146,7 @@ export class CustomerPaymentRepository extends PostgreSqlRepository<
             oid,
             customerId,
             voucherId: i.visitId,
-            voucherType: VoucherType.Visit,
+            voucherType: VoucherType.Clinic,
             createdAt: time,
             paymentType: PaymentType.PayDebt,
             paid: i.money,

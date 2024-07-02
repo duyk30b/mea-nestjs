@@ -73,7 +73,7 @@ export class BatchMovementRepository extends PostgreSqlRepository<
         'productMovement.visit',
         'visit',
         'productMovement.voucherType = :typeInvoice',
-        { typeInvoice: VoucherType.Visit }
+        { typeInvoice: VoucherType.Clinic }
       )
       if (relation?.visit?.customer) {
         query = query.leftJoinAndSelect('visit.customer', 'customer')

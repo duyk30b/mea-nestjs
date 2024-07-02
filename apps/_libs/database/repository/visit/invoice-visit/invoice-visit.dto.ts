@@ -1,5 +1,4 @@
-import { VisitBatch, VisitProcedure, VisitProduct } from '../../../entities'
-import { VisitBatchRelationType } from '../../../entities/visit-batch.entity'
+import { VisitProcedure, VisitProduct } from '../../../entities'
 import VisitExpense, { VisitExpenseRelationType } from '../../../entities/visit-expense.entity'
 import { VisitProcedureRelationType } from '../../../entities/visit-procedure.entity'
 import { VisitProductRelationType } from '../../../entities/visit-product.entity'
@@ -15,7 +14,7 @@ export type InvoiceVisitDraftInsertType = Omit<
       Visit,
       | 'oid'
       | 'id'
-      | 'visitType'
+      | 'voucherType'
       | 'visitStatus'
       | 'isSent'
       | 'paid'
@@ -37,7 +36,7 @@ export type InvoiceVisitDraftUpdateType = Omit<
       | 'oid'
       | 'id'
       | 'customerId' // không được update customerId
-      | 'visitType'
+      | 'voucherType'
       | 'visitStatus'
       | 'isSent'
       | 'paid'
