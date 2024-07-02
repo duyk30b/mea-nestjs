@@ -58,7 +58,7 @@ export class VisitPrepayment {
         createdAt: time,
         paymentType: PaymentType.Prepayment,
         paid: money,
-        debit: 0, // refund prepayment không phát sinh nợ
+        debit: 0,
         openDebt: customerOpenDebt,
         closeDebt: customerCloseDebt,
         note: '',
@@ -75,22 +75,6 @@ export class VisitPrepayment {
           `${PREFIX}: Insert CustomerPayment failed: ${JSON.stringify(customerPaymentInsertResult)}`
         )
       }
-
-      // const customerPaymentInsertResult: InsertResult = await manager
-      //   .createQueryBuilder()
-      //   .insert()
-      //   .into(CustomerPayment)
-      //   .values(customerPaymentInsert)
-      //   // .returning('*')
-      //   .execute()
-
-      // const [customerPayment] = CustomerPayment.fromRaws(customerPaymentInsertResult.raw)
-
-      // if (!customerPayment) {
-      //   throw new Error(
-      //     `${PREFIX}: Insert CustomerPayment failed: ${JSON.stringify(customerPaymentInsertResult)}`
-      //   )
-      // }
 
       return { visitBasic: visit }
     })

@@ -1,7 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
+import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../../_libs/common/interceptor'
+import { VisitStatus, VisitType } from '../../../../../_libs/database/entities/visit.entity'
 import { InvoiceVisitRepository } from '../../../../../_libs/database/repository/visit/invoice-visit/invoice-visit.repository'
+import { VisitPrepayment } from '../../../../../_libs/database/repository/visit/visit-prepayment'
 import { VisitRepository } from '../../../../../_libs/database/repository/visit/visit.repository'
+import { VisitPaymentBody } from '../request'
 import {
   InvoiceVisitInsertBody,
   InvoiceVisitUpdateBody,
@@ -11,7 +15,8 @@ import {
 export class ApiInvoiceVisitService {
   constructor(
     private readonly invoiceVisitRepository: InvoiceVisitRepository,
-    private readonly visitRepository: VisitRepository
+    private readonly visitRepository: VisitRepository,
+    private readonly visitPrepayment: VisitPrepayment
   ) {}
 
   async createDraft(params: { oid: number; body: InvoiceVisitInsertBody }): Promise<BaseResponse> {
@@ -59,6 +64,32 @@ export class ApiInvoiceVisitService {
       await this.invoiceVisitRepository.destroyDraft({ oid, visitId })
       return { data: { visitId } }
     } catch (error: any) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+    }
+  }
+
+  async prepayment(oid: number, body: VisitPaymentBody) {
+    try {
+      const oldVisit = await this.visitRepository.findOneById(body.visitId)
+      if (oldVisit.visitStatus === VisitStatus.Draft) {
+        const affected = await this.visitRepository.update(
+          { oid, id: body.visitId, visitType: VisitType.Invoice, visitStatus: VisitStatus.Draft },
+          { visitStatus: VisitStatus.InProgress }
+        )
+        if (affected != 1) {
+          throw new BusinessException('error.Database.UpdateFailed')
+        }
+      }
+
+      const { visitBasic } = await this.visitPrepayment.prepayment({
+        oid,
+        visitId: body.visitId,
+        time: Date.now(),
+        money: body.money,
+      })
+
+      return { data: true }
+    } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
   }

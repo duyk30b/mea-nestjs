@@ -12,7 +12,7 @@ import VisitRadiology from './visit-radiology.entity'
 import VisitSurcharge from './visit-surcharge.entity'
 
 export enum VisitType {
-  Store = 1, // Bán hàng
+  Invoice = 1, // Bán hàng
   Clinic = 2, // Phòng khám
 }
 

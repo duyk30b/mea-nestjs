@@ -45,7 +45,7 @@ export class InvoiceVisitRepository {
         ...visitDraftInsert,
         oid,
         visitStatus: VisitStatus.Draft,
-        visitType: VisitType.Store,
+        visitType: VisitType.Invoice,
         isSent: 0,
         paid: 0,
         debt: 0,

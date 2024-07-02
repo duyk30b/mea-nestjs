@@ -4,6 +4,7 @@ import { IdParam } from '../../../../../_libs/common/dto'
 import { HasPermission } from '../../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../../_libs/database/entities/permission.entity'
+import { VisitPaymentBody } from '../request'
 import { ApiInvoiceVisitService } from './api-invoice-visit.service'
 import {
   InvoiceVisitInsertBody,
@@ -43,5 +44,11 @@ export class ApiInvoiceVisitController {
       oid,
       visitId: id,
     })
+  }
+
+  @Post('prepayment')
+  @HasPermission(PermissionId.INVOICE_PREPAYMENT)
+  async prepayment(@External() { oid }: TExternal, @Body() body: VisitPaymentBody) {
+    return await this.apiInvoiceVisitService.prepayment(oid, body)
   }
 }
