@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Patch } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { IsUser } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { IsUser } from '../../guards/user.guard.'
 import { ApiMeService } from './api-me.service'
 import { UserChangePasswordBody, UserUpdateInfoBody } from './request'
 
@@ -13,8 +13,8 @@ export class ApiMeController {
 
   @Get('info')
   @IsUser()
-  async info(@External() { oid, uid }: TExternal) {
-    return await this.apiUserService.info(oid, uid)
+  async info(@External() { oid, uid, rid }: TExternal) {
+    return await this.apiUserService.info({ oid, uid, rid })
   }
 
   @Patch('change-password')

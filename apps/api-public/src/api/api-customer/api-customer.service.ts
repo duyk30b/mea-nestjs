@@ -60,15 +60,15 @@ export class ApiCustomerService {
   }
 
   async getOne(oid: number, id: number, query?: CustomerGetOneQuery): Promise<BaseResponse> {
-    const data = await this.customerRepository.findOneBy({ oid, id })
-    if (!data) throw new BusinessException('error.Customer.NotExist')
-    return { data }
+    const customer = await this.customerRepository.findOneBy({ oid, id })
+    if (!customer) throw new BusinessException('error.Customer.NotExist')
+    return { data: { customer } }
   }
 
   async createOne(oid: number, body: CustomerCreateBody): Promise<BaseResponse> {
     const customer = await this.customerRepository.insertOneAndReturnEntity({ oid, ...body })
     this.socketEmitService.customerUpsert(oid, { customer })
-    return { data: customer }
+    return { data: { customer } }
   }
 
   async updateOne(oid: number, id: number, body: CustomerUpdateBody): Promise<BaseResponse> {
@@ -77,7 +77,7 @@ export class ApiCustomerService {
       throw new BusinessException('error.Database.UpdateFailed')
     }
     this.socketEmitService.customerUpsert(oid, { customer })
-    return { data: customer }
+    return { data: { customer } }
   }
 
   async deleteOne(oid: number, id: number): Promise<BaseResponse> {
@@ -88,7 +88,7 @@ export class ApiCustomerService {
     if (affected === 0) {
       throw new BusinessException('error.Database.DeleteFailed')
     }
-    const data = await this.customerRepository.findOneById(id)
-    return { data }
+    const customer = await this.customerRepository.findOneById(id)
+    return { data: { customer } }
   }
 }

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Google Drive File Upload</title>
+  <script>
+    async function authenticate() {
+      try {
+        const response = await fetch('http://localhost:20000/google-driver/login')
+        const data = await response.json()
+        const popup = window.open(data.data, '_blank', 'width=1000,height=700')
+      } catch (error) {
+        console.error('Error getting auth URL:', error)
+      }
+    }
+
+    async function findFolderAll() {
+      try {
+        const response = await fetch('http://localhost:20000/google-driver/get-all-folders')
+        const data = await response.json()
+        document.getElementById('folder-list').innerHTML = JSON.stringify(data, null, 2)
+      } catch (error) {
+        console.error('Error getting auth URL:', error)
+      }
+    }
+  </script>
+</head>
+
+<body>
+  <h2>Google Drive File Upload</h2>
+  <button onclick="authenticate()">Login with Google</button>
+  <button onclick="findFolderAll()">Get All Folder</button>
+  <pre id="folder-list"></pre>
+</body>
+
+</html>

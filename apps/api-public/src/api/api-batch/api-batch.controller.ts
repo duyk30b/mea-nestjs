@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
+import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
-import { HasPermission } from '../../guards/permission.guard'
 import { ApiBatchService } from './api-batch.service'
 import {
   BatchGetManyQuery,
@@ -55,5 +55,11 @@ export class ApiBatchController {
     @Body() body: BatchUpdateBody
   ) {
     return await this.apiBatchService.updateOne(oid, id, body)
+  }
+
+  @Post('find-or-create')
+  @HasPermission(PermissionId.BATCH_CREATE)
+  async findOrCreate(@External() { oid }: TExternal, @Body() body: BatchInsertBody) {
+    return await this.apiBatchService.findOrCreateOne(oid, body)
   }
 }

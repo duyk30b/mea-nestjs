@@ -37,17 +37,17 @@ export class ProductCreateBody {
   @IsNumber()
   costPrice: number
 
-  @ApiPropertyOptional({ example: 59_000 })
-  @Expose()
-  @Transform(({ value }) => Math.round(value || 0))
-  @IsNumber()
-  retailPrice: number
-
   @ApiPropertyOptional({ example: 45_000 })
   @Expose()
   @Transform(({ value }) => Math.round(value || 0))
   @IsNumber()
   wholesalePrice: number
+
+  @ApiPropertyOptional({ example: 59_000 })
+  @Expose()
+  @Transform(({ value }) => Math.round(value || 0))
+  @IsNumber()
+  retailPrice: number
 
   @ApiPropertyOptional({ example: '2' })
   @Expose()

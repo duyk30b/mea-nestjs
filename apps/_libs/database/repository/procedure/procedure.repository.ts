@@ -4,14 +4,21 @@ import { DataSource, Repository } from 'typeorm'
 import { BaseCondition } from '../../../common/dto'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { Procedure } from '../../entities'
-import { ProcedureInsertType, ProcedureUpdateType } from '../../entities/procedure.entity'
+import {
+  ProcedureInsertType,
+  ProcedureRelationType,
+  ProcedureSortType,
+  ProcedureUpdateType,
+} from '../../entities/procedure.entity'
 import { PostgreSqlRepository } from '../postgresql.repository'
 
 @Injectable()
 export class ProcedureRepository extends PostgreSqlRepository<
   Procedure,
-  { [P in 'id' | 'name' | 'price']?: 'ASC' | 'DESC' },
-  { [P in '']?: boolean }
+  { [P in keyof ProcedureSortType]?: 'ASC' | 'DESC' },
+  { [P in keyof ProcedureRelationType]?: boolean },
+  ProcedureInsertType,
+  ProcedureUpdateType
 > {
   constructor(
     private dataSource: DataSource,
@@ -24,6 +31,13 @@ export class ProcedureRepository extends PostgreSqlRepository<
     data: NoExtra<Partial<ProcedureInsertType>, X>
   ): Promise<Procedure> {
     const raw = await this.insertOneAndReturnRaw(data)
+    return Procedure.fromRaw(raw)
+  }
+
+  async insertOneFullFieldAndReturnEntity<X extends ProcedureInsertType>(
+    data: NoExtra<ProcedureInsertType, X>
+  ): Promise<Procedure> {
+    const raw = await this.insertOneFullFieldAndReturnRaw(data)
     return Procedure.fromRaw(raw)
   }
 

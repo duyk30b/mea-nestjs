@@ -98,6 +98,21 @@ export default class User {
 
   @Expose()
   devices: Device[]
+
+  static fromRaw(raw: { [P in keyof User]: any }) {
+    if (!raw) return null
+    const entity = new User()
+    Object.assign(entity, raw)
+
+    entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)
+    entity.deletedAt = raw.deletedAt == null ? raw.deletedAt : Number(raw.deletedAt)
+
+    return entity
+  }
+
+  static fromRaws(raws: { [P in keyof User]: any }[]) {
+    return raws.map((i) => User.fromRaw(i))
+  }
 }
 
 export type UserRelationType = Pick<User, 'organization' | 'role' | 'devices'>

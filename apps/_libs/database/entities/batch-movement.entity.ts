@@ -5,10 +5,9 @@ import { VoucherType } from '../common/variable'
 import Batch from './batch.entity'
 import Customer from './customer.entity'
 import Distributor from './distributor.entity'
-import Invoice from './invoice.entity'
 import Product from './product.entity'
 import Receipt from './receipt.entity'
-import Visit from './visit.entity'
+import Ticket from './ticket.entity'
 
 @Index('IDX_BatchMovement__oid_productId_batchId_createdAt', [
   'oid',
@@ -26,7 +25,7 @@ export default class BatchMovement extends BaseEntity {
   @Expose()
   batchId: number
 
-  @Column() // ID visit hoặc ID receipt
+  @Column() // ID ticket hoặc ID receipt
   @Expose()
   voucherId: number
 
@@ -110,32 +109,42 @@ export default class BatchMovement extends BaseEntity {
   batch: Batch
 
   @Expose()
+  @ManyToOne((type) => Ticket, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'contactId', referencedColumnName: 'id' })
+  distributor: Distributor
+
+  @Expose()
   @ManyToOne((type) => Receipt, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
   receipt: Receipt
 
   @Expose()
-  @ManyToOne((type) => Invoice, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
-  invoice: Invoice
-
-  @Expose()
-  @ManyToOne((type) => Visit, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
-  visit: Visit
-
-  @Expose()
-  @ManyToOne((type) => Visit, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'contactId', referencedColumnName: 'id' })
-  distributor: Distributor
-
-  @Expose()
-  @ManyToOne((type) => Visit, { createForeignKeyConstraints: false })
+  @ManyToOne((type) => Ticket, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'contactId', referencedColumnName: 'id' })
   customer: Customer
+
+  @Expose()
+  @ManyToOne((type) => Ticket, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
+  ticket: Ticket
 }
+
+export type BatchMovementRelationType = Pick<
+  BatchMovement,
+  'product' | 'batch' | 'distributor' | 'receipt' | 'customer' | 'ticket'
+>
+
+export type BatchMovementSortType = Pick<
+  BatchMovement,
+  'id' | 'productId' | 'batchId' | 'voucherId' | 'contactId'
+>
 
 export type BatchMovementInsertType = Omit<
   BatchMovement,
-  'id' | 'product' | 'batch' | 'receipt' | 'invoice' | 'visit' | 'distributor' | 'customer'
+  keyof BatchMovementRelationType | keyof Pick<BatchMovement, 'id'>
+>
+
+export type BatchMovementUpdateType = Omit<
+  BatchMovement,
+  keyof BatchMovementRelationType | keyof Pick<Ticket, 'oid' | 'id'>
 >

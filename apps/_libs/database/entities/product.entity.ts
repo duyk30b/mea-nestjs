@@ -72,11 +72,11 @@ export default class Product extends BaseEntity {
 
   @Column({ default: 1, type: 'smallint' })
   @Expose()
-  hasManageQuantity: number
+  hasManageQuantity: 0 | 1
 
   @Column({ default: 0, type: 'smallint' })
   @Expose()
-  hasManageBatches: number
+  hasManageBatches: 0 | 1
 
   @Column({ type: 'character varying', length: 255, nullable: true })
   @Expose()

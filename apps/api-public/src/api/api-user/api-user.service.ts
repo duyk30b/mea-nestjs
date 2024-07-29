@@ -6,6 +6,7 @@ import { BaseResponse } from '../../../../_libs/common/interceptor/transform-res
 import { User } from '../../../../_libs/database/entities'
 import Device from '../../../../_libs/database/entities/device'
 import { UserRepository } from '../../../../_libs/database/repository/user/user.repository'
+import { CacheDataService } from '../../../../_libs/transporter/cache-manager/cache-data.service'
 import { CacheTokenService } from '../../../../_libs/transporter/cache-manager/cache-token.service'
 import {
   UserCreateBody,
@@ -19,7 +20,8 @@ import {
 export class ApiUserService {
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly cacheTokenService: CacheTokenService
+    private readonly cacheTokenService: CacheTokenService,
+    private readonly cacheDataService: CacheDataService
   ) {}
 
   async pagination(options: { oid: number; query: UserPaginationQuery }): Promise<BaseResponse> {
@@ -44,7 +46,7 @@ export class ApiUserService {
 
     for (let i = 0; i < data.length; i++) {
       const user = data[i]
-      const tokenData = await this.cacheTokenService.getToken({ oid, userId: user.id })
+      const tokenData = this.cacheTokenService.getTokenList({ oid, uid: user.id })
       user.devices = tokenData.map((t) => {
         const device = new Device()
         device.code = t.code
@@ -103,7 +105,8 @@ export class ApiUserService {
     }
     const hashPassword = await bcrypt.hash(password, 5)
     const secret = encrypt(password, username)
-    const id = await this.userRepository.insertOneFullField({
+
+    const user = await this.userRepository.insertOneFullFieldAndReturnEntity({
       ...other,
       oid,
       username,
@@ -111,26 +114,25 @@ export class ApiUserService {
       secret,
       hashPassword,
     })
-
-    const data: User = await this.userRepository.findOneById(id)
-    return { data }
+    this.cacheDataService.updateUser(user)
+    return { data: user }
   }
 
   async updateInfo(oid: number, id: number, body: UserUpdateBody): Promise<BaseResponse> {
     const { roleId, ...other } = body
-    const user: User = await this.userRepository.findOneBy({ oid, id })
+    const oldUser: User = await this.userRepository.findOneBy({ oid, id })
 
     // Không đổi role cho Root, và cũng ko cho add thêm Root
-    if ((user.roleId === 0 && body.roleId != 0) || (user.roleId !== 0 && body.roleId == 0)) {
+    if ((oldUser.roleId === 0 && body.roleId != 0) || (oldUser.roleId !== 0 && body.roleId == 0)) {
       throw new BusinessException('error.User.WrongRole')
     }
 
-    const affected = await this.userRepository.update({ oid, id }, body)
-    if (affected === 0) {
+    const [user] = await this.userRepository.updateAndReturnEntity({ oid, id }, body)
+    if (!user) {
       throw new BusinessException('error.Database.UpdateFailed')
     }
-    const data = await this.userRepository.findOneBy({ oid, id })
-    return { data }
+    this.cacheDataService.updateUser(user)
+    return { data: user }
   }
 
   async newPassword(oid: number, id: number, password: string): Promise<BaseResponse> {
@@ -146,21 +148,24 @@ export class ApiUserService {
   }
 
   async deleteOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.userRepository.update({ oid, id }, { deletedAt: Date.now() })
-    if (affected === 0) {
+    const [user] = await this.userRepository.updateAndReturnEntity(
+      { oid, id },
+      { deletedAt: Date.now() }
+    )
+    if (!user) {
       throw new BusinessException('error.Database.DeleteFailed')
     }
-    const data = await this.userRepository.findOneById(id)
-    return { data }
+    this.cacheDataService.updateUser(user)
+    return { data: user }
   }
 
   async deviceLogout(options: { oid: number; userId: number; code: string }) {
     const { oid, userId, code } = options
-    const result = await this.cacheTokenService.removeDevice({
+    const result = this.cacheTokenService.removeDevice({
       oid,
-      userId,
+      uid: userId,
       code,
     })
-    return { data: result }
+    return { data: true }
   }
 }

@@ -61,7 +61,7 @@ export class BatchMovementRepository extends PostgreSqlRepository<
         'productMovement.invoice',
         'invoice',
         'productMovement.voucherType = :typeInvoice',
-        { typeInvoice: VoucherType.Invoice }
+        { typeInvoice: VoucherType.Order }
       )
       if (relation?.invoice?.customer) {
         query = query.leftJoinAndSelect('invoice.customer', 'customer')
@@ -73,7 +73,7 @@ export class BatchMovementRepository extends PostgreSqlRepository<
         'productMovement.visit',
         'visit',
         'productMovement.voucherType = :typeInvoice',
-        { typeInvoice: VoucherType.Visit }
+        { typeInvoice: VoucherType.Clinic }
       )
       if (relation?.visit?.customer) {
         query = query.leftJoinAndSelect('visit.customer', 'customer')

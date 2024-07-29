@@ -4,11 +4,11 @@ import { BaseResponse } from '../../../../_libs/common/interceptor/transform-res
 import { ReceiptStatus } from '../../../../_libs/database/common/variable'
 import { Batch, Distributor, Product } from '../../../../_libs/database/entities'
 import { DistributorPaymentRepository } from '../../../../_libs/database/repository/distributor-payment/distributor-payment.repository'
+import { ReceiptCancel } from '../../../../_libs/database/repository/receipt/receipt-cancel'
 import { ReceiptDraft } from '../../../../_libs/database/repository/receipt/receipt-draft'
 import { ReceiptPayDebt } from '../../../../_libs/database/repository/receipt/receipt-pay-debt'
 import { ReceiptPrepayment } from '../../../../_libs/database/repository/receipt/receipt-prepayment'
 import { ReceiptRefundPrepayment } from '../../../../_libs/database/repository/receipt/receipt-refund-prepayment'
-import { ReceiptReturnProduct } from '../../../../_libs/database/repository/receipt/receipt-return-product'
 import { ReceiptSendProductAndPayment } from '../../../../_libs/database/repository/receipt/receipt-send-product-and-payment'
 import { ReceiptRepository } from '../../../../_libs/database/repository/receipt/receipt.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
@@ -30,9 +30,9 @@ export class ApiReceiptService {
     private readonly receiptRefundPrepayment: ReceiptRefundPrepayment,
     private readonly receiptSendProductAndPayment: ReceiptSendProductAndPayment,
     private readonly receiptPayDebt: ReceiptPayDebt,
-    private readonly receiptReturnProduct: ReceiptReturnProduct,
+    private readonly receiptCancel: ReceiptCancel,
     private readonly distributorPaymentRepository: DistributorPaymentRepository
-  ) {}
+  ) { }
 
   async pagination(oid: number, query: ReceiptPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, sort, relation } = query
@@ -76,7 +76,7 @@ export class ApiReceiptService {
   }
 
   async getOne(oid: number, id: number, { relation }: ReceiptGetOneQuery): Promise<BaseResponse> {
-    const data = await this.receiptRepository.findOne({
+    const receipt = await this.receiptRepository.findOne({
       condition: { oid, id },
       relation: {
         distributor: !!relation?.distributor,
@@ -84,10 +84,10 @@ export class ApiReceiptService {
         receiptItems: relation?.receiptItems ? { batch: true, product: true } : false,
       },
     })
-    if (!data) {
+    if (!receipt) {
       throw new BusinessException('error.Database.NotFound')
     }
-    return { data }
+    return { data: { receipt } }
   }
 
   async queryOne(oid: number, id: number, { relation }: ReceiptGetOneQuery): Promise<BaseResponse> {
@@ -272,7 +272,7 @@ export class ApiReceiptService {
     }
   }
 
-  async returnProduct(params: {
+  async cancel(params: {
     oid: number
     receiptId: number
     time: number
@@ -280,7 +280,7 @@ export class ApiReceiptService {
   }): Promise<BaseResponse> {
     const { oid, receiptId, time, money } = params
     try {
-      const result = await this.receiptReturnProduct.returnProduct({ oid, receiptId, time, money })
+      const result = await this.receiptCancel.cancel({ oid, receiptId, time, money })
       const distributorPayments = await this.distributorPaymentRepository.findMany({
         condition: {
           oid,
@@ -301,10 +301,10 @@ export class ApiReceiptService {
     }
   }
 
-  async softDeleteRefund(params: { oid: number; receiptId: number }): Promise<BaseResponse> {
+  async softDeleteCancel(params: { oid: number; receiptId: number }): Promise<BaseResponse> {
     const { oid, receiptId } = params
     try {
-      await this.receiptDraft.softDeleteRefund({ oid, receiptId })
+      await this.receiptDraft.softDeleteCancel({ oid, receiptId })
       return { data: { receiptId } }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
@@ -344,7 +344,7 @@ export class ApiReceiptService {
     const { oid, body, receiptId, time } = options
     const oldReceipt = await this.receiptRepository.findOneById(receiptId)
     try {
-      await this.receiptReturnProduct.returnProduct({
+      await this.receiptCancel.cancel({
         oid,
         receiptId,
         time,

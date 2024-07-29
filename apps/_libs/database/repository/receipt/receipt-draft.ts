@@ -13,7 +13,7 @@ export class ReceiptDraft {
   constructor(
     private dataSource: DataSource,
     @InjectEntityManager() private manager: EntityManager
-  ) {}
+  ) { }
 
   async createDraft<T extends ReceiptDraftInsertType>(params: {
     oid: number
@@ -113,14 +113,14 @@ export class ReceiptDraft {
     })
   }
 
-  async softDeleteRefund(params: { oid: number; receiptId: number }) {
+  async softDeleteCancel(params: { oid: number; receiptId: number }) {
     const { oid, receiptId } = params
     const receiptUpdateResult = await this.manager.update(
       Receipt,
       {
         id: receiptId,
         oid,
-        status: ReceiptStatus.Refund,
+        status: ReceiptStatus.Cancelled,
         deletedAt: IsNull(),
       },
       { deletedAt: Date.now() }

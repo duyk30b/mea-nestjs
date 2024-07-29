@@ -22,7 +22,18 @@ export class AccessLogInterceptor implements NestInterceptor {
     if (context.getType() === 'http') {
       const ctx = context.switchToHttp()
       const request = ctx.getRequest()
-      const requestExternal: RequestExternal = request.raw
+      const { external }: RequestExternal = request.raw
+      const basicExternal = {
+        ip: external.ip,
+        browser: external.browser,
+        mobile: external.mobile,
+        uid: external.uid,
+        oid: external.oid,
+        rid: external.rid,
+        username: external.user?.username,
+        phone: external.organization?.phone,
+        email: external.organization?.email,
+      }
 
       const { originalUrl, method, body } = request
       const urlParse = url.parse(originalUrl, true)
@@ -32,7 +43,7 @@ export class AccessLogInterceptor implements NestInterceptor {
       message.query = urlParse.query
       message.className = className
       message.funcName = funcName
-      message.external = requestExternal.external
+      message.external = basicExternal
       if (showData) {
         message.body = body
       }
@@ -69,11 +80,13 @@ export class AccessLogInterceptor implements NestInterceptor {
     return next.handle().pipe(
       catchError((err) => {
         message.errorMessage = err.message
+        message.time = `${Date.now() - createTime.getTime()}ms`
         if (err instanceof ValidationException) {
           message.errors = err.errors
+          this.logger.warn(JSON.stringify(message))
+        } else {
+          this.logger.error(JSON.stringify(message))
         }
-        message.time = `${Date.now() - createTime.getTime()}ms`
-        this.logger.error(JSON.stringify(message))
         return throwError(() => err)
       }),
       tap((xx: any) => {

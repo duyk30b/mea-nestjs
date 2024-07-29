@@ -1,4 +1,4 @@
-version: "3.8"
+version: '3.8'
 
 networks:
   mn_network:
@@ -13,13 +13,13 @@ services:
       - mn_network
     build:
       dockerfile: Dockerfile
-      context: "./"
+      context: './'
       target: production
-    command:
-      [
-        "sh",
-        "-c",
-        "npm run build && npm run migration:run && node dist/apps/api-public/main"
+    command: [
+        'sh',
+        '-c',
+        'npm run migration:run && node dist/apps/api-public/main',
+        # "npm run build && npm run migration:run && node dist/apps/api-public/main"
       ]
     environment:
       - NODE_ENV=production

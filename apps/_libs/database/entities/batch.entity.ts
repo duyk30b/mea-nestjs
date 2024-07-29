@@ -38,6 +38,28 @@ export default class Batch extends BaseEntity {
   costPrice: number // Giá nhập
 
   @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  wholesalePrice: number // Giá bán sỉ
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  retailPrice: number // Giá bán lẻ
+
+  @Column({
     type: 'decimal',
     default: 0,
     precision: 10,
@@ -70,6 +92,8 @@ export default class Batch extends BaseEntity {
 
     entity.expiryDate = raw.expiryDate == null ? raw.expiryDate : Number(raw.expiryDate)
     entity.costPrice = Number(raw.costPrice)
+    entity.wholesalePrice = Number(raw.wholesalePrice)
+    entity.retailPrice = Number(raw.retailPrice)
     entity.quantity = Number(raw.quantity)
 
     entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)

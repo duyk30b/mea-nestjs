@@ -4,24 +4,26 @@ import CustomerPayment from './customer-payment.entity'
 import Customer from './customer.entity'
 import DistributorPayment from './distributor-payment.entity'
 import Distributor from './distributor.entity'
-import InvoiceExpense from './invoice-expense.entity'
-import InvoiceItem from './invoice-item.entity'
-import InvoiceSurcharge from './invoice-surcharge.entity'
-import Invoice from './invoice.entity'
-import OrganizationSetting from './organization-setting.entity'
+import Image from './image.entity'
 import Organization from './organization.entity'
+import Permission from './permission.entity'
 import Procedure from './procedure.entity'
 import ProductMovement from './product-movement.entity'
 import Product from './product.entity'
+import Radiology from './radiology.entity'
 import ReceiptItem from './receipt-item.entity'
 import Receipt from './receipt.entity'
 import Role from './role.entity'
+import Setting from './setting.entity'
 import User from './user.entity'
-import VisitBatch from './visit-batch.entity'
-import VisitDiagnosis from './visit-diagnosis.entity'
-import VisitProcedure from './visit-procedure.entity'
-import VisitProduct from './visit-product.entity'
-import Visit from './visit.entity'
+
+export { default as TicketDiagnosis } from './ticket-diagnosis.entity'
+export { default as TicketExpense } from './ticket-expense.entity'
+export { default as TicketProcedure } from './ticket-procedure.entity'
+export { default as TicketProduct } from './ticket-product.entity'
+export { default as TicketRadiology } from './ticket-radiology.entity'
+export { default as TicketSurcharge } from './ticket-surcharge.entity'
+export { default as Ticket } from './ticket.entity'
 
 export {
   Batch,
@@ -30,22 +32,16 @@ export {
   CustomerPayment,
   Distributor,
   DistributorPayment,
-  Invoice,
-  InvoiceExpense,
-  InvoiceItem,
-  InvoiceSurcharge,
+  Image,
   Organization,
-  OrganizationSetting,
+  Permission,
   Procedure,
   Product,
   ProductMovement,
+  Radiology,
   Receipt,
   ReceiptItem,
   Role,
+  Setting,
   User,
-  Visit,
-  VisitBatch,
-  VisitDiagnosis,
-  VisitProcedure,
-  VisitProduct,
 }

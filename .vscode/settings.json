@@ -12,7 +12,7 @@
     "editorInlayHint.foreground": "#ffffffcc"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.defaultFormatter": "vscode.typescript-language-features",
     "editor.codeActionsOnSave": [
       "source.sortImports",
       "source.formatDocument",

@@ -86,10 +86,35 @@ export default class Organization {
   @Expose()
   @OneToMany(() => User, (user) => user.organization)
   users: User[]
+
+  static fromRaw(raw: { [P in keyof Organization]: any }) {
+    if (!raw) return null
+    const entity = new Organization()
+    Object.assign(entity, raw)
+
+    entity.createdAt = raw.createdAt == null ? raw.createdAt : Number(raw.createdAt)
+    entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)
+    entity.deletedAt = raw.deletedAt == null ? raw.deletedAt : Number(raw.deletedAt)
+
+    return entity
+  }
+
+  static fromRaws(raws: { [P in keyof Organization]: any }[]) {
+    return raws.map((i) => Organization.fromRaw(i))
+  }
 }
+
+export type OrganizationRelationType = Pick<Organization, 'users'>
+
+export type OrganizationSortType = Pick<Organization, 'id'>
 
 export type OrganizationInsertType = Omit<
   Organization,
-  'id' | 'users' | 'createdAt' | 'updatedAt' | 'deletedAt'
+  | keyof OrganizationRelationType
+  | keyof Pick<Organization, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>
 >
-export type OrganizationUpdateType = Omit<Organization, 'id' | 'users' | 'createdAt' | 'updatedAt'>
+
+export type OrganizationUpdateType = Omit<
+  Organization,
+  keyof OrganizationRelationType | keyof Pick<Organization, 'id' | 'createdAt'>
+>

@@ -11,8 +11,8 @@ import {
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto'
+import { IsRoot } from '../../../../_libs/common/guards/root.guard'
 import { UserGroup } from '../../../../_libs/database/entities/user.entity'
-import { IsRoot } from '../../guards/root.guard'
 import { ApiRootUserService } from './api-root-user.service'
 import { DeviceLogoutBody } from './request/device-logout.query'
 import { RootUserPaginationQuery } from './request/root-user-get.query'
@@ -24,7 +24,7 @@ import { RootUserCreateBody, RootUserUpdateBody } from './request/root-user-upse
 @IsRoot() // ===== Controller dành riêng cho ROOT =====
 @SerializeOptions({ groups: [UserGroup.ROOT] })
 export class ApiRootUserController {
-  constructor(private readonly apiRootUserService: ApiRootUserService) {}
+  constructor(private readonly apiRootUserService: ApiRootUserService) { }
 
   @Get('user/pagination')
   userPagination(@Query() query: RootUserPaginationQuery) {
@@ -55,5 +55,10 @@ export class ApiRootUserController {
       userId: +id,
       code: body.code,
     })
+  }
+
+  @Post('user/logout-all')
+  logoutAll() {
+    return this.apiRootUserService.logoutAll()
   }
 }

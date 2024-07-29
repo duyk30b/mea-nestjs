@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto'
-import { IsRoot } from '../../guards/root.guard'
+import { IsRoot } from '../../../../_libs/common/guards/root.guard'
 import { ApiRootOrganizationService } from './api-root-organization.service'
 import { RootOrganizationPaginationQuery } from './request/root-organization-get.query'
 import {
@@ -14,7 +14,7 @@ import {
 @IsRoot() // ===== Controller dành riêng cho ROOT =====
 @Controller('root')
 export class ApiRootOrganizationController {
-  constructor(private readonly apiRootOrganizationService: ApiRootOrganizationService) {}
+  constructor(private readonly apiRootOrganizationService: ApiRootOrganizationService) { }
 
   @Get('organization/pagination')
   pagination(@Query() query: RootOrganizationPaginationQuery) {
@@ -35,6 +35,9 @@ export class ApiRootOrganizationController {
   @Put('organization/clear/:id')
   @ApiParam({ name: 'id', example: 1 })
   async clearOne(@Param() { id }: IdParam) {
+    if (id != 4 && id != 1) {
+      throw new Error('Chỉ có thể clear tài khoản Demo')
+    }
     return await this.apiRootOrganizationService.clearOne(id)
   }
 

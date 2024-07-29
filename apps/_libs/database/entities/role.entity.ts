@@ -33,6 +33,20 @@ export default class Role {
   })
   @Expose()
   updatedAt: number
+
+  static fromRaw(raw: { [P in keyof Role]: any }) {
+    if (!raw) return null
+    const entity = new Role()
+    Object.assign(entity, raw)
+
+    entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)
+
+    return entity
+  }
+
+  static fromRaws(raws: { [P in keyof Role]: any }[]) {
+    return raws.map((i) => Role.fromRaw(i))
+  }
 }
 
 export type RoleRelationType = Pick<Role, never>

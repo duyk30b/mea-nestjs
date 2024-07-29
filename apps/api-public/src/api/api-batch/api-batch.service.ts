@@ -4,6 +4,7 @@ import { uniqueArray } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { BatchRepository } from '../../../../_libs/database/repository/batch/batch.repository'
 import { ProductRepository } from '../../../../_libs/database/repository/product/product.repository'
+import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   BatchGetManyQuery,
   BatchGetOneQuery,
@@ -15,6 +16,7 @@ import {
 @Injectable()
 export class ApiBatchService {
   constructor(
+    private readonly socketEmitService: SocketEmitService,
     private readonly batchRepository: BatchRepository,
     private readonly productRepository: ProductRepository
   ) {}
@@ -94,5 +96,25 @@ export class ApiBatchService {
     await this.batchRepository.update({ id, oid }, body)
     const data = await this.batchRepository.findOneBy({ id, oid })
     return { data }
+  }
+
+  async findOrCreateOne(oid: number, body: BatchInsertBody): Promise<BaseResponse> {
+    const batchList = await this.batchRepository.findManyBy({
+      oid,
+      productId: body.productId,
+    })
+    const batchFind = batchList.find((b) => {
+      return b.costPrice == body.costPrice && b.expiryDate == body.expiryDate
+    })
+    if (batchFind) {
+      return { data: { batch: batchFind } }
+    }
+    const batch = await this.batchRepository.insertOneFullFieldAndReturnEntity({
+      ...body,
+      oid,
+    })
+    this.socketEmitService.batchUpsert(oid, { batch })
+
+    return { data: { batch } }
   }
 }

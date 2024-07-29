@@ -38,7 +38,7 @@ export class BatchMovementGetQuery {
     type: String,
     example: JSON.stringify(<BatchMovementFilterQuery>{
       voucherId: 3,
-      voucherType: VoucherType.Visit,
+      voucherType: VoucherType.Clinic,
     }),
   })
   @Expose()

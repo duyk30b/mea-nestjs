@@ -38,7 +38,7 @@ type EnumReverseKeyValue = {
 export enum PaymentType {
   Prepayment = 1, // Thanh toán trước mua hàng
   ReceiveRefund = 2, // Nhận tiền hoàn trả
-  Close = 3, // Đóng hồ sơ
+  Close = 3, // Đóng hồ sơ (trả tiền khi thanh toán)
   PayDebt = 4, // Trả nợ (thanh toán sau mua hàng )
   Reopen = 5, // Mở lại hồ sơ
 }
@@ -52,7 +52,7 @@ export enum InvoiceStatus {
 }
 
 export enum ReceiptStatus {
-  Refund = -1,
+  Cancelled = -1,
   Draft = 0,
   Prepayment = 1, // Chờ gửi hàng
   Debt = 2,
@@ -68,14 +68,24 @@ export enum InvoiceItemType {
 
 export enum VoucherType {
   Receipt = 1,
-  Invoice = 2,
-  Visit = 3,
+  Order = 2,
+  Clinic = 3,
 }
 
 export enum DeliveryStatus {
-  OutOfStock = 0,
-  Pending = 1,
-  Delivered = 2,
-  PartiallyReturned = 3,
-  FullyReturned = 4,
+  NoStock = 1, // không có hàng
+  Pending = 2,
+  Delivered = 3,
+  Cancelled = 4,
+  // Returned = 4,
+  // PartiallyReturned = 4,
+  // FullyReturned = 5,
 }
+
+// export enum PaymentStatus {
+//   Unpaid = 1, // Chưa thanh toán
+//   Prepaid = 2, // Tạm ứng
+//   Debt = 3, // Nợ
+//   Completed = 4, // Hoàn thành
+//   Refunded = 5,
+// }

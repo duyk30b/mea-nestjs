@@ -1,81 +1,36 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import * as bcrypt from 'bcrypt'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { encrypt } from '../../../../_libs/common/helpers/string.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { Customer, Distributor, Role } from '../../../../_libs/database/entities'
-import { ScreenSettingKey } from '../../../../_libs/database/entities/organization-setting.entity'
-import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
-import { DistributorRepository } from '../../../../_libs/database/repository/distributor/distributor.repository'
-import { OrganizationSettingRepository } from '../../../../_libs/database/repository/organization-setting/organization-setting.repository'
-import { OrganizationRepository } from '../../../../_libs/database/repository/organization/organization.repository'
-import { PermissionRepository } from '../../../../_libs/database/repository/permission/permission.repository'
-import { RoleRepository } from '../../../../_libs/database/repository/role/role.repository'
 import { UserRepository } from '../../../../_libs/database/repository/user/user.repository'
+import { CacheDataService } from '../../../../_libs/transporter/cache-manager/cache-data.service'
 import { UserChangePasswordBody, UserUpdateInfoBody } from './request'
 
 @Injectable()
 export class ApiMeService {
-  private logger = new Logger(ApiMeService.name)
-
   constructor(
     private readonly userRepository: UserRepository,
-    private readonly roleRepository: RoleRepository,
-    private readonly organizationRepository: OrganizationRepository,
-    private readonly organizationSettingRepository: OrganizationSettingRepository,
-    private readonly permissionRepository: PermissionRepository,
-    private readonly distributorRepository: DistributorRepository,
-    private readonly customerRepository: CustomerRepository
+    private readonly cacheDataService: CacheDataService
   ) {}
 
-  async info(oid: number, uid: number): Promise<BaseResponse> {
-    const [user, organization, allOrgSettings, permissions] = await Promise.all([
-      this.userRepository.findOneBy({ oid, id: uid }),
-      this.organizationRepository.findOneById(oid),
-      this.organizationSettingRepository.getAllSetting(oid),
-      this.permissionRepository.findManyBy({}),
+  async info(params: { oid: number; uid: number; rid: number }): Promise<BaseResponse> {
+    const { uid, oid, rid } = params
+    const [user, organization, role, settingMap, permissionList] = await Promise.all([
+      this.cacheDataService.getUser(uid),
+      this.cacheDataService.getOrganization(oid),
+      this.cacheDataService.getRole(rid),
+      this.cacheDataService.getSettingMap(oid),
+      this.cacheDataService.getPermissionList(),
     ])
-
-    const screenSettings: Record<string, string> = {}
-    allOrgSettings.forEach((i) => (screenSettings[i.type] = i.data))
-
-    let distributorDefault: Distributor
-    let customerDefault: Customer
-    let role: Role
-    try {
-      const screenReceipt = JSON.parse(
-        screenSettings[ScreenSettingKey.SCREEN_RECEIPT_UPSERT] || '{}'
-      )
-      const screenInvoice = JSON.parse(
-        screenSettings[ScreenSettingKey.SCREEN_INVOICE_UPSERT] || '{}'
-      )
-
-      const distributorId = screenReceipt.distributor?.idDefault
-      const customerId = screenInvoice.customer?.idDefault
-
-      const promiseResult = await Promise.all([
-        ![0].includes(user.roleId) ? this.roleRepository.findOneById(user.roleId) : ({} as Role),
-        distributorId
-          ? this.distributorRepository.findOneBy({ oid, id: distributorId })
-          : ({} as Distributor),
-        customerId ? this.customerRepository.findOneBy({ oid, id: customerId }) : ({} as Customer),
-      ])
-      role = promiseResult[0]
-      distributorDefault = promiseResult[1]
-      customerDefault = promiseResult[2]
-    } catch (error) {
-      this.logger.error(error)
-    }
 
     return {
       data: {
         user,
-        role,
         organization,
-        permissions,
-        screenSettings,
-        distributorDefault,
-        customerDefault,
+        role,
+        permissionList,
+        settingMap,
       },
     }
   }

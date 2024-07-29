@@ -86,6 +86,9 @@ export class ReceiptSendProductAndPayment {
           costAmountSend: number
           openQuantity: number
           openCostAmount: number
+          costPrice: number
+          wholesalePrice: number
+          retailPrice: number
         }
       > = {}
       for (let i = 0; i < receiptItemsProduct.length; i++) {
@@ -97,6 +100,9 @@ export class ReceiptSendProductAndPayment {
             costAmountSend: 0,
             openQuantity: 0,
             openCostAmount: 0,
+            costPrice,
+            wholesalePrice: receiptItemsProduct[i].wholesalePrice,
+            retailPrice: receiptItemsProduct[i].retailPrice,
           }
         }
         productIdMap[productId].quantitySend += quantity
@@ -109,16 +115,22 @@ export class ReceiptSendProductAndPayment {
           productId: number
           quantitySend: number
           openQuantity: number
+          costPrice: number
+          wholesalePrice: number
+          retailPrice: number
         }
       > = {}
       for (let i = 0; i < receiptItemsBatch.length; i++) {
-        const { batchId, productId, quantity } = receiptItemsBatch[i]
+        const { batchId, productId, quantity, costPrice } = receiptItemsBatch[i]
         if (!batchIdMap[batchId]) {
           batchIdMap[batchId] = {
             batchId,
             productId,
             quantitySend: 0,
             openQuantity: 0,
+            costPrice,
+            wholesalePrice: receiptItemsBatch[i].wholesalePrice,
+            retailPrice: receiptItemsBatch[i].retailPrice,
           }
         }
         batchIdMap[batchId].quantitySend += quantity
@@ -189,14 +201,21 @@ export class ReceiptSendProductAndPayment {
           `
           UPDATE    "Product" "product"
           SET       "quantity" = "product"."quantity" + temp."quantitySend",
-                    "costAmount" = "product"."costAmount" + temp."costAmountSend"
+                    "costAmount" = "product"."costAmount" + temp."costAmountSend",
+                    "costPrice" = temp."costPrice",
+                    "wholesalePrice" = temp."wholesalePrice",
+                    "retailPrice" = temp."retailPrice"
           FROM (VALUES ` +
             productQuantityList
               .map((i) => {
-                return `(${i.productId}, ${i.quantitySend}, ${i.costAmountSend})`
+                return (
+                  `(${i.productId}, ${i.quantitySend}, ${i.costAmountSend},` +
+                  ` ${i.costPrice}, ${i.wholesalePrice}, ${i.retailPrice})`
+                )
               })
               .join(', ') +
-            `   ) AS temp("productId", "quantitySend", "costAmountSend")
+            `   ) AS temp("productId", "quantitySend", "costAmountSend",
+                           "costPrice", "wholesalePrice", "retailPrice")
           WHERE     "product"."id" = temp."productId" 
                 AND "product"."oid" = ${oid}
                 AND "product"."hasManageQuantity" = 1 
@@ -220,14 +239,16 @@ export class ReceiptSendProductAndPayment {
         const batchUpdateResult: [any[], number] = await manager.query(
           `
           UPDATE    "Batch" "batch"
-          SET       "quantity" = "batch"."quantity" + temp."quantitySend"
+          SET       "quantity" = "batch"."quantity" + temp."quantitySend",
+                    "wholesalePrice" = temp."wholesalePrice",
+                    "retailPrice" = temp."retailPrice"
           FROM (VALUES ` +
             batchQuantityList
               .map((i) => {
-                return `(${i.batchId}, ${i.quantitySend})`
+                return `(${i.batchId}, ${i.quantitySend}, ${i.wholesalePrice}, ${i.retailPrice})`
               })
               .join(', ') +
-            `   ) AS temp("batchId", "quantitySend")
+            `   ) AS temp("batchId", "quantitySend", "wholesalePrice", "retailPrice")
           WHERE     "batch"."id" = temp."batchId" AND "batch"."oid" = ${oid}
           RETURNING "batch".*;        
           `
