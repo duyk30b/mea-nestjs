@@ -1,8 +1,8 @@
 import { Controller, Get, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
-import { HasPermission } from '../../guards/permission.guard'
 import { ApiProductMovementService } from './api-product-movement.service'
 import { ProductMovementPaginationQuery } from './request'
 

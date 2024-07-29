@@ -1,10 +1,9 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { PaymentType, VoucherType } from '../common/variable'
+import { PaymentType } from '../common/variable'
 import Customer from './customer.entity'
-import Invoice from './invoice.entity'
-import Visit from './visit.entity'
+import Ticket from './ticket.entity'
 
 @Entity('CustomerPayment')
 @Index('IDX_CustomerPayment__oid_customerId', ['oid', 'customerId'])
@@ -13,13 +12,9 @@ export default class CustomerPayment extends BaseEntity {
   @Expose()
   customerId: number
 
-  @Column() // ID visit hoặc ID receipt
+  @Column()
   @Expose()
-  voucherId: number
-
-  @Column({ type: 'smallint', default: 0 })
-  @Expose()
-  voucherType: VoucherType
+  ticketId: number
 
   @Column({
     type: 'bigint',
@@ -62,11 +57,11 @@ export default class CustomerPayment extends BaseEntity {
   @Expose() // openDebt + debit = closeDebt
   closeDebt: number // Công nợ cuối kỳ
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   note: string // Ghi chú
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   description: string
 
@@ -76,14 +71,9 @@ export default class CustomerPayment extends BaseEntity {
   customer: Customer
 
   @Expose()
-  @ManyToOne((type) => Invoice, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
-  invoice: Invoice
-
-  @Expose()
-  @ManyToOne((type) => Visit, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
-  visit: Visit
+  @ManyToOne((type) => Ticket, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'ticketId', referencedColumnName: 'id' })
+  ticket: Ticket
 
   static fromRaw(raw: { [P in keyof CustomerPayment]: any }) {
     if (!raw) return null
@@ -116,7 +106,7 @@ export default class CustomerPayment extends BaseEntity {
 // })
 // export class ViewCustomerPayment {}
 
-export type CustomerPaymentRelationType = Pick<CustomerPayment, 'customer' | 'invoice' | 'visit'>
+export type CustomerPaymentRelationType = Pick<CustomerPayment, 'customer' | 'ticket'>
 
 export type CustomerPaymentInsertType = Omit<
   CustomerPayment,

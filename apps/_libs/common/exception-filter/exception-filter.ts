@@ -11,8 +11,7 @@ import {
 import { KafkaContext, NatsContext } from '@nestjs/microservices'
 import { ThrottlerException } from '@nestjs/throttler'
 import { I18nPath, I18nTranslations } from 'assets/generated/i18n.generated'
-import { Response } from 'express'
-import { FastifyReply, FastifyRequest } from 'fastify'
+import { FastifyReply } from 'fastify'
 import { I18nContext } from 'nestjs-i18n'
 import { from } from 'rxjs'
 import * as url from 'url'
@@ -39,11 +38,24 @@ export class ValidationException extends Error {
 export class BusinessException extends Error {
   public statusCode: HttpStatus
   public args?: Record<string, string | number>
+  public details: any
 
   constructor(message: I18nPath, args = {}, statusCode = HttpStatus.BAD_REQUEST) {
     super(message)
     this.statusCode = statusCode
     this.args = args
+  }
+
+  static create(options: {
+    message: I18nPath
+    args?: Record<string, any>
+    statusCode?: HttpStatus
+    details?: any
+  }) {
+    const { message, args, statusCode, details } = options
+    const exception = new BusinessException(message, args, statusCode)
+    exception.details = details
+    return exception
   }
 }
 
@@ -53,6 +65,7 @@ export class ServerExceptionFilter implements ExceptionFilter {
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR
     let { message } = exception
     const { stack } = exception
+    let details: any = undefined
     Logger.error(stack)
 
     const errors: any[] = (exception as any).errors || []
@@ -64,10 +77,12 @@ export class ServerExceptionFilter implements ExceptionFilter {
         break
       }
       case BusinessException.name: {
+        const businessException = exception as BusinessException
         message = i18n.translate(exception.message as any, {
-          args: (exception as BusinessException).args,
+          args: businessException.args,
         })
-        statusCode = (exception as BusinessException).statusCode
+        statusCode = businessException.statusCode
+        details = businessException.details
         break
       }
       case ThrottlerException.name: {
@@ -92,29 +107,45 @@ export class ServerExceptionFilter implements ExceptionFilter {
       const ctx = host.switchToHttp()
       const response = ctx.getResponse<FastifyReply>()
       const request = ctx.getRequest()
-      const requestExternal: RequestExternal = request.raw
+      const { external }: RequestExternal = request.raw
 
       const { originalUrl, method, body } = request
       const urlParse = url.parse(originalUrl, true)
-      Logger.error(
-        JSON.stringify({
-          statusCode,
-          message,
-          type: '[HTTP]',
-          method,
-          path: urlParse.pathname,
-          query: urlParse.query,
-          errors,
-          body,
-          external: requestExternal.external,
-        }),
-        exception.name
-      )
+      const basicExternal = {
+        ip: external.ip,
+        browser: external.browser,
+        mobile: external.mobile,
+        uid: external.uid,
+        oid: external.oid,
+        username: external.user?.username,
+        phone: external.organization?.phone,
+        email: external.organization?.email,
+      }
+
+      const logMessage = JSON.stringify({
+        statusCode,
+        message,
+        type: '[HTTP]',
+        method,
+        path: urlParse.pathname,
+        query: urlParse.query,
+        errors,
+        body,
+        external: basicExternal,
+      })
+      if (statusCode === HttpStatus.UNPROCESSABLE_ENTITY) {
+        Logger.warn(logMessage, exception.name)
+      } else if (statusCode === HttpStatus.NOT_FOUND) {
+        Logger.debug(logMessage, exception.name)
+      } else {
+        Logger.error(logMessage, exception.name)
+      }
 
       return response.code(statusCode).send({
         statusCode,
         errors,
         message,
+        details,
         path: originalUrl,
         time: new Date().toISOString(),
       })

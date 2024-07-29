@@ -4,8 +4,6 @@
   "ForbiddenPermission": "Bạn không có quyền: {permission}",
   "TooManyRequests": "Quá nhiều thao tác",
   "AccountInactive": "Tài khoản của bạn đang bị khóa",
-  "ApiInactive": "Link truy cập đã bị khóa",
-  "ForgotPassword": {
-    "Success": "Gửi email thành công, vui lòng kiểm tra email"
-  }
+  "AccountRequired": "Thao tác yêu cầu cần có tài khoản hợp lệ",
+  "ApiInactive": "Link truy cập đã bị khóa"
 }

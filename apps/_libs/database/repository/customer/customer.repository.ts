@@ -4,14 +4,14 @@ import { DataSource, Repository } from 'typeorm'
 import { BaseCondition } from '../../../common/dto'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { Customer } from '../../entities'
-import { CustomerInsertType, CustomerUpdateType } from '../../entities/customer.entity'
+import { CustomerInsertType, CustomerRelationType, CustomerSortType, CustomerUpdateType } from '../../entities/customer.entity'
 import { PostgreSqlRepository } from '../postgresql.repository'
 
 @Injectable()
 export class CustomerRepository extends PostgreSqlRepository<
   Customer,
-  { [P in 'id' | 'debt' | 'fullName']?: 'ASC' | 'DESC' },
-  { [P in keyof Customer]?: never },
+  { [P in keyof CustomerSortType]?: 'ASC' | 'DESC' },
+  { [P in keyof CustomerRelationType]?: never },
   CustomerInsertType,
   CustomerUpdateType
 > {
@@ -26,6 +26,13 @@ export class CustomerRepository extends PostgreSqlRepository<
     data: NoExtra<Partial<CustomerInsertType>, X>
   ): Promise<Customer> {
     const raw = await this.insertOneAndReturnRaw(data)
+    return Customer.fromRaw(raw)
+  }
+
+  async insertOneFullFieldAndReturnEntity<X extends CustomerInsertType>(
+    data: NoExtra<CustomerInsertType, X>
+  ): Promise<Customer> {
+    const raw = await this.insertOneFullFieldAndReturnRaw(data)
     return Customer.fromRaw(raw)
   }
 

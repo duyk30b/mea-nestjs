@@ -25,8 +25,7 @@ export class BatchMovementRepository extends PostgreSqlRepository<
       product?: boolean
       batch?: boolean
       receipt?: { distributor?: boolean }
-      invoice?: { customer?: boolean }
-      visit?: { customer?: boolean }
+      ticket?: { customer?: boolean }
     }
   ) {
     let query = this.manager
@@ -56,27 +55,15 @@ export class BatchMovementRepository extends PostgreSqlRepository<
       }
     }
 
-    if (relation?.invoice) {
+    if (relation?.ticket) {
       query = query.leftJoinAndSelect(
-        'productMovement.invoice',
-        'invoice',
+        'productMovement.ticket',
+        'ticket',
         'productMovement.voucherType = :typeInvoice',
-        { typeInvoice: VoucherType.Invoice }
+        { typeInvoice: VoucherType.Ticket }
       )
-      if (relation?.invoice?.customer) {
-        query = query.leftJoinAndSelect('invoice.customer', 'customer')
-      }
-    }
-
-    if (relation?.visit) {
-      query = query.leftJoinAndSelect(
-        'productMovement.visit',
-        'visit',
-        'productMovement.voucherType = :typeInvoice',
-        { typeInvoice: VoucherType.Visit }
-      )
-      if (relation?.visit?.customer) {
-        query = query.leftJoinAndSelect('visit.customer', 'customer')
+      if (relation?.ticket?.customer) {
+        query = query.leftJoinAndSelect('ticket.customer', 'customer')
       }
     }
 

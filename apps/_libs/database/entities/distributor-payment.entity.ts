@@ -55,11 +55,11 @@ export default class DistributorPayment extends BaseEntity {
   @Expose() // openDebt + debit = closeDebt
   closeDebt: number // Công nợ cuối kỳ
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   note: string // Ghi chú
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   description: string
 

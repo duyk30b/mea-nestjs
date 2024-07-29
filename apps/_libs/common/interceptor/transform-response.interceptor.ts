@@ -13,7 +13,7 @@ import { I18nPath, I18nTranslations } from '../../../../assets/generated/i18n.ge
 export type BaseResponse<T = any> = {
   data: T
   meta?: { page: number; limit: number; total: number } | Record<string, any>
-  status?: HttpStatus
+  success?: boolean
   message?: I18nPath
   args?: Record<string, any>
   time?: string
@@ -25,7 +25,7 @@ export class TransformResponseInterceptor implements NestInterceptor {
     const i18n = I18nContext.current<I18nTranslations>()
     return next.handle().pipe(
       map((response: BaseResponse) => ({
-        status: response?.status || HttpStatus.OK,
+        success: response?.success != null ? response?.success : true,
         message: i18n.translate(response?.message || 'common.Success', {
           args: response?.args || {},
         }),

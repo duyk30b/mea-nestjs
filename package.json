@@ -25,7 +25,8 @@
     "migration:revert": "npm run typeorm -- migration:revert",
     "seed:data": "npm run build seed-data && node dist/apps/seed-data/main.js start:seed",
     "stop:local": "taskkill /f /im node.exe",
-    "git:logs": "git log --all --oneline --graph -10"
+    "git:logs": "git log --all --oneline --graph -10",
+    "git:master-upgrade": "git branch -f master HEAD"
   },
   "dependencies": {
     "@fastify/cors": "^8.5.0",
@@ -64,6 +65,9 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "cross-var": "^1.1.0",
+    "exceljs": "^4.4.0",
+    "fastify-multer": "^2.0.3",
+    "googleapis": "^140.0.0",
     "isomorphic-dompurify": "^2.12.0",
     "kafkajs": "^2.2.4",
     "mongoose": "^8.1.0",
@@ -71,6 +75,7 @@
     "nestjs-i18n": "^10.4.0",
     "nodemailer": "^6.9.8",
     "pg": "^8.11.3",
+    "redis": "^4.7.0",
     "redlock": "^5.0.0-beta.2",
     "reflect-metadata": "^0.1.13",
     "request-ip": "^3.3.0",

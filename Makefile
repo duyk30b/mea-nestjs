@@ -1,48 +1,51 @@
-init-db:
-	docker compose -f docker.db.yml up -d
+up: 
+	docker compose up -d --build
 
-upgrade:
-	git fetch --all
+restore-postgres:
+	docker compose exec postgres sh -c '\
+		ls -la /restore; \
+		psql "dbname=mea_sql user=mea password=Abc12345" < /restore/$$(ls -1 /restore); \
+	'
+
+production-up:
+	mkdir -p ./data/backup
+	mkdir -p ./data/postgres
+	mkdir -p ./data/restore
+	docker compose -f docker-compose.production.yml up -d --build
+
+production-upgrade:
+	git fetch --all --prune
 	git log --all --oneline --graph -10
 	git reset --hard origin/master
-	docker compose -f docker-compose.production.yml --env-file .env.production up -d --build
+	docker compose -f docker-compose.production.yml up -d --build --force-recreate api_public
 	docker compose logs -f api_public
 
-hotfix:
-	git fetch --all
-	git log --all --oneline --graph -10
-	git reset --hard origin/hotfix
-	docker compose -f docker-compose.production.yml --env-file .env.production up -d --build
+production-logs:
 	docker compose logs -f api_public
 
-up:
-	docker compose up -d
-	docker compose logs -f api_public
-
-down:
-	docker compose down
-	
-logs:
-	docker compose logs -f api_public
-
-nginx-reload:
-	git fetch --all
+production-reload-nginx:
+	git fetch --all --prune
 	git log --all --oneline --graph -10
 	git reset --hard origin/master
-	docker compose -f docker.nginx.yml up -d
-	docker exec mc_nginx nginx -t
-	docker exec mc_nginx nginx -s reload
+	docker compose -f docker-compose.production.yml restart nginx
+	docker compose -f docker-compose.production.yml exec nginx nginx -t
+	docker compose -f docker-compose.production.yml exec nginx nginx -s reload
 
-backup-db: 
-	docker compose -f docker.db.yml exec postgres sh -c '\
-		mkdir -p backup; \
-		chmod -R 777 /backup; \
+production-backup-postgres: 
+	git fetch --all --prune
+	git reset --hard origin/master
+	git log --all --oneline --graph -10
+	docker compose -f docker-compose.production.yml exec postgres sh -c '\
 		pg_dump "dbname=mea_sql user=mea password=Abc12345" > /backup/$$(date +%Y-%m-%d_%H-%M-%S).sql; \
 		ls -la /backup; \
 	'
+	git status
+	git add .
+	git commit -m "backup-postgres"
+	git push origin master
 
-restore-db:
-	docker compose -f docker.db.yml exec postgres sh -c '\
+production-restore-postgres:
+	docker compose -f docker-compose.production.yml exec postgres sh -c '\
 		ls -la /restore; \
 		psql "dbname=mea_sql user=mea password=Abc12345" < /restore/$$(ls -1 /restore); \
 	'

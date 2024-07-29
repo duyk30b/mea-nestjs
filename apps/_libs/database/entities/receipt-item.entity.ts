@@ -26,6 +26,21 @@ export default class ReceiptItem extends BaseEntity {
   @Expose()
   batchId: number
 
+  @Column({ type: 'varchar', length: 255, default: '' })
+  @Expose()
+  lotNumber: string // Số Lô sản phẩm
+
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  expiryDate: number
+
   @Column({
     type: 'bigint',
     default: 0,
@@ -33,6 +48,28 @@ export default class ReceiptItem extends BaseEntity {
   })
   @Expose()
   costPrice: number // Giá cost
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  wholesalePrice: number // Giá bán sỉ
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  retailPrice: number // Giá bán lẻ
 
   @Column({
     type: 'decimal',
@@ -49,7 +86,9 @@ export default class ReceiptItem extends BaseEntity {
   unitRate: number
 
   @Expose()
-  @ManyToOne((type) => Receipt, { createForeignKeyConstraints: false })
+  @ManyToOne((type) => Receipt, (receipt) => receipt.receiptItems, {
+    createForeignKeyConstraints: false,
+  })
   @JoinColumn({ name: 'receiptId', referencedColumnName: 'id' })
   receipt: Receipt
 
@@ -67,8 +106,10 @@ export default class ReceiptItem extends BaseEntity {
     if (!raw) return null
     const entity = new ReceiptItem()
     Object.assign(entity, raw)
-
+    entity.expiryDate = raw.expiryDate == null ? raw.expiryDate : Number(raw.expiryDate)
     entity.costPrice = Number(raw.costPrice)
+    entity.wholesalePrice = Number(raw.wholesalePrice)
+    entity.retailPrice = Number(raw.retailPrice)
     entity.quantity = Number(raw.quantity)
 
     return entity
@@ -79,14 +120,26 @@ export default class ReceiptItem extends BaseEntity {
   }
 }
 
-export type ReceiptItemRelationType = Pick<ReceiptItem, 'receipt' | 'batch' | 'product'>
+export type ReceiptItemRelationType = {
+  [P in keyof Pick<ReceiptItem, 'product' | 'batch'>]?: boolean
+} & {
+  [P in keyof Pick<ReceiptItem, 'receipt'>]?:
+  | { [P in keyof Pick<Receipt, 'distributor'>]?: boolean }
+  | false
+}
+
+export type ReceiptItemSortType = {
+  [P in keyof Pick<ReceiptItem, 'id'>]?: 'ASC' | 'DESC'
+}
 
 export type ReceiptItemInsertType = Omit<
   ReceiptItem,
   keyof ReceiptItemRelationType | keyof Pick<ReceiptItem, 'id'>
 >
 
-export type ReceiptItemUpdateType = Omit<
-  ReceiptItem,
-  keyof ReceiptItemRelationType | keyof Pick<ReceiptItem, 'id' | 'oid' | 'distributorId'>
->
+export type ReceiptItemUpdateType = {
+  [K in Exclude<
+    keyof ReceiptItem,
+    keyof ReceiptItemRelationType | keyof Pick<ReceiptItem, 'oid' | 'id'>
+  >]: ReceiptItem[K] | (() => string)
+}

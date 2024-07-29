@@ -3,11 +3,15 @@
   "SystemError": "Lỗi hệ thống",
   "Database": {
     "NotFound": "Không tìm thấy bản ghi",
+    "InsertFailed": "Lỗi tạo bản ghi mới",
     "UpdateFailed": "Lỗi cập nhật bản ghi",
     "DeleteFailed": "Lỗi xóa bản ghi"
   },
   "Token": {
-    "Expired": "Phiên đăng nhập đã hết hạn",
+    "AccessTokenExpired": "AccessToken đã hết hạn",
+    "RefreshTokenExpired": "RefreshToken đã hết hạn",
+    "AccessTokenNoCache": "AccessToken không còn lưu trên cache",
+    "RefreshTokenNoCache": "RefreshToken không còn lưu trên cache",
     "Empty": "Mã xác thực không được phép trống",
     "Invalid": "Xác thực mã đăng nhập thất bại",
     "NoInCache": "Mã xác thực không còn lưu trong bộ nhớ",
@@ -23,35 +27,17 @@
     "WrongPassword": "Mật khẩu không đúng"
   },
   "User": {
-    "NotExist": "User không tồn tại",
     "WrongPassword": "Mật khẩu không đúng",
     "WrongRole": "Vai trò không phù hợp"
   },
   "Role": {
-    "NotExist": "Vai trò không tồn tại",
     "Inactive": "Vai trò tạm khóa"
-  },
-  "Organization": {
-    "NotExist": "Organization không tồn tại"
   },
   "Diagnosis": {
     "ConflictArrival": "Diagnosis không tồn tại"
   },
   "Product": {
-    "NotExist": "Sản phẩm không tồn tại",
     "ConflictManageQuantity": "Sản phẩm có số lượng khác 0 không thể hủy theo dõi tồn kho",
     "ConflictManageBatches": "Sản phẩm có số lượng khác 0 không thể thay đổi cách quản lý theo lô"
-  },
-  "Customer": {
-    "NotExist": "Khách hàng không tồn tại"
-  },
-  "Invoice": {
-    "NotExist": "Hóa đơn không tồn tại"
-  },
-  "Distributor": {
-    "NotExist": "Nhà cung cấp không tồn tại"
-  },
-  "Procedure": {
-    "NotExist": "Dịch vụ không tồn tại"
   }
 }

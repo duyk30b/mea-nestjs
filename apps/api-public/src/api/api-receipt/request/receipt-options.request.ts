@@ -1,8 +1,7 @@
-import { Expose, Type } from 'class-transformer'
-import { IsBoolean, IsNumber, ValidateNested } from 'class-validator'
-import { ConditionTimestamp } from '../../../../../_libs/common/dto'
+import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
+import { IsBoolean, IsNumber, IsOptional, ValidateNested } from 'class-validator'
+import { ConditionTimestamp, createConditionEnum, transformConditionEnum } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
-import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { ReceiptStatus } from '../../../../../_libs/database/common/variable'
 
 export class ReceiptRelationQuery {
@@ -15,9 +14,11 @@ export class ReceiptRelationQuery {
   distributorPayments: boolean
 
   @Expose()
-  @IsBoolean()
-  receiptItems: boolean
+  @IsOptional()
+  receiptItems: false | { product?: boolean, batch?: boolean }
 }
+
+const ConditionEnumDeliveryStatus = createConditionEnum(ReceiptStatus)
 
 export class ReceiptFilterQuery {
   @Expose()
@@ -25,18 +26,14 @@ export class ReceiptFilterQuery {
   distributorId: number
 
   @Expose()
-  @IsEnumValue(ReceiptStatus)
-  status: ReceiptStatus
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, ReceiptStatus))
+  @IsOptional()
+  status: ReceiptStatus | InstanceType<typeof ConditionEnumDeliveryStatus>
 
   @Expose()
   @Type(() => ConditionTimestamp)
   @ValidateNested({ each: true })
   startedAt: ConditionTimestamp
-
-  @Expose()
-  @Type(() => ConditionTimestamp)
-  @ValidateNested({ each: true })
-  deletedAt: ConditionTimestamp
 }
 
-export class ReceiptSortQuery extends SortQuery {}
+export class ReceiptSortQuery extends SortQuery { }

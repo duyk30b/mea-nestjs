@@ -12,7 +12,8 @@ export class OrganizationGetQuery {
   @ApiPropertyOptional({
     type: String,
     example: JSON.stringify(<OrganizationRelationQuery>{
-      users: true,
+      userList: true,
+      logoImage: true,
     }),
   })
   @Expose()
@@ -78,11 +79,11 @@ export class OrganizationGetQuery {
 export class OrganizationPaginationQuery extends IntersectionType(
   OrganizationGetQuery,
   PaginationQuery
-) {}
+) { }
 
 export class OrganizationGetManyQuery extends IntersectionType(
   PickType(OrganizationGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
-) {}
+) { }
 
-export class OrganizationGetOneQuery extends PickType(OrganizationGetQuery, ['relation']) {}
+export class OrganizationGetOneQuery extends PickType(OrganizationGetQuery, ['relation']) { }

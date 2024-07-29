@@ -1,9 +1,9 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import { EGender } from '../common/variable'
 import Device from './device'
 import Organization from './organization.entity'
-import Role from './role.entity'
+import UserRole from './user-role.entity'
 
 export enum UserGroup {
   ROOT = 'ROOT',
@@ -24,23 +24,19 @@ export default class User {
   phone: string
 
   @Expose()
-  @Column({ type: 'character varying', length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   username: string
 
   @Exclude()
-  @Column({ name: 'hashPassword', type: 'character varying', length: 255 })
+  @Column({ name: 'hashPassword', type: 'varchar', length: 255 })
   hashPassword: string
 
   @Expose({ groups: [UserGroup.ROOT] })
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   secret: string
 
   @Expose()
-  @Column({ type: 'integer', default: 1 })
-  roleId: number
-
-  @Expose()
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   fullName: string
 
   @Expose()
@@ -57,6 +53,10 @@ export default class User {
   @Expose()
   @Column({ type: 'smallint', nullable: true })
   gender: EGender
+
+  @Expose()
+  @Column({ type: 'smallint', default: 1 })
+  isAdmin: 0 | 1
 
   @Expose()
   @Column({ type: 'smallint', default: 1 })
@@ -85,22 +85,36 @@ export default class User {
   deletedAt: number
 
   @Expose()
-  @ManyToOne((type) => Organization, (organization) => organization.users, {
+  @ManyToOne((type) => Organization, (organization) => organization.userList, {
     createForeignKeyConstraints: false,
   })
   @JoinColumn({ name: 'oid', referencedColumnName: 'id' })
   organization: Organization
 
   @Expose()
-  @ManyToOne((type) => Role, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'roleId', referencedColumnName: 'id' })
-  role: Role
+  @OneToMany((type) => UserRole, (userRole) => userRole.user)
+  userRoleList: UserRole[]
 
   @Expose()
   devices: Device[]
+
+  static fromRaw(raw: { [P in keyof User]: any }) {
+    if (!raw) return null
+    const entity = new User()
+    Object.assign(entity, raw)
+
+    entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)
+    entity.deletedAt = raw.deletedAt == null ? raw.deletedAt : Number(raw.deletedAt)
+
+    return entity
+  }
+
+  static fromRaws(raws: { [P in keyof User]: any }[]) {
+    return raws.map((i) => User.fromRaw(i))
+  }
 }
 
-export type UserRelationType = Pick<User, 'organization' | 'role' | 'devices'>
+export type UserRelationType = Pick<User, 'organization' | 'userRoleList' | 'devices'>
 
 export type UserSortType = Pick<User, 'oid' | 'id' | 'phone' | 'username'>
 

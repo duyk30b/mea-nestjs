@@ -6,7 +6,7 @@ module.exports = {
     sourceType: 'module',
   },
   plugins: ['@typescript-eslint/eslint-plugin'],
-  extends: ['plugin:@typescript-eslint/recommended', 'plugin:prettier/recommended'],
+  extends: ['plugin:@typescript-eslint/recommended'],
   root: true,
   env: {
     node: true,
@@ -64,7 +64,7 @@ module.exports = {
     'array-bracket-spacing': [1, 'never'], // space trong array, eg: [ 1,2, 3 ] => [1,2, 3]
     'array-bracket-newline': [1, 'consistent'], // quy tắc xuống dòng với dấu [ và ] trong mảng
     'array-element-newline': [1, 'consistent'], // quy tắc xuống dòng với các item trong mảng
-    'operator-linebreak': [0, 'before'], // dấu ||, ?, +, = ở đầu dòng
+    'operator-linebreak': [1, 'before', { overrides: { '=': 'after' } }], // dấu ||, ?, +, = ở đầu dòng
     'padded-blocks': [1, { blocks: 'never', classes: 'never' }], // Dòng trống sau { và trước }
     'padding-line-between-statements': [
       // quy tắc cách 1 dòng

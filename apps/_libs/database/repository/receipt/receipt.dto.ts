@@ -8,10 +8,7 @@ export type ReceiptDraftInsertType = Omit<
 
 export type ReceiptDraftUpdateType = Omit<
   ReceiptUpdateType,
-  keyof Pick<
-    Receipt,
-    'oid' | 'status' | 'paid' | 'debt' | 'year' | 'month' | 'date' | 'endedAt' | 'deletedAt'
-  >
+  keyof Pick<Receipt, 'oid' | 'status' | 'paid' | 'debt' | 'year' | 'month' | 'date' | 'endedAt'>
 >
 
 export type ReceiptItemDraftType = Omit<

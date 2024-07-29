@@ -1,10 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
-import { IsString } from 'class-validator'
+import { IsDefined, IsNumber } from 'class-validator'
 
 export class DeviceLogoutBody {
-  @ApiProperty({ example: 'LSGXOWSX' })
+  @ApiProperty({ example: Date.now() })
   @Expose()
-  @IsString()
-  code: string
+  @IsDefined()
+  @IsNumber()
+  refreshExp: number
 }

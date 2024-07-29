@@ -19,7 +19,7 @@ import { ProductMovementInsertType } from '../../entities/product-movement.entit
 
 @Injectable()
 export class ReceiptSendProductAndPayment {
-  constructor(private dataSource: DataSource) {}
+  constructor(private dataSource: DataSource) { }
 
   async sendProductAndPayment(params: {
     oid: number
@@ -51,9 +51,6 @@ export class ReceiptSendProductAndPayment {
         paid: () => `paid + ${money}`,
         startedAt: time,
         endedAt: time,
-        year: DTimer.info(time, 7).year,
-        month: DTimer.info(time, 7).month + 1,
-        date: DTimer.info(time, 7).date,
       }
       const receiptUpdateResult: UpdateResult = await manager
         .createQueryBuilder()
@@ -86,6 +83,11 @@ export class ReceiptSendProductAndPayment {
           costAmountSend: number
           openQuantity: number
           openCostAmount: number
+          costPrice: number
+          wholesalePrice: number
+          retailPrice: number
+          lotNumber: string
+          expiryDate: number | null
         }
       > = {}
       for (let i = 0; i < receiptItemsProduct.length; i++) {
@@ -97,10 +99,27 @@ export class ReceiptSendProductAndPayment {
             costAmountSend: 0,
             openQuantity: 0,
             openCostAmount: 0,
+            costPrice,
+            wholesalePrice: receiptItemsProduct[i].wholesalePrice,
+            retailPrice: receiptItemsProduct[i].retailPrice,
+            lotNumber: receiptItemsProduct[i].lotNumber,
+            expiryDate: null,
           }
         }
         productIdMap[productId].quantitySend += quantity
         productIdMap[productId].costAmountSend += quantity * costPrice
+
+        // Lấy thằng có expiryDate thấp nhất để cập nhật cho PRODUCT
+        if (receiptItemsProduct[i].expiryDate != null) {
+          if (productIdMap[productId].expiryDate == null) {
+            productIdMap[productId].expiryDate = receiptItemsProduct[i].expiryDate
+          } else {
+            productIdMap[productId].expiryDate = Math.min(
+              productIdMap[productId].expiryDate,
+              receiptItemsProduct[i].expiryDate
+            )
+          }
+        }
       }
       const batchIdMap: Record<
         string,
@@ -109,16 +128,26 @@ export class ReceiptSendProductAndPayment {
           productId: number
           quantitySend: number
           openQuantity: number
+          costPrice: number
+          wholesalePrice: number
+          retailPrice: number
+          lotNumber: string
+          expiryDate: number | null
         }
       > = {}
       for (let i = 0; i < receiptItemsBatch.length; i++) {
-        const { batchId, productId, quantity } = receiptItemsBatch[i]
+        const { batchId, productId, quantity, costPrice } = receiptItemsBatch[i]
         if (!batchIdMap[batchId]) {
           batchIdMap[batchId] = {
             batchId,
             productId,
             quantitySend: 0,
             openQuantity: 0,
+            costPrice,
+            wholesalePrice: receiptItemsBatch[i].wholesalePrice,
+            retailPrice: receiptItemsBatch[i].retailPrice,
+            lotNumber: receiptItemsProduct[i].lotNumber,
+            expiryDate: receiptItemsProduct[i].expiryDate || null,
           }
         }
         batchIdMap[batchId].quantitySend += quantity
@@ -176,8 +205,8 @@ export class ReceiptSendProductAndPayment {
         const distributorPaymentId: number = distributorPaymentInsertResult.identifiers?.[0]?.id
         if (!distributorPaymentId) {
           throw new Error(
-            `${PREFIX}: Insert DistributorPayment failed:` +
-              ` ${JSON.stringify(distributorPaymentInsertResult)}`
+            `${PREFIX}: Insert DistributorPayment failed:`
+            + ` ${JSON.stringify(distributorPaymentInsertResult)}`
           )
         }
       }
@@ -189,14 +218,35 @@ export class ReceiptSendProductAndPayment {
           `
           UPDATE    "Product" "product"
           SET       "quantity" = "product"."quantity" + temp."quantitySend",
-                    "costAmount" = "product"."costAmount" + temp."costAmountSend"
-          FROM (VALUES ` +
-            productQuantityList
-              .map((i) => {
-                return `(${i.productId}, ${i.quantitySend}, ${i.costAmountSend})`
-              })
-              .join(', ') +
-            `   ) AS temp("productId", "quantitySend", "costAmountSend")
+                    "costAmount" = "product"."costAmount" + temp."costAmountSend",
+                    "lotNumber" = temp."lotNumber",
+                    "expiryDate" = CASE 
+                                      WHEN product."hasManageBatches" = 0 THEN temp."expiryDate"  
+                                      WHEN product."hasManageBatches" = 1 
+                                          AND product."expiryDate" >= temp."expiryDate"
+                                          THEN temp."expiryDate"  
+                                      WHEN product."hasManageBatches" = 1 
+                                          AND product."expiryDate" < temp."expiryDate"
+                                          THEN product."expiryDate" 
+                                      ELSE temp."expiryDate" 
+                                  END,
+                    "costPrice" = temp."costPrice",
+                    "wholesalePrice" = temp."wholesalePrice",
+                    "retailPrice" = temp."retailPrice"
+          FROM (VALUES `
+          + productQuantityList
+            .map((i) => {
+              return (
+                `(${i.productId}, ${i.quantitySend}, ${i.costAmountSend},`
+                + ` '${i.lotNumber}', ${i.expiryDate || 'NULL'}::bigint,`
+                + ` ${i.costPrice}, ${i.wholesalePrice}, ${i.retailPrice})`
+              )
+            })
+            .join(', ')
+          + `   ) AS temp ( "productId", "quantitySend", "costAmountSend",
+                            "lotNumber", "expiryDate",
+                            "costPrice", "wholesalePrice", "retailPrice"
+                          )
           WHERE     "product"."id" = temp."productId" 
                 AND "product"."oid" = ${oid}
                 AND "product"."hasManageQuantity" = 1 
@@ -220,14 +270,25 @@ export class ReceiptSendProductAndPayment {
         const batchUpdateResult: [any[], number] = await manager.query(
           `
           UPDATE    "Batch" "batch"
-          SET       "quantity" = "batch"."quantity" + temp."quantitySend"
-          FROM (VALUES ` +
-            batchQuantityList
-              .map((i) => {
-                return `(${i.batchId}, ${i.quantitySend})`
-              })
-              .join(', ') +
-            `   ) AS temp("batchId", "quantitySend")
+          SET       "quantity" = "batch"."quantity" + temp."quantitySend",
+                    "lotNumber" = temp."lotNumber",
+                    "expiryDate" = temp."expiryDate",
+                    "wholesalePrice" = temp."wholesalePrice",
+                    "retailPrice" = temp."retailPrice"
+          FROM (VALUES `
+          + batchQuantityList
+            .map((i) => {
+              return (
+                `(${i.batchId}, ${i.quantitySend},`
+                + ` '${i.lotNumber}', ${i.expiryDate || 'NULL'}::bigint,`
+                + ` ${i.wholesalePrice}, ${i.retailPrice})`
+              )
+            })
+            .join(', ')
+          + `   ) AS temp ( "batchId", "quantitySend",
+                            "lotNumber", "expiryDate",
+                            "wholesalePrice", "retailPrice"
+                          )
           WHERE     "batch"."id" = temp."batchId" AND "batch"."oid" = ${oid}
           RETURNING "batch".*;        
           `
@@ -236,6 +297,33 @@ export class ReceiptSendProductAndPayment {
           throw new Error(`${PREFIX}: Update Batch, affected = ${batchUpdateResult[1]}`)
         }
         batchList = Batch.fromRaws(batchUpdateResult[0])
+
+        // Nếu số lượng lô hàng bị quay về 0, thì cần phải tính lại HSD cho sản phẩm gốc
+        const batchZeroQuantityList = batchList.filter((i) => i.quantity === 0)
+        if (batchZeroQuantityList.length) {
+          const productReCalculatorIds = batchZeroQuantityList.map((i) => i.productId)
+          const productReCalculatorResult: [any[], number] = await manager.query(`
+            UPDATE "Product" product
+            SET "expiryDate" = (
+                SELECT MIN("expiryDate")
+                FROM "Batch" batch
+                WHERE   batch."productId" = product.id
+                    AND batch."expiryDate" IS NOT NULL
+                    AND batch."quantity" <> 0
+            )
+            WHERE product."hasManageBatches" = 1
+                AND "product"."id" IN (${productReCalculatorIds.toString()})
+            RETURNING "product".*;  
+          `)
+          const productReCalculatorList = Product.fromRaws(productReCalculatorResult[0])
+          for (let i = 0; i < productList.length; i++) {
+            const productId = productList[i].id
+            const productReCalculatorFind = productReCalculatorList.find((i) => i.id === productId)
+            if (productReCalculatorFind) {
+              productList[i] = productReCalculatorFind
+            }
+          }
+        }
       }
 
       // === 7. CALCULATOR: số lượng ban đầu của product và batch ===

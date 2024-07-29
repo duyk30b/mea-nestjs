@@ -8,7 +8,7 @@ import { RequestExternal } from '../request/external.request'
 
 @Injectable()
 export class AccessLogInterceptor implements NestInterceptor {
-  constructor(private readonly logger = new Logger('ACCESS_LOG')) {}
+  constructor(private readonly logger = new Logger('ACCESS_LOG')) { }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const createTime = new Date()
@@ -22,19 +22,31 @@ export class AccessLogInterceptor implements NestInterceptor {
     if (context.getType() === 'http') {
       const ctx = context.switchToHttp()
       const request = ctx.getRequest()
-      const requestExternal: RequestExternal = request.raw
+      const { external }: RequestExternal = request.raw
+      const basicExternal = {
+        ip: external.ip,
+        browser: external.browser,
+        mobile: external.mobile,
+        uid: external.uid,
+        oid: external.oid,
+        username: external.user?.username,
+        phone: external.organization?.phone,
+        email: external.organization?.email,
+      }
 
-      const { originalUrl, method, body } = request
-      const urlParse = url.parse(originalUrl, true)
+      const urlParse = url.parse(request.originalUrl, true)
+      if (basicExternal.oid) {
+        message.OID = basicExternal.oid
+      }
       message.type = '[API]'
-      message.method = method
-      message.path = urlParse.pathname
+      message.method = request.method
+      message.url = `${request.protocol}://${request.raw.hostname}${urlParse.pathname}`
       message.query = urlParse.query
       message.className = className
       message.funcName = funcName
-      message.external = requestExternal.external
+      message.external = basicExternal
       if (showData) {
-        message.body = body
+        message.body = request.body
       }
     } else if (context.getType() === 'rpc') {
       if (res.constructor.name === 'NatsContext') {
@@ -69,11 +81,13 @@ export class AccessLogInterceptor implements NestInterceptor {
     return next.handle().pipe(
       catchError((err) => {
         message.errorMessage = err.message
+        message.time = `${Date.now() - createTime.getTime()}ms`
         if (err instanceof ValidationException) {
           message.errors = err.errors
+          this.logger.warn(JSON.stringify(message))
+        } else {
+          this.logger.error(JSON.stringify(message))
         }
-        message.time = `${Date.now() - createTime.getTime()}ms`
-        this.logger.error(JSON.stringify(message))
         return throwError(() => err)
       }),
       tap((xx: any) => {

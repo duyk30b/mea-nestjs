@@ -4,18 +4,19 @@ import { ClassSerializerInterceptor, Logger, ValidationError, ValidationPipe } f
 import { NestFactory, Reflector } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { contentParser } from 'fastify-multer'
 import * as requestIp from 'request-ip'
 import {
   ServerExceptionFilter,
   ValidationException,
 } from '../../_libs/common/exception-filter/exception-filter'
+import { RootGuard } from '../../_libs/common/guards/root.guard'
+import { UserGuard } from '../../_libs/common/guards/user.guard.'
 import { AccessLogInterceptor } from '../../_libs/common/interceptor/access-log.interceptor'
 import { TimeoutInterceptor } from '../../_libs/common/interceptor/timeout.interceptor'
 import { TransformResponseInterceptor } from '../../_libs/common/interceptor/transform-response.interceptor'
+import { GlobalConfig } from '../../_libs/environments'
 import { AppModule } from './app.module'
-import { GlobalConfig } from './environments'
-import { RootGuard } from './guards/root.guard'
-import { UserGuard } from './guards/user.guard.'
 
 async function bootstrap() {
   const logger = new Logger('bootstrap')
@@ -25,8 +26,11 @@ async function bootstrap() {
     logger: ['error', 'warn', 'log', 'debug'],
   })
   app.register(cors, { origin: '*' })
+  app.register(contentParser)
 
-  await app.register(helmet)
+  await app.register(helmet, {
+    contentSecurityPolicy: false, // cấu hình cho google-driver callback hoạt động script
+  })
   app.use(requestIp.mw())
 
   app.useGlobalInterceptors(
@@ -40,7 +44,6 @@ async function bootstrap() {
   )
 
   app.useGlobalFilters(new ServerExceptionFilter())
-
   app.useGlobalGuards(new UserGuard(app.get(Reflector)), new RootGuard(app.get(Reflector)))
 
   app.useGlobalPipes(
@@ -81,6 +84,7 @@ async function bootstrap() {
       swaggerOptions: { persistAuthorization: true },
     })
   }
+
   await app.listen(API_PUBLIC_PORT, '0.0.0.0', () => {
     logger.debug(
       `🚀 ===== [API] Server document: http://${API_PUBLIC_HOST}:${API_PUBLIC_PORT}/documents/ =====`
@@ -92,4 +96,5 @@ async function bootstrap() {
     logger.debug(`🚀 ===== [NODE] NodeJS version: ${NODE_VERSION} =====`)
   })
 }
+
 bootstrap()

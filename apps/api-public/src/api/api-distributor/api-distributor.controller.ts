@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
+import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
-import { HasPermission } from '../../guards/permission.guard'
 import { ApiDistributorService } from './api-distributor.service'
 import {
   DistributorCreateBody,
@@ -16,7 +16,7 @@ import {
 @ApiBearerAuth('access-token')
 @Controller('distributor')
 export class ApiDistributorController {
-  constructor(private readonly apiDistributorService: ApiDistributorService) {}
+  constructor(private readonly apiDistributorService: ApiDistributorService) { }
 
   @Get('pagination')
   @HasPermission(PermissionId.DISTRIBUTOR_READ)
@@ -53,10 +53,10 @@ export class ApiDistributorController {
     return await this.apiDistributorService.updateOne(oid, id, body)
   }
 
-  @Delete('delete/:id')
+  @Delete('destroy/:id')
   @HasPermission(PermissionId.DISTRIBUTOR_DELETE)
   @ApiParam({ name: 'id', example: 1 })
-  async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiDistributorService.deleteOne(oid, id)
+  async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiDistributorService.destroyOne(oid, id)
   }
 }

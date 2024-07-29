@@ -35,25 +35,25 @@ export type NoExtra<T, U extends T = T> = U & Impossible<Exclude<keyof U, keyof 
 // https://stackoverflow.com/questions/49580725/is-it-possible-to-restrict-typescript-object-to-contain-only-properties-defined
 
 // interface Animal {
-//     name: string;
-//     noise: string;
+//   name: string
+//   noise: string
 // }
 
 // function thisWorks<T extends Animal>(animal: T & Impossible<Exclude<keyof T, keyof Animal>>): void {
-//     console.log(`The noise that ${animal.name.toLowerCase()}s make is ${animal.noise}.`);
+//   console.log(`The noise that ${animal.name.toLowerCase()}s make is ${animal.noise}.`)
 // }
 
-// function thisIsAsGoodAsICanGetIt<T extends Animal>(animal: NoExtraProperties<Animal, T>): void {
-//     console.log(`The noise that ${animal.name.toLowerCase()}s make is ${animal.noise}.`);
+// function thisIsAsGoodAsICanGetIt<T extends Animal>(animal: NoExtra<Animal, T>): void {
+//   console.log(`The noise that ${animal.name.toLowerCase()}s make is ${animal.noise}.`)
 // }
 
 // // It works for variables defined as the type
-// const okay: NoExtraProperties<Animal> = {
-//     name: 'Dog',
-//     noise: 'bark',
-// };
+// const okay: NoExtra<Animal> = {
+//   name: 'Dog',
+//   noise: 'bark',
+// }
 
-// const wrong1: NoExtraProperties<Animal> = {
+// const wrong1: NoExtra<Animal> = {
 //     name: 'Cat',
 //     noise: 'meow'
 //     betterThanDogs: false, // look, an error!

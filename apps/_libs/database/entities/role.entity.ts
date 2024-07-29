@@ -1,5 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import UserRole from './user-role.entity'
 
 @Entity('Role')
 export default class Role {
@@ -11,7 +12,7 @@ export default class Role {
   @Expose()
   id: number
 
-  @Column({ type: 'character varying', length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   @Expose()
   name: string
 
@@ -33,9 +34,27 @@ export default class Role {
   })
   @Expose()
   updatedAt: number
+
+  @Expose()
+  @OneToMany(() => UserRole, (userRole) => userRole.role)
+  userRoleList: UserRole[]
+
+  static fromRaw(raw: { [P in keyof Role]: any }) {
+    if (!raw) return null
+    const entity = new Role()
+    Object.assign(entity, raw)
+
+    entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)
+
+    return entity
+  }
+
+  static fromRaws(raws: { [P in keyof Role]: any }[]) {
+    return raws.map((i) => Role.fromRaw(i))
+  }
 }
 
-export type RoleRelationType = Pick<Role, never>
+export type RoleRelationType = Pick<Role, 'userRoleList'>
 
 export type RoleSortType = Pick<Role, 'oid' | 'id'>
 

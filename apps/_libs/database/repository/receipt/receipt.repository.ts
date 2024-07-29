@@ -1,18 +1,19 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
-import { EntityManager, Repository } from 'typeorm'
-import { Receipt } from '../../entities'
+import { DataSource, EntityManager, In, Repository } from 'typeorm'
+import { ReceiptStatus } from '../../common/variable'
+import { Receipt, ReceiptItem } from '../../entities'
+import { ReceiptRelationType, ReceiptSortType } from '../../entities/receipt.entity'
 import { PostgreSqlRepository } from '../postgresql.repository'
 
 @Injectable()
 export class ReceiptRepository extends PostgreSqlRepository<
   Receipt,
-  { [P in 'id' | 'distributorId']?: 'ASC' | 'DESC' },
-  { [P in 'distributor' | 'distributorPayments']?: boolean } & {
-    receiptItems?: { batch?: boolean; product?: boolean } | false
-  }
+  { [P in keyof ReceiptSortType]?: 'ASC' | 'DESC' },
+  ReceiptRelationType
 > {
   constructor(
+    private dataSource: DataSource,
     @InjectEntityManager() private manager: EntityManager,
     @InjectRepository(Receipt) private receiptRepository: Repository<Receipt>
   ) {
@@ -52,5 +53,20 @@ export class ReceiptRepository extends PostgreSqlRepository<
 
     const receipt = await query.getOne()
     return receipt
+  }
+
+  async destroy(params: { oid: number; receiptId: number }) {
+    const { oid, receiptId } = params
+    return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
+      const receiptDeleteResult = await manager.delete(Receipt, {
+        oid,
+        id: receiptId,
+        status: In([ReceiptStatus.Draft, ReceiptStatus.Cancelled]),
+      })
+      if (receiptDeleteResult.affected !== 1) {
+        throw new Error(`Delete Receipt ${receiptId} failed: Status invalid`)
+      }
+      await manager.delete(ReceiptItem, { oid, receiptId })
+    })
   }
 }

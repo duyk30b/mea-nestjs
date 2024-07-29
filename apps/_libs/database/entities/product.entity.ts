@@ -1,20 +1,35 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity, Index, OneToMany } from 'typeorm'
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import Batch from './batch.entity'
+import ProductGroup from './product-group.entity'
 
 @Entity('Product')
 @Index('IDX_Product__oid_brandName', ['oid', 'brandName'])
 @Index('IDX_Product__oid_substance', ['oid', 'substance'])
-@Index('IDX_Product__oid_group', ['oid', 'group'])
 export default class Product extends BaseEntity {
-  @Column({ type: 'character varying', length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   @Expose()
   brandName: string // Tên biệt dược
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   substance: string // Hoạt chất
+
+  @Column({ type: 'varchar', length: 255, default: '' })
+  @Expose()
+  lotNumber: string // Số Lô sản phẩm
+
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  expiryDate: number
 
   @Column({
     type: 'decimal',
@@ -72,33 +87,33 @@ export default class Product extends BaseEntity {
 
   @Column({ default: 1, type: 'smallint' })
   @Expose()
-  hasManageQuantity: number
+  hasManageQuantity: 0 | 1
 
   @Column({ default: 0, type: 'smallint' })
   @Expose()
-  hasManageBatches: number
+  hasManageBatches: 0 | 1
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
   @Expose()
-  group: string // Nhóm thuốc: kháng sinh, dinh dưỡng ...
+  @Column({ default: 0 })
+  productGroupId: number
 
   @Column({ type: 'text', default: JSON.stringify([]) })
   @Expose()
   unit: string
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   route: string // Đường dùng: uống, tiêm, ...
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   source: string // Nguồn gốc: ... Ấn Độ, Ý, Pháp, ...
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   image: string
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   hintUsage: string // Gợi ý cách sử dụng
 
@@ -128,6 +143,11 @@ export default class Product extends BaseEntity {
   @Expose()
   deletedAt: number
 
+  @ManyToOne((type) => ProductGroup, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'productGroupId', referencedColumnName: 'id' })
+  @Expose()
+  productGroup: ProductGroup
+
   @Expose()
   @OneToMany(() => Batch, (batch) => batch.product)
   batchList: Batch[]
@@ -137,6 +157,7 @@ export default class Product extends BaseEntity {
     const entity = new Product()
     Object.assign(entity, raw)
 
+    entity.expiryDate = raw.expiryDate == null ? raw.expiryDate : Number(raw.expiryDate)
     entity.quantity = Number(raw.quantity)
     entity.costAmount = Number(raw.costAmount)
     entity.costPrice = Number(raw.costPrice)
@@ -154,9 +175,12 @@ export default class Product extends BaseEntity {
   }
 }
 
-export type ProductRelationType = Pick<Product, 'batchList'>
+export type ProductRelationType = Pick<Product, 'batchList' | 'productGroup'>
 
-export type ProductSortType = Pick<Product, 'id' | 'quantity' | 'brandName' | 'costAmount'>
+export type ProductSortType = Pick<
+  Product,
+  'id' | 'quantity' | 'brandName' | 'costAmount' | 'expiryDate'
+>
 
 export type ProductInsertType = Omit<
   Product,

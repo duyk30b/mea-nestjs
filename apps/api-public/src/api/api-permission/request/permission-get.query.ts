@@ -30,7 +30,7 @@ export class PermissionGetQuery {
   @ApiPropertyOptional({
     type: String,
     example: JSON.stringify(<PermissionFilterQuery>{
-      level: 1,
+      level: { EQUAL: 1 },
     }),
   })
   @Expose()
@@ -77,11 +77,11 @@ export class PermissionGetQuery {
 export class PermissionPaginationQuery extends IntersectionType(
   PermissionGetQuery,
   PaginationQuery
-) {}
+) { }
 
 export class PermissionGetManyQuery extends IntersectionType(
   PickType(PermissionGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
-) {}
+) { }
 
-export class PermissionGetOneQuery extends PickType(PermissionGetQuery, ['relation']) {}
+export class PermissionGetOneQuery extends PickType(PermissionGetQuery, ['relation']) { }

@@ -2,13 +2,16 @@ import { Injectable } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, Repository } from 'typeorm'
 import { ReceiptItem } from '../../entities'
+import { ReceiptItemInsertType, ReceiptItemRelationType, ReceiptItemSortType, ReceiptItemUpdateType } from '../../entities/receipt-item.entity'
 import { PostgreSqlRepository } from '../postgresql.repository'
 
 @Injectable()
 export class ReceiptItemRepository extends PostgreSqlRepository<
   ReceiptItem,
-  { [P in 'id']?: 'ASC' | 'DESC' },
-  { [P in 'receipt' | 'product' | 'batch']?: boolean }
+  ReceiptItemSortType,
+  ReceiptItemRelationType,
+  ReceiptItemInsertType,
+  ReceiptItemUpdateType
 > {
   constructor(
     @InjectEntityManager() private manager: EntityManager,

@@ -13,7 +13,7 @@ export class ProductMovementGetQuery {
   @ApiPropertyOptional({
     type: String,
     example: JSON.stringify(<ProductMovementRelationQuery>{
-      visit: true,
+      ticket: true,
       product: true,
     }),
   })
@@ -38,7 +38,7 @@ export class ProductMovementGetQuery {
     type: String,
     example: JSON.stringify(<ProductMovementFilterQuery>{
       voucherId: 3,
-      voucherType: VoucherType.Visit,
+      voucherType: VoucherType.Receipt,
     }),
   })
   @Expose()
@@ -83,11 +83,11 @@ export class ProductMovementGetQuery {
 export class ProductMovementPaginationQuery extends IntersectionType(
   ProductMovementGetQuery,
   PaginationQuery
-) {}
+) { }
 
 export class ProductMovementGetManyQuery extends IntersectionType(
   PickType(ProductMovementGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
-) {}
+) { }
 
-export class ProductMovementGetOneQuery extends PickType(ProductMovementGetQuery, ['relation']) {}
+export class ProductMovementGetOneQuery extends PickType(ProductMovementGetQuery, ['relation']) { }

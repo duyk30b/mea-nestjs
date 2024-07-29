@@ -1,7 +1,10 @@
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { DistributorPaymentRepository } from '../../../../_libs/database/repository/distributor-payment/distributor-payment.repository'
 import { DistributorRepository } from '../../../../_libs/database/repository/distributor/distributor.repository'
+import { ReceiptRepository } from '../../../../_libs/database/repository/receipt/receipt.repository'
+import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   DistributorCreateBody,
   DistributorGetManyQuery,
@@ -11,7 +14,12 @@ import {
 
 @Injectable()
 export class ApiDistributorService {
-  constructor(private readonly distributorRepository: DistributorRepository) {}
+  constructor(
+    private readonly socketEmitService: SocketEmitService,
+    private readonly distributorRepository: DistributorRepository,
+    private readonly distributorPaymentRepository: DistributorPaymentRepository,
+    private readonly receiptRepository: ReceiptRepository
+  ) { }
 
   async pagination(oid: number, query: DistributorPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, sort, relation } = query
@@ -57,29 +65,47 @@ export class ApiDistributorService {
   }
 
   async getOne(oid: number, id: number): Promise<BaseResponse> {
-    const data = await this.distributorRepository.findOneBy({ oid, id })
-    if (!data) throw new BusinessException('error.Distributor.NotExist')
-    return { data }
+    const distributor = await this.distributorRepository.findOneBy({ oid, id })
+    if (!distributor) throw new BusinessException('error.Database.NotFound')
+    return { data: { distributor } }
   }
 
   async createOne(oid: number, body: DistributorCreateBody): Promise<BaseResponse> {
-    const id = await this.distributorRepository.insertOne({ oid, ...body })
-    const data = await this.distributorRepository.findOneById(id)
-    return { data }
+    const distributor = await this.distributorRepository.insertOneFullFieldAndReturnEntity({
+      ...body,
+      oid,
+      debt: 0,
+    })
+    this.socketEmitService.distributorUpsert(oid, { distributor })
+    return { data: { distributor } }
   }
 
   async updateOne(oid: number, id: number, body: DistributorUpdateBody): Promise<BaseResponse> {
-    const affected = await this.distributorRepository.update({ id, oid }, body)
-    const data = await this.distributorRepository.findOneBy({ oid, id })
-    return { data }
+    const [distributor] = await this.distributorRepository.updateAndReturnEntity({ oid, id }, body)
+    if (!distributor) {
+      throw BusinessException.create({
+        message: 'error.Database.UpdateFailed',
+        details: 'Distributor',
+      })
+    }
+    this.socketEmitService.distributorUpsert(oid, { distributor })
+    return { data: { distributor } }
   }
 
-  async deleteOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.distributorRepository.update({ oid, id }, { deletedAt: Date.now() })
-    if (affected === 0) {
-      throw new BusinessException('error.Database.DeleteFailed')
+  async destroyOne(oid: number, id: number): Promise<BaseResponse> {
+    const countReceipt = await this.receiptRepository.countBy({ oid, distributorId: id })
+    if (countReceipt > 0) {
+      return {
+        data: { countReceipt },
+        success: false,
+      }
     }
-    const data = await this.distributorRepository.findOneById(id)
-    return { data }
+
+    await Promise.allSettled([
+      this.distributorRepository.delete({ oid, id }),
+      this.distributorPaymentRepository.delete({ oid, distributorId: id }),
+    ])
+
+    return { data: { countReceipt: 0, distributorId: id } }
   }
 }

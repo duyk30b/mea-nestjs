@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { DataSource, FindOptionsWhere, MoreThanOrEqual, Repository, UpdateResult } from 'typeorm'
 import { formatNumber } from '../../../common/helpers/string.helper'
-import { InvoiceStatus, PaymentType, VoucherType } from '../../common/variable'
+import { PaymentType } from '../../common/variable'
 import { Customer, CustomerPayment } from '../../entities'
 import {
   CustomerPaymentInsertType,
   CustomerPaymentRelationType,
 } from '../../entities/customer-payment.entity'
-import { VisitStatus } from '../../entities/visit.entity'
+import { TicketStatus } from '../../entities/ticket.entity'
 import { PostgreSqlRepository } from '../postgresql.repository'
 
 @Injectable()
@@ -29,16 +29,18 @@ export class CustomerPaymentRepository extends PostgreSqlRepository<
     oid: number
     customerId: number
     time: number
-    invoicePaymentList: { invoiceId: number; money: number }[]
-    visitPaymentList: { visitId: number; money: number }[]
+    ticketPaymentList: { ticketId: number; money: number }[]
     note?: string
   }) {
-    const { oid, customerId, invoicePaymentList, visitPaymentList, time, note } = options
+    const { oid, customerId, ticketPaymentList, time, note } = options
     const PREFIX = `customerId=${customerId} pay debt failed`
 
-    const totalMoney =
-      invoicePaymentList.reduce((acc, cur) => acc + cur.money, 0) +
-      visitPaymentList.reduce((acc, cur) => acc + cur.money, 0)
+    const totalMoney = ticketPaymentList.reduce((acc, cur) => {
+      if (cur.money <= 0) {
+        throw new Error(`${PREFIX}: Money number invalid`)
+      }
+      return acc + cur.money
+    }, 0)
 
     if (totalMoney <= 0) {
       throw new Error(`${PREFIX}: Money number invalid`)
@@ -68,85 +70,44 @@ export class CustomerPaymentRepository extends PostgreSqlRepository<
       let customerOpenDebt = customerCloseDebt + totalMoney
 
       const customerPaymentInsertList: CustomerPaymentInsertType[] = []
-      const description =
-        `Trả ${formatNumber(totalMoney)} vào các phiếu nợ: ` +
-        `${[invoicePaymentList.map((i) => 'IV' + i.invoiceId), visitPaymentList.map((i) => 'VS' + i.visitId)].flat().join(',')}`
-      // === 2. UPDATE INVOICE ===
-      if (invoicePaymentList.length) {
-        const invoiceUpdateResult: [any[], number] = await manager.query(
-          `
-          UPDATE "Invoice" iv
-          SET "paid"    = iv."paid" + temp."money",
-              "debt"    = iv."debt" - temp."money",
-              "status"  = CASE 
-                            WHEN(iv."debt" = temp."money") THEN ${InvoiceStatus.Success} 
-                            ELSE ${InvoiceStatus.Debt}
-                          END
-          FROM (VALUES ` +
-            invoicePaymentList.map((i) => `(${i.invoiceId}, ${i.money})`).join(', ') +
-            `   ) AS temp("invoiceId", "money")
-          WHERE   iv."oid" = ${oid} 
-              AND iv."id" = temp."invoiceId" 
-              AND iv."customerId" = ${customerId}
-              AND iv."status" = ${InvoiceStatus.Debt}
-              AND iv."debt" >= temp."money";
-          `
-        )
-        if (invoiceUpdateResult[1] != invoicePaymentList.length) {
-          throw new Error(`${PREFIX}: Update Invoice failed, affected = ${invoiceUpdateResult[1]}`)
-        }
-
-        invoicePaymentList.forEach((i) => {
-          const customerPaymentInsert: CustomerPaymentInsertType = {
-            oid,
-            customerId,
-            voucherId: i.invoiceId,
-            voucherType: VoucherType.Invoice,
-            createdAt: time,
-            paymentType: PaymentType.PayDebt,
-            paid: i.money,
-            debit: -i.money,
-            openDebt: customerOpenDebt,
-            closeDebt: customerOpenDebt - i.money,
-            note: note || '',
-            description,
-          }
-          customerOpenDebt = customerPaymentInsert.closeDebt
-          customerPaymentInsertList.push(customerPaymentInsert)
-        })
+      let description = ''
+      if (ticketPaymentList.length) {
+        description =
+          `Trả ${formatNumber(totalMoney)} vào các phiếu nợ: `
+          + `${ticketPaymentList.map((i) => 'T' + i.ticketId).join(',')}`
       }
 
       // === 3. UPDATE VISIT ===
-      if (visitPaymentList.length) {
-        const visitUpdateResult: [any[], number] = await manager.query(
+      if (ticketPaymentList.length) {
+        const ticketUpdateResult: [any[], number] = await manager.query(
           `
-          UPDATE "Visit" vs
-          SET "paid"    = vs."paid" + temp."money",
-              "debt"    = vs."debt" - temp."money",
-              "visitStatus"  = CASE 
-                            WHEN(vs."debt" = temp."money") THEN ${VisitStatus.Completed} 
-                            ELSE ${VisitStatus.Debt}
-                          END
-          FROM (VALUES ` +
-            visitPaymentList.map((i) => `(${i.visitId}, ${i.money})`).join(', ') +
-            `   ) AS temp("visitId", "money")
-          WHERE   vs."oid" = ${oid} 
-              AND vs."id" = temp."visitId" 
-              AND vs."customerId" = ${customerId}
-              AND vs."visitStatus" = ${VisitStatus.Debt}
-              AND vs."debt" >= temp."money";
+          UPDATE "Ticket" ticket
+          SET "paid"            = ticket."paid" + temp."money",
+              "debt"            = ticket."debt" - temp."money",
+              "ticketStatus"    = CASE 
+                                    WHEN(ticket."debt" = temp."money") 
+                                        THEN ${TicketStatus.Completed} 
+                                    ELSE ${TicketStatus.Debt}
+                                  END
+          FROM (VALUES `
+          + ticketPaymentList.map((i) => `(${i.ticketId}, ${i.money})`).join(', ')
+          + `   ) AS temp("ticketId", "money")
+          WHERE   ticket."oid"          = ${oid} 
+              AND ticket."id"           = temp."ticketId" 
+              AND ticket."customerId"   = ${customerId}
+              AND ticket."ticketStatus" = ${TicketStatus.Debt}
+              AND ticket."debt"         >= temp."money";
           `
         )
-        if (visitUpdateResult[1] != visitPaymentList.length) {
-          throw new Error(`${PREFIX}: Update Visit failed, affected = ${visitUpdateResult[1]}`)
+        if (ticketUpdateResult[1] != ticketPaymentList.length) {
+          throw new Error(`${PREFIX}: Update Ticket failed, affected = ${ticketUpdateResult[1]}`)
         }
 
-        visitPaymentList.forEach((i) => {
+        ticketPaymentList.forEach((i) => {
           const customerPaymentInsert: CustomerPaymentInsertType = {
             oid,
             customerId,
-            voucherId: i.visitId,
-            voucherType: VoucherType.Visit,
+            ticketId: i.ticketId,
             createdAt: time,
             paymentType: PaymentType.PayDebt,
             paid: i.money,

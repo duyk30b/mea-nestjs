@@ -38,7 +38,7 @@ export class BatchMovementGetQuery {
     type: String,
     example: JSON.stringify(<BatchMovementFilterQuery>{
       voucherId: 3,
-      voucherType: VoucherType.Visit,
+      voucherType: VoucherType.Receipt,
     }),
   })
   @Expose()
@@ -83,11 +83,11 @@ export class BatchMovementGetQuery {
 export class BatchMovementPaginationQuery extends IntersectionType(
   BatchMovementGetQuery,
   PaginationQuery
-) {}
+) { }
 
 export class BatchMovementGetManyQuery extends IntersectionType(
   PickType(BatchMovementGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
-) {}
+) { }
 
-export class BatchMovementGetOneQuery extends PickType(BatchMovementGetQuery, ['relation']) {}
+export class BatchMovementGetOneQuery extends PickType(BatchMovementGetQuery, ['relation']) { }

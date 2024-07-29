@@ -6,7 +6,7 @@ import { DistributorPaymentInsertType } from '../../entities/distributor-payment
 
 @Injectable()
 export class ReceiptPrepayment {
-  constructor(private dataSource: DataSource) {}
+  constructor(private dataSource: DataSource) { }
 
   async prepayment(params: { oid: number; receiptId: number; time: number; money: number }) {
     const { oid, receiptId, time, money } = params
@@ -29,7 +29,7 @@ export class ReceiptPrepayment {
         .set({
           status: ReceiptStatus.Prepayment,
           paid: () => `paid + ${money}`,
-          debt: 0, // thanh toán trước nên không tính là nợ
+          debt: () => `debt - ${money}`,
         })
         .returning('*')
         .execute()

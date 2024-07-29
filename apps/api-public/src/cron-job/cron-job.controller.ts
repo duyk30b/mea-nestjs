@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IsRoot } from '../guards/root.guard'
+import { IsRoot } from '../../../_libs/common/guards/root.guard'
 import { ProductBatchJob } from './product-batch.job'
 
 @Controller('cron-job')

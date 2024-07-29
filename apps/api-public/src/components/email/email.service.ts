@@ -14,7 +14,7 @@ export class EmailService {
     this.subjectPrefix = this.configService.get('mail.subject_prefix')
   }
 
-  async send(options: ISendMailOptions): Promise<void> {
-    await this.mailerService.sendMail(options)
+  async send(options: ISendMailOptions) {
+    return await this.mailerService.sendMail(options)
   }
 }

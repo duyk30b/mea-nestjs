@@ -16,20 +16,26 @@ export class CustomerCreateBody {
   @Validate(IsPhone)
   phone: string
 
+  @ApiProperty({ example: 45 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  customerSourceId: number
+
   @ApiPropertyOptional({ example: 1678890707005 })
   @Expose()
   @IsNumber()
   birthday: number
 
+  @ApiPropertyOptional({ example: 1998 })
+  @Expose()
+  @IsNumber()
+  yearOfBirth: number
+
   @ApiPropertyOptional({ enum: [0, 1], example: EGender.Female })
   @Expose()
   @IsIn([0, 1])
   gender: EGender
-
-  @ApiPropertyOptional({ example: '0330400025442' })
-  @Expose() // số căn cước công dân
-  @IsString()
-  identityCard: string
 
   @ApiPropertyOptional({ example: 'Tỉnh Hưng Yên' })
   @Expose()
@@ -54,7 +60,7 @@ export class CustomerCreateBody {
   @ApiPropertyOptional({ example: 'Mẹ Nguyễn Thị Hương, sđt: 0988021146' })
   @Expose() // người thân
   @IsString()
-  relative?: string
+  relative: string
 
   @ApiPropertyOptional({ example: 'Mổ ruột thừa năm 2018' })
   @Expose()
@@ -72,4 +78,4 @@ export class CustomerCreateBody {
   isActive: 0 | 1
 }
 
-export class CustomerUpdateBody extends PartialType(CustomerCreateBody) {}
+export class CustomerUpdateBody extends PartialType(CustomerCreateBody) { }

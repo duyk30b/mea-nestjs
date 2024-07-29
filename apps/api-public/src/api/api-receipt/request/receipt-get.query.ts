@@ -11,7 +11,10 @@ import {
 export class ReceiptGetQuery {
   @ApiPropertyOptional({
     type: String,
-    example: JSON.stringify(<ReceiptRelationQuery>{ distributor: true, receiptItems: true }),
+    example: JSON.stringify(<ReceiptRelationQuery>{
+      distributor: true,
+      receiptItems: { product: true },
+    }),
   })
   @Expose()
   @Transform(({ value }) => {
@@ -70,11 +73,11 @@ export class ReceiptGetQuery {
   sort?: ReceiptSortQuery
 }
 
-export class ReceiptPaginationQuery extends IntersectionType(ReceiptGetQuery, PaginationQuery) {}
+export class ReceiptPaginationQuery extends IntersectionType(ReceiptGetQuery, PaginationQuery) { }
 
 export class ReceiptGetManyQuery extends IntersectionType(
   PickType(ReceiptGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
-) {}
+) { }
 
-export class ReceiptGetOneQuery extends PickType(ReceiptGetQuery, ['relation']) {}
+export class ReceiptGetOneQuery extends PickType(ReceiptGetQuery, ['relation']) { }

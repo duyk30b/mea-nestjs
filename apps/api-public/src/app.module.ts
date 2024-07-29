@@ -10,22 +10,23 @@ import {
   QueryResolver,
 } from 'nestjs-i18n'
 import * as path from 'path'
+import { CacheDataModule } from '../../_libs/common/cache-data/cache-data.module'
+import { PermissionGuard } from '../../_libs/common/guards/permission.guard'
+import { JwtExtendModule } from '../../_libs/common/jwt-extend/jwt-extend.module'
+import { DetectClientMiddleware } from '../../_libs/common/middleware/detect-client.middleware'
 import { RepositoryModule } from '../../_libs/database/repository/repository.module'
 import { SqlModule } from '../../_libs/database/sql.module'
-import { CacheManagerModule } from '../../_libs/transporter/cache-manager/cache-manager.module'
+import { GoogleDriverModule } from '../../_libs/transporter/google-driver/google-driver.module'
+import { AuthModule } from './api-auth/auth.module'
+import { ApiRootModule } from './api-root/api-root.module'
 import { ApiModule } from './api/api.module'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
-import { AuthModule } from './auth/auth.module'
-import { JwtExtendModule } from './auth/jwt-extend/jwt-extend.module'
 import { EmailModule } from './components/email/email.module'
 import { HealthModule } from './components/health/health.module'
+import { ImageManagerModule } from './components/image-manager/image-manager.module'
 import { EventListenerModule } from './event-listener/event-listener.module'
-import { PermissionGuard } from './guards/permission.guard'
-import { DetectClientMiddleware } from './middleware/detect-client.middleware copy'
-import { RootModule } from './root/root.module'
 import { SocketModule } from './socket/socket.module'
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -47,17 +48,19 @@ import { SocketModule } from './socket/socket.module'
     RepositoryModule,
 
     JwtExtendModule,
+    GoogleDriverModule,
     HealthModule,
     EmailModule,
+    ImageManagerModule,
     // CronJobModule,
 
     EventListenerModule,
     SocketModule,
-    CacheManagerModule,
+    CacheDataModule,
 
     AuthModule,
     ApiModule,
-    RootModule,
+    ApiRootModule,
   ],
   controllers: [AppController],
   providers: [
@@ -76,6 +79,7 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(I18nMiddleware).forRoutes('*')
     consumer.apply(DetectClientMiddleware).forRoutes('*')
+    // consumer.apply(HelmetMiddleware).forRoutes('*')
     // consumer
     //   .apply(ValidateTokenMiddleware)
     //   .exclude('auth/(.*)', '/documents/(.*)', { path: 'health', method: RequestMethod.GET })

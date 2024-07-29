@@ -1,0 +1,171 @@
+networks:
+  mn_network:
+    driver: bridge
+
+services:
+  portainer:
+    container_name: mc_portainer
+    image: portainer/portainer-ce:2.18.4-alpine
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data/portainer:/data
+    ports:
+      - 29000:9000
+
+zookeeper:
+    container_name: mc_zookeeper
+    image: "bitnami/zookeeper:3.6.4"
+    networks:
+      - mn_network
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  kafka:
+    container_name: mc_kafka
+    image: "bitnami/kafka:3.3.2"
+    networks:
+      - mn_network
+    depends_on:
+      - zookeeper
+    # volumes:
+    #   - ./data/kafka:/bitnami/kafka
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9092,EXTERNAL://localhost:9093
+      - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=CLIENT
+
+  kafka-ui:
+    container_name: mc_kafka-ui
+    image: provectuslabs/kafka-ui
+    depends_on:
+      - kafka
+    networks:
+      - mn_network
+    ports:
+      - "9090:8080"
+    restart: unless-stopped
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+
+
+# event-dispatcher:
+#   container_name: mc_event-dispatcher
+#   image: mi_nestjs_${NODE_ENV:-local}:1.0.0
+#   restart: unless-stopped
+#   networks:
+#     - mn_network
+#   build:
+#     dockerfile: Dockerfile
+#     context: "./"
+#     target: ${NODE_ENV:-local}
+#   volumes:
+#     - ./:/app/
+#     - mv_node_modules:/app/node_modules/
+#   command: ["sh", "-c", "npm run dev event-dispatcher"]
+#   environment:
+#     - NODE_ENV=${NODE_ENV:-local}
+
+# worker:
+#   container_name: mc_worker
+#   image: mi_nestjs_${NODE_ENV:-local}:1.0.0
+#   restart: unless-stopped
+#   networks:
+#     - mn_network
+#   build:
+#     dockerfile: Dockerfile
+#     context: "./"
+#     target: ${NODE_ENV:-local}
+#   volumes:
+#     - ./:/app/
+#     - mv_node_modules:/app/node_modules/
+#   command: ["sh", "-c", "npm run dev worker"]
+#   environment:
+#     - NODE_ENV=${NODE_ENV:-local}
+#   ports:
+#     - "${WEBSOCKET_PORT:-7201}:${WEBSOCKET_PORT:-7201}"
+
+# mariadb:
+#   container_name: mc_mariadb
+#   image: mariadb:11.0.2
+#   restart: unless-stopped
+#   networks:
+#     - mn_network
+#   volumes:
+#     - ./data/mariadb:/var/lib/mysql
+#     - ./data/backup:/backup
+#     - ./data/restore:/restore
+#   environment:
+#     - MARIADB_ROOT_PASSWORD=Abc12345
+#     - MARIADB_DATABASE=mea_sql
+#     - MARIADB_USER=mea
+#     - MARIADB_PASSWORD=Abc12345
+#   ports:
+#     - "23306:3306"
+
+# mysql:
+#   container_name: mc_mysql
+#   image: mysql:8.0.31
+#   restart: unless-stopped
+#   command: --default-authentication-plugin=mysql_native_password
+#   networks:
+#     - mn_network
+#   volumes:
+#     - ./data/mysql:/var/lib/mysql
+#   environment:
+#     - MYSQL_ROOT_PASSWORD=Abc12345
+#     - MYSQL_DATABASE=mea_sql
+#     - MYSQL_USER=mea
+#     - MYSQL_PASSWORD=Abc12345
+#   ports:
+#     - "23306:3306"
+
+# mongo:
+#   image: mongo:7.0.5
+#   container_name: mc_mongo
+#   restart: unless-stopped
+#   networks:
+#     - mn_network
+#   volumes:
+#     - ./data/mongo:/data/db
+#   command: mongod --replSet rs0
+#   healthcheck:
+#     test: |
+#       mongosh --eval "try { rs.status().ok } catch (e) { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] }).ok }"
+#     start_period: 0s
+#     interval: 500ms
+#     timeout: 5s
+#     retries: 5
+#   environment:
+#     MONGO_INITDB_ROOT_USERNAME: mea
+#     MONGO_INITDB_ROOT_PASSWORD: Abc12345
+#   ports:
+#     - 27017:27017
+
+# mongo-express:
+#   image: mongo-express:1.0.2-20
+#   container_name: mc_mongo_express
+#   restart: unless-stopped
+#   depends_on:
+#     - mongo
+#   networks:
+#     - mn_network
+#   ports:
+#     - 28081:8081
+#   environment:
+#     ME_CONFIG_MONGODB_ADMINUSERNAME: mea
+#     ME_CONFIG_MONGODB_ADMINPASSWORD: Abc12345
+#     ME_CONFIG_MONGODB_URL: mongodb://mea:Abc12345@mongo:27017/

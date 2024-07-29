@@ -22,11 +22,7 @@ export class ProductMovementRelationQuery {
 
   @Expose()
   @IsBoolean()
-  invoice: boolean
-
-  @Expose()
-  @IsBoolean()
-  visit: boolean
+  ticket: boolean
 
   @Expose()
   @IsBoolean()

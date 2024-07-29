@@ -5,9 +5,13 @@ import { EGender } from '../common/variable'
 
 @Entity('Customer')
 export default class Customer extends BaseEntity {
-  @Column({ type: 'character varying', length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   @Expose()
   fullName: string
+
+  @Column({ default: 0 })
+  @Expose()
+  customerSourceId: number
 
   @Column({ type: 'char', length: 10, nullable: true })
   @Expose()
@@ -26,29 +30,29 @@ export default class Customer extends BaseEntity {
 
   @Column({ type: 'smallint', nullable: true })
   @Expose()
+  yearOfBirth: number
+
+  @Column({ type: 'smallint', nullable: true })
+  @Expose()
   gender: EGender
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
-  @Expose() // số căn cước
-  identityCard: string
-
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   addressProvince: string
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   addressDistrict: string
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   addressWard: string
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   addressStreet: string
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose() // người thân
   relative: string
 
@@ -64,7 +68,7 @@ export default class Customer extends BaseEntity {
   @Expose()
   debt: number // tiền nợ
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   note: string // Ghi chú
 
@@ -113,6 +117,16 @@ export default class Customer extends BaseEntity {
   }
 }
 
-export type CustomerInsertType = Omit<Customer, 'id' | 'updatedAt' | 'deletedAt'>
+export type CustomerRelationType = Pick<Customer, never>
 
-export type CustomerUpdateType = Omit<Customer, 'oid' | 'id' | 'updatedAt'>
+export type CustomerSortType = Pick<Customer, 'id' | 'fullName' | 'debt'>
+
+export type CustomerInsertType = Omit<
+  Customer,
+  keyof CustomerRelationType | keyof Pick<Customer, 'id' | 'updatedAt' | 'deletedAt'>
+>
+
+export type CustomerUpdateType = Omit<
+  Customer,
+  keyof CustomerRelationType | keyof Pick<Customer, 'oid' | 'id'>
+>

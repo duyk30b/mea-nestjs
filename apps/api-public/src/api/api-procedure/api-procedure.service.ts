@@ -1,11 +1,12 @@
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { ProcedureRepository } from '../../../../_libs/database/repository/procedure/procedure.repository'
-import { SocketEmitService } from '../../socket/socket-emit.service'
+import { TicketProcedureRepository } from '../../../../_libs/database/repository/ticket-procedure/ticket-procedure.repository'
 import {
   ProcedureCreateBody,
   ProcedureGetManyQuery,
+  ProcedureGetOneQuery,
   ProcedurePaginationQuery,
   ProcedureUpdateBody,
 } from './request'
@@ -13,9 +14,9 @@ import {
 @Injectable()
 export class ApiProcedureService {
   constructor(
-    private readonly socketEmitService: SocketEmitService,
-    private readonly procedureRepository: ProcedureRepository
-  ) {}
+    private readonly procedureRepository: ProcedureRepository,
+    private readonly ticketProcedureRepository: TicketProcedureRepository
+  ) { }
 
   async pagination(oid: number, query: ProcedurePaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, relation, sort } = query
@@ -26,7 +27,7 @@ export class ApiProcedureService {
       condition: {
         oid,
         name: filter?.searchText ? { LIKE: filter.searchText } : undefined,
-        group: filter?.group,
+        procedureGroupId: filter?.procedureGroupId,
         isActive: filter?.isActive,
         updatedAt: filter?.updatedAt,
       },
@@ -45,7 +46,7 @@ export class ApiProcedureService {
       condition: {
         oid,
         name: filter?.searchText ? { LIKE: filter.searchText } : undefined,
-        group: filter?.group,
+        procedureGroupId: filter?.procedureGroupId,
         isActive: filter?.isActive,
         updatedAt: filter?.updatedAt,
       },
@@ -55,33 +56,45 @@ export class ApiProcedureService {
     return { data }
   }
 
-  async getOne(oid: number, id: number): Promise<BaseResponse> {
-    const data = await this.procedureRepository.findOneBy({ oid, id })
-    if (!data) throw new BusinessException('error.Procedure.NotExist')
-    return { data }
+  async getOne(oid: number, id: number, query: ProcedureGetOneQuery): Promise<BaseResponse> {
+    const procedure = await this.procedureRepository.findOne({
+      relation: { procedureGroup: query?.relation?.procedureGroup },
+      condition: { oid, id },
+    })
+    if (!procedure) throw new BusinessException('error.Database.NotFound')
+    return { data: { procedure } }
   }
 
   async createOne(oid: number, body: ProcedureCreateBody): Promise<BaseResponse> {
-    const procedure = await this.procedureRepository.insertOneAndReturnEntity({ oid, ...body })
-    this.socketEmitService.procedureUpsert(oid, { procedure })
-    return { data: procedure }
+    const procedure = await this.procedureRepository.insertOneFullFieldAndReturnEntity({
+      oid,
+      ...body,
+    })
+    return { data: { procedure } }
   }
 
   async updateOne(oid: number, id: number, body: ProcedureUpdateBody): Promise<BaseResponse> {
     const [procedure] = await this.procedureRepository.updateAndReturnEntity({ oid, id }, body)
-    if (!procedure) {
-      throw new BusinessException('error.Database.UpdateFailed')
-    }
-    this.socketEmitService.procedureUpsert(oid, { procedure })
-    return { data: procedure }
+    if (!procedure) throw new BusinessException('error.Database.UpdateFailed')
+
+    return { data: { procedure } }
   }
 
-  async deleteOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.procedureRepository.update({ oid, id }, { deletedAt: Date.now() })
-    if (affected === 0) {
-      throw new BusinessException('error.Database.DeleteFailed')
+  async destroyOne(oid: number, id: number): Promise<BaseResponse> {
+    const countTicketProcedure = await this.ticketProcedureRepository.countBy({
+      oid,
+      procedureId: id,
+    })
+    if (countTicketProcedure > 0) {
+      return {
+        data: { countTicketProcedure },
+        success: false,
+      }
     }
-    const data = await this.procedureRepository.findOneById(id)
-    return { data }
+
+    const affected = await this.procedureRepository.delete({ oid, id })
+    if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
+
+    return { data: { countTicketProcedure: 0, procedureId: id } }
   }
 }

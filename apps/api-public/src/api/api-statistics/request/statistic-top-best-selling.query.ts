@@ -9,6 +9,6 @@ export class StatisticTopBestSellingQuery extends StatisticTimeQuery {
     example: 'sumQuantity',
   })
   @Expose()
-  @IsIn(['sumActualMoney', 'sumQuantity'])
+  @IsIn(['sumActualMoney', 'sumQuantity', 'sumProfit'])
   orderBy: 'sumActualMoney' | 'sumQuantity'
 }

@@ -1,9 +1,10 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
+import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
-import { HasPermission } from '../../guards/permission.guard'
+import { ApiCustomerExcel } from './api-customer.excel'
 import { ApiCustomerService } from './api-customer.service'
 import {
   CustomerCreateBody,
@@ -17,7 +18,10 @@ import {
 @ApiBearerAuth('access-token')
 @Controller('customer')
 export class ApiCustomerController {
-  constructor(private readonly apiCustomerService: ApiCustomerService) {}
+  constructor(
+    private readonly apiCustomerService: ApiCustomerService,
+    private readonly apiCustomerExcel: ApiCustomerExcel
+  ) { }
 
   @Get('pagination')
   @HasPermission(PermissionId.CUSTOMER_READ)
@@ -57,10 +61,20 @@ export class ApiCustomerController {
     return await this.apiCustomerService.updateOne(oid, +id, body)
   }
 
-  @Delete('delete/:id')
+  @Delete('destroy/:id')
   @HasPermission(PermissionId.CUSTOMER_DELETE)
   @ApiParam({ name: 'id', example: 1 })
-  async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiCustomerService.deleteOne(oid, id)
+  async destroyOne(@External() { oid, organization }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiCustomerService.destroyOne({
+      oid,
+      customerId: id,
+      organization,
+    })
+  }
+
+  @Get('download-excel')
+  @HasPermission(PermissionId.PRODUCT_DOWNLOAD_EXCEL)
+  async downloadExcel(@External() { user, organization }: TExternal) {
+    return await this.apiCustomerExcel.downloadExcel({ organization, user })
   }
 }

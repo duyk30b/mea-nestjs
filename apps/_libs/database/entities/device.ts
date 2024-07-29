@@ -8,7 +8,7 @@ export default class Device {
   id: number
 
   @Expose()
-  code: string
+  refreshExp: number
 
   @Expose()
   ip: string
@@ -20,5 +20,8 @@ export default class Device {
   browser: string
 
   @Expose()
-  mobile: 1 | 0
+  mobile: 0 | 1
+
+  @Expose()
+  online: boolean | number
 }

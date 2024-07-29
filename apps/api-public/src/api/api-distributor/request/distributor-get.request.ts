@@ -9,7 +9,7 @@ import {
 } from './distributor-options.request'
 
 export class DistributorGetQuery {
-  @ApiPropertyOptional({ type: String, example: '{}' })
+  @ApiPropertyOptional({ type: String, example: JSON.stringify(<DistributorRelationQuery>{}) })
   @Expose()
   @Transform(({ value }) => {
     try {
@@ -27,7 +27,10 @@ export class DistributorGetQuery {
   @ValidateNested({ each: true })
   relation: DistributorRelationQuery
 
-  @ApiPropertyOptional({ type: String, example: '{"isActive":1,"debt":{"GT":1500000}}' })
+  @ApiPropertyOptional({
+    type: String,
+    example: JSON.stringify(<DistributorFilterQuery>{ isActive: 1, debt: { GT: 15000 } }),
+  })
   @Expose()
   @Transform(({ value }) => {
     try {
@@ -45,7 +48,10 @@ export class DistributorGetQuery {
   @ValidateNested({ each: true })
   filter?: DistributorFilterQuery
 
-  @ApiPropertyOptional({ type: String, example: '{"id":"ASC"}' })
+  @ApiPropertyOptional({
+    type: String,
+    example: JSON.stringify(<DistributorSortQuery>{ id: 'ASC' }),
+  })
   @Expose()
   @Transform(({ value }) => {
     try {
@@ -67,11 +73,11 @@ export class DistributorGetQuery {
 export class DistributorPaginationQuery extends IntersectionType(
   DistributorGetQuery,
   PaginationQuery
-) {}
+) { }
 
 export class DistributorGetManyQuery extends IntersectionType(
   PickType(DistributorGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
-) {}
+) { }
 
-export class DistributorGetOneQuery extends PickType(DistributorGetQuery, ['relation']) {}
+export class DistributorGetOneQuery extends PickType(DistributorGetQuery, ['relation']) { }

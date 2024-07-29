@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
+import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
-import { HasPermission } from '../../guards/permission.guard'
 import { ApiUserService } from './api-user.service'
 import {
   UserCreateBody,
@@ -19,7 +19,7 @@ import { NewPasswordBody } from './request/new-password.body'
 @ApiBearerAuth('access-token')
 @Controller('user')
 export class ApiUserController {
-  constructor(private readonly apiUserService: ApiUserService) {}
+  constructor(private readonly apiUserService: ApiUserService) { }
 
   @Get('pagination')
   @HasPermission(PermissionId.USER_READ)
@@ -45,18 +45,18 @@ export class ApiUserController {
 
   @Post('create')
   @HasPermission(PermissionId.USER_CREATE)
-  async create(@External() { oid }: TExternal, @Body() body: UserCreateBody) {
+  async createOne(@External() { oid }: TExternal, @Body() body: UserCreateBody) {
     return await this.apiUserService.createOne(oid, body)
   }
 
   @Patch('update/:id')
   @HasPermission(PermissionId.USER_UPDATE)
-  async updateInfo(
+  async updateOne(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
     @Body() body: UserUpdateBody
   ) {
-    return await this.apiUserService.updateInfo(oid, +id, body)
+    return await this.apiUserService.updateOne(oid, +id, body)
   }
 
   @Patch('new-password/:id')
@@ -86,7 +86,7 @@ export class ApiUserController {
     return this.apiUserService.deviceLogout({
       oid,
       userId: +id,
-      code: body.code,
+      refreshExp: body.refreshExp,
     })
   }
 }

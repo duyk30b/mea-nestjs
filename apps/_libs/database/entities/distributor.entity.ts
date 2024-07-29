@@ -1,10 +1,10 @@
 import { Expose } from 'class-transformer'
-import { Column, DeepPartial, Entity } from 'typeorm'
+import { Column, Entity } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 
 @Entity('Distributor')
 export default class Distributor extends BaseEntity {
-  @Column({ type: 'character varying', length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   @Expose()
   fullName: string
 
@@ -12,19 +12,19 @@ export default class Distributor extends BaseEntity {
   @Expose()
   phone: string
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   addressProvince: string
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   addressDistrict: string
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   addressWard: string
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   addressStreet: string
 
@@ -36,7 +36,7 @@ export default class Distributor extends BaseEntity {
   @Expose()
   debt: number // tiền nợ
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   note: string // Ghi chú
 
@@ -84,6 +84,19 @@ export default class Distributor extends BaseEntity {
   }
 }
 
+export type DistributorRelationType = {
+  [P in keyof Pick<Distributor, never>]?: boolean
+}
+
+export type DistributorSortType = {
+  [P in keyof Pick<Distributor, 'id' | 'debt' | 'fullName'>]?: 'ASC' | 'DESC'
+}
+
 export type DistributorInsertType = Omit<Distributor, 'id' | 'updatedAt' | 'deletedAt'>
 
-export type DistributorUpdateType = Omit<Distributor, 'oid' | 'id' | 'updatedAt'>
+export type DistributorUpdateType = {
+  [K in Exclude<
+    keyof Distributor,
+    keyof DistributorRelationType | keyof Pick<Distributor, 'oid' | 'id' | 'updatedAt'>
+  >]: Distributor[K] | (() => string)
+}

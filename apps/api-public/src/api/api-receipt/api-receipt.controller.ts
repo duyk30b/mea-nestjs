@@ -2,9 +2,9 @@ import { Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common'
 import { Body, Query } from '@nestjs/common/decorators/http/route-params.decorator'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
+import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
-import { HasPermission } from '../../guards/permission.guard'
 import { ApiReceiptService } from './api-receipt.service'
 import {
   ReceiptDraftInsertBody,
@@ -23,7 +23,7 @@ import {
 @ApiBearerAuth('access-token')
 @Controller('receipt')
 export class ApiReceiptController {
-  constructor(private readonly apiReceiptService: ApiReceiptService) {}
+  constructor(private readonly apiReceiptService: ApiReceiptService) { }
 
   @Get('pagination')
   @HasPermission(PermissionId.RECEIPT_READ)
@@ -53,17 +53,22 @@ export class ApiReceiptController {
     return await this.apiReceiptService.createDraft({ oid, body })
   }
 
-  @Delete('destroy-draft/:id')
-  @HasPermission(PermissionId.RECEIPT_DELETE)
-  async destroyDraft(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiReceiptService.destroyDraft({
+  @Patch('update-draft-prepayment/:id')
+  @HasPermission(PermissionId.RECEIPT_UPDATE_DRAFT_PREPAYMENT)
+  async updateDraftPrepayment(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam,
+    @Body() body: ReceiptUpdateBody
+  ) {
+    return await this.apiReceiptService.updateDraftPrepayment({
       oid,
       receiptId: id,
+      body,
     })
   }
 
   @Post('prepayment/:id')
-  @HasPermission(PermissionId.RECEIPT_PREPAYMENT)
+  @HasPermission(PermissionId.RECEIPT_PAYMENT)
   async prepayment(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -77,7 +82,7 @@ export class ApiReceiptController {
   }
 
   @Post('refund-prepayment/:id')
-  @HasPermission(PermissionId.RECEIPT_REFUND_PREPAYMENT)
+  @HasPermission(PermissionId.RECEIPT_REFUND_PAYMENT)
   async refundPrepayment(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -86,21 +91,6 @@ export class ApiReceiptController {
     return await this.apiReceiptService.refundPrepayment({
       oid,
       receiptId: id,
-      money: body.money,
-    })
-  }
-
-  @Post('send-product-and-payment/:id')
-  @HasPermission(PermissionId.RECEIPT_SEND_PRODUCT)
-  async sendProductAndPayment(
-    @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: ReceiptSendProductAndPaymentBody
-  ) {
-    return await this.apiReceiptService.sendProductAndPayment({
-      oid,
-      receiptId: id,
-      time: Date.now(),
       money: body.money,
     })
   }
@@ -120,14 +110,14 @@ export class ApiReceiptController {
     })
   }
 
-  @Post('return-product/:id')
-  @HasPermission(PermissionId.RECEIPT_RETURN_PRODUCT)
-  async returnProduct(
+  @Post('send-product-and-payment/:id')
+  @HasPermission(PermissionId.RECEIPT_SEND_PRODUCT, PermissionId.RECEIPT_PAYMENT)
+  async sendProductAndPayment(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: ReceiptReturnProductBody
+    @Body() body: ReceiptSendProductAndPaymentBody
   ) {
-    return await this.apiReceiptService.returnProduct({
+    return await this.apiReceiptService.sendProductAndPayment({
       oid,
       receiptId: id,
       time: Date.now(),
@@ -135,44 +125,27 @@ export class ApiReceiptController {
     })
   }
 
-  @Delete('soft-delete-refund/:id')
-  @HasPermission(PermissionId.RECEIPT_DELETE)
-  async softDeleteRefund(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiReceiptService.softDeleteRefund({ oid, receiptId: id })
-  }
-
-  @Post('create-quick-receipt')
-  @HasPermission(PermissionId.RECEIPT)
-  async createQuickReceipt(@External() { oid }: TExternal, @Body() body: ReceiptDraftInsertBody) {
-    return await this.apiReceiptService.createQuickReceipt({ oid, body })
-  }
-
-  @Patch('update-receipt-draft-and-receipt-prepayment/:id')
-  @HasPermission(PermissionId.RECEIPT_UPDATE_RECEIPT_DRAFT_AND_RECEIPT_PREPAYMENT)
-  async updateReceiptDraftAndReceiptPrepayment(
+  @Post('cancel/:id')
+  @HasPermission(PermissionId.RECEIPT_CANCEL)
+  async cancel(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: ReceiptUpdateBody
+    @Body() body: ReceiptReturnProductBody
   ) {
-    return await this.apiReceiptService.updateReceiptDraftAndReceiptPrepayment({
+    return await this.apiReceiptService.cancel({
       oid,
       receiptId: id,
-      body,
+      time: Date.now(),
+      money: body.money,
     })
   }
 
-  @Patch('update-receipt-debt-and-receipt-success/:id')
-  @HasPermission(PermissionId.RECEIPT)
-  async updateBasic(
-    @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: ReceiptDraftInsertBody
-  ) {
-    return await this.apiReceiptService.updateReceiptDebtAndReceiptSuccess({
+  @Delete('destroy/:id')
+  @HasPermission(PermissionId.RECEIPT_DESTROY_DRAFT)
+  async destroyDraft(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiReceiptService.destroy({
       oid,
-      body,
       receiptId: id,
-      time: Date.now(),
     })
   }
 }

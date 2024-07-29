@@ -9,6 +9,7 @@ import {
   LessThanOrEqual,
   Like,
   MoreThan,
+  MoreThanOrEqual,
   Not,
   Raw,
 } from 'typeorm'
@@ -34,7 +35,7 @@ export abstract class PostgreSqlCondition<_ENTITY> {
               return operators.push(MoreThan(value))
             }
             if (rule === '>=' || rule === 'GTE') {
-              return operators.push(MoreThan(value))
+              return operators.push(MoreThanOrEqual(value))
             }
             if (rule === '<' || rule === 'LT') {
               return operators.push(LessThan(value))
@@ -88,7 +89,7 @@ export abstract class PostgreSqlCondition<_ENTITY> {
     if ($OR && $OR.length) {
       const conditionOr = []
       $OR.forEach((i) => {
-        if (!Object.keys(i).length) return
+        if (!Object.keys(i).length) return // bỏ qua những trường hợp $OR có những object rỗng: [{},{}]
         conditionOr.push(
           this.getWhereOptions({
             ...otherCondition,
@@ -96,7 +97,7 @@ export abstract class PostgreSqlCondition<_ENTITY> {
           })
         )
       })
-      conditionOr.flat().filter((i) => Object.keys(i).length)
+      conditionOr.flat().filter((i) => Object.keys(i).length) // flat để giải quyết nhiều $OR lồng nhau
       if (conditionOr.length === 0) {
         return this.getConditions(otherCondition as any)
       } else if (conditionOr.length === 1) {

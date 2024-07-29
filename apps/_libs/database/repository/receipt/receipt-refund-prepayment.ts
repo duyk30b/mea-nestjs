@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource, FindOptionsWhere, UpdateResult } from 'typeorm'
-import { PaymentType, ReceiptStatus, VoucherType } from '../../common/variable'
+import { PaymentType, ReceiptStatus } from '../../common/variable'
 import { Distributor, DistributorPayment, Receipt } from '../../entities'
 import { DistributorPaymentInsertType } from '../../entities/distributor-payment.entity'
 
 @Injectable()
 export class ReceiptRefundPrepayment {
-  constructor(private dataSource: DataSource) {}
+  constructor(private dataSource: DataSource) { }
 
   async refundPrepayment(params: { oid: number; receiptId: number; time: number; money: number }) {
     const { oid, receiptId, time, money } = params
@@ -31,6 +31,7 @@ export class ReceiptRefundPrepayment {
                             END
                         `,
           paid: () => `paid - ${money}`,
+          debt: () => `debt + ${money}`,
         })
         .returning('*')
         .execute()
@@ -71,12 +72,12 @@ export class ReceiptRefundPrepayment {
       const distributorPaymentId: number = distributorPaymentInsertResult.identifiers?.[0]?.id
       if (!distributorPaymentId) {
         throw new Error(
-          `Create DistributorPayment failed: ` +
-            `Insert error ${JSON.stringify(distributorPaymentInsertResult)}`
+          `Create DistributorPayment failed: `
+          + `Insert error ${JSON.stringify(distributorPaymentInsertResult)}`
         )
       }
 
-      return { receiptBasic: receipt }
+      return { receiptBasic: receipt, distributor }
     })
 
     return transaction

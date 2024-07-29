@@ -20,11 +20,7 @@ export class BatchMovementRelationQuery {
 
   @Expose()
   @IsBoolean()
-  invoice: boolean
-
-  @Expose()
-  @IsBoolean()
-  visit: boolean
+  ticket: boolean
 
   @Expose()
   @IsBoolean()

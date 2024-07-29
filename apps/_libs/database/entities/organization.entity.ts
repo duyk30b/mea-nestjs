@@ -1,5 +1,6 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+import Image from './image.entity'
 import User from './user.entity'
 
 @Entity('Organization')
@@ -15,36 +16,63 @@ export default class Organization {
   phone: string
 
   @Expose()
-  @Column({ type: 'character varying', length: 255, nullable: false })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   email: string
+
+  @Column({ type: 'smallint', default: 0 })
+  @Expose()
+  emailVerify: 0 | 1
+
+  @Expose()
+  @Column({ type: 'varchar', default: JSON.stringify({}) })
+  dataVersion: string
 
   @Expose()
   @Column({ type: 'smallint', default: 0 })
   level: number
 
   @Expose()
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   name: string
 
   @Expose()
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ default: 0 })
+  logoImageId: number
+
+  @Expose()
+  @Column({ type: 'varchar', length: 255, nullable: true })
   addressProvince: string
 
   @Expose()
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   addressDistrict: string
 
   @Expose()
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   addressWard: string
 
   @Expose()
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   addressStreet: string
 
   @Column({ type: 'text', default: '[]' })
   @Expose()
   permissionIds: string
+
+  @Column({ type: 'text', default: '' })
+  @Expose({})
+  note: string
+
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  expiryDate: number
 
   @Expose()
   @Column({
@@ -83,13 +111,46 @@ export default class Organization {
   @Expose()
   isActive: 0 | 1
 
+  @OneToOne(() => Image, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'logoImageId', referencedColumnName: 'id' })
+  @Expose()
+  logoImage: Image
+
   @Expose()
   @OneToMany(() => User, (user) => user.organization)
-  users: User[]
+  userList: User[]
+
+  @Expose()
+  dataVersionParse: { product: number, batch: number, customer: number }
+
+  static fromRaw(raw: { [P in keyof Organization]: any }) {
+    if (!raw) return null
+    const entity = new Organization()
+    Object.assign(entity, raw)
+
+    entity.createdAt = raw.createdAt == null ? raw.createdAt : Number(raw.createdAt)
+    entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)
+    entity.deletedAt = raw.deletedAt == null ? raw.deletedAt : Number(raw.deletedAt)
+
+    return entity
+  }
+
+  static fromRaws(raws: { [P in keyof Organization]: any }[]) {
+    return raws.map((i) => Organization.fromRaw(i))
+  }
 }
+
+export type OrganizationRelationType = Pick<Organization, 'userList' | 'logoImage'>
+
+export type OrganizationSortType = Pick<Organization, 'id'>
 
 export type OrganizationInsertType = Omit<
   Organization,
-  'id' | 'users' | 'createdAt' | 'updatedAt' | 'deletedAt'
+  | keyof OrganizationRelationType
+  | keyof Pick<Organization, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'dataVersionParse'>
 >
-export type OrganizationUpdateType = Omit<Organization, 'id' | 'users' | 'createdAt' | 'updatedAt'>
+
+export type OrganizationUpdateType = Omit<
+  Organization,
+  keyof OrganizationRelationType | keyof Pick<Organization, 'id' | 'createdAt' | 'dataVersionParse'>
+>

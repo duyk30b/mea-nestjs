@@ -1,7 +1,12 @@
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
+import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { Organization } from '../../../../_libs/database/entities'
+import { CustomerPaymentRepository } from '../../../../_libs/database/repository/customer-payment/customer-payment.repository'
 import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
+import { OrganizationRepository } from '../../../../_libs/database/repository/organization/organization.repository'
+import { TicketRepository } from '../../../../_libs/database/repository/ticket/ticket-base/ticket.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   CustomerCreateBody,
@@ -15,8 +20,12 @@ import {
 export class ApiCustomerService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
-    private readonly customerRepository: CustomerRepository
-  ) {}
+    private readonly cacheDataService: CacheDataService,
+    private readonly customerRepository: CustomerRepository,
+    private readonly customerPaymentRepository: CustomerPaymentRepository,
+    private readonly organizationRepository: OrganizationRepository,
+    private readonly ticketRepository: TicketRepository
+  ) { }
 
   async pagination(oid: number, query: CustomerPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, sort, relation } = query
@@ -60,35 +69,61 @@ export class ApiCustomerService {
   }
 
   async getOne(oid: number, id: number, query?: CustomerGetOneQuery): Promise<BaseResponse> {
-    const data = await this.customerRepository.findOneBy({ oid, id })
-    if (!data) throw new BusinessException('error.Customer.NotExist')
-    return { data }
+    const customer = await this.customerRepository.findOneBy({ oid, id })
+    if (!customer) throw new BusinessException('error.Database.NotFound')
+    return { data: { customer } }
   }
 
   async createOne(oid: number, body: CustomerCreateBody): Promise<BaseResponse> {
-    const customer = await this.customerRepository.insertOneAndReturnEntity({ oid, ...body })
+    const customer = await this.customerRepository.insertOneFullFieldAndReturnEntity({
+      ...body,
+      oid,
+      debt: 0,
+    })
     this.socketEmitService.customerUpsert(oid, { customer })
-    return { data: customer }
+    return { data: { customer } }
   }
 
   async updateOne(oid: number, id: number, body: CustomerUpdateBody): Promise<BaseResponse> {
     const [customer] = await this.customerRepository.updateAndReturnEntity({ oid, id }, body)
     if (!customer) {
-      throw new BusinessException('error.Database.UpdateFailed')
+      throw BusinessException.create({
+        message: 'error.Database.UpdateFailed',
+        details: 'Customer',
+      })
     }
     this.socketEmitService.customerUpsert(oid, { customer })
-    return { data: customer }
+    return { data: { customer } }
   }
 
-  async deleteOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.customerRepository.update(
-      { oid, id, debt: 0 },
-      { deletedAt: Date.now() }
-    )
-    if (affected === 0) {
-      throw new BusinessException('error.Database.DeleteFailed')
+  async destroyOne(options: {
+    oid: number
+    customerId: number
+    organization: Organization
+  }): Promise<BaseResponse> {
+    const { oid, customerId, organization } = options
+    const countTicket = await this.ticketRepository.countBy({ oid, customerId })
+    if (countTicket > 0) {
+      return {
+        data: { countTicket },
+        success: false,
+      }
     }
-    const data = await this.customerRepository.findOneById(id)
-    return { data }
+
+    await Promise.allSettled([
+      this.customerRepository.delete({ oid, id: customerId }),
+      this.customerPaymentRepository.delete({ oid, customerId }),
+    ])
+
+    organization.dataVersionParse.customer += 1
+    await this.organizationRepository.update(
+      { id: oid },
+      {
+        dataVersion: JSON.stringify(organization.dataVersionParse),
+      }
+    )
+    this.cacheDataService.clearOrganization(oid)
+
+    return { data: { countTicket: 0, customerId } }
   }
 }

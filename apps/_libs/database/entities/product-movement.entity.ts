@@ -4,10 +4,9 @@ import { BaseEntity } from '../common/base.entity'
 import { VoucherType } from '../common/variable'
 import Customer from './customer.entity'
 import Distributor from './distributor.entity'
-import Invoice from './invoice.entity'
 import Product from './product.entity'
 import Receipt from './receipt.entity'
-import Visit from './visit.entity'
+import Ticket from './ticket.entity'
 
 @Entity('ProductMovement')
 @Index('IDX_ProductMovement__oid_productId_id', ['oid', 'productId', 'id'])
@@ -22,7 +21,7 @@ export default class ProductMovement extends BaseEntity {
   @Expose()
   productId: number
 
-  @Column() // ID visit hoặc ID receipt
+  @Column() // ID ticket hoặc ID receipt
   @Expose()
   voucherId: number
 
@@ -125,37 +124,35 @@ export default class ProductMovement extends BaseEntity {
   product: Product
 
   @Expose()
+  @ManyToOne((type) => Ticket, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'contactId', referencedColumnName: 'id' })
+  distributor: Distributor
+
+  @Expose()
   @ManyToOne((type) => Receipt, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
   receipt: Receipt
 
   @Expose()
-  @ManyToOne((type) => Invoice, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
-  invoice: Invoice
-
-  @Expose()
-  @ManyToOne((type) => Visit, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
-  visit: Visit
-
-  @Expose()
-  @ManyToOne((type) => Visit, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'contactId', referencedColumnName: 'id' })
-  distributor: Distributor
-
-  @Expose()
-  @ManyToOne((type) => Visit, { createForeignKeyConstraints: false })
+  @ManyToOne((type) => Ticket, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'contactId', referencedColumnName: 'id' })
   customer: Customer
+
+  @Expose()
+  @ManyToOne((type) => Ticket, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
+  ticket: Ticket
 }
 
 export type ProductMovementRelationType = Pick<
   ProductMovement,
-  'product' | 'receipt' | 'invoice' | 'visit' | 'distributor' | 'customer'
+  'product' | 'distributor' | 'receipt' | 'customer' | 'ticket'
 >
 
-export type ProductMovementSortType = Pick<ProductMovement, 'id'>
+export type ProductMovementSortType = Pick<
+  ProductMovement,
+  'id' | 'productId' | 'voucherId' | 'contactId'
+>
 
 export type ProductMovementInsertType = Omit<
   ProductMovement,

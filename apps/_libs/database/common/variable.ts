@@ -38,44 +38,42 @@ type EnumReverseKeyValue = {
 export enum PaymentType {
   Prepayment = 1, // Thanh toán trước mua hàng
   ReceiveRefund = 2, // Nhận tiền hoàn trả
-  Close = 3, // Đóng hồ sơ
+  Close = 3, // Đóng hồ sơ (trả tiền khi thanh toán)
   PayDebt = 4, // Trả nợ (thanh toán sau mua hàng )
   Reopen = 5, // Mở lại hồ sơ
 }
 
-export enum InvoiceStatus {
-  Refund = -1,
-  Draft = 0,
-  Prepayment = 1, // Chờ gửi hàng
-  Debt = 2,
-  Success = 3,
-}
-
 export enum ReceiptStatus {
-  Refund = -1,
+  Cancelled = -1,
   Draft = 0,
   Prepayment = 1, // Chờ gửi hàng
   Debt = 2,
   Success = 3,
-}
-
-export enum InvoiceItemType {
-  Batch = 1,
-  Procedure = 2,
-  ProductHasManageQuantity = 3,
-  ProductNoManageQuantity = 4,
 }
 
 export enum VoucherType {
   Receipt = 1,
-  Invoice = 2,
-  Visit = 3,
+  Ticket = 2,
 }
 
 export enum DeliveryStatus {
-  OutOfStock = 0,
-  Pending = 1,
-  Delivered = 2,
-  PartiallyReturned = 3,
-  FullyReturned = 4,
+  NoStock = 1, // không có hàng
+  Pending = 2,
+  Delivered = 3,
+  // Returned = 4,
+  // PartiallyReturned = 4,
+  // FullyReturned = 5,
+}
+
+export enum AttributeInputType {
+  InputText = 'InputText',
+  InputNumber = 'InputNumber',
+  InputDate = 'InputDate',
+  Select = 'Select',
+}
+
+export enum AttributeLayoutType {
+  Table = 'Bảng',
+  InputAndLabelTop = 'Input và Nhãn bên trên',
+  InputAndLabelLeft = 'Input và Nhãn bên trái',
 }

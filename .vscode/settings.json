@@ -4,15 +4,16 @@
   "workbench.tree.indent": 16,
   "editor.tabSize": 2,
   "editor.wordWrap": "off",
+  "editor.inlayHints.fontSize": 10,
+  "editor.suggest.insertMode": "replace",
   "workbench.editor.wrapTabs": true,
   "window.title": "${rootName}",
-  "editor.inlayHints.fontSize": 10,
   "workbench.colorCustomizations": {
     "editorInlayHint.background": "#4d4d4d99",
     "editorInlayHint.foreground": "#ffffffcc"
   },
   "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.defaultFormatter": "vscode.typescript-language-features",
     "editor.codeActionsOnSave": [
       "source.sortImports",
       "source.formatDocument",
@@ -44,6 +45,7 @@
     "middie",
     "nats",
     "nestjs",
+    "CĐHA",
     "Partitioner",
     "Partitioners",
     "redisinsight",
