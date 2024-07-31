@@ -16,7 +16,7 @@ export class ApiTicketService {
   constructor(
     private readonly ticketRepository: TicketRepository,
     private readonly imageRepository: ImageRepository
-  ) {}
+  ) { }
 
   async pagination(oid: number, query: TicketPaginationQuery): Promise<BaseResponse> {
     const { page, limit, sort, relation, filter } = query
@@ -66,10 +66,11 @@ export class ApiTicketService {
   }
 
   async getOne(oid: number, id: number, { relation }: TicketGetOneQuery): Promise<BaseResponse> {
-    const ticket = await this.ticketRepository.queryOne(
-      { oid, id },
-      {
+    const ticket = await this.ticketRepository.queryOne({
+      condition: { oid, id },
+      relation: {
         customer: !!relation?.customer,
+        user: !!relation?.user,
         customerPaymentList: !!relation?.customerPaymentList,
         ticketSurchargeList: !!relation?.ticketSurchargeList,
         ticketExpenseList: !!relation?.ticketExpenseList,
@@ -79,8 +80,8 @@ export class ApiTicketService {
         ticketRadiologyList: relation?.ticketRadiologyList
           ? { radiology: true, doctor: true }
           : false,
-      }
-    )
+      },
+    })
     if (!ticket) {
       throw new BusinessException('error.Database.NotFound')
     }

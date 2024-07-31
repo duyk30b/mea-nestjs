@@ -17,7 +17,7 @@ import {
 @ApiBearerAuth('access-token')
 @Controller('product')
 export class ApiProductController {
-  constructor(private readonly apiProductService: ApiProductService) {}
+  constructor(private readonly apiProductService: ApiProductService) { }
 
   @Get('pagination')
   @HasPermission(PermissionId.PRODUCT_READ)
@@ -62,5 +62,11 @@ export class ApiProductController {
   @ApiParam({ name: 'id', example: 1 })
   async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiProductService.deleteOne(oid, id)
+  }
+
+  @Get('download-excel')
+  @HasPermission(PermissionId.PRODUCT_READ)
+  async downloadExcel(@External() { oid }: TExternal) {
+    // return await this.apiProductService.downloadExcel(oid, query)
   }
 }

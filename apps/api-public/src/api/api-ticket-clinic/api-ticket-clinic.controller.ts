@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Param, Post, UploadedFiles, UseInterceptors } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Post,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common'
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto'
 import { FileUploadDto } from '../../../../_libs/common/dto/file'
@@ -8,6 +16,7 @@ import { External, TExternal } from '../../../../_libs/common/request/external.r
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
 import { ApiTicketClinicService } from './api-ticket-clinic.service'
 import {
+  TicketClinicChangeConsumableBody,
   TicketClinicChangeItemsMoneyBody,
   TicketClinicChangePrescriptionBody,
   TicketClinicChangeTicketProcedureListBody,
@@ -30,25 +39,33 @@ export class ApiTicketClinicController {
   @Post('register-with-new-customer')
   @HasPermission(PermissionId.TICKET_CLINIC_REGISTER_NEW)
   async registerWithNewUser(
-    @External() { oid }: TExternal,
+    @External() { oid, uid }: TExternal,
     @Body() body: TicketClinicRegisterWithNewCustomerBody
   ) {
-    return await this.apiTicketClinicService.registerWithNewUser(oid, body)
+    return await this.apiTicketClinicService.registerWithNewUser({
+      oid,
+      body,
+      userId: uid,
+    })
   }
 
   @Post('register-with-exist-customer')
   @HasPermission(PermissionId.TICKET_CLINIC_REGISTER_NEW)
   async registerWithExistUser(
-    @External() { oid }: TExternal,
+    @External() { oid, uid }: TExternal,
     @Body() body: TicketClinicRegisterWithExistCustomerBody
   ) {
-    return await this.apiTicketClinicService.registerWithExistUser(oid, body)
+    return await this.apiTicketClinicService.registerWithExistUser({
+      oid,
+      userId: uid,
+      body,
+    })
   }
 
   @Post(':id/start-checkup')
   @HasPermission(PermissionId.TICKET_CLINIC_START_CHECKUP)
-  async startCheckup(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiTicketClinicService.startCheckup(oid, id)
+  async startCheckup(@External() { oid, user, uid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiTicketClinicService.startCheckup({ oid, userId: uid, user, ticketId: id })
   }
 
   @Post(':id/update-diagnosis')
@@ -130,6 +147,20 @@ export class ApiTicketClinicController {
       ticketId: id,
       body,
       files,
+    })
+  }
+
+  @Post(':id/change-consumable')
+  @HasPermission(PermissionId.TICKET_CLINIC_CHANGE_CONSUMABLE)
+  async changeConsumable(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam,
+    @Body() body: TicketClinicChangeConsumableBody
+  ) {
+    return await this.apiTicketClinicService.changeConsumable({
+      oid,
+      ticketId: id,
+      body,
     })
   }
 

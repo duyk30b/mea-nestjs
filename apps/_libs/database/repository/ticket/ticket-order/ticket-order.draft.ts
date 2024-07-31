@@ -12,7 +12,7 @@ import {
 } from '../../../entities'
 import { TicketExpenseInsertType } from '../../../entities/ticket-expense.entity'
 import { TicketProcedureInsertType } from '../../../entities/ticket-procedure.entity'
-import { TicketProductInsertType } from '../../../entities/ticket-product.entity'
+import { TicketProductInsertType, TicketProductType } from '../../../entities/ticket-product.entity'
 import { TicketSurchargeInsertType } from '../../../entities/ticket-surcharge.entity'
 import { TicketInsertType, TicketStatus } from '../../../entities/ticket.entity'
 import {
@@ -95,6 +95,7 @@ export class TicketOrderDraft {
             deliveryStatus: DeliveryStatus.Pending,
             quantityPrescription: i.quantity,
             quantityReturn: 0,
+            type: TicketProductType.Prescription,
           }
           return ticketProduct
         })

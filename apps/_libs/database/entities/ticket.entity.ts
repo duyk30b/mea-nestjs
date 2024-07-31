@@ -10,6 +10,7 @@ import TicketProcedure from './ticket-procedure.entity'
 import TicketProduct from './ticket-product.entity'
 import TicketRadiology from './ticket-radiology.entity'
 import TicketSurcharge from './ticket-surcharge.entity'
+import User from './user.entity'
 
 export enum TicketStatus {
   Schedule = 1,
@@ -29,6 +30,10 @@ export default class Ticket extends BaseEntity {
   @Column()
   @Expose()
   customerId: number
+
+  @Column({ default: 0 })
+  @Expose()
+  userId: number
 
   @Column({ type: 'smallint', default: VoucherType.Order })
   @Expose()
@@ -205,8 +210,14 @@ export default class Ticket extends BaseEntity {
   updatedAt: number
 
   @ManyToOne((type) => Customer, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'customerId', referencedColumnName: 'id' })
   @Expose()
   customer: Customer
+
+  @ManyToOne((type) => User, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
+  @Expose()
+  user: User
 
   @OneToMany(() => CustomerPayment, (customerPayment) => customerPayment.ticket)
   @Expose()
@@ -275,6 +286,7 @@ export default class Ticket extends BaseEntity {
 export type TicketRelationType = Pick<
   Ticket,
   | 'customer'
+  | 'user'
   | 'ticketDiagnosis'
   | 'ticketProductList'
   | 'ticketProcedureList'

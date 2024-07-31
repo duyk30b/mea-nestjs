@@ -34,12 +34,20 @@ nginx-reload:
 	docker exec mc_nginx nginx -s reload
 
 backup-db: 
+	git fetch --all
+	git reset --hard origin/master
+	git log --all --oneline --graph -10
+	mkdir -p ./data/backup
 	docker compose -f docker.db.yml exec postgres sh -c '\
 		mkdir -p backup; \
 		chmod -R 777 /backup; \
 		pg_dump "dbname=mea_sql user=mea password=Abc12345" > /backup/$$(date +%Y-%m-%d_%H-%M-%S).sql; \
 		ls -la /backup; \
 	'
+	git status
+	git add .
+	git commit -m "backup"
+	git push origin master
 
 restore-db:
 	docker compose -f docker.db.yml exec postgres sh -c '\

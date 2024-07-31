@@ -227,6 +227,16 @@ export class ApiPermissionService {
         rootId: PermissionId.PRODUCT,
       },
       {
+        id: PermissionId.PRODUCT_DOWNLOAD_EXCEL,
+        level: 2,
+        code: PermissionId[PermissionId.PRODUCT_DOWNLOAD_EXCEL],
+        isActive: 1,
+        pathId: `${PermissionId.PRODUCT}.${PermissionId.PRODUCT_DOWNLOAD_EXCEL}`,
+        name: 'Tải file Excel tất cả sản phẩm',
+        parentId: PermissionId.PRODUCT,
+        rootId: PermissionId.PRODUCT,
+      },
+      {
         id: PermissionId.BATCH_READ,
         level: 2,
         code: PermissionId[PermissionId.BATCH_READ],
@@ -407,6 +417,16 @@ export class ApiPermissionService {
         isActive: 1,
         pathId: `${PermissionId.CUSTOMER}.${PermissionId.CUSTOMER_DELETE}`,
         name: 'Xóa khách hàng',
+        parentId: PermissionId.CUSTOMER,
+        rootId: PermissionId.CUSTOMER,
+      },
+      {
+        id: PermissionId.CUSTOMER_DOWNLOAD_EXCEL,
+        level: 2,
+        code: PermissionId[PermissionId.CUSTOMER_DOWNLOAD_EXCEL],
+        isActive: 1,
+        pathId: `${PermissionId.CUSTOMER}.${PermissionId.CUSTOMER_DOWNLOAD_EXCEL}`,
+        name: 'Tải file Excel tất cả khách hàng',
         parentId: PermissionId.CUSTOMER,
         rootId: PermissionId.CUSTOMER,
       },
@@ -892,6 +912,16 @@ export class ApiPermissionService {
         rootId: PermissionId.TICKET_CLINIC,
       },
       {
+        id: PermissionId.TICKET_CLINIC_CHANGE_CONSUMABLE,
+        level: 2,
+        code: PermissionId[PermissionId.TICKET_CLINIC_CHANGE_CONSUMABLE],
+        isActive: 1,
+        pathId: `${PermissionId.TICKET_CLINIC}.${PermissionId.TICKET_CLINIC_CHANGE_CONSUMABLE}`,
+        name: 'Sửa danh sách vật tư tiêu hao',
+        parentId: PermissionId.TICKET_CLINIC,
+        rootId: PermissionId.TICKET_CLINIC,
+      },
+      {
         id: PermissionId.TICKET_CLINIC_CHANGE_PRESCRIPTION,
         level: 2,
         code: PermissionId[PermissionId.TICKET_CLINIC_CHANGE_PRESCRIPTION],
@@ -901,7 +931,6 @@ export class ApiPermissionService {
         parentId: PermissionId.TICKET_CLINIC,
         rootId: PermissionId.TICKET_CLINIC,
       },
-
       {
         id: PermissionId.TICKET_CLINIC_CHANGE_ITEMS_MONEY,
         level: 2,

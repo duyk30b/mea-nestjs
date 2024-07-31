@@ -7,7 +7,7 @@ class TicketProductReturn {
   @ApiProperty({ example: 56 })
   @Expose()
   @IsDefined()
-  @IsInt()
+  @IsNumberGreaterThan(0)
   ticketProductId: number
 
   @ApiProperty({ example: 3 })

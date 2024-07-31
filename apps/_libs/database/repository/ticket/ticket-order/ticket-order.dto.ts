@@ -83,6 +83,7 @@ export type TicketOrderProductDraftType = Omit<
     | 'deliveryStatus'
     | 'quantityPrescription'
     | 'quantityReturn'
+    | 'type'
   >
 >
 

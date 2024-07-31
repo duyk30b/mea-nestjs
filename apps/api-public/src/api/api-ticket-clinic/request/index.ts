@@ -1,3 +1,4 @@
+export * from './ticket-clinic-change-consumable.body'
 export * from './ticket-clinic-change-items-money.body'
 export * from './ticket-clinic-change-prescription.body'
 export * from './ticket-clinic-change-procedure-list.body'

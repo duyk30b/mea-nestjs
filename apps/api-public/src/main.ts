@@ -85,6 +85,7 @@ async function bootstrap() {
       swaggerOptions: { persistAuthorization: true },
     })
   }
+
   await app.listen(API_PUBLIC_PORT, '0.0.0.0', () => {
     logger.debug(
       `🚀 ===== [API] Server document: http://${API_PUBLIC_HOST}:${API_PUBLIC_PORT}/documents/ =====`
@@ -96,4 +97,5 @@ async function bootstrap() {
     logger.debug(`🚀 ===== [NODE] NodeJS version: ${NODE_VERSION} =====`)
   })
 }
+
 bootstrap()

@@ -8,7 +8,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator'
-import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
+import { IsEnumValue, IsNumberGreaterThan } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { DiscountType } from '../../../../../_libs/database/common/variable'
 import { ReceiptItemBody } from './receipt-item.body'
 
@@ -16,7 +16,7 @@ export class ReceiptInsert {
   @ApiPropertyOptional({ example: 52 })
   @Expose()
   @IsDefined()
-  @IsNumber()
+  @IsNumberGreaterThan(0)
   distributorId: number
 
   @ApiPropertyOptional()
@@ -67,7 +67,7 @@ export class ReceiptInsert {
   note: string
 }
 
-export class ReceiptUpdate extends OmitType(ReceiptInsert, ['distributorId']) {}
+export class ReceiptUpdate extends OmitType(ReceiptInsert, ['distributorId']) { }
 
 export class ReceiptDraftInsertBody {
   @ApiProperty({ type: ReceiptInsert })

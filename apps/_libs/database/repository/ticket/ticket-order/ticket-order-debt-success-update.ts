@@ -30,7 +30,7 @@ import ProductMovement, {
 } from '../../../entities/product-movement.entity'
 import { TicketExpenseInsertType } from '../../../entities/ticket-expense.entity'
 import { TicketProcedureInsertType } from '../../../entities/ticket-procedure.entity'
-import { TicketProductInsertType } from '../../../entities/ticket-product.entity'
+import { TicketProductInsertType, TicketProductType } from '../../../entities/ticket-product.entity'
 import { TicketSurchargeInsertType } from '../../../entities/ticket-surcharge.entity'
 import { TicketStatus } from '../../../entities/ticket.entity'
 import {
@@ -209,6 +209,7 @@ export class TicketOrderDebtSuccessUpdate {
             quantityPrescription: i.quantity, // cho lấy số lượng kê đơn bằng số lượng bán
             quantityReturn: 0,
             deliveryStatus: DeliveryStatus.Delivered, // cho xử lý xong luôn
+            type: TicketProductType.Prescription,
           }
           return ticketProduct
         })

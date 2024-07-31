@@ -26,19 +26,24 @@ export class ApiTicketOrderController {
 
   @Post('create-draft')
   @HasPermission(PermissionId.TICKET_ORDER_CREATE_DRAFT)
-  async createDraft(@External() { oid }: TExternal, @Body() body: TicketOrderDraftInsertBody) {
-    return await this.apiTicketOrderBasicService.createDraft({ oid, body })
+  async createDraft(@External() { oid, uid }: TExternal, @Body() body: TicketOrderDraftInsertBody) {
+    return await this.apiTicketOrderBasicService.createDraft({
+      oid,
+      userId: uid,
+      body,
+    })
   }
 
   @Patch(':id/update-draft-approved')
   @HasPermission(PermissionId.TICKET_ORDER_UPDATE_DRAFT_APPROVED)
   async updateDraftApproved(
-    @External() { oid }: TExternal,
+    @External() { oid, uid }: TExternal,
     @Param() { id }: IdParam,
     @Body() body: TicketOrderDraftApprovedUpdateBody
   ) {
     return await this.apiTicketOrderBasicService.updateDraftApproved({
       oid,
+      userId: uid,
       ticketId: id,
       body,
     })
@@ -56,21 +61,26 @@ export class ApiTicketOrderController {
   @Post('create-debt-success')
   @HasPermission(PermissionId.TICKET_ORDER_CREATE_DEBT_SUCCESS)
   async createDebtSuccess(
-    @External() { oid }: TExternal,
+    @External() { oid, uid }: TExternal,
     @Body() body: TicketOrderDebtSuccessInsertBody
   ) {
-    return await this.apiTicketOrderBasicService.createDebtSuccess({ oid, body })
+    return await this.apiTicketOrderBasicService.createDebtSuccess({
+      oid,
+      userId: uid,
+      body,
+    })
   }
 
   @Patch(':id/update-debt-success')
   @HasPermission(PermissionId.TICKET_ORDER_UPDATE_DEBT_SUCCESS)
   async updateDebtSuccess(
-    @External() { oid }: TExternal,
+    @External() { oid, uid }: TExternal,
     @Param() { id }: IdParam,
     @Body() body: TicketOrderDebtSuccessUpdateBody
   ) {
     return await this.apiTicketOrderBasicService.updateDebtSuccess({
       oid,
+      userId: uid,
       ticketId: id,
       body,
     })

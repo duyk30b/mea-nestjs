@@ -3,9 +3,10 @@ import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
-import { DeliveryStatus, VoucherType } from '../../../../_libs/database/common/variable'
+import { VoucherType } from '../../../../_libs/database/common/variable'
+import { User } from '../../../../_libs/database/entities'
 import { TicketProcedureInsertType } from '../../../../_libs/database/entities/ticket-procedure.entity'
-import { TicketProductInsertType } from '../../../../_libs/database/entities/ticket-product.entity'
+import { TicketProductType } from '../../../../_libs/database/entities/ticket-product.entity'
 import { TicketRadiologyInsertType } from '../../../../_libs/database/entities/ticket-radiology.entity'
 import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
@@ -31,6 +32,7 @@ import { CacheDataService } from '../../../../_libs/transporter/cache-manager/ca
 import { ImageManagerService } from '../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
+  TicketClinicChangeConsumableBody,
   TicketClinicChangeItemsMoneyBody,
   TicketClinicChangePrescriptionBody,
   TicketClinicChangeTicketProcedureListBody,
@@ -71,7 +73,12 @@ export class ApiTicketClinicService {
     private readonly imageRepository: ImageRepository
   ) { }
 
-  async registerWithNewUser(oid: number, body: TicketClinicRegisterWithNewCustomerBody) {
+  async registerWithNewUser(options: {
+    oid: number
+    userId: number
+    body: TicketClinicRegisterWithNewCustomerBody
+  }) {
+    const { oid, userId, body } = options
     const customer = await this.customerRepository.insertOneAndReturnEntity({
       oid,
       ...body.customer,
@@ -79,14 +86,21 @@ export class ApiTicketClinicService {
     const ticket = await this.ticketRepository.insertOneAndReturnEntity({
       oid,
       customerId: customer.id,
+      userId,
       voucherType: VoucherType.Clinic,
       registeredAt: body.registeredAt,
       ticketStatus: TicketStatus.Draft,
     })
-    const ticketDiagnosis = await this.ticketDiagnosisRepository.insertOneAndReturnEntity({
+    const ticketDiagnosis = await this.ticketDiagnosisRepository.insertOneFullFieldAndReturnEntity({
       oid,
       ticketId: ticket.id,
       healthHistory: customer.healthHistory || '',
+      reason: '',
+      summary: '',
+      diagnosis: '',
+      vitalSigns: JSON.stringify({}),
+      imageIds: JSON.stringify([]),
+      advice: '',
     })
     ticket.customer = customer
     ticket.ticketDiagnosis = ticketDiagnosis
@@ -97,20 +111,32 @@ export class ApiTicketClinicService {
     return { data: ticket }
   }
 
-  async registerWithExistUser(oid: number, body: TicketClinicRegisterWithExistCustomerBody) {
+  async registerWithExistUser(options: {
+    oid: number
+    userId: number
+    body: TicketClinicRegisterWithExistCustomerBody
+  }) {
+    const { oid, userId, body } = options
     const customer = await this.customerRepository.findOneById(body.customerId)
     const ticket = await this.ticketRepository.insertOneAndReturnEntity({
       oid,
       customerId: body.customerId,
+      userId,
       voucherType: VoucherType.Clinic,
       registeredAt: body.registeredAt,
       ticketStatus: TicketStatus.Draft,
     })
 
-    const ticketDiagnosis = await this.ticketDiagnosisRepository.insertOneAndReturnEntity({
+    const ticketDiagnosis = await this.ticketDiagnosisRepository.insertOneFullFieldAndReturnEntity({
       oid,
       ticketId: ticket.id,
       healthHistory: customer.healthHistory || '',
+      reason: '',
+      summary: '',
+      diagnosis: '',
+      vitalSigns: JSON.stringify({}),
+      imageIds: JSON.stringify([]),
+      advice: '',
     })
     ticket.customer = customer
     ticket.ticketDiagnosis = ticketDiagnosis
@@ -121,7 +147,11 @@ export class ApiTicketClinicService {
     return { data: ticket }
   }
 
-  async startCheckup(oid: number, ticketId: number) {
+  async startCheckup(options: {
+    oid: number, userId: number, ticketId: number,
+    user: User
+  }) {
+    const { oid, userId, ticketId, user } = options
     const [ticketBasic] = await this.ticketRepository.updateAndReturnEntity(
       {
         oid,
@@ -129,10 +159,12 @@ export class ApiTicketClinicService {
         ticketStatus: { IN: [TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Approved] },
       },
       {
+        userId,
         ticketStatus: TicketStatus.Executing,
         startedAt: Date.now(),
       }
     )
+    ticketBasic.user = user
     if (!ticketBasic) throw new BusinessException('error.Database.UpdateFailed')
     this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
     return { data: { ticketBasic } }
@@ -382,6 +414,35 @@ export class ApiTicketClinicService {
       oid,
       ticketId,
       ticketProductListDto: body.ticketProductList,
+      type: TicketProductType.Prescription,
+    })
+
+    const { ticketBasic, ticketProductList } = result
+
+    this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
+    this.socketEmitService.ticketClinicChangeTicketProductList(oid, { ticketId, ticketProductList })
+
+    return { data: true }
+  }
+
+  async changeConsumable(options: {
+    oid: number
+    ticketId: number
+    body: TicketClinicChangeConsumableBody
+  }) {
+    const { oid, ticketId, body } = options
+
+    const result = await this.ticketClinicChangeTicketProductList.changeTicketProductList({
+      oid,
+      ticketId,
+      ticketProductListDto: body.ticketProductList.map((i) => {
+        return {
+          ...i,
+          quantityPrescription: 0,
+          hintUsage: '',
+        }
+      }),
+      type: TicketProductType.Consumable,
     })
 
     const { ticketBasic, ticketProductList } = result
@@ -486,7 +547,7 @@ export class ApiTicketClinicService {
     }
   }
 
-  async prepayment(params: { oid: number, ticketId: number, body: TicketClinicPaymentBody }) {
+  async prepayment(params: { oid: number; ticketId: number; body: TicketClinicPaymentBody }) {
     const { oid, ticketId, body } = params
     try {
       const { ticketBasic } = await this.ticketPrepayment.prepayment({
@@ -503,7 +564,7 @@ export class ApiTicketClinicService {
     }
   }
 
-  async refundOverpaid(params: { oid: number, ticketId: number, body: TicketClinicPaymentBody }) {
+  async refundOverpaid(params: { oid: number; ticketId: number; body: TicketClinicPaymentBody }) {
     const { oid, ticketId, body } = params
     try {
       const { ticketBasic } = await this.ticketClinicRefundOverpaid.refundOverpaid({
@@ -519,7 +580,7 @@ export class ApiTicketClinicService {
     }
   }
 
-  async payDebt(params: { oid: number, ticketId: number, body: TicketClinicPaymentBody }) {
+  async payDebt(params: { oid: number; ticketId: number; body: TicketClinicPaymentBody }) {
     const { oid, ticketId, body } = params
     try {
       const { ticketBasic, customer } = await this.ticketPayDebt.payDebt({
@@ -538,7 +599,7 @@ export class ApiTicketClinicService {
     }
   }
 
-  async close(params: { oid: number, ticketId: number }) {
+  async close(params: { oid: number; ticketId: number }) {
     const { oid, ticketId } = params
     try {
       const { ticketBasic, customer } = await this.ticketPaymentAndClose.paymentAndClose({
@@ -558,7 +619,7 @@ export class ApiTicketClinicService {
     }
   }
 
-  async reopen(params: { oid: number, ticketId: number }) {
+  async reopen(params: { oid: number; ticketId: number }) {
     const { oid, ticketId } = params
     try {
       const { ticketBasic, customer } = await this.ticketClinicReopen.reopen({

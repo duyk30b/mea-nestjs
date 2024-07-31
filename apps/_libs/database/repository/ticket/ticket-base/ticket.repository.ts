@@ -28,24 +28,29 @@ export class TicketRepository extends PostgreSqlRepository<
   }
 
   async queryOne(
-    condition: { id: number; oid: number },
-    relation?: {
-      customer?: boolean
-      customerPaymentList?: boolean
-      ticketDiagnosis?: boolean
-      ticketProductList?: { product?: boolean; batch?: boolean } | false
-      ticketProcedureList?: { procedure?: boolean } | false
-      ticketRadiologyList?: { radiology?: boolean; doctor?: boolean } | false
-      ticketExpenseList?: boolean
-      ticketSurchargeList?: boolean
+    options: {
+      condition: { id: number; oid: number },
+      relation?: {
+        customer?: boolean
+        user?: boolean
+        customerPaymentList?: boolean
+        ticketDiagnosis?: boolean
+        ticketProductList?: { product?: boolean; batch?: boolean } | false
+        ticketProcedureList?: { procedure?: boolean } | false
+        ticketRadiologyList?: { radiology?: boolean; doctor?: boolean } | false
+        ticketExpenseList?: boolean
+        ticketSurchargeList?: boolean
+      }
     }
   ): Promise<Ticket | null> {
+    const { condition, relation } = options
     let query = this.manager
       .createQueryBuilder(Ticket, 'ticket')
       .where('ticket.id = :id', { id: condition.id })
       .andWhere('ticket.oid = :oid', { oid: condition.oid })
 
     if (relation?.customer) query = query.leftJoinAndSelect('ticket.customer', 'customer')
+    if (relation?.user) query = query.leftJoinAndSelect('ticket.user', 'user')
     if (relation?.customerPaymentList) {
       query = query.leftJoinAndSelect('ticket.customerPaymentList', 'customerPayment')
       query.addOrderBy('customerPayment.id', 'ASC')
@@ -116,6 +121,13 @@ export class TicketRepository extends PostgreSqlRepository<
     data: NoExtra<Partial<TicketInsertType>, X>
   ): Promise<Ticket> {
     const raw = await this.insertOneAndReturnRaw(data)
+    return Ticket.fromRaw(raw)
+  }
+
+  async insertOneFullFieldAndReturnEntity<X extends TicketInsertType>(
+    data: NoExtra<TicketInsertType, X>
+  ): Promise<Ticket> {
+    const raw = await this.insertOneFullFieldAndReturnRaw(data)
     return Ticket.fromRaw(raw)
   }
 

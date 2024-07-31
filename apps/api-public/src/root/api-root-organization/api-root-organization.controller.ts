@@ -35,9 +35,6 @@ export class ApiRootOrganizationController {
   @Put('organization/clear/:id')
   @ApiParam({ name: 'id', example: 1 })
   async clearOne(@Param() { id }: IdParam) {
-    if (id != 4 && id != 1) {
-      throw new Error('Chỉ có thể clear tài khoản Demo')
-    }
     return await this.apiRootOrganizationService.clearOne(id)
   }
 

@@ -7,6 +7,11 @@ import Customer from './customer.entity'
 import Product from './product.entity'
 import Ticket from './ticket.entity'
 
+export enum TicketProductType {
+  Prescription = 1,
+  Consumable = 2,
+}
+
 @Entity('TicketProduct')
 @Index('IDX_TicketProduct__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketProduct__oid_customerId', ['oid', 'customerId'])
@@ -30,6 +35,10 @@ export default class TicketProduct extends BaseEntity {
   @Column({ type: 'smallint', default: DeliveryStatus.Pending })
   @Expose()
   deliveryStatus: DeliveryStatus
+
+  @Column({ type: 'smallint', default: TicketProductType.Prescription })
+  @Expose()
+  type: TicketProductType
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()

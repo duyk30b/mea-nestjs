@@ -13,6 +13,10 @@ import { TicketStatus } from '../../../../../_libs/database/entities/ticket.enti
 export class TicketRelationQuery {
   @Expose()
   @IsBoolean()
+  user: boolean
+
+  @Expose()
+  @IsBoolean()
   customer: boolean
 
   @Expose()

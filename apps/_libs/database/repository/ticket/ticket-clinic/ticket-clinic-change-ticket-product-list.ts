@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { DataSource, FindOptionsWhere, In, UpdateResult } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { DeliveryStatus } from '../../../common/variable'
-import TicketProduct, { TicketProductInsertType, TicketProductRelationType } from '../../../entities/ticket-product.entity'
+import TicketProduct, { TicketProductInsertType, TicketProductRelationType, TicketProductType } from '../../../entities/ticket-product.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 
 export type TicketClinicProductChangeDtoType = Omit<
@@ -16,6 +16,7 @@ export type TicketClinicProductChangeDtoType = Omit<
     | 'customerId'
     | 'deliveryStatus'
     | 'quantityReturn'
+    | 'type'
   >
 >
 
@@ -27,8 +28,9 @@ export class TicketClinicChangeTicketProductList {
     oid: number
     ticketId: number
     ticketProductListDto: NoExtra<TicketClinicProductChangeDtoType, T>[]
+    type: TicketProductType
   }) {
-    const { oid, ticketId, ticketProductListDto } = params
+    const { oid, ticketId, ticketProductListDto, type } = params
     const PREFIX = `ticketId=${ticketId} changeTicketProductList failed`
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
@@ -61,6 +63,7 @@ export class TicketClinicChangeTicketProductList {
         oid,
         ticketId,
         deliveryStatus: In([DeliveryStatus.NoStock, DeliveryStatus.Pending]),
+        type, // xóa type đó thôi, các type khác không liên quan
       }
       await manager.delete(TicketProduct, whereTicketProductDelete)
 
@@ -74,6 +77,7 @@ export class TicketClinicChangeTicketProductList {
             customerId: ticketRoot.customerId,
             deliveryStatus: DeliveryStatus.Pending,
             quantityReturn: 0,
+            type,
           }
           return draft
         })

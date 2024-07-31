@@ -28,13 +28,17 @@ export class ApiTicketOrderBasicService {
 
   async createDraft(params: {
     oid: number
+    userId: number
     body: TicketOrderDraftInsertBody
   }): Promise<BaseResponse> {
-    const { oid, body } = params
+    const { oid, body, userId } = params
     try {
       const { ticketBasic } = await this.ticketOrderDraft.create({
         oid,
-        ticketOrderDraftInsert: body.ticketOrderDraftInsert,
+        ticketOrderDraftInsert: {
+          ...body.ticketOrderDraftInsert,
+          userId,
+        },
         ticketOrderProductDraftList: body.ticketOrderProductDraftList,
         ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,
         ticketOrderSurchargeDraftList: body.ticketOrderSurchargeDraftList,
@@ -48,15 +52,19 @@ export class ApiTicketOrderBasicService {
 
   async updateDraftApproved(params: {
     oid: number
+    userId: number
     ticketId: number
     body: TicketOrderDraftApprovedUpdateBody
   }): Promise<BaseResponse> {
-    const { oid, ticketId, body } = params
+    const { oid, userId, ticketId, body } = params
     try {
       const { ticketBasic } = await this.ticketOrderDraftApprovedUpdate.update({
         oid,
         ticketId,
-        ticketOrderDraftApprovedUpdate: body.ticketOrderDraftApprovedUpdate,
+        ticketOrderDraftApprovedUpdate: {
+          ...body.ticketOrderDraftApprovedUpdate,
+          userId,
+        },
         ticketOrderProductDraftList: body.ticketOrderProductDraftList,
         ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,
         ticketOrderSurchargeDraftList: body.ticketOrderSurchargeDraftList,
@@ -80,15 +88,19 @@ export class ApiTicketOrderBasicService {
 
   async createDebtSuccess(params: {
     oid: number
+    userId: number,
     body: TicketOrderDebtSuccessInsertBody
   }): Promise<BaseResponse> {
-    const { oid, body } = params
+    const { oid, body, userId } = params
     const { paid, ...ticketOrderDraftInsert } = body.ticketOrderDebtSuccessInsert
     const time = ticketOrderDraftInsert.registeredAt
 
     const createDraftResponse = await this.ticketOrderDraft.create({
       oid,
-      ticketOrderDraftInsert,
+      ticketOrderDraftInsert: {
+        ...ticketOrderDraftInsert,
+        userId,
+      },
       ticketOrderProductDraftList: body.ticketOrderProductDraftList,
       ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,
       ticketOrderSurchargeDraftList: body.ticketOrderSurchargeDraftList,
@@ -128,17 +140,21 @@ export class ApiTicketOrderBasicService {
 
   async updateDebtSuccess(params: {
     oid: number
+    userId: number
     ticketId: number
     body: TicketOrderDebtSuccessUpdateBody
   }): Promise<BaseResponse> {
-    const { oid, ticketId, body } = params
+    const { oid, userId, ticketId, body } = params
     try {
       const allowNegativeQuantity = await this.cacheDataService.getSettingAllowNegativeQuantity(oid)
       const { ticketBasic, batchList, productList } =
         await this.ticketOrderDebtSuccessUpdate.update({
           oid,
           ticketId,
-          ticketOrderDebtSuccessUpdate: body.ticketOrderDebtSuccessUpdate,
+          ticketOrderDebtSuccessUpdate: {
+            ...body.ticketOrderDebtSuccessUpdate,
+            userId,
+          },
           ticketOrderProductDraftList: body.ticketOrderProductDraftList,
           ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,
           ticketOrderSurchargeDraftList: body.ticketOrderSurchargeDraftList,

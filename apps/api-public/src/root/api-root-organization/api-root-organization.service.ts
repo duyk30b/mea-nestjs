@@ -98,7 +98,7 @@ export class ApiRootOrganizationService {
     await this.manager.delete(TicketRadiology, { oid })
     await this.manager.delete(TicketSurcharge, { oid })
 
-    if (oid == 4) {
+    if (oid != 1) {
       await this.manager.delete(Radiology, { oid })
     }
     return { data: { oid } }

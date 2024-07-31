@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager, FindOptionsWhere, In } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
-import { DeliveryStatus } from '../../../common/variable'
+import { DeliveryStatus, VoucherType } from '../../../common/variable'
 import {
   Ticket,
   TicketExpense,
@@ -12,7 +12,7 @@ import {
 } from '../../../entities'
 import { TicketExpenseInsertType } from '../../../entities/ticket-expense.entity'
 import { TicketProcedureInsertType } from '../../../entities/ticket-procedure.entity'
-import { TicketProductInsertType } from '../../../entities/ticket-product.entity'
+import { TicketProductInsertType, TicketProductType } from '../../../entities/ticket-product.entity'
 import { TicketSurchargeInsertType } from '../../../entities/ticket-surcharge.entity'
 import { TicketStatus } from '../../../entities/ticket.entity'
 import {
@@ -61,6 +61,10 @@ export class TicketOrderDraftApprovedUpdate {
         deliveryStatus: ticketOrderProductDraftList.length
           ? DeliveryStatus.Pending
           : DeliveryStatus.NoStock,
+        voucherType: VoucherType.Order,
+        paid: 0,
+        debt: ticketOrderDraftApprovedUpdate.totalMoney,
+        startedAt: ticketOrderDraftApprovedUpdate.registeredAt,
       }
       const ticketUpdateResult = await manager
         .createQueryBuilder()
@@ -90,6 +94,7 @@ export class TicketOrderDraftApprovedUpdate {
             quantityPrescription: i.quantity, // cho lấy số lượng kê đơn bằng số lượng bán
             quantityReturn: 0,
             deliveryStatus: DeliveryStatus.Pending,
+            type: TicketProductType.Prescription,
           }
           return ticketProduct
         })

@@ -1,12 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
 import { IsDefined, IsNumber } from 'class-validator'
+import { IsNumberGreaterThan } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 
 export class ReceiptItemBody {
   @ApiPropertyOptional({ example: 52 })
   @Expose()
   @IsDefined()
-  @IsNumber()
+  @IsNumberGreaterThan(0)
   productId: number
 
   @ApiPropertyOptional({ example: 52 })
@@ -49,6 +50,6 @@ export class ReceiptItemBody {
   @ApiProperty({ example: 4 })
   @Expose()
   @IsDefined()
-  @IsNumber()
+  @IsNumberGreaterThan(0)
   quantity: number
 }
