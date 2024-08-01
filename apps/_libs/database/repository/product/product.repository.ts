@@ -35,6 +35,13 @@ export class ProductRepository extends PostgreSqlRepository<
     return Product.fromRaw(raw)
   }
 
+  async insertOneFullFieldAndReturnEntity<X extends ProductInsertType>(
+    data: NoExtra<ProductInsertType, X>
+  ): Promise<Product> {
+    const raw = await this.insertOneFullFieldAndReturnRaw(data)
+    return Product.fromRaw(raw)
+  }
+
   async updateAndReturnEntity<X extends Partial<ProductUpdateType>>(
     condition: BaseCondition<Product>,
     data: NoExtra<Partial<ProductUpdateType>, X>

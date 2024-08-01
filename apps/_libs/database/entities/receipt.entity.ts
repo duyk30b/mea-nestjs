@@ -175,5 +175,5 @@ export type ReceiptInsertType = Omit<
 
 export type ReceiptUpdateType = Omit<
   Receipt,
-  keyof ReceiptRelationType | keyof Pick<Receipt, 'id' | 'oid' | 'distributorId'>
+  keyof ReceiptRelationType | keyof Pick<Receipt, 'id' | 'oid' | 'distributorId' | 'deletedAt'>
 >

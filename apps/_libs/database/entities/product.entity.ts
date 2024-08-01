@@ -16,6 +16,21 @@ export default class Product extends BaseEntity {
   @Expose()
   substance: string // Hoạt chất
 
+  @Column({ type: 'character varying', length: 255, default: '' })
+  @Expose()
+  lotNumber: string // Số Lô sản phẩm
+
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  expiryDate: number
+
   @Column({
     type: 'decimal',
     default: 0,
@@ -137,6 +152,7 @@ export default class Product extends BaseEntity {
     const entity = new Product()
     Object.assign(entity, raw)
 
+    entity.expiryDate = raw.expiryDate == null ? raw.expiryDate : Number(raw.expiryDate)
     entity.quantity = Number(raw.quantity)
     entity.costAmount = Number(raw.costAmount)
     entity.costPrice = Number(raw.costPrice)

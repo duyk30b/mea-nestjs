@@ -4,6 +4,7 @@ import { IdParam } from '../../../../_libs/common/dto/param'
 import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { ApiCustomerExcel } from './api-customer.excel'
 import { ApiCustomerService } from './api-customer.service'
 import {
   CustomerCreateBody,
@@ -17,7 +18,10 @@ import {
 @ApiBearerAuth('access-token')
 @Controller('customer')
 export class ApiCustomerController {
-  constructor(private readonly apiCustomerService: ApiCustomerService) {}
+  constructor(
+    private readonly apiCustomerService: ApiCustomerService,
+    private readonly apiCustomerExcel: ApiCustomerExcel
+  ) { }
 
   @Get('pagination')
   @HasPermission(PermissionId.CUSTOMER_READ)
@@ -62,5 +66,11 @@ export class ApiCustomerController {
   @ApiParam({ name: 'id', example: 1 })
   async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiCustomerService.deleteOne(oid, id)
+  }
+
+  @Get('download-excel')
+  @HasPermission(PermissionId.PRODUCT_DOWNLOAD_EXCEL)
+  async downloadExcel(@External() { user, organization }: TExternal) {
+    return await this.apiCustomerExcel.downloadExcel({ organization, user })
   }
 }

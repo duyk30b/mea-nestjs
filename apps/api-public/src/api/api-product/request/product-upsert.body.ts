@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
-import { IsBoolean, IsDefined, IsIn, IsNumber, IsString, validateSync } from 'class-validator'
+import { IsBoolean, IsDefined, IsIn, IsInt, IsNumber, IsString, validateSync } from 'class-validator'
 
 export class UnitConversionQuery {
   @Expose()
@@ -29,6 +29,18 @@ export class ProductCreateBody {
   @Expose()
   @IsString()
   substance: string // Hoạt chất
+
+  @ApiPropertyOptional({ example: 'ABC12345' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  lotNumber: string
+
+  @ApiPropertyOptional({ example: 1679995369195 })
+  @Expose()
+  // @IsDefined() //expiryDate được phép null
+  @IsInt()
+  expiryDate: number
 
   @ApiPropertyOptional({ example: 20_000 })
   @Expose()
@@ -131,4 +143,4 @@ export class ProductCreateBody {
   isActive: 0 | 1
 }
 
-export class ProductUpdateBody extends PartialType(ProductCreateBody) {}
+export class ProductUpdateBody extends PartialType(ProductCreateBody) { }

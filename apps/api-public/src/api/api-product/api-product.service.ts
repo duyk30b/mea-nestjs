@@ -19,7 +19,7 @@ export class ApiProductService {
     private readonly socketEmitService: SocketEmitService,
     private readonly productRepository: ProductRepository,
     private readonly batchRepository: BatchRepository
-  ) {}
+  ) { }
 
   async pagination(oid: number, query: ProductPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, sort, relation } = query
@@ -114,7 +114,10 @@ export class ApiProductService {
   }
 
   async createOne(oid: number, body: ProductCreateBody): Promise<BaseResponse> {
-    const product = await this.productRepository.insertOneAndReturnEntity({ oid, ...body })
+    const product = await this.productRepository.insertOneFullFieldAndReturnEntity({
+      oid,
+      ...body,
+    })
     this.socketEmitService.productUpsert(oid, { product })
     return { data: product }
   }

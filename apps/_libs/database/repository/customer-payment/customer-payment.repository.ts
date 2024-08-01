@@ -70,9 +70,12 @@ export class CustomerPaymentRepository extends PostgreSqlRepository<
       let customerOpenDebt = customerCloseDebt + totalMoney
 
       const customerPaymentInsertList: CustomerPaymentInsertType[] = []
-      const description =
-        `Trả ${formatNumber(totalMoney)} vào các phiếu nợ: `
-        + `${ticketPaymentList.map((i) => 'T' + i.ticketId).join(',')}`
+      let description = ''
+      if (ticketPaymentList.length) {
+        description =
+          `Trả ${formatNumber(totalMoney)} vào các phiếu nợ: `
+          + `${ticketPaymentList.map((i) => 'T' + i.ticketId).join(',')}`
+      }
 
       // === 3. UPDATE VISIT ===
       if (ticketPaymentList.length) {

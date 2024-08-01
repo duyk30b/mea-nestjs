@@ -4,6 +4,7 @@ import { IdParam } from '../../../../_libs/common/dto/param'
 import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { ApiProductExcel } from './api-product.excel'
 import { ApiProductService } from './api-product.service'
 import {
   ProductCreateBody,
@@ -17,7 +18,10 @@ import {
 @ApiBearerAuth('access-token')
 @Controller('product')
 export class ApiProductController {
-  constructor(private readonly apiProductService: ApiProductService) { }
+  constructor(
+    private readonly apiProductService: ApiProductService,
+    private readonly apiProductExcel: ApiProductExcel
+  ) { }
 
   @Get('pagination')
   @HasPermission(PermissionId.PRODUCT_READ)
@@ -65,8 +69,8 @@ export class ApiProductController {
   }
 
   @Get('download-excel')
-  @HasPermission(PermissionId.PRODUCT_READ)
-  async downloadExcel(@External() { oid }: TExternal) {
-    // return await this.apiProductService.downloadExcel(oid, query)
+  @HasPermission(PermissionId.PRODUCT_DOWNLOAD_EXCEL)
+  async downloadExcel(@External() { user, organization }: TExternal) {
+    return await this.apiProductExcel.downloadExcel({ organization, user })
   }
 }

@@ -19,7 +19,7 @@ import { ProductMovementInsertType } from '../../entities/product-movement.entit
 
 @Injectable()
 export class ReceiptSendProductAndPayment {
-  constructor(private dataSource: DataSource) {}
+  constructor(private dataSource: DataSource) { }
 
   async sendProductAndPayment(params: {
     oid: number
@@ -89,6 +89,8 @@ export class ReceiptSendProductAndPayment {
           costPrice: number
           wholesalePrice: number
           retailPrice: number
+          lotNumber: string
+          expiryDate: number | null
         }
       > = {}
       for (let i = 0; i < receiptItemsProduct.length; i++) {
@@ -103,6 +105,8 @@ export class ReceiptSendProductAndPayment {
             costPrice,
             wholesalePrice: receiptItemsProduct[i].wholesalePrice,
             retailPrice: receiptItemsProduct[i].retailPrice,
+            lotNumber: receiptItemsProduct[i].lotNumber,
+            expiryDate: receiptItemsProduct[i].expiryDate || null,
           }
         }
         productIdMap[productId].quantitySend += quantity
@@ -118,6 +122,8 @@ export class ReceiptSendProductAndPayment {
           costPrice: number
           wholesalePrice: number
           retailPrice: number
+          lotNumber: string
+          expiryDate: number | null
         }
       > = {}
       for (let i = 0; i < receiptItemsBatch.length; i++) {
@@ -131,6 +137,8 @@ export class ReceiptSendProductAndPayment {
             costPrice,
             wholesalePrice: receiptItemsBatch[i].wholesalePrice,
             retailPrice: receiptItemsBatch[i].retailPrice,
+            lotNumber: receiptItemsProduct[i].lotNumber,
+            expiryDate: receiptItemsProduct[i].expiryDate || null,
           }
         }
         batchIdMap[batchId].quantitySend += quantity
@@ -188,8 +196,8 @@ export class ReceiptSendProductAndPayment {
         const distributorPaymentId: number = distributorPaymentInsertResult.identifiers?.[0]?.id
         if (!distributorPaymentId) {
           throw new Error(
-            `${PREFIX}: Insert DistributorPayment failed:` +
-              ` ${JSON.stringify(distributorPaymentInsertResult)}`
+            `${PREFIX}: Insert DistributorPayment failed:`
+            + ` ${JSON.stringify(distributorPaymentInsertResult)}`
           )
         }
       }
@@ -202,20 +210,28 @@ export class ReceiptSendProductAndPayment {
           UPDATE    "Product" "product"
           SET       "quantity" = "product"."quantity" + temp."quantitySend",
                     "costAmount" = "product"."costAmount" + temp."costAmountSend",
+                    "lotNumber" = temp."lotNumber",
+                    "expiryDate" = CASE 
+                                      WHEN product."hasManageBatches" = 1 THEN NULL 
+                                      ELSE temp."expiryDate" 
+                                  END,
                     "costPrice" = temp."costPrice",
                     "wholesalePrice" = temp."wholesalePrice",
                     "retailPrice" = temp."retailPrice"
-          FROM (VALUES ` +
-            productQuantityList
-              .map((i) => {
-                return (
-                  `(${i.productId}, ${i.quantitySend}, ${i.costAmountSend},` +
-                  ` ${i.costPrice}, ${i.wholesalePrice}, ${i.retailPrice})`
-                )
-              })
-              .join(', ') +
-            `   ) AS temp("productId", "quantitySend", "costAmountSend",
-                           "costPrice", "wholesalePrice", "retailPrice")
+          FROM (VALUES `
+          + productQuantityList
+            .map((i) => {
+              return (
+                `(${i.productId}, ${i.quantitySend}, ${i.costAmountSend},`
+                + ` '${i.lotNumber}', ${i.expiryDate || 'NULL'}::bigint,`
+                + ` ${i.costPrice}, ${i.wholesalePrice}, ${i.retailPrice})`
+              )
+            })
+            .join(', ')
+          + `   ) AS temp ( "productId", "quantitySend", "costAmountSend",
+                            "lotNumber", "expiryDate",
+                            "costPrice", "wholesalePrice", "retailPrice"
+                          )
           WHERE     "product"."id" = temp."productId" 
                 AND "product"."oid" = ${oid}
                 AND "product"."hasManageQuantity" = 1 
@@ -240,15 +256,22 @@ export class ReceiptSendProductAndPayment {
           `
           UPDATE    "Batch" "batch"
           SET       "quantity" = "batch"."quantity" + temp."quantitySend",
+                    "lotNumber" = temp."lotNumber",
+                    "expiryDate" = temp."expiryDate",
                     "wholesalePrice" = temp."wholesalePrice",
                     "retailPrice" = temp."retailPrice"
-          FROM (VALUES ` +
-            batchQuantityList
-              .map((i) => {
-                return `(${i.batchId}, ${i.quantitySend}, ${i.wholesalePrice}, ${i.retailPrice})`
-              })
-              .join(', ') +
-            `   ) AS temp("batchId", "quantitySend", "wholesalePrice", "retailPrice")
+          FROM (VALUES `
+          + batchQuantityList
+            .map((i) => {
+              return `(${i.batchId}, ${i.quantitySend},`
+                + ` '${i.lotNumber}', ${i.expiryDate || 'NULL'}::bigint,`
+                + ` ${i.wholesalePrice}, ${i.retailPrice})`
+            })
+            .join(', ')
+          + `   ) AS temp ( "batchId", "quantitySend",
+                            "lotNumber", "expiryDate",
+                            "wholesalePrice", "retailPrice"
+                          )
           WHERE     "batch"."id" = temp."batchId" AND "batch"."oid" = ${oid}
           RETURNING "batch".*;        
           `

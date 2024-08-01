@@ -26,6 +26,21 @@ export default class ReceiptItem extends BaseEntity {
   @Expose()
   batchId: number
 
+  @Column({ type: 'character varying', length: 255, default: '' })
+  @Expose()
+  lotNumber: string // Số Lô sản phẩm
+
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  expiryDate: number
+
   @Column({
     type: 'bigint',
     default: 0,
@@ -89,7 +104,7 @@ export default class ReceiptItem extends BaseEntity {
     if (!raw) return null
     const entity = new ReceiptItem()
     Object.assign(entity, raw)
-
+    entity.expiryDate = raw.expiryDate == null ? raw.expiryDate : Number(raw.expiryDate)
     entity.costPrice = Number(raw.costPrice)
     entity.wholesalePrice = Number(raw.wholesalePrice)
     entity.retailPrice = Number(raw.retailPrice)

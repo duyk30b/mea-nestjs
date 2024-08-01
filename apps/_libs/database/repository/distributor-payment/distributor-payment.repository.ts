@@ -101,9 +101,9 @@ export class DistributorPaymentRepository extends PostgreSqlRepository<
           note,
           description:
             receiptPayments.length > 1
-              ? `Trả ${formatNumber(totalMoney)} vào ${receiptPayments.length} phiếu nợ: ` +
-                `${JSON.stringify(receiptIds)}`
-              : undefined,
+              ? `Trả ${formatNumber(totalMoney)} vào ${receiptPayments.length} phiếu nợ: `
+              + `${JSON.stringify(receiptIds)}`
+              : '',
         }
         distributorOpenDebt = distributorOpenDebt - money
         distributorPaymentListDto.push(distributorPaymentDto)

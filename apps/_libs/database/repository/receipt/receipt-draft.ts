@@ -5,7 +5,7 @@ import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { ReceiptStatus } from '../../common/variable'
 import { Receipt, ReceiptItem } from '../../entities'
 import { ReceiptItemInsertType } from '../../entities/receipt-item.entity'
-import { ReceiptInsertType } from '../../entities/receipt.entity'
+import { ReceiptInsertType, ReceiptUpdateType } from '../../entities/receipt.entity'
 import { ReceiptDraftInsertType, ReceiptDraftUpdateType, ReceiptItemDraftType } from './receipt.dto'
 
 @Injectable()
@@ -15,10 +15,10 @@ export class ReceiptDraft {
     @InjectEntityManager() private manager: EntityManager
   ) { }
 
-  async createDraft<T extends ReceiptDraftInsertType>(params: {
+  async createDraft<T extends ReceiptDraftInsertType, X extends ReceiptItemDraftType>(params: {
     oid: number
     receiptInsertDto: NoExtra<ReceiptDraftInsertType, T>
-    receiptItemListDto: ReceiptItemDraftType[]
+    receiptItemListDto: NoExtra<ReceiptItemDraftType, X>[]
   }) {
     const { oid, receiptInsertDto, receiptItemListDto } = params
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
@@ -27,7 +27,7 @@ export class ReceiptDraft {
         oid,
         status: ReceiptStatus.Draft,
         paid: 0,
-        debt: 0,
+        debt: receiptInsertDto.totalMoney,
         year: 0,
         month: 0,
         date: 0,
@@ -55,11 +55,14 @@ export class ReceiptDraft {
     })
   }
 
-  async updateReceiptDraftAndReceiptPrepayment<T extends ReceiptDraftUpdateType>(params: {
+  async updateReceiptDraftAndReceiptPrepayment<
+    T extends ReceiptDraftUpdateType,
+    X extends ReceiptItemDraftType,
+  >(params: {
     oid: number
     receiptId: number
     receiptUpdateDto: NoExtra<ReceiptDraftUpdateType, T>
-    receiptItemListDto: ReceiptItemDraftType[]
+    receiptItemListDto: NoExtra<ReceiptItemDraftType, X>[]
   }) {
     const { oid, receiptId, receiptUpdateDto, receiptItemListDto } = params
 
@@ -69,11 +72,22 @@ export class ReceiptDraft {
         oid,
         status: In([ReceiptStatus.Draft, ReceiptStatus.Prepayment]),
       }
+      const receiptUpdate: ReceiptUpdateType = {
+        ...receiptUpdateDto,
+        oid,
+        status: ReceiptStatus.Draft,
+        paid: 0,
+        debt: receiptUpdateDto.totalMoney,
+        year: 0,
+        month: 0,
+        date: 0,
+        endedAt: null,
+      }
       const receiptUpdateResult = await manager
         .createQueryBuilder()
         .update(Receipt)
         .where(whereReceipt)
-        .set(receiptUpdateDto)
+        .set(receiptUpdate)
         .returning('*')
         .execute()
       if (receiptUpdateResult.affected !== 1) {

@@ -60,6 +60,24 @@ export class CacheDataService {
     return email as string
   }
 
+  async getProductGroupMap(oid: number) {
+    const settingMap = await this.getSettingMap(oid)
+    const productGroup = settingMap?.[SettingKey.PRODUCT_GROUP] || {
+      1: 'Kháng sinh - Kháng Virus',
+      2: 'Dị ứng',
+      3: 'Thần Kinh',
+      4: 'Tiêu Hóa',
+      5: 'Cơ Xương Khớp',
+      6: 'Giảm Đau - Hạ Sốt',
+      8: 'Thực Phẩm Chức Năng',
+      9: 'Dinh Dưỡng',
+      10: 'Hô hấp',
+      11: 'Tim Mạch',
+      12: 'Da Liễu',
+    }
+    return productGroup
+  }
+
   async getSettingAllowNegativeQuantity(oid: number) {
     const settingMap = await this.getSettingMap(oid)
     const { allowNegativeQuantity } = settingMap?.[SettingKey.SYSTEM_SETTING] || {}
