@@ -3,7 +3,8 @@ import { registerAs } from '@nestjs/config'
 export const GlobalConfig = registerAs('global', () => ({
   NODE_VERSION: process.versions.node,
   NODE_ENV: process.env.NODE_ENV,
-  DOMAIN: process.env.DOMAIN,
+  DOMAIN_FRONT_END: process.env.DOMAIN_FRONT_END,
+  DOMAIN_BACK_END: process.env.DOMAIN_BACK_END,
   API_PUBLIC_HOST: process.env.API_PUBLIC_HOST || 'localhost',
   API_PUBLIC_PORT: Number(process.env.API_PUBLIC_PORT || 20000),
   FILE_SERVICE_HOST: process.env.FILE_SERVICE_HOST || 'localhost',

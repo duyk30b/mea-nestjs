@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, HttpStatus, Injectable, SetMetadata } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
 import { PermissionId } from '../../database/entities/permission.entity'
-import { CacheDataService } from '../../transporter/cache-manager/cache-data.service'
+import { CacheDataService } from '../cache-data/cache-data.service'
 import { BusinessException } from '../exception-filter/exception-filter'
 import { RequestExternal } from '../request/external.request'
 
@@ -38,11 +38,9 @@ export class PermissionGuard implements CanActivate {
     const request = context.switchToHttp().getRequest()
     const requestExternal: RequestExternal = request.raw // Fastify phải đọc trong Raw
     const { external } = requestExternal
-
     if (external.error) {
       throw new BusinessException(external.error, {}, HttpStatus.UNAUTHORIZED)
     }
-    // Nếu user, role, org inactive thì loại từ vòng gửi xe
     if (
       !external.uid
       || !external.oid
@@ -50,10 +48,12 @@ export class PermissionGuard implements CanActivate {
       || !external.user
       || !external.role
       || !external.organization
-      || !!external.user.deletedAt
-      || !external.role.isActive
-      || !external.organization.isActive
     ) {
+      throw new BusinessException('common.AccountRequired', {}, HttpStatus.UNAUTHORIZED)
+    }
+
+    // Nếu user, role, org inactive thì loại từ vòng gửi xe
+    if (!!external.user.deletedAt || !external.role.isActive || !external.organization.isActive) {
       throw new BusinessException('common.AccountInactive', {}, HttpStatus.UNAUTHORIZED)
     }
     // ROOT: oid = 1 được xem mọi API, kể cả API inActive

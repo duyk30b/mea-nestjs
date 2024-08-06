@@ -17,7 +17,7 @@ export class ApiSettingController {
   constructor(
     private readonly apiSettingService: ApiSettingService,
     private readonly apiSettingGoogleDriverService: ApiSettingGoogleDriverService
-  ) {}
+  ) { }
 
   @Get('get-map')
   @IsUser()
@@ -26,7 +26,7 @@ export class ApiSettingController {
   }
 
   @Post('upsert/:type')
-  @HasPermission(PermissionId.SETTING_UPSERT)
+  @HasPermission(PermissionId.ORGANIZATION_SETTING_UPSERT)
   async upsert(
     @External() { oid }: TExternal,
     @Param() { type }: SettingUpsertParams,
@@ -37,13 +37,13 @@ export class ApiSettingController {
   }
 
   @Get('google-driver/get-auth-url')
-  @HasPermission(PermissionId.SETTING_UPSERT)
+  @HasPermission(PermissionId.ORGANIZATION_SETTING_UPSERT)
   async getAuthUrl(@External() { oid }: TExternal) {
     return this.apiSettingGoogleDriverService.getAuthUrl({ state: `${oid}` })
   }
 
   @Post('google-driver/logout')
-  @HasPermission(PermissionId.SETTING_UPSERT)
+  @HasPermission(PermissionId.ORGANIZATION_SETTING_UPSERT)
   async authLogout(@External() { oid }: TExternal) {
     return this.apiSettingGoogleDriverService.logout(oid)
   }

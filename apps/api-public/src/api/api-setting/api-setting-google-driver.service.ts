@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
+import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { SettingKey } from '../../../../_libs/database/entities/setting.entity'
 import { SettingRepository } from '../../../../_libs/database/repository/setting/setting.repository'
-import { CacheDataService } from '../../../../_libs/transporter/cache-manager/cache-data.service'
 import { GoogleDriverService } from '../../../../_libs/transporter/google-driver/google-driver.service'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 
@@ -12,7 +12,7 @@ export class ApiSettingGoogleDriverService {
     private readonly cacheDataService: CacheDataService,
     private readonly socketEmitService: SocketEmitService,
     private readonly settingRepository: SettingRepository
-  ) {}
+  ) { }
 
   async getAuthUrl(options: { state: string }) {
     const { url } = await this.googleDriverService.getAuthUrl({ state: options.state })
@@ -40,7 +40,7 @@ export class ApiSettingGoogleDriverService {
       data: JSON.stringify({ oid, email, refreshToken }),
     })
     await this.cacheDataService.reloadSettingMap(oid)
-    this.socketEmitService.organizationSettingReload(oid)
+    this.socketEmitService.settingReload(oid)
   }
 
   async getAllAccounts() {

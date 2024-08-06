@@ -11,10 +11,8 @@ export type I18nTranslations = {
         "ForbiddenPermission": string;
         "TooManyRequests": string;
         "AccountInactive": string;
+        "AccountRequired": string;
         "ApiInactive": string;
-        "ForgotPassword": {
-            "Success": string;
-        };
     };
     "error": {
         "ValidateFailed": string;
@@ -26,7 +24,10 @@ export type I18nTranslations = {
             "DeleteFailed": string;
         };
         "Token": {
-            "Expired": string;
+            "AccessTokenExpired": string;
+            "RefreshTokenExpired": string;
+            "AccessTokenNoCache": string;
+            "RefreshTokenNoCache": string;
             "Empty": string;
             "Invalid": string;
             "NoInCache": string;

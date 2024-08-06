@@ -4,7 +4,8 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 export enum PermissionId {
   ORGANIZATION = 1,
   ORGANIZATION_UPDATE_INFO = 100,
-  SETTING_UPSERT = 101,
+  ORGANIZATION_SETTING_UPSERT = 101,
+  ORGANIZATION_VERIFY_EMAIL = 102,
 
   ROLE = 2,
   ROLE_READ = 200,

@@ -11,8 +11,7 @@ import {
 import { KafkaContext, NatsContext } from '@nestjs/microservices'
 import { ThrottlerException } from '@nestjs/throttler'
 import { I18nPath, I18nTranslations } from 'assets/generated/i18n.generated'
-import { Response } from 'express'
-import { FastifyReply, FastifyRequest } from 'fastify'
+import { FastifyReply } from 'fastify'
 import { I18nContext } from 'nestjs-i18n'
 import { from } from 'rxjs'
 import * as url from 'url'
@@ -39,11 +38,24 @@ export class ValidationException extends Error {
 export class BusinessException extends Error {
   public statusCode: HttpStatus
   public args?: Record<string, string | number>
+  public details: any
 
   constructor(message: I18nPath, args = {}, statusCode = HttpStatus.BAD_REQUEST) {
     super(message)
     this.statusCode = statusCode
     this.args = args
+  }
+
+  static create(options: {
+    message: I18nPath
+    args?: Record<string, any>
+    statusCode?: HttpStatus
+    details?: any
+  }) {
+    const { message, args, statusCode, details } = options
+    const exception = new BusinessException(message, args, statusCode)
+    exception.details = details
+    return exception
   }
 }
 
@@ -53,6 +65,7 @@ export class ServerExceptionFilter implements ExceptionFilter {
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR
     let { message } = exception
     const { stack } = exception
+    let details: any = undefined
     Logger.error(stack)
 
     const errors: any[] = (exception as any).errors || []
@@ -64,10 +77,12 @@ export class ServerExceptionFilter implements ExceptionFilter {
         break
       }
       case BusinessException.name: {
+        const businessException = exception as BusinessException
         message = i18n.translate(exception.message as any, {
-          args: (exception as BusinessException).args,
+          args: businessException.args,
         })
-        statusCode = (exception as BusinessException).statusCode
+        statusCode = businessException.statusCode
+        details = businessException.details
         break
       }
       case ThrottlerException.name: {
@@ -129,6 +144,7 @@ export class ServerExceptionFilter implements ExceptionFilter {
         statusCode,
         errors,
         message,
+        details,
         path: originalUrl,
         time: new Date().toISOString(),
       })

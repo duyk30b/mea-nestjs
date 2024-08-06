@@ -1,15 +1,15 @@
 /* eslint-disable max-len */
 import { Injectable } from '@nestjs/common'
+import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import Permission, { PermissionId } from '../../../../_libs/database/entities/permission.entity'
 import { PermissionRepository } from '../../../../_libs/database/repository/permission/permission.repository'
-import { CacheDataService } from '../../../../_libs/transporter/cache-manager/cache-data.service'
 import { PermissionGetManyQuery } from './request'
 
 @Injectable()
 export class ApiPermissionService {
   constructor(
-    private readonly permissionRepository: PermissionRepository,
-    private readonly cacheDataService: CacheDataService
+    private readonly cacheDataService: CacheDataService,
+    private readonly permissionRepository: PermissionRepository
   ) { }
 
   async getMany(query: PermissionGetManyQuery) {
@@ -51,12 +51,22 @@ export class ApiPermissionService {
         rootId: PermissionId.ORGANIZATION,
       },
       {
-        id: PermissionId.SETTING_UPSERT,
+        id: PermissionId.ORGANIZATION_SETTING_UPSERT,
         level: 2,
-        code: PermissionId[PermissionId.SETTING_UPSERT],
+        code: PermissionId[PermissionId.ORGANIZATION_SETTING_UPSERT],
         isActive: 1,
-        pathId: `${PermissionId.ORGANIZATION}.${PermissionId.SETTING_UPSERT}`,
+        pathId: `${PermissionId.ORGANIZATION}.${PermissionId.ORGANIZATION_SETTING_UPSERT}`,
         name: 'Chỉnh sửa cài đặt',
+        parentId: PermissionId.ORGANIZATION,
+        rootId: PermissionId.ORGANIZATION,
+      },
+      {
+        id: PermissionId.ORGANIZATION_VERIFY_EMAIL,
+        level: 2,
+        code: PermissionId[PermissionId.ORGANIZATION_VERIFY_EMAIL],
+        isActive: 1,
+        pathId: `${PermissionId.ORGANIZATION}.${PermissionId.ORGANIZATION_VERIFY_EMAIL}`,
+        name: 'Sửa và kích hoạt email',
         parentId: PermissionId.ORGANIZATION,
         rootId: PermissionId.ORGANIZATION,
       },

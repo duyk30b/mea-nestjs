@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import * as bcrypt from 'bcrypt'
+import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
+import { CacheTokenService } from '../../../../_libs/common/cache-data/cache-token.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { encrypt } from '../../../../_libs/common/helpers/string.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { User } from '../../../../_libs/database/entities'
 import Device from '../../../../_libs/database/entities/device'
 import { UserRepository } from '../../../../_libs/database/repository/user/user.repository'
-import { CacheDataService } from '../../../../_libs/transporter/cache-manager/cache-data.service'
-import { CacheTokenService } from '../../../../_libs/transporter/cache-manager/cache-token.service'
+import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   UserCreateBody,
   UserGetManyQuery,
@@ -19,10 +20,11 @@ import {
 @Injectable()
 export class ApiUserService {
   constructor(
+    private readonly socketEmitService: SocketEmitService,
     private readonly userRepository: UserRepository,
     private readonly cacheTokenService: CacheTokenService,
     private readonly cacheDataService: CacheDataService
-  ) {}
+  ) { }
 
   async pagination(options: { oid: number; query: UserPaginationQuery }): Promise<BaseResponse> {
     const { oid, query } = options
@@ -46,14 +48,20 @@ export class ApiUserService {
 
     for (let i = 0; i < data.length; i++) {
       const user = data[i]
-      const tokenData = this.cacheTokenService.getTokenList({ oid, uid: user.id })
-      user.devices = tokenData.map((t) => {
+      const tokenData = await this.cacheTokenService.getTokenList({
+        oid,
+        uid: user.id,
+      })
+      user.devices = tokenData.map((j) => {
         const device = new Device()
-        device.code = t.code
-        device.ip = t.ip
-        device.os = t.os
-        device.browser = t.browser
-        device.mobile = t.mobile
+        device.refreshExp = j.refreshExp
+        device.ip = j.ip
+        device.os = j.os
+        device.browser = j.browser
+        device.mobile = j.mobile
+        device.online = this.socketEmitService.connections[user.id].some((k) => {
+          return k.refreshExp === j.refreshExp
+        }) || j.online
         return device
       })
     }
@@ -83,12 +91,12 @@ export class ApiUserService {
   }
 
   async getOne(oid: number, id: number, query?: UserGetOneQuery): Promise<BaseResponse> {
-    const data = await this.userRepository.findOne({
+    const user = await this.userRepository.findOne({
       relation: query.relation,
       condition: { id, oid },
     })
-    if (!data) throw new BusinessException('error.User.NotExist')
-    return { data }
+    if (!user) throw new BusinessException('error.User.NotExist')
+    return { data: { user } }
   }
 
   async createOne(oid: number, body: UserCreateBody): Promise<BaseResponse> {
@@ -115,7 +123,7 @@ export class ApiUserService {
       hashPassword,
     })
     this.cacheDataService.updateUser(user)
-    return { data: user }
+    return { data: { user } }
   }
 
   async updateInfo(oid: number, id: number, body: UserUpdateBody): Promise<BaseResponse> {
@@ -132,7 +140,7 @@ export class ApiUserService {
       throw new BusinessException('error.Database.UpdateFailed')
     }
     this.cacheDataService.updateUser(user)
-    return { data: user }
+    return { data: { user } }
   }
 
   async newPassword(oid: number, id: number, password: string): Promise<BaseResponse> {
@@ -156,15 +164,15 @@ export class ApiUserService {
       throw new BusinessException('error.Database.DeleteFailed')
     }
     this.cacheDataService.updateUser(user)
-    return { data: user }
+    return { data: { userId: id } }
   }
 
-  async deviceLogout(options: { oid: number; userId: number; code: string }) {
-    const { oid, userId, code } = options
-    const result = this.cacheTokenService.removeDevice({
+  async deviceLogout(options: { oid: number; userId: number; refreshExp: number }) {
+    const { oid, userId, refreshExp } = options
+    const result = this.cacheTokenService.removeRefreshToken({
       oid,
       uid: userId,
-      code,
+      refreshExp,
     })
     return { data: true }
   }

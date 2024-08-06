@@ -1,11 +1,11 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
+import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { TicketPaymentAndClose } from '../../../../_libs/database/repository/ticket/ticket-base/ticket-payment-and-close'
 import { TicketSendProduct } from '../../../../_libs/database/repository/ticket/ticket-base/ticket-send-product'
 import { TicketOrderDebtSuccessUpdate } from '../../../../_libs/database/repository/ticket/ticket-order/ticket-order-debt-success-update'
 import { TicketOrderDraftApprovedUpdate } from '../../../../_libs/database/repository/ticket/ticket-order/ticket-order-draft-approved-update'
 import { TicketOrderDraft } from '../../../../_libs/database/repository/ticket/ticket-order/ticket-order.draft'
-import { CacheDataService } from '../../../../_libs/transporter/cache-manager/cache-data.service'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   TicketOrderDebtSuccessInsertBody,
@@ -18,12 +18,12 @@ import {
 export class ApiTicketOrderBasicService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
+    private readonly cacheDataService: CacheDataService,
     private readonly ticketOrderDraft: TicketOrderDraft,
     private readonly ticketOrderDraftApprovedUpdate: TicketOrderDraftApprovedUpdate,
     private readonly ticketOrderDebtSuccessUpdate: TicketOrderDebtSuccessUpdate,
     private readonly ticketPaymentAndClose: TicketPaymentAndClose,
-    private readonly ticketSendProduct: TicketSendProduct,
-    private readonly cacheDataService: CacheDataService
+    private readonly ticketSendProduct: TicketSendProduct
   ) { }
 
   async createDraft(params: {

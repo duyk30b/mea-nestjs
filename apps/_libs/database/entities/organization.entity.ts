@@ -15,8 +15,16 @@ export default class Organization {
   phone: string
 
   @Expose()
-  @Column({ type: 'character varying', length: 255, nullable: false })
+  @Column({ type: 'character varying', length: 255, nullable: true })
   email: string
+
+  @Column({ type: 'smallint', default: 0 })
+  @Expose()
+  emailVerify: 0 | 1
+
+  @Expose()
+  @Column({ type: 'smallint', default: 1 })
+  dataVersion: number
 
   @Expose()
   @Column({ type: 'smallint', default: 0 })
@@ -85,7 +93,7 @@ export default class Organization {
 
   @Expose()
   @OneToMany(() => User, (user) => user.organization)
-  users: User[]
+  userList: User[]
 
   static fromRaw(raw: { [P in keyof Organization]: any }) {
     if (!raw) return null
@@ -104,7 +112,7 @@ export default class Organization {
   }
 }
 
-export type OrganizationRelationType = Pick<Organization, 'users'>
+export type OrganizationRelationType = Pick<Organization, 'userList'>
 
 export type OrganizationSortType = Pick<Organization, 'id'>
 

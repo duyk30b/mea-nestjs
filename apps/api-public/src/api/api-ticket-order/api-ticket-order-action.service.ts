@@ -1,4 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
+import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { TicketPayDebt } from '../../../../_libs/database/repository/ticket/ticket-base/ticket-pay-debt'
 import { TicketPaymentAndClose } from '../../../../_libs/database/repository/ticket/ticket-base/ticket-payment-and-close'
@@ -8,7 +9,6 @@ import { TicketRepository } from '../../../../_libs/database/repository/ticket/t
 import { TicketOrderCancel } from '../../../../_libs/database/repository/ticket/ticket-order/ticket-order-cancel'
 import { TicketOrderRefundOverpaid } from '../../../../_libs/database/repository/ticket/ticket-order/ticket-order-refund-overpaid'
 import { TicketOrderReturnProductList } from '../../../../_libs/database/repository/ticket/ticket-order/ticket-order-return-product-list'
-import { CacheDataService } from '../../../../_libs/transporter/cache-manager/cache-data.service'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import { TicketOrderPaymentBody } from './request-action/ticket-order-payment.body'
 import { TicketOrderReturnProductListBody } from './request-action/ticket-order-return-product-list.body'

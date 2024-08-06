@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import { Cell, Workbook, Worksheet } from 'exceljs'
+import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { arrayToKeyArray } from '../../../../_libs/common/helpers/object.helper'
 import { DTimer } from '../../../../_libs/common/helpers/time.helper'
 import { Organization, Product, User } from '../../../../_libs/database/entities'
 import { BatchRepository } from '../../../../_libs/database/repository/batch/batch.repository'
 import { ProductRepository } from '../../../../_libs/database/repository/product/product.repository'
 import { excelOneSheetWorkbook } from '../../../../_libs/file/excel-one-sheet.util'
-import { CacheDataService } from '../../../../_libs/transporter/cache-manager/cache-data.service'
 
 @Injectable()
 export class ApiProductExcel {

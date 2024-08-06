@@ -19,7 +19,7 @@ import { NewPasswordBody } from './request/new-password.body'
 @ApiBearerAuth('access-token')
 @Controller('user')
 export class ApiUserController {
-  constructor(private readonly apiUserService: ApiUserService) {}
+  constructor(private readonly apiUserService: ApiUserService) { }
 
   @Get('pagination')
   @HasPermission(PermissionId.USER_READ)
@@ -86,7 +86,7 @@ export class ApiUserController {
     return this.apiUserService.deviceLogout({
       oid,
       userId: +id,
-      code: body.code,
+      refreshExp: body.refreshExp,
     })
   }
 }

@@ -8,7 +8,7 @@ import { RequestExternal } from '../request/external.request'
 
 @Injectable()
 export class AccessLogInterceptor implements NestInterceptor {
-  constructor(private readonly logger = new Logger('ACCESS_LOG')) {}
+  constructor(private readonly logger = new Logger('ACCESS_LOG')) { }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const createTime = new Date()
@@ -37,6 +37,9 @@ export class AccessLogInterceptor implements NestInterceptor {
 
       const { originalUrl, method, body } = request
       const urlParse = url.parse(originalUrl, true)
+      if (basicExternal.oid) {
+        message.OID = basicExternal.oid
+      }
       message.type = '[API]'
       message.method = method
       message.path = urlParse.pathname

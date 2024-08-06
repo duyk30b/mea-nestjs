@@ -12,7 +12,7 @@ import {
 
 @Injectable()
 export class ApiRoleService {
-  constructor(private readonly roleRepository: RoleRepository) {}
+  constructor(private readonly roleRepository: RoleRepository) { }
 
   async pagination(oid: number, query: RolePaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, sort, relation } = query
@@ -50,21 +50,25 @@ export class ApiRoleService {
   }
 
   async getOne(oid: number, id: number, query?: RoleGetOneQuery): Promise<BaseResponse> {
-    const data = await this.roleRepository.findOneBy({ oid, id })
-    if (!data) throw new BusinessException('error.Database.NotFound')
-    return { data }
+    const role = await this.roleRepository.findOneBy({ oid, id })
+    if (!role) throw new BusinessException('error.Database.NotFound')
+    return { data: { role } }
   }
 
   async createOne(oid: number, body: RoleCreateBody): Promise<BaseResponse> {
-    const id = await this.roleRepository.insertOne({ oid, ...body })
-    const data = await this.roleRepository.findOneById(id)
-    return { data }
+    const role = await this.roleRepository.insertOneFullFieldAndReturnEntity({
+      ...body,
+      oid,
+    })
+    return { data: { role } }
   }
 
   async updateOne(oid: number, id: number, body: RoleUpdateBody): Promise<BaseResponse> {
-    const affected = await this.roleRepository.update({ oid, id }, body)
-    const data = await this.roleRepository.findOneBy({ oid, id })
-    return { data }
+    const [role] = await this.roleRepository.updateAndReturnEntity({ oid, id }, body)
+    if (!role) {
+      throw new BusinessException('error.Database.UpdateFailed')
+    }
+    return { data: { role } }
   }
 
   async destroyOne(oid: number, id: number): Promise<BaseResponse> {
@@ -72,6 +76,6 @@ export class ApiRoleService {
     if (affected === 0) {
       throw new BusinessException('error.Database.DeleteFailed')
     }
-    return { data: id }
+    return { data: { roleId: id } }
   }
 }

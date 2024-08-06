@@ -1,11 +1,11 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
+import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { arrayToKeyArray } from '../../../../_libs/common/helpers/object.helper'
 import { ImageHost, ImageInsertType } from '../../../../_libs/database/entities/image.entity'
 import { SettingKey } from '../../../../_libs/database/entities/setting.entity'
 import { ImageRepository } from '../../../../_libs/database/repository/image/image.repository'
 import { SettingRepository } from '../../../../_libs/database/repository/setting/setting.repository'
-import { CacheDataService } from '../../../../_libs/transporter/cache-manager/cache-data.service'
 import { GoogleDriverService } from '../../../../_libs/transporter/google-driver/google-driver.service'
 
 @Injectable()
@@ -17,7 +17,7 @@ export class ImageManagerService implements OnModuleInit {
     private readonly googleDriverService: GoogleDriverService,
     private readonly cacheDataService: CacheDataService,
     private readonly settingRepository: SettingRepository
-  ) {}
+  ) { }
 
   async onModuleInit() {
     try {

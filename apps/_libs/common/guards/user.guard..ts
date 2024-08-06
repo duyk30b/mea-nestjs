@@ -8,7 +8,7 @@ export const IsUser = () => SetMetadata(USER_GUARD, true)
 
 @Injectable()
 export class UserGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(private reflector: Reflector) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const requireUser = this.reflector.getAllAndOverride<boolean>(USER_GUARD, [
@@ -24,17 +24,17 @@ export class UserGuard implements CanActivate {
     }
 
     if (
-      !external.uid ||
-      !external.oid ||
-      !external.rid ||
-      !external.user ||
-      !external.role ||
-      !external.organization ||
-      !!external.user.deletedAt ||
-      !external.role.isActive ||
-      !external.organization.isActive
+      !external.uid
+      || !external.oid
+      || !external.rid
+      || !external.user
+      || !external.role
+      || !external.organization
+      || !!external.user.deletedAt
+      || !external.role.isActive
+      || !external.organization.isActive
     ) {
-      throw new BusinessException('error.Token.Expired', {}, HttpStatus.UNAUTHORIZED)
+      throw new BusinessException('error.Token.AccessTokenExpired', {}, HttpStatus.UNAUTHORIZED)
     }
 
     return true

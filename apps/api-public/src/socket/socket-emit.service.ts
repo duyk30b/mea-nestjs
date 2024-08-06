@@ -4,6 +4,7 @@ import {
   Batch,
   Customer,
   Distributor,
+  Organization,
   Procedure,
   Product,
   Ticket,
@@ -16,13 +17,23 @@ import { SOCKET_EVENT } from './socket.variable'
 
 @Injectable()
 export class SocketEmitService {
-  public connections: Record<string, any[]> = null
+  public connections: Record<string, { refreshExp: number, socketId: string }[]> = null
   public io: Server = null
 
   demo(oid: number) {
     if (!this.io) return
     const dataDemo = new Date().toISOString()
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SERVER_EMIT_DEMO, { dataDemo })
+  }
+
+  organizationUpdate(oid: number, data: { organization: Organization }) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.ORGANIZATION_UPDATE)
+  }
+
+  settingReload(oid: number) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SETTING_RELOAD)
   }
 
   distributorUpsert(oid: number, data: { distributor: Distributor }) {
@@ -58,11 +69,6 @@ export class SocketEmitService {
   procedureUpsert(oid: number, data: { procedure: Procedure }) {
     if (!this.io) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.PROCEDURE_UPSERT, data)
-  }
-
-  organizationSettingReload(oid: number) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SETTING_RELOAD)
   }
 
   ticketClinicCreate(oid: number, data: { ticket: Ticket }) {

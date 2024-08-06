@@ -33,6 +33,13 @@ export class OrganizationRepository extends PostgreSqlRepository<
     return Organization.fromRaw(raw)
   }
 
+  async insertOneFullFieldAndReturnEntity<X extends OrganizationInsertType>(
+    data: NoExtra<OrganizationInsertType, X>
+  ): Promise<Organization> {
+    const raw = await this.insertOneFullFieldAndReturnRaw(data)
+    return Organization.fromRaw(raw)
+  }
+
   async updateAndReturnEntity<X extends Partial<OrganizationUpdateType>>(
     condition: BaseCondition<Organization>,
     data: NoExtra<Partial<OrganizationUpdateType>, X>

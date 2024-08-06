@@ -9,8 +9,8 @@ import {
 } from '@nestjs/websockets'
 import { getClientIp } from 'request-ip'
 import { Server, Socket } from 'socket.io'
+import { CacheDataService } from '../../../_libs/common/cache-data/cache-data.service'
 import { JwtExtendService } from '../../../_libs/common/jwt-extend/jwt-extend.service'
-import { CacheDataService } from '../../../_libs/transporter/cache-manager/cache-data.service'
 import { SocketEmitService } from './socket-emit.service'
 import { SOCKET_EVENT } from './socket.variable'
 
@@ -19,7 +19,7 @@ import { SOCKET_EVENT } from './socket.variable'
 export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(SocketGateway.name)
 
-  public connections: Record<string, any[]> = {}
+  public connections: Record<string, { refreshExp: number, socketId: string }[]> = {}
 
   @WebSocketServer()
   io: Server
@@ -28,7 +28,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     private readonly socketEmitService: SocketEmitService,
     private readonly jwtExtendService: JwtExtendService,
     private readonly cacheDataService: CacheDataService
-  ) {}
+  ) { }
 
   afterInit(io: Server) {
     this.socketEmitService.io = io
@@ -40,12 +40,19 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const { token } = socket.handshake.auth
     const ip = getClientIp(socket.client.request)
     try {
-      const { oid, uid } = this.jwtExtendService.verifyRefreshToken(token, ip)
+      if (!token) {
+        throw new Error('error.Token.Empty')
+      }
+      const jwtPayloadRefresh = this.jwtExtendService.verifyRefreshToken(token, ip)
+      const { uid, oid } = jwtPayloadRefresh.data
       socket.data.user = await this.cacheDataService.getUser(uid)
       socket.join(oid.toString())
       this.connections[uid] ||= []
-      this.connections[uid].push(socket.id)
-      this.logger.log(
+      this.connections[uid].push({
+        socketId: socket.id,
+        refreshExp: jwtPayloadRefresh.exp,
+      })
+      this.logger.debug(
         `IP ${ip} UserId ${uid} with socketId ${socket.id} connected, join room ${oid}`
       )
     } catch (error) {
@@ -56,10 +63,10 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     }
   }
 
-  handleDisconnect(socket: Socket) {
+  async handleDisconnect(socket: Socket) {
     const uid = socket.data.user?.id
-    this.connections[uid] = this.connections[uid]?.filter((i) => i !== socket.id)
-    this.logger.log(`UserId ${socket.data.user?.id} with socketId ${socket.id} disconnected`)
+    this.connections[uid] = this.connections[uid]?.filter((i) => i.socketId !== socket.id)
+    this.logger.debug(`UserId ${socket.data.user?.id} with socketId ${socket.id} disconnected`)
   }
 
   @SubscribeMessage(SOCKET_EVENT.CLIENT_EMIT_TICKET_CREATE)

@@ -85,7 +85,7 @@ export default class User {
   deletedAt: number
 
   @Expose()
-  @ManyToOne((type) => Organization, (organization) => organization.users, {
+  @ManyToOne((type) => Organization, (organization) => organization.userList, {
     createForeignKeyConstraints: false,
   })
   @JoinColumn({ name: 'oid', referencedColumnName: 'id' })
