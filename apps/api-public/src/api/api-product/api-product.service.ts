@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { uniqueArray } from '../../../../_libs/common/helpers/object.helper'
+import { arrayToKeyArray, uniqueArray } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { BatchRepository } from '../../../../_libs/database/repository/batch/batch.repository'
 import { ProductRepository } from '../../../../_libs/database/repository/product/product.repository'
@@ -33,25 +33,24 @@ export class ApiProductService {
         group: filter?.group,
         isActive: filter?.isActive,
         quantity: filter?.quantity,
-        $OR: filter?.searchText
-          ? [{ brandName: { LIKE: filter.searchText } }, { substance: { LIKE: filter.searchText } }]
-          : undefined,
+        expiryDate: filter?.expiryDate,
+        $OR: filter?.$OR,
         updatedAt: filter?.updatedAt,
       },
       sort,
     })
 
-    if (relation?.batchList && data.length) {
-      const productIds = uniqueArray(data.map((item) => item.id))
+    const productHasBatchesList = data.filter((i) => i.hasManageBatches)
+    const productHasBatchesIds = uniqueArray(productHasBatchesList.map((item) => item.id))
+    if (relation?.batchList && productHasBatchesIds.length) {
       const batchList = await this.batchRepository.findManyBy({
-        productId: { IN: productIds },
-        quantity: { NOT: 0 }, // cứ lấy hết số lượng 0, về frontend convert sau
+        productId: { IN: productHasBatchesIds },
+        quantity: filter?.batchList?.quantity,
+        expiryDate: filter?.batchList?.expiryDate,
       })
-
+      const batchListMapProductId = arrayToKeyArray(batchList, 'productId')
       data.forEach((item) => {
-        item.batchList = batchList
-          .filter((ma) => ma.productId === item.id)
-          .sort((a, b) => ((a.expiryDate || 0) > (b.expiryDate || 0) ? 1 : -1))
+        item.batchList = batchListMapProductId[item.id] || []
       })
     }
 
@@ -71,24 +70,24 @@ export class ApiProductService {
         isActive: filter?.isActive,
         group: filter?.group,
         quantity: filter?.quantity,
-        $OR: filter?.searchText
-          ? [{ brandName: { LIKE: filter.searchText } }, { substance: { LIKE: filter.searchText } }]
-          : undefined,
+        expiryDate: filter?.expiryDate,
+        $OR: filter?.$OR,
         updatedAt: filter?.updatedAt,
       },
       limit,
     })
 
-    if (relation?.batchList && productList.length) {
-      const productIds = uniqueArray(productList.map((item) => item.id))
+    const productHasBatchesList = productList.filter((i) => i.hasManageBatches)
+    const productHasBatchesIds = uniqueArray(productHasBatchesList.map((item) => item.id))
+    if (relation?.batchList && productHasBatchesIds.length) {
       const batchList = await this.batchRepository.findManyBy({
-        id: { IN: productIds },
+        id: { IN: productHasBatchesIds },
         quantity: filter?.batchList?.quantity,
+        expiryDate: filter?.batchList?.expiryDate,
       })
+      const batchListMapProductId = arrayToKeyArray(batchList, 'productId')
       productList.forEach((item) => {
-        item.batchList = batchList
-          .filter((ma) => ma.productId === item.id)
-          .sort((a, b) => ((a.expiryDate || 0) > (b.expiryDate || 0) ? 1 : -1))
+        item.batchList = batchListMapProductId[item.id] || []
       })
     }
     return { data: productList }
@@ -100,17 +99,18 @@ export class ApiProductService {
     if (!product) {
       throw new BusinessException('error.Product.NotExist')
     }
-    if (relation?.batchList) {
+    if (relation?.batchList && product.hasManageBatches) {
       product.batchList = await this.batchRepository.findMany({
         condition: {
           oid,
           productId: product.id,
           quantity: filter?.batchList?.quantity,
+          expiryDate: filter?.batchList.expiryDate,
         },
         sort: { expiryDate: 'ASC' },
       })
     }
-    return { data: product }
+    return { data: { product } }
   }
 
   async createOne(oid: number, body: ProductCreateBody): Promise<BaseResponse> {
@@ -119,7 +119,7 @@ export class ApiProductService {
       ...body,
     })
     this.socketEmitService.productUpsert(oid, { product })
-    return { data: product }
+    return { data: { product } }
   }
 
   async updateOne(oid: number, id: number, body: ProductUpdateBody): Promise<BaseResponse> {
@@ -137,15 +137,20 @@ export class ApiProductService {
       throw new BusinessException('error.Database.UpdateFailed')
     }
     this.socketEmitService.productUpsert(oid, { product })
-    return { data: product }
+    return { data: { product } }
   }
 
   async deleteOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.productRepository.update({ oid, id }, { deletedAt: Date.now() })
+    const affected = await this.productRepository.update(
+      { oid, id },
+      {
+        deletedAt: Date.now(),
+      }
+    )
     if (affected === 0) {
       throw new BusinessException('error.Database.DeleteFailed')
     }
-    const data = await this.productRepository.findOneBy({ id })
-    return { data }
+    const product = await this.productRepository.findOneBy({ id })
+    return { data: { product } }
   }
 }

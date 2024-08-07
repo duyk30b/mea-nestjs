@@ -7177,6 +7177,31 @@ let ReceiptCancel = class ReceiptCancel {
                     throw new Error(`${PREFIX}: Update Batch, affected = ${batchUpdateResult[1]}`);
                 }
                 batchList = entities_1.Batch.fromRaws(batchUpdateResult[0]);
+                const batchZeroQuantityList = batchList.filter((i) => i.quantity === 0);
+                if (batchZeroQuantityList.length) {
+                    const productReCalculatorIds = batchZeroQuantityList.map((i) => i.productId);
+                    const productReCalculatorResult = await manager.query(`
+              UPDATE "Product" product
+              SET "expiryDate" = (
+                  SELECT MIN("expiryDate")
+                  FROM "Batch" batch
+                  WHERE   batch."productId" = product.id
+                      AND batch."expiryDate" IS NOT NULL
+                      AND batch."quantity" <> 0
+              )
+              WHERE product."hasManageBatches" = 1
+                  AND "product"."id" IN (${productReCalculatorIds.toString()})
+              RETURNING "product".*;  
+            `);
+                    const productReCalculatorList = entities_1.Product.fromRaws(productReCalculatorResult[0]);
+                    for (let i = 0; i < productList.length; i++) {
+                        const productId = productList[i].id;
+                        const productReCalculatorFind = productReCalculatorList.find((i) => i.id === productId);
+                        if (productReCalculatorFind) {
+                            productList[i] = productReCalculatorFind;
+                        }
+                    }
+                }
             }
             productList.forEach((i) => {
                 const currentMap = productIdMap[i.id];
@@ -7767,11 +7792,19 @@ let ReceiptSendProductAndPayment = class ReceiptSendProductAndPayment {
                         wholesalePrice: receiptItemsProduct[i].wholesalePrice,
                         retailPrice: receiptItemsProduct[i].retailPrice,
                         lotNumber: receiptItemsProduct[i].lotNumber,
-                        expiryDate: receiptItemsProduct[i].expiryDate || null,
+                        expiryDate: null,
                     };
                 }
                 productIdMap[productId].quantitySend += quantity;
                 productIdMap[productId].costAmountSend += quantity * costPrice;
+                if (receiptItemsProduct[i].expiryDate != null) {
+                    if (productIdMap[productId].expiryDate == null) {
+                        productIdMap[productId].expiryDate = receiptItemsProduct[i].expiryDate;
+                    }
+                    else {
+                        productIdMap[productId].expiryDate = Math.min(productIdMap[productId].expiryDate, receiptItemsProduct[i].expiryDate);
+                    }
+                }
             }
             const batchIdMap = {};
             for (let i = 0; i < receiptItemsBatch.length; i++) {
@@ -7845,7 +7878,13 @@ let ReceiptSendProductAndPayment = class ReceiptSendProductAndPayment {
                     "costAmount" = "product"."costAmount" + temp."costAmountSend",
                     "lotNumber" = temp."lotNumber",
                     "expiryDate" = CASE 
-                                      WHEN product."hasManageBatches" = 1 THEN NULL 
+                                      WHEN product."hasManageBatches" = 0 THEN temp."expiryDate"  
+                                      WHEN product."hasManageBatches" = 1 
+                                          AND product."expiryDate" >= temp."expiryDate"
+                                          THEN temp."expiryDate"  
+                                      WHEN product."hasManageBatches" = 1 
+                                          AND product."expiryDate" < temp."expiryDate"
+                                          THEN product."expiryDate" 
                                       ELSE temp."expiryDate" 
                                   END,
                     "costPrice" = temp."costPrice",
@@ -7885,9 +7924,9 @@ let ReceiptSendProductAndPayment = class ReceiptSendProductAndPayment {
           FROM (VALUES `
                     + batchQuantityList
                         .map((i) => {
-                        return `(${i.batchId}, ${i.quantitySend},`
+                        return (`(${i.batchId}, ${i.quantitySend},`
                             + ` '${i.lotNumber}', ${i.expiryDate || 'NULL'}::bigint,`
-                            + ` ${i.wholesalePrice}, ${i.retailPrice})`;
+                            + ` ${i.wholesalePrice}, ${i.retailPrice})`);
                     })
                         .join(', ')
                     + `   ) AS temp ( "batchId", "quantitySend",
@@ -7901,6 +7940,31 @@ let ReceiptSendProductAndPayment = class ReceiptSendProductAndPayment {
                     throw new Error(`${PREFIX}: Update Batch, affected = ${batchUpdateResult[1]}`);
                 }
                 batchList = entities_1.Batch.fromRaws(batchUpdateResult[0]);
+                const batchZeroQuantityList = batchList.filter((i) => i.quantity === 0);
+                if (batchZeroQuantityList.length) {
+                    const productReCalculatorIds = batchZeroQuantityList.map((i) => i.productId);
+                    const productReCalculatorResult = await manager.query(`
+            UPDATE "Product" product
+            SET "expiryDate" = (
+                SELECT MIN("expiryDate")
+                FROM "Batch" batch
+                WHERE   batch."productId" = product.id
+                    AND batch."expiryDate" IS NOT NULL
+                    AND batch."quantity" <> 0
+            )
+            WHERE product."hasManageBatches" = 1
+                AND "product"."id" IN (${productReCalculatorIds.toString()})
+            RETURNING "product".*;  
+          `);
+                    const productReCalculatorList = entities_1.Product.fromRaws(productReCalculatorResult[0]);
+                    for (let i = 0; i < productList.length; i++) {
+                        const productId = productList[i].id;
+                        const productReCalculatorFind = productReCalculatorList.find((i) => i.id === productId);
+                        if (productReCalculatorFind) {
+                            productList[i] = productReCalculatorFind;
+                        }
+                    }
+                }
             }
             productList.forEach((i) => {
                 const currentMap = productIdMap[i.id];
@@ -9257,6 +9321,31 @@ let TicketSendProduct = class TicketSendProduct {
                         }
                     });
                 }
+                const batchZeroQuantityList = batchList.filter((i) => i.quantity === 0);
+                if (batchZeroQuantityList.length) {
+                    const productReCalculatorIds = batchZeroQuantityList.map((i) => i.productId);
+                    const productReCalculatorResult = await manager.query(`
+              UPDATE "Product" product
+              SET "expiryDate" = (
+                  SELECT MIN("expiryDate")
+                  FROM "Batch" batch
+                  WHERE   batch."productId" = product.id
+                      AND batch."expiryDate" IS NOT NULL
+                      AND batch."quantity" <> 0
+              )
+              WHERE product."hasManageBatches" = 1
+                  AND "product"."id" IN (${productReCalculatorIds.toString()})
+              RETURNING "product".*;  
+            `);
+                    const productReCalculatorList = entities_1.Product.fromRaws(productReCalculatorResult[0]);
+                    for (let i = 0; i < productList.length; i++) {
+                        const productId = productList[i].id;
+                        const productReCalculatorFind = productReCalculatorList.find((i) => i.id === productId);
+                        if (productReCalculatorFind) {
+                            productList[i] = productReCalculatorFind;
+                        }
+                    }
+                }
             }
             productList.forEach((i) => {
                 const currentMap = productIdMapValue[i.id];
@@ -10339,6 +10428,32 @@ let TicketClinicReturnProduct = class TicketClinicReturnProduct {
                     throw new Error(`${PREFIX}: Update Batch, affected = ${batchUpdateResult[1]}`);
                 }
                 batchList = entities_1.Batch.fromRaws(batchUpdateResult[0]);
+                if (batchList.length) {
+                    const productReCalculatorIds = batchList.map((i) => i.productId);
+                    const productReCalculatorResult = await manager.query(`
+              UPDATE "Product" product
+              SET "expiryDate" = (
+                  SELECT MIN("expiryDate")
+                  FROM "Batch" batch
+                  WHERE   batch."productId" = product.id
+                      AND batch."expiryDate" IS NOT NULL
+                      AND batch."quantity" <> 0
+              )
+              WHERE product."hasManageBatches" = 1
+                  AND "product"."id" IN (${productReCalculatorIds.toString()})
+              RETURNING "product".*;  
+          `);
+                    const productReCalculatorList = entities_1.Product.fromRaws(productReCalculatorResult[0]);
+                    for (let i = 0; i < productList.length; i++) {
+                        const productId = productList[i].id;
+                        const productReCalculatorFind = productReCalculatorList.find((i) => {
+                            return i.id === productId;
+                        });
+                        if (productReCalculatorFind) {
+                            productList[i] = productReCalculatorFind;
+                        }
+                    }
+                }
             }
             productList.forEach((i) => {
                 const currentMap = productIdMapValue[i.id];
@@ -10627,6 +10742,32 @@ let TicketOrderCancel = class TicketOrderCancel {
                         throw new Error(`${PREFIX}: Update Batch failed, ${JSON.stringify(batchUpdateResult)}`);
                     }
                     batchList = entities_1.Batch.fromRaws(batchUpdateResult[0]);
+                    if (batchList.length) {
+                        const productReCalculatorIds = batchList.map((i) => i.productId);
+                        const productReCalculatorResult = await manager.query(`
+              UPDATE "Product" product
+              SET "expiryDate" = (
+                  SELECT MIN("expiryDate")
+                  FROM "Batch" batch
+                  WHERE   batch."productId" = product.id
+                      AND batch."expiryDate" IS NOT NULL
+                      AND batch."quantity" <> 0
+              )
+              WHERE product."hasManageBatches" = 1
+                  AND "product"."id" IN (${productReCalculatorIds.toString()})
+              RETURNING "product".*;  
+            `);
+                        const productReCalculatorList = entities_1.Product.fromRaws(productReCalculatorResult[0]);
+                        for (let i = 0; i < productList.length; i++) {
+                            const productId = productList[i].id;
+                            const productReCalculatorFind = productReCalculatorList.find((i) => {
+                                return i.id === productId;
+                            });
+                            if (productReCalculatorFind) {
+                                productList[i] = productReCalculatorFind;
+                            }
+                        }
+                    }
                 }
                 productList.forEach((i) => {
                     const currentMap = productIdMapValue[i.id];
@@ -11636,6 +11777,32 @@ let TicketOrderReturnProductList = class TicketOrderReturnProductList {
                     throw new Error(`${PREFIX}: Update Batch failed, ${JSON.stringify(batchUpdateResult)}`);
                 }
                 batchList = entities_1.Batch.fromRaws(batchUpdateResult[0]);
+                if (batchList.length) {
+                    const productReCalculatorIds = batchList.map((i) => i.productId);
+                    const productReCalculatorResult = await manager.query(`
+            UPDATE "Product" product
+            SET "expiryDate" = (
+                SELECT MIN("expiryDate")
+                FROM "Batch" batch
+                WHERE   batch."productId" = product.id
+                    AND batch."expiryDate" IS NOT NULL
+                    AND batch."quantity" <> 0
+            )
+            WHERE product."hasManageBatches" = 1
+                AND "product"."id" IN (${productReCalculatorIds.toString()})
+            RETURNING "product".*;  
+          `);
+                    const productReCalculatorList = entities_1.Product.fromRaws(productReCalculatorResult[0]);
+                    for (let i = 0; i < productList.length; i++) {
+                        const productId = productList[i].id;
+                        const productReCalculatorFind = productReCalculatorList.find((i) => {
+                            return i.id === productId;
+                        });
+                        if (productReCalculatorFind) {
+                            productList[i] = productReCalculatorFind;
+                        }
+                    }
+                }
             }
             productList.forEach((i) => {
                 const currentMap = productIdMapValue[i.id];
@@ -15474,7 +15641,7 @@ let ApiRootUserService = ApiRootUserService_1 = class ApiRootUserService {
                 device.os = j.os;
                 device.browser = j.browser;
                 device.mobile = j.mobile;
-                device.online = this.socketEmitService.connections[user.id].some((k) => {
+                device.online = (this.socketEmitService.connections[user.id] || []).some((k) => {
                     return k.refreshExp === j.refreshExp;
                 }) || j.online;
                 return device;
@@ -22588,6 +22755,7 @@ let ApiProductService = class ApiProductService {
         this.batchRepository = batchRepository;
     }
     async pagination(oid, query) {
+        var _a, _b;
         const { page, limit, filter, sort, relation } = query;
         const { total, data } = await this.productRepository.pagination({
             page,
@@ -22597,23 +22765,23 @@ let ApiProductService = class ApiProductService {
                 group: filter === null || filter === void 0 ? void 0 : filter.group,
                 isActive: filter === null || filter === void 0 ? void 0 : filter.isActive,
                 quantity: filter === null || filter === void 0 ? void 0 : filter.quantity,
-                $OR: (filter === null || filter === void 0 ? void 0 : filter.searchText)
-                    ? [{ brandName: { LIKE: filter.searchText } }, { substance: { LIKE: filter.searchText } }]
-                    : undefined,
+                expiryDate: filter === null || filter === void 0 ? void 0 : filter.expiryDate,
+                $OR: filter === null || filter === void 0 ? void 0 : filter.$OR,
                 updatedAt: filter === null || filter === void 0 ? void 0 : filter.updatedAt,
             },
             sort,
         });
-        if ((relation === null || relation === void 0 ? void 0 : relation.batchList) && data.length) {
-            const productIds = (0, object_helper_1.uniqueArray)(data.map((item) => item.id));
+        const productHasBatchesList = data.filter((i) => i.hasManageBatches);
+        const productHasBatchesIds = (0, object_helper_1.uniqueArray)(productHasBatchesList.map((item) => item.id));
+        if ((relation === null || relation === void 0 ? void 0 : relation.batchList) && productHasBatchesIds.length) {
             const batchList = await this.batchRepository.findManyBy({
-                productId: { IN: productIds },
-                quantity: { NOT: 0 },
+                productId: { IN: productHasBatchesIds },
+                quantity: (_a = filter === null || filter === void 0 ? void 0 : filter.batchList) === null || _a === void 0 ? void 0 : _a.quantity,
+                expiryDate: (_b = filter === null || filter === void 0 ? void 0 : filter.batchList) === null || _b === void 0 ? void 0 : _b.expiryDate,
             });
+            const batchListMapProductId = (0, object_helper_1.arrayToKeyArray)(batchList, 'productId');
             data.forEach((item) => {
-                item.batchList = batchList
-                    .filter((ma) => ma.productId === item.id)
-                    .sort((a, b) => ((a.expiryDate || 0) > (b.expiryDate || 0) ? 1 : -1));
+                item.batchList = batchListMapProductId[item.id] || [];
             });
         }
         return {
@@ -22622,7 +22790,7 @@ let ApiProductService = class ApiProductService {
         };
     }
     async getList(oid, query) {
-        var _a;
+        var _a, _b;
         const { filter, limit, relation } = query;
         const productList = await this.productRepository.findMany({
             condition: {
@@ -22630,23 +22798,23 @@ let ApiProductService = class ApiProductService {
                 isActive: filter === null || filter === void 0 ? void 0 : filter.isActive,
                 group: filter === null || filter === void 0 ? void 0 : filter.group,
                 quantity: filter === null || filter === void 0 ? void 0 : filter.quantity,
-                $OR: (filter === null || filter === void 0 ? void 0 : filter.searchText)
-                    ? [{ brandName: { LIKE: filter.searchText } }, { substance: { LIKE: filter.searchText } }]
-                    : undefined,
+                expiryDate: filter === null || filter === void 0 ? void 0 : filter.expiryDate,
+                $OR: filter === null || filter === void 0 ? void 0 : filter.$OR,
                 updatedAt: filter === null || filter === void 0 ? void 0 : filter.updatedAt,
             },
             limit,
         });
-        if ((relation === null || relation === void 0 ? void 0 : relation.batchList) && productList.length) {
-            const productIds = (0, object_helper_1.uniqueArray)(productList.map((item) => item.id));
+        const productHasBatchesList = productList.filter((i) => i.hasManageBatches);
+        const productHasBatchesIds = (0, object_helper_1.uniqueArray)(productHasBatchesList.map((item) => item.id));
+        if ((relation === null || relation === void 0 ? void 0 : relation.batchList) && productHasBatchesIds.length) {
             const batchList = await this.batchRepository.findManyBy({
-                id: { IN: productIds },
+                id: { IN: productHasBatchesIds },
                 quantity: (_a = filter === null || filter === void 0 ? void 0 : filter.batchList) === null || _a === void 0 ? void 0 : _a.quantity,
+                expiryDate: (_b = filter === null || filter === void 0 ? void 0 : filter.batchList) === null || _b === void 0 ? void 0 : _b.expiryDate,
             });
+            const batchListMapProductId = (0, object_helper_1.arrayToKeyArray)(batchList, 'productId');
             productList.forEach((item) => {
-                item.batchList = batchList
-                    .filter((ma) => ma.productId === item.id)
-                    .sort((a, b) => ((a.expiryDate || 0) > (b.expiryDate || 0) ? 1 : -1));
+                item.batchList = batchListMapProductId[item.id] || [];
             });
         }
         return { data: productList };
@@ -22658,22 +22826,23 @@ let ApiProductService = class ApiProductService {
         if (!product) {
             throw new exception_filter_1.BusinessException('error.Product.NotExist');
         }
-        if (relation === null || relation === void 0 ? void 0 : relation.batchList) {
+        if ((relation === null || relation === void 0 ? void 0 : relation.batchList) && product.hasManageBatches) {
             product.batchList = await this.batchRepository.findMany({
                 condition: {
                     oid,
                     productId: product.id,
                     quantity: (_a = filter === null || filter === void 0 ? void 0 : filter.batchList) === null || _a === void 0 ? void 0 : _a.quantity,
+                    expiryDate: filter === null || filter === void 0 ? void 0 : filter.batchList.expiryDate,
                 },
                 sort: { expiryDate: 'ASC' },
             });
         }
-        return { data: product };
+        return { data: { product } };
     }
     async createOne(oid, body) {
         const product = await this.productRepository.insertOneFullFieldAndReturnEntity(Object.assign({ oid }, body));
         this.socketEmitService.productUpsert(oid, { product });
-        return { data: product };
+        return { data: { product } };
     }
     async updateOne(oid, id, body) {
         const rootProduct = await this.productRepository.findOneById(id);
@@ -22690,15 +22859,17 @@ let ApiProductService = class ApiProductService {
             throw new exception_filter_1.BusinessException('error.Database.UpdateFailed');
         }
         this.socketEmitService.productUpsert(oid, { product });
-        return { data: product };
+        return { data: { product } };
     }
     async deleteOne(oid, id) {
-        const affected = await this.productRepository.update({ oid, id }, { deletedAt: Date.now() });
+        const affected = await this.productRepository.update({ oid, id }, {
+            deletedAt: Date.now(),
+        });
         if (affected === 0) {
             throw new exception_filter_1.BusinessException('error.Database.DeleteFailed');
         }
-        const data = await this.productRepository.findOneBy({ id });
-        return { data };
+        const product = await this.productRepository.findOneBy({ id });
+        return { data: { product } };
     }
 };
 exports.ApiProductService = ApiProductService;
@@ -22793,7 +22964,7 @@ __decorate([
             if (!value)
                 return undefined;
             const plain = JSON.parse(value);
-            return (0, class_transformer_1.plainToInstance)(product_options_request_1.ProductFilterQuery, plain, {
+            return (0, class_transformer_1.plainToInstance)(product_options_request_1.ProductFilterQueryFull, plain, {
                 exposeUnsetFields: false,
                 excludeExtraneousValues: false,
             });
@@ -22804,7 +22975,7 @@ __decorate([
     }),
     (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
     (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", typeof (_b = typeof product_options_request_1.ProductFilterQuery !== "undefined" && product_options_request_1.ProductFilterQuery) === "function" ? _b : Object)
+    __metadata("design:type", typeof (_b = typeof product_options_request_1.ProductFilterQueryFull !== "undefined" && product_options_request_1.ProductFilterQueryFull) === "function" ? _b : Object)
 ], ProductGetQuery.prototype, "filter", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ type: String, example: JSON.stringify({ id: 'DESC' }) }),
@@ -22852,11 +23023,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ProductSortQuery = exports.ProductFilterQuery = exports.BatchFilterQuery = exports.ProductRelationQuery = void 0;
+exports.ProductSortQuery = exports.ProductFilterQueryFull = exports.ProductFilterQuery = exports.BatchFilterQuery = exports.ProductRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(142);
+const dto_1 = __webpack_require__(160);
 const condition_number_1 = __webpack_require__(164);
 const condition_timestamp_1 = __webpack_require__(166);
 const query_1 = __webpack_require__(154);
@@ -22879,11 +23051,6 @@ __decorate([
 ], BatchFilterQuery.prototype, "quantity", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsIn)([0, 1]),
-    __metadata("design:type", Number)
-], BatchFilterQuery.prototype, "isActive", void 0);
-__decorate([
-    (0, class_transformer_1.Expose)(),
     (0, class_transformer_1.Type)(() => condition_timestamp_1.ConditionTimestamp),
     (0, class_validator_1.ValidateNested)({ each: true }),
     __metadata("design:type", typeof (_b = typeof condition_timestamp_1.ConditionTimestamp !== "undefined" && condition_timestamp_1.ConditionTimestamp) === "function" ? _b : Object)
@@ -22893,21 +23060,21 @@ class ProductFilterQuery {
 exports.ProductFilterQuery = ProductFilterQuery;
 __decorate([
     (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => BatchFilterQuery),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", BatchFilterQuery)
-], ProductFilterQuery.prototype, "batchList", void 0);
-__decorate([
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], ProductFilterQuery.prototype, "searchText", void 0);
-__decorate([
-    (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], ProductFilterQuery.prototype, "group", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => dto_1.ConditionString),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_c = typeof dto_1.ConditionString !== "undefined" && dto_1.ConditionString) === "function" ? _c : Object)
+], ProductFilterQuery.prototype, "brandName", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => dto_1.ConditionString),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_d = typeof dto_1.ConditionString !== "undefined" && dto_1.ConditionString) === "function" ? _d : Object)
+], ProductFilterQuery.prototype, "substance", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsIn)([0, 1]),
@@ -22917,14 +23084,35 @@ __decorate([
     (0, class_transformer_1.Expose)(),
     (0, class_transformer_1.Type)(() => condition_number_1.ConditionNumber),
     (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", typeof (_c = typeof condition_number_1.ConditionNumber !== "undefined" && condition_number_1.ConditionNumber) === "function" ? _c : Object)
+    __metadata("design:type", typeof (_e = typeof condition_number_1.ConditionNumber !== "undefined" && condition_number_1.ConditionNumber) === "function" ? _e : Object)
 ], ProductFilterQuery.prototype, "quantity", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
     (0, class_transformer_1.Type)(() => condition_timestamp_1.ConditionTimestamp),
     (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", typeof (_d = typeof condition_timestamp_1.ConditionTimestamp !== "undefined" && condition_timestamp_1.ConditionTimestamp) === "function" ? _d : Object)
+    __metadata("design:type", typeof (_f = typeof condition_timestamp_1.ConditionTimestamp !== "undefined" && condition_timestamp_1.ConditionTimestamp) === "function" ? _f : Object)
+], ProductFilterQuery.prototype, "expiryDate", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => condition_timestamp_1.ConditionTimestamp),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_g = typeof condition_timestamp_1.ConditionTimestamp !== "undefined" && condition_timestamp_1.ConditionTimestamp) === "function" ? _g : Object)
 ], ProductFilterQuery.prototype, "updatedAt", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => ProductFilterQuery),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], ProductFilterQuery.prototype, "$OR", void 0);
+class ProductFilterQueryFull extends ProductFilterQuery {
+}
+exports.ProductFilterQueryFull = ProductFilterQueryFull;
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => BatchFilterQuery),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", BatchFilterQuery)
+], ProductFilterQueryFull.prototype, "batchList", void 0);
 class ProductSortQuery extends query_1.SortQuery {
 }
 exports.ProductSortQuery = ProductSortQuery;
@@ -22943,6 +23131,11 @@ __decorate([
     (0, class_validator_1.IsIn)(['ASC', 'DESC']),
     __metadata("design:type", String)
 ], ProductSortQuery.prototype, "costAmount", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsIn)(['ASC', 'DESC']),
+    __metadata("design:type", String)
+], ProductSortQuery.prototype, "expiryDate", void 0);
 
 
 /***/ }),

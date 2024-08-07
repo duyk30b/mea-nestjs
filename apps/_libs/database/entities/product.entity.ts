@@ -172,7 +172,10 @@ export default class Product extends BaseEntity {
 
 export type ProductRelationType = Pick<Product, 'batchList'>
 
-export type ProductSortType = Pick<Product, 'id' | 'quantity' | 'brandName' | 'costAmount'>
+export type ProductSortType = Pick<
+  Product,
+  'id' | 'quantity' | 'brandName' | 'costAmount' | 'expiryDate'
+>
 
 export type ProductInsertType = Omit<
   Product,
