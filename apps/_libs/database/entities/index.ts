@@ -1,22 +1,21 @@
-import BatchMovement from './batch-movement.entity'
-import Batch from './batch.entity'
-import CustomerPayment from './customer-payment.entity'
-import Customer from './customer.entity'
-import DistributorPayment from './distributor-payment.entity'
-import Distributor from './distributor.entity'
-import Image from './image.entity'
-import Organization from './organization.entity'
-import Permission from './permission.entity'
-import Procedure from './procedure.entity'
-import ProductMovement from './product-movement.entity'
-import Product from './product.entity'
-import Radiology from './radiology.entity'
-import ReceiptItem from './receipt-item.entity'
-import Receipt from './receipt.entity'
-import Role from './role.entity'
-import Setting from './setting.entity'
-import User from './user.entity'
-
+export { default as Appointment } from './appointment.entity'
+export { default as BatchMovement } from './batch-movement.entity'
+export { default as Batch } from './batch.entity'
+export { default as CustomerPayment } from './customer-payment.entity'
+export { default as Customer } from './customer.entity'
+export { default as DistributorPayment } from './distributor-payment.entity'
+export { default as Distributor } from './distributor.entity'
+export { default as Image } from './image.entity'
+export { default as Organization } from './organization.entity'
+export { default as Permission } from './permission.entity'
+export { default as Procedure } from './procedure.entity'
+export { default as ProductMovement } from './product-movement.entity'
+export { default as Product } from './product.entity'
+export { default as Radiology } from './radiology.entity'
+export { default as ReceiptItem } from './receipt-item.entity'
+export { default as Receipt } from './receipt.entity'
+export { default as Role } from './role.entity'
+export { default as Setting } from './setting.entity'
 export { default as TicketDiagnosis } from './ticket-diagnosis.entity'
 export { default as TicketExpense } from './ticket-expense.entity'
 export { default as TicketProcedure } from './ticket-procedure.entity'
@@ -24,24 +23,4 @@ export { default as TicketProduct } from './ticket-product.entity'
 export { default as TicketRadiology } from './ticket-radiology.entity'
 export { default as TicketSurcharge } from './ticket-surcharge.entity'
 export { default as Ticket } from './ticket.entity'
-
-export {
-  Batch,
-  BatchMovement,
-  Customer,
-  CustomerPayment,
-  Distributor,
-  DistributorPayment,
-  Image,
-  Organization,
-  Permission,
-  Procedure,
-  Product,
-  ProductMovement,
-  Radiology,
-  Receipt,
-  ReceiptItem,
-  Role,
-  Setting,
-  User,
-}
+export { default as User } from './user.entity'

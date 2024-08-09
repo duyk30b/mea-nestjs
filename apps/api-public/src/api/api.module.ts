@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common'
+import { ApiAppointmentModule } from './api-appointment/api-appointment.module'
 import { ApiBatchMovementModule } from './api-batch-movement/api-batch-movement.module'
 import { ApiBatchModule } from './api-batch/api-batch.module'
 import { ApiCustomerPaymentModule } from './api-customer-payment/api-customer-payment.module'
@@ -27,6 +28,7 @@ import { ApiUserModule } from './api-user/api-user.module'
 
 @Module({
   imports: [
+    ApiAppointmentModule,
     ApiBatchModule,
     ApiBatchMovementModule,
     ApiCustomerModule,
