@@ -30,7 +30,7 @@ export default class Appointment extends BaseEntity {
     },
   })
   @Expose()
-  time: number
+  registeredAt: number
 
   @Column({ type: 'smallint', default: AppointmentType.CustomerInitiated })
   @Expose()
@@ -54,7 +54,7 @@ export default class Appointment extends BaseEntity {
     const entity = new Appointment()
     Object.assign(entity, raw)
 
-    entity.time = raw.time == null ? raw.time : Number(raw.time)
+    entity.registeredAt = raw.registeredAt == null ? raw.registeredAt : Number(raw.registeredAt)
 
     return entity
   }
@@ -66,7 +66,7 @@ export default class Appointment extends BaseEntity {
 
 export type AppointmentRelationType = Pick<Appointment, 'customer'>
 
-export type AppointmentSortType = Pick<Appointment, 'oid' | 'id' | 'time'>
+export type AppointmentSortType = Pick<Appointment, 'oid' | 'id' | 'registeredAt'>
 
 export type AppointmentInsertType = Omit<
   Appointment,

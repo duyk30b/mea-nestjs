@@ -31,11 +31,11 @@ export class AppointmentFilterQuery {
   @Expose()
   @Type(() => ConditionTimestamp)
   @ValidateNested({ each: true })
-  time: ConditionTimestamp
+  registeredAt: ConditionTimestamp
 }
 
 export class AppointmentSortQuery extends SortQuery {
   @Expose()
   @IsIn(['ASC', 'DESC'])
-  time: 'ASC' | 'DESC'
+  registeredAt: 'ASC' | 'DESC'
 }
