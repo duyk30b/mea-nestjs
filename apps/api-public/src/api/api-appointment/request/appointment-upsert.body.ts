@@ -1,10 +1,10 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
-import { IsDefined, IsNumber, IsOptional, IsString } from 'class-validator'
+import { IsDefined, IsIn, IsNumber, IsOptional, IsString } from 'class-validator'
 import { IsEnumValue, IsNumberGreaterThan } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { AppointmentStatus, AppointmentType } from '../../../../../_libs/database/entities/appointment.entity'
 
-export class AppointmentCreateBody {
+export class AppointmentBody {
   @ApiProperty({ example: 45 })
   @Expose()
   @IsDefined()
@@ -21,7 +21,9 @@ export class AppointmentCreateBody {
   @Expose()
   @IsString()
   reason: string
+}
 
+export class AppointmentCreateBody extends AppointmentBody {
   @ApiPropertyOptional({ example: AppointmentType.CustomerInitiated })
   @Expose()
   @IsOptional()
@@ -30,9 +32,15 @@ export class AppointmentCreateBody {
 
   @ApiPropertyOptional({ example: AppointmentStatus.Confirm })
   @Expose()
-  @IsOptional()
   @IsEnumValue(AppointmentStatus)
+  @IsIn([AppointmentStatus.Waiting, AppointmentStatus.Confirm])
   appointmentStatus: AppointmentStatus
 }
 
-export class AppointmentUpdateBody extends PartialType(AppointmentCreateBody) { }
+export class AppointmentUpdateBody extends AppointmentBody {
+  @ApiPropertyOptional({ example: AppointmentStatus.Confirm })
+  @Expose()
+  @IsEnumValue(AppointmentStatus)
+  @IsIn([AppointmentStatus.Waiting, AppointmentStatus.Confirm, AppointmentStatus.Cancelled])
+  appointmentStatus: AppointmentStatus
+}

@@ -12,7 +12,7 @@ export class AppointmentRelationQuery {
   customer: boolean
 }
 
-const ConditionEnumAppointmentType = createConditionEnum(AppointmentType)
+const ConditionEnumAppointmentStatus = createConditionEnum(AppointmentStatus)
 
 export class AppointmentFilterQuery {
   @Expose()
@@ -20,13 +20,13 @@ export class AppointmentFilterQuery {
   customerId: number
 
   @Expose()
-  @IsEnumValue(AppointmentStatus)
-  appointmentStatus: AppointmentStatus
+  @IsEnumValue(AppointmentType)
+  appointmentType: AppointmentType
 
   @Expose()
-  @Transform((params: TransformFnParams) => transformConditionEnum(params, AppointmentType))
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, AppointmentStatus))
   @IsOptional()
-  appointmentType: AppointmentType | InstanceType<typeof ConditionEnumAppointmentType>
+  appointmentStatus: AppointmentStatus | InstanceType<typeof ConditionEnumAppointmentStatus>
 
   @Expose()
   @Type(() => ConditionTimestamp)

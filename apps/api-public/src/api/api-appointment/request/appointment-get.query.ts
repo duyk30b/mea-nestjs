@@ -2,7 +2,7 @@ import { ApiPropertyOptional, IntersectionType, PickType } from '@nestjs/swagger
 import { Expose, Transform, plainToInstance } from 'class-transformer'
 import { IsObject, ValidateNested } from 'class-validator'
 import { LimitQuery, PaginationQuery } from '../../../../../_libs/common/dto/query'
-import { AppointmentType } from '../../../../../_libs/database/entities/appointment.entity'
+import { AppointmentStatus, AppointmentType } from '../../../../../_libs/database/entities/appointment.entity'
 import {
   AppointmentFilterQuery,
   AppointmentRelationQuery,
@@ -33,7 +33,8 @@ export class AppointmentGetQuery {
     example: JSON.stringify(<AppointmentFilterQuery>{
       customerId: 3,
       registeredAt: { GT: Date.now() },
-      appointmentType: { IN: [AppointmentType.CustomerInitiated, AppointmentType.Reminder] },
+      appointmentType: AppointmentType.CustomerInitiated,
+      appointmentStatus: { IN: [AppointmentStatus.Confirm, AppointmentStatus.Waiting] },
     }),
   })
   @Expose()
