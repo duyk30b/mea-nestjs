@@ -20,7 +20,7 @@ export class AppointmentCreateBody {
   @ApiPropertyOptional({ example: 'Khách hàng đến chăm sóc da' })
   @Expose()
   @IsString()
-  note: string
+  reason: string
 
   @ApiPropertyOptional({ example: AppointmentType.CustomerInitiated })
   @Expose()

@@ -32,7 +32,7 @@ export class AppointmentGetQuery {
     type: String,
     example: JSON.stringify(<AppointmentFilterQuery>{
       customerId: 3,
-      time: { GT: Date.now() },
+      registeredAt: { GT: Date.now() },
       appointmentType: { IN: [AppointmentType.CustomerInitiated, AppointmentType.Reminder] },
     }),
   })
@@ -57,7 +57,7 @@ export class AppointmentGetQuery {
     type: String,
     example: JSON.stringify(<AppointmentSortQuery>{
       id: 'ASC',
-      time: 'DESC',
+      registeredAt: 'DESC',
     }),
   })
   @Expose()

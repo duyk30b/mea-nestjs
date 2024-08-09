@@ -22,6 +22,10 @@ export default class Appointment extends BaseEntity {
   @Expose()
   customerId: number
 
+  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Expose()
+  reason: string // Lý do hẹn
+
   @Column({
     type: 'bigint',
     transformer: {
@@ -39,10 +43,6 @@ export default class Appointment extends BaseEntity {
   @Column({ type: 'smallint', default: AppointmentStatus.Waiting })
   @Expose()
   appointmentStatus: AppointmentStatus
-
-  @Column({ type: 'character varying', length: 255, nullable: true })
-  @Expose()
-  note: string // Ghi chú
 
   @ManyToOne((type) => Customer, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'customerId', referencedColumnName: 'id' })
