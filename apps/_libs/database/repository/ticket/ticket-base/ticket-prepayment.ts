@@ -23,11 +23,17 @@ export class TicketPrepayment {
       const whereTicket: FindOptionsWhere<Ticket> = {
         oid,
         id: ticketId,
-        ticketStatus: In([TicketStatus.Draft, TicketStatus.Approved, TicketStatus.Executing]),
+        ticketStatus: In([
+          TicketStatus.Schedule,
+          TicketStatus.Draft,
+          TicketStatus.Approved,
+          TicketStatus.Executing,
+        ]),
       }
       const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
         ticketStatus: () => `CASE 
-            WHEN("ticketStatus" = ${TicketStatus.Draft}) THEN ${TicketStatus.Approved} 
+            WHEN("ticketStatus" IN (${TicketStatus.Schedule}, ${TicketStatus.Draft})) 
+                THEN ${TicketStatus.Approved} 
             ELSE "ticketStatus"
           END
         `,

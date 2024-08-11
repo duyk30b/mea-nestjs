@@ -246,9 +246,9 @@ export class ApiTicketClinicController {
     return await this.apiTicketClinicService.reopen({ oid, ticketId: id })
   }
 
-  @Delete(':id/destroy-draft')
-  @HasPermission(PermissionId.TICKET_CLINIC_READ)
-  async destroyDraft(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiTicketClinicService.destroyDraft({ oid, ticketId: id })
+  @Delete(':id/destroy-draft-schedule')
+  @HasPermission(PermissionId.TICKET_CLINIC_DESTROY_DRAFT_SCHEDULE)
+  async destroyDraftSchedule(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiTicketClinicService.destroyDraftSchedule({ oid, ticketId: id })
   }
 }

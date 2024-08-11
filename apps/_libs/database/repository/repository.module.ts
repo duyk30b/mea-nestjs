@@ -1,6 +1,7 @@
 import { Global, Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import {
+  Appointment,
   Batch,
   BatchMovement,
   Customer,
@@ -27,6 +28,7 @@ import {
 } from '../entities'
 import TicketExpense from '../entities/ticket-expense.entity'
 import TicketSurcharge from '../entities/ticket-surcharge.entity'
+import { AppointmentRepository } from './appointment/appointment.repository'
 import { BatchMovementRepository } from './batch-movement/bat-movement.repository'
 import { BatchRepository } from './batch/batch.repository'
 import { CustomerPaymentRepository } from './customer-payment/customer-payment.repository'
@@ -81,6 +83,7 @@ import { UserRepository } from './user/user.repository'
 @Module({
   imports: [
     TypeOrmModule.forFeature([
+      Appointment,
       Batch,
       BatchMovement,
       Customer,
@@ -109,6 +112,7 @@ import { UserRepository } from './user/user.repository'
     ]),
   ],
   providers: [
+    AppointmentRepository,
     BatchRepository,
     BatchMovementRepository,
     CustomerRepository,
@@ -155,12 +159,12 @@ import { UserRepository } from './user/user.repository'
     TicketProcedureRepository,
     TicketProductRepository,
     TicketRadiologyRepository,
-
     StatisticRepository,
     StatisticReceiptRepository,
     StatisticTicketRepository,
   ],
   exports: [
+    AppointmentRepository,
     BatchRepository,
     BatchMovementRepository,
     CustomerRepository,

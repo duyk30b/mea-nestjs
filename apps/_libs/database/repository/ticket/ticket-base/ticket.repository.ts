@@ -3,7 +3,7 @@ import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, Repository } from 'typeorm'
 import { BaseCondition } from '../../../../common/dto'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
-import { Ticket } from '../../../entities'
+import { Appointment, Ticket } from '../../../entities'
 import {
   TicketInsertType,
   TicketRelationType,
@@ -27,22 +27,21 @@ export class TicketRepository extends PostgreSqlRepository<
     super(ticketRepository)
   }
 
-  async queryOne(
-    options: {
-      condition: { id: number; oid: number },
-      relation?: {
-        customer?: boolean
-        user?: boolean
-        customerPaymentList?: boolean
-        ticketDiagnosis?: boolean
-        ticketProductList?: { product?: boolean; batch?: boolean } | false
-        ticketProcedureList?: { procedure?: boolean } | false
-        ticketRadiologyList?: { radiology?: boolean; doctor?: boolean } | false
-        ticketExpenseList?: boolean
-        ticketSurchargeList?: boolean
-      }
+  async queryOne(options: {
+    condition: { id: number; oid: number }
+    relation?: {
+      customer?: boolean
+      user?: boolean
+      customerPaymentList?: boolean
+      ticketDiagnosis?: boolean
+      toAppointment?: boolean
+      ticketProductList?: { product?: boolean; batch?: boolean } | false
+      ticketProcedureList?: { procedure?: boolean } | false
+      ticketRadiologyList?: { radiology?: boolean; doctor?: boolean } | false
+      ticketExpenseList?: boolean
+      ticketSurchargeList?: boolean
     }
-  ): Promise<Ticket | null> {
+  }): Promise<Ticket | null> {
     const { condition, relation } = options
     let query = this.manager
       .createQueryBuilder(Ticket, 'ticket')
@@ -63,6 +62,15 @@ export class TicketRepository extends PostgreSqlRepository<
     }
     if (relation?.ticketDiagnosis) {
       query = query.leftJoinAndSelect('ticket.ticketDiagnosis', 'ticketDiagnosis')
+    }
+    if (relation?.toAppointment) {
+      // dùng leftJoinAndMapOne vì có lỗi Appointment và Diagnosis cùng join với cột ID, typeOrm đang lỗi, chán thật
+      query = query.leftJoinAndMapOne(
+        'ticket.toAppointment',
+        Appointment,
+        'toAppointment',
+        'toAppointment.fromTicketId = ticket.id'
+      )
     }
     if (relation?.ticketProductList) {
       query = query.leftJoinAndSelect('ticket.ticketProductList', 'ticketProduct')

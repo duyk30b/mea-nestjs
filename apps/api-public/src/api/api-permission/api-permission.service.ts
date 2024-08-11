@@ -862,6 +862,16 @@ export class ApiPermissionService {
         rootId: PermissionId.TICKET_CLINIC,
       },
       {
+        id: PermissionId.TICKET_CLINIC_DESTROY_DRAFT_SCHEDULE,
+        level: 2,
+        code: PermissionId[PermissionId.TICKET_CLINIC_DESTROY_DRAFT_SCHEDULE],
+        isActive: 1,
+        pathId: `${PermissionId.TICKET_CLINIC}.${PermissionId.TICKET_CLINIC_DESTROY_DRAFT_SCHEDULE}`,
+        name: 'Xóa phiếu khám',
+        parentId: PermissionId.TICKET_CLINIC,
+        rootId: PermissionId.TICKET_CLINIC,
+      },
+      {
         id: PermissionId.TICKET_CLINIC_START_CHECKUP,
         level: 2,
         code: PermissionId[PermissionId.TICKET_CLINIC_START_CHECKUP],
@@ -1023,6 +1033,69 @@ export class ApiPermissionService {
       },
     ]
 
+    const permissionAppointment: Permission[] = [
+      {
+        id: PermissionId.APPOINTMENT,
+        level: 1,
+        code: PermissionId[PermissionId.APPOINTMENT],
+        isActive: 1,
+        pathId: `${PermissionId.APPOINTMENT}`,
+        name: 'Quản lý hẹn khám',
+        parentId: 0,
+        rootId: PermissionId.APPOINTMENT,
+      },
+      {
+        id: PermissionId.APPOINTMENT_READ,
+        level: 2,
+        code: PermissionId[PermissionId.APPOINTMENT_READ],
+        isActive: 1,
+        pathId: `${PermissionId.APPOINTMENT}.${PermissionId.APPOINTMENT_READ}`,
+        name: 'Xem lịch hẹn khám',
+        parentId: PermissionId.APPOINTMENT,
+        rootId: PermissionId.APPOINTMENT,
+      },
+      {
+        id: PermissionId.APPOINTMENT_CREATE,
+        level: 2,
+        code: PermissionId[PermissionId.APPOINTMENT_CREATE],
+        isActive: 1,
+        pathId: `${PermissionId.APPOINTMENT}.${PermissionId.APPOINTMENT_CREATE}`,
+        name: 'Tạo lịch hẹn mới',
+        parentId: PermissionId.APPOINTMENT,
+        rootId: PermissionId.APPOINTMENT,
+      },
+      {
+        id: PermissionId.APPOINTMENT_UPDATE,
+        level: 2,
+        code: PermissionId[PermissionId.APPOINTMENT_UPDATE],
+        isActive: 1,
+        pathId: `${PermissionId.APPOINTMENT}.${PermissionId.APPOINTMENT_UPDATE}`,
+        name: 'Sửa lịch hẹn',
+        parentId: PermissionId.APPOINTMENT,
+        rootId: PermissionId.APPOINTMENT,
+      },
+      {
+        id: PermissionId.APPOINTMENT_DELETE,
+        level: 2,
+        code: PermissionId[PermissionId.APPOINTMENT_DELETE],
+        isActive: 1,
+        pathId: `${PermissionId.APPOINTMENT}.${PermissionId.APPOINTMENT_DELETE}`,
+        name: 'Xóa lịch hẹn',
+        parentId: PermissionId.APPOINTMENT,
+        rootId: PermissionId.APPOINTMENT,
+      },
+      {
+        id: PermissionId.APPOINTMENT_REGISTER_TICKET_CLINIC,
+        level: 2,
+        code: PermissionId[PermissionId.APPOINTMENT_REGISTER_TICKET_CLINIC],
+        isActive: 1,
+        pathId: `${PermissionId.APPOINTMENT}.${PermissionId.APPOINTMENT_REGISTER_TICKET_CLINIC}`,
+        name: 'Đón khách hàng đến và tạo phiếu khám',
+        parentId: PermissionId.APPOINTMENT,
+        rootId: PermissionId.APPOINTMENT,
+      },
+    ]
+
     const permissionStatistic: Permission[] = [
       {
         id: PermissionId.STATISTIC,
@@ -1100,6 +1173,7 @@ export class ApiPermissionService {
       ...permissionReceipt,
       ...permissionOrderTicket,
       ...permissionClinicTicket,
+      ...permissionAppointment,
       ...permissionStatistic,
     ])
 

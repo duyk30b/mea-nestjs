@@ -16,7 +16,7 @@ export class ApiCustomerService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
     private readonly customerRepository: CustomerRepository
-  ) {}
+  ) { }
 
   async pagination(oid: number, query: CustomerPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, sort, relation } = query
@@ -74,7 +74,7 @@ export class ApiCustomerService {
   async updateOne(oid: number, id: number, body: CustomerUpdateBody): Promise<BaseResponse> {
     const [customer] = await this.customerRepository.updateAndReturnEntity({ oid, id }, body)
     if (!customer) {
-      throw new BusinessException('error.Database.UpdateFailed')
+      throw BusinessException.create({ message: 'error.Database.UpdateFailed', details: 'Customer' })
     }
     this.socketEmitService.customerUpsert(oid, { customer })
     return { data: { customer } }

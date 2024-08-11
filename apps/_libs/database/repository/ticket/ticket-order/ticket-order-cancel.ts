@@ -60,7 +60,7 @@ export class TicketOrderCancel {
       // nếu đã thanh toán thì trả thanh toán
       if (ticketRoot.paid !== 0 || ticketRoot.debt !== 0) {
         // === 2. UPDATE CUSTOMER ===
-        if (ticketRoot.debt > 0) {
+        if ([TicketStatus.Debt].includes(ticketRoot.ticketStatus)) {
           const whereCustomer: FindOptionsWhere<Customer> = { oid, id: customerId }
           const customerUpdateResult: UpdateResult = await manager
             .createQueryBuilder()
@@ -79,8 +79,10 @@ export class TicketOrderCancel {
           customer = await manager.findOneBy(Customer, { oid, id: customerId })
         }
 
+        // chỉ bỏ nợ trong trường hợp TicketStatus.Debt, các trường hợp khác không hề ghi nợ
+        const debt = ticketRoot.ticketStatus === TicketStatus.Debt ? ticketRoot.debt : 0
         const customerCloseDebt = customer.debt
-        const customerOpenDebt = customerCloseDebt + ticketRoot.debt
+        const customerOpenDebt = customerCloseDebt + debt
 
         // === 3. INSERT CUSTOMER_PAYMENT ===
         const customerPaymentInsert: CustomerPaymentInsertType = {
@@ -90,7 +92,7 @@ export class TicketOrderCancel {
           createdAt: time,
           paymentType: PaymentType.ReceiveRefund,
           paid: -ticketRoot.paid,
-          debit: -ticketRoot.debt, //
+          debit: -debt, //
           openDebt: customerOpenDebt,
           closeDebt: customerCloseDebt,
           note: '',
@@ -224,6 +226,34 @@ export class TicketOrderCancel {
             throw new Error(`${PREFIX}: Update Batch failed, ${JSON.stringify(batchUpdateResult)}`)
           }
           batchList = Batch.fromRaws(batchUpdateResult[0])
+
+          // Nhập lại thuốc thì luôn tính lại HSD, vì thông tin phiếu không có HSD, nên cần phải tính lại hết
+          if (batchList.length) {
+            const productReCalculatorIds = batchList.map((i) => i.productId)
+            const productReCalculatorResult: [any[], number] = await manager.query(`
+              UPDATE "Product" product
+              SET "expiryDate" = (
+                  SELECT MIN("expiryDate")
+                  FROM "Batch" batch
+                  WHERE   batch."productId" = product.id
+                      AND batch."expiryDate" IS NOT NULL
+                      AND batch."quantity" <> 0
+              )
+              WHERE product."hasManageBatches" = 1
+                  AND "product"."id" IN (${productReCalculatorIds.toString()})
+              RETURNING "product".*;  
+            `)
+            const productReCalculatorList = Product.fromRaws(productReCalculatorResult[0])
+            for (let i = 0; i < productList.length; i++) {
+              const productId = productList[i].id
+              const productReCalculatorFind = productReCalculatorList.find((i) => {
+                return i.id === productId
+              })
+              if (productReCalculatorFind) {
+                productList[i] = productReCalculatorFind
+              }
+            }
+          }
         }
 
         // 7. === CALCULATOR: số lượng ban đầu của product và batch ===

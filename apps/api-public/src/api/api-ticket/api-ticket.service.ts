@@ -75,6 +75,7 @@ export class ApiTicketService {
         ticketSurchargeList: !!relation?.ticketSurchargeList,
         ticketExpenseList: !!relation?.ticketExpenseList,
         ticketDiagnosis: !!relation?.ticketDiagnosis,
+        toAppointment: !!relation?.toAppointment,
         ticketProductList: relation?.ticketProductList ? { product: true, batch: true } : false,
         ticketProcedureList: relation?.ticketProcedureList ? { procedure: true } : false,
         ticketRadiologyList: relation?.ticketRadiologyList

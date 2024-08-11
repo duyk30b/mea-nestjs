@@ -66,7 +66,7 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD:-Abc12345}
       - REDIS_USERNAME=${REDIS_USERNAME:-mea}
     ports:
-      - "26379:6379"
+      - '26379:6379'
 
   adminer:
     container_name: mc_adminer
@@ -91,3 +91,16 @@ services:
       - ./data/redis-insight:/db
     ports:
       - '${REDIS_INSIGHT_PORT:-25540}:5540'
+
+  portainer:
+    container_name: mc_portainer
+    image: portainer/portainer-ce:2.20.3-alpine
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data/portainer:/data
+    ports:
+      - 29000:9000

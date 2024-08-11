@@ -1,5 +1,7 @@
+import { OmitType } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsNotEmpty, IsString, ValidateNested } from 'class-validator'
+import { IsBoolean, IsIn, IsString, ValidateNested } from 'class-validator'
+import { ConditionString } from '../../../../../_libs/common/dto'
 import { ConditionNumber } from '../../../../../_libs/common/dto/condition-number'
 import { ConditionTimestamp } from '../../../../../_libs/common/dto/condition-timestamp'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
@@ -17,10 +19,6 @@ export class BatchFilterQuery {
   quantity: ConditionNumber
 
   @Expose()
-  @IsIn([0, 1])
-  isActive: 0 | 1
-
-  @Expose()
   @Type(() => ConditionTimestamp)
   @ValidateNested({ each: true })
   expiryDate: ConditionTimestamp
@@ -28,18 +26,18 @@ export class BatchFilterQuery {
 
 export class ProductFilterQuery {
   @Expose()
-  @Type(() => BatchFilterQuery)
-  @ValidateNested({ each: true })
-  batchList: BatchFilterQuery
-
-  @Expose()
-  @IsNotEmpty()
-  @IsString()
-  searchText?: string
-
-  @Expose()
   @IsString()
   group: string
+
+  @Expose()
+  @Type(() => ConditionString)
+  @ValidateNested({ each: true })
+  brandName: ConditionString
+
+  @Expose()
+  @Type(() => ConditionString)
+  @ValidateNested({ each: true })
+  substance: ConditionString
 
   @Expose()
   @IsIn([0, 1])
@@ -53,7 +51,24 @@ export class ProductFilterQuery {
   @Expose()
   @Type(() => ConditionTimestamp)
   @ValidateNested({ each: true })
+  expiryDate: ConditionTimestamp
+
+  @Expose()
+  @Type(() => ConditionTimestamp)
+  @ValidateNested({ each: true })
   updatedAt: ConditionTimestamp
+
+  @Expose()
+  @Type(() => ProductFilterQuery)
+  @ValidateNested({ each: true })
+  $OR: ProductFilterQuery[]
+}
+
+export class ProductFilterQueryFull extends ProductFilterQuery {
+  @Expose()
+  @Type(() => BatchFilterQuery)
+  @ValidateNested({ each: true })
+  batchList: BatchFilterQuery
 }
 
 export class ProductSortQuery extends SortQuery {
@@ -68,4 +83,8 @@ export class ProductSortQuery extends SortQuery {
   @Expose()
   @IsIn(['ASC', 'DESC'])
   costAmount: 'ASC' | 'DESC'
+
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  expiryDate: 'ASC' | 'DESC'
 }

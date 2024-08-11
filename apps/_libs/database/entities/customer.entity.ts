@@ -115,7 +115,7 @@ export default class Customer extends BaseEntity {
 
 export type CustomerRelationType = Pick<Customer, never>
 
-export type CustomerSortType = Pick<Customer, 'oid' | 'id'>
+export type CustomerSortType = Pick<Customer, 'id' | 'fullName' | 'debt'>
 
 export type CustomerInsertType = Omit<
   Customer,
