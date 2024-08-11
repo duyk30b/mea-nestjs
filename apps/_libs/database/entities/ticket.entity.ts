@@ -2,6 +2,7 @@ import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import { DeliveryStatus, DiscountType, VoucherType } from '../common/variable'
+import Appointment from './appointment.entity'
 import CustomerPayment from './customer-payment.entity'
 import Customer from './customer.entity'
 import TicketDiagnosis from './ticket-diagnosis.entity'
@@ -228,6 +229,11 @@ export default class Ticket extends BaseEntity {
   @Expose()
   ticketDiagnosis: TicketDiagnosis
 
+  // @OneToOne(() => Appointment, { createForeignKeyConstraints: false })
+  // @JoinColumn({ name: 'id', referencedColumnName: 'fromTicketId' }) // không JoinColumn trên cùng cột id được, vkl
+  @Expose()
+  toAppointment: Appointment
+
   @OneToMany(() => TicketProduct, (ticketProduct) => ticketProduct.ticket)
   @Expose()
   ticketProductList: TicketProduct[]
@@ -294,6 +300,7 @@ export type TicketRelationType = Pick<
   | 'ticketExpenseList'
   | 'ticketSurchargeList'
   | 'customerPaymentList'
+  | 'toAppointment'
 >
 
 export type TicketSortType = Pick<Ticket, 'id' | 'customerId' | 'registeredAt'>

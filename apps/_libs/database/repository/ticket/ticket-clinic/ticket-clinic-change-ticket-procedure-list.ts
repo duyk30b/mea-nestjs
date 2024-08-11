@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { DataSource, FindOptionsWhere, UpdateResult } from 'typeorm'
+import { DataSource, FindOptionsWhere, In, UpdateResult } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { Ticket } from '../../../entities'
 import TicketProcedure, { TicketProcedureInsertType } from '../../../entities/ticket-procedure.entity'
@@ -22,7 +22,7 @@ export class TicketClinicChangeTicketProcedureList {
       const whereTicket: FindOptionsWhere<Ticket> = {
         oid,
         id: ticketId,
-        ticketStatus: TicketStatus.Executing,
+        ticketStatus: In([TicketStatus.Schedule, TicketStatus.Executing, TicketStatus.Executing]),
       }
       const ticketUpdateRoot = await manager.update(Ticket, whereTicket, {
         updatedAt: Date.now(),

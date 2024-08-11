@@ -6,10 +6,12 @@ import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { VoucherType } from '../../../../_libs/database/common/variable'
 import { User } from '../../../../_libs/database/entities'
+import { AppointmentStatus } from '../../../../_libs/database/entities/appointment.entity'
 import { TicketProcedureInsertType } from '../../../../_libs/database/entities/ticket-procedure.entity'
 import { TicketProductType } from '../../../../_libs/database/entities/ticket-product.entity'
 import { TicketRadiologyInsertType } from '../../../../_libs/database/entities/ticket-radiology.entity'
 import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
+import { AppointmentRepository } from '../../../../_libs/database/repository/appointment/appointment.repository'
 import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
 import { ImageRepository } from '../../../../_libs/database/repository/image/image.repository'
 import { RadiologyRepository } from '../../../../_libs/database/repository/radiology/radiology.repository'
@@ -58,6 +60,7 @@ export class ApiTicketClinicService {
     private readonly ticketRadiologyRepository: TicketRadiologyRepository,
     private readonly radiologyRepository: RadiologyRepository,
     private readonly userRepository: UserRepository,
+    private readonly appointmentRepository: AppointmentRepository,
     private readonly ticketClinicChangeTicketProcedureList: TicketClinicChangeTicketProcedureList,
     private readonly ticketClinicChangeTicketRadiologyList: TicketClinicChangeTicketRadiologyList,
     private readonly ticketClinicChangeTicketProductList: TicketClinicChangeTicketProductList,
@@ -131,7 +134,7 @@ export class ApiTicketClinicService {
       oid,
       ticketId: ticket.id,
       healthHistory: customer.healthHistory || '',
-      reason: '',
+      reason: body.reason,
       summary: '',
       diagnosis: '',
       vitalSigns: JSON.stringify({}),
@@ -143,14 +146,18 @@ export class ApiTicketClinicService {
     ticket.ticketProductList = []
     ticket.ticketProcedureList = []
     ticket.customerPaymentList = []
+
+    if (body.fromAppointmentId) {
+      await this.appointmentRepository.update({ oid, id: body.fromAppointmentId }, {
+        toTicketId: ticket.id,
+        appointmentStatus: AppointmentStatus.Completed,
+      })
+    }
     this.socketEmitService.ticketClinicCreate(oid, { ticket })
     return { data: ticket }
   }
 
-  async startCheckup(options: {
-    oid: number, userId: number, ticketId: number,
-    user: User
-  }) {
+  async startCheckup(options: { oid: number; userId: number; ticketId: number; user: User }) {
     const { oid, userId, ticketId, user } = options
     const [ticketBasic] = await this.ticketRepository.updateAndReturnEntity(
       {
@@ -639,9 +646,13 @@ export class ApiTicketClinicService {
     }
   }
 
-  async destroyDraft(params: { oid: number; ticketId: number }): Promise<BaseResponse> {
+  async destroyDraftSchedule(params: { oid: number; ticketId: number }): Promise<BaseResponse> {
     const { oid, ticketId } = params
-    await this.ticketRepository.delete({ oid, id: ticketId })
+    await this.ticketRepository.delete({
+      oid,
+      id: ticketId,
+      ticketStatus: { IN: [TicketStatus.Draft, TicketStatus.Schedule] },
+    })
     await this.ticketDiagnosisRepository.delete({ oid, ticketId })
     return { data: { ticketId } }
   }

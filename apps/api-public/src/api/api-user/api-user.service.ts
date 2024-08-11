@@ -59,7 +59,7 @@ export class ApiUserService {
         device.os = j.os
         device.browser = j.browser
         device.mobile = j.mobile
-        device.online = this.socketEmitService.connections[user.id].some((k) => {
+        device.online = (this.socketEmitService.connections[user.id] || []).some((k) => {
           return k.refreshExp === j.refreshExp
         }) || j.online
         return device

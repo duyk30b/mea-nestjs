@@ -45,15 +45,25 @@ export class TicketRelationQuery {
 
   @Expose()
   @IsBoolean()
+  toAppointment: boolean
+
+  @Expose()
+  @IsBoolean()
   ticketRadiologyList: boolean
 }
 
 const ConditionEnumVoucherType = createConditionEnum(VoucherType)
+const ConditionEnumTicketStatus = createConditionEnum(TicketStatus)
 
 export class TicketFilterQuery {
+  // @Expose()
+  // @IsEnumValue(TicketStatus)
+  // ticketStatus: TicketStatus
+
   @Expose()
-  @IsEnumValue(TicketStatus)
-  ticketStatus: TicketStatus
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketStatus))
+  @IsOptional()
+  ticketStatus: TicketStatus | InstanceType<typeof ConditionEnumTicketStatus>
 
   @Expose()
   @Transform((params: TransformFnParams) => transformConditionEnum(params, VoucherType))

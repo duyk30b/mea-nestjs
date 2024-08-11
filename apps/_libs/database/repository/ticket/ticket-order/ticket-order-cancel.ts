@@ -224,6 +224,34 @@ export class TicketOrderCancel {
             throw new Error(`${PREFIX}: Update Batch failed, ${JSON.stringify(batchUpdateResult)}`)
           }
           batchList = Batch.fromRaws(batchUpdateResult[0])
+
+          // Nhập lại thuốc thì luôn tính lại HSD, vì thông tin phiếu không có HSD, nên cần phải tính lại hết
+          if (batchList.length) {
+            const productReCalculatorIds = batchList.map((i) => i.productId)
+            const productReCalculatorResult: [any[], number] = await manager.query(`
+              UPDATE "Product" product
+              SET "expiryDate" = (
+                  SELECT MIN("expiryDate")
+                  FROM "Batch" batch
+                  WHERE   batch."productId" = product.id
+                      AND batch."expiryDate" IS NOT NULL
+                      AND batch."quantity" <> 0
+              )
+              WHERE product."hasManageBatches" = 1
+                  AND "product"."id" IN (${productReCalculatorIds.toString()})
+              RETURNING "product".*;  
+            `)
+            const productReCalculatorList = Product.fromRaws(productReCalculatorResult[0])
+            for (let i = 0; i < productList.length; i++) {
+              const productId = productList[i].id
+              const productReCalculatorFind = productReCalculatorList.find((i) => {
+                return i.id === productId
+              })
+              if (productReCalculatorFind) {
+                productList[i] = productReCalculatorFind
+              }
+            }
+          }
         }
 
         // 7. === CALCULATOR: số lượng ban đầu của product và batch ===
