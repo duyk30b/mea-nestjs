@@ -10797,7 +10797,7 @@ let TicketOrderCancel = class TicketOrderCancel {
             let customer;
             let customerPayment;
             if (ticketRoot.paid !== 0 || ticketRoot.debt !== 0) {
-                if (ticketRoot.debt > 0) {
+                if ([ticket_entity_1.TicketStatus.Debt].includes(ticketRoot.ticketStatus)) {
                     const whereCustomer = { oid, id: customerId };
                     const customerUpdateResult = await manager
                         .createQueryBuilder()
@@ -10816,8 +10816,9 @@ let TicketOrderCancel = class TicketOrderCancel {
                 else {
                     customer = await manager.findOneBy(entities_1.Customer, { oid, id: customerId });
                 }
+                const debt = ticketRoot.ticketStatus === ticket_entity_1.TicketStatus.Debt ? ticketRoot.debt : 0;
                 const customerCloseDebt = customer.debt;
-                const customerOpenDebt = customerCloseDebt + ticketRoot.debt;
+                const customerOpenDebt = customerCloseDebt + debt;
                 const customerPaymentInsert = {
                     oid,
                     customerId,
@@ -10825,7 +10826,7 @@ let TicketOrderCancel = class TicketOrderCancel {
                     createdAt: time,
                     paymentType: variable_1.PaymentType.ReceiveRefund,
                     paid: -ticketRoot.paid,
-                    debit: -ticketRoot.debt,
+                    debit: -debt,
                     openDebt: customerOpenDebt,
                     closeDebt: customerCloseDebt,
                     note: '',

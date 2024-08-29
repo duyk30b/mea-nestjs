@@ -60,7 +60,7 @@ export class TicketOrderCancel {
       // nếu đã thanh toán thì trả thanh toán
       if (ticketRoot.paid !== 0 || ticketRoot.debt !== 0) {
         // === 2. UPDATE CUSTOMER ===
-        if (ticketRoot.debt > 0) {
+        if ([TicketStatus.Debt].includes(ticketRoot.ticketStatus)) {
           const whereCustomer: FindOptionsWhere<Customer> = { oid, id: customerId }
           const customerUpdateResult: UpdateResult = await manager
             .createQueryBuilder()
@@ -79,8 +79,10 @@ export class TicketOrderCancel {
           customer = await manager.findOneBy(Customer, { oid, id: customerId })
         }
 
+        // chỉ bỏ nợ trong trường hợp TicketStatus.Debt, các trường hợp khác không hề ghi nợ
+        const debt = ticketRoot.ticketStatus === TicketStatus.Debt ? ticketRoot.debt : 0
         const customerCloseDebt = customer.debt
-        const customerOpenDebt = customerCloseDebt + ticketRoot.debt
+        const customerOpenDebt = customerCloseDebt + debt
 
         // === 3. INSERT CUSTOMER_PAYMENT ===
         const customerPaymentInsert: CustomerPaymentInsertType = {
@@ -90,7 +92,7 @@ export class TicketOrderCancel {
           createdAt: time,
           paymentType: PaymentType.ReceiveRefund,
           paid: -ticketRoot.paid,
-          debit: -ticketRoot.debt, //
+          debit: -debt, //
           openDebt: customerOpenDebt,
           closeDebt: customerCloseDebt,
           note: '',
