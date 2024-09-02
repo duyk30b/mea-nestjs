@@ -8,6 +8,11 @@ import Radiology from './radiology.entity'
 import Ticket from './ticket.entity'
 import User from './user.entity'
 
+export enum TicketRadiologyStatus {
+  Empty = 1,
+  Pending = 2,
+  Completed = 3,
+}
 @Entity('TicketRadiology')
 @Index('IDX_TicketRadiology__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketRadiology__oid_radiologyId', ['oid', 'radiologyId'])
@@ -23,6 +28,10 @@ export default class TicketRadiology extends BaseEntity {
   @Column()
   @Expose()
   radiologyId: number
+
+  @Column({ type: 'smallint', default: TicketRadiologyStatus.Pending })
+  @Expose()
+  status: TicketRadiologyStatus
 
   @Column({ default: 0 })
   @Expose()

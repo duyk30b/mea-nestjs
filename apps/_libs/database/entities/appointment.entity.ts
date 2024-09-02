@@ -1,13 +1,8 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { EGender } from '../common/variable'
+import { VoucherType } from '../common/variable'
 import Customer from './customer.entity'
-
-export enum AppointmentType {
-  CustomerInitiated = 1, // Đã lên lịch
-  Reminder = 2, // Hoàn thành
-}
 
 export enum AppointmentStatus {
   Waiting = 1, // Đợi - Nhắc khám
@@ -49,9 +44,9 @@ export default class Appointment extends BaseEntity {
   @Expose()
   cancelReason: string // Lý do hẹn
 
-  @Column({ type: 'smallint', default: AppointmentType.CustomerInitiated })
+  @Column({ type: 'smallint', default: VoucherType.Clinic })
   @Expose()
-  appointmentType: AppointmentType
+  appointmentType: VoucherType
 
   @Column({ type: 'smallint', default: AppointmentStatus.Waiting })
   @Expose()

@@ -1,12 +1,11 @@
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsNumber, IsOptional, ValidateNested } from 'class-validator'
+import { IsBoolean, IsDefined, IsIn, IsNumber, IsOptional, ValidateNested } from 'class-validator'
 import {
   ConditionTimestamp,
   SortQuery,
   createConditionEnum,
   transformConditionEnum,
 } from '../../../../../_libs/common/dto'
-import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { VoucherType } from '../../../../../_libs/database/common/variable'
 import { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
 
@@ -67,7 +66,7 @@ export class TicketFilterQuery {
 
   @Expose()
   @Transform((params: TransformFnParams) => transformConditionEnum(params, VoucherType))
-  @IsOptional()
+  @IsDefined()
   voucherType: VoucherType | InstanceType<typeof ConditionEnumVoucherType>
 
   @Expose()

@@ -134,8 +134,10 @@ export class ServerExceptionFilter implements ExceptionFilter {
         body,
         external: basicExternal,
       })
-      if (statusCode === 422) {
+      if (statusCode === HttpStatus.UNPROCESSABLE_ENTITY) {
         Logger.warn(logMessage, exception.name)
+      } else if (statusCode === HttpStatus.NOT_FOUND) {
+        Logger.debug(logMessage, exception.name)
       } else {
         Logger.error(logMessage, exception.name)
       }

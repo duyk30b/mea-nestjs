@@ -21,11 +21,9 @@ import {
   TicketClinicChangePrescriptionBody,
   TicketClinicChangeTicketProcedureListBody,
   TicketClinicChangeTicketRadiologyListBody,
-  TicketClinicCreateTicketRadiologyBody,
   TicketClinicRegisterWithExistCustomerBody,
   TicketClinicRegisterWithNewCustomerBody,
   TicketClinicUpdateDiagnosisBody,
-  TicketClinicUpdateTicketRadiologyBody,
 } from './request'
 import { TicketClinicPaymentBody } from './request/ticket-clinic-payment.body'
 import { TicketClinicReturnProductListBody } from './request/ticket-clinic-return-product-list.body'
@@ -111,42 +109,6 @@ export class ApiTicketClinicController {
       oid,
       ticketId: id,
       body,
-    })
-  }
-
-  @Post(':id/create-ticket-radiology')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPSERT_TICKET_RADIOLOGY_RESULT)
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FastifyFilesInterceptor('files', 10, {}))
-  async createTicketRadiology(
-    @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
-    @UploadedFiles() files: FileUploadDto[],
-    @Body() body: TicketClinicCreateTicketRadiologyBody
-  ) {
-    return await this.apiTicketClinicService.createTicketRadiology({
-      oid,
-      ticketId: id,
-      body,
-      files,
-    })
-  }
-
-  @Post(':id/update-ticket-radiology')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPSERT_TICKET_RADIOLOGY_RESULT)
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FastifyFilesInterceptor('files', 10, {}))
-  async updateTicketRadiology(
-    @External() { oid }: TExternal,
-    @UploadedFiles() files: FileUploadDto[],
-    @Param() { id }: IdParam,
-    @Body() body: TicketClinicUpdateTicketRadiologyBody
-  ) {
-    return await this.apiTicketClinicService.updateTicketRadiology({
-      oid,
-      ticketId: id,
-      body,
-      files,
     })
   }
 

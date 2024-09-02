@@ -23,6 +23,7 @@ import { ApiTicketOrderModule } from './api-ticket-order/api-ticket-order.module
 import { ApiTicketProcedureModule } from './api-ticket-procedure/api-ticket-procedure.module'
 import { ApiTicketProductModule } from './api-ticket-product/api-ticket-product.module'
 import { ApiTicketRadiologyModule } from './api-ticket-radiology/api-ticket-radiology.module'
+import { ApiTicketSpaModule } from './api-ticket-spa/api-ticket-spa.module'
 import { ApiTicketModule } from './api-ticket/api-ticket.module'
 import { ApiUserModule } from './api-user/api-user.module'
 
@@ -54,6 +55,7 @@ import { ApiUserModule } from './api-user/api-user.module'
     ApiTicketClinicModule,
     ApiTicketDiagnosisModule,
     ApiTicketRadiologyModule,
+    ApiTicketSpaModule,
   ],
   controllers: [],
   providers: [],

@@ -4,7 +4,8 @@ import { createConditionEnum, transformConditionEnum } from '../../../../../_lib
 import { ConditionTimestamp } from '../../../../../_libs/common/dto/condition-timestamp'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 import { IsEnumValue, IsNumberGreaterThan } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { AppointmentStatus, AppointmentType } from '../../../../../_libs/database/entities/appointment.entity'
+import { VoucherType } from '../../../../../_libs/database/common/variable'
+import { AppointmentStatus } from '../../../../../_libs/database/entities/appointment.entity'
 
 export class AppointmentRelationQuery {
   @Expose()
@@ -20,8 +21,8 @@ export class AppointmentFilterQuery {
   customerId: number
 
   @Expose()
-  @IsEnumValue(AppointmentType)
-  appointmentType: AppointmentType
+  @IsEnumValue(VoucherType)
+  appointmentType: VoucherType
 
   @Expose()
   @Transform((params: TransformFnParams) => transformConditionEnum(params, AppointmentStatus))

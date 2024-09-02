@@ -7,10 +7,11 @@ import CustomerPayment from './customer-payment.entity'
 import Customer from './customer.entity'
 import TicketDiagnosis from './ticket-diagnosis.entity'
 import TicketExpense from './ticket-expense.entity'
-import TicketProcedure from './ticket-procedure.entity'
+import TicketProcedure, { TicketProcedureStatus } from './ticket-procedure.entity'
 import TicketProduct from './ticket-product.entity'
-import TicketRadiology from './ticket-radiology.entity'
+import TicketRadiology, { TicketRadiologyStatus } from './ticket-radiology.entity'
 import TicketSurcharge from './ticket-surcharge.entity'
+import TicketUser from './ticket-user.entity'
 import User from './user.entity'
 
 export enum TicketStatus {
@@ -47,6 +48,14 @@ export default class Ticket extends BaseEntity {
   @Column({ type: 'smallint', default: DeliveryStatus.NoStock })
   @Expose()
   deliveryStatus: DeliveryStatus
+
+  @Column({ type: 'smallint', default: TicketProcedureStatus.Empty })
+  @Expose()
+  procedureStatus: TicketProcedureStatus
+
+  @Column({ type: 'smallint', default: TicketRadiologyStatus.Empty })
+  @Expose()
+  radiologyStatus: TicketRadiologyStatus
 
   @Column({ type: 'smallint', nullable: true })
   @Expose()
@@ -210,6 +219,17 @@ export default class Ticket extends BaseEntity {
   @Expose()
   updatedAt: number
 
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  nextTime: number
+
   @ManyToOne((type) => Customer, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'customerId', referencedColumnName: 'id' })
   @Expose()
@@ -254,6 +274,10 @@ export default class Ticket extends BaseEntity {
   @OneToMany(() => TicketSurcharge, (ticketSurcharge) => ticketSurcharge.ticket)
   ticketSurchargeList: TicketSurcharge[]
 
+  @Expose()
+  @OneToMany(() => TicketUser, (ticketUser) => ticketUser.ticket)
+  ticketUserList: TicketUser[]
+
   static fromRaw(raw: { [P in keyof Ticket]: any }) {
     if (!raw) return null
     const entity = new Ticket()
@@ -280,6 +304,7 @@ export default class Ticket extends BaseEntity {
     entity.startedAt = raw.startedAt == null ? raw.startedAt : Number(raw.startedAt)
     entity.endedAt = raw.endedAt == null ? raw.endedAt : Number(raw.endedAt)
     entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)
+    entity.nextTime = raw.nextTime == null ? raw.nextTime : Number(raw.nextTime)
 
     return entity
   }
@@ -299,6 +324,7 @@ export type TicketRelationType = Pick<
   | 'ticketRadiologyList'
   | 'ticketExpenseList'
   | 'ticketSurchargeList'
+  | 'ticketUserList'
   | 'customerPaymentList'
   | 'toAppointment'
 >

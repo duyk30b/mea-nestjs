@@ -3,8 +3,16 @@ import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import { DiscountType } from '../common/variable'
 import Customer from './customer.entity'
+import Image from './image.entity'
 import Procedure from './procedure.entity'
+import TicketUser from './ticket-user.entity'
 import Ticket from './ticket.entity'
+
+export enum TicketProcedureStatus {
+  Empty = 1,
+  Pending = 2,
+  Completed = 3,
+}
 
 @Entity('TicketProcedure')
 @Index('IDX_TicketProcedure__oid_ticketId', ['oid', 'ticketId'])
@@ -21,6 +29,10 @@ export default class TicketProcedure extends BaseEntity {
   @Column({ default: 0 })
   @Expose()
   procedureId: number
+
+  @Column({ type: 'smallint', default: TicketProcedureStatus.Pending })
+  @Expose()
+  status: TicketProcedureStatus
 
   @Column({ default: 0 })
   @Expose()
@@ -72,7 +84,15 @@ export default class TicketProcedure extends BaseEntity {
     },
   })
   @Expose()
-  createdAt: number
+  startedAt: number
+
+  @Column({ type: 'text', default: '' })
+  @Expose({})
+  result: string // Kết luận
+
+  @Column({ type: 'varchar', length: 100, default: JSON.stringify([]) })
+  @Expose()
+  imageIds: string
 
   @Expose()
   @ManyToOne((type) => Customer, { createForeignKeyConstraints: false })
@@ -89,6 +109,12 @@ export default class TicketProcedure extends BaseEntity {
   @JoinColumn({ name: 'procedureId', referencedColumnName: 'id' })
   procedure: Procedure
 
+  @Expose()
+  imageList: Image[]
+
+  @Expose()
+  ticketUserList: TicketUser[]
+
   static fromRaw(raw: { [P in keyof TicketProcedure]: any }) {
     if (!raw) return null
     const entity = new TicketProcedure()
@@ -99,7 +125,7 @@ export default class TicketProcedure extends BaseEntity {
     entity.discountPercent = Number(raw.discountPercent)
     entity.actualPrice = Number(raw.actualPrice)
 
-    entity.createdAt = raw.createdAt == null ? raw.createdAt : Number(raw.createdAt)
+    entity.startedAt = raw.startedAt == null ? raw.startedAt : Number(raw.startedAt)
     return entity
   }
 
@@ -108,7 +134,10 @@ export default class TicketProcedure extends BaseEntity {
   }
 }
 
-export type TicketProcedureRelationType = Pick<TicketProcedure, 'ticket' | 'procedure' | 'customer'>
+export type TicketProcedureRelationType = Pick<
+  TicketProcedure,
+  'ticket' | 'procedure' | 'customer' | 'imageList' | 'ticketUserList'
+>
 
 export type TicketProcedureSortType = Pick<TicketProcedure, 'id' | 'ticketId' | 'procedureId'>
 

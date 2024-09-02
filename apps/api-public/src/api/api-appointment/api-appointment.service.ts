@@ -151,7 +151,7 @@ export class ApiAppointmentService {
     ticket.ticketProductList = []
     ticket.ticketProcedureList = []
     ticket.customerPaymentList = []
-    this.socketEmitService.ticketClinicCreate(oid, { ticket })
+    this.socketEmitService.ticketCreate(oid, { ticket })
     return { data: { appointmentId: id } }
   }
 }

@@ -12,6 +12,7 @@ import {
   TicketProcedure,
   TicketProduct,
   TicketRadiology,
+  TicketUser,
 } from '../../../_libs/database/entities'
 import { SOCKET_EVENT } from './socket.variable'
 
@@ -71,53 +72,61 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.PROCEDURE_UPSERT, data)
   }
 
-  ticketClinicCreate(oid: number, data: { ticket: Ticket }) {
+  ticketCreate(oid: number, data: { ticket: Ticket }) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CREATE, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CREATE, data)
   }
 
-  ticketClinicUpdate(oid: number, data: { ticketBasic: Ticket }) {
+  ticketUpdate(oid: number, data: { ticketBasic: Ticket }) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_UPDATE, data)
   }
 
-  ticketClinicUpdateTicketDiagnosis(
+  ticketUpdateTicketDiagnosis(
     oid: number,
     data: { ticketId: number; ticketDiagnosis: TicketDiagnosis }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_DIAGNOSIS, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_UPDATE_TICKET_DIAGNOSIS, data)
   }
 
-  ticketClinicUpdateTicketRadiology(
+  ticketUpdateTicketRadiology(
     oid: number,
     data: { ticketId: number; ticketRadiology: TicketRadiology }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_UPDATE_TICKET_RADIOLOGY, data)
   }
 
-  ticketClinicChangeTicketProductList(
+  ticketChangeTicketProductList(
     oid: number,
     data: { ticketId: number; ticketProductList: TicketProduct[] }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE_TICKET_PRODUCT_LIST, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CHANGE_TICKET_PRODUCT_LIST, data)
   }
 
-  ticketClinicChangeTicketProcedureList(
+  ticketChangeTicketProcedureList(
     oid: number,
     data: { ticketId: number; ticketProcedureList: TicketProcedure[] }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE_TICKET_PROCEDURE_LIST, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CHANGE_TICKET_PROCEDURE_LIST, data)
   }
 
-  ticketClinicChangeTicketRadiologyList(
+  ticketChangeTicketRadiologyList(
     oid: number,
     data: { ticketId: number; ticketRadiologyList: TicketRadiology[] }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE_TICKET_RADIOLOGY_LIST, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CHANGE_TICKET_RADIOLOGY_LIST, data)
+  }
+
+  ticketChangeTicketUserList(
+    oid: number,
+    data: { ticketId: number; ticketUserList: TicketUser[] }
+  ) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CHANGE_TICKET_USER_LIST, data)
   }
 }
