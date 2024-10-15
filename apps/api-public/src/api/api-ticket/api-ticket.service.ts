@@ -31,7 +31,7 @@ export class ApiTicketService {
       condition: {
         oid,
         ticketStatus: filter?.ticketStatus,
-        voucherType: filter?.voucherType,
+        voucherType: filter.voucherType,
         customerId: filter?.customerId,
         registeredAt: filter?.registeredAt,
         startedAt: filter?.startedAt,
@@ -41,7 +41,7 @@ export class ApiTicketService {
     })
     return {
       data,
-      meta: { total, page, limit },
+      meta: { total, page, limit, voucherType: filter.voucherType },
     }
   }
 

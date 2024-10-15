@@ -16,9 +16,9 @@ import { UserGroup } from '../../../../_libs/database/entities/user.entity'
 import { ApiRootUserService } from './api-root-user.service'
 import { DeviceLogoutBody } from './request/device-logout.query'
 import { RootUserPaginationQuery } from './request/root-user-get.query'
-import { RootUserCreateBody, RootUserUpdateBody } from './request/root-user-upsert.body'
+import { RootUserCreateAdminBody, RootUserUpdateAdminBody } from './request/root-user-upsert.body'
 
-@Controller('root')
+@Controller('root/user')
 @ApiTags('Root')
 @ApiBearerAuth('access-token')
 @IsRoot() // ===== Controller dành riêng cho ROOT =====
@@ -26,29 +26,29 @@ import { RootUserCreateBody, RootUserUpdateBody } from './request/root-user-upse
 export class ApiRootUserController {
   constructor(private readonly apiRootUserService: ApiRootUserService) { }
 
-  @Get('user/pagination')
-  userPagination(@Query() query: RootUserPaginationQuery) {
+  @Get('pagination')
+  pagination(@Query() query: RootUserPaginationQuery) {
     return this.apiRootUserService.pagination(query)
   }
 
-  @Post('user/create')
-  async createOne(@Body() body: RootUserCreateBody) {
-    return await this.apiRootUserService.createOne(body)
+  @Post('create-admin')
+  async createAdmin(@Body() body: RootUserCreateAdminBody) {
+    return await this.apiRootUserService.createAdmin(body)
   }
 
-  @Patch('user/update/:id')
+  @Patch('update-admin/:id')
   @ApiParam({ name: 'id', example: 1 })
-  async userUpdateOne(@Param() { id }: IdParam, @Body() body: RootUserUpdateBody) {
-    return await this.apiRootUserService.updateOne(id, body)
+  async updateAdmin(@Param() { id }: IdParam, @Body() body: RootUserUpdateAdminBody) {
+    return await this.apiRootUserService.updateAdmin(id, body)
   }
 
-  @Delete('user/delete/:id')
+  @Delete('delete/:id')
   @ApiParam({ name: 'id', example: 1 })
   async userDeleteOne(@Param() { id }: IdParam) {
     return await this.apiRootUserService.deleteOne(id)
   }
 
-  @Post('user/device-logout/:id')
+  @Post('device-logout/:id')
   deviceLogout(@Param() { id }: IdParam, @Body() body: DeviceLogoutBody) {
     return this.apiRootUserService.deviceLogout({
       oid: body.oid,
@@ -57,7 +57,7 @@ export class ApiRootUserController {
     })
   }
 
-  @Post('user/logout-all')
+  @Post('logout-all')
   logoutAll() {
     return this.apiRootUserService.logoutAll()
   }

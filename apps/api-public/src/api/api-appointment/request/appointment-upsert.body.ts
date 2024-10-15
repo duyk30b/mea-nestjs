@@ -2,7 +2,8 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
 import { IsDefined, IsIn, IsNumber, IsOptional, IsString } from 'class-validator'
 import { IsEnumValue, IsNumberGreaterThan } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { AppointmentStatus, AppointmentType } from '../../../../../_libs/database/entities/appointment.entity'
+import { VoucherType } from '../../../../../_libs/database/common/variable'
+import { AppointmentStatus } from '../../../../../_libs/database/entities/appointment.entity'
 
 export class AppointmentBody {
   @ApiProperty({ example: 0 })
@@ -30,11 +31,11 @@ export class AppointmentBody {
 }
 
 export class AppointmentCreateBody extends AppointmentBody {
-  @ApiPropertyOptional({ example: AppointmentType.CustomerInitiated })
+  @ApiPropertyOptional({ example: VoucherType.Clinic })
   @Expose()
   @IsOptional()
-  @IsEnumValue(AppointmentType)
-  appointmentType: AppointmentType
+  @IsEnumValue(VoucherType)
+  appointmentType: VoucherType
 
   @ApiPropertyOptional({ example: AppointmentStatus.Confirm })
   @Expose()

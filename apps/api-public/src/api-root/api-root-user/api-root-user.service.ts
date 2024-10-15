@@ -11,7 +11,7 @@ import { RoleRepository } from '../../../../_libs/database/repository/role/role.
 import { UserRepository } from '../../../../_libs/database/repository/user/user.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import { RootUserPaginationQuery } from './request/root-user-get.query'
-import { RootUserCreateBody, RootUserUpdateBody } from './request/root-user-upsert.body'
+import { RootUserCreateAdminBody, RootUserUpdateAdminBody } from './request/root-user-upsert.body'
 
 @Injectable()
 export class ApiRootUserService {
@@ -34,7 +34,9 @@ export class ApiRootUserService {
       relation,
       condition: {
         oid: filter?.oid,
-        roleId: filter?.roleId,
+        isAdmin: filter?.isAdmin,
+        isActive: filter?.isActive,
+        updatedAt: filter?.updatedAt,
       },
       sort,
     })
@@ -52,9 +54,10 @@ export class ApiRootUserService {
         device.os = j.os
         device.browser = j.browser
         device.mobile = j.mobile
-        device.online = (this.socketEmitService.connections[user.id] || []).some((k) => {
-          return k.refreshExp === j.refreshExp
-        }) || j.online
+        device.online =
+          (this.socketEmitService.connections[user.id] || []).some((k) => {
+            return k.refreshExp === j.refreshExp
+          }) || j.online
         return device
       })
     }
@@ -65,64 +68,46 @@ export class ApiRootUserService {
     }
   }
 
-  async createOne(body: RootUserCreateBody): Promise<BaseResponse<{ user: User }>> {
-    const { oid, username, password, roleId, ...other } = body
+  async createAdmin(body: RootUserCreateAdminBody): Promise<BaseResponse<{ user: User }>> {
+    const { oid, username, password, ...other } = body
     const existUser = await this.userRepository.findOneBy({
       oid,
       username,
     })
     if (existUser) throw new BusinessException('error.Register.ExistUsername')
 
-    if (roleId === 0) throw new BusinessException('error.Role.NotExist')
-    if (![1].includes(roleId)) {
-      const existRole = await this.roleRepository.findOneBy({
-        oid,
-        id: roleId,
-      })
-      if (!existRole) throw new BusinessException('error.Role.NotExist')
-    }
-
     const hashPassword = await bcrypt.hash(password, 5)
     const secret = encrypt(password, username)
-    const id = await this.userRepository.insertOneFullField({
+    const user = await this.userRepository.insertOneFullFieldAndReturnEntity({
       ...other,
       oid,
       username,
-      roleId,
       secret,
       hashPassword,
+      isAdmin: 1,
+      isActive: 1,
     })
 
-    const user: User = await this.userRepository.findOneById(id)
     return { data: { user } }
   }
 
-  async updateOne(id: number, body: RootUserUpdateBody): Promise<BaseResponse<{ user: User }>> {
-    const { username, password, roleId, ...other } = body
-    const userOld: User = await this.userRepository.findOneBy({ id })
+  async updateAdmin(
+    userId: number,
+    body: RootUserUpdateAdminBody
+  ): Promise<BaseResponse<{ user: User }>> {
+    const { username, password, ...other } = body
+    const userOld: User = await this.userRepository.findOneBy({ id: userId })
     if (!userOld) throw new BusinessException('error.User.NotExist')
-
-    const { oid } = userOld
-
-    if (roleId === 0) throw new BusinessException('error.Role.NotExist')
-    if (![1].includes(roleId)) {
-      const existRole = await this.roleRepository.findOneBy({
-        oid,
-        id: roleId,
-      })
-      if (!existRole) throw new BusinessException('error.Role.NotExist')
-    }
 
     const hashPassword = await bcrypt.hash(password, 5)
     const secret = encrypt(password, username)
     const [user] = await this.userRepository.updateAndReturnEntity(
-      { oid, id },
+      { id: userId },
       {
         ...other,
         hashPassword,
         secret,
         username,
-        roleId,
       }
     )
     if (!user) {

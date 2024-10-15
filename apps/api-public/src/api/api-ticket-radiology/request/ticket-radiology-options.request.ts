@@ -13,7 +13,7 @@ export class TicketRadiologyRelationQuery {
 
   @Expose()
   @IsBoolean()
-  doctor: boolean
+  ticketUserList: boolean
 
   @Expose()
   @IsBoolean()

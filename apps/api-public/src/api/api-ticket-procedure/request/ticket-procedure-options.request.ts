@@ -14,6 +14,14 @@ export class TicketProcedureRelationQuery {
   @Expose()
   @IsBoolean()
   ticket: boolean
+
+  @Expose()
+  @IsBoolean()
+  imageList: boolean
+
+  @Expose()
+  @IsBoolean()
+  ticketUser: boolean
 }
 
 export class TicketProcedureFilterQuery {
@@ -30,4 +38,4 @@ export class TicketProcedureFilterQuery {
   ticketId: number
 }
 
-export class TicketProcedureSortQuery extends SortQuery {}
+export class TicketProcedureSortQuery extends SortQuery { }

@@ -136,7 +136,7 @@ export class ApiRootOrganizationService {
     await this.manager.delete(Role, { oid })
     await this.manager.delete(User, { oid })
 
-    this.cacheDataService.removeOrganization(oid)
+    this.cacheDataService.clearOrganization(oid)
     return { data: { oid } }
   }
 }

@@ -1,9 +1,9 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import { EGender } from '../common/variable'
 import Device from './device'
 import Organization from './organization.entity'
-import Role from './role.entity'
+import UserRole from './user-role.entity'
 
 export enum UserGroup {
   ROOT = 'ROOT',
@@ -36,10 +36,6 @@ export default class User {
   secret: string
 
   @Expose()
-  @Column({ type: 'integer', default: 1 })
-  roleId: number
-
-  @Expose()
   @Column({ type: 'character varying', length: 255, nullable: true })
   fullName: string
 
@@ -57,6 +53,10 @@ export default class User {
   @Expose()
   @Column({ type: 'smallint', nullable: true })
   gender: EGender
+
+  @Expose()
+  @Column({ type: 'smallint', default: 1 })
+  isAdmin: 0 | 1
 
   @Expose()
   @Column({ type: 'smallint', default: 1 })
@@ -92,9 +92,8 @@ export default class User {
   organization: Organization
 
   @Expose()
-  @ManyToOne((type) => Role, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'roleId', referencedColumnName: 'id' })
-  role: Role
+  @OneToMany(() => UserRole, (userRole) => userRole.user)
+  userRoleList: UserRole[]
 
   @Expose()
   devices: Device[]
@@ -115,7 +114,7 @@ export default class User {
   }
 }
 
-export type UserRelationType = Pick<User, 'organization' | 'role' | 'devices'>
+export type UserRelationType = Pick<User, 'organization' | 'userRoleList' | 'devices'>
 
 export type UserSortType = Pick<User, 'oid' | 'id' | 'phone' | 'username'>
 

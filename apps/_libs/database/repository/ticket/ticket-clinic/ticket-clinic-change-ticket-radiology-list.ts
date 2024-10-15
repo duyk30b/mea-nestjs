@@ -46,7 +46,7 @@ export class TicketClinicChangeTicketRadiologyList {
 
       // === 4. QUERY NEW ===
       const ticketRadiologyList = await manager.find(TicketRadiology, {
-        relations: { radiology: true, doctor: true },
+        relations: { radiology: true },
         relationLoadStrategy: 'join',
         where: { ticketId },
         order: { id: 'ASC' },

@@ -1,5 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import UserRole from './user-role.entity'
 
 @Entity('Role')
 export default class Role {
@@ -34,6 +35,10 @@ export default class Role {
   @Expose()
   updatedAt: number
 
+  @Expose()
+  @OneToMany(() => UserRole, (userRole) => userRole.role)
+  userRoleList: UserRole[]
+
   static fromRaw(raw: { [P in keyof Role]: any }) {
     if (!raw) return null
     const entity = new Role()
@@ -49,7 +54,7 @@ export default class Role {
   }
 }
 
-export type RoleRelationType = Pick<Role, never>
+export type RoleRelationType = Pick<Role, 'userRoleList'>
 
 export type RoleSortType = Pick<Role, 'oid' | 'id'>
 

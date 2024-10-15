@@ -37,7 +37,7 @@ export class ApiTicketOrderBasicService {
         oid,
         ticketOrderDraftInsert: {
           ...body.ticketOrderDraftInsert,
-          userId,
+          nextTime: body.ticketOrderDraftInsert.registeredAt,
         },
         ticketOrderProductDraftList: body.ticketOrderProductDraftList,
         ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,
@@ -63,7 +63,7 @@ export class ApiTicketOrderBasicService {
         ticketId,
         ticketOrderDraftApprovedUpdate: {
           ...body.ticketOrderDraftApprovedUpdate,
-          userId,
+          nextTime: body.ticketOrderDraftApprovedUpdate.registeredAt,
         },
         ticketOrderProductDraftList: body.ticketOrderProductDraftList,
         ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,
@@ -99,7 +99,7 @@ export class ApiTicketOrderBasicService {
       oid,
       ticketOrderDraftInsert: {
         ...ticketOrderDraftInsert,
-        userId,
+        nextTime: ticketOrderDraftInsert.registeredAt,
       },
       ticketOrderProductDraftList: body.ticketOrderProductDraftList,
       ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,
@@ -153,7 +153,7 @@ export class ApiTicketOrderBasicService {
           ticketId,
           ticketOrderDebtSuccessUpdate: {
             ...body.ticketOrderDebtSuccessUpdate,
-            userId,
+            nextTime: body.ticketOrderDebtSuccessUpdate.registeredAt,
           },
           ticketOrderProductDraftList: body.ticketOrderProductDraftList,
           ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,

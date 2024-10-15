@@ -19,10 +19,12 @@ import { ApiSettingModule } from './api-setting/api-setting.module'
 import { ApiStatisticModule } from './api-statistics/api-statistic.module'
 import { ApiTicketClinicModule } from './api-ticket-clinic/api-ticket-clinic.module'
 import { ApiTicketDiagnosisModule } from './api-ticket-diagnosis/api-ticket-diagnosis.module'
+import { ApiTicketEyeModule } from './api-ticket-eye/api-ticket-eye.module'
 import { ApiTicketOrderModule } from './api-ticket-order/api-ticket-order.module'
 import { ApiTicketProcedureModule } from './api-ticket-procedure/api-ticket-procedure.module'
 import { ApiTicketProductModule } from './api-ticket-product/api-ticket-product.module'
 import { ApiTicketRadiologyModule } from './api-ticket-radiology/api-ticket-radiology.module'
+import { ApiTicketSpaModule } from './api-ticket-spa/api-ticket-spa.module'
 import { ApiTicketModule } from './api-ticket/api-ticket.module'
 import { ApiUserModule } from './api-user/api-user.module'
 
@@ -52,8 +54,10 @@ import { ApiUserModule } from './api-user/api-user.module'
     ApiTicketProcedureModule,
     ApiTicketProductModule,
     ApiTicketClinicModule,
+    ApiTicketEyeModule,
     ApiTicketDiagnosisModule,
     ApiTicketRadiologyModule,
+    ApiTicketSpaModule,
   ],
   controllers: [],
   providers: [],

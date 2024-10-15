@@ -117,7 +117,6 @@ export class ServerExceptionFilter implements ExceptionFilter {
         mobile: external.mobile,
         uid: external.uid,
         oid: external.oid,
-        rid: external.rid,
         username: external.user?.username,
         phone: external.organization?.phone,
         email: external.organization?.email,
@@ -134,8 +133,10 @@ export class ServerExceptionFilter implements ExceptionFilter {
         body,
         external: basicExternal,
       })
-      if (statusCode === 422) {
+      if (statusCode === HttpStatus.UNPROCESSABLE_ENTITY) {
         Logger.warn(logMessage, exception.name)
+      } else if (statusCode === HttpStatus.NOT_FOUND) {
+        Logger.debug(logMessage, exception.name)
       } else {
         Logger.error(logMessage, exception.name)
       }

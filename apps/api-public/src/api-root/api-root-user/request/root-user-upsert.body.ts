@@ -5,7 +5,6 @@ import {
   IsIn,
   IsNotEmpty,
   IsNumber,
-  IsPositive,
   IsString,
   MinLength,
   Validate,
@@ -13,7 +12,7 @@ import {
 import { IsPhone } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { EGender } from '../../../../../_libs/database/common/variable'
 
-export class RootUserCreateBody {
+export class RootUserCreateAdminBody {
   @ApiProperty({ example: 40 })
   @Expose()
   @IsDefined()
@@ -38,12 +37,6 @@ export class RootUserCreateBody {
   @MinLength(6)
   password: string
 
-  @ApiProperty({ example: 40 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  roleId: number
-
   @ApiProperty({ example: 'Phạm Hoàng Mai' })
   @Expose()
   @IsDefined()
@@ -59,11 +52,6 @@ export class RootUserCreateBody {
   @Expose()
   @IsIn([0, 1])
   gender: EGender
-
-  @ApiPropertyOptional({ example: 1 })
-  @Expose()
-  @IsIn([0, 1])
-  isActive: 0 | 1
 }
 
-export class RootUserUpdateBody extends OmitType(RootUserCreateBody, ['oid']) {}
+export class RootUserUpdateAdminBody extends OmitType(RootUserCreateAdminBody, ['oid']) { }

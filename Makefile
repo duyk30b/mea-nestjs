@@ -24,7 +24,7 @@ production-logs:
 	docker compose logs -f api_public
 
 production-reload-nginx:
-	git fetch --all
+	git fetch --all --prune
 	git log --all --oneline --graph -10
 	git reset --hard origin/master
 	docker compose -f docker-compose.production.yml restart nginx
@@ -32,7 +32,7 @@ production-reload-nginx:
 	docker compose -f docker-compose.production.yml exec nginx nginx -s reload
 
 production-backup-postgres: 
-	git fetch --all
+	git fetch --all --prune
 	git reset --hard origin/master
 	git log --all --oneline --graph -10
 	docker compose -f docker-compose.production.yml exec postgres sh -c '\

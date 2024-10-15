@@ -51,12 +51,6 @@ class TicketProcedureBody {
   @IsDefined()
   @IsNumber()
   actualPrice: number
-
-  @ApiProperty({ example: Date.now() })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  createdAt: number
 }
 
 export class TicketClinicChangeTicketProcedureListBody {

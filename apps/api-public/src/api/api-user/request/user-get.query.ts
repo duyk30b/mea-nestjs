@@ -7,7 +7,7 @@ import { UserFilterQuery, UserRelationQuery, UserSortQuery } from './user-option
 export class UserGetQuery {
   @ApiPropertyOptional({
     type: String,
-    example: JSON.stringify(<UserRelationQuery>{ role: true }),
+    example: JSON.stringify(<UserRelationQuery>{ userRoleList: true }),
   })
   @Expose()
   @Transform(({ value }) => {
@@ -31,7 +31,7 @@ export class UserGetQuery {
     example: JSON.stringify(<UserFilterQuery>{
       searchText: 'a',
       isActive: 1,
-      roleId: 10,
+      isAdmin: 1,
       updatedAt: { LT: 1000 },
     }),
   })
@@ -78,11 +78,11 @@ export class UserGetQuery {
   sort?: UserSortQuery
 }
 
-export class UserPaginationQuery extends IntersectionType(UserGetQuery, PaginationQuery) {}
+export class UserPaginationQuery extends IntersectionType(UserGetQuery, PaginationQuery) { }
 
 export class UserGetManyQuery extends IntersectionType(
   PickType(UserGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
-) {}
+) { }
 
-export class UserGetOneQuery extends PickType(UserGetQuery, ['relation']) {}
+export class UserGetOneQuery extends PickType(UserGetQuery, ['relation']) { }

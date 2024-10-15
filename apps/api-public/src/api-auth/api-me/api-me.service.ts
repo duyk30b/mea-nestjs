@@ -14,22 +14,21 @@ export class ApiMeService {
     private readonly cacheDataService: CacheDataService
   ) { }
 
-  async info(params: { oid: number; uid: number; rid: number }): Promise<BaseResponse> {
-    const { uid, oid, rid } = params
-    const [user, organization, role, settingMap, permissionList] = await Promise.all([
-      this.cacheDataService.getUser(uid),
+  async info(params: { oid: number; uid: number; permissionIds: number[] }): Promise<BaseResponse> {
+    const { uid, oid, permissionIds } = params
+    const [user, organization, settingMap, permissionAll] = await Promise.all([
+      this.cacheDataService.getUser(oid, uid),
       this.cacheDataService.getOrganization(oid),
-      this.cacheDataService.getRole(rid),
       this.cacheDataService.getSettingMap(oid),
-      this.cacheDataService.getPermissionList(),
+      this.cacheDataService.getPermissionAllList(),
     ])
 
     return {
       data: {
         user,
         organization,
-        role,
-        permissionList,
+        permissionIds,
+        permissionAll,
         settingMap,
       },
     }

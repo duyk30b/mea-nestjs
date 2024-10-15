@@ -128,7 +128,6 @@ export class ApiAppointmentService {
     const ticket = await this.ticketRepository.insertOneAndReturnEntity({
       oid,
       customerId: customer.id,
-      userId,
       voucherType: VoucherType.Clinic,
       registeredAt: Math.max(appointment.registeredAt, now),
       ticketStatus: TicketStatus.Schedule,
@@ -147,11 +146,10 @@ export class ApiAppointmentService {
 
     ticket.customer = customer
     ticket.ticketDiagnosis = ticketDiagnosis
-    ticket.user = user
     ticket.ticketProductList = []
     ticket.ticketProcedureList = []
     ticket.customerPaymentList = []
-    this.socketEmitService.ticketClinicCreate(oid, { ticket })
+    this.socketEmitService.ticketCreate(oid, { ticket })
     return { data: { appointmentId: id } }
   }
 }

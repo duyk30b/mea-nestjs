@@ -24,7 +24,7 @@ export class GoogleDriverService {
   constructor(
     @Inject(GoogleDriverConfig.KEY)
     private googleDriverConfig: ConfigType<typeof GoogleDriverConfig>
-  ) {}
+  ) { }
 
   public setCache(
     email: string,
@@ -253,6 +253,7 @@ export class GoogleDriverService {
     if (!fileIds.length) return { success: [], failed: [] }
     let drive: drive_v3.Drive
     try {
+      this.logger.log(`GoogleDriver ${email} start trashMultipleFiles, with ${fileIds.length} file`)
       drive = this.createDrive(email)
     } catch (error) {
       return { success: [], failed: fileIds }
@@ -338,12 +339,14 @@ export class GoogleDriverService {
   }
 
   public async uploadMultipleFiles(options: {
+    files: FileUploadDto[]
     email: string
     oid: number
-    files: FileUploadDto[]
+    customerId: number
   }) {
-    const { files, oid, email } = options
+    const { files, email, oid, customerId } = options
     if (!files.length) return []
+    this.logger.log(`GoogleDriver ${email} start uploadMultipleFiles, with ${files.length} file`)
     const drive = this.createDrive(email)
 
     if (!this.cache[email].rootFolderId) {
@@ -367,7 +370,7 @@ export class GoogleDriverService {
           buffer: item.buffer,
           mimetype: item.mimetype,
           parent: this.cache[email].defaultFolderId,
-          title: oid + '-' + DTimer.timeToText(now + index, 'YYYY-MM-DD-hh-mm-ss-xxx'),
+          title: oid + '-' + customerId + '-' + DTimer.timeToText(now + index, 'YYYY-MM-DD-hh-mm-ss-xxx'),
         })
       })
     )

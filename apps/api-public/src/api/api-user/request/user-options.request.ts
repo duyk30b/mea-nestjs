@@ -6,7 +6,7 @@ import { SortQuery } from '../../../../../_libs/common/dto/query'
 export class UserRelationQuery {
   @Expose()
   @IsBoolean()
-  role: boolean
+  userRoleList: boolean
 }
 
 export class UserFilterQuery {
@@ -16,8 +16,8 @@ export class UserFilterQuery {
   searchText: string
 
   @Expose()
-  @IsNumber()
-  roleId: number
+  @IsIn([0, 1])
+  isAdmin: 0 | 1
 
   @Expose()
   @IsIn([0, 1])

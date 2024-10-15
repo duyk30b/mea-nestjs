@@ -6,11 +6,11 @@ import { External, TExternal } from '../../../../_libs/common/request/external.r
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
 import { ApiAppointmentService } from './api-appointment.service'
 import {
-  AppointmentCreateBody,
-  AppointmentGetManyQuery,
-  AppointmentGetOneQuery,
-  AppointmentPaginationQuery,
-  AppointmentUpdateBody,
+    AppointmentCreateBody,
+    AppointmentGetManyQuery,
+    AppointmentGetOneQuery,
+    AppointmentPaginationQuery,
+    AppointmentUpdateBody,
 } from './request'
 
 @ApiTags('Appointment')
@@ -65,7 +65,7 @@ export class ApiAppointmentController {
   }
 
   @Post('register-ticket-clinic/:id')
-  @HasPermission(PermissionId.APPOINTMENT_REGISTER_TICKET_CLINIC)
+  @HasPermission(PermissionId.APPOINTMENT_REGISTER_TICKET)
   async registerTicketClinic(@External() { oid, uid, user }: TExternal, @Param() { id }: IdParam) {
     return await this.apiAppointmentService.registerTicketClinic({
       oid,
