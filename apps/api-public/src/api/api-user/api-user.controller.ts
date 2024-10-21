@@ -51,12 +51,12 @@ export class ApiUserController {
 
   @Patch('update/:id')
   @HasPermission(PermissionId.USER_UPDATE)
-  async updateInfo(
+  async updateOne(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
     @Body() body: UserUpdateBody
   ) {
-    return await this.apiUserService.updateInfo(oid, +id, body)
+    return await this.apiUserService.updateOne(oid, +id, body)
   }
 
   @Patch('new-password/:id')

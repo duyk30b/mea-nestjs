@@ -17,6 +17,8 @@ export type TicketOrderDraftInsertType = Omit<
     | 'voucherType'
     | 'ticketStatus'
     | 'deliveryStatus'
+    | 'procedureStatus'
+    | 'radiologyStatus'
     | 'paid'
     | 'debt'
     | 'year'
@@ -39,6 +41,8 @@ export type TicketOrderDraftApprovedUpdateType = Omit<
     | 'voucherType'
     | 'ticketStatus'
     | 'deliveryStatus'
+    | 'procedureStatus'
+    | 'radiologyStatus'
     | 'paid'
     | 'debt'
     | 'year'
@@ -61,6 +65,8 @@ export type TicketOrderDebtSuccessUpdateType = Omit<
     | 'voucherType'
     | 'ticketStatus'
     | 'deliveryStatus'
+    | 'procedureStatus'
+    | 'radiologyStatus'
     | 'debt'
     | 'year'
     | 'month'
@@ -90,7 +96,17 @@ export type TicketOrderProductDraftType = Omit<
 export type TicketOrderProcedureDraftType = Omit<
   TicketProcedure,
   | keyof TicketProcedureRelationType
-  | keyof Pick<TicketProcedure, 'oid' | 'id' | 'ticketId' | 'customerId' | 'createdAt'>
+  | keyof Pick<
+    TicketProcedure,
+    | 'oid'
+    | 'id'
+    | 'ticketId'
+    | 'customerId'
+    | 'status'
+    | 'startedAt'
+    | 'imageIds'
+    | 'result'
+  >
 >
 
 export type TicketOrderSurchargeDraftType = Omit<

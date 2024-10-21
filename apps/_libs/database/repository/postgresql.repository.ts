@@ -74,6 +74,7 @@ export abstract class PostgreSqlRepository<
   }
 
   async findManyByIds(ids: number[]): Promise<_ENTITY[]> {
+    if (!ids.length) return []
     return await this.findManyBy({ id: { IN: ids } } as any)
   }
 

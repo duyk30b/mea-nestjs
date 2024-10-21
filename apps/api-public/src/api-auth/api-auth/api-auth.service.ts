@@ -111,7 +111,7 @@ export class ApiAuthService {
     const { ip, os, browser, mobile } = dataExternal
 
     const [user] = await this.dataSource.getRepository(User).find({
-      relations: { organization: true, role: true },
+      relations: { organization: true },
       relationLoadStrategy: 'join',
       where: {
         username: loginDto.username,
@@ -119,7 +119,7 @@ export class ApiAuthService {
       },
     })
     if (!user) throw new BusinessException('error.User.NotExist')
-    if (!user.isActive || !user.organization?.isActive || user.role?.isActive === 0) {
+    if (!user.isActive || !user.organization?.isActive) {
       throw new BusinessException('common.AccountInactive')
     }
 
@@ -154,12 +154,12 @@ export class ApiAuthService {
     const { ip, os, browser, mobile } = dataExternal
 
     const [user] = await this.dataSource.getRepository(User).find({
-      relations: { organization: true, role: true },
+      relations: { organization: true },
       relationLoadStrategy: 'query', // dùng join+findOne thì bị lỗi 2 câu query
       where: { id: 4, oid: 4 },
     })
     if (!user) throw new BusinessException('error.User.NotExist')
-    if (!user.isActive || !user.organization?.isActive || user.role?.isActive === 0) {
+    if (!user.isActive || !user.organization?.isActive) {
       throw new BusinessException('common.AccountInactive')
     }
 
@@ -196,7 +196,7 @@ export class ApiAuthService {
       throw BusinessException.create({ message: 'error.Database.NotFound', details: 'Organization' })
     }
     const user = await this.userRepository.findOne({
-      relation: { role: true },
+      // relation: { organization: true },
       condition: {
         oid: organization.id,
         username: body.username,
@@ -206,7 +206,7 @@ export class ApiAuthService {
       throw BusinessException.create({ message: 'error.Database.NotFound', details: 'User' })
     }
 
-    if (!user.isActive || !organization.isActive || !user.role?.isActive) {
+    if (!user.isActive || !organization.isActive) {
       throw new BusinessException('common.AccountInactive')
     }
 
@@ -241,7 +241,7 @@ export class ApiAuthService {
       throw BusinessException.create({ message: 'error.Database.NotFound', details: 'Organization' })
     }
     const user = await this.userRepository.findOne({
-      relation: { role: true },
+      // relation: { organization: true },
       condition: {
         oid: organization.id,
         username: body.username,

@@ -5,7 +5,6 @@ import {
   IsIn,
   IsNotEmpty,
   IsNumber,
-  IsPositive,
   IsString,
   MinLength,
   Validate,
@@ -38,12 +37,6 @@ export class RootUserCreateBody {
   @MinLength(6)
   password: string
 
-  @ApiProperty({ example: 40 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  roleId: number
-
   @ApiProperty({ example: 'Phạm Hoàng Mai' })
   @Expose()
   @IsDefined()
@@ -60,10 +53,15 @@ export class RootUserCreateBody {
   @IsIn([0, 1])
   gender: EGender
 
-  @ApiPropertyOptional({ example: 1 })
+  @ApiProperty({ example: 1 })
+  @Expose()
+  @IsIn([0, 1])
+  isAdmin: 0 | 1
+
+  @ApiProperty({ example: 1 })
   @Expose()
   @IsIn([0, 1])
   isActive: 0 | 1
 }
 
-export class RootUserUpdateBody extends OmitType(RootUserCreateBody, ['oid']) {}
+export class RootUserUpdateBody extends OmitType(RootUserCreateBody, ['oid']) { }

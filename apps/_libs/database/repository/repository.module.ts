@@ -24,10 +24,12 @@ import {
   TicketProcedure,
   TicketProduct,
   TicketRadiology,
+  TicketUser,
   User,
 } from '../entities'
 import TicketExpense from '../entities/ticket-expense.entity'
 import TicketSurcharge from '../entities/ticket-surcharge.entity'
+import UserRole from '../entities/user-role.entity'
 import { AppointmentRepository } from './appointment/appointment.repository'
 import { BatchMovementRepository } from './batch-movement/bat-movement.repository'
 import { BatchRepository } from './batch/batch.repository'
@@ -59,6 +61,7 @@ import { TicketDiagnosisRepository } from './ticket-diagnosis/ticket-diagnosis.r
 import { TicketProcedureRepository } from './ticket-procedure/ticket-procedure.repository'
 import { TicketProductRepository } from './ticket-product/ticket-product.repository'
 import { TicketRadiologyRepository } from './ticket-radiology/ticket-radiology.repository'
+import { TicketUserRepository } from './ticket-user/ticket-user.repository'
 import { TicketPayDebt } from './ticket/ticket-base/ticket-pay-debt'
 import { TicketPaymentAndClose } from './ticket/ticket-base/ticket-payment-and-close'
 import { TicketPrepayment } from './ticket/ticket-base/ticket-prepayment'
@@ -77,6 +80,8 @@ import { TicketOrderDraftApprovedUpdate } from './ticket/ticket-order/ticket-ord
 import { TicketOrderRefundOverpaid } from './ticket/ticket-order/ticket-order-refund-overpaid'
 import { TicketOrderReturnProductList } from './ticket/ticket-order/ticket-order-return-product-list'
 import { TicketOrderDraft } from './ticket/ticket-order/ticket-order.draft'
+import { TicketSpaChangeTicketProcedureList } from './ticket/ticket-spa/ticket-spa-change-ticket-procedure-list'
+import { UserRoleRepository } from './user-role/user-role.repository'
 import { UserRepository } from './user/user.repository'
 
 @Global()
@@ -102,6 +107,7 @@ import { UserRepository } from './user/user.repository'
       Role,
       Setting,
       User,
+      UserRole,
       Ticket,
       TicketExpense,
       TicketSurcharge,
@@ -109,6 +115,7 @@ import { UserRepository } from './user/user.repository'
       TicketProcedure,
       TicketProduct,
       TicketRadiology,
+      TicketUser,
     ]),
   ],
   providers: [
@@ -137,6 +144,8 @@ import { UserRepository } from './user/user.repository'
     RoleRepository,
     SettingRepository,
     UserRepository,
+    UserRoleRepository,
+
     TicketClinicChangeTicketProcedureList,
     TicketClinicChangeTicketRadiologyList,
     TicketClinicChangeTicketProductList,
@@ -158,7 +167,10 @@ import { UserRepository } from './user/user.repository'
     TicketDiagnosisRepository,
     TicketProcedureRepository,
     TicketProductRepository,
+    TicketUserRepository,
     TicketRadiologyRepository,
+    TicketSpaChangeTicketProcedureList,
+
     StatisticRepository,
     StatisticReceiptRepository,
     StatisticTicketRepository,
@@ -190,6 +202,8 @@ import { UserRepository } from './user/user.repository'
     ReceiptItemRepository,
     SettingRepository,
     UserRepository,
+    UserRoleRepository,
+
     TicketClinicChangeTicketProcedureList,
     TicketClinicChangeTicketRadiologyList,
     TicketClinicChangeTicketProductList,
@@ -212,6 +226,8 @@ import { UserRepository } from './user/user.repository'
     TicketProcedureRepository,
     TicketProductRepository,
     TicketRadiologyRepository,
+    TicketUserRepository,
+    TicketSpaChangeTicketProcedureList,
 
     StatisticRepository,
     StatisticReceiptRepository,

@@ -22,12 +22,9 @@ export class RootGuard implements CanActivate {
     if (
       !external.uid
       || !external.oid
-      || !external.rid
       || !external.user
-      || !external.role
       || !external.organization
       || !!external.user.deletedAt
-      || !external.role.isActive
       || !external.organization.isActive
     ) {
       throw new BusinessException(external.error, {}, HttpStatus.UNAUTHORIZED)

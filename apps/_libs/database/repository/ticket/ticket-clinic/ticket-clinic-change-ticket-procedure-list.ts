@@ -1,20 +1,36 @@
 import { Injectable } from '@nestjs/common'
-import { DataSource, FindOptionsWhere, In, UpdateResult } from 'typeorm'
+import { DataSource, FindOptionsWhere, UpdateResult } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { Ticket } from '../../../entities'
-import TicketProcedure, { TicketProcedureInsertType } from '../../../entities/ticket-procedure.entity'
+import TicketProcedure, { TicketProcedureInsertType, TicketProcedureRelationType, TicketProcedureStatus } from '../../../entities/ticket-procedure.entity'
 import { TicketStatus } from '../../../entities/ticket.entity'
+
+export type TicketClinicProcedureChangeDtoType = Omit<
+  TicketProcedure,
+  | keyof TicketProcedureRelationType
+  | keyof Pick<
+    TicketProcedure,
+    | 'oid'
+    | 'id'
+    | 'ticketId'
+    | 'customerId'
+    | 'result'
+    | 'startedAt'
+    | 'status'
+    | 'imageIds'
+  >
+>
 
 @Injectable()
 export class TicketClinicChangeTicketProcedureList {
   constructor(private dataSource: DataSource) { }
 
-  async changeTicketProcedureList(params: {
+  async changeTicketProcedureList<T extends TicketClinicProcedureChangeDtoType>(params: {
     oid: number
     ticketId: number
-    ticketProcedureListInsert: TicketProcedureInsertType[]
+    ticketProcedureListDto: NoExtra<TicketClinicProcedureChangeDtoType, T>[]
   }) {
-    const { oid, ticketId, ticketProcedureListInsert } = params
+    const { oid, ticketId, ticketProcedureListDto } = params
     const PREFIX = `ticketId=${ticketId} changeTicketProcedureList failed`
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
@@ -22,24 +38,50 @@ export class TicketClinicChangeTicketProcedureList {
       const whereTicket: FindOptionsWhere<Ticket> = {
         oid,
         id: ticketId,
-        ticketStatus: In([TicketStatus.Schedule, TicketStatus.Executing, TicketStatus.Executing]),
+        ticketStatus: TicketStatus.Executing,
       }
-      const ticketUpdateRoot = await manager.update(Ticket, whereTicket, {
+      const setTicketRoot: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
         updatedAt: Date.now(),
-      }) // update tạm để tạo transaction
-      if (ticketUpdateRoot.affected !== 1) {
+      }
+      // update tạm để tạo transaction
+      const ticketRootUpdateResult: UpdateResult = await manager
+        .createQueryBuilder()
+        .update(Ticket)
+        .where(whereTicket)
+        .set(setTicketRoot)
+        .returning('*')
+        .execute()
+      const ticketUpdateRoot = await manager.update(Ticket, whereTicket, {
+        updatedAt: Date.now(), // update tạm để tạo transaction
+      })
+      if (ticketRootUpdateResult.affected != 1) {
         throw new Error(`${PREFIX}: Update Ticket failed`)
       }
+      const ticketRoot = Ticket.fromRaw(ticketRootUpdateResult.raw[0])
 
       // === 2. DELETE OLD ===
       const whereTicketProcedureDelete: FindOptionsWhere<TicketProcedure> = {
         oid,
         ticketId,
+        status: TicketProcedureStatus.Pending,
       }
       await manager.delete(TicketProcedure, whereTicketProcedureDelete)
 
       // === 3. INSERT NEW ===
-      if (ticketProcedureListInsert.length) {
+      if (ticketProcedureListDto.length) {
+        const ticketProcedureListInsert = ticketProcedureListDto.map((i) => {
+          const draft: NoExtra<TicketProcedureInsertType> = {
+            ...i,
+            oid,
+            ticketId,
+            customerId: ticketRoot.customerId,
+            imageIds: JSON.stringify([]),
+            result: '',
+            startedAt: null,
+            status: TicketProcedureStatus.Pending,
+          }
+          return draft
+        })
         await manager.insert(TicketProcedure, ticketProcedureListInsert)
       }
 
@@ -53,9 +95,18 @@ export class TicketClinicChangeTicketProcedureList {
       const proceduresMoney = ticketProcedureList.reduce((acc, item) => {
         return acc + item.actualPrice * item.quantity
       }, 0)
+      let ticketProcedureStatus = TicketProcedureStatus.Empty
+      if (!ticketProcedureList.length) {
+        ticketProcedureStatus = TicketProcedureStatus.Empty
+      } else if (ticketProcedureList.find((i) => i.status === TicketProcedureStatus.Pending)) {
+        ticketProcedureStatus = TicketProcedureStatus.Pending
+      } else if (ticketProcedureList.find((i) => i.status === TicketProcedureStatus.Completed)) {
+        ticketProcedureStatus = TicketProcedureStatus.Completed
+      }
 
       // === 5. UPDATE VISIT: MONEY  ===
       const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
+        procedureStatus: ticketProcedureStatus,
         proceduresMoney,
         totalMoney: () => `"totalMoney" - "proceduresMoney" + ${proceduresMoney}`,
         debt: () => `"debt" - "proceduresMoney" + ${proceduresMoney}`,

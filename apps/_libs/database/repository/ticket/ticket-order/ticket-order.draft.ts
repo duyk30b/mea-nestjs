@@ -11,8 +11,12 @@ import {
   TicketSurcharge,
 } from '../../../entities'
 import { TicketExpenseInsertType } from '../../../entities/ticket-expense.entity'
-import { TicketProcedureInsertType } from '../../../entities/ticket-procedure.entity'
+import {
+  TicketProcedureInsertType,
+  TicketProcedureStatus,
+} from '../../../entities/ticket-procedure.entity'
 import { TicketProductInsertType, TicketProductType } from '../../../entities/ticket-product.entity'
+import { TicketRadiologyStatus } from '../../../entities/ticket-radiology.entity'
 import { TicketSurchargeInsertType } from '../../../entities/ticket-surcharge.entity'
 import { TicketInsertType, TicketStatus } from '../../../entities/ticket.entity'
 import {
@@ -55,6 +59,10 @@ export class TicketOrderDraft {
         deliveryStatus: ticketOrderProductDraftList.length
           ? DeliveryStatus.Pending
           : DeliveryStatus.NoStock,
+        procedureStatus: ticketOrderProcedureDraftList.length
+          ? TicketProcedureStatus.Completed
+          : TicketProcedureStatus.Empty,
+        radiologyStatus: TicketRadiologyStatus.Empty,
         voucherType: VoucherType.Order,
         paid: 0,
         debt: ticketOrderDraftInsert.totalMoney,
@@ -109,7 +117,10 @@ export class TicketOrderDraft {
             oid,
             ticketId: ticketBasic.id,
             customerId: ticketOrderDraftInsert.customerId,
-            createdAt: ticketOrderDraftInsert.registeredAt,
+            startedAt: ticketOrderDraftInsert.registeredAt,
+            status: TicketProcedureStatus.Completed,
+            imageIds: JSON.stringify([]),
+            result: '',
           }
           return ticketProcedure
         })

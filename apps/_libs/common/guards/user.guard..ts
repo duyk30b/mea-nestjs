@@ -26,12 +26,9 @@ export class UserGuard implements CanActivate {
     if (
       !external.uid
       || !external.oid
-      || !external.rid
       || !external.user
-      || !external.role
       || !external.organization
       || !!external.user.deletedAt
-      || !external.role.isActive
       || !external.organization.isActive
     ) {
       throw new BusinessException('error.Token.AccessTokenExpired', {}, HttpStatus.UNAUTHORIZED)

@@ -5,9 +5,14 @@ import { DiscountType } from '../common/variable'
 import Customer from './customer.entity'
 import Image from './image.entity'
 import Radiology from './radiology.entity'
+import TicketUser from './ticket-user.entity'
 import Ticket from './ticket.entity'
-import User from './user.entity'
 
+export enum TicketRadiologyStatus {
+  Empty = 1,
+  Pending = 2,
+  Completed = 3,
+}
 @Entity('TicketRadiology')
 @Index('IDX_TicketRadiology__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketRadiology__oid_radiologyId', ['oid', 'radiologyId'])
@@ -24,9 +29,9 @@ export default class TicketRadiology extends BaseEntity {
   @Expose()
   radiologyId: number
 
-  @Column({ default: 0 })
+  @Column({ type: 'smallint', default: TicketRadiologyStatus.Pending })
   @Expose()
-  doctorId: number
+  status: TicketRadiologyStatus
 
   @Column({
     type: 'bigint',
@@ -95,22 +100,20 @@ export default class TicketRadiology extends BaseEntity {
   ticket: Ticket
 
   @Expose()
-  @ManyToOne((type) => Radiology, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'radiologyId', referencedColumnName: 'id' })
-  radiology: Radiology
-
-  @Expose()
   @ManyToOne((type) => Customer, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'customerId', referencedColumnName: 'id' })
   customer: Customer
 
   @Expose()
-  @ManyToOne((type) => User, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'doctorId', referencedColumnName: 'id' })
-  doctor: User
+  @ManyToOne((type) => Radiology, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'radiologyId', referencedColumnName: 'id' })
+  radiology: Radiology
 
   @Expose()
   imageList: Image[]
+
+  @Expose()
+  ticketUserList: TicketUser[]
 
   static fromRaw(raw: { [P in keyof TicketRadiology]: any }) {
     if (!raw) return null
@@ -133,14 +136,14 @@ export default class TicketRadiology extends BaseEntity {
 
 export type TicketRadiologyRelationType = Pick<
   TicketRadiology,
-  'ticket' | 'radiology' | 'doctor' | 'customer'
+  'ticket' | 'radiology' | 'customer' | 'imageList' | 'ticketUserList'
 >
 
 export type TicketRadiologySortType = Pick<TicketRadiology, 'id' | 'ticketId' | 'radiologyId'>
 
 export type TicketRadiologyInsertType = Omit<
   TicketRadiology,
-  keyof TicketRadiologyRelationType | keyof Pick<TicketRadiology, 'id' | 'imageList'>
+  keyof TicketRadiologyRelationType | keyof Pick<TicketRadiology, 'id'>
 >
 
 export type TicketRadiologyInsertBasicType = Omit<
@@ -148,7 +151,7 @@ export type TicketRadiologyInsertBasicType = Omit<
   | keyof TicketRadiologyRelationType
   | keyof Pick<
     TicketRadiology,
-    'id' | 'doctorId' | 'startedAt' | 'description' | 'result' | 'imageIds' | 'imageList'
+    'id' | 'startedAt' | 'description' | 'result' | 'imageIds'
   >
 >
 

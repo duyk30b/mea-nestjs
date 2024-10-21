@@ -44,23 +44,21 @@ export class PermissionGuard implements CanActivate {
     if (
       !external.uid
       || !external.oid
-      || !external.rid
       || !external.user
-      || !external.role
       || !external.organization
     ) {
       throw new BusinessException('common.AccountRequired', {}, HttpStatus.UNAUTHORIZED)
     }
 
-    // Nếu user, role, org inactive thì loại từ vòng gửi xe
-    if (!!external.user.deletedAt || !external.role.isActive || !external.organization.isActive) {
+    // Nếu user, org inactive thì loại từ vòng gửi xe
+    if (!!external.user.deletedAt || !external.organization.isActive) {
       throw new BusinessException('common.AccountInactive', {}, HttpStatus.UNAUTHORIZED)
     }
-    // ROOT: oid = 1 được xem mọi API, kể cả API inActive
+    // ROOT: oid = 1 (ROOT) được xem mọi API, kể cả API inActive
     if (external.oid === 1) return true
 
     // Get data để check
-    const permissionMap = await this.cacheDataService.getPermissionMap()
+    const permissionMap = await this.cacheDataService.getPermissionAllMap()
 
     const checkPermissionId = (permissionId: number) => {
       const permission = permissionMap[permissionId]
@@ -83,13 +81,11 @@ export class PermissionGuard implements CanActivate {
         return false
       }
 
-      // Check Role ko có quyền thì out
-      if (external.rid === 1) return true // rid === 1 thì có toàn quyền của org (đã check bên trên)
-      const rolePermissionIds: number[] = JSON.parse(external.role.permissionIds || '[]')
-      if (!pathIdArr.some((pid) => rolePermissionIds.includes(pid))) {
-        return false
-      }
-      return true
+      // Nếu user là admin thì có toàn quyền
+      if (external.user.isAdmin) return true
+
+      // Cuối cùng chỉ cần chứa 1 permissionId trong cây pathIdArr là ok
+      return pathIdArr.some((pid) => external.permissionIds.includes(pid))
     }
 
     if (permissionIdsAnd.length) {

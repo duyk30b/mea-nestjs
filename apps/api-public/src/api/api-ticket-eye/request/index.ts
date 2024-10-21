@@ -1,0 +1,7 @@
+export * from './ticket-eye-register.body'
+export * from './ticket-eye-update-consumable.body'
+export * from './ticket-eye-update-diagnosis.body'
+export * from './ticket-eye-update-items-money.body'
+export * from './ticket-eye-update-prescription.body'
+export * from './ticket-eye-update-procedure-list.body'
+export * from './ticket-eye-update-radiology-list.body'

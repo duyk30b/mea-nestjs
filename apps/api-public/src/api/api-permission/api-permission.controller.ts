@@ -9,7 +9,7 @@ import { PermissionGetManyQuery } from './request'
 @ApiBearerAuth('access-token')
 @Controller('permission')
 export class ApiPermissionController {
-  constructor(private readonly apiPermissionService: ApiPermissionService) {}
+  constructor(private readonly apiPermissionService: ApiPermissionService) { }
 
   @Get('list')
   @IsUser()
