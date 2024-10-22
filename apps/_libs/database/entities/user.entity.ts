@@ -92,7 +92,7 @@ export default class User {
   organization: Organization
 
   @Expose()
-  @OneToMany(() => UserRole, (userRole) => userRole.user)
+  @OneToMany((type) => UserRole, (userRole) => userRole.user)
   userRoleList: UserRole[]
 
   @Expose()

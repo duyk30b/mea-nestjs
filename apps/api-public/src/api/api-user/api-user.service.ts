@@ -35,9 +35,13 @@ export class ApiUserService {
     const { page, limit, filter, sort, relation } = query
 
     const { data, total } = await this.userRepository.pagination({
+      // relationLoadStrategy: 'join',
       page,
       limit,
-      relation,
+      relation: {
+        organization: !!relation.organization,
+        userRoleList: relation.userRoleList ? ({ role: true }) as any : false,
+      },
       condition: {
         oid,
         isAdmin: filter?.isAdmin,
@@ -106,6 +110,11 @@ export class ApiUserService {
 
   async createOne(oid: number, body: UserCreateBody): Promise<BaseResponse> {
     const { username, password, roleIdList, ...other } = body
+    console.log('🚀 ~ file: api-user.service.ts:109 ~ ApiUserService ~ createOne ~ body:', body)
+    console.log(
+      '🚀 ~ file: api-user.service.ts:109 ~ ApiUserService ~ createOne ~ roleIdList:',
+      roleIdList
+    )
     const existUser = await this.userRepository.findOneBy({
       oid,
       username,

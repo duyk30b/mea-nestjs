@@ -22,12 +22,12 @@ export default class UserRole {
   roleId: number
 
   @Expose()
-  @ManyToOne((type) => Role, { createForeignKeyConstraints: false })
+  @ManyToOne((type) => Role, (role) => role.userRoleList, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'roleId', referencedColumnName: 'id' })
   role: Role
 
   @Expose()
-  @ManyToOne((type) => User, { createForeignKeyConstraints: false })
+  @ManyToOne((type) => User, (user) => user.userRoleList, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: User
 

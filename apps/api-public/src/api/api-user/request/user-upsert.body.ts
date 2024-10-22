@@ -1,12 +1,11 @@
 import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
 import {
-  ArrayMinSize,
+  IsArray,
   IsDefined,
   IsIn,
   IsNotEmpty,
   IsNumber,
-  IsPositive,
   IsString,
   MinLength,
   Validate,
@@ -57,7 +56,7 @@ export class UserCreateBody {
   @ApiProperty({ example: [2, 3, 4] })
   @Expose()
   @IsDefined()
-  @IsPositive()
+  @IsArray()
   roleIdList: number[]
 }
 

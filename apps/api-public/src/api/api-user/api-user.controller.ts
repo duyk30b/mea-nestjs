@@ -45,7 +45,7 @@ export class ApiUserController {
 
   @Post('create')
   @HasPermission(PermissionId.USER_CREATE)
-  async create(@External() { oid }: TExternal, @Body() body: UserCreateBody) {
+  async createOne(@External() { oid }: TExternal, @Body() body: UserCreateBody) {
     return await this.apiUserService.createOne(oid, body)
   }
 

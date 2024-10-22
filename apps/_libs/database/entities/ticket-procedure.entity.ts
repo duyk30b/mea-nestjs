@@ -95,7 +95,9 @@ export default class TicketProcedure extends BaseEntity {
   imageIds: string
 
   @Expose()
-  @ManyToOne((type) => Ticket, { createForeignKeyConstraints: false })
+  @ManyToOne((type) => Ticket, (ticket) => ticket.ticketProcedureList, {
+    createForeignKeyConstraints: false,
+  })
   @JoinColumn({ name: 'ticketId', referencedColumnName: 'id' })
   ticket: Ticket
 

@@ -27,6 +27,8 @@ export class ApiTicketService {
       relation: {
         customer: relation?.customer,
         ticketDiagnosis: relation?.ticketDiagnosis,
+        ticketProductList: relation?.ticketProductList,
+        ticketProcedureList: relation?.ticketProcedureList,
       },
       condition: {
         oid,

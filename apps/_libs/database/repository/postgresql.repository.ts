@@ -119,6 +119,7 @@ export abstract class PostgreSqlRepository<
   async insertManyAndReturnRaw<X extends Partial<_INSERT>>(
     data: NoExtra<Partial<_INSERT>, X>[]
   ): Promise<{ [P in keyof _ENTITY]: any }[]> {
+    if (!data.length) return []
     const insertResult: InsertResult = await this.repository
       .createQueryBuilder()
       .insert()
