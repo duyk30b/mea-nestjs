@@ -4,14 +4,15 @@ import { BaseEntity } from '../common/base.entity'
 import { DeliveryStatus, DiscountType, VoucherType } from '../common/variable'
 import Appointment from './appointment.entity'
 import CustomerPayment from './customer-payment.entity'
+import CustomerSource from './customer-source.entity'
 import Customer from './customer.entity'
 import TicketDiagnosis from './ticket-diagnosis.entity'
 import TicketExpense from './ticket-expense.entity'
-import TicketProcedure from './ticket-procedure.entity'
+import TicketProcedure, { TicketProcedureStatus } from './ticket-procedure.entity'
 import TicketProduct from './ticket-product.entity'
-import TicketRadiology from './ticket-radiology.entity'
+import TicketRadiology, { TicketRadiologyStatus } from './ticket-radiology.entity'
 import TicketSurcharge from './ticket-surcharge.entity'
-import User from './user.entity'
+import TicketUser from './ticket-user.entity'
 
 export enum TicketStatus {
   Schedule = 1,
@@ -34,7 +35,7 @@ export default class Ticket extends BaseEntity {
 
   @Column({ default: 0 })
   @Expose()
-  userId: number
+  customerSourceId: number
 
   @Column({ type: 'smallint', default: VoucherType.Order })
   @Expose()
@@ -47,6 +48,14 @@ export default class Ticket extends BaseEntity {
   @Column({ type: 'smallint', default: DeliveryStatus.NoStock })
   @Expose()
   deliveryStatus: DeliveryStatus
+
+  @Column({ type: 'smallint', default: TicketProcedureStatus.Empty })
+  @Expose()
+  procedureStatus: TicketProcedureStatus
+
+  @Column({ type: 'smallint', default: TicketRadiologyStatus.Empty })
+  @Expose()
+  radiologyStatus: TicketRadiologyStatus
 
   @Column({ type: 'smallint', nullable: true })
   @Expose()
@@ -210,15 +219,15 @@ export default class Ticket extends BaseEntity {
   @Expose()
   updatedAt: number
 
+  @ManyToOne((type) => CustomerSource, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'customerSourceId', referencedColumnName: 'id' })
+  @Expose()
+  customerSource: CustomerSource
+
   @ManyToOne((type) => Customer, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'customerId', referencedColumnName: 'id' })
   @Expose()
   customer: Customer
-
-  @ManyToOne((type) => User, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
-  @Expose()
-  user: User
 
   @OneToMany(() => CustomerPayment, (customerPayment) => customerPayment.ticket)
   @Expose()
@@ -238,6 +247,14 @@ export default class Ticket extends BaseEntity {
   @Expose()
   ticketProductList: TicketProduct[]
 
+  @OneToMany(() => TicketProduct, (ticketProductConsumable) => ticketProductConsumable.ticket)
+  @Expose()
+  ticketProductConsumableList: TicketProduct[]
+
+  @OneToMany(() => TicketProduct, (ticketProductPrescription) => ticketProductPrescription.ticket)
+  @Expose()
+  ticketProductPrescriptionList: TicketProduct[]
+
   @OneToMany(() => TicketProcedure, (ticketProcedure) => ticketProcedure.ticket)
   @Expose()
   ticketProcedureList: TicketProcedure[]
@@ -253,6 +270,10 @@ export default class Ticket extends BaseEntity {
   @Expose()
   @OneToMany(() => TicketSurcharge, (ticketSurcharge) => ticketSurcharge.ticket)
   ticketSurchargeList: TicketSurcharge[]
+
+  @Expose()
+  @OneToMany(() => TicketUser, (ticketUser) => ticketUser.ticket)
+  ticketUserList: TicketUser[]
 
   static fromRaw(raw: { [P in keyof Ticket]: any }) {
     if (!raw) return null
@@ -292,15 +313,18 @@ export default class Ticket extends BaseEntity {
 export type TicketRelationType = Pick<
   Ticket,
   | 'customer'
-  | 'user'
   | 'ticketDiagnosis'
   | 'ticketProductList'
+  | 'ticketProductConsumableList'
+  | 'ticketProductPrescriptionList'
   | 'ticketProcedureList'
   | 'ticketRadiologyList'
   | 'ticketExpenseList'
   | 'ticketSurchargeList'
+  | 'ticketUserList'
   | 'customerPaymentList'
   | 'toAppointment'
+  | 'customerSource'
 >
 
 export type TicketSortType = Pick<Ticket, 'id' | 'customerId' | 'registeredAt'>

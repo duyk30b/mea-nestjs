@@ -5,7 +5,11 @@ import { SortQuery } from '../../../../../_libs/common/dto'
 export class RootOrganizationRelationQuery {
   @Expose()
   @IsBoolean()
-  users: boolean
+  userList: boolean
+
+  @Expose()
+  @IsBoolean()
+  logoImage: boolean
 }
 
 export class RootOrganizationFilterQuery {}

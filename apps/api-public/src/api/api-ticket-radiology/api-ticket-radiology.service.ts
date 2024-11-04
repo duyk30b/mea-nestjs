@@ -1,22 +1,35 @@
 import { Injectable } from '@nestjs/common'
+import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { Image } from '../../../../_libs/database/entities'
+import { TicketRadiologyStatus } from '../../../../_libs/database/entities/ticket-radiology.entity'
 import { ImageRepository } from '../../../../_libs/database/repository/image/image.repository'
+import { RadiologyRepository } from '../../../../_libs/database/repository/radiology/radiology.repository'
 import { TicketRadiologyRepository } from '../../../../_libs/database/repository/ticket-radiology/ticket-radiology.repository'
+import { TicketRepository } from '../../../../_libs/database/repository/ticket/ticket-base/ticket.repository'
+import { UserRepository } from '../../../../_libs/database/repository/user/user.repository'
+import { ImageManagerService } from '../../components/image-manager/image-manager.service'
+import { SocketEmitService } from '../../socket/socket-emit.service'
 import { TicketRadiologyGetOneQuery, TicketRadiologyPaginationQuery } from './request'
+import { TicketRadiologyCreateBody, TicketRadiologyUpdateBody } from './request/ticket-radiology-upsert.body'
 
 @Injectable()
 export class ApiTicketRadiologyService {
   constructor(
+    private readonly socketEmitService: SocketEmitService,
+    private readonly imageManagerService: ImageManagerService,
     private readonly ticketRadiologyRepository: TicketRadiologyRepository,
-    private readonly imageRepository: ImageRepository
+    private readonly imageRepository: ImageRepository,
+    private readonly radiologyRepository: RadiologyRepository,
+    private readonly userRepository: UserRepository,
+    private readonly ticketRepository: TicketRepository
   ) { }
 
   async pagination(oid: number, query: TicketRadiologyPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, relation, sort } = query
-    const { imageList, ...relationEntity } = relation
+    const { imageList, ...relationEntity } = relation // chưa xử lý imageList
 
     const { total, data } = await this.ticketRadiologyRepository.pagination({
       relation: relationEntity,
@@ -44,19 +57,133 @@ export class ApiTicketRadiologyService {
       condition: { oid, id },
     })
     if (!ticketRadiology) {
-      throw new BusinessException('error.Product.NotExist')
+      throw new BusinessException('error.Database.NotFound')
     }
+
+    if (imageList) {
+      ticketRadiology.imageList = []
+      const imageIds: number[] = JSON.parse(ticketRadiology.imageIds)
+      let imageMap: Record<string, Image> = {}
+      if (imageIds.length > 0) {
+        const imageList = await this.imageRepository.findManyByIds(imageIds)
+        imageMap = arrayToKeyValue(imageList, 'id')
+      }
+      imageIds.forEach((i) => {
+        ticketRadiology.imageList.push(imageMap[i])
+      })
+    }
+
+    return { data: { ticketRadiology } }
+  }
+
+  async createCompleted(options: {
+    oid: number
+    body: Omit<TicketRadiologyCreateBody, 'files' | 'file'>
+    files: FileUploadDto[]
+  }) {
+    const { oid, body, files } = options
+
+    const imageIdsUpdate = await this.imageManagerService.changeImage({
+      oid,
+      customerId: body.customerId,
+      files,
+      filesPosition: Array.from({ length: files.length }, (_, i) => i),
+      imageIdsKeep: [],
+      imageIdsOld: [],
+    })
+
+    const ticketRadiology = await this.ticketRadiologyRepository.insertOneFullFieldAndReturnEntity({
+      ...body,
+      oid,
+      ticketId: body.ticketId,
+      imageIds: JSON.stringify(imageIdsUpdate),
+      status: TicketRadiologyStatus.Completed,
+      startedAt: body.startedAt,
+    })
+
+    if (!ticketRadiology) throw new BusinessException('error.Database.InsertFailed')
+
+    const [radiology, imageList] = await Promise.all([
+      this.radiologyRepository.findOneById(ticketRadiology.radiologyId),
+      this.imageRepository.findMany({
+        condition: {
+          id: { IN: JSON.parse(ticketRadiology.imageIds) },
+        },
+        sort: { id: 'ASC' },
+      }),
+    ])
+
+    ticketRadiology.radiology = radiology
+    ticketRadiology.imageList = imageList
+
+    const [ticket] = await this.ticketRepository.refreshRadiologyMoney({
+      oid,
+      ticketId: body.ticketId,
+    })
+
+    this.socketEmitService.ticketUpdate(oid, { ticketBasic: ticket })
+    this.socketEmitService.ticketUpdateTicketRadiologyResult(oid, {
+      ticketId: ticketRadiology.ticketId,
+      voucherType: ticket.voucherType,
+      ticketRadiology,
+    })
+    return { data: { ticketRadiologyId: ticketRadiology.id } }
+  }
+
+  async update(options: {
+    oid: number,
+    ticketRadiologyId: number,
+    body: Omit<TicketRadiologyUpdateBody, 'files' | 'file'>
+    files: FileUploadDto[]
+  }) {
+    const { oid, body, files, ticketRadiologyId } = options
+    const { imageIdsKeep, filesPosition, ...object } = body
+
+    const oldTicketRadiology = await this.ticketRadiologyRepository.findOneBy({
+      oid,
+      id: ticketRadiologyId,
+    })
+
+    const imageIdsUpdate = await this.imageManagerService.changeImage({
+      oid,
+      customerId: oldTicketRadiology.customerId,
+      files,
+      filesPosition,
+      imageIdsKeep,
+      imageIdsOld: JSON.parse(oldTicketRadiology.imageIds),
+    })
+
+    const [ticketRadiology] = await this.ticketRadiologyRepository.updateAndReturnEntity(
+      { oid, id: ticketRadiologyId },
+      {
+        imageIds: JSON.stringify(imageIdsUpdate),
+        ...object,
+      }
+    )
+
+    if (!ticketRadiology) throw new BusinessException('error.Database.UpdateFailed')
     ticketRadiology.imageList = []
     const imageIds: number[] = JSON.parse(ticketRadiology.imageIds)
-    let imageMap: Record<string, Image> = {}
-    if (imageIds.length > 0) {
-      const imageList = await this.imageRepository.findManyByIds(imageIds)
-      imageMap = arrayToKeyValue(imageList, 'id')
-    }
+
+    const [radiology, imageList] = await Promise.all([
+      this.radiologyRepository.findOneById(ticketRadiology.radiologyId),
+      this.imageRepository.findManyByIds(imageIds),
+    ])
+
+    const imageMap = arrayToKeyValue(imageList, 'id')
     imageIds.forEach((i) => {
       ticketRadiology.imageList.push(imageMap[i])
     })
 
-    return { data: { ticketRadiology } }
+    ticketRadiology.radiology = radiology
+
+    const ticket = await this.ticketRepository.findOneBy({ oid, id: ticketRadiology.ticketId })
+
+    this.socketEmitService.ticketUpdateTicketRadiologyResult(oid, {
+      ticketId: ticketRadiology.ticketId,
+      voucherType: ticket.voucherType,
+      ticketRadiology,
+    })
+    return { data: { ticketRadiologyId: ticketRadiology.id } }
   }
 }

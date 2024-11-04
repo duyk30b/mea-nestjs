@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import { Cell, Workbook, Worksheet } from 'exceljs'
-import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
-import { arrayToKeyArray } from '../../../../_libs/common/helpers/object.helper'
+import { arrayToKeyArray, arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
 import { DTimer } from '../../../../_libs/common/helpers/time.helper'
-import { Organization, Product, User } from '../../../../_libs/database/entities'
+import { Organization, Product, ProductGroup, User } from '../../../../_libs/database/entities'
 import { BatchRepository } from '../../../../_libs/database/repository/batch/batch.repository'
+import { ProductGroupRepository } from '../../../../_libs/database/repository/product-group/product-group.repository'
 import { ProductRepository } from '../../../../_libs/database/repository/product/product.repository'
 import { excelOneSheetWorkbook } from '../../../../_libs/file/excel-one-sheet.util'
 
@@ -12,8 +12,8 @@ import { excelOneSheetWorkbook } from '../../../../_libs/file/excel-one-sheet.ut
 export class ApiProductExcel {
   constructor(
     private readonly productRepository: ProductRepository,
-    private readonly batchRepository: BatchRepository,
-    private readonly cacheDataService: CacheDataService
+    private readonly productGroupRepository: ProductGroupRepository,
+    private readonly batchRepository: BatchRepository
   ) { }
 
   async downloadExcel(options: { user: User; organization: Organization }) {
@@ -29,6 +29,9 @@ export class ApiProductExcel {
     productList.forEach((product) => {
       product.batchList = batchListMapProductId[product.id] || []
     })
+
+    const productGroupAll = await this.productGroupRepository.findManyBy({})
+    const productGroupMap = arrayToKeyValue(productGroupAll, 'id')
 
     const workbook: Workbook = this.getWorkbookProduct(productList, {
       orgName: organization.name,
@@ -47,7 +50,7 @@ export class ApiProductExcel {
         .replace('Phường ', '')
         .replace('Xã ', ''),
       userFullName: user.fullName,
-      groupMap: await this.cacheDataService.getProductGroupMap(organization.id),
+      productGroupMap,
     })
     const buffer = await workbook.xlsx.writeBuffer()
 
@@ -67,7 +70,7 @@ export class ApiProductExcel {
       orgPhone: string
       orgAddress: string
       userFullName: string
-      groupMap: Record<string, string>
+      productGroupMap: Record<string, ProductGroup>
     }
   ): Workbook {
     const dataRows = []
@@ -128,7 +131,7 @@ export class ApiProductExcel {
               costPrice: product.costPrice || 0,
               wholesalePrice: product.wholesalePrice || 0,
               retailPrice: product.retailPrice || 0,
-              group: meta.groupMap[product.group] || '',
+              group: meta.productGroupMap[product.productGroupId] || '',
               unit: unitNameBasic,
               route: product.route || '',
               source: product.source || '',
@@ -193,7 +196,7 @@ export class ApiProductExcel {
                 costPrice: batch.costPrice || 0,
                 wholesalePrice: batch.wholesalePrice || 0,
                 retailPrice: batch.retailPrice || 0,
-                group: meta.groupMap[product.group] || '',
+                group: meta.productGroupMap[product.productGroupId] || '',
                 unit: unitNameBasic,
                 route: product.route || '',
                 source: product.source || '',

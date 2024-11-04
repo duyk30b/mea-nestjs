@@ -1,12 +1,12 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity, Index, OneToMany } from 'typeorm'
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import Batch from './batch.entity'
+import ProductGroup from './product-group.entity'
 
 @Entity('Product')
 @Index('IDX_Product__oid_brandName', ['oid', 'brandName'])
 @Index('IDX_Product__oid_substance', ['oid', 'substance'])
-@Index('IDX_Product__oid_group', ['oid', 'group'])
 export default class Product extends BaseEntity {
   @Column({ type: 'character varying', length: 255 })
   @Expose()
@@ -93,9 +93,9 @@ export default class Product extends BaseEntity {
   @Expose()
   hasManageBatches: 0 | 1
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
   @Expose()
-  group: string // Nhóm thuốc: kháng sinh, dinh dưỡng ...
+  @Column({ default: 0 })
+  productGroupId: number
 
   @Column({ type: 'text', default: JSON.stringify([]) })
   @Expose()
@@ -143,6 +143,11 @@ export default class Product extends BaseEntity {
   @Expose()
   deletedAt: number
 
+  @ManyToOne((type) => ProductGroup, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'productGroupId', referencedColumnName: 'id' })
+  @Expose()
+  productGroup: ProductGroup
+
   @Expose()
   @OneToMany(() => Batch, (batch) => batch.product)
   batchList: Batch[]
@@ -170,7 +175,7 @@ export default class Product extends BaseEntity {
   }
 }
 
-export type ProductRelationType = Pick<Product, 'batchList'>
+export type ProductRelationType = Pick<Product, 'batchList' | 'productGroup'>
 
 export type ProductSortType = Pick<
   Product,

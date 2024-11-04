@@ -1,9 +1,20 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
-import { EntityManager, Repository } from 'typeorm'
+import { DataSource, EntityManager, Repository } from 'typeorm'
 import { BaseCondition } from '../../../../common/dto'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
-import { Appointment, Ticket } from '../../../entities'
+import {
+  Appointment,
+  Ticket,
+  TicketDiagnosis,
+  TicketExpense,
+  TicketProcedure,
+  TicketProduct,
+  TicketRadiology,
+  TicketSurcharge,
+  TicketUser,
+} from '../../../entities'
+import { TicketProductType } from '../../../entities/ticket-product.entity'
 import {
   TicketInsertType,
   TicketRelationType,
@@ -21,6 +32,7 @@ export class TicketRepository extends PostgreSqlRepository<
   TicketUpdateType
 > {
   constructor(
+    private dataSource: DataSource,
     @InjectEntityManager() private manager: EntityManager,
     @InjectRepository(Ticket) private ticketRepository: Repository<Ticket>
   ) {
@@ -36,8 +48,11 @@ export class TicketRepository extends PostgreSqlRepository<
       ticketDiagnosis?: boolean
       toAppointment?: boolean
       ticketProductList?: { product?: boolean; batch?: boolean } | false
+      ticketProductConsumableList?: { product?: boolean; batch?: boolean } | false
+      ticketProductPrescriptionList?: { product?: boolean; batch?: boolean } | false
       ticketProcedureList?: { procedure?: boolean } | false
-      ticketRadiologyList?: { radiology?: boolean; doctor?: boolean } | false
+      ticketRadiologyList?: { radiology?: boolean } | false
+      ticketUserList?: { user?: boolean } | false
       ticketExpenseList?: boolean
       ticketSurchargeList?: boolean
     }
@@ -78,15 +93,61 @@ export class TicketRepository extends PostgreSqlRepository<
       if (relation?.ticketProductList.product) {
         query = query.leftJoinAndSelect(
           'ticketProduct.product',
-          'product',
+          'ticketProduct_product',
           'ticketProduct.productId != 0'
         )
       }
       if (relation?.ticketProductList.batch) {
         query = query.leftJoinAndSelect(
           'ticketProduct.batch',
-          'batch',
+          'ticketProduct_batch',
           'ticketProduct.batchId != 0'
+        )
+      }
+    }
+    if (relation?.ticketProductConsumableList) {
+      query = query.leftJoinAndSelect(
+        'ticket.ticketProductConsumableList',
+        'ticketProductConsumable',
+        'ticketProductConsumable.type = :typeConsumable',
+        { typeConsumable: TicketProductType.Consumable }
+      )
+      query.addOrderBy('ticketProductConsumable.id', 'ASC')
+      if (relation?.ticketProductConsumableList.product) {
+        query = query.leftJoinAndSelect(
+          'ticketProductConsumable.product',
+          'ticketProductConsumable_product',
+          'ticketProductConsumable.productId != 0'
+        )
+      }
+      if (relation?.ticketProductConsumableList.batch) {
+        query = query.leftJoinAndSelect(
+          'ticketProductConsumable.batch',
+          'ticketProductConsumable_batch',
+          'ticketProductConsumable.batchId != 0'
+        )
+      }
+    }
+    if (relation?.ticketProductPrescriptionList) {
+      query = query.leftJoinAndSelect(
+        'ticket.ticketProductPrescriptionList',
+        'ticketProductPrescription',
+        'ticketProductPrescription.type = :typePrescription',
+        { typePrescription: TicketProductType.Prescription }
+      )
+      query.addOrderBy('ticketProductPrescription.id', 'ASC')
+      if (relation?.ticketProductPrescriptionList.product) {
+        query = query.leftJoinAndSelect(
+          'ticketProductPrescription.product',
+          'ticketProductPrescription_product',
+          'ticketProductPrescription.productId != 0'
+        )
+      }
+      if (relation?.ticketProductPrescriptionList.batch) {
+        query = query.leftJoinAndSelect(
+          'ticketProductPrescription.batch',
+          'ticketProductPrescription_batch',
+          'ticketProductPrescription.batchId != 0'
         )
       }
     }
@@ -112,12 +173,13 @@ export class TicketRepository extends PostgreSqlRepository<
           'ticketRadiology.radiologyId != 0'
         )
       }
-      if (relation?.ticketRadiologyList?.doctor) {
-        query = query.leftJoinAndSelect(
-          'ticketRadiology.doctor',
-          'doctor',
-          'ticketRadiology.doctorId != 0'
-        )
+    }
+
+    if (relation?.ticketUserList) {
+      query = query.leftJoinAndSelect('ticket.ticketUserList', 'ticketUser')
+      query.addOrderBy('ticketUser.id', 'ASC')
+      if (relation?.ticketUserList?.user) {
+        query = query.leftJoinAndSelect('ticketUser.user', 'user', 'ticketUser.userId != 0')
       }
     }
 
@@ -145,6 +207,24 @@ export class TicketRepository extends PostgreSqlRepository<
   ): Promise<Ticket[]> {
     const raws = await this.updateAndReturnRaw(condition, data)
     return Ticket.fromRaws(raws)
+  }
+
+  async destroy(options: { oid: number; ticketId: number }) {
+    const { oid, ticketId } = options
+    return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
+      await manager.delete(Ticket, { oid, id: ticketId })
+
+      await manager.delete(TicketDiagnosis, { oid, ticketId })
+
+      await manager.delete(TicketProduct, { oid, ticketId })
+      await manager.delete(TicketProcedure, { oid, ticketId })
+      await manager.delete(TicketRadiology, { oid, ticketId })
+
+      await manager.delete(TicketSurcharge, { oid, ticketId })
+      await manager.delete(TicketExpense, { oid, ticketId })
+
+      await manager.delete(TicketUser, { oid, ticketId })
+    })
   }
 
   async refreshRadiologyMoney(options: { oid: number; ticketId: number }) {

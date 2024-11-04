@@ -13,19 +13,17 @@ import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { FastifyFilesInterceptor } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
+import { VoucherType } from '../../../../_libs/database/common/variable'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
 import { ApiTicketClinicService } from './api-ticket-clinic.service'
 import {
-  TicketClinicChangeConsumableBody,
-  TicketClinicChangeItemsMoneyBody,
-  TicketClinicChangePrescriptionBody,
-  TicketClinicChangeTicketProcedureListBody,
-  TicketClinicChangeTicketRadiologyListBody,
-  TicketClinicCreateTicketRadiologyBody,
-  TicketClinicRegisterWithExistCustomerBody,
-  TicketClinicRegisterWithNewCustomerBody,
-  TicketClinicUpdateDiagnosisBody,
-  TicketClinicUpdateTicketRadiologyBody,
+  TicketClinicRegisterBody,
+  TicketClinicUpdateConsumableBody,
+  TicketClinicUpdateDiagnosisBasicBody,
+  TicketClinicUpdateItemsMoneyBody,
+  TicketClinicUpdatePrescriptionBody,
+  TicketClinicUpdateTicketProcedureListBody,
+  TicketClinicUpdateTicketRadiologyListBody,
 } from './request'
 import { TicketClinicPaymentBody } from './request/ticket-clinic-payment.body'
 import { TicketClinicReturnProductListBody } from './request/ticket-clinic-return-product-list.body'
@@ -36,49 +34,45 @@ import { TicketClinicReturnProductListBody } from './request/ticket-clinic-retur
 export class ApiTicketClinicController {
   constructor(private readonly apiTicketClinicService: ApiTicketClinicService) { }
 
-  @Post('register-with-new-customer')
+  @Post('register')
   @HasPermission(PermissionId.TICKET_CLINIC_REGISTER_NEW)
-  async registerWithNewUser(
-    @External() { oid, uid }: TExternal,
-    @Body() body: TicketClinicRegisterWithNewCustomerBody
+  async register(
+    @External() { oid, uid, clientId }: TExternal,
+    @Body() body: TicketClinicRegisterBody
   ) {
-    return await this.apiTicketClinicService.registerWithNewUser({
+    return await this.apiTicketClinicService.register({
       oid,
       body,
-      userId: uid,
     })
   }
 
-  @Post('register-with-exist-customer')
-  @HasPermission(PermissionId.TICKET_CLINIC_REGISTER_NEW)
-  async registerWithExistUser(
-    @External() { oid, uid }: TExternal,
-    @Body() body: TicketClinicRegisterWithExistCustomerBody
-  ) {
-    return await this.apiTicketClinicService.registerWithExistUser({
+  @Delete(':id/destroy-draft-schedule')
+  @HasPermission(PermissionId.TICKET_CLINIC_DESTROY_DRAFT_SCHEDULE)
+  async destroyDraftSchedule(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiTicketClinicService.destroyDraftSchedule({
       oid,
-      userId: uid,
-      body,
+      ticketId: id,
+      voucherType: VoucherType.Clinic,
     })
   }
 
   @Post(':id/start-checkup')
   @HasPermission(PermissionId.TICKET_CLINIC_START_CHECKUP)
-  async startCheckup(@External() { oid, user, uid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiTicketClinicService.startCheckup({ oid, userId: uid, user, ticketId: id })
+  async startCheckup(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiTicketClinicService.startCheckup({ oid, ticketId: id })
   }
 
-  @Post(':id/update-diagnosis')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_DIAGNOSIS)
+  @Post(':id/update-diagnosis-basic')
+  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_DIAGNOSIS_BASIC)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FastifyFilesInterceptor('files', 10, {}))
-  async update(
+  async updateDiagnosisBasic(
     @External() { oid }: TExternal,
     @UploadedFiles() files: FileUploadDto[],
     @Param() { id }: IdParam,
-    @Body() body: TicketClinicUpdateDiagnosisBody
+    @Body() body: TicketClinicUpdateDiagnosisBasicBody
   ) {
-    return await this.apiTicketClinicService.updateDiagnosis({
+    return await this.apiTicketClinicService.updateDiagnosisBasic({
       oid,
       ticketId: id,
       body,
@@ -86,106 +80,70 @@ export class ApiTicketClinicController {
     })
   }
 
-  @Post(':id/change-ticket-procedure-list')
-  @HasPermission(PermissionId.TICKET_CLINIC_CHANGE_TICKET_PROCEDURE_LIST)
-  async changeTicketProcedureList(
+  @Post(':id/update-ticket-procedure-list')
+  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST)
+  async updateTicketProcedureList(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketClinicChangeTicketProcedureListBody
+    @Body() body: TicketClinicUpdateTicketProcedureListBody
   ) {
-    return await this.apiTicketClinicService.changeTicketProcedureList({
+    return await this.apiTicketClinicService.updateTicketProcedureList({
       oid,
       ticketId: id,
       body,
     })
   }
 
-  @Post(':id/change-ticket-radiology-list')
-  @HasPermission(PermissionId.TICKET_CLINIC_CHANGE_TICKET_RADIOLOGY_LIST)
-  async changeTicketRadiologyList(
+  @Post(':id/update-ticket-product-consumable')
+  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE)
+  async updateTicketProductConsumable(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketClinicChangeTicketRadiologyListBody
+    @Body() body: TicketClinicUpdateConsumableBody
   ) {
-    return await this.apiTicketClinicService.changeTicketRadiologyList({
+    return await this.apiTicketClinicService.updateTicketProductConsumable({
       oid,
       ticketId: id,
       body,
     })
   }
 
-  @Post(':id/create-ticket-radiology')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPSERT_TICKET_RADIOLOGY_RESULT)
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FastifyFilesInterceptor('files', 10, {}))
-  async createTicketRadiology(
+  @Post(':id/update-ticket-product-prescription')
+  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION)
+  async updateTicketProductPrescription(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @UploadedFiles() files: FileUploadDto[],
-    @Body() body: TicketClinicCreateTicketRadiologyBody
+    @Body() body: TicketClinicUpdatePrescriptionBody
   ) {
-    return await this.apiTicketClinicService.createTicketRadiology({
-      oid,
-      ticketId: id,
-      body,
-      files,
-    })
-  }
-
-  @Post(':id/update-ticket-radiology')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPSERT_TICKET_RADIOLOGY_RESULT)
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FastifyFilesInterceptor('files', 10, {}))
-  async updateTicketRadiology(
-    @External() { oid }: TExternal,
-    @UploadedFiles() files: FileUploadDto[],
-    @Param() { id }: IdParam,
-    @Body() body: TicketClinicUpdateTicketRadiologyBody
-  ) {
-    return await this.apiTicketClinicService.updateTicketRadiology({
-      oid,
-      ticketId: id,
-      body,
-      files,
-    })
-  }
-
-  @Post(':id/change-consumable')
-  @HasPermission(PermissionId.TICKET_CLINIC_CHANGE_CONSUMABLE)
-  async changeConsumable(
-    @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: TicketClinicChangeConsumableBody
-  ) {
-    return await this.apiTicketClinicService.changeConsumable({
+    return await this.apiTicketClinicService.updateTicketProductPrescription({
       oid,
       ticketId: id,
       body,
     })
   }
 
-  @Post(':id/change-prescription')
-  @HasPermission(PermissionId.TICKET_CLINIC_CHANGE_PRESCRIPTION)
-  async changePrescription(
+  @Post(':id/update-ticket-radiology-list')
+  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST)
+  async updateTicketRadiologyList(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketClinicChangePrescriptionBody
+    @Body() body: TicketClinicUpdateTicketRadiologyListBody
   ) {
-    return await this.apiTicketClinicService.changePrescription({
+    return await this.apiTicketClinicService.updateTicketRadiologyList({
       oid,
       ticketId: id,
       body,
     })
   }
 
-  @Post(':id/change-items-money')
-  @HasPermission(PermissionId.TICKET_CLINIC_CHANGE_ITEMS_MONEY)
-  async changeItemsMoney(
+  @Post(':id/update-items-money')
+  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_ITEMS_MONEY)
+  async updateItemsMoney(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketClinicChangeItemsMoneyBody
+    @Body() body: TicketClinicUpdateItemsMoneyBody
   ) {
-    return await this.apiTicketClinicService.changeItemsMoney({ oid, ticketId: id, body })
+    return await this.apiTicketClinicService.updateItemsMoney({ oid, ticketId: id, body })
   }
 
   @Post(':id/send-product')
@@ -244,11 +202,5 @@ export class ApiTicketClinicController {
   @HasPermission(PermissionId.TICKET_CLINIC_READ)
   async reopen(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiTicketClinicService.reopen({ oid, ticketId: id })
-  }
-
-  @Delete(':id/destroy-draft-schedule')
-  @HasPermission(PermissionId.TICKET_CLINIC_DESTROY_DRAFT_SCHEDULE)
-  async destroyDraftSchedule(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiTicketClinicService.destroyDraftSchedule({ oid, ticketId: id })
   }
 }

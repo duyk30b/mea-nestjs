@@ -1,5 +1,12 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import ProcedureGroup from './procedure-group.entity'
+
+export enum ProcedureType {
+  Basic = 1,
+  Regimen = 2, // Liệu trình
+  Remedy = 3, // Bài thuốc
+}
 
 @Entity('Procedure')
 export default class Procedure {
@@ -15,13 +22,29 @@ export default class Procedure {
   @Expose()
   name: string // Tên dịch vụ
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'smallint', default: ProcedureType.Basic })
   @Expose()
-  group: string // Nhóm dịch vụ ...
+  procedureType: ProcedureType
+
+  @Column({ type: 'smallint', default: 1 })
+  @Expose()
+  quantityDefault: number
+
+  @Column({ type: 'smallint', default: 0 })
+  @Expose()
+  gapHours: number
+
+  @Expose()
+  @Column({ default: 0 })
+  procedureGroupId: number
 
   @Column({ nullable: true })
   @Expose()
-  price: number // Giá dự kiến
+  price: number // Giá mặc định
+
+  @Column({ type: 'text', default: JSON.stringify([]) })
+  @Expose()
+  consumablesHint: string
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()
@@ -49,6 +72,11 @@ export default class Procedure {
   @Expose()
   deletedAt: number
 
+  @ManyToOne((type) => ProcedureGroup, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'procedureGroupId', referencedColumnName: 'id' })
+  @Expose()
+  procedureGroup: ProcedureGroup
+
   static fromRaw(raw: { [P in keyof Procedure]: any }) {
     if (!raw) return null
     const entity = new Procedure()
@@ -67,7 +95,7 @@ export default class Procedure {
   }
 }
 
-export type ProcedureRelationType = Pick<Procedure, never>
+export type ProcedureRelationType = Pick<Procedure, 'procedureGroup'>
 
 export type ProcedureSortType = Pick<Procedure, 'oid' | 'id' | 'name' | 'price'>
 

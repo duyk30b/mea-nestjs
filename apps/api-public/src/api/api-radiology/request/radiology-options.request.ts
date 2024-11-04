@@ -1,14 +1,18 @@
 import { Expose, Type } from 'class-transformer'
-import { IsIn, IsString, ValidateNested } from 'class-validator'
+import { IsBoolean, IsIn, IsNumber, ValidateNested } from 'class-validator'
 import { ConditionTimestamp } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 
-export class RadiologyRelationQuery { }
+export class RadiologyRelationQuery {
+  @Expose()
+  @IsBoolean()
+  radiologyGroup: boolean
+}
 
 export class RadiologyFilterQuery {
   @Expose()
-  @IsString()
-  group: string
+  @IsNumber()
+  radiologyGroupId: number
 
   @Expose()
   @Type(() => ConditionTimestamp)

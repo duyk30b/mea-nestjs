@@ -1,13 +1,9 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { EGender } from '../common/variable'
+import { VoucherType } from '../common/variable'
+import CustomerSource from './customer-source.entity'
 import Customer from './customer.entity'
-
-export enum AppointmentType {
-  CustomerInitiated = 1, // Đã lên lịch
-  Reminder = 2, // Hoàn thành
-}
 
 export enum AppointmentStatus {
   Waiting = 1, // Đợi - Nhắc khám
@@ -22,6 +18,10 @@ export default class Appointment extends BaseEntity {
   @Column()
   @Expose()
   customerId: number
+
+  @Column({ default: 0 })
+  @Expose()
+  customerSourceId: number
 
   @Column({ type: 'character varying', length: 255, nullable: true })
   @Expose()
@@ -49,9 +49,9 @@ export default class Appointment extends BaseEntity {
   @Expose()
   cancelReason: string // Lý do hẹn
 
-  @Column({ type: 'smallint', default: AppointmentType.CustomerInitiated })
+  @Column({ type: 'smallint', default: VoucherType.Clinic })
   @Expose()
-  appointmentType: AppointmentType
+  voucherType: VoucherType
 
   @Column({ type: 'smallint', default: AppointmentStatus.Waiting })
   @Expose()
@@ -61,6 +61,11 @@ export default class Appointment extends BaseEntity {
   @JoinColumn({ name: 'customerId', referencedColumnName: 'id' })
   @Expose()
   customer: Customer
+
+  @ManyToOne((type) => CustomerSource, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'customerSourceId', referencedColumnName: 'id' })
+  @Expose()
+  customerSource: CustomerSource
 
   static fromRaw(raw: { [P in keyof Appointment]: any }) {
     if (!raw) return null
@@ -77,7 +82,7 @@ export default class Appointment extends BaseEntity {
   }
 }
 
-export type AppointmentRelationType = Pick<Appointment, 'customer'>
+export type AppointmentRelationType = Pick<Appointment, 'customer' | 'customerSource'>
 
 export type AppointmentSortType = Pick<Appointment, 'oid' | 'id' | 'registeredAt'>
 

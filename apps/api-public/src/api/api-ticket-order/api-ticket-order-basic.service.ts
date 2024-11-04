@@ -37,7 +37,7 @@ export class ApiTicketOrderBasicService {
         oid,
         ticketOrderDraftInsert: {
           ...body.ticketOrderDraftInsert,
-          userId,
+          customerSourceId: 0,
         },
         ticketOrderProductDraftList: body.ticketOrderProductDraftList,
         ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,
@@ -63,7 +63,7 @@ export class ApiTicketOrderBasicService {
         ticketId,
         ticketOrderDraftApprovedUpdate: {
           ...body.ticketOrderDraftApprovedUpdate,
-          userId,
+          customerSourceId: 0,
         },
         ticketOrderProductDraftList: body.ticketOrderProductDraftList,
         ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,
@@ -88,7 +88,7 @@ export class ApiTicketOrderBasicService {
 
   async createDebtSuccess(params: {
     oid: number
-    userId: number,
+    userId: number
     body: TicketOrderDebtSuccessInsertBody
   }): Promise<BaseResponse> {
     const { oid, body, userId } = params
@@ -99,7 +99,7 @@ export class ApiTicketOrderBasicService {
       oid,
       ticketOrderDraftInsert: {
         ...ticketOrderDraftInsert,
-        userId,
+        customerSourceId: 0,
       },
       ticketOrderProductDraftList: body.ticketOrderProductDraftList,
       ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,
@@ -153,7 +153,7 @@ export class ApiTicketOrderBasicService {
           ticketId,
           ticketOrderDebtSuccessUpdate: {
             ...body.ticketOrderDebtSuccessUpdate,
-            userId,
+            customerSourceId: 0,
           },
           ticketOrderProductDraftList: body.ticketOrderProductDraftList,
           ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,

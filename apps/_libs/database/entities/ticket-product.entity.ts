@@ -118,7 +118,9 @@ export default class TicketProduct extends BaseEntity {
   hintUsage: string
 
   @Expose()
-  @ManyToOne((type) => Ticket, { createForeignKeyConstraints: false })
+  @ManyToOne((type) => Ticket, (ticket) => ticket.ticketProductList, {
+    createForeignKeyConstraints: false,
+  })
   @JoinColumn({ name: 'ticketId', referencedColumnName: 'id' })
   ticket: Ticket
 

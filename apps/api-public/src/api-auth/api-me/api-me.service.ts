@@ -14,22 +14,21 @@ export class ApiMeService {
     private readonly cacheDataService: CacheDataService
   ) { }
 
-  async info(params: { oid: number; uid: number; rid: number }): Promise<BaseResponse> {
-    const { uid, oid, rid } = params
-    const [user, organization, role, settingMap, permissionList] = await Promise.all([
-      this.cacheDataService.getUser(uid),
+  async info(params: { oid: number; uid: number; permissionIds: number[] }): Promise<BaseResponse> {
+    const { uid, oid, permissionIds } = params
+    const [user, organization, settingMap, permissionAll] = await Promise.all([
+      this.cacheDataService.getUser(oid, uid),
       this.cacheDataService.getOrganization(oid),
-      this.cacheDataService.getRole(rid),
       this.cacheDataService.getSettingMap(oid),
-      this.cacheDataService.getPermissionList(),
+      this.cacheDataService.getPermissionAllList(),
     ])
 
     return {
       data: {
         user,
         organization,
-        role,
-        permissionList,
+        permissionIds,
+        permissionAll,
         settingMap,
       },
     }
@@ -42,7 +41,7 @@ export class ApiMeService {
   ): Promise<BaseResponse> {
     const { oldPassword, newPassword } = body
     const user = await this.userRepository.findOneBy({ id, oid })
-    if (!user) throw new BusinessException('error.User.NotExist')
+    if (!user) throw new BusinessException('error.Database.NotFound')
 
     const checkPassword = await bcrypt.compare(oldPassword, user.hashPassword)
     if (!checkPassword) throw new BusinessException('error.User.WrongPassword')

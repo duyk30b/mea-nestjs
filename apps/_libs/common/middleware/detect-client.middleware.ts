@@ -21,50 +21,52 @@ export class DetectClientMiddleware implements NestMiddleware {
     const os = request.headers['x-os'] as string
     const browser = request.headers['x-browser'] as string
     const mobile = request.headers['x-mobile'] as string
+    const clientId = request.headers['x-client-id'] as string
     const authorization = request.headers.authorization || ''
 
     const ip = getClientIp(request)
     const dataExternal: TExternal = {
+      clientId,
       ip,
       os,
       browser,
       mobile: mobile === '1' ? 1 : 0,
       uid: null,
       oid: null,
-      rid: null,
-      error: null,
       user: null,
       organization: null,
-      role: null,
+      permissionIds: [],
+      error: null,
     }
 
     const [, accessToken] = authorization.split(' ')
     if (accessToken) {
       try {
         const decode = this.jwtExtendService.verifyAccessToken(accessToken, ip)
-        dataExternal.oid = decode.data.oid
-        dataExternal.uid = decode.data.uid
+        const { oid, uid } = decode.data
+        dataExternal.oid = oid
+        dataExternal.uid = uid
 
         const checkTokenCache = await this.cacheTokenService.checkAccessToken({
-          oid: decode.data.oid,
-          uid: decode.data.uid,
+          oid,
+          uid,
           accessExp: decode.exp,
         })
 
         if (checkTokenCache) {
-          dataExternal.user = await this.cacheDataService.getUser(decode.data.uid)
-          dataExternal.organization = await this.cacheDataService.getOrganization(decode.data.oid)
-          dataExternal.rid = dataExternal.user.roleId
-          dataExternal.role = await this.cacheDataService.getRole(dataExternal.user.roleId)
+          dataExternal.user = await this.cacheDataService.getUser(oid, uid)
+          dataExternal.organization = await this.cacheDataService.getOrganization(oid)
+          dataExternal.permissionIds = await this.cacheDataService.getPermissionIdsByUserId(
+            oid,
+            uid
+          )
         } else {
           dataExternal.error = 'error.Token.AccessTokenNoCache'
-          // if (process.env.NODE_ENV !== 'production') {
-          //   dataExternal.error = null
-          //   dataExternal.user = await this.cacheDataService.getUser(decode.uid)
-          //   dataExternal.organization = await this.cacheDataService.getOrganization(decode.oid)
-          //   dataExternal.rid = dataExternal.user.roleId
-          //   dataExternal.role = await this.cacheDataService.getRole(dataExternal.user.roleId)
-          // }
+          if (process.env.NODE_ENV !== 'production') {
+            // dataExternal.error = null
+            // dataExternal.user = await this.cacheDataService.getUser(dataExternal.uid)
+            // dataExternal.organization = await this.cacheDataService.getOrganization(dataExternal.oid)
+          }
         }
       } catch (error) {
         dataExternal.error = error.message

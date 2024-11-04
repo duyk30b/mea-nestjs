@@ -61,7 +61,7 @@ export class ApiCustomerService {
 
   async getOne(oid: number, id: number, query?: CustomerGetOneQuery): Promise<BaseResponse> {
     const customer = await this.customerRepository.findOneBy({ oid, id })
-    if (!customer) throw new BusinessException('error.Customer.NotExist')
+    if (!customer) throw new BusinessException('error.Database.NotFound')
     return { data: { customer } }
   }
 

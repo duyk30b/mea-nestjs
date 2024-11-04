@@ -26,12 +26,15 @@ export class ApiTicketService {
       limit,
       relation: {
         customer: relation?.customer,
+        ticketUserList: relation?.ticketUserList,
         ticketDiagnosis: relation?.ticketDiagnosis,
+        ticketProductList: relation?.ticketProductList,
+        ticketProcedureList: relation?.ticketProcedureList,
       },
       condition: {
         oid,
         ticketStatus: filter?.ticketStatus,
-        voucherType: filter?.voucherType,
+        voucherType: filter.voucherType,
         customerId: filter?.customerId,
         registeredAt: filter?.registeredAt,
         startedAt: filter?.startedAt,
@@ -41,7 +44,7 @@ export class ApiTicketService {
     })
     return {
       data,
-      meta: { total, page, limit },
+      meta: { total, page, limit, voucherType: filter.voucherType },
     }
   }
 
@@ -70,17 +73,21 @@ export class ApiTicketService {
       condition: { oid, id },
       relation: {
         customer: !!relation?.customer,
-        user: !!relation?.user,
         customerPaymentList: !!relation?.customerPaymentList,
         ticketSurchargeList: !!relation?.ticketSurchargeList,
         ticketExpenseList: !!relation?.ticketExpenseList,
         ticketDiagnosis: !!relation?.ticketDiagnosis,
         toAppointment: !!relation?.toAppointment,
         ticketProductList: relation?.ticketProductList ? { product: true, batch: true } : false,
-        ticketProcedureList: relation?.ticketProcedureList ? { procedure: true } : false,
-        ticketRadiologyList: relation?.ticketRadiologyList
-          ? { radiology: true, doctor: true }
+        ticketProductConsumableList: relation?.ticketProductConsumableList
+          ? { product: true, batch: true }
           : false,
+        ticketProductPrescriptionList: relation?.ticketProductPrescriptionList
+          ? { product: true, batch: true }
+          : false,
+        ticketProcedureList: relation?.ticketProcedureList ? { procedure: true } : false,
+        ticketRadiologyList: relation?.ticketRadiologyList ? { radiology: true } : false,
+        ticketUserList: relation?.ticketUserList ? { user: true } : false,
       },
     })
     if (!ticket) {
@@ -89,9 +96,11 @@ export class ApiTicketService {
 
     if (ticket.ticketRadiologyList || ticket.ticketDiagnosis?.imageList) {
       ticket.ticketRadiologyList = ticket.ticketRadiologyList || []
-      ticket.ticketDiagnosis.imageList = []
+      if (ticket.ticketDiagnosis) {
+        ticket.ticketDiagnosis.imageList = []
+      }
 
-      const ticketDiagnosisImageIds: number[] = JSON.parse(ticket.ticketDiagnosis.imageIds)
+      const ticketDiagnosisImageIds: number[] = JSON.parse(ticket.ticketDiagnosis?.imageIds || '[]')
       const ticketRadiologyImageIds: number[] = ticket.ticketRadiologyList
         .map((i) => JSON.parse(i.imageIds))
         .flat()

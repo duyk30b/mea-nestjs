@@ -1,11 +1,11 @@
 import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
 import {
+  IsArray,
   IsDefined,
   IsIn,
   IsNotEmpty,
   IsNumber,
-  IsPositive,
   IsString,
   MinLength,
   Validate,
@@ -32,12 +32,6 @@ export class UserCreateBody {
   @MinLength(6)
   password: string
 
-  @ApiProperty({ example: 40 })
-  @Expose()
-  @IsDefined()
-  @IsPositive()
-  roleId: number
-
   @ApiProperty({ example: 'Phạm Hoàng Mai' })
   @Expose()
   @IsDefined()
@@ -58,6 +52,12 @@ export class UserCreateBody {
   @Expose()
   @IsIn([0, 1])
   isActive: 0 | 1
+
+  @ApiProperty({ example: [2, 3, 4] })
+  @Expose()
+  @IsDefined()
+  @IsArray()
+  roleIdList: number[]
 }
 
-export class UserUpdateBody extends OmitType(UserCreateBody, ['username', 'password']) {}
+export class UserUpdateBody extends OmitType(UserCreateBody, ['username', 'password']) { }

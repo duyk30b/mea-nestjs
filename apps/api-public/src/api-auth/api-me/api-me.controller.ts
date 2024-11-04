@@ -9,12 +9,12 @@ import { UserChangePasswordBody, UserUpdateInfoBody } from './request'
 @ApiBearerAuth('access-token')
 @Controller('me')
 export class ApiMeController {
-  constructor(private readonly apiUserService: ApiMeService) {}
+  constructor(private readonly apiUserService: ApiMeService) { }
 
   @Get('info')
   @IsUser()
-  async info(@External() { oid, uid, rid }: TExternal) {
-    return await this.apiUserService.info({ oid, uid, rid })
+  async info(@External() { oid, uid, permissionIds }: TExternal) {
+    return await this.apiUserService.info({ oid, uid, permissionIds })
   }
 
   @Patch('change-password')
@@ -25,7 +25,7 @@ export class ApiMeController {
 
   @Patch('update-info')
   @IsUser()
-  async update(@External() { oid, uid }: TExternal, @Body() body: UserUpdateInfoBody) {
+  async updateInfo(@External() { oid, uid }: TExternal, @Body() body: UserUpdateInfoBody) {
     return await this.apiUserService.updateInfo(oid, uid, body)
   }
 }

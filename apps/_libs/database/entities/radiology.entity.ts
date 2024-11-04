@@ -1,5 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import RadiologyGroup from './radiology-group.entity'
 
 export enum RadiologyHost {
   GoogleDriver = 'GoogleDriver',
@@ -19,9 +20,9 @@ export default class Radiology {
   @Expose()
   name: string
 
-  @Column({ type: 'character varying', length: 25 })
   @Expose()
-  group: string // Nhóm dịch vụ ...
+  @Column({ default: 0 })
+  radiologyGroupId: number
 
   @Column({ nullable: true })
   @Expose()
@@ -57,6 +58,11 @@ export default class Radiology {
   @Expose()
   deletedAt: number
 
+  @ManyToOne((type) => RadiologyGroup, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'radiologyGroupId', referencedColumnName: 'id' })
+  @Expose()
+  radiologyGroup: RadiologyGroup
+
   static fromRaw(raw: { [P in keyof Radiology]: any }) {
     if (!raw) return null
     const entity = new Radiology()
@@ -76,7 +82,7 @@ export default class Radiology {
   }
 }
 
-export type RadiologyRelationType = Pick<Radiology, never>
+export type RadiologyRelationType = Pick<Radiology, 'radiologyGroup'>
 
 export type RadiologySortType = Pick<Radiology, 'oid' | 'id' | 'name' | 'price'>
 

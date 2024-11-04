@@ -30,7 +30,7 @@ export class ApiProductService {
       limit,
       condition: {
         oid,
-        group: filter?.group,
+        productGroupId: filter?.productGroupId,
         isActive: filter?.isActive,
         quantity: filter?.quantity,
         expiryDate: filter?.expiryDate,
@@ -68,7 +68,7 @@ export class ApiProductService {
       condition: {
         oid,
         isActive: filter?.isActive,
-        group: filter?.group,
+        productGroupId: filter?.productGroupId,
         quantity: filter?.quantity,
         expiryDate: filter?.expiryDate,
         $OR: filter?.$OR,
@@ -95,10 +95,14 @@ export class ApiProductService {
 
   async getOne(oid: number, id: number, query: ProductGetOneQuery): Promise<BaseResponse> {
     const { relation, filter } = query
-    const product = await this.productRepository.findOneBy({ oid, id })
+    const product = await this.productRepository.findOne({
+      relation: { productGroup: relation?.productGroup },
+      condition: { oid, id },
+    })
     if (!product) {
-      throw new BusinessException('error.Product.NotExist')
+      throw new BusinessException('error.Database.NotFound')
     }
+
     if (relation?.batchList && product.hasManageBatches) {
       product.batchList = await this.batchRepository.findMany({
         condition: {

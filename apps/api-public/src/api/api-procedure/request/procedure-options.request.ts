@@ -1,9 +1,13 @@
 import { Expose, Type } from 'class-transformer'
-import { IsIn, IsNotEmpty, IsString, ValidateNested } from 'class-validator'
+import { IsBoolean, IsIn, IsNotEmpty, IsNumber, IsString, ValidateNested } from 'class-validator'
 import { ConditionTimestamp } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 
-export class ProcedureRelationQuery {}
+export class ProcedureRelationQuery {
+  @Expose()
+  @IsBoolean()
+  procedureGroup: boolean
+}
 
 export class ProcedureFilterQuery {
   @Expose()
@@ -12,8 +16,8 @@ export class ProcedureFilterQuery {
   searchText: string
 
   @Expose()
-  @IsString()
-  group: string
+  @IsNumber()
+  procedureGroupId: number
 
   @Expose()
   @IsIn([0, 1])

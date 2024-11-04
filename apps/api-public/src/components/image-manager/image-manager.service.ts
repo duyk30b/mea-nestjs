@@ -39,14 +39,17 @@ export class ImageManagerService implements OnModuleInit {
 
   async changeImage(options: {
     oid: number
+    customerId: number
     imageIdsOld: number[]
     imageIdsKeep: number[]
     files: FileUploadDto[]
     filesPosition: number[]
   }) {
-    const { oid, imageIdsKeep, imageIdsOld, files, filesPosition } = options
+    const { oid, customerId, imageIdsKeep, imageIdsOld, files, filesPosition } = options
 
-    const imageOldList = await this.imageRepository.findManyByIds(imageIdsOld)
+    const imageOldList = imageIdsOld.length
+      ? await this.imageRepository.findManyByIds(imageIdsOld)
+      : []
     const imageRemoveList = imageOldList.filter((i) => !imageIdsKeep.includes(i.id))
     // tách các imageRemove ra làm nhiều nhóm, vì có thể mỗi image lại được quản lý bởi email khác nhau
     const imageRemoveMapList = arrayToKeyArray(imageRemoveList, 'hostAccount')
@@ -55,9 +58,10 @@ export class ImageManagerService implements OnModuleInit {
 
     const [imageHostInsertList, ...imageHostTrashResponse] = await Promise.all([
       this.googleDriverService.uploadMultipleFiles({
+        files,
         email,
         oid,
-        files,
+        customerId,
       }),
       ...Object.entries(imageRemoveMapList).map(([curEmail, imageList]) => {
         return this.googleDriverService.trashMultipleFiles(
@@ -70,6 +74,7 @@ export class ImageManagerService implements OnModuleInit {
     const imageInsertList: ImageInsertType[] = imageHostInsertList.map((i, index) => {
       const draft: ImageInsertType = {
         oid,
+        customerId,
         name: i.name,
         size: Number(i.size),
         mimeType: i.mimeType,
@@ -89,7 +94,7 @@ export class ImageManagerService implements OnModuleInit {
       .map((i) => i.id)
 
     const [imageIdsNew] = await Promise.all([
-      this.imageRepository.insertManyFullField(imageInsertList),
+      imageInsertList.length ? this.imageRepository.insertManyFullField(imageInsertList) : [],
       imageIdsRemoveSuccess.length
         ? this.imageRepository.delete({ id: { IN: imageIdsRemoveSuccess } })
         : null,

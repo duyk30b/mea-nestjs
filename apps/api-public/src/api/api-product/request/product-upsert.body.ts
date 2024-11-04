@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
 import { IsBoolean, IsDefined, IsIn, IsInt, IsNumber, IsString, validateSync } from 'class-validator'
 
-export class UnitConversionQuery {
+export class UnitConversionBody {
   @Expose()
   @IsDefined()
   @IsString()
@@ -61,18 +61,19 @@ export class ProductCreateBody {
   @IsNumber()
   retailPrice: number
 
-  @ApiPropertyOptional({ example: '2' })
+  @ApiProperty({ example: 25 })
   @Expose()
-  @IsString()
-  group: string // nhóm thuốc: kháng sinh, dinh dưỡng ...
+  @IsDefined()
+  @IsInt()
+  productGroupId: number
 
-  @ApiPropertyOptional({ name: 'unit', type: 'string', example: '[{"name":"Viên","rate":1}]' })
+  @ApiPropertyOptional({ name: 'unit', type: 'string', example: JSON.stringify([{ name: 'Viên', rate: 1 }]) })
   @Expose({ name: 'unit' })
   @Transform(({ value }) => {
     try {
       const err = []
       const result = JSON.parse(value).map((i: any) => {
-        const instance = Object.assign(new UnitConversionQuery(), i)
+        const instance = Object.assign(new UnitConversionBody(), i)
         const validate = validateSync(instance, {
           whitelist: true,
           forbidNonWhitelisted: true,
@@ -87,11 +88,11 @@ export class ProductCreateBody {
       return [error.message]
     }
   })
-  @IsString({ message: 'Validate unit failed: Example: [{"name":"Viên","rate":1}]' })
+  @IsString({ message: `Validate unit failed: Example: ${JSON.stringify([{ name: 'Viên', rate: 1 }])}` })
   unit: string // đơn vị tính: lọ, ống, vỉ
 
   // @ApiPropertyOptional({
-  //     type: UnitConversionQuery,
+  //     type: UnitConversionBody,
   //     isArray: true,
   //     example: [
   //         { name: 'Viên', rate: 1 },
@@ -100,10 +101,10 @@ export class ProductCreateBody {
   // })
   // @Expose()
   // @IsDefined()
-  // @Type(() => UnitConversionQuery)
+  // @Type(() => UnitConversionBody)
   // @IsArray()
   // @ValidateNested({ each: true })
-  // unit: UnitConversionQuery[]
+  // unit: UnitConversionBody[]
 
   @ApiPropertyOptional({ example: 'Uống' })
   @Expose()

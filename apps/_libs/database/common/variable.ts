@@ -70,6 +70,9 @@ export enum VoucherType {
   Receipt = 1,
   Order = 2,
   Clinic = 3,
+  Spa = 4,
+  Eye = 5,
+  Traditional = 6,
 }
 
 export enum DeliveryStatus {

@@ -9,11 +9,11 @@ export class RadiologyCreateBody {
   @IsString()
   name: string // tên dịch vụ
 
-  @ApiProperty({ example: 'abc123' })
+  @ApiProperty({ example: 25 })
   @Expose()
   @IsDefined()
-  @IsString()
-  group: string // tên dịch vụ
+  @IsInt()
+  radiologyGroupId: number
 
   @ApiPropertyOptional({ example: 105000 })
   @Expose()

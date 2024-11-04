@@ -6,6 +6,7 @@ import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   ProcedureCreateBody,
   ProcedureGetManyQuery,
+  ProcedureGetOneQuery,
   ProcedurePaginationQuery,
   ProcedureUpdateBody,
 } from './request'
@@ -15,7 +16,7 @@ export class ApiProcedureService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
     private readonly procedureRepository: ProcedureRepository
-  ) {}
+  ) { }
 
   async pagination(oid: number, query: ProcedurePaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, relation, sort } = query
@@ -26,7 +27,7 @@ export class ApiProcedureService {
       condition: {
         oid,
         name: filter?.searchText ? { LIKE: filter.searchText } : undefined,
-        group: filter?.group,
+        procedureGroupId: filter?.procedureGroupId,
         isActive: filter?.isActive,
         updatedAt: filter?.updatedAt,
       },
@@ -45,7 +46,7 @@ export class ApiProcedureService {
       condition: {
         oid,
         name: filter?.searchText ? { LIKE: filter.searchText } : undefined,
-        group: filter?.group,
+        procedureGroupId: filter?.procedureGroupId,
         isActive: filter?.isActive,
         updatedAt: filter?.updatedAt,
       },
@@ -55,9 +56,12 @@ export class ApiProcedureService {
     return { data }
   }
 
-  async getOne(oid: number, id: number): Promise<BaseResponse> {
-    const procedure = await this.procedureRepository.findOneBy({ oid, id })
-    if (!procedure) throw new BusinessException('error.Procedure.NotExist')
+  async getOne(oid: number, id: number, query: ProcedureGetOneQuery): Promise<BaseResponse> {
+    const procedure = await this.procedureRepository.findOne({
+      relation: { procedureGroup: query?.relation?.procedureGroup },
+      condition: { oid, id },
+    })
+    if (!procedure) throw new BusinessException('error.Database.NotFound')
     return { data: { procedure } }
   }
 

@@ -15,6 +15,10 @@ export default class Image {
   @PrimaryGeneratedColumn()
   id: number
 
+  @Column({ default: 0 })
+  @Expose()
+  customerId: number
+
   @Column({ type: 'varchar', length: 50 })
   @Expose()
   name: string

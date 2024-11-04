@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
-import { IsDefined, IsIn, IsNumber, IsString, Validate } from 'class-validator'
+import { IsDefined, IsIn, IsInt, IsNumber, IsString, Validate } from 'class-validator'
 import {
   IsGmail,
   IsPhone,
@@ -91,11 +91,23 @@ export class RootOrganizationCreateBody {
   @IsString()
   addressStreet: string
 
-  @ApiPropertyOptional({ example: 1 })
+  @ApiProperty({ example: 1 })
   @Expose()
   @IsDefined()
   @IsIn([0, 1])
   isActive: 0 | 1
+
+  @ApiProperty({ example: 'Đã thanh toán ngày' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  note: string
+
+  @ApiPropertyOptional({ example: 1679995369195 })
+  @Expose()
+  // @IsDefined() //expiryDate được phép null
+  @IsInt()
+  expiryDate: number
 }
 
 export class RootOrganizationUpdateBody extends RootOrganizationCreateBody { }

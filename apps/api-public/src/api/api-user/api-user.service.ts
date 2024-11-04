@@ -7,6 +7,8 @@ import { encrypt } from '../../../../_libs/common/helpers/string.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { User } from '../../../../_libs/database/entities'
 import Device from '../../../../_libs/database/entities/device'
+import { RoleRepository } from '../../../../_libs/database/repository/role/role.repository'
+import { UserRoleRepository } from '../../../../_libs/database/repository/user-role/user-role.repository'
 import { UserRepository } from '../../../../_libs/database/repository/user/user.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
@@ -22,6 +24,8 @@ export class ApiUserService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
     private readonly userRepository: UserRepository,
+    private readonly userRoleRepository: UserRoleRepository,
+    private readonly roleRepository: RoleRepository,
     private readonly cacheTokenService: CacheTokenService,
     private readonly cacheDataService: CacheDataService
   ) { }
@@ -31,12 +35,16 @@ export class ApiUserService {
     const { page, limit, filter, sort, relation } = query
 
     const { data, total } = await this.userRepository.pagination({
+      // relationLoadStrategy: 'join',
       page,
       limit,
-      relation,
+      relation: {
+        organization: !!relation.organization,
+        userRoleList: relation.userRoleList ? ({ role: true }) as any : false,
+      },
       condition: {
         oid,
-        roleId: filter?.roleId,
+        isAdmin: filter?.isAdmin,
         isActive: filter?.isActive,
         $OR: filter?.searchText
           ? [{ username: { LIKE: filter.searchText } }, { phone: { LIKE: filter.searchText } }]
@@ -59,9 +67,10 @@ export class ApiUserService {
         device.os = j.os
         device.browser = j.browser
         device.mobile = j.mobile
-        device.online = (this.socketEmitService.connections[user.id] || []).some((k) => {
-          return k.refreshExp === j.refreshExp
-        }) || j.online
+        device.online =
+          (this.socketEmitService.connections[user.id] || []).some((k) => {
+            return k.refreshExp === j.refreshExp
+          }) || j.online
         return device
       })
     }
@@ -78,7 +87,7 @@ export class ApiUserService {
     const data = await this.userRepository.findMany({
       condition: {
         oid,
-        roleId: filter?.roleId,
+        isAdmin: filter?.isAdmin,
         isActive: filter?.isActive,
         $OR: filter?.searchText
           ? [{ fullName: { LIKE: filter.searchText } }, { phone: { LIKE: filter.searchText } }]
@@ -95,22 +104,32 @@ export class ApiUserService {
       relation: query.relation,
       condition: { id, oid },
     })
-    if (!user) throw new BusinessException('error.User.NotExist')
+    if (!user) throw new BusinessException('error.Database.NotFound')
     return { data: { user } }
   }
 
   async createOne(oid: number, body: UserCreateBody): Promise<BaseResponse> {
-    const { username, password, roleId, ...other } = body
+    const { username, password, roleIdList, ...other } = body
+    console.log('🚀 ~ file: api-user.service.ts:109 ~ ApiUserService ~ createOne ~ body:', body)
+    console.log(
+      '🚀 ~ file: api-user.service.ts:109 ~ ApiUserService ~ createOne ~ roleIdList:',
+      roleIdList
+    )
     const existUser = await this.userRepository.findOneBy({
       oid,
       username,
     })
-    if (roleId === 0) {
-      throw new BusinessException('error.User.WrongRole')
-    }
     if (existUser) {
       throw new BusinessException('error.Register.ExistUsername')
     }
+    const roleList = await this.roleRepository.findManyBy({
+      oid,
+      id: { IN: roleIdList },
+    })
+    if (roleList.length !== roleIdList.length) {
+      throw new BusinessException('error.User.WrongRole')
+    }
+
     const hashPassword = await bcrypt.hash(password, 5)
     const secret = encrypt(password, username)
 
@@ -118,27 +137,48 @@ export class ApiUserService {
       ...other,
       oid,
       username,
-      roleId,
+      isAdmin: 0,
       secret,
       hashPassword,
     })
+
+    user.userRoleList = await this.userRoleRepository.insertManyFullFieldAndReturnEntity(
+      roleIdList.map((i) => ({
+        oid,
+        roleId: i,
+        userId: user.id,
+      }))
+    )
+
     this.cacheDataService.updateUser(user)
     return { data: { user } }
   }
 
-  async updateInfo(oid: number, id: number, body: UserUpdateBody): Promise<BaseResponse> {
-    const { roleId, ...other } = body
-    const oldUser: User = await this.userRepository.findOneBy({ oid, id })
+  async updateOne(oid: number, userId: number, body: UserUpdateBody): Promise<BaseResponse> {
+    const { roleIdList, ...other } = body
 
-    // Không đổi role cho Root, và cũng ko cho add thêm Root
-    if ((oldUser.roleId === 0 && body.roleId != 0) || (oldUser.roleId !== 0 && body.roleId == 0)) {
+    const roleList = await this.roleRepository.findManyBy({
+      oid,
+      id: { IN: roleIdList },
+    })
+    if (roleList.length !== roleIdList.length) {
       throw new BusinessException('error.User.WrongRole')
     }
 
-    const [user] = await this.userRepository.updateAndReturnEntity({ oid, id }, body)
+    const [user] = await this.userRepository.updateAndReturnEntity({ oid, id: userId }, other)
     if (!user) {
       throw new BusinessException('error.Database.UpdateFailed')
     }
+
+    await this.userRoleRepository.delete({ oid, userId })
+    user.userRoleList = await this.userRoleRepository.insertManyFullFieldAndReturnEntity(
+      roleIdList.map((i) => ({
+        oid,
+        roleId: i,
+        userId: user.id,
+      }))
+    )
+
     this.cacheDataService.updateUser(user)
     return { data: { user } }
   }

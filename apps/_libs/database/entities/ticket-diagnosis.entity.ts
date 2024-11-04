@@ -1,11 +1,19 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity, Index } from 'typeorm'
+import { Exclude, Expose } from 'class-transformer'
+import { Column, Entity, Index, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import Image from './image.entity'
 
 @Entity('TicketDiagnosis')
 @Index('IDX_TicketDiagnosis__oid_ticketId', ['oid', 'ticketId'])
 export default class TicketDiagnosis extends BaseEntity {
+  @Column({ name: 'oid' })
+  @Exclude()
+  oid: number
+
+  @PrimaryGeneratedColumn({ name: 'id' })
+  @Expose({ name: 'id' })
+  id: number
+
   @Column()
   @Expose({})
   ticketId: number
@@ -18,17 +26,25 @@ export default class TicketDiagnosis extends BaseEntity {
   @Expose({})
   healthHistory: string // Tiền sử
 
+  @Column({ type: 'text', default: JSON.stringify({}) })
+  @Expose({})
+  general: string // Khám tổng quát, toàn thân
+
+  @Column({ type: 'text', default: JSON.stringify({}) })
+  @Expose()
+  regional: string // khám bộ phận
+
   @Column({ type: 'text', default: '' })
   @Expose({})
   summary: string // Tóm tăt bệnh án
 
+  @Column({ type: 'text', default: JSON.stringify({}) })
+  @Expose()
+  special: string // khám đặc biệt, VD: đo thị lực
+
   @Column({ default: '' })
   @Expose({})
   diagnosis: string // Chẩn đoán
-
-  @Column({ type: 'text', default: JSON.stringify({}) })
-  @Expose()
-  vitalSigns: string
 
   @Column({ type: 'varchar', length: 100, default: JSON.stringify([]) })
   @Expose()
@@ -37,6 +53,11 @@ export default class TicketDiagnosis extends BaseEntity {
   @Column({ type: 'text', default: '' })
   @Expose({})
   advice: string // Lời dặn của bác sĩ
+
+  @OneToOne(() => TicketDiagnosis, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'ticketId', referencedColumnName: 'id' })
+  @Expose()
+  ticketDiagnosis: TicketDiagnosis
 
   @Expose()
   imageList: Image[]
@@ -54,7 +75,7 @@ export default class TicketDiagnosis extends BaseEntity {
   }
 }
 
-export type TicketDiagnosisRelationType = Pick<TicketDiagnosis, 'imageList'>
+export type TicketDiagnosisRelationType = Pick<TicketDiagnosis, 'ticketDiagnosis' | 'imageList'>
 
 export type TicketDiagnosisSortType = Pick<TicketDiagnosis, 'oid' | 'id' | 'ticketId'>
 

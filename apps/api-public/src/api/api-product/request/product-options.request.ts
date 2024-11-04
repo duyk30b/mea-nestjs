@@ -1,6 +1,6 @@
 import { OmitType } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsString, ValidateNested } from 'class-validator'
+import { IsBoolean, IsIn, IsNumber, IsString, ValidateNested } from 'class-validator'
 import { ConditionString } from '../../../../../_libs/common/dto'
 import { ConditionNumber } from '../../../../../_libs/common/dto/condition-number'
 import { ConditionTimestamp } from '../../../../../_libs/common/dto/condition-timestamp'
@@ -10,6 +10,10 @@ export class ProductRelationQuery {
   @Expose()
   @IsBoolean()
   batchList: boolean
+
+  @Expose()
+  @IsBoolean()
+  productGroup: boolean
 }
 
 export class BatchFilterQuery {
@@ -26,8 +30,8 @@ export class BatchFilterQuery {
 
 export class ProductFilterQuery {
   @Expose()
-  @IsString()
-  group: string
+  @IsNumber()
+  productGroupId: number
 
   @Expose()
   @Type(() => ConditionString)

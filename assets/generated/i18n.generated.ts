@@ -43,36 +43,18 @@ export type I18nTranslations = {
             "WrongPassword": string;
         };
         "User": {
-            "NotExist": string;
             "WrongPassword": string;
             "WrongRole": string;
         };
         "Role": {
-            "NotExist": string;
             "Inactive": string;
-        };
-        "Organization": {
-            "NotExist": string;
         };
         "Diagnosis": {
             "ConflictArrival": string;
         };
         "Product": {
-            "NotExist": string;
             "ConflictManageQuantity": string;
             "ConflictManageBatches": string;
-        };
-        "Customer": {
-            "NotExist": string;
-        };
-        "Invoice": {
-            "NotExist": string;
-        };
-        "Distributor": {
-            "NotExist": string;
-        };
-        "Procedure": {
-            "NotExist": string;
         };
     };
 };

@@ -6,15 +6,19 @@ import {
   BatchMovement,
   Customer,
   CustomerPayment,
+  CustomerSource,
   Distributor,
   DistributorPayment,
   Image,
   Organization,
   Permission,
   Procedure,
+  ProcedureGroup,
   Product,
+  ProductGroup,
   ProductMovement,
   Radiology,
+  RadiologyGroup,
   Receipt,
   ReceiptItem,
   Role,
@@ -24,23 +28,30 @@ import {
   TicketProcedure,
   TicketProduct,
   TicketRadiology,
+  TicketUser,
   User,
+  Warehouse,
 } from '../entities'
 import TicketExpense from '../entities/ticket-expense.entity'
 import TicketSurcharge from '../entities/ticket-surcharge.entity'
+import UserRole from '../entities/user-role.entity'
 import { AppointmentRepository } from './appointment/appointment.repository'
 import { BatchMovementRepository } from './batch-movement/bat-movement.repository'
 import { BatchRepository } from './batch/batch.repository'
 import { CustomerPaymentRepository } from './customer-payment/customer-payment.repository'
+import { CustomerSourceRepository } from './customer-source/customer-source.repository'
 import { CustomerRepository } from './customer/customer.repository'
 import { DistributorPaymentRepository } from './distributor-payment/distributor-payment.repository'
 import { DistributorRepository } from './distributor/distributor.repository'
 import { ImageRepository } from './image/image.repository'
 import { OrganizationRepository } from './organization/organization.repository'
 import { PermissionRepository } from './permission/permission.repository'
+import { ProcedureGroupRepository } from './procedure-group/procedure-group.repository'
 import { ProcedureRepository } from './procedure/procedure.repository'
+import { ProductGroupRepository } from './product-group/product-group.repository'
 import { ProductMovementRepository } from './product-movement/product-movement.repository'
 import { ProductRepository } from './product/product.repository'
+import { RadiologyGroupRepository } from './radiology-group/radiology-group.repository'
 import { RadiologyRepository } from './radiology/radiology.repository'
 import { ReceiptItemRepository } from './receipt-item/receipt-item.repository'
 import { ReceiptCancel } from './receipt/receipt-cancel'
@@ -59,25 +70,29 @@ import { TicketDiagnosisRepository } from './ticket-diagnosis/ticket-diagnosis.r
 import { TicketProcedureRepository } from './ticket-procedure/ticket-procedure.repository'
 import { TicketProductRepository } from './ticket-product/ticket-product.repository'
 import { TicketRadiologyRepository } from './ticket-radiology/ticket-radiology.repository'
+import { TicketUserRepository } from './ticket-user/ticket-user.repository'
 import { TicketPayDebt } from './ticket/ticket-base/ticket-pay-debt'
 import { TicketPaymentAndClose } from './ticket/ticket-base/ticket-payment-and-close'
 import { TicketPrepayment } from './ticket/ticket-base/ticket-prepayment'
 import { TicketSendProduct } from './ticket/ticket-base/ticket-send-product'
 import { TicketRepository } from './ticket/ticket-base/ticket.repository'
-import { TicketClinicChangeItemsMoney } from './ticket/ticket-clinic/ticket-clinic-change-items-money'
-import { TicketClinicChangeTicketProcedureList } from './ticket/ticket-clinic/ticket-clinic-change-ticket-procedure-list'
-import { TicketClinicChangeTicketProductList } from './ticket/ticket-clinic/ticket-clinic-change-ticket-product-list'
-import { TicketClinicChangeTicketRadiologyList } from './ticket/ticket-clinic/ticket-clinic-change-ticket-radiology-list'
 import { TicketClinicRefundOverpaid } from './ticket/ticket-clinic/ticket-clinic-refund-overpaid'
 import { TicketClinicReopen } from './ticket/ticket-clinic/ticket-clinic-reopen'
 import { TicketClinicReturnProduct } from './ticket/ticket-clinic/ticket-clinic-return-product'
+import { TicketClinicUpdateItemsMoney } from './ticket/ticket-clinic/ticket-clinic-update-items-money'
+import { TicketClinicUpdateTicketProcedureList } from './ticket/ticket-clinic/ticket-clinic-update-ticket-procedure-list'
+import { TicketClinicUpdateTicketProductList } from './ticket/ticket-clinic/ticket-clinic-update-ticket-product-list'
+import { TicketClinicUpdateTicketRadiologyList } from './ticket/ticket-clinic/ticket-clinic-update-ticket-radiology-list'
 import { TicketOrderCancel } from './ticket/ticket-order/ticket-order-cancel'
 import { TicketOrderDebtSuccessUpdate } from './ticket/ticket-order/ticket-order-debt-success-update'
 import { TicketOrderDraftApprovedUpdate } from './ticket/ticket-order/ticket-order-draft-approved-update'
 import { TicketOrderRefundOverpaid } from './ticket/ticket-order/ticket-order-refund-overpaid'
 import { TicketOrderReturnProductList } from './ticket/ticket-order/ticket-order-return-product-list'
 import { TicketOrderDraft } from './ticket/ticket-order/ticket-order.draft'
+import { TicketSpaChangeTicketProcedureList } from './ticket/ticket-spa/ticket-spa-change-ticket-procedure-list'
+import { UserRoleRepository } from './user-role/user-role.repository'
 import { UserRepository } from './user/user.repository'
+import { WarehouseRepository } from './warehouse/warehouse.repository'
 
 @Global()
 @Module({
@@ -88,6 +103,7 @@ import { UserRepository } from './user/user.repository'
       BatchMovement,
       Customer,
       CustomerPayment,
+      CustomerSource,
       Distributor,
       DistributorPayment,
       Image,
@@ -102,6 +118,7 @@ import { UserRepository } from './user/user.repository'
       Role,
       Setting,
       User,
+      UserRole,
       Ticket,
       TicketExpense,
       TicketSurcharge,
@@ -109,6 +126,12 @@ import { UserRepository } from './user/user.repository'
       TicketProcedure,
       TicketProduct,
       TicketRadiology,
+      TicketUser,
+
+      Warehouse,
+      ProductGroup,
+      ProcedureGroup,
+      RadiologyGroup,
     ]),
   ],
   providers: [
@@ -117,6 +140,7 @@ import { UserRepository } from './user/user.repository'
     BatchMovementRepository,
     CustomerRepository,
     CustomerPaymentRepository,
+    CustomerSourceRepository,
     DistributorRepository,
     DistributorPaymentRepository,
     ImageRepository,
@@ -137,10 +161,17 @@ import { UserRepository } from './user/user.repository'
     RoleRepository,
     SettingRepository,
     UserRepository,
-    TicketClinicChangeTicketProcedureList,
-    TicketClinicChangeTicketRadiologyList,
-    TicketClinicChangeTicketProductList,
-    TicketClinicChangeItemsMoney,
+    UserRoleRepository,
+
+    WarehouseRepository,
+    ProductGroupRepository,
+    ProcedureGroupRepository,
+    RadiologyGroupRepository,
+
+    TicketClinicUpdateTicketProcedureList,
+    TicketClinicUpdateTicketRadiologyList,
+    TicketClinicUpdateTicketProductList,
+    TicketClinicUpdateItemsMoney,
     TicketClinicReturnProduct,
     TicketClinicRefundOverpaid,
     TicketClinicReopen,
@@ -158,7 +189,10 @@ import { UserRepository } from './user/user.repository'
     TicketDiagnosisRepository,
     TicketProcedureRepository,
     TicketProductRepository,
+    TicketUserRepository,
     TicketRadiologyRepository,
+    TicketSpaChangeTicketProcedureList,
+
     StatisticRepository,
     StatisticReceiptRepository,
     StatisticTicketRepository,
@@ -169,6 +203,7 @@ import { UserRepository } from './user/user.repository'
     BatchMovementRepository,
     CustomerRepository,
     CustomerPaymentRepository,
+    CustomerSourceRepository,
     DistributorRepository,
     DistributorPaymentRepository,
     ImageRepository,
@@ -190,10 +225,17 @@ import { UserRepository } from './user/user.repository'
     ReceiptItemRepository,
     SettingRepository,
     UserRepository,
-    TicketClinicChangeTicketProcedureList,
-    TicketClinicChangeTicketRadiologyList,
-    TicketClinicChangeTicketProductList,
-    TicketClinicChangeItemsMoney,
+    UserRoleRepository,
+
+    WarehouseRepository,
+    ProductGroupRepository,
+    ProcedureGroupRepository,
+    RadiologyGroupRepository,
+
+    TicketClinicUpdateTicketProcedureList,
+    TicketClinicUpdateTicketRadiologyList,
+    TicketClinicUpdateTicketProductList,
+    TicketClinicUpdateItemsMoney,
     TicketClinicReturnProduct,
     TicketClinicRefundOverpaid,
     TicketClinicReopen,
@@ -212,6 +254,8 @@ import { UserRepository } from './user/user.repository'
     TicketProcedureRepository,
     TicketProductRepository,
     TicketRadiologyRepository,
+    TicketUserRepository,
+    TicketSpaChangeTicketProcedureList,
 
     StatisticRepository,
     StatisticReceiptRepository,

@@ -5,7 +5,7 @@ import { IsEnumValue } from '../../../../../_libs/common/transform-validate/clas
 import { SettingKey } from '../../../../../_libs/database/entities/setting.entity'
 
 export class SettingUpsertParams {
-  @ApiProperty({ enum: SettingKey, example: SettingKey.PRODUCT_GROUP })
+  @ApiProperty({ enum: SettingKey, example: SettingKey.PRODUCT_UNIT })
   @Expose()
   @IsEnumValue(SettingKey)
   type: SettingKey
@@ -13,20 +13,7 @@ export class SettingUpsertParams {
 
 export class SettingUpsertBody {
   @ApiProperty({
-    example: JSON.stringify({
-      1: 'Kháng sinh - Kháng Virus',
-      2: 'Dị ứng',
-      3: 'Thần Kinh',
-      4: 'Tiêu Hóa',
-      5: 'Cơ Xương Khớp',
-      6: 'Giảm Đau - Hạ Sốt - NSAID',
-      7: 'Corticoid',
-      8: 'Thực Phẩm Chức Năng',
-      9: 'Dinh Dưỡng',
-      10: 'Hô hấp',
-      11: 'Tim Mạch',
-      12: 'Da Liễu',
-    }),
+    example: JSON.stringify('Viên, Lọ, Cái, Chai'),
   })
   @Expose()
   @IsString()

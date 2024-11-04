@@ -29,7 +29,7 @@ import ProductMovement, {
   ProductMovementInsertType,
 } from '../../../entities/product-movement.entity'
 import { TicketExpenseInsertType } from '../../../entities/ticket-expense.entity'
-import { TicketProcedureInsertType } from '../../../entities/ticket-procedure.entity'
+import { TicketProcedureInsertType, TicketProcedureStatus } from '../../../entities/ticket-procedure.entity'
 import { TicketProductInsertType, TicketProductType } from '../../../entities/ticket-product.entity'
 import { TicketSurchargeInsertType } from '../../../entities/ticket-surcharge.entity'
 import { TicketStatus } from '../../../entities/ticket.entity'
@@ -230,7 +230,10 @@ export class TicketOrderDebtSuccessUpdate {
             oid,
             ticketId,
             customerId,
-            createdAt: ticketOrderDebtSuccessUpdate.registeredAt,
+            startedAt: ticketOrderDebtSuccessUpdate.registeredAt,
+            status: TicketProcedureStatus.Completed,
+            imageIds: JSON.stringify([]),
+            result: '',
           }
           return ticketProcedure
         })

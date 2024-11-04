@@ -5,6 +5,7 @@ import { RadiologyRepository } from '../../../../_libs/database/repository/radio
 import {
   RadiologyCreateBody,
   RadiologyGetManyQuery,
+  RadiologyGetOneQuery,
   RadiologyPaginationQuery,
   RadiologyUpdateBody,
 } from './request'
@@ -21,7 +22,7 @@ export class ApiRadiologyService {
       limit,
       condition: {
         oid,
-        group: filter?.group,
+        radiologyGroupId: filter?.radiologyGroupId,
         updatedAt: filter?.updatedAt,
       },
       sort,
@@ -38,7 +39,7 @@ export class ApiRadiologyService {
       relation,
       condition: {
         oid,
-        group: filter?.group,
+        radiologyGroupId: filter?.radiologyGroupId,
         updatedAt: filter?.updatedAt,
       },
       sort,
@@ -54,8 +55,11 @@ export class ApiRadiologyService {
     return { data }
   }
 
-  async getOne(oid: number, id: number): Promise<BaseResponse> {
-    const radiology = await this.radiologyRepository.findOneBy({ oid, id })
+  async getOne(oid: number, id: number, query: RadiologyGetOneQuery): Promise<BaseResponse> {
+    const radiology = await this.radiologyRepository.findOne({
+      relation: { radiologyGroup: query?.relation?.radiologyGroup },
+      condition: { oid, id },
+    })
     if (!radiology) throw new BusinessException('error.Database.NotFound')
     return { data: { radiology } }
   }

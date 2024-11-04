@@ -11,7 +11,7 @@ import {
 
 @Injectable()
 export class ApiDistributorService {
-  constructor(private readonly distributorRepository: DistributorRepository) {}
+  constructor(private readonly distributorRepository: DistributorRepository) { }
 
   async pagination(oid: number, query: DistributorPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, sort, relation } = query
@@ -58,7 +58,7 @@ export class ApiDistributorService {
 
   async getOne(oid: number, id: number): Promise<BaseResponse> {
     const data = await this.distributorRepository.findOneBy({ oid, id })
-    if (!data) throw new BusinessException('error.Distributor.NotExist')
+    if (!data) throw new BusinessException('error.Database.NotFound')
     return { data }
   }
 

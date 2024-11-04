@@ -45,18 +45,18 @@ export class ApiUserController {
 
   @Post('create')
   @HasPermission(PermissionId.USER_CREATE)
-  async create(@External() { oid }: TExternal, @Body() body: UserCreateBody) {
+  async createOne(@External() { oid }: TExternal, @Body() body: UserCreateBody) {
     return await this.apiUserService.createOne(oid, body)
   }
 
   @Patch('update/:id')
   @HasPermission(PermissionId.USER_UPDATE)
-  async updateInfo(
+  async updateOne(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
     @Body() body: UserUpdateBody
   ) {
-    return await this.apiUserService.updateInfo(oid, +id, body)
+    return await this.apiUserService.updateOne(oid, +id, body)
   }
 
   @Patch('new-password/:id')

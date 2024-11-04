@@ -1,5 +1,6 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity, Index, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+import Image from './image.entity'
 import User from './user.entity'
 
 @Entity('Organization')
@@ -35,6 +36,10 @@ export default class Organization {
   name: string
 
   @Expose()
+  @Column({ default: 0 })
+  logoImageId: number
+
+  @Expose()
   @Column({ type: 'character varying', length: 255, nullable: true })
   addressProvince: string
 
@@ -53,6 +58,21 @@ export default class Organization {
   @Column({ type: 'text', default: '[]' })
   @Expose()
   permissionIds: string
+
+  @Column({ type: 'text', default: '' })
+  @Expose({})
+  note: string
+
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  expiryDate: number
 
   @Expose()
   @Column({
@@ -91,6 +111,11 @@ export default class Organization {
   @Expose()
   isActive: 0 | 1
 
+  @OneToOne(() => Image, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'logoImageId', referencedColumnName: 'id' })
+  @Expose()
+  logoImage: Image
+
   @Expose()
   @OneToMany(() => User, (user) => user.organization)
   userList: User[]
@@ -112,7 +137,7 @@ export default class Organization {
   }
 }
 
-export type OrganizationRelationType = Pick<Organization, 'userList'>
+export type OrganizationRelationType = Pick<Organization, 'userList' | 'logoImage'>
 
 export type OrganizationSortType = Pick<Organization, 'id'>
 

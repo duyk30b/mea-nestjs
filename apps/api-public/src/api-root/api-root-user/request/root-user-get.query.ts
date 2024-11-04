@@ -13,7 +13,7 @@ export class RootUserGetQuery {
     type: String,
     example: JSON.stringify(<RootUserRelationQuery>{
       organization: true,
-      role: true,
+      userRoleList: true,
     }),
   })
   @Expose()
@@ -76,11 +76,11 @@ export class RootUserGetQuery {
   sort?: RootUserSortQuery
 }
 
-export class RootUserPaginationQuery extends IntersectionType(RootUserGetQuery, PaginationQuery) {}
+export class RootUserPaginationQuery extends IntersectionType(RootUserGetQuery, PaginationQuery) { }
 
 export class RootUserGetManyQuery extends IntersectionType(
   PickType(RootUserGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
-) {}
+) { }
 
-export class RootUserGetOneQuery extends PickType(RootUserGetQuery, ['relation']) {}
+export class RootUserGetOneQuery extends PickType(RootUserGetQuery, ['relation']) { }

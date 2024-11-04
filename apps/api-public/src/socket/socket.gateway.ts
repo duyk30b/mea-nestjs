@@ -45,7 +45,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       }
       const jwtPayloadRefresh = this.jwtExtendService.verifyRefreshToken(token, ip)
       const { uid, oid } = jwtPayloadRefresh.data
-      socket.data.user = await this.cacheDataService.getUser(uid)
+      socket.data.user = await this.cacheDataService.getUser(oid, uid)
       socket.join(oid.toString())
       this.connections[uid] ||= []
       this.connections[uid].push({

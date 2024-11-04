@@ -44,7 +44,6 @@ async function bootstrap() {
   )
 
   app.useGlobalFilters(new ServerExceptionFilter())
-
   app.useGlobalGuards(new UserGuard(app.get(Reflector)), new RootGuard(app.get(Reflector)))
 
   app.useGlobalPipes(

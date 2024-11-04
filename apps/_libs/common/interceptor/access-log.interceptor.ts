@@ -29,26 +29,24 @@ export class AccessLogInterceptor implements NestInterceptor {
         mobile: external.mobile,
         uid: external.uid,
         oid: external.oid,
-        rid: external.rid,
         username: external.user?.username,
         phone: external.organization?.phone,
         email: external.organization?.email,
       }
 
-      const { originalUrl, method, body } = request
-      const urlParse = url.parse(originalUrl, true)
+      const urlParse = url.parse(request.originalUrl, true)
       if (basicExternal.oid) {
         message.OID = basicExternal.oid
       }
       message.type = '[API]'
-      message.method = method
-      message.path = urlParse.pathname
+      message.method = request.method
+      message.url = `${request.protocol}://${request.raw.hostname}${urlParse.pathname}`
       message.query = urlParse.query
       message.className = className
       message.funcName = funcName
       message.external = basicExternal
       if (showData) {
-        message.body = body
+        message.body = request.body
       }
     } else if (context.getType() === 'rpc') {
       if (res.constructor.name === 'NatsContext') {

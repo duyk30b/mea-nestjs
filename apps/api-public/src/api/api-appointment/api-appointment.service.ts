@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { VoucherType } from '../../../../_libs/database/common/variable'
-import { User } from '../../../../_libs/database/entities'
 import { AppointmentStatus } from '../../../../_libs/database/entities/appointment.entity'
 import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import { AppointmentRepository } from '../../../../_libs/database/repository/appointment/appointment.repository'
@@ -15,6 +13,7 @@ import {
   AppointmentGetManyQuery,
   AppointmentGetOneQuery,
   AppointmentPaginationQuery,
+  AppointmentRegisterTicketBody,
   AppointmentUpdateBody,
 } from './request'
 
@@ -39,7 +38,7 @@ export class ApiAppointmentService {
         oid,
         customerId: filter?.customerId,
         appointmentStatus: filter?.appointmentStatus,
-        appointmentType: filter?.appointmentType,
+        voucherType: filter?.voucherType,
         registeredAt: filter?.registeredAt,
       },
       sort,
@@ -58,7 +57,7 @@ export class ApiAppointmentService {
         oid,
         customerId: filter?.customerId,
         appointmentStatus: filter?.appointmentStatus,
-        appointmentType: filter?.appointmentType,
+        voucherType: filter?.voucherType,
         registeredAt: filter?.registeredAt,
       },
       limit,
@@ -78,6 +77,7 @@ export class ApiAppointmentService {
     const appointment = await this.appointmentRepository.insertOneFullFieldAndReturnEntity({
       ...body,
       oid,
+      voucherType: body.voucherType,
       fromTicketId: body.fromTicketId,
       toTicketId: 0,
       cancelReason: '',
@@ -110,48 +110,38 @@ export class ApiAppointmentService {
     return { data: { appointmentId: id } }
   }
 
-  async registerTicketClinic(options: {
+  async registerTicket(options: {
     oid: number
-    id: number
-    userId: number
-    user: User
+    appointmentId: number
+    body: AppointmentRegisterTicketBody
   }): Promise<BaseResponse> {
-    const { oid, id, userId, user } = options
-    const [appointment] = await this.appointmentRepository.updateAndReturnEntity(
-      { oid, id },
-      {
-        appointmentStatus: AppointmentStatus.Completed,
-      }
-    )
-    const customer = await this.customerRepository.findOneById(appointment.customerId)
-    const now = Date.now()
+    const { oid, appointmentId, body } = options
+    const appointment = await this.appointmentRepository.findOneBy({ oid, id: appointmentId })
+    const customer = await this.customerRepository.findOneBy({ oid, id: appointment.customerId })
+
     const ticket = await this.ticketRepository.insertOneAndReturnEntity({
       oid,
       customerId: customer.id,
-      userId,
-      voucherType: VoucherType.Clinic,
-      registeredAt: Math.max(appointment.registeredAt, now),
+      voucherType: appointment.voucherType,
+      registeredAt: body.registeredAt,
       ticketStatus: TicketStatus.Schedule,
-    })
-    const ticketDiagnosis = await this.ticketDiagnosisRepository.insertOneFullFieldAndReturnEntity({
-      oid,
-      ticketId: ticket.id,
-      healthHistory: customer.healthHistory || '',
-      reason: '',
-      summary: '',
-      diagnosis: '',
-      vitalSigns: JSON.stringify({}),
-      imageIds: JSON.stringify([]),
-      advice: '',
+      note: appointment.reason,
     })
 
     ticket.customer = customer
-    ticket.ticketDiagnosis = ticketDiagnosis
-    ticket.user = user
+    ticket.ticketDiagnosis = null
     ticket.ticketProductList = []
     ticket.ticketProcedureList = []
     ticket.customerPaymentList = []
-    this.socketEmitService.ticketClinicCreate(oid, { ticket })
-    return { data: { appointmentId: id } }
+    this.socketEmitService.ticketCreate(oid, { ticket })
+
+    await this.appointmentRepository.updateAndReturnEntity(
+      { oid, id: appointmentId },
+      {
+        appointmentStatus: AppointmentStatus.Completed,
+        toTicketId: ticket.id,
+      }
+    )
+    return { data: { appointmentId } }
   }
 }

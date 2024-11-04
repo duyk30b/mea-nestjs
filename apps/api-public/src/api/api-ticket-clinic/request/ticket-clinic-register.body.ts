@@ -1,28 +1,27 @@
-import { ApiProperty } from '@nestjs/swagger'
-import { Expose, Type } from 'class-transformer'
-import { IsDefined, IsNumber, IsPositive, IsString, ValidateNested } from 'class-validator'
-import { CustomerCreateBody } from '../../api-customer/request'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { Expose } from 'class-transformer'
+import { IsDefined, IsNumber, IsPositive, IsString } from 'class-validator'
+import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
+import { VoucherType } from '../../../../../_libs/database/common/variable'
 
-export class TicketClinicRegisterWithNewCustomerBody {
-  @ApiProperty({ type: CustomerCreateBody })
-  @Expose()
-  @Type(() => CustomerCreateBody)
-  @IsDefined()
-  @ValidateNested({ each: true })
-  customer: CustomerCreateBody
-
-  @ApiProperty({ example: 1678890707005 })
-  @Expose()
-  @IsNumber()
-  registeredAt: number
-}
-
-export class TicketClinicRegisterWithExistCustomerBody {
+export class TicketClinicRegisterBody {
   @ApiProperty({ example: 45 })
   @Expose()
   @IsDefined()
   @IsPositive()
   customerId: number
+
+  @ApiProperty({ example: 45 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  customerSourceId: number
+
+  @ApiProperty({ example: VoucherType.Clinic })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(VoucherType)
+  voucherType: VoucherType
 
   @ApiProperty({ example: 45 })
   @Expose()

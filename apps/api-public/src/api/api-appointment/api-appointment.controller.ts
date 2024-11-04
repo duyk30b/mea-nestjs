@@ -10,6 +10,7 @@ import {
   AppointmentGetManyQuery,
   AppointmentGetOneQuery,
   AppointmentPaginationQuery,
+  AppointmentRegisterTicketBody,
   AppointmentUpdateBody,
 } from './request'
 
@@ -64,14 +65,17 @@ export class ApiAppointmentController {
     return await this.apiAppointmentService.deleteOne(oid, id)
   }
 
-  @Post('register-ticket-clinic/:id')
-  @HasPermission(PermissionId.APPOINTMENT_REGISTER_TICKET_CLINIC)
-  async registerTicketClinic(@External() { oid, uid, user }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiAppointmentService.registerTicketClinic({
+  @Post(':id/register-ticket')
+  @HasPermission(PermissionId.APPOINTMENT_REGISTER_TICKET)
+  async registerTicket(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam,
+    @Body() body: AppointmentRegisterTicketBody
+  ) {
+    return await this.apiAppointmentService.registerTicket({
       oid,
-      id,
-      userId: uid,
-      user,
+      appointmentId: id,
+      body,
     })
   }
 }

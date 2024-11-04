@@ -1,20 +1,15 @@
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsNumber, IsOptional, ValidateNested } from 'class-validator'
+import { IsBoolean, IsDefined, IsIn, IsNumber, IsOptional, ValidateNested } from 'class-validator'
 import {
   ConditionTimestamp,
   SortQuery,
   createConditionEnum,
   transformConditionEnum,
 } from '../../../../../_libs/common/dto'
-import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { VoucherType } from '../../../../../_libs/database/common/variable'
 import { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
 
 export class TicketRelationQuery {
-  @Expose()
-  @IsBoolean()
-  user: boolean
-
   @Expose()
   @IsBoolean()
   customer: boolean
@@ -33,7 +28,19 @@ export class TicketRelationQuery {
 
   @Expose()
   @IsBoolean()
+  ticketDiagnosis: boolean
+
+  @Expose()
+  @IsBoolean()
   ticketProductList: boolean
+
+  @Expose()
+  @IsBoolean()
+  ticketProductConsumableList: boolean
+
+  @Expose()
+  @IsBoolean()
+  ticketProductPrescriptionList: boolean
 
   @Expose()
   @IsBoolean()
@@ -41,7 +48,11 @@ export class TicketRelationQuery {
 
   @Expose()
   @IsBoolean()
-  ticketDiagnosis: boolean
+  ticketRadiologyList: boolean
+
+  @Expose()
+  @IsBoolean()
+  ticketUserList: boolean
 
   @Expose()
   @IsBoolean()
@@ -49,7 +60,7 @@ export class TicketRelationQuery {
 
   @Expose()
   @IsBoolean()
-  ticketRadiologyList: boolean
+  customerSource: boolean
 }
 
 const ConditionEnumVoucherType = createConditionEnum(VoucherType)
@@ -67,7 +78,7 @@ export class TicketFilterQuery {
 
   @Expose()
   @Transform((params: TransformFnParams) => transformConditionEnum(params, VoucherType))
-  @IsOptional()
+  @IsDefined()
   voucherType: VoucherType | InstanceType<typeof ConditionEnumVoucherType>
 
   @Expose()

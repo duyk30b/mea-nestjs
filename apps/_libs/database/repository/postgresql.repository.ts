@@ -74,6 +74,7 @@ export abstract class PostgreSqlRepository<
   }
 
   async findManyByIds(ids: number[]): Promise<_ENTITY[]> {
+    if (!ids.length) return []
     return await this.findManyBy({ id: { IN: ids } } as any)
   }
 
@@ -95,12 +96,12 @@ export abstract class PostgreSqlRepository<
     })
   }
 
-  async findOneBy(condition: BaseCondition<_ENTITY>): Promise<_ENTITY> {
+  async findOneBy(condition: BaseCondition<_ENTITY>): Promise<_ENTITY | null> {
     const where = this.getWhereOptions(condition)
     return await this.repository.findOneBy(where)
   }
 
-  async findOneById(id: number): Promise<_ENTITY> {
+  async findOneById(id: number): Promise<_ENTITY | null> {
     return await this.findOneBy({ id } as any)
   }
 
@@ -118,6 +119,7 @@ export abstract class PostgreSqlRepository<
   async insertManyAndReturnRaw<X extends Partial<_INSERT>>(
     data: NoExtra<Partial<_INSERT>, X>[]
   ): Promise<{ [P in keyof _ENTITY]: any }[]> {
+    if (!data.length) return []
     const insertResult: InsertResult = await this.repository
       .createQueryBuilder()
       .insert()

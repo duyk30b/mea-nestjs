@@ -47,7 +47,7 @@ class TicketRadiologyBody {
   actualPrice: number
 }
 
-export class TicketClinicChangeTicketRadiologyListBody {
+export class TicketClinicUpdateTicketRadiologyListBody {
   @ApiProperty({ example: 56 })
   @Expose()
   @IsDefined()
