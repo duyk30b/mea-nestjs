@@ -14,6 +14,13 @@ import TicketRadiology, { TicketRadiologyStatus } from './ticket-radiology.entit
 import TicketSurcharge from './ticket-surcharge.entity'
 import TicketUser from './ticket-user.entity'
 
+export enum TicketType {
+  Order = 2,
+  Clinic = 3,
+  Spa = 4,
+  Eye = 5,
+}
+
 export enum TicketStatus {
   Schedule = 1,
   Draft = 2,
@@ -37,9 +44,9 @@ export default class Ticket extends BaseEntity {
   @Expose()
   customerSourceId: number
 
-  @Column({ type: 'smallint', default: VoucherType.Order })
+  @Column({ type: 'smallint', default: TicketType.Order })
   @Expose()
-  voucherType: VoucherType
+  ticketType: TicketType
 
   @Column({ type: 'smallint', default: TicketStatus.Draft })
   @Expose()

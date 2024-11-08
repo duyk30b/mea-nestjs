@@ -121,10 +121,9 @@ export class ApiTicketRadiologyService {
       ticketId: body.ticketId,
     })
 
-    this.socketEmitService.ticketUpdate(oid, { ticketBasic: ticket })
-    this.socketEmitService.ticketUpdateTicketRadiologyResult(oid, {
+    this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic: ticket })
+    this.socketEmitService.ticketClinicUpdateTicketRadiologyResult(oid, {
       ticketId: ticketRadiology.ticketId,
-      voucherType: ticket.voucherType,
       ticketRadiology,
     })
     return { data: { ticketRadiologyId: ticketRadiology.id } }
@@ -179,9 +178,8 @@ export class ApiTicketRadiologyService {
 
     const ticket = await this.ticketRepository.findOneBy({ oid, id: ticketRadiology.ticketId })
 
-    this.socketEmitService.ticketUpdateTicketRadiologyResult(oid, {
+    this.socketEmitService.ticketClinicUpdateTicketRadiologyResult(oid, {
       ticketId: ticketRadiology.ticketId,
-      voucherType: ticket.voucherType,
       ticketRadiology,
     })
     return { data: { ticketRadiologyId: ticketRadiology.id } }

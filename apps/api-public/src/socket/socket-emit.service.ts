@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 import { Server } from 'socket.io'
-import { VoucherType } from '../../../_libs/database/common/variable'
 import {
   Batch,
   Customer,
@@ -73,96 +72,97 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.PROCEDURE_UPSERT, data)
   }
 
-  ticketCreate(oid: number, data: { ticket: Ticket }) {
+  ticketClinicCreate(oid: number, data: { ticket: Ticket }) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CREATE, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CREATE, data)
   }
 
-  ticketDestroy(oid: number, data: { ticketId: number; voucherType: VoucherType }) {
+  ticketClinicDestroy(oid: number, data: { ticketId: number }) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_DESTROY, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_DESTROY, data)
   }
 
-  ticketUpdate(oid: number, data: { ticketBasic: Ticket }) {
+  ticketClinicUpdate(oid: number, data: { ticketBasic: Ticket }) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_UPDATE, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE, data)
   }
 
-  ticketUpdateTicketDiagnosisBasic(
+  ticketClinicUpdateTicketDiagnosisBasic(
     oid: number,
     data: {
       ticketId: number
-      voucherType: VoucherType
       ticketDiagnosisBasic: Omit<TicketDiagnosis, keyof Pick<TicketDiagnosis, 'special'>>
     }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_UPDATE_TICKET_DIAGNOSIS_BASIC, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_DIAGNOSIS_BASIC, data)
   }
 
-  ticketUpdateTicketDiagnosisSpecial(
+  ticketClinicUpdateTicketDiagnosisSpecial(
     oid: number,
-    data: { ticketId: number; voucherType: VoucherType; special: string }
+    data: { ticketId: number; special: string }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_UPDATE_TICKET_DIAGNOSIS_SPECIAL, data)
+    this.io
+      .in(oid.toString())
+      .emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_DIAGNOSIS_SPECIAL, data)
   }
 
-  ticketUpdateTicketProcedureList(
+  ticketClinicUpdateTicketProcedureList(
     oid: number,
-    data: { ticketId: number; voucherType: VoucherType; ticketProcedureList: TicketProcedure[] }
+    data: { ticketId: number; ticketProcedureList: TicketProcedure[] }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_UPDATE_TICKET_PROCEDURE_LIST, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST, data)
   }
 
-  ticketUpdateTicketProductConsumableList(
+  ticketClinicUpdateTicketProductConsumableList(
     oid: number,
     data: {
       ticketId: number
-      voucherType: VoucherType
       ticketProductConsumableList: TicketProduct[]
     }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_UPDATE_TICKET_PRODUCT_CONSUMABLE_LIST, data)
+    this.io
+      .in(oid.toString())
+      .emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE_LIST, data)
   }
 
-  ticketUpdateTicketProductPrescriptionList(
+  ticketClinicUpdateTicketProductPrescriptionList(
     oid: number,
     data: {
       ticketId: number
-      voucherType: VoucherType
       ticketProductPrescriptionList: TicketProduct[]
     }
   ) {
     if (!this.io) return
     this.io
       .in(oid.toString())
-      .emit(SOCKET_EVENT.TICKET_UPDATE_TICKET_PRODUCT_PRESCRIPTION_LIST, data)
+      .emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION_LIST, data)
   }
 
-  ticketUpdateTicketRadiologyList(
+  ticketClinicUpdateTicketRadiologyList(
     oid: number,
-    data: { ticketId: number; voucherType: VoucherType; ticketRadiologyList: TicketRadiology[] }
+    data: { ticketId: number; ticketRadiologyList: TicketRadiology[] }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_UPDATE_TICKET_RADIOLOGY_LIST, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST, data)
   }
 
-  ticketUpdateTicketRadiologyResult(
+  ticketClinicUpdateTicketRadiologyResult(
     oid: number,
-    data: { ticketId: number; voucherType: VoucherType; ticketRadiology: TicketRadiology }
+    data: { ticketId: number; ticketRadiology: TicketRadiology }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_UPDATE_TICKET_RADIOLOGY_RESULT, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_RESULT, data)
   }
 
-  ticketUpdateTicketUserList(
+  ticketClinicUpdateTicketUserList(
     oid: number,
-    data: { ticketId: number; voucherType: VoucherType; ticketUserList: TicketUser[] }
+    data: { ticketId: number; ticketUserList: TicketUser[] }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_UPDATE_TICKET_USER_LIST, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_USER_LIST, data)
   }
 }

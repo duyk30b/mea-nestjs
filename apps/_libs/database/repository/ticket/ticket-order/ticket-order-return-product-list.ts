@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { DataSource, FindOptionsWhere, In, InsertResult, UpdateResult } from 'typeorm'
 import { arrayToKeyValue } from '../../../../common/helpers/object.helper'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
-import { DeliveryStatus, DiscountType, PaymentType } from '../../../common/variable'
+import { DeliveryStatus, DiscountType, PaymentType, VoucherType } from '../../../common/variable'
 import {
   Batch,
   BatchMovement,
@@ -87,7 +87,7 @@ export class TicketOrderReturnProductList {
         throw new Error(`${PREFIX}: Update Ticket failed`)
       }
       const ticketRoot = Ticket.fromRaw(ticketRootUpdateResult.raw[0])
-      const { customerId, voucherType } = ticketRoot
+      const { customerId } = ticketRoot
 
       // === 2. INSERT CUSTOMER_PAYMENT  ===
       let customer: Customer = null
@@ -353,7 +353,7 @@ export class TicketOrderReturnProductList {
           productId: ticketProductActioned.productId,
           voucherId: ticketId,
           contactId: customerId,
-          voucherType,
+          voucherType: VoucherType.Ticket,
           isRefund: 1,
           createdAt: time,
           unitRate: ticketProductActioned.unitRate,
@@ -397,7 +397,7 @@ export class TicketOrderReturnProductList {
             batchId: ticketProductActioned.batchId,
             voucherId: ticketId,
             contactId: customerId,
-            voucherType,
+            voucherType: VoucherType.Ticket,
             isRefund: 1,
             createdAt: time,
             unitRate: ticketProductActioned.unitRate,

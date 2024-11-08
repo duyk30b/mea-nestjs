@@ -1,8 +1,8 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { ApiProperty } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
 import { IsDefined, IsNumber, IsPositive, IsString } from 'class-validator'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { VoucherType } from '../../../../../_libs/database/common/variable'
+import { TicketType } from '../../../../../_libs/database/entities/ticket.entity'
 
 export class TicketClinicRegisterBody {
   @ApiProperty({ example: 45 })
@@ -17,11 +17,11 @@ export class TicketClinicRegisterBody {
   @IsNumber()
   customerSourceId: number
 
-  @ApiProperty({ example: VoucherType.Clinic })
+  @ApiProperty({ example: TicketType.Clinic })
   @Expose()
   @IsDefined()
-  @IsEnumValue(VoucherType)
-  voucherType: VoucherType
+  @IsEnumValue(TicketType)
+  ticketType: TicketType
 
   @ApiProperty({ example: 45 })
   @Expose()

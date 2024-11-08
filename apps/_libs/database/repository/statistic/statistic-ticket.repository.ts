@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { Between, EntityManager, FindOptionsWhere, In } from 'typeorm'
-import { VoucherType } from '../../common/variable'
 import { Ticket } from '../../entities'
-import { TicketStatus } from '../../entities/ticket.entity'
+import { TicketStatus, TicketType } from '../../entities/ticket.entity'
 
 @Injectable()
 export class StatisticTicketRepository {
@@ -14,9 +13,9 @@ export class StatisticTicketRepository {
     fromTime: Date
     toTime: Date
     timeType: 'date' | 'month'
-    voucherType?: VoucherType
+    ticketType?: TicketType
   }) {
-    const { oid, timeType, voucherType } = options
+    const { oid, timeType, ticketType } = options
     const fromTime = options.fromTime.getTime()
     const toTime = options.toTime.getTime()
 
@@ -25,8 +24,8 @@ export class StatisticTicketRepository {
       ticketStatus: In([TicketStatus.Debt, TicketStatus.Completed]),
       endedAt: Between(fromTime, toTime),
     }
-    if (voucherType) {
-      whereTicket.voucherType = voucherType
+    if (ticketType) {
+      whereTicket.ticketType = ticketType
     }
 
     let query = this.manager

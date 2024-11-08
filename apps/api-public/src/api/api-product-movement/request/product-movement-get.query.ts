@@ -4,9 +4,9 @@ import { IsObject, ValidateNested } from 'class-validator'
 import { LimitQuery, PaginationQuery } from '../../../../../_libs/common/dto/query'
 import { VoucherType } from '../../../../../_libs/database/common/variable'
 import {
-    ProductMovementFilterQuery,
-    ProductMovementRelationQuery,
-    ProductMovementSortQuery,
+  ProductMovementFilterQuery,
+  ProductMovementRelationQuery,
+  ProductMovementSortQuery,
 } from './product-movement-options.request'
 
 export class ProductMovementGetQuery {
@@ -38,7 +38,7 @@ export class ProductMovementGetQuery {
     type: String,
     example: JSON.stringify(<ProductMovementFilterQuery>{
       voucherId: 3,
-      voucherType: VoucherType.Clinic,
+      voucherType: VoucherType.Receipt,
     }),
   })
   @Expose()
@@ -83,11 +83,11 @@ export class ProductMovementGetQuery {
 export class ProductMovementPaginationQuery extends IntersectionType(
   ProductMovementGetQuery,
   PaginationQuery
-) {}
+) { }
 
 export class ProductMovementGetManyQuery extends IntersectionType(
   PickType(ProductMovementGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
-) {}
+) { }
 
-export class ProductMovementGetOneQuery extends PickType(ProductMovementGetQuery, ['relation']) {}
+export class ProductMovementGetOneQuery extends PickType(ProductMovementGetQuery, ['relation']) { }

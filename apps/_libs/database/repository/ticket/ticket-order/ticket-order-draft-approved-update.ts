@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager, FindOptionsWhere, In } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
-import { DeliveryStatus, VoucherType } from '../../../common/variable'
+import { DeliveryStatus } from '../../../common/variable'
 import {
   Ticket,
   TicketExpense,
@@ -15,7 +15,7 @@ import { TicketProcedureInsertType, TicketProcedureStatus } from '../../../entit
 import { TicketProductInsertType, TicketProductType } from '../../../entities/ticket-product.entity'
 import { TicketRadiologyStatus } from '../../../entities/ticket-radiology.entity'
 import { TicketSurchargeInsertType } from '../../../entities/ticket-surcharge.entity'
-import { TicketStatus } from '../../../entities/ticket.entity'
+import { TicketStatus, TicketType } from '../../../entities/ticket.entity'
 import {
   TicketOrderDraftApprovedUpdateType,
   TicketOrderExpenseDraftType,
@@ -66,7 +66,6 @@ export class TicketOrderDraftApprovedUpdate {
           ? TicketProcedureStatus.Completed
           : TicketProcedureStatus.Empty,
         radiologyStatus: TicketRadiologyStatus.Empty,
-        voucherType: VoucherType.Order,
         paid: 0,
         debt: ticketOrderDraftApprovedUpdate.totalMoney,
         startedAt: ticketOrderDraftApprovedUpdate.registeredAt,

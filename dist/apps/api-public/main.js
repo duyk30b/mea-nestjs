@@ -1325,9 +1325,9 @@ var batch_entity_1 = __webpack_require__(43);
 Object.defineProperty(exports, "Batch", ({ enumerable: true, get: function () { return batch_entity_1.default; } }));
 var customer_payment_entity_1 = __webpack_require__(51);
 Object.defineProperty(exports, "CustomerPayment", ({ enumerable: true, get: function () { return customer_payment_entity_1.default; } }));
-var customer_source_entity_1 = __webpack_require__(40);
+var customer_source_entity_1 = __webpack_require__(39);
 Object.defineProperty(exports, "CustomerSource", ({ enumerable: true, get: function () { return customer_source_entity_1.default; } }));
-var customer_entity_1 = __webpack_require__(41);
+var customer_entity_1 = __webpack_require__(40);
 Object.defineProperty(exports, "Customer", ({ enumerable: true, get: function () { return customer_entity_1.default; } }));
 var distributor_payment_entity_1 = __webpack_require__(48);
 Object.defineProperty(exports, "DistributorPayment", ({ enumerable: true, get: function () { return distributor_payment_entity_1.default; } }));
@@ -1400,15 +1400,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var Appointment_1;
-var _a, _b, _c;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AppointmentStatus = void 0;
 const class_transformer_1 = __webpack_require__(32);
 const typeorm_1 = __webpack_require__(33);
 const base_entity_1 = __webpack_require__(38);
-const variable_1 = __webpack_require__(39);
-const customer_source_entity_1 = __webpack_require__(40);
-const customer_entity_1 = __webpack_require__(41);
+const customer_source_entity_1 = __webpack_require__(39);
+const customer_entity_1 = __webpack_require__(40);
 var AppointmentStatus;
 (function (AppointmentStatus) {
     AppointmentStatus[AppointmentStatus["Waiting"] = 1] = "Waiting";
@@ -1471,11 +1470,6 @@ __decorate([
     __metadata("design:type", String)
 ], Appointment.prototype, "cancelReason", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'smallint', default: variable_1.VoucherType.Clinic }),
-    (0, class_transformer_1.Expose)(),
-    __metadata("design:type", typeof (_a = typeof variable_1.VoucherType !== "undefined" && variable_1.VoucherType) === "function" ? _a : Object)
-], Appointment.prototype, "voucherType", void 0);
-__decorate([
     (0, typeorm_1.Column)({ type: 'smallint', default: AppointmentStatus.Waiting }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Number)
@@ -1484,13 +1478,13 @@ __decorate([
     (0, typeorm_1.ManyToOne)((type) => customer_entity_1.default, { createForeignKeyConstraints: false }),
     (0, typeorm_1.JoinColumn)({ name: 'customerId', referencedColumnName: 'id' }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", typeof (_b = typeof customer_entity_1.default !== "undefined" && customer_entity_1.default) === "function" ? _b : Object)
+    __metadata("design:type", typeof (_a = typeof customer_entity_1.default !== "undefined" && customer_entity_1.default) === "function" ? _a : Object)
 ], Appointment.prototype, "customer", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)((type) => customer_source_entity_1.default, { createForeignKeyConstraints: false }),
     (0, typeorm_1.JoinColumn)({ name: 'customerSourceId', referencedColumnName: 'id' }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", typeof (_c = typeof customer_source_entity_1.default !== "undefined" && customer_source_entity_1.default) === "function" ? _c : Object)
+    __metadata("design:type", typeof (_b = typeof customer_source_entity_1.default !== "undefined" && customer_source_entity_1.default) === "function" ? _b : Object)
 ], Appointment.prototype, "customerSource", void 0);
 Appointment = Appointment_1 = __decorate([
     (0, typeorm_1.Entity)('Appointment'),
@@ -1534,83 +1528,6 @@ __decorate([
 
 /***/ }),
 /* 39 */
-/***/ ((__unused_webpack_module, exports) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.DeliveryStatus = exports.VoucherType = exports.InvoiceItemType = exports.ReceiptStatus = exports.InvoiceStatus = exports.PaymentType = exports.DiscountType = exports.EOrder = exports.ERole = exports.EGender = void 0;
-var EGender;
-(function (EGender) {
-    EGender[EGender["Female"] = 0] = "Female";
-    EGender[EGender["Male"] = 1] = "Male";
-})(EGender || (exports.EGender = EGender = {}));
-var ERole;
-(function (ERole) {
-    ERole[ERole["Root"] = 0] = "Root";
-    ERole[ERole["Admin"] = 1] = "Admin";
-    ERole[ERole["User"] = 2] = "User";
-})(ERole || (exports.ERole = ERole = {}));
-var EOrder;
-(function (EOrder) {
-    EOrder[EOrder["ASC"] = 0] = "ASC";
-    EOrder[EOrder["DESC"] = 1] = "DESC";
-})(EOrder || (exports.EOrder = EOrder = {}));
-var DiscountType;
-(function (DiscountType) {
-    DiscountType["Percent"] = "%";
-    DiscountType["VND"] = "VN\u0110";
-})(DiscountType || (exports.DiscountType = DiscountType = {}));
-var PaymentType;
-(function (PaymentType) {
-    PaymentType[PaymentType["Prepayment"] = 1] = "Prepayment";
-    PaymentType[PaymentType["ReceiveRefund"] = 2] = "ReceiveRefund";
-    PaymentType[PaymentType["Close"] = 3] = "Close";
-    PaymentType[PaymentType["PayDebt"] = 4] = "PayDebt";
-    PaymentType[PaymentType["Reopen"] = 5] = "Reopen";
-})(PaymentType || (exports.PaymentType = PaymentType = {}));
-var InvoiceStatus;
-(function (InvoiceStatus) {
-    InvoiceStatus[InvoiceStatus["Refund"] = -1] = "Refund";
-    InvoiceStatus[InvoiceStatus["Draft"] = 0] = "Draft";
-    InvoiceStatus[InvoiceStatus["Prepayment"] = 1] = "Prepayment";
-    InvoiceStatus[InvoiceStatus["Debt"] = 2] = "Debt";
-    InvoiceStatus[InvoiceStatus["Success"] = 3] = "Success";
-})(InvoiceStatus || (exports.InvoiceStatus = InvoiceStatus = {}));
-var ReceiptStatus;
-(function (ReceiptStatus) {
-    ReceiptStatus[ReceiptStatus["Cancelled"] = -1] = "Cancelled";
-    ReceiptStatus[ReceiptStatus["Draft"] = 0] = "Draft";
-    ReceiptStatus[ReceiptStatus["Prepayment"] = 1] = "Prepayment";
-    ReceiptStatus[ReceiptStatus["Debt"] = 2] = "Debt";
-    ReceiptStatus[ReceiptStatus["Success"] = 3] = "Success";
-})(ReceiptStatus || (exports.ReceiptStatus = ReceiptStatus = {}));
-var InvoiceItemType;
-(function (InvoiceItemType) {
-    InvoiceItemType[InvoiceItemType["Batch"] = 1] = "Batch";
-    InvoiceItemType[InvoiceItemType["Procedure"] = 2] = "Procedure";
-    InvoiceItemType[InvoiceItemType["ProductHasManageQuantity"] = 3] = "ProductHasManageQuantity";
-    InvoiceItemType[InvoiceItemType["ProductNoManageQuantity"] = 4] = "ProductNoManageQuantity";
-})(InvoiceItemType || (exports.InvoiceItemType = InvoiceItemType = {}));
-var VoucherType;
-(function (VoucherType) {
-    VoucherType[VoucherType["Receipt"] = 1] = "Receipt";
-    VoucherType[VoucherType["Order"] = 2] = "Order";
-    VoucherType[VoucherType["Clinic"] = 3] = "Clinic";
-    VoucherType[VoucherType["Spa"] = 4] = "Spa";
-    VoucherType[VoucherType["Eye"] = 5] = "Eye";
-    VoucherType[VoucherType["Traditional"] = 6] = "Traditional";
-})(VoucherType || (exports.VoucherType = VoucherType = {}));
-var DeliveryStatus;
-(function (DeliveryStatus) {
-    DeliveryStatus[DeliveryStatus["NoStock"] = 1] = "NoStock";
-    DeliveryStatus[DeliveryStatus["Pending"] = 2] = "Pending";
-    DeliveryStatus[DeliveryStatus["Delivered"] = 3] = "Delivered";
-    DeliveryStatus[DeliveryStatus["Cancelled"] = 4] = "Cancelled";
-})(DeliveryStatus || (exports.DeliveryStatus = DeliveryStatus = {}));
-
-
-/***/ }),
-/* 40 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -1661,7 +1578,7 @@ exports["default"] = CustomerSource;
 
 
 /***/ }),
-/* 41 */
+/* 40 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -1680,7 +1597,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const class_transformer_1 = __webpack_require__(32);
 const typeorm_1 = __webpack_require__(33);
 const base_entity_1 = __webpack_require__(38);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 let Customer = Customer_1 = class Customer extends base_entity_1.BaseEntity {
     static fromRaw(raw) {
         if (!raw)
@@ -1809,6 +1726,79 @@ exports["default"] = Customer;
 
 
 /***/ }),
+/* 41 */
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DeliveryStatus = exports.VoucherType = exports.InvoiceItemType = exports.ReceiptStatus = exports.InvoiceStatus = exports.PaymentType = exports.DiscountType = exports.EOrder = exports.ERole = exports.EGender = void 0;
+var EGender;
+(function (EGender) {
+    EGender[EGender["Female"] = 0] = "Female";
+    EGender[EGender["Male"] = 1] = "Male";
+})(EGender || (exports.EGender = EGender = {}));
+var ERole;
+(function (ERole) {
+    ERole[ERole["Root"] = 0] = "Root";
+    ERole[ERole["Admin"] = 1] = "Admin";
+    ERole[ERole["User"] = 2] = "User";
+})(ERole || (exports.ERole = ERole = {}));
+var EOrder;
+(function (EOrder) {
+    EOrder[EOrder["ASC"] = 0] = "ASC";
+    EOrder[EOrder["DESC"] = 1] = "DESC";
+})(EOrder || (exports.EOrder = EOrder = {}));
+var DiscountType;
+(function (DiscountType) {
+    DiscountType["Percent"] = "%";
+    DiscountType["VND"] = "VN\u0110";
+})(DiscountType || (exports.DiscountType = DiscountType = {}));
+var PaymentType;
+(function (PaymentType) {
+    PaymentType[PaymentType["Prepayment"] = 1] = "Prepayment";
+    PaymentType[PaymentType["ReceiveRefund"] = 2] = "ReceiveRefund";
+    PaymentType[PaymentType["Close"] = 3] = "Close";
+    PaymentType[PaymentType["PayDebt"] = 4] = "PayDebt";
+    PaymentType[PaymentType["Reopen"] = 5] = "Reopen";
+})(PaymentType || (exports.PaymentType = PaymentType = {}));
+var InvoiceStatus;
+(function (InvoiceStatus) {
+    InvoiceStatus[InvoiceStatus["Refund"] = -1] = "Refund";
+    InvoiceStatus[InvoiceStatus["Draft"] = 0] = "Draft";
+    InvoiceStatus[InvoiceStatus["Prepayment"] = 1] = "Prepayment";
+    InvoiceStatus[InvoiceStatus["Debt"] = 2] = "Debt";
+    InvoiceStatus[InvoiceStatus["Success"] = 3] = "Success";
+})(InvoiceStatus || (exports.InvoiceStatus = InvoiceStatus = {}));
+var ReceiptStatus;
+(function (ReceiptStatus) {
+    ReceiptStatus[ReceiptStatus["Cancelled"] = -1] = "Cancelled";
+    ReceiptStatus[ReceiptStatus["Draft"] = 0] = "Draft";
+    ReceiptStatus[ReceiptStatus["Prepayment"] = 1] = "Prepayment";
+    ReceiptStatus[ReceiptStatus["Debt"] = 2] = "Debt";
+    ReceiptStatus[ReceiptStatus["Success"] = 3] = "Success";
+})(ReceiptStatus || (exports.ReceiptStatus = ReceiptStatus = {}));
+var InvoiceItemType;
+(function (InvoiceItemType) {
+    InvoiceItemType[InvoiceItemType["Batch"] = 1] = "Batch";
+    InvoiceItemType[InvoiceItemType["Procedure"] = 2] = "Procedure";
+    InvoiceItemType[InvoiceItemType["ProductHasManageQuantity"] = 3] = "ProductHasManageQuantity";
+    InvoiceItemType[InvoiceItemType["ProductNoManageQuantity"] = 4] = "ProductNoManageQuantity";
+})(InvoiceItemType || (exports.InvoiceItemType = InvoiceItemType = {}));
+var VoucherType;
+(function (VoucherType) {
+    VoucherType[VoucherType["Receipt"] = 1] = "Receipt";
+    VoucherType[VoucherType["Ticket"] = 2] = "Ticket";
+})(VoucherType || (exports.VoucherType = VoucherType = {}));
+var DeliveryStatus;
+(function (DeliveryStatus) {
+    DeliveryStatus[DeliveryStatus["NoStock"] = 1] = "NoStock";
+    DeliveryStatus[DeliveryStatus["Pending"] = 2] = "Pending";
+    DeliveryStatus[DeliveryStatus["Delivered"] = 3] = "Delivered";
+    DeliveryStatus[DeliveryStatus["Cancelled"] = 4] = "Cancelled";
+})(DeliveryStatus || (exports.DeliveryStatus = DeliveryStatus = {}));
+
+
+/***/ }),
 /* 42 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
@@ -1827,9 +1817,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const class_transformer_1 = __webpack_require__(32);
 const typeorm_1 = __webpack_require__(33);
 const base_entity_1 = __webpack_require__(38);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const batch_entity_1 = __webpack_require__(43);
-const customer_entity_1 = __webpack_require__(41);
+const customer_entity_1 = __webpack_require__(40);
 const distributor_entity_1 = __webpack_require__(46);
 const product_entity_1 = __webpack_require__(44);
 const receipt_entity_1 = __webpack_require__(47);
@@ -2525,7 +2515,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const class_transformer_1 = __webpack_require__(32);
 const typeorm_1 = __webpack_require__(33);
 const base_entity_1 = __webpack_require__(38);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const distributor_payment_entity_1 = __webpack_require__(48);
 const distributor_entity_1 = __webpack_require__(46);
 const receipt_item_entity_1 = __webpack_require__(49);
@@ -2712,7 +2702,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const class_transformer_1 = __webpack_require__(32);
 const typeorm_1 = __webpack_require__(33);
 const base_entity_1 = __webpack_require__(38);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const receipt_entity_1 = __webpack_require__(47);
 let DistributorPayment = class DistributorPayment extends base_entity_1.BaseEntity {
 };
@@ -2965,17 +2955,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var Ticket_1;
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketStatus = void 0;
+exports.TicketStatus = exports.TicketType = void 0;
 const class_transformer_1 = __webpack_require__(32);
 const typeorm_1 = __webpack_require__(33);
 const base_entity_1 = __webpack_require__(38);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const appointment_entity_1 = __webpack_require__(37);
 const customer_payment_entity_1 = __webpack_require__(51);
-const customer_source_entity_1 = __webpack_require__(40);
-const customer_entity_1 = __webpack_require__(41);
+const customer_source_entity_1 = __webpack_require__(39);
+const customer_entity_1 = __webpack_require__(40);
 const ticket_diagnosis_entity_1 = __webpack_require__(52);
 const ticket_expense_entity_1 = __webpack_require__(53);
 const ticket_procedure_entity_1 = __webpack_require__(54);
@@ -2983,6 +2973,13 @@ const ticket_product_entity_1 = __webpack_require__(57);
 const ticket_radiology_entity_1 = __webpack_require__(58);
 const ticket_surcharge_entity_1 = __webpack_require__(61);
 const ticket_user_entity_1 = __webpack_require__(62);
+var TicketType;
+(function (TicketType) {
+    TicketType[TicketType["Order"] = 2] = "Order";
+    TicketType[TicketType["Clinic"] = 3] = "Clinic";
+    TicketType[TicketType["Spa"] = 4] = "Spa";
+    TicketType[TicketType["Eye"] = 5] = "Eye";
+})(TicketType || (exports.TicketType = TicketType = {}));
 var TicketStatus;
 (function (TicketStatus) {
     TicketStatus[TicketStatus["Schedule"] = 1] = "Schedule";
@@ -3032,10 +3029,10 @@ __decorate([
     __metadata("design:type", Number)
 ], Ticket.prototype, "customerSourceId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'smallint', default: variable_1.VoucherType.Order }),
+    (0, typeorm_1.Column)({ type: 'smallint', default: TicketType.Order }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", typeof (_a = typeof variable_1.VoucherType !== "undefined" && variable_1.VoucherType) === "function" ? _a : Object)
-], Ticket.prototype, "voucherType", void 0);
+    __metadata("design:type", Number)
+], Ticket.prototype, "ticketType", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'smallint', default: TicketStatus.Draft }),
     (0, class_transformer_1.Expose)(),
@@ -3044,17 +3041,17 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ type: 'smallint', default: variable_1.DeliveryStatus.NoStock }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", typeof (_b = typeof variable_1.DeliveryStatus !== "undefined" && variable_1.DeliveryStatus) === "function" ? _b : Object)
+    __metadata("design:type", typeof (_a = typeof variable_1.DeliveryStatus !== "undefined" && variable_1.DeliveryStatus) === "function" ? _a : Object)
 ], Ticket.prototype, "deliveryStatus", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'smallint', default: ticket_procedure_entity_1.TicketProcedureStatus.Empty }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", typeof (_c = typeof ticket_procedure_entity_1.TicketProcedureStatus !== "undefined" && ticket_procedure_entity_1.TicketProcedureStatus) === "function" ? _c : Object)
+    __metadata("design:type", typeof (_b = typeof ticket_procedure_entity_1.TicketProcedureStatus !== "undefined" && ticket_procedure_entity_1.TicketProcedureStatus) === "function" ? _b : Object)
 ], Ticket.prototype, "procedureStatus", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'smallint', default: ticket_radiology_entity_1.TicketRadiologyStatus.Empty }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", typeof (_d = typeof ticket_radiology_entity_1.TicketRadiologyStatus !== "undefined" && ticket_radiology_entity_1.TicketRadiologyStatus) === "function" ? _d : Object)
+    __metadata("design:type", typeof (_c = typeof ticket_radiology_entity_1.TicketRadiologyStatus !== "undefined" && ticket_radiology_entity_1.TicketRadiologyStatus) === "function" ? _c : Object)
 ], Ticket.prototype, "radiologyStatus", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'smallint', nullable: true }),
@@ -3130,7 +3127,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 25, default: variable_1.DiscountType.VND }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", typeof (_e = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _e : Object)
+    __metadata("design:type", typeof (_d = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _d : Object)
 ], Ticket.prototype, "discountType", void 0);
 __decorate([
     (0, typeorm_1.Column)({
@@ -3243,13 +3240,13 @@ __decorate([
     (0, typeorm_1.ManyToOne)((type) => customer_source_entity_1.default, { createForeignKeyConstraints: false }),
     (0, typeorm_1.JoinColumn)({ name: 'customerSourceId', referencedColumnName: 'id' }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", typeof (_f = typeof customer_source_entity_1.default !== "undefined" && customer_source_entity_1.default) === "function" ? _f : Object)
+    __metadata("design:type", typeof (_e = typeof customer_source_entity_1.default !== "undefined" && customer_source_entity_1.default) === "function" ? _e : Object)
 ], Ticket.prototype, "customerSource", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)((type) => customer_entity_1.default, { createForeignKeyConstraints: false }),
     (0, typeorm_1.JoinColumn)({ name: 'customerId', referencedColumnName: 'id' }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", typeof (_g = typeof customer_entity_1.default !== "undefined" && customer_entity_1.default) === "function" ? _g : Object)
+    __metadata("design:type", typeof (_f = typeof customer_entity_1.default !== "undefined" && customer_entity_1.default) === "function" ? _f : Object)
 ], Ticket.prototype, "customer", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => customer_payment_entity_1.default, (customerPayment) => customerPayment.ticket),
@@ -3260,11 +3257,11 @@ __decorate([
     (0, typeorm_1.OneToOne)(() => ticket_diagnosis_entity_1.default, { createForeignKeyConstraints: false }),
     (0, typeorm_1.JoinColumn)({ name: 'id', referencedColumnName: 'ticketId' }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", typeof (_h = typeof ticket_diagnosis_entity_1.default !== "undefined" && ticket_diagnosis_entity_1.default) === "function" ? _h : Object)
+    __metadata("design:type", typeof (_g = typeof ticket_diagnosis_entity_1.default !== "undefined" && ticket_diagnosis_entity_1.default) === "function" ? _g : Object)
 ], Ticket.prototype, "ticketDiagnosis", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", typeof (_j = typeof appointment_entity_1.default !== "undefined" && appointment_entity_1.default) === "function" ? _j : Object)
+    __metadata("design:type", typeof (_h = typeof appointment_entity_1.default !== "undefined" && appointment_entity_1.default) === "function" ? _h : Object)
 ], Ticket.prototype, "toAppointment", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => ticket_product_entity_1.default, (ticketProduct) => ticketProduct.ticket),
@@ -3335,8 +3332,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const class_transformer_1 = __webpack_require__(32);
 const typeorm_1 = __webpack_require__(33);
 const base_entity_1 = __webpack_require__(38);
-const variable_1 = __webpack_require__(39);
-const customer_entity_1 = __webpack_require__(41);
+const variable_1 = __webpack_require__(41);
+const customer_entity_1 = __webpack_require__(40);
 const ticket_entity_1 = __webpack_require__(50);
 let CustomerPayment = CustomerPayment_1 = class CustomerPayment extends base_entity_1.BaseEntity {
     static fromRaw(raw) {
@@ -3629,8 +3626,8 @@ exports.TicketProcedureStatus = void 0;
 const class_transformer_1 = __webpack_require__(32);
 const typeorm_1 = __webpack_require__(33);
 const base_entity_1 = __webpack_require__(38);
-const variable_1 = __webpack_require__(39);
-const customer_entity_1 = __webpack_require__(41);
+const variable_1 = __webpack_require__(41);
+const customer_entity_1 = __webpack_require__(40);
 const procedure_entity_1 = __webpack_require__(55);
 const ticket_entity_1 = __webpack_require__(50);
 var TicketProcedureStatus;
@@ -3994,9 +3991,9 @@ exports.TicketProductType = void 0;
 const class_transformer_1 = __webpack_require__(32);
 const typeorm_1 = __webpack_require__(33);
 const base_entity_1 = __webpack_require__(38);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const batch_entity_1 = __webpack_require__(43);
-const customer_entity_1 = __webpack_require__(41);
+const customer_entity_1 = __webpack_require__(40);
 const product_entity_1 = __webpack_require__(44);
 const ticket_entity_1 = __webpack_require__(50);
 var TicketProductType;
@@ -4195,8 +4192,8 @@ exports.TicketRadiologyStatus = void 0;
 const class_transformer_1 = __webpack_require__(32);
 const typeorm_1 = __webpack_require__(33);
 const base_entity_1 = __webpack_require__(38);
-const variable_1 = __webpack_require__(39);
-const customer_entity_1 = __webpack_require__(41);
+const variable_1 = __webpack_require__(41);
+const customer_entity_1 = __webpack_require__(40);
 const radiology_entity_1 = __webpack_require__(59);
 const ticket_entity_1 = __webpack_require__(50);
 var TicketRadiologyStatus;
@@ -4608,7 +4605,7 @@ exports.TicketUserReferenceType = void 0;
 const class_transformer_1 = __webpack_require__(32);
 const typeorm_1 = __webpack_require__(33);
 const base_entity_1 = __webpack_require__(38);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const role_entity_1 = __webpack_require__(63);
 const ticket_entity_1 = __webpack_require__(50);
 const user_entity_1 = __webpack_require__(65);
@@ -4879,7 +4876,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserGroup = void 0;
 const class_transformer_1 = __webpack_require__(32);
 const typeorm_1 = __webpack_require__(33);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const organization_entity_1 = __webpack_require__(66);
 const user_role_entity_1 = __webpack_require__(64);
 var UserGroup;
@@ -5400,58 +5397,23 @@ var PermissionId;
     PermissionId[PermissionId["TICKET_CLINIC_REGISTER_NEW"] = 1401] = "TICKET_CLINIC_REGISTER_NEW";
     PermissionId[PermissionId["TICKET_CLINIC_DESTROY_DRAFT_SCHEDULE"] = 1402] = "TICKET_CLINIC_DESTROY_DRAFT_SCHEDULE";
     PermissionId[PermissionId["TICKET_CLINIC_START_CHECKUP"] = 1403] = "TICKET_CLINIC_START_CHECKUP";
-    PermissionId[PermissionId["TICKET_CLINIC_UPDATE_DIAGNOSIS_BASIC"] = 1404] = "TICKET_CLINIC_UPDATE_DIAGNOSIS_BASIC";
-    PermissionId[PermissionId["TICKET_CLINIC_UPDATE_DIAGNOSIS_SPECIAL"] = 1405] = "TICKET_CLINIC_UPDATE_DIAGNOSIS_SPECIAL";
-    PermissionId[PermissionId["TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST"] = 1406] = "TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST";
-    PermissionId[PermissionId["TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST"] = 1407] = "TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST";
-    PermissionId[PermissionId["TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE"] = 1408] = "TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE";
-    PermissionId[PermissionId["TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION"] = 1409] = "TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION";
-    PermissionId[PermissionId["TICKET_CLINIC_UPDATE_ITEMS_MONEY"] = 1410] = "TICKET_CLINIC_UPDATE_ITEMS_MONEY";
-    PermissionId[PermissionId["TICKET_CLINIC_PREPAYMENT"] = 1411] = "TICKET_CLINIC_PREPAYMENT";
-    PermissionId[PermissionId["TICKET_CLINIC_REFUND_OVERPAID"] = 1412] = "TICKET_CLINIC_REFUND_OVERPAID";
-    PermissionId[PermissionId["TICKET_CLINIC_PAY_DEBT"] = 1413] = "TICKET_CLINIC_PAY_DEBT";
-    PermissionId[PermissionId["TICKET_CLINIC_SEND_PRODUCT"] = 1414] = "TICKET_CLINIC_SEND_PRODUCT";
-    PermissionId[PermissionId["TICKET_CLINIC_RETURN_PRODUCT"] = 1415] = "TICKET_CLINIC_RETURN_PRODUCT";
-    PermissionId[PermissionId["TICKET_CLINIC_CLOSE"] = 1416] = "TICKET_CLINIC_CLOSE";
-    PermissionId[PermissionId["TICKET_CLINIC_REOPEN"] = 1417] = "TICKET_CLINIC_REOPEN";
-    PermissionId[PermissionId["TICKET_SPA"] = 15] = "TICKET_SPA";
-    PermissionId[PermissionId["TICKET_SPA_READ"] = 1500] = "TICKET_SPA_READ";
-    PermissionId[PermissionId["TICKET_SPA_REGISTER_NEW"] = 1501] = "TICKET_SPA_REGISTER_NEW";
-    PermissionId[PermissionId["TICKET_SPA_DESTROY_DRAFT_SCHEDULE"] = 1502] = "TICKET_SPA_DESTROY_DRAFT_SCHEDULE";
-    PermissionId[PermissionId["TICKET_SPA_START_CHECKUP"] = 1503] = "TICKET_SPA_START_CHECKUP";
-    PermissionId[PermissionId["TICKET_SPA_UPDATE_DIAGNOSIS_BASIC"] = 1504] = "TICKET_SPA_UPDATE_DIAGNOSIS_BASIC";
-    PermissionId[PermissionId["TICKET_SPA_UPDATE_DIAGNOSIS_SPECIAL"] = 1505] = "TICKET_SPA_UPDATE_DIAGNOSIS_SPECIAL";
-    PermissionId[PermissionId["TICKET_SPA_UPDATE_TICKET_PROCEDURE_LIST"] = 1506] = "TICKET_SPA_UPDATE_TICKET_PROCEDURE_LIST";
-    PermissionId[PermissionId["TICKET_SPA_UPDATE_TICKET_RADIOLOGY_LIST"] = 1507] = "TICKET_SPA_UPDATE_TICKET_RADIOLOGY_LIST";
-    PermissionId[PermissionId["TICKET_SPA_UPDATE_TICKET_PRODUCT_CONSUMABLE"] = 1508] = "TICKET_SPA_UPDATE_TICKET_PRODUCT_CONSUMABLE";
-    PermissionId[PermissionId["TICKET_SPA_UPDATE_TICKET_PRODUCT_PRESCRIPTION"] = 1509] = "TICKET_SPA_UPDATE_TICKET_PRODUCT_PRESCRIPTION";
-    PermissionId[PermissionId["TICKET_SPA_UPDATE_ITEMS_MONEY"] = 1510] = "TICKET_SPA_UPDATE_ITEMS_MONEY";
-    PermissionId[PermissionId["TICKET_SPA_PREPAYMENT"] = 1511] = "TICKET_SPA_PREPAYMENT";
-    PermissionId[PermissionId["TICKET_SPA_REFUND_OVERPAID"] = 1512] = "TICKET_SPA_REFUND_OVERPAID";
-    PermissionId[PermissionId["TICKET_SPA_PAY_DEBT"] = 1513] = "TICKET_SPA_PAY_DEBT";
-    PermissionId[PermissionId["TICKET_SPA_SEND_PRODUCT"] = 1514] = "TICKET_SPA_SEND_PRODUCT";
-    PermissionId[PermissionId["TICKET_SPA_RETURN_PRODUCT"] = 1515] = "TICKET_SPA_RETURN_PRODUCT";
-    PermissionId[PermissionId["TICKET_SPA_CLOSE"] = 1516] = "TICKET_SPA_CLOSE";
-    PermissionId[PermissionId["TICKET_SPA_REOPEN"] = 1517] = "TICKET_SPA_REOPEN";
-    PermissionId[PermissionId["TICKET_EYE"] = 16] = "TICKET_EYE";
-    PermissionId[PermissionId["TICKET_EYE_READ"] = 1600] = "TICKET_EYE_READ";
-    PermissionId[PermissionId["TICKET_EYE_REGISTER_NEW"] = 1601] = "TICKET_EYE_REGISTER_NEW";
-    PermissionId[PermissionId["TICKET_EYE_DESTROY_DRAFT_SCHEDULE"] = 1602] = "TICKET_EYE_DESTROY_DRAFT_SCHEDULE";
-    PermissionId[PermissionId["TICKET_EYE_START_CHECKUP"] = 1603] = "TICKET_EYE_START_CHECKUP";
-    PermissionId[PermissionId["TICKET_EYE_UPDATE_DIAGNOSIS_BASIC"] = 1604] = "TICKET_EYE_UPDATE_DIAGNOSIS_BASIC";
-    PermissionId[PermissionId["TICKET_EYE_UPDATE_DIAGNOSIS_SPECIAL"] = 1605] = "TICKET_EYE_UPDATE_DIAGNOSIS_SPECIAL";
-    PermissionId[PermissionId["TICKET_EYE_UPDATE_TICKET_PROCEDURE_LIST"] = 1606] = "TICKET_EYE_UPDATE_TICKET_PROCEDURE_LIST";
-    PermissionId[PermissionId["TICKET_EYE_UPDATE_TICKET_RADIOLOGY_LIST"] = 1607] = "TICKET_EYE_UPDATE_TICKET_RADIOLOGY_LIST";
-    PermissionId[PermissionId["TICKET_EYE_UPDATE_TICKET_PRODUCT_CONSUMABLE"] = 1608] = "TICKET_EYE_UPDATE_TICKET_PRODUCT_CONSUMABLE";
-    PermissionId[PermissionId["TICKET_EYE_UPDATE_TICKET_PRODUCT_PRESCRIPTION"] = 1609] = "TICKET_EYE_UPDATE_TICKET_PRODUCT_PRESCRIPTION";
-    PermissionId[PermissionId["TICKET_EYE_UPDATE_ITEMS_MONEY"] = 1610] = "TICKET_EYE_UPDATE_ITEMS_MONEY";
-    PermissionId[PermissionId["TICKET_EYE_PREPAYMENT"] = 1611] = "TICKET_EYE_PREPAYMENT";
-    PermissionId[PermissionId["TICKET_EYE_REFUND_OVERPAID"] = 1612] = "TICKET_EYE_REFUND_OVERPAID";
-    PermissionId[PermissionId["TICKET_EYE_PAY_DEBT"] = 1613] = "TICKET_EYE_PAY_DEBT";
-    PermissionId[PermissionId["TICKET_EYE_SEND_PRODUCT"] = 1614] = "TICKET_EYE_SEND_PRODUCT";
-    PermissionId[PermissionId["TICKET_EYE_RETURN_PRODUCT"] = 1615] = "TICKET_EYE_RETURN_PRODUCT";
-    PermissionId[PermissionId["TICKET_EYE_CLOSE"] = 1616] = "TICKET_EYE_CLOSE";
-    PermissionId[PermissionId["TICKET_EYE_REOPEN"] = 1617] = "TICKET_EYE_REOPEN";
+    PermissionId[PermissionId["TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST"] = 1404] = "TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST";
+    PermissionId[PermissionId["TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST"] = 1405] = "TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST";
+    PermissionId[PermissionId["TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE"] = 1406] = "TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE";
+    PermissionId[PermissionId["TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION"] = 1407] = "TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION";
+    PermissionId[PermissionId["TICKET_CLINIC_UPDATE_ITEMS_MONEY"] = 1408] = "TICKET_CLINIC_UPDATE_ITEMS_MONEY";
+    PermissionId[PermissionId["TICKET_CLINIC_PREPAYMENT"] = 1409] = "TICKET_CLINIC_PREPAYMENT";
+    PermissionId[PermissionId["TICKET_CLINIC_REFUND_OVERPAID"] = 1410] = "TICKET_CLINIC_REFUND_OVERPAID";
+    PermissionId[PermissionId["TICKET_CLINIC_PAY_DEBT"] = 1411] = "TICKET_CLINIC_PAY_DEBT";
+    PermissionId[PermissionId["TICKET_CLINIC_SEND_PRODUCT"] = 1412] = "TICKET_CLINIC_SEND_PRODUCT";
+    PermissionId[PermissionId["TICKET_CLINIC_RETURN_PRODUCT"] = 1413] = "TICKET_CLINIC_RETURN_PRODUCT";
+    PermissionId[PermissionId["TICKET_CLINIC_CLOSE"] = 1414] = "TICKET_CLINIC_CLOSE";
+    PermissionId[PermissionId["TICKET_CLINIC_REOPEN"] = 1415] = "TICKET_CLINIC_REOPEN";
+    PermissionId[PermissionId["TICKET_CLINIC_BASE"] = 15] = "TICKET_CLINIC_BASE";
+    PermissionId[PermissionId["TICKET_CLINIC_BASE_UPDATE_DIAGNOSIS"] = 1501] = "TICKET_CLINIC_BASE_UPDATE_DIAGNOSIS";
+    PermissionId[PermissionId["TICKET_CLINIC_EYE"] = 16] = "TICKET_CLINIC_EYE";
+    PermissionId[PermissionId["TICKET_CLINIC_EYE_UPDATE_DIAGNOSIS_BASIC"] = 1601] = "TICKET_CLINIC_EYE_UPDATE_DIAGNOSIS_BASIC";
+    PermissionId[PermissionId["TICKET_CLINIC_EYE_UPDATE_DIAGNOSIS_SPECIAL"] = 1602] = "TICKET_CLINIC_EYE_UPDATE_DIAGNOSIS_SPECIAL";
 })(PermissionId || (exports.PermissionId = PermissionId = {}));
 let Permission = Permission_1 = class Permission {
     static fromRaw(raw) {
@@ -5619,8 +5581,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const class_transformer_1 = __webpack_require__(32);
 const typeorm_1 = __webpack_require__(33);
 const base_entity_1 = __webpack_require__(38);
-const variable_1 = __webpack_require__(39);
-const customer_entity_1 = __webpack_require__(41);
+const variable_1 = __webpack_require__(41);
+const customer_entity_1 = __webpack_require__(40);
 const distributor_entity_1 = __webpack_require__(46);
 const product_entity_1 = __webpack_require__(44);
 const receipt_entity_1 = __webpack_require__(47);
@@ -7243,7 +7205,7 @@ exports.BatchMovementRepository = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(35);
 const typeorm_2 = __webpack_require__(33);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const postgresql_repository_1 = __webpack_require__(72);
 let BatchMovementRepository = class BatchMovementRepository extends postgresql_repository_1.PostgreSqlRepository {
@@ -7253,7 +7215,7 @@ let BatchMovementRepository = class BatchMovementRepository extends postgresql_r
         this.batchMovementRepository = batchMovementRepository;
     }
     async queryOne(condition, relation) {
-        var _a, _b, _c;
+        var _a, _b;
         let query = this.manager
             .createQueryBuilder(entities_1.BatchMovement, 'productMovement')
             .where('productMovement.oid = :oid', { oid: condition.oid });
@@ -7273,16 +7235,10 @@ let BatchMovementRepository = class BatchMovementRepository extends postgresql_r
                 query = query.leftJoinAndSelect('receipt.distributor', 'distributor');
             }
         }
-        if (relation === null || relation === void 0 ? void 0 : relation.invoice) {
-            query = query.leftJoinAndSelect('productMovement.invoice', 'invoice', 'productMovement.voucherType = :typeInvoice', { typeInvoice: variable_1.VoucherType.Order });
-            if ((_b = relation === null || relation === void 0 ? void 0 : relation.invoice) === null || _b === void 0 ? void 0 : _b.customer) {
-                query = query.leftJoinAndSelect('invoice.customer', 'customer');
-            }
-        }
-        if (relation === null || relation === void 0 ? void 0 : relation.visit) {
-            query = query.leftJoinAndSelect('productMovement.visit', 'visit', 'productMovement.voucherType = :typeInvoice', { typeInvoice: variable_1.VoucherType.Clinic });
-            if ((_c = relation === null || relation === void 0 ? void 0 : relation.visit) === null || _c === void 0 ? void 0 : _c.customer) {
-                query = query.leftJoinAndSelect('visit.customer', 'customer');
+        if (relation === null || relation === void 0 ? void 0 : relation.ticket) {
+            query = query.leftJoinAndSelect('productMovement.ticket', 'ticket', 'productMovement.voucherType = :typeInvoice', { typeInvoice: variable_1.VoucherType.Ticket });
+            if ((_b = relation === null || relation === void 0 ? void 0 : relation.ticket) === null || _b === void 0 ? void 0 : _b.customer) {
+                query = query.leftJoinAndSelect('ticket.customer', 'customer');
             }
         }
         const batch = await query.getOne();
@@ -7372,7 +7328,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(35);
 const typeorm_2 = __webpack_require__(33);
 const string_helper_1 = __webpack_require__(93);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const ticket_entity_1 = __webpack_require__(50);
 const postgresql_repository_1 = __webpack_require__(72);
@@ -7704,7 +7660,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(35);
 const typeorm_2 = __webpack_require__(33);
 const string_helper_1 = __webpack_require__(93);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const postgresql_repository_1 = __webpack_require__(72);
 let DistributorPaymentRepository = class DistributorPaymentRepository extends postgresql_repository_1.PostgreSqlRepository {
@@ -8106,7 +8062,7 @@ exports.ProductMovementRepository = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(35);
 const typeorm_2 = __webpack_require__(33);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const postgresql_repository_1 = __webpack_require__(72);
 let ProductMovementRepository = class ProductMovementRepository extends postgresql_repository_1.PostgreSqlRepository {
@@ -8116,7 +8072,7 @@ let ProductMovementRepository = class ProductMovementRepository extends postgres
         this.productMovementRepository = productMovementRepository;
     }
     async queryOne(condition, relation) {
-        var _a, _b, _c;
+        var _a, _b;
         let query = this.manager
             .createQueryBuilder(entities_1.ProductMovement, 'productMovement')
             .where('productMovement.oid = :oid', { oid: condition.oid });
@@ -8131,16 +8087,10 @@ let ProductMovementRepository = class ProductMovementRepository extends postgres
                 query = query.leftJoinAndSelect('receipt.distributor', 'distributor');
             }
         }
-        if (relation === null || relation === void 0 ? void 0 : relation.invoice) {
-            query = query.leftJoinAndSelect('productMovement.invoice', 'invoice', 'productMovement.voucherType = :typeInvoice', { typeInvoice: variable_1.VoucherType.Order });
-            if ((_b = relation === null || relation === void 0 ? void 0 : relation.invoice) === null || _b === void 0 ? void 0 : _b.customer) {
-                query = query.leftJoinAndSelect('invoice.customer', 'customer');
-            }
-        }
-        if (relation === null || relation === void 0 ? void 0 : relation.visit) {
-            query = query.leftJoinAndSelect('productMovement.visit', 'visit', 'productMovement.voucherType = :typeInvoice', { typeInvoice: variable_1.VoucherType.Clinic });
-            if ((_c = relation === null || relation === void 0 ? void 0 : relation.visit) === null || _c === void 0 ? void 0 : _c.customer) {
-                query = query.leftJoinAndSelect('visit.customer', 'customer');
+        if (relation === null || relation === void 0 ? void 0 : relation.ticket) {
+            query = query.leftJoinAndSelect('productMovement.ticket', 'ticket', 'productMovement.voucherType = :typeInvoice', { typeInvoice: variable_1.VoucherType.Ticket });
+            if ((_b = relation === null || relation === void 0 ? void 0 : relation.ticket) === null || _b === void 0 ? void 0 : _b.customer) {
+                query = query.leftJoinAndSelect('ticket.customer', 'customer');
             }
         }
         const productMovement = await query.getOne();
@@ -8415,7 +8365,7 @@ exports.ReceiptCancel = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(33);
 const object_helper_1 = __webpack_require__(80);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const batch_movement_entity_1 = __webpack_require__(42);
 let ReceiptCancel = class ReceiptCancel {
@@ -8707,7 +8657,7 @@ exports.ReceiptDraft = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(35);
 const typeorm_2 = __webpack_require__(33);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 let ReceiptDraft = class ReceiptDraft {
     constructor(dataSource, manager) {
@@ -8805,7 +8755,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReceiptPayDebt = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(33);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 let ReceiptPayDebt = class ReceiptPayDebt {
     constructor(dataSource) {
@@ -8910,7 +8860,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReceiptPrepayment = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(33);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 let ReceiptPrepayment = class ReceiptPrepayment {
     constructor(dataSource) {
@@ -9001,7 +8951,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReceiptRefundPrepayment = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(33);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 let ReceiptRefundPrepayment = class ReceiptRefundPrepayment {
     constructor(dataSource) {
@@ -9108,7 +9058,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(33);
 const object_helper_1 = __webpack_require__(80);
 const time_helper_1 = __webpack_require__(114);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const batch_movement_entity_1 = __webpack_require__(42);
 let ReceiptSendProductAndPayment = class ReceiptSendProductAndPayment {
@@ -9669,7 +9619,7 @@ exports.StatisticReceiptRepository = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(35);
 const typeorm_2 = __webpack_require__(33);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 let StatisticReceiptRepository = class StatisticReceiptRepository {
     constructor(manager) {
@@ -9754,7 +9704,7 @@ let StatisticTicketRepository = class StatisticTicketRepository {
         this.manager = manager;
     }
     async statisticTicket(options) {
-        const { oid, timeType, voucherType } = options;
+        const { oid, timeType, ticketType } = options;
         const fromTime = options.fromTime.getTime();
         const toTime = options.toTime.getTime();
         const whereTicket = {
@@ -9762,8 +9712,8 @@ let StatisticTicketRepository = class StatisticTicketRepository {
             ticketStatus: (0, typeorm_2.In)([ticket_entity_1.TicketStatus.Debt, ticket_entity_1.TicketStatus.Completed]),
             endedAt: (0, typeorm_2.Between)(fromTime, toTime),
         };
-        if (voucherType) {
-            whereTicket.voucherType = voucherType;
+        if (ticketType) {
+            whereTicket.ticketType = ticketType;
         }
         let query = this.manager
             .createQueryBuilder(entities_1.Ticket, 'ticket')
@@ -9842,7 +9792,7 @@ exports.StatisticRepository = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(35);
 const typeorm_2 = __webpack_require__(33);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const ticket_entity_1 = __webpack_require__(50);
 let StatisticRepository = class StatisticRepository {
@@ -9884,7 +9834,7 @@ let StatisticRepository = class StatisticRepository {
         let query = this.manager
             .createQueryBuilder(entities_1.ProductMovement, 'productMovement')
             .where('"productMovement".oid = :oid', { oid })
-            .andWhere(`"productMovement"."voucherType" IN (${variable_1.VoucherType.Order}, ${variable_1.VoucherType.Clinic})`)
+            .andWhere(`"productMovement"."voucherType" IN (${variable_1.VoucherType.Ticket})`)
             .andWhere('"productMovement"."createdAt" BETWEEN :fromTime AND :toTime', { fromTime, toTime })
             .groupBy('"productMovement"."productId"')
             .select('"productMovement"."productId"', 'productId')
@@ -10283,7 +10233,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketPayDebt = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(33);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const ticket_entity_1 = __webpack_require__(50);
 let TicketPayDebt = class TicketPayDebt {
@@ -10394,7 +10344,7 @@ exports.TicketPaymentAndClose = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(33);
 const time_helper_1 = __webpack_require__(114);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const ticket_entity_1 = __webpack_require__(50);
 let TicketPaymentAndClose = class TicketPaymentAndClose {
@@ -10522,7 +10472,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketPrepayment = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(33);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const ticket_entity_1 = __webpack_require__(50);
 let TicketPrepayment = class TicketPrepayment {
@@ -10629,7 +10579,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(33);
 const object_helper_1 = __webpack_require__(80);
 const time_helper_1 = __webpack_require__(114);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const ticket_entity_1 = __webpack_require__(50);
 let TicketSendProduct = class TicketSendProduct {
@@ -10824,7 +10774,7 @@ let TicketSendProduct = class TicketSendProduct {
                     productId: ticketProductSend.productId,
                     voucherId: ticketId,
                     contactId: ticket.customerId,
-                    voucherType: ticket.voucherType,
+                    voucherType: variable_1.VoucherType.Ticket,
                     isRefund: 0,
                     createdAt: time,
                     unitRate: ticketProductSend.unitRate,
@@ -10858,7 +10808,7 @@ let TicketSendProduct = class TicketSendProduct {
                     batchId: ticketProductSend.batchId,
                     voucherId: ticketId,
                     contactId: ticket.customerId,
-                    voucherType: ticket.voucherType,
+                    voucherType: variable_1.VoucherType.Ticket,
                     isRefund: 0,
                     createdAt: time,
                     unitRate: ticketProductSend.unitRate,
@@ -11074,7 +11024,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicRefundOverpaid = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(33);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const ticket_entity_1 = __webpack_require__(50);
 let TicketClinicRefundOverpaid = class TicketClinicRefundOverpaid {
@@ -11171,7 +11121,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicReopen = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(33);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const ticket_entity_1 = __webpack_require__(50);
 let TicketClinicReopen = class TicketClinicReopen {
@@ -11272,7 +11222,7 @@ exports.TicketClinicReturnProduct = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(33);
 const object_helper_1 = __webpack_require__(80);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const batch_movement_entity_1 = __webpack_require__(42);
 const product_movement_entity_1 = __webpack_require__(70);
@@ -11479,7 +11429,7 @@ let TicketClinicReturnProduct = class TicketClinicReturnProduct {
                     productId: ticketProductActioned.productId,
                     voucherId: ticketId,
                     contactId: ticket.customerId,
-                    voucherType: ticket.voucherType,
+                    voucherType: variable_1.VoucherType.Ticket,
                     isRefund: 1,
                     createdAt: time,
                     unitRate: ticketProductActioned.unitRate,
@@ -11514,7 +11464,7 @@ let TicketClinicReturnProduct = class TicketClinicReturnProduct {
                     batchId: ticketProductActioned.batchId,
                     voucherId: ticketId,
                     contactId: ticket.customerId,
-                    voucherType: ticket.voucherType,
+                    voucherType: variable_1.VoucherType.Ticket,
                     isRefund: 1,
                     createdAt: time,
                     unitRate: ticketProductActioned.unitRate,
@@ -11564,7 +11514,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdateItemsMoney = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(33);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const ticket_entity_1 = __webpack_require__(50);
 let TicketClinicUpdateItemsMoney = class TicketClinicUpdateItemsMoney {
@@ -11881,7 +11831,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdateTicketProductList = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(33);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const ticket_product_entity_1 = __webpack_require__(57);
 const ticket_entity_1 = __webpack_require__(50);
 let TicketClinicUpdateTicketProductList = class TicketClinicUpdateTicketProductList {
@@ -12086,7 +12036,7 @@ exports.TicketOrderCancel = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(33);
 const object_helper_1 = __webpack_require__(80);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const batch_movement_entity_1 = __webpack_require__(42);
 const ticket_entity_1 = __webpack_require__(50);
@@ -12122,7 +12072,7 @@ let TicketOrderCancel = class TicketOrderCancel {
                 throw new Error(`${PREFIX}: Update Ticket failed`);
             }
             const ticketRoot = entities_1.Ticket.fromRaw(ticketUpdateRootResult.raw[0]);
-            const { customerId, voucherType } = ticketRoot;
+            const { customerId } = ticketRoot;
             let customer;
             let customerPayment;
             if (ticketRoot.paid !== 0 || ticketRoot.debt !== 0) {
@@ -12314,7 +12264,7 @@ let TicketOrderCancel = class TicketOrderCancel {
                         productId: ticketProduct.productId,
                         voucherId: ticketId,
                         contactId: customerId,
-                        voucherType,
+                        voucherType: variable_1.VoucherType.Ticket,
                         isRefund: 1,
                         createdAt: time,
                         unitRate: ticketProduct.unitRate,
@@ -12347,7 +12297,7 @@ let TicketOrderCancel = class TicketOrderCancel {
                         batchId: ticketProduct.batchId,
                         voucherId: ticketId,
                         contactId: customerId,
-                        voucherType,
+                        voucherType: variable_1.VoucherType.Ticket,
                         isRefund: 1,
                         createdAt: time,
                         unitRate: ticketProduct.unitRate,
@@ -12417,7 +12367,7 @@ const typeorm_1 = __webpack_require__(35);
 const typeorm_2 = __webpack_require__(33);
 const object_helper_1 = __webpack_require__(80);
 const time_helper_1 = __webpack_require__(114);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const batch_movement_entity_1 = __webpack_require__(42);
 const product_movement_entity_1 = __webpack_require__(70);
@@ -12453,7 +12403,7 @@ let TicketOrderDebtSuccessUpdate = class TicketOrderDebtSuccessUpdate {
                 throw new Error(`${PREFIX}: Update Ticket failed`);
             }
             const ticketRoot = entities_1.Ticket.fromRaw(ticketRootUpdateResult.raw[0]);
-            const { customerId, voucherType } = ticketRoot;
+            const { customerId } = ticketRoot;
             const setTicket = Object.assign(Object.assign({}, ticketOrderDebtSuccessUpdate), { ticketStatus: ticketOrderDebtSuccessUpdate.paid === ticketOrderDebtSuccessUpdate.totalMoney
                     ? ticket_entity_1.TicketStatus.Completed
                     : ticket_entity_1.TicketStatus.Debt, paid: ticketOrderDebtSuccessUpdate.paid, debt: ticketOrderDebtSuccessUpdate.totalMoney - ticketOrderDebtSuccessUpdate.paid, deliveryStatus: ticketOrderProductDraftList.length
@@ -12756,7 +12706,7 @@ let TicketOrderDebtSuccessUpdate = class TicketOrderDebtSuccessUpdate {
                         productId: Number(productId),
                         voucherId: ticketId,
                         contactId: customerId,
-                        voucherType,
+                        voucherType: variable_1.VoucherType.Ticket,
                         isRefund: 1,
                         createdAt: time,
                         unitRate: ticketProductReturn.unitRate,
@@ -12783,7 +12733,7 @@ let TicketOrderDebtSuccessUpdate = class TicketOrderDebtSuccessUpdate {
                         productId: Number(productId),
                         voucherId: ticketId,
                         contactId: customerId,
-                        voucherType,
+                        voucherType: variable_1.VoucherType.Ticket,
                         isRefund: 0,
                         createdAt: time,
                         unitRate: ticketProductSend.unitRate,
@@ -12816,7 +12766,7 @@ let TicketOrderDebtSuccessUpdate = class TicketOrderDebtSuccessUpdate {
                         batchId: Number(batchId),
                         voucherId: ticketId,
                         contactId: customerId,
-                        voucherType,
+                        voucherType: variable_1.VoucherType.Ticket,
                         isRefund: 1,
                         createdAt: time,
                         unitRate: ticketProductReturn.unitRate,
@@ -12839,7 +12789,7 @@ let TicketOrderDebtSuccessUpdate = class TicketOrderDebtSuccessUpdate {
                         batchId: Number(batchId),
                         voucherId: ticketId,
                         contactId: customerId,
-                        voucherType,
+                        voucherType: variable_1.VoucherType.Ticket,
                         isRefund: 0,
                         createdAt: time,
                         unitRate: ticketProductSend.unitRate,
@@ -12891,7 +12841,7 @@ exports.TicketOrderDraftApprovedUpdate = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(35);
 const typeorm_2 = __webpack_require__(33);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const ticket_procedure_entity_1 = __webpack_require__(54);
 const ticket_product_entity_1 = __webpack_require__(57);
@@ -12914,7 +12864,7 @@ let TicketOrderDraftApprovedUpdate = class TicketOrderDraftApprovedUpdate {
                     ? variable_1.DeliveryStatus.Pending
                     : variable_1.DeliveryStatus.NoStock, procedureStatus: ticketOrderProcedureDraftList.length
                     ? ticket_procedure_entity_1.TicketProcedureStatus.Completed
-                    : ticket_procedure_entity_1.TicketProcedureStatus.Empty, radiologyStatus: ticket_radiology_entity_1.TicketRadiologyStatus.Empty, voucherType: variable_1.VoucherType.Order, paid: 0, debt: ticketOrderDraftApprovedUpdate.totalMoney, startedAt: ticketOrderDraftApprovedUpdate.registeredAt });
+                    : ticket_procedure_entity_1.TicketProcedureStatus.Empty, radiologyStatus: ticket_radiology_entity_1.TicketRadiologyStatus.Empty, paid: 0, debt: ticketOrderDraftApprovedUpdate.totalMoney, startedAt: ticketOrderDraftApprovedUpdate.registeredAt });
             const ticketUpdateResult = await manager
                 .createQueryBuilder()
                 .update(entities_1.Ticket)
@@ -12993,7 +12943,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketOrderRefundOverpaid = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(33);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const ticket_entity_1 = __webpack_require__(50);
 let TicketOrderRefundOverpaid = class TicketOrderRefundOverpaid {
@@ -13100,7 +13050,7 @@ exports.TicketOrderReturnProductList = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(33);
 const object_helper_1 = __webpack_require__(80);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const customer_payment_entity_1 = __webpack_require__(51);
 const ticket_entity_1 = __webpack_require__(50);
@@ -13141,7 +13091,7 @@ let TicketOrderReturnProductList = class TicketOrderReturnProductList {
                 throw new Error(`${PREFIX}: Update Ticket failed`);
             }
             const ticketRoot = entities_1.Ticket.fromRaw(ticketRootUpdateResult.raw[0]);
-            const { customerId, voucherType } = ticketRoot;
+            const { customerId } = ticketRoot;
             let customer = null;
             let customerPayment = null;
             if ((paidReturn > 0 || debtReturn > 0)
@@ -13355,7 +13305,7 @@ let TicketOrderReturnProductList = class TicketOrderReturnProductList {
                     productId: ticketProductActioned.productId,
                     voucherId: ticketId,
                     contactId: customerId,
-                    voucherType,
+                    voucherType: variable_1.VoucherType.Ticket,
                     isRefund: 1,
                     createdAt: time,
                     unitRate: ticketProductActioned.unitRate,
@@ -13390,7 +13340,7 @@ let TicketOrderReturnProductList = class TicketOrderReturnProductList {
                     batchId: ticketProductActioned.batchId,
                     voucherId: ticketId,
                     contactId: customerId,
-                    voucherType,
+                    voucherType: variable_1.VoucherType.Ticket,
                     isRefund: 1,
                     createdAt: time,
                     unitRate: ticketProductActioned.unitRate,
@@ -13515,7 +13465,7 @@ exports.TicketOrderDraft = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(35);
 const typeorm_2 = __webpack_require__(33);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const entities_1 = __webpack_require__(36);
 const ticket_procedure_entity_1 = __webpack_require__(54);
 const ticket_product_entity_1 = __webpack_require__(57);
@@ -13534,7 +13484,7 @@ let TicketOrderDraft = class TicketOrderDraft {
                     ? variable_1.DeliveryStatus.Pending
                     : variable_1.DeliveryStatus.NoStock, procedureStatus: ticketOrderProcedureDraftList.length
                     ? ticket_procedure_entity_1.TicketProcedureStatus.Completed
-                    : ticket_procedure_entity_1.TicketProcedureStatus.Empty, radiologyStatus: ticket_radiology_entity_1.TicketRadiologyStatus.Empty, voucherType: variable_1.VoucherType.Order, paid: 0, debt: ticketOrderDraftInsert.totalMoney, year: 0, month: 0, date: 0, startedAt: ticketOrderDraftInsert.registeredAt, endedAt: null });
+                    : ticket_procedure_entity_1.TicketProcedureStatus.Empty, radiologyStatus: ticket_radiology_entity_1.TicketRadiologyStatus.Empty, ticketType: ticket_entity_1.TicketType.Order, paid: 0, debt: ticketOrderDraftInsert.totalMoney, year: 0, month: 0, date: 0, startedAt: ticketOrderDraftInsert.registeredAt, endedAt: null });
             const ticketInsertResult = await manager
                 .createQueryBuilder()
                 .insert()
@@ -13582,7 +13532,7 @@ let TicketOrderDraft = class TicketOrderDraft {
         const whereTicket = {
             id: ticketId,
             oid,
-            voucherType: variable_1.VoucherType.Order,
+            ticketType: ticket_entity_1.TicketType.Order,
             ticketStatus: (0, typeorm_2.In)([ticket_entity_1.TicketStatus.Schedule, ticket_entity_1.TicketStatus.Draft]),
             deliveryStatus: (0, typeorm_2.In)([variable_1.DeliveryStatus.NoStock, variable_1.DeliveryStatus.Pending]),
         };
@@ -15522,7 +15472,7 @@ const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 class UserUpdateInfoBody {
 }
 exports.UserUpdateInfoBody = UserUpdateInfoBody;
@@ -16765,62 +16715,66 @@ let SocketEmitService = class SocketEmitService {
             return;
         this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.PROCEDURE_UPSERT, data);
     }
-    ticketCreate(oid, data) {
+    ticketClinicCreate(oid, data) {
         if (!this.io)
             return;
-        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_CREATE, data);
+        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_CLINIC_CREATE, data);
     }
-    ticketDestroy(oid, data) {
+    ticketClinicDestroy(oid, data) {
         if (!this.io)
             return;
-        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_DESTROY, data);
+        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_CLINIC_DESTROY, data);
     }
-    ticketUpdate(oid, data) {
+    ticketClinicUpdate(oid, data) {
         if (!this.io)
             return;
-        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_UPDATE, data);
+        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_CLINIC_UPDATE, data);
     }
-    ticketUpdateTicketDiagnosisBasic(oid, data) {
+    ticketClinicUpdateTicketDiagnosisBasic(oid, data) {
         if (!this.io)
             return;
-        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_UPDATE_TICKET_DIAGNOSIS_BASIC, data);
+        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_DIAGNOSIS_BASIC, data);
     }
-    ticketUpdateTicketDiagnosisSpecial(oid, data) {
-        if (!this.io)
-            return;
-        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_UPDATE_TICKET_DIAGNOSIS_SPECIAL, data);
-    }
-    ticketUpdateTicketProcedureList(oid, data) {
-        if (!this.io)
-            return;
-        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_UPDATE_TICKET_PROCEDURE_LIST, data);
-    }
-    ticketUpdateTicketProductConsumableList(oid, data) {
-        if (!this.io)
-            return;
-        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_UPDATE_TICKET_PRODUCT_CONSUMABLE_LIST, data);
-    }
-    ticketUpdateTicketProductPrescriptionList(oid, data) {
+    ticketClinicUpdateTicketDiagnosisSpecial(oid, data) {
         if (!this.io)
             return;
         this.io
             .in(oid.toString())
-            .emit(socket_variable_1.SOCKET_EVENT.TICKET_UPDATE_TICKET_PRODUCT_PRESCRIPTION_LIST, data);
+            .emit(socket_variable_1.SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_DIAGNOSIS_SPECIAL, data);
     }
-    ticketUpdateTicketRadiologyList(oid, data) {
+    ticketClinicUpdateTicketProcedureList(oid, data) {
         if (!this.io)
             return;
-        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_UPDATE_TICKET_RADIOLOGY_LIST, data);
+        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST, data);
     }
-    ticketUpdateTicketRadiologyResult(oid, data) {
+    ticketClinicUpdateTicketProductConsumableList(oid, data) {
         if (!this.io)
             return;
-        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_UPDATE_TICKET_RADIOLOGY_RESULT, data);
+        this.io
+            .in(oid.toString())
+            .emit(socket_variable_1.SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE_LIST, data);
     }
-    ticketUpdateTicketUserList(oid, data) {
+    ticketClinicUpdateTicketProductPrescriptionList(oid, data) {
         if (!this.io)
             return;
-        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_UPDATE_TICKET_USER_LIST, data);
+        this.io
+            .in(oid.toString())
+            .emit(socket_variable_1.SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION_LIST, data);
+    }
+    ticketClinicUpdateTicketRadiologyList(oid, data) {
+        if (!this.io)
+            return;
+        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST, data);
+    }
+    ticketClinicUpdateTicketRadiologyResult(oid, data) {
+        if (!this.io)
+            return;
+        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_RESULT, data);
+    }
+    ticketClinicUpdateTicketUserList(oid, data) {
+        if (!this.io)
+            return;
+        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_USER_LIST, data);
     }
 };
 exports.SocketEmitService = SocketEmitService;
@@ -16850,17 +16804,17 @@ var SOCKET_EVENT;
     SOCKET_EVENT["BATCH_UPSERT"] = "BATCH_UPSERT";
     SOCKET_EVENT["BATCH_LIST_UPDATE"] = "BATCH_LIST_UPDATE";
     SOCKET_EVENT["PROCEDURE_UPSERT"] = "PROCEDURE_UPSERT";
-    SOCKET_EVENT["TICKET_CREATE"] = "TICKET_CREATE";
-    SOCKET_EVENT["TICKET_UPDATE"] = "TICKET_UPDATE";
-    SOCKET_EVENT["TICKET_DESTROY"] = "TICKET_DESTROY";
-    SOCKET_EVENT["TICKET_UPDATE_TICKET_DIAGNOSIS_BASIC"] = "TICKET_UPDATE_TICKET_DIAGNOSIS_BASIC";
-    SOCKET_EVENT["TICKET_UPDATE_TICKET_DIAGNOSIS_SPECIAL"] = "TICKET_UPDATE_TICKET_DIAGNOSIS_SPECIAL";
-    SOCKET_EVENT["TICKET_UPDATE_TICKET_PROCEDURE_LIST"] = "TICKET_UPDATE_TICKET_PROCEDURE_LIST";
-    SOCKET_EVENT["TICKET_UPDATE_TICKET_PRODUCT_CONSUMABLE_LIST"] = "TICKET_UPDATE_TICKET_PRODUCT_CONSUMABLE_LIST";
-    SOCKET_EVENT["TICKET_UPDATE_TICKET_PRODUCT_PRESCRIPTION_LIST"] = "TICKET_UPDATE_TICKET_PRODUCT_PRESCRIPTION_LIST";
-    SOCKET_EVENT["TICKET_UPDATE_TICKET_RADIOLOGY_LIST"] = "TICKET_UPDATE_TICKET_RADIOLOGY_LIST";
-    SOCKET_EVENT["TICKET_UPDATE_TICKET_RADIOLOGY_RESULT"] = "TICKET_UPDATE_TICKET_RADIOLOGY_RESULT";
-    SOCKET_EVENT["TICKET_UPDATE_TICKET_USER_LIST"] = "TICKET_UPDATE_TICKET_USER_LIST";
+    SOCKET_EVENT["TICKET_CLINIC_CREATE"] = "TICKET_CLINIC_CREATE";
+    SOCKET_EVENT["TICKET_CLINIC_UPDATE"] = "TICKET_CLINIC_UPDATE";
+    SOCKET_EVENT["TICKET_CLINIC_DESTROY"] = "TICKET_CLINIC_DESTROY";
+    SOCKET_EVENT["TICKET_CLINIC_UPDATE_TICKET_DIAGNOSIS_BASIC"] = "TICKET_CLINIC_UPDATE_TICKET_DIAGNOSIS_BASIC";
+    SOCKET_EVENT["TICKET_CLINIC_UPDATE_TICKET_DIAGNOSIS_SPECIAL"] = "TICKET_CLINIC_UPDATE_TICKET_DIAGNOSIS_SPECIAL";
+    SOCKET_EVENT["TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST"] = "TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST";
+    SOCKET_EVENT["TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE_LIST"] = "TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE_LIST";
+    SOCKET_EVENT["TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION_LIST"] = "TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION_LIST";
+    SOCKET_EVENT["TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST"] = "TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST";
+    SOCKET_EVENT["TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_RESULT"] = "TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_RESULT";
+    SOCKET_EVENT["TICKET_CLINIC_UPDATE_TICKET_USER_LIST"] = "TICKET_CLINIC_UPDATE_TICKET_USER_LIST";
 })(SOCKET_EVENT || (exports.SOCKET_EVENT = SOCKET_EVENT = {}));
 
 
@@ -17741,7 +17695,7 @@ const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 class RootUserCreateBody {
 }
 exports.RootUserCreateBody = RootUserCreateBody;
@@ -17978,8 +17932,8 @@ let ApiAppointmentController = class ApiAppointmentController {
     async deleteOne({ oid }, { id }) {
         return await this.apiAppointmentService.deleteOne(oid, id);
     }
-    async registerTicket({ oid }, { id }, body) {
-        return await this.apiAppointmentService.registerTicket({
+    async registerTicketClinic({ oid }, { id }, body) {
+        return await this.apiAppointmentService.registerTicketClinic({
             oid,
             appointmentId: id,
             body,
@@ -18045,15 +17999,15 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ApiAppointmentController.prototype, "deleteOne", null);
 __decorate([
-    (0, common_1.Post)(':id/register-ticket'),
+    (0, common_1.Post)(':id/register-ticket-clinic'),
     (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.APPOINTMENT_REGISTER_TICKET),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_r = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _r : Object, typeof (_s = typeof param_1.IdParam !== "undefined" && param_1.IdParam) === "function" ? _s : Object, typeof (_t = typeof request_1.AppointmentRegisterTicketBody !== "undefined" && request_1.AppointmentRegisterTicketBody) === "function" ? _t : Object]),
+    __metadata("design:paramtypes", [typeof (_r = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _r : Object, typeof (_s = typeof param_1.IdParam !== "undefined" && param_1.IdParam) === "function" ? _s : Object, typeof (_t = typeof request_1.AppointmentRegisterTicketClinicBody !== "undefined" && request_1.AppointmentRegisterTicketClinicBody) === "function" ? _t : Object]),
     __metadata("design:returntype", Promise)
-], ApiAppointmentController.prototype, "registerTicket", null);
+], ApiAppointmentController.prototype, "registerTicketClinic", null);
 exports.ApiAppointmentController = ApiAppointmentController = __decorate([
     (0, swagger_1.ApiTags)('Appointment'),
     (0, swagger_1.ApiBearerAuth)('access-token'),
@@ -18076,7 +18030,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiAppointmentService = void 0;
 const common_1 = __webpack_require__(3);
@@ -18085,14 +18039,12 @@ const appointment_entity_1 = __webpack_require__(37);
 const ticket_entity_1 = __webpack_require__(50);
 const appointment_repository_1 = __webpack_require__(89);
 const customer_repository_1 = __webpack_require__(95);
-const ticket_diagnosis_repository_1 = __webpack_require__(119);
 const ticket_repository_1 = __webpack_require__(128);
 const socket_emit_service_1 = __webpack_require__(188);
 let ApiAppointmentService = class ApiAppointmentService {
-    constructor(socketEmitService, appointmentRepository, ticketDiagnosisRepository, customerRepository, ticketRepository) {
+    constructor(socketEmitService, appointmentRepository, customerRepository, ticketRepository) {
         this.socketEmitService = socketEmitService;
         this.appointmentRepository = appointmentRepository;
-        this.ticketDiagnosisRepository = ticketDiagnosisRepository;
         this.customerRepository = customerRepository;
         this.ticketRepository = ticketRepository;
     }
@@ -18106,7 +18058,6 @@ let ApiAppointmentService = class ApiAppointmentService {
                 oid,
                 customerId: filter === null || filter === void 0 ? void 0 : filter.customerId,
                 appointmentStatus: filter === null || filter === void 0 ? void 0 : filter.appointmentStatus,
-                voucherType: filter === null || filter === void 0 ? void 0 : filter.voucherType,
                 registeredAt: filter === null || filter === void 0 ? void 0 : filter.registeredAt,
             },
             sort,
@@ -18123,7 +18074,6 @@ let ApiAppointmentService = class ApiAppointmentService {
                 oid,
                 customerId: filter === null || filter === void 0 ? void 0 : filter.customerId,
                 appointmentStatus: filter === null || filter === void 0 ? void 0 : filter.appointmentStatus,
-                voucherType: filter === null || filter === void 0 ? void 0 : filter.voucherType,
                 registeredAt: filter === null || filter === void 0 ? void 0 : filter.registeredAt,
             },
             limit,
@@ -18138,7 +18088,7 @@ let ApiAppointmentService = class ApiAppointmentService {
         return { data: { appointment } };
     }
     async createOne(oid, body) {
-        const appointment = await this.appointmentRepository.insertOneFullFieldAndReturnEntity(Object.assign(Object.assign({}, body), { oid, voucherType: body.voucherType, fromTicketId: body.fromTicketId, toTicketId: 0, cancelReason: '' }));
+        const appointment = await this.appointmentRepository.insertOneFullFieldAndReturnEntity(Object.assign(Object.assign({}, body), { oid, fromTicketId: body.fromTicketId, toTicketId: 0, cancelReason: '' }));
         return { data: { appointment } };
     }
     async updateOne(oid, id, body) {
@@ -18164,16 +18114,16 @@ let ApiAppointmentService = class ApiAppointmentService {
         }
         return { data: { appointmentId: id } };
     }
-    async registerTicket(options) {
+    async registerTicketClinic(options) {
         const { oid, appointmentId, body } = options;
         const appointment = await this.appointmentRepository.findOneBy({ oid, id: appointmentId });
         const customer = await this.customerRepository.findOneBy({ oid, id: appointment.customerId });
         const ticket = await this.ticketRepository.insertOneAndReturnEntity({
             oid,
             customerId: customer.id,
-            voucherType: appointment.voucherType,
-            registeredAt: body.registeredAt,
             ticketStatus: ticket_entity_1.TicketStatus.Schedule,
+            ticketType: body.ticketType,
+            registeredAt: body.registeredAt,
             note: appointment.reason,
         });
         ticket.customer = customer;
@@ -18181,7 +18131,7 @@ let ApiAppointmentService = class ApiAppointmentService {
         ticket.ticketProductList = [];
         ticket.ticketProcedureList = [];
         ticket.customerPaymentList = [];
-        this.socketEmitService.ticketCreate(oid, { ticket });
+        this.socketEmitService.ticketClinicCreate(oid, { ticket });
         await this.appointmentRepository.updateAndReturnEntity({ oid, id: appointmentId }, {
             appointmentStatus: appointment_entity_1.AppointmentStatus.Completed,
             toTicketId: ticket.id,
@@ -18192,7 +18142,7 @@ let ApiAppointmentService = class ApiAppointmentService {
 exports.ApiAppointmentService = ApiAppointmentService;
 exports.ApiAppointmentService = ApiAppointmentService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof appointment_repository_1.AppointmentRepository !== "undefined" && appointment_repository_1.AppointmentRepository) === "function" ? _b : Object, typeof (_c = typeof ticket_diagnosis_repository_1.TicketDiagnosisRepository !== "undefined" && ticket_diagnosis_repository_1.TicketDiagnosisRepository) === "function" ? _c : Object, typeof (_d = typeof customer_repository_1.CustomerRepository !== "undefined" && customer_repository_1.CustomerRepository) === "function" ? _d : Object, typeof (_e = typeof ticket_repository_1.TicketRepository !== "undefined" && ticket_repository_1.TicketRepository) === "function" ? _e : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof appointment_repository_1.AppointmentRepository !== "undefined" && appointment_repository_1.AppointmentRepository) === "function" ? _b : Object, typeof (_c = typeof customer_repository_1.CustomerRepository !== "undefined" && customer_repository_1.CustomerRepository) === "function" ? _c : Object, typeof (_d = typeof ticket_repository_1.TicketRepository !== "undefined" && ticket_repository_1.TicketRepository) === "function" ? _d : Object])
 ], ApiAppointmentService);
 
 
@@ -18243,7 +18193,6 @@ const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const query_1 = __webpack_require__(173);
-const variable_1 = __webpack_require__(39);
 const appointment_entity_1 = __webpack_require__(37);
 const appointment_options_request_1 = __webpack_require__(207);
 class AppointmentGetQuery {
@@ -18276,7 +18225,6 @@ __decorate([
         example: JSON.stringify({
             customerId: 3,
             registeredAt: { GT: Date.now() },
-            voucherType: variable_1.VoucherType.Clinic,
             appointmentStatus: { IN: [appointment_entity_1.AppointmentStatus.Confirm, appointment_entity_1.AppointmentStatus.Waiting] },
         }),
     }),
@@ -18351,7 +18299,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AppointmentSortQuery = exports.AppointmentFilterQuery = exports.AppointmentRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(32);
@@ -18360,7 +18308,6 @@ const dto_1 = __webpack_require__(179);
 const condition_timestamp_1 = __webpack_require__(185);
 const query_1 = __webpack_require__(173);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
 const appointment_entity_1 = __webpack_require__(37);
 class AppointmentRelationQuery {
 }
@@ -18381,11 +18328,6 @@ __decorate([
 ], AppointmentFilterQuery.prototype, "customerId", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
-    (0, class_validator_custom_1.IsEnumValue)(variable_1.VoucherType),
-    __metadata("design:type", typeof (_a = typeof variable_1.VoucherType !== "undefined" && variable_1.VoucherType) === "function" ? _a : Object)
-], AppointmentFilterQuery.prototype, "voucherType", void 0);
-__decorate([
-    (0, class_transformer_1.Expose)(),
     (0, class_transformer_1.Transform)((params) => (0, dto_1.transformConditionEnum)(params, appointment_entity_1.AppointmentStatus)),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Object)
@@ -18394,7 +18336,7 @@ __decorate([
     (0, class_transformer_1.Expose)(),
     (0, class_transformer_1.Type)(() => condition_timestamp_1.ConditionTimestamp),
     (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", typeof (_d = typeof condition_timestamp_1.ConditionTimestamp !== "undefined" && condition_timestamp_1.ConditionTimestamp) === "function" ? _d : Object)
+    __metadata("design:type", typeof (_c = typeof condition_timestamp_1.ConditionTimestamp !== "undefined" && condition_timestamp_1.ConditionTimestamp) === "function" ? _c : Object)
 ], AppointmentFilterQuery.prototype, "registeredAt", void 0);
 class AppointmentSortQuery extends query_1.SortQuery {
 }
@@ -18420,21 +18362,31 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AppointmentRegisterTicketBody = void 0;
+exports.AppointmentRegisterTicketClinicBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
-class AppointmentRegisterTicketBody {
+const class_validator_custom_1 = __webpack_require__(162);
+const ticket_entity_1 = __webpack_require__(50);
+class AppointmentRegisterTicketClinicBody {
 }
-exports.AppointmentRegisterTicketBody = AppointmentRegisterTicketBody;
+exports.AppointmentRegisterTicketClinicBody = AppointmentRegisterTicketClinicBody;
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 1678890707005 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], AppointmentRegisterTicketBody.prototype, "registeredAt", void 0);
+], AppointmentRegisterTicketClinicBody.prototype, "registeredAt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: ticket_entity_1.TicketType.Clinic }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsEnumValue)(ticket_entity_1.TicketType),
+    __metadata("design:type", typeof (_a = typeof ticket_entity_1.TicketType !== "undefined" && ticket_entity_1.TicketType) === "function" ? _a : Object)
+], AppointmentRegisterTicketClinicBody.prototype, "ticketType", void 0);
 
 
 /***/ }),
@@ -18451,14 +18403,13 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AppointmentUpdateBody = exports.AppointmentCreateBody = exports.AppointmentBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
 const appointment_entity_1 = __webpack_require__(37);
 class AppointmentBody {
 }
@@ -18501,18 +18452,11 @@ class AppointmentCreateBody extends AppointmentBody {
 }
 exports.AppointmentCreateBody = AppointmentCreateBody;
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ example: variable_1.VoucherType.Clinic }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_custom_1.IsEnumValue)(variable_1.VoucherType),
-    __metadata("design:type", typeof (_a = typeof variable_1.VoucherType !== "undefined" && variable_1.VoucherType) === "function" ? _a : Object)
-], AppointmentCreateBody.prototype, "voucherType", void 0);
-__decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: appointment_entity_1.AppointmentStatus.Confirm }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_custom_1.IsEnumValue)(appointment_entity_1.AppointmentStatus),
     (0, class_validator_1.IsIn)([appointment_entity_1.AppointmentStatus.Waiting, appointment_entity_1.AppointmentStatus.Confirm]),
-    __metadata("design:type", typeof (_b = typeof appointment_entity_1.AppointmentStatus !== "undefined" && appointment_entity_1.AppointmentStatus) === "function" ? _b : Object)
+    __metadata("design:type", typeof (_a = typeof appointment_entity_1.AppointmentStatus !== "undefined" && appointment_entity_1.AppointmentStatus) === "function" ? _a : Object)
 ], AppointmentCreateBody.prototype, "appointmentStatus", void 0);
 class AppointmentUpdateBody extends AppointmentBody {
 }
@@ -18522,7 +18466,7 @@ __decorate([
     (0, class_transformer_1.Expose)(),
     (0, class_validator_custom_1.IsEnumValue)(appointment_entity_1.AppointmentStatus),
     (0, class_validator_1.IsIn)([appointment_entity_1.AppointmentStatus.Waiting, appointment_entity_1.AppointmentStatus.Confirm, appointment_entity_1.AppointmentStatus.Cancelled]),
-    __metadata("design:type", typeof (_c = typeof appointment_entity_1.AppointmentStatus !== "undefined" && appointment_entity_1.AppointmentStatus) === "function" ? _c : Object)
+    __metadata("design:type", typeof (_b = typeof appointment_entity_1.AppointmentStatus !== "undefined" && appointment_entity_1.AppointmentStatus) === "function" ? _b : Object)
 ], AppointmentUpdateBody.prototype, "appointmentStatus", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'Khách hàng thay đổi kế hoạch' }),
@@ -18645,7 +18589,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiBatchMovementService = void 0;
 const common_1 = __webpack_require__(3);
 const object_helper_1 = __webpack_require__(80);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const bat_movement_repository_1 = __webpack_require__(90);
 const customer_repository_1 = __webpack_require__(95);
 const distributor_repository_1 = __webpack_require__(97);
@@ -18685,10 +18629,10 @@ let ApiBatchMovementService = class ApiBatchMovementService {
             .filter((i) => i.voucherType === variable_1.VoucherType.Receipt)
             .map((i) => i.voucherId);
         const customerIds = data
-            .filter((i) => i.voucherType === variable_1.VoucherType.Order || i.voucherType === variable_1.VoucherType.Clinic)
+            .filter((i) => i.voucherType === variable_1.VoucherType.Ticket)
             .map((i) => i.contactId);
         const ticketIds = data
-            .filter((i) => i.voucherType === variable_1.VoucherType.Order || i.voucherType === variable_1.VoucherType.Clinic)
+            .filter((i) => i.voucherType === variable_1.VoucherType.Ticket)
             .map((i) => i.voucherId);
         const [distributorList, receiptList, customerList, ticketList] = await Promise.all([
             (relation === null || relation === void 0 ? void 0 : relation.distributor) && distributorIds.length
@@ -18709,7 +18653,7 @@ let ApiBatchMovementService = class ApiBatchMovementService {
                 mov.distributor = distributorList.find((rc) => rc.id === mov.contactId);
                 mov.receipt = receiptList.find((rc) => rc.id === mov.voucherId);
             }
-            if (mov.voucherType === variable_1.VoucherType.Order || mov.voucherType === variable_1.VoucherType.Clinic) {
+            if (mov.voucherType === variable_1.VoucherType.Ticket) {
                 mov.ticket = ticketList.find((iv) => iv.id === mov.voucherId);
                 mov.customer = customerList.find((rc) => rc.id === mov.contactId);
             }
@@ -18791,7 +18735,7 @@ const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const query_1 = __webpack_require__(173);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const batch_movement_options_request_1 = __webpack_require__(215);
 class BatchMovementGetQuery {
 }
@@ -18828,7 +18772,7 @@ __decorate([
         type: String,
         example: JSON.stringify({
             voucherId: 3,
-            voucherType: variable_1.VoucherType.Clinic,
+            voucherType: variable_1.VoucherType.Receipt,
         }),
     }),
     (0, class_transformer_1.Expose)(),
@@ -18907,7 +18851,7 @@ const class_validator_1 = __webpack_require__(161);
 const dto_1 = __webpack_require__(179);
 const query_1 = __webpack_require__(173);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 class BatchMovementRelationQuery {
 }
 exports.BatchMovementRelationQuery = BatchMovementRelationQuery;
@@ -19859,7 +19803,7 @@ const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const query_1 = __webpack_require__(173);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 class CustomerPaymentRelationQuery {
 }
 exports.CustomerPaymentRelationQuery = CustomerPaymentRelationQuery;
@@ -21239,7 +21183,7 @@ const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 class CustomerCreateBody {
 }
 exports.CustomerCreateBody = CustomerCreateBody;
@@ -23989,26 +23933,6 @@ let ApiPermissionService = class ApiPermissionService {
                 rootId: permission_entity_1.PermissionId.TICKET_CLINIC,
             },
             {
-                id: permission_entity_1.PermissionId.TICKET_CLINIC_UPDATE_DIAGNOSIS_BASIC,
-                level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_CLINIC_UPDATE_DIAGNOSIS_BASIC],
-                isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_CLINIC}.${permission_entity_1.PermissionId.TICKET_CLINIC_UPDATE_DIAGNOSIS_BASIC}`,
-                name: 'Khám bệnh và chẩn đoán',
-                parentId: permission_entity_1.PermissionId.TICKET_CLINIC,
-                rootId: permission_entity_1.PermissionId.TICKET_CLINIC,
-            },
-            {
-                id: permission_entity_1.PermissionId.TICKET_CLINIC_UPDATE_DIAGNOSIS_SPECIAL,
-                level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_CLINIC_UPDATE_DIAGNOSIS_SPECIAL],
-                isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_CLINIC}.${permission_entity_1.PermissionId.TICKET_CLINIC_UPDATE_DIAGNOSIS_SPECIAL}`,
-                name: 'Khám bộ phận',
-                parentId: permission_entity_1.PermissionId.TICKET_CLINIC,
-                rootId: permission_entity_1.PermissionId.TICKET_CLINIC,
-            },
-            {
                 id: permission_entity_1.PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST,
                 level: 2,
                 code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST],
@@ -24129,197 +24053,58 @@ let ApiPermissionService = class ApiPermissionService {
                 rootId: permission_entity_1.PermissionId.TICKET_CLINIC,
             },
         ];
-        const permissionTicketSpa = [];
+        const permissionTicketBasic = [
+            {
+                id: permission_entity_1.PermissionId.TICKET_CLINIC_BASE,
+                level: 1,
+                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_CLINIC_BASE],
+                isActive: 1,
+                pathId: `${permission_entity_1.PermissionId.TICKET_CLINIC_BASE}`,
+                name: 'Quản lý phòng khám cơ bản',
+                parentId: 0,
+                rootId: permission_entity_1.PermissionId.TICKET_CLINIC_BASE,
+            },
+            {
+                id: permission_entity_1.PermissionId.TICKET_CLINIC_BASE_UPDATE_DIAGNOSIS,
+                level: 2,
+                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_CLINIC_BASE_UPDATE_DIAGNOSIS],
+                isActive: 1,
+                pathId: `${permission_entity_1.PermissionId.TICKET_CLINIC_BASE}.${permission_entity_1.PermissionId.TICKET_CLINIC_BASE_UPDATE_DIAGNOSIS}`,
+                name: 'Khám và chẩn đoán',
+                parentId: permission_entity_1.PermissionId.TICKET_CLINIC_BASE,
+                rootId: permission_entity_1.PermissionId.TICKET_CLINIC_BASE,
+            },
+        ];
         const permissionTicketEye = [
             {
-                id: permission_entity_1.PermissionId.TICKET_EYE,
+                id: permission_entity_1.PermissionId.TICKET_CLINIC_EYE,
                 level: 1,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_EYE],
+                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_CLINIC_EYE],
                 isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_EYE}`,
+                pathId: `${permission_entity_1.PermissionId.TICKET_CLINIC_EYE}`,
                 name: 'Quản lý phòng khám Mắt',
                 parentId: 0,
-                rootId: permission_entity_1.PermissionId.TICKET_EYE,
+                rootId: permission_entity_1.PermissionId.TICKET_CLINIC_EYE,
             },
             {
-                id: permission_entity_1.PermissionId.TICKET_EYE_READ,
+                id: permission_entity_1.PermissionId.TICKET_CLINIC_EYE_UPDATE_DIAGNOSIS_BASIC,
                 level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_EYE_READ],
+                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_CLINIC_EYE_UPDATE_DIAGNOSIS_BASIC],
                 isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_EYE}.${permission_entity_1.PermissionId.TICKET_EYE_READ}`,
-                name: 'Xem phiếu khám',
-                parentId: permission_entity_1.PermissionId.TICKET_EYE,
-                rootId: permission_entity_1.PermissionId.TICKET_EYE,
+                pathId: `${permission_entity_1.PermissionId.TICKET_CLINIC_EYE}.${permission_entity_1.PermissionId.TICKET_CLINIC_EYE_UPDATE_DIAGNOSIS_BASIC}`,
+                name: 'Khám và chẩn đoán',
+                parentId: permission_entity_1.PermissionId.TICKET_CLINIC_EYE,
+                rootId: permission_entity_1.PermissionId.TICKET_CLINIC_EYE,
             },
             {
-                id: permission_entity_1.PermissionId.TICKET_EYE_REGISTER_NEW,
+                id: permission_entity_1.PermissionId.TICKET_CLINIC_EYE_UPDATE_DIAGNOSIS_SPECIAL,
                 level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_EYE_REGISTER_NEW],
+                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_CLINIC_EYE_UPDATE_DIAGNOSIS_SPECIAL],
                 isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_EYE}.${permission_entity_1.PermissionId.TICKET_EYE_REGISTER_NEW}`,
-                name: 'Đăng ký khám mới',
-                parentId: permission_entity_1.PermissionId.TICKET_EYE,
-                rootId: permission_entity_1.PermissionId.TICKET_EYE,
-            },
-            {
-                id: permission_entity_1.PermissionId.TICKET_EYE_DESTROY_DRAFT_SCHEDULE,
-                level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_EYE_DESTROY_DRAFT_SCHEDULE],
-                isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_EYE}.${permission_entity_1.PermissionId.TICKET_EYE_DESTROY_DRAFT_SCHEDULE}`,
-                name: 'Xóa phiếu khám',
-                parentId: permission_entity_1.PermissionId.TICKET_EYE,
-                rootId: permission_entity_1.PermissionId.TICKET_EYE,
-            },
-            {
-                id: permission_entity_1.PermissionId.TICKET_EYE_START_CHECKUP,
-                level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_EYE_START_CHECKUP],
-                isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_EYE}.${permission_entity_1.PermissionId.TICKET_EYE_START_CHECKUP}`,
-                name: 'Bắt đầu vào khám',
-                parentId: permission_entity_1.PermissionId.TICKET_EYE,
-                rootId: permission_entity_1.PermissionId.TICKET_EYE,
-            },
-            {
-                id: permission_entity_1.PermissionId.TICKET_EYE_UPDATE_DIAGNOSIS_BASIC,
-                level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_EYE_UPDATE_DIAGNOSIS_BASIC],
-                isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_EYE}.${permission_entity_1.PermissionId.TICKET_EYE_UPDATE_DIAGNOSIS_BASIC}`,
-                name: 'Khám bệnh và chẩn đoán',
-                parentId: permission_entity_1.PermissionId.TICKET_EYE,
-                rootId: permission_entity_1.PermissionId.TICKET_EYE,
-            },
-            {
-                id: permission_entity_1.PermissionId.TICKET_EYE_UPDATE_TICKET_PROCEDURE_LIST,
-                level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_EYE_UPDATE_TICKET_PROCEDURE_LIST],
-                isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_EYE}.${permission_entity_1.PermissionId.TICKET_EYE_UPDATE_TICKET_PROCEDURE_LIST}`,
-                name: 'Chỉ định dịch vụ',
-                parentId: permission_entity_1.PermissionId.TICKET_EYE,
-                rootId: permission_entity_1.PermissionId.TICKET_EYE,
-            },
-            {
-                id: permission_entity_1.PermissionId.TICKET_EYE_UPDATE_TICKET_RADIOLOGY_LIST,
-                level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_EYE_UPDATE_TICKET_RADIOLOGY_LIST],
-                isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_EYE}.${permission_entity_1.PermissionId.TICKET_EYE_UPDATE_TICKET_RADIOLOGY_LIST}`,
-                name: 'Chỉ định CĐHA',
-                parentId: permission_entity_1.PermissionId.TICKET_EYE,
-                rootId: permission_entity_1.PermissionId.TICKET_EYE,
-            },
-            {
-                id: permission_entity_1.PermissionId.TICKET_EYE_UPDATE_TICKET_PRODUCT_CONSUMABLE,
-                level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_EYE_UPDATE_TICKET_PRODUCT_CONSUMABLE],
-                isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_EYE}.${permission_entity_1.PermissionId.TICKET_EYE_UPDATE_TICKET_PRODUCT_CONSUMABLE}`,
-                name: 'Sửa danh sách vật tư tiêu hao',
-                parentId: permission_entity_1.PermissionId.TICKET_EYE,
-                rootId: permission_entity_1.PermissionId.TICKET_EYE,
-            },
-            {
-                id: permission_entity_1.PermissionId.TICKET_EYE_UPDATE_TICKET_PRODUCT_PRESCRIPTION,
-                level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_EYE_UPDATE_TICKET_PRODUCT_PRESCRIPTION],
-                isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_EYE}.${permission_entity_1.PermissionId.TICKET_EYE_UPDATE_TICKET_PRODUCT_PRESCRIPTION}`,
-                name: 'Kê đơn thuốc',
-                parentId: permission_entity_1.PermissionId.TICKET_EYE,
-                rootId: permission_entity_1.PermissionId.TICKET_EYE,
-            },
-            {
-                id: permission_entity_1.PermissionId.TICKET_EYE_UPDATE_ITEMS_MONEY,
-                level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_EYE_UPDATE_ITEMS_MONEY],
-                isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_EYE}.${permission_entity_1.PermissionId.TICKET_EYE_UPDATE_ITEMS_MONEY}`,
-                name: 'Sửa số lượng và chiết khấu',
-                parentId: permission_entity_1.PermissionId.TICKET_EYE,
-                rootId: permission_entity_1.PermissionId.TICKET_EYE,
-            },
-            {
-                id: permission_entity_1.PermissionId.TICKET_EYE_PREPAYMENT,
-                level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_EYE_PREPAYMENT],
-                isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_EYE}.${permission_entity_1.PermissionId.TICKET_EYE_PREPAYMENT}`,
-                name: 'Tạm ứng',
-                parentId: permission_entity_1.PermissionId.TICKET_EYE,
-                rootId: permission_entity_1.PermissionId.TICKET_EYE,
-            },
-            {
-                id: permission_entity_1.PermissionId.TICKET_EYE_REFUND_OVERPAID,
-                level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_EYE_REFUND_OVERPAID],
-                isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_EYE}.${permission_entity_1.PermissionId.TICKET_EYE_REFUND_OVERPAID}`,
-                name: 'Hoàn trả tiền thừa',
-                parentId: permission_entity_1.PermissionId.TICKET_EYE,
-                rootId: permission_entity_1.PermissionId.TICKET_EYE,
-            },
-            {
-                id: permission_entity_1.PermissionId.TICKET_EYE_PAY_DEBT,
-                level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_EYE_PAY_DEBT],
-                isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_EYE}.${permission_entity_1.PermissionId.TICKET_EYE_PAY_DEBT}`,
-                name: 'Trả nợ',
-                parentId: permission_entity_1.PermissionId.TICKET_EYE,
-                rootId: permission_entity_1.PermissionId.TICKET_EYE,
-            },
-            {
-                id: permission_entity_1.PermissionId.TICKET_EYE_SEND_PRODUCT,
-                level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_EYE_SEND_PRODUCT],
-                isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_EYE}.${permission_entity_1.PermissionId.TICKET_EYE_SEND_PRODUCT}`,
-                name: 'Xuất thuốc',
-                parentId: permission_entity_1.PermissionId.TICKET_EYE,
-                rootId: permission_entity_1.PermissionId.TICKET_EYE,
-            },
-            {
-                id: permission_entity_1.PermissionId.TICKET_EYE_RETURN_PRODUCT,
-                level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_EYE_RETURN_PRODUCT],
-                isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_EYE}.${permission_entity_1.PermissionId.TICKET_EYE_RETURN_PRODUCT}`,
-                name: 'Hoàn trả thuốc',
-                parentId: permission_entity_1.PermissionId.TICKET_EYE,
-                rootId: permission_entity_1.PermissionId.TICKET_EYE,
-            },
-            {
-                id: permission_entity_1.PermissionId.TICKET_EYE_CLOSE,
-                level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_EYE_CLOSE],
-                isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_EYE}.${permission_entity_1.PermissionId.TICKET_EYE_CLOSE}`,
-                name: 'Đóng phiếu khám',
-                parentId: permission_entity_1.PermissionId.TICKET_EYE,
-                rootId: permission_entity_1.PermissionId.TICKET_EYE,
-            },
-            {
-                id: permission_entity_1.PermissionId.TICKET_EYE_REOPEN,
-                level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_EYE_REOPEN],
-                isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_EYE}.${permission_entity_1.PermissionId.TICKET_EYE_REOPEN}`,
-                name: 'Mở lại phiếu khám',
-                parentId: permission_entity_1.PermissionId.TICKET_EYE,
-                rootId: permission_entity_1.PermissionId.TICKET_EYE,
-            },
-            {
-                id: permission_entity_1.PermissionId.TICKET_EYE_UPDATE_DIAGNOSIS_SPECIAL,
-                level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_EYE_UPDATE_DIAGNOSIS_SPECIAL],
-                isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_EYE}.${permission_entity_1.PermissionId.TICKET_EYE_UPDATE_DIAGNOSIS_SPECIAL}`,
+                pathId: `${permission_entity_1.PermissionId.TICKET_CLINIC_EYE}.${permission_entity_1.PermissionId.TICKET_CLINIC_EYE_UPDATE_DIAGNOSIS_SPECIAL}`,
                 name: 'Đo thị lực',
-                parentId: permission_entity_1.PermissionId.TICKET_EYE,
-                rootId: permission_entity_1.PermissionId.TICKET_EYE,
+                parentId: permission_entity_1.PermissionId.TICKET_CLINIC_EYE,
+                rootId: permission_entity_1.PermissionId.TICKET_CLINIC_EYE,
             },
         ];
         await this.permissionRepository.delete({});
@@ -24338,7 +24123,7 @@ let ApiPermissionService = class ApiPermissionService {
             ...permissionTicketRadiology,
             ...permissionTicketOrder,
             ...permissionTicketClinic,
-            ...permissionTicketSpa,
+            ...permissionTicketBasic,
             ...permissionTicketEye,
         ]);
         this.cacheDataService.reloadPermissionAll();
@@ -24752,8 +24537,6 @@ let ApiPrintHtmlService = class ApiPrintHtmlService {
                 updatedAt: filter === null || filter === void 0 ? void 0 : filter.updatedAt,
             },
         });
-        if (!print)
-            throw new exception_filter_1.BusinessException('error.Database.NotFound');
         return { data: { print } };
     }
     async detail(oid, id) {
@@ -26557,7 +26340,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiProductMovementService = void 0;
 const common_1 = __webpack_require__(3);
 const object_helper_1 = __webpack_require__(80);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const customer_repository_1 = __webpack_require__(95);
 const distributor_repository_1 = __webpack_require__(97);
 const product_movement_repository_1 = __webpack_require__(103);
@@ -26589,18 +26372,14 @@ let ApiProductMovementService = class ApiProductMovementService {
         const distributorIds = data
             .filter((i) => i.voucherType === variable_1.VoucherType.Receipt)
             .map((i) => i.contactId);
-        const customerIds = data
-            .filter((i) => {
-            return [variable_1.VoucherType.Order, variable_1.VoucherType.Clinic, variable_1.VoucherType.Eye].includes(i.voucherType);
-        })
-            .map((i) => i.contactId);
         const receiptIds = data
             .filter((i) => i.voucherType === variable_1.VoucherType.Receipt)
             .map((i) => i.voucherId);
+        const customerIds = data
+            .filter((i) => i.voucherType === variable_1.VoucherType.Ticket)
+            .map((i) => i.contactId);
         const ticketIds = data
-            .filter((i) => {
-            return [variable_1.VoucherType.Order, variable_1.VoucherType.Clinic, variable_1.VoucherType.Eye].includes(i.voucherType);
-        })
+            .filter((i) => i.voucherType === variable_1.VoucherType.Ticket)
             .map((i) => i.voucherId);
         const [distributorList, customerList, receiptList, ticketList] = await Promise.all([
             (relation === null || relation === void 0 ? void 0 : relation.distributor) && distributorIds.length
@@ -26621,7 +26400,7 @@ let ApiProductMovementService = class ApiProductMovementService {
                 mov.receipt = receiptList.find((rc) => rc.id === mov.voucherId);
                 mov.distributor = distributorList.find((rc) => rc.id === mov.contactId);
             }
-            if ([variable_1.VoucherType.Order, variable_1.VoucherType.Clinic, variable_1.VoucherType.Eye].includes(mov.voucherType)) {
+            if (mov.voucherType === variable_1.VoucherType.Ticket) {
                 mov.ticket = ticketList.find((iv) => iv.id === mov.voucherId);
                 mov.customer = customerList.find((rc) => rc.id === mov.contactId);
             }
@@ -26684,7 +26463,7 @@ const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const query_1 = __webpack_require__(173);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const product_movement_options_request_1 = __webpack_require__(311);
 class ProductMovementGetQuery {
 }
@@ -26721,7 +26500,7 @@ __decorate([
         type: String,
         example: JSON.stringify({
             voucherId: 3,
-            voucherType: variable_1.VoucherType.Clinic,
+            voucherType: variable_1.VoucherType.Receipt,
         }),
     }),
     (0, class_transformer_1.Expose)(),
@@ -26798,7 +26577,7 @@ exports.ProductMovementSortQuery = exports.ProductMovementFilterQuery = exports.
 const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const dto_1 = __webpack_require__(179);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const ConditionEnumVoucherType = (0, dto_1.createConditionEnum)(variable_1.VoucherType);
 class ProductMovementRelationQuery {
 }
@@ -29855,7 +29634,7 @@ const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const dto_1 = __webpack_require__(179);
 const query_1 = __webpack_require__(173);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 class ReceiptRelationQuery {
 }
 exports.ReceiptRelationQuery = ReceiptRelationQuery;
@@ -30079,7 +29858,7 @@ const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const receipt_item_body_1 = __webpack_require__(347);
 class ReceiptInsert {
 }
@@ -31117,13 +30896,13 @@ let ApiStatisticTicketService = class ApiStatisticTicketService {
         this.statisticTicketRepository = statisticTicketRepository;
     }
     async statisticTicket(oid, query) {
-        const { fromTime, toTime, timeType, voucherType } = query;
+        const { fromTime, toTime, timeType, ticketType } = query;
         const data = await this.statisticTicketRepository.statisticTicket({
             oid,
             fromTime,
             toTime,
             timeType,
-            voucherType,
+            ticketType,
         });
         const dataMap = {};
         const date = new Date(fromTime.getTime());
@@ -31530,7 +31309,7 @@ exports.StatisticTicketQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(32);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
+const ticket_entity_1 = __webpack_require__(50);
 const statistic_time_query_1 = __webpack_require__(370);
 class StatisticTicketQuery extends statistic_time_query_1.StatisticTimeQuery {
 }
@@ -31539,9 +31318,9 @@ __decorate([
     (0, swagger_1.ApiPropertyOptional)(),
     (0, class_transformer_1.Expose)(),
     (0, class_transformer_1.Type)(() => Number),
-    (0, class_validator_custom_1.IsEnumValue)(variable_1.VoucherType),
-    __metadata("design:type", typeof (_a = typeof variable_1.VoucherType !== "undefined" && variable_1.VoucherType) === "function" ? _a : Object)
-], StatisticTicketQuery.prototype, "voucherType", void 0);
+    (0, class_validator_custom_1.IsEnumValue)(ticket_entity_1.TicketType),
+    __metadata("design:type", typeof (_a = typeof ticket_entity_1.TicketType !== "undefined" && ticket_entity_1.TicketType) === "function" ? _a : Object)
+], StatisticTicketQuery.prototype, "ticketType", void 0);
 
 
 /***/ }),
@@ -31749,7 +31528,6 @@ const dto_1 = __webpack_require__(179);
 const permission_guard_1 = __webpack_require__(82);
 const interceptor_1 = __webpack_require__(376);
 const external_request_1 = __webpack_require__(157);
-const variable_1 = __webpack_require__(39);
 const permission_entity_1 = __webpack_require__(68);
 const api_ticket_clinic_service_1 = __webpack_require__(380);
 const request_1 = __webpack_require__(382);
@@ -31769,7 +31547,6 @@ let ApiTicketClinicController = class ApiTicketClinicController {
         return await this.apiTicketClinicService.destroyDraftSchedule({
             oid,
             ticketId: id,
-            voucherType: variable_1.VoucherType.Clinic,
         });
     }
     async startCheckup({ oid }, { id }) {
@@ -31866,7 +31643,7 @@ __decorate([
 ], ApiTicketClinicController.prototype, "startCheckup", null);
 __decorate([
     (0, common_1.Post)(':id/update-diagnosis-basic'),
-    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_CLINIC_UPDATE_DIAGNOSIS_BASIC),
+    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_CLINIC_BASE_UPDATE_DIAGNOSIS),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, common_1.UseInterceptors)((0, interceptor_1.FastifyFilesInterceptor)('files', 10, {})),
     __param(0, (0, external_request_1.External)()),
@@ -32223,7 +32000,7 @@ let ApiTicketClinicService = class ApiTicketClinicService {
         const ticket = await this.ticketRepository.insertOneAndReturnEntity({
             oid,
             customerId: body.customerId,
-            voucherType: body.voucherType,
+            ticketType: body.ticketType,
             registeredAt: body.registeredAt,
             note: body.reason,
             customerSourceId: body.customerSourceId,
@@ -32241,11 +32018,11 @@ let ApiTicketClinicService = class ApiTicketClinicService {
                 appointmentStatus: appointment_entity_1.AppointmentStatus.Completed,
             });
         }
-        this.socketEmitService.ticketCreate(oid, { ticket });
+        this.socketEmitService.ticketClinicCreate(oid, { ticket });
         return { data: { ticket } };
     }
     async destroyDraftSchedule(params) {
-        const { oid, ticketId, voucherType } = params;
+        const { oid, ticketId } = params;
         await this.ticketRepository.delete({
             oid,
             id: ticketId,
@@ -32253,7 +32030,7 @@ let ApiTicketClinicService = class ApiTicketClinicService {
         });
         await this.ticketDiagnosisRepository.delete({ oid, ticketId });
         await this.ticketUserRepository.delete({ oid, ticketId });
-        this.socketEmitService.ticketDestroy(oid, { ticketId, voucherType });
+        this.socketEmitService.ticketClinicDestroy(oid, { ticketId });
         return { data: { ticketId } };
     }
     async startCheckup(options) {
@@ -32268,7 +32045,7 @@ let ApiTicketClinicService = class ApiTicketClinicService {
         });
         if (!ticketBasic)
             throw new exception_filter_1.BusinessException('error.Database.UpdateFailed');
-        this.socketEmitService.ticketUpdate(oid, { ticketBasic });
+        this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic });
         return { data: { ticketBasic } };
     }
     async updateDiagnosisBasic(options) {
@@ -32324,9 +32101,8 @@ let ApiTicketClinicService = class ApiTicketClinicService {
             ticketDiagnosis.imageList.push(imageMap[i]);
         });
         const { special } = ticketDiagnosis, ticketDiagnosisBasic = __rest(ticketDiagnosis, ["special"]);
-        this.socketEmitService.ticketUpdateTicketDiagnosisBasic(oid, {
+        this.socketEmitService.ticketClinicUpdateTicketDiagnosisBasic(oid, {
             ticketId: ticketDiagnosis.ticketId,
-            voucherType: ticket.voucherType,
             ticketDiagnosisBasic,
         });
         return { data: true };
@@ -32364,10 +32140,9 @@ let ApiTicketClinicService = class ApiTicketClinicService {
                 throw new exception_filter_1.BusinessException('error.Database.UpdateFailed');
             }
         }
-        this.socketEmitService.ticketUpdateTicketDiagnosisSpecial(oid, {
+        this.socketEmitService.ticketClinicUpdateTicketDiagnosisSpecial(oid, {
             ticketId: ticketDiagnosis.ticketId,
             special: ticketDiagnosis.special,
-            voucherType: ticket.voucherType,
         });
         return { data: true };
     }
@@ -32379,10 +32154,9 @@ let ApiTicketClinicService = class ApiTicketClinicService {
             ticketProcedureListDto: body.ticketProcedureList,
         });
         const { ticketBasic, ticketProcedureList } = result;
-        this.socketEmitService.ticketUpdate(oid, { ticketBasic });
-        this.socketEmitService.ticketUpdateTicketProcedureList(oid, {
+        this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic });
+        this.socketEmitService.ticketClinicUpdateTicketProcedureList(oid, {
             ticketId,
-            voucherType: ticketBasic.voucherType,
             ticketProcedureList,
         });
         return { data: true };
@@ -32398,10 +32172,9 @@ let ApiTicketClinicService = class ApiTicketClinicService {
             type: ticket_product_entity_1.TicketProductType.Consumable,
         });
         const { ticketBasic, ticketProductList } = result;
-        this.socketEmitService.ticketUpdate(oid, { ticketBasic });
-        this.socketEmitService.ticketUpdateTicketProductConsumableList(oid, {
+        this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic });
+        this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
             ticketId,
-            voucherType: ticketBasic.voucherType,
             ticketProductConsumableList: ticketProductList.filter((i) => {
                 return i.type === ticket_product_entity_1.TicketProductType.Consumable;
             }),
@@ -32420,10 +32193,9 @@ let ApiTicketClinicService = class ApiTicketClinicService {
             });
             const { ticketProductList } = result;
             ticketBasic = result.ticketBasic;
-            this.socketEmitService.ticketUpdate(oid, { ticketBasic });
-            this.socketEmitService.ticketUpdateTicketProductPrescriptionList(oid, {
+            this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic });
+            this.socketEmitService.ticketClinicUpdateTicketProductPrescriptionList(oid, {
                 ticketId,
-                voucherType: ticketBasic.voucherType,
                 ticketProductPrescriptionList: ticketProductList.filter((i) => {
                     return i.type === ticket_product_entity_1.TicketProductType.Prescription;
                 }),
@@ -32435,9 +32207,8 @@ let ApiTicketClinicService = class ApiTicketClinicService {
             }
             const [ticketDiagnosis] = await this.ticketDiagnosisRepository.updateAndReturnEntity({ oid, ticketId }, { advice: body.advice });
             const { special } = ticketDiagnosis, ticketDiagnosisBasic = __rest(ticketDiagnosis, ["special"]);
-            this.socketEmitService.ticketUpdateTicketDiagnosisBasic(oid, {
+            this.socketEmitService.ticketClinicUpdateTicketDiagnosisBasic(oid, {
                 ticketId,
-                voucherType: ticketBasic.voucherType,
                 ticketDiagnosisBasic,
             });
         }
@@ -32455,10 +32226,9 @@ let ApiTicketClinicService = class ApiTicketClinicService {
             }),
         });
         const { ticketBasic, ticketRadiologyList } = result;
-        this.socketEmitService.ticketUpdate(oid, { ticketBasic });
-        this.socketEmitService.ticketUpdateTicketRadiologyList(oid, {
+        this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic });
+        this.socketEmitService.ticketClinicUpdateTicketRadiologyList(oid, {
             ticketId,
-            voucherType: ticketBasic.voucherType,
             ticketRadiologyList,
         });
         return { data: true };
@@ -32473,29 +32243,25 @@ let ApiTicketClinicService = class ApiTicketClinicService {
             ticketRadiologyUpdateList: body.ticketRadiologyUpdateList,
         });
         const { ticketBasic, ticketProductList, ticketProcedureList, ticketRadiologyList } = result;
-        this.socketEmitService.ticketUpdate(oid, { ticketBasic });
-        this.socketEmitService.ticketUpdateTicketProductConsumableList(oid, {
+        this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic });
+        this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
             ticketId,
-            voucherType: ticketBasic.voucherType,
             ticketProductConsumableList: ticketProductList.filter((i) => {
                 return i.type === ticket_product_entity_1.TicketProductType.Consumable;
             }),
         });
-        this.socketEmitService.ticketUpdateTicketProductPrescriptionList(oid, {
+        this.socketEmitService.ticketClinicUpdateTicketProductPrescriptionList(oid, {
             ticketId,
-            voucherType: ticketBasic.voucherType,
             ticketProductPrescriptionList: ticketProductList.filter((i) => {
                 return i.type === ticket_product_entity_1.TicketProductType.Prescription;
             }),
         });
-        this.socketEmitService.ticketUpdateTicketProcedureList(oid, {
+        this.socketEmitService.ticketClinicUpdateTicketProcedureList(oid, {
             ticketId,
-            voucherType: ticketBasic.voucherType,
             ticketProcedureList,
         });
-        this.socketEmitService.ticketUpdateTicketRadiologyList(oid, {
+        this.socketEmitService.ticketClinicUpdateTicketRadiologyList(oid, {
             ticketId,
-            voucherType: ticketBasic.voucherType,
             ticketRadiologyList,
         });
         return { data: true };
@@ -32513,22 +32279,20 @@ let ApiTicketClinicService = class ApiTicketClinicService {
             });
             this.socketEmitService.batchListUpdate(oid, { batchList });
             this.socketEmitService.productListUpdate(oid, { productList });
-            this.socketEmitService.ticketUpdate(oid, { ticketBasic });
+            this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic });
             const ticketProductList = await this.ticketProductRepository.findMany({
                 relation: { product: true, batch: true },
                 condition: { oid, ticketId },
                 sort: { id: 'ASC' },
             });
-            this.socketEmitService.ticketUpdateTicketProductConsumableList(oid, {
+            this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
                 ticketId,
-                voucherType: ticketBasic.voucherType,
                 ticketProductConsumableList: ticketProductList.filter((i) => {
                     return i.type === ticket_product_entity_1.TicketProductType.Consumable;
                 }),
             });
-            this.socketEmitService.ticketUpdateTicketProductPrescriptionList(oid, {
+            this.socketEmitService.ticketClinicUpdateTicketProductPrescriptionList(oid, {
                 ticketId,
-                voucherType: ticketBasic.voucherType,
                 ticketProductPrescriptionList: ticketProductList.filter((i) => {
                     return i.type === ticket_product_entity_1.TicketProductType.Prescription;
                 }),
@@ -32550,22 +32314,20 @@ let ApiTicketClinicService = class ApiTicketClinicService {
             });
             this.socketEmitService.batchListUpdate(oid, { batchList });
             this.socketEmitService.productListUpdate(oid, { productList });
-            this.socketEmitService.ticketUpdate(oid, { ticketBasic });
+            this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic });
             const ticketProductList = await this.ticketProductRepository.findMany({
                 relation: { product: true, batch: true },
                 condition: { oid, ticketId },
                 sort: { id: 'ASC' },
             });
-            this.socketEmitService.ticketUpdateTicketProductConsumableList(oid, {
+            this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
                 ticketId,
-                voucherType: ticketBasic.voucherType,
                 ticketProductConsumableList: ticketProductList.filter((i) => {
                     return i.type === ticket_product_entity_1.TicketProductType.Consumable;
                 }),
             });
-            this.socketEmitService.ticketUpdateTicketProductPrescriptionList(oid, {
+            this.socketEmitService.ticketClinicUpdateTicketProductPrescriptionList(oid, {
                 ticketId,
-                voucherType: ticketBasic.voucherType,
                 ticketProductPrescriptionList: ticketProductList.filter((i) => {
                     return i.type === ticket_product_entity_1.TicketProductType.Prescription;
                 }),
@@ -32585,7 +32347,7 @@ let ApiTicketClinicService = class ApiTicketClinicService {
                 time: Date.now(),
                 money: body.money,
             });
-            this.socketEmitService.ticketUpdate(oid, { ticketBasic });
+            this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic });
             return { data: true };
         }
         catch (error) {
@@ -32601,7 +32363,7 @@ let ApiTicketClinicService = class ApiTicketClinicService {
                 time: Date.now(),
                 money: body.money,
             });
-            this.socketEmitService.ticketUpdate(oid, { ticketBasic });
+            this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic });
             return { data: { ticketBasic } };
         }
         catch (error) {
@@ -32617,7 +32379,7 @@ let ApiTicketClinicService = class ApiTicketClinicService {
                 time: Date.now(),
                 money: body.money,
             });
-            this.socketEmitService.ticketUpdate(oid, { ticketBasic });
+            this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic });
             if (customer) {
                 this.socketEmitService.customerUpsert(oid, { customer });
             }
@@ -32636,7 +32398,7 @@ let ApiTicketClinicService = class ApiTicketClinicService {
                 time: Date.now(),
                 money: 0,
             });
-            this.socketEmitService.ticketUpdate(oid, { ticketBasic });
+            this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic });
             if (customer) {
                 this.socketEmitService.customerUpsert(oid, { customer });
             }
@@ -32655,7 +32417,7 @@ let ApiTicketClinicService = class ApiTicketClinicService {
                 time: Date.now(),
                 description: '',
             });
-            this.socketEmitService.ticketUpdate(oid, { ticketBasic });
+            this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic });
             if (customer) {
                 this.socketEmitService.customerUpsert(oid, { customer });
             }
@@ -32844,7 +32606,7 @@ const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const typescript_helper_1 = __webpack_require__(163);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 class TicketRadiologyBody {
 }
 __decorate([
@@ -32966,7 +32728,7 @@ const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
+const ticket_entity_1 = __webpack_require__(50);
 class TicketClinicRegisterBody {
 }
 exports.TicketClinicRegisterBody = TicketClinicRegisterBody;
@@ -32985,12 +32747,12 @@ __decorate([
     __metadata("design:type", Number)
 ], TicketClinicRegisterBody.prototype, "customerSourceId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: variable_1.VoucherType.Clinic }),
+    (0, swagger_1.ApiProperty)({ example: ticket_entity_1.TicketType.Clinic }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
-    (0, class_validator_custom_1.IsEnumValue)(variable_1.VoucherType),
-    __metadata("design:type", typeof (_a = typeof variable_1.VoucherType !== "undefined" && variable_1.VoucherType) === "function" ? _a : Object)
-], TicketClinicRegisterBody.prototype, "voucherType", void 0);
+    (0, class_validator_custom_1.IsEnumValue)(ticket_entity_1.TicketType),
+    __metadata("design:type", typeof (_a = typeof ticket_entity_1.TicketType !== "undefined" && ticket_entity_1.TicketType) === "function" ? _a : Object)
+], TicketClinicRegisterBody.prototype, "ticketType", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 45 }),
     (0, class_transformer_1.Expose)(),
@@ -33099,7 +32861,7 @@ const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const typescript_helper_1 = __webpack_require__(163);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 class TicketProductConsumableBody {
 }
 __decorate([
@@ -33397,7 +33159,7 @@ const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const typescript_helper_1 = __webpack_require__(163);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 class TicketProductUpdateBody {
 }
 __decorate([
@@ -33611,7 +33373,7 @@ const class_validator_1 = __webpack_require__(161);
 const DOMPurify = __webpack_require__(389);
 const typescript_helper_1 = __webpack_require__(163);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 class TicketProductPrescriptionBody {
 }
 __decorate([
@@ -33749,7 +33511,7 @@ const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const typescript_helper_1 = __webpack_require__(163);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 class TicketProcedureBody {
 }
 __decorate([
@@ -33843,7 +33605,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketEyeController = void 0;
 const common_1 = __webpack_require__(3);
@@ -33852,29 +33614,12 @@ const dto_1 = __webpack_require__(179);
 const permission_guard_1 = __webpack_require__(82);
 const interceptor_1 = __webpack_require__(376);
 const external_request_1 = __webpack_require__(157);
-const variable_1 = __webpack_require__(39);
 const permission_entity_1 = __webpack_require__(68);
 const api_ticket_clinic_service_1 = __webpack_require__(380);
 const request_1 = __webpack_require__(382);
 let ApiTicketEyeController = class ApiTicketEyeController {
     constructor(apiTicketClinicService) {
         this.apiTicketClinicService = apiTicketClinicService;
-    }
-    async register({ oid, uid, clientId }, body) {
-        return await this.apiTicketClinicService.register({
-            oid,
-            body,
-        });
-    }
-    async destroyDraftSchedule({ oid }, { id }) {
-        return await this.apiTicketClinicService.destroyDraftSchedule({
-            oid,
-            ticketId: id,
-            voucherType: variable_1.VoucherType.Eye,
-        });
-    }
-    async startCheckup({ oid }, { id }) {
-        return await this.apiTicketClinicService.startCheckup({ oid, ticketId: id });
     }
     async updateDiagnosis({ oid }, files, { id }, body) {
         return await this.apiTicketClinicService.updateDiagnosisBasic({
@@ -33891,83 +33636,11 @@ let ApiTicketEyeController = class ApiTicketEyeController {
             body,
         });
     }
-    async updateTicketProcedureList({ oid }, { id }, body) {
-        return await this.apiTicketClinicService.updateTicketProcedureList({
-            oid,
-            ticketId: id,
-            body,
-        });
-    }
-    async updateTicketProductConsumable({ oid }, { id }, body) {
-        return await this.apiTicketClinicService.updateTicketProductConsumable({
-            oid,
-            ticketId: id,
-            body,
-        });
-    }
-    async updateTicketProductPrescription({ oid }, { id }, body) {
-        return await this.apiTicketClinicService.updateTicketProductPrescription({
-            oid,
-            ticketId: id,
-            body,
-        });
-    }
-    async updateItemsMoney({ oid }, { id }, body) {
-        return await this.apiTicketClinicService.updateItemsMoney({ oid, ticketId: id, body });
-    }
-    async sendProduct({ oid }, { id }) {
-        return await this.apiTicketClinicService.sendProduct({ oid, ticketId: id });
-    }
-    async returnProduct({ oid }, { id }, body) {
-        return await this.apiTicketClinicService.returnProduct({ oid, ticketId: id, body });
-    }
-    async prepayment({ oid }, { id }, body) {
-        return await this.apiTicketClinicService.prepayment({ oid, ticketId: id, body });
-    }
-    async refundOverpaid({ oid }, { id }, body) {
-        return await this.apiTicketClinicService.refundOverpaid({ oid, ticketId: id, body });
-    }
-    async payDebt({ oid }, { id }, body) {
-        return await this.apiTicketClinicService.payDebt({ oid, ticketId: id, body });
-    }
-    async close({ oid }, { id }) {
-        return await this.apiTicketClinicService.close({ oid, ticketId: id });
-    }
-    async reopen({ oid }, { id }) {
-        return await this.apiTicketClinicService.reopen({ oid, ticketId: id });
-    }
 };
 exports.ApiTicketEyeController = ApiTicketEyeController;
 __decorate([
-    (0, common_1.Post)('register'),
-    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_EYE_REGISTER_NEW),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _b : Object, typeof (_c = typeof request_1.TicketClinicRegisterBody !== "undefined" && request_1.TicketClinicRegisterBody) === "function" ? _c : Object]),
-    __metadata("design:returntype", Promise)
-], ApiTicketEyeController.prototype, "register", null);
-__decorate([
-    (0, common_1.Delete)(':id/destroy-draft-schedule'),
-    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_EYE_DESTROY_DRAFT_SCHEDULE),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _d : Object, typeof (_e = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _e : Object]),
-    __metadata("design:returntype", Promise)
-], ApiTicketEyeController.prototype, "destroyDraftSchedule", null);
-__decorate([
-    (0, common_1.Post)(':id/start-checkup'),
-    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_EYE_START_CHECKUP),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _f : Object, typeof (_g = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _g : Object]),
-    __metadata("design:returntype", Promise)
-], ApiTicketEyeController.prototype, "startCheckup", null);
-__decorate([
     (0, common_1.Post)(':id/update-diagnosis-basic'),
-    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_EYE_UPDATE_DIAGNOSIS_BASIC),
+    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_CLINIC_EYE_UPDATE_DIAGNOSIS_BASIC),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
     (0, common_1.UseInterceptors)((0, interceptor_1.FastifyFilesInterceptor)('files', 10, {})),
     __param(0, (0, external_request_1.External)()),
@@ -33975,126 +33648,19 @@ __decorate([
     __param(2, (0, common_1.Param)()),
     __param(3, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_h = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _h : Object, Array, typeof (_j = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _j : Object, typeof (_k = typeof request_1.TicketClinicUpdateDiagnosisBasicBody !== "undefined" && request_1.TicketClinicUpdateDiagnosisBasicBody) === "function" ? _k : Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _b : Object, Array, typeof (_c = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _c : Object, typeof (_d = typeof request_1.TicketClinicUpdateDiagnosisBasicBody !== "undefined" && request_1.TicketClinicUpdateDiagnosisBasicBody) === "function" ? _d : Object]),
     __metadata("design:returntype", Promise)
 ], ApiTicketEyeController.prototype, "updateDiagnosis", null);
 __decorate([
     (0, common_1.Post)(':id/update-diagnosis-special'),
-    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_EYE_UPDATE_DIAGNOSIS_SPECIAL),
+    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_CLINIC_EYE_UPDATE_DIAGNOSIS_SPECIAL),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_l = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _l : Object, typeof (_m = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _m : Object, typeof (_o = typeof request_1.TicketClinicUpdateDiagnosisSpecialBody !== "undefined" && request_1.TicketClinicUpdateDiagnosisSpecialBody) === "function" ? _o : Object]),
+    __metadata("design:paramtypes", [typeof (_e = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _e : Object, typeof (_f = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _f : Object, typeof (_g = typeof request_1.TicketClinicUpdateDiagnosisSpecialBody !== "undefined" && request_1.TicketClinicUpdateDiagnosisSpecialBody) === "function" ? _g : Object]),
     __metadata("design:returntype", Promise)
 ], ApiTicketEyeController.prototype, "updateDiagnosisSpecial", null);
-__decorate([
-    (0, common_1.Post)(':id/update-ticket-procedure-list'),
-    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_EYE_UPDATE_TICKET_PROCEDURE_LIST),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_p = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _p : Object, typeof (_q = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _q : Object, typeof (_r = typeof request_1.TicketClinicUpdateTicketProcedureListBody !== "undefined" && request_1.TicketClinicUpdateTicketProcedureListBody) === "function" ? _r : Object]),
-    __metadata("design:returntype", Promise)
-], ApiTicketEyeController.prototype, "updateTicketProcedureList", null);
-__decorate([
-    (0, common_1.Post)(':id/update-ticket-product-consumable'),
-    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_EYE_UPDATE_TICKET_PRODUCT_CONSUMABLE),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_s = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _s : Object, typeof (_t = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _t : Object, typeof (_u = typeof request_1.TicketClinicUpdateConsumableBody !== "undefined" && request_1.TicketClinicUpdateConsumableBody) === "function" ? _u : Object]),
-    __metadata("design:returntype", Promise)
-], ApiTicketEyeController.prototype, "updateTicketProductConsumable", null);
-__decorate([
-    (0, common_1.Post)(':id/update-ticket-product-prescription'),
-    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_EYE_UPDATE_TICKET_PRODUCT_PRESCRIPTION),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_v = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _v : Object, typeof (_w = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _w : Object, typeof (_x = typeof request_1.TicketClinicUpdatePrescriptionBody !== "undefined" && request_1.TicketClinicUpdatePrescriptionBody) === "function" ? _x : Object]),
-    __metadata("design:returntype", Promise)
-], ApiTicketEyeController.prototype, "updateTicketProductPrescription", null);
-__decorate([
-    (0, common_1.Post)(':id/update-items-money'),
-    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_EYE_UPDATE_ITEMS_MONEY),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_y = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _y : Object, typeof (_z = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _z : Object, typeof (_0 = typeof request_1.TicketClinicUpdateItemsMoneyBody !== "undefined" && request_1.TicketClinicUpdateItemsMoneyBody) === "function" ? _0 : Object]),
-    __metadata("design:returntype", Promise)
-], ApiTicketEyeController.prototype, "updateItemsMoney", null);
-__decorate([
-    (0, common_1.Post)(':id/send-product'),
-    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_EYE_SEND_PRODUCT),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_1 = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _1 : Object, typeof (_2 = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _2 : Object]),
-    __metadata("design:returntype", Promise)
-], ApiTicketEyeController.prototype, "sendProduct", null);
-__decorate([
-    (0, common_1.Post)(':id/return-product'),
-    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_EYE_RETURN_PRODUCT),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_3 = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _3 : Object, typeof (_4 = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _4 : Object, typeof (_5 = typeof request_1.TicketClinicReturnProductListBody !== "undefined" && request_1.TicketClinicReturnProductListBody) === "function" ? _5 : Object]),
-    __metadata("design:returntype", Promise)
-], ApiTicketEyeController.prototype, "returnProduct", null);
-__decorate([
-    (0, common_1.Post)(':id/prepayment'),
-    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_EYE_PREPAYMENT),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_6 = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _6 : Object, typeof (_7 = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _7 : Object, typeof (_8 = typeof request_1.TicketClinicPaymentBody !== "undefined" && request_1.TicketClinicPaymentBody) === "function" ? _8 : Object]),
-    __metadata("design:returntype", Promise)
-], ApiTicketEyeController.prototype, "prepayment", null);
-__decorate([
-    (0, common_1.Post)(':id/refund-overpaid'),
-    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_EYE_REFUND_OVERPAID),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_9 = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _9 : Object, typeof (_10 = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _10 : Object, typeof (_11 = typeof request_1.TicketClinicPaymentBody !== "undefined" && request_1.TicketClinicPaymentBody) === "function" ? _11 : Object]),
-    __metadata("design:returntype", Promise)
-], ApiTicketEyeController.prototype, "refundOverpaid", null);
-__decorate([
-    (0, common_1.Post)(':id/pay-debt'),
-    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_EYE_PAY_DEBT),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_12 = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _12 : Object, typeof (_13 = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _13 : Object, typeof (_14 = typeof request_1.TicketClinicPaymentBody !== "undefined" && request_1.TicketClinicPaymentBody) === "function" ? _14 : Object]),
-    __metadata("design:returntype", Promise)
-], ApiTicketEyeController.prototype, "payDebt", null);
-__decorate([
-    (0, common_1.Post)(':id/close'),
-    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_EYE_CLOSE),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_15 = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _15 : Object, typeof (_16 = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _16 : Object]),
-    __metadata("design:returntype", Promise)
-], ApiTicketEyeController.prototype, "close", null);
-__decorate([
-    (0, common_1.Post)(':id/reopen'),
-    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_EYE_READ),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_17 = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _17 : Object, typeof (_18 = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _18 : Object]),
-    __metadata("design:returntype", Promise)
-], ApiTicketEyeController.prototype, "reopen", null);
 exports.ApiTicketEyeController = ApiTicketEyeController = __decorate([
     (0, swagger_1.ApiTags)('TicketEye'),
     (0, swagger_1.ApiBearerAuth)('access-token'),
@@ -34903,7 +34469,7 @@ const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const typescript_helper_1 = __webpack_require__(163);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 class TicketOrderProcedureDraft {
 }
 exports.TicketOrderProcedureDraft = TicketOrderProcedureDraft;
@@ -34982,7 +34548,7 @@ const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const typescript_helper_1 = __webpack_require__(163);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 class TicketOrderProductDraft {
 }
 exports.TicketOrderProductDraft = TicketOrderProductDraft;
@@ -35222,7 +34788,7 @@ const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 const ticket_order_expense_draft_1 = __webpack_require__(403);
 const ticket_order_procedure_draft_1 = __webpack_require__(405);
 const ticket_order_product_draft_1 = __webpack_require__(406);
@@ -36133,7 +35699,7 @@ const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const dto_1 = __webpack_require__(179);
 const query_1 = __webpack_require__(173);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 class TicketProductRelationQuery {
 }
 exports.TicketProductRelationQuery = TicketProductRelationQuery;
@@ -36449,10 +36015,9 @@ let ApiTicketRadiologyService = class ApiTicketRadiologyService {
             oid,
             ticketId: body.ticketId,
         });
-        this.socketEmitService.ticketUpdate(oid, { ticketBasic: ticket });
-        this.socketEmitService.ticketUpdateTicketRadiologyResult(oid, {
+        this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic: ticket });
+        this.socketEmitService.ticketClinicUpdateTicketRadiologyResult(oid, {
             ticketId: ticketRadiology.ticketId,
-            voucherType: ticket.voucherType,
             ticketRadiology,
         });
         return { data: { ticketRadiologyId: ticketRadiology.id } };
@@ -36487,9 +36052,8 @@ let ApiTicketRadiologyService = class ApiTicketRadiologyService {
         });
         ticketRadiology.radiology = radiology;
         const ticket = await this.ticketRepository.findOneBy({ oid, id: ticketRadiology.ticketId });
-        this.socketEmitService.ticketUpdateTicketRadiologyResult(oid, {
+        this.socketEmitService.ticketClinicUpdateTicketRadiologyResult(oid, {
             ticketId: ticketRadiology.ticketId,
-            voucherType: ticket.voucherType,
             ticketRadiology,
         });
         return { data: { ticketRadiologyId: ticketRadiology.id } };
@@ -36729,7 +36293,7 @@ const DOMPurify = __webpack_require__(389);
 const file_1 = __webpack_require__(390);
 const typescript_helper_1 = __webpack_require__(163);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 class TicketRadiologyCreateBody extends file_1.MultipleFileUpload {
 }
 exports.TicketRadiologyCreateBody = TicketRadiologyCreateBody;
@@ -36995,7 +36559,7 @@ let ApiTicketService = class ApiTicketService {
             condition: {
                 oid,
                 ticketStatus: filter === null || filter === void 0 ? void 0 : filter.ticketStatus,
-                voucherType: filter.voucherType,
+                ticketType: filter.ticketType,
                 customerId: filter === null || filter === void 0 ? void 0 : filter.customerId,
                 registeredAt: filter === null || filter === void 0 ? void 0 : filter.registeredAt,
                 startedAt: filter === null || filter === void 0 ? void 0 : filter.startedAt,
@@ -37005,7 +36569,7 @@ let ApiTicketService = class ApiTicketService {
         });
         return {
             data,
-            meta: { total, page, limit, voucherType: filter.voucherType },
+            meta: { total, page, limit },
         };
     }
     async getMany(oid, query) {
@@ -37014,7 +36578,7 @@ let ApiTicketService = class ApiTicketService {
             condition: {
                 oid,
                 ticketStatus: filter === null || filter === void 0 ? void 0 : filter.ticketStatus,
-                voucherType: filter === null || filter === void 0 ? void 0 : filter.voucherType,
+                ticketType: filter === null || filter === void 0 ? void 0 : filter.ticketType,
                 customerId: filter === null || filter === void 0 ? void 0 : filter.customerId,
                 registeredAt: filter === null || filter === void 0 ? void 0 : filter.registeredAt,
                 startedAt: filter === null || filter === void 0 ? void 0 : filter.startedAt,
@@ -37248,7 +36812,6 @@ exports.TicketSortQuery = exports.TicketFilterQuery = exports.TicketRelationQuer
 const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const dto_1 = __webpack_require__(179);
-const variable_1 = __webpack_require__(39);
 const ticket_entity_1 = __webpack_require__(50);
 class TicketRelationQuery {
 }
@@ -37318,7 +36881,7 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], TicketRelationQuery.prototype, "customerSource", void 0);
-const ConditionEnumVoucherType = (0, dto_1.createConditionEnum)(variable_1.VoucherType);
+const ConditionEnumTicketType = (0, dto_1.createConditionEnum)(ticket_entity_1.TicketType);
 const ConditionEnumTicketStatus = (0, dto_1.createConditionEnum)(ticket_entity_1.TicketStatus);
 class TicketFilterQuery {
 }
@@ -37331,10 +36894,10 @@ __decorate([
 ], TicketFilterQuery.prototype, "ticketStatus", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)((params) => (0, dto_1.transformConditionEnum)(params, variable_1.VoucherType)),
+    (0, class_transformer_1.Transform)((params) => (0, dto_1.transformConditionEnum)(params, ticket_entity_1.TicketType)),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Object)
-], TicketFilterQuery.prototype, "voucherType", void 0);
+], TicketFilterQuery.prototype, "ticketType", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsNumber)(),
@@ -37987,7 +37550,7 @@ const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(32);
 const class_validator_1 = __webpack_require__(161);
 const class_validator_custom_1 = __webpack_require__(162);
-const variable_1 = __webpack_require__(39);
+const variable_1 = __webpack_require__(41);
 class UserCreateBody {
 }
 exports.UserCreateBody = UserCreateBody;

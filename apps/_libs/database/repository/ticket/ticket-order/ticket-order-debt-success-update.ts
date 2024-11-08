@@ -11,7 +11,7 @@ import {
 import { arrayToKeyValue } from '../../../../common/helpers/object.helper'
 import { DTimer } from '../../../../common/helpers/time.helper'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
-import { DeliveryStatus, PaymentType } from '../../../common/variable'
+import { DeliveryStatus, PaymentType, VoucherType } from '../../../common/variable'
 import {
   Batch,
   Customer,
@@ -94,7 +94,7 @@ export class TicketOrderDebtSuccessUpdate {
         throw new Error(`${PREFIX}: Update Ticket failed`)
       }
       const ticketRoot = Ticket.fromRaw(ticketRootUpdateResult.raw[0])
-      const { customerId, voucherType } = ticketRoot
+      const { customerId } = ticketRoot
 
       const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
         ...ticketOrderDebtSuccessUpdate,
@@ -494,7 +494,7 @@ export class TicketOrderDebtSuccessUpdate {
               productId: Number(productId),
               voucherId: ticketId,
               contactId: customerId,
-              voucherType,
+              voucherType: VoucherType.Ticket,
               isRefund: 1,
               createdAt: time,
               unitRate: ticketProductReturn.unitRate,
@@ -523,7 +523,7 @@ export class TicketOrderDebtSuccessUpdate {
               productId: Number(productId),
               voucherId: ticketId,
               contactId: customerId,
-              voucherType,
+              voucherType: VoucherType.Ticket,
               isRefund: 0,
               createdAt: time,
               unitRate: ticketProductSend.unitRate,
@@ -559,7 +559,7 @@ export class TicketOrderDebtSuccessUpdate {
               batchId: Number(batchId),
               voucherId: ticketId,
               contactId: customerId,
-              voucherType,
+              voucherType: VoucherType.Ticket,
               isRefund: 1,
               createdAt: time,
               unitRate: ticketProductReturn.unitRate,
@@ -584,7 +584,7 @@ export class TicketOrderDebtSuccessUpdate {
               batchId: Number(batchId),
               voucherId: ticketId,
               contactId: customerId,
-              voucherType,
+              voucherType: VoucherType.Ticket,
               isRefund: 0,
               createdAt: time,
               unitRate: ticketProductSend.unitRate,

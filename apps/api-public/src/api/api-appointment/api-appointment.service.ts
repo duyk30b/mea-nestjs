@@ -5,7 +5,6 @@ import { AppointmentStatus } from '../../../../_libs/database/entities/appointme
 import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import { AppointmentRepository } from '../../../../_libs/database/repository/appointment/appointment.repository'
 import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
-import { TicketDiagnosisRepository } from '../../../../_libs/database/repository/ticket-diagnosis/ticket-diagnosis.repository'
 import { TicketRepository } from '../../../../_libs/database/repository/ticket/ticket-base/ticket.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
@@ -13,7 +12,7 @@ import {
   AppointmentGetManyQuery,
   AppointmentGetOneQuery,
   AppointmentPaginationQuery,
-  AppointmentRegisterTicketBody,
+  AppointmentRegisterTicketClinicBody,
   AppointmentUpdateBody,
 } from './request'
 
@@ -22,7 +21,6 @@ export class ApiAppointmentService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
     private readonly appointmentRepository: AppointmentRepository,
-    private readonly ticketDiagnosisRepository: TicketDiagnosisRepository,
     private readonly customerRepository: CustomerRepository,
     private readonly ticketRepository: TicketRepository
   ) { }
@@ -38,7 +36,6 @@ export class ApiAppointmentService {
         oid,
         customerId: filter?.customerId,
         appointmentStatus: filter?.appointmentStatus,
-        voucherType: filter?.voucherType,
         registeredAt: filter?.registeredAt,
       },
       sort,
@@ -57,7 +54,6 @@ export class ApiAppointmentService {
         oid,
         customerId: filter?.customerId,
         appointmentStatus: filter?.appointmentStatus,
-        voucherType: filter?.voucherType,
         registeredAt: filter?.registeredAt,
       },
       limit,
@@ -77,7 +73,6 @@ export class ApiAppointmentService {
     const appointment = await this.appointmentRepository.insertOneFullFieldAndReturnEntity({
       ...body,
       oid,
-      voucherType: body.voucherType,
       fromTicketId: body.fromTicketId,
       toTicketId: 0,
       cancelReason: '',
@@ -110,10 +105,10 @@ export class ApiAppointmentService {
     return { data: { appointmentId: id } }
   }
 
-  async registerTicket(options: {
+  async registerTicketClinic(options: {
     oid: number
     appointmentId: number
-    body: AppointmentRegisterTicketBody
+    body: AppointmentRegisterTicketClinicBody
   }): Promise<BaseResponse> {
     const { oid, appointmentId, body } = options
     const appointment = await this.appointmentRepository.findOneBy({ oid, id: appointmentId })
@@ -122,9 +117,9 @@ export class ApiAppointmentService {
     const ticket = await this.ticketRepository.insertOneAndReturnEntity({
       oid,
       customerId: customer.id,
-      voucherType: appointment.voucherType,
-      registeredAt: body.registeredAt,
       ticketStatus: TicketStatus.Schedule,
+      ticketType: body.ticketType,
+      registeredAt: body.registeredAt,
       note: appointment.reason,
     })
 
@@ -133,7 +128,8 @@ export class ApiAppointmentService {
     ticket.ticketProductList = []
     ticket.ticketProcedureList = []
     ticket.customerPaymentList = []
-    this.socketEmitService.ticketCreate(oid, { ticket })
+
+    this.socketEmitService.ticketClinicCreate(oid, { ticket })
 
     await this.appointmentRepository.updateAndReturnEntity(
       { oid, id: appointmentId },

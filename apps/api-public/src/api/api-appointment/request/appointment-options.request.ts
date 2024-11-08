@@ -3,8 +3,7 @@ import { IsBoolean, IsIn, IsOptional, ValidateNested } from 'class-validator'
 import { createConditionEnum, transformConditionEnum } from '../../../../../_libs/common/dto'
 import { ConditionTimestamp } from '../../../../../_libs/common/dto/condition-timestamp'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
-import { IsEnumValue, IsNumberGreaterThan } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { VoucherType } from '../../../../../_libs/database/common/variable'
+import { IsNumberGreaterThan } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { AppointmentStatus } from '../../../../../_libs/database/entities/appointment.entity'
 
 export class AppointmentRelationQuery {
@@ -19,10 +18,6 @@ export class AppointmentFilterQuery {
   @Expose()
   @IsNumberGreaterThan(0)
   customerId: number
-
-  @Expose()
-  @IsEnumValue(VoucherType)
-  voucherType: VoucherType
 
   @Expose()
   @Transform((params: TransformFnParams) => transformConditionEnum(params, AppointmentStatus))

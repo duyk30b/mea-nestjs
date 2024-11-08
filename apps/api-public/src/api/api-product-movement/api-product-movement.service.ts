@@ -45,20 +45,16 @@ export class ApiProductMovementService {
     const distributorIds = data
       .filter((i) => i.voucherType === VoucherType.Receipt)
       .map((i) => i.contactId)
-    const customerIds = data
-      .filter((i) => {
-        return [VoucherType.Order, VoucherType.Clinic, VoucherType.Eye].includes(i.voucherType)
-      })
-      .map((i) => i.contactId)
-
     const receiptIds = data
       .filter((i) => i.voucherType === VoucherType.Receipt)
       .map((i) => i.voucherId)
 
+    const customerIds = data
+      .filter((i) => i.voucherType === VoucherType.Ticket)
+      .map((i) => i.contactId)
+
     const ticketIds = data
-      .filter((i) => {
-        return [VoucherType.Order, VoucherType.Clinic, VoucherType.Eye].includes(i.voucherType)
-      })
+      .filter((i) => i.voucherType === VoucherType.Ticket)
       .map((i) => i.voucherId)
 
     const [distributorList, customerList, receiptList, ticketList] = await Promise.all([
@@ -81,7 +77,7 @@ export class ApiProductMovementService {
         mov.receipt = receiptList.find((rc) => rc.id === mov.voucherId)
         mov.distributor = distributorList.find((rc) => rc.id === mov.contactId)
       }
-      if ([VoucherType.Order, VoucherType.Clinic, VoucherType.Eye].includes(mov.voucherType)) {
+      if (mov.voucherType === VoucherType.Ticket) {
         mov.ticket = ticketList.find((iv) => iv.id === mov.voucherId)
         mov.customer = customerList.find((rc) => rc.id === mov.contactId)
       }

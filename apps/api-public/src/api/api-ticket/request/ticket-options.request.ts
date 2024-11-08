@@ -6,8 +6,7 @@ import {
   createConditionEnum,
   transformConditionEnum,
 } from '../../../../../_libs/common/dto'
-import { VoucherType } from '../../../../../_libs/database/common/variable'
-import { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
+import { TicketStatus, TicketType } from '../../../../../_libs/database/entities/ticket.entity'
 
 export class TicketRelationQuery {
   @Expose()
@@ -63,7 +62,7 @@ export class TicketRelationQuery {
   customerSource: boolean
 }
 
-const ConditionEnumVoucherType = createConditionEnum(VoucherType)
+const ConditionEnumTicketType = createConditionEnum(TicketType)
 const ConditionEnumTicketStatus = createConditionEnum(TicketStatus)
 
 export class TicketFilterQuery {
@@ -77,9 +76,9 @@ export class TicketFilterQuery {
   ticketStatus: TicketStatus | InstanceType<typeof ConditionEnumTicketStatus>
 
   @Expose()
-  @Transform((params: TransformFnParams) => transformConditionEnum(params, VoucherType))
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketType))
   @IsOptional()
-  voucherType: VoucherType | InstanceType<typeof ConditionEnumVoucherType>
+  ticketType: TicketType | InstanceType<typeof ConditionEnumTicketType>
 
   @Expose()
   @IsNumber()

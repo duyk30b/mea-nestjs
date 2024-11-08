@@ -9,14 +9,14 @@ export class ApiStatisticTicketService {
   constructor(private readonly statisticTicketRepository: StatisticTicketRepository) { }
 
   async statisticTicket(oid: number, query: StatisticTicketQuery): Promise<BaseResponse> {
-    const { fromTime, toTime, timeType, voucherType } = query
+    const { fromTime, toTime, timeType, ticketType } = query
 
     const data = await this.statisticTicketRepository.statisticTicket({
       oid,
       fromTime,
       toTime,
       timeType,
-      voucherType,
+      ticketType,
     })
     // tạo ra 1 dataMap có đầy đủ các giá trị = 0
     const dataMap: Record<string, (typeof data)[number]> = {}

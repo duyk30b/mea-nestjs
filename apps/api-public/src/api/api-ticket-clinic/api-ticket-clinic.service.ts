@@ -4,7 +4,6 @@ import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
-import { VoucherType } from '../../../../_libs/database/common/variable'
 import { TicketDiagnosis } from '../../../../_libs/database/entities'
 import { AppointmentStatus } from '../../../../_libs/database/entities/appointment.entity'
 import { TicketProductType } from '../../../../_libs/database/entities/ticket-product.entity'
@@ -78,7 +77,7 @@ export class ApiTicketClinicService {
     const ticket = await this.ticketRepository.insertOneAndReturnEntity({
       oid,
       customerId: body.customerId,
-      voucherType: body.voucherType,
+      ticketType: body.ticketType,
       registeredAt: body.registeredAt,
       note: body.reason,
       customerSourceId: body.customerSourceId,
@@ -101,16 +100,15 @@ export class ApiTicketClinicService {
         }
       )
     }
-    this.socketEmitService.ticketCreate(oid, { ticket })
+    this.socketEmitService.ticketClinicCreate(oid, { ticket })
     return { data: { ticket } }
   }
 
   async destroyDraftSchedule(params: {
     oid: number
     ticketId: number
-    voucherType: VoucherType
   }): Promise<BaseResponse> {
-    const { oid, ticketId, voucherType } = params
+    const { oid, ticketId } = params
     await this.ticketRepository.delete({
       oid,
       id: ticketId,
@@ -118,7 +116,7 @@ export class ApiTicketClinicService {
     })
     await this.ticketDiagnosisRepository.delete({ oid, ticketId })
     await this.ticketUserRepository.delete({ oid, ticketId })
-    this.socketEmitService.ticketDestroy(oid, { ticketId, voucherType })
+    this.socketEmitService.ticketClinicDestroy(oid, { ticketId })
     return { data: { ticketId } }
   }
 
@@ -136,7 +134,7 @@ export class ApiTicketClinicService {
       }
     )
     if (!ticketBasic) throw new BusinessException('error.Database.UpdateFailed')
-    this.socketEmitService.ticketUpdate(oid, { ticketBasic })
+    this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
     return { data: { ticketBasic } }
   }
 
@@ -209,9 +207,8 @@ export class ApiTicketClinicService {
     })
 
     const { special, ...ticketDiagnosisBasic } = ticketDiagnosis
-    this.socketEmitService.ticketUpdateTicketDiagnosisBasic(oid, {
+    this.socketEmitService.ticketClinicUpdateTicketDiagnosisBasic(oid, {
       ticketId: ticketDiagnosis.ticketId,
-      voucherType: ticket.voucherType,
       ticketDiagnosisBasic,
     })
     return { data: true }
@@ -258,10 +255,9 @@ export class ApiTicketClinicService {
       }
     }
 
-    this.socketEmitService.ticketUpdateTicketDiagnosisSpecial(oid, {
+    this.socketEmitService.ticketClinicUpdateTicketDiagnosisSpecial(oid, {
       ticketId: ticketDiagnosis.ticketId,
       special: ticketDiagnosis.special,
-      voucherType: ticket.voucherType,
     })
     return { data: true }
   }
@@ -280,10 +276,9 @@ export class ApiTicketClinicService {
 
     const { ticketBasic, ticketProcedureList } = result
 
-    this.socketEmitService.ticketUpdate(oid, { ticketBasic })
-    this.socketEmitService.ticketUpdateTicketProcedureList(oid, {
+    this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
+    this.socketEmitService.ticketClinicUpdateTicketProcedureList(oid, {
       ticketId,
-      voucherType: ticketBasic.voucherType,
       ticketProcedureList,
     })
 
@@ -312,10 +307,9 @@ export class ApiTicketClinicService {
 
     const { ticketBasic, ticketProductList } = result
 
-    this.socketEmitService.ticketUpdate(oid, { ticketBasic })
-    this.socketEmitService.ticketUpdateTicketProductConsumableList(oid, {
+    this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
+    this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
       ticketId,
-      voucherType: ticketBasic.voucherType,
       ticketProductConsumableList: ticketProductList.filter((i) => {
         return i.type === TicketProductType.Consumable
       }),
@@ -343,10 +337,9 @@ export class ApiTicketClinicService {
       const { ticketProductList } = result
       ticketBasic = result.ticketBasic
 
-      this.socketEmitService.ticketUpdate(oid, { ticketBasic })
-      this.socketEmitService.ticketUpdateTicketProductPrescriptionList(oid, {
+      this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
+      this.socketEmitService.ticketClinicUpdateTicketProductPrescriptionList(oid, {
         ticketId,
-        voucherType: ticketBasic.voucherType,
         ticketProductPrescriptionList: ticketProductList.filter((i) => {
           return i.type === TicketProductType.Prescription
         }),
@@ -363,9 +356,8 @@ export class ApiTicketClinicService {
       )
       const { special, ...ticketDiagnosisBasic } = ticketDiagnosis
 
-      this.socketEmitService.ticketUpdateTicketDiagnosisBasic(oid, {
+      this.socketEmitService.ticketClinicUpdateTicketDiagnosisBasic(oid, {
         ticketId,
-        voucherType: ticketBasic.voucherType,
         ticketDiagnosisBasic,
       })
     }
@@ -400,10 +392,9 @@ export class ApiTicketClinicService {
 
     const { ticketBasic, ticketRadiologyList } = result
 
-    this.socketEmitService.ticketUpdate(oid, { ticketBasic })
-    this.socketEmitService.ticketUpdateTicketRadiologyList(oid, {
+    this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
+    this.socketEmitService.ticketClinicUpdateTicketRadiologyList(oid, {
       ticketId,
-      voucherType: ticketBasic.voucherType,
       ticketRadiologyList,
     })
 
@@ -425,29 +416,25 @@ export class ApiTicketClinicService {
     })
 
     const { ticketBasic, ticketProductList, ticketProcedureList, ticketRadiologyList } = result
-    this.socketEmitService.ticketUpdate(oid, { ticketBasic })
-    this.socketEmitService.ticketUpdateTicketProductConsumableList(oid, {
+    this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
+    this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
       ticketId,
-      voucherType: ticketBasic.voucherType,
       ticketProductConsumableList: ticketProductList.filter((i) => {
         return i.type === TicketProductType.Consumable
       }),
     })
-    this.socketEmitService.ticketUpdateTicketProductPrescriptionList(oid, {
+    this.socketEmitService.ticketClinicUpdateTicketProductPrescriptionList(oid, {
       ticketId,
-      voucherType: ticketBasic.voucherType,
       ticketProductPrescriptionList: ticketProductList.filter((i) => {
         return i.type === TicketProductType.Prescription
       }),
     })
-    this.socketEmitService.ticketUpdateTicketProcedureList(oid, {
+    this.socketEmitService.ticketClinicUpdateTicketProcedureList(oid, {
       ticketId,
-      voucherType: ticketBasic.voucherType,
       ticketProcedureList,
     })
-    this.socketEmitService.ticketUpdateTicketRadiologyList(oid, {
+    this.socketEmitService.ticketClinicUpdateTicketRadiologyList(oid, {
       ticketId,
-      voucherType: ticketBasic.voucherType,
       ticketRadiologyList,
     })
     return { data: true }
@@ -466,23 +453,21 @@ export class ApiTicketClinicService {
       })
       this.socketEmitService.batchListUpdate(oid, { batchList })
       this.socketEmitService.productListUpdate(oid, { productList })
-      this.socketEmitService.ticketUpdate(oid, { ticketBasic })
+      this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
 
       const ticketProductList = await this.ticketProductRepository.findMany({
         relation: { product: true, batch: true },
         condition: { oid, ticketId },
         sort: { id: 'ASC' },
       })
-      this.socketEmitService.ticketUpdateTicketProductConsumableList(oid, {
+      this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
         ticketId,
-        voucherType: ticketBasic.voucherType,
         ticketProductConsumableList: ticketProductList.filter((i) => {
           return i.type === TicketProductType.Consumable
         }),
       })
-      this.socketEmitService.ticketUpdateTicketProductPrescriptionList(oid, {
+      this.socketEmitService.ticketClinicUpdateTicketProductPrescriptionList(oid, {
         ticketId,
-        voucherType: ticketBasic.voucherType,
         ticketProductPrescriptionList: ticketProductList.filter((i) => {
           return i.type === TicketProductType.Prescription
         }),
@@ -511,23 +496,21 @@ export class ApiTicketClinicService {
 
       this.socketEmitService.batchListUpdate(oid, { batchList })
       this.socketEmitService.productListUpdate(oid, { productList })
-      this.socketEmitService.ticketUpdate(oid, { ticketBasic })
+      this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
 
       const ticketProductList = await this.ticketProductRepository.findMany({
         relation: { product: true, batch: true },
         condition: { oid, ticketId },
         sort: { id: 'ASC' },
       })
-      this.socketEmitService.ticketUpdateTicketProductConsumableList(oid, {
+      this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
         ticketId,
-        voucherType: ticketBasic.voucherType,
         ticketProductConsumableList: ticketProductList.filter((i) => {
           return i.type === TicketProductType.Consumable
         }),
       })
-      this.socketEmitService.ticketUpdateTicketProductPrescriptionList(oid, {
+      this.socketEmitService.ticketClinicUpdateTicketProductPrescriptionList(oid, {
         ticketId,
-        voucherType: ticketBasic.voucherType,
         ticketProductPrescriptionList: ticketProductList.filter((i) => {
           return i.type === TicketProductType.Prescription
         }),
@@ -549,7 +532,7 @@ export class ApiTicketClinicService {
         money: body.money,
       })
 
-      this.socketEmitService.ticketUpdate(oid, { ticketBasic })
+      this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
       return { data: true }
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
@@ -565,7 +548,7 @@ export class ApiTicketClinicService {
         time: Date.now(),
         money: body.money,
       })
-      this.socketEmitService.ticketUpdate(oid, { ticketBasic })
+      this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
       return { data: { ticketBasic } }
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
@@ -581,7 +564,7 @@ export class ApiTicketClinicService {
         time: Date.now(),
         money: body.money,
       })
-      this.socketEmitService.ticketUpdate(oid, { ticketBasic })
+      this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
       if (customer) {
         this.socketEmitService.customerUpsert(oid, { customer })
       }
@@ -601,7 +584,7 @@ export class ApiTicketClinicService {
         money: 0,
       })
 
-      this.socketEmitService.ticketUpdate(oid, { ticketBasic })
+      this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
       if (customer) {
         this.socketEmitService.customerUpsert(oid, { customer })
       }
@@ -621,7 +604,7 @@ export class ApiTicketClinicService {
         description: '',
       })
 
-      this.socketEmitService.ticketUpdate(oid, { ticketBasic })
+      this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
       if (customer) {
         this.socketEmitService.customerUpsert(oid, { customer })
       }

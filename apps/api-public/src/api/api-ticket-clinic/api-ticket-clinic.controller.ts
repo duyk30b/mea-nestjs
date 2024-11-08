@@ -52,7 +52,6 @@ export class ApiTicketClinicController {
     return await this.apiTicketClinicService.destroyDraftSchedule({
       oid,
       ticketId: id,
-      voucherType: VoucherType.Clinic,
     })
   }
 
@@ -63,7 +62,7 @@ export class ApiTicketClinicController {
   }
 
   @Post(':id/update-diagnosis-basic')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_DIAGNOSIS_BASIC)
+  @HasPermission(PermissionId.TICKET_CLINIC_BASE_UPDATE_DIAGNOSIS)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FastifyFilesInterceptor('files', 10, {}))
   async updateDiagnosisBasic(

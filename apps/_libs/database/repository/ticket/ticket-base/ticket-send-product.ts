@@ -3,7 +3,7 @@ import { DataSource, FindOptionsWhere, In, MoreThan, UpdateResult } from 'typeor
 import { arrayToKeyValue } from '../../../../common/helpers/object.helper'
 import { DTimer } from '../../../../common/helpers/time.helper'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
-import { DeliveryStatus } from '../../../common/variable'
+import { DeliveryStatus, VoucherType } from '../../../common/variable'
 import {
   Batch,
   BatchMovement,
@@ -255,7 +255,7 @@ export class TicketSendProduct {
           productId: ticketProductSend.productId,
           voucherId: ticketId,
           contactId: ticket.customerId,
-          voucherType: ticket.voucherType,
+          voucherType: VoucherType.Ticket,
           isRefund: 0,
           createdAt: time,
           unitRate: ticketProductSend.unitRate,
@@ -297,7 +297,7 @@ export class TicketSendProduct {
             batchId: ticketProductSend.batchId,
             voucherId: ticketId,
             contactId: ticket.customerId,
-            voucherType: ticket.voucherType,
+            voucherType: VoucherType.Ticket,
             isRefund: 0,
             createdAt: time,
             unitRate: ticketProductSend.unitRate,

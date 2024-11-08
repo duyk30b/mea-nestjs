@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { DataSource, FindOptionsWhere, UpdateResult } from 'typeorm'
 import { arrayToKeyValue } from '../../../../common/helpers/object.helper'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
-import { DeliveryStatus } from '../../../common/variable'
+import { DeliveryStatus, VoucherType } from '../../../common/variable'
 import { Batch, Product, Ticket, TicketProduct } from '../../../entities'
 import BatchMovement, { BatchMovementInsertType } from '../../../entities/batch-movement.entity'
 import ProductMovement, {
@@ -264,7 +264,7 @@ export class TicketClinicReturnProduct {
           productId: ticketProductActioned.productId,
           voucherId: ticketId,
           contactId: ticket.customerId,
-          voucherType: ticket.voucherType,
+          voucherType: VoucherType.Ticket,
           isRefund: 1,
           createdAt: time,
           unitRate: ticketProductActioned.unitRate,
@@ -308,7 +308,7 @@ export class TicketClinicReturnProduct {
             batchId: ticketProductActioned.batchId,
             voucherId: ticketId,
             contactId: ticket.customerId,
-            voucherType: ticket.voucherType,
+            voucherType: VoucherType.Ticket,
             isRefund: 1,
             createdAt: time,
             unitRate: ticketProductActioned.unitRate,

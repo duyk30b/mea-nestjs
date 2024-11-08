@@ -14,7 +14,7 @@ export type TicketOrderDraftInsertType = Omit<
     Ticket,
     | 'oid'
     | 'id'
-    | 'voucherType'
+    | 'ticketType'
     | 'ticketStatus'
     | 'deliveryStatus'
     | 'procedureStatus'
@@ -38,7 +38,7 @@ export type TicketOrderDraftApprovedUpdateType = Omit<
     | 'oid'
     | 'id'
     | 'customerId' // không được update customerId
-    | 'voucherType'
+    | 'ticketType'
     | 'ticketStatus'
     | 'deliveryStatus'
     | 'procedureStatus'
@@ -62,7 +62,7 @@ export type TicketOrderDebtSuccessUpdateType = Omit<
     | 'oid'
     | 'id'
     | 'customerId' // không được update customerId
-    | 'voucherType'
+    | 'ticketType'
     | 'ticketStatus'
     | 'deliveryStatus'
     | 'procedureStatus'

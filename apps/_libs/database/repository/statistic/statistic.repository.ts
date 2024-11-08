@@ -61,7 +61,7 @@ export class StatisticRepository {
     let query = this.manager
       .createQueryBuilder(ProductMovement, 'productMovement')
       .where('"productMovement".oid = :oid', { oid })
-      .andWhere(`"productMovement"."voucherType" IN (${VoucherType.Order}, ${VoucherType.Clinic})`)
+      .andWhere(`"productMovement"."voucherType" IN (${VoucherType.Ticket})`)
       .andWhere('"productMovement"."createdAt" BETWEEN :fromTime AND :toTime', { fromTime, toTime })
       .groupBy('"productMovement"."productId"')
       .select('"productMovement"."productId"', 'productId')

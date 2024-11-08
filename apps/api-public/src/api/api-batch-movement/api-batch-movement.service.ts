@@ -24,7 +24,7 @@ export class ApiBatchMovementService {
     private readonly ticketRepository: TicketRepository,
     private readonly customerRepository: CustomerRepository,
     private readonly distributorRepository: DistributorRepository
-  ) {}
+  ) { }
 
   async pagination(oid: number, query: BatchMovementPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, sort, relation } = query
@@ -52,10 +52,10 @@ export class ApiBatchMovementService {
       .filter((i) => i.voucherType === VoucherType.Receipt)
       .map((i) => i.voucherId)
     const customerIds = data
-      .filter((i) => i.voucherType === VoucherType.Order || i.voucherType === VoucherType.Clinic)
+      .filter((i) => i.voucherType === VoucherType.Ticket)
       .map((i) => i.contactId)
     const ticketIds = data
-      .filter((i) => i.voucherType === VoucherType.Order || i.voucherType === VoucherType.Clinic)
+      .filter((i) => i.voucherType === VoucherType.Ticket)
       .map((i) => i.voucherId)
 
     const [distributorList, receiptList, customerList, ticketList] = await Promise.all([
@@ -78,7 +78,7 @@ export class ApiBatchMovementService {
         mov.distributor = distributorList.find((rc) => rc.id === mov.contactId)
         mov.receipt = receiptList.find((rc) => rc.id === mov.voucherId)
       }
-      if (mov.voucherType === VoucherType.Order || mov.voucherType === VoucherType.Clinic) {
+      if (mov.voucherType === VoucherType.Ticket) {
         mov.ticket = ticketList.find((iv) => iv.id === mov.voucherId)
         mov.customer = customerList.find((rc) => rc.id === mov.contactId)
       }

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager, FindOptionsWhere, In, InsertResult } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
-import { DeliveryStatus, VoucherType } from '../../../common/variable'
+import { DeliveryStatus } from '../../../common/variable'
 import {
   Ticket,
   TicketExpense,
@@ -18,7 +18,7 @@ import {
 import { TicketProductInsertType, TicketProductType } from '../../../entities/ticket-product.entity'
 import { TicketRadiologyStatus } from '../../../entities/ticket-radiology.entity'
 import { TicketSurchargeInsertType } from '../../../entities/ticket-surcharge.entity'
-import { TicketInsertType, TicketStatus } from '../../../entities/ticket.entity'
+import { TicketInsertType, TicketStatus, TicketType } from '../../../entities/ticket.entity'
 import {
   TicketOrderDraftInsertType,
   TicketOrderExpenseDraftType,
@@ -63,7 +63,7 @@ export class TicketOrderDraft {
           ? TicketProcedureStatus.Completed
           : TicketProcedureStatus.Empty,
         radiologyStatus: TicketRadiologyStatus.Empty,
-        voucherType: VoucherType.Order,
+        ticketType: TicketType.Order,
         paid: 0,
         debt: ticketOrderDraftInsert.totalMoney,
         year: 0,
@@ -160,7 +160,7 @@ export class TicketOrderDraft {
     const whereTicket: FindOptionsWhere<Ticket> = {
       id: ticketId,
       oid,
-      voucherType: VoucherType.Order,
+      ticketType: TicketType.Order,
       ticketStatus: In([TicketStatus.Schedule, TicketStatus.Draft]),
       deliveryStatus: In([DeliveryStatus.NoStock, DeliveryStatus.Pending]),
     }

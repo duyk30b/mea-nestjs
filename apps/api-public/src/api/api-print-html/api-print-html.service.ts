@@ -59,7 +59,6 @@ export class ApiPrintHtmlService {
         updatedAt: filter?.updatedAt,
       },
     })
-    if (!print) throw new BusinessException('error.Database.NotFound')
     return { data: { print } }
   }
 

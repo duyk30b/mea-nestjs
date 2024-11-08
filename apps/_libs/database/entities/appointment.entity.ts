@@ -1,7 +1,6 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { VoucherType } from '../common/variable'
 import CustomerSource from './customer-source.entity'
 import Customer from './customer.entity'
 
@@ -48,10 +47,6 @@ export default class Appointment extends BaseEntity {
   @Column({ type: 'character varying', length: 255, nullable: true })
   @Expose()
   cancelReason: string // Lý do hẹn
-
-  @Column({ type: 'smallint', default: VoucherType.Clinic })
-  @Expose()
-  voucherType: VoucherType
 
   @Column({ type: 'smallint', default: AppointmentStatus.Waiting })
   @Expose()
