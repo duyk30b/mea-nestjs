@@ -310,22 +310,35 @@ export default class Ticket extends BaseEntity {
   }
 }
 
-export type TicketRelationType = Pick<
-  Ticket,
-  | 'customer'
-  | 'ticketDiagnosis'
-  | 'ticketProductList'
-  | 'ticketProductConsumableList'
-  | 'ticketProductPrescriptionList'
-  | 'ticketProcedureList'
-  | 'ticketRadiologyList'
-  | 'ticketExpenseList'
-  | 'ticketSurchargeList'
-  | 'ticketUserList'
-  | 'customerPaymentList'
-  | 'toAppointment'
-  | 'customerSource'
->
+export type TicketRelationType = {
+  [P in keyof Pick<
+    Ticket,
+    | 'customer'
+    | 'ticketDiagnosis'
+    | 'ticketExpenseList'
+    | 'ticketSurchargeList'
+    | 'customerPaymentList'
+    | 'toAppointment'
+    | 'customerSource'
+  >]?: boolean
+} & {
+  [P in keyof Pick<
+    Ticket,
+    'ticketProductList' | 'ticketProductConsumableList' | 'ticketProductPrescriptionList'
+  >]?: { [P in keyof Pick<TicketProduct, 'product' | 'batch'>]?: boolean } | false
+} & {
+  [P in keyof Pick<Ticket, 'ticketProcedureList'>]?:
+  | { [P in keyof Pick<TicketProcedure, 'procedure'>]?: boolean }
+  | false
+} & {
+  [P in keyof Pick<Ticket, 'ticketRadiologyList'>]?:
+  | { [P in keyof Pick<TicketRadiology, 'radiology'>]?: boolean }
+  | false
+} & {
+  [P in keyof Pick<Ticket, 'ticketUserList'>]?:
+  | { [P in keyof Pick<TicketUser, 'user'>]?: boolean }
+  | false
+}
 
 export type TicketSortType = Pick<Ticket, 'id' | 'customerId' | 'registeredAt'>
 

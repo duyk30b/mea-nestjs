@@ -5,7 +5,7 @@ import { TicketProductPaginationQuery } from './request'
 
 @Injectable()
 export class ApiTicketProductService {
-  constructor(private readonly ticketProductRepository: TicketProductRepository) {}
+  constructor(private readonly ticketProductRepository: TicketProductRepository) { }
 
   async pagination(oid: number, query: TicketProductPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, relation, sort } = query
@@ -20,6 +20,7 @@ export class ApiTicketProductService {
         productId: filter?.productId,
         batchId: filter?.batchId,
         ticketId: filter?.ticketId,
+        deliveryStatus: filter?.deliveryStatus,
       },
       sort,
     })

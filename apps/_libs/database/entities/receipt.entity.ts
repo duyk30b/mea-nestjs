@@ -113,17 +113,6 @@ export default class Receipt extends BaseEntity {
   @Expose()
   endedAt: number
 
-  @Column({
-    type: 'bigint',
-    nullable: true,
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
-  @Expose()
-  deletedAt: number
-
   @Expose()
   @OneToMany(() => ReceiptItem, (receiptItem) => receiptItem.receipt)
   receiptItems: ReceiptItem[]
@@ -153,7 +142,6 @@ export default class Receipt extends BaseEntity {
 
     entity.startedAt = raw.startedAt == null ? raw.startedAt : Number(raw.startedAt)
     entity.endedAt = raw.endedAt == null ? raw.endedAt : Number(raw.endedAt)
-    entity.deletedAt = raw.deletedAt == null ? raw.deletedAt : Number(raw.deletedAt)
 
     return entity
   }
@@ -163,17 +151,23 @@ export default class Receipt extends BaseEntity {
   }
 }
 
-export type ReceiptRelationType = Pick<
-  Receipt,
-  'distributor' | 'receiptItems' | 'distributorPayments'
->
+export type ReceiptRelationType = {
+  [P in keyof Pick<Receipt, 'distributor' | 'distributorPayments'>]?: boolean
+} & {
+  [P in keyof Pick<
+    Receipt,
+    'receiptItems'
+  >]?: { [P in keyof Pick<ReceiptItem, 'product' | 'batch'>]?: boolean } | false
+}
+
+export type ReceiptSortType = Pick<Receipt, 'id' | 'distributorId' | 'startedAt'>
 
 export type ReceiptInsertType = Omit<
   Receipt,
-  keyof ReceiptRelationType | keyof Pick<Receipt, 'id' | 'deletedAt'>
+  keyof ReceiptRelationType | keyof Pick<Receipt, 'id'>
 >
 
 export type ReceiptUpdateType = Omit<
   Receipt,
-  keyof ReceiptRelationType | keyof Pick<Receipt, 'id' | 'oid' | 'distributorId' | 'deletedAt'>
+  keyof ReceiptRelationType | keyof Pick<Receipt, 'id' | 'oid' | 'distributorId'>
 >

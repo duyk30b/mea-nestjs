@@ -9,6 +9,7 @@ import { ApiDistributorPaymentModule } from './api-distributor-payment/api-distr
 import { ApiDistributorModule } from './api-distributor/api-distributor.module'
 import { ApiOrganizationModule } from './api-organization/api-organization.module'
 import { ApiPermissionModule } from './api-permission/api-permission.module'
+import { ApiPrintHtmlModule } from './api-print-html/api-print-html.module'
 import { ApiProcedureGroupModule } from './api-procedure-group/api-procedure-group.module'
 import { ApiProcedureModule } from './api-procedure/api-procedure.module'
 import { ApiProductGroupModule } from './api-product-group/api-product-group.module'
@@ -58,6 +59,7 @@ import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
     ApiProductGroupModule,
     ApiProcedureGroupModule,
     ApiRadiologyGroupModule,
+    ApiPrintHtmlModule,
 
     ApiTicketModule,
     ApiTicketOrderModule,

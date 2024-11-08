@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
-import { DataSource, EntityManager, FindOptionsWhere, In, IsNull } from 'typeorm'
+import { DataSource, EntityManager, FindOptionsWhere, In } from 'typeorm'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { ReceiptStatus } from '../../common/variable'
 import { Receipt, ReceiptItem } from '../../entities'
@@ -55,7 +55,7 @@ export class ReceiptDraft {
     })
   }
 
-  async updateReceiptDraftAndReceiptPrepayment<
+  async updateDraftPrepayment<
     T extends ReceiptDraftUpdateType,
     X extends ReceiptItemDraftType,
   >(params: {
@@ -125,22 +125,5 @@ export class ReceiptDraft {
       }
       await manager.delete(ReceiptItem, { oid, receiptId })
     })
-  }
-
-  async softDeleteCancel(params: { oid: number; receiptId: number }) {
-    const { oid, receiptId } = params
-    const receiptUpdateResult = await this.manager.update(
-      Receipt,
-      {
-        id: receiptId,
-        oid,
-        status: ReceiptStatus.Cancelled,
-        deletedAt: IsNull(),
-      },
-      { deletedAt: Date.now() }
-    )
-    if (receiptUpdateResult.affected !== 1) {
-      throw new Error(`Delete Receipt ${receiptId} failed: Status invalid`)
-    }
   }
 }

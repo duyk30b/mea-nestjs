@@ -1,6 +1,5 @@
-import { OmitType } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsNumber, IsString, ValidateNested } from 'class-validator'
+import { IsBoolean, IsIn, IsNumber, ValidateNested } from 'class-validator'
 import { ConditionString } from '../../../../../_libs/common/dto'
 import { ConditionNumber } from '../../../../../_libs/common/dto/condition-number'
 import { ConditionTimestamp } from '../../../../../_libs/common/dto/condition-timestamp'

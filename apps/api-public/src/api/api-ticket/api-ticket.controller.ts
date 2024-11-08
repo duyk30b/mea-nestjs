@@ -9,7 +9,7 @@ import {
   TicketGetManyQuery,
   TicketGetOneQuery,
   TicketPaginationQuery,
-} from './request-basic/ticket-get.query'
+} from './request'
 
 @ApiTags('Ticket')
 @ApiBearerAuth('access-token')

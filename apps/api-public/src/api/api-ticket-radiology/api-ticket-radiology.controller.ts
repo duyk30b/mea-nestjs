@@ -32,7 +32,7 @@ export class ApiTicketRadiologyController {
     return await this.apiTicketRadiologyService.getOne(oid, id, query)
   }
 
-  @Post(':id/create-completed')
+  @Post('create-completed')
   @HasPermission(PermissionId.TICKET_RADIOLOGY_CREATE)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FastifyFilesInterceptor('files', 10, {}))

@@ -86,7 +86,9 @@ export default class ReceiptItem extends BaseEntity {
   unitRate: number
 
   @Expose()
-  @ManyToOne((type) => Receipt, { createForeignKeyConstraints: false })
+  @ManyToOne((type) => Receipt, (receipt) => receipt.receiptItems, {
+    createForeignKeyConstraints: false,
+  })
   @JoinColumn({ name: 'receiptId', referencedColumnName: 'id' })
   receipt: Receipt
 

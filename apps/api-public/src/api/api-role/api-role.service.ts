@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { RoleRepository } from '../../../../_libs/database/repository/role/role.repository'
@@ -12,7 +13,10 @@ import {
 
 @Injectable()
 export class ApiRoleService {
-  constructor(private readonly roleRepository: RoleRepository) { }
+  constructor(
+    private readonly roleRepository: RoleRepository,
+    private readonly cacheDataService: CacheDataService
+  ) { }
 
   async pagination(oid: number, query: RolePaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, sort, relation } = query
@@ -60,6 +64,7 @@ export class ApiRoleService {
       ...body,
       oid,
     })
+    this.cacheDataService.clearUserAndRole(oid)
     return { data: { role } }
   }
 
@@ -68,6 +73,7 @@ export class ApiRoleService {
     if (!role) {
       throw new BusinessException('error.Database.UpdateFailed')
     }
+    this.cacheDataService.clearUserAndRole(oid)
     return { data: { role } }
   }
 
@@ -76,6 +82,7 @@ export class ApiRoleService {
     if (affected === 0) {
       throw new BusinessException('error.Database.DeleteFailed')
     }
+    this.cacheDataService.clearUserAndRole(oid)
     return { data: { roleId: id } }
   }
 }

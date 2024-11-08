@@ -125,7 +125,7 @@ export class TicketOrderCancel {
           where: {
             oid,
             ticketId,
-            deliveryStatus: DeliveryStatus.Delivered,
+            deliveryStatus: DeliveryStatus.Cancelled,
           },
         })
         const ticketProductMap = arrayToKeyValue(ticketProductList, 'id')

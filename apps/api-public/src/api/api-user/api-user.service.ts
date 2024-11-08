@@ -110,11 +110,6 @@ export class ApiUserService {
 
   async createOne(oid: number, body: UserCreateBody): Promise<BaseResponse> {
     const { username, password, roleIdList, ...other } = body
-    console.log('🚀 ~ file: api-user.service.ts:109 ~ ApiUserService ~ createOne ~ body:', body)
-    console.log(
-      '🚀 ~ file: api-user.service.ts:109 ~ ApiUserService ~ createOne ~ roleIdList:',
-      roleIdList
-    )
     const existUser = await this.userRepository.findOneBy({
       oid,
       username,
@@ -150,7 +145,7 @@ export class ApiUserService {
       }))
     )
 
-    this.cacheDataService.updateUser(user)
+    this.cacheDataService.clearUserAndRole(user.oid)
     return { data: { user } }
   }
 
@@ -179,7 +174,7 @@ export class ApiUserService {
       }))
     )
 
-    this.cacheDataService.updateUser(user)
+    this.cacheDataService.clearUserAndRole(user.oid)
     return { data: { user } }
   }
 
@@ -203,7 +198,7 @@ export class ApiUserService {
     if (!user) {
       throw new BusinessException('error.Database.DeleteFailed')
     }
-    this.cacheDataService.updateUser(user)
+    this.cacheDataService.clearUserAndRole(user.oid)
     return { data: { userId: id } }
   }
 

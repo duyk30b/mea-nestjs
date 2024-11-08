@@ -9,7 +9,7 @@ import {
   TicketGetManyQuery,
   TicketGetOneQuery,
   TicketPaginationQuery,
-} from './request-basic/ticket-get.query'
+} from './request'
 
 @Injectable()
 export class ApiTicketService {
@@ -78,16 +78,12 @@ export class ApiTicketService {
         ticketExpenseList: !!relation?.ticketExpenseList,
         ticketDiagnosis: !!relation?.ticketDiagnosis,
         toAppointment: !!relation?.toAppointment,
-        ticketProductList: relation?.ticketProductList ? { product: true, batch: true } : false,
-        ticketProductConsumableList: relation?.ticketProductConsumableList
-          ? { product: true, batch: true }
-          : false,
-        ticketProductPrescriptionList: relation?.ticketProductPrescriptionList
-          ? { product: true, batch: true }
-          : false,
-        ticketProcedureList: relation?.ticketProcedureList ? { procedure: true } : false,
-        ticketRadiologyList: relation?.ticketRadiologyList ? { radiology: true } : false,
-        ticketUserList: relation?.ticketUserList ? { user: true } : false,
+        ticketProductList: relation?.ticketProductList,
+        ticketProductConsumableList: relation?.ticketProductConsumableList,
+        ticketProductPrescriptionList: relation?.ticketProductPrescriptionList,
+        ticketProcedureList: relation?.ticketProcedureList,
+        ticketRadiologyList: relation?.ticketRadiologyList,
+        ticketUserList: relation?.ticketUserList,
       },
     })
     if (!ticket) {

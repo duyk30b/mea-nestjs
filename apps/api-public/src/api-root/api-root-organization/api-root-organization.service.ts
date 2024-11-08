@@ -36,6 +36,7 @@ import {
   TicketUser,
   User,
 } from '../../../../_libs/database/entities'
+import UserRole from '../../../../_libs/database/entities/user-role.entity'
 import { OrganizationRepository } from '../../../../_libs/database/repository/organization/organization.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import { RootOrganizationPaginationQuery } from './request/root-organization-get.query'
@@ -79,7 +80,7 @@ export class ApiRootOrganizationService {
       emailVerify: 0,
       logoImageId: 0,
     })
-    this.cacheDataService.updateOrganization(organization)
+    this.cacheDataService.updateOrganizationInfo(organization)
     return { data: { organization } }
   }
 
@@ -95,7 +96,7 @@ export class ApiRootOrganizationService {
     if (!organization) {
       throw new BusinessException('error.Database.UpdateFailed')
     }
-    this.cacheDataService.updateOrganization(organization)
+    this.cacheDataService.updateOrganizationInfo(organization)
     return { data: { organization } }
   }
 
@@ -105,28 +106,33 @@ export class ApiRootOrganizationService {
     await this.manager.delete(Batch, { oid })
     await this.manager.delete(CustomerPayment, { oid })
     // await this.manager.delete(CustomerSource, { oid })
-    await this.manager.delete(Customer, { oid })
+    await this.manager.update(Customer, { oid }, { debt: 0 })
     await this.manager.delete(DistributorPayment, { oid })
-    await this.manager.delete(Distributor, { oid })
+    await this.manager.update(Distributor, { oid }, { debt: 0 })
     await this.manager.update(Image, { oid }, { waitDelete: 1 }) // TODO
     // await this.manager.delete(ProcedureGroup, { oid })
     // await this.manager.delete(Procedure, { oid })
     // await this.manager.delete(ProductGroup, { oid })
     await this.manager.delete(ProductMovement, { oid })
-    await this.manager.delete(Product, { oid })
+    await this.manager.update(Product, { oid }, { quantity: 0, costAmount: 0 })
     // await this.manager.delete(RadiologyGroup, { oid })
     // await this.manager.delete(Radiology, { oid })
     await this.manager.delete(ReceiptItem, { oid })
     await this.manager.delete(Receipt, { oid })
-    await this.manager.delete(Setting, { oid })
+    // await this.manager.delete(Role, { oid })
+
+    // await this.manager.delete(Setting, { oid })
     await this.manager.delete(TicketDiagnosis, { oid })
     await this.manager.delete(TicketExpense, { oid })
-    await this.manager.delete(TicketProcedure, { oid })
-    await this.manager.delete(TicketProduct, { oid })
-    await this.manager.delete(TicketRadiology, { oid })
     await this.manager.delete(TicketSurcharge, { oid })
+    await this.manager.delete(TicketProduct, { oid })
+    await this.manager.delete(TicketProcedure, { oid })
+    await this.manager.delete(TicketRadiology, { oid })
     await this.manager.delete(TicketUser, { oid })
     await this.manager.delete(Ticket, { oid })
+
+    // await this.manager.delete(User, { oid })
+    // await this.manager.delete(UserRole, { oid })
 
     if (oid != 1) {
       await this.manager.delete(Radiology, { oid })
@@ -140,7 +146,7 @@ export class ApiRootOrganizationService {
     if (!organization) {
       throw new BusinessException('error.Database.UpdateFailed')
     }
-    this.cacheDataService.updateOrganization(organization)
+    this.cacheDataService.clearOrganization(organization.id)
     this.socketEmitService.organizationUpdate(organization.id, { organization })
     return { data: { oid } }
   }

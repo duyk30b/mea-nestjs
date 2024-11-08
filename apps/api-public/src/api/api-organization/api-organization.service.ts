@@ -22,7 +22,7 @@ export class ApiOrganizationService {
 
   async getInfo(oid: number): Promise<BaseResponse> {
     const organization = await this.organizationRepository.findOneById(oid)
-    this.cacheDataService.updateOrganization(organization)
+    this.cacheDataService.updateOrganizationInfo(organization)
     return { data: { organization } }
   }
 
@@ -34,7 +34,7 @@ export class ApiOrganizationService {
     if (!organization) {
       throw new BusinessException('error.Database.UpdateFailed')
     }
-    this.cacheDataService.updateOrganization(organization)
+    this.cacheDataService.updateOrganizationInfo(organization)
     return { data: { organization } }
   }
 
@@ -62,7 +62,7 @@ export class ApiOrganizationService {
     if (!organization) {
       throw new BusinessException('error.Database.UpdateFailed')
     }
-    this.cacheDataService.updateOrganization(organization)
+    this.cacheDataService.updateOrganizationInfo(organization)
     await this.sendEmailVerifyOrganizationEmail(oid)
     return { data: { organization } }
   }
@@ -109,7 +109,7 @@ export class ApiOrganizationService {
       { id: query.oid },
       { emailVerify: 1 }
     )
-    this.cacheDataService.updateOrganization(organization)
+    this.cacheDataService.updateOrganizationInfo(organization)
     return { data: { organization } }
   }
 }

@@ -1,6 +1,8 @@
-import { Expose } from 'class-transformer'
-import { IsBoolean, IsInt } from 'class-validator'
+import { Expose, Transform, TransformFnParams } from 'class-transformer'
+import { IsBoolean, IsInt, IsOptional } from 'class-validator'
+import { createConditionEnum, transformConditionEnum } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
+import { DeliveryStatus } from '../../../../../_libs/database/common/variable'
 
 export class TicketProductRelationQuery {
   @Expose()
@@ -20,6 +22,8 @@ export class TicketProductRelationQuery {
   customer: boolean
 }
 
+const ConditionEnumDeliveryStatus = createConditionEnum(DeliveryStatus)
+
 export class TicketProductFilterQuery {
   @Expose()
   @IsInt()
@@ -36,6 +40,11 @@ export class TicketProductFilterQuery {
   @Expose()
   @IsInt()
   ticketId: number
+
+  @Expose()
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, DeliveryStatus))
+  @IsOptional()
+  deliveryStatus: DeliveryStatus | InstanceType<typeof ConditionEnumDeliveryStatus>
 }
 
-export class TicketProductSortQuery extends SortQuery {}
+export class TicketProductSortQuery extends SortQuery { }

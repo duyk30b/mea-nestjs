@@ -27,7 +27,7 @@ import { PostgreSqlRepository } from '../../postgresql.repository'
 export class TicketRepository extends PostgreSqlRepository<
   Ticket,
   { [P in keyof TicketSortType]?: 'ASC' | 'DESC' },
-  { [P in keyof TicketRelationType]?: boolean },
+  TicketRelationType,
   TicketInsertType,
   TicketUpdateType
 > {
@@ -41,21 +41,7 @@ export class TicketRepository extends PostgreSqlRepository<
 
   async queryOne(options: {
     condition: { id: number; oid: number }
-    relation?: {
-      customer?: boolean
-      user?: boolean
-      customerPaymentList?: boolean
-      ticketDiagnosis?: boolean
-      toAppointment?: boolean
-      ticketProductList?: { product?: boolean; batch?: boolean } | false
-      ticketProductConsumableList?: { product?: boolean; batch?: boolean } | false
-      ticketProductPrescriptionList?: { product?: boolean; batch?: boolean } | false
-      ticketProcedureList?: { procedure?: boolean } | false
-      ticketRadiologyList?: { radiology?: boolean } | false
-      ticketUserList?: { user?: boolean } | false
-      ticketExpenseList?: boolean
-      ticketSurchargeList?: boolean
-    }
+    relation?: TicketRelationType
   }): Promise<Ticket | null> {
     const { condition, relation } = options
     let query = this.manager
@@ -64,7 +50,6 @@ export class TicketRepository extends PostgreSqlRepository<
       .andWhere('ticket.oid = :oid', { oid: condition.oid })
 
     if (relation?.customer) query = query.leftJoinAndSelect('ticket.customer', 'customer')
-    if (relation?.user) query = query.leftJoinAndSelect('ticket.user', 'user')
     if (relation?.customerPaymentList) {
       query = query.leftJoinAndSelect('ticket.customerPaymentList', 'customerPayment')
       query.addOrderBy('customerPayment.id', 'ASC')

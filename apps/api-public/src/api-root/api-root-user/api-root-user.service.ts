@@ -7,7 +7,6 @@ import { encrypt } from '../../../../_libs/common/helpers/string.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { User } from '../../../../_libs/database/entities'
 import Device from '../../../../_libs/database/entities/device'
-import { RoleRepository } from '../../../../_libs/database/repository/role/role.repository'
 import { UserRepository } from '../../../../_libs/database/repository/user/user.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import { RootUserPaginationQuery } from './request/root-user-get.query'
@@ -21,8 +20,7 @@ export class ApiRootUserService {
     private readonly socketEmitService: SocketEmitService,
     private readonly cacheTokenService: CacheTokenService,
     private readonly cacheDataService: CacheDataService,
-    private readonly userRepository: UserRepository,
-    private readonly roleRepository: RoleRepository
+    private readonly userRepository: UserRepository
   ) { }
 
   async pagination(query: RootUserPaginationQuery): Promise<BaseResponse> {
@@ -85,7 +83,7 @@ export class ApiRootUserService {
       secret,
       hashPassword,
     })
-
+    this.cacheDataService.clearUserAndRole(user.oid)
     return { data: { user } }
   }
 
@@ -111,7 +109,7 @@ export class ApiRootUserService {
     if (!user) {
       throw new BusinessException('error.Database.UpdateFailed')
     }
-    this.cacheDataService.updateUser(user)
+    this.cacheDataService.clearUserAndRole(user.oid)
     return { data: { user } }
   }
 
@@ -123,7 +121,7 @@ export class ApiRootUserService {
     if (!user) {
       throw new BusinessException('error.Database.DeleteFailed')
     }
-    this.cacheDataService.updateUser(user)
+    this.cacheDataService.clearUserAndRole(user.oid)
     return { data: { userId: user.id } }
   }
 

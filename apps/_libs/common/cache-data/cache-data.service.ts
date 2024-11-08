@@ -153,34 +153,17 @@ export class CacheDataService {
     return Object.values(map)
   }
 
-  updateOrganization(organization: Organization) {
+  updateOrganizationInfo(organization: Organization) {
     const oid = organization.id
     if (!this.orgCache[oid]) this.orgCache[oid] = {}
     this.orgCache[oid].organization = organization
   }
 
-  updateUser(user: User) {
-    const oid = user.oid
-    if (!this.orgCache[oid]) this.orgCache[oid] = {}
-    if (!this.orgCache[oid].userMap) this.orgCache[oid].userMap = {}
-    this.orgCache[oid].userMap[user.id] = user
-  }
-
-  updateRole(role: Role) {
-    const oid = role.oid
-    if (!this.orgCache[oid]) this.orgCache[oid] = {}
-    if (!this.orgCache[oid].roleMap) this.orgCache[oid].roleMap = {}
-    this.orgCache[oid].roleMap[role.id] = role
-  }
-
-  clearUser(oid: number) {
+  clearUserAndRole(oid: number) {
     if (!this.orgCache[oid]) this.orgCache[oid] = {}
     this.orgCache[oid].userMap = {}
-  }
-
-  clearRole(oid: number) {
-    if (!this.orgCache[oid]) this.orgCache[oid] = {}
     this.orgCache[oid].roleMap = {}
+    this.orgCache[oid].userRoleList = null
   }
 
   clearOrganization(oid: number) {

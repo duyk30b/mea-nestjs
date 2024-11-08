@@ -12,6 +12,7 @@ import {
   Image,
   Organization,
   Permission,
+  PrintHtml,
   Procedure,
   ProcedureGroup,
   Product,
@@ -46,6 +47,7 @@ import { DistributorRepository } from './distributor/distributor.repository'
 import { ImageRepository } from './image/image.repository'
 import { OrganizationRepository } from './organization/organization.repository'
 import { PermissionRepository } from './permission/permission.repository'
+import { PrintHtmlRepository } from './print-html/print-html.repository'
 import { ProcedureGroupRepository } from './procedure-group/procedure-group.repository'
 import { ProcedureRepository } from './procedure/procedure.repository'
 import { ProductGroupRepository } from './product-group/product-group.repository'
@@ -132,6 +134,7 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
       ProductGroup,
       ProcedureGroup,
       RadiologyGroup,
+      PrintHtml,
     ]),
   ],
   providers: [
@@ -167,6 +170,7 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
     ProductGroupRepository,
     ProcedureGroupRepository,
     RadiologyGroupRepository,
+    PrintHtmlRepository,
 
     TicketClinicUpdateTicketProcedureList,
     TicketClinicUpdateTicketRadiologyList,
@@ -231,6 +235,7 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
     ProductGroupRepository,
     ProcedureGroupRepository,
     RadiologyGroupRepository,
+    PrintHtmlRepository,
 
     TicketClinicUpdateTicketProcedureList,
     TicketClinicUpdateTicketRadiologyList,
