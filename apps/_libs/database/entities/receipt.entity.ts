@@ -87,7 +87,7 @@ export default class Receipt extends BaseEntity {
   @Expose()
   debt: number // tiền nợ
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   note: string // Ghi chú
 

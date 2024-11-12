@@ -49,7 +49,7 @@ export default class Setting {
   @Expose()
   id: number
 
-  @Column({ type: 'character varying', length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   @Expose()
   key: SettingKey
 

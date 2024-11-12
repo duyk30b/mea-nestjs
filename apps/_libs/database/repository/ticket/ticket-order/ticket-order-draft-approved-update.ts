@@ -13,9 +13,8 @@ import {
 import { TicketExpenseInsertType } from '../../../entities/ticket-expense.entity'
 import { TicketProcedureInsertType, TicketProcedureStatus } from '../../../entities/ticket-procedure.entity'
 import { TicketProductInsertType, TicketProductType } from '../../../entities/ticket-product.entity'
-import { TicketRadiologyStatus } from '../../../entities/ticket-radiology.entity'
 import { TicketSurchargeInsertType } from '../../../entities/ticket-surcharge.entity'
-import { TicketStatus, TicketType } from '../../../entities/ticket.entity'
+import { TicketStatus } from '../../../entities/ticket.entity'
 import {
   TicketOrderDraftApprovedUpdateType,
   TicketOrderExpenseDraftType,
@@ -59,13 +58,6 @@ export class TicketOrderDraftApprovedUpdate {
       const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
         ...ticketOrderDraftApprovedUpdate,
         // ticketStatus: TicketStatus.Draft, // giữ nguyên status
-        deliveryStatus: ticketOrderProductDraftList.length
-          ? DeliveryStatus.Pending
-          : DeliveryStatus.NoStock,
-        procedureStatus: ticketOrderProcedureDraftList.length
-          ? TicketProcedureStatus.Completed
-          : TicketProcedureStatus.Empty,
-        radiologyStatus: TicketRadiologyStatus.Empty,
         paid: 0,
         debt: ticketOrderDraftApprovedUpdate.totalMoney,
         startedAt: ticketOrderDraftApprovedUpdate.registeredAt,
@@ -84,7 +76,7 @@ export class TicketOrderDraftApprovedUpdate {
 
       await manager.delete(TicketProduct, { oid, ticketId })
       await manager.delete(TicketProcedure, { oid, ticketId })
-      // await manager.delete(TicketRadiology, { oid, ticketId })
+      // await manager.delete(TicketParaclinical, { oid, ticketId })
       await manager.delete(TicketSurcharge, { oid, ticketId })
       await manager.delete(TicketExpense, { oid, ticketId })
 

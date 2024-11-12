@@ -1,5 +1,5 @@
 import { Expose, Type } from 'class-transformer'
-import { IsBoolean, IsIn, ValidateNested } from 'class-validator'
+import { IsBoolean, IsIn, IsNumber, ValidateNested } from 'class-validator'
 import { ConditionTimestamp } from '../../../../../_libs/common/dto/condition-timestamp'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 import { PrintHtmlType } from '../../../../../_libs/database/entities/print-html.entity'
@@ -7,12 +7,16 @@ import { PrintHtmlType } from '../../../../../_libs/database/entities/print-html
 export class PrintHtmlRelationQuery {
   @Expose()
   @IsBoolean()
-  radiology: boolean
+  paraclinical: boolean
 }
 export class PrintHtmlFilterQuery {
   @Expose()
   @IsIn(Object.keys(PrintHtmlType))
-  key: keyof typeof PrintHtmlType
+  type: keyof typeof PrintHtmlType
+
+  @Expose()
+  @IsNumber()
+  paraclinicalId: number
 
   @Expose()
   @Type(() => ConditionTimestamp)

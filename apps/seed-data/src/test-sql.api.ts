@@ -4,8 +4,7 @@ import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
 import { sleep } from '../../_libs/common/helpers/function.helper'
 import { randomFullName } from '../../_libs/common/helpers/random.helper'
-import { InvoiceStatus } from '../../_libs/database/common/variable'
-import { Customer, Distributor, Invoice, Receipt } from '../../_libs/database/entities'
+import { Customer, Distributor, Receipt } from '../../_libs/database/entities'
 
 @ApiTags('Test')
 @ApiBearerAuth('access-token')
@@ -14,7 +13,7 @@ export class TestApi {
   constructor(
     private dataSource: DataSource,
     @InjectEntityManager() private manager: EntityManager
-  ) {}
+  ) { }
 
   @Get('raw_query')
   async rawQuery() {
@@ -45,25 +44,25 @@ export class TestApi {
 
   @Get('update_calculator')
   async update_calculator() {
-    const money = 11
-    const invoiceUpdateResult = await this.manager.update(
-      Invoice,
-      { id: 226 },
-      {
-        status: () => `CASE 
-          WHEN(revenue - paid = ${money}) THEN ${InvoiceStatus.Success} 
-          ELSE ${InvoiceStatus.Debt}
-          END
-      `,
-        debt: () => `debt - ${money}`,
-        paid: () => `paid + ${money}`,
-      }
-    )
-    console.log(
-      '🚀 ~ file: test-sql.api.ts:57 ~ TestApi ~ update_calculator ~ invoiceUpdateResult:',
-      invoiceUpdateResult
-    )
-    return invoiceUpdateResult
+    // const money = 11
+    // const invoiceUpdateResult = await this.manager.update(
+    //   Invoice,
+    //   { id: 226 },
+    //   {
+    //     status: () => `CASE 
+    //       WHEN(revenue - paid = ${money}) THEN ${InvoiceStatus.Success} 
+    //       ELSE ${InvoiceStatus.Debt}
+    //       END
+    //   `,
+    //     debt: () => `debt - ${money}`,
+    //     paid: () => `paid + ${money}`,
+    //   }
+    // )
+    // console.log(
+    //   '🚀 ~ file: test-sql.api.ts:57 ~ TestApi ~ update_calculator ~ invoiceUpdateResult:',
+    //   invoiceUpdateResult
+    // )
+    // return invoiceUpdateResult
   }
 
   @Get('update_query_join')

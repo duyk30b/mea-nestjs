@@ -6,11 +6,11 @@ import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { TicketDiagnosis } from '../../../../_libs/database/entities'
 import { AppointmentStatus } from '../../../../_libs/database/entities/appointment.entity'
-import { TicketProductType } from '../../../../_libs/database/entities/ticket-product.entity'
 import {
-  TicketRadiologyInsertType,
-  TicketRadiologyStatus,
-} from '../../../../_libs/database/entities/ticket-radiology.entity'
+  TicketParaclinicalInsertType,
+  TicketParaclinicalStatus,
+} from '../../../../_libs/database/entities/ticket-paraclinical.entity'
+import { TicketProductType } from '../../../../_libs/database/entities/ticket-product.entity'
 import Ticket, { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import { AppointmentRepository } from '../../../../_libs/database/repository/appointment/appointment.repository'
 import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
@@ -27,9 +27,9 @@ import { TicketClinicRefundOverpaid } from '../../../../_libs/database/repositor
 import { TicketClinicReopen } from '../../../../_libs/database/repository/ticket/ticket-clinic/ticket-clinic-reopen'
 import { TicketClinicReturnProduct } from '../../../../_libs/database/repository/ticket/ticket-clinic/ticket-clinic-return-product'
 import { TicketClinicUpdateItemsMoney } from '../../../../_libs/database/repository/ticket/ticket-clinic/ticket-clinic-update-items-money'
+import { TicketClinicUpdateTicketParaclinicalList } from '../../../../_libs/database/repository/ticket/ticket-clinic/ticket-clinic-update-ticket-paraclinical-list'
 import { TicketClinicUpdateTicketProcedureList } from '../../../../_libs/database/repository/ticket/ticket-clinic/ticket-clinic-update-ticket-procedure-list'
 import { TicketClinicUpdateTicketProductList } from '../../../../_libs/database/repository/ticket/ticket-clinic/ticket-clinic-update-ticket-product-list'
-import { TicketClinicUpdateTicketRadiologyList } from '../../../../_libs/database/repository/ticket/ticket-clinic/ticket-clinic-update-ticket-radiology-list'
 import { ImageManagerService } from '../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
@@ -41,8 +41,8 @@ import {
   TicketClinicUpdateDiagnosisSpecialBody,
   TicketClinicUpdateItemsMoneyBody,
   TicketClinicUpdatePrescriptionBody,
+  TicketClinicUpdateTicketParaclinicalListBody,
   TicketClinicUpdateTicketProcedureListBody,
-  TicketClinicUpdateTicketRadiologyListBody,
 } from './request'
 
 @Injectable()
@@ -57,7 +57,8 @@ export class ApiTicketClinicService {
     private readonly ticketProductRepository: TicketProductRepository,
     private readonly appointmentRepository: AppointmentRepository,
     private readonly ticketClinicUpdateTicketProcedureList: TicketClinicUpdateTicketProcedureList,
-    private readonly ticketClinicUpdateTicketRadiologyList: TicketClinicUpdateTicketRadiologyList,
+    // eslint-disable-next-line max-len
+    private readonly ticketClinicUpdateTicketParaclinicalList: TicketClinicUpdateTicketParaclinicalList,
     private readonly ticketClinicUpdateTicketProductList: TicketClinicUpdateTicketProductList,
     private readonly ticketClinicUpdateItemsMoney: TicketClinicUpdateItemsMoney,
     private readonly ticketClinicReturnProduct: TicketClinicReturnProduct,
@@ -104,10 +105,7 @@ export class ApiTicketClinicService {
     return { data: { ticket } }
   }
 
-  async destroyDraftSchedule(params: {
-    oid: number
-    ticketId: number
-  }): Promise<BaseResponse> {
+  async destroyDraftSchedule(params: { oid: number; ticketId: number }): Promise<BaseResponse> {
     const { oid, ticketId } = params
     await this.ticketRepository.delete({
       oid,
@@ -365,37 +363,39 @@ export class ApiTicketClinicService {
     return { data: true }
   }
 
-  async updateTicketRadiologyList(options: {
+  async updateTicketParaclinicalList(options: {
     oid: number
     ticketId: number
-    body: TicketClinicUpdateTicketRadiologyListBody
+    body: TicketClinicUpdateTicketParaclinicalListBody
   }) {
     const { ticketId, oid, body } = options
-    const result = await this.ticketClinicUpdateTicketRadiologyList.updateTicketRadiologyList({
-      oid,
-      ticketId,
-      ticketRadiologyListInsert: body.ticketRadiologyList.map((i) => {
-        const data: TicketRadiologyInsertType = {
-          ...i,
-          oid,
-          ticketId,
-          customerId: body.customerId,
-          imageIds: JSON.stringify([]),
-          description: '',
-          result: '',
-          startedAt: null,
-          status: TicketRadiologyStatus.Pending,
-        }
-        return data
-      }),
-    })
+    const result = await this.ticketClinicUpdateTicketParaclinicalList.updateTicketParaclinicalList(
+      {
+        oid,
+        ticketId,
+        ticketParaclinicalListInsert: body.ticketParaclinicalList.map((i) => {
+          const data: TicketParaclinicalInsertType = {
+            ...i,
+            oid,
+            ticketId,
+            customerId: body.customerId,
+            imageIds: JSON.stringify([]),
+            description: '',
+            result: '',
+            startedAt: null,
+            status: TicketParaclinicalStatus.Pending,
+          }
+          return data
+        }),
+      }
+    )
 
-    const { ticketBasic, ticketRadiologyList } = result
+    const { ticketBasic, ticketParaclinicalList } = result
 
     this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
-    this.socketEmitService.ticketClinicUpdateTicketRadiologyList(oid, {
+    this.socketEmitService.ticketClinicUpdateTicketParaclinicalList(oid, {
       ticketId,
-      ticketRadiologyList,
+      ticketParaclinicalList,
     })
 
     return { data: true }
@@ -412,10 +412,10 @@ export class ApiTicketClinicService {
       ticketId,
       ticketProductUpdateList: body.ticketProductUpdateList,
       ticketProcedureUpdateList: body.ticketProcedureUpdateList,
-      ticketRadiologyUpdateList: body.ticketRadiologyUpdateList,
+      ticketParaclinicalUpdateList: body.ticketParaclinicalUpdateList,
     })
 
-    const { ticketBasic, ticketProductList, ticketProcedureList, ticketRadiologyList } = result
+    const { ticketBasic, ticketProductList, ticketProcedureList, ticketParaclinicalList } = result
     this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
     this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
       ticketId,
@@ -433,9 +433,9 @@ export class ApiTicketClinicService {
       ticketId,
       ticketProcedureList,
     })
-    this.socketEmitService.ticketClinicUpdateTicketRadiologyList(oid, {
+    this.socketEmitService.ticketClinicUpdateTicketParaclinicalList(oid, {
       ticketId,
-      ticketRadiologyList,
+      ticketParaclinicalList,
     })
     return { data: true }
   }

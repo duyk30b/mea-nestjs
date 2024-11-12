@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
+import { TicketProductRepository } from '../../../../_libs/database/repository/ticket-product/ticket-product.repository'
 import { TicketPayDebt } from '../../../../_libs/database/repository/ticket/ticket-base/ticket-pay-debt'
 import { TicketPaymentAndClose } from '../../../../_libs/database/repository/ticket/ticket-base/ticket-payment-and-close'
 import { TicketPrepayment } from '../../../../_libs/database/repository/ticket/ticket-base/ticket-prepayment'
@@ -27,6 +28,7 @@ export class ApiTicketOrderService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
     private readonly cacheDataService: CacheDataService,
+    private readonly ticketProductRepository: TicketProductRepository,
     private readonly ticketOrderDraft: TicketOrderDraft,
     private readonly ticketOrderDraftApprovedUpdate: TicketOrderDraftApprovedUpdate,
     private readonly ticketOrderDebtSuccessUpdate: TicketOrderDebtSuccessUpdate,
@@ -231,7 +233,14 @@ export class ApiTicketOrderService {
       if (customer) {
         this.socketEmitService.customerUpsert(oid, { customer })
       }
-      return { data: { ticketBasic, customerPayment } }
+      const ticketProductList = await this.ticketProductRepository.findMany({
+        condition: {
+          oid,
+          ticketId,
+        },
+        sort: { id: 'ASC' },
+      })
+      return { data: { ticketBasic, ticketProductList, customerPayment } }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
@@ -293,9 +302,17 @@ export class ApiTicketOrderService {
         allowNegativeQuantity,
       })
 
+      const ticketProductList = await this.ticketProductRepository.findMany({
+        condition: {
+          oid,
+          ticketId,
+        },
+        sort: { id: 'ASC' },
+      })
+
       this.socketEmitService.batchListUpdate(oid, { batchList })
       this.socketEmitService.productListUpdate(oid, { productList })
-      return { data: { ticketBasic } }
+      return { data: { ticketBasic, ticketProductList } }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
@@ -326,7 +343,16 @@ export class ApiTicketOrderService {
       if (customer) {
         this.socketEmitService.customerUpsert(oid, { customer })
       }
-      return { data: { ticketBasic, customerPayment } }
+
+      const ticketProductList = await this.ticketProductRepository.findMany({
+        condition: {
+          oid,
+          ticketId,
+        },
+        sort: { id: 'ASC' },
+      })
+
+      return { data: { ticketBasic, ticketProductList, customerPayment } }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }

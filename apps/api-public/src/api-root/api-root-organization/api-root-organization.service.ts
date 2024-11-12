@@ -10,33 +10,25 @@ import {
   BatchMovement,
   Customer,
   CustomerPayment,
-  CustomerSource,
   Distributor,
   DistributorPayment,
   Image,
   Organization,
-  Procedure,
-  ProcedureGroup,
   Product,
-  ProductGroup,
   ProductMovement,
-  Radiology,
-  RadiologyGroup,
   Receipt,
   ReceiptItem,
   Role,
-  Setting,
   Ticket,
   TicketDiagnosis,
   TicketExpense,
+  TicketParaclinical,
   TicketProcedure,
   TicketProduct,
-  TicketRadiology,
   TicketSurcharge,
   TicketUser,
   User,
 } from '../../../../_libs/database/entities'
-import UserRole from '../../../../_libs/database/entities/user-role.entity'
 import { OrganizationRepository } from '../../../../_libs/database/repository/organization/organization.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import { RootOrganizationPaginationQuery } from './request/root-organization-get.query'
@@ -115,8 +107,8 @@ export class ApiRootOrganizationService {
     // await this.manager.delete(ProductGroup, { oid })
     await this.manager.delete(ProductMovement, { oid })
     await this.manager.update(Product, { oid }, { quantity: 0, costAmount: 0 })
-    // await this.manager.delete(RadiologyGroup, { oid })
-    // await this.manager.delete(Radiology, { oid })
+    // await this.manager.delete(ParaclinicalGroup, { oid })
+    // await this.manager.delete(Paraclinical, { oid })
     await this.manager.delete(ReceiptItem, { oid })
     await this.manager.delete(Receipt, { oid })
     // await this.manager.delete(Role, { oid })
@@ -127,16 +119,12 @@ export class ApiRootOrganizationService {
     await this.manager.delete(TicketSurcharge, { oid })
     await this.manager.delete(TicketProduct, { oid })
     await this.manager.delete(TicketProcedure, { oid })
-    await this.manager.delete(TicketRadiology, { oid })
+    await this.manager.delete(TicketParaclinical, { oid })
     await this.manager.delete(TicketUser, { oid })
     await this.manager.delete(Ticket, { oid })
 
     // await this.manager.delete(User, { oid })
     // await this.manager.delete(UserRole, { oid })
-
-    if (oid != 1) {
-      await this.manager.delete(Radiology, { oid })
-    }
 
     const organizationRoot = await this.organizationRepository.findOneById(oid)
     const [organization] = await this.organizationRepository.updateAndReturnEntity(

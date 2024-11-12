@@ -1,3 +1,0 @@
-export * from './radiology-get.query'
-export * from './radiology-options.request'
-export * from './radiology-upsert.body'

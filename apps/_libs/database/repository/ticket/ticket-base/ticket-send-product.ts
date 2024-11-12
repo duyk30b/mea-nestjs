@@ -35,11 +35,9 @@ export class TicketSendProduct {
         oid,
         id: ticketId,
         ticketStatus: In([TicketStatus.Draft, TicketStatus.Approved, TicketStatus.Executing]),
-        deliveryStatus: In([DeliveryStatus.Pending]),
       }
       const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
         ticketStatus: TicketStatus.Executing,
-        deliveryStatus: DeliveryStatus.Delivered,
       }
       const ticketUpdateResult: UpdateResult = await manager
         .createQueryBuilder()

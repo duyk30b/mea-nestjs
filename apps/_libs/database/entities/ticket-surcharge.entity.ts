@@ -10,11 +10,11 @@ export default class TicketSurcharge extends BaseEntity {
   @Expose()
   ticketId: number
 
-  @Column({ type: 'character varying', length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   @Expose()
   key: string
 
-  @Column({ type: 'character varying', length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   @Expose()
   name: string
 

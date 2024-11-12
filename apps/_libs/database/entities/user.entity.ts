@@ -24,19 +24,19 @@ export default class User {
   phone: string
 
   @Expose()
-  @Column({ type: 'character varying', length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   username: string
 
   @Exclude()
-  @Column({ name: 'hashPassword', type: 'character varying', length: 255 })
+  @Column({ name: 'hashPassword', type: 'varchar', length: 255 })
   hashPassword: string
 
   @Expose({ groups: [UserGroup.ROOT] })
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   secret: string
 
   @Expose()
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   fullName: string
 
   @Expose()

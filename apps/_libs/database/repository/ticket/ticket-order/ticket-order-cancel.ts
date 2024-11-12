@@ -118,16 +118,15 @@ export class TicketOrderCancel {
         }
       }
 
+      const ticketProductList = await manager.find(TicketProduct, {
+        where: {
+          oid,
+          ticketId,
+          deliveryStatus: DeliveryStatus.Delivered,
+        },
+      })
       // nếu đã gửi hàng thì trả gửi hàng
-      if (ticketRoot.deliveryStatus === DeliveryStatus.Delivered) {
-        // === 3. UPDATE for TICKET_PRODUCT ===
-        const ticketProductList = await manager.find(TicketProduct, {
-          where: {
-            oid,
-            ticketId,
-            deliveryStatus: DeliveryStatus.Cancelled,
-          },
-        })
+      if (ticketProductList.length) {
         const ticketProductMap = arrayToKeyValue(ticketProductList, 'id')
 
         // 4. === CALCULATOR: số lượng RETURN của product và batch ===
@@ -355,7 +354,6 @@ export class TicketOrderCancel {
       // === 2. TICKET: update ===
       const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
         ticketStatus: TicketStatus.Cancelled,
-        deliveryStatus: DeliveryStatus.Cancelled,
         paid: 0,
         debt: 0,
       }

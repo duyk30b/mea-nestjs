@@ -9,9 +9,9 @@ import {
   Product,
   Ticket,
   TicketDiagnosis,
+  TicketParaclinical,
   TicketProcedure,
   TicketProduct,
-  TicketRadiology,
   TicketUser,
 } from '../../../_libs/database/entities'
 import { SOCKET_EVENT } from './socket.variable'
@@ -142,20 +142,24 @@ export class SocketEmitService {
       .emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION_LIST, data)
   }
 
-  ticketClinicUpdateTicketRadiologyList(
+  ticketClinicUpdateTicketParaclinicalList(
     oid: number,
-    data: { ticketId: number; ticketRadiologyList: TicketRadiology[] }
+    data: { ticketId: number; ticketParaclinicalList: TicketParaclinical[] }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST, data)
+    this.io
+      .in(oid.toString())
+      .emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_PARACLINICAL_LIST, data)
   }
 
-  ticketClinicUpdateTicketRadiologyResult(
+  ticketClinicUpdateTicketParaclinicalResult(
     oid: number,
-    data: { ticketId: number; ticketRadiology: TicketRadiology }
+    data: { ticketId: number; ticketParaclinical: TicketParaclinical }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_RESULT, data)
+    this.io
+      .in(oid.toString())
+      .emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_PARACLINICAL_RESULT, data)
   }
 
   ticketClinicUpdateTicketUserList(

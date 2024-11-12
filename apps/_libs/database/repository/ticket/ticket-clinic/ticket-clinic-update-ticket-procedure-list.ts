@@ -106,7 +106,6 @@ export class TicketClinicUpdateTicketProcedureList {
 
       // === 5. UPDATE VISIT: MONEY  ===
       const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
-        procedureStatus: ticketProcedureStatus,
         proceduresMoney,
         totalMoney: () => `"totalMoney" - "proceduresMoney" + ${proceduresMoney}`,
         debt: () => `"debt" - "proceduresMoney" + ${proceduresMoney}`,

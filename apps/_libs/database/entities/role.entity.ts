@@ -12,7 +12,7 @@ export default class Role {
   @Expose()
   id: number
 
-  @Column({ type: 'character varying', length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   @Expose()
   name: string
 

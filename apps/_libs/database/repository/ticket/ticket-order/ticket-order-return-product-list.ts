@@ -70,7 +70,6 @@ export class TicketOrderReturnProductList {
         oid,
         id: ticketId,
         ticketStatus: In([TicketStatus.Executing, TicketStatus.Debt, TicketStatus.Completed]),
-        deliveryStatus: In([DeliveryStatus.Delivered]),
         // totalMoney: MoreThanOrEqual(productsMoneyReturn - discountMoneyReturn),
       }
       const setTicketRoot: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
@@ -418,20 +417,6 @@ export class TicketOrderReturnProductList {
 
       // === 10. UPDATE TICKET MONEY ===
       const ticketProductList = await manager.find(TicketProduct, { where: { oid, ticketId } })
-      let deliveryStatus = DeliveryStatus.NoStock
-      if (!ticketProductList.length) {
-        deliveryStatus = DeliveryStatus.NoStock
-      }
-      else if (ticketProductList.find((i) => i.deliveryStatus === DeliveryStatus.Pending)) {
-        deliveryStatus = DeliveryStatus.Pending
-      }
-      else if (ticketProductList.find((i) => i.deliveryStatus === DeliveryStatus.Delivered)) {
-        deliveryStatus = DeliveryStatus.Delivered
-      }
-      else {
-        throw new Error(`${PREFIX}: deliveryStatus for ticketProductList error:`
-          + ` ${JSON.stringify(ticketProductList)}`)
-      }
 
       const productsMoneyUpdate = ticketProductList.reduce((acc, cur) => {
         return acc + cur.quantity * cur.actualPrice
@@ -457,7 +442,6 @@ export class TicketOrderReturnProductList {
       const profitUpdate = totalMoneyUpdate - totalCostAmountUpdate - ticketRoot.expense
 
       const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
-        deliveryStatus,
         ticketStatus: () => `CASE 
             WHEN("ticketStatus" = ${TicketStatus.Executing}) THEN ${TicketStatus.Executing}
             WHEN(${debtUpdate} != 0) THEN ${TicketStatus.Debt}

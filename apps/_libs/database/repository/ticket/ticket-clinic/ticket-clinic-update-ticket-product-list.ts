@@ -98,18 +98,8 @@ export class TicketClinicUpdateTicketProductList {
         return acc + item.costAmount
       }, 0)
 
-      let deliveryStatus = DeliveryStatus.NoStock
-      if (!ticketProductList.length) {
-        deliveryStatus = DeliveryStatus.NoStock
-      } else if (ticketProductList.find((i) => i.deliveryStatus === DeliveryStatus.Pending)) {
-        deliveryStatus = DeliveryStatus.Pending
-      } else if (ticketProductList.find((i) => i.deliveryStatus === DeliveryStatus.Delivered)) {
-        deliveryStatus = DeliveryStatus.Delivered
-      }
-
       // === 5. UPDATE VISIT: MONEY  ===
       const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
-        deliveryStatus,
         productsMoney,
         totalCostAmount,
         totalMoney: () => `"totalMoney" - "productsMoney" + ${productsMoney}`,

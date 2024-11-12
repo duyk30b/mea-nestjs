@@ -113,7 +113,7 @@ export default class TicketProduct extends BaseEntity {
   @Expose()
   actualPrice: number // Giá thực tế
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   hintUsage: string
 

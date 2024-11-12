@@ -1,16 +1,16 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { DeliveryStatus, DiscountType, VoucherType } from '../common/variable'
+import { DiscountType } from '../common/variable'
 import Appointment from './appointment.entity'
 import CustomerPayment from './customer-payment.entity'
 import CustomerSource from './customer-source.entity'
 import Customer from './customer.entity'
 import TicketDiagnosis from './ticket-diagnosis.entity'
 import TicketExpense from './ticket-expense.entity'
-import TicketProcedure, { TicketProcedureStatus } from './ticket-procedure.entity'
+import TicketParaclinical from './ticket-paraclinical.entity'
+import TicketProcedure from './ticket-procedure.entity'
 import TicketProduct from './ticket-product.entity'
-import TicketRadiology, { TicketRadiologyStatus } from './ticket-radiology.entity'
 import TicketSurcharge from './ticket-surcharge.entity'
 import TicketUser from './ticket-user.entity'
 
@@ -51,18 +51,6 @@ export default class Ticket extends BaseEntity {
   @Column({ type: 'smallint', default: TicketStatus.Draft })
   @Expose()
   ticketStatus: TicketStatus
-
-  @Column({ type: 'smallint', default: DeliveryStatus.NoStock })
-  @Expose()
-  deliveryStatus: DeliveryStatus
-
-  @Column({ type: 'smallint', default: TicketProcedureStatus.Empty })
-  @Expose()
-  procedureStatus: TicketProcedureStatus
-
-  @Column({ type: 'smallint', default: TicketRadiologyStatus.Empty })
-  @Expose()
-  radiologyStatus: TicketRadiologyStatus
 
   @Column({ type: 'smallint', nullable: true })
   @Expose()
@@ -106,7 +94,7 @@ export default class Ticket extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  radiologyMoney: number
+  paraclinicalMoney: number
 
   @Column({
     type: 'bigint',
@@ -178,7 +166,7 @@ export default class Ticket extends BaseEntity {
   @Expose()
   debt: number // tiền nợ
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   note: string // Ghi chú
 
@@ -266,9 +254,9 @@ export default class Ticket extends BaseEntity {
   @Expose()
   ticketProcedureList: TicketProcedure[]
 
-  @OneToMany(() => TicketRadiology, (ticketRadiology) => ticketRadiology.ticket)
+  @OneToMany(() => TicketParaclinical, (ticketParaclinical) => ticketParaclinical.ticket)
   @Expose()
-  ticketRadiologyList: TicketRadiology[]
+  ticketParaclinicalList: TicketParaclinical[]
 
   @Expose()
   @OneToMany(() => TicketExpense, (ticketExpense) => ticketExpense.ticket)
@@ -291,7 +279,7 @@ export default class Ticket extends BaseEntity {
 
     entity.proceduresMoney = Number(raw.proceduresMoney)
     entity.productsMoney = Number(raw.productsMoney)
-    entity.radiologyMoney = Number(raw.radiologyMoney)
+    entity.paraclinicalMoney = Number(raw.paraclinicalMoney)
 
     entity.discountMoney = Number(raw.discountMoney)
     entity.discountPercent = Number(raw.discountPercent)
@@ -338,8 +326,8 @@ export type TicketRelationType = {
   | { [P in keyof Pick<TicketProcedure, 'procedure'>]?: boolean }
   | false
 } & {
-  [P in keyof Pick<Ticket, 'ticketRadiologyList'>]?:
-  | { [P in keyof Pick<TicketRadiology, 'radiology'>]?: boolean }
+  [P in keyof Pick<Ticket, 'ticketParaclinicalList'>]?:
+  | { [P in keyof Pick<TicketParaclinical, 'paraclinical'>]?: boolean }
   | false
 } & {
   [P in keyof Pick<Ticket, 'ticketUserList'>]?:

@@ -16,7 +16,7 @@ export default class Organization {
   phone: string
 
   @Expose()
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   email: string
 
   @Column({ type: 'smallint', default: 0 })
@@ -32,7 +32,7 @@ export default class Organization {
   level: number
 
   @Expose()
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   name: string
 
   @Expose()
@@ -40,19 +40,19 @@ export default class Organization {
   logoImageId: number
 
   @Expose()
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   addressProvince: string
 
   @Expose()
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   addressDistrict: string
 
   @Expose()
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   addressWard: string
 
   @Expose()
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   addressStreet: string
 
   @Column({ type: 'text', default: '[]' })

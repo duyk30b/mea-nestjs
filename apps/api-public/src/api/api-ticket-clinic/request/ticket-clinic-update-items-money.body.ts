@@ -101,18 +101,18 @@ class TicketProcedureUpdateBody {
   actualPrice: number
 }
 
-class TicketRadiologyUpdateBody {
+class TicketParaclinicalUpdateBody {
   @ApiProperty({ example: 56 })
   @Expose()
   @IsDefined()
   @IsInt()
-  ticketRadiologyId: number
+  ticketParaclinicalId: number
 
   @ApiProperty({ example: 56 })
   @Expose()
   @IsDefined()
   @IsInt()
-  radiologyId: number
+  paraclinicalId: number
 
   @ApiProperty({ example: 22_500 })
   @Expose()
@@ -160,11 +160,11 @@ export class TicketClinicUpdateItemsMoneyBody {
   @ValidateNested({ each: true })
   ticketProcedureUpdateList: TicketProcedureUpdateBody[]
 
-  @ApiProperty({ type: TicketRadiologyUpdateBody, isArray: true })
+  @ApiProperty({ type: TicketParaclinicalUpdateBody, isArray: true })
   @Expose()
-  @Type(() => TicketRadiologyUpdateBody)
+  @Type(() => TicketParaclinicalUpdateBody)
   @IsDefined()
   @IsArray()
   @ValidateNested({ each: true })
-  ticketRadiologyUpdateList: TicketRadiologyUpdateBody[]
+  ticketParaclinicalUpdateList: TicketParaclinicalUpdateBody[]
 }

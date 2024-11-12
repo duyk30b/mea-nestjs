@@ -45,7 +45,7 @@ class TicketOrderFullInsert {
   @Expose()
   @IsDefined()
   @IsInt()
-  radiologyMoney: number
+  paraclinicalMoney: number
 
   @ApiProperty({ example: 22_500 })
   @Expose()

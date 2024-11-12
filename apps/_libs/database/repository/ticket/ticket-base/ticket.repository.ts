@@ -8,9 +8,9 @@ import {
   Ticket,
   TicketDiagnosis,
   TicketExpense,
+  TicketParaclinical,
   TicketProcedure,
   TicketProduct,
-  TicketRadiology,
   TicketSurcharge,
   TicketUser,
 } from '../../../entities'
@@ -148,14 +148,14 @@ export class TicketRepository extends PostgreSqlRepository<
       }
     }
 
-    if (relation?.ticketRadiologyList) {
-      query = query.leftJoinAndSelect('ticket.ticketRadiologyList', 'ticketRadiology')
-      query.addOrderBy('ticketRadiology.id', 'ASC')
-      if (relation?.ticketRadiologyList?.radiology) {
+    if (relation?.ticketParaclinicalList) {
+      query = query.leftJoinAndSelect('ticket.ticketParaclinicalList', 'ticketParaclinical')
+      query.addOrderBy('ticketParaclinical.id', 'ASC')
+      if (relation?.ticketParaclinicalList?.paraclinical) {
         query = query.leftJoinAndSelect(
-          'ticketRadiology.radiology',
-          'radiology',
-          'ticketRadiology.radiologyId != 0'
+          'ticketParaclinical.paraclinical',
+          'paraclinical',
+          'ticketParaclinical.paraclinicalId != 0'
         )
       }
     }
@@ -203,7 +203,7 @@ export class TicketRepository extends PostgreSqlRepository<
 
       await manager.delete(TicketProduct, { oid, ticketId })
       await manager.delete(TicketProcedure, { oid, ticketId })
-      await manager.delete(TicketRadiology, { oid, ticketId })
+      await manager.delete(TicketParaclinical, { oid, ticketId })
 
       await manager.delete(TicketSurcharge, { oid, ticketId })
       await manager.delete(TicketExpense, { oid, ticketId })
@@ -212,20 +212,20 @@ export class TicketRepository extends PostgreSqlRepository<
     })
   }
 
-  async refreshRadiologyMoney(options: { oid: number; ticketId: number }) {
+  async refreshParaclinicalMoney(options: { oid: number; ticketId: number }) {
     const { oid, ticketId } = options
     const updateResult: [any[], number] = await this.manager.query(`
         UPDATE  "Ticket" "ticket" 
-        SET     "radiologyMoney"  = "temp"."sumActualPrice",
-                "totalMoney"      = "ticket"."totalMoney" - "ticket"."radiologyMoney" 
+        SET     "paraclinicalMoney"  = "temp"."sumActualPrice",
+                "totalMoney"      = "ticket"."totalMoney" - "ticket"."paraclinicalMoney" 
                                         + temp."sumActualPrice",
-                "debt"            = "ticket"."debt" - "ticket"."radiologyMoney" 
+                "debt"            = "ticket"."debt" - "ticket"."paraclinicalMoney" 
                                         + temp."sumActualPrice",
-                "profit"          = "ticket"."profit" - "ticket"."radiologyMoney" 
+                "profit"          = "ticket"."profit" - "ticket"."paraclinicalMoney" 
                                         + temp."sumActualPrice"
         FROM    ( 
                 SELECT "ticketId", SUM("actualPrice") as "sumActualPrice"
-                    FROM "TicketRadiology" 
+                    FROM "TicketParaclinical" 
                     WHERE "ticketId" = (${ticketId}) AND "oid" = ${oid}
                     GROUP BY "ticketId" 
                 ) AS "temp" 

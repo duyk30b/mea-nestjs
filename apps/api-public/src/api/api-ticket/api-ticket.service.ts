@@ -82,7 +82,7 @@ export class ApiTicketService {
         ticketProductConsumableList: relation?.ticketProductConsumableList,
         ticketProductPrescriptionList: relation?.ticketProductPrescriptionList,
         ticketProcedureList: relation?.ticketProcedureList,
-        ticketRadiologyList: relation?.ticketRadiologyList,
+        ticketParaclinicalList: relation?.ticketParaclinicalList,
         ticketUserList: relation?.ticketUserList,
       },
     })
@@ -90,18 +90,18 @@ export class ApiTicketService {
       throw new BusinessException('error.Database.NotFound')
     }
 
-    if (ticket.ticketRadiologyList || ticket.ticketDiagnosis?.imageList) {
-      ticket.ticketRadiologyList = ticket.ticketRadiologyList || []
+    if (ticket.ticketParaclinicalList || ticket.ticketDiagnosis?.imageList) {
+      ticket.ticketParaclinicalList = ticket.ticketParaclinicalList || []
       if (ticket.ticketDiagnosis) {
         ticket.ticketDiagnosis.imageList = []
       }
 
       const ticketDiagnosisImageIds: number[] = JSON.parse(ticket.ticketDiagnosis?.imageIds || '[]')
-      const ticketRadiologyImageIds: number[] = ticket.ticketRadiologyList
+      const ticketParaclinicalImageIds: number[] = ticket.ticketParaclinicalList
         .map((i) => JSON.parse(i.imageIds))
         .flat()
 
-      const imageIds = [...ticketDiagnosisImageIds, ...ticketRadiologyImageIds]
+      const imageIds = [...ticketDiagnosisImageIds, ...ticketParaclinicalImageIds]
 
       let imageMap: Record<string, Image> = {}
       if (imageIds.length > 0) {
@@ -116,11 +116,11 @@ export class ApiTicketService {
       ticketDiagnosisImageIds.forEach((i) => {
         ticket.ticketDiagnosis.imageList.push(imageMap[i])
       })
-      ticket.ticketRadiologyList.forEach((ticketRadiology) => {
-        const ticketDiagnosisImageIds: number[] = JSON.parse(ticketRadiology.imageIds)
-        ticketRadiology.imageList = []
+      ticket.ticketParaclinicalList.forEach((ticketParaclinical) => {
+        const ticketDiagnosisImageIds: number[] = JSON.parse(ticketParaclinical.imageIds)
+        ticketParaclinical.imageList = []
         ticketDiagnosisImageIds.forEach((i) => {
-          ticketRadiology.imageList.push(imageMap[i])
+          ticketParaclinical.imageList.push(imageMap[i])
         })
       })
     }

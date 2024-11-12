@@ -1,4 +1,4 @@
-export * from './ticket-clinic-change-radiology-list.body'
+export * from './ticket-clinic-change-paraclinical-list.body'
 export * from './ticket-clinic-payment.body'
 export * from './ticket-clinic-register.body'
 export * from './ticket-clinic-return-product-list.body'

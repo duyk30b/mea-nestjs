@@ -8,15 +8,15 @@ import ProductGroup from './product-group.entity'
 @Index('IDX_Product__oid_brandName', ['oid', 'brandName'])
 @Index('IDX_Product__oid_substance', ['oid', 'substance'])
 export default class Product extends BaseEntity {
-  @Column({ type: 'character varying', length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   @Expose()
   brandName: string // Tên biệt dược
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   substance: string // Hoạt chất
 
-  @Column({ type: 'character varying', length: 255, default: '' })
+  @Column({ type: 'varchar', length: 255, default: '' })
   @Expose()
   lotNumber: string // Số Lô sản phẩm
 
@@ -101,19 +101,19 @@ export default class Product extends BaseEntity {
   @Expose()
   unit: string
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   route: string // Đường dùng: uống, tiêm, ...
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   source: string // Nguồn gốc: ... Ấn Độ, Ý, Pháp, ...
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   image: string
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   hintUsage: string // Gợi ý cách sử dụng
 

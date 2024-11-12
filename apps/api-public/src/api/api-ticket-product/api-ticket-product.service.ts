@@ -30,4 +30,13 @@ export class ApiTicketProductService {
       meta: { page, limit, total },
     }
   }
+
+  async destroyZero(oid: number, ticketProductId: number) {
+    await this.ticketProductRepository.delete({
+      oid,
+      id: ticketProductId,
+      quantity: 0,
+    })
+    return { data: { ticketProductId } }
+  }
 }

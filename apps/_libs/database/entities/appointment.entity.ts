@@ -22,7 +22,7 @@ export default class Appointment extends BaseEntity {
   @Expose()
   customerSourceId: number
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   reason: string // Lý do hẹn
 
@@ -44,7 +44,7 @@ export default class Appointment extends BaseEntity {
   @Expose()
   toTicketId: number
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   cancelReason: string // Lý do hẹn
 

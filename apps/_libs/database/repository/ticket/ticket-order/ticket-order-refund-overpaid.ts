@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource, FindOptionsWhere, In, InsertResult, Raw, UpdateResult } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
-import { DeliveryStatus, PaymentType } from '../../../common/variable'
+import { PaymentType } from '../../../common/variable'
 import { Customer, CustomerPayment, Ticket } from '../../../entities'
 import { CustomerPaymentInsertType } from '../../../entities/customer-payment.entity'
 import { TicketStatus } from '../../../entities/ticket.entity'
@@ -24,10 +24,6 @@ export class TicketOrderRefundOverpaid {
         oid,
         id: ticketId,
         ticketStatus: In([TicketStatus.Approved, TicketStatus.Executing]),
-        deliveryStatus: In([
-          DeliveryStatus.NoStock,
-          DeliveryStatus.Delivered,
-        ]),
         totalMoney: Raw((alias) => `${alias} <= (paid - :money)`, { money }), // không cho trả quá tổng số tiền
       }
       const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {

@@ -22,8 +22,8 @@ import {
   TicketClinicUpdateDiagnosisBasicBody,
   TicketClinicUpdateItemsMoneyBody,
   TicketClinicUpdatePrescriptionBody,
+  TicketClinicUpdateTicketParaclinicalListBody,
   TicketClinicUpdateTicketProcedureListBody,
-  TicketClinicUpdateTicketRadiologyListBody,
 } from './request'
 import { TicketClinicPaymentBody } from './request/ticket-clinic-payment.body'
 import { TicketClinicReturnProductListBody } from './request/ticket-clinic-return-product-list.body'
@@ -121,14 +121,14 @@ export class ApiTicketClinicController {
     })
   }
 
-  @Post(':id/update-ticket-radiology-list')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST)
-  async updateTicketRadiologyList(
+  @Post(':id/update-ticket-paraclinical-list')
+  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PARACLINICAL_LIST)
+  async updateTicketParaclinicalList(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketClinicUpdateTicketRadiologyListBody
+    @Body() body: TicketClinicUpdateTicketParaclinicalListBody
   ) {
-    return await this.apiTicketClinicService.updateTicketRadiologyList({
+    return await this.apiTicketClinicService.updateTicketParaclinicalList({
       oid,
       ticketId: id,
       body,

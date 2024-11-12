@@ -25,7 +25,8 @@
     "migration:revert": "npm run typeorm -- migration:revert",
     "seed:data": "npm run build seed-data && node dist/apps/seed-data/main.js start:seed",
     "stop:local": "taskkill /f /im node.exe",
-    "git:logs": "git log --all --oneline --graph -10"
+    "git:logs": "git log --all --oneline --graph -10",
+    "git:master-upgrade": "git branch -f master HEAD"
   },
   "dependencies": {
     "@fastify/cors": "^8.5.0",

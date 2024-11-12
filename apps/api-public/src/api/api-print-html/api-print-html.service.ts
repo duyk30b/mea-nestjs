@@ -23,7 +23,8 @@ export class ApiPrintHtmlService {
       relation,
       condition: {
         oid,
-        key: filter?.key,
+        type: filter?.type,
+        paraclinicalId: filter?.paraclinicalId,
         updatedAt: filter?.updatedAt,
       },
       sort,
@@ -41,7 +42,8 @@ export class ApiPrintHtmlService {
       relation,
       condition: {
         oid,
-        key: filter?.key,
+        type: filter?.type,
+        paraclinicalId: filter?.paraclinicalId,
         updatedAt: filter?.updatedAt,
       },
       limit,
@@ -51,33 +53,40 @@ export class ApiPrintHtmlService {
 
   async getOne(oid: number, query: PrintHtmlGetOneQuery): Promise<BaseResponse> {
     const { filter, relation } = query
-    const print = await this.printHtmlRepository.findOne({
+    const printHtml = await this.printHtmlRepository.findOne({
       relation,
       condition: {
         oid,
-        key: filter?.key,
+        type: filter?.type,
+        paraclinicalId: filter?.paraclinicalId,
         updatedAt: filter?.updatedAt,
       },
     })
-    return { data: { print } }
+    return { data: { printHtml } }
   }
 
-  async detail(oid: number, id: number): Promise<BaseResponse> {
-    const print = await this.printHtmlRepository.findOneBy({ oid, id })
-    if (!print) throw new BusinessException('error.Database.NotFound')
-    return { data: { print } }
+  async detail(oid: number, id: number, query: PrintHtmlGetOneQuery): Promise<BaseResponse> {
+    const printHtml = await this.printHtmlRepository.findOne({
+      condition: { oid, id },
+      relation: query.relation,
+    })
+    if (!printHtml) throw new BusinessException('error.Database.NotFound')
+    return { data: { printHtml } }
   }
 
   async createOne(oid: number, body: PrintHtmlCreateBody): Promise<BaseResponse> {
-    const print = await this.printHtmlRepository.insertOneFullFieldAndReturnEntity({ oid, ...body })
-    if (!print) throw new BusinessException('error.Database.InsertFailed')
-    return { data: { print } }
+    const printHtml = await this.printHtmlRepository.insertOneFullFieldAndReturnEntity({
+      oid,
+      ...body,
+    })
+    if (!printHtml) throw new BusinessException('error.Database.InsertFailed')
+    return { data: { printHtml } }
   }
 
   async updateOne(oid: number, id: number, body: PrintHtmlUpdateBody): Promise<BaseResponse> {
-    const [print] = await this.printHtmlRepository.updateAndReturnEntity({ id, oid }, body)
-    if (!print) throw new BusinessException('error.Database.UpdateFailed')
-    return { data: { print } }
+    const [printHtml] = await this.printHtmlRepository.updateAndReturnEntity({ id, oid }, body)
+    if (!printHtml) throw new BusinessException('error.Database.UpdateFailed')
+    return { data: { printHtml } }
   }
 
   async destroyOne(oid: number, id: number): Promise<BaseResponse> {

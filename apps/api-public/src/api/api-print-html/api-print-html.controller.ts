@@ -40,8 +40,12 @@ export class ApiPrintHtmlController {
 
   @Get('detail/:id')
   @IsUser()
-  findOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return this.apiPrintHtmlService.detail(oid, id)
+  findOne(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam,
+    @Query() query: PrintHtmlGetOneQuery
+  ) {
+    return this.apiPrintHtmlService.detail(oid, id, query)
   }
 
   @Post('create')

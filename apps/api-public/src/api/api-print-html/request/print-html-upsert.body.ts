@@ -8,7 +8,7 @@ export class PrintHtmlCreateBody {
   @Expose()
   @IsDefined()
   @IsIn(Object.keys(PrintHtmlType))
-  key: keyof typeof PrintHtmlType
+  type: keyof typeof PrintHtmlType
 
   @ApiProperty({
     example: '<div>ĐƠN THUỐC</div>',
@@ -22,7 +22,7 @@ export class PrintHtmlCreateBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  radiologyId: number
+  paraclinicalId: number
 }
 
 export class PrintHtmlUpdateBody extends PartialType(PrintHtmlCreateBody) { }

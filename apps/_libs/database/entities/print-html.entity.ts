@@ -1,12 +1,13 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
-import Radiology from './radiology.entity'
+import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+import Paraclinical from './paraclinical.entity'
 
 export const PrintHtmlType = {
   DIAGNOSIS: 'Phiếu khám và chẩn đoán',
+  OPTOMETRY: 'Phiếu đo thị lực',
   PRESCRIPTION: 'Đơn thuốc',
   INVOICE: 'Hóa đơn',
-  RADIOLOGY: 'Phiếu chẩn đoán hình ảnh',
+  PARACLINICAL: 'Phiếu cận lâm sàng',
 }
 
 @Entity('PrintHtml')
@@ -19,13 +20,13 @@ export default class PrintHtml {
   @PrimaryGeneratedColumn()
   id: number
 
-  @Column({ type: 'character varying', length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   @Expose()
-  key: keyof typeof PrintHtmlType
+  type: keyof typeof PrintHtmlType
 
   @Column({ default: 0 })
   @Expose()
-  radiologyId: number
+  paraclinicalId: number
 
   @Column({ type: 'text' })
   @Expose()
@@ -42,10 +43,10 @@ export default class PrintHtml {
   })
   updatedAt: number
 
-  @ManyToOne((type) => Radiology, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'radiologyId', referencedColumnName: 'id' })
+  @OneToOne((type) => Paraclinical, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'paraclinicalId', referencedColumnName: 'id' })
   @Expose()
-  radiology: Radiology
+  paraclinical: Paraclinical
 
   static fromRaw(raw: { [P in keyof PrintHtml]: any }) {
     if (!raw) return null
@@ -62,7 +63,7 @@ export default class PrintHtml {
   }
 }
 
-export type PrintHtmlRelationType = Pick<PrintHtml, 'radiology'>
+export type PrintHtmlRelationType = Pick<PrintHtml, 'paraclinical'>
 
 export type PrintHtmlSortType = Pick<PrintHtml, 'id'>
 

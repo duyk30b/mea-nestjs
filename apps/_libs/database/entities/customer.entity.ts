@@ -5,7 +5,7 @@ import { EGender } from '../common/variable'
 
 @Entity('Customer')
 export default class Customer extends BaseEntity {
-  @Column({ type: 'character varying', length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   @Expose()
   fullName: string
 
@@ -28,27 +28,27 @@ export default class Customer extends BaseEntity {
   @Expose()
   gender: EGender
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose() // số căn cước
   identityCard: string
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   addressProvince: string
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   addressDistrict: string
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   addressWard: string
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   addressStreet: string
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose() // người thân
   relative: string
 
@@ -64,7 +64,7 @@ export default class Customer extends BaseEntity {
   @Expose()
   debt: number // tiền nợ
 
-  @Column({ type: 'character varying', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   note: string // Ghi chú
 

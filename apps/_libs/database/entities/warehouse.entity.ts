@@ -12,7 +12,7 @@ export default class Warehouse {
   id: number
 
   @Expose()
-  @Column({ type: 'character varying', length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   name: string
 
   @Expose()

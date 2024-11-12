@@ -18,7 +18,7 @@ export default class Procedure {
   @Expose({ name: 'id' })
   id: number
 
-  @Column({ type: 'character varying', length: 255 })
+  @Column({ type: 'varchar', length: 255 })
   @Expose()
   name: string // Tên dịch vụ
 

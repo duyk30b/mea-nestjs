@@ -19,6 +19,7 @@ import {
   Product,
   Ticket,
   TicketExpense,
+  TicketParaclinical,
   TicketProcedure,
   TicketProduct,
   TicketSurcharge,
@@ -104,9 +105,6 @@ export class TicketOrderDebtSuccessUpdate {
             : TicketStatus.Debt,
         paid: ticketOrderDebtSuccessUpdate.paid,
         debt: ticketOrderDebtSuccessUpdate.totalMoney - ticketOrderDebtSuccessUpdate.paid,
-        deliveryStatus: ticketOrderProductDraftList.length
-          ? DeliveryStatus.Delivered
-          : DeliveryStatus.NoStock,
         endedAt: ticketOrderDebtSuccessUpdate.registeredAt,
         year: DTimer.info(time, 7).year,
         month: DTimer.info(time, 7).month + 1,
@@ -194,7 +192,7 @@ export class TicketOrderDebtSuccessUpdate {
 
       await manager.delete(TicketProduct, { oid, ticketId })
       await manager.delete(TicketProcedure, { oid, ticketId })
-      // await manager.delete(TicketRadiology, { oid, ticketId })
+      await manager.delete(TicketParaclinical, { oid, ticketId })
       await manager.delete(TicketSurcharge, { oid, ticketId })
       await manager.delete(TicketExpense, { oid, ticketId })
 

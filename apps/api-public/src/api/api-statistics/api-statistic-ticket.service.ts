@@ -40,7 +40,7 @@ export class ApiStatisticTicketService {
         sumTotalCostAmount: 0,
         sumProceduresMoney: 0,
         sumProductsMoney: 0,
-        sumRadiologyMoney: 0,
+        sumParaclinicalMoney: 0,
         sumSurcharge: 0,
         sumExpense: 0,
         sumDiscountMoney: 0,

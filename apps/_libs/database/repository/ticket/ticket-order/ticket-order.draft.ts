@@ -6,6 +6,7 @@ import { DeliveryStatus } from '../../../common/variable'
 import {
   Ticket,
   TicketExpense,
+  TicketParaclinical,
   TicketProcedure,
   TicketProduct,
   TicketSurcharge,
@@ -16,7 +17,6 @@ import {
   TicketProcedureStatus,
 } from '../../../entities/ticket-procedure.entity'
 import { TicketProductInsertType, TicketProductType } from '../../../entities/ticket-product.entity'
-import { TicketRadiologyStatus } from '../../../entities/ticket-radiology.entity'
 import { TicketSurchargeInsertType } from '../../../entities/ticket-surcharge.entity'
 import { TicketInsertType, TicketStatus, TicketType } from '../../../entities/ticket.entity'
 import {
@@ -56,13 +56,6 @@ export class TicketOrderDraft {
         ...ticketOrderDraftInsert,
         oid,
         ticketStatus: TicketStatus.Draft,
-        deliveryStatus: ticketOrderProductDraftList.length
-          ? DeliveryStatus.Pending
-          : DeliveryStatus.NoStock,
-        procedureStatus: ticketOrderProcedureDraftList.length
-          ? TicketProcedureStatus.Completed
-          : TicketProcedureStatus.Empty,
-        radiologyStatus: TicketRadiologyStatus.Empty,
         ticketType: TicketType.Order,
         paid: 0,
         debt: ticketOrderDraftInsert.totalMoney,
@@ -162,7 +155,6 @@ export class TicketOrderDraft {
       oid,
       ticketType: TicketType.Order,
       ticketStatus: In([TicketStatus.Schedule, TicketStatus.Draft]),
-      deliveryStatus: In([DeliveryStatus.NoStock, DeliveryStatus.Pending]),
     }
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       const ticketDeleteResult = await manager.delete(Ticket, whereTicket)
@@ -171,7 +163,7 @@ export class TicketOrderDraft {
       }
       await manager.delete(TicketProduct, { oid, ticketId })
       await manager.delete(TicketProcedure, { oid, ticketId })
-      // await manager.delete(TicketRadiology, { oid, ticketId })
+      await manager.delete(TicketParaclinical, { oid, ticketId })
       await manager.delete(TicketSurcharge, { oid, ticketId })
       await manager.delete(TicketExpense, { oid, ticketId })
     })
