@@ -1,28 +1,32 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger'
+import { ApiProperty } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
-import { IsDefined, IsIn, IsNumber, IsString } from 'class-validator'
-import { PrintHtmlType } from '../../../../../_libs/database/entities/print-html.entity'
+import { IsDefined, IsNotEmpty, IsString } from 'class-validator'
 
 export class PrintHtmlCreateBody {
-  @ApiProperty({ enum: PrintHtmlType, example: PrintHtmlType.PRESCRIPTION })
+  @ApiProperty({ example: 'Đơn thuốc' })
   @Expose()
   @IsDefined()
-  @IsIn(Object.keys(PrintHtmlType))
-  type: keyof typeof PrintHtmlType
+  @IsNotEmpty()
+  @IsString()
+  name: string
 
-  @ApiProperty({
-    example: '<div>ĐƠN THUỐC</div>',
-  })
+  @ApiProperty({ example: '<div>ĐƠN THUỐC</div>' })
   @Expose()
   @IsDefined()
   @IsString()
   content: string
 
-  @ApiProperty({ example: 52 })
+  @ApiProperty({ example: '' })
   @Expose()
   @IsDefined()
-  @IsNumber()
-  paraclinicalId: number
+  @IsString()
+  initVariable: string
+
+  @ApiProperty({ example: '' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  dataExample: string
 }
 
-export class PrintHtmlUpdateBody extends PartialType(PrintHtmlCreateBody) { }
+export class PrintHtmlUpdateBody extends PrintHtmlCreateBody { }

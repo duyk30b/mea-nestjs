@@ -6,9 +6,9 @@ import { DeliveryStatus } from '../../../common/variable'
 import {
   Ticket,
   TicketExpense,
-  TicketParaclinical,
   TicketProcedure,
   TicketProduct,
+  TicketRadiology,
   TicketSurcharge,
 } from '../../../entities'
 import { TicketExpenseInsertType } from '../../../entities/ticket-expense.entity'
@@ -163,7 +163,7 @@ export class TicketOrderDraft {
       }
       await manager.delete(TicketProduct, { oid, ticketId })
       await manager.delete(TicketProcedure, { oid, ticketId })
-      await manager.delete(TicketParaclinical, { oid, ticketId })
+      await manager.delete(TicketRadiology, { oid, ticketId })
       await manager.delete(TicketSurcharge, { oid, ticketId })
       await manager.delete(TicketExpense, { oid, ticketId })
     })

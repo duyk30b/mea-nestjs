@@ -10,7 +10,7 @@ export enum TicketUserReferenceType {
   Ticket = 1,
   TicketProcedure = 2,
   TicketProduct = 3,
-  TicketParaclinical = 4,
+  TicketRadiology = 4,
 }
 
 @Entity('TicketUser')
@@ -27,7 +27,7 @@ export default class TicketUser extends BaseEntity {
 
   @Column()
   @Expose()
-  referenceId: number // ticketProcedureId hoặc ticketProductId hoặc ticketParaclinicalId
+  referenceId: number // ticketProcedureId hoặc ticketProductId hoặc ticketRadiologyId
 
   @Column({ default: 0 })
   @Expose()

@@ -8,9 +8,9 @@ import CustomerSource from './customer-source.entity'
 import Customer from './customer.entity'
 import TicketDiagnosis from './ticket-diagnosis.entity'
 import TicketExpense from './ticket-expense.entity'
-import TicketParaclinical from './ticket-paraclinical.entity'
 import TicketProcedure from './ticket-procedure.entity'
 import TicketProduct from './ticket-product.entity'
+import TicketRadiology from './ticket-radiology.entity'
 import TicketSurcharge from './ticket-surcharge.entity'
 import TicketUser from './ticket-user.entity'
 
@@ -94,7 +94,7 @@ export default class Ticket extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  paraclinicalMoney: number
+  radiologyMoney: number
 
   @Column({
     type: 'bigint',
@@ -254,9 +254,9 @@ export default class Ticket extends BaseEntity {
   @Expose()
   ticketProcedureList: TicketProcedure[]
 
-  @OneToMany(() => TicketParaclinical, (ticketParaclinical) => ticketParaclinical.ticket)
+  @OneToMany(() => TicketRadiology, (ticketRadiology) => ticketRadiology.ticket)
   @Expose()
-  ticketParaclinicalList: TicketParaclinical[]
+  ticketRadiologyList: TicketRadiology[]
 
   @Expose()
   @OneToMany(() => TicketExpense, (ticketExpense) => ticketExpense.ticket)
@@ -279,7 +279,7 @@ export default class Ticket extends BaseEntity {
 
     entity.proceduresMoney = Number(raw.proceduresMoney)
     entity.productsMoney = Number(raw.productsMoney)
-    entity.paraclinicalMoney = Number(raw.paraclinicalMoney)
+    entity.radiologyMoney = Number(raw.radiologyMoney)
 
     entity.discountMoney = Number(raw.discountMoney)
     entity.discountPercent = Number(raw.discountPercent)
@@ -326,8 +326,8 @@ export type TicketRelationType = {
   | { [P in keyof Pick<TicketProcedure, 'procedure'>]?: boolean }
   | false
 } & {
-  [P in keyof Pick<Ticket, 'ticketParaclinicalList'>]?:
-  | { [P in keyof Pick<TicketParaclinical, 'paraclinical'>]?: boolean }
+  [P in keyof Pick<Ticket, 'ticketRadiologyList'>]?:
+  | { [P in keyof Pick<TicketRadiology, 'radiology'>]?: boolean }
   | false
 } & {
   [P in keyof Pick<Ticket, 'ticketUserList'>]?:

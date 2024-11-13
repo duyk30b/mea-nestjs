@@ -26,6 +26,12 @@ export class ApiPrintHtmlController {
     return this.apiPrintHtmlService.pagination(oid, query)
   }
 
+  @Get('example-list')
+  @IsUser()
+  async exampleList() {
+    return await this.apiPrintHtmlService.exampleList()
+  }
+
   @Get('get-list')
   @IsUser()
   getList(@External() { oid }: TExternal, @Query() query: PrintHtmlGetManyQuery) {

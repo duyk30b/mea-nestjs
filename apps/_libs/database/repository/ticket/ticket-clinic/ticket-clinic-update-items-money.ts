@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { DataSource, FindOptionsWhere, UpdateResult } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { DeliveryStatus, DiscountType } from '../../../common/variable'
-import { Ticket, TicketParaclinical, TicketProcedure, TicketProduct } from '../../../entities'
+import { Ticket, TicketProcedure, TicketProduct, TicketRadiology } from '../../../entities'
 import { TicketStatus } from '../../../entities/ticket.entity'
 
 @Injectable()
@@ -30,9 +30,9 @@ export class TicketClinicUpdateItemsMoney {
       discountType: DiscountType
       actualPrice: number
     }[]
-    ticketParaclinicalUpdateList: {
-      ticketParaclinicalId: number
-      paraclinicalId: number
+    ticketRadiologyUpdateList: {
+      ticketRadiologyId: number
+      radiologyId: number
       discountMoney: number
       discountPercent: number
       discountType: DiscountType
@@ -44,7 +44,7 @@ export class TicketClinicUpdateItemsMoney {
       ticketId,
       ticketProductUpdateList,
       ticketProcedureUpdateList,
-      ticketParaclinicalUpdateList,
+      ticketRadiologyUpdateList,
     } = params
     const PREFIX = `ticketId=${ticketId} update items quantity and discount failed`
 
@@ -140,37 +140,37 @@ export class TicketClinicUpdateItemsMoney {
         }
       }
 
-      // === 4. UPDATE PARACLINICAL_LIST ===
-      if (ticketParaclinicalUpdateList.length) {
-        const ticketParaclinicalUpdateResult: [any[], number] = await manager.query(
+      // === 4. UPDATE RADIOLOGY_LIST ===
+      if (ticketRadiologyUpdateList.length) {
+        const ticketRadiologyUpdateResult: [any[], number] = await manager.query(
           `
-            UPDATE "TicketParaclinical" tp
+            UPDATE "TicketRadiology" tp
             SET "discountMoney"   = temp."discountMoney",
                 "discountPercent" = temp."discountPercent",
                 "discountType"    = temp."discountType",
                 "actualPrice"     = temp."actualPrice"
             FROM (VALUES `
-          + ticketParaclinicalUpdateList
+          + ticketRadiologyUpdateList
             .map((i) => {
               return (
-                `(${i.ticketParaclinicalId}, ${ticketId}, ${i.paraclinicalId}, ${i.discountMoney}, `
+                `(${i.ticketRadiologyId}, ${ticketId}, ${i.radiologyId}, ${i.discountMoney}, `
                 + ` ${i.discountPercent}, '${i.discountType}', ${i.actualPrice})`
               )
             })
             .join(', ')
-          + `   ) AS temp("ticketParaclinicalId", "ticketId", "paraclinicalId", "discountMoney",
+          + `   ) AS temp("ticketRadiologyId", "ticketId", "radiologyId", "discountMoney",
                         "discountPercent", "discountType", "actualPrice"
                         )
-            WHERE   tp."id"           = temp."ticketParaclinicalId"
+            WHERE   tp."id"           = temp."ticketRadiologyId"
                 AND tp."ticketId"     = temp."ticketId"
-                AND tp."paraclinicalId"  = temp."paraclinicalId"
+                AND tp."radiologyId"  = temp."radiologyId"
                 AND tp."oid"          = ${oid}
             RETURNING tp.*;
             `
         )
-        if (ticketParaclinicalUpdateResult[0].length != ticketParaclinicalUpdateList.length) {
+        if (ticketRadiologyUpdateResult[0].length != ticketRadiologyUpdateList.length) {
           throw new Error(
-            `${PREFIX}: Update TicketParaclinical, affected = ${ticketParaclinicalUpdateResult[1]}`
+            `${PREFIX}: Update TicketRadiology, affected = ${ticketRadiologyUpdateResult[1]}`
           )
         }
       }
@@ -188,8 +188,8 @@ export class TicketClinicUpdateItemsMoney {
         where: { ticketId },
         order: { id: 'ASC' },
       })
-      const ticketParaclinicalList = await manager.find(TicketParaclinical, {
-        relations: { paraclinical: true },
+      const ticketRadiologyList = await manager.find(TicketRadiology, {
+        relations: { radiology: true },
         relationLoadStrategy: 'join',
         where: { ticketId },
         order: { id: 'ASC' },
@@ -201,7 +201,7 @@ export class TicketClinicUpdateItemsMoney {
       const productsMoney = ticketProductList.reduce((acc, item) => {
         return acc + item.actualPrice * item.quantity
       }, 0)
-      const paraclinicalMoney = ticketParaclinicalList.reduce((acc, item) => {
+      const radiologyMoney = ticketRadiologyList.reduce((acc, item) => {
         return acc + item.actualPrice
       }, 0)
       const totalCostAmount = ticketProductList.reduce((acc, item) => {
@@ -213,13 +213,13 @@ export class TicketClinicUpdateItemsMoney {
         totalCostAmount,
         proceduresMoney,
         productsMoney,
-        paraclinicalMoney,
+        radiologyMoney,
         totalMoney: () =>
-          `${proceduresMoney} + ${productsMoney} + ${paraclinicalMoney} - "discountMoney"`,
+          `${proceduresMoney} + ${productsMoney} + ${radiologyMoney} - "discountMoney"`,
         debt: () =>
-          `${proceduresMoney} + ${productsMoney} + ${paraclinicalMoney} - "discountMoney" - "paid"`,
+          `${proceduresMoney} + ${productsMoney} + ${radiologyMoney} - "discountMoney" - "paid"`,
         profit: () =>
-          `${proceduresMoney} + ${productsMoney} + ${paraclinicalMoney}`
+          `${proceduresMoney} + ${productsMoney} + ${radiologyMoney}`
           + ` - ${totalCostAmount} - "expense"`,
       }
       const ticketUpdateResult: UpdateResult = await manager
@@ -234,7 +234,7 @@ export class TicketClinicUpdateItemsMoney {
       }
       const ticketBasic = Ticket.fromRaw(ticketUpdateResult.raw[0])
 
-      return { ticketBasic, ticketProcedureList, ticketProductList, ticketParaclinicalList }
+      return { ticketBasic, ticketProcedureList, ticketProductList, ticketRadiologyList }
     })
   }
 }

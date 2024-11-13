@@ -11,9 +11,6 @@ import {
   DistributorPayment,
   Image,
   Organization,
-  Paraclinical,
-  ParaclinicalAttribute,
-  ParaclinicalGroup,
   Permission,
   PrintHtml,
   Procedure,
@@ -21,15 +18,17 @@ import {
   Product,
   ProductGroup,
   ProductMovement,
+  Radiology,
+  RadiologyGroup,
   Receipt,
   ReceiptItem,
   Role,
   Setting,
   Ticket,
   TicketDiagnosis,
-  TicketParaclinical,
   TicketProcedure,
   TicketProduct,
+  TicketRadiology,
   TicketUser,
   User,
   Warehouse,
@@ -47,9 +46,6 @@ import { DistributorPaymentRepository } from './distributor-payment/distributor-
 import { DistributorRepository } from './distributor/distributor.repository'
 import { ImageRepository } from './image/image.repository'
 import { OrganizationRepository } from './organization/organization.repository'
-import { ParaclinicalAttributeRepository } from './paraclinical-attribute/paraclinical-attribute.repository'
-import { ParaclinicalGroupRepository } from './paraclinical-group/paraclinical-group.repository'
-import { ParaclinicalRepository } from './paraclinical/paraclinical.repository'
 import { PermissionRepository } from './permission/permission.repository'
 import { PrintHtmlRepository } from './print-html/print-html.repository'
 import { ProcedureGroupRepository } from './procedure-group/procedure-group.repository'
@@ -57,6 +53,8 @@ import { ProcedureRepository } from './procedure/procedure.repository'
 import { ProductGroupRepository } from './product-group/product-group.repository'
 import { ProductMovementRepository } from './product-movement/product-movement.repository'
 import { ProductRepository } from './product/product.repository'
+import { RadiologyGroupRepository } from './radiology-group/radiology-group.repository'
+import { RadiologyRepository } from './radiology/radiology.repository'
 import { ReceiptItemRepository } from './receipt-item/receipt-item.repository'
 import { ReceiptCancel } from './receipt/receipt-cancel'
 import { ReceiptDraft } from './receipt/receipt-draft'
@@ -71,9 +69,9 @@ import { StatisticReceiptRepository } from './statistic/statistic-receipt.reposi
 import { StatisticTicketRepository } from './statistic/statistic-ticket.repository'
 import { StatisticRepository } from './statistic/statistic.repository'
 import { TicketDiagnosisRepository } from './ticket-diagnosis/ticket-diagnosis.repository'
-import { TicketParaclinicalRepository } from './ticket-paraclinical/ticket-paraclinical.repository'
 import { TicketProcedureRepository } from './ticket-procedure/ticket-procedure.repository'
 import { TicketProductRepository } from './ticket-product/ticket-product.repository'
+import { TicketRadiologyRepository } from './ticket-radiology/ticket-radiology.repository'
 import { TicketUserRepository } from './ticket-user/ticket-user.repository'
 import { TicketPayDebt } from './ticket/ticket-base/ticket-pay-debt'
 import { TicketPaymentAndClose } from './ticket/ticket-base/ticket-payment-and-close'
@@ -84,9 +82,9 @@ import { TicketClinicRefundOverpaid } from './ticket/ticket-clinic/ticket-clinic
 import { TicketClinicReopen } from './ticket/ticket-clinic/ticket-clinic-reopen'
 import { TicketClinicReturnProduct } from './ticket/ticket-clinic/ticket-clinic-return-product'
 import { TicketClinicUpdateItemsMoney } from './ticket/ticket-clinic/ticket-clinic-update-items-money'
-import { TicketClinicUpdateTicketParaclinicalList } from './ticket/ticket-clinic/ticket-clinic-update-ticket-paraclinical-list'
 import { TicketClinicUpdateTicketProcedureList } from './ticket/ticket-clinic/ticket-clinic-update-ticket-procedure-list'
 import { TicketClinicUpdateTicketProductList } from './ticket/ticket-clinic/ticket-clinic-update-ticket-product-list'
+import { TicketClinicUpdateTicketRadiologyList } from './ticket/ticket-clinic/ticket-clinic-update-ticket-radiology-list'
 import { TicketOrderCancel } from './ticket/ticket-order/ticket-order-cancel'
 import { TicketOrderDebtSuccessUpdate } from './ticket/ticket-order/ticket-order-debt-success-update'
 import { TicketOrderDraftApprovedUpdate } from './ticket/ticket-order/ticket-order-draft-approved-update'
@@ -116,9 +114,8 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
       Product,
       ProductMovement,
 
-      Paraclinical,
-      ParaclinicalGroup,
-      ParaclinicalAttribute,
+      Radiology,
+      RadiologyGroup,
 
       Receipt,
       ReceiptItem,
@@ -132,7 +129,7 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
       TicketDiagnosis,
       TicketProcedure,
       TicketProduct,
-      TicketParaclinical,
+      TicketRadiology,
       TicketUser,
 
       Warehouse,
@@ -157,9 +154,8 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
     ProductRepository,
     ProductMovementRepository,
 
-    ParaclinicalRepository,
-    ParaclinicalAttributeRepository,
-    ParaclinicalGroupRepository,
+    RadiologyRepository,
+    RadiologyGroupRepository,
 
     ReceiptDraft,
     ReceiptPayDebt,
@@ -180,7 +176,7 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
     PrintHtmlRepository,
 
     TicketClinicUpdateTicketProcedureList,
-    TicketClinicUpdateTicketParaclinicalList,
+    TicketClinicUpdateTicketRadiologyList,
     TicketClinicUpdateTicketProductList,
     TicketClinicUpdateItemsMoney,
     TicketClinicReturnProduct,
@@ -201,7 +197,7 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
     TicketProcedureRepository,
     TicketProductRepository,
     TicketUserRepository,
-    TicketParaclinicalRepository,
+    TicketRadiologyRepository,
 
     StatisticRepository,
     StatisticReceiptRepository,
@@ -223,9 +219,8 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
     ProcedureRepository,
     ProductMovementRepository,
 
-    ParaclinicalRepository,
-    ParaclinicalGroupRepository,
-    ParaclinicalAttributeRepository,
+    RadiologyRepository,
+    RadiologyGroupRepository,
 
     ReceiptRepository,
     RoleRepository,
@@ -247,7 +242,7 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
     PrintHtmlRepository,
 
     TicketClinicUpdateTicketProcedureList,
-    TicketClinicUpdateTicketParaclinicalList,
+    TicketClinicUpdateTicketRadiologyList,
     TicketClinicUpdateTicketProductList,
     TicketClinicUpdateItemsMoney,
     TicketClinicReturnProduct,
@@ -267,7 +262,7 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
     TicketDiagnosisRepository,
     TicketProcedureRepository,
     TicketProductRepository,
-    TicketParaclinicalRepository,
+    TicketRadiologyRepository,
     TicketUserRepository,
 
     StatisticRepository,

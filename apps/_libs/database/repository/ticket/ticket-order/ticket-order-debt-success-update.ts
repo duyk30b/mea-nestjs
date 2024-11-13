@@ -19,9 +19,9 @@ import {
   Product,
   Ticket,
   TicketExpense,
-  TicketParaclinical,
   TicketProcedure,
   TicketProduct,
+  TicketRadiology,
   TicketSurcharge,
 } from '../../../entities'
 import BatchMovement, { BatchMovementInsertType } from '../../../entities/batch-movement.entity'
@@ -192,7 +192,7 @@ export class TicketOrderDebtSuccessUpdate {
 
       await manager.delete(TicketProduct, { oid, ticketId })
       await manager.delete(TicketProcedure, { oid, ticketId })
-      await manager.delete(TicketParaclinical, { oid, ticketId })
+      await manager.delete(TicketRadiology, { oid, ticketId })
       await manager.delete(TicketSurcharge, { oid, ticketId })
       await manager.delete(TicketExpense, { oid, ticketId })
 

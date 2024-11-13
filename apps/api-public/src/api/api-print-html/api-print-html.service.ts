@@ -23,8 +23,6 @@ export class ApiPrintHtmlService {
       relation,
       condition: {
         oid,
-        type: filter?.type,
-        paraclinicalId: filter?.paraclinicalId,
         updatedAt: filter?.updatedAt,
       },
       sort,
@@ -35,6 +33,14 @@ export class ApiPrintHtmlService {
     }
   }
 
+  async exampleList(): Promise<BaseResponse> {
+    const data = await this.printHtmlRepository.findMany({
+      condition: { oid: 1 },
+      sort: { id: 'ASC' },
+    })
+    return { data }
+  }
+
   async getList(oid: number, query: PrintHtmlGetManyQuery): Promise<BaseResponse> {
     const { limit, filter, relation } = query
 
@@ -42,8 +48,6 @@ export class ApiPrintHtmlService {
       relation,
       condition: {
         oid,
-        type: filter?.type,
-        paraclinicalId: filter?.paraclinicalId,
         updatedAt: filter?.updatedAt,
       },
       limit,
@@ -57,8 +61,6 @@ export class ApiPrintHtmlService {
       relation,
       condition: {
         oid,
-        type: filter?.type,
-        paraclinicalId: filter?.paraclinicalId,
         updatedAt: filter?.updatedAt,
       },
     })
@@ -67,7 +69,10 @@ export class ApiPrintHtmlService {
 
   async detail(oid: number, id: number, query: PrintHtmlGetOneQuery): Promise<BaseResponse> {
     const printHtml = await this.printHtmlRepository.findOne({
-      condition: { oid, id },
+      condition: {
+        oid,
+        id,
+      },
       relation: query.relation,
     })
     if (!printHtml) throw new BusinessException('error.Database.NotFound')

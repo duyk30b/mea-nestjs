@@ -1,14 +1,5 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
-import Paraclinical from './paraclinical.entity'
-
-export const PrintHtmlType = {
-  DIAGNOSIS: 'Phiếu khám và chẩn đoán',
-  OPTOMETRY: 'Phiếu đo thị lực',
-  PRESCRIPTION: 'Đơn thuốc',
-  INVOICE: 'Hóa đơn',
-  PARACLINICAL: 'Phiếu cận lâm sàng',
-}
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity('PrintHtml')
 export default class PrintHtml {
@@ -22,11 +13,15 @@ export default class PrintHtml {
 
   @Column({ type: 'varchar', length: 255 })
   @Expose()
-  type: keyof typeof PrintHtmlType
+  name: string
 
-  @Column({ default: 0 })
+  @Column({ type: 'text', default: '' })
   @Expose()
-  paraclinicalId: number
+  initVariable: string // Dạng HTML
+
+  @Column({ type: 'text', default: '' })
+  @Expose()
+  dataExample: string // Dạng HTML
 
   @Column({ type: 'text' })
   @Expose()
@@ -43,11 +38,6 @@ export default class PrintHtml {
   })
   updatedAt: number
 
-  @OneToOne((type) => Paraclinical, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'paraclinicalId', referencedColumnName: 'id' })
-  @Expose()
-  paraclinical: Paraclinical
-
   static fromRaw(raw: { [P in keyof PrintHtml]: any }) {
     if (!raw) return null
     const entity = new PrintHtml()
@@ -63,7 +53,7 @@ export default class PrintHtml {
   }
 }
 
-export type PrintHtmlRelationType = Pick<PrintHtml, 'paraclinical'>
+export type PrintHtmlRelationType = Pick<PrintHtml, never>
 
 export type PrintHtmlSortType = Pick<PrintHtml, 'id'>
 

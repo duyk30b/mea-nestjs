@@ -76,7 +76,7 @@ export class TicketOrderDraftApprovedUpdate {
 
       await manager.delete(TicketProduct, { oid, ticketId })
       await manager.delete(TicketProcedure, { oid, ticketId })
-      // await manager.delete(TicketParaclinical, { oid, ticketId })
+      // await manager.delete(TicketRadiology, { oid, ticketId })
       await manager.delete(TicketSurcharge, { oid, ticketId })
       await manager.delete(TicketExpense, { oid, ticketId })
 
