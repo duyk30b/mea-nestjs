@@ -15,23 +15,10 @@ export default class ProcedureGroup {
   @Column({ type: 'varchar', length: 255 })
   name: string
 
-  @Expose()
-  @Column({
-    type: 'bigint',
-    default: () => '(EXTRACT(epoch FROM now()) * (1000))',
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
-  updatedAt: number
-
   static fromRaw(raw: { [P in keyof ProcedureGroup]: any }) {
     if (!raw) return null
     const entity = new ProcedureGroup()
     Object.assign(entity, raw)
-
-    entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)
 
     return entity
   }
@@ -47,10 +34,10 @@ export type ProcedureGroupSortType = Pick<ProcedureGroup, 'oid' | 'id' | 'name'>
 
 export type ProcedureGroupInsertType = Omit<
   ProcedureGroup,
-  keyof ProcedureGroupRelationType | keyof Pick<ProcedureGroup, 'id' | 'updatedAt'>
+  keyof ProcedureGroupRelationType | keyof Pick<ProcedureGroup, 'id'>
 >
 
 export type ProcedureGroupUpdateType = Omit<
   ProcedureGroup,
-  keyof ProcedureGroupRelationType | keyof Pick<ProcedureGroup, 'oid' | 'id' | 'updatedAt'>
+  keyof ProcedureGroupRelationType | keyof Pick<ProcedureGroup, 'oid' | 'id'>
 >

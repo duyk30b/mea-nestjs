@@ -28,6 +28,18 @@ export class RadiologyUpsertBody {
   @IsInt()
   price: number // Giá dịch vụ
 
+  @ApiPropertyOptional({ example: 105000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  priority: number
+
+  @ApiProperty({ example: 'Siêu âm thai, rau, ối' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  requestNoteDefault: string
+
   @ApiProperty({ example: '<h1>Âm tính</h1>' })
   @Expose()
   @Transform(({ value }) => DOMPurify.sanitize(value))

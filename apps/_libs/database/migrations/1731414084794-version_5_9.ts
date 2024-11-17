@@ -79,6 +79,7 @@ export class Version591731414084794 implements MigrationInterface {
         await queryRunner.query(`
             DROP TABLE "Paraclinical" CASCADE;
             DROP TABLE "ParaclinicalGroup" CASCADE;
+            DROP TABLE "ParaclinicalAttribute" CASCADE;
             DROP TABLE "TicketParaclinical" CASCADE;
         `)
     }

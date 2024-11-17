@@ -5,10 +5,7 @@ import { SortQuery } from '../../../../../_libs/common/dto/query'
 
 export class ProcedureGroupRelationQuery { }
 export class ProcedureGroupFilterQuery {
-  @Expose()
-  @Type(() => ConditionTimestamp)
-  @ValidateNested({ each: true })
-  updatedAt: ConditionTimestamp
+
 }
 
 export class ProcedureGroupSortQuery extends SortQuery { }

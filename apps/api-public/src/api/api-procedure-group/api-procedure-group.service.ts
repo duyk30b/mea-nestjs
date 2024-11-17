@@ -6,6 +6,7 @@ import {
   ProcedureGroupCreateBody,
   ProcedureGroupGetManyQuery,
   ProcedureGroupPaginationQuery,
+  ProcedureGroupReplaceAllBody,
   ProcedureGroupUpdateBody,
 } from './request'
 
@@ -22,7 +23,6 @@ export class ApiProcedureGroupService {
       relation,
       condition: {
         oid,
-        updatedAt: filter?.updatedAt,
       },
       sort,
     })
@@ -39,7 +39,6 @@ export class ApiProcedureGroupService {
       relation,
       condition: {
         oid,
-        updatedAt: filter?.updatedAt,
       },
       limit,
     })
@@ -50,6 +49,14 @@ export class ApiProcedureGroupService {
     const data = await this.procedureGroupRepository.findOneBy({ oid, id })
     if (!data) throw new BusinessException('error.Database.NotFound')
     return { data }
+  }
+
+  async replaceAll(oid: number, body: ProcedureGroupReplaceAllBody): Promise<BaseResponse> {
+    await this.procedureGroupRepository.replaceAll(
+      oid,
+      body.procedureGroupReplaceAll
+    )
+    return { data: true }
   }
 
   async createOne(oid: number, body: ProcedureGroupCreateBody): Promise<BaseResponse> {

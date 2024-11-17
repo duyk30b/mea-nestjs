@@ -35,6 +35,14 @@ export default class Radiology {
   @Expose()
   price: number
 
+  @Column({ default: 1 })
+  @Expose()
+  priority: number
+
+  @Column({ type: 'varchar', length: 255, default: '' })
+  @Expose()
+  requestNoteDefault: string
+
   @Column({ type: 'text' })
   @Expose()
   descriptionDefault: string
@@ -99,7 +107,7 @@ export type RadiologyRelationType = Pick<
   'radiologyGroup' | 'printHtml'
 >
 
-export type RadiologySortType = Pick<Radiology, 'oid' | 'id' | 'name' | 'price'>
+export type RadiologySortType = Pick<Radiology, 'oid' | 'id' | 'name' | 'priority'>
 
 export type RadiologyInsertType = Omit<
   Radiology,

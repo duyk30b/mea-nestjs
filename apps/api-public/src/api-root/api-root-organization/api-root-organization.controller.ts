@@ -1,13 +1,14 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
+import { Body, Controller, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto'
 import { IsRoot } from '../../../../_libs/common/guards/root.guard'
 import { ApiRootOrganizationService } from './api-root-organization.service'
-import { RootOrganizationPaginationQuery } from './request/root-organization-get.query'
 import {
+  RootOrganizationClearBody,
   RootOrganizationCreateBody,
+  RootOrganizationPaginationQuery,
   RootOrganizationUpdateBody,
-} from './request/root-organization-upsert.body'
+} from './request'
 
 @ApiTags('Root')
 @ApiBearerAuth('access-token')
@@ -34,13 +35,7 @@ export class ApiRootOrganizationController {
 
   @Put('organization/clear/:id')
   @ApiParam({ name: 'id', example: 1 })
-  async clearOne(@Param() { id }: IdParam) {
-    return await this.apiRootOrganizationService.clearOne(id)
-  }
-
-  @Delete('organization/delete/:id')
-  @ApiParam({ name: 'id', example: 1 })
-  async deleteOne(@Param() { id }: IdParam) {
-    return await this.apiRootOrganizationService.deleteOne(id)
+  async clearOne(@Param() { id }: IdParam, @Body() body: RootOrganizationClearBody) {
+    return await this.apiRootOrganizationService.clearOne(id, body)
   }
 }

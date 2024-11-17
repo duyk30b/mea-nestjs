@@ -7,6 +7,8 @@ import { ApiCustomerSourceModule } from './api-customer-source/api-customer-sour
 import { ApiCustomerModule } from './api-customer/api-customer.module'
 import { ApiDistributorPaymentModule } from './api-distributor-payment/api-distributor-payment.module'
 import { ApiDistributorModule } from './api-distributor/api-distributor.module'
+import { ApiLaboratoryGroupModule } from './api-laboratory-group/api-laboratory-group.module'
+import { ApiLaboratoryModule } from './api-laboratory/api-laboratory.module'
 import { ApiOrganizationModule } from './api-organization/api-organization.module'
 import { ApiPermissionModule } from './api-permission/api-permission.module'
 import { ApiPrintHtmlModule } from './api-print-html/api-print-html.module'
@@ -47,7 +49,6 @@ import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
     ApiProcedureModule,
     ApiProductModule,
     ApiProductMovementModule,
-    ApiRadiologyModule,
     ApiReceiptModule,
     ApiReceiptItemModule,
     ApiRoleModule,
@@ -55,10 +56,14 @@ import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
     ApiStatisticModule,
     ApiUserModule,
 
+    ApiLaboratoryModule,
+    ApiLaboratoryGroupModule,
+    ApiRadiologyModule,
+    ApiRadiologyGroupModule,
+
     ApiWarehouseModule,
     ApiProductGroupModule,
     ApiProcedureGroupModule,
-    ApiRadiologyGroupModule,
     ApiPrintHtmlModule,
 
     ApiTicketModule,

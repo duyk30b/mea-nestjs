@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
-import { IsDefined, MinLength, Validate } from 'class-validator'
+import { IsDefined, IsNumber, MinLength, Validate } from 'class-validator'
 import { IsPhone } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 
 export class LoginBody {
@@ -21,4 +21,12 @@ export class LoginBody {
   @IsDefined()
   @MinLength(6)
   password: string
+}
+
+export class LoginRootBody extends LoginBody {
+  @ApiProperty({ example: 4 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  oid: number
 }

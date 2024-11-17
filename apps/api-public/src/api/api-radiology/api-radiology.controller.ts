@@ -64,10 +64,10 @@ export class ApiRadiologyController {
     return await this.apiRadiologyService.updateOne(oid, id, body)
   }
 
-  @Delete('delete/:id')
+  @Delete('destroy/:id')
   @HasPermission(PermissionId.MASTER_DATA_RADIOLOGY)
   @ApiParam({ name: 'id', example: 1 })
-  async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiRadiologyService.deleteOne(oid, id)
+  async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiRadiologyService.destroyOne(oid, id)
   }
 }

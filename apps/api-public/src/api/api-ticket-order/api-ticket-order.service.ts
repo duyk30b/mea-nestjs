@@ -234,6 +234,7 @@ export class ApiTicketOrderService {
         this.socketEmitService.customerUpsert(oid, { customer })
       }
       const ticketProductList = await this.ticketProductRepository.findMany({
+        relation: { product: true, batch: true },
         condition: {
           oid,
           ticketId,
@@ -303,6 +304,7 @@ export class ApiTicketOrderService {
       })
 
       const ticketProductList = await this.ticketProductRepository.findMany({
+        relation: { product: true, batch: true },
         condition: {
           oid,
           ticketId,
@@ -345,6 +347,7 @@ export class ApiTicketOrderService {
       }
 
       const ticketProductList = await this.ticketProductRepository.findMany({
+        relation: { product: true, batch: true },
         condition: {
           oid,
           ticketId,

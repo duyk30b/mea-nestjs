@@ -10,6 +10,8 @@ import {
   Distributor,
   DistributorPayment,
   Image,
+  Laboratory,
+  LaboratoryGroup,
   Organization,
   Permission,
   PrintHtml,
@@ -45,6 +47,8 @@ import { CustomerRepository } from './customer/customer.repository'
 import { DistributorPaymentRepository } from './distributor-payment/distributor-payment.repository'
 import { DistributorRepository } from './distributor/distributor.repository'
 import { ImageRepository } from './image/image.repository'
+import { LaboratoryGroupRepository } from './laboratory-group/laboratory-group.repository'
+import { LaboratoryRepository } from './laboratory/radiology.repository'
 import { OrganizationRepository } from './organization/organization.repository'
 import { PermissionRepository } from './permission/permission.repository'
 import { PrintHtmlRepository } from './print-html/print-html.repository'
@@ -114,6 +118,8 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
       Product,
       ProductMovement,
 
+      Laboratory,
+      LaboratoryGroup,
       Radiology,
       RadiologyGroup,
 
@@ -154,6 +160,8 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
     ProductRepository,
     ProductMovementRepository,
 
+    LaboratoryRepository,
+    LaboratoryGroupRepository,
     RadiologyRepository,
     RadiologyGroupRepository,
 
@@ -219,6 +227,8 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
     ProcedureRepository,
     ProductMovementRepository,
 
+    LaboratoryRepository,
+    LaboratoryGroupRepository,
     RadiologyRepository,
     RadiologyGroupRepository,
 

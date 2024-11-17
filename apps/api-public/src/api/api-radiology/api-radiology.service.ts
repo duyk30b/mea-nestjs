@@ -82,8 +82,8 @@ export class ApiRadiologyService {
     return { data: { radiology } }
   }
 
-  async deleteOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.radiologyRepository.update({ oid, id }, { deletedAt: Date.now() })
+  async destroyOne(oid: number, id: number): Promise<BaseResponse> {
+    const affected = await this.radiologyRepository.delete({ oid, id })
     if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
 
     const radiology = await this.radiologyRepository.findOneById(id)

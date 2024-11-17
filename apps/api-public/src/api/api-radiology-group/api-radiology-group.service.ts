@@ -6,6 +6,7 @@ import {
   RadiologyGroupCreateBody,
   RadiologyGroupGetManyQuery,
   RadiologyGroupPaginationQuery,
+  RadiologyGroupReplaceAllBody,
   RadiologyGroupUpdateBody,
 } from './request'
 
@@ -22,7 +23,6 @@ export class ApiRadiologyGroupService {
       relation,
       condition: {
         oid,
-        updatedAt: filter?.updatedAt,
       },
       sort,
     })
@@ -39,7 +39,6 @@ export class ApiRadiologyGroupService {
       relation,
       condition: {
         oid,
-        updatedAt: filter?.updatedAt,
       },
       limit,
     })
@@ -50,6 +49,14 @@ export class ApiRadiologyGroupService {
     const data = await this.radiologyGroupRepository.findOneBy({ oid, id })
     if (!data) throw new BusinessException('error.Database.NotFound')
     return { data }
+  }
+
+  async replaceAll(oid: number, body: RadiologyGroupReplaceAllBody): Promise<BaseResponse> {
+    await this.radiologyGroupRepository.replaceAll(
+      oid,
+      body.radiologyGroupReplaceAll
+    )
+    return { data: true }
   }
 
   async createOne(oid: number, body: RadiologyGroupCreateBody): Promise<BaseResponse> {

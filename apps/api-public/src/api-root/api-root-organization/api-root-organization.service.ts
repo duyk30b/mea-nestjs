@@ -10,15 +10,23 @@ import {
   BatchMovement,
   Customer,
   CustomerPayment,
+  CustomerSource,
   Distributor,
   DistributorPayment,
   Image,
   Organization,
+  PrintHtml,
+  Procedure,
+  ProcedureGroup,
   Product,
+  ProductGroup,
   ProductMovement,
+  Radiology,
+  RadiologyGroup,
   Receipt,
   ReceiptItem,
   Role,
+  Setting,
   Ticket,
   TicketDiagnosis,
   TicketExpense,
@@ -28,14 +36,17 @@ import {
   TicketSurcharge,
   TicketUser,
   User,
+  Warehouse,
 } from '../../../../_libs/database/entities'
+import UserRole from '../../../../_libs/database/entities/user-role.entity'
 import { OrganizationRepository } from '../../../../_libs/database/repository/organization/organization.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
-import { RootOrganizationPaginationQuery } from './request/root-organization-get.query'
 import {
+  RootOrganizationClearBody,
   RootOrganizationCreateBody,
+  RootOrganizationPaginationQuery,
   RootOrganizationUpdateBody,
-} from './request/root-organization-upsert.body'
+} from './request'
 
 @Injectable()
 export class ApiRootOrganizationService {
@@ -92,58 +103,143 @@ export class ApiRootOrganizationService {
     return { data: { organization } }
   }
 
-  async clearOne(oid: number) {
-    await this.manager.delete(Appointment, { oid })
-    await this.manager.delete(BatchMovement, { oid })
-    await this.manager.delete(Batch, { oid })
-    await this.manager.delete(CustomerPayment, { oid })
-    // await this.manager.delete(CustomerSource, { oid })
-    await this.manager.update(Customer, { oid }, { debt: 0 })
-    await this.manager.delete(DistributorPayment, { oid })
-    await this.manager.update(Distributor, { oid }, { debt: 0 })
-    await this.manager.update(Image, { oid }, { waitDelete: 1 }) // TODO
-    // await this.manager.delete(ProcedureGroup, { oid })
-    // await this.manager.delete(Procedure, { oid })
-    // await this.manager.delete(ProductGroup, { oid })
-    await this.manager.delete(ProductMovement, { oid })
-    await this.manager.update(Product, { oid }, { quantity: 0, costAmount: 0 })
-    // await this.manager.delete(RadiologyGroup, { oid })
-    // await this.manager.delete(Radiology, { oid })
-    await this.manager.delete(ReceiptItem, { oid })
-    await this.manager.delete(Receipt, { oid })
-    // await this.manager.delete(Role, { oid })
-
-    // await this.manager.delete(Setting, { oid })
-    await this.manager.delete(TicketDiagnosis, { oid })
-    await this.manager.delete(TicketExpense, { oid })
-    await this.manager.delete(TicketSurcharge, { oid })
-    await this.manager.delete(TicketProduct, { oid })
-    await this.manager.delete(TicketProcedure, { oid })
-    await this.manager.delete(TicketRadiology, { oid })
-    await this.manager.delete(TicketUser, { oid })
-    await this.manager.delete(Ticket, { oid })
-
-    // await this.manager.delete(User, { oid })
-    // await this.manager.delete(UserRole, { oid })
-
-    const organizationRoot = await this.organizationRepository.findOneById(oid)
-    const [organization] = await this.organizationRepository.updateAndReturnEntity(
-      { id: oid },
-      { dataVersion: organizationRoot.dataVersion + 1 }
-    )
-    if (!organization) {
-      throw new BusinessException('error.Database.UpdateFailed')
+  async clearOne(oid: number, body: RootOrganizationClearBody) {
+    const { tableNameList } = body
+    if (tableNameList.includes(Appointment.name)) {
+      await this.manager.delete(Appointment, { oid })
     }
-    this.cacheDataService.clearOrganization(organization.id)
-    this.socketEmitService.organizationUpdate(organization.id, { organization })
-    return { data: { oid } }
-  }
+    if (tableNameList.includes(Batch.name)) {
+      await this.manager.delete(Batch, { oid })
+    }
+    if (tableNameList.includes(BatchMovement.name)) {
+      await this.manager.delete(BatchMovement, { oid })
+    }
 
-  async deleteOne(oid: number) {
-    await this.clearOne(oid)
-    await this.manager.delete(Organization, { id: oid })
-    await this.manager.delete(Role, { oid })
-    await this.manager.delete(User, { oid })
+    if (tableNameList.includes(Customer.name)) {
+      await this.manager.delete(Customer, { oid })
+    } else {
+      await this.manager.update(Customer, { oid }, { debt: 0 })
+    }
+
+    if (tableNameList.includes(CustomerPayment.name)) {
+      await this.manager.delete(CustomerPayment, { oid })
+    }
+
+    if (tableNameList.includes(CustomerSource.name)) {
+      await this.manager.delete(CustomerSource, { oid })
+    }
+
+    if (tableNameList.includes(Distributor.name)) {
+      await this.manager.delete(Distributor, { oid })
+    } else {
+      await this.manager.update(Distributor, { oid }, { debt: 0 })
+    }
+
+    if (tableNameList.includes(DistributorPayment.name)) {
+      await this.manager.delete(DistributorPayment, { oid })
+    }
+
+    if (tableNameList.includes(Image.name)) {
+      await this.manager.delete(Image, { oid })
+    } else {
+      await this.manager.update(Image, { oid }, { waitDelete: 1 })
+    }
+
+    if (tableNameList.includes(PrintHtml.name)) {
+      await this.manager.delete(PrintHtml, { oid })
+    }
+
+    if (tableNameList.includes(Procedure.name)) {
+      await this.manager.delete(Procedure, { oid })
+    }
+
+    if (tableNameList.includes(ProcedureGroup.name)) {
+      await this.manager.delete(ProcedureGroup, { oid })
+    }
+
+    if (tableNameList.includes(Product.name)) {
+      await this.manager.delete(Product, { oid })
+    } else {
+      await this.manager.update(Product, { oid }, { quantity: 0, costAmount: 0 })
+    }
+
+    if (tableNameList.includes(ProductGroup.name)) {
+      await this.manager.delete(ProductGroup, { oid })
+    }
+
+    if (tableNameList.includes(ProductMovement.name)) {
+      await this.manager.delete(ProductMovement, { oid })
+    }
+
+    if (tableNameList.includes(Radiology.name)) {
+      await this.manager.delete(Radiology, { oid })
+    }
+
+    if (tableNameList.includes(RadiologyGroup.name)) {
+      await this.manager.delete(RadiologyGroup, { oid })
+    }
+
+    if (tableNameList.includes(Receipt.name)) {
+      await this.manager.delete(Receipt, { oid })
+    }
+
+    if (tableNameList.includes(ReceiptItem.name)) {
+      await this.manager.delete(ReceiptItem, { oid })
+    }
+
+    if (tableNameList.includes(Role.name)) {
+      await this.manager.delete(Role, { oid })
+    }
+
+    if (tableNameList.includes(Setting.name)) {
+      await this.manager.delete(Setting, { oid })
+    }
+
+    if (tableNameList.includes(TicketDiagnosis.name)) {
+      await this.manager.delete(TicketDiagnosis, { oid })
+    }
+
+    if (tableNameList.includes(TicketExpense.name)) {
+      await this.manager.delete(TicketExpense, { oid })
+    }
+
+    if (tableNameList.includes(TicketProcedure.name)) {
+      await this.manager.delete(TicketProcedure, { oid })
+    }
+    if (tableNameList.includes(TicketProduct.name)) {
+      await this.manager.delete(TicketProduct, { oid })
+    }
+    if (tableNameList.includes(TicketRadiology.name)) {
+      await this.manager.delete(TicketRadiology, { oid })
+    }
+    if (tableNameList.includes(TicketSurcharge.name)) {
+      await this.manager.delete(TicketSurcharge, { oid })
+    }
+    if (tableNameList.includes(TicketUser.name)) {
+      await this.manager.delete(TicketUser, { oid })
+    }
+    if (tableNameList.includes(Ticket.name)) {
+      await this.manager.delete(Ticket, { oid })
+    }
+    if (tableNameList.includes(User.name)) {
+      await this.manager.delete(User, { oid })
+    }
+    if (tableNameList.includes(UserRole.name)) {
+      await this.manager.delete(UserRole, { oid })
+    }
+    if (tableNameList.includes(Warehouse.name)) {
+      await this.manager.delete(Warehouse, { oid })
+    }
+
+    if (tableNameList.includes(Organization.name)) {
+      await this.manager.delete(Organization, { id: oid })
+    } else {
+      const organizationRoot = await this.organizationRepository.findOneById(oid)
+      await this.organizationRepository.updateAndReturnEntity(
+        { id: oid },
+        { dataVersion: organizationRoot.dataVersion + 1 }
+      )
+    }
 
     this.cacheDataService.clearOrganization(oid)
     return { data: { oid } }

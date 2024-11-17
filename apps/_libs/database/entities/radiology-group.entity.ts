@@ -15,23 +15,10 @@ export default class RadiologyGroup {
   @Column({ type: 'varchar', length: 255 })
   name: string
 
-  @Expose()
-  @Column({
-    type: 'bigint',
-    default: () => '(EXTRACT(epoch FROM now()) * (1000))',
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
-  updatedAt: number
-
   static fromRaw(raw: { [P in keyof RadiologyGroup]: any }) {
     if (!raw) return null
     const entity = new RadiologyGroup()
     Object.assign(entity, raw)
-
-    entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)
 
     return entity
   }
@@ -47,10 +34,10 @@ export type RadiologyGroupSortType = Pick<RadiologyGroup, 'oid' | 'id' | 'name'>
 
 export type RadiologyGroupInsertType = Omit<
   RadiologyGroup,
-  keyof RadiologyGroupRelationType | keyof Pick<RadiologyGroup, 'id' | 'updatedAt'>
+  keyof RadiologyGroupRelationType | keyof Pick<RadiologyGroup, 'id'>
 >
 
 export type RadiologyGroupUpdateType = Omit<
   RadiologyGroup,
-  keyof RadiologyGroupRelationType | keyof Pick<RadiologyGroup, 'oid' | 'id' | 'updatedAt'>
+  keyof RadiologyGroupRelationType | keyof Pick<RadiologyGroup, 'oid' | 'id'>
 >

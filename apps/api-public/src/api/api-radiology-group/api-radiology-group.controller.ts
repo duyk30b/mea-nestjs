@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
 import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
@@ -10,6 +10,7 @@ import {
   RadiologyGroupCreateBody,
   RadiologyGroupGetManyQuery,
   RadiologyGroupPaginationQuery,
+  RadiologyGroupReplaceAllBody,
   RadiologyGroupUpdateBody,
 } from './request'
 
@@ -35,6 +36,15 @@ export class ApiRadiologyGroupController {
   @IsUser()
   findOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return this.apiRadiologyGroupService.getOne(oid, id)
+  }
+
+  @Put('replace-all')
+  @HasPermission(PermissionId.MASTER_DATA_RADIOLOGY_GROUP)
+  async replaceAll(
+    @External() { oid }: TExternal,
+    @Body() body: RadiologyGroupReplaceAllBody
+  ) {
+    return await this.apiRadiologyGroupService.replaceAll(oid, body)
   }
 
   @Post('create')

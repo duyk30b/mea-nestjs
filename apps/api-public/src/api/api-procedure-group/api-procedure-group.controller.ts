@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
 import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
@@ -10,6 +10,7 @@ import {
   ProcedureGroupCreateBody,
   ProcedureGroupGetManyQuery,
   ProcedureGroupPaginationQuery,
+  ProcedureGroupReplaceAllBody,
   ProcedureGroupUpdateBody,
 } from './request'
 
@@ -35,6 +36,15 @@ export class ApiProcedureGroupController {
   @IsUser()
   findOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return this.apiProcedureGroupService.getOne(oid, id)
+  }
+
+  @Put('replace-all')
+  @HasPermission(PermissionId.MASTER_DATA_PROCEDURE_GROUP)
+  async replaceAll(
+    @External() { oid }: TExternal,
+    @Body() body: ProcedureGroupReplaceAllBody
+  ) {
+    return await this.apiProcedureGroupService.replaceAll(oid, body)
   }
 
   @Post('create')

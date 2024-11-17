@@ -344,6 +344,16 @@ export class ApiPermissionService {
         parentId: PermissionId.MASTER_DATA,
         rootId: PermissionId.MASTER_DATA,
       },
+      {
+        id: PermissionId.MASTER_DATA_LABORATORY,
+        level: 2,
+        code: PermissionId[PermissionId.MASTER_DATA_LABORATORY],
+        isActive: 1,
+        pathId: `${PermissionId.MASTER_DATA}.${PermissionId.MASTER_DATA_LABORATORY}`,
+        name: 'Quản lý xét nghiệm',
+        parentId: PermissionId.MASTER_DATA,
+        rootId: PermissionId.MASTER_DATA,
+      },
     ]
 
     const permissionProduct: Permission[] = [

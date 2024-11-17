@@ -17,9 +17,7 @@ import { OrganizationRepository } from '../../../../_libs/database/repository/or
 import { UserRepository } from '../../../../_libs/database/repository/user/user.repository'
 import { GlobalConfig } from '../../../../_libs/environments'
 import { EmailService } from '../../components/email/email.service'
-import { ForgotPasswordBody } from './request/forgot-password.body'
-import { LoginBody } from './request/login.body'
-import { ResetPasswordBody } from './request/reset-password.body'
+import { ForgotPasswordBody, LoginBody, LoginRootBody, ResetPasswordBody } from './request'
 
 @Injectable()
 export class ApiAuthService {
@@ -125,6 +123,58 @@ export class ApiAuthService {
 
     const checkPassword = await bcrypt.compare(loginDto.password, user.hashPassword)
     if (!checkPassword) throw new BusinessException('error.User.WrongPassword')
+
+    const token = this.jwtExtendService.createTokenFromUser(user, ip)
+
+    await this.cacheTokenService.addAccessToken({
+      oid: user.oid,
+      uid: user.id,
+      accessExp: token.accessExp,
+      refreshExp: token.refreshExp,
+      ip,
+      os,
+      browser,
+      mobile,
+    })
+
+    return {
+      data: {
+        user,
+        accessToken: token.accessToken,
+        accessExp: token.accessExp,
+        refreshToken: token.refreshToken,
+        refreshExp: token.refreshExp,
+      },
+    }
+  }
+
+  async loginRoot(loginRootDto: LoginRootBody, dataExternal: TExternal): Promise<BaseResponse> {
+    const { ip, os, browser, mobile } = dataExternal
+
+    const [root] = await this.dataSource.getRepository(User).find({
+      relations: { organization: true },
+      relationLoadStrategy: 'join',
+      where: {
+        username: loginRootDto.username,
+        organization: { phone: loginRootDto.orgPhone },
+      },
+    })
+    if (!root) throw new BusinessException('error.Database.NotFound')
+    if (!root.isActive || !root.organization?.isActive) {
+      throw new BusinessException('common.AccountInactive')
+    }
+
+    const checkPassword = await bcrypt.compare(loginRootDto.password, root.hashPassword)
+    if (!checkPassword) throw new BusinessException('error.User.WrongPassword')
+
+    const [user] = await this.dataSource.getRepository(User).find({
+      relations: { organization: true },
+      relationLoadStrategy: 'join',
+      where: {
+        oid: loginRootDto.oid,
+        isAdmin: 1,
+      },
+    })
 
     const token = this.jwtExtendService.createTokenFromUser(user, ip)
 
