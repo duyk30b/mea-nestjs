@@ -12,11 +12,12 @@ import { TicketRepository } from '../../../../_libs/database/repository/ticket/t
 import { UserRepository } from '../../../../_libs/database/repository/user/user.repository'
 import { ImageManagerService } from '../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../socket/socket-emit.service'
-import { TicketRadiologyGetOneQuery, TicketRadiologyPaginationQuery } from './request'
 import {
   TicketRadiologyCreateBody,
+  TicketRadiologyGetOneQuery,
+  TicketRadiologyPaginationQuery,
   TicketRadiologyUpdateBody,
-} from './request/ticket-radiology-upsert.body'
+} from './request'
 
 @Injectable()
 export class ApiTicketRadiologyService {
@@ -53,11 +54,7 @@ export class ApiTicketRadiologyService {
     }
   }
 
-  async getOne(
-    oid: number,
-    id: number,
-    query: TicketRadiologyGetOneQuery
-  ): Promise<BaseResponse> {
+  async getOne(oid: number, id: number, query: TicketRadiologyGetOneQuery): Promise<BaseResponse> {
     const { imageList, ...relationEntity } = query.relation
     const ticketRadiology = await this.ticketRadiologyRepository.findOne({
       relation: relationEntity,
@@ -90,7 +87,7 @@ export class ApiTicketRadiologyService {
   }) {
     const { oid, body, files } = options
 
-    const imageIdsUpdate = await this.imageManagerService.changeImage({
+    const imageIdsUpdate = await this.imageManagerService.changeImageList({
       oid,
       customerId: body.customerId,
       files,
@@ -99,15 +96,14 @@ export class ApiTicketRadiologyService {
       imageIdsOld: [],
     })
 
-    const ticketRadiology =
-      await this.ticketRadiologyRepository.insertOneFullFieldAndReturnEntity({
-        ...body,
-        oid,
-        ticketId: body.ticketId,
-        imageIds: JSON.stringify(imageIdsUpdate),
-        status: TicketRadiologyStatus.Completed,
-        startedAt: body.startedAt,
-      })
+    const ticketRadiology = await this.ticketRadiologyRepository.insertOneFullFieldAndReturnEntity({
+      ...body,
+      oid,
+      ticketId: body.ticketId,
+      imageIds: JSON.stringify(imageIdsUpdate),
+      status: TicketRadiologyStatus.Completed,
+      startedAt: body.startedAt,
+    })
 
     if (!ticketRadiology) throw new BusinessException('error.Database.InsertFailed')
 
@@ -151,7 +147,7 @@ export class ApiTicketRadiologyService {
       id: ticketRadiologyId,
     })
 
-    const imageIdsUpdate = await this.imageManagerService.changeImage({
+    const imageIdsUpdate = await this.imageManagerService.changeImageList({
       oid,
       customerId: oldTicketRadiology.customerId,
       files,
@@ -163,8 +159,9 @@ export class ApiTicketRadiologyService {
     const [ticketRadiology] = await this.ticketRadiologyRepository.updateAndReturnEntity(
       { oid, id: ticketRadiologyId },
       {
-        imageIds: JSON.stringify(imageIdsUpdate),
         ...object,
+        imageIds: JSON.stringify(imageIdsUpdate),
+        status: TicketRadiologyStatus.Completed,
       }
     )
 
@@ -183,8 +180,6 @@ export class ApiTicketRadiologyService {
     })
 
     ticketRadiology.radiology = radiology
-
-    const ticket = await this.ticketRepository.findOneBy({ oid, id: ticketRadiology.ticketId })
 
     this.socketEmitService.ticketClinicUpdateTicketRadiologyResult(oid, {
       ticketId: ticketRadiology.ticketId,

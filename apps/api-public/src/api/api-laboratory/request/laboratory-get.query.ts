@@ -29,7 +29,7 @@ export class LaboratoryGetQuery {
 
   @ApiPropertyOptional({
     type: String,
-    example: JSON.stringify(<LaboratoryFilterQuery>{ updatedAt: { GT: Date.now() } }),
+    example: JSON.stringify(<LaboratoryFilterQuery>{ level: 1 }),
   })
   @Expose()
   @Transform(({ value }) => {
@@ -73,11 +73,11 @@ export class LaboratoryGetQuery {
 export class LaboratoryPaginationQuery extends IntersectionType(
   LaboratoryGetQuery,
   PaginationQuery
-) {}
+) { }
 
 export class LaboratoryGetManyQuery extends IntersectionType(
   PickType(LaboratoryGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
-) {}
+) { }
 
-export class LaboratoryGetOneQuery extends PickType(LaboratoryGetQuery, ['relation']) {}
+export class LaboratoryGetOneQuery extends PickType(LaboratoryGetQuery, ['relation']) { }

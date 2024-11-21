@@ -1,12 +1,16 @@
 import { Expose, Type } from 'class-transformer'
 import { IsBoolean, IsIn, IsNumber, ValidateNested } from 'class-validator'
-import { ConditionTimestamp } from '../../../../../_libs/common/dto'
+import { ConditionNumber } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 
 export class LaboratoryRelationQuery {
   @Expose()
   @IsBoolean()
   laboratoryGroup: boolean
+
+  @Expose()
+  @IsBoolean()
+  children: boolean
 }
 
 export class LaboratoryFilterQuery {
@@ -15,9 +19,12 @@ export class LaboratoryFilterQuery {
   laboratoryGroupId: number
 
   @Expose()
-  @Type(() => ConditionTimestamp)
-  @ValidateNested({ each: true })
-  updatedAt: ConditionTimestamp
+  @IsNumber()
+  level: number
+
+  @Expose()
+  @IsNumber()
+  parentId: number
 }
 
 export class LaboratorySortQuery extends SortQuery {

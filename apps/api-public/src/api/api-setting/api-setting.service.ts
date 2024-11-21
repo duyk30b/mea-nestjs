@@ -25,7 +25,7 @@ export class ApiSettingService {
       key,
       data: body.data,
     })
-    this.cacheDataService.reloadSettingMap(oid)
+    await this.cacheDataService.reloadSettingMap(oid)
     this.socketEmitService.settingReload(oid)
     return { data }
   }

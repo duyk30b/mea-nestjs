@@ -13,7 +13,6 @@ import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { FastifyFilesInterceptor } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { VoucherType } from '../../../../_libs/database/common/variable'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
 import { ApiTicketClinicService } from './api-ticket-clinic.service'
 import {
@@ -22,6 +21,7 @@ import {
   TicketClinicUpdateDiagnosisBasicBody,
   TicketClinicUpdateItemsMoneyBody,
   TicketClinicUpdatePrescriptionBody,
+  TicketClinicUpdateTicketLaboratoryListBody,
   TicketClinicUpdateTicketProcedureListBody,
   TicketClinicUpdateTicketRadiologyListBody,
 } from './request'
@@ -129,6 +129,20 @@ export class ApiTicketClinicController {
     @Body() body: TicketClinicUpdateTicketRadiologyListBody
   ) {
     return await this.apiTicketClinicService.updateTicketRadiologyList({
+      oid,
+      ticketId: id,
+      body,
+    })
+  }
+
+  @Post(':id/update-ticket-laboratory-list')
+  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST)
+  async updateTicketLaboratoryList(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam,
+    @Body() body: TicketClinicUpdateTicketLaboratoryListBody
+  ) {
+    return await this.apiTicketClinicService.updateTicketLaboratoryList({
       oid,
       ticketId: id,
       body,

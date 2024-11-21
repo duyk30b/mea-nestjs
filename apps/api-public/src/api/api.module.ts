@@ -26,6 +26,7 @@ import { ApiSettingModule } from './api-setting/api-setting.module'
 import { ApiStatisticModule } from './api-statistics/api-statistic.module'
 import { ApiTicketClinicModule } from './api-ticket-clinic/api-ticket-clinic.module'
 import { ApiTicketDiagnosisModule } from './api-ticket-diagnosis/api-ticket-diagnosis.module'
+import { ApiTicketLaboratoryModule } from './api-ticket-laboratory/api-ticket-laboratory.module'
 import { ApiTicketOrderModule } from './api-ticket-order/api-ticket-order.module'
 import { ApiTicketProcedureModule } from './api-ticket-procedure/api-ticket-procedure.module'
 import { ApiTicketProductModule } from './api-ticket-product/api-ticket-product.module'
@@ -72,6 +73,7 @@ import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
     ApiTicketProductModule,
     ApiTicketClinicModule,
     ApiTicketDiagnosisModule,
+    ApiTicketLaboratoryModule,
     ApiTicketRadiologyModule,
   ],
   controllers: [],

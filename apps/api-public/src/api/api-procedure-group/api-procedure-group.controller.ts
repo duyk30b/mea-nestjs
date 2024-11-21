@@ -39,7 +39,7 @@ export class ApiProcedureGroupController {
   }
 
   @Put('replace-all')
-  @HasPermission(PermissionId.MASTER_DATA_PROCEDURE_GROUP)
+  @HasPermission(PermissionId.MASTER_DATA_PROCEDURE)
   async replaceAll(
     @External() { oid }: TExternal,
     @Body() body: ProcedureGroupReplaceAllBody
@@ -48,13 +48,13 @@ export class ApiProcedureGroupController {
   }
 
   @Post('create')
-  @HasPermission(PermissionId.MASTER_DATA_PROCEDURE_GROUP)
+  @HasPermission(PermissionId.MASTER_DATA_PROCEDURE)
   async createOne(@External() { oid }: TExternal, @Body() body: ProcedureGroupCreateBody) {
     return await this.apiProcedureGroupService.createOne(oid, body)
   }
 
   @Patch('update/:id')
-  @HasPermission(PermissionId.MASTER_DATA_PROCEDURE_GROUP)
+  @HasPermission(PermissionId.MASTER_DATA_PROCEDURE)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
     @External() { oid }: TExternal,
@@ -65,7 +65,7 @@ export class ApiProcedureGroupController {
   }
 
   @Delete('destroy/:id')
-  @HasPermission(PermissionId.MASTER_DATA_PROCEDURE_GROUP)
+  @HasPermission(PermissionId.MASTER_DATA_PROCEDURE)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiProcedureGroupService.destroyOne(oid, id)

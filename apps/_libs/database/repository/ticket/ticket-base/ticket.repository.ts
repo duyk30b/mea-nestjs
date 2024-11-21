@@ -148,6 +148,18 @@ export class TicketRepository extends PostgreSqlRepository<
       }
     }
 
+    if (relation?.ticketLaboratoryList) {
+      query = query.leftJoinAndSelect('ticket.ticketLaboratoryList', 'ticketLaboratory')
+      query.addOrderBy('ticketLaboratory.id', 'ASC')
+      if (relation?.ticketLaboratoryList?.laboratoryList) {
+        query = query.leftJoinAndSelect(
+          'ticketLaboratory.laboratoryList',
+          'laboratory',
+          'ticketLaboratory.laboratoryId = laboratory.parentId'
+        )
+      }
+    }
+
     if (relation?.ticketRadiologyList) {
       query = query.leftJoinAndSelect('ticket.ticketRadiologyList', 'ticketRadiology')
       query.addOrderBy('ticketRadiology.id', 'ASC')
@@ -212,6 +224,30 @@ export class TicketRepository extends PostgreSqlRepository<
     })
   }
 
+  async refreshLaboratoryMoney(options: { oid: number; ticketId: number }) {
+    const { oid, ticketId } = options
+    const updateResult: [any[], number] = await this.manager.query(`
+        UPDATE  "Ticket" "ticket" 
+        SET     "laboratoryMoney"  = "temp"."sumActualPrice",
+                "totalMoney"      = "ticket"."totalMoney" - "ticket"."laboratoryMoney" 
+                                        + temp."sumActualPrice",
+                "debt"            = "ticket"."debt" - "ticket"."laboratoryMoney" 
+                                        + temp."sumActualPrice",
+                "profit"          = "ticket"."profit" - "ticket"."laboratoryMoney" 
+                                        + temp."sumActualPrice"
+        FROM    ( 
+                SELECT "ticketId", SUM("actualPrice") as "sumActualPrice"
+                    FROM "TicketLaboratory" 
+                    WHERE "ticketId" = (${ticketId}) AND "oid" = ${oid}
+                    GROUP BY "ticketId" 
+                ) AS "temp" 
+        WHERE   "ticket"."id" = "temp"."ticketId" 
+                    AND "ticket"."oid" = ${oid}
+        RETURNING ticket.*
+    `)
+    return Ticket.fromRaws(updateResult[0])
+  }
+
   async refreshRadiologyMoney(options: { oid: number; ticketId: number }) {
     const { oid, ticketId } = options
     const updateResult: [any[], number] = await this.manager.query(`
@@ -231,6 +267,21 @@ export class TicketRepository extends PostgreSqlRepository<
                 ) AS "temp" 
         WHERE   "ticket"."id" = "temp"."ticketId" 
                     AND "ticket"."oid" = ${oid}
+        RETURNING ticket.*
+    `)
+    return Ticket.fromRaws(updateResult[0])
+  }
+
+  async changeLaboratoryMoney(options: { oid: number; ticketId: number, laboratoryMoney: number }) {
+    const { oid, ticketId, laboratoryMoney } = options
+    const updateResult: [any[], number] = await this.manager.query(`
+        UPDATE  "Ticket" "ticket" 
+        SET     "laboratoryMoney" = ${laboratoryMoney},
+                "totalMoney"      = "totalMoney" - "laboratoryMoney" + ${laboratoryMoney},
+                "debt"            = "debt" - "laboratoryMoney"  + ${laboratoryMoney},
+                "profit"          = "profit" - "laboratoryMoney" + ${laboratoryMoney}
+        WHERE   "ticket"."id"     = ${ticketId}
+            AND "ticket"."oid"    = ${oid}
         RETURNING ticket.*
     `)
     return Ticket.fromRaws(updateResult[0])

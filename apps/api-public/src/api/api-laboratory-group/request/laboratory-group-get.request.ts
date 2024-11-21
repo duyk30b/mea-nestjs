@@ -29,7 +29,7 @@ export class LaboratoryGroupGetQuery {
 
   @ApiPropertyOptional({
     type: String,
-    example: JSON.stringify(<LaboratoryGroupFilterQuery>{ updatedAt: { GT: Date.now() } }),
+    example: JSON.stringify(<LaboratoryGroupFilterQuery>{ printHtmlId: 0 }),
   })
   @Expose()
   @Transform(({ value }) => {

@@ -47,6 +47,10 @@ export class TicketRelationQuery {
 
   @Expose()
   @IsOptional()
+  ticketLaboratoryList: false | { laboratoryList?: boolean }
+
+  @Expose()
+  @IsOptional()
   ticketRadiologyList: false | { radiology?: boolean }
 
   @Expose()

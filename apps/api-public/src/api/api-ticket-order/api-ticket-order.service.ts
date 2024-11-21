@@ -54,6 +54,8 @@ export class ApiTicketOrderService {
         ticketOrderDraftInsert: {
           ...body.ticketOrderDraftInsert,
           customerSourceId: 0,
+          laboratoryMoney: 0,
+          radiologyMoney: 0,
         },
         ticketOrderProductDraftList: body.ticketOrderProductDraftList,
         ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,
@@ -80,6 +82,8 @@ export class ApiTicketOrderService {
         ticketOrderDraftApprovedUpdate: {
           ...body.ticketOrderDraftApprovedUpdate,
           customerSourceId: 0,
+          laboratoryMoney: 0,
+          radiologyMoney: 0,
         },
         ticketOrderProductDraftList: body.ticketOrderProductDraftList,
         ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,
@@ -116,6 +120,8 @@ export class ApiTicketOrderService {
       ticketOrderDraftInsert: {
         ...ticketOrderDraftInsert,
         customerSourceId: 0,
+        laboratoryMoney: 0,
+        radiologyMoney: 0,
       },
       ticketOrderProductDraftList: body.ticketOrderProductDraftList,
       ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,
@@ -170,6 +176,8 @@ export class ApiTicketOrderService {
           ticketOrderDebtSuccessUpdate: {
             ...body.ticketOrderDebtSuccessUpdate,
             customerSourceId: 0,
+            laboratoryMoney: 0,
+            radiologyMoney: 0,
           },
           ticketOrderProductDraftList: body.ticketOrderProductDraftList,
           ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,

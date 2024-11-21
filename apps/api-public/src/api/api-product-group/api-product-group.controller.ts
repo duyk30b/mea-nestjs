@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
 import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
@@ -10,6 +10,7 @@ import {
   ProductGroupCreateBody,
   ProductGroupGetManyQuery,
   ProductGroupPaginationQuery,
+  ProductGroupReplaceAllBody,
   ProductGroupUpdateBody,
 } from './request'
 
@@ -37,14 +38,23 @@ export class ApiProductGroupController {
     return this.apiProductGroupService.getOne(oid, id)
   }
 
+  @Put('replace-all')
+  @HasPermission(PermissionId.PRODUCT_UPDATE)
+  async replaceAll(
+    @External() { oid }: TExternal,
+    @Body() body: ProductGroupReplaceAllBody
+  ) {
+    return await this.apiProductGroupService.replaceAll(oid, body)
+  }
+
   @Post('create')
-  @HasPermission(PermissionId.MASTER_DATA_PRODUCT_GROUP)
+  @HasPermission(PermissionId.PRODUCT_UPDATE)
   async createOne(@External() { oid }: TExternal, @Body() body: ProductGroupCreateBody) {
     return await this.apiProductGroupService.createOne(oid, body)
   }
 
   @Patch('update/:id')
-  @HasPermission(PermissionId.MASTER_DATA_PRODUCT_GROUP)
+  @HasPermission(PermissionId.PRODUCT_UPDATE)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
     @External() { oid }: TExternal,
@@ -55,7 +65,7 @@ export class ApiProductGroupController {
   }
 
   @Delete('destroy/:id')
-  @HasPermission(PermissionId.MASTER_DATA_PRODUCT_GROUP)
+  @HasPermission(PermissionId.PRODUCT_UPDATE)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiProductGroupService.destroyOne(oid, id)

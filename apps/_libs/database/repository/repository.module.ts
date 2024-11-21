@@ -28,6 +28,7 @@ import {
   Setting,
   Ticket,
   TicketDiagnosis,
+  TicketLaboratory,
   TicketProcedure,
   TicketProduct,
   TicketRadiology,
@@ -48,7 +49,7 @@ import { DistributorPaymentRepository } from './distributor-payment/distributor-
 import { DistributorRepository } from './distributor/distributor.repository'
 import { ImageRepository } from './image/image.repository'
 import { LaboratoryGroupRepository } from './laboratory-group/laboratory-group.repository'
-import { LaboratoryRepository } from './laboratory/radiology.repository'
+import { LaboratoryRepository } from './laboratory/laboratory.repository'
 import { OrganizationRepository } from './organization/organization.repository'
 import { PermissionRepository } from './permission/permission.repository'
 import { PrintHtmlRepository } from './print-html/print-html.repository'
@@ -73,6 +74,7 @@ import { StatisticReceiptRepository } from './statistic/statistic-receipt.reposi
 import { StatisticTicketRepository } from './statistic/statistic-ticket.repository'
 import { StatisticRepository } from './statistic/statistic.repository'
 import { TicketDiagnosisRepository } from './ticket-diagnosis/ticket-diagnosis.repository'
+import { TicketLaboratoryRepository } from './ticket-laboratory/ticket-laboratory.repository'
 import { TicketProcedureRepository } from './ticket-procedure/ticket-procedure.repository'
 import { TicketProductRepository } from './ticket-product/ticket-product.repository'
 import { TicketRadiologyRepository } from './ticket-radiology/ticket-radiology.repository'
@@ -86,6 +88,7 @@ import { TicketClinicRefundOverpaid } from './ticket/ticket-clinic/ticket-clinic
 import { TicketClinicReopen } from './ticket/ticket-clinic/ticket-clinic-reopen'
 import { TicketClinicReturnProduct } from './ticket/ticket-clinic/ticket-clinic-return-product'
 import { TicketClinicUpdateItemsMoney } from './ticket/ticket-clinic/ticket-clinic-update-items-money'
+import { TicketClinicUpdateTicketLaboratoryList } from './ticket/ticket-clinic/ticket-clinic-update-ticket-laboratory-list'
 import { TicketClinicUpdateTicketProcedureList } from './ticket/ticket-clinic/ticket-clinic-update-ticket-procedure-list'
 import { TicketClinicUpdateTicketProductList } from './ticket/ticket-clinic/ticket-clinic-update-ticket-product-list'
 import { TicketClinicUpdateTicketRadiologyList } from './ticket/ticket-clinic/ticket-clinic-update-ticket-radiology-list'
@@ -129,6 +132,7 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
       Setting,
       User,
       UserRole,
+
       Ticket,
       TicketExpense,
       TicketSurcharge,
@@ -136,6 +140,7 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
       TicketProcedure,
       TicketProduct,
       TicketRadiology,
+      TicketLaboratory,
       TicketUser,
 
       Warehouse,
@@ -184,6 +189,7 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
     PrintHtmlRepository,
 
     TicketClinicUpdateTicketProcedureList,
+    TicketClinicUpdateTicketLaboratoryList,
     TicketClinicUpdateTicketRadiologyList,
     TicketClinicUpdateTicketProductList,
     TicketClinicUpdateItemsMoney,
@@ -200,12 +206,14 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
     TicketOrderReturnProductList,
     TicketOrderRefundOverpaid,
     TicketOrderCancel,
+
     TicketRepository,
     TicketDiagnosisRepository,
     TicketProcedureRepository,
     TicketProductRepository,
-    TicketUserRepository,
     TicketRadiologyRepository,
+    TicketLaboratoryRepository,
+    TicketUserRepository,
 
     StatisticRepository,
     StatisticReceiptRepository,
@@ -252,6 +260,7 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
     PrintHtmlRepository,
 
     TicketClinicUpdateTicketProcedureList,
+    TicketClinicUpdateTicketLaboratoryList,
     TicketClinicUpdateTicketRadiologyList,
     TicketClinicUpdateTicketProductList,
     TicketClinicUpdateItemsMoney,
@@ -268,11 +277,13 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
     TicketOrderRefundOverpaid,
     TicketOrderReturnProductList,
     TicketOrderCancel,
+
     TicketRepository,
     TicketDiagnosisRepository,
     TicketProcedureRepository,
     TicketProductRepository,
     TicketRadiologyRepository,
+    TicketLaboratoryRepository,
     TicketUserRepository,
 
     StatisticRepository,

@@ -16,11 +16,12 @@ export class ApiMeService {
 
   async info(params: { oid: number; uid: number; permissionIds: number[] }): Promise<BaseResponse> {
     const { uid, oid, permissionIds } = params
-    const [user, organization, settingMap, permissionAll] = await Promise.all([
+    const [user, organization, permissionAll, settingMap, settingMapRoot] = await Promise.all([
       this.cacheDataService.getUser(oid, uid),
       this.cacheDataService.getOrganization(oid),
-      this.cacheDataService.getSettingMap(oid),
       this.cacheDataService.getPermissionAllList(),
+      this.cacheDataService.getSettingMap(oid),
+      this.cacheDataService.getSettingMap(1),
     ])
 
     return {
@@ -30,6 +31,7 @@ export class ApiMeService {
         permissionIds,
         permissionAll,
         settingMap,
+        rootSetting: settingMapRoot.ROOT_SETTING,
       },
     }
   }

@@ -82,6 +82,7 @@ export class ApiTicketService {
         ticketProductConsumableList: relation?.ticketProductConsumableList,
         ticketProductPrescriptionList: relation?.ticketProductPrescriptionList,
         ticketProcedureList: relation?.ticketProcedureList,
+        ticketLaboratoryList: relation?.ticketLaboratoryList,
         ticketRadiologyList: relation?.ticketRadiologyList,
         ticketUserList: relation?.ticketUserList,
       },

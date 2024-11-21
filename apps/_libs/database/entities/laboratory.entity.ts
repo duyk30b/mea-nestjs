@@ -1,14 +1,16 @@
 import { Exclude, Expose } from 'class-transformer'
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import LaboratoryGroup from './laboratory-group.entity'
+import TicketLaboratory from './ticket-laboratory.entity'
 
+export enum LaboratoryValueType {
+  Number = 1,
+  String = 2,
+  Options = 3,
+  Children = 4,
+}
 @Entity('Laboratory')
+@Index('IDX_Laboratory__oid_parentId', ['oid', 'parentId'])
 export default class Laboratory {
   @Exclude()
   @Column()
@@ -26,50 +28,72 @@ export default class Laboratory {
   @Column({ default: 0 })
   laboratoryGroupId: number
 
-  @Column({ type: 'smallint', default: 1 })
-  @Expose()
-  level: number
-
   @Column({ nullable: true })
   @Expose()
   price: number
 
-  @Column({
-    type: 'decimal',
-    nullable: true,
-    precision: 7,
-    scale: 3,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
+  @Column({ type: 'smallint', default: 1 })
   @Expose()
-  minValue: number
+  level: number
 
-  @Column({
-    type: 'decimal',
-    nullable: true,
-    precision: 7,
-    scale: 3,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
+  @Column({ default: 0 })
   @Expose()
-  maxValue: number
+  parentId: number
+
+  @Expose()
+  @Column({ type: 'smallint', default: LaboratoryValueType.Number })
+  valueType: LaboratoryValueType
 
   @Column({ type: 'varchar', length: 25 })
   @Expose()
   unit: string
+
+  @Column({
+    type: 'decimal',
+    nullable: true,
+    precision: 7,
+    scale: 3,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  lowValue: number
+
+  @Column({
+    type: 'decimal',
+    nullable: true,
+    precision: 7,
+    scale: 3,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  highValue: number
+
+  @Column({ type: 'varchar', length: 255 })
+  @Expose()
+  options: string
 
   @ManyToOne((type) => LaboratoryGroup, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'laboratoryGroupId', referencedColumnName: 'id' })
   @Expose()
   laboratoryGroup: LaboratoryGroup
 
+  @Expose()
+  @ManyToOne((type) => TicketLaboratory, (ticketLaboratory) => ticketLaboratory.laboratoryList, {
+    createForeignKeyConstraints: false,
+  })
+  @JoinColumn({ name: 'parentId', referencedColumnName: 'laboratoryId' })
+  ticketLaboratory: TicketLaboratory
+
+  @Expose()
+  children: Laboratory[]
+
   static fromRaw(raw: { [P in keyof Laboratory]: any }) {
     if (!raw) return null
     const entity = new Laboratory()
 
     entity.price = Number(raw.price)
-    entity.minValue = Number(raw.minValue)
-    entity.maxValue = Number(raw.maxValue)
+    entity.lowValue = Number(raw.lowValue)
+    entity.highValue = Number(raw.highValue)
 
     Object.assign(entity, raw)
 
@@ -83,7 +107,7 @@ export default class Laboratory {
 
 export type LaboratoryRelationType = Pick<
   Laboratory,
-  'laboratoryGroup'
+  'laboratoryGroup' | 'children' | 'ticketLaboratory'
 >
 
 export type LaboratorySortType = Pick<Laboratory, 'oid' | 'id' | 'name' | 'laboratoryGroupId'>
@@ -96,4 +120,10 @@ export type LaboratoryInsertType = Omit<
 export type LaboratoryUpdateType = Omit<
   Laboratory,
   keyof LaboratoryRelationType | keyof Pick<Laboratory, 'oid' | 'id'>
+>
+
+export type LaboratoryChildUpdateType = Omit<
+  Laboratory,
+  | keyof LaboratoryRelationType
+  | keyof Pick<Laboratory, 'oid' | 'parentId' | 'level' | 'laboratoryGroupId'>
 >

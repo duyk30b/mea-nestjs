@@ -1,25 +1,15 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { Expose } from 'class-transformer'
-import { IsDefined, IsInt, IsString } from 'class-validator'
+import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger'
+import { Expose, Type } from 'class-transformer'
+import { IsArray, IsDefined, IsInt, IsNumber, IsString, ValidateNested } from 'class-validator'
+import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
+import { LaboratoryValueType } from '../../../../../_libs/database/entities/laboratory.entity'
 
-export class LaboratoryUpsertBody {
+export class LaboratoryParentCreate {
   @ApiProperty({ example: 'GOT' })
   @Expose()
   @IsDefined()
   @IsString()
   name: string
-
-  @ApiProperty({ example: 25 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  laboratoryGroupId: number
-
-  @ApiPropertyOptional({ example: 1 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  level: number
 
   @ApiPropertyOptional({ example: 105000 })
   @Expose()
@@ -27,19 +17,68 @@ export class LaboratoryUpsertBody {
   @IsInt()
   price: number
 
-  @ApiPropertyOptional({ example: 105000 })
+  @ApiProperty({ example: 25 })
   @Expose()
   @IsDefined()
-  minValue: number
+  @IsInt()
+  laboratoryGroupId: number
 
   @ApiPropertyOptional({ example: 105000 })
   @Expose()
   @IsDefined()
-  maxValue: number
+  lowValue: number
+
+  @ApiPropertyOptional({ example: 105000 })
+  @Expose()
+  @IsDefined()
+  highValue: number
+
+  @ApiProperty({ enum: LaboratoryValueType, example: LaboratoryValueType.Number })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(LaboratoryValueType)
+  valueType: LaboratoryValueType
 
   @ApiProperty({ example: 'mg/l' })
   @Expose()
   @IsDefined()
   @IsString()
   unit: string
+
+  @ApiProperty({ example: 'mg/l' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  options: string
+}
+
+export class LaboratoryCreateChild extends OmitType(LaboratoryParentCreate, ['laboratoryGroupId']) { }
+
+export class LaboratoryCreateBody extends LaboratoryParentCreate {
+  @ApiProperty({ type: LaboratoryCreateChild, isArray: true })
+  @Expose()
+  @Type(() => LaboratoryCreateChild)
+  @IsDefined()
+  @IsArray()
+  @ValidateNested({ each: true })
+  children: LaboratoryCreateChild[]
+}
+
+export class LaboratoryParentUpdate extends OmitType(LaboratoryParentCreate, ['valueType']) { }
+export class LaboratoryUpdateChild extends OmitType(LaboratoryParentCreate, ['laboratoryGroupId']) {
+  @ApiPropertyOptional({ example: 12 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  id: number
+}
+
+export class LaboratoryUpdateBody extends LaboratoryParentUpdate {
+  @ApiProperty({ type: LaboratoryUpdateChild, isArray: true })
+  @Expose()
+  @Type(() => LaboratoryUpdateChild)
+  @IsDefined()
+  @IsArray()
+  @ValidateNested({ each: true })
+  children: LaboratoryUpdateChild[]
 }

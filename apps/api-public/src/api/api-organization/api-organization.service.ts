@@ -1,13 +1,17 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
+import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { decrypt, encrypt } from '../../../../_libs/common/helpers/string.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { JwtConfig } from '../../../../_libs/common/jwt-extend/jwt.config'
+import { Image } from '../../../../_libs/database/entities'
+import { ImageRepository } from '../../../../_libs/database/repository/image/image.repository'
 import { OrganizationRepository } from '../../../../_libs/database/repository/organization/organization.repository'
 import { GlobalConfig } from '../../../../_libs/environments'
 import { EmailService } from '../../components/email/email.service'
+import { ImageManagerService } from '../../components/image-manager/image-manager.service'
 import { OrganizationUpdateInfoBody, VerifyOrganizationEmailQuery } from './request'
 
 @Injectable()
@@ -17,11 +21,16 @@ export class ApiOrganizationService {
     @Inject(JwtConfig.KEY) private jwtConfig: ConfigType<typeof JwtConfig>,
     private emailService: EmailService,
     private readonly cacheDataService: CacheDataService,
-    private readonly organizationRepository: OrganizationRepository
+    private readonly imageManagerService: ImageManagerService,
+    private readonly organizationRepository: OrganizationRepository,
+    private readonly imageRepository: ImageRepository
   ) { }
 
   async getInfo(oid: number): Promise<BaseResponse> {
-    const organization = await this.organizationRepository.findOneById(oid)
+    const organization = await this.organizationRepository.findOne({
+      relation: { logoImage: true },
+      condition: { id: oid },
+    })
     this.cacheDataService.updateOrganizationInfo(organization)
     return { data: { organization } }
   }
@@ -34,6 +43,47 @@ export class ApiOrganizationService {
     if (!organization) {
       throw new BusinessException('error.Database.UpdateFailed')
     }
+    this.cacheDataService.updateOrganizationInfo(organization)
+    return { data: { organization } }
+  }
+
+  async updateInfoAndLogo(
+    options: {
+      oid: number,
+      body: OrganizationUpdateInfoBody,
+      file: FileUploadDto
+    }
+  ): Promise<BaseResponse> {
+    const { oid, body, file } = options
+    const organizationOrigin = await this.organizationRepository.findOneById(oid)
+
+    let image: Image | undefined
+    if (organizationOrigin.logoImageId) {
+      image = await this.imageRepository.findOneBy({ oid, id: organizationOrigin.logoImageId })
+    }
+
+    const [logoImageId] = await this.imageManagerService.changeImageList({
+      oid,
+      customerId: 0,
+      files: [file],
+      filesPosition: [0],
+      imageIdsKeep: [],
+      imageIdsOld: image ? [image.id] : [],
+    })
+
+    const [organization] = await this.organizationRepository.updateAndReturnEntity(
+      { id: oid },
+      {
+        name: body.name,
+        addressProvince: body.addressProvince,
+        addressDistrict: body.addressDistrict,
+        addressWard: body.addressWard,
+        addressStreet: body.addressStreet,
+        logoImageId,
+      }
+    )
+    if (!organization) throw new BusinessException('error.Database.UpdateFailed')
+    organization.logoImage = await this.imageRepository.findOneBy({ oid, id: logoImageId })
     this.cacheDataService.updateOrganizationInfo(organization)
     return { data: { organization } }
   }

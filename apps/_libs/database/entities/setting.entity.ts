@@ -2,6 +2,8 @@ import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
 
 export enum SettingKey {
+  ROOT_SETTING = 'ROOT_SETTING',
+
   SYSTEM_SETTING = 'SYSTEM_SETTING',
   GOOGLE_DRIVER = 'GOOGLE_DRIVER',
 

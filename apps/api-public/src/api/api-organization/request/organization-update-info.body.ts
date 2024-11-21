@@ -1,8 +1,9 @@
-import { ApiPropertyOptional } from '@nestjs/swagger'
+import { ApiPropertyOptional, OmitType } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
 import { IsDefined, IsString } from 'class-validator'
+import { SingleFileUpload } from '../../../../../_libs/common/dto/file'
 
-export class OrganizationUpdateInfoBody {
+export class OrganizationUpdateInfoAndLogoBody extends SingleFileUpload {
   @ApiPropertyOptional({ example: 'Phòng khám đa khoa Medical' })
   @Expose()
   @IsDefined()
@@ -33,3 +34,5 @@ export class OrganizationUpdateInfoBody {
   @IsString()
   addressStreet: string
 }
+
+export class OrganizationUpdateInfoBody extends OmitType(OrganizationUpdateInfoAndLogoBody, ['file']) { }

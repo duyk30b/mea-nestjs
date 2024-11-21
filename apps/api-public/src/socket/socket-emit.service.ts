@@ -9,6 +9,7 @@ import {
   Product,
   Ticket,
   TicketDiagnosis,
+  TicketLaboratory,
   TicketProcedure,
   TicketProduct,
   TicketRadiology,
@@ -140,6 +141,26 @@ export class SocketEmitService {
     this.io
       .in(oid.toString())
       .emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION_LIST, data)
+  }
+
+  ticketClinicUpdateTicketLaboratoryList(
+    oid: number,
+    data: { ticketId: number; ticketLaboratoryList: TicketLaboratory[] }
+  ) {
+    if (!this.io) return
+    this.io
+      .in(oid.toString())
+      .emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_LIST, data)
+  }
+
+  ticketClinicUpdateTicketLaboratoryResult(
+    oid: number,
+    data: { ticketId: number; ticketLaboratory: TicketLaboratory }
+  ) {
+    if (!this.io) return
+    this.io
+      .in(oid.toString())
+      .emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_RESULT, data)
   }
 
   ticketClinicUpdateTicketRadiologyList(

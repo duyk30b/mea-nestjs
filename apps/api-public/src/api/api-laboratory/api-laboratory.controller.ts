@@ -7,10 +7,11 @@ import { External, TExternal } from '../../../../_libs/common/request/external.r
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
 import { ApiLaboratoryService } from './api-laboratory.service'
 import {
+  LaboratoryCreateBody,
   LaboratoryGetManyQuery,
   LaboratoryGetOneQuery,
   LaboratoryPaginationQuery,
-  LaboratoryUpsertBody,
+  LaboratoryUpdateBody,
 } from './request'
 
 @ApiTags('Laboratory')
@@ -49,8 +50,8 @@ export class ApiLaboratoryController {
 
   @Post('create')
   @HasPermission(PermissionId.MASTER_DATA_LABORATORY)
-  async create(@External() { oid }: TExternal, @Body() body: LaboratoryUpsertBody) {
-    return await this.apiLaboratoryService.createOne(oid, body)
+  async create(@External() { oid }: TExternal, @Body() body: LaboratoryCreateBody) {
+    return await this.apiLaboratoryService.create(oid, body)
   }
 
   @Patch('update/:id')
@@ -59,15 +60,15 @@ export class ApiLaboratoryController {
   async update(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: LaboratoryUpsertBody
+    @Body() body: LaboratoryUpdateBody
   ) {
-    return await this.apiLaboratoryService.updateOne(oid, id, body)
+    return await this.apiLaboratoryService.update(oid, id, body)
   }
 
   @Delete('destroy/:id')
   @HasPermission(PermissionId.MASTER_DATA_LABORATORY)
   @ApiParam({ name: 'id', example: 1 })
-  async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiLaboratoryService.destroyOne(oid, id)
+  async destroy(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiLaboratoryService.destroy(oid, id)
   }
 }

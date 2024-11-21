@@ -39,7 +39,7 @@ export class ApiLaboratoryGroupController {
   }
 
   @Put('replace-all')
-  @HasPermission(PermissionId.MASTER_DATA_RADIOLOGY_GROUP)
+  @HasPermission(PermissionId.MASTER_DATA_LABORATORY)
   async replaceAll(
     @External() { oid }: TExternal,
     @Body() body: LaboratoryGroupReplaceAllBody
@@ -48,13 +48,13 @@ export class ApiLaboratoryGroupController {
   }
 
   @Post('create')
-  @HasPermission(PermissionId.MASTER_DATA_RADIOLOGY_GROUP)
+  @HasPermission(PermissionId.MASTER_DATA_LABORATORY)
   async createOne(@External() { oid }: TExternal, @Body() body: LaboratoryGroupCreateBody) {
     return await this.apiLaboratoryGroupService.createOne(oid, body)
   }
 
   @Patch('update/:id')
-  @HasPermission(PermissionId.MASTER_DATA_RADIOLOGY_GROUP)
+  @HasPermission(PermissionId.MASTER_DATA_LABORATORY)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
     @External() { oid }: TExternal,
@@ -65,7 +65,7 @@ export class ApiLaboratoryGroupController {
   }
 
   @Delete('destroy/:id')
-  @HasPermission(PermissionId.MASTER_DATA_RADIOLOGY_GROUP)
+  @HasPermission(PermissionId.MASTER_DATA_LABORATORY)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiLaboratoryGroupService.destroyOne(oid, id)

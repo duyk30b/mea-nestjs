@@ -12,15 +12,17 @@ import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto'
 import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
+import { IsUser } from '../../../../_libs/common/guards/user.guard.'
 import { FastifyFilesInterceptor } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
 import { ApiTicketRadiologyService } from './api-ticket-radiology.service'
-import { TicketRadiologyGetOneQuery, TicketRadiologyPaginationQuery } from './request'
 import {
   TicketRadiologyCreateBody,
+  TicketRadiologyGetOneQuery,
+  TicketRadiologyPaginationQuery,
   TicketRadiologyUpdateBody,
-} from './request/ticket-radiology-upsert.body'
+} from './request'
 
 @ApiTags('TicketRadiology')
 @ApiBearerAuth('access-token')
@@ -29,16 +31,13 @@ export class ApiTicketRadiologyController {
   constructor(private readonly apiTicketRadiologyService: ApiTicketRadiologyService) { }
 
   @Get('pagination')
-  @HasPermission(PermissionId.TICKET_RADIOLOGY_READ)
-  async pagination(
-    @External() { oid }: TExternal,
-    @Query() query: TicketRadiologyPaginationQuery
-  ) {
+  @IsUser()
+  async pagination(@External() { oid }: TExternal, @Query() query: TicketRadiologyPaginationQuery) {
     return await this.apiTicketRadiologyService.pagination(oid, query)
   }
 
   @Get('detail/:id')
-  @HasPermission(PermissionId.TICKET_RADIOLOGY_READ)
+  @IsUser()
   async detail(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -48,7 +47,7 @@ export class ApiTicketRadiologyController {
   }
 
   @Post('create-completed')
-  @HasPermission(PermissionId.TICKET_RADIOLOGY_CREATE)
+  @HasPermission(PermissionId.TICKET_RADIOLOGY_RESULT)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FastifyFilesInterceptor('files', 10, {}))
   async createTicketRadiologyCompleted(
@@ -64,7 +63,7 @@ export class ApiTicketRadiologyController {
   }
 
   @Post('update/:id')
-  @HasPermission(PermissionId.TICKET_RADIOLOGY_UPDATE)
+  @HasPermission(PermissionId.TICKET_RADIOLOGY_RESULT)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FastifyFilesInterceptor('files', 10, {}))
   async updateTicketRadiology(

@@ -1,0 +1,158 @@
+import { Expose } from 'class-transformer'
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
+import { BaseEntity } from '../common/base.entity'
+import { DiscountType } from '../common/variable'
+import Customer from './customer.entity'
+import Laboratory from './laboratory.entity'
+import TicketUser from './ticket-user.entity'
+import Ticket from './ticket.entity'
+
+export enum TicketLaboratoryStatus {
+  Empty = 1,
+  Pending = 2,
+  Completed = 3,
+}
+@Entity('TicketLaboratory')
+@Index('IDX_TicketLaboratory__oid_ticketId', ['oid', 'ticketId'])
+@Index('IDX_TicketLaboratory__oid_laboratoryId', ['oid', 'laboratoryId'])
+export default class TicketLaboratory extends BaseEntity {
+  @Column()
+  @Expose()
+  ticketId: number
+
+  @Column()
+  @Expose()
+  customerId: number
+
+  @Column()
+  @Expose()
+  laboratoryId: number
+
+  @Column({ type: 'smallint', default: TicketLaboratoryStatus.Pending })
+  @Expose()
+  status: TicketLaboratoryStatus
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  expectedPrice: number // Giá dự kiến
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  discountMoney: number // tiền giảm giá
+
+  @Column({
+    type: 'decimal',
+    default: 0,
+    precision: 7,
+    scale: 3,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  discountPercent: number // % giảm giá
+
+  @Column({ type: 'varchar', length: 25, default: DiscountType.VND })
+  @Expose()
+  discountType: DiscountType // Loại giảm giá
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  actualPrice: number // Giá thực tế
+
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  startedAt: number
+
+  @Column({ type: 'text', default: JSON.stringify({}) })
+  @Expose({})
+  result: string
+
+  @Column({ type: 'text', default: JSON.stringify({}) })
+  @Expose({})
+  attention: string
+
+  @Expose()
+  @ManyToOne((type) => Ticket, (ticket) => ticket.ticketLaboratoryList, {
+    createForeignKeyConstraints: false,
+  })
+  @JoinColumn({ name: 'ticketId', referencedColumnName: 'id' })
+  ticket: Ticket
+
+  @Expose()
+  @ManyToOne((type) => Customer, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'customerId', referencedColumnName: 'id' })
+  customer: Customer
+
+  @Expose()
+  @OneToMany(() => Laboratory, (laboratory) => laboratory.ticketLaboratory)
+  laboratoryList: Laboratory[]
+
+  @Expose()
+  ticketUserList: TicketUser[]
+
+  static fromRaw(raw: { [P in keyof TicketLaboratory]: any }) {
+    if (!raw) return null
+    const entity = new TicketLaboratory()
+    Object.assign(entity, raw)
+
+    entity.expectedPrice = Number(raw.expectedPrice)
+    entity.discountMoney = Number(raw.discountMoney)
+    entity.discountPercent = Number(raw.discountPercent)
+    entity.actualPrice = Number(raw.actualPrice)
+
+    entity.startedAt = raw.startedAt == null ? raw.startedAt : Number(raw.startedAt)
+    return entity
+  }
+
+  static fromRaws(raws: { [P in keyof TicketLaboratory]: any }[]) {
+    return raws.map((i) => TicketLaboratory.fromRaw(i))
+  }
+}
+
+export type TicketLaboratoryRelationType = {
+  [P in keyof Pick<
+    TicketLaboratory,
+    'ticket' | 'customer' | 'ticketUserList' | 'laboratoryList'
+  >]?: boolean
+}
+
+export type TicketLaboratorySortType = {
+  [P in keyof Pick<
+    TicketLaboratory,
+    'id' | 'ticketId' | 'laboratoryId'
+  >]?: 'ASC' | 'DESC'
+}
+
+export type TicketLaboratoryInsertType = Omit<
+  TicketLaboratory,
+  keyof TicketLaboratoryRelationType | keyof Pick<TicketLaboratory, 'id'>
+>
+
+export type TicketLaboratoryInsertBasicType = Omit<
+  TicketLaboratory,
+  | keyof TicketLaboratoryRelationType
+  | keyof Pick<TicketLaboratory, 'id' | 'startedAt' | 'result' | 'attention'>
+>
+
+export type TicketLaboratoryUpdateType = Omit<
+  TicketLaboratory,
+  keyof TicketLaboratoryRelationType | keyof Pick<TicketLaboratory, 'oid' | 'id'>
+>

@@ -101,6 +101,48 @@ class TicketProcedureUpdateBody {
   actualPrice: number
 }
 
+class TicketLaboratoryUpdateBody {
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  ticketLaboratoryId: number
+
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  laboratoryId: number
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @Transform(({ value }) => Math.round(value || 0))
+  @IsDefined()
+  @IsInt()
+  discountMoney: number
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  @Max(9999.99)
+  @Min(-9999.99)
+  discountPercent: number
+
+  @ApiProperty({ enum: valuesEnum(DiscountType), example: DiscountType.VND })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(DiscountType)
+  discountType: DiscountType
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @Transform(({ value }) => Math.round(value || 0))
+  @IsDefined()
+  @IsInt()
+  actualPrice: number
+}
+
 class TicketRadiologyUpdateBody {
   @ApiProperty({ example: 56 })
   @Expose()
@@ -159,6 +201,14 @@ export class TicketClinicUpdateItemsMoneyBody {
   @IsArray()
   @ValidateNested({ each: true })
   ticketProcedureUpdateList: TicketProcedureUpdateBody[]
+
+  @ApiProperty({ type: TicketLaboratoryUpdateBody, isArray: true })
+  @Expose()
+  @Type(() => TicketLaboratoryUpdateBody)
+  @IsDefined()
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketLaboratoryUpdateList: TicketLaboratoryUpdateBody[]
 
   @ApiProperty({ type: TicketRadiologyUpdateBody, isArray: true })
   @Expose()

@@ -6,6 +6,10 @@ import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { TicketDiagnosis } from '../../../../_libs/database/entities'
 import { AppointmentStatus } from '../../../../_libs/database/entities/appointment.entity'
+import {
+  TicketLaboratoryInsertType,
+  TicketLaboratoryStatus,
+} from '../../../../_libs/database/entities/ticket-laboratory.entity'
 import { TicketProductType } from '../../../../_libs/database/entities/ticket-product.entity'
 import {
   TicketRadiologyInsertType,
@@ -27,6 +31,7 @@ import { TicketClinicRefundOverpaid } from '../../../../_libs/database/repositor
 import { TicketClinicReopen } from '../../../../_libs/database/repository/ticket/ticket-clinic/ticket-clinic-reopen'
 import { TicketClinicReturnProduct } from '../../../../_libs/database/repository/ticket/ticket-clinic/ticket-clinic-return-product'
 import { TicketClinicUpdateItemsMoney } from '../../../../_libs/database/repository/ticket/ticket-clinic/ticket-clinic-update-items-money'
+import { TicketClinicUpdateTicketLaboratoryList } from '../../../../_libs/database/repository/ticket/ticket-clinic/ticket-clinic-update-ticket-laboratory-list'
 import { TicketClinicUpdateTicketProcedureList } from '../../../../_libs/database/repository/ticket/ticket-clinic/ticket-clinic-update-ticket-procedure-list'
 import { TicketClinicUpdateTicketProductList } from '../../../../_libs/database/repository/ticket/ticket-clinic/ticket-clinic-update-ticket-product-list'
 import { TicketClinicUpdateTicketRadiologyList } from '../../../../_libs/database/repository/ticket/ticket-clinic/ticket-clinic-update-ticket-radiology-list'
@@ -41,6 +46,7 @@ import {
   TicketClinicUpdateDiagnosisSpecialBody,
   TicketClinicUpdateItemsMoneyBody,
   TicketClinicUpdatePrescriptionBody,
+  TicketClinicUpdateTicketLaboratoryListBody,
   TicketClinicUpdateTicketProcedureListBody,
   TicketClinicUpdateTicketRadiologyListBody,
 } from './request'
@@ -51,25 +57,26 @@ export class ApiTicketClinicService {
     private readonly socketEmitService: SocketEmitService,
     private readonly cacheDataService: CacheDataService,
     private readonly imageManagerService: ImageManagerService,
+    private readonly imageRepository: ImageRepository,
+    private readonly customerRepository: CustomerRepository,
+    private readonly appointmentRepository: AppointmentRepository,
     private readonly ticketRepository: TicketRepository,
     private readonly ticketDiagnosisRepository: TicketDiagnosisRepository,
     private readonly ticketUserRepository: TicketUserRepository,
     private readonly ticketProductRepository: TicketProductRepository,
-    private readonly appointmentRepository: AppointmentRepository,
     private readonly ticketClinicUpdateTicketProcedureList: TicketClinicUpdateTicketProcedureList,
     // eslint-disable-next-line max-len
+    private readonly ticketClinicUpdateTicketLaboratoryList: TicketClinicUpdateTicketLaboratoryList,
     private readonly ticketClinicUpdateTicketRadiologyList: TicketClinicUpdateTicketRadiologyList,
     private readonly ticketClinicUpdateTicketProductList: TicketClinicUpdateTicketProductList,
     private readonly ticketClinicUpdateItemsMoney: TicketClinicUpdateItemsMoney,
     private readonly ticketClinicReturnProduct: TicketClinicReturnProduct,
     private readonly ticketClinicRefundOverpaid: TicketClinicRefundOverpaid,
-    private readonly ticketClinicReopen: TicketClinicReopen,
     private readonly ticketSendProduct: TicketSendProduct,
     private readonly ticketPrepayment: TicketPrepayment,
     private readonly ticketPaymentAndClose: TicketPaymentAndClose,
     private readonly ticketPayDebt: TicketPayDebt,
-    private readonly customerRepository: CustomerRepository,
-    private readonly imageRepository: ImageRepository
+    private readonly ticketClinicReopen: TicketClinicReopen
   ) { }
 
   async register(options: { oid: number; body: TicketClinicRegisterBody }) {
@@ -148,7 +155,7 @@ export class ApiTicketClinicService {
       this.ticketDiagnosisRepository.findOneBy({ oid, ticketId }),
     ])
 
-    const imageIdsUpdate = await this.imageManagerService.changeImage({
+    const imageIdsUpdate = await this.imageManagerService.changeImageList({
       oid,
       customerId: body.customerId,
       files,
@@ -363,32 +370,65 @@ export class ApiTicketClinicService {
     return { data: true }
   }
 
+  async updateTicketLaboratoryList(options: {
+    oid: number
+    ticketId: number
+    body: TicketClinicUpdateTicketLaboratoryListBody
+  }) {
+    const { ticketId, oid, body } = options
+    const result = await this.ticketClinicUpdateTicketLaboratoryList.updateTicketLaboratoryList({
+      oid,
+      ticketId,
+      ticketLaboratoryListInsert: body.ticketLaboratoryList.map((i) => {
+        const data: TicketLaboratoryInsertType = {
+          ...i,
+          oid,
+          ticketId,
+          customerId: body.customerId,
+          attention: '',
+          result: '',
+          startedAt: null,
+          status: TicketLaboratoryStatus.Pending,
+        }
+        return data
+      }),
+    })
+
+    const { ticketBasic, ticketLaboratoryList } = result
+
+    this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
+    this.socketEmitService.ticketClinicUpdateTicketLaboratoryList(oid, {
+      ticketId,
+      ticketLaboratoryList,
+    })
+
+    return { data: true }
+  }
+
   async updateTicketRadiologyList(options: {
     oid: number
     ticketId: number
     body: TicketClinicUpdateTicketRadiologyListBody
   }) {
     const { ticketId, oid, body } = options
-    const result = await this.ticketClinicUpdateTicketRadiologyList.updateTicketRadiologyList(
-      {
-        oid,
-        ticketId,
-        ticketRadiologyListInsert: body.ticketRadiologyList.map((i) => {
-          const data: TicketRadiologyInsertType = {
-            ...i,
-            oid,
-            ticketId,
-            customerId: body.customerId,
-            imageIds: JSON.stringify([]),
-            description: '',
-            result: '',
-            startedAt: null,
-            status: TicketRadiologyStatus.Pending,
-          }
-          return data
-        }),
-      }
-    )
+    const result = await this.ticketClinicUpdateTicketRadiologyList.updateTicketRadiologyList({
+      oid,
+      ticketId,
+      ticketRadiologyListInsert: body.ticketRadiologyList.map((i) => {
+        const data: TicketRadiologyInsertType = {
+          ...i,
+          oid,
+          ticketId,
+          customerId: body.customerId,
+          imageIds: JSON.stringify([]),
+          description: '',
+          result: '',
+          startedAt: null,
+          status: TicketRadiologyStatus.Pending,
+        }
+        return data
+      }),
+    })
 
     const { ticketBasic, ticketRadiologyList } = result
 
@@ -412,10 +452,17 @@ export class ApiTicketClinicService {
       ticketId,
       ticketProductUpdateList: body.ticketProductUpdateList,
       ticketProcedureUpdateList: body.ticketProcedureUpdateList,
+      ticketLaboratoryUpdateList: body.ticketLaboratoryUpdateList,
       ticketRadiologyUpdateList: body.ticketRadiologyUpdateList,
     })
 
-    const { ticketBasic, ticketProductList, ticketProcedureList, ticketRadiologyList } = result
+    const {
+      ticketBasic,
+      ticketProductList,
+      ticketProcedureList,
+      ticketLaboratoryList,
+      ticketRadiologyList,
+    } = result
     this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
     this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
       ticketId,
@@ -432,6 +479,10 @@ export class ApiTicketClinicService {
     this.socketEmitService.ticketClinicUpdateTicketProcedureList(oid, {
       ticketId,
       ticketProcedureList,
+    })
+    this.socketEmitService.ticketClinicUpdateTicketLaboratoryList(oid, {
+      ticketId,
+      ticketLaboratoryList,
     })
     this.socketEmitService.ticketClinicUpdateTicketRadiologyList(oid, {
       ticketId,

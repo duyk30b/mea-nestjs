@@ -8,6 +8,7 @@ import CustomerSource from './customer-source.entity'
 import Customer from './customer.entity'
 import TicketDiagnosis from './ticket-diagnosis.entity'
 import TicketExpense from './ticket-expense.entity'
+import TicketLaboratory from './ticket-laboratory.entity'
 import TicketProcedure from './ticket-procedure.entity'
 import TicketProduct from './ticket-product.entity'
 import TicketRadiology from './ticket-radiology.entity'
@@ -95,6 +96,14 @@ export default class Ticket extends BaseEntity {
   })
   @Expose()
   radiologyMoney: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  laboratoryMoney: number
 
   @Column({
     type: 'bigint',
@@ -254,6 +263,10 @@ export default class Ticket extends BaseEntity {
   @Expose()
   ticketProcedureList: TicketProcedure[]
 
+  @OneToMany(() => TicketLaboratory, (ticketLaboratory) => ticketLaboratory.ticket)
+  @Expose()
+  ticketLaboratoryList: TicketLaboratory[]
+
   @OneToMany(() => TicketRadiology, (ticketRadiology) => ticketRadiology.ticket)
   @Expose()
   ticketRadiologyList: TicketRadiology[]
@@ -280,6 +293,7 @@ export default class Ticket extends BaseEntity {
     entity.proceduresMoney = Number(raw.proceduresMoney)
     entity.productsMoney = Number(raw.productsMoney)
     entity.radiologyMoney = Number(raw.radiologyMoney)
+    entity.laboratoryMoney = Number(raw.laboratoryMoney)
 
     entity.discountMoney = Number(raw.discountMoney)
     entity.discountPercent = Number(raw.discountPercent)
@@ -328,6 +342,10 @@ export type TicketRelationType = {
 } & {
   [P in keyof Pick<Ticket, 'ticketRadiologyList'>]?:
   | { [P in keyof Pick<TicketRadiology, 'radiology'>]?: boolean }
+  | false
+} & {
+  [P in keyof Pick<Ticket, 'ticketLaboratoryList'>]?:
+  | { [P in keyof Pick<TicketLaboratory, 'laboratoryList'>]?: boolean }
   | false
 } & {
   [P in keyof Pick<Ticket, 'ticketUserList'>]?:

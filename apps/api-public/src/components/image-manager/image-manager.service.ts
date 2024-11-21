@@ -37,7 +37,7 @@ export class ImageManagerService implements OnModuleInit {
     }
   }
 
-  async changeImage(options: {
+  async changeImageList(options: {
     oid: number
     customerId: number
     imageIdsOld: number[]

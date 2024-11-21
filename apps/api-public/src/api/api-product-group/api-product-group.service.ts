@@ -6,6 +6,7 @@ import {
   ProductGroupCreateBody,
   ProductGroupGetManyQuery,
   ProductGroupPaginationQuery,
+  ProductGroupReplaceAllBody,
   ProductGroupUpdateBody,
 } from './request'
 
@@ -50,6 +51,14 @@ export class ApiProductGroupService {
     const data = await this.productGroupRepository.findOneBy({ oid, id })
     if (!data) throw new BusinessException('error.Database.NotFound')
     return { data }
+  }
+
+  async replaceAll(oid: number, body: ProductGroupReplaceAllBody): Promise<BaseResponse> {
+    await this.productGroupRepository.replaceAll(
+      oid,
+      body.productGroupReplaceAll
+    )
+    return { data: true }
   }
 
   async createOne(oid: number, body: ProductGroupCreateBody): Promise<BaseResponse> {

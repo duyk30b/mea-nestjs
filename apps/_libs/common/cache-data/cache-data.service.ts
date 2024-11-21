@@ -39,7 +39,10 @@ export class CacheDataService {
     if (!this.orgCache[oid]) this.orgCache[oid] = {}
 
     if (!this.orgCache[oid].organization) {
-      this.orgCache[oid].organization = await this.organizationRepository.findOneById(oid)
+      this.orgCache[oid].organization = await this.organizationRepository.findOne({
+        relation: { logoImage: true },
+        condition: { id: oid },
+      })
     }
     return this.orgCache[oid].organization
   }

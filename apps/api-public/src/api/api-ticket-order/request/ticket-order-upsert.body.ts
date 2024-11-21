@@ -41,12 +41,6 @@ class TicketOrderFullInsert {
   @IsInt()
   productsMoney: number
 
-  @ApiProperty({ example: 750_000 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  radiologyMoney: number
-
   @ApiProperty({ example: 22_500 })
   @Expose()
   @IsDefined()

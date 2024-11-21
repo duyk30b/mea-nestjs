@@ -7,6 +7,7 @@ import { LaboratoryGroup } from '../../entities'
 import {
   LaboratoryGroupInsertType,
   LaboratoryGroupRelationType,
+  LaboratoryGroupReplaceType,
   LaboratoryGroupSortType,
   LaboratoryGroupUpdateType,
 } from '../../entities/laboratory-group.entity'
@@ -51,19 +52,26 @@ export class LaboratoryGroupRepository extends PostgreSqlRepository<
     return LaboratoryGroup.fromRaws(raws)
   }
 
-  async replaceAll(oid: number, data: { name: string; id: number }[]) {
+  async replaceAll(
+    oid: number,
+    laboratoryGroupListDto: { name: string; printHtmlId: number; id: number }[]
+  ) {
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. DELETE OLD ===
       await manager.delete(LaboratoryGroup, {
         oid,
-        id: Not(In(data.map((i) => i.id))),
+        id: Not(In(laboratoryGroupListDto.map((i) => i.id))),
       })
 
       // === 2. INSERT NEW
-      const laboratoryGroupInsertDto = data
+      const laboratoryGroupInsertDto = laboratoryGroupListDto
         .filter((i) => i.id === 0)
         .map((i) => {
-          const insertDto: LaboratoryGroupInsertType = { oid, name: i.name }
+          const insertDto: LaboratoryGroupInsertType = {
+            oid,
+            name: i.name,
+            printHtmlId: i.printHtmlId,
+          }
           return insertDto
         })
       if (laboratoryGroupInsertDto.length) {
@@ -71,23 +79,28 @@ export class LaboratoryGroupRepository extends PostgreSqlRepository<
       }
 
       // === 2. UPDATE EXIST
-      const laboratoryGroupUpdateDto = data
+      const laboratoryGroupUpdateDto = laboratoryGroupListDto
         .filter((i) => i.id !== 0)
         .map((i) => {
-          const updateDto = { id: i.id, name: i.name }
+          const updateDto: LaboratoryGroupReplaceType = {
+            id: i.id,
+            name: i.name,
+            printHtmlId: i.printHtmlId,
+          }
           return updateDto
         })
 
       if (laboratoryGroupUpdateDto.length) {
         await manager.query(
           `
-          UPDATE "LaboratoryGroup" AS "group"
-          SET "name" = temp.name
+          UPDATE  "LaboratoryGroup" AS "group"
+          SET     "name"        = temp.name,
+                  "printHtmlId" = temp."printHtmlId"
           FROM (VALUES `
-          + laboratoryGroupUpdateDto
-            .map(({ id, name }) => `(${id}, '${name}')`)
-            .join(', ')
-          + `   ) AS temp("id", "name")
+          + laboratoryGroupUpdateDto.map(({ id, name, printHtmlId }) => {
+            return `(${id}, '${name}', ${printHtmlId})`
+          }).join(', ')
+          + `   ) AS temp("id", "name", "printHtmlId")
           WHERE   "group"."id" = temp."id" 
               AND "group"."oid" = ${oid} 
           `
