@@ -27,6 +27,7 @@ import {
   Role,
   Setting,
   Ticket,
+  TicketAttribute,
   TicketDiagnosis,
   TicketLaboratory,
   TicketProcedure,
@@ -73,6 +74,7 @@ import { SettingRepository } from './setting/setting.repository'
 import { StatisticReceiptRepository } from './statistic/statistic-receipt.repository'
 import { StatisticTicketRepository } from './statistic/statistic-ticket.repository'
 import { StatisticRepository } from './statistic/statistic.repository'
+import { TicketAttributeRepository } from './ticket-attribute/ticket-attribute.repository'
 import { TicketDiagnosisRepository } from './ticket-diagnosis/ticket-diagnosis.repository'
 import { TicketLaboratoryRepository } from './ticket-laboratory/ticket-laboratory.repository'
 import { TicketProcedureRepository } from './ticket-procedure/ticket-procedure.repository'
@@ -134,6 +136,7 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
       UserRole,
 
       Ticket,
+      TicketAttribute,
       TicketExpense,
       TicketSurcharge,
       TicketDiagnosis,
@@ -208,6 +211,7 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
     TicketOrderCancel,
 
     TicketRepository,
+    TicketAttributeRepository,
     TicketDiagnosisRepository,
     TicketProcedureRepository,
     TicketProductRepository,
@@ -279,6 +283,7 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
     TicketOrderCancel,
 
     TicketRepository,
+    TicketAttributeRepository,
     TicketDiagnosisRepository,
     TicketProcedureRepository,
     TicketProductRepository,

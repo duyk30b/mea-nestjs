@@ -66,7 +66,11 @@ export class ApiCustomerService {
   }
 
   async createOne(oid: number, body: CustomerCreateBody): Promise<BaseResponse> {
-    const customer = await this.customerRepository.insertOneAndReturnEntity({ oid, ...body })
+    const customer = await this.customerRepository.insertOneFullFieldAndReturnEntity({
+      ...body,
+      oid,
+      debt: 0,
+    })
     this.socketEmitService.customerUpsert(oid, { customer })
     return { data: { customer } }
   }
@@ -74,7 +78,10 @@ export class ApiCustomerService {
   async updateOne(oid: number, id: number, body: CustomerUpdateBody): Promise<BaseResponse> {
     const [customer] = await this.customerRepository.updateAndReturnEntity({ oid, id }, body)
     if (!customer) {
-      throw BusinessException.create({ message: 'error.Database.UpdateFailed', details: 'Customer' })
+      throw BusinessException.create({
+        message: 'error.Database.UpdateFailed',
+        details: 'Customer',
+      })
     }
     this.socketEmitService.customerUpsert(oid, { customer })
     return { data: { customer } }

@@ -64,10 +64,11 @@ export class ImageManagerService implements OnModuleInit {
         customerId,
       }),
       ...Object.entries(imageRemoveMapList).map(([curEmail, imageList]) => {
-        return this.googleDriverService.trashMultipleFiles(
-          curEmail,
-          imageList.map((i) => i.hostId)
-        )
+        return this.googleDriverService.trashMultipleFiles({
+          oid,
+          email: curEmail,
+          fileIds: imageList.map((i) => i.hostId),
+        })
       }),
     ])
 
@@ -94,7 +95,7 @@ export class ImageManagerService implements OnModuleInit {
       .map((i) => i.id)
 
     const [imageIdsNew] = await Promise.all([
-      imageInsertList.length ? this.imageRepository.insertManyFullField(imageInsertList) : [],
+      this.imageRepository.insertManyFullField(imageInsertList),
       imageIdsRemoveSuccess.length
         ? this.imageRepository.delete({ id: { IN: imageIdsRemoveSuccess } })
         : null,

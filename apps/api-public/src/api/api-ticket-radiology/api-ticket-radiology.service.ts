@@ -133,7 +133,7 @@ export class ApiTicketRadiologyService {
     return { data: { ticketRadiologyId: ticketRadiology.id } }
   }
 
-  async update(options: {
+  async updateResult(options: {
     oid: number
     ticketRadiologyId: number
     body: Omit<TicketRadiologyUpdateBody, 'files' | 'file'>
@@ -186,5 +186,38 @@ export class ApiTicketRadiologyService {
       ticketRadiology,
     })
     return { data: { ticketRadiologyId: ticketRadiology.id } }
+  }
+
+  async cancelResult(oid: number, id: number) {
+    const ticketRadiologyOrigin = await this.ticketRadiologyRepository.findOneBy({
+      oid,
+      id,
+    })
+
+    const imageIdsUpdate = await this.imageManagerService.changeImageList({
+      oid,
+      customerId: ticketRadiologyOrigin.customerId,
+      files: [],
+      filesPosition: [],
+      imageIdsKeep: [],
+      imageIdsOld: JSON.parse(ticketRadiologyOrigin.imageIds),
+    })
+
+    const [ticketRadiology] = await this.ticketRadiologyRepository.updateAndReturnEntity(
+      { oid, id },
+      {
+        startedAt: null,
+        status: TicketRadiologyStatus.Pending,
+        result: '',
+        description: '',
+        imageIds: JSON.stringify(imageIdsUpdate),
+      }
+    )
+
+    this.socketEmitService.ticketClinicUpdateTicketRadiologyResult(oid, {
+      ticketId: ticketRadiology.ticketId,
+      ticketRadiology,
+    })
+    return { data: { ticketId: ticketRadiology.ticketId } }
   }
 }

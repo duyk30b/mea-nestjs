@@ -5,11 +5,13 @@ import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { DeliveryStatus } from '../../../common/variable'
 import {
   Ticket,
+  TicketAttribute,
   TicketExpense,
   TicketProcedure,
   TicketProduct,
   TicketSurcharge,
 } from '../../../entities'
+import { TicketAttributeInsertType } from '../../../entities/ticket-attribute.entity'
 import { TicketExpenseInsertType } from '../../../entities/ticket-expense.entity'
 import { TicketProcedureInsertType, TicketProcedureStatus } from '../../../entities/ticket-procedure.entity'
 import { TicketProductInsertType, TicketProductType } from '../../../entities/ticket-product.entity'
@@ -38,6 +40,7 @@ export class TicketOrderDraftApprovedUpdate {
     ticketOrderProcedureDraftList: TicketOrderProcedureDraftType[]
     ticketOrderSurchargeDraftList: TicketOrderSurchargeDraftType[]
     ticketOrderExpenseDraftList: TicketOrderExpenseDraftType[]
+    ticketAttributeDraftList: { key: string, value: any }[]
   }) {
     const {
       oid,
@@ -47,6 +50,7 @@ export class TicketOrderDraftApprovedUpdate {
       ticketOrderProcedureDraftList,
       ticketOrderSurchargeDraftList,
       ticketOrderExpenseDraftList,
+      ticketAttributeDraftList,
     } = params
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       const whereTicket: FindOptionsWhere<Ticket> = {
@@ -74,6 +78,7 @@ export class TicketOrderDraftApprovedUpdate {
       }
       const ticketBasic = Ticket.fromRaw(ticketUpdateResult.raw[0])
 
+      await manager.delete(TicketAttribute, { oid, ticketId })
       await manager.delete(TicketProduct, { oid, ticketId })
       await manager.delete(TicketProcedure, { oid, ticketId })
       // await manager.delete(TicketRadiology, { oid, ticketId })
@@ -136,6 +141,18 @@ export class TicketOrderDraftApprovedUpdate {
           return ticketExpense
         })
         await manager.insert(TicketExpense, ticketExpenseListInsert)
+      }
+
+      if (ticketAttributeDraftList.length) {
+        const ticketAttributeListInsert = ticketAttributeDraftList.map((i) => {
+          const ticketAttribute: TicketAttributeInsertType = {
+            ...i,
+            oid,
+            ticketId: ticketBasic.id,
+          }
+          return ticketAttribute
+        })
+        await manager.insert(TicketAttribute, ticketAttributeListInsert)
       }
 
       return { ticketBasic }

@@ -29,6 +29,13 @@ export class CustomerRepository extends PostgreSqlRepository<
     return Customer.fromRaw(raw)
   }
 
+  async insertOneFullFieldAndReturnEntity<X extends CustomerInsertType>(
+    data: NoExtra<CustomerInsertType, X>
+  ): Promise<Customer> {
+    const raw = await this.insertOneFullFieldAndReturnRaw(data)
+    return Customer.fromRaw(raw)
+  }
+
   async updateAndReturnEntity<X extends Partial<CustomerUpdateType>>(
     condition: BaseCondition<Customer>,
     data: NoExtra<Partial<CustomerUpdateType>, X>

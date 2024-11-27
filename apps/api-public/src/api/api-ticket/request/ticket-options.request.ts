@@ -27,7 +27,7 @@ export class TicketRelationQuery {
 
   @Expose()
   @IsBoolean()
-  ticketDiagnosis: boolean
+  ticketAttributeList: boolean
 
   @Expose()
   @IsOptional()

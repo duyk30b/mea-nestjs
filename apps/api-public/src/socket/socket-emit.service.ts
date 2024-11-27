@@ -8,7 +8,7 @@ import {
   Procedure,
   Product,
   Ticket,
-  TicketDiagnosis,
+  TicketAttribute,
   TicketLaboratory,
   TicketProcedure,
   TicketProduct,
@@ -88,25 +88,14 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE, data)
   }
 
-  ticketClinicUpdateTicketDiagnosisBasic(
+  ticketClinicUpdateTicketAttributeList(
     oid: number,
-    data: {
-      ticketId: number
-      ticketDiagnosisBasic: Omit<TicketDiagnosis, keyof Pick<TicketDiagnosis, 'special'>>
-    }
-  ) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_DIAGNOSIS_BASIC, data)
-  }
-
-  ticketClinicUpdateTicketDiagnosisSpecial(
-    oid: number,
-    data: { ticketId: number; special: string }
+    data: { ticketId: number; ticketAttributeList: TicketAttribute[] }
   ) {
     if (!this.io) return
     this.io
       .in(oid.toString())
-      .emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_DIAGNOSIS_SPECIAL, data)
+      .emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_ATTRIBUTE_LIST, data)
   }
 
   ticketClinicUpdateTicketProcedureList(

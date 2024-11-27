@@ -9,6 +9,10 @@ export default class Customer extends BaseEntity {
   @Expose()
   fullName: string
 
+  @Column({ default: 0 })
+  @Expose()
+  customerSourceId: number
+
   @Column({ type: 'char', length: 10, nullable: true })
   @Expose()
   phone: string
@@ -27,10 +31,6 @@ export default class Customer extends BaseEntity {
   @Column({ type: 'smallint', nullable: true })
   @Expose()
   gender: EGender
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  @Expose() // số căn cước
-  identityCard: string
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()

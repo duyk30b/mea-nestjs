@@ -11,6 +11,7 @@ import {
   TicketRadiology,
   TicketSurcharge,
 } from '../../../entities'
+import TicketAttribute, { TicketAttributeInsertType } from '../../../entities/ticket-attribute.entity'
 import { TicketExpenseInsertType } from '../../../entities/ticket-expense.entity'
 import {
   TicketProcedureInsertType,
@@ -41,6 +42,7 @@ export class TicketOrderDraft {
     ticketOrderProcedureDraftList: TicketOrderProcedureDraftType[]
     ticketOrderSurchargeDraftList: TicketOrderSurchargeDraftType[]
     ticketOrderExpenseDraftList: TicketOrderExpenseDraftType[]
+    ticketAttributeDraftList: { key: string, value: any }[]
   }) {
     const {
       oid,
@@ -48,6 +50,7 @@ export class TicketOrderDraft {
       ticketOrderProcedureDraftList,
       ticketOrderSurchargeDraftList,
       ticketOrderExpenseDraftList,
+      ticketAttributeDraftList,
     } = params
     const ticketOrderDraftInsert: TicketOrderDraftInsertType = params.ticketOrderDraftInsert
 
@@ -144,6 +147,18 @@ export class TicketOrderDraft {
         await manager.insert(TicketExpense, ticketExpenseListInsert)
       }
 
+      if (ticketAttributeDraftList.length) {
+        const ticketAttributeListInsert = ticketAttributeDraftList.map((i) => {
+          const ticketAttribute: TicketAttributeInsertType = {
+            ...i,
+            oid,
+            ticketId: ticketBasic.id,
+          }
+          return ticketAttribute
+        })
+        await manager.insert(TicketAttribute, ticketAttributeListInsert)
+      }
+
       return { ticketBasic }
     })
   }
@@ -161,6 +176,7 @@ export class TicketOrderDraft {
       if (ticketDeleteResult.affected !== 1) {
         throw new Error(`Destroy Ticket ${ticketId} failed: Status invalid`)
       }
+      await manager.delete(TicketAttribute, { oid, ticketId })
       await manager.delete(TicketProduct, { oid, ticketId })
       await manager.delete(TicketProcedure, { oid, ticketId })
       await manager.delete(TicketRadiology, { oid, ticketId })

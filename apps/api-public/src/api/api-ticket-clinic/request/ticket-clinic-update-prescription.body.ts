@@ -1,17 +1,18 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
 import {
+  ArrayMinSize,
   IsArray,
   IsDefined,
   IsInt,
+  IsNotEmpty,
   IsNumber,
-  IsOptional,
   IsString,
   Max,
+  MaxLength,
   Min,
   ValidateNested,
 } from 'class-validator'
-import * as DOMPurify from 'isomorphic-dompurify'
 import { valuesEnum } from '../../../../../_libs/common/helpers/typescript.helper'
 import { IsEnumValue, IsNumberGreaterThan } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { DiscountType } from '../../../../../_libs/database/common/variable'
@@ -112,22 +113,38 @@ class TicketProductPrescriptionBody {
   hintUsage: string
 }
 
+class TicketAttributeBody {
+  @ApiProperty({ example: 'advice' })
+  @Expose()
+  @IsString()
+  @MaxLength(100)
+  @IsNotEmpty()
+  key: string
+
+  @ApiProperty({ example: 'Uống 2 lần/ngày sáng 1 viên, chiều 1 viên' })
+  @Expose()
+  @IsString()
+  value: string
+}
+
 export class TicketClinicUpdatePrescriptionBody {
   @ApiProperty({ type: TicketProductPrescriptionBody, isArray: true })
   @Expose()
   @Type(() => TicketProductPrescriptionBody)
-  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   ticketProductPrescriptionList: TicketProductPrescriptionBody[]
 
-  @ApiPropertyOptional({ example: 'Uống 2 lần/ngày sáng 1 viên, chiều 1 viên' })
+  @ApiProperty()
   @Expose()
-  @Transform(({ value }) => {
-    if (value == null) return undefined
-    return DOMPurify.sanitize(value)
-  })
-  @IsOptional()
-  @IsString()
-  advice: string
+  @IsArray()
+  @ArrayMinSize(1)
+  ticketAttributeKeyList: string[]
+
+  @ApiProperty({ type: TicketAttributeBody })
+  @Expose()
+  @Type(() => TicketAttributeBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketAttributeChangeList: TicketAttributeBody[]
 }

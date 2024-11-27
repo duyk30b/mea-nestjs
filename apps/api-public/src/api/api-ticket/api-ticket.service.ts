@@ -5,11 +5,7 @@ import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { Image } from '../../../../_libs/database/entities'
 import { ImageRepository } from '../../../../_libs/database/repository/image/image.repository'
 import { TicketRepository } from '../../../../_libs/database/repository/ticket/ticket-base/ticket.repository'
-import {
-  TicketGetManyQuery,
-  TicketGetOneQuery,
-  TicketPaginationQuery,
-} from './request'
+import { TicketGetManyQuery, TicketGetOneQuery, TicketPaginationQuery } from './request'
 
 @Injectable()
 export class ApiTicketService {
@@ -27,7 +23,7 @@ export class ApiTicketService {
       relation: {
         customer: relation?.customer,
         ticketUserList: relation?.ticketUserList,
-        ticketDiagnosis: relation?.ticketDiagnosis,
+        ticketAttributeList: relation?.ticketAttributeList,
         ticketProductList: relation?.ticketProductList,
         ticketProcedureList: relation?.ticketProcedureList,
       },
@@ -76,7 +72,7 @@ export class ApiTicketService {
         customerPaymentList: !!relation?.customerPaymentList,
         ticketSurchargeList: !!relation?.ticketSurchargeList,
         ticketExpenseList: !!relation?.ticketExpenseList,
-        ticketDiagnosis: !!relation?.ticketDiagnosis,
+        ticketAttributeList: !!relation?.ticketAttributeList,
         toAppointment: !!relation?.toAppointment,
         ticketProductList: relation?.ticketProductList,
         ticketProductConsumableList: relation?.ticketProductConsumableList,
@@ -91,18 +87,16 @@ export class ApiTicketService {
       throw new BusinessException('error.Database.NotFound')
     }
 
-    if (ticket.ticketRadiologyList || ticket.ticketDiagnosis?.imageList) {
+    if (ticket.ticketRadiologyList || ticket.imageList) {
       ticket.ticketRadiologyList = ticket.ticketRadiologyList || []
-      if (ticket.ticketDiagnosis) {
-        ticket.ticketDiagnosis.imageList = []
-      }
+      ticket.imageList = []
 
-      const ticketDiagnosisImageIds: number[] = JSON.parse(ticket.ticketDiagnosis?.imageIds || '[]')
+      const ticketImageIds: number[] = JSON.parse(ticket.imageIds || '[]')
       const ticketRadiologyImageIds: number[] = ticket.ticketRadiologyList
         .map((i) => JSON.parse(i.imageIds))
         .flat()
 
-      const imageIds = [...ticketDiagnosisImageIds, ...ticketRadiologyImageIds]
+      const imageIds = [...ticketImageIds, ...ticketRadiologyImageIds]
 
       let imageMap: Record<string, Image> = {}
       if (imageIds.length > 0) {
@@ -114,9 +108,7 @@ export class ApiTicketService {
       }
 
       // push để lấy image đúng thứ tự
-      ticketDiagnosisImageIds.forEach((i) => {
-        ticket.ticketDiagnosis.imageList.push(imageMap[i])
-      })
+      ticketImageIds.forEach((i) => ticket.imageList.push(imageMap[i]))
       ticket.ticketRadiologyList.forEach((ticketRadiology) => {
         const ticketDiagnosisImageIds: number[] = JSON.parse(ticketRadiology.imageIds)
         ticketRadiology.imageList = []

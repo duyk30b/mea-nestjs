@@ -62,21 +62,33 @@ export class ApiTicketRadiologyController {
     })
   }
 
-  @Post('update/:id')
+  @Post(':id/update-result')
   @HasPermission(PermissionId.TICKET_RADIOLOGY_RESULT)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FastifyFilesInterceptor('files', 10, {}))
-  async updateTicketRadiology(
+  async updateResult(
     @External() { oid }: TExternal,
     @UploadedFiles() files: FileUploadDto[],
     @Param() { id }: IdParam,
     @Body() body: TicketRadiologyUpdateBody
   ) {
-    return await this.apiTicketRadiologyService.update({
+    return await this.apiTicketRadiologyService.updateResult({
       oid,
       ticketRadiologyId: id,
       body,
       files,
     })
+  }
+
+  @Post(':id/cancel-result')
+  @HasPermission(PermissionId.TICKET_LABORATORY_RESULT)
+  async cancelResult(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam
+  ) {
+    return await this.apiTicketRadiologyService.cancelResult(
+      oid,
+      id
+    )
   }
 }

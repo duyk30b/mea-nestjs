@@ -1,20 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
-import { IsString } from 'class-validator'
-import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
+import { IsNotEmpty, IsString } from 'class-validator'
 import { SettingKey } from '../../../../../_libs/database/entities/setting.entity'
 
 export class SettingUpsertParams {
-  @ApiProperty({ enum: SettingKey, example: SettingKey.PRODUCT_UNIT })
+  @ApiProperty({ example: SettingKey.GOOGLE_DRIVER })
   @Expose()
-  @IsEnumValue(SettingKey)
+  @IsString()
+  @IsNotEmpty()
   type: SettingKey
 }
 
 export class SettingUpsertBody {
-  @ApiProperty({
-    example: JSON.stringify('Viên, Lọ, Cái, Chai'),
-  })
+  @ApiProperty({ example: JSON.stringify({}) })
   @Expose()
   @IsString()
   data: string

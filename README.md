@@ -1,5 +1,5 @@
 ## I. Setup
-1. Init Mariadb and Redis: `docker compose -f docker.db.yml up -d`
+1. Init Project: `docker compose -f docker-compose.production.yml up -d`
 2. Start Nginx for run SSL: `docker compose -f docker.nginx.yml up -d`
 3. Init Kafka Server: `docker compose -f docker.kafka.yml up -d`
 4. Install NodeJS in local:

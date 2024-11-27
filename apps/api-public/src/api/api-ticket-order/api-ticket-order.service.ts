@@ -56,11 +56,14 @@ export class ApiTicketOrderService {
           customerSourceId: 0,
           laboratoryMoney: 0,
           radiologyMoney: 0,
+          dailyIndex: 0,
+          imageIds: JSON.stringify([]),
         },
         ticketOrderProductDraftList: body.ticketOrderProductDraftList,
         ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,
         ticketOrderSurchargeDraftList: body.ticketOrderSurchargeDraftList,
         ticketOrderExpenseDraftList: body.ticketOrderExpenseDraftList,
+        ticketAttributeDraftList: body.ticketOrderAttributeDaftList,
       })
       return { data: { ticketBasic } }
     } catch (error: any) {
@@ -84,11 +87,14 @@ export class ApiTicketOrderService {
           customerSourceId: 0,
           laboratoryMoney: 0,
           radiologyMoney: 0,
+          dailyIndex: 0,
+          imageIds: JSON.stringify([]),
         },
         ticketOrderProductDraftList: body.ticketOrderProductDraftList,
         ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,
         ticketOrderSurchargeDraftList: body.ticketOrderSurchargeDraftList,
         ticketOrderExpenseDraftList: body.ticketOrderExpenseDraftList,
+        ticketAttributeDraftList: body.ticketOrderAttributeDaftList,
       })
       return { data: { ticketBasic } }
     } catch (error: any) {
@@ -122,11 +128,14 @@ export class ApiTicketOrderService {
         customerSourceId: 0,
         laboratoryMoney: 0,
         radiologyMoney: 0,
+        dailyIndex: 0,
+        imageIds: JSON.stringify([]),
       },
       ticketOrderProductDraftList: body.ticketOrderProductDraftList,
       ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,
       ticketOrderSurchargeDraftList: body.ticketOrderSurchargeDraftList,
       ticketOrderExpenseDraftList: body.ticketOrderExpenseDraftList,
+      ticketAttributeDraftList: body.ticketOrderAttributeDaftList,
     })
 
     const ticketId = createDraftResponse.ticketBasic.id
@@ -178,6 +187,8 @@ export class ApiTicketOrderService {
             customerSourceId: 0,
             laboratoryMoney: 0,
             radiologyMoney: 0,
+            dailyIndex: 0,
+            imageIds: JSON.stringify([]),
           },
           ticketOrderProductDraftList: body.ticketOrderProductDraftList,
           ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,

@@ -1143,61 +1143,26 @@ export class ApiPermissionService {
         parentId: PermissionId.TICKET_CLINIC,
         rootId: PermissionId.TICKET_CLINIC,
       },
-    ]
 
-    const permissionTicketBase: Permission[] = [
       {
-        id: PermissionId.TICKET_CLINIC_BASE,
-        level: 1,
-        code: PermissionId[PermissionId.TICKET_CLINIC_BASE],
-        isActive: 1,
-        pathId: `${PermissionId.TICKET_CLINIC_BASE}`,
-        name: 'Quản lý phòng khám cơ bản',
-        parentId: 0,
-        rootId: PermissionId.TICKET_CLINIC_BASE,
-      },
-      {
-        id: PermissionId.TICKET_CLINIC_BASE_UPDATE_DIAGNOSIS,
+        id: PermissionId.TICKET_CLINIC_UPDATE_DIAGNOSIS_BASIC,
         level: 2,
-        code: PermissionId[PermissionId.TICKET_CLINIC_BASE_UPDATE_DIAGNOSIS],
+        code: PermissionId[PermissionId.TICKET_CLINIC_UPDATE_DIAGNOSIS_BASIC],
         isActive: 1,
-        pathId: `${PermissionId.TICKET_CLINIC_BASE}.${PermissionId.TICKET_CLINIC_BASE_UPDATE_DIAGNOSIS}`,
+        pathId: `${PermissionId.TICKET_CLINIC}.${PermissionId.TICKET_CLINIC_UPDATE_DIAGNOSIS_BASIC}`,
         name: 'Khám và chẩn đoán',
-        parentId: PermissionId.TICKET_CLINIC_BASE,
-        rootId: PermissionId.TICKET_CLINIC_BASE,
-      },
-    ]
-
-    const permissionTicketEye: Permission[] = [
-      {
-        id: PermissionId.TICKET_CLINIC_EYE,
-        level: 1,
-        code: PermissionId[PermissionId.TICKET_CLINIC_EYE],
-        isActive: 1,
-        pathId: `${PermissionId.TICKET_CLINIC_EYE}`,
-        name: 'Quản lý phòng khám Mắt',
-        parentId: 0,
-        rootId: PermissionId.TICKET_CLINIC_EYE,
+        parentId: PermissionId.TICKET_CLINIC,
+        rootId: PermissionId.TICKET_CLINIC,
       },
       {
-        id: PermissionId.TICKET_CLINIC_EYE_UPDATE_DIAGNOSIS_BASIC,
+        id: PermissionId.TICKET_CLINIC_UPDATE_DIAGNOSIS_SPECIAL,
         level: 2,
-        code: PermissionId[PermissionId.TICKET_CLINIC_EYE_UPDATE_DIAGNOSIS_BASIC],
+        code: PermissionId[PermissionId.TICKET_CLINIC_UPDATE_DIAGNOSIS_SPECIAL],
         isActive: 1,
-        pathId: `${PermissionId.TICKET_CLINIC_EYE}.${PermissionId.TICKET_CLINIC_EYE_UPDATE_DIAGNOSIS_BASIC}`,
-        name: 'Khám và chẩn đoán',
-        parentId: PermissionId.TICKET_CLINIC_EYE,
-        rootId: PermissionId.TICKET_CLINIC_EYE,
-      },
-      {
-        id: PermissionId.TICKET_CLINIC_EYE_UPDATE_DIAGNOSIS_SPECIAL,
-        level: 2,
-        code: PermissionId[PermissionId.TICKET_CLINIC_EYE_UPDATE_DIAGNOSIS_SPECIAL],
-        isActive: 1,
-        pathId: `${PermissionId.TICKET_CLINIC_EYE}.${PermissionId.TICKET_CLINIC_EYE_UPDATE_DIAGNOSIS_SPECIAL}`,
-        name: 'Đo thị lực',
-        parentId: PermissionId.TICKET_CLINIC_EYE,
-        rootId: PermissionId.TICKET_CLINIC_EYE,
+        pathId: `${PermissionId.TICKET_CLINIC}.${PermissionId.TICKET_CLINIC_UPDATE_DIAGNOSIS_SPECIAL}`,
+        name: 'Khám chuyên sâu',
+        parentId: PermissionId.TICKET_CLINIC,
+        rootId: PermissionId.TICKET_CLINIC,
       },
     ]
 
@@ -1222,8 +1187,6 @@ export class ApiPermissionService {
 
       ...permissionTicketOrder,
       ...permissionTicketClinic,
-      ...permissionTicketBase,
-      ...permissionTicketEye,
     ])
 
     this.cacheDataService.reloadPermissionAll()

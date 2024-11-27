@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, EntityManager, Repository } from 'typeorm'
 import { BaseCondition } from '../../../../common/dto'
+import { DTimer } from '../../../../common/helpers/time.helper'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import {
   Appointment,
@@ -60,8 +61,8 @@ export class TicketRepository extends PostgreSqlRepository<
     if (relation?.ticketSurchargeList) {
       query = query.leftJoinAndSelect('ticket.ticketSurchargeList', 'ticketSurchargeList')
     }
-    if (relation?.ticketDiagnosis) {
-      query = query.leftJoinAndSelect('ticket.ticketDiagnosis', 'ticketDiagnosis')
+    if (relation?.ticketAttributeList) {
+      query = query.leftJoinAndSelect('ticket.ticketAttributeList', 'ticketAttributeList')
     }
     if (relation?.toAppointment) {
       // dùng leftJoinAndMapOne vì có lỗi Appointment và Diagnosis cùng join với cột ID, typeOrm đang lỗi, chán thật
@@ -182,6 +183,18 @@ export class TicketRepository extends PostgreSqlRepository<
 
     const ticket = await query.getOne()
     return ticket
+  }
+
+  async countToday(oid: number) {
+    const now = new Date()
+    const number = await this.countBy({
+      oid,
+      registeredAt: {
+        GTE: DTimer.startOfDate(now, 7).getTime(),
+        LTE: DTimer.endOfDate(now, 7).getTime(),
+      },
+    })
+    return number
   }
 
   async insertOneAndReturnEntity<X extends Partial<TicketInsertType>>(

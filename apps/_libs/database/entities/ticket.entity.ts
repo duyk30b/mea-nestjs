@@ -1,12 +1,13 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm'
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import { DiscountType } from '../common/variable'
 import Appointment from './appointment.entity'
 import CustomerPayment from './customer-payment.entity'
 import CustomerSource from './customer-source.entity'
 import Customer from './customer.entity'
-import TicketDiagnosis from './ticket-diagnosis.entity'
+import Image from './image.entity'
+import TicketAttribute from './ticket-attribute.entity'
 import TicketExpense from './ticket-expense.entity'
 import TicketLaboratory from './ticket-laboratory.entity'
 import TicketProcedure from './ticket-procedure.entity'
@@ -20,6 +21,7 @@ export enum TicketType {
   Clinic = 3,
   Spa = 4,
   Eye = 5,
+  Obstetric = 6
 }
 
 export enum TicketStatus {
@@ -64,6 +66,10 @@ export default class Ticket extends BaseEntity {
   @Column({ type: 'smallint', nullable: true })
   @Expose()
   date: number
+
+  @Column({ type: 'smallint', default: 0 })
+  @Expose()
+  dailyIndex: number
 
   @Column({
     type: 'bigint',
@@ -175,9 +181,9 @@ export default class Ticket extends BaseEntity {
   @Expose()
   debt: number // tiền nợ
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 100, default: JSON.stringify([]) })
   @Expose()
-  note: string // Ghi chú
+  imageIds: string
 
   @Column({
     type: 'bigint',
@@ -237,15 +243,14 @@ export default class Ticket extends BaseEntity {
   @Expose()
   customerPaymentList: CustomerPayment[]
 
-  @OneToOne(() => TicketDiagnosis, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'id', referencedColumnName: 'ticketId' })
-  @Expose()
-  ticketDiagnosis: TicketDiagnosis
-
   // @OneToOne(() => Appointment, { createForeignKeyConstraints: false })
   // @JoinColumn({ name: 'id', referencedColumnName: 'fromTicketId' }) // không JoinColumn trên cùng cột id được, vkl
   @Expose()
   toAppointment: Appointment
+
+  @OneToMany(() => TicketAttribute, (ticketAttribute) => ticketAttribute.ticket)
+  @Expose()
+  ticketAttributeList: TicketAttribute[]
 
   @OneToMany(() => TicketProduct, (ticketProduct) => ticketProduct.ticket)
   @Expose()
@@ -282,6 +287,9 @@ export default class Ticket extends BaseEntity {
   @Expose()
   @OneToMany(() => TicketUser, (ticketUser) => ticketUser.ticket)
   ticketUserList: TicketUser[]
+
+  @Expose()
+  imageList: Image[]
 
   static fromRaw(raw: { [P in keyof Ticket]: any }) {
     if (!raw) return null
@@ -323,12 +331,13 @@ export type TicketRelationType = {
   [P in keyof Pick<
     Ticket,
     | 'customer'
-    | 'ticketDiagnosis'
+    | 'ticketAttributeList'
     | 'ticketExpenseList'
     | 'ticketSurchargeList'
     | 'customerPaymentList'
     | 'toAppointment'
     | 'customerSource'
+    | 'imageList'
   >]?: boolean
 } & {
   [P in keyof Pick<

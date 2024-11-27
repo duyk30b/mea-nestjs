@@ -28,6 +28,7 @@ import {
   Role,
   Setting,
   Ticket,
+  TicketAttribute,
   TicketDiagnosis,
   TicketExpense,
   TicketProcedure,
@@ -193,6 +194,10 @@ export class ApiRootOrganizationService {
 
     if (tableNameList.includes(Setting.name)) {
       await this.manager.delete(Setting, { oid })
+    }
+
+    if (tableNameList.includes(TicketAttribute.name)) {
+      await this.manager.delete(TicketAttribute, { oid })
     }
 
     if (tableNameList.includes(TicketDiagnosis.name)) {

@@ -4,9 +4,11 @@ import {
   IsArray,
   IsDefined,
   IsInt,
+  IsNotEmpty,
   IsNumber,
   IsPositive,
   IsString,
+  MaxLength,
   ValidateNested,
 } from 'class-validator'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
@@ -16,7 +18,7 @@ import { TicketOrderProcedureDraft } from './ticket-order-procedure-draft'
 import { TicketOrderProductDraft } from './ticket-order-product-draft'
 import { TicketOrderSurchargeDraft } from './ticket-order-surcharge-draft'
 
-class TicketOrderFullInsert {
+class TicketOrderBasic {
   @ApiProperty({ example: 45 })
   @Expose()
   @IsDefined()
@@ -95,11 +97,6 @@ class TicketOrderFullInsert {
   @IsInt()
   profit: number // Tiền lãi = totalMoney - itemsCostMoney - khoản chi
 
-  @ApiPropertyOptional({ example: 'Khách hàng không hài lòng dịch vụ nên không trả tiền' })
-  @Expose()
-  @IsString()
-  note: string
-
   @ApiProperty({ example: Date.now() })
   @Expose()
   @IsDefined()
@@ -107,15 +104,29 @@ class TicketOrderFullInsert {
   registeredAt: number
 }
 
-class TicketOrderDebtSuccessInsert extends OmitType(TicketOrderFullInsert, ['debt']) { }
+class TicketOrderBasicDebtSuccessInsert extends OmitType(TicketOrderBasic, ['debt']) { }
 
-class TicketOrderDebtSuccessUpdate extends OmitType(TicketOrderFullInsert, ['customerId', 'debt']) { }
+class TicketOrderBasicDebtSuccessUpdate extends OmitType(TicketOrderBasic, ['customerId', 'debt']) { }
 
-class TicketOrderDraftInsert extends OmitType(TicketOrderFullInsert, ['paid', 'debt']) { }
+class TicketOrderBasicDraftInsert extends OmitType(TicketOrderBasic, ['paid', 'debt']) { }
 
-class TicketOrderDraftApprovedUpdate extends OmitType(TicketOrderFullInsert, ['customerId', 'paid', 'debt']) { }
+class TicketOrderBasicDraftApprovedUpdate extends OmitType(TicketOrderBasic, ['customerId', 'paid', 'debt']) { }
 
-class TicketOrderInfo {
+class TicketOrderAttributeBody {
+  @ApiProperty({ example: 'Diagnosis' })
+  @Expose()
+  @IsString()
+  @MaxLength(100)
+  @IsNotEmpty()
+  key: string
+
+  @ApiProperty()
+  @Expose()
+  @IsString()
+  value: string
+}
+
+class TicketOrderRelation {
   @ApiProperty({ type: TicketOrderProductDraft, isArray: true })
   @Expose()
   @Type(() => TicketOrderProductDraft)
@@ -161,40 +172,48 @@ class TicketOrderInfo {
   @IsArray()
   @ValidateNested({ each: true })
   ticketOrderExpenseDraftList: TicketOrderExpenseDraft[]
+
+  @ApiProperty({ type: TicketOrderAttributeBody, isArray: true })
+  @Expose()
+  @Type(() => TicketOrderAttributeBody)
+  @IsDefined()
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketOrderAttributeDaftList: TicketOrderAttributeBody[]
 }
 
-export class TicketOrderDraftInsertBody extends TicketOrderInfo {
-  @ApiProperty({ type: TicketOrderDraftInsert })
+export class TicketOrderDraftInsertBody extends TicketOrderRelation {
+  @ApiProperty({ type: TicketOrderBasicDraftInsert })
   @Expose()
-  @Type(() => TicketOrderDraftInsert)
+  @Type(() => TicketOrderBasicDraftInsert)
   @IsDefined()
   @ValidateNested({ each: true })
-  ticketOrderDraftInsert: TicketOrderDraftInsert
+  ticketOrderDraftInsert: TicketOrderBasicDraftInsert
 }
 
-export class TicketOrderDraftApprovedUpdateBody extends TicketOrderInfo {
-  @ApiProperty({ type: TicketOrderDraftApprovedUpdate })
+export class TicketOrderDraftApprovedUpdateBody extends TicketOrderRelation {
+  @ApiProperty({ type: TicketOrderBasicDraftApprovedUpdate })
   @Expose()
-  @Type(() => TicketOrderDraftApprovedUpdate)
+  @Type(() => TicketOrderBasicDraftApprovedUpdate)
   @IsDefined()
   @ValidateNested({ each: true })
-  ticketOrderDraftApprovedUpdate: TicketOrderDraftApprovedUpdate
+  ticketOrderDraftApprovedUpdate: TicketOrderBasicDraftApprovedUpdate
 }
 
-export class TicketOrderDebtSuccessInsertBody extends TicketOrderInfo {
-  @ApiProperty({ type: TicketOrderDebtSuccessInsert })
+export class TicketOrderDebtSuccessInsertBody extends TicketOrderRelation {
+  @ApiProperty({ type: TicketOrderBasicDebtSuccessInsert })
   @Expose()
-  @Type(() => TicketOrderDebtSuccessInsert)
+  @Type(() => TicketOrderBasicDebtSuccessInsert)
   @IsDefined()
   @ValidateNested({ each: true })
-  ticketOrderDebtSuccessInsert: TicketOrderDebtSuccessInsert
+  ticketOrderDebtSuccessInsert: TicketOrderBasicDebtSuccessInsert
 }
 
-export class TicketOrderDebtSuccessUpdateBody extends TicketOrderInfo {
-  @ApiProperty({ type: TicketOrderDebtSuccessUpdate })
+export class TicketOrderDebtSuccessUpdateBody extends TicketOrderRelation {
+  @ApiProperty({ type: TicketOrderBasicDebtSuccessUpdate })
   @Expose()
-  @Type(() => TicketOrderDebtSuccessUpdate)
+  @Type(() => TicketOrderBasicDebtSuccessUpdate)
   @IsDefined()
   @ValidateNested({ each: true })
-  ticketOrderDebtSuccessUpdate: TicketOrderDebtSuccessUpdate
+  ticketOrderDebtSuccessUpdate: TicketOrderBasicDebtSuccessUpdate
 }

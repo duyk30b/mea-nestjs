@@ -105,14 +105,22 @@ export abstract class PostgreSqlRepository<
     return await this.findOneBy({ id } as any)
   }
 
+  async countBy(condition: BaseCondition<_ENTITY>): Promise<number> {
+    const where = this.getWhereOptions(condition)
+    const number = await this.repository.countBy(where)
+    return number
+  }
+
   async insertMany<X extends Partial<_INSERT>>(
     data: NoExtra<Partial<_INSERT>, X>[]
   ): Promise<number[]> {
+    if (!data.length) return []
     const insertResult = await this.repository.insert(data)
     return insertResult.identifiers.map((i) => i.id)
   }
 
   async insertManyFullField<X extends _INSERT>(data: NoExtra<_INSERT, X>[]): Promise<number[]> {
+    if (!data.length) return []
     return this.insertMany(data)
   }
 
@@ -132,6 +140,7 @@ export abstract class PostgreSqlRepository<
   async insertManyFullFieldAndReturnRaws<X extends _INSERT>(
     data: NoExtra<_INSERT, X>[]
   ): Promise<{ [P in keyof _ENTITY]: any }[]> {
+    if (!data.length) return []
     return this.insertManyAndReturnRaw(data)
   }
 

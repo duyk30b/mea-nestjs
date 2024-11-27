@@ -175,7 +175,8 @@ export class GoogleDriverService {
     if (parentId) queryString += ` and '${parentId}' in parents`
 
     const response = await drive.files.list({
-      q: `mimeType='application/vnd.google-apps.folder' and trashed=false and 'me' in owners`
+      q:
+        `mimeType='application/vnd.google-apps.folder' and trashed=false and 'me' in owners`
         + queryString,
       fields: 'nextPageToken, files(id, name, mimeType, trashed, parents, modifiedTime)',
     })
@@ -249,11 +250,14 @@ export class GoogleDriverService {
     return response.data
   }
 
-  public async trashMultipleFiles(email: string, fileIds: string[]) {
+  public async trashMultipleFiles(options: { email: string; fileIds: string[]; oid: number }) {
+    const { email, fileIds, oid } = options
     if (!fileIds.length) return { success: [], failed: [] }
     let drive: drive_v3.Drive
     try {
-      this.logger.log(`GoogleDriver ${email} start trashMultipleFiles, with ${fileIds.length} file`)
+      this.logger.debug(
+        `[OID=${oid}] GoogleDriver ${email} start trashMultipleFiles, with ${fileIds.length} file`
+      )
       drive = this.createDrive(email)
     } catch (error) {
       return { success: [], failed: fileIds }
@@ -346,7 +350,9 @@ export class GoogleDriverService {
   }) {
     const { files, email, oid, customerId } = options
     if (!files.length) return []
-    this.logger.log(`GoogleDriver ${email} start uploadMultipleFiles, with ${files.length} file`)
+    this.logger.debug(
+      `[OID=${oid}] GoogleDriver ${email} start uploadMultipleFiles, with ${files.length} file`
+    )
     const drive = this.createDrive(email)
 
     if (!this.cache[email].rootFolderId) {
@@ -370,7 +376,12 @@ export class GoogleDriverService {
           buffer: item.buffer,
           mimetype: item.mimetype,
           parent: this.cache[email].defaultFolderId,
-          title: oid + '-' + customerId + '-' + DTimer.timeToText(now + index, 'YYYY-MM-DD-hh-mm-ss-xxx'),
+          title:
+            oid
+            + '-'
+            + customerId
+            + '-'
+            + DTimer.timeToText(now + index, 'YYYY-MM-DD-hh-mm-ss-xxx'),
         })
       })
     )

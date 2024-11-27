@@ -1,10 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
+import { DTimer } from '../../../../_libs/common/helpers/time.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { AppointmentStatus } from '../../../../_libs/database/entities/appointment.entity'
 import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import { AppointmentRepository } from '../../../../_libs/database/repository/appointment/appointment.repository'
 import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
+import { TicketAttributeRepository } from '../../../../_libs/database/repository/ticket-attribute/ticket-attribute.repository'
 import { TicketRepository } from '../../../../_libs/database/repository/ticket/ticket-base/ticket.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
@@ -22,7 +24,8 @@ export class ApiAppointmentService {
     private readonly socketEmitService: SocketEmitService,
     private readonly appointmentRepository: AppointmentRepository,
     private readonly customerRepository: CustomerRepository,
-    private readonly ticketRepository: TicketRepository
+    private readonly ticketRepository: TicketRepository,
+    private readonly ticketAttributeRepository: TicketAttributeRepository
   ) { }
 
   async pagination(oid: number, query: AppointmentPaginationQuery): Promise<BaseResponse> {
@@ -114,17 +117,28 @@ export class ApiAppointmentService {
     const appointment = await this.appointmentRepository.findOneBy({ oid, id: appointmentId })
     const customer = await this.customerRepository.findOneBy({ oid, id: appointment.customerId })
 
+    const registeredAt = body.registeredAt
     const ticket = await this.ticketRepository.insertOneAndReturnEntity({
       oid,
       customerId: customer.id,
       ticketStatus: TicketStatus.Schedule,
       ticketType: body.ticketType,
-      registeredAt: body.registeredAt,
-      note: appointment.reason,
+      registeredAt,
+      year: DTimer.info(registeredAt, 7).year,
+      month: DTimer.info(registeredAt, 7).month + 1,
+      date: DTimer.info(registeredAt, 7).date,
     })
 
+    ticket.ticketAttributeList =
+      await this.ticketAttributeRepository.insertManyFullFieldAndReturnEntity([{
+        key: 'reason',
+        value: appointment.reason,
+        oid,
+        ticketId: ticket.id,
+      }])
+
     ticket.customer = customer
-    ticket.ticketDiagnosis = null
+    ticket.ticketAttributeList = []
     ticket.ticketProductList = []
     ticket.ticketProcedureList = []
     ticket.customerPaymentList = []
