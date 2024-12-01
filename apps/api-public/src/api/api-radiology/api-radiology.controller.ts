@@ -10,6 +10,7 @@ import {
   RadiologyGetManyQuery,
   RadiologyGetOneQuery,
   RadiologyPaginationQuery,
+  RadiologySystemCopyBody,
   RadiologyUpsertBody,
 } from './request'
 
@@ -29,12 +30,6 @@ export class ApiRadiologyController {
   @IsUser()
   async list(@External() { oid }: TExternal, @Query() query: RadiologyGetManyQuery) {
     return await this.apiRadiologyService.getMany(oid, query)
-  }
-
-  @Get('example-list')
-  @IsUser()
-  async exampleList() {
-    return await this.apiRadiologyService.exampleList()
   }
 
   @Get('detail/:id')
@@ -69,5 +64,17 @@ export class ApiRadiologyController {
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiRadiologyService.destroyOne(oid, id)
+  }
+
+  @Get('system-list')
+  @IsUser()
+  async systemList() {
+    return await this.apiRadiologyService.systemList()
+  }
+
+  @Post('system-copy')
+  @HasPermission(PermissionId.MASTER_DATA_RADIOLOGY)
+  async systemCopy(@External() { oid }: TExternal, @Body() body: RadiologySystemCopyBody) {
+    return await this.apiRadiologyService.systemCopy(oid, body)
   }
 }

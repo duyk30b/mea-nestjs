@@ -46,36 +46,43 @@ export class ApiRadiologyGroupService {
   }
 
   async getOne(oid: number, id: number): Promise<BaseResponse> {
-    const data = await this.radiologyGroupRepository.findOneBy({ oid, id })
-    if (!data) throw new BusinessException('error.Database.NotFound')
-    return { data }
-  }
-
-  async replaceAll(oid: number, body: RadiologyGroupReplaceAllBody): Promise<BaseResponse> {
-    await this.radiologyGroupRepository.replaceAll(
-      oid,
-      body.radiologyGroupReplaceAll
-    )
-    return { data: true }
+    const radiologyGroup = await this.radiologyGroupRepository.findOneBy({ oid, id })
+    if (!radiologyGroup) throw new BusinessException('error.Database.NotFound')
+    return { data: { radiologyGroup } }
   }
 
   async createOne(oid: number, body: RadiologyGroupCreateBody): Promise<BaseResponse> {
-    const id = await this.radiologyGroupRepository.insertOne({ oid, ...body })
-    const data = await this.radiologyGroupRepository.findOneById(id)
-    return { data }
+    const radiologyGroup = await this.radiologyGroupRepository.insertOneAndReturnEntity({
+      oid,
+      ...body,
+    })
+    return { data: { radiologyGroup } }
   }
 
   async updateOne(oid: number, id: number, body: RadiologyGroupUpdateBody): Promise<BaseResponse> {
-    const affected = await this.radiologyGroupRepository.update({ id, oid }, body)
-    const data = await this.radiologyGroupRepository.findOneBy({ oid, id })
-    return { data }
+    const radiologyGroupList = await this.radiologyGroupRepository.updateAndReturnEntity(
+      { id, oid },
+      body
+    )
+    return { data: { radiologyGroup: radiologyGroupList[0] } }
   }
 
   async destroyOne(oid: number, id: number): Promise<BaseResponse> {
     const affected = await this.radiologyGroupRepository.delete({ oid, id })
-    if (affected === 0) {
-      throw new BusinessException('error.Database.DeleteFailed')
-    }
+    if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
+
     return { data: true }
+  }
+
+  async replaceAll(oid: number, body: RadiologyGroupReplaceAllBody): Promise<BaseResponse> {
+    await this.radiologyGroupRepository.replaceAll(oid, body.radiologyGroupReplaceAll)
+    return { data: true }
+  }
+
+  async systemList(): Promise<BaseResponse> {
+    const data = await this.radiologyGroupRepository.findMany({
+      condition: { oid: 1 },
+    })
+    return { data }
   }
 }

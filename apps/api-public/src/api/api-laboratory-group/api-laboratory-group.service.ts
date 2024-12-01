@@ -68,19 +68,22 @@ export class ApiLaboratoryGroupService {
     return { data: { laboratoryGroup: laboratoryGroupList[0] } }
   }
 
-  async replaceAll(oid: number, body: LaboratoryGroupReplaceAllBody): Promise<BaseResponse> {
-    await this.laboratoryGroupRepository.replaceAll(
-      oid,
-      body.laboratoryGroupReplaceAll
-    )
+  async destroyOne(oid: number, id: number): Promise<BaseResponse> {
+    const affected = await this.laboratoryGroupRepository.delete({ oid, id })
+    if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
+
     return { data: true }
   }
 
-  async destroyOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.laboratoryGroupRepository.delete({ oid, id })
-    if (affected === 0) {
-      throw new BusinessException('error.Database.DeleteFailed')
-    }
+  async replaceAll(oid: number, body: LaboratoryGroupReplaceAllBody): Promise<BaseResponse> {
+    await this.laboratoryGroupRepository.replaceAll(oid, body.laboratoryGroupReplaceAll)
     return { data: true }
+  }
+
+  async systemList(): Promise<BaseResponse> {
+    const data = await this.laboratoryGroupRepository.findMany({
+      condition: { oid: 1 },
+    })
+    return { data }
   }
 }

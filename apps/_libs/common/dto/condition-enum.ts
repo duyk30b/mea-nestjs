@@ -46,12 +46,19 @@ export const transformConditionEnum = <T>(
   enumObject: object
 ) => {
   if (!value) return
-  if (typeof value === 'number') {
-    if (valuesEnum(enumObject).includes(value)) {
-      return value
-    } else {
-      throw new Error(`${key} must be a enum ${stringEnum(enumObject)}`)
+  if (typeof value === 'number' || typeof value === 'string') {
+    const enumObjectValueList = valuesEnum(enumObject)
+    for (let i = 0; i < enumObjectValueList.length; i++) {
+      const item = enumObjectValueList[i]
+      if (item != value) continue
+      if (typeof item === 'number') {
+        return Number(value)
+      }
+      if (typeof item === 'string') {
+        return String(value)
+      }
     }
+    throw new Error(`${key} must be a enum ${stringEnum(enumObject)}`)
   } else if (typeof value === 'object') {
     const ConditionEnum = createConditionEnum(enumObject)
     const instance = plainToInstance(ConditionEnum, value, {

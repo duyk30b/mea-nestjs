@@ -84,13 +84,13 @@ export class ApiTicketClinicService {
 
   async create(options: { oid: number; body: TicketClinicCreateBody }) {
     const { oid, body } = options
+    const { registeredAt, ticketStatus, ticketType, customerSourceId } = body.ticket
+
     let customer: Customer
     if (!body.customerId) {
       customer = await this.customerRepository.insertOneFullFieldAndReturnEntity({
         ...body.customer,
         debt: 0,
-        isActive: 1,
-        customerSourceId: body.ticket.customerSourceId,
         oid,
       })
     } else {
@@ -102,14 +102,14 @@ export class ApiTicketClinicService {
     if (!customer) throw new BusinessException('error.SystemError')
 
     const countToday = await this.ticketRepository.countToday(oid)
-    const registeredAt = body.ticket.registeredAt
     const ticket = await this.ticketRepository.insertOneAndReturnEntity({
       oid,
       customerId: customer.id,
-      ticketType: body.ticket.ticketType,
-      ticketStatus: body.ticket.ticketStatus,
+      ticketType,
+      ticketStatus,
       registeredAt,
-      customerSourceId: body.ticket.customerSourceId,
+      startedAt: ticketStatus === TicketStatus.Executing ? registeredAt : null,
+      customerSourceId,
       dailyIndex: countToday + 1,
       year: DTimer.info(registeredAt, 7).year,
       month: DTimer.info(registeredAt, 7).month + 1,
@@ -451,6 +451,9 @@ export class ApiTicketClinicService {
     const result = await this.ticketClinicUpdateItemsMoney.updateItemsMoney({
       oid,
       ticketId,
+      discountMoney: body.discountMoney,
+      discountPercent: body.discountPercent,
+      discountType: body.discountType,
       ticketProductUpdateList: body.ticketProductUpdateList,
       ticketProcedureUpdateList: body.ticketProcedureUpdateList,
       ticketLaboratoryUpdateList: body.ticketLaboratoryUpdateList,

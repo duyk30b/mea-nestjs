@@ -8,9 +8,11 @@ import { ApiCustomerModule } from './api-customer/api-customer.module'
 import { ApiDistributorPaymentModule } from './api-distributor-payment/api-distributor-payment.module'
 import { ApiDistributorModule } from './api-distributor/api-distributor.module'
 import { ApiLaboratoryGroupModule } from './api-laboratory-group/api-laboratory-group.module'
+import { ApiLaboratoryKitModule } from './api-laboratory-kit/api-laboratory-kit.module'
 import { ApiLaboratoryModule } from './api-laboratory/api-laboratory.module'
 import { ApiOrganizationModule } from './api-organization/api-organization.module'
 import { ApiPermissionModule } from './api-permission/api-permission.module'
+import { ApiPrescriptionSampleModule } from './api-prescription-sample/api-prescription-sample.module'
 import { ApiPrintHtmlModule } from './api-print-html/api-print-html.module'
 import { ApiProcedureGroupModule } from './api-procedure-group/api-procedure-group.module'
 import { ApiProcedureModule } from './api-procedure/api-procedure.module'
@@ -59,8 +61,10 @@ import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
 
     ApiLaboratoryModule,
     ApiLaboratoryGroupModule,
+    ApiLaboratoryKitModule,
     ApiRadiologyModule,
     ApiRadiologyGroupModule,
+    ApiPrescriptionSampleModule,
 
     ApiWarehouseModule,
     ApiProductGroupModule,

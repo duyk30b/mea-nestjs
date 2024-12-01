@@ -4,6 +4,12 @@ import { IsDefined, IsInt, IsString } from 'class-validator'
 import * as DOMPurify from 'isomorphic-dompurify'
 
 export class RadiologyUpsertBody {
+  @ApiPropertyOptional({ example: 105000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  priority: number
+
   @ApiProperty({ example: 'Siêu âm tuyến giáp' })
   @Expose()
   @IsDefined()
@@ -27,12 +33,6 @@ export class RadiologyUpsertBody {
   @IsDefined()
   @IsInt()
   price: number // Giá dịch vụ
-
-  @ApiPropertyOptional({ example: 105000 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  priority: number
 
   @ApiProperty({ example: 'Siêu âm thai, rau, ối' })
   @Expose()

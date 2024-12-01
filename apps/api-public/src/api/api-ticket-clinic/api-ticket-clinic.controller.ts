@@ -1,11 +1,11 @@
 import {
-  Body,
-  Controller,
-  Delete,
-  Param,
-  Post,
-  UploadedFiles,
-  UseInterceptors,
+    Body,
+    Controller,
+    Delete,
+    Param,
+    Post,
+    UploadedFiles,
+    UseInterceptors,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto'
@@ -16,13 +16,13 @@ import { External, TExternal } from '../../../../_libs/common/request/external.r
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
 import { ApiTicketClinicService } from './api-ticket-clinic.service'
 import {
-  TicketClinicCreateBody,
-  TicketClinicUpdateConsumableBody,
-  TicketClinicUpdateItemsMoneyBody,
-  TicketClinicUpdatePrescriptionBody,
-  TicketClinicUpdateTicketLaboratoryListBody,
-  TicketClinicUpdateTicketProcedureListBody,
-  TicketClinicUpdateTicketRadiologyListBody,
+    TicketClinicCreateBody,
+    TicketClinicUpdateConsumableBody,
+    TicketClinicUpdateItemsMoneyBody,
+    TicketClinicUpdatePrescriptionBody,
+    TicketClinicUpdateTicketLaboratoryListBody,
+    TicketClinicUpdateTicketProcedureListBody,
+    TicketClinicUpdateTicketRadiologyListBody,
 } from './request'
 import { TicketClinicPaymentBody } from './request/ticket-clinic-payment.body'
 import { TicketClinicReturnProductListBody } from './request/ticket-clinic-return-product-list.body'
@@ -35,7 +35,7 @@ export class ApiTicketClinicController {
   constructor(private readonly apiTicketClinicService: ApiTicketClinicService) { }
 
   @Post('create')
-  @HasPermission(PermissionId.TICKET_CLINIC_REGISTER_NEW)
+  @HasPermission(PermissionId.TICKET_CLINIC_CREATE)
   async create(
     @External() { oid }: TExternal,
     @Body() body: TicketClinicCreateBody

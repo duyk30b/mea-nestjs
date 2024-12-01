@@ -12,8 +12,10 @@ import {
   Image,
   Laboratory,
   LaboratoryGroup,
+  LaboratoryKit,
   Organization,
   Permission,
+  PrescriptionSample,
   PrintHtml,
   Procedure,
   ProcedureGroup,
@@ -50,9 +52,11 @@ import { DistributorPaymentRepository } from './distributor-payment/distributor-
 import { DistributorRepository } from './distributor/distributor.repository'
 import { ImageRepository } from './image/image.repository'
 import { LaboratoryGroupRepository } from './laboratory-group/laboratory-group.repository'
+import { LaboratoryKitRepository } from './laboratory-kit/laboratory-kit.repository'
 import { LaboratoryRepository } from './laboratory/laboratory.repository'
 import { OrganizationRepository } from './organization/organization.repository'
 import { PermissionRepository } from './permission/permission.repository'
+import { PrescriptionSampleRepository } from './prescription-sample/prescription-sample.repository'
 import { PrintHtmlRepository } from './print-html/print-html.repository'
 import { ProcedureGroupRepository } from './procedure-group/procedure-group.repository'
 import { ProcedureRepository } from './procedure/procedure.repository'
@@ -72,7 +76,6 @@ import { ReceiptRepository } from './receipt/receipt.repository'
 import { RoleRepository } from './role/role.repository'
 import { SettingRepository } from './setting/setting.repository'
 import { StatisticReceiptRepository } from './statistic/statistic-receipt.repository'
-import { StatisticTicketRepository } from './statistic/statistic-ticket.repository'
 import { StatisticRepository } from './statistic/statistic.repository'
 import { TicketAttributeRepository } from './ticket-attribute/ticket-attribute.repository'
 import { TicketDiagnosisRepository } from './ticket-diagnosis/ticket-diagnosis.repository'
@@ -85,6 +88,7 @@ import { TicketPayDebt } from './ticket/ticket-base/ticket-pay-debt'
 import { TicketPaymentAndClose } from './ticket/ticket-base/ticket-payment-and-close'
 import { TicketPrepayment } from './ticket/ticket-base/ticket-prepayment'
 import { TicketSendProduct } from './ticket/ticket-base/ticket-send-product'
+import { TicketStatisticRepository } from './ticket/ticket-base/ticket-statistic.repository'
 import { TicketRepository } from './ticket/ticket-base/ticket.repository'
 import { TicketClinicRefundOverpaid } from './ticket/ticket-clinic/ticket-clinic-refund-overpaid'
 import { TicketClinicReopen } from './ticket/ticket-clinic/ticket-clinic-reopen'
@@ -124,9 +128,11 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
       ProductMovement,
 
       Laboratory,
+      LaboratoryKit,
       LaboratoryGroup,
       Radiology,
       RadiologyGroup,
+      PrescriptionSample,
 
       Receipt,
       ReceiptItem,
@@ -170,8 +176,10 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
 
     LaboratoryRepository,
     LaboratoryGroupRepository,
+    LaboratoryKitRepository,
     RadiologyRepository,
     RadiologyGroupRepository,
+    PrescriptionSampleRepository,
 
     ReceiptDraft,
     ReceiptPayDebt,
@@ -211,6 +219,7 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
     TicketOrderCancel,
 
     TicketRepository,
+    TicketStatisticRepository,
     TicketAttributeRepository,
     TicketDiagnosisRepository,
     TicketProcedureRepository,
@@ -221,7 +230,6 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
 
     StatisticRepository,
     StatisticReceiptRepository,
-    StatisticTicketRepository,
   ],
   exports: [
     AppointmentRepository,
@@ -241,8 +249,10 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
 
     LaboratoryRepository,
     LaboratoryGroupRepository,
+    LaboratoryKitRepository,
     RadiologyRepository,
     RadiologyGroupRepository,
+    PrescriptionSampleRepository,
 
     ReceiptRepository,
     RoleRepository,
@@ -283,6 +293,7 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
     TicketOrderCancel,
 
     TicketRepository,
+    TicketStatisticRepository,
     TicketAttributeRepository,
     TicketDiagnosisRepository,
     TicketProcedureRepository,
@@ -293,7 +304,6 @@ import { WarehouseRepository } from './warehouse/warehouse.repository'
 
     StatisticRepository,
     StatisticReceiptRepository,
-    StatisticTicketRepository,
   ],
 })
 export class RepositoryModule { }

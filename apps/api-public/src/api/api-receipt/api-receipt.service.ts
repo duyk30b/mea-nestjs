@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { ReceiptStatus } from '../../../../_libs/database/common/variable'
 import { Batch, Distributor, Product } from '../../../../_libs/database/entities'
 import { DistributorPaymentRepository } from '../../../../_libs/database/repository/distributor-payment/distributor-payment.repository'
 import { ReceiptCancel } from '../../../../_libs/database/repository/receipt/receipt-cancel'
@@ -261,7 +260,6 @@ export class ApiReceiptService {
         },
         sort: { id: 'ASC' },
       })
-      this.socketEmitService.distributorUpsert(oid, { distributor })
       return {
         data: {
           receiptBasic,
@@ -306,10 +304,7 @@ export class ApiReceiptService {
     oid: number,
     data: { distributor: Distributor; productList: Product[]; batchList: Batch[] }
   ) {
-    const { distributor, productList, batchList } = data
-    if (distributor) {
-      this.socketEmitService.distributorUpsert(oid, { distributor })
-    }
+    const { productList, batchList } = data
     if (productList.length) {
       this.socketEmitService.productListUpdate(oid, { productList })
     }

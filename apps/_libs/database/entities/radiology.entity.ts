@@ -19,6 +19,10 @@ export default class Radiology {
   @PrimaryGeneratedColumn()
   id: number
 
+  @Column({ default: 1 })
+  @Expose()
+  priority: number
+
   @Column({ type: 'varchar', length: 255 })
   @Expose()
   name: string
@@ -34,10 +38,6 @@ export default class Radiology {
   @Column({ nullable: true })
   @Expose()
   price: number
-
-  @Column({ default: 1 })
-  @Expose()
-  priority: number
 
   @Column({ type: 'varchar', length: 255, default: '' })
   @Expose()
@@ -114,7 +114,13 @@ export type RadiologyInsertType = Omit<
   keyof RadiologyRelationType | keyof Pick<Radiology, 'id' | 'updatedAt' | 'deletedAt'>
 >
 
-export type RadiologyUpdateType = Omit<
-  Radiology,
-  keyof RadiologyRelationType | keyof Pick<Radiology, 'oid' | 'id'>
->
+// export type RadiologyUpdateType = Omit<
+//   Radiology,
+//   keyof RadiologyRelationType | keyof Pick<Radiology, 'oid' | 'id'>
+// >
+
+export type RadiologyUpdateType = {
+  [K in Exclude<keyof Radiology, keyof RadiologyRelationType | 'oid' | 'id'>]:
+  | Radiology[K]
+  | (() => string)
+}

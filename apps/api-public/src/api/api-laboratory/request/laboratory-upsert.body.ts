@@ -5,6 +5,12 @@ import { IsEnumValue } from '../../../../../_libs/common/transform-validate/clas
 import { LaboratoryValueType } from '../../../../../_libs/database/entities/laboratory.entity'
 
 export class LaboratoryParentCreate {
+  @ApiProperty({ example: 105000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  priority: number
+
   @ApiProperty({ example: 'GOT' })
   @Expose()
   @IsDefined()

@@ -20,6 +20,10 @@ export default class Laboratory {
   @PrimaryGeneratedColumn()
   id: number
 
+  @Column({ default: 1 })
+  @Expose()
+  priority: number
+
   @Column({ type: 'varchar', length: 255 })
   @Expose()
   name: string
@@ -110,17 +114,26 @@ export type LaboratoryRelationType = Pick<
   'laboratoryGroup' | 'children' | 'ticketLaboratory'
 >
 
-export type LaboratorySortType = Pick<Laboratory, 'oid' | 'id' | 'name' | 'laboratoryGroupId'>
+export type LaboratorySortType = Pick<
+  Laboratory,
+  'oid' | 'id' | 'priority' | 'name' | 'laboratoryGroupId'
+>
 
 export type LaboratoryInsertType = Omit<
   Laboratory,
   keyof LaboratoryRelationType | keyof Pick<Laboratory, 'id'>
 >
 
-export type LaboratoryUpdateType = Omit<
-  Laboratory,
-  keyof LaboratoryRelationType | keyof Pick<Laboratory, 'oid' | 'id'>
->
+// export type LaboratoryUpdateType = Omit<
+//   Laboratory,
+//   keyof LaboratoryRelationType | keyof Pick<Laboratory, 'oid' | 'id'>
+// >
+
+export type LaboratoryUpdateType = {
+  [K in Exclude<keyof Laboratory, keyof LaboratoryRelationType | 'oid' | 'id'>]:
+  | Laboratory[K]
+  | (() => string)
+}
 
 export type LaboratoryChildUpdateType = Omit<
   Laboratory,

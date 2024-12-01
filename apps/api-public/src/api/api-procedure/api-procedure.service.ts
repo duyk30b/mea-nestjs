@@ -70,25 +70,20 @@ export class ApiProcedureService {
       oid,
       ...body,
     })
-    this.socketEmitService.procedureUpsert(oid, { procedure })
     return { data: { procedure } }
   }
 
   async updateOne(oid: number, id: number, body: ProcedureUpdateBody): Promise<BaseResponse> {
     const [procedure] = await this.procedureRepository.updateAndReturnEntity({ oid, id }, body)
-    if (!procedure) {
-      throw new BusinessException('error.Database.UpdateFailed')
-    }
-    this.socketEmitService.procedureUpsert(oid, { procedure })
+    if (!procedure) throw new BusinessException('error.Database.UpdateFailed')
+
     return { data: { procedure } }
   }
 
-  async deleteOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.procedureRepository.update({ oid, id }, { deletedAt: Date.now() })
-    if (affected === 0) {
-      throw new BusinessException('error.Database.DeleteFailed')
-    }
-    const procedure = await this.procedureRepository.findOneById(id)
-    return { data: { procedure } }
+  async destroyOne(oid: number, id: number): Promise<BaseResponse> {
+    const affected = await this.procedureRepository.delete({ oid, id })
+    if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
+
+    return { data: true }
   }
 }

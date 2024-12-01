@@ -59,10 +59,10 @@ export class ApiProcedureController {
     return await this.apiProcedureService.updateOne(oid, id, body)
   }
 
-  @Delete('delete/:id')
+  @Delete('destroy/:id')
   @HasPermission(PermissionId.MASTER_DATA_PROCEDURE)
   @ApiParam({ name: 'id', example: 1 })
-  async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiProcedureService.deleteOne(oid, id)
+  async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiProcedureService.destroyOne(oid, id)
   }
 }

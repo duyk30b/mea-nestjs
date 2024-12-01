@@ -26,12 +26,6 @@ export class ApiPrintHtmlController {
     return this.apiPrintHtmlService.pagination(oid, query)
   }
 
-  @Get('example-list')
-  @IsUser()
-  async exampleList() {
-    return await this.apiPrintHtmlService.exampleList()
-  }
-
   @Get('get-list')
   @IsUser()
   getList(@External() { oid }: TExternal, @Query() query: PrintHtmlGetManyQuery) {
@@ -76,5 +70,11 @@ export class ApiPrintHtmlController {
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiPrintHtmlService.destroyOne(oid, id)
+  }
+
+  @Get('system-list')
+  @IsUser()
+  async systemList() {
+    return await this.apiPrintHtmlService.systemList()
   }
 }

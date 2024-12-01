@@ -30,6 +30,10 @@ export default class Customer extends BaseEntity {
 
   @Column({ type: 'smallint', nullable: true })
   @Expose()
+  yearOfBirth: number
+
+  @Column({ type: 'smallint', nullable: true })
+  @Expose()
   gender: EGender
 
   @Column({ type: 'varchar', length: 255, nullable: true })

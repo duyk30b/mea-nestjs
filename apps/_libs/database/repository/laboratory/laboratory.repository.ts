@@ -106,7 +106,9 @@ export class LaboratoryRepository extends PostgreSqlRepository<
         const laboratoryUpdateResult: [any[], number] = await manager.query(
           `
           UPDATE  "Laboratory" AS "laboratory"
-          SET     "name" = temp.name,
+          SET     "priority" = temp.priority,
+                  "name" = temp.name,
+                  "laboratoryGroupId" = ${laboratoryParent.laboratoryGroupId},
                   "price" = temp.price,
                   "valueType" = temp."valueType",
                   "unit" = temp.unit,
@@ -115,12 +117,12 @@ export class LaboratoryRepository extends PostgreSqlRepository<
                   "options" = temp.options
           FROM (VALUES `
           + laboratoryUpdateList.map((i) => {
-            return `(${i.id}, '${i.name}', ${i.price}, 
+            return `(${i.id}, ${i.priority}, '${i.name}', ${i.price}, 
                     ${i.valueType}, '${i.unit}', ${i.lowValue}, 
                     ${i.highValue}, '${i.options}'
                     )`
           }).join(', ')
-          + `   ) AS temp("id", "name", "price", 
+          + `   ) AS temp("id", "priority", "name", "price", 
                           "valueType", "unit", "lowValue", 
                           "highValue", "options"
                           )
@@ -128,7 +130,6 @@ export class LaboratoryRepository extends PostgreSqlRepository<
               AND "laboratory"."oid" = ${oid} 
               AND "laboratory"."parentId" = ${laboratoryParent.id} 
               AND "laboratory"."level" = 2
-              AND "laboratory"."laboratoryGroupId" = ${laboratoryParent.laboratoryGroupId} 
           `
         )
 

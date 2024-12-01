@@ -33,14 +33,6 @@ export class ApiPrintHtmlService {
     }
   }
 
-  async exampleList(): Promise<BaseResponse> {
-    const data = await this.printHtmlRepository.findMany({
-      condition: { oid: 1 },
-      sort: { id: 'ASC' },
-    })
-    return { data }
-  }
-
   async getList(oid: number, query: PrintHtmlGetManyQuery): Promise<BaseResponse> {
     const { limit, filter, relation } = query
 
@@ -100,5 +92,13 @@ export class ApiPrintHtmlService {
       throw new BusinessException('error.Database.DeleteFailed')
     }
     return { data: true }
+  }
+
+  async systemList(): Promise<BaseResponse> {
+    const data = await this.printHtmlRepository.findMany({
+      condition: { oid: 1 },
+      sort: { id: 'ASC' },
+    })
+    return { data }
   }
 }

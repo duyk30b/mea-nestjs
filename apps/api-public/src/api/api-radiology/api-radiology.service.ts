@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { RadiologyInsertType } from '../../../../_libs/database/entities/radiology.entity'
 import { RadiologyRepository } from '../../../../_libs/database/repository/radiology/radiology.repository'
 import {
   RadiologyGetManyQuery,
   RadiologyGetOneQuery,
   RadiologyPaginationQuery,
+  RadiologySystemCopyBody,
   RadiologyUpsertBody,
 } from './request'
 
@@ -49,14 +51,6 @@ export class ApiRadiologyService {
     return { data }
   }
 
-  async exampleList(): Promise<BaseResponse> {
-    const data = await this.radiologyRepository.findMany({
-      relation: { printHtml: true },
-      condition: { oid: 1 },
-    })
-    return { data }
-  }
-
   async getOne(oid: number, id: number, query: RadiologyGetOneQuery): Promise<BaseResponse> {
     const radiology = await this.radiologyRepository.findOne({
       relation: query?.relation,
@@ -86,7 +80,38 @@ export class ApiRadiologyService {
     const affected = await this.radiologyRepository.delete({ oid, id })
     if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
 
-    const radiology = await this.radiologyRepository.findOneById(id)
-    return { data: { radiology } }
+    return { data: true }
+  }
+
+  async systemList(): Promise<BaseResponse> {
+    const data = await this.radiologyRepository.findMany({
+      relation: { printHtml: true },
+      condition: { oid: 1 },
+      sort: { priority: 'ASC' },
+    })
+    return { data }
+  }
+
+  async systemCopy(oid: number, body: RadiologySystemCopyBody): Promise<BaseResponse> {
+    const radiologySystemList = await this.radiologyRepository.findMany({
+      condition: { oid: 1, id: { IN: body.radiologyIdList } },
+    })
+    const radiologyInsertList = radiologySystemList.map((i) => {
+      const dto: RadiologyInsertType = {
+        oid,
+        name: i.name,
+        price: i.price,
+        printHtmlId: i.printHtmlId,
+        radiologyGroupId: 0,
+        descriptionDefault: i.descriptionDefault,
+        requestNoteDefault: i.requestNoteDefault,
+        resultDefault: i.resultDefault,
+        priority: 0, // cập nhật sau
+      }
+      return dto
+    })
+    const insertIds = await this.radiologyRepository.insertMany(radiologyInsertList)
+    await this.radiologyRepository.update({ id: { IN: insertIds } }, { priority: () => `"id"` })
+    return { data: true }
   }
 }

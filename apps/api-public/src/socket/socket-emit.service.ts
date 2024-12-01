@@ -3,9 +3,7 @@ import { Server } from 'socket.io'
 import {
   Batch,
   Customer,
-  Distributor,
   Organization,
-  Procedure,
   Product,
   Ticket,
   TicketAttribute,
@@ -38,11 +36,6 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SETTING_RELOAD)
   }
 
-  distributorUpsert(oid: number, data: { distributor: Distributor }) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.DISTRIBUTOR_UPSERT, data)
-  }
-
   customerUpsert(oid: number, data: { customer: Customer }) {
     if (!this.io) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.CUSTOMER_UPSERT, data)
@@ -66,11 +59,6 @@ export class SocketEmitService {
   batchListUpdate(oid: number, data: { batchList: Batch[] }) {
     if (!this.io || !data.batchList.length) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.BATCH_LIST_UPDATE, data)
-  }
-
-  procedureUpsert(oid: number, data: { procedure: Procedure }) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.PROCEDURE_UPSERT, data)
   }
 
   ticketClinicCreate(oid: number, data: { ticket: Ticket }) {

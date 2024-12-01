@@ -1,9 +1,9 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsIn, IsNotEmpty, IsNumber, IsPositive, IsString, MaxLength, Validate, ValidateNested } from 'class-validator'
-import { IsEnumValue, IsPhone } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { EGender } from '../../../../../_libs/database/common/variable'
+import { Allow, IsArray, IsDefined, IsIn, IsNotEmpty, IsNumber, IsNumberString, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator'
+import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { TicketStatus, TicketType } from '../../../../../_libs/database/entities/ticket.entity'
+import { CustomerCreateBody } from '../../api-customer/request'
 
 class TicketAttributeBody {
   @ApiProperty({ example: 'Diagnosis' })
@@ -15,7 +15,7 @@ class TicketAttributeBody {
 
   @ApiProperty()
   @Expose()
-  @IsString()
+  @IsDefined()
   value: string
 }
 
@@ -44,64 +44,6 @@ class TicketBody {
   registeredAt: number
 }
 
-export class CustomerBody {
-  @ApiProperty({ example: 'Phạm Hoàng Mai' })
-  @Expose()
-  @IsDefined()
-  @IsNotEmpty()
-  fullName: string
-
-  @ApiPropertyOptional({ example: '0986123456' })
-  @Expose()
-  @Validate(IsPhone)
-  phone: string
-
-  @ApiPropertyOptional({ example: 1678890707005 })
-  @Expose()
-  @IsNumber()
-  birthday: number
-
-  @ApiPropertyOptional({ enum: [0, 1], example: EGender.Female })
-  @Expose()
-  @IsIn([0, 1])
-  gender: EGender
-
-  @ApiPropertyOptional({ example: 'Tỉnh Hưng Yên' })
-  @Expose()
-  @IsString()
-  addressProvince: string
-
-  @ApiPropertyOptional({ example: 'Huyện Khoái Châu' })
-  @Expose()
-  @IsString()
-  addressDistrict: string
-
-  @ApiPropertyOptional({ example: 'Xã Dạ Trạch' })
-  @Expose()
-  @IsString()
-  addressWard: string
-
-  @ApiPropertyOptional({ example: 'Thôn Đức Nhuận' })
-  @Expose()
-  @IsString()
-  addressStreet: string
-
-  @ApiPropertyOptional({ example: 'Mẹ Nguyễn Thị Hương, sđt: 0988021146' })
-  @Expose() // người thân
-  @IsString()
-  relative: string
-
-  @ApiPropertyOptional({ example: 'Mổ ruột thừa năm 2018' })
-  @Expose()
-  @IsString()
-  healthHistory: string
-
-  @ApiPropertyOptional({ example: 'Khách hàng khó tính' })
-  @Expose()
-  @IsString()
-  note: string
-}
-
 export class TicketClinicCreateBody {
   @ApiProperty({ type: TicketAttributeBody, isArray: true })
   @Expose()
@@ -111,11 +53,11 @@ export class TicketClinicCreateBody {
   @ValidateNested({ each: true })
   ticketAttributeList: TicketAttributeBody[]
 
-  @ApiProperty({ type: CustomerBody })
+  @ApiProperty({ type: CustomerCreateBody })
   @Expose()
-  @Type(() => CustomerBody)
+  @Type(() => CustomerCreateBody)
   @ValidateNested({ each: true })
-  customer: CustomerBody
+  customer: CustomerCreateBody
 
   @ApiProperty({ type: TicketBody })
   @Expose()

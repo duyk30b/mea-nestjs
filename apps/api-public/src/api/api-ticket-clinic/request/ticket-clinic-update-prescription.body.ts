@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
 import {
+  Allow,
   ArrayMinSize,
   IsArray,
   IsDefined,
@@ -123,7 +124,7 @@ class TicketAttributeBody {
 
   @ApiProperty({ example: 'Uống 2 lần/ngày sáng 1 viên, chiều 1 viên' })
   @Expose()
-  @IsString()
+  @Allow()
   value: string
 }
 

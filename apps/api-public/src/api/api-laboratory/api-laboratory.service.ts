@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
+import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import {
   LaboratoryInsertType,
@@ -11,6 +12,7 @@ import {
   LaboratoryGetManyQuery,
   LaboratoryGetOneQuery,
   LaboratoryPaginationQuery,
+  LaboratorySystemCopyBody,
   LaboratoryUpdateBody,
 } from './request'
 
@@ -58,13 +60,6 @@ export class ApiLaboratoryService {
     return { data }
   }
 
-  async exampleList(): Promise<BaseResponse> {
-    const data = await this.laboratoryRepository.findMany({
-      condition: { oid: 1 },
-    })
-    return { data }
-  }
-
   async getOne(oid: number, id: number, query: LaboratoryGetOneQuery): Promise<BaseResponse> {
     const laboratory = await this.laboratoryRepository.findOne({
       relation: {
@@ -81,7 +76,7 @@ export class ApiLaboratoryService {
             parentId: laboratory.id,
             level: 2,
           },
-          sort: { id: 'ASC' },
+          sort: { priority: 'ASC' },
         })
       }
     }
@@ -138,13 +133,96 @@ export class ApiLaboratoryService {
   }
 
   async destroy(oid: number, id: number): Promise<BaseResponse> {
-    const original = await this.laboratoryRepository.findOneBy({ oid, id })
-    const affected = await this.laboratoryRepository.delete({ oid, id })
-    if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
-
-    if (original.valueType === LaboratoryValueType.Children) {
-      await this.laboratoryRepository.delete({ oid, parentId: id })
+    const affected = await this.laboratoryRepository.delete({ oid, parentId: id })
+    if (affected === 0) {
+      throw new BusinessException('error.Database.DeleteFailed')
     }
     return { data: { laboratoryId: id } }
+  }
+
+  async systemList(): Promise<BaseResponse> {
+    const data = await this.laboratoryRepository.findMany({
+      condition: { oid: 1 },
+      sort: { priority: 'ASC' },
+    })
+    return { data }
+  }
+
+  async systemCopy(oid: number, body: LaboratorySystemCopyBody): Promise<BaseResponse> {
+    const laboratorySystem = await this.laboratoryRepository.findMany({
+      condition: { oid: 1, parentId: { IN: body.laboratoryIdList } },
+      sort: { priority: 'ASC' },
+    })
+
+    const laboratoryList = laboratorySystem.filter((i) => i.level === 1)
+    const laboratoryMap = arrayToKeyValue(laboratoryList, 'id')
+    laboratorySystem.forEach((i) => {
+      if (!laboratoryMap[i.parentId].children) {
+        laboratoryMap[i.parentId].children = []
+      }
+      if (i.level === 2) {
+        laboratoryMap[i.parentId].children?.push(i)
+      }
+    })
+
+    // Insert cho level 1
+    const laboratoryParentInsertList: LaboratoryInsertType[] = laboratoryList.map((i) => {
+      const dto: LaboratoryInsertType = {
+        oid,
+        name: i.name,
+        price: i.price,
+        laboratoryGroupId: 0,
+        level: i.level,
+        valueType: i.valueType,
+        lowValue: i.lowValue,
+        highValue: i.highValue,
+        unit: i.unit,
+        options: i.options,
+        parentId: 0, // cập nhật sau
+        priority: 0, // cập nhật sau
+      }
+      return dto
+    })
+    const laboratoryParentIds = await this.laboratoryRepository.insertMany(
+      laboratoryParentInsertList
+    )
+    await this.laboratoryRepository.update(
+      { id: { IN: laboratoryParentIds } },
+      {
+        parentId: () => `"id"`,
+        priority: () => `"id"`,
+      }
+    )
+
+    // Insert cho level 2
+    const laboratoryChildInsertList: LaboratoryInsertType[] = laboratoryList
+      .map((i, index) => {
+        i.children.forEach((c, j) => {
+          c.parentId = laboratoryParentIds[index]
+          c.priority = j + 1
+        })
+        return i.children
+      })
+      .flat()
+      .map((i) => {
+        const dto: LaboratoryInsertType = {
+          oid,
+          name: i.name,
+          price: i.price,
+          laboratoryGroupId: 0,
+          level: i.level,
+          valueType: i.valueType,
+          lowValue: i.lowValue,
+          highValue: i.highValue,
+          unit: i.unit,
+          options: i.options,
+          parentId: i.parentId,
+          priority: i.priority,
+        }
+        return dto
+      })
+    await this.laboratoryRepository.insertMany(laboratoryChildInsertList)
+
+    return { data: true }
   }
 }

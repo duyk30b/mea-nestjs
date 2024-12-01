@@ -38,15 +38,6 @@ export class ApiLaboratoryGroupController {
     return this.apiLaboratoryGroupService.getOne(oid, id)
   }
 
-  @Put('replace-all')
-  @HasPermission(PermissionId.MASTER_DATA_LABORATORY)
-  async replaceAll(
-    @External() { oid }: TExternal,
-    @Body() body: LaboratoryGroupReplaceAllBody
-  ) {
-    return await this.apiLaboratoryGroupService.replaceAll(oid, body)
-  }
-
   @Post('create')
   @HasPermission(PermissionId.MASTER_DATA_LABORATORY)
   async createOne(@External() { oid }: TExternal, @Body() body: LaboratoryGroupCreateBody) {
@@ -69,5 +60,20 @@ export class ApiLaboratoryGroupController {
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiLaboratoryGroupService.destroyOne(oid, id)
+  }
+
+  @Put('replace-all')
+  @HasPermission(PermissionId.MASTER_DATA_LABORATORY)
+  async replaceAll(
+    @External() { oid }: TExternal,
+    @Body() body: LaboratoryGroupReplaceAllBody
+  ) {
+    return await this.apiLaboratoryGroupService.replaceAll(oid, body)
+  }
+
+  @Get('system-list')
+  @IsUser()
+  async systemList() {
+    return await this.apiLaboratoryGroupService.systemList()
   }
 }

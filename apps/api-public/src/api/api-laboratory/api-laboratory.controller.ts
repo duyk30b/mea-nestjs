@@ -11,6 +11,7 @@ import {
   LaboratoryGetManyQuery,
   LaboratoryGetOneQuery,
   LaboratoryPaginationQuery,
+  LaboratorySystemCopyBody,
   LaboratoryUpdateBody,
 } from './request'
 
@@ -30,12 +31,6 @@ export class ApiLaboratoryController {
   @IsUser()
   async list(@External() { oid }: TExternal, @Query() query: LaboratoryGetManyQuery) {
     return await this.apiLaboratoryService.getMany(oid, query)
-  }
-
-  @Get('example-list')
-  @IsUser()
-  async exampleList() {
-    return await this.apiLaboratoryService.exampleList()
   }
 
   @Get('detail/:id')
@@ -70,5 +65,17 @@ export class ApiLaboratoryController {
   @ApiParam({ name: 'id', example: 1 })
   async destroy(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiLaboratoryService.destroy(oid, id)
+  }
+
+  @Get('system-list')
+  @IsUser()
+  async systemList() {
+    return await this.apiLaboratoryService.systemList()
+  }
+
+  @Post('system-copy')
+  @HasPermission(PermissionId.MASTER_DATA_LABORATORY)
+  async systemCopy(@External() { oid }: TExternal, @Body() body: LaboratorySystemCopyBody) {
+    return await this.apiLaboratoryService.systemCopy(oid, body)
   }
 }

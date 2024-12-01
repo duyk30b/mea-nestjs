@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
-import { InjectRepository } from '@nestjs/typeorm'
-import { DataSource, Repository } from 'typeorm'
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
+import { DataSource, EntityManager, Repository } from 'typeorm'
 import { BaseCondition } from '../../../common/dto'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { Procedure } from '../../entities'
@@ -22,6 +22,7 @@ export class ProcedureRepository extends PostgreSqlRepository<
 > {
   constructor(
     private dataSource: DataSource,
+    @InjectEntityManager() private manager: EntityManager,
     @InjectRepository(Procedure) private procedureRepository: Repository<Procedure>
   ) {
     super(procedureRepository)

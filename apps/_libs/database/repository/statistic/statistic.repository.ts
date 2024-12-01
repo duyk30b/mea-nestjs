@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { Between, DataSource, EntityManager, FindOptionsWhere, In } from 'typeorm'
 import { VoucherType } from '../../common/variable'
-import { Customer, ProductMovement, Ticket, TicketProcedure } from '../../entities'
+import { Customer, ProductMovement, Ticket } from '../../entities'
 import { TicketStatus } from '../../entities/ticket.entity'
 
 @Injectable()
@@ -93,43 +93,6 @@ export class StatisticRepository {
       sumCostAmount: Number(i.sumCostAmount),
       sumActualMoney: Number(i.sumActualMoney),
       sumProfit: Number(i.sumProfit),
-    }))
-  }
-
-  async topProcedureBestSelling(options: {
-    oid: number
-    fromTime: number
-    toTime: number
-    limit: number
-    orderBy: 'sumActualMoney' | 'sumQuantity'
-  }) {
-    const { oid, fromTime, toTime, orderBy, limit } = options
-
-    let query = this.manager
-      .createQueryBuilder(TicketProcedure, 'ticketProcedure')
-      .where('ticketProcedure.oid = :oid', { oid })
-      .andWhere('"ticketProcedure"."createdAt" BETWEEN :fromTime AND :toTime', { fromTime, toTime })
-      .groupBy('"ticketProcedure"."procedureId"')
-      .select('"ticketProcedure"."procedureId"', 'procedureId')
-      .addSelect('SUM("ticketProcedure".quantity)', 'sumQuantity')
-      .addSelect(
-        'SUM("ticketProcedure".quantity * "ticketProcedure"."actualPrice")',
-        'sumActualMoney'
-      )
-      .limit(limit)
-
-    if (orderBy === 'sumActualMoney') {
-      query = query.orderBy('"sumActualMoney"', 'DESC')
-    } else if (orderBy === 'sumQuantity') {
-      query = query.orderBy('"sumQuantity"', 'DESC')
-    }
-
-    const data = await query.getRawMany()
-
-    return data.map((i) => ({
-      procedureId: i.procedureId as number,
-      sumQuantity: Number(i.sumQuantity),
-      sumActualMoney: Number(i.sumActualMoney),
     }))
   }
 

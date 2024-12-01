@@ -186,6 +186,24 @@ class TicketRadiologyUpdateBody {
 }
 
 export class TicketClinicUpdateItemsMoneyBody {
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  discountMoney: number
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  discountPercent: number
+
+  @ApiProperty({ enum: DiscountType, example: DiscountType.VND })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(DiscountType)
+  discountType: DiscountType
+
   @ApiProperty({ type: TicketProductUpdateBody, isArray: true })
   @Expose()
   @Type(() => TicketProductUpdateBody)

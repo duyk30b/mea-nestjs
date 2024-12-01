@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, Repository } from 'typeorm'
+import { BaseCondition } from '../../../common/dto'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { TicketProcedure } from '../../entities'
 import {
@@ -64,5 +65,40 @@ export class TicketProcedureRepository extends PostgreSqlRepository<
           AND vp."procedureId" = v."procedureId" AND vp."oid" = ${oid};    
       `
     )
+  }
+
+  async topProcedureBestSelling(options: {
+    condition: BaseCondition<TicketProcedure>
+    limit: number
+    orderBy: 'sumActualMoney' | 'sumQuantity'
+  }) {
+    const { condition, orderBy, limit } = options
+    const where = this.getWhereOptions(condition)
+
+    let query = this.manager
+      .createQueryBuilder(TicketProcedure, 'ticketProcedure')
+      .where(where)
+      .groupBy('"ticketProcedure"."procedureId"')
+      .select('"ticketProcedure"."procedureId"', 'procedureId')
+      .addSelect('SUM("ticketProcedure".quantity)', 'sumQuantity')
+      .addSelect(
+        'SUM("ticketProcedure".quantity * "ticketProcedure"."actualPrice")',
+        'sumActualMoney'
+      )
+      .limit(limit)
+
+    if (orderBy === 'sumActualMoney') {
+      query = query.orderBy('"sumActualMoney"', 'DESC')
+    } else if (orderBy === 'sumQuantity') {
+      query = query.orderBy('"sumQuantity"', 'DESC')
+    }
+
+    const data = await query.getRawMany()
+
+    return data.map((i) => ({
+      procedureId: i.procedureId as number,
+      sumQuantity: Number(i.sumQuantity),
+      sumActualMoney: Number(i.sumActualMoney),
+    }))
   }
 }

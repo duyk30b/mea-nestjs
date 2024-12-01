@@ -1,13 +1,25 @@
-import { ApiPropertyOptional } from '@nestjs/swagger'
+import { ApiProperty, PickType } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
-import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { TicketType } from '../../../../../_libs/database/entities/ticket.entity'
-import { StatisticTimeQuery } from './statistic-time.query'
+import { IsDate, IsDefined, IsIn } from 'class-validator'
+import { TicketGetQuery } from '../../api-ticket/request'
 
-export class StatisticTicketQuery extends StatisticTimeQuery {
-  @ApiPropertyOptional()
+export class StatisticTicketQuery extends PickType(TicketGetQuery, ['filter']) {
+  @ApiProperty()
   @Expose()
-  @Type(() => Number)
-  @IsEnumValue(TicketType)
-  ticketType: TicketType
+  @IsIn(['date', 'month'])
+  groupTimeType: 'date' | 'month'
+
+  @ApiProperty()
+  @Expose()
+  @Type(() => Date)
+  @IsDefined()
+  @IsDate()
+  fromTime: Date
+
+  @ApiProperty()
+  @Expose()
+  @Type(() => Date)
+  @IsDefined()
+  @IsDate()
+  toTime: Date
 }

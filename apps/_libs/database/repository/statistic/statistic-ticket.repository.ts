@@ -1,80 +1,10 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
-import { Between, EntityManager, FindOptionsWhere, In } from 'typeorm'
-import { Ticket } from '../../entities'
-import { TicketStatus, TicketType } from '../../entities/ticket.entity'
+import { EntityManager } from 'typeorm'
 
 @Injectable()
 export class StatisticTicketRepository {
   constructor(@InjectEntityManager() private manager: EntityManager) { }
-
-  async statisticTicket(options: {
-    oid: number
-    fromTime: Date
-    toTime: Date
-    timeType: 'date' | 'month'
-    ticketType?: TicketType
-  }) {
-    const { oid, timeType, ticketType } = options
-    const fromTime = options.fromTime.getTime()
-    const toTime = options.toTime.getTime()
-
-    const whereTicket: FindOptionsWhere<Ticket> = {
-      oid,
-      ticketStatus: In([TicketStatus.Debt, TicketStatus.Completed]),
-      endedAt: Between(fromTime, toTime),
-    }
-    if (ticketType) {
-      whereTicket.ticketType = ticketType
-    }
-
-    let query = this.manager
-      .createQueryBuilder(Ticket, 'ticket')
-      .where(whereTicket)
-      .select([
-        'SUM("totalCostAmount") AS "sumTotalCostAmount"',
-        'SUM("proceduresMoney") AS "sumProceduresMoney"',
-        'SUM("productsMoney") AS "sumProductsMoney"',
-        'SUM("radiologyMoney") AS "sumRadiologyMoney"',
-        'SUM("surcharge") AS "sumSurcharge"',
-        'SUM("expense") AS "sumExpense"',
-        'SUM("discountMoney") AS "sumDiscountMoney"',
-        'SUM("totalMoney") AS "sumTotalMoney"',
-        'SUM("profit") AS "sumProfit"',
-        'SUM("debt") AS "sumDebt"',
-        'COUNT(*) AS "countTicket"',
-      ])
-
-    if (timeType === 'month') {
-      query = query.addSelect(['"year"', '"month"']).groupBy('"year"').addGroupBy('"month"')
-    }
-    if (timeType === 'date') {
-      query = query
-        .addSelect(['"year"', '"month"', '"date"'])
-        .groupBy('"year"')
-        .addGroupBy('"month"')
-        .addGroupBy('"date"')
-    }
-
-    const data = await query.getRawMany()
-    return data.map((i) => ({
-      oid,
-      year: i.year as number,
-      month: i.month as number,
-      date: i.date as number,
-      sumTotalCostAmount: Number(i.sumTotalCostAmount),
-      sumProceduresMoney: Number(i.sumProceduresMoney),
-      sumProductsMoney: Number(i.sumProductsMoney),
-      sumRadiologyMoney: Number(i.sumRadiologyMoney),
-      sumSurcharge: Number(i.sumSurcharge),
-      sumExpense: Number(i.sumExpense),
-      sumDiscountMoney: Number(i.sumDiscountMoney),
-      sumTotalMoney: Number(i.sumTotalMoney),
-      sumProfit: Number(i.sumProfit),
-      sumDebt: Number(i.sumDebt),
-      countTicket: Number(i.countTicket),
-    }))
-  }
 
   // async statisticInvoiceExpense(options: {
   //   oid: number

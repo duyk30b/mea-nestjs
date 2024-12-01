@@ -27,6 +27,11 @@ export class CustomerCreateBody {
   @IsNumber()
   birthday: number
 
+  @ApiPropertyOptional({ example: 1998 })
+  @Expose()
+  @IsNumber()
+  yearOfBirth: number
+
   @ApiPropertyOptional({ enum: [0, 1], example: EGender.Female })
   @Expose()
   @IsIn([0, 1])

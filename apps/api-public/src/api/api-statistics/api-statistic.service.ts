@@ -5,10 +5,8 @@ import { CustomerRepository } from '../../../../_libs/database/repository/custom
 import { ProcedureRepository } from '../../../../_libs/database/repository/procedure/procedure.repository'
 import { ProductRepository } from '../../../../_libs/database/repository/product/product.repository'
 import { StatisticRepository } from '../../../../_libs/database/repository/statistic/statistic.repository'
-import {
-  StatisticTopBestSellingQuery,
-  StatisticTopCustomerBestTicketQuery,
-} from './request'
+import { TicketProcedureRepository } from '../../../../_libs/database/repository/ticket-procedure/ticket-procedure.repository'
+import { StatisticTopBestSellingQuery, StatisticTopCustomerBestTicketQuery } from './request'
 import { StatisticProductHighMoneyQuery } from './request/statistic-top-product-high-money.query'
 
 @Injectable()
@@ -17,7 +15,8 @@ export class ApiStatisticService {
     private readonly statisticRepository: StatisticRepository,
     private readonly productRepository: ProductRepository,
     private readonly procedureRepository: ProcedureRepository,
-    private readonly customerRepository: CustomerRepository
+    private readonly customerRepository: CustomerRepository,
+    private readonly ticketProcedureRepository: TicketProcedureRepository
   ) { }
 
   async sumWarehouse(oid: number): Promise<BaseResponse> {
@@ -83,10 +82,11 @@ export class ApiStatisticService {
   ): Promise<BaseResponse> {
     const { fromTime, toTime, orderBy, limit } = query
 
-    const data = await this.statisticRepository.topProcedureBestSelling({
-      oid,
-      fromTime: fromTime.getTime(),
-      toTime: toTime.getTime(),
+    const data = await this.ticketProcedureRepository.topProcedureBestSelling({
+      condition: {
+        oid,
+        startedAt: { GTE: fromTime.getTime(), LTE: toTime.getTime() },
+      },
       orderBy,
       limit,
     })

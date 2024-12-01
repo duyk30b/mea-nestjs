@@ -22,7 +22,7 @@ export default class Appointment extends BaseEntity {
   @Expose()
   customerSourceId: number
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({ type: 'varchar', length: 255, default: '' })
   @Expose()
   reason: string // Lý do hẹn
 

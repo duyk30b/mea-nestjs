@@ -19,7 +19,7 @@ import { SOCKET_EVENT } from './socket.variable'
 export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(SocketGateway.name)
 
-  public connections: Record<string, { refreshExp: number, socketId: string }[]> = {}
+  public connections: Record<string, { refreshExp: number; socketId: string }[]> = {}
 
   @WebSocketServer()
   io: Server
@@ -53,7 +53,8 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         refreshExp: jwtPayloadRefresh.exp,
       })
       this.logger.debug(
-        `IP ${ip} UserId ${uid} with socketId ${socket.id} connected, join room ${oid}`
+        `[OID=${oid}] UserId ${uid} with IP ${ip}, `
+        + `socketId ${socket.id} connected, join room ${oid}`
       )
     } catch (error) {
       this.logger.warn(
@@ -64,9 +65,10 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   async handleDisconnect(socket: Socket) {
+    const oid = socket.data.user?.oid
     const uid = socket.data.user?.id
     this.connections[uid] = this.connections[uid]?.filter((i) => i.socketId !== socket.id)
-    this.logger.debug(`UserId ${socket.data.user?.id} with socketId ${socket.id} disconnected`)
+    this.logger.debug(`[OID=${oid}] UserId ${uid} with socketId ${socket.id} disconnected`)
   }
 
   @SubscribeMessage(SOCKET_EVENT.CLIENT_EMIT_TICKET_CREATE)

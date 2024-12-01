@@ -14,7 +14,11 @@ import {
   Distributor,
   DistributorPayment,
   Image,
+  Laboratory,
+  LaboratoryGroup,
+  LaboratoryKit,
   Organization,
+  PrescriptionSample,
   PrintHtml,
   Procedure,
   ProcedureGroup,
@@ -31,6 +35,7 @@ import {
   TicketAttribute,
   TicketDiagnosis,
   TicketExpense,
+  TicketLaboratory,
   TicketProcedure,
   TicketProduct,
   TicketRadiology,
@@ -146,6 +151,22 @@ export class ApiRootOrganizationService {
       await this.manager.update(Image, { oid }, { waitDelete: 1 })
     }
 
+    if (tableNameList.includes(Laboratory.name)) {
+      await this.manager.delete(Laboratory, { oid })
+    }
+
+    if (tableNameList.includes(LaboratoryGroup.name)) {
+      await this.manager.delete(LaboratoryGroup, { oid })
+    }
+
+    if (tableNameList.includes(LaboratoryKit.name)) {
+      await this.manager.delete(LaboratoryKit, { oid })
+    }
+
+    if (tableNameList.includes(PrescriptionSample.name)) {
+      await this.manager.delete(PrescriptionSample, { oid })
+    }
+
     if (tableNameList.includes(PrintHtml.name)) {
       await this.manager.delete(PrintHtml, { oid })
     }
@@ -206,6 +227,10 @@ export class ApiRootOrganizationService {
 
     if (tableNameList.includes(TicketExpense.name)) {
       await this.manager.delete(TicketExpense, { oid })
+    }
+
+    if (tableNameList.includes(TicketLaboratory.name)) {
+      await this.manager.delete(TicketLaboratory, { oid })
     }
 
     if (tableNameList.includes(TicketProcedure.name)) {

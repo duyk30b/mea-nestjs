@@ -18,6 +18,9 @@ export class TicketClinicUpdateItemsMoney {
   async updateItemsMoney(params: {
     oid: number
     ticketId: number
+    discountMoney: number
+    discountPercent: number
+    discountType: DiscountType
     ticketProductUpdateList: {
       ticketProductId: number
       productId: number
@@ -266,6 +269,12 @@ export class TicketClinicUpdateItemsMoney {
         return acc + item.costAmount
       }, 0)
 
+      const discountMoney = params.discountMoney
+      const discountPercent = params.discountPercent
+      const discountType = params.discountType
+
+      const totalMoney = sumMoney - discountMoney
+
       // 4. UPDATE TICKET: MONEY
       const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
         totalCostAmount,
@@ -273,9 +282,12 @@ export class TicketClinicUpdateItemsMoney {
         productsMoney,
         laboratoryMoney,
         radiologyMoney,
-        totalMoney: () => `${sumMoney} - "discountMoney"`,
-        debt: () => `${sumMoney} - "discountMoney" - "paid"`,
-        profit: () => `${sumMoney} - ${totalCostAmount} - "expense"`,
+        discountMoney,
+        discountPercent,
+        discountType,
+        totalMoney,
+        debt: () => `${totalMoney} - "paid"`,
+        profit: () => `${totalMoney} - ${totalCostAmount} - "expense"`,
       }
       const ticketUpdateResult: UpdateResult = await manager
         .createQueryBuilder()

@@ -73,12 +73,22 @@ export class ApiAppointmentService {
   }
 
   async createOne(oid: number, body: AppointmentCreateBody): Promise<BaseResponse> {
+    const { customerId: cid, customer, ...ticketBody } = body
+    let customerId = cid
+    if (!customerId) {
+      customerId = await this.customerRepository.insertOneFullField({
+        ...body.customer,
+        debt: 0,
+        oid,
+      })
+    }
+
     const appointment = await this.appointmentRepository.insertOneFullFieldAndReturnEntity({
-      ...body,
-      oid,
-      fromTicketId: body.fromTicketId,
+      ...ticketBody,
+      customerId,
       toTicketId: 0,
       cancelReason: '',
+      oid,
     })
     return { data: { appointment } }
   }
@@ -114,16 +124,19 @@ export class ApiAppointmentService {
     body: AppointmentRegisterTicketClinicBody
   }): Promise<BaseResponse> {
     const { oid, appointmentId, body } = options
+
     const appointment = await this.appointmentRepository.findOneBy({ oid, id: appointmentId })
     const customer = await this.customerRepository.findOneBy({ oid, id: appointment.customerId })
-
+    const countToday = await this.ticketRepository.countToday(oid)
     const registeredAt = body.registeredAt
+
     const ticket = await this.ticketRepository.insertOneAndReturnEntity({
       oid,
       customerId: customer.id,
       ticketStatus: TicketStatus.Schedule,
       ticketType: body.ticketType,
       registeredAt,
+      dailyIndex: countToday + 1,
       year: DTimer.info(registeredAt, 7).year,
       month: DTimer.info(registeredAt, 7).month + 1,
       date: DTimer.info(registeredAt, 7).date,
@@ -132,16 +145,12 @@ export class ApiAppointmentService {
     ticket.ticketAttributeList =
       await this.ticketAttributeRepository.insertManyFullFieldAndReturnEntity([{
         key: 'reason',
-        value: appointment.reason,
+        value: appointment.reason || '',
         oid,
         ticketId: ticket.id,
       }])
 
     ticket.customer = customer
-    ticket.ticketAttributeList = []
-    ticket.ticketProductList = []
-    ticket.ticketProcedureList = []
-    ticket.customerPaymentList = []
 
     this.socketEmitService.ticketClinicCreate(oid, { ticket })
 

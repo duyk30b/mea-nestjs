@@ -323,6 +323,16 @@ export class ApiPermissionService {
         parentId: PermissionId.MASTER_DATA,
         rootId: PermissionId.MASTER_DATA,
       },
+      {
+        id: PermissionId.MASTER_DATA_PRESCRIPTION_SAMPLE,
+        level: 2,
+        code: PermissionId[PermissionId.MASTER_DATA_PRESCRIPTION_SAMPLE],
+        isActive: 1,
+        pathId: `${PermissionId.MASTER_DATA}.${PermissionId.MASTER_DATA_PRESCRIPTION_SAMPLE}`,
+        name: 'Quản lý đơn thuốc mẫu',
+        parentId: PermissionId.MASTER_DATA,
+        rootId: PermissionId.MASTER_DATA,
+      },
     ]
 
     const permissionProduct: Permission[] = [
@@ -984,11 +994,11 @@ export class ApiPermissionService {
         rootId: PermissionId.TICKET_CLINIC,
       },
       {
-        id: PermissionId.TICKET_CLINIC_REGISTER_NEW,
+        id: PermissionId.TICKET_CLINIC_CREATE,
         level: 2,
-        code: PermissionId[PermissionId.TICKET_CLINIC_REGISTER_NEW],
+        code: PermissionId[PermissionId.TICKET_CLINIC_CREATE],
         isActive: 1,
-        pathId: `${PermissionId.TICKET_CLINIC}.${PermissionId.TICKET_CLINIC_REGISTER_NEW}`,
+        pathId: `${PermissionId.TICKET_CLINIC}.${PermissionId.TICKET_CLINIC_CREATE}`,
         name: 'Đăng ký khám mới',
         parentId: PermissionId.TICKET_CLINIC,
         rootId: PermissionId.TICKET_CLINIC,

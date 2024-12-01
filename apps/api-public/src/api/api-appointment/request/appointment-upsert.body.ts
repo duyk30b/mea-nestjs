@@ -1,8 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { Expose } from 'class-transformer'
-import { IsDefined, IsIn, IsNumber, IsOptional, IsString } from 'class-validator'
-import { IsEnumValue, IsNumberGreaterThan } from '../../../../../_libs/common/transform-validate/class-validator.custom'
+import { Expose, Type } from 'class-transformer'
+import { IsDefined, IsIn, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator'
+import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { AppointmentStatus } from '../../../../../_libs/database/entities/appointment.entity'
+import { CustomerCreateBody } from '../../api-customer/request'
 
 export class AppointmentBody {
   @ApiProperty({ example: 0 })
@@ -10,12 +11,6 @@ export class AppointmentBody {
   @IsOptional()
   @IsNumber()
   fromTicketId: number
-
-  @ApiProperty({ example: 45 })
-  @Expose()
-  @IsDefined()
-  @IsNumberGreaterThan(0)
-  customerId: number
 
   @ApiProperty({ example: Date.now() })
   @Expose()
@@ -36,6 +31,18 @@ export class AppointmentBody {
 }
 
 export class AppointmentCreateBody extends AppointmentBody {
+  @ApiProperty({ example: 45 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  customerId: number
+
+  @ApiProperty({ type: CustomerCreateBody })
+  @Expose()
+  @Type(() => CustomerCreateBody)
+  @ValidateNested({ each: true })
+  customer: CustomerCreateBody
+
   @ApiPropertyOptional({ example: AppointmentStatus.Confirm })
   @Expose()
   @IsEnumValue(AppointmentStatus)

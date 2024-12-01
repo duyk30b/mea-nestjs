@@ -9,6 +9,7 @@ import {
   LessThanOrEqual,
   Like,
   MoreThan,
+  MoreThanOrEqual,
   Not,
   Raw,
 } from 'typeorm'
@@ -34,7 +35,7 @@ export abstract class PostgreSqlCondition<_ENTITY> {
               return operators.push(MoreThan(value))
             }
             if (rule === '>=' || rule === 'GTE') {
-              return operators.push(MoreThan(value))
+              return operators.push(MoreThanOrEqual(value))
             }
             if (rule === '<' || rule === 'LT') {
               return operators.push(LessThan(value))

@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import {
+  Allow,
   IsArray,
   IsDefined,
   IsInt,
@@ -122,7 +123,7 @@ class TicketOrderAttributeBody {
 
   @ApiProperty()
   @Expose()
-  @IsString()
+  @Allow()
   value: string
 }
 
