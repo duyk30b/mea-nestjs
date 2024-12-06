@@ -135,16 +135,6 @@ export class ApiReceiptService {
     }
   }
 
-  async destroyDraft(params: { oid: number; receiptId: number }): Promise<BaseResponse> {
-    const { oid, receiptId } = params
-    try {
-      await this.receiptDraft.destroyDraft({ oid, receiptId })
-      return { data: { receiptId } }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
   async prepayment(params: {
     oid: number
     receiptId: number
@@ -226,7 +216,7 @@ export class ApiReceiptService {
         },
         sort: { id: 'ASC' },
       })
-      this.emitSocketAfterSendProductAndPayment(oid, result)
+      this.emitSocketAfterChangeProductAndDistributor(oid, result)
       return {
         data: {
           receiptBasic: result.receiptBasic,
@@ -260,6 +250,9 @@ export class ApiReceiptService {
         },
         sort: { id: 'ASC' },
       })
+      if (distributor) {
+        this.socketEmitService.distributorUpsert(oid, { distributor })
+      }
       return {
         data: {
           receiptBasic,
@@ -288,7 +281,7 @@ export class ApiReceiptService {
         },
         sort: { id: 'ASC' },
       })
-      this.emitSocketAfterSendProductAndPayment(oid, result)
+      this.emitSocketAfterChangeProductAndDistributor(oid, result)
       return {
         data: {
           receiptBasic: result.receiptBasic,
@@ -300,11 +293,24 @@ export class ApiReceiptService {
     }
   }
 
-  async emitSocketAfterSendProductAndPayment(
+  async destroy(params: { oid: number; receiptId: number }): Promise<BaseResponse> {
+    const { oid, receiptId } = params
+    try {
+      await this.receiptRepository.destroy({ oid, receiptId })
+      return { data: { receiptId } }
+    } catch (error: any) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+    }
+  }
+
+  async emitSocketAfterChangeProductAndDistributor(
     oid: number,
     data: { distributor: Distributor; productList: Product[]; batchList: Batch[] }
   ) {
-    const { productList, batchList } = data
+    const { distributor, productList, batchList } = data
+    if (distributor) {
+      this.socketEmitService.distributorUpsert(oid, { distributor })
+    }
     if (productList.length) {
       this.socketEmitService.productListUpdate(oid, { productList })
     }

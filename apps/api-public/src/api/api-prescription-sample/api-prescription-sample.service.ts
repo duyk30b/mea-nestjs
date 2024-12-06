@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
+import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { PrescriptionSampleRepository } from '../../../../_libs/database/repository/prescription-sample/prescription-sample.repository'
+import { ProductRepository } from '../../../../_libs/database/repository/product/product.repository'
 import {
   PrescriptionSampleCreateBody,
   PrescriptionSampleGetManyQuery,
@@ -11,7 +13,10 @@ import {
 
 @Injectable()
 export class ApiPrescriptionSampleService {
-  constructor(private readonly prescriptionSampleRepository: PrescriptionSampleRepository) { }
+  constructor(
+    private readonly prescriptionSampleRepository: PrescriptionSampleRepository,
+    private readonly productRepository: ProductRepository
+  ) { }
 
   async pagination(oid: number, query: PrescriptionSamplePaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, sort, relation } = query
@@ -19,7 +24,7 @@ export class ApiPrescriptionSampleService {
     const { data, total } = await this.prescriptionSampleRepository.pagination({
       page,
       limit,
-      relation,
+      // relation,
       condition: {
         oid,
       },
@@ -33,15 +38,37 @@ export class ApiPrescriptionSampleService {
 
   async getMany(oid: number, query: PrescriptionSampleGetManyQuery): Promise<BaseResponse> {
     const { limit, filter, relation, sort } = query
-
     const data = await this.prescriptionSampleRepository.findMany({
-      relation,
       condition: {
         oid,
       },
       limit,
       sort,
     })
+
+    if (relation?.medicineList) {
+      const productIdList = data
+        .map((i) => {
+          try {
+            i.medicineList = JSON.parse(i.medicines || '[]')
+          } catch (error) {
+            i.medicineList = []
+          }
+          return i.medicineList
+        })
+        .flat()
+        .map((i) => i.productId)
+      const productList = await this.productRepository.findManyBy({
+        oid,
+        id: { IN: productIdList },
+      })
+      const productMap = arrayToKeyValue(productList, 'id')
+      data.forEach((i) => {
+        i.medicineList.forEach((j) => {
+          j.product = productMap[j.productId] || null
+        })
+      })
+    }
     return { data }
   }
 

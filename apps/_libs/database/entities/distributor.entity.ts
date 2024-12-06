@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer'
-import { Column, DeepPartial, Entity } from 'typeorm'
+import { Column, Entity } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 
 @Entity('Distributor')
@@ -84,6 +84,19 @@ export default class Distributor extends BaseEntity {
   }
 }
 
+export type DistributorRelationType = {
+  [P in keyof Pick<Distributor, never>]?: boolean
+}
+
+export type DistributorSortType = {
+  [P in keyof Pick<Distributor, 'id' | 'debt' | 'fullName'>]?: 'ASC' | 'DESC'
+}
+
 export type DistributorInsertType = Omit<Distributor, 'id' | 'updatedAt' | 'deletedAt'>
 
-export type DistributorUpdateType = Omit<Distributor, 'oid' | 'id' | 'updatedAt'>
+export type DistributorUpdateType = {
+  [K in Exclude<
+    keyof Distributor,
+    keyof DistributorRelationType | keyof Pick<Distributor, 'oid' | 'id' | 'updatedAt'>
+  >]: Distributor[K] | (() => string)
+}

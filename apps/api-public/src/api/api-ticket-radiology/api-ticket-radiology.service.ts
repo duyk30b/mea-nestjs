@@ -213,7 +213,7 @@ export class ApiTicketRadiologyService {
         imageIds: JSON.stringify(imageIdsUpdate),
       }
     )
-
+    ticketRadiology.imageList = []
     this.socketEmitService.ticketClinicUpdateTicketRadiologyResult(oid, {
       ticketId: ticketRadiology.ticketId,
       ticketRadiology,

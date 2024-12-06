@@ -28,6 +28,8 @@ export class TicketClinicReopen {
       }
       const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
         ticketStatus: TicketStatus.Executing,
+        profit: 0,
+        itemsDiscount: 0,
         endedAt: null,
       }
       const ticketUpdateResult: UpdateResult = await manager

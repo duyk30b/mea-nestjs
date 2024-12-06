@@ -17,7 +17,7 @@ import {
 @ApiBearerAuth('access-token')
 @Controller('batch')
 export class ApiBatchController {
-  constructor(private readonly apiBatchService: ApiBatchService) {}
+  constructor(private readonly apiBatchService: ApiBatchService) { }
 
   @Get('pagination')
   @HasPermission(PermissionId.BATCH_READ)
@@ -55,6 +55,13 @@ export class ApiBatchController {
     @Body() body: BatchUpdateBody
   ) {
     return await this.apiBatchService.updateOne(oid, id, body)
+  }
+
+  @Delete('delete/:id')
+  @HasPermission(PermissionId.PRODUCT_DELETE)
+  @ApiParam({ name: 'id', example: 1 })
+  async deleteOne(@External() { oid, organization }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiBatchService.destroyOne({ organization, oid, batchId: id })
   }
 
   @Post('find-or-create')

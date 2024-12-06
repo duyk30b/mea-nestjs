@@ -77,7 +77,7 @@ export class ReceiptRefundPrepayment {
         )
       }
 
-      return { receiptBasic: receipt }
+      return { receiptBasic: receipt, distributor }
     })
 
     return transaction

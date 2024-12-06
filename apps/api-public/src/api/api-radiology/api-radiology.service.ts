@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { RadiologyInsertType } from '../../../../_libs/database/entities/radiology.entity'
 import { RadiologyRepository } from '../../../../_libs/database/repository/radiology/radiology.repository'
+import { TicketRadiologyRepository } from '../../../../_libs/database/repository/ticket-radiology/ticket-radiology.repository'
 import {
   RadiologyGetManyQuery,
   RadiologyGetOneQuery,
@@ -13,7 +14,10 @@ import {
 
 @Injectable()
 export class ApiRadiologyService {
-  constructor(private readonly radiologyRepository: RadiologyRepository) { }
+  constructor(
+    private readonly radiologyRepository: RadiologyRepository,
+    private readonly ticketRadiologyRepository: TicketRadiologyRepository
+  ) { }
 
   async pagination(oid: number, query: RadiologyPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, relation, sort } = query
@@ -77,10 +81,20 @@ export class ApiRadiologyService {
   }
 
   async destroyOne(oid: number, id: number): Promise<BaseResponse> {
+    const countTicketRadiology = await this.ticketRadiologyRepository.countBy({
+      oid,
+      radiologyId: id,
+    })
+    if (countTicketRadiology > 0) {
+      return {
+        data: { countTicketRadiology },
+        success: false,
+      }
+    }
     const affected = await this.radiologyRepository.delete({ oid, id })
     if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
 
-    return { data: true }
+    return { data: { countTicketRadiology: 0, radiologyId: id } }
   }
 
   async systemList(): Promise<BaseResponse> {

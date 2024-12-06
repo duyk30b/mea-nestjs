@@ -24,7 +24,7 @@ export class TicketClinicRefundOverpaid {
         oid,
         id: ticketId,
         ticketStatus: In([TicketStatus.Approved, TicketStatus.Executing]),
-        totalMoney: Raw((alias) => `${alias} <= (paid - :money)`, { money }), // không cho trả quá tổng số tiền
+        paid: Raw((alias) => `${alias} >= :money`, { money }), // chỉ được phép hoàn trả số tiền nhỏ hơn số tiền đã thanh toán
       }
       const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
         paid: () => `paid - ${money}`,

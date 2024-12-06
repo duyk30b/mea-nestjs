@@ -19,7 +19,7 @@ import { TicketStatus } from '../../../entities/ticket.entity'
 
 @Injectable()
 export class TicketOrderCancel {
-  constructor(private dataSource: DataSource) { }
+  constructor(private dataSource: DataSource) {}
 
   async cancel(params: { oid: number; ticketId: number; time: number; description: string }) {
     const { oid, ticketId, time, description } = params
@@ -113,7 +113,7 @@ export class TicketOrderCancel {
         if (!customerPayment) {
           throw new Error(
             `${PREFIX}: Insert CustomerPayment failed:`
-            + ` ${JSON.stringify(customerPaymentInsertResult)}`
+              + ` ${JSON.stringify(customerPaymentInsertResult)}`
           )
         }
       }
@@ -183,12 +183,12 @@ export class TicketOrderCancel {
                                     ELSE "product"."costAmount" + temp."costAmountReturn"
                                 END
             FROM (VALUES `
-            + productIdEntriesValue
-              .map(([productId, sl]) => {
-                return `(${productId}, ${sl.quantityReturn}, ${sl.costAmountReturn})`
-              })
-              .join(', ')
-            + `   ) AS temp("productId", "quantityReturn", "costAmountReturn")
+              + productIdEntriesValue
+                .map(([productId, sl]) => {
+                  return `(${productId}, ${sl.quantityReturn}, ${sl.costAmountReturn})`
+                })
+                .join(', ')
+              + `   ) AS temp("productId", "quantityReturn", "costAmountReturn")
             WHERE   "product"."oid" = ${oid} 
                 AND "product"."id" = temp."productId" 
             RETURNING "product".*;   
@@ -212,10 +212,10 @@ export class TicketOrderCancel {
           UPDATE "Batch" "batch"
           SET "quantity" = "batch"."quantity" + temp."quantityReturn"
           FROM (VALUES `
-            + batchIdEntriesQuantity
-              .map(([batchId, sl]) => `(${batchId}, ${sl.quantityReturn})`)
-              .join(', ')
-            + `   ) AS temp("batchId", "quantityReturn")
+              + batchIdEntriesQuantity
+                .map(([batchId, sl]) => `(${batchId}, ${sl.quantityReturn})`)
+                .join(', ')
+              + `   ) AS temp("batchId", "quantityReturn")
           WHERE   "batch"."oid" = ${oid}
               AND "batch"."id" = temp."batchId" 
           RETURNING "batch".*;        
@@ -368,7 +368,9 @@ export class TicketOrderCancel {
         throw new Error(`${PREFIX}: Update Ticket failed`)
       }
       const ticket = Ticket.fromRaw(ticketUpdateResult.raw[0])
-      return { ticketBasic: ticket, customerPayment, customer }
+      if (customer) ticket.customer = customer
+
+      return { ticketBasic: ticket, customerPayment }
     })
   }
 }

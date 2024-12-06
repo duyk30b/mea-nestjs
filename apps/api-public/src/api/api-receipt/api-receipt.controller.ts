@@ -67,15 +67,6 @@ export class ApiReceiptController {
     })
   }
 
-  @Delete('destroy-draft/:id')
-  @HasPermission(PermissionId.RECEIPT_DESTROY_DRAFT)
-  async destroyDraft(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiReceiptService.destroyDraft({
-      oid,
-      receiptId: id,
-    })
-  }
-
   @Post('prepayment/:id')
   @HasPermission(PermissionId.RECEIPT_PAYMENT)
   async prepayment(
@@ -146,6 +137,15 @@ export class ApiReceiptController {
       receiptId: id,
       time: Date.now(),
       money: body.money,
+    })
+  }
+
+  @Delete('destroy/:id')
+  @HasPermission(PermissionId.RECEIPT_DESTROY_DRAFT)
+  async destroyDraft(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiReceiptService.destroy({
+      oid,
+      receiptId: id,
     })
   }
 }

@@ -1,5 +1,6 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import Product from './product.entity'
 
 @Entity('PrescriptionSample')
 export default class PrescriptionSample {
@@ -23,6 +24,9 @@ export default class PrescriptionSample {
   @Column({ type: 'text', default: JSON.stringify([]) })
   medicines: string
 
+  @Expose()
+  medicineList: { productId: number; quantity: number; hintUsage: string; product?: Product }[]
+
   static fromRaw(raw: { [P in keyof PrescriptionSample]: any }) {
     if (!raw) return null
     const entity = new PrescriptionSample()
@@ -36,9 +40,13 @@ export default class PrescriptionSample {
   }
 }
 
-export type PrescriptionSampleRelationType = Pick<PrescriptionSample, never>
+export type PrescriptionSampleRelationType = {
+  [P in keyof Pick<PrescriptionSample, 'medicineList'>]?: boolean
+}
 
-export type PrescriptionSampleSortType = Pick<PrescriptionSample, 'oid' | 'id' | 'priority' | 'name'>
+export type PrescriptionSampleSortType = {
+  [P in keyof Pick<PrescriptionSample, 'oid' | 'id' | 'priority' | 'name'>]?: 'ASC' | 'DESC'
+}
 
 export type PrescriptionSampleInsertType = Omit<
   PrescriptionSample,

@@ -190,6 +190,12 @@ export class TicketClinicUpdateItemsMoneyBody {
   @Expose()
   @IsDefined()
   @IsInt()
+  itemsActualMoney: number
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
   discountMoney: number
 
   @ApiProperty({ example: 22_500 })

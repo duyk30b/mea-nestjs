@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
-import { DataSource, EntityManager, Repository } from 'typeorm'
+import { DataSource, EntityManager, FindOptionsWhere, In, Repository } from 'typeorm'
 import { BaseCondition } from '../../../../common/dto'
 import { DTimer } from '../../../../common/helpers/time.helper'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import {
   Appointment,
   Ticket,
-  TicketDiagnosis,
+  TicketAttribute,
   TicketExpense,
+  TicketLaboratory,
   TicketProcedure,
   TicketProduct,
   TicketRadiology,
@@ -20,6 +21,7 @@ import {
   TicketInsertType,
   TicketRelationType,
   TicketSortType,
+  TicketStatus,
   TicketUpdateType,
 } from '../../../entities/ticket.entity'
 import { PostgreSqlRepository } from '../../postgresql.repository'
@@ -222,13 +224,20 @@ export class TicketRepository extends PostgreSqlRepository<
   async destroy(options: { oid: number; ticketId: number }) {
     const { oid, ticketId } = options
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-      await manager.delete(Ticket, { oid, id: ticketId })
-
-      await manager.delete(TicketDiagnosis, { oid, ticketId })
-
+      const whereTicket: FindOptionsWhere<Ticket> = {
+        id: ticketId,
+        oid,
+        ticketStatus: In([TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Cancelled]),
+      }
+      const ticketDeleteResult = await manager.delete(Ticket, whereTicket)
+      if (ticketDeleteResult.affected !== 1) {
+        throw new Error(`Destroy Ticket ${ticketId} failed: Status invalid`)
+      }
+      await manager.delete(TicketAttribute, { oid, ticketId })
       await manager.delete(TicketProduct, { oid, ticketId })
       await manager.delete(TicketProcedure, { oid, ticketId })
       await manager.delete(TicketRadiology, { oid, ticketId })
+      await manager.delete(TicketLaboratory, { oid, ticketId })
 
       await manager.delete(TicketSurcharge, { oid, ticketId })
       await manager.delete(TicketExpense, { oid, ticketId })

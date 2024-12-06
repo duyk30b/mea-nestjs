@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
-import { DataSource, EntityManager, FindOptionsWhere, In, InsertResult } from 'typeorm'
+import { DataSource, EntityManager, InsertResult } from 'typeorm'
+import { DTimer } from '../../../../common/helpers/time.helper'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { DeliveryStatus } from '../../../common/variable'
 import {
@@ -8,10 +9,11 @@ import {
   TicketExpense,
   TicketProcedure,
   TicketProduct,
-  TicketRadiology,
   TicketSurcharge,
 } from '../../../entities'
-import TicketAttribute, { TicketAttributeInsertType } from '../../../entities/ticket-attribute.entity'
+import TicketAttribute, {
+  TicketAttributeInsertType,
+} from '../../../entities/ticket-attribute.entity'
 import { TicketExpenseInsertType } from '../../../entities/ticket-expense.entity'
 import {
   TicketProcedureInsertType,
@@ -42,7 +44,7 @@ export class TicketOrderDraft {
     ticketOrderProcedureDraftList: TicketOrderProcedureDraftType[]
     ticketOrderSurchargeDraftList: TicketOrderSurchargeDraftType[]
     ticketOrderExpenseDraftList: TicketOrderExpenseDraftType[]
-    ticketAttributeDraftList: { key: string, value: any }[]
+    ticketAttributeDraftList: { key: string; value: any }[]
   }) {
     const {
       oid,
@@ -53,6 +55,7 @@ export class TicketOrderDraft {
       ticketAttributeDraftList,
     } = params
     const ticketOrderDraftInsert: TicketOrderDraftInsertType = params.ticketOrderDraftInsert
+    const registeredAt = ticketOrderDraftInsert.registeredAt
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       const ticketInsert: NoExtra<TicketInsertType> = {
@@ -62,10 +65,11 @@ export class TicketOrderDraft {
         ticketType: TicketType.Order,
         paid: 0,
         debt: ticketOrderDraftInsert.totalMoney,
-        year: 0,
-        month: 0,
-        date: 0,
-        startedAt: ticketOrderDraftInsert.registeredAt,
+        registeredAt,
+        startedAt: registeredAt,
+        year: DTimer.info(registeredAt, 7).year,
+        month: DTimer.info(registeredAt, 7).month + 1,
+        date: DTimer.info(registeredAt, 7).date,
         endedAt: null,
       }
 
@@ -160,28 +164,6 @@ export class TicketOrderDraft {
       }
 
       return { ticketBasic }
-    })
-  }
-
-  async destroy(params: { oid: number; ticketId: number }) {
-    const { oid, ticketId } = params
-    const whereTicket: FindOptionsWhere<Ticket> = {
-      id: ticketId,
-      oid,
-      ticketType: TicketType.Order,
-      ticketStatus: In([TicketStatus.Schedule, TicketStatus.Draft]),
-    }
-    return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-      const ticketDeleteResult = await manager.delete(Ticket, whereTicket)
-      if (ticketDeleteResult.affected !== 1) {
-        throw new Error(`Destroy Ticket ${ticketId} failed: Status invalid`)
-      }
-      await manager.delete(TicketAttribute, { oid, ticketId })
-      await manager.delete(TicketProduct, { oid, ticketId })
-      await manager.delete(TicketProcedure, { oid, ticketId })
-      await manager.delete(TicketRadiology, { oid, ticketId })
-      await manager.delete(TicketSurcharge, { oid, ticketId })
-      await manager.delete(TicketExpense, { oid, ticketId })
     })
   }
 }

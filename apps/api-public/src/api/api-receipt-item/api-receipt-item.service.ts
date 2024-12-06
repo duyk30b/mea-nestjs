@@ -5,17 +5,19 @@ import { ReceiptItemPaginationQuery } from './request'
 
 @Injectable()
 export class ApiReceiptItemService {
-  constructor(private readonly receiptItemRepository: ReceiptItemRepository) {}
+  constructor(private readonly receiptItemRepository: ReceiptItemRepository) { }
 
   async pagination(oid: number, query: ReceiptItemPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, relation, sort } = query
 
     const { total, data } = await this.receiptItemRepository.pagination({
+      relation,
       page,
       limit,
       condition: {
         oid,
         receiptId: filter?.receiptId,
+        distributorId: filter?.distributorId,
         productId: filter?.productId,
         batchId: filter?.batchId,
       },

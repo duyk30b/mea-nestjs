@@ -21,3 +21,6 @@
 5. Data
 - Reset permission
 - Login Google Driver
+
+6. Other
+- CMD history: `sudo cat /root/.bash_history`

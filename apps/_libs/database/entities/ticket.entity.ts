@@ -85,7 +85,7 @@ export default class Ticket extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  proceduresMoney: number
+  procedureMoney: number
 
   @Column({
     type: 'bigint',
@@ -93,7 +93,7 @@ export default class Ticket extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  productsMoney: number
+  productMoney: number
 
   @Column({
     type: 'bigint',
@@ -110,6 +110,22 @@ export default class Ticket extends BaseEntity {
   })
   @Expose()
   laboratoryMoney: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  itemsDiscount: number // tiền giảm giá
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  itemsActualMoney: number // tiền sản phẩm
 
   @Column({
     type: 'bigint',
@@ -298,10 +314,12 @@ export default class Ticket extends BaseEntity {
 
     entity.totalCostAmount = Number(raw.totalCostAmount)
 
-    entity.proceduresMoney = Number(raw.proceduresMoney)
-    entity.productsMoney = Number(raw.productsMoney)
+    entity.procedureMoney = Number(raw.procedureMoney)
+    entity.productMoney = Number(raw.productMoney)
     entity.radiologyMoney = Number(raw.radiologyMoney)
     entity.laboratoryMoney = Number(raw.laboratoryMoney)
+    entity.itemsActualMoney = Number(raw.itemsActualMoney)
+    entity.itemsDiscount = Number(raw.itemsDiscount)
 
     entity.discountMoney = Number(raw.discountMoney)
     entity.discountPercent = Number(raw.discountPercent)

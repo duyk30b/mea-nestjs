@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
-import { ArrayMinSize, IsArray, IsDefined, IsInt, ValidateNested } from 'class-validator'
+import { IsArray, IsDefined, IsInt, ValidateNested } from 'class-validator'
 import { IsNumberGreaterThan } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 
 class TicketProductReturn {
@@ -16,17 +16,25 @@ class TicketProductReturn {
   @IsNumberGreaterThan(0)
   quantityReturn: number
 
-  @ApiProperty({ example: 300_000 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  actualPrice: number
-
   @ApiProperty({ example: 600_000 })
   @Expose()
   @IsDefined()
   @IsInt()
   costAmountReturn: number
+}
+
+class TicketProcedureReturn {
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsNumberGreaterThan(0)
+  ticketProcedureId: number
+
+  @ApiProperty({ example: 3 })
+  @Expose()
+  @IsDefined()
+  @IsNumberGreaterThan(0)
+  quantityReturn: number
 }
 
 export class TicketOrderReturnProductListBody {
@@ -35,31 +43,92 @@ export class TicketOrderReturnProductListBody {
   @Type(() => TicketProductReturn)
   @IsDefined()
   @IsArray()
-  @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  returnList: TicketProductReturn[]
+  ticketProductReturnList: TicketProductReturn[]
+
+  @ApiProperty({ type: TicketProcedureReturn, isArray: true })
+  @Expose()
+  @Type(() => TicketProcedureReturn)
+  @IsDefined()
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketProcedureReturnList: TicketProcedureReturn[]
 
   @ApiProperty({ example: 300_000 })
   @Expose()
   @IsDefined()
   @IsInt()
-  discountMoneyReturn: number
+  totalCostAmountUpdate: number
 
   @ApiProperty({ example: 300_000 })
   @Expose()
   @IsDefined()
   @IsInt()
-  surchargeReturn: number
+  productMoneyUpdate: number
 
   @ApiProperty({ example: 300_000 })
   @Expose()
   @IsDefined()
   @IsInt()
-  debtReturn: number
+  procedureMoneyUpdate: number
 
   @ApiProperty({ example: 300_000 })
   @Expose()
   @IsDefined()
   @IsInt()
-  paidReturn: number
+  itemsActualMoneyUpdate: number
+
+  @ApiProperty({ example: 300_000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  itemsDiscountUpdate: number
+
+  @ApiProperty({ example: 300_000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  discountMoneyUpdate: number
+
+  @ApiProperty({ example: 300_000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  discountPercentUpdate: number
+
+  @ApiProperty({ example: 300_000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  surchargeUpdate: number
+
+  @ApiProperty({ example: 300_000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  expenseUpdate: number
+
+  @ApiProperty({ example: 300_000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  totalMoneyUpdate: number
+
+  @ApiProperty({ example: 300_000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  profitUpdate: number
+
+  @ApiProperty({ example: 300_000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  paidUpdate: number
+
+  @ApiProperty({ example: 300_000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  debtUpdate: number
 }

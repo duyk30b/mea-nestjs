@@ -51,9 +51,6 @@ export class ReceiptSendProductAndPayment {
         paid: () => `paid + ${money}`,
         startedAt: time,
         endedAt: time,
-        year: DTimer.info(time, 7).year,
-        month: DTimer.info(time, 7).month + 1,
-        date: DTimer.info(time, 7).date,
       }
       const receiptUpdateResult: UpdateResult = await manager
         .createQueryBuilder()

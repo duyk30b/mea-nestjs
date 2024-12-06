@@ -16,7 +16,7 @@ import {
 @ApiBearerAuth('access-token')
 @Controller('distributor')
 export class ApiDistributorController {
-  constructor(private readonly apiDistributorService: ApiDistributorService) {}
+  constructor(private readonly apiDistributorService: ApiDistributorService) { }
 
   @Get('pagination')
   @HasPermission(PermissionId.DISTRIBUTOR_READ)
@@ -53,10 +53,10 @@ export class ApiDistributorController {
     return await this.apiDistributorService.updateOne(oid, id, body)
   }
 
-  @Delete('delete/:id')
+  @Delete('destroy/:id')
   @HasPermission(PermissionId.DISTRIBUTOR_DELETE)
   @ApiParam({ name: 'id', example: 1 })
-  async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiDistributorService.deleteOne(oid, id)
+  async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiDistributorService.destroyOne(oid, id)
   }
 }

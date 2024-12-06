@@ -18,6 +18,7 @@ export class TicketClinicUpdateItemsMoney {
   async updateItemsMoney(params: {
     oid: number
     ticketId: number
+    itemsActualMoney: number
     discountMoney: number
     discountPercent: number
     discountType: DiscountType
@@ -251,10 +252,10 @@ export class TicketClinicUpdateItemsMoney {
         order: { id: 'ASC' },
       })
 
-      const proceduresMoney = ticketProcedureList.reduce((acc, item) => {
+      const procedureMoney = ticketProcedureList.reduce((acc, item) => {
         return acc + item.actualPrice * item.quantity
       }, 0)
-      const productsMoney = ticketProductList.reduce((acc, item) => {
+      const productMoney = ticketProductList.reduce((acc, item) => {
         return acc + item.actualPrice * item.quantity
       }, 0)
       const laboratoryMoney = ticketLaboratoryList.reduce((acc, item) => {
@@ -263,25 +264,27 @@ export class TicketClinicUpdateItemsMoney {
       const radiologyMoney = ticketRadiologyList.reduce((acc, item) => {
         return acc + item.actualPrice
       }, 0)
-      const sumMoney = proceduresMoney + productsMoney + laboratoryMoney + radiologyMoney
 
       const totalCostAmount = ticketProductList.reduce((acc, item) => {
         return acc + item.costAmount
       }, 0)
 
+      const itemsActualMoney = procedureMoney + productMoney + laboratoryMoney + radiologyMoney
       const discountMoney = params.discountMoney
       const discountPercent = params.discountPercent
       const discountType = params.discountType
 
-      const totalMoney = sumMoney - discountMoney
+      const totalMoney = itemsActualMoney - discountMoney
 
       // 4. UPDATE TICKET: MONEY
       const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
         totalCostAmount,
-        proceduresMoney,
-        productsMoney,
+        procedureMoney,
+        productMoney,
         laboratoryMoney,
         radiologyMoney,
+        itemsActualMoney,
+        // itemsDiscount, // itemDiscount có thể thay đổi liên tục nên để đợi khi đóng phiếu mới tính
         discountMoney,
         discountPercent,
         discountType,

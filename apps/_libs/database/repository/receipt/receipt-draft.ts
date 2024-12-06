@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager, FindOptionsWhere, In } from 'typeorm'
+import { DTimer } from '../../../common/helpers/time.helper'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { ReceiptStatus } from '../../common/variable'
 import { Receipt, ReceiptItem } from '../../entities'
@@ -21,6 +22,7 @@ export class ReceiptDraft {
     receiptItemListDto: NoExtra<ReceiptItemDraftType, X>[]
   }) {
     const { oid, receiptInsertDto, receiptItemListDto } = params
+
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       const receiptInsert: ReceiptInsertType = {
         ...receiptInsertDto,
@@ -28,9 +30,9 @@ export class ReceiptDraft {
         status: ReceiptStatus.Draft,
         paid: 0,
         debt: receiptInsertDto.totalMoney,
-        year: 0,
-        month: 0,
-        date: 0,
+        year: DTimer.info(receiptInsertDto.startedAt, 7).year,
+        month: DTimer.info(receiptInsertDto.startedAt, 7).month + 1,
+        date: DTimer.info(receiptInsertDto.startedAt, 7).date,
         endedAt: null,
       }
 
@@ -78,9 +80,9 @@ export class ReceiptDraft {
         status: ReceiptStatus.Draft,
         paid: 0,
         debt: receiptUpdateDto.totalMoney,
-        year: 0,
-        month: 0,
-        date: 0,
+        year: DTimer.info(receiptUpdateDto.startedAt, 7).year,
+        month: DTimer.info(receiptUpdateDto.startedAt, 7).month + 1,
+        date: DTimer.info(receiptUpdateDto.startedAt, 7).date,
         endedAt: null,
       }
       const receiptUpdateResult = await manager
@@ -109,21 +111,6 @@ export class ReceiptDraft {
       await manager.insert(ReceiptItem, receiptItemListInsert)
 
       return { receiptId }
-    })
-  }
-
-  async destroyDraft(params: { oid: number; receiptId: number }) {
-    const { oid, receiptId } = params
-    return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-      const receiptDeleteResult = await manager.delete(Receipt, {
-        oid,
-        id: receiptId,
-        status: ReceiptStatus.Draft,
-      })
-      if (receiptDeleteResult.affected !== 1) {
-        throw new Error(`Delete Receipt ${receiptId} failed: Status invalid`)
-      }
-      await manager.delete(ReceiptItem, { oid, receiptId })
     })
   }
 }

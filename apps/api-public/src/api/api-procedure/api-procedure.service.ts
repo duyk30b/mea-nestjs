@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { ProcedureRepository } from '../../../../_libs/database/repository/procedure/procedure.repository'
-import { SocketEmitService } from '../../socket/socket-emit.service'
+import { TicketProcedureRepository } from '../../../../_libs/database/repository/ticket-procedure/ticket-procedure.repository'
 import {
   ProcedureCreateBody,
   ProcedureGetManyQuery,
@@ -14,8 +14,8 @@ import {
 @Injectable()
 export class ApiProcedureService {
   constructor(
-    private readonly socketEmitService: SocketEmitService,
-    private readonly procedureRepository: ProcedureRepository
+    private readonly procedureRepository: ProcedureRepository,
+    private readonly ticketProcedureRepository: TicketProcedureRepository
   ) { }
 
   async pagination(oid: number, query: ProcedurePaginationQuery): Promise<BaseResponse> {
@@ -81,9 +81,20 @@ export class ApiProcedureService {
   }
 
   async destroyOne(oid: number, id: number): Promise<BaseResponse> {
+    const countTicketProcedure = await this.ticketProcedureRepository.countBy({
+      oid,
+      procedureId: id,
+    })
+    if (countTicketProcedure > 0) {
+      return {
+        data: { countTicketProcedure },
+        success: false,
+      }
+    }
+
     const affected = await this.procedureRepository.delete({ oid, id })
     if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
 
-    return { data: true }
+    return { data: { countTicketProcedure: 0, procedureId: id } }
   }
 }

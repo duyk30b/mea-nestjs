@@ -45,8 +45,8 @@ export class RootOrganizationCreateBody {
   @ApiPropertyOptional({ example: 1 })
   @Expose()
   @IsDefined()
-  @IsNumber()
-  dataVersion: number
+  @IsString()
+  dataVersion: string
 
   @ApiPropertyOptional({ example: JSON.stringify([1, 2, 3, 4]) })
   @Expose()

@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource, FindOptionsWhere, In, UpdateResult } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
-import { DeliveryStatus } from '../../../common/variable'
-import TicketProduct, { TicketProductInsertType, TicketProductRelationType, TicketProductType } from '../../../entities/ticket-product.entity'
+import { DeliveryStatus, DiscountType } from '../../../common/variable'
+import TicketProduct, {
+  TicketProductInsertType,
+  TicketProductRelationType,
+  TicketProductType,
+} from '../../../entities/ticket-product.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 
 export type TicketClinicProductUpdateDtoType = Omit<
@@ -10,13 +14,7 @@ export type TicketClinicProductUpdateDtoType = Omit<
   | keyof TicketProductRelationType
   | keyof Pick<
     TicketProduct,
-    | 'oid'
-    | 'id'
-    | 'ticketId'
-    | 'customerId'
-    | 'deliveryStatus'
-    | 'quantityReturn'
-    | 'type'
+    'oid' | 'id' | 'ticketId' | 'customerId' | 'deliveryStatus' | 'quantityReturn' | 'type'
   >
 >
 
@@ -34,29 +32,30 @@ export class TicketClinicUpdateTicketProductList {
     const PREFIX = `ticketId=${ticketId} updateTicketProductList failed`
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-      // === 1. UPDATE VISIT FOR TRANSACTION ===
+      // === 1. UPDATE TICKET FOR TRANSACTION ===
       const whereTicket: FindOptionsWhere<Ticket> = {
         oid,
         id: ticketId,
         ticketStatus: TicketStatus.Executing,
       }
 
-      const setTicketRoot: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
+      const setTicketOrigin: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } =
+      {
         updatedAt: Date.now(),
       }
 
       // update tạm để tạo transaction
-      const ticketRootUpdateResult: UpdateResult = await manager
+      const ticketOriginUpdateResult: UpdateResult = await manager
         .createQueryBuilder()
         .update(Ticket)
         .where(whereTicket)
-        .set(setTicketRoot)
+        .set(setTicketOrigin)
         .returning('*')
         .execute()
-      if (ticketRootUpdateResult.affected != 1) {
+      if (ticketOriginUpdateResult.affected != 1) {
         throw new Error(`${PREFIX}: Update Ticket failed`)
       }
-      const ticketRoot = Ticket.fromRaw(ticketRootUpdateResult.raw[0])
+      const ticketOrigin = Ticket.fromRaw(ticketOriginUpdateResult.raw[0])
 
       // === 2. DELETE OLD ===
       const whereTicketProductDelete: FindOptionsWhere<TicketProduct> = {
@@ -74,7 +73,7 @@ export class TicketClinicUpdateTicketProductList {
             ...i,
             oid,
             ticketId,
-            customerId: ticketRoot.customerId,
+            customerId: ticketOrigin.customerId,
             deliveryStatus: DeliveryStatus.Pending,
             quantityReturn: 0,
             type,
@@ -91,21 +90,38 @@ export class TicketClinicUpdateTicketProductList {
         where: { ticketId },
         order: { id: 'ASC' },
       })
-      const productsMoney = ticketProductList.reduce((acc, item) => {
+
+      const productMoney = ticketProductList.reduce((acc, item) => {
         return acc + item.actualPrice * item.quantity
       }, 0)
       const totalCostAmount = ticketProductList.reduce((acc, item) => {
         return acc + item.costAmount
       }, 0)
 
+      const itemsActualMoney =
+        ticketOrigin.itemsActualMoney - ticketOrigin.productMoney + productMoney
+
+      const discountType = ticketOrigin.discountType
+      let discountPercent = ticketOrigin.discountPercent
+      let discountMoney = ticketOrigin.discountMoney
+      if (discountType === DiscountType.VND) {
+        discountPercent =
+          itemsActualMoney == 0 ? 0 : Math.floor((discountMoney * 100) / itemsActualMoney)
+      }
+      if (discountType === DiscountType.Percent) {
+        discountMoney = Math.floor((discountPercent * itemsActualMoney) / 100)
+      }
+      const totalMoney = itemsActualMoney - discountMoney
+
       // === 5. UPDATE VISIT: MONEY  ===
       const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
-        productsMoney,
+        productMoney,
         totalCostAmount,
-        totalMoney: () => `"totalMoney" - "productsMoney" + ${productsMoney}`,
-        debt: () => `"debt" - "productsMoney" + ${productsMoney}`,
-        profit: () =>
-          `"totalMoney" - "productsMoney" + ${productsMoney} - ${totalCostAmount} - "expense"`,
+        itemsActualMoney,
+        discountPercent,
+        discountMoney,
+        totalMoney,
+        debt: () => `${totalMoney} - "paid"`,
       }
 
       const ticketUpdateResult: UpdateResult = await manager

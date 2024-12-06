@@ -3,6 +3,7 @@ import { Server } from 'socket.io'
 import {
   Batch,
   Customer,
+  Distributor,
   Organization,
   Product,
   Ticket,
@@ -39,6 +40,11 @@ export class SocketEmitService {
   customerUpsert(oid: number, data: { customer: Customer }) {
     if (!this.io) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.CUSTOMER_UPSERT, data)
+  }
+
+  distributorUpsert(oid: number, data: { distributor: Distributor }) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.DISTRIBUTOR_UPSERT, data)
   }
 
   productUpsert(oid: number, data: { product: Product }) {

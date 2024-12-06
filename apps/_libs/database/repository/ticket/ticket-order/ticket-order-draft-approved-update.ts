@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager, FindOptionsWhere, In } from 'typeorm'
+import { DTimer } from '../../../../common/helpers/time.helper'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { DeliveryStatus } from '../../../common/variable'
 import {
@@ -52,6 +53,8 @@ export class TicketOrderDraftApprovedUpdate {
       ticketOrderExpenseDraftList,
       ticketAttributeDraftList,
     } = params
+    const registeredAt = ticketOrderDraftApprovedUpdate.registeredAt
+
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       const whereTicket: FindOptionsWhere<Ticket> = {
         id: ticketId,
@@ -64,7 +67,11 @@ export class TicketOrderDraftApprovedUpdate {
         // ticketStatus: TicketStatus.Draft, // giữ nguyên status
         paid: 0,
         debt: ticketOrderDraftApprovedUpdate.totalMoney,
-        startedAt: ticketOrderDraftApprovedUpdate.registeredAt,
+        registeredAt,
+        startedAt: registeredAt,
+        year: DTimer.info(registeredAt, 7).year,
+        month: DTimer.info(registeredAt, 7).month + 1,
+        date: DTimer.info(registeredAt, 7).date,
       }
       const ticketUpdateResult = await manager
         .createQueryBuilder()

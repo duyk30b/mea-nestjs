@@ -15,8 +15,8 @@ import { PostgreSqlRepository } from '../postgresql.repository'
 @Injectable()
 export class PrescriptionSampleRepository extends PostgreSqlRepository<
   PrescriptionSample,
-  { [P in keyof PrescriptionSampleSortType]?: 'ASC' | 'DESC' },
-  { [P in keyof PrescriptionSampleRelationType]?: boolean },
+  PrescriptionSampleSortType,
+  PrescriptionSampleRelationType,
   PrescriptionSampleInsertType,
   PrescriptionSampleUpdateType
 > {

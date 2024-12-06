@@ -1,7 +1,12 @@
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
+import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { Organization } from '../../../../_libs/database/entities'
+import { CustomerPaymentRepository } from '../../../../_libs/database/repository/customer-payment/customer-payment.repository'
 import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
+import { OrganizationRepository } from '../../../../_libs/database/repository/organization/organization.repository'
+import { TicketRepository } from '../../../../_libs/database/repository/ticket/ticket-base/ticket.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   CustomerCreateBody,
@@ -15,7 +20,11 @@ import {
 export class ApiCustomerService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
-    private readonly customerRepository: CustomerRepository
+    private readonly cacheDataService: CacheDataService,
+    private readonly customerRepository: CustomerRepository,
+    private readonly customerPaymentRepository: CustomerPaymentRepository,
+    private readonly organizationRepository: OrganizationRepository,
+    private readonly ticketRepository: TicketRepository
   ) { }
 
   async pagination(oid: number, query: CustomerPaginationQuery): Promise<BaseResponse> {
@@ -87,15 +96,34 @@ export class ApiCustomerService {
     return { data: { customer } }
   }
 
-  async deleteOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.customerRepository.update(
-      { oid, id, debt: 0 },
-      { deletedAt: Date.now() }
-    )
-    if (affected === 0) {
-      throw new BusinessException('error.Database.DeleteFailed')
+  async destroyOne(options: {
+    oid: number
+    customerId: number
+    organization: Organization
+  }): Promise<BaseResponse> {
+    const { oid, customerId, organization } = options
+    const countTicket = await this.ticketRepository.countBy({ oid, customerId })
+    if (countTicket > 0) {
+      return {
+        data: { countTicket },
+        success: false,
+      }
     }
-    const customer = await this.customerRepository.findOneById(id)
-    return { data: { customer } }
+
+    await Promise.allSettled([
+      this.customerRepository.delete({ oid, id: customerId }),
+      this.customerPaymentRepository.delete({ oid, customerId }),
+    ])
+
+    organization.dataVersionParse.customer += 1
+    await this.organizationRepository.update(
+      { id: oid },
+      {
+        dataVersion: JSON.stringify(organization.dataVersionParse),
+      }
+    )
+    this.cacheDataService.clearOrganization(oid)
+
+    return { data: { countTicket: 0, customerId } }
   }
 }

@@ -142,13 +142,15 @@ export class ApiAppointmentService {
       date: DTimer.info(registeredAt, 7).date,
     })
 
-    ticket.ticketAttributeList =
-      await this.ticketAttributeRepository.insertManyFullFieldAndReturnEntity([{
-        key: 'reason',
-        value: appointment.reason || '',
-        oid,
-        ticketId: ticket.id,
-      }])
+    if (appointment.reason) {
+      ticket.ticketAttributeList =
+        await this.ticketAttributeRepository.insertManyFullFieldAndReturnEntity([{
+          key: 'reason',
+          value: appointment.reason || '',
+          oid,
+          ticketId: ticket.id,
+        }])
+    }
 
     ticket.customer = customer
 

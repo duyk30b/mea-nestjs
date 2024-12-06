@@ -39,10 +39,19 @@ export class CacheDataService {
     if (!this.orgCache[oid]) this.orgCache[oid] = {}
 
     if (!this.orgCache[oid].organization) {
-      this.orgCache[oid].organization = await this.organizationRepository.findOne({
+      const organization = await this.organizationRepository.findOne({
         relation: { logoImage: true },
         condition: { id: oid },
       })
+      try {
+        organization.dataVersionParse = JSON.parse(organization.dataVersion)
+        organization.dataVersionParse.product ||= 0
+        organization.dataVersionParse.batch ||= 0
+        organization.dataVersionParse.customer ||= 0
+      } catch (error) {
+        organization.dataVersionParse = { product: 0, batch: 0, customer: 0 }
+      }
+      this.orgCache[oid].organization = organization
     }
     return this.orgCache[oid].organization
   }
@@ -159,6 +168,14 @@ export class CacheDataService {
   updateOrganizationInfo(organization: Organization) {
     const oid = organization.id
     if (!this.orgCache[oid]) this.orgCache[oid] = {}
+    try {
+      organization.dataVersionParse = JSON.parse(organization.dataVersion)
+      organization.dataVersionParse.product ||= 0
+      organization.dataVersionParse.batch ||= 0
+      organization.dataVersionParse.customer ||= 0
+    } catch (error) {
+      organization.dataVersionParse = { product: 0, batch: 0, customer: 0 }
+    }
     this.orgCache[oid].organization = organization
   }
 

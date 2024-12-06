@@ -102,16 +102,6 @@ export class ApiTicketOrderService {
     }
   }
 
-  async destroyDraft(params: { oid: number; ticketId: number }): Promise<BaseResponse> {
-    const { oid, ticketId } = params
-    try {
-      await this.ticketOrderDraft.destroy({ oid, ticketId })
-      return { data: { ticketId } }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
   async createDebtSuccess(params: {
     oid: number
     userId: number
@@ -351,12 +341,8 @@ export class ApiTicketOrderService {
           oid,
           ticketId,
           time: Date.now(),
-          returnList: body.returnList,
-          discountMoneyReturn: body.discountMoneyReturn,
-          surchargeReturn: body.surchargeReturn,
-          debtReturn: body.debtReturn,
-          paidReturn: body.paidReturn,
           description: 'Trả hàng',
+          ...body,
         })
 
       this.socketEmitService.batchListUpdate(oid, { batchList })
@@ -365,16 +351,7 @@ export class ApiTicketOrderService {
         this.socketEmitService.customerUpsert(oid, { customer })
       }
 
-      const ticketProductList = await this.ticketProductRepository.findMany({
-        relation: { product: true, batch: true },
-        condition: {
-          oid,
-          ticketId,
-        },
-        sort: { id: 'ASC' },
-      })
-
-      return { data: { ticketBasic, ticketProductList, customerPayment } }
+      return { data: { ticketBasic, customerPayment } }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
@@ -405,15 +382,22 @@ export class ApiTicketOrderService {
   async cancel(options: { oid: number; ticketId: number }): Promise<BaseResponse> {
     const { oid, ticketId } = options
 
-    const { ticketBasic, customerPayment, customer } = await this.ticketOrderCancel.cancel({
+    const { ticketBasic, customerPayment } = await this.ticketOrderCancel.cancel({
       oid,
       ticketId,
       time: Date.now(),
       description: 'Hủy phiếu',
     })
-    if (customer) {
-      this.socketEmitService.customerUpsert(oid, { customer })
-    }
     return { data: { ticketBasic, customerPayment } }
+  }
+
+  async destroy(params: { oid: number; ticketId: number }): Promise<BaseResponse> {
+    const { oid, ticketId } = params
+    try {
+      await this.ticketRepository.destroy({ oid, ticketId })
+      return { data: { ticketId } }
+    } catch (error: any) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+    }
   }
 }

@@ -61,11 +61,15 @@ export class ApiCustomerController {
     return await this.apiCustomerService.updateOne(oid, +id, body)
   }
 
-  @Delete('delete/:id')
+  @Delete('destroy/:id')
   @HasPermission(PermissionId.CUSTOMER_DELETE)
   @ApiParam({ name: 'id', example: 1 })
-  async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiCustomerService.deleteOne(oid, id)
+  async destroyOne(@External() { oid, organization }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiCustomerService.destroyOne({
+      oid,
+      customerId: id,
+      organization,
+    })
   }
 
   @Get('download-excel')

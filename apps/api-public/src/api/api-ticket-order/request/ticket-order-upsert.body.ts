@@ -36,13 +36,25 @@ class TicketOrderBasic {
   @Expose()
   @IsDefined()
   @IsInt()
-  proceduresMoney: number
+  procedureMoney: number
 
   @ApiProperty({ example: 750_000 })
   @Expose()
   @IsDefined()
   @IsInt()
-  productsMoney: number
+  productMoney: number
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  itemsActualMoney: number
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  itemsDiscount: number
 
   @ApiProperty({ example: 22_500 })
   @Expose()

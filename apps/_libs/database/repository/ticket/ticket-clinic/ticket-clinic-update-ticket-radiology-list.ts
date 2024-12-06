@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource, FindOptionsWhere, IsNull, UpdateResult } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
+import { DiscountType } from '../../../common/variable'
 import { Ticket, TicketRadiology } from '../../../entities'
 import { TicketRadiologyInsertBasicType } from '../../../entities/ticket-radiology.entity'
 import { TicketStatus } from '../../../entities/ticket.entity'
@@ -24,12 +25,23 @@ export class TicketClinicUpdateTicketRadiologyList {
         id: ticketId,
         ticketStatus: TicketStatus.Executing,
       }
-      const ticketUpdateTime = await manager.update(Ticket, whereTicket, {
+      const setTicketOrigin: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } =
+      {
         updatedAt: Date.now(),
-      }) // update tạm để tạo transaction
-      if (ticketUpdateTime.affected !== 1) {
+      }
+
+      // update tạm để tạo transaction
+      const ticketOriginUpdateResult: UpdateResult = await manager
+        .createQueryBuilder()
+        .update(Ticket)
+        .where(whereTicket)
+        .set(setTicketOrigin)
+        .returning('*')
+        .execute()
+      if (ticketOriginUpdateResult.affected != 1) {
         throw new Error(`${PREFIX}: Update Ticket failed`)
       }
+      const ticketOrigin = Ticket.fromRaw(ticketOriginUpdateResult.raw[0])
 
       // === 2. DELETE OLD ===
       const whereTicketRadiologyDelete: FindOptionsWhere<TicketRadiology> = {
@@ -56,11 +68,27 @@ export class TicketClinicUpdateTicketRadiologyList {
       }, 0)
 
       // === 5. UPDATE VISIT: MONEY  ===
+      const itemsActualMoney =
+        ticketOrigin.itemsActualMoney - ticketOrigin.radiologyMoney + radiologyMoney
+
+      const discountType = ticketOrigin.discountType
+      let discountPercent = ticketOrigin.discountPercent
+      let discountMoney = ticketOrigin.discountMoney
+      if (discountType === DiscountType.VND) {
+        discountPercent =
+          itemsActualMoney == 0 ? 0 : Math.floor((discountMoney * 100) / itemsActualMoney)
+      }
+      if (discountType === DiscountType.Percent) {
+        discountMoney = Math.floor((discountPercent * itemsActualMoney) / 100)
+      }
+      const totalMoney = itemsActualMoney - discountMoney
       const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
         radiologyMoney,
-        totalMoney: () => `"totalMoney" - "radiologyMoney" + ${radiologyMoney}`,
-        debt: () => `"debt" - "radiologyMoney" + ${radiologyMoney}`,
-        profit: () => `"profit" - "radiologyMoney" + ${radiologyMoney}`,
+        itemsActualMoney,
+        discountPercent,
+        discountMoney,
+        totalMoney,
+        debt: () => `${totalMoney} - "paid"`,
       }
 
       const ticketUpdateResult: UpdateResult = await manager

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { DataSource, FindOptionsWhere, UpdateResult } from 'typeorm'
 import { arrayToKeyValue } from '../../../../common/helpers/object.helper'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
-import { DeliveryStatus, VoucherType } from '../../../common/variable'
+import { DeliveryStatus, DiscountType, VoucherType } from '../../../common/variable'
 import { Batch, Product, Ticket, TicketProduct } from '../../../entities'
 import BatchMovement, { BatchMovementInsertType } from '../../../entities/batch-movement.entity'
 import ProductMovement, {
@@ -33,36 +33,52 @@ export class TicketClinicReturnProduct {
     }
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-      // === 1. UPDATE VISIT MONEY ===
+      // === 1. UPDATE TICKET FOR TRANSACTION ===
       const whereTicket: FindOptionsWhere<Ticket> = {
         oid,
         id: ticketId,
         ticketStatus: TicketStatus.Executing,
       }
-      const productsMoneyReturn = returnList.reduce((acc, item) => {
-        return acc + item.quantityReturn * item.actualPrice
-      }, 0)
-      const totalCostAmountReturn = returnList.reduce((acc, item) => {
-        return acc + item.costAmountReturn
-      }, 0)
-      const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
-        productsMoney: () => `"productsMoney" - ${productsMoneyReturn}`,
-        totalCostAmount: () => `"totalCostAmount" - ${totalCostAmountReturn}`,
-        totalMoney: () => `"totalMoney" - ${productsMoneyReturn}`,
-        debt: () => `"debt" - ${productsMoneyReturn}`,
-        profit: () => `"totalMoney" - ${productsMoneyReturn} + ${totalCostAmountReturn}`,
+      const setTicketOrigin: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } =
+      {
+        updatedAt: Date.now(),
       }
-      const ticketUpdateResult: UpdateResult = await manager
+      // update tạm để tạo transaction
+      const ticketOriginUpdateResult: UpdateResult = await manager
         .createQueryBuilder()
         .update(Ticket)
         .where(whereTicket)
-        .set(setTicket)
+        .set(setTicketOrigin)
         .returning('*')
         .execute()
-      if (ticketUpdateResult.affected != 1) {
+      if (ticketOriginUpdateResult.affected != 1) {
         throw new Error(`${PREFIX}: Update Ticket failed`)
       }
-      const ticket = Ticket.fromRaw(ticketUpdateResult.raw[0])
+      const ticketOrigin = Ticket.fromRaw(ticketOriginUpdateResult.raw[0])
+
+      // const productMoneyReturn = returnList.reduce((acc, item) => {
+      //   return acc + item.quantityReturn * item.actualPrice
+      // }, 0)
+      // const totalCostAmountReturn = returnList.reduce((acc, item) => {
+      //   return acc + item.costAmountReturn
+      // }, 0)
+      // const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
+      //   productMoney: () => `"productMoney" - ${productMoneyReturn}`,
+      //   totalCostAmount: () => `"totalCostAmount" - ${totalCostAmountReturn}`,
+      //   totalMoney: () => `"totalMoney" - ${productMoneyReturn}`,
+      //   debt: () => `"debt" - ${productMoneyReturn}`,
+      // }
+      // const ticketUpdateResult: UpdateResult = await manager
+      //   .createQueryBuilder()
+      //   .update(Ticket)
+      //   .where(whereTicket)
+      //   .set(setTicket)
+      //   .returning('*')
+      //   .execute()
+      // if (ticketUpdateResult.affected != 1) {
+      //   throw new Error(`${PREFIX}: Update Ticket failed`)
+      // }
+      // const ticket = Ticket.fromRaw(ticketUpdateResult.raw[0])
 
       // === 2. UPDATE for VISIT_PRODUCT ===
       const ticketProductUpdateResult: [any[], number] = await manager.query(
@@ -70,23 +86,21 @@ export class TicketClinicReturnProduct {
         UPDATE  "TicketProduct" tp
         SET     "costAmount"      = tp."costAmount" - temp."costAmountReturn",
                 "quantity"        = tp."quantity" - temp."quantityReturn",
-                "quantityReturn"  = tp."quantityReturn" + temp."quantityReturn"
+                "quantityReturn"  = tp."quantityReturn" + temp."quantityReturn",
+                "deliveryStatus"  = CASE 
+                                      WHEN  (tp."quantity" = temp."quantityReturn") 
+                                        THEN ${DeliveryStatus.NoStock} 
+                                      ELSE ${DeliveryStatus.Delivered} 
+                                    END
         FROM (VALUES `
         + returnList
-          .map((i) => {
-            return (
-              `(${i.ticketProductId}, ${i.actualPrice},`
-              + ` ${i.quantityReturn}, ${i.costAmountReturn})`
-            )
-          })
+          .map((i) => `(${i.ticketProductId}, ${i.quantityReturn}, ${i.costAmountReturn})`)
           .join(', ')
-        + `   ) AS temp("ticketProductId", "actualPrice",
-                        "quantityReturn", "costAmountReturn"
+        + `   ) AS temp("ticketProductId", "quantityReturn", "costAmountReturn"
                         )
         WHERE   tp."oid"            = ${oid}
             AND tp."ticketId"       = ${ticketId}
             AND tp."id"             = temp."ticketProductId"
-            AND tp."actualPrice"    = temp."actualPrice"
             AND tp."deliveryStatus" = ${DeliveryStatus.Delivered}
         RETURNING tp.*;
         `
@@ -263,7 +277,7 @@ export class TicketClinicReturnProduct {
           oid,
           productId: ticketProductActioned.productId,
           voucherId: ticketId,
-          contactId: ticket.customerId,
+          contactId: ticketOrigin.customerId,
           voucherType: VoucherType.Ticket,
           isRefund: 1,
           createdAt: time,
@@ -307,7 +321,7 @@ export class TicketClinicReturnProduct {
             productId: ticketProductActioned.productId,
             batchId: ticketProductActioned.batchId,
             voucherId: ticketId,
-            contactId: ticket.customerId,
+            contactId: ticketOrigin.customerId,
             voucherType: VoucherType.Ticket,
             isRefund: 1,
             createdAt: time,
@@ -327,10 +341,64 @@ export class TicketClinicReturnProduct {
         await manager.insert(BatchMovement, batchMovementsDraft)
       }
 
+      // === 11. QUERY NEW ===
+      const ticketProductList = await manager.find(TicketProduct, {
+        relations: { product: true, batch: true },
+        relationLoadStrategy: 'join',
+        where: { ticketId },
+        order: { id: 'ASC' },
+      })
+
+      const productMoney = ticketProductList.reduce((acc, item) => {
+        return acc + item.actualPrice * item.quantity
+      }, 0)
+      const totalCostAmount = ticketProductList.reduce((acc, item) => {
+        return acc + item.costAmount
+      }, 0)
+
+      const itemsActualMoney =
+        ticketOrigin.itemsActualMoney - ticketOrigin.productMoney + productMoney
+
+      const discountType = ticketOrigin.discountType
+      let discountPercent = ticketOrigin.discountPercent
+      let discountMoney = ticketOrigin.discountMoney
+      if (discountType === DiscountType.VND) {
+        discountPercent =
+          itemsActualMoney == 0 ? 0 : Math.floor((discountMoney * 100) / itemsActualMoney)
+      }
+      if (discountType === DiscountType.Percent) {
+        discountMoney = Math.floor((discountPercent * itemsActualMoney) / 100)
+      }
+      const totalMoney = itemsActualMoney - discountMoney
+
+      // === 5. UPDATE VISIT: MONEY  ===
+      const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
+        productMoney,
+        totalCostAmount,
+        itemsActualMoney,
+        discountPercent,
+        discountMoney,
+        totalMoney,
+        debt: () => `${totalMoney} - "paid"`,
+      }
+
+      const ticketUpdateResult: UpdateResult = await manager
+        .createQueryBuilder()
+        .update(Ticket)
+        .where(whereTicket)
+        .set(setTicket)
+        .returning('*')
+        .execute()
+      if (ticketUpdateResult.affected != 1) {
+        throw new Error(`${PREFIX}: Update Ticket failed`)
+      }
+      const ticketBasic = Ticket.fromRaw(ticketUpdateResult.raw[0])
+
       return {
-        ticketBasic: ticket,
+        ticketBasic,
         productList,
         batchList,
+        ticketProductList,
       }
     })
   }

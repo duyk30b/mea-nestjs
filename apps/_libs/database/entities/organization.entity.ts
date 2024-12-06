@@ -24,8 +24,8 @@ export default class Organization {
   emailVerify: 0 | 1
 
   @Expose()
-  @Column({ type: 'smallint', default: 1 })
-  dataVersion: number
+  @Column({ type: 'varchar', default: JSON.stringify({}) })
+  dataVersion: string
 
   @Expose()
   @Column({ type: 'smallint', default: 0 })
@@ -120,6 +120,9 @@ export default class Organization {
   @OneToMany(() => User, (user) => user.organization)
   userList: User[]
 
+  @Expose()
+  dataVersionParse: { product: number, batch: number, customer: number }
+
   static fromRaw(raw: { [P in keyof Organization]: any }) {
     if (!raw) return null
     const entity = new Organization()
@@ -144,10 +147,10 @@ export type OrganizationSortType = Pick<Organization, 'id'>
 export type OrganizationInsertType = Omit<
   Organization,
   | keyof OrganizationRelationType
-  | keyof Pick<Organization, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>
+  | keyof Pick<Organization, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'dataVersionParse'>
 >
 
 export type OrganizationUpdateType = Omit<
   Organization,
-  keyof OrganizationRelationType | keyof Pick<Organization, 'id' | 'createdAt'>
+  keyof OrganizationRelationType | keyof Pick<Organization, 'id' | 'createdAt' | 'dataVersionParse'>
 >

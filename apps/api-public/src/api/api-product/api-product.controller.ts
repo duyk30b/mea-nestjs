@@ -61,11 +61,11 @@ export class ApiProductController {
     return await this.apiProductService.updateOne(oid, id, body)
   }
 
-  @Delete('delete/:id')
+  @Delete('destroy/:id')
   @HasPermission(PermissionId.PRODUCT_DELETE)
   @ApiParam({ name: 'id', example: 1 })
-  async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiProductService.deleteOne(oid, id)
+  async deleteOne(@External() { oid, organization }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiProductService.destroyOne({ organization, oid, productId: id })
   }
 
   @Get('download-excel')

@@ -5,6 +5,7 @@ import { BusinessException } from '../../../../_libs/common/exception-filter/exc
 import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
 import { DTimer } from '../../../../_libs/common/helpers/time.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
+import { DeliveryStatus } from '../../../../_libs/database/common/variable'
 import { Customer } from '../../../../_libs/database/entities'
 import { AppointmentStatus } from '../../../../_libs/database/entities/appointment.entity'
 import { TicketAttributeInsertType } from '../../../../_libs/database/entities/ticket-attribute.entity'
@@ -22,7 +23,6 @@ import { AppointmentRepository } from '../../../../_libs/database/repository/app
 import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
 import { ImageRepository } from '../../../../_libs/database/repository/image/image.repository'
 import { TicketAttributeRepository } from '../../../../_libs/database/repository/ticket-attribute/ticket-attribute.repository'
-import { TicketDiagnosisRepository } from '../../../../_libs/database/repository/ticket-diagnosis/ticket-diagnosis.repository'
 import { TicketProductRepository } from '../../../../_libs/database/repository/ticket-product/ticket-product.repository'
 import { TicketUserRepository } from '../../../../_libs/database/repository/ticket-user/ticket-user.repository'
 import { TicketPayDebt } from '../../../../_libs/database/repository/ticket/ticket-base/ticket-pay-debt'
@@ -64,7 +64,6 @@ export class ApiTicketClinicService {
     private readonly appointmentRepository: AppointmentRepository,
     private readonly ticketRepository: TicketRepository,
     private readonly ticketAttributeRepository: TicketAttributeRepository,
-    private readonly ticketDiagnosisRepository: TicketDiagnosisRepository,
     private readonly ticketUserRepository: TicketUserRepository,
     private readonly ticketProductRepository: TicketProductRepository,
     private readonly ticketClinicUpdateTicketProcedureList: TicketClinicUpdateTicketProcedureList,
@@ -142,19 +141,6 @@ export class ApiTicketClinicService {
 
     this.socketEmitService.ticketClinicCreate(oid, { ticket })
     return { data: { ticket } }
-  }
-
-  async destroyDraftSchedule(params: { oid: number; ticketId: number }): Promise<BaseResponse> {
-    const { oid, ticketId } = params
-    await this.ticketRepository.delete({
-      oid,
-      id: ticketId,
-      ticketStatus: { IN: [TicketStatus.Draft, TicketStatus.Schedule] },
-    })
-    await this.ticketDiagnosisRepository.delete({ oid, ticketId })
-    await this.ticketUserRepository.delete({ oid, ticketId })
-    this.socketEmitService.ticketClinicDestroy(oid, { ticketId })
-    return { data: { ticketId } }
   }
 
   async startCheckup(options: { oid: number; ticketId: number }) {
@@ -451,6 +437,7 @@ export class ApiTicketClinicService {
     const result = await this.ticketClinicUpdateItemsMoney.updateItemsMoney({
       oid,
       ticketId,
+      itemsActualMoney: body.itemsActualMoney,
       discountMoney: body.discountMoney,
       discountPercent: body.discountPercent,
       discountType: body.discountType,
@@ -541,7 +528,7 @@ export class ApiTicketClinicService {
   }): Promise<BaseResponse> {
     const { oid, ticketId, body } = params
     try {
-      const { ticketBasic, productList, batchList } =
+      const { ticketBasic, productList, batchList, ticketProductList } =
         await this.ticketClinicReturnProduct.returnProductList({
           oid,
           ticketId,
@@ -553,11 +540,6 @@ export class ApiTicketClinicService {
       this.socketEmitService.productListUpdate(oid, { productList })
       this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic })
 
-      const ticketProductList = await this.ticketProductRepository.findMany({
-        relation: { product: true, batch: true },
-        condition: { oid, ticketId },
-        sort: { id: 'ASC' },
-      })
       this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
         ticketId,
         ticketProductConsumableList: ticketProductList.filter((i) => {
@@ -667,5 +649,37 @@ export class ApiTicketClinicService {
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
+  }
+
+  async destroy(params: { oid: number; ticketId: number }): Promise<BaseResponse> {
+    const { oid, ticketId } = params
+    const ticket = await this.ticketRepository.findOne({
+      condition: { id: ticketId, oid },
+      relation: { ticketProductList: {}, ticketRadiologyList: {} },
+    })
+
+    if (ticket.ticketProductList.find((i) => i.deliveryStatus === DeliveryStatus.Delivered)) {
+      throw new BusinessException('error.ValidateFailed', HttpStatus.BAD_REQUEST)
+    }
+
+    if (ticket.ticketRadiologyList.find((i) => i.status === TicketRadiologyStatus.Completed)) {
+      throw new BusinessException('error.ValidateFailed', HttpStatus.BAD_REQUEST)
+    }
+
+    await this.imageManagerService.changeImageList({
+      oid,
+      customerId: ticket.customerId,
+      files: [],
+      filesPosition: [],
+      imageIdsKeep: [],
+      imageIdsOld: JSON.parse(ticket.imageIds || '[]'),
+    })
+    await this.ticketRepository.update(
+      { oid, id: ticketId },
+      { ticketStatus: TicketStatus.Cancelled }
+    )
+    await this.ticketRepository.destroy({ oid, ticketId })
+    this.socketEmitService.ticketClinicDestroy(oid, { ticketId })
+    return { data: { ticketId } }
   }
 }

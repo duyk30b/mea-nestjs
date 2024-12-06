@@ -45,15 +45,6 @@ export class ApiTicketOrderController {
     })
   }
 
-  @Delete(':id/destroy-draft')
-  @HasPermission(PermissionId.TICKET_ORDER_DESTROY_DRAFT)
-  async destroyDraft(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiTicketOrderService.destroyDraft({
-      oid,
-      ticketId: id,
-    })
-  }
-
   @Post('create-debt-success')
   @HasPermission(PermissionId.TICKET_ORDER_CREATE_DEBT_SUCCESS)
   async createDebtSuccess(
@@ -170,5 +161,14 @@ export class ApiTicketOrderController {
   @HasPermission(PermissionId.TICKET_ORDER_CANCEL)
   async cancel(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiTicketOrderService.cancel({ oid, ticketId: id })
+  }
+
+  @Delete(':id/destroy')
+  @HasPermission(PermissionId.TICKET_ORDER_DESTROY_DRAFT)
+  async destroy(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiTicketOrderService.destroy({
+      oid,
+      ticketId: id,
+    })
   }
 }

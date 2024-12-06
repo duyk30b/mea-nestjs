@@ -1,9 +1,14 @@
-import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
+import { HttpStatus, Injectable } from '@nestjs/common'
+import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { uniqueArray } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { Organization } from '../../../../_libs/database/entities'
+import { BatchMovementRepository } from '../../../../_libs/database/repository/batch-movement/bat-movement.repository'
 import { BatchRepository } from '../../../../_libs/database/repository/batch/batch.repository'
+import { OrganizationRepository } from '../../../../_libs/database/repository/organization/organization.repository'
 import { ProductRepository } from '../../../../_libs/database/repository/product/product.repository'
+import { ReceiptItemRepository } from '../../../../_libs/database/repository/receipt-item/receipt-item.repository'
+import { TicketProductRepository } from '../../../../_libs/database/repository/ticket-product/ticket-product.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   BatchGetManyQuery,
@@ -17,9 +22,14 @@ import {
 export class ApiBatchService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
+    private readonly cacheDataService: CacheDataService,
+    private readonly organizationRepository: OrganizationRepository,
     private readonly batchRepository: BatchRepository,
-    private readonly productRepository: ProductRepository
-  ) {}
+    private readonly productRepository: ProductRepository,
+    private readonly ticketProductRepository: TicketProductRepository,
+    private readonly receiptItemRepository: ReceiptItemRepository,
+    private readonly batchMovementRepository: BatchMovementRepository
+  ) { }
 
   async pagination(oid: number, query: BatchPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, sort, relation } = query
@@ -96,6 +106,38 @@ export class ApiBatchService {
     await this.batchRepository.update({ id, oid }, body)
     const data = await this.batchRepository.findOneBy({ id, oid })
     return { data }
+  }
+
+  async destroyOne(options: {
+    oid: number
+    batchId: number
+    organization: Organization
+  }): Promise<BaseResponse> {
+    const { oid, batchId, organization } = options
+    const countReceiptItem = await this.receiptItemRepository.countBy({ oid, batchId })
+    const countTicketProduct = await this.ticketProductRepository.countBy({ oid, batchId })
+    if (countReceiptItem > 0 || countTicketProduct > 0) {
+      return {
+        data: { countReceiptItem, countTicketProduct },
+        success: false,
+      }
+    }
+
+    await Promise.allSettled([
+      this.batchRepository.delete({ oid, id: batchId }),
+      this.batchMovementRepository.delete({ oid, batchId }),
+    ])
+
+    organization.dataVersionParse.batch += 1
+    await this.organizationRepository.update(
+      { id: oid },
+      {
+        dataVersion: JSON.stringify(organization.dataVersionParse),
+      }
+    )
+    this.cacheDataService.clearOrganization(oid)
+
+    return { data: { countTicketProduct: 0, countReceiptItem: 0, batchId } }
   }
 
   async findOrCreateOne(oid: number, body: BatchInsertBody): Promise<BaseResponse> {

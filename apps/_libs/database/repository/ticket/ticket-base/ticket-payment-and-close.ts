@@ -1,9 +1,16 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource, FindOptionsWhere, In, InsertResult, Raw, UpdateResult } from 'typeorm'
-import { DTimer } from '../../../../common/helpers/time.helper'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { PaymentType } from '../../../common/variable'
-import { Customer, CustomerPayment, Ticket } from '../../../entities'
+import {
+  Customer,
+  CustomerPayment,
+  Ticket,
+  TicketLaboratory,
+  TicketProcedure,
+  TicketProduct,
+  TicketRadiology,
+} from '../../../entities'
 import { CustomerPaymentInsertType } from '../../../entities/customer-payment.entity'
 import { TicketStatus } from '../../../entities/ticket.entity'
 
@@ -20,25 +27,59 @@ export class TicketPaymentAndClose {
     }
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-      // === 1. TICKET: update ===
+      // === 1. TICKET: Update status để tạo transaction ===
       const whereTicket: FindOptionsWhere<Ticket> = {
         oid,
         id: ticketId,
-        ticketStatus: In([TicketStatus.Draft, TicketStatus.Approved, TicketStatus.Executing]),
+        ticketStatus: In([TicketStatus.Executing]),
         totalMoney: Raw((alias) => `${alias} >= (paid + :money)`, { money }),
       }
+      const ticketUpdateTime = await manager.update(Ticket, whereTicket, {
+        updatedAt: Date.now(),
+      }) // update tạm để tạo transaction
+      if (ticketUpdateTime.affected !== 1) {
+        throw new Error(`${PREFIX}: Update Ticket failed`)
+      }
+      // === 2. TICKET: Update profit and discountItems ===
+      const ticketProcedureList = await manager.find(TicketProcedure, {
+        where: { ticketId },
+      })
+      const ticketProductList = await manager.find(TicketProduct, {
+        where: { ticketId },
+      })
+      const ticketLaboratoryList = await manager.find(TicketLaboratory, {
+        where: { ticketId },
+      })
+      const ticketRadiologyList = await manager.find(TicketRadiology, {
+        where: { ticketId },
+      })
+
+      const procedureDiscount = ticketProcedureList.reduce((acc, item) => {
+        return acc + item.discountMoney * item.quantity
+      }, 0)
+      const productDiscount = ticketProductList.reduce((acc, item) => {
+        return acc + item.discountMoney * item.quantity
+      }, 0)
+      const laboratoryDiscount = ticketLaboratoryList.reduce((acc, item) => {
+        return acc + item.discountMoney
+      }, 0)
+      const radiologyDiscount = ticketRadiologyList.reduce((acc, item) => {
+        return acc + item.discountMoney
+      }, 0)
+      const itemsDiscount =
+        procedureDiscount + productDiscount + laboratoryDiscount + radiologyDiscount
+
       const setTicket: { [P in keyof NoExtra<Partial<Ticket>>]: Ticket[P] | (() => string) } = {
         ticketStatus: () => `CASE 
-                              WHEN("totalMoney" = paid + ${money}) THEN ${TicketStatus.Completed} 
-                              ELSE ${TicketStatus.Debt} 
-                            END
-                          `,
+                                WHEN("totalMoney" = paid + ${money}) THEN ${TicketStatus.Completed} 
+                                ELSE ${TicketStatus.Debt} 
+                              END
+                            `,
         paid: () => `paid + ${money}`,
         debt: () => `debt - ${money}`,
+        itemsDiscount,
+        profit: () => `"totalMoney" - "totalCostAmount" - "expense"`,
         endedAt: time,
-        year: DTimer.info(time, 7).year,
-        month: DTimer.info(time, 7).month + 1,
-        date: DTimer.info(time, 7).date,
       }
       const ticketUpdateResult: UpdateResult = await manager
         .createQueryBuilder()

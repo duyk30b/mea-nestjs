@@ -120,14 +120,26 @@ export default class ReceiptItem extends BaseEntity {
   }
 }
 
-export type ReceiptItemRelationType = Pick<ReceiptItem, 'receipt' | 'batch' | 'product'>
+export type ReceiptItemRelationType = {
+  [P in keyof Pick<ReceiptItem, 'product' | 'batch'>]?: boolean
+} & {
+  [P in keyof Pick<ReceiptItem, 'receipt'>]?:
+  | { [P in keyof Pick<Receipt, 'distributor'>]?: boolean }
+  | false
+}
+
+export type ReceiptItemSortType = {
+  [P in keyof Pick<ReceiptItem, 'id'>]?: 'ASC' | 'DESC'
+}
 
 export type ReceiptItemInsertType = Omit<
   ReceiptItem,
   keyof ReceiptItemRelationType | keyof Pick<ReceiptItem, 'id'>
 >
 
-export type ReceiptItemUpdateType = Omit<
-  ReceiptItem,
-  keyof ReceiptItemRelationType | keyof Pick<ReceiptItem, 'id' | 'oid'>
->
+export type ReceiptItemUpdateType = {
+  [K in Exclude<
+    keyof ReceiptItem,
+    keyof ReceiptItemRelationType | keyof Pick<ReceiptItem, 'oid' | 'id'>
+  >]: ReceiptItem[K] | (() => string)
+}

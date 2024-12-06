@@ -1,9 +1,16 @@
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
+import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { arrayToKeyArray, uniqueArray } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { Organization } from '../../../../_libs/database/entities'
+import { BatchMovementRepository } from '../../../../_libs/database/repository/batch-movement/bat-movement.repository'
 import { BatchRepository } from '../../../../_libs/database/repository/batch/batch.repository'
+import { OrganizationRepository } from '../../../../_libs/database/repository/organization/organization.repository'
+import { ProductMovementRepository } from '../../../../_libs/database/repository/product-movement/product-movement.repository'
 import { ProductRepository } from '../../../../_libs/database/repository/product/product.repository'
+import { ReceiptItemRepository } from '../../../../_libs/database/repository/receipt-item/receipt-item.repository'
+import { TicketProductRepository } from '../../../../_libs/database/repository/ticket-product/ticket-product.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   ProductCreateBody,
@@ -17,8 +24,14 @@ import {
 export class ApiProductService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
+    private readonly cacheDataService: CacheDataService,
+    private readonly organizationRepository: OrganizationRepository,
+    private readonly ticketProductRepository: TicketProductRepository,
+    private readonly receiptItemRepository: ReceiptItemRepository,
     private readonly productRepository: ProductRepository,
-    private readonly batchRepository: BatchRepository
+    private readonly batchRepository: BatchRepository,
+    private readonly productMovementRepository: ProductMovementRepository,
+    private readonly batchMovementRepository: BatchMovementRepository
   ) { }
 
   async pagination(oid: number, query: ProductPaginationQuery): Promise<BaseResponse> {
@@ -144,17 +157,38 @@ export class ApiProductService {
     return { data: { product } }
   }
 
-  async deleteOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.productRepository.update(
-      { oid, id },
+  async destroyOne(options: {
+    oid: number
+    productId: number
+    organization: Organization
+  }): Promise<BaseResponse> {
+    const { oid, productId, organization } = options
+    const countReceiptItem = await this.receiptItemRepository.countBy({ oid, productId })
+    const countTicketProduct = await this.ticketProductRepository.countBy({ oid, productId })
+    if (countReceiptItem > 0 || countTicketProduct > 0) {
+      return {
+        data: { countReceiptItem, countTicketProduct },
+        success: false,
+      }
+    }
+
+    await Promise.allSettled([
+      this.productRepository.delete({ oid, id: productId }),
+      this.batchRepository.delete({ oid, id: productId }),
+      this.productMovementRepository.delete({ oid, productId }),
+      this.batchMovementRepository.delete({ oid, productId }),
+    ])
+
+    organization.dataVersionParse.product += 1
+    organization.dataVersionParse.batch += 1
+    await this.organizationRepository.update(
+      { id: oid },
       {
-        deletedAt: Date.now(),
+        dataVersion: JSON.stringify(organization.dataVersionParse),
       }
     )
-    if (affected === 0) {
-      throw new BusinessException('error.Database.DeleteFailed')
-    }
-    const product = await this.productRepository.findOneBy({ id })
-    return { data: { product } }
+    this.cacheDataService.clearOrganization(oid)
+
+    return { data: { countReceiptItem: 0, countTicketProduct: 0, productId } }
   }
 }

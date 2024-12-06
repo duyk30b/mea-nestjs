@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { HttpStatus, Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
@@ -7,6 +7,7 @@ import {
   LaboratoryValueType,
 } from '../../../../_libs/database/entities/laboratory.entity'
 import { LaboratoryRepository } from '../../../../_libs/database/repository/laboratory/laboratory.repository'
+import { TicketLaboratoryRepository } from '../../../../_libs/database/repository/ticket-laboratory/ticket-laboratory.repository'
 import {
   LaboratoryCreateBody,
   LaboratoryGetManyQuery,
@@ -18,7 +19,10 @@ import {
 
 @Injectable()
 export class ApiLaboratoryService {
-  constructor(private readonly laboratoryRepository: LaboratoryRepository) { }
+  constructor(
+    private readonly laboratoryRepository: LaboratoryRepository,
+    private readonly ticketLaboratoryRepository: TicketLaboratoryRepository
+  ) { }
 
   async pagination(oid: number, query: LaboratoryPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, relation, sort } = query
@@ -133,11 +137,20 @@ export class ApiLaboratoryService {
   }
 
   async destroy(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.laboratoryRepository.delete({ oid, parentId: id })
-    if (affected === 0) {
-      throw new BusinessException('error.Database.DeleteFailed')
+    const countTicketLaboratory = await this.ticketLaboratoryRepository.countBy({
+      oid,
+      laboratoryId: id,
+    })
+    if (countTicketLaboratory > 0) {
+      return {
+        data: { countTicketLaboratory },
+        success: false,
+      }
     }
-    return { data: { laboratoryId: id } }
+    const affected = await this.laboratoryRepository.delete({ oid, parentId: id })
+    if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
+
+    return { data: { countTicketLaboratory: 0, laboratoryId: id } }
   }
 
   async systemList(): Promise<BaseResponse> {

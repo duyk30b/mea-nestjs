@@ -1,11 +1,11 @@
 import {
-    Body,
-    Controller,
-    Delete,
-    Param,
-    Post,
-    UploadedFiles,
-    UseInterceptors,
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Post,
+  UploadedFiles,
+  UseInterceptors,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto'
@@ -16,13 +16,13 @@ import { External, TExternal } from '../../../../_libs/common/request/external.r
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
 import { ApiTicketClinicService } from './api-ticket-clinic.service'
 import {
-    TicketClinicCreateBody,
-    TicketClinicUpdateConsumableBody,
-    TicketClinicUpdateItemsMoneyBody,
-    TicketClinicUpdatePrescriptionBody,
-    TicketClinicUpdateTicketLaboratoryListBody,
-    TicketClinicUpdateTicketProcedureListBody,
-    TicketClinicUpdateTicketRadiologyListBody,
+  TicketClinicCreateBody,
+  TicketClinicUpdateConsumableBody,
+  TicketClinicUpdateItemsMoneyBody,
+  TicketClinicUpdatePrescriptionBody,
+  TicketClinicUpdateTicketLaboratoryListBody,
+  TicketClinicUpdateTicketProcedureListBody,
+  TicketClinicUpdateTicketRadiologyListBody,
 } from './request'
 import { TicketClinicPaymentBody } from './request/ticket-clinic-payment.body'
 import { TicketClinicReturnProductListBody } from './request/ticket-clinic-return-product-list.body'
@@ -43,15 +43,6 @@ export class ApiTicketClinicController {
     return await this.apiTicketClinicService.create({
       oid,
       body,
-    })
-  }
-
-  @Delete(':id/destroy-draft-schedule')
-  @HasPermission(PermissionId.TICKET_CLINIC_DESTROY_DRAFT_SCHEDULE)
-  async destroyDraftSchedule(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiTicketClinicService.destroyDraftSchedule({
-      oid,
-      ticketId: id,
     })
   }
 
@@ -215,5 +206,14 @@ export class ApiTicketClinicController {
   @HasPermission(PermissionId.TICKET_CLINIC_REOPEN)
   async reopen(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiTicketClinicService.reopen({ oid, ticketId: id })
+  }
+
+  @Delete(':id/destroy')
+  @HasPermission(PermissionId.TICKET_CLINIC_DESTROY_DRAFT_SCHEDULE)
+  async destroy(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiTicketClinicService.destroy({
+      oid,
+      ticketId: id,
+    })
   }
 }
