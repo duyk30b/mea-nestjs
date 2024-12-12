@@ -1,12 +1,12 @@
-import { HttpStatus, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { Organization } from '../../../../_libs/database/entities'
-import { CustomerPaymentRepository } from '../../../../_libs/database/repository/customer-payment/customer-payment.repository'
-import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
-import { OrganizationRepository } from '../../../../_libs/database/repository/organization/organization.repository'
-import { TicketRepository } from '../../../../_libs/database/repository/ticket/ticket-base/ticket.repository'
+import { TicketRepository } from '../../../../_libs/database/repositories'
+import { CustomerPaymentRepository } from '../../../../_libs/database/repositories/customer-payment.repository'
+import { CustomerRepository } from '../../../../_libs/database/repositories/customer.repository'
+import { OrganizationRepository } from '../../../../_libs/database/repositories/organization.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   CustomerCreateBody,
@@ -102,10 +102,13 @@ export class ApiCustomerService {
     organization: Organization
   }): Promise<BaseResponse> {
     const { oid, customerId, organization } = options
-    const countTicket = await this.ticketRepository.countBy({ oid, customerId })
-    if (countTicket > 0) {
+    const ticketList = await this.ticketRepository.findMany({
+      condition: { oid, customerId },
+      limit: 10,
+    })
+    if (ticketList.length > 0) {
       return {
-        data: { countTicket },
+        data: { ticketList },
         success: false,
       }
     }
@@ -124,6 +127,6 @@ export class ApiCustomerService {
     )
     this.cacheDataService.clearOrganization(oid)
 
-    return { data: { countTicket: 0, customerId } }
+    return { data: { ticketList: [], customerId } }
   }
 }

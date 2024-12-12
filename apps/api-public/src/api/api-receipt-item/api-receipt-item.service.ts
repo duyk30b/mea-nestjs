@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { ReceiptItemRepository } from '../../../../_libs/database/repository/receipt-item/receipt-item.repository'
+import { ReceiptItemRepository } from '../../../../_libs/database/repositories/receipt-item.repository'
 import { ReceiptItemPaginationQuery } from './request'
 
 @Injectable()

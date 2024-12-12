@@ -4,9 +4,9 @@ import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { Image } from '../../../../_libs/database/entities'
 import { TicketUserReferenceType } from '../../../../_libs/database/entities/ticket-user.entity'
-import { ImageRepository } from '../../../../_libs/database/repository/image/image.repository'
-import { TicketProcedureRepository } from '../../../../_libs/database/repository/ticket-procedure/ticket-procedure.repository'
-import { TicketUserRepository } from '../../../../_libs/database/repository/ticket-user/ticket-user.repository'
+import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
+import { TicketProcedureRepository } from '../../../../_libs/database/repositories/ticket-procedure.repository'
+import { TicketUserRepository } from '../../../../_libs/database/repositories/ticket-user.repository'
 import { TicketProcedureGetOneQuery, TicketProcedurePaginationQuery } from './request'
 
 @Injectable()

@@ -53,16 +53,22 @@ export default class Warehouse {
   }
 }
 
-export type WarehouseRelationType = Pick<Warehouse, never>
-
-export type WarehouseSortType = Pick<Warehouse, 'oid' | 'id' | 'name'>
+export type WarehouseRelationType = {
+  [P in keyof Pick<Warehouse, never>]?: boolean
+}
 
 export type WarehouseInsertType = Omit<
   Warehouse,
   keyof WarehouseRelationType | keyof Pick<Warehouse, 'id' | 'updatedAt' | 'deletedAt'>
 >
 
-export type WarehouseUpdateType = Omit<
-  Warehouse,
-  keyof WarehouseRelationType | keyof Pick<Warehouse, 'oid' | 'id' | 'updatedAt'>
->
+export type WarehouseUpdateType = {
+  [K in Exclude<
+    keyof Warehouse,
+    keyof WarehouseRelationType | keyof Pick<Warehouse, 'oid' | 'id' | 'updatedAt'>
+  >]: Warehouse[K] | (() => string)
+}
+
+export type WarehouseSortType = {
+  [P in keyof Pick<Warehouse, 'oid' | 'id' | 'name'>]?: 'ASC' | 'DESC'
+}

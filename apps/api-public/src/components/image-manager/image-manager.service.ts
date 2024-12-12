@@ -4,8 +4,8 @@ import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { arrayToKeyArray } from '../../../../_libs/common/helpers/object.helper'
 import { ImageHost, ImageInsertType } from '../../../../_libs/database/entities/image.entity'
 import { SettingKey } from '../../../../_libs/database/entities/setting.entity'
-import { ImageRepository } from '../../../../_libs/database/repository/image/image.repository'
-import { SettingRepository } from '../../../../_libs/database/repository/setting/setting.repository'
+import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
+import { SettingRepository } from '../../../../_libs/database/repositories/setting.repository'
 import { GoogleDriverService } from '../../../../_libs/transporter/google-driver/google-driver.service'
 
 @Injectable()

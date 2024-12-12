@@ -39,13 +39,22 @@ export default class Setting {
   }
 }
 
-export type SettingRelationType = Pick<Setting, never>
+export type SettingRelationType = {
+  [P in keyof Pick<Setting, never>]?: boolean
+}
 
-export type SettingSortType = Pick<Setting, 'id'>
-
-export type SettingInsertType = Omit<Setting, keyof SettingRelationType | keyof Pick<Setting, 'id'>>
-
-export type SettingUpdateType = Omit<
+export type SettingInsertType = Omit<
   Setting,
-  keyof SettingRelationType | keyof Pick<Setting, 'id' | 'oid'>
+  keyof SettingRelationType | keyof Pick<Setting, 'id'>
 >
+
+export type SettingUpdateType = {
+  [K in Exclude<
+    keyof Setting,
+    keyof SettingRelationType | keyof Pick<Setting, 'oid' | 'id'>
+  >]: Setting[K] | (() => string)
+}
+
+export type SettingSortType = {
+  [P in keyof Pick<Setting, 'oid' | 'id'>]?: 'ASC' | 'DESC'
+}

@@ -7,9 +7,9 @@ import { encrypt } from '../../../../_libs/common/helpers/string.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { User } from '../../../../_libs/database/entities'
 import Device from '../../../../_libs/database/entities/device'
-import { RoleRepository } from '../../../../_libs/database/repository/role/role.repository'
-import { UserRoleRepository } from '../../../../_libs/database/repository/user-role/user-role.repository'
-import { UserRepository } from '../../../../_libs/database/repository/user/user.repository'
+import { RoleRepository } from '../../../../_libs/database/repositories/role.repository'
+import { UserRoleRepository } from '../../../../_libs/database/repositories/user-role.repository'
+import { UserRepository } from '../../../../_libs/database/repositories/user.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   UserCreateBody,

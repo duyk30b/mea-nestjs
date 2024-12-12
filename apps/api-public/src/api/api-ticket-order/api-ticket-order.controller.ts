@@ -11,7 +11,7 @@ import {
   TicketOrderDraftApprovedUpdateBody,
   TicketOrderDraftInsertBody,
   TicketOrderPaymentBody,
-  TicketOrderReturnProductListBody,
+  TicketOrderReturnBody,
 } from './request'
 
 @ApiTags('TicketOrder')
@@ -142,7 +142,7 @@ export class ApiTicketOrderController {
   async returnProduct(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketOrderReturnProductListBody
+    @Body() body: TicketOrderReturnBody
   ) {
     return await this.apiTicketOrderService.returnProduct({ oid, ticketId: id, body })
   }

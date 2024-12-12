@@ -183,33 +183,33 @@ export class TestApi {
 
   @Get('transaction_REPEATABLE_READ')
   async transaction_REPEATABLE_READ() {
-    const [receiptRoot] = await this.manager.find(Receipt, { where: { id: 1 } })
-    const startTime = Date.now()
-    const result = await Promise.allSettled([
-      this.dataSource.transaction('REPEATABLE READ', async (manager) => {
-        await sleep(1000)
-        // await manager.update(Receipt, { id: 1 }, { note: randomFullName() })
-        await manager.update(Distributor, { id: 156 }, { fullName: randomFullName() })
-        await sleep(3000)
-      }),
-      this.dataSource.transaction('SERIALIZABLE', async (manager) => {
-        const [receipt] = await manager.find(Receipt, {
-          where: { id: 1, oid: 1 },
-          relations: { receiptItems: true, distributor: true },
-          relationLoadStrategy: 'join',
-        })
-        await sleep(2000)
-        return receipt.note
-      }),
-    ])
-    const endTime = Date.now()
-    const [receiptAfter] = await this.manager.find(Receipt, { where: { id: 1 } })
-    return {
-      receiptRoot: receiptRoot.note,
-      result,
-      receiptAfter: receiptAfter.note,
-      time: endTime - startTime,
-    }
+    // const [receiptRoot] = await this.manager.find(Receipt, { where: { id: 1 } })
+    // const startTime = Date.now()
+    // const result = await Promise.allSettled([
+    //   this.dataSource.transaction('REPEATABLE READ', async (manager) => {
+    //     await sleep(1000)
+    //     // await manager.update(Receipt, { id: 1 }, { note: randomFullName() })
+    //     await manager.update(Distributor, { id: 156 }, { fullName: randomFullName() })
+    //     await sleep(3000)
+    //   }),
+    //   this.dataSource.transaction('SERIALIZABLE', async (manager) => {
+    //     const [receipt] = await manager.find(Receipt, {
+    //       where: { id: 1, oid: 1 },
+    //       relations: { receiptItems: true, distributor: true },
+    //       relationLoadStrategy: 'join',
+    //     })
+    //     await sleep(2000)
+    //     return receipt.note
+    //   }),
+    // ])
+    // const endTime = Date.now()
+    // const [receiptAfter] = await this.manager.find(Receipt, { where: { id: 1 } })
+    // return {
+    //   receiptRoot: receiptRoot.note,
+    //   result,
+    //   receiptAfter: receiptAfter.note,
+    //   time: endTime - startTime,
+    // }
   }
 
   @Get('transaction_SERIALIZABLE')

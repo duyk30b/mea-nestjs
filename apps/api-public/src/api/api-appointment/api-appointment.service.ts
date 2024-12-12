@@ -4,10 +4,12 @@ import { DTimer } from '../../../../_libs/common/helpers/time.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { AppointmentStatus } from '../../../../_libs/database/entities/appointment.entity'
 import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
-import { AppointmentRepository } from '../../../../_libs/database/repository/appointment/appointment.repository'
-import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
-import { TicketAttributeRepository } from '../../../../_libs/database/repository/ticket-attribute/ticket-attribute.repository'
-import { TicketRepository } from '../../../../_libs/database/repository/ticket/ticket-base/ticket.repository'
+import {
+  AppointmentRepository,
+  CustomerRepository,
+  TicketAttributeRepository,
+  TicketRepository,
+} from '../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   AppointmentCreateBody,
@@ -144,12 +146,14 @@ export class ApiAppointmentService {
 
     if (appointment.reason) {
       ticket.ticketAttributeList =
-        await this.ticketAttributeRepository.insertManyFullFieldAndReturnEntity([{
-          key: 'reason',
-          value: appointment.reason || '',
-          oid,
-          ticketId: ticket.id,
-        }])
+        await this.ticketAttributeRepository.insertManyFullFieldAndReturnEntity([
+          {
+            key: 'reason',
+            value: appointment.reason || '',
+            oid,
+            ticketId: ticket.id,
+          },
+        ])
     }
 
     ticket.customer = customer

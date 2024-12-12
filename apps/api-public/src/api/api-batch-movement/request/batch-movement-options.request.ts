@@ -3,7 +3,7 @@ import { IsBoolean, IsNumber, IsOptional } from 'class-validator'
 import { ConditionNumber, transformConditionNumber } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { VoucherType } from '../../../../../_libs/database/common/variable'
+import { MovementType } from '../../../../../_libs/database/common/variable'
 
 export class BatchMovementRelationQuery {
   @Expose()
@@ -29,6 +29,10 @@ export class BatchMovementRelationQuery {
   @Expose()
   @IsBoolean()
   distributor: boolean
+
+  @Expose()
+  @IsBoolean()
+  user: boolean
 }
 export class BatchMovementFilterQuery {
   @Expose()
@@ -50,8 +54,8 @@ export class BatchMovementFilterQuery {
   contactId: number | ConditionNumber
 
   @Expose()
-  @IsEnumValue(VoucherType)
-  voucherType: VoucherType
+  @IsEnumValue(MovementType)
+  movementType: MovementType
 }
 
-export class BatchMovementSortQuery extends SortQuery {}
+export class BatchMovementSortQuery extends SortQuery { }

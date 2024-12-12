@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { TicketProductRepository } from '../../../../_libs/database/repository/ticket-product/ticket-product.repository'
+import { TicketProductRepository } from '../../../../_libs/database/repositories/ticket-product.repository'
 import { TicketProductPaginationQuery } from './request'
 
 @Injectable()

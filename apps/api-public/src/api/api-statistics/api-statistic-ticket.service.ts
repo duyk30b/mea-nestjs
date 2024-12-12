@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common'
 import { DTimer } from '../../../../_libs/common/helpers/time.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { TicketStatisticRepository } from '../../../../_libs/database/repository/ticket/ticket-base/ticket-statistic.repository'
+import { TicketStatisticOperation } from '../../../../_libs/database/operations/ticket-base/ticket-statistic.operation'
 import { StatisticTicketQuery } from './request'
 
 @Injectable()
 export class ApiStatisticTicketService {
-  constructor(private readonly statisticTicketRepository: TicketStatisticRepository) { }
+  constructor(private readonly ticketStatisticOperation: TicketStatisticOperation) { }
 
   async statisticTicket(oid: number, query: StatisticTicketQuery): Promise<BaseResponse> {
     const { filter, groupTimeType, fromTime, toTime } = query
 
-    const data = await this.statisticTicketRepository.statistic({
+    const data = await this.ticketStatisticOperation.statistic({
       condition: {
         oid,
         registeredAt: {

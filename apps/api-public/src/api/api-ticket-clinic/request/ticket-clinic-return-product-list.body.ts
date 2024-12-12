@@ -21,18 +21,6 @@ class TicketProductReturn {
   @IsDefined()
   @IsNumberGreaterThan(0)
   quantityReturn: number
-
-  @ApiProperty({ example: 300_000 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  actualPrice: number
-
-  @ApiProperty({ example: 600_000 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  costAmountReturn: number
 }
 
 export class TicketClinicReturnProductListBody {

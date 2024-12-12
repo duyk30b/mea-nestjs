@@ -11,11 +11,11 @@ export class ReceiptRelationQuery {
 
   @Expose()
   @IsBoolean()
-  distributorPayments: boolean
+  distributorPaymentList: boolean
 
   @Expose()
   @IsOptional()
-  receiptItems: false | { product?: boolean, batch?: boolean }
+  receiptItemList: false | { product?: boolean, batch?: boolean }
 }
 
 const ConditionEnumDeliveryStatus = createConditionEnum(ReceiptStatus)

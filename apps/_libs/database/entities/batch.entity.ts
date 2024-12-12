@@ -11,6 +11,14 @@ export default class Batch extends BaseEntity {
   @Expose()
   productId: number
 
+  @Column({ default: 0 })
+  @Expose()
+  distributorId: number
+
+  @Column({ default: 0 })
+  @Expose()
+  warehouseId: number
+
   @Column({ type: 'varchar', length: 255, default: '' })
   @Expose()
   lotNumber: string // Số Lô sản phẩm
@@ -36,28 +44,6 @@ export default class Batch extends BaseEntity {
   })
   @Expose()
   costPrice: number // Giá nhập
-
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
-  @Expose()
-  wholesalePrice: number // Giá bán sỉ
-
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
-  @Expose()
-  retailPrice: number // Giá bán lẻ
 
   @Column({
     type: 'decimal',
@@ -92,8 +78,6 @@ export default class Batch extends BaseEntity {
 
     entity.expiryDate = raw.expiryDate == null ? raw.expiryDate : Number(raw.expiryDate)
     entity.costPrice = Number(raw.costPrice)
-    entity.wholesalePrice = Number(raw.wholesalePrice)
-    entity.retailPrice = Number(raw.retailPrice)
     entity.quantity = Number(raw.quantity)
 
     entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)
@@ -106,13 +90,23 @@ export default class Batch extends BaseEntity {
   }
 }
 
-export type BatchRelationType = Pick<Batch, 'product'>
+export type BatchRelationType = {
+  [P in keyof Pick<Batch, 'product'>]?: boolean
+}
+
 export type BatchInsertType = Omit<
   Batch,
   keyof BatchRelationType | keyof Pick<Batch, 'id' | 'quantity' | 'updatedAt'>
 >
 
-export type BatchUpdateType = Omit<
-  Batch,
-  keyof BatchRelationType | keyof Pick<Batch, 'id' | 'oid' | 'quantity' | 'productId'>
->
+export type BatchUpdateType = {
+  [K in Exclude<
+    keyof Batch,
+    | keyof BatchRelationType
+    | keyof Pick<Batch, 'oid' | 'id' | 'productId' | 'distributorId' | 'updatedAt'>
+  >]: Batch[K] | (() => string)
+}
+
+export type BatchSortType = {
+  [P in keyof Pick<Batch, 'id' | 'quantity' | 'expiryDate'>]?: 'ASC' | 'DESC'
+}

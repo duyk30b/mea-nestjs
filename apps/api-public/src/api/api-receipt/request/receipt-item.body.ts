@@ -16,6 +16,12 @@ export class ReceiptItemBody {
   @IsNumber()
   batchId: number
 
+  @ApiPropertyOptional({ example: 52 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  warehouseId: number
+
   // @ApiPropertyOptional({ type: UnitConversionQuery, example: { name: 'Viên', rate: 1 } })
   // @Expose()
   // @Type(() => UnitConversionQuery)
@@ -47,21 +53,9 @@ export class ReceiptItemBody {
   @IsNumberGreaterThan(0)
   quantity: number
 
-  @ApiPropertyOptional({ example: 12_000 })
+  @ApiProperty({ example: 12_000 })
   @Expose()
   @IsDefined()
   @IsNumber()
   costPrice: number
-
-  @ApiPropertyOptional({ example: 50_000 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  wholesalePrice: number
-
-  @ApiPropertyOptional({ example: 50_000 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  retailPrice: number
 }

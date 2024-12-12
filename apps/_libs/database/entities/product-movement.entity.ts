@@ -1,22 +1,27 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { VoucherType } from '../common/variable'
+import { MovementType } from '../common/variable'
 import Customer from './customer.entity'
 import Distributor from './distributor.entity'
 import Product from './product.entity'
 import Receipt from './receipt.entity'
 import Ticket from './ticket.entity'
+import User from './user.entity'
 
 @Entity('ProductMovement')
 @Index('IDX_ProductMovement__oid_productId_id', ['oid', 'productId', 'id'])
-@Index('IDX_ProductMovement__oid_contactId_voucherType_id', [
+@Index('IDX_ProductMovement__oid_contactId_movementType_id', [
   'oid',
   'contactId',
-  'voucherType',
+  'movementType',
   'id',
 ])
 export default class ProductMovement extends BaseEntity {
+  @Column({ default: 0 })
+  @Expose()
+  warehouseId: number
+
   @Column()
   @Expose()
   productId: number
@@ -31,7 +36,7 @@ export default class ProductMovement extends BaseEntity {
 
   @Column({ type: 'smallint' })
   @Expose()
-  voucherType: VoucherType
+  movementType: MovementType
 
   @Column({ type: 'smallint', default: 0 })
   @Expose()
@@ -93,23 +98,7 @@ export default class ProductMovement extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  openCostAmount: number // Tổng vốn
-
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose()
-  costAmount: number // Tổng tiền
-
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose()
-  closeCostAmount: number // Tổng vốn
+  costPrice: number
 
   @Column({
     type: 'bigint',
@@ -142,19 +131,51 @@ export default class ProductMovement extends BaseEntity {
   @ManyToOne((type) => Ticket, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
   ticket: Ticket
+
+  @Expose()
+  @ManyToOne((type) => User, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'contactId', referencedColumnName: 'id' })
+  user: User
+
+  static fromRaw(raw: { [P in keyof ProductMovement]: any }) {
+    if (!raw) return null
+    const entity = new ProductMovement()
+    Object.assign(entity, raw)
+    entity.openQuantity = Number(raw.openQuantity)
+    entity.quantity = Number(raw.quantity)
+    entity.closeQuantity = Number(raw.closeQuantity)
+    entity.costPrice = Number(raw.costPrice)
+    entity.actualPrice = Number(raw.actualPrice)
+    entity.expectedPrice = Number(raw.expectedPrice)
+    entity.createdAt = raw.createdAt == null ? raw.createdAt : Number(raw.createdAt)
+
+    return entity
+  }
+
+  static fromRaws(raws: { [P in keyof ProductMovement]: any }[]) {
+    return raws.map((i) => ProductMovement.fromRaw(i))
+  }
 }
 
-export type ProductMovementRelationType = Pick<
-  ProductMovement,
-  'product' | 'distributor' | 'receipt' | 'customer' | 'ticket'
->
-
-export type ProductMovementSortType = Pick<
-  ProductMovement,
-  'id' | 'productId' | 'voucherId' | 'contactId'
->
+export type ProductMovementRelationType = {
+  [P in keyof Pick<
+    ProductMovement,
+    'product' | 'distributor' | 'customer' | 'receipt' | 'ticket' | 'user'
+  >]?: boolean
+}
 
 export type ProductMovementInsertType = Omit<
   ProductMovement,
   keyof ProductMovementRelationType | keyof Pick<ProductMovement, 'id'>
 >
+
+export type ProductMovementUpdateType = {
+  [K in Exclude<
+    keyof ProductMovement,
+    keyof ProductMovementRelationType | keyof Pick<ProductMovement, 'oid' | 'id'>
+  >]: ProductMovement[K] | (() => string)
+}
+
+export type ProductMovementSortType = {
+  [P in keyof Pick<ProductMovement, 'id'>]?: 'ASC' | 'DESC'
+}

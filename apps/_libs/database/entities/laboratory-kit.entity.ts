@@ -36,16 +36,22 @@ export default class LaboratoryKit {
   }
 }
 
-export type LaboratoryKitRelationType = Pick<LaboratoryKit, never>
-
-export type LaboratoryKitSortType = Pick<LaboratoryKit, 'oid' | 'id' | 'priority' | 'name'>
+export type LaboratoryKitRelationType = {
+  [P in keyof Pick<LaboratoryKit, never>]?: boolean
+}
 
 export type LaboratoryKitInsertType = Omit<
   LaboratoryKit,
   keyof LaboratoryKitRelationType | keyof Pick<LaboratoryKit, 'id'>
 >
 
-export type LaboratoryKitUpdateType = Omit<
-  LaboratoryKit,
-  keyof LaboratoryKitRelationType | keyof Pick<LaboratoryKit, 'oid' | 'id'>
->
+export type LaboratoryKitUpdateType = {
+  [K in Exclude<
+    keyof LaboratoryKit,
+    keyof LaboratoryKitRelationType | keyof Pick<LaboratoryKit, 'oid' | 'id'>
+  >]: LaboratoryKit[K] | (() => string)
+}
+
+export type LaboratoryKitSortType = {
+  [P in keyof Pick<LaboratoryKit, 'oid' | 'id' | 'priority' | 'name'>]?: 'ASC' | 'DESC'
+}

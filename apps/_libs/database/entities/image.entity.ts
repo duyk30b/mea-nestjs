@@ -60,13 +60,22 @@ export default class Image {
   }
 }
 
-export type ImageRelationType = Pick<Image, never>
-
-export type ImageSortType = Pick<Image, 'oid' | 'id'>
+export type ImageRelationType = {
+  [P in keyof Pick<Image, never>]?: boolean
+}
 
 export type ImageInsertType = Omit<
   Image,
   keyof ImageRelationType | keyof Pick<Image, 'id' | 'waitDelete'>
 >
 
-export type ImageUpdateType = Omit<Image, keyof ImageRelationType | keyof Pick<Image, 'oid' | 'id'>>
+export type ImageUpdateType = {
+  [K in Exclude<
+    keyof Image,
+    keyof ImageRelationType | keyof Pick<Image, 'oid' | 'id'>
+  >]: Image[K] | (() => string)
+}
+
+export type ImageSortType = {
+  [P in keyof Pick<Image, 'oid' | 'id'>]?: 'ASC' | 'DESC'
+}

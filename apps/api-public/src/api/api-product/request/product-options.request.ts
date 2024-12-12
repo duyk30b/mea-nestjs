@@ -54,11 +54,6 @@ export class ProductFilterQuery {
   @Expose()
   @Type(() => ConditionTimestamp)
   @ValidateNested({ each: true })
-  expiryDate: ConditionTimestamp
-
-  @Expose()
-  @Type(() => ConditionTimestamp)
-  @ValidateNested({ each: true })
   updatedAt: ConditionTimestamp
 
   @Expose()
@@ -82,12 +77,4 @@ export class ProductSortQuery extends SortQuery {
   @Expose()
   @IsIn(['ASC', 'DESC'])
   quantity: 'ASC' | 'DESC'
-
-  @Expose()
-  @IsIn(['ASC', 'DESC'])
-  costAmount: 'ASC' | 'DESC'
-
-  @Expose()
-  @IsIn(['ASC', 'DESC'])
-  expiryDate: 'ASC' | 'DESC'
 }

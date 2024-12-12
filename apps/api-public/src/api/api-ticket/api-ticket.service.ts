@@ -3,8 +3,8 @@ import { BusinessException } from '../../../../_libs/common/exception-filter/exc
 import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { Image } from '../../../../_libs/database/entities'
-import { ImageRepository } from '../../../../_libs/database/repository/image/image.repository'
-import { TicketRepository } from '../../../../_libs/database/repository/ticket/ticket-base/ticket.repository'
+import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
+import { TicketRepository } from '../../../../_libs/database/repositories/ticket.repository'
 import { TicketGetManyQuery, TicketGetOneQuery, TicketPaginationQuery } from './request'
 
 @Injectable()

@@ -53,16 +53,22 @@ export default class PrintHtml {
   }
 }
 
-export type PrintHtmlRelationType = Pick<PrintHtml, never>
-
-export type PrintHtmlSortType = Pick<PrintHtml, 'id'>
+export type PrintHtmlRelationType = {
+  [P in keyof Pick<PrintHtml, never>]?: boolean
+}
 
 export type PrintHtmlInsertType = Omit<
   PrintHtml,
   keyof PrintHtmlRelationType | keyof Pick<PrintHtml, 'id' | 'updatedAt'>
 >
 
-export type PrintHtmlUpdateType = Omit<
-  PrintHtml,
-  keyof PrintHtmlRelationType | keyof Pick<PrintHtml, 'id' | 'oid' | 'updatedAt'>
->
+export type PrintHtmlUpdateType = {
+  [K in Exclude<
+    keyof PrintHtml,
+    keyof PrintHtmlRelationType | keyof Pick<PrintHtml, 'oid' | 'id' | 'updatedAt'>
+  >]: PrintHtml[K] | (() => string)
+}
+
+export type PrintHtmlSortType = {
+  [P in keyof Pick<PrintHtml, 'id'>]?: 'ASC' | 'DESC'
+}

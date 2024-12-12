@@ -51,9 +51,10 @@ export enum ReceiptStatus {
   Success = 3,
 }
 
-export enum VoucherType {
+export enum MovementType {
   Receipt = 1,
   Ticket = 2,
+  UserChange = 3,
 }
 
 export enum DeliveryStatus {

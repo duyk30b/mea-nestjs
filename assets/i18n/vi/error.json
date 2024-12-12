@@ -1,5 +1,6 @@
 {
   "ValidateFailed": "Validate Failed: {obj}",
+  "Conflict": "Conflict: {obj}",
   "SystemError": "Lỗi hệ thống",
   "Database": {
     "NotFound": "Không tìm thấy bản ghi",
@@ -32,12 +33,5 @@
   },
   "Role": {
     "Inactive": "Vai trò tạm khóa"
-  },
-  "Diagnosis": {
-    "ConflictArrival": "Diagnosis không tồn tại"
-  },
-  "Product": {
-    "ConflictManageQuantity": "Sản phẩm có số lượng khác 0 không thể hủy theo dõi tồn kho",
-    "ConflictManageBatches": "Sản phẩm có số lượng khác 0 không thể thay đổi cách quản lý theo lô"
   }
 }

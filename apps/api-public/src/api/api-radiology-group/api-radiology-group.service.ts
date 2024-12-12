@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { RadiologyGroupRepository } from '../../../../_libs/database/repository/radiology-group/radiology-group.repository'
+import { RadiologyGroupRepository } from '../../../../_libs/database/repositories'
 import {
   RadiologyGroupCreateBody,
   RadiologyGroupGetManyQuery,

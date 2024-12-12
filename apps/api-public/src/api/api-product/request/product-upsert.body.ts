@@ -30,22 +30,9 @@ export class ProductCreateBody {
   @IsString()
   substance: string // Hoạt chất
 
-  @ApiPropertyOptional({ example: 'ABC12345' })
-  @Expose()
-  @IsDefined()
-  @IsString()
-  lotNumber: string
-
-  @ApiPropertyOptional({ example: 1679995369195 })
-  @Expose()
-  // @IsDefined() //expiryDate được phép null
-  @IsInt()
-  expiryDate: number
-
-  @ApiPropertyOptional({ example: 20_000 })
+  @ApiPropertyOptional({ example: 45_000 })
   @Expose()
   @Transform(({ value }) => Math.round(value || 0))
-  @IsDefined()
   @IsNumber()
   costPrice: number
 
@@ -58,6 +45,7 @@ export class ProductCreateBody {
   @ApiPropertyOptional({ example: 59_000 })
   @Expose()
   @Transform(({ value }) => Math.round(value || 0))
+  @IsDefined()
   @IsNumber()
   retailPrice: number
 
@@ -68,7 +56,7 @@ export class ProductCreateBody {
   productGroupId: number
 
   @ApiPropertyOptional({ name: 'unit', type: 'string', example: JSON.stringify([{ name: 'Viên', rate: 1 }]) })
-  @Expose({ name: 'unit' })
+  @Expose()
   @Transform(({ value }) => {
     try {
       const err = []
@@ -130,18 +118,36 @@ export class ProductCreateBody {
 
   @ApiPropertyOptional({ example: 1 })
   @Expose()
+  @IsDefined()
   @IsIn([0, 1])
   hasManageQuantity: 0 | 1
 
-  @ApiPropertyOptional({ example: 0 })
-  @Expose()
-  @IsIn([0, 1])
-  hasManageBatches: 0 | 1
-
   @ApiPropertyOptional({ example: 1 })
   @Expose()
+  @IsDefined()
   @IsIn([0, 1])
   isActive: 0 | 1
+
+  @ApiPropertyOptional({ name: 'warehouseIds', type: 'string', example: JSON.stringify([1, 5, 10]) })
+  @Expose()
+  @Transform(({ value }) => {
+    try {
+      const err = []
+      const result = JSON.parse(value).map((i: any) => {
+        if (!Number.isInteger) {
+          err.push(`${i} is not integer`)
+        }
+        return i
+      })
+      if (err.length) return err
+      else return JSON.stringify(result)
+    } catch (error) {
+      return [error.message]
+    }
+  })
+  @IsDefined()
+  @IsString({ message: `Validate warehouseIds failed: Example: ${JSON.stringify([1, 2, 3])}` })
+  warehouseIds: string // đơn vị tính: lọ, ống, vỉ
 }
 
 export class ProductUpdateBody extends PartialType(ProductCreateBody) { }

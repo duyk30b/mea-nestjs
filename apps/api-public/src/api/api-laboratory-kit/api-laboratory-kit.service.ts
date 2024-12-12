@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { LaboratoryKitRepository } from '../../../../_libs/database/repository/laboratory-kit/laboratory-kit.repository'
+import { LaboratoryKitRepository } from '../../../../_libs/database/repositories/laboratory-kit.repository'
 import {
   LaboratoryKitCreateBody,
   LaboratoryKitGetManyQuery,

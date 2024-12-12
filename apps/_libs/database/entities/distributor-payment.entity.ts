@@ -67,6 +67,43 @@ export default class DistributorPayment extends BaseEntity {
   @ManyToOne((type) => Receipt, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'receiptId', referencedColumnName: 'id' })
   receipt: Receipt
+
+  static fromRaw(raw: { [P in keyof DistributorPayment]: any }) {
+    if (!raw) return null
+    const entity = new DistributorPayment()
+    Object.assign(entity, raw)
+
+    entity.createdAt = raw.createdAt == null ? raw.createdAt : Number(raw.createdAt)
+    entity.paid = Number(raw.paid)
+    entity.debit = Number(raw.debit)
+    entity.openDebt = Number(raw.openDebt)
+    entity.closeDebt = Number(raw.closeDebt)
+
+    return entity
+  }
+
+  static fromRaws(raws: { [P in keyof DistributorPayment]: any }[]) {
+    return raws.map((i) => DistributorPayment.fromRaw(i))
+  }
 }
 
-export type DistributorPaymentInsertType = Omit<DistributorPayment, 'id' | 'receipt'>
+export type DistributorPaymentRelationType = {
+  [P in keyof Pick<DistributorPayment, 'receipt'>]?: boolean
+}
+
+export type DistributorPaymentInsertType = Omit<
+  DistributorPayment,
+  keyof DistributorPaymentRelationType | keyof Pick<DistributorPayment, 'id'>
+>
+
+export type DistributorPaymentUpdateType = {
+  [K in Exclude<
+    keyof DistributorPayment,
+    | keyof DistributorPaymentRelationType
+    | keyof Pick<DistributorPayment, 'oid' | 'id'>
+  >]: DistributorPayment[K] | (() => string)
+}
+
+export type DistributorPaymentSortType = {
+  [P in keyof Pick<DistributorPayment, 'id'>]?: 'ASC' | 'DESC'
+}

@@ -77,7 +77,7 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_DESTROY, data)
   }
 
-  ticketClinicUpdate(oid: number, data: { ticketBasic: Ticket }) {
+  ticketClinicUpdate(oid: number, data: { ticket: Ticket }) {
     if (!this.io) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE, data)
   }

@@ -114,16 +114,22 @@ export default class User {
   }
 }
 
-export type UserRelationType = Pick<User, 'organization' | 'userRoleList' | 'devices'>
-
-export type UserSortType = Pick<User, 'oid' | 'id' | 'phone' | 'username'>
+export type UserRelationType = {
+  [P in keyof Pick<User, 'organization' | 'userRoleList' | 'devices'>]?: boolean
+}
 
 export type UserInsertType = Omit<
   User,
   keyof UserRelationType | keyof Pick<User, 'id' | 'updatedAt' | 'deletedAt'>
 >
 
-export type UserUpdateType = Omit<
-  User,
-  keyof UserRelationType | keyof Pick<User, 'oid' | 'id' | 'updatedAt'>
->
+export type UserUpdateType = {
+  [K in Exclude<
+    keyof User,
+    keyof UserRelationType | keyof Pick<User, 'oid' | 'id' | 'updatedAt'>
+  >]: User[K] | (() => string)
+}
+
+export type UserSortType = {
+  [P in keyof Pick<User, 'oid' | 'id' | 'phone' | 'username'>]?: 'ASC' | 'DESC'
+}

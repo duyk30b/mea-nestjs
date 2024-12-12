@@ -16,6 +16,7 @@ export type I18nTranslations = {
     };
     "error": {
         "ValidateFailed": string;
+        "Conflict": string;
         "SystemError": string;
         "Database": {
             "NotFound": string;
@@ -48,13 +49,6 @@ export type I18nTranslations = {
         };
         "Role": {
             "Inactive": string;
-        };
-        "Diagnosis": {
-            "ConflictArrival": string;
-        };
-        "Product": {
-            "ConflictManageQuantity": string;
-            "ConflictManageBatches": string;
         };
     };
 };

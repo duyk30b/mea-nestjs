@@ -41,16 +41,22 @@ export default class ProductGroup {
   }
 }
 
-export type ProductGroupRelationType = Pick<ProductGroup, never>
-
-export type ProductGroupSortType = Pick<ProductGroup, 'oid' | 'id' | 'name'>
+export type ProductGroupRelationType = {
+  [P in keyof Pick<ProductGroup, never>]?: boolean
+}
 
 export type ProductGroupInsertType = Omit<
   ProductGroup,
   keyof ProductGroupRelationType | keyof Pick<ProductGroup, 'id' | 'updatedAt'>
 >
 
-export type ProductGroupUpdateType = Omit<
-  ProductGroup,
-  keyof ProductGroupRelationType | keyof Pick<ProductGroup, 'oid' | 'id' | 'updatedAt'>
->
+export type ProductGroupUpdateType = {
+  [K in Exclude<
+    keyof ProductGroup,
+    keyof ProductGroupRelationType | keyof Pick<ProductGroup, 'oid' | 'id' | 'updatedAt'>
+  >]: ProductGroup[K] | (() => string)
+}
+
+export type ProductGroupSortType = {
+  [P in keyof Pick<ProductGroup, 'oid' | 'id' | 'name'>]?: 'ASC' | 'DESC'
+}

@@ -88,15 +88,18 @@ export type DistributorRelationType = {
   [P in keyof Pick<Distributor, never>]?: boolean
 }
 
-export type DistributorSortType = {
-  [P in keyof Pick<Distributor, 'id' | 'debt' | 'fullName'>]?: 'ASC' | 'DESC'
-}
-
-export type DistributorInsertType = Omit<Distributor, 'id' | 'updatedAt' | 'deletedAt'>
+export type DistributorInsertType = Omit<
+  Distributor,
+  keyof DistributorRelationType | keyof Pick<Distributor, 'id' | 'updatedAt' | 'deletedAt'>
+>
 
 export type DistributorUpdateType = {
   [K in Exclude<
     keyof Distributor,
     keyof DistributorRelationType | keyof Pick<Distributor, 'oid' | 'id' | 'updatedAt'>
   >]: Distributor[K] | (() => string)
+}
+
+export type DistributorSortType = {
+  [P in keyof Pick<Distributor, 'id' | 'debt' | 'fullName'>]?: 'ASC' | 'DESC'
 }

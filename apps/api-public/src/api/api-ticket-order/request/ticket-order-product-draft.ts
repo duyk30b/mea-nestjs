@@ -21,6 +21,12 @@ export class TicketOrderProductDraft {
   @IsNumber()
   batchId: number
 
+  @ApiProperty({ example: 12 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  warehouseId: number
+
   @ApiPropertyOptional({ example: 1 })
   @Expose()
   @IsDefined()
@@ -33,11 +39,11 @@ export class TicketOrderProductDraft {
   @IsNumberGreaterThan(0)
   quantity: number
 
-  @ApiPropertyOptional({ example: 12_000 })
+  @ApiProperty({ example: 25_000 })
   @Expose()
   @IsDefined()
   @IsNumber()
-  costAmount: number
+  costPrice: number
 
   @ApiProperty({ example: 25_000 })
   @Expose()

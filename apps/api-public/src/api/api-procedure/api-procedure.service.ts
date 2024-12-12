@@ -1,8 +1,8 @@
 import { HttpStatus, Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { ProcedureRepository } from '../../../../_libs/database/repository/procedure/procedure.repository'
-import { TicketProcedureRepository } from '../../../../_libs/database/repository/ticket-procedure/ticket-procedure.repository'
+import { ProcedureRepository } from '../../../../_libs/database/repositories/procedure.repository'
+import { TicketProcedureRepository } from '../../../../_libs/database/repositories/ticket-procedure.repository'
 import {
   ProcedureCreateBody,
   ProcedureGetManyQuery,
@@ -81,13 +81,13 @@ export class ApiProcedureService {
   }
 
   async destroyOne(oid: number, id: number): Promise<BaseResponse> {
-    const countTicketProcedure = await this.ticketProcedureRepository.countBy({
-      oid,
-      procedureId: id,
+    const ticketProcedureList = await this.ticketProcedureRepository.findMany({
+      condition: { oid, procedureId: id },
+      limit: 10,
     })
-    if (countTicketProcedure > 0) {
+    if (ticketProcedureList.length > 0) {
       return {
-        data: { countTicketProcedure },
+        data: { ticketProcedureList },
         success: false,
       }
     }
@@ -95,6 +95,6 @@ export class ApiProcedureService {
     const affected = await this.procedureRepository.delete({ oid, id })
     if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
 
-    return { data: { countTicketProcedure: 0, procedureId: id } }
+    return { data: { ticketProcedureList: [], procedureId: id } }
   }
 }

@@ -1,9 +1,8 @@
-import { HttpStatus, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { RadiologyInsertType } from '../../../../_libs/database/entities/radiology.entity'
-import { RadiologyRepository } from '../../../../_libs/database/repository/radiology/radiology.repository'
-import { TicketRadiologyRepository } from '../../../../_libs/database/repository/ticket-radiology/ticket-radiology.repository'
+import { RadiologyRepository, TicketRadiologyRepository } from '../../../../_libs/database/repositories'
 import {
   RadiologyGetManyQuery,
   RadiologyGetOneQuery,
@@ -81,20 +80,20 @@ export class ApiRadiologyService {
   }
 
   async destroyOne(oid: number, id: number): Promise<BaseResponse> {
-    const countTicketRadiology = await this.ticketRadiologyRepository.countBy({
-      oid,
-      radiologyId: id,
+    const ticketRadiologyList = await this.ticketRadiologyRepository.findMany({
+      condition: { oid, radiologyId: id },
+      limit: 10,
     })
-    if (countTicketRadiology > 0) {
+    if (ticketRadiologyList.length > 0) {
       return {
-        data: { countTicketRadiology },
+        data: { ticketRadiologyList },
         success: false,
       }
     }
     const affected = await this.radiologyRepository.delete({ oid, id })
     if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
 
-    return { data: { countTicketRadiology: 0, radiologyId: id } }
+    return { data: { ticketRadiologyList: [], radiologyId: id } }
   }
 
   async systemList(): Promise<BaseResponse> {

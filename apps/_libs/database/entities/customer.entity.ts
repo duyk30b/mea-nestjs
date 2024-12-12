@@ -117,16 +117,22 @@ export default class Customer extends BaseEntity {
   }
 }
 
-export type CustomerRelationType = Pick<Customer, never>
-
-export type CustomerSortType = Pick<Customer, 'id' | 'fullName' | 'debt'>
+export type CustomerRelationType = {
+  [P in keyof Pick<Customer, never>]?: boolean
+}
 
 export type CustomerInsertType = Omit<
   Customer,
   keyof CustomerRelationType | keyof Pick<Customer, 'id' | 'updatedAt' | 'deletedAt'>
 >
 
-export type CustomerUpdateType = Omit<
-  Customer,
-  keyof CustomerRelationType | keyof Pick<Customer, 'oid' | 'id'>
->
+export type CustomerUpdateType = {
+  [K in Exclude<
+    keyof Customer,
+    keyof CustomerRelationType | keyof Pick<Customer, 'oid' | 'id' | 'updatedAt'>
+  >]: Customer[K] | (() => string)
+}
+
+export type CustomerSortType = {
+  [P in keyof Pick<Customer, 'id' | 'debt' | 'fullName'>]?: 'ASC' | 'DESC'
+}

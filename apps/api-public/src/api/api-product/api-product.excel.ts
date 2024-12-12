@@ -3,9 +3,9 @@ import { Cell, Workbook, Worksheet } from 'exceljs'
 import { arrayToKeyArray, arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
 import { DTimer } from '../../../../_libs/common/helpers/time.helper'
 import { Organization, Product, ProductGroup, User } from '../../../../_libs/database/entities'
-import { BatchRepository } from '../../../../_libs/database/repository/batch/batch.repository'
-import { ProductGroupRepository } from '../../../../_libs/database/repository/product-group/product-group.repository'
-import { ProductRepository } from '../../../../_libs/database/repository/product/product.repository'
+import { BatchRepository } from '../../../../_libs/database/repositories/batch.repository'
+import { ProductGroupRepository } from '../../../../_libs/database/repositories/product-group.repository'
+import { ProductRepository } from '../../../../_libs/database/repositories/product.repository'
 import { excelOneSheetWorkbook } from '../../../../_libs/file/excel-one-sheet.util'
 
 @Injectable()
@@ -89,7 +89,6 @@ export class ApiProductExcel {
             lotNumber: { alignment: { horizontal: 'center' } },
             expiryDate: { alignment: { horizontal: 'center' }, numFmt: 'dd/mm/yyyy' },
             quantity: { numFmt: '###,##0', font: { bold: true } },
-            costAmount: { numFmt: '###,##0' },
             costPrice: { numFmt: '###,##0' },
             wholesalePrice: { numFmt: '###,##0' },
             retailPrice: { numFmt: '###,##0' },
@@ -124,10 +123,9 @@ export class ApiProductExcel {
               // },
               brandName: product.brandName || '',
               substance: product.substance || '',
-              lotNumber: product.lotNumber || '',
-              expiryDate: product.expiryDate ? new Date(product.expiryDate + 7 * 60 * 60 * 1000) : '', // fix giờ do hệ thống lệch giờ
+              lotNumber: '',
+              expiryDate: '', // fix giờ do hệ thống lệch giờ
               quantity: product.quantity || 0,
-              costAmount: product.costAmount || 0,
               costPrice: product.costPrice || 0,
               wholesalePrice: product.wholesalePrice || 0,
               retailPrice: product.retailPrice || 0,
@@ -153,7 +151,6 @@ export class ApiProductExcel {
               lotNumber: { alignment: { horizontal: 'center' } },
               expiryDate: { alignment: { horizontal: 'center' }, numFmt: 'dd/mm/yyyy' },
               quantity: { font: { bold: true } },
-              costAmount: { numFmt: '###,##0' },
               costPrice: { numFmt: '###,##0' },
               wholesalePrice: { numFmt: '###,##0' },
               retailPrice: { numFmt: '###,##0' },
@@ -192,10 +189,9 @@ export class ApiProductExcel {
                 lotNumber: batch.lotNumber || '',
                 expiryDate: batch.expiryDate ? new Date(batch.expiryDate + 7 * 60 * 60 * 1000) : '', // fix giờ do hệ thống lệch giờ
                 quantity: batch.quantity || 0,
-                costAmount: batch.costPrice * batch.quantity,
                 costPrice: batch.costPrice || 0,
-                wholesalePrice: batch.wholesalePrice || 0,
-                retailPrice: batch.retailPrice || 0,
+                wholesalePrice: product.wholesalePrice || 0,
+                retailPrice: product.retailPrice || 0,
                 group: meta.productGroupMap[product.productGroupId] || '',
                 unit: unitNameBasic,
                 route: product.route || '',
@@ -263,7 +259,6 @@ export class ApiProductExcel {
           'Lô',
           'HSD',
           'Số Lượng',
-          'Tổng Vốn',
           'Giá nhập',
           'Giá bán sỉ',
           'Giá bán lẻ',
@@ -302,7 +297,6 @@ export class ApiProductExcel {
         { key: 'lotNumber', width: 10 },
         { key: 'expiryDate', width: 10 },
         { key: 'quantity', width: 10 },
-        { key: 'costAmount', width: 10 },
         { key: 'costPrice', width: 10 },
         { key: 'wholesalePrice', width: 10 },
         { key: 'retailPrice', width: 10 },

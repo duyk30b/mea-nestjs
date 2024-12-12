@@ -28,16 +28,22 @@ export default class RadiologyGroup {
   }
 }
 
-export type RadiologyGroupRelationType = Pick<RadiologyGroup, never>
-
-export type RadiologyGroupSortType = Pick<RadiologyGroup, 'oid' | 'id' | 'name'>
+export type RadiologyGroupRelationType = {
+  [P in keyof Pick<RadiologyGroup, never>]?: boolean
+}
 
 export type RadiologyGroupInsertType = Omit<
   RadiologyGroup,
   keyof RadiologyGroupRelationType | keyof Pick<RadiologyGroup, 'id'>
 >
 
-export type RadiologyGroupUpdateType = Omit<
-  RadiologyGroup,
-  keyof RadiologyGroupRelationType | keyof Pick<RadiologyGroup, 'oid' | 'id'>
->
+export type RadiologyGroupUpdateType = {
+  [K in Exclude<
+    keyof RadiologyGroup,
+    keyof RadiologyGroupRelationType | keyof Pick<RadiologyGroup, 'oid' | 'id'>
+  >]: RadiologyGroup[K] | (() => string)
+}
+
+export type RadiologyGroupSortType = {
+  [P in keyof Pick<RadiologyGroup, 'oid' | 'id' | 'name'>]?: 'ASC' | 'DESC'
+}

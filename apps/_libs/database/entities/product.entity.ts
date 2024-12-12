@@ -16,21 +16,6 @@ export default class Product extends BaseEntity {
   @Expose()
   substance: string // Hoạt chất
 
-  @Column({ type: 'varchar', length: 255, default: '' })
-  @Expose()
-  lotNumber: string // Số Lô sản phẩm
-
-  @Column({
-    type: 'bigint',
-    nullable: true,
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
-  @Expose()
-  expiryDate: number
-
   @Column({
     type: 'decimal',
     default: 0,
@@ -41,16 +26,9 @@ export default class Product extends BaseEntity {
   @Expose()
   quantity: number
 
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
+  @Column({ default: 1, type: 'smallint' })
   @Expose()
-  costAmount: number // Tổng nhập
+  hasManageQuantity: 0 | 1
 
   @Column({
     type: 'bigint',
@@ -85,14 +63,6 @@ export default class Product extends BaseEntity {
   @Expose()
   retailPrice: number // Giá bán lẻ
 
-  @Column({ default: 1, type: 'smallint' })
-  @Expose()
-  hasManageQuantity: 0 | 1
-
-  @Column({ default: 0, type: 'smallint' })
-  @Expose()
-  hasManageBatches: 0 | 1
-
   @Expose()
   @Column({ default: 0 })
   productGroupId: number
@@ -121,6 +91,13 @@ export default class Product extends BaseEntity {
   @Expose()
   isActive: 0 | 1
 
+  @Column({ type: 'varchar', length: 100, default: JSON.stringify([0]) })
+  @Expose()
+  warehouseIds: string
+
+  @Expose()
+  warehouseIdList: number[]
+
   @Column({
     type: 'bigint',
     default: () => '(EXTRACT(epoch FROM now()) * (1000))',
@@ -131,17 +108,6 @@ export default class Product extends BaseEntity {
   })
   @Expose()
   updatedAt: number
-
-  @Column({
-    type: 'bigint',
-    nullable: true,
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
-  @Expose()
-  deletedAt: number
 
   @ManyToOne((type) => ProductGroup, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'productGroupId', referencedColumnName: 'id' })
@@ -157,15 +123,12 @@ export default class Product extends BaseEntity {
     const entity = new Product()
     Object.assign(entity, raw)
 
-    entity.expiryDate = raw.expiryDate == null ? raw.expiryDate : Number(raw.expiryDate)
     entity.quantity = Number(raw.quantity)
-    entity.costAmount = Number(raw.costAmount)
     entity.costPrice = Number(raw.costPrice)
     entity.wholesalePrice = Number(raw.wholesalePrice)
     entity.retailPrice = Number(raw.retailPrice)
 
     entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)
-    entity.deletedAt = raw.deletedAt == null ? raw.deletedAt : Number(raw.deletedAt)
 
     return entity
   }
@@ -175,21 +138,24 @@ export default class Product extends BaseEntity {
   }
 }
 
-export type ProductRelationType = Pick<Product, 'batchList' | 'productGroup'>
-
-export type ProductSortType = Pick<
-  Product,
-  'id' | 'quantity' | 'brandName' | 'costAmount' | 'expiryDate'
->
+export type ProductRelationType = {
+  [P in keyof Pick<Product, 'batchList' | 'productGroup'>]?: boolean
+}
 
 export type ProductInsertType = Omit<
   Product,
   | keyof ProductRelationType
-  | keyof Pick<Product, 'id' | 'quantity' | 'costAmount' | 'updatedAt' | 'deletedAt'>
+  | keyof Pick<Product, 'id' | 'quantity' | 'updatedAt' | 'warehouseIdList'>
 >
 
-export type ProductUpdateType = Omit<
-  Product,
-  | keyof ProductRelationType
-  | keyof Pick<Product, 'oid' | 'id' | 'quantity' | 'costAmount' | 'updatedAt'>
->
+export type ProductUpdateType = {
+  [K in Exclude<
+    keyof Product,
+    | keyof ProductRelationType
+    | keyof Pick<Product, 'oid' | 'id' | 'quantity' | 'updatedAt' | 'warehouseIdList'>
+  >]: Product[K] | (() => string)
+}
+
+export type ProductSortType = {
+  [P in keyof Pick<Product, 'id' | 'quantity' | 'brandName'>]?: 'ASC' | 'DESC'
+}

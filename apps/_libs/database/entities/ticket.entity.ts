@@ -380,14 +380,18 @@ export type TicketRelationType = {
   | false
 }
 
-export type TicketSortType = Pick<Ticket, 'id' | 'customerId' | 'registeredAt'>
-
 export type TicketInsertType = Omit<
   Ticket,
   keyof TicketRelationType | keyof Pick<Ticket, 'id' | 'updatedAt'>
 >
 
-export type TicketUpdateType = Omit<
-  Ticket,
-  keyof TicketRelationType | keyof Pick<Ticket, 'oid' | 'id'>
->
+export type TicketUpdateType = {
+  [K in Exclude<
+    keyof Ticket,
+    keyof TicketRelationType | keyof Pick<Ticket, 'oid' | 'id'>
+  >]: Ticket[K] | (() => string)
+}
+
+export type TicketSortType = {
+  [P in keyof Pick<Ticket, 'id' | 'customerId' | 'registeredAt'>]?: 'ASC' | 'DESC'
+}

@@ -115,7 +115,7 @@ export default class Receipt extends BaseEntity {
 
   @Expose()
   @OneToMany(() => ReceiptItem, (receiptItem) => receiptItem.receipt)
-  receiptItems: ReceiptItem[]
+  receiptItemList: ReceiptItem[]
 
   @Expose()
   @ManyToOne((type) => Distributor, { createForeignKeyConstraints: false })
@@ -124,7 +124,7 @@ export default class Receipt extends BaseEntity {
 
   @Expose()
   @OneToMany(() => DistributorPayment, (distributorPayment) => distributorPayment.receipt)
-  distributorPayments: DistributorPayment[]
+  distributorPaymentList: DistributorPayment[]
 
   static fromRaw(raw: { [P in keyof Receipt]: any }) {
     if (!raw) return null
@@ -152,22 +152,26 @@ export default class Receipt extends BaseEntity {
 }
 
 export type ReceiptRelationType = {
-  [P in keyof Pick<Receipt, 'distributor' | 'distributorPayments'>]?: boolean
+  [P in keyof Pick<Receipt, 'distributor' | 'distributorPaymentList'>]?: boolean
 } & {
   [P in keyof Pick<
     Receipt,
-    'receiptItems'
+    'receiptItemList'
   >]?: { [P in keyof Pick<ReceiptItem, 'product' | 'batch'>]?: boolean } | false
 }
-
-export type ReceiptSortType = Pick<Receipt, 'id' | 'distributorId' | 'startedAt'>
 
 export type ReceiptInsertType = Omit<
   Receipt,
   keyof ReceiptRelationType | keyof Pick<Receipt, 'id'>
 >
 
-export type ReceiptUpdateType = Omit<
-  Receipt,
-  keyof ReceiptRelationType | keyof Pick<Receipt, 'id' | 'oid' | 'distributorId'>
->
+export type ReceiptUpdateType = {
+  [K in Exclude<
+    keyof Receipt,
+    keyof ReceiptRelationType | keyof Pick<Receipt, 'oid' | 'id' | 'distributorId'>
+  >]: Receipt[K] | (() => string)
+}
+
+export type ReceiptSortType = {
+  [P in keyof Pick<Receipt, 'id' | 'distributorId' | 'startedAt'>]?: 'ASC' | 'DESC'
+}

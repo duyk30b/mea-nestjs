@@ -14,8 +14,7 @@ import { CacheDataModule } from '../../_libs/common/cache-data/cache-data.module
 import { PermissionGuard } from '../../_libs/common/guards/permission.guard'
 import { JwtExtendModule } from '../../_libs/common/jwt-extend/jwt-extend.module'
 import { DetectClientMiddleware } from '../../_libs/common/middleware/detect-client.middleware'
-import { RepositoryModule } from '../../_libs/database/repository/repository.module'
-import { SqlModule } from '../../_libs/database/sql.module'
+import { PostgresqlModule } from '../../_libs/database/postgresql.module'
 import { GoogleDriverModule } from '../../_libs/transporter/google-driver/google-driver.module'
 import { AuthModule } from './api-auth/auth.module'
 import { ApiRootModule } from './api-root/api-root.module'
@@ -44,8 +43,7 @@ import { SocketModule } from './socket/socket.module'
       resolvers: [new QueryResolver(['lang', 'l']), new HeaderResolver(['x-lang'])],
       typesOutputPath: path.join(__dirname, '../../../assets/generated/i18n.generated.ts'),
     }),
-    SqlModule,
-    RepositoryModule,
+    PostgresqlModule,
 
     JwtExtendModule,
     GoogleDriverModule,
