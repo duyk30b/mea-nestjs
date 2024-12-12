@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common'
 import { DTimer } from '../../../../_libs/common/helpers/time.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { StatisticReceiptRepository } from '../../../../_libs/database/repository/statistic/statistic-receipt.repository'
+import { StatisticReceiptOperation } from '../../../../_libs/database/operations/statistic/statistic-receipt.operation'
 import { StatisticTimeQuery } from './request'
 
 @Injectable()
 export class ApiStatisticReceiptService {
-  constructor(private readonly statisticReceiptRepository: StatisticReceiptRepository) {}
+  constructor(private readonly statisticReceiptOperation: StatisticReceiptOperation) { }
 
   async statisticReceipt(oid: number, query: StatisticTimeQuery): Promise<BaseResponse> {
     const { fromTime, toTime, timeType } = query
 
-    const data = await this.statisticReceiptRepository.statisticReceipt({
+    const data = await this.statisticReceiptOperation.statisticReceipt({
       oid,
       fromTime,
       toTime,

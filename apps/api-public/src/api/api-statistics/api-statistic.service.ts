@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { Customer, Procedure, Product } from '../../../../_libs/database/entities'
-import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
-import { ProcedureRepository } from '../../../../_libs/database/repository/procedure/procedure.repository'
-import { ProductRepository } from '../../../../_libs/database/repository/product/product.repository'
-import { StatisticRepository } from '../../../../_libs/database/repository/statistic/statistic.repository'
-import { TicketProcedureRepository } from '../../../../_libs/database/repository/ticket-procedure/ticket-procedure.repository'
+import { StatisticOperation } from '../../../../_libs/database/operations/statistic/statistic.operation'
+import { CustomerRepository } from '../../../../_libs/database/repositories/customer.repository'
+import { ProcedureRepository } from '../../../../_libs/database/repositories/procedure.repository'
+import { ProductRepository } from '../../../../_libs/database/repositories/product.repository'
+import { TicketProcedureRepository } from '../../../../_libs/database/repositories/ticket-procedure.repository'
 import { StatisticTopBestSellingQuery, StatisticTopCustomerBestTicketQuery } from './request'
 import { StatisticProductHighMoneyQuery } from './request/statistic-top-product-high-money.query'
 
 @Injectable()
 export class ApiStatisticService {
   constructor(
-    private readonly statisticRepository: StatisticRepository,
+    private readonly statisticRepository: StatisticOperation,
     private readonly productRepository: ProductRepository,
     private readonly procedureRepository: ProcedureRepository,
     private readonly customerRepository: CustomerRepository,
@@ -22,10 +22,7 @@ export class ApiStatisticService {
   async sumWarehouse(oid: number): Promise<BaseResponse> {
     const data = await this.statisticRepository.sumWarehouse(oid)
     return {
-      data: {
-        totalCostAmount: Number(data.totalCostAmount),
-        totalRetailMoney: Number(data.totalRetailMoney),
-      },
+      data,
     }
   }
 
@@ -55,8 +52,8 @@ export class ApiStatisticService {
       productId: i.productId,
       sumQuantity: i.sumQuantity,
       sumCostAmount: i.sumCostAmount,
-      sumActualMoney: i.sumActualMoney,
-      sumProfit: i.sumProfit,
+      sumActualAmount: i.sumActualAmount,
+      sumProfitAmount: i.sumProfitAmount,
       product: productMap[i.productId],
     }))
 
@@ -102,7 +99,7 @@ export class ApiStatisticService {
     const topData = data.map((i) => ({
       procedureId: i.procedureId,
       sumQuantity: i.sumQuantity,
-      sumActualMoney: i.sumActualMoney,
+      sumActualAmount: i.sumActualAmount,
       procedure: procedureMap[i.procedureId],
     }))
 
@@ -146,7 +143,7 @@ export class ApiStatisticService {
   }
 
   async sumCustomerDebt(oid: number): Promise<BaseResponse> {
-    const customerSumDebt = await this.statisticRepository.sumCustomerDebt(oid)
+    const customerSumDebt = await this.customerRepository.sumDebt(oid)
     return { data: { customerSumDebt } }
   }
 }

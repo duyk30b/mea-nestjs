@@ -106,9 +106,22 @@ export default class CustomerPayment extends BaseEntity {
 // })
 // export class ViewCustomerPayment {}
 
-export type CustomerPaymentRelationType = Pick<CustomerPayment, 'customer' | 'ticket'>
+export type CustomerPaymentRelationType = {
+  [P in keyof Pick<CustomerPayment, 'customer' | 'ticket'>]?: boolean
+}
 
 export type CustomerPaymentInsertType = Omit<
   CustomerPayment,
-  'id' | keyof CustomerPaymentRelationType
+  keyof CustomerPaymentRelationType | keyof Pick<CustomerPayment, 'id'>
 >
+
+export type CustomerPaymentUpdateType = {
+  [K in Exclude<
+    keyof CustomerPayment,
+    keyof CustomerPaymentRelationType | keyof Pick<CustomerPayment, 'oid' | 'id'>
+  >]: CustomerPayment[K] | (() => string)
+}
+
+export type CustomerPaymentSortType = {
+  [P in keyof Pick<CustomerPayment, 'oid' | 'id' | 'customerId' | 'ticketId'>]?: 'ASC' | 'DESC'
+}

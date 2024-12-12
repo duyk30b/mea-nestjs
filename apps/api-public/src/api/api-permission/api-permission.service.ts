@@ -2,7 +2,7 @@
 import { Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import Permission, { PermissionId } from '../../../../_libs/database/entities/permission.entity'
-import { PermissionRepository } from '../../../../_libs/database/repository/permission/permission.repository'
+import { PermissionRepository } from '../../../../_libs/database/repositories/permission.repository'
 import { PermissionGetManyQuery } from './request'
 
 @Injectable()
@@ -443,6 +443,16 @@ export class ApiPermissionService {
         isActive: 1,
         pathId: `${PermissionId.PRODUCT}.${PermissionId.READ_COST_PRICE}`,
         name: 'Xem giá nhập',
+        parentId: PermissionId.PRODUCT,
+        rootId: PermissionId.PRODUCT,
+      },
+      {
+        id: PermissionId.BATCH_CHANGE_QUANTITY,
+        level: 2,
+        code: PermissionId[PermissionId.BATCH_CHANGE_QUANTITY],
+        isActive: 1,
+        pathId: `${PermissionId.PRODUCT}.${PermissionId.BATCH_CHANGE_QUANTITY}`,
+        name: '*** Chỉnh sửa số lượng lô hàng',
         parentId: PermissionId.PRODUCT,
         rootId: PermissionId.PRODUCT,
       },

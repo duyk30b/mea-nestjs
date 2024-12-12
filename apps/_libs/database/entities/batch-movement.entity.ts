@@ -1,13 +1,14 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { VoucherType } from '../common/variable'
+import { MovementType } from '../common/variable'
 import Batch from './batch.entity'
 import Customer from './customer.entity'
 import Distributor from './distributor.entity'
 import Product from './product.entity'
 import Receipt from './receipt.entity'
 import Ticket from './ticket.entity'
+import User from './user.entity'
 
 @Index('IDX_BatchMovement__oid_productId_batchId_createdAt', [
   'oid',
@@ -17,6 +18,10 @@ import Ticket from './ticket.entity'
 ])
 @Entity('BatchMovement')
 export default class BatchMovement extends BaseEntity {
+  @Column({ default: 0 })
+  @Expose()
+  warehouseId: number
+
   @Column()
   @Expose()
   productId: number
@@ -31,7 +36,7 @@ export default class BatchMovement extends BaseEntity {
 
   @Column({ type: 'smallint' })
   @Expose()
-  voucherType: VoucherType
+  movementType: MovementType
 
   @Column({ default: 0 }) // ID customer hoặc ID distributor
   @Expose()
@@ -127,24 +132,50 @@ export default class BatchMovement extends BaseEntity {
   @ManyToOne((type) => Ticket, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
   ticket: Ticket
+
+  @Expose()
+  @ManyToOne((type) => User, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'contactId', referencedColumnName: 'id' })
+  user: User
+
+  static fromRaw(raw: { [P in keyof BatchMovement]: any }) {
+    if (!raw) return null
+    const entity = new BatchMovement()
+    Object.assign(entity, raw)
+    entity.openQuantity = Number(raw.openQuantity)
+    entity.quantity = Number(raw.quantity)
+    entity.closeQuantity = Number(raw.closeQuantity)
+    entity.actualPrice = Number(raw.actualPrice)
+    entity.expectedPrice = Number(raw.expectedPrice)
+    entity.createdAt = raw.createdAt == null ? raw.createdAt : Number(raw.createdAt)
+
+    return entity
+  }
+
+  static fromRaws(raws: { [P in keyof BatchMovement]: any }[]) {
+    return raws.map((i) => BatchMovement.fromRaw(i))
+  }
 }
 
-export type BatchMovementRelationType = Pick<
-  BatchMovement,
-  'product' | 'batch' | 'distributor' | 'receipt' | 'customer' | 'ticket'
->
-
-export type BatchMovementSortType = Pick<
-  BatchMovement,
-  'id' | 'productId' | 'batchId' | 'voucherId' | 'contactId'
->
+export type BatchMovementRelationType = {
+  [P in keyof Pick<
+    BatchMovement,
+    'batch' | 'product' | 'distributor' | 'customer' | 'receipt' | 'ticket' | 'user'
+  >]?: boolean
+}
 
 export type BatchMovementInsertType = Omit<
   BatchMovement,
   keyof BatchMovementRelationType | keyof Pick<BatchMovement, 'id'>
 >
 
-export type BatchMovementUpdateType = Omit<
-  BatchMovement,
-  keyof BatchMovementRelationType | keyof Pick<Ticket, 'oid' | 'id'>
->
+export type BatchMovementUpdateType = {
+  [K in Exclude<
+    keyof BatchMovement,
+    keyof BatchMovementRelationType | keyof Pick<BatchMovement, 'oid' | 'id'>
+  >]: BatchMovement[K] | (() => string)
+}
+
+export type BatchMovementSortType = {
+  [P in keyof Pick<BatchMovement, 'id'>]?: 'ASC' | 'DESC'
+}

@@ -54,16 +54,22 @@ export default class Role {
   }
 }
 
-export type RoleRelationType = Pick<Role, 'userRoleList'>
-
-export type RoleSortType = Pick<Role, 'oid' | 'id'>
+export type RoleRelationType = {
+  [P in keyof Pick<Role, 'userRoleList'>]?: boolean
+}
 
 export type RoleInsertType = Omit<
   Role,
   keyof RoleRelationType | keyof Pick<Role, 'id' | 'updatedAt'>
 >
 
-export type RoleUpdateType = Omit<
-  Role,
-  keyof RoleRelationType | keyof Pick<Role, 'oid' | 'id' | 'updatedAt'>
->
+export type RoleUpdateType = {
+  [K in Exclude<
+    keyof Role,
+    keyof RoleRelationType | keyof Pick<Role, 'oid' | 'id' | 'updatedAt'>
+  >]: Role[K] | (() => string)
+}
+
+export type RoleSortType = {
+  [P in keyof Pick<Role, 'oid' | 'id'>]?: 'ASC' | 'DESC'
+}

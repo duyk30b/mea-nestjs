@@ -102,25 +102,22 @@ export default class Radiology {
   }
 }
 
-export type RadiologyRelationType = Pick<
-  Radiology,
-  'radiologyGroup' | 'printHtml'
->
-
-export type RadiologySortType = Pick<Radiology, 'oid' | 'id' | 'name' | 'priority'>
+export type RadiologyRelationType = {
+  [P in keyof Pick<Radiology, 'radiologyGroup' | 'printHtml'>]?: boolean
+}
 
 export type RadiologyInsertType = Omit<
   Radiology,
   keyof RadiologyRelationType | keyof Pick<Radiology, 'id' | 'updatedAt' | 'deletedAt'>
 >
 
-// export type RadiologyUpdateType = Omit<
-//   Radiology,
-//   keyof RadiologyRelationType | keyof Pick<Radiology, 'oid' | 'id'>
-// >
-
 export type RadiologyUpdateType = {
-  [K in Exclude<keyof Radiology, keyof RadiologyRelationType | 'oid' | 'id'>]:
-  | Radiology[K]
-  | (() => string)
+  [K in Exclude<
+    keyof Radiology,
+    keyof RadiologyRelationType | keyof Pick<Radiology, 'oid' | 'id'>
+  >]: Radiology[K] | (() => string)
+}
+
+export type RadiologySortType = {
+  [P in keyof Pick<Radiology, 'oid' | 'id' | 'name' | 'priority'>]?: 'ASC' | 'DESC'
 }

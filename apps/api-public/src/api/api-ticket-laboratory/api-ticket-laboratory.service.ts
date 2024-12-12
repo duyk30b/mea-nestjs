@@ -5,10 +5,10 @@ import {
   TicketLaboratoryInsertType,
   TicketLaboratoryStatus,
 } from '../../../../_libs/database/entities/ticket-laboratory.entity'
-import { LaboratoryRepository } from '../../../../_libs/database/repository/laboratory/laboratory.repository'
-import { TicketLaboratoryRepository } from '../../../../_libs/database/repository/ticket-laboratory/ticket-laboratory.repository'
-import { TicketRepository } from '../../../../_libs/database/repository/ticket/ticket-base/ticket.repository'
-import { UserRepository } from '../../../../_libs/database/repository/user/user.repository'
+import { TicketRepository } from '../../../../_libs/database/repositories'
+import { LaboratoryRepository } from '../../../../_libs/database/repositories/laboratory.repository'
+import { TicketLaboratoryRepository } from '../../../../_libs/database/repositories/ticket-laboratory.repository'
+import { UserRepository } from '../../../../_libs/database/repositories/user.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   TicketLaboratoryGetOneQuery,
@@ -110,7 +110,7 @@ export class ApiTicketLaboratoryService {
         laboratoryMoney,
       })
 
-      this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic: ticket })
+      this.socketEmitService.ticketClinicUpdate(oid, { ticket })
     }
 
     this.socketEmitService.ticketClinicUpdateTicketLaboratoryList(oid, {

@@ -4,7 +4,7 @@ import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { encrypt } from '../../../../_libs/common/helpers/string.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { UserRepository } from '../../../../_libs/database/repository/user/user.repository'
+import { UserRepository } from '../../../../_libs/database/repositories/user.repository'
 import { UserChangePasswordBody, UserUpdateInfoBody } from './request'
 
 @Injectable()

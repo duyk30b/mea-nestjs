@@ -10,7 +10,8 @@ import {
   BatchGetOneQuery,
   BatchInsertBody,
   BatchPaginationQuery,
-  BatchUpdateBody,
+  BatchUpdateInfoAndQuantityBody,
+  BatchUpdateInfoBody,
 } from './request'
 
 @ApiTags('Batch')
@@ -47,26 +48,30 @@ export class ApiBatchController {
     return await this.apiBatchService.createOne(oid, body)
   }
 
-  @Patch('update/:id')
+  @Patch('update-info/:id')
   @HasPermission(PermissionId.BATCH_UPDATE)
-  async update(
+  async updateInfo(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: BatchUpdateBody
+    @Body() body: BatchUpdateInfoBody
   ) {
-    return await this.apiBatchService.updateOne(oid, id, body)
+    return await this.apiBatchService.updateInfo(oid, id, body)
   }
 
-  @Delete('delete/:id')
+  @Patch('update-info-and-quantity/:id')
+  @HasPermission(PermissionId.BATCH_CHANGE_QUANTITY)
+  async updateInfoAndQuantity(
+    @External() { oid, uid }: TExternal,
+    @Param() { id }: IdParam,
+    @Body() body: BatchUpdateInfoAndQuantityBody
+  ) {
+    return await this.apiBatchService.updateInfoAndQuantity({ oid, batchId: id, body, userId: uid })
+  }
+
+  @Delete('destroy/:id')
   @HasPermission(PermissionId.PRODUCT_DELETE)
   @ApiParam({ name: 'id', example: 1 })
   async deleteOne(@External() { oid, organization }: TExternal, @Param() { id }: IdParam) {
     return await this.apiBatchService.destroyOne({ organization, oid, batchId: id })
-  }
-
-  @Post('find-or-create')
-  @HasPermission(PermissionId.BATCH_CREATE)
-  async findOrCreate(@External() { oid }: TExternal, @Body() body: BatchInsertBody) {
-    return await this.apiBatchService.findOrCreateOne(oid, body)
   }
 }

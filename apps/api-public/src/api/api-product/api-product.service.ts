@@ -1,16 +1,15 @@
-import { HttpStatus, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { arrayToKeyArray, uniqueArray } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { Organization } from '../../../../_libs/database/entities'
-import { BatchMovementRepository } from '../../../../_libs/database/repository/batch-movement/bat-movement.repository'
-import { BatchRepository } from '../../../../_libs/database/repository/batch/batch.repository'
-import { OrganizationRepository } from '../../../../_libs/database/repository/organization/organization.repository'
-import { ProductMovementRepository } from '../../../../_libs/database/repository/product-movement/product-movement.repository'
-import { ProductRepository } from '../../../../_libs/database/repository/product/product.repository'
-import { ReceiptItemRepository } from '../../../../_libs/database/repository/receipt-item/receipt-item.repository'
-import { TicketProductRepository } from '../../../../_libs/database/repository/ticket-product/ticket-product.repository'
+import { Batch, Organization } from '../../../../_libs/database/entities'
+import { BatchRepository, ProductRepository } from '../../../../_libs/database/repositories'
+import { BatchMovementRepository } from '../../../../_libs/database/repositories/bat-movement.repository'
+import { OrganizationRepository } from '../../../../_libs/database/repositories/organization.repository'
+import { ProductMovementRepository } from '../../../../_libs/database/repositories/product-movement.repository'
+import { ReceiptItemRepository } from '../../../../_libs/database/repositories/receipt-item.repository'
+import { TicketProductRepository } from '../../../../_libs/database/repositories/ticket-product.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   ProductCreateBody,
@@ -46,15 +45,13 @@ export class ApiProductService {
         productGroupId: filter?.productGroupId,
         isActive: filter?.isActive,
         quantity: filter?.quantity,
-        expiryDate: filter?.expiryDate,
         $OR: filter?.$OR,
         updatedAt: filter?.updatedAt,
       },
       sort,
     })
 
-    const productHasBatchesList = data.filter((i) => i.hasManageBatches)
-    const productHasBatchesIds = uniqueArray(productHasBatchesList.map((item) => item.id))
+    const productHasBatchesIds = uniqueArray(data.map((item) => item.id))
     if (relation?.batchList && productHasBatchesIds.length) {
       const batchList = await this.batchRepository.findManyBy({
         productId: { IN: productHasBatchesIds },
@@ -76,22 +73,20 @@ export class ApiProductService {
   async getList(oid: number, query: ProductGetManyQuery): Promise<BaseResponse> {
     const { filter, limit, relation } = query
 
-    const productList = await this.productRepository.findMany({
+    const data = await this.productRepository.findMany({
       // relation,
       condition: {
         oid,
         isActive: filter?.isActive,
         productGroupId: filter?.productGroupId,
         quantity: filter?.quantity,
-        expiryDate: filter?.expiryDate,
         $OR: filter?.$OR,
         updatedAt: filter?.updatedAt,
       },
       limit,
     })
 
-    const productHasBatchesList = productList.filter((i) => i.hasManageBatches)
-    const productHasBatchesIds = uniqueArray(productHasBatchesList.map((item) => item.id))
+    const productHasBatchesIds = uniqueArray(data.map((item) => item.id))
     if (relation?.batchList && productHasBatchesIds.length) {
       const batchList = await this.batchRepository.findManyBy({
         id: { IN: productHasBatchesIds },
@@ -99,11 +94,11 @@ export class ApiProductService {
         expiryDate: filter?.batchList?.expiryDate,
       })
       const batchListMapProductId = arrayToKeyArray(batchList, 'productId')
-      productList.forEach((item) => {
+      data.forEach((item) => {
         item.batchList = batchListMapProductId[item.id] || []
       })
     }
-    return { data: productList }
+    return { data }
   }
 
   async getOne(oid: number, id: number, query: ProductGetOneQuery): Promise<BaseResponse> {
@@ -112,11 +107,9 @@ export class ApiProductService {
       relation: { productGroup: relation?.productGroup },
       condition: { oid, id },
     })
-    if (!product) {
-      throw new BusinessException('error.Database.NotFound')
-    }
+    if (!product) throw new BusinessException('error.Database.NotFound')
 
-    if (relation?.batchList && product.hasManageBatches) {
+    if (relation?.batchList) {
       product.batchList = await this.batchRepository.findMany({
         condition: {
           oid,
@@ -139,20 +132,50 @@ export class ApiProductService {
     return { data: { product } }
   }
 
-  async updateOne(oid: number, id: number, body: ProductUpdateBody): Promise<BaseResponse> {
-    const rootProduct = await this.productRepository.findOneById(id)
-    if (rootProduct.quantity) {
-      if (!body.hasManageQuantity) {
-        throw new BusinessException('error.Product.ConflictManageQuantity')
-      }
-      if (body.hasManageBatches !== rootProduct.hasManageBatches) {
-        throw new BusinessException('error.Product.ConflictManageBatches')
+  async updateOne(oid: number, productId: number, body: ProductUpdateBody): Promise<BaseResponse> {
+    const productOrigin = await this.productRepository.findOneBy({ oid, id: productId })
+    if (productOrigin.quantity) {
+      if (productOrigin.hasManageQuantity !== body.hasManageQuantity) {
+        // đã chặn ở front-end, nếu cố tình thì vào đây
+        throw new BusinessException('error.Conflict')
       }
     }
-    const [product] = await this.productRepository.updateAndReturnEntity({ oid, id }, body)
-    if (!product) {
-      throw new BusinessException('error.Database.UpdateFailed')
+
+    if (productOrigin.warehouseIds !== body.warehouseIds) {
+      let bodyWarehouseIdList = []
+      try {
+        bodyWarehouseIdList = JSON.parse(body.warehouseIds)
+      } catch (error) { }
+      if (bodyWarehouseIdList.includes(0)) {
+        // trường hợp này được quản lý mọi kho
+      } else {
+        const batchList = await this.batchRepository.findManyBy({
+          oid,
+          productId,
+          quantity: { NOT: 0 },
+        })
+        const batchError: Batch[] = []
+        batchList.forEach((i) => {
+          if (i.warehouseId === 0) return
+          if (!bodyWarehouseIdList.includes(i.warehouseId)) {
+            batchError.push(i)
+          }
+        })
+        if (batchError.length) {
+          return {
+            success: false,
+            data: { batchError },
+            message: 'error.Conflict',
+          }
+        }
+      }
     }
+    const [product] = await this.productRepository.updateAndReturnEntity(
+      { oid, id: productId },
+      body
+    )
+    if (!product) throw new BusinessException('error.Database.UpdateFailed')
+
     this.socketEmitService.productUpsert(oid, { product })
     return { data: { product } }
   }
@@ -163,11 +186,19 @@ export class ApiProductService {
     organization: Organization
   }): Promise<BaseResponse> {
     const { oid, productId, organization } = options
-    const countReceiptItem = await this.receiptItemRepository.countBy({ oid, productId })
-    const countTicketProduct = await this.ticketProductRepository.countBy({ oid, productId })
-    if (countReceiptItem > 0 || countTicketProduct > 0) {
+    const [receiptItemList, ticketProductList] = await Promise.all([
+      this.receiptItemRepository.findMany({
+        condition: { oid, productId },
+        limit: 10,
+      }),
+      this.ticketProductRepository.findMany({
+        condition: { oid, productId },
+        limit: 10,
+      }),
+    ])
+    if (receiptItemList.length > 0 || ticketProductList.length > 0) {
       return {
-        data: { countReceiptItem, countTicketProduct },
+        data: { receiptItemList, ticketProductList },
         success: false,
       }
     }
@@ -189,6 +220,6 @@ export class ApiProductService {
     )
     this.cacheDataService.clearOrganization(oid)
 
-    return { data: { countReceiptItem: 0, countTicketProduct: 0, productId } }
+    return { data: { receiptItemList: [], ticketProductList: [], productId } }
   }
 }

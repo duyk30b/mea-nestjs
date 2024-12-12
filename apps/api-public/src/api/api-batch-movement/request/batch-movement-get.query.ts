@@ -2,11 +2,11 @@ import { ApiPropertyOptional, IntersectionType, PickType } from '@nestjs/swagger
 import { Expose, Transform, plainToInstance } from 'class-transformer'
 import { IsObject, ValidateNested } from 'class-validator'
 import { LimitQuery, PaginationQuery } from '../../../../../_libs/common/dto/query'
-import { VoucherType } from '../../../../../_libs/database/common/variable'
+import { MovementType } from '../../../../../_libs/database/common/variable'
 import {
-  BatchMovementFilterQuery,
-  BatchMovementRelationQuery,
-  BatchMovementSortQuery,
+    BatchMovementFilterQuery,
+    BatchMovementRelationQuery,
+    BatchMovementSortQuery,
 } from './batch-movement-options.request'
 
 export class BatchMovementGetQuery {
@@ -38,7 +38,7 @@ export class BatchMovementGetQuery {
     type: String,
     example: JSON.stringify(<BatchMovementFilterQuery>{
       voucherId: 3,
-      voucherType: VoucherType.Receipt,
+      movementType: MovementType.Receipt,
     }),
   })
   @Expose()

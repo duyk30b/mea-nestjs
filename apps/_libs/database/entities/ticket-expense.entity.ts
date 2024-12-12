@@ -30,18 +30,37 @@ export default class TicketExpense extends BaseEntity {
   @ManyToOne((type) => Ticket, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'ticketId', referencedColumnName: 'id' })
   ticket: Ticket
+
+  static fromRaw(raw: { [P in keyof TicketExpense]: any }) {
+    if (!raw) return null
+    const entity = new TicketExpense()
+    Object.assign(entity, raw)
+
+    entity.money = Number(raw.money)
+    return entity
+  }
+
+  static fromRaws(raws: { [P in keyof TicketExpense]: any }[]) {
+    return raws.map((i) => TicketExpense.fromRaw(i))
+  }
 }
 
-export type TicketExpenseRelationType = Pick<TicketExpense, 'ticket'>
-
-export type TicketExpenseSortType = Pick<TicketExpense, 'oid' | 'id'>
+export type TicketExpenseRelationType = {
+  [P in keyof Pick<TicketExpense, 'ticket'>]?: boolean
+}
 
 export type TicketExpenseInsertType = Omit<
   TicketExpense,
   keyof TicketExpenseRelationType | keyof Pick<TicketExpense, 'id'>
 >
 
-export type TicketExpenseUpdateType = Omit<
-  TicketExpense,
-  keyof TicketExpenseRelationType | keyof Pick<TicketExpense, 'oid' | 'id'>
->
+export type TicketExpenseUpdateType = {
+  [K in Exclude<
+    keyof TicketExpense,
+    keyof TicketExpenseRelationType | keyof Pick<TicketExpense, 'oid' | 'id'>
+  >]: TicketExpense[K] | (() => string)
+}
+
+export type TicketExpenseSortType = {
+  [P in keyof Pick<TicketExpense, 'oid' | 'id'>]?: 'ASC' | 'DESC'
+}

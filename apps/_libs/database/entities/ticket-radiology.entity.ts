@@ -149,20 +149,24 @@ export type TicketRadiologyRelationType = {
   | false
 }
 
-export type TicketRadiologySortType = Pick<TicketRadiology, 'id' | 'ticketId' | 'radiologyId'>
-
 export type TicketRadiologyInsertType = Omit<
   TicketRadiology,
   keyof TicketRadiologyRelationType | keyof Pick<TicketRadiology, 'id'>
 >
 
+export type TicketRadiologyUpdateType = {
+  [K in Exclude<
+    keyof TicketRadiology,
+    keyof TicketRadiologyRelationType | keyof Pick<TicketRadiology, 'oid' | 'id'>
+  >]: TicketRadiology[K] | (() => string)
+}
+
+export type TicketRadiologySortType = {
+  [P in keyof Pick<TicketRadiology, 'id' | 'ticketId' | 'radiologyId'>]?: 'ASC' | 'DESC'
+}
+
 export type TicketRadiologyInsertBasicType = Omit<
   TicketRadiology,
   | keyof TicketRadiologyRelationType
   | keyof Pick<TicketRadiology, 'id' | 'startedAt' | 'description' | 'result' | 'imageIds'>
->
-
-export type TicketRadiologyUpdateType = Omit<
-  TicketRadiology,
-  keyof TicketRadiologyRelationType | keyof Pick<TicketRadiology, 'oid' | 'id'>
 >

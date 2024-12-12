@@ -38,19 +38,25 @@ export default class LaboratoryGroup {
   }
 }
 
-export type LaboratoryGroupRelationType = Pick<LaboratoryGroup, 'printHtml'>
-
-export type LaboratoryGroupSortType = Pick<LaboratoryGroup, 'oid' | 'id' | 'name'>
+export type LaboratoryGroupRelationType = {
+  [P in keyof Pick<LaboratoryGroup, 'printHtml'>]?: boolean
+}
 
 export type LaboratoryGroupInsertType = Omit<
   LaboratoryGroup,
   keyof LaboratoryGroupRelationType | keyof Pick<LaboratoryGroup, 'id'>
 >
 
-export type LaboratoryGroupUpdateType = Omit<
-  LaboratoryGroup,
-  keyof LaboratoryGroupRelationType | keyof Pick<LaboratoryGroup, 'oid' | 'id'>
->
+export type LaboratoryGroupUpdateType = {
+  [K in Exclude<
+    keyof LaboratoryGroup,
+    keyof LaboratoryGroupRelationType | keyof Pick<LaboratoryGroup, 'oid' | 'id'>
+  >]: LaboratoryGroup[K] | (() => string)
+}
+
+export type LaboratoryGroupSortType = {
+  [P in keyof Pick<LaboratoryGroup, 'oid' | 'id' | 'name'>]?: 'ASC' | 'DESC'
+}
 
 export type LaboratoryGroupReplaceType = Omit<
   LaboratoryGroup,

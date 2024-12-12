@@ -134,13 +134,6 @@ export type TicketLaboratoryRelationType = {
   >]?: boolean
 }
 
-export type TicketLaboratorySortType = {
-  [P in keyof Pick<
-    TicketLaboratory,
-    'id' | 'ticketId' | 'laboratoryId'
-  >]?: 'ASC' | 'DESC'
-}
-
 export type TicketLaboratoryInsertType = Omit<
   TicketLaboratory,
   keyof TicketLaboratoryRelationType | keyof Pick<TicketLaboratory, 'id'>
@@ -152,7 +145,16 @@ export type TicketLaboratoryInsertBasicType = Omit<
   | keyof Pick<TicketLaboratory, 'id' | 'startedAt' | 'result' | 'attention'>
 >
 
-export type TicketLaboratoryUpdateType = Omit<
-  TicketLaboratory,
-  keyof TicketLaboratoryRelationType | keyof Pick<TicketLaboratory, 'oid' | 'id'>
->
+export type TicketLaboratoryUpdateType = {
+  [K in Exclude<
+    keyof TicketLaboratory,
+    keyof TicketLaboratoryRelationType | keyof Pick<TicketLaboratory, 'oid' | 'id'>
+  >]: TicketLaboratory[K] | (() => string)
+}
+
+export type TicketLaboratorySortType = {
+  [P in keyof Pick<
+    TicketLaboratory,
+    'id' | 'ticketId' | 'laboratoryId'
+  >]?: 'ASC' | 'DESC'
+}

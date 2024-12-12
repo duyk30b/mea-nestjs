@@ -136,6 +136,7 @@ class TicketOrderAttributeBody {
   @ApiProperty()
   @Expose()
   @Allow()
+  @IsNotEmpty()
   value: string
 }
 

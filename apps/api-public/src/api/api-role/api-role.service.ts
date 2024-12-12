@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { RoleRepository } from '../../../../_libs/database/repository/role/role.repository'
+import { RoleRepository } from '../../../../_libs/database/repositories/role.repository'
 import {
   RoleCreateBody,
   RoleGetManyQuery,

@@ -44,7 +44,7 @@ import {
   Warehouse,
 } from '../../../../_libs/database/entities'
 import UserRole from '../../../../_libs/database/entities/user-role.entity'
-import { OrganizationRepository } from '../../../../_libs/database/repository/organization/organization.repository'
+import { OrganizationRepository } from '../../../../_libs/database/repositories/organization.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   RootOrganizationClearBody,
@@ -181,7 +181,7 @@ export class ApiRootOrganizationService {
     if (tableNameList.includes(Product.name)) {
       await this.manager.delete(Product, { oid })
     } else {
-      await this.manager.update(Product, { oid }, { quantity: 0, costAmount: 0 })
+      await this.manager.update(Product, { oid }, { quantity: 0 })
     }
 
     if (tableNameList.includes(ProductGroup.name)) {

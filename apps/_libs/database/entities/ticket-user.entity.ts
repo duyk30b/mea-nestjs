@@ -9,7 +9,7 @@ import User from './user.entity'
 export enum TicketUserReferenceType {
   Ticket = 1,
   TicketProcedure = 2,
-  TicketProduct = 3,
+  TicketUser = 3,
   TicketRadiology = 4,
 }
 
@@ -87,16 +87,27 @@ export default class TicketUser extends BaseEntity {
   }
 }
 
-export type TicketUserRelationType = Pick<TicketUser, 'user' | 'ticket' | 'role'>
-
-export type TicketUserSortType = Pick<TicketUser, 'id' | 'createdAt'>
+export type TicketUserRelationType = {
+  [P in keyof Pick<
+    TicketUser,
+    | 'ticket'
+    | 'user'
+    | 'role'
+  >]?: boolean
+}
 
 export type TicketUserInsertType = Omit<
   TicketUser,
   keyof TicketUserRelationType | keyof Pick<TicketUser, 'id'>
 >
 
-export type TicketUserUpdateType = Omit<
-  TicketUser,
-  keyof TicketUserRelationType | keyof Pick<TicketUser, 'oid' | 'id'>
->
+export type TicketUserUpdateType = {
+  [K in Exclude<
+    keyof TicketUser,
+    keyof TicketUserRelationType | keyof Pick<TicketUser, 'oid' | 'id'>
+  >]: TicketUser[K] | (() => string)
+}
+
+export type TicketUserSortType = {
+  [P in keyof Pick<TicketUser, 'oid' | 'id' | 'createdAt'>]?: 'ASC' | 'DESC'
+}

@@ -140,17 +140,22 @@ export default class Organization {
   }
 }
 
-export type OrganizationRelationType = Pick<Organization, 'userList' | 'logoImage'>
-
-export type OrganizationSortType = Pick<Organization, 'id'>
+export type OrganizationRelationType = {
+  [P in keyof Pick<Organization, 'userList' | 'logoImage'>]?: boolean
+}
 
 export type OrganizationInsertType = Omit<
   Organization,
-  | keyof OrganizationRelationType
-  | keyof Pick<Organization, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'dataVersionParse'>
+  keyof OrganizationRelationType | keyof Pick<Organization, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'dataVersionParse'>
 >
 
-export type OrganizationUpdateType = Omit<
-  Organization,
-  keyof OrganizationRelationType | keyof Pick<Organization, 'id' | 'createdAt' | 'dataVersionParse'>
->
+export type OrganizationUpdateType = {
+  [K in Exclude<
+    keyof Organization,
+    keyof OrganizationRelationType | keyof Pick<Organization, 'id' | 'createdAt' | 'dataVersionParse'>
+  >]: Organization[K] | (() => string)
+}
+
+export type OrganizationSortType = {
+  [P in keyof Pick<Organization, 'id'>]?: 'ASC' | 'DESC'
+}

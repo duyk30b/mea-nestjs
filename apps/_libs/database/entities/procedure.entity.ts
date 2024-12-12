@@ -95,16 +95,22 @@ export default class Procedure {
   }
 }
 
-export type ProcedureRelationType = Pick<Procedure, 'procedureGroup'>
-
-export type ProcedureSortType = Pick<Procedure, 'oid' | 'id' | 'name' | 'price'>
+export type ProcedureRelationType = {
+  [P in keyof Pick<Procedure, 'procedureGroup'>]?: boolean
+}
 
 export type ProcedureInsertType = Omit<
   Procedure,
   keyof ProcedureRelationType | keyof Pick<Procedure, 'id' | 'updatedAt' | 'deletedAt'>
 >
 
-export type ProcedureUpdateType = Omit<
-  Procedure,
-  keyof ProcedureRelationType | keyof Pick<Procedure, 'oid' | 'id' | 'updatedAt'>
->
+export type ProcedureUpdateType = {
+  [K in Exclude<
+    keyof Procedure,
+    keyof ProcedureRelationType | keyof Pick<Procedure, 'oid' | 'id' | 'updatedAt'>
+  >]: Procedure[K] | (() => string)
+}
+
+export type ProcedureSortType = {
+  [P in keyof Pick<Procedure, 'oid' | 'id' | 'name' | 'price'>]?: 'ASC' | 'DESC'
+}

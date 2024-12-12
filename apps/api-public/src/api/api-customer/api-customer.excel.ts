@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { Cell, Workbook, Worksheet } from 'exceljs'
 import { DTimer } from '../../../../_libs/common/helpers/time.helper'
 import { Customer, Organization, User } from '../../../../_libs/database/entities'
-import { CustomerRepository } from '../../../../_libs/database/repository/customer/customer.repository'
+import { CustomerRepository } from '../../../../_libs/database/repositories/customer.repository'
 import { excelOneSheetWorkbook } from '../../../../_libs/file/excel-one-sheet.util'
 
 @Injectable()

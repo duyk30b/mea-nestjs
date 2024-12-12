@@ -109,30 +109,24 @@ export default class Laboratory {
   }
 }
 
-export type LaboratoryRelationType = Pick<
-  Laboratory,
-  'laboratoryGroup' | 'children' | 'ticketLaboratory'
->
-
-export type LaboratorySortType = Pick<
-  Laboratory,
-  'oid' | 'id' | 'priority' | 'name' | 'laboratoryGroupId'
->
+export type LaboratoryRelationType = {
+  [P in keyof Pick<Laboratory, 'laboratoryGroup' | 'children' | 'ticketLaboratory'>]?: boolean
+}
 
 export type LaboratoryInsertType = Omit<
   Laboratory,
   keyof LaboratoryRelationType | keyof Pick<Laboratory, 'id'>
 >
 
-// export type LaboratoryUpdateType = Omit<
-//   Laboratory,
-//   keyof LaboratoryRelationType | keyof Pick<Laboratory, 'oid' | 'id'>
-// >
-
 export type LaboratoryUpdateType = {
-  [K in Exclude<keyof Laboratory, keyof LaboratoryRelationType | 'oid' | 'id'>]:
-  | Laboratory[K]
-  | (() => string)
+  [K in Exclude<
+    keyof Laboratory,
+    keyof LaboratoryRelationType | keyof Pick<Laboratory, 'oid' | 'id'>
+  >]: Laboratory[K] | (() => string)
+}
+
+export type LaboratorySortType = {
+  [P in keyof Pick<Laboratory, 'oid' | 'id' | 'priority' | 'name' | 'laboratoryGroupId'>]?: 'ASC' | 'DESC'
 }
 
 export type LaboratoryChildUpdateType = Omit<

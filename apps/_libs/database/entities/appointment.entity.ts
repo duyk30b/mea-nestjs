@@ -77,16 +77,22 @@ export default class Appointment extends BaseEntity {
   }
 }
 
-export type AppointmentRelationType = Pick<Appointment, 'customer' | 'customerSource'>
-
-export type AppointmentSortType = Pick<Appointment, 'oid' | 'id' | 'registeredAt'>
+export type AppointmentRelationType = {
+  [P in keyof Pick<Appointment, 'customer' | 'customerSource'>]?: boolean
+}
 
 export type AppointmentInsertType = Omit<
   Appointment,
   keyof AppointmentRelationType | keyof Pick<Appointment, 'id'>
 >
 
-export type AppointmentUpdateType = Omit<
-  Appointment,
-  keyof AppointmentRelationType | keyof Pick<Appointment, 'oid' | 'id'>
->
+export type AppointmentUpdateType = {
+  [K in Exclude<
+    keyof Appointment,
+    keyof AppointmentRelationType | keyof Pick<Appointment, 'oid' | 'id'>
+  >]: Appointment[K] | (() => string)
+}
+
+export type AppointmentSortType = {
+  [P in keyof Pick<Appointment, 'oid' | 'id' | 'registeredAt'>]?: 'ASC' | 'DESC'
+}

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { ProductGroupRepository } from '../../../../_libs/database/repository/product-group/product-group.repository'
+import { ProductGroupRepository } from '../../../../_libs/database/repositories/product-group.repository'
 import {
   ProductGroupCreateBody,
   ProductGroupGetManyQuery,

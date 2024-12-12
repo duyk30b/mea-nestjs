@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { WarehouseRepository } from '../../../../_libs/database/repository/warehouse/warehouse.repository'
+import { BatchRepository } from '../../../../_libs/database/repositories/batch.repository'
+import { WarehouseRepository } from '../../../../_libs/database/repositories/warehouse.repository'
 import {
   WarehouseCreateBody,
   WarehouseGetManyQuery,
@@ -11,7 +12,10 @@ import {
 
 @Injectable()
 export class ApiWarehouseService {
-  constructor(private readonly warehouseRepository: WarehouseRepository) { }
+  constructor(
+    private readonly warehouseRepository: WarehouseRepository,
+    private readonly batchRepository: BatchRepository
+  ) { }
 
   async pagination(oid: number, query: WarehousePaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, sort, relation } = query
@@ -47,29 +51,41 @@ export class ApiWarehouseService {
   }
 
   async getOne(oid: number, id: number): Promise<BaseResponse> {
-    const data = await this.warehouseRepository.findOneBy({ oid, id })
-    if (!data) throw new BusinessException('error.Database.NotFound')
-    return { data }
+    const warehouse = await this.warehouseRepository.findOneBy({ oid, id })
+    if (!warehouse) throw new BusinessException('error.Database.NotFound')
+    return { data: { warehouse } }
   }
 
   async createOne(oid: number, body: WarehouseCreateBody): Promise<BaseResponse> {
-    const id = await this.warehouseRepository.insertOne({ oid, ...body })
-    const data = await this.warehouseRepository.findOneById(id)
-    return { data }
+    const warehouse = await this.warehouseRepository.insertOneFullFieldAndReturnEntity({
+      oid,
+      ...body,
+    })
+    return { data: { warehouse } }
   }
 
   async updateOne(oid: number, id: number, body: WarehouseUpdateBody): Promise<BaseResponse> {
-    const affected = await this.warehouseRepository.update({ id, oid }, body)
-    const data = await this.warehouseRepository.findOneBy({ oid, id })
-    return { data }
+    const [warehouse] = await this.warehouseRepository.updateAndReturnEntity({ id, oid }, body)
+    if (!warehouse) {
+      throw BusinessException.create({
+        message: 'error.Database.UpdateFailed',
+        details: 'Warehouse',
+      })
+    }
+    return { data: { warehouse } }
   }
 
-  async deleteOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.warehouseRepository.update({ oid, id }, { deletedAt: Date.now() })
-    if (affected === 0) {
-      throw new BusinessException('error.Database.DeleteFailed')
+  async destroyOne(options: { oid: number; warehouseId: number }): Promise<BaseResponse> {
+    const { oid, warehouseId } = options
+    const countBatch = await this.batchRepository.countBy({ oid, warehouseId })
+    if (countBatch > 0) {
+      return {
+        data: { countBatch },
+        success: false,
+      }
     }
-    const data = await this.warehouseRepository.findOneById(id)
-    return { data }
+    await this.warehouseRepository.delete({ oid, id: warehouseId })
+
+    return { data: { countBatch: 0, warehouseId } }
   }
 }

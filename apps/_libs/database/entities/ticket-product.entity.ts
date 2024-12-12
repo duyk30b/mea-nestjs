@@ -32,6 +32,10 @@ export default class TicketProduct extends BaseEntity {
   @Expose()
   batchId: number
 
+  @Column({ default: 0 })
+  @Expose()
+  warehouseId: number
+
   @Column({ type: 'smallint', default: DeliveryStatus.Pending })
   @Expose()
   deliveryStatus: DeliveryStatus
@@ -59,14 +63,12 @@ export default class TicketProduct extends BaseEntity {
   quantity: number
 
   @Column({
-    type: 'decimal',
+    type: 'bigint',
     default: 0,
-    precision: 10,
-    scale: 3,
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  quantityReturn: number
+  costPrice: number
 
   @Column({
     type: 'bigint',
@@ -74,15 +76,7 @@ export default class TicketProduct extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  costAmount: number // Tổng cost
-
-  @Column({
-    type: 'bigint',
-    nullable: true,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose()
-  expectedPrice: number // Giá dự kiến
+  expectedPrice: number
 
   @Column({
     type: 'bigint',
@@ -90,7 +84,7 @@ export default class TicketProduct extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  discountMoney: number // tiền giảm giá
+  discountMoney: number
 
   @Column({
     type: 'decimal',
@@ -100,18 +94,18 @@ export default class TicketProduct extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  discountPercent: number // % giảm giá
+  discountPercent: number
 
   @Column({ type: 'varchar', length: 25, default: DiscountType.VND })
   @Expose()
-  discountType: DiscountType // Loại giảm giá
+  discountType: DiscountType
 
   @Column({
     type: 'bigint',
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  actualPrice: number // Giá thực tế
+  actualPrice: number
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
@@ -145,7 +139,7 @@ export default class TicketProduct extends BaseEntity {
     Object.assign(entity, raw)
 
     entity.quantity = Number(raw.quantity)
-    entity.costAmount = Number(raw.costAmount)
+    entity.quantityPrescription = Number(raw.quantityPrescription)
     entity.expectedPrice = Number(raw.expectedPrice)
     entity.discountMoney = Number(raw.discountMoney)
     entity.discountPercent = Number(raw.discountPercent)
@@ -159,19 +153,28 @@ export default class TicketProduct extends BaseEntity {
   }
 }
 
-export type TicketProductRelationType = Pick<
-  TicketProduct,
-  'ticket' | 'customer' | 'product' | 'batch'
->
-
-export type TicketProductSortType = Pick<TicketProduct, 'oid' | 'id' | 'ticketId' | 'productId'>
+export type TicketProductRelationType = {
+  [P in keyof Pick<
+    TicketProduct,
+    | 'ticket'
+    | 'customer'
+    | 'product'
+    | 'batch'
+  >]?: boolean
+}
 
 export type TicketProductInsertType = Omit<
   TicketProduct,
   keyof TicketProductRelationType | keyof Pick<TicketProduct, 'id'>
 >
 
-export type TicketProductUpdateType = Omit<
-  TicketProduct,
-  keyof TicketProductRelationType | keyof Pick<TicketProduct, 'oid' | 'id'>
->
+export type TicketProductUpdateType = {
+  [K in Exclude<
+    keyof TicketProduct,
+    keyof TicketProductRelationType | keyof Pick<TicketProduct, 'oid' | 'id'>
+  >]: TicketProduct[K] | (() => string)
+}
+
+export type TicketProductSortType = {
+  [P in keyof Pick<TicketProduct, 'oid' | 'id' | 'ticketId' | 'productId'>]?: 'ASC' | 'DESC'
+}

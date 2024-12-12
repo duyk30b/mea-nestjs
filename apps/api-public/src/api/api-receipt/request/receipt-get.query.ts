@@ -13,7 +13,7 @@ export class ReceiptGetQuery {
     type: String,
     example: JSON.stringify(<ReceiptRelationQuery>{
       distributor: true,
-      receiptItems: { product: true },
+      receiptItemList: { product: true, batch: true },
     }),
   })
   @Expose()

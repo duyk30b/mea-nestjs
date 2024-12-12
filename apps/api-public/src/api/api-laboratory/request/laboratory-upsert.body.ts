@@ -4,7 +4,7 @@ import { IsArray, IsDefined, IsInt, IsNumber, IsString, ValidateNested } from 'c
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { LaboratoryValueType } from '../../../../../_libs/database/entities/laboratory.entity'
 
-export class LaboratoryParentCreate {
+export class LaboratoryParentUpsert {
   @ApiProperty({ example: 105000 })
   @Expose()
   @IsDefined()
@@ -58,20 +58,10 @@ export class LaboratoryParentCreate {
   options: string
 }
 
-export class LaboratoryCreateChild extends OmitType(LaboratoryParentCreate, ['laboratoryGroupId']) { }
-
-export class LaboratoryCreateBody extends LaboratoryParentCreate {
-  @ApiProperty({ type: LaboratoryCreateChild, isArray: true })
-  @Expose()
-  @Type(() => LaboratoryCreateChild)
-  @IsDefined()
-  @IsArray()
-  @ValidateNested({ each: true })
-  children: LaboratoryCreateChild[]
-}
-
-export class LaboratoryParentUpdate extends OmitType(LaboratoryParentCreate, ['valueType']) { }
-export class LaboratoryUpdateChild extends OmitType(LaboratoryParentCreate, ['laboratoryGroupId']) {
+export class LaboratoryChildCreate extends OmitType(LaboratoryParentUpsert, [
+  'laboratoryGroupId',
+]) { }
+export class LaboratoryChildUpdate extends OmitType(LaboratoryParentUpsert, ['laboratoryGroupId']) {
   @ApiPropertyOptional({ example: 12 })
   @Expose()
   @IsDefined()
@@ -79,12 +69,22 @@ export class LaboratoryUpdateChild extends OmitType(LaboratoryParentCreate, ['la
   id: number
 }
 
-export class LaboratoryUpdateBody extends LaboratoryParentUpdate {
-  @ApiProperty({ type: LaboratoryUpdateChild, isArray: true })
+export class LaboratoryCreateBody extends LaboratoryParentUpsert {
+  @ApiProperty({ type: LaboratoryChildCreate, isArray: true })
   @Expose()
-  @Type(() => LaboratoryUpdateChild)
+  @Type(() => LaboratoryChildCreate)
   @IsDefined()
   @IsArray()
   @ValidateNested({ each: true })
-  children: LaboratoryUpdateChild[]
+  children: LaboratoryChildCreate[]
+}
+
+export class LaboratoryUpdateBody extends LaboratoryParentUpsert {
+  @ApiProperty({ type: LaboratoryChildUpdate, isArray: true })
+  @Expose()
+  @Type(() => LaboratoryChildUpdate)
+  @IsDefined()
+  @IsArray()
+  @ValidateNested({ each: true })
+  children: LaboratoryChildUpdate[]
 }

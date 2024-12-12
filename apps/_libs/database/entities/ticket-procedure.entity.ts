@@ -136,19 +136,25 @@ export default class TicketProcedure extends BaseEntity {
   }
 }
 
-export type TicketProcedureRelationType = Pick<
-  TicketProcedure,
-  'ticket' | 'procedure' | 'customer' | 'imageList' | 'ticketUserList'
->
-
-export type TicketProcedureSortType = Pick<TicketProcedure, 'id' | 'ticketId' | 'procedureId'>
+export type TicketProcedureRelationType = {
+  [P in keyof Pick<
+    TicketProcedure,
+    'ticket' | 'procedure' | 'customer' | 'imageList' | 'ticketUserList'
+  >]?: boolean
+}
 
 export type TicketProcedureInsertType = Omit<
   TicketProcedure,
   keyof TicketProcedureRelationType | keyof Pick<TicketProcedure, 'id'>
 >
 
-export type TicketProcedureUpdateType = Omit<
-  TicketProcedure,
-  keyof TicketProcedureRelationType | keyof Pick<TicketProcedure, 'oid' | 'id'>
->
+export type TicketProcedureUpdateType = {
+  [K in Exclude<
+    keyof TicketProcedure,
+    keyof TicketProcedureRelationType | keyof Pick<TicketProcedure, 'oid' | 'id'>
+  >]: TicketProcedure[K] | (() => string)
+}
+
+export type TicketProcedureSortType = {
+  [P in keyof Pick<TicketProcedure, 'id' | 'ticketId' | 'procedureId'>]?: 'ASC' | 'DESC'
+}

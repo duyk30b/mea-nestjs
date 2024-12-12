@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import Role from './role.entity'
 import User from './user.entity'
 
@@ -44,16 +44,22 @@ export default class UserRole {
   }
 }
 
-export type UserRoleRelationType = Pick<UserRole, 'role' | 'user'>
-
-export type UserRoleSortType = Pick<UserRole, 'oid'>
+export type UserRoleRelationType = {
+  [P in keyof Pick<UserRole, 'role' | 'user'>]?: boolean
+}
 
 export type UserRoleInsertType = Omit<
   UserRole,
   keyof UserRoleRelationType | keyof Pick<UserRole, 'id'>
 >
 
-export type UserRoleUpdateType = Omit<
-  UserRole,
-  keyof UserRoleRelationType | keyof Pick<UserRole, 'oid'>
->
+export type UserRoleUpdateType = {
+  [K in Exclude<
+    keyof UserRole,
+    keyof UserRoleRelationType | keyof Pick<UserRole, 'oid' | 'id'>
+  >]: UserRole[K] | (() => string)
+}
+
+export type UserRoleSortType = {
+  [P in keyof Pick<UserRole, 'oid'>]?: 'ASC' | 'DESC'
+}

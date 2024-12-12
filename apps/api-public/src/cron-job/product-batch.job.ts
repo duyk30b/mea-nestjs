@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron } from '@nestjs/schedule'
-import { BatchRepository } from '../../../_libs/database/repository/batch/batch.repository'
-import { ProductMovementRepository } from '../../../_libs/database/repository/product-movement/product-movement.repository'
+import { BatchRepository } from '../../../_libs/database/repositories/batch.repository'
+import { ProductMovementRepository } from '../../../_libs/database/repositories/product-movement.repository'
 
 @Injectable()
 export class ProductBatchJob {

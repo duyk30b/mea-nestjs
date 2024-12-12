@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { TicketAttributeInsertType } from '../../../../_libs/database/entities/ticket-attribute.entity'
-import { TicketAttributeRepository } from '../../../../_libs/database/repository/ticket-attribute/ticket-attribute.repository'
+import { TicketAttributeRepository } from '../../../../_libs/database/repositories/ticket-attribute.repository'
 import { RootMigrationDataBody } from './request/root-migration-data.body'
 
 @Injectable()

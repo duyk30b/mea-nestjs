@@ -28,16 +28,22 @@ export default class ProcedureGroup {
   }
 }
 
-export type ProcedureGroupRelationType = Pick<ProcedureGroup, never>
-
-export type ProcedureGroupSortType = Pick<ProcedureGroup, 'oid' | 'id' | 'name'>
+export type ProcedureGroupRelationType = {
+  [P in keyof Pick<ProcedureGroup, never>]?: boolean
+}
 
 export type ProcedureGroupInsertType = Omit<
   ProcedureGroup,
   keyof ProcedureGroupRelationType | keyof Pick<ProcedureGroup, 'id'>
 >
 
-export type ProcedureGroupUpdateType = Omit<
-  ProcedureGroup,
-  keyof ProcedureGroupRelationType | keyof Pick<ProcedureGroup, 'oid' | 'id'>
->
+export type ProcedureGroupUpdateType = {
+  [K in Exclude<
+    keyof ProcedureGroup,
+    keyof ProcedureGroupRelationType | keyof Pick<ProcedureGroup, 'oid' | 'id'>
+  >]: ProcedureGroup[K] | (() => string)
+}
+
+export type ProcedureGroupSortType = {
+  [P in keyof Pick<ProcedureGroup, 'oid' | 'id' | 'name'>]?: 'ASC' | 'DESC'
+}

@@ -21,7 +21,7 @@
 //   Role,
 //   User,
 // } from '../../_libs/database/entities'
-// import { SqlModule } from '../../_libs/database/sql.module'
+// import { PostgresqlModule } from '../../_libs/database/sql.module'
 // import { TestApi } from './test-sql.api'
 
 // @Module({
@@ -30,7 +30,7 @@
 //       envFilePath: [`.env.${process.env.NODE_ENV || 'local'}`, '.env'],
 //       isGlobal: true,
 //     }),
-//     SqlModule,
+//     PostgresqlModule,
 //     TypeOrmModule.forFeature([
 //       Customer,
 //       Distributor,

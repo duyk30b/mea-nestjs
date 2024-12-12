@@ -5,10 +5,10 @@ import { LimitQuery } from '../../../../../_libs/common/dto'
 
 export class StatisticProductHighMoneyQuery extends LimitQuery {
   @ApiPropertyOptional({
-    enum: ['quantity', 'costAmount', 'sumRetailMoney'],
+    enum: ['quantity', 'costAmount', 'retailAmount'],
     example: 'costAmount',
   })
   @Expose()
-  @IsIn(['quantity', 'costAmount', 'sumRetailMoney'])
-  orderBy: 'quantity' | 'costAmount' | 'sumRetailMoney'
+  @IsIn(['quantity', 'costAmount', 'retailAmount'])
+  orderBy: 'quantity' | 'costAmount' | 'retailAmount'
 }

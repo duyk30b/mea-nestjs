@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { PrescriptionSampleRepository } from '../../../../_libs/database/repository/prescription-sample/prescription-sample.repository'
-import { ProductRepository } from '../../../../_libs/database/repository/product/product.repository'
+import { PrescriptionSampleRepository } from '../../../../_libs/database/repositories/prescription-sample.repository'
+import { ProductRepository } from '../../../../_libs/database/repositories/product.repository'
 import {
   PrescriptionSampleCreateBody,
   PrescriptionSampleGetManyQuery,

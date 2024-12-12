@@ -7,7 +7,6 @@ import { External, TExternal } from '../../../../_libs/common/request/external.r
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
 import { ApiReceiptService } from './api-receipt.service'
 import {
-  ReceiptDraftInsertBody,
   ReceiptGetManyQuery,
   ReceiptGetOneQuery,
   ReceiptPaginationQuery,
@@ -16,7 +15,7 @@ import {
   ReceiptRefundPrepaymentBody,
   ReceiptReturnProductBody,
   ReceiptSendProductAndPaymentBody,
-  ReceiptUpdateBody,
+  ReceiptUpsertBody,
 } from './request'
 
 @ApiTags('Receipt')
@@ -49,7 +48,7 @@ export class ApiReceiptController {
 
   @Post('create-draft')
   @HasPermission(PermissionId.RECEIPT_CREATE_DRAFT)
-  async createDraft(@External() { oid }: TExternal, @Body() body: ReceiptDraftInsertBody) {
+  async createDraft(@External() { oid }: TExternal, @Body() body: ReceiptUpsertBody) {
     return await this.apiReceiptService.createDraft({ oid, body })
   }
 
@@ -58,7 +57,7 @@ export class ApiReceiptController {
   async updateDraftPrepayment(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: ReceiptUpdateBody
+    @Body() body: ReceiptUpsertBody
   ) {
     return await this.apiReceiptService.updateDraftPrepayment({
       oid,
@@ -127,16 +126,11 @@ export class ApiReceiptController {
 
   @Post('cancel/:id')
   @HasPermission(PermissionId.RECEIPT_CANCEL)
-  async cancel(
-    @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: ReceiptReturnProductBody
-  ) {
+  async cancel(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiReceiptService.cancel({
       oid,
       receiptId: id,
       time: Date.now(),
-      money: body.money,
     })
   }
 

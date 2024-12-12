@@ -31,6 +31,12 @@ class TicketProductPrescriptionBody {
   @IsInt()
   batchId: number
 
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  warehouseId: number
+
   @ApiPropertyOptional({ example: 52 })
   @Expose()
   @IsDefined()
@@ -72,7 +78,7 @@ class TicketProductPrescriptionBody {
   @Expose()
   @IsDefined()
   @IsInt()
-  costAmount: number
+  costPrice: number
 
   @ApiProperty({ example: 25_000 })
   @Expose()

@@ -7,9 +7,9 @@ import {
   transformConditionEnum,
   transformConditionNumber,
 } from '../../../../../_libs/common/dto'
-import { VoucherType } from '../../../../../_libs/database/common/variable'
+import { MovementType } from '../../../../../_libs/database/common/variable'
 
-const ConditionEnumVoucherType = createConditionEnum(VoucherType)
+const ConditionEnumMovementType = createConditionEnum(MovementType)
 
 export class ProductMovementRelationQuery {
   @Expose()
@@ -31,6 +31,10 @@ export class ProductMovementRelationQuery {
   @Expose()
   @IsBoolean()
   distributor: boolean
+
+  @Expose()
+  @IsBoolean()
+  user: boolean
 }
 export class ProductMovementFilterQuery {
   @Expose()
@@ -48,9 +52,9 @@ export class ProductMovementFilterQuery {
   contactId: number | ConditionNumber
 
   @Expose()
-  @Transform((params: TransformFnParams) => transformConditionEnum(params, VoucherType))
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, MovementType))
   @IsOptional()
-  voucherType: VoucherType | InstanceType<typeof ConditionEnumVoucherType>
+  movementType: MovementType | InstanceType<typeof ConditionEnumMovementType>
 }
 
 export class ProductMovementSortQuery extends SortQuery {}

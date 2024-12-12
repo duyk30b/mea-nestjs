@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { CustomerPaymentRepository } from '../../../../_libs/database/repository/customer-payment/customer-payment.repository'
-import { TicketRepository } from '../../../../_libs/database/repository/ticket/ticket-base/ticket.repository'
+import { TicketRepository } from '../../../../_libs/database/repositories'
+import { CustomerPaymentRepository } from '../../../../_libs/database/repositories/customer-payment.repository'
 import {
   CustomerPaymentGetManyQuery,
   CustomerPaymentPaginationQuery,

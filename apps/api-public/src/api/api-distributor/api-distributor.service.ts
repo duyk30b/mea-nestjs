@@ -1,9 +1,9 @@
-import { HttpStatus, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { DistributorPaymentRepository } from '../../../../_libs/database/repository/distributor-payment/distributor-payment.repository'
-import { DistributorRepository } from '../../../../_libs/database/repository/distributor/distributor.repository'
-import { ReceiptRepository } from '../../../../_libs/database/repository/receipt/receipt.repository'
+import { DistributorPaymentRepository } from '../../../../_libs/database/repositories/distributor-payment.repository'
+import { DistributorRepository } from '../../../../_libs/database/repositories/distributor.repository'
+import { ReceiptRepository } from '../../../../_libs/database/repositories/receipt.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   DistributorCreateBody,
@@ -93,10 +93,13 @@ export class ApiDistributorService {
   }
 
   async destroyOne(oid: number, id: number): Promise<BaseResponse> {
-    const countReceipt = await this.receiptRepository.countBy({ oid, distributorId: id })
-    if (countReceipt > 0) {
+    const receiptList = await this.receiptRepository.findMany({
+      condition: { oid, distributorId: id },
+      limit: 10,
+    })
+    if (receiptList.length > 0) {
       return {
-        data: { countReceipt },
+        data: { receiptList },
         success: false,
       }
     }
@@ -106,6 +109,6 @@ export class ApiDistributorService {
       this.distributorPaymentRepository.delete({ oid, distributorId: id }),
     ])
 
-    return { data: { countReceipt: 0, distributorId: id } }
+    return { data: { receiptList: [], distributorId: id } }
   }
 }

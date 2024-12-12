@@ -12,23 +12,11 @@ class TicketProductUpdateBody {
   @IsInt()
   ticketProductId: number
 
-  @ApiProperty({ example: 56 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  productId: number
-
   @ApiProperty({ example: 4 })
   @Expose()
   @IsDefined()
   @IsNumber()
   quantity: number
-
-  @ApiProperty({ example: 4 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  costAmount: number
 
   @ApiProperty({ example: 22_500 })
   @Expose()
@@ -66,12 +54,6 @@ class TicketProcedureUpdateBody {
   @IsInt()
   ticketProcedureId: number
 
-  @ApiProperty({ example: 56 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  procedureId: number
-
   @ApiProperty({ example: 22_500 })
   @Expose()
   @Transform(({ value }) => Math.round(value || 0))
@@ -108,12 +90,6 @@ class TicketLaboratoryUpdateBody {
   @IsInt()
   ticketLaboratoryId: number
 
-  @ApiProperty({ example: 56 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  laboratoryId: number
-
   @ApiProperty({ example: 22_500 })
   @Expose()
   @Transform(({ value }) => Math.round(value || 0))
@@ -149,12 +125,6 @@ class TicketRadiologyUpdateBody {
   @IsDefined()
   @IsInt()
   ticketRadiologyId: number
-
-  @ApiProperty({ example: 56 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  radiologyId: number
 
   @ApiProperty({ example: 22_500 })
   @Expose()

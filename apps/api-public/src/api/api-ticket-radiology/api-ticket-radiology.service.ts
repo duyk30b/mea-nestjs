@@ -5,11 +5,11 @@ import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { Image } from '../../../../_libs/database/entities'
 import { TicketRadiologyStatus } from '../../../../_libs/database/entities/ticket-radiology.entity'
-import { ImageRepository } from '../../../../_libs/database/repository/image/image.repository'
-import { RadiologyRepository } from '../../../../_libs/database/repository/radiology/radiology.repository'
-import { TicketRadiologyRepository } from '../../../../_libs/database/repository/ticket-radiology/ticket-radiology.repository'
-import { TicketRepository } from '../../../../_libs/database/repository/ticket/ticket-base/ticket.repository'
-import { UserRepository } from '../../../../_libs/database/repository/user/user.repository'
+import { TicketRepository } from '../../../../_libs/database/repositories'
+import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
+import { RadiologyRepository } from '../../../../_libs/database/repositories/radiology.repository'
+import { TicketRadiologyRepository } from '../../../../_libs/database/repositories/ticket-radiology.repository'
+import { UserRepository } from '../../../../_libs/database/repositories/user.repository'
 import { ImageManagerService } from '../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
@@ -125,7 +125,7 @@ export class ApiTicketRadiologyService {
       ticketId: body.ticketId,
     })
 
-    this.socketEmitService.ticketClinicUpdate(oid, { ticketBasic: ticket })
+    this.socketEmitService.ticketClinicUpdate(oid, { ticket })
     this.socketEmitService.ticketClinicUpdateTicketRadiologyResult(oid, {
       ticketId: ticketRadiology.ticketId,
       ticketRadiology,

@@ -47,6 +47,7 @@ export enum PermissionId {
   BATCH_UPDATE = 612,
   BATCH_DELETE = 613,
   READ_COST_PRICE = 614,
+  BATCH_CHANGE_QUANTITY = 615,
   READ_MOVEMENT = 620,
 
   DISTRIBUTOR = 7,
@@ -175,16 +176,21 @@ export default class Permission {
   }
 }
 
-export type PermissionRelationType = Pick<Permission, never>
-
-export type PermissionSortType = Pick<Permission, 'id'>
+export type PermissionRelationType = {
+  [P in keyof Pick<Permission, never>]?: boolean
+}
 
 export type PermissionInsertType = Omit<
   Permission,
   keyof PermissionRelationType | keyof Pick<Permission, 'id'>
 >
 
-export type PermissionUpdateType = Omit<
-  Permission,
-  keyof PermissionRelationType | keyof Pick<Permission, 'id'>
->
+export type PermissionUpdateType = {
+  [K in Exclude<keyof Permission, keyof PermissionRelationType | keyof Pick<Permission, 'id'>>]:
+  | Permission[K]
+  | (() => string)
+}
+
+export type PermissionSortType = {
+  [P in keyof Pick<Permission, 'id'>]?: 'ASC' | 'DESC'
+}

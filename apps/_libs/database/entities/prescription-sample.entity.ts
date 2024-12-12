@@ -53,7 +53,9 @@ export type PrescriptionSampleInsertType = Omit<
   keyof PrescriptionSampleRelationType | keyof Pick<PrescriptionSample, 'id'>
 >
 
-export type PrescriptionSampleUpdateType = Omit<
-  PrescriptionSample,
-  keyof PrescriptionSampleRelationType | keyof Pick<PrescriptionSample, 'oid' | 'id'>
->
+export type PrescriptionSampleUpdateType = {
+  [K in Exclude<
+    keyof PrescriptionSample,
+    keyof PrescriptionSampleRelationType | keyof Pick<PrescriptionSample, 'oid' | 'id'>
+  >]: PrescriptionSample[K] | (() => string)
+}

@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
@@ -6,8 +6,8 @@ import {
   LaboratoryInsertType,
   LaboratoryValueType,
 } from '../../../../_libs/database/entities/laboratory.entity'
-import { LaboratoryRepository } from '../../../../_libs/database/repository/laboratory/laboratory.repository'
-import { TicketLaboratoryRepository } from '../../../../_libs/database/repository/ticket-laboratory/ticket-laboratory.repository'
+import { LaboratoryRepository } from '../../../../_libs/database/repositories/laboratory.repository'
+import { TicketLaboratoryRepository } from '../../../../_libs/database/repositories/ticket-laboratory.repository'
 import {
   LaboratoryCreateBody,
   LaboratoryGetManyQuery,
@@ -120,6 +120,20 @@ export class ApiLaboratoryService {
 
   async update(oid: number, id: number, body: LaboratoryUpdateBody): Promise<BaseResponse> {
     const { children, ...laboratoryUpdateDto } = body
+    const laboratoryOrigin = await this.laboratoryRepository.findOneBy({ oid, id })
+    if (!laboratoryOrigin) {
+      throw new BusinessException('error.Database.NotFound')
+    }
+    if (laboratoryOrigin.valueType === LaboratoryValueType.Children) {
+      if (laboratoryUpdateDto.valueType !== LaboratoryValueType.Children) {
+        await this.laboratoryRepository.delete({
+          oid,
+          level: 2,
+          parentId: id,
+        })
+      }
+    }
+
     const [laboratory] = await this.laboratoryRepository.updateAndReturnEntity(
       { oid, id },
       laboratoryUpdateDto
@@ -137,20 +151,20 @@ export class ApiLaboratoryService {
   }
 
   async destroy(oid: number, id: number): Promise<BaseResponse> {
-    const countTicketLaboratory = await this.ticketLaboratoryRepository.countBy({
-      oid,
-      laboratoryId: id,
+    const ticketLaboratoryList = await this.ticketLaboratoryRepository.findMany({
+      condition: { oid, laboratoryId: id },
+      limit: 10,
     })
-    if (countTicketLaboratory > 0) {
+    if (ticketLaboratoryList.length > 0) {
       return {
-        data: { countTicketLaboratory },
+        data: { ticketLaboratoryList },
         success: false,
       }
     }
     const affected = await this.laboratoryRepository.delete({ oid, parentId: id })
     if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
 
-    return { data: { countTicketLaboratory: 0, laboratoryId: id } }
+    return { data: { ticketLaboratoryList: [], laboratoryId: id } }
   }
 
   async systemList(): Promise<BaseResponse> {

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { CustomerSourceRepository } from '../../../../_libs/database/repository/customer-source/customer-source.repository'
+import { CustomerSourceRepository } from '../../../../_libs/database/repositories/customer-source.repository'
 import {
   CustomerSourceCreateBody,
   CustomerSourceGetManyQuery,
