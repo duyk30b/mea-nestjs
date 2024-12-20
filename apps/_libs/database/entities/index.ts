@@ -1,6 +1,7 @@
 export { default as Appointment } from './appointment.entity'
 export { default as BatchMovement } from './batch-movement.entity'
 export { default as Batch } from './batch.entity'
+export { default as Commission } from './commission.entity'
 export { default as CustomerPayment } from './customer-payment.entity'
 export { default as CustomerSource } from './customer-source.entity'
 export { default as Customer } from './customer.entity'

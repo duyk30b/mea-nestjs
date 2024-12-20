@@ -9,6 +9,7 @@ import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { DeliveryStatus } from '../../../../_libs/database/common/variable'
 import { Customer } from '../../../../_libs/database/entities'
 import { AppointmentStatus } from '../../../../_libs/database/entities/appointment.entity'
+import { CommissionCalculatorType } from '../../../../_libs/database/entities/commission.entity'
 import { TicketAttributeInsertType } from '../../../../_libs/database/entities/ticket-attribute.entity'
 import {
   TicketLaboratoryInsertType,
@@ -19,6 +20,7 @@ import {
   TicketRadiologyInsertType,
   TicketRadiologyStatus,
 } from '../../../../_libs/database/entities/ticket-radiology.entity'
+import { TicketUserInsertType } from '../../../../_libs/database/entities/ticket-user.entity'
 import Ticket, { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import {
   TicketClinicReopenOperation,
@@ -141,6 +143,23 @@ export class ApiTicketClinicService {
       })
       ticket.ticketAttributeList =
         await this.ticketAttributeRepository.insertManyAndReturnEntity(ticketAttributeInsertList)
+    }
+
+    if (body.ticketUserList?.length) {
+      const ticketUserInsertList = body.ticketUserList.map((i) => {
+        const dto: TicketUserInsertType = {
+          ...i,
+          oid,
+          ticketId: ticket.id,
+          createdAt: Date.now(),
+          commissionCalculatorType: CommissionCalculatorType.VND,
+          commissionMoney: 0,
+          commissionValue: 0,
+        }
+        return dto
+      })
+      ticket.ticketUserList =
+        await this.ticketUserRepository.insertManyAndReturnEntity(ticketUserInsertList)
     }
 
     this.socketEmitService.ticketClinicCreate(oid, { ticket })

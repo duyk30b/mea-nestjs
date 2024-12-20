@@ -1,5 +1,6 @@
 import { CanActivate, ExecutionContext, HttpStatus, Injectable, SetMetadata } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
+import { OrganizationStatus } from '../../database/entities/organization.entity'
 import { PermissionId } from '../../database/entities/permission.entity'
 import { CacheDataService } from '../cache-data/cache-data.service'
 import { BusinessException } from '../exception-filter/exception-filter'
@@ -41,17 +42,12 @@ export class PermissionGuard implements CanActivate {
     if (external.error) {
       throw new BusinessException(external.error, {}, HttpStatus.UNAUTHORIZED)
     }
-    if (
-      !external.uid
-      || !external.oid
-      || !external.user
-      || !external.organization
-    ) {
+    if (!external.uid || !external.oid || !external.user || !external.organization) {
       throw new BusinessException('common.AccountRequired', {}, HttpStatus.UNAUTHORIZED)
     }
 
     // Nếu user, org inactive thì loại từ vòng gửi xe
-    if (!!external.user.deletedAt || !external.organization.isActive) {
+    if (!!external.user.deletedAt || external.organization.status == OrganizationStatus.Inactive) {
       throw new BusinessException('common.AccountInactive', {}, HttpStatus.UNAUTHORIZED)
     }
     // ROOT: oid = 1 (ROOT) được xem mọi API, kể cả API inActive

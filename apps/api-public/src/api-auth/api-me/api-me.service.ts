@@ -66,6 +66,7 @@ export class ApiMeService {
       }
     )
     const user = await this.userRepository.findOneBy({ oid, id })
+    this.cacheDataService.clearUserAndRole(oid)
     return { data: { user } }
   }
 }

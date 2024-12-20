@@ -1,6 +1,7 @@
 export * from './appointment.manager'
 export * from './batch-movement.manager'
 export * from './batch.manager'
+export * from './commission.manager'
 export * from './customer-payment.manager'
 export * from './customer-source.manager'
 export * from './customer.manager'

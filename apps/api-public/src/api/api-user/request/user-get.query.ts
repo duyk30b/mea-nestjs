@@ -7,7 +7,7 @@ import { UserFilterQuery, UserRelationQuery, UserSortQuery } from './user-option
 export class UserGetQuery {
   @ApiPropertyOptional({
     type: String,
-    example: JSON.stringify(<UserRelationQuery>{ userRoleList: true }),
+    example: JSON.stringify(<UserRelationQuery>{ userRoleList: {} }),
   })
   @Expose()
   @Transform(({ value }) => {
