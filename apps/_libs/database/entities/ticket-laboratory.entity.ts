@@ -20,6 +20,10 @@ export default class TicketLaboratory extends BaseEntity {
   @Expose()
   ticketId: number
 
+  @Column({ default: 1 })
+  @Expose()
+  priority: number
+
   @Column()
   @Expose()
   customerId: number
@@ -153,8 +157,7 @@ export type TicketLaboratoryUpdateType = {
 }
 
 export type TicketLaboratorySortType = {
-  [P in keyof Pick<
-    TicketLaboratory,
-    'id' | 'ticketId' | 'laboratoryId'
-  >]?: 'ASC' | 'DESC'
+  [P in keyof Pick<TicketLaboratory, 'id' | 'ticketId' | 'laboratoryId' | 'priority'>]?:
+  | 'ASC'
+  | 'DESC'
 }

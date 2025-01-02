@@ -10,23 +10,50 @@ export class Version611734210344255 implements MigrationInterface {
         `)
 
         await queryRunner.query(`
+            ALTER TABLE "Role"
+                ADD "displayName" character varying(255) NOT NULL DEFAULT ''
+        `)
+
+        await queryRunner.query(`
+            ALTER TABLE "Procedure" 
+                DROP COLUMN "deletedAt"
+        `)
+
+        await queryRunner.query(`
+            ALTER TABLE "Ticket"
+                ADD "commissionMoney" bigint NOT NULL DEFAULT '0'
+        `)
+
+        await queryRunner.query(`
             CREATE TABLE "Commission" (
                 "oid" integer NOT NULL,
                 "id" SERIAL NOT NULL,
                 "roleId" integer NOT NULL,
                 "interactId" integer NOT NULL DEFAULT '0',
                 "interactType" smallint NOT NULL DEFAULT '1',
-                "value" numeric(10, 3) NOT NULL DEFAULT '0',
-                "calculatorType" smallint NOT NULL DEFAULT '1',
+                "commissionValue" numeric(10, 3) NOT NULL DEFAULT '0',
+                "commissionCalculatorType" smallint NOT NULL DEFAULT '1',
                 CONSTRAINT "PK_d7dcc93818e7e1e816adf58bee3" PRIMARY KEY ("id")
             );
-            CREATE UNIQUE INDEX "IDX_Setting__oid_roleId_interactType_interactId" 
+            CREATE UNIQUE INDEX "IDX_Commission__oid_roleId_interactType_interactId" 
                 ON "Commission" ("oid", "roleId", "interactType", "interactId")
         `)
 
         await queryRunner.query(`
-            ALTER TABLE "Role"
-                ADD "displayName" character varying(255) NOT NULL DEFAULT ''
+            ALTER TABLE "TicketLaboratory"
+                ADD "priority" integer NOT NULL DEFAULT '1'
+        `)
+        await queryRunner.query(`
+            ALTER TABLE "TicketProcedure"
+                ADD "priority" integer NOT NULL DEFAULT '1'
+        `)
+        await queryRunner.query(`
+            ALTER TABLE "TicketProduct"
+                ADD "priority" integer NOT NULL DEFAULT '1'
+        `)
+        await queryRunner.query(`
+            ALTER TABLE "TicketRadiology"
+                ADD "priority" integer NOT NULL DEFAULT '1'
         `)
 
         await queryRunner.query(`
@@ -40,8 +67,9 @@ export class Version611734210344255 implements MigrationInterface {
             ALTER TABLE "TicketUser"
                 ADD "interactType" smallint NOT NULL DEFAULT '1',
                 ADD "interactId" integer NOT NULL DEFAULT '0',
-                ADD "commissionMoney" integer NOT NULL DEFAULT '0',
-                ADD "commissionValue" numeric(10, 3) NOT NULL DEFAULT '0',
+                ADD "ticketItemId" integer NOT NULL DEFAULT '0',
+                ADD "commissionMoney" bigint NOT NULL DEFAULT '0',
+                ADD "commissionPercent" numeric(5, 3) NOT NULL DEFAULT '0',
                 ADD "commissionCalculatorType" smallint NOT NULL DEFAULT '1';
         `)
     }

@@ -22,6 +22,10 @@ export default class TicketProcedure extends BaseEntity {
   @Expose()
   ticketId: number
 
+  @Column({ default: 1 })
+  @Expose()
+  priority: number
+
   @Column()
   @Expose()
   customerId: number
@@ -152,9 +156,11 @@ export type TicketProcedureUpdateType = {
   [K in Exclude<
     keyof TicketProcedure,
     keyof TicketProcedureRelationType | keyof Pick<TicketProcedure, 'oid' | 'id'>
-  >]: TicketProcedure[K] | (() => string)
+  >]?: TicketProcedure[K] | (() => string)
 }
 
 export type TicketProcedureSortType = {
-  [P in keyof Pick<TicketProcedure, 'id' | 'ticketId' | 'procedureId'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<TicketProcedure, 'id' | 'ticketId' | 'procedureId' | 'priority'>]?:
+  | 'ASC'
+  | 'DESC'
 }

@@ -75,7 +75,7 @@ export class TicketRepository extends _PostgreSqlRepository<
     }
     if (relation?.ticketProductList) {
       query = query.leftJoinAndSelect('ticket.ticketProductList', 'ticketProduct')
-      query.addOrderBy('ticketProduct.id', 'ASC')
+      query.addOrderBy('ticketProduct.priority', 'ASC')
       if (relation?.ticketProductList.product) {
         query = query.leftJoinAndSelect(
           'ticketProduct.product',
@@ -98,7 +98,7 @@ export class TicketRepository extends _PostgreSqlRepository<
         'ticketProductConsumable.type = :typeConsumable',
         { typeConsumable: TicketProductType.Consumable }
       )
-      query.addOrderBy('ticketProductConsumable.id', 'ASC')
+      query.addOrderBy('ticketProductConsumable.priority', 'ASC')
       if (relation?.ticketProductConsumableList.product) {
         query = query.leftJoinAndSelect(
           'ticketProductConsumable.product',
@@ -121,7 +121,7 @@ export class TicketRepository extends _PostgreSqlRepository<
         'ticketProductPrescription.type = :typePrescription',
         { typePrescription: TicketProductType.Prescription }
       )
-      query.addOrderBy('ticketProductPrescription.id', 'ASC')
+      query.addOrderBy('ticketProductPrescription.priority', 'ASC')
       if (relation?.ticketProductPrescriptionList.product) {
         query = query.leftJoinAndSelect(
           'ticketProductPrescription.product',
@@ -139,7 +139,7 @@ export class TicketRepository extends _PostgreSqlRepository<
     }
     if (relation?.ticketProcedureList) {
       query = query.leftJoinAndSelect('ticket.ticketProcedureList', 'ticketProcedure')
-      query.addOrderBy('ticketProcedure.id', 'ASC')
+      query.addOrderBy('ticketProcedure.priority', 'ASC')
       if (relation?.ticketProcedureList?.procedure) {
         query = query.leftJoinAndSelect(
           'ticketProcedure.procedure',
@@ -151,7 +151,7 @@ export class TicketRepository extends _PostgreSqlRepository<
 
     if (relation?.ticketLaboratoryList) {
       query = query.leftJoinAndSelect('ticket.ticketLaboratoryList', 'ticketLaboratory')
-      query.addOrderBy('ticketLaboratory.id', 'ASC')
+      query.addOrderBy('ticketLaboratory.priority', 'ASC')
       if (relation?.ticketLaboratoryList?.laboratoryList) {
         query = query.leftJoinAndSelect(
           'ticketLaboratory.laboratoryList',
@@ -163,7 +163,7 @@ export class TicketRepository extends _PostgreSqlRepository<
 
     if (relation?.ticketRadiologyList) {
       query = query.leftJoinAndSelect('ticket.ticketRadiologyList', 'ticketRadiology')
-      query.addOrderBy('ticketRadiology.id', 'ASC')
+      query.addOrderBy('ticketRadiology.priority', 'ASC')
       if (relation?.ticketRadiologyList?.radiology) {
         query = query.leftJoinAndSelect(
           'ticketRadiology.radiology',

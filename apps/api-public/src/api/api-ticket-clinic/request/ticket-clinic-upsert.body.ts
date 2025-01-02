@@ -1,10 +1,19 @@
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, PickType } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsIn, IsNotEmpty, IsNumber, IsString, MaxLength, ValidateNested } from 'class-validator'
+import {
+  IsArray,
+  IsDefined,
+  IsIn,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  MaxLength,
+  ValidateNested,
+} from 'class-validator'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { RoleInteractType } from '../../../../../_libs/database/entities/commission.entity'
 import { TicketStatus, TicketType } from '../../../../../_libs/database/entities/ticket.entity'
 import { CustomerCreateBody } from '../../api-customer/request'
+import { TicketUserBasicBody } from './ticket-clinic-update-user-list.body'
 
 class TicketAttributeBody {
   @ApiProperty({ example: 'Diagnosis' })
@@ -20,38 +29,24 @@ class TicketAttributeBody {
   value: string
 }
 
-class TicketUserBody {
-  @ApiProperty({ example: 45 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  userId: number
-
-  @ApiProperty({ example: 45 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  roleId: number
-
-  @ApiProperty({ example: RoleInteractType.Ticket })
-  @Expose()
-  @IsDefined()
-  @IsEnumValue(RoleInteractType)
-  interactType: RoleInteractType
-
-  @ApiProperty({ example: 45 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  interactId: number
-}
-
-class TicketBody {
+class TicketInformationCreateBody {
   @ApiProperty({ example: 45 })
   @Expose()
   @IsDefined()
   @IsNumber()
   customerSourceId: number
+
+  @ApiProperty({ example: 45 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  customerId: number
+
+  @ApiProperty({ example: 45 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  fromAppointmentId: number
 
   @ApiProperty({ example: TicketType.Clinic })
   @Expose()
@@ -71,6 +66,11 @@ class TicketBody {
   registeredAt: number
 }
 
+class TicketInformationUpdateBody extends PickType(TicketInformationCreateBody, [
+  'customerSourceId',
+  'registeredAt',
+]) { }
+
 export class TicketClinicCreateBody {
   @ApiProperty({ type: TicketAttributeBody, isArray: true })
   @Expose()
@@ -80,13 +80,13 @@ export class TicketClinicCreateBody {
   @ValidateNested({ each: true })
   ticketAttributeList: TicketAttributeBody[]
 
-  @ApiProperty({ type: TicketUserBody, isArray: true })
+  @ApiProperty({ type: TicketUserBasicBody, isArray: true })
   @Expose()
-  @Type(() => TicketUserBody)
+  @Type(() => TicketUserBasicBody)
   @IsDefined()
   @IsArray()
   @ValidateNested({ each: true })
-  ticketUserList: TicketUserBody[]
+  ticketUserList: TicketUserBasicBody[]
 
   @ApiProperty({ type: CustomerCreateBody })
   @Expose()
@@ -94,22 +94,35 @@ export class TicketClinicCreateBody {
   @ValidateNested({ each: true })
   customer: CustomerCreateBody
 
-  @ApiProperty({ type: TicketBody })
+  @ApiProperty({ type: TicketInformationCreateBody })
   @Expose()
-  @Type(() => TicketBody)
+  @Type(() => TicketInformationCreateBody)
   @IsDefined()
   @ValidateNested({ each: true })
-  ticket: TicketBody
+  ticketInformation: TicketInformationCreateBody
+}
 
-  @ApiProperty({ example: 45 })
+export class TicketClinicUpdateBody {
+  @ApiProperty({ type: TicketAttributeBody, isArray: true })
   @Expose()
+  @Type(() => TicketAttributeBody)
   @IsDefined()
-  @IsNumber()
-  customerId: number
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketAttributeList: TicketAttributeBody[]
 
-  @ApiProperty({ example: 45 })
+  @ApiProperty({ type: TicketUserBasicBody, isArray: true })
   @Expose()
+  @Type(() => TicketUserBasicBody)
   @IsDefined()
-  @IsNumber()
-  fromAppointmentId: number
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketUserList: TicketUserBasicBody[]
+
+  @ApiProperty({ type: TicketInformationUpdateBody })
+  @Expose()
+  @Type(() => TicketInformationUpdateBody)
+  @IsDefined()
+  @ValidateNested({ each: true })
+  ticketInformation: TicketInformationUpdateBody
 }

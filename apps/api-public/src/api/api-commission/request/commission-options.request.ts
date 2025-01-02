@@ -7,21 +7,37 @@ import {
   transformConditionNumber,
 } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
-import { RoleInteractType } from '../../../../../_libs/database/entities/commission.entity'
+import { InteractType } from '../../../../../_libs/database/entities/commission.entity'
 
-const ConditionEnumRoleInteractType = createConditionEnum(RoleInteractType)
+const ConditionEnumInteractType = createConditionEnum(InteractType)
 
 export class CommissionRelationQuery {
   @Expose()
   @IsBoolean()
-  role: boolean
+  role?: boolean
+
+  @Expose()
+  @IsBoolean()
+  product?: boolean
+
+  @Expose()
+  @IsBoolean()
+  procedure?: boolean
+
+  @Expose()
+  @IsBoolean()
+  laboratory?: boolean
+
+  @Expose()
+  @IsBoolean()
+  radiology?: boolean
 }
 
 export class CommissionFilterQuery {
   @Expose()
-  @Transform((params: TransformFnParams) => transformConditionEnum(params, RoleInteractType))
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, InteractType))
   @IsOptional()
-  interactType: RoleInteractType | InstanceType<typeof ConditionEnumRoleInteractType>
+  interactType: InteractType | InstanceType<typeof ConditionEnumInteractType>
 
   @Expose()
   @IsNumber()

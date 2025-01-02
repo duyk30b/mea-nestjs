@@ -2,7 +2,7 @@ import { ApiPropertyOptional, IntersectionType, PickType } from '@nestjs/swagger
 import { Expose, Transform, plainToInstance } from 'class-transformer'
 import { IsObject, ValidateNested } from 'class-validator'
 import { LimitQuery, PaginationQuery } from '../../../../../_libs/common/dto/query'
-import { RoleInteractType } from '../../../../../_libs/database/entities/commission.entity'
+import { InteractType } from '../../../../../_libs/database/entities/commission.entity'
 import {
   CommissionFilterQuery,
   CommissionRelationQuery,
@@ -31,7 +31,7 @@ export class CommissionGetQuery {
   @ApiPropertyOptional({
     type: String,
     example: JSON.stringify(<CommissionFilterQuery>{
-      interactType: RoleInteractType.Ticket,
+      interactType: InteractType.Ticket,
     }),
   })
   @Expose()

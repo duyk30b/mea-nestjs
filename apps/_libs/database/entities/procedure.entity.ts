@@ -1,5 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import Commission from './commission.entity'
 import ProcedureGroup from './procedure-group.entity'
 
 export enum ProcedureType {
@@ -61,21 +62,13 @@ export default class Procedure {
   @Expose()
   updatedAt: number
 
-  @Column({
-    type: 'bigint',
-    nullable: true,
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
-  @Expose()
-  deletedAt: number
-
   @ManyToOne((type) => ProcedureGroup, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'procedureGroupId', referencedColumnName: 'id' })
   @Expose()
   procedureGroup: ProcedureGroup
+
+  @Expose()
+  commissionList: Commission[]
 
   static fromRaw(raw: { [P in keyof Procedure]: any }) {
     if (!raw) return null
@@ -85,7 +78,6 @@ export default class Procedure {
     entity.price = Number(raw.price)
 
     entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)
-    entity.deletedAt = raw.deletedAt == null ? raw.deletedAt : Number(raw.deletedAt)
 
     return entity
   }
@@ -96,12 +88,12 @@ export default class Procedure {
 }
 
 export type ProcedureRelationType = {
-  [P in keyof Pick<Procedure, 'procedureGroup'>]?: boolean
+  [P in keyof Pick<Procedure, 'procedureGroup' | 'commissionList'>]?: boolean
 }
 
 export type ProcedureInsertType = Omit<
   Procedure,
-  keyof ProcedureRelationType | keyof Pick<Procedure, 'id' | 'updatedAt' | 'deletedAt'>
+  keyof ProcedureRelationType | keyof Pick<Procedure, 'id' | 'updatedAt'>
 >
 
 export type ProcedureUpdateType = {

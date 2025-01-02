@@ -1,15 +1,18 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger'
-import { Expose, Transform } from 'class-transformer'
+import { Expose, Transform, Type } from 'class-transformer'
 import {
+  IsArray,
   IsDefined,
   IsIn,
   IsInt,
   IsNumber,
   IsPositive,
   IsString,
+  ValidateNested,
   validateSync,
 } from 'class-validator'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
+import { CommissionCalculatorType } from '../../../../../_libs/database/entities/commission.entity'
 import { ProcedureType } from '../../../../../_libs/database/entities/procedure.entity'
 
 export class ConsumableConversion {
@@ -24,6 +27,24 @@ export class ConsumableConversion {
   @IsNumber()
   @IsPositive()
   quantity: number
+}
+
+export class ProcedureCommission {
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  @IsPositive()
+  roleId: number
+
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  commissionValue: number
+
+  @ApiProperty({ example: CommissionCalculatorType.VND })
+  @Expose()
+  @IsEnumValue(CommissionCalculatorType)
+  commissionCalculatorType: CommissionCalculatorType
 }
 
 export class ProcedureCreateBody {
@@ -98,6 +119,14 @@ export class ProcedureCreateBody {
   @IsDefined()
   @IsIn([0, 1])
   isActive: 0 | 1
+
+  @ApiProperty({ type: ProcedureCommission, isArray: true })
+  @Expose()
+  @Type(() => ProcedureCommission)
+  @IsDefined()
+  @IsArray()
+  @ValidateNested({ each: true })
+  commissionList: ProcedureCommission[]
 }
 
 export class ProcedureUpdateBody extends PartialType(ProcedureCreateBody) { }

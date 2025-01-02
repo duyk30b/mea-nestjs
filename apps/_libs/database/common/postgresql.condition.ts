@@ -64,6 +64,10 @@ export abstract class PostgreSqlCondition<_ENTITY> {
               if (value.length === 0) return operators.push(IsNull())
               return operators.push(In(value))
             }
+            if (rule === 'NOT_IN') {
+              if (value.length === 0) return operators.push(Not(IsNull()))
+              return operators.push(Not(In(value)))
+            }
             if (rule === 'LIKE') {
               const textLike = `%${escapeSearch(value)}%`
               return operators.push(Like(textLike))

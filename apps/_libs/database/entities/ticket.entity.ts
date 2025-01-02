@@ -174,6 +174,14 @@ export default class Ticket extends BaseEntity {
   expense: number // Mục này sẽ không hiện trong đơn hàng, khách hàng ko nhìn thấy
 
   @Column({
+    default: 0,
+    type: 'bigint',
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  commissionMoney: number // Tổng tiền hoa hồng
+
+  @Column({
     type: 'bigint',
     default: 0,
     transformer: { to: (value) => value, from: (value) => Number(value) },

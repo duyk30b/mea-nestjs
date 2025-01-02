@@ -17,16 +17,17 @@ import { PermissionId } from '../../../../_libs/database/entities/permission.ent
 import { ApiTicketClinicService } from './api-ticket-clinic.service'
 import {
   TicketClinicCreateBody,
+  TicketClinicUpdateBody,
   TicketClinicUpdateConsumableBody,
   TicketClinicUpdateItemsMoneyBody,
   TicketClinicUpdatePrescriptionBody,
   TicketClinicUpdateTicketLaboratoryListBody,
-  TicketClinicUpdateTicketProcedureListBody,
   TicketClinicUpdateTicketRadiologyListBody,
 } from './request'
 import { TicketClinicPaymentBody } from './request/ticket-clinic-payment.body'
 import { TicketClinicReturnProductListBody } from './request/ticket-clinic-return-product-list.body'
 import { TicketClinicUpdateDiagnosisBody } from './request/ticket-clinic-update-diagnosis.body'
+import { TicketClinicUpdateTicketUserListBody } from './request/ticket-clinic-update-user-list.body'
 
 @ApiTags('TicketClinic')
 @ApiBearerAuth('access-token')
@@ -36,12 +37,23 @@ export class ApiTicketClinicController {
 
   @Post('create')
   @HasPermission(PermissionId.TICKET_CLINIC_CREATE)
-  async create(
-    @External() { oid }: TExternal,
-    @Body() body: TicketClinicCreateBody
-  ) {
+  async create(@External() { oid }: TExternal, @Body() body: TicketClinicCreateBody) {
     return await this.apiTicketClinicService.create({
       oid,
+      body,
+    })
+  }
+
+  @Post(':id/update')
+  @HasPermission(PermissionId.TICKET_CLINIC_CREATE)
+  async update(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam,
+    @Body() body: TicketClinicUpdateBody
+  ) {
+    return await this.apiTicketClinicService.update({
+      oid,
+      ticketId: id,
       body,
     })
   }
@@ -53,7 +65,7 @@ export class ApiTicketClinicController {
   }
 
   @Post(':id/update-diagnosis')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_DIAGNOSIS_BASIC)
+  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_DIAGNOSIS)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FastifyFilesInterceptor('files', 10, {}))
   async updateDiagnosisBasic(
@@ -70,14 +82,14 @@ export class ApiTicketClinicController {
     })
   }
 
-  @Post(':id/update-ticket-procedure-list')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST)
-  async updateTicketProcedureList(
+  @Post(':id/update-ticket-user-list')
+  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_USER_LIST)
+  async updateTicketUserList(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketClinicUpdateTicketProcedureListBody
+    @Body() body: TicketClinicUpdateTicketUserListBody
   ) {
-    return await this.apiTicketClinicService.updateTicketProcedureList({
+    return await this.apiTicketClinicService.updateTicketUserList({
       oid,
       ticketId: id,
       body,

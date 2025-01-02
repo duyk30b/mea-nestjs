@@ -13,6 +13,10 @@ export class ProductRelationQuery {
   @Expose()
   @IsBoolean()
   productGroup: boolean
+
+  @Expose()
+  @IsBoolean()
+  commissionList: boolean
 }
 
 export class BatchFilterQuery {

@@ -87,17 +87,34 @@ export class SocketEmitService {
     data: { ticketId: number; ticketAttributeList: TicketAttribute[] }
   ) {
     if (!this.io) return
-    this.io
-      .in(oid.toString())
-      .emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_ATTRIBUTE_LIST, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_ATTRIBUTE_LIST, data)
   }
 
-  ticketClinicUpdateTicketProcedureList(
+  ticketClinicChangeTicketProcedureList(
     oid: number,
-    data: { ticketId: number; ticketProcedureList: TicketProcedure[] }
+    data: {
+      ticketId: number
+      ticketProcedureInsert?: TicketProcedure
+      ticketProcedureUpdateList?: TicketProcedure[]
+      ticketProcedureDestroy?: TicketProcedure
+      ticketProcedureList?: TicketProcedure[]
+    }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE_TICKET_PROCEDURE_LIST, data)
+  }
+
+  ticketClinicChangeTicketUserList(
+    oid: number,
+    data: {
+      ticketId: number
+      ticketUserInsertList?: TicketUser[]
+      ticketUserUpdateList?: TicketUser[]
+      ticketUserDestroyList?: TicketUser[]
+    }
+  ) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE_TICKET_USER_LIST, data)
   }
 
   ticketClinicUpdateTicketProductConsumableList(
@@ -131,9 +148,7 @@ export class SocketEmitService {
     data: { ticketId: number; ticketLaboratoryList: TicketLaboratory[] }
   ) {
     if (!this.io) return
-    this.io
-      .in(oid.toString())
-      .emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_LIST, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_LIST, data)
   }
 
   ticketClinicUpdateTicketLaboratoryResult(
@@ -151,9 +166,7 @@ export class SocketEmitService {
     data: { ticketId: number; ticketRadiologyList: TicketRadiology[] }
   ) {
     if (!this.io) return
-    this.io
-      .in(oid.toString())
-      .emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST, data)
   }
 
   ticketClinicUpdateTicketRadiologyResult(
@@ -161,9 +174,7 @@ export class SocketEmitService {
     data: { ticketId: number; ticketRadiology: TicketRadiology }
   ) {
     if (!this.io) return
-    this.io
-      .in(oid.toString())
-      .emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_RESULT, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_RESULT, data)
   }
 
   ticketClinicUpdateTicketUserList(

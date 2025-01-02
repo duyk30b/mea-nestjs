@@ -20,6 +20,7 @@ export type BaseCondition<T> = {
       } & {
         LIKE?: string
         IN?: T[P][]
+        NOT_IN?: T[P][]
         BETWEEN?: [T[P], T[P]]
         RAW_QUERY?: string
       })

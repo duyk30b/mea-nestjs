@@ -10,6 +10,12 @@ class TicketRadiologyBody {
   @Expose()
   @IsDefined()
   @IsNumber()
+  priority: number
+
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
   radiologyId: number
 
   @ApiProperty({ example: 25_000 })

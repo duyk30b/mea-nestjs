@@ -1,12 +1,13 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger'
-import { Expose } from 'class-transformer'
-import { IsDefined, IsNumber } from 'class-validator'
+import { Expose, Type } from 'class-transformer'
+import { IsArray, IsDefined, IsNumber, ValidateNested } from 'class-validator'
 import { valuesEnum } from '../../../../../_libs/common/helpers/typescript.helper'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import {
   CommissionCalculatorType,
-  RoleInteractType,
+  InteractType,
 } from '../../../../../_libs/database/entities/commission.entity'
+import { CommissionFilterQuery } from './commission-options.request'
 
 export class CommissionCreateBody {
   @ApiProperty({ example: 25 })
@@ -15,11 +16,11 @@ export class CommissionCreateBody {
   @IsNumber()
   roleId: number
 
-  @ApiProperty({ enum: RoleInteractType, example: RoleInteractType.Ticket })
+  @ApiProperty({ enum: InteractType, example: InteractType.Ticket })
   @Expose()
   @IsDefined()
-  @IsEnumValue(RoleInteractType)
-  interactType: RoleInteractType
+  @IsEnumValue(InteractType)
+  interactType: InteractType
 
   @ApiProperty({ example: 25 })
   @Expose()
@@ -31,7 +32,7 @@ export class CommissionCreateBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  value: number
+  commissionValue: number
 
   @ApiProperty({
     enum: valuesEnum(CommissionCalculatorType),
@@ -40,7 +41,24 @@ export class CommissionCreateBody {
   @Expose()
   @IsDefined()
   @IsEnumValue(CommissionCalculatorType)
-  calculatorType: CommissionCalculatorType
+  commissionCalculatorType: CommissionCalculatorType
 }
 
 export class CommissionUpdateBody extends PartialType(CommissionCreateBody) { }
+
+export class CommissionReplaceListBody {
+  @ApiProperty({ type: CommissionCreateBody, isArray: true })
+  @Expose()
+  @Type(() => CommissionCreateBody)
+  @IsDefined()
+  @IsArray()
+  @ValidateNested({ each: true })
+  commissionData: CommissionCreateBody[]
+
+  @ApiProperty({ type: CommissionFilterQuery })
+  @Expose()
+  @Type(() => CommissionFilterQuery)
+  @IsDefined()
+  @ValidateNested({ each: true })
+  filter: CommissionFilterQuery
+}

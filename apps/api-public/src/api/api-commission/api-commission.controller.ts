@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
 import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
@@ -9,7 +9,9 @@ import { ApiCommissionService } from './api-commission.service'
 import {
   CommissionCreateBody,
   CommissionGetManyQuery,
+  CommissionGetOneQuery,
   CommissionPaginationQuery,
+  CommissionReplaceListBody,
   CommissionUpdateBody,
 } from './request'
 
@@ -33,8 +35,12 @@ export class ApiCommissionController {
 
   @Get('detail/:id')
   @IsUser()
-  findOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return this.apiCommissionService.getOne(oid, id)
+  findOne(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam,
+    @Query() query: CommissionGetOneQuery
+  ) {
+    return this.apiCommissionService.getOne(oid, id, query)
   }
 
   @Post('create')
@@ -59,5 +65,11 @@ export class ApiCommissionController {
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiCommissionService.destroyOne(oid, id)
+  }
+
+  @Put('replace-list')
+  @HasPermission(PermissionId.COMMISSION_CRUD)
+  async replaceAll(@External() { oid }: TExternal, @Body() body: CommissionReplaceListBody) {
+    return await this.apiCommissionService.replaceList(oid, body)
   }
 }

@@ -228,8 +228,8 @@ export abstract class _PostgreSqlManager<
       .set(data)
       .returning('*')
       .execute()
-    const raw = updateResult.raw
-    return raw
+    const raws = updateResult.raw
+    return raws
   }
 
   async updateAndReturnEntity<X extends Partial<_UPDATE>>(
@@ -258,5 +258,40 @@ export abstract class _PostgreSqlManager<
     const deleteResult = await manager.delete(this.entity, where)
     const affected = deleteResult.affected
     return affected
+  }
+
+  async deleteAndReturnRaw(
+    manager: EntityManager,
+    condition: BaseCondition<_ENTITY>
+  ): Promise<{ [P in keyof _ENTITY]: any }[]> {
+    const where = this.getWhereOptions(condition)
+    const deleteResult = await manager
+      .createQueryBuilder()
+      .delete()
+      .from(this.entity)
+      .where(where)
+      .returning('*')
+      .execute()
+    const raws = deleteResult.raw
+    return raws
+  }
+
+  async deleteAndReturnEntity(
+    manager: EntityManager,
+    condition: BaseCondition<_ENTITY>
+  ): Promise<_ENTITY[]> {
+    const raws = await this.deleteAndReturnRaw(manager, condition)
+    return this.entity.fromRaws(raws)
+  }
+
+  async deleteOneAndReturnEntity(
+    manager: EntityManager,
+    condition: BaseCondition<_ENTITY>
+  ): Promise<_ENTITY> {
+    const raws = await this.deleteAndReturnRaw(manager, condition)
+    if (raws.length !== 1) {
+      throw new Error(`Delete Database failed: ` + JSON.stringify({ raws }))
+    }
+    return this.entity.fromRaw(raws[0])
   }
 }

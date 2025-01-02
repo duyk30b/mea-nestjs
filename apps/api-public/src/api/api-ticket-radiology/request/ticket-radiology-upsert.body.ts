@@ -17,6 +17,12 @@ export class TicketRadiologyCreateBody extends MultipleFileUpload {
 
   @ApiProperty({ example: 56 })
   @Expose()
+  @IsDefined()
+  @IsNumber()
+  priority: number
+
+  @ApiProperty({ example: 56 })
+  @Expose()
   @Transform(({ value }) => (value != null ? Number(value) : value))
   @IsDefined()
   @IsInt()

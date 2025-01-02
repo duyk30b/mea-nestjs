@@ -1,8 +1,12 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import Laboratory from './laboratory.entity'
+import Procedure from './procedure.entity'
+import Product from './product.entity'
+import Radiology from './radiology.entity'
 import Role from './role.entity'
 
-export enum RoleInteractType {
+export enum InteractType {
   Ticket = 1,
   Product = 2,
   Procedure = 3,
@@ -12,12 +16,16 @@ export enum RoleInteractType {
 
 export enum CommissionCalculatorType {
   VND = 1,
-  PercentRetail = 2,
+  PercentExpected = 2,
   PercentActual = 3,
 }
 
 @Entity('Commission')
-@Index('IDX_Setting__oid_roleId_interactType_interactId', ['oid', 'roleId', 'interactType', 'interactId'], { unique: true })
+@Index(
+  'IDX_Commission__oid_roleId_interactType_interactId',
+  ['oid', 'roleId', 'interactType', 'interactId'],
+  { unique: true }
+)
 export default class Commission {
   @Column()
   @Exclude()
@@ -35,9 +43,9 @@ export default class Commission {
   @Expose()
   interactId: number
 
-  @Column({ type: 'smallint', default: RoleInteractType.Ticket })
+  @Column({ type: 'smallint', default: InteractType.Ticket })
   @Expose()
-  interactType: RoleInteractType
+  interactType: InteractType
 
   @Column({
     type: 'decimal',
@@ -47,23 +55,35 @@ export default class Commission {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  value: number
+  commissionValue: number
 
   @Column({ type: 'smallint', default: CommissionCalculatorType.VND })
   @Expose()
-  calculatorType: CommissionCalculatorType
+  commissionCalculatorType: CommissionCalculatorType
 
   @Expose()
   @ManyToOne((type) => Role, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'roleId', referencedColumnName: 'id' })
   role: Role
 
+  @Expose()
+  product: Product
+
+  @Expose()
+  procedure: Procedure
+
+  @Expose()
+  radiology: Radiology
+
+  @Expose()
+  laboratory: Laboratory
+
   static fromRaw(raw: { [P in keyof Commission]: any }) {
     if (!raw) return null
     const entity = new Commission()
     Object.assign(entity, raw)
 
-    entity.value = Number(raw.value)
+    entity.commissionValue = Number(raw.commissionValue)
     return entity
   }
 
@@ -73,7 +93,10 @@ export default class Commission {
 }
 
 export type CommissionRelationType = {
-  [P in keyof Pick<Commission, 'role'>]?: boolean
+  [P in keyof Pick<
+    Commission,
+    'role' | 'product' | 'procedure' | 'radiology' | 'laboratory'
+  >]?: boolean
 }
 
 export type CommissionInsertType = Omit<

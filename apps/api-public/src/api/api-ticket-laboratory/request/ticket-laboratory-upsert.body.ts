@@ -9,6 +9,12 @@ import { DiscountType } from '../../../../../_libs/database/common/variable'
 export class TicketLaboratoryCreate {
   @ApiProperty({ example: 56 })
   @Expose()
+  @IsDefined()
+  @IsNumber()
+  priority: number
+
+  @ApiProperty({ example: 56 })
+  @Expose()
   @Transform(({ value }) => (value != null ? Number(value) : value))
   @IsDefined()
   @IsInt()

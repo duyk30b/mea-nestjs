@@ -1,6 +1,11 @@
-import { HttpStatus, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import {
+  CommissionInsertType,
+  InteractType,
+} from '../../../../_libs/database/entities/commission.entity'
+import { CommissionRepository } from '../../../../_libs/database/repositories'
 import { ProcedureRepository } from '../../../../_libs/database/repositories/procedure.repository'
 import { TicketProcedureRepository } from '../../../../_libs/database/repositories/ticket-procedure.repository'
 import {
@@ -15,6 +20,7 @@ import {
 export class ApiProcedureService {
   constructor(
     private readonly procedureRepository: ProcedureRepository,
+    private readonly commissionRepository: CommissionRepository,
     private readonly ticketProcedureRepository: TicketProcedureRepository
   ) { }
 
@@ -62,21 +68,64 @@ export class ApiProcedureService {
       condition: { oid, id },
     })
     if (!procedure) throw new BusinessException('error.Database.NotFound')
+    if (query?.relation?.commissionList) {
+      procedure.commissionList = await this.commissionRepository.findManyBy({
+        oid,
+        interactType: InteractType.Procedure,
+        interactId: procedure.id,
+      })
+    }
     return { data: { procedure } }
   }
 
   async createOne(oid: number, body: ProcedureCreateBody): Promise<BaseResponse> {
+    const { commissionList, ...procedureBody } = body
     const procedure = await this.procedureRepository.insertOneFullFieldAndReturnEntity({
       oid,
-      ...body,
+      ...procedureBody,
     })
+
+    const commissionDtoList: CommissionInsertType[] = commissionList.map((i) => {
+      const dto: CommissionInsertType = {
+        oid,
+        roleId: i.roleId,
+        commissionCalculatorType: i.commissionCalculatorType,
+        commissionValue: i.commissionValue,
+        interactId: procedure.id,
+        interactType: InteractType.Procedure,
+      }
+      return dto
+    })
+    procedure.commissionList =
+      await this.commissionRepository.insertManyFullFieldAndReturnEntity(commissionDtoList)
     return { data: { procedure } }
   }
 
   async updateOne(oid: number, id: number, body: ProcedureUpdateBody): Promise<BaseResponse> {
-    const [procedure] = await this.procedureRepository.updateAndReturnEntity({ oid, id }, body)
+    const { commissionList, ...procedureBody } = body
+    const [procedure] = await this.procedureRepository.updateAndReturnEntity(
+      { oid, id },
+      procedureBody
+    )
     if (!procedure) throw new BusinessException('error.Database.UpdateFailed')
-
+    await this.commissionRepository.delete({
+      oid,
+      interactId: procedure.id,
+      interactType: InteractType.Procedure,
+    })
+    const commissionDtoList: CommissionInsertType[] = commissionList.map((i) => {
+      const dto: CommissionInsertType = {
+        oid,
+        roleId: i.roleId,
+        commissionCalculatorType: i.commissionCalculatorType,
+        commissionValue: i.commissionValue,
+        interactId: procedure.id,
+        interactType: InteractType.Procedure,
+      }
+      return dto
+    })
+    procedure.commissionList =
+      await this.commissionRepository.insertManyFullFieldAndReturnEntity(commissionDtoList)
     return { data: { procedure } }
   }
 

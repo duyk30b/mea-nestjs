@@ -1,9 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
-import {
-  CommissionCalculatorType,
-  RoleInteractType,
-} from './commission.entity'
+import { CommissionCalculatorType, InteractType } from './commission.entity'
 import Role from './role.entity'
 import Ticket from './ticket.entity'
 import User from './user.entity'
@@ -32,27 +29,35 @@ export default class TicketUser {
   @Expose()
   userId: number
 
-  @Column({ type: 'smallint', default: RoleInteractType.Ticket })
+  @Column({ type: 'smallint', default: InteractType.Ticket })
   @Expose()
-  interactType: RoleInteractType
+  interactType: InteractType
 
   @Column({ type: 'integer', default: 0 })
   @Expose()
-  interactId: number  // ticketProcedureId hoặc ticketProductId hoặc ticketRadiologyId
+  interactId: number
 
-  @Column({ default: 0 })
+  @Column({ type: 'integer', default: 0 })
+  @Expose()
+  ticketItemId: number // ticketProcedureId hoặc ticketProductId hoặc ticketRadiologyId
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
   @Expose()
   commissionMoney: number
 
   @Column({
     type: 'decimal',
     default: 0,
-    precision: 10,
+    precision: 5,
     scale: 3,
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  commissionValue: number
+  commissionPercent: number // % giảm giá
 
   @Column({ type: 'smallint', default: CommissionCalculatorType.VND })
   @Expose()
@@ -87,7 +92,8 @@ export default class TicketUser {
     const entity = new TicketUser()
     Object.assign(entity, raw)
 
-    entity.commissionValue = Number(raw.commissionValue)
+    entity.commissionMoney = Number(raw.commissionMoney)
+    entity.commissionPercent = Number(raw.commissionPercent)
     entity.createdAt = Number(raw.createdAt)
     return entity
   }
