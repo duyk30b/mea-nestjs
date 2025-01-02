@@ -14872,15 +14872,17 @@ let TicketRepository = class TicketRepository extends _postgresql_repository_1._
         const { oid, ticketId } = options;
         const updateResult = await this.manager.query(`
         UPDATE  "Ticket" "ticket" 
-        SET     "laboratoryMoney"  = "temp"."sumActualPrice",
-                "totalMoney"      = "ticket"."totalMoney" - "ticket"."laboratoryMoney" 
-                                        + temp."sumActualPrice",
-                "debt"            = "ticket"."debt" - "ticket"."laboratoryMoney" 
-                                        + temp."sumActualPrice",
-                "profit"          = "ticket"."profit" - "ticket"."laboratoryMoney" 
-                                        + temp."sumActualPrice"
+        SET     "laboratoryMoney"   = "temp"."sumLaboratoryActualPrice",
+                "itemsActualMoney"  = "ticket"."itemsActualMoney" - "ticket"."laboratoryMoney" 
+                                        + temp."sumLaboratoryActualPrice",
+                "totalMoney"        = "ticket"."totalMoney" - "ticket"."laboratoryMoney" 
+                                        + temp."sumLaboratoryActualPrice",
+                "debt"              = "ticket"."debt" - "ticket"."laboratoryMoney" 
+                                        + temp."sumLaboratoryActualPrice",
+                "profit"            = "ticket"."profit" - "ticket"."laboratoryMoney" 
+                                        + temp."sumLaboratoryActualPrice"
         FROM    ( 
-                SELECT "ticketId", SUM("actualPrice") as "sumActualPrice"
+                SELECT "ticketId", SUM("actualPrice") as "sumLaboratoryActualPrice"
                     FROM "TicketLaboratory" 
                     WHERE "ticketId" = (${ticketId}) AND "oid" = ${oid}
                     GROUP BY "ticketId" 
@@ -14895,15 +14897,17 @@ let TicketRepository = class TicketRepository extends _postgresql_repository_1._
         const { oid, ticketId } = options;
         const updateResult = await this.manager.query(`
         UPDATE  "Ticket" "ticket" 
-        SET     "radiologyMoney"  = "temp"."sumActualPrice",
-                "totalMoney"      = "ticket"."totalMoney" - "ticket"."radiologyMoney" 
-                                        + temp."sumActualPrice",
-                "debt"            = "ticket"."debt" - "ticket"."radiologyMoney" 
-                                        + temp."sumActualPrice",
-                "profit"          = "ticket"."profit" - "ticket"."radiologyMoney" 
-                                        + temp."sumActualPrice"
+        SET     "radiologyMoney"    = "temp"."sumRadiologyActualPrice",
+                "itemsActualMoney"  = "ticket"."itemsActualMoney" - "ticket"."radiologyMoney" 
+                                        + temp."sumRadiologyActualPrice",
+                "totalMoney"        = "ticket"."totalMoney" - "ticket"."radiologyMoney" 
+                                        + temp."sumRadiologyActualPrice",
+                "debt"              = "ticket"."debt" - "ticket"."radiologyMoney" 
+                                        + temp."sumRadiologyActualPrice",
+                "profit"            = "ticket"."profit" - "ticket"."radiologyMoney" 
+                                        + temp."sumRadiologyActualPrice"
         FROM    ( 
-                SELECT "ticketId", SUM("actualPrice") as "sumActualPrice"
+                SELECT "ticketId", SUM("actualPrice") as "sumRadiologyActualPrice"
                     FROM "TicketRadiology" 
                     WHERE "ticketId" = (${ticketId}) AND "oid" = ${oid}
                     GROUP BY "ticketId" 
@@ -14918,12 +14922,13 @@ let TicketRepository = class TicketRepository extends _postgresql_repository_1._
         const { oid, ticketId, laboratoryMoney } = options;
         const updateResult = await this.manager.query(`
         UPDATE  "Ticket" "ticket" 
-        SET     "laboratoryMoney" = ${laboratoryMoney},
-                "totalMoney"      = "totalMoney" - "laboratoryMoney" + ${laboratoryMoney},
-                "debt"            = "debt" - "laboratoryMoney"  + ${laboratoryMoney},
-                "profit"          = "profit" - "laboratoryMoney" + ${laboratoryMoney}
-        WHERE   "ticket"."id"     = ${ticketId}
-            AND "ticket"."oid"    = ${oid}
+        SET     "laboratoryMoney"   = ${laboratoryMoney},
+                "itemsActualMoney"  = "itemsActualMoney" - "laboratoryMoney" + ${laboratoryMoney},
+                "totalMoney"        = "totalMoney" - "laboratoryMoney" + ${laboratoryMoney},
+                "debt"              = "debt" - "laboratoryMoney"  + ${laboratoryMoney},
+                "profit"            = "profit" - "laboratoryMoney" + ${laboratoryMoney}
+        WHERE   "ticket"."id"       = ${ticketId}
+            AND "ticket"."oid"      = ${oid}
         RETURNING ticket.*
     `);
         return entities_1.Ticket.fromRaws(updateResult[0]);
