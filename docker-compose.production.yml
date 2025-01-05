@@ -77,7 +77,6 @@ services:
       - api_public
     volumes:
       - ./nginx/conf.d/:/etc/nginx/conf.d/
-      - ./nginx/adminer.d/:/etc/nginx/adminer.d/
       - ./nginx/ssl/:/etc/nginx/ssl/
     ports:
       - "80:80"

@@ -44,7 +44,8 @@ cd ~/mea-nestjs/nginx/ssl/letsencrypt/
 ls -la
 mv mea.ga-0003 mea.ga
 cd ~/mea-nestjs/
-docker compose -f docker.nginx.yml up -d
+docker compose -f docker-compose.production.yml up -d nginx
+docker exec mc_nginx nginx -t
 ```
 
 2. Nginx
