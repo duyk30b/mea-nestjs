@@ -3,7 +3,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
+import { arrayToKeyValue, ESObject } from '../../../../_libs/common/helpers/object.helper'
 import { DTimer } from '../../../../_libs/common/helpers/time.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { DeliveryStatus } from '../../../../_libs/database/common/variable'
@@ -41,6 +41,7 @@ import {
 } from '../../../../_libs/database/operations'
 import {
   AppointmentRepository,
+  CommissionRepository,
   CustomerRepository,
   TicketAttributeRepository,
   TicketProductRepository,
@@ -74,6 +75,7 @@ export class ApiTicketClinicService {
     private readonly customerRepository: CustomerRepository,
     private readonly appointmentRepository: AppointmentRepository,
     private readonly ticketRepository: TicketRepository,
+    private readonly commissionRepository: CommissionRepository,
     private readonly ticketAttributeRepository: TicketAttributeRepository,
     private readonly ticketUserRepository: TicketUserRepository,
     private readonly ticketProductRepository: TicketProductRepository,
@@ -152,6 +154,13 @@ export class ApiTicketClinicService {
     }
 
     if (body.ticketUserList) {
+      const commissionList = await this.commissionRepository.findManyBy({
+        oid,
+        interactType: InteractType.Ticket,
+        interactId: 0,
+      })
+      const commissionMap = ESObject.keyBy(commissionList, 'roleId')
+
       const ticketUserInsertList = body.ticketUserList
         .filter((i) => !!i.userId)
         .map((i) => {
@@ -164,13 +173,26 @@ export class ApiTicketClinicService {
             ticketId: ticket.id,
             createdAt: Date.now(),
             commissionCalculatorType: CommissionCalculatorType.VND,
-            commissionMoney: 0,
+            commissionMoney: commissionMap[i.roleId]?.commissionValue || 0,
             commissionPercent: 0,
           }
           return dto
         })
       ticket.ticketUserList =
         await this.ticketUserRepository.insertManyAndReturnEntity(ticketUserInsertList)
+
+      const commissionMoneyAdd = ticket.ticketUserList.reduce((acc, item) => {
+        return acc + item.commissionMoney
+      }, 0)
+
+      const [ticketUpdate] = await this.ticketRepository.updateAndReturnEntity(
+        { oid, id: ticket.id },
+        {
+          commissionMoney: ticket.commissionMoney + commissionMoneyAdd,
+          profit: ticket.profit - commissionMoneyAdd,
+        }
+      )
+      Object.assign(ticket, ticketUpdate)
     }
 
     this.socketEmitService.ticketClinicCreate(oid, { ticket })

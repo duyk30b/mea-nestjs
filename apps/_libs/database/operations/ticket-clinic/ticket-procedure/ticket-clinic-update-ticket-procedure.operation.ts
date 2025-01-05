@@ -4,13 +4,8 @@ import { ESObject } from '../../../../common/helpers/object.helper'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { DiscountType } from '../../../common/variable'
 import { CommissionCalculatorType, InteractType } from '../../../entities/commission.entity'
-import TicketProcedure, {
-  TicketProcedureInsertType,
-  TicketProcedureRelationType,
-  TicketProcedureStatus,
-  TicketProcedureUpdateType,
-} from '../../../entities/ticket-procedure.entity'
-import { TicketUserInsertType } from '../../../entities/ticket-user.entity'
+import TicketProcedure from '../../../entities/ticket-procedure.entity'
+import TicketUser, { TicketUserInsertType } from '../../../entities/ticket-user.entity'
 import { TicketStatus } from '../../../entities/ticket.entity'
 import {
   CommissionManager,
@@ -24,7 +19,7 @@ export type TicketProcedureUpdateDtoType = {
 }
 
 @Injectable()
-export class TicketClinicAddTicketProcedureOperation {
+export class TicketClinicUpdateTicketProcedureOperation {
   constructor(
     private dataSource: DataSource,
     private ticketManager: TicketManager,
@@ -37,8 +32,8 @@ export class TicketClinicAddTicketProcedureOperation {
     oid: number
     ticketId: number
     ticketProcedureId: number
-    ticketProcedureUpdateDto: NoExtra<TicketProcedureUpdateDtoType, T>
-    ticketUserDto?: { id: number; roleId: number; userId: number }[]
+    ticketProcedureUpdateDto?: NoExtra<TicketProcedureUpdateDtoType, T>
+    ticketUserDto?: { roleId: number; userId: number }[]
   }) {
     const { oid, ticketId, ticketProcedureId, ticketProcedureUpdateDto, ticketUserDto } = params
     const PREFIX = `ticketId=${ticketId} updateTicketProcedure failed`
@@ -52,31 +47,56 @@ export class TicketClinicAddTicketProcedureOperation {
       )
 
       // === 2. UPDATE TICKET PROCEDURE ===
-      const ticketProcedureOrigin = await this.ticketProcedureManager.findOneBy(manager, {
-        oid,
-        id: ticketProcedureId,
-      })
-      const ticketProcedureUpdate = await this.ticketProcedureManager.updateOneAndReturnEntity(
-        manager,
-        { oid, id: ticketProcedureId },
-        { quantity: ticketProcedureUpdateDto.quantity }
-      )
-      const procedureMoneyChange =
-        ticketProcedureUpdate.quantity * ticketProcedureUpdate.actualPrice
-        - ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice
+      let ticketProcedure: TicketProcedure
+      let procedureMoneyChange = 0
+      if (ticketProcedureUpdateDto) {
+        const ticketProcedureOrigin = await this.ticketProcedureManager.findOneBy(manager, {
+          oid,
+          id: ticketProcedureId,
+        })
+        ticketProcedure = await this.ticketProcedureManager.updateOneAndReturnEntity(
+          manager,
+          { oid, id: ticketProcedureId },
+          { quantity: ticketProcedureUpdateDto.quantity }
+        )
+        procedureMoneyChange =
+          ticketProcedure.quantity * ticketProcedure.actualPrice
+          - ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice
+      }
 
-      const commissionMoneyChange = 0
+      let commissionMoneyChange = 0
+      let ticketUserDestroyList: TicketUser[] = []
+      let ticketUserInsertList: TicketUser[] = []
       if (ticketUserDto) {
-        const ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+        if (!ticketProcedure) {
+          ticketProcedure = await this.ticketProcedureManager.findOneBy(manager, {
+            oid,
+            id: ticketProcedureId,
+          })
+        }
+
+        ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
           oid,
           interactType: InteractType.Procedure,
           ticketItemId: ticketProcedureId,
-          id: { NOT_IN: ticketUserDto.map((i) => i.id) },
         })
-        
-        const ticketUserInsertDto = ticketUserDto
-          .filter((i) => i.id === 0)
-          .map((i) => {
+        const commissionMoneyDelete = ticketUserDestroyList.reduce((acc, item) => {
+          return acc + item.commissionMoney
+        }, 0)
+
+        let commissionMoneyAdd = 0
+
+        if (ticketUserDto.length) {
+          // === 3. QUERY COMMISSION ===
+          const commissionList = await this.commissionManager.findManyBy(manager, {
+            oid,
+            interactType: InteractType.Procedure,
+            interactId: ticketProcedure.procedureId,
+          })
+          const commissionMap = ESObject.keyBy(commissionList, 'roleId')
+
+          // === 4. INSERT TICKET USER ===
+          const ticketUserInsertListDto = ticketUserDto.map((i) => {
             let commissionMoney = 0
             let commissionPercent = 0
 
@@ -111,47 +131,22 @@ export class TicketClinicAddTicketProcedureOperation {
             return insertDto
           })
 
-        const ticketUserInsert = await this.ticketUserManager.insertManyAndReturnEntity(
-          manager,
-          ticketUserInsertDto
-        )
+          ticketUserInsertList = await this.ticketUserManager.insertManyAndReturnEntity(
+            manager,
+            ticketUserInsertListDto
+          )
 
-        const commissionMoneySubtract = ticketUserDestroyList.reduce((acc, item) => {
-          return acc + item.commissionMoney
-        }, 0)
-
-        let commissionMoneyPlus = 0
-        if (ticketUserDto.length) {
-          // === 3. QUERY COMMISSION ===
-          const commissionList = await this.commissionManager.findManyBy(manager, {
-            oid,
-            interactType: InteractType.Procedure,
-            interactId: ticketProcedureId,
-          })
-          const commissionMap = ESObject.keyBy(commissionList, 'roleId')
-
-          // === 4. INSERT TICKET USER ===
-
-          commissionMoneyPlus = ticketUserInsert.reduce((acc, item) => {
+          commissionMoneyAdd = ticketUserInsertList.reduce((acc, item) => {
             return acc + item.commissionMoney
           }, 0)
         }
 
-        // === 3. QUERY COMMISSION ===
-        const commissionList = await this.commissionManager.findManyBy(manager, {
-          oid,
-          interactType: InteractType.Procedure,
-          interactId: ticketProcedure.procedureId,
-        })
-        const commissionMap = ESObject.keyBy(commissionList, 'roleId')
-
-        // === 4. INSERT TICKET USER ===
+        commissionMoneyChange = commissionMoneyAdd - commissionMoneyDelete
       }
 
       // === 5. UPDATE TICKET: MONEY  ===
-      const procedureMoneyUpdate =
-        ticketOrigin.procedureMoney + ticketProcedure.quantity * ticketProcedure.actualPrice
-      const commissionMoneyUpdate = ticketOrigin.commissionMoney + commissionMoneyAdd
+      const procedureMoneyUpdate = ticketOrigin.procedureMoney + procedureMoneyChange
+      const commissionMoneyUpdate = ticketOrigin.commissionMoney + commissionMoneyChange
 
       const itemsActualMoneyUpdate =
         ticketOrigin.itemsActualMoney - ticketOrigin.procedureMoney + procedureMoneyUpdate
@@ -186,10 +181,11 @@ export class TicketClinicAddTicketProcedureOperation {
           discountMoney,
           totalMoney: totalMoneyUpdate,
           debt: debtUpdate,
+          commissionMoney: commissionMoneyUpdate,
           profit: profitUpdate,
         }
       )
-      return { ticket, ticketProcedure }
+      return { ticket, ticketProcedure, ticketUserDestroyList, ticketUserInsertList }
     })
 
     return transaction

@@ -86,6 +86,7 @@ export class TicketClinicDestroyTicketProcedureOperation {
           discountMoney,
           totalMoney: totalMoneyUpdate,
           debt: debtUpdate,
+          commissionMoney: commissionMoneyUpdate,
           profit: profitUpdate,
         }
       )

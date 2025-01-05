@@ -9,7 +9,7 @@ import TicketProcedure, {
   TicketProcedureRelationType,
   TicketProcedureStatus,
 } from '../../../entities/ticket-procedure.entity'
-import { TicketUserInsertType } from '../../../entities/ticket-user.entity'
+import TicketUser, { TicketUserInsertType } from '../../../entities/ticket-user.entity'
 import { TicketStatus } from '../../../entities/ticket.entity'
 import {
   CommissionManager,
@@ -23,14 +23,7 @@ export type TicketProcedureAddDtoType = Omit<
   | keyof TicketProcedureRelationType
   | keyof Pick<
     TicketProcedure,
-    | 'oid'
-    | 'id'
-    | 'ticketId'
-    | 'customerId'
-    | 'result'
-    | 'startedAt'
-    | 'status'
-    | 'imageIds'
+    'oid' | 'id' | 'ticketId' | 'customerId' | 'result' | 'startedAt' | 'status' | 'imageIds'
   >
 >
 
@@ -78,6 +71,7 @@ export class TicketClinicAddTicketProcedureOperation {
       )
 
       let commissionMoneyAdd = 0
+      let ticketUserInsertList: TicketUser[] = []
       if (ticketUserDto.length) {
         // === 3. QUERY COMMISSION ===
         const commissionList = await this.commissionManager.findManyBy(manager, {
@@ -88,7 +82,7 @@ export class TicketClinicAddTicketProcedureOperation {
         const commissionMap = ESObject.keyBy(commissionList, 'roleId')
 
         // === 4. INSERT TICKET USER ===
-        const ticketUserInsertDto = ticketUserDto.map((i) => {
+        const ticketUserInsertListDto = ticketUserDto.map((i) => {
           let commissionMoney = 0
           let commissionPercent = 0
 
@@ -121,19 +115,20 @@ export class TicketClinicAddTicketProcedureOperation {
           return insertDto
         })
 
-        const ticketUserInsert = await this.ticketUserManager.insertManyAndReturnEntity(
+        ticketUserInsertList = await this.ticketUserManager.insertManyAndReturnEntity(
           manager,
-          ticketUserInsertDto
+          ticketUserInsertListDto
         )
 
-        commissionMoneyAdd = ticketUserInsert.reduce((acc, item) => {
+        commissionMoneyAdd = ticketUserInsertList.reduce((acc, item) => {
           return acc + item.commissionMoney
         }, 0)
       }
 
       // === 5. UPDATE TICKET: MONEY  ===
-      const procedureMoneyUpdate =
-        ticketOrigin.procedureMoney + ticketProcedure.quantity * ticketProcedure.actualPrice
+      const procedureMoneyAdd = ticketProcedure.quantity * ticketProcedure.actualPrice
+
+      const procedureMoneyUpdate = ticketOrigin.procedureMoney + procedureMoneyAdd
       const commissionMoneyUpdate = ticketOrigin.commissionMoney + commissionMoneyAdd
 
       const itemsActualMoneyUpdate =
@@ -169,10 +164,11 @@ export class TicketClinicAddTicketProcedureOperation {
           discountMoney,
           totalMoney: totalMoneyUpdate,
           debt: debtUpdate,
+          commissionMoney: commissionMoneyUpdate,
           profit: profitUpdate,
         }
       )
-      return { ticket, ticketProcedure }
+      return { ticket, ticketProcedure, ticketUserInsertList }
     })
 
     return transaction

@@ -39,7 +39,7 @@ export default class Commission {
   @Expose()
   roleId: number
 
-  @Column({ type: 'integer' })
+  @Column({ type: 'integer', default: 0 })
   @Expose()
   interactId: number
 

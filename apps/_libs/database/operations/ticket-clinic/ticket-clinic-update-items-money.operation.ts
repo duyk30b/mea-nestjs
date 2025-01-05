@@ -142,7 +142,6 @@ export class TicketClinicUpdateItemsMoneyOperation {
                       "discountPercent", "discountType", "actualPrice"
                       )
           WHERE   tp."id"           = temp."ticketProcedureId"
-              AND tp."procedureId"  = temp."procedureId"
               AND tp."ticketId"     = ${ticketId}
               AND tp."oid"          = ${oid}
           RETURNING tp.*;

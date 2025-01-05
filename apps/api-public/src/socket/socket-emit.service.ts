@@ -95,8 +95,9 @@ export class SocketEmitService {
     data: {
       ticketId: number
       ticketProcedureInsert?: TicketProcedure
-      ticketProcedureUpdateList?: TicketProcedure[]
+      ticketProcedureUpdate?: TicketProcedure
       ticketProcedureDestroy?: TicketProcedure
+      ticketProcedureUpdateList?: TicketProcedure[]
       ticketProcedureList?: TicketProcedure[]
     }
   ) {

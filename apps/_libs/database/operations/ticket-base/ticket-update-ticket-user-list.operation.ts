@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { DataSource } from 'typeorm'
+import { DataSource, EntityManager } from 'typeorm'
 import { ESObject } from '../../../common/helpers/object.helper'
 import { TicketUser } from '../../entities'
 import { CommissionCalculatorType, InteractType } from '../../entities/commission.entity'
@@ -15,6 +15,44 @@ export class TicketUpdateTicketUserListOperation {
     private ticketUserManager: TicketUserManager,
     private commissionManager: CommissionManager
   ) { }
+
+  async changeDataList(options: {
+    manager: EntityManager
+    information: {
+      oid: number
+      ticketId: number
+      interactType: InteractType
+      interactId: number
+      ticketItemId: number
+    }
+    data?: { roleId: number; userId: number }[]
+  }) {
+    const { manager, information, data } = options
+    const { oid, ticketId } = information
+
+    let ticketUserDestroyList: TicketUser[]
+
+    // === 1. DELETE EMPTY USERID ===
+    const roleIdRemoveList = data.filter((i) => !i.userId).map((i) => i.roleId)
+    if (roleIdRemoveList.length) {
+      const deleteResult = await this.ticketUserManager.delete(manager, {
+        oid,
+        ticketId,
+        roleId: { IN: roleIdRemoveList },
+      })
+    }
+
+    if (roleIdRemoveList.length) {
+      ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+        oid,
+        ticketId,
+        interactType: InteractType.Procedure,
+        ticketItemId: information.ticketItemId,
+      })
+    }
+
+    return { ticketUserDestroyList }
+  }
 
   async changeList(
     information: {

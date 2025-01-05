@@ -39,6 +39,7 @@ export class TicketProcedureRepository extends _PostgreSqlRepository<
 
   async updatePriorityList(params: {
     oid: number
+    ticketId: number
     updateData: { id: number; priority: number }[]
   }) {
     if (!params.updateData.length) return
@@ -54,6 +55,7 @@ export class TicketProcedureRepository extends _PostgreSqlRepository<
         .join(', ')
       + `   ) AS temp("id", "priority")
       WHERE   "TicketProcedure"."id"  = temp."id" 
+          AND "TicketProcedure"."ticketId" = ${params.ticketId} 
           AND "TicketProcedure"."oid" = ${params.oid} 
       `
     )

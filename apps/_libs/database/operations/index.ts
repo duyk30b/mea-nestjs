@@ -26,7 +26,7 @@ export * from './ticket-clinic/ticket-clinic-update-ticket-product-list.operatio
 export * from './ticket-clinic/ticket-clinic-update-ticket-radiology-list.operation'
 export * from './ticket-clinic/ticket-procedure/ticket-clinic-add-ticket-procedure.operation'
 export * from './ticket-clinic/ticket-procedure/ticket-clinic-destroy-ticket-procedure.operation'
-export * from './ticket-clinic/ticket-procedure/ticket-clinic-update-ticket-procedure-list.operation'
+export * from './ticket-clinic/ticket-procedure/ticket-clinic-update-ticket-procedure.operation'
 
 export * from './ticket-order/ticket-order-cancel.operation'
 export * from './ticket-order/ticket-order-debt-success-update.operation'

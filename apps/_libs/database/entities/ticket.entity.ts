@@ -339,6 +339,7 @@ export default class Ticket extends BaseEntity {
 
     entity.surcharge = Number(raw.surcharge)
     entity.expense = Number(raw.expense)
+    entity.commissionMoney = Number(raw.commissionMoney)
 
     entity.registeredAt = raw.registeredAt == null ? raw.registeredAt : Number(raw.registeredAt)
     entity.startedAt = raw.startedAt == null ? raw.startedAt : Number(raw.startedAt)

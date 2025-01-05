@@ -6,9 +6,10 @@ import { External, TExternal } from '../../../../../_libs/common/request/externa
 import { PermissionId } from '../../../../../_libs/database/entities/permission.entity'
 import { ApiTicketClinicProcedureService } from './api-ticket-clinic-procedure.service'
 import {
-  TicketClinicAddTicketProcedure,
+  TicketClinicAddTicketProcedureBody,
   TicketClinicDestroyTicketProcedureParams,
-  TicketClinicUpdateTicketProcedureListBody,
+  TicketClinicUpdatePriorityTicketProcedureBody,
+  TicketClinicUpdateTicketProcedureBody,
 } from './request'
 
 @ApiTags('TicketClinic')
@@ -22,7 +23,7 @@ export class ApiTicketClinicProcedureController {
   async addTicketProcedure(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketClinicAddTicketProcedure
+    @Body() body: TicketClinicAddTicketProcedureBody
   ) {
     return await this.apiTicketClinicProcedureService.addTicketProcedure({
       oid,
@@ -44,14 +45,28 @@ export class ApiTicketClinicProcedureController {
     })
   }
 
+  @Post(':id/update-ticket-procedure')
+  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST)
+  async updateTicketProcedure(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam,
+    @Body() body: TicketClinicUpdateTicketProcedureBody
+  ) {
+    return await this.apiTicketClinicProcedureService.updateTicketProcedure({
+      oid,
+      ticketId: id,
+      body,
+    })
+  }
+
   @Post(':id/update-ticket-procedure-list')
   @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST)
   async updateTicketProcedureList(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketClinicUpdateTicketProcedureListBody
+    @Body() body: TicketClinicUpdatePriorityTicketProcedureBody
   ) {
-    return await this.apiTicketClinicProcedureService.updateTicketProcedureList({
+    return await this.apiTicketClinicProcedureService.updatePriorityTicketProcedure({
       oid,
       ticketId: id,
       body,

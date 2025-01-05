@@ -60,7 +60,7 @@ class TicketProcedureBody {
   actualPrice: number
 }
 
-export class TicketClinicAddTicketProcedure {
+export class TicketClinicAddTicketProcedureBody {
   @ApiProperty({ type: TicketUserBasicBody, isArray: true })
   @Expose()
   @Type(() => TicketUserBasicBody)
