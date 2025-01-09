@@ -127,6 +127,8 @@ export class TicketUserChangeListManager {
         + `   ) AS temp("roleId", "userId")
         WHERE   "TicketUser"."oid" = ${oid} 
             AND "TicketUser"."ticketId" = ${ticketId} 
+            AND "TicketUser"."interactType" = ${information.interactType} 
+            AND "TicketUser"."ticketItemId" = ${information.ticketItemId} 
             AND "TicketUser"."roleId" = temp."roleId" 
         RETURNING "TicketUser".*; 
         `

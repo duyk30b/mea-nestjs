@@ -16,9 +16,7 @@ import {
   TicketLaboratoryStatus,
 } from '../../../../_libs/database/entities/ticket-laboratory.entity'
 import { TicketProductType } from '../../../../_libs/database/entities/ticket-product.entity'
-import {
-  TicketRadiologyStatus,
-} from '../../../../_libs/database/entities/ticket-radiology.entity'
+import { TicketRadiologyStatus } from '../../../../_libs/database/entities/ticket-radiology.entity'
 import Ticket, { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import {
   TicketClinicReopenOperation,
@@ -480,13 +478,13 @@ export class ApiTicketClinicService {
     })
     this.socketEmitService.ticketClinicChangeTicketProcedureList(oid, {
       ticketId,
-      ticketProcedureUpdateList: ticketProcedureList,
+      ticketProcedureList,
     })
     this.socketEmitService.ticketClinicUpdateTicketLaboratoryList(oid, {
       ticketId,
       ticketLaboratoryList,
     })
-    this.socketEmitService.ticketClinicUpdateTicketRadiologyList(oid, {
+    this.socketEmitService.ticketClinicChangeTicketRadiologyList(oid, {
       ticketId,
       ticketRadiologyList,
     })
