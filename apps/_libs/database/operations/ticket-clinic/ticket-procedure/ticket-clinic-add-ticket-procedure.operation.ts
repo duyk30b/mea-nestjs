@@ -1,22 +1,21 @@
 import { Injectable } from '@nestjs/common'
-import { DataSource } from 'typeorm'
-import { ESObject } from '../../../../common/helpers/object.helper'
+import { InjectEntityManager } from '@nestjs/typeorm'
+import { DataSource, EntityManager } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
-import { DiscountType } from '../../../common/variable'
-import { CommissionCalculatorType, InteractType } from '../../../entities/commission.entity'
+import { InteractType } from '../../../entities/commission.entity'
 import TicketProcedure, {
   TicketProcedureInsertType,
   TicketProcedureRelationType,
   TicketProcedureStatus,
 } from '../../../entities/ticket-procedure.entity'
-import TicketUser, { TicketUserInsertType } from '../../../entities/ticket-user.entity'
-import { TicketStatus } from '../../../entities/ticket.entity'
+import TicketUser from '../../../entities/ticket-user.entity'
+import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import {
-  CommissionManager,
   TicketManager,
   TicketProcedureManager,
-  TicketUserManager,
 } from '../../../managers'
+import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
+import { TicketUserChangeListManager } from '../../ticket-user/ticket-user-change-list.manager'
 
 export type TicketProcedureAddDtoType = Omit<
   TicketProcedure,
@@ -31,10 +30,11 @@ export type TicketProcedureAddDtoType = Omit<
 export class TicketClinicAddTicketProcedureOperation {
   constructor(
     private dataSource: DataSource,
+    @InjectEntityManager() private manager: EntityManager,
     private ticketManager: TicketManager,
-    private ticketUserManager: TicketUserManager,
-    private commissionManager: CommissionManager,
-    private ticketProcedureManager: TicketProcedureManager
+    private ticketProcedureManager: TicketProcedureManager,
+    private ticketUserChangeListManager: TicketUserChangeListManager,
+    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
   ) { }
 
   async addTicketProcedure<T extends TicketProcedureAddDtoType>(params: {
@@ -73,52 +73,19 @@ export class TicketClinicAddTicketProcedureOperation {
       let commissionMoneyAdd = 0
       let ticketUserInsertList: TicketUser[] = []
       if (ticketUserDto.length) {
-        // === 3. QUERY COMMISSION ===
-        const commissionList = await this.commissionManager.findManyBy(manager, {
-          oid,
-          interactType: InteractType.Procedure,
-          interactId: ticketProcedure.procedureId,
-        })
-        const commissionMap = ESObject.keyBy(commissionList, 'roleId')
-
-        // === 4. INSERT TICKET USER ===
-        const ticketUserInsertListDto = ticketUserDto.map((i) => {
-          let commissionMoney = 0
-          let commissionPercent = 0
-
-          const commissionCalculatorType = commissionMap[i.roleId].commissionCalculatorType
-          if (commissionCalculatorType === CommissionCalculatorType.VND) {
-            commissionPercent = 0
-            commissionMoney = commissionMap[i.roleId]?.commissionValue || 0
-          }
-          if (commissionCalculatorType === CommissionCalculatorType.PercentActual) {
-            commissionPercent = commissionMap[i.roleId]?.commissionValue || 0
-            commissionMoney = Math.floor((ticketProcedure.actualPrice * commissionPercent) / 100)
-          }
-          if (commissionCalculatorType === CommissionCalculatorType.PercentExpected) {
-            commissionPercent = commissionMap[i.roleId]?.commissionValue || 0
-            commissionMoney = Math.floor((ticketProcedure.expectedPrice * commissionPercent) / 100)
-          }
-
-          const insertDto: TicketUserInsertType = {
-            ...i,
+        ticketUserInsertList = await this.ticketUserChangeListManager.insertList({
+          manager,
+          information: {
             oid,
             ticketId,
-            interactId: ticketProcedure.procedureId,
             interactType: InteractType.Procedure,
+            interactId: ticketProcedure.procedureId,
             ticketItemId: ticketProcedure.id,
-            createdAt: Date.now(),
-            commissionCalculatorType,
-            commissionMoney,
-            commissionPercent,
-          }
-          return insertDto
+            ticketItemActualPrice: ticketProcedure.actualPrice,
+            ticketItemExpectedPrice: ticketProcedure.expectedPrice,
+          },
+          dataInsert: ticketUserDto,
         })
-
-        ticketUserInsertList = await this.ticketUserManager.insertManyAndReturnEntity(
-          manager,
-          ticketUserInsertListDto
-        )
 
         commissionMoneyAdd = ticketUserInsertList.reduce((acc, item) => {
           return acc + item.commissionMoney
@@ -127,47 +94,18 @@ export class TicketClinicAddTicketProcedureOperation {
 
       // === 5. UPDATE TICKET: MONEY  ===
       const procedureMoneyAdd = ticketProcedure.quantity * ticketProcedure.actualPrice
-
-      const procedureMoneyUpdate = ticketOrigin.procedureMoney + procedureMoneyAdd
-      const commissionMoneyUpdate = ticketOrigin.commissionMoney + commissionMoneyAdd
-
-      const itemsActualMoneyUpdate =
-        ticketOrigin.itemsActualMoney - ticketOrigin.procedureMoney + procedureMoneyUpdate
-
-      const discountType = ticketOrigin.discountType
-      let discountPercent = ticketOrigin.discountPercent
-      let discountMoney = ticketOrigin.discountMoney
-      if (discountType === DiscountType.VND) {
-        discountPercent =
-          itemsActualMoneyUpdate == 0
-            ? 0
-            : Math.floor((discountMoney * 100) / itemsActualMoneyUpdate)
+      let ticket: Ticket = ticketOrigin
+      if (procedureMoneyAdd != 0 || commissionMoneyAdd != 0) {
+        ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
+          manager,
+          oid,
+          ticketOrigin,
+          itemMoney: {
+            procedureMoneyAdd,
+            commissionMoneyAdd,
+          },
+        })
       }
-      if (discountType === DiscountType.Percent) {
-        discountMoney = Math.floor((discountPercent * itemsActualMoneyUpdate) / 100)
-      }
-      const totalMoneyUpdate = itemsActualMoneyUpdate - discountMoney
-      const debtUpdate = totalMoneyUpdate - ticketOrigin.paid
-      const profitUpdate =
-        totalMoneyUpdate
-        - ticketOrigin.totalCostAmount
-        - ticketOrigin.expense
-        - commissionMoneyUpdate
-
-      const ticket = await this.ticketManager.updateOneAndReturnEntity(
-        manager,
-        { oid, id: ticketId },
-        {
-          procedureMoney: procedureMoneyUpdate,
-          itemsActualMoney: itemsActualMoneyUpdate,
-          discountPercent,
-          discountMoney,
-          totalMoney: totalMoneyUpdate,
-          debt: debtUpdate,
-          commissionMoney: commissionMoneyUpdate,
-          profit: profitUpdate,
-        }
-      )
       return { ticket, ticketProcedure, ticketUserInsertList }
     })
 

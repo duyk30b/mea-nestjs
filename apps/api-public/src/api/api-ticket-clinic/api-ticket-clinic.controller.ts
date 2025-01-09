@@ -22,12 +22,10 @@ import {
   TicketClinicUpdateItemsMoneyBody,
   TicketClinicUpdatePrescriptionBody,
   TicketClinicUpdateTicketLaboratoryListBody,
-  TicketClinicUpdateTicketRadiologyListBody,
 } from './request'
 import { TicketClinicPaymentBody } from './request/ticket-clinic-payment.body'
 import { TicketClinicReturnProductListBody } from './request/ticket-clinic-return-product-list.body'
 import { TicketClinicUpdateDiagnosisBody } from './request/ticket-clinic-update-diagnosis.body'
-import { TicketClinicUpdateTicketUserListBody } from './request/ticket-clinic-update-user-list.body'
 
 @ApiTags('TicketClinic')
 @ApiBearerAuth('access-token')
@@ -82,20 +80,6 @@ export class ApiTicketClinicController {
     })
   }
 
-  @Post(':id/update-ticket-user-list')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_USER_LIST)
-  async updateTicketUserList(
-    @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: TicketClinicUpdateTicketUserListBody
-  ) {
-    return await this.apiTicketClinicService.updateTicketUserList({
-      oid,
-      ticketId: id,
-      body,
-    })
-  }
-
   @Post(':id/update-ticket-product-consumable')
   @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE)
   async updateTicketProductConsumable(
@@ -118,20 +102,6 @@ export class ApiTicketClinicController {
     @Body() body: TicketClinicUpdatePrescriptionBody
   ) {
     return await this.apiTicketClinicService.updateTicketProductPrescription({
-      oid,
-      ticketId: id,
-      body,
-    })
-  }
-
-  @Post(':id/update-ticket-radiology-list')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST)
-  async updateTicketRadiologyList(
-    @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: TicketClinicUpdateTicketRadiologyListBody
-  ) {
-    return await this.apiTicketClinicService.updateTicketRadiologyList({
       oid,
       ticketId: id,
       body,

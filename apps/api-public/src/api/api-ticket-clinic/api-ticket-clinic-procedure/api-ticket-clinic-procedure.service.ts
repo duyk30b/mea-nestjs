@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 import { Injectable } from '@nestjs/common'
+import { InteractType } from '../../../../../_libs/database/entities/commission.entity'
 import {
   TicketClinicAddTicketProcedureOperation,
   TicketClinicDestroyTicketProcedureOperation,
@@ -38,17 +39,21 @@ export class ApiTicketClinicProcedureService {
 
     const { ticket, ticketProcedure } = result
 
-    this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
     this.socketEmitService.ticketClinicChangeTicketProcedureList(oid, {
       ticketId,
       ticketProcedureInsert: ticketProcedure,
     })
-    this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
-      ticketId,
-      ticketUserInsertList: result.ticketUserInsertList,
-    })
+    if (result.ticketUserInsertList) {
+      this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
+        ticketId,
+        interactType: InteractType.Procedure,
+        ticketItemId: ticketProcedure.id,
+        ticketUserReplaceList: result.ticketUserInsertList,
+      })
+    }
 
-    return { data: { ticket, ticketProcedure } }
+    return { data: true }
   }
 
   async destroyTicketProcedure(options: {
@@ -65,44 +70,53 @@ export class ApiTicketClinicProcedureService {
 
     const { ticket } = result
 
-    this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
     this.socketEmitService.ticketClinicChangeTicketProcedureList(oid, {
       ticketId,
       ticketProcedureDestroy: result.ticketProcedureDestroy,
     })
-    this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
-      ticketId,
-      ticketUserDestroyList: result.ticketUserDestroyList,
-    })
+    if (result.ticketUserDestroyList) {
+      this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
+        ticketId,
+        interactType: InteractType.Procedure,
+        ticketItemId: result.ticketProcedureDestroy.id,
+        ticketUserDestroyList: result.ticketUserDestroyList,
+      })
+    }
 
-    return { data: { ticket } }
+    return { data: true }
   }
 
   async updateTicketProcedure(options: {
     oid: number
     ticketId: number
+    ticketProcedureId: number
     body: TicketClinicUpdateTicketProcedureBody
   }) {
-    const { oid, ticketId, body } = options
+    const { oid, ticketId, ticketProcedureId, body } = options
     const result = await this.ticketClinicUpdateTicketProcedureOperation.updateTicketProcedure({
       oid,
       ticketId,
-      ticketProcedureId: body.ticketProcedureId,
+      ticketProcedureId,
       ticketProcedureUpdateDto: body.ticketProcedure,
       ticketUserDto: body.ticketUserList?.filter((i) => !!i.userId),
     })
 
-    this.socketEmitService.ticketClinicUpdate(oid, { ticket: result.ticket })
+    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket: result.ticket })
     this.socketEmitService.ticketClinicChangeTicketProcedureList(oid, {
       ticketId,
       ticketProcedureUpdate: result.ticketProcedure,
     })
-    this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
-      ticketId,
-      ticketUserDestroyList: result.ticketUserDestroyList,
-      ticketUserInsertList: result.ticketUserInsertList,
-    })
-
+    if (result.ticketUserChangeList) {
+      this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
+        ticketId,
+        interactType: InteractType.Ticket,
+        ticketItemId: 0,
+        ticketUserDestroyList: result.ticketUserChangeList.ticketUserDestroyList,
+        ticketUserUpdateList: result.ticketUserChangeList.ticketUserUpdateList,
+        ticketUserInsertList: result.ticketUserChangeList.ticketUserInsertList,
+      })
+    }
     return { data: true }
   }
 
@@ -112,16 +126,12 @@ export class ApiTicketClinicProcedureService {
     body: TicketClinicUpdatePriorityTicketProcedureBody
   }) {
     const { oid, ticketId, body } = options
-    const result = await this.ticketProcedureRepository.updatePriorityList({
+    const ticketProcedureList = await this.ticketProcedureRepository.updatePriorityList({
       oid,
       ticketId,
       updateData: body.ticketProcedureList,
     })
-
-    const ticketProcedureList = await this.ticketProcedureRepository.findMany({
-      condition: { oid, ticketId },
-      sort: { priority: 'ASC' },
-    })
+    ticketProcedureList.sort((a, b) => (a.priority < b.priority ? -1 : 1))
 
     this.socketEmitService.ticketClinicChangeTicketProcedureList(oid, {
       ticketId,

@@ -4,7 +4,7 @@ import { IsArray, IsDefined, IsNumber, Max, Min, ValidateNested } from 'class-va
 import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
 import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
 import { DiscountType } from '../../../../../../_libs/database/common/variable'
-import { TicketUserBasicBody } from '../../request'
+import { TicketUserBasicBody } from '../../api-ticket-clinic-user/request/ticket-clinic-update-user-list.body'
 
 class TicketProcedureBody {
   @ApiProperty({ example: 1 })

@@ -7,7 +7,7 @@ import { PermissionId } from '../../../../../_libs/database/entities/permission.
 import { ApiTicketClinicProcedureService } from './api-ticket-clinic-procedure.service'
 import {
   TicketClinicAddTicketProcedureBody,
-  TicketClinicDestroyTicketProcedureParams,
+  TicketClinicProcedureParams,
   TicketClinicUpdatePriorityTicketProcedureBody,
   TicketClinicUpdateTicketProcedureBody,
 } from './request'
@@ -36,7 +36,7 @@ export class ApiTicketClinicProcedureController {
   @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST)
   async destroyTicketProcedure(
     @External() { oid }: TExternal,
-    @Param() { ticketId, ticketProcedureId }: TicketClinicDestroyTicketProcedureParams
+    @Param() { ticketId, ticketProcedureId }: TicketClinicProcedureParams
   ) {
     return await this.apiTicketClinicProcedureService.destroyTicketProcedure({
       oid,
@@ -45,23 +45,24 @@ export class ApiTicketClinicProcedureController {
     })
   }
 
-  @Post(':id/update-ticket-procedure')
+  @Post(':ticketId/update-ticket-procedure/:ticketProcedureId')
   @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST)
   async updateTicketProcedure(
     @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
+    @Param() { ticketId, ticketProcedureId }: TicketClinicProcedureParams,
     @Body() body: TicketClinicUpdateTicketProcedureBody
   ) {
     return await this.apiTicketClinicProcedureService.updateTicketProcedure({
       oid,
-      ticketId: id,
+      ticketId,
+      ticketProcedureId,
       body,
     })
   }
 
-  @Post(':id/update-ticket-procedure-list')
+  @Post(':id/update-priority-ticket-procedure')
   @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST)
-  async updateTicketProcedureList(
+  async updatePriorityTicketProcedure(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
     @Body() body: TicketClinicUpdatePriorityTicketProcedureBody

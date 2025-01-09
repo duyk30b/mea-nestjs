@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import {
+  CommissionCalculatorType,
   CommissionInsertType,
   InteractType,
 } from '../../../../_libs/database/entities/commission.entity'
@@ -80,6 +81,16 @@ export class ApiProcedureService {
 
   async createOne(oid: number, body: ProcedureCreateBody): Promise<BaseResponse> {
     const { commissionList, ...procedureBody } = body
+    commissionList.forEach((i) => {
+      if (
+        i.commissionCalculatorType === CommissionCalculatorType.PercentExpected
+        || i.commissionCalculatorType === CommissionCalculatorType.PercentActual
+      ) {
+        if (i.commissionValue >= 1000) {
+          throw new BusinessException('error.ValidateFailed')
+        }
+      }
+    })
     const procedure = await this.procedureRepository.insertOneFullFieldAndReturnEntity({
       oid,
       ...procedureBody,
@@ -103,6 +114,16 @@ export class ApiProcedureService {
 
   async updateOne(oid: number, id: number, body: ProcedureUpdateBody): Promise<BaseResponse> {
     const { commissionList, ...procedureBody } = body
+    commissionList.forEach((i) => {
+      if (
+        i.commissionCalculatorType === CommissionCalculatorType.PercentExpected
+        || i.commissionCalculatorType === CommissionCalculatorType.PercentActual
+      ) {
+        if (i.commissionValue >= 1000) {
+          throw new BusinessException('error.ValidateFailed')
+        }
+      }
+    })
     const [procedure] = await this.procedureRepository.updateAndReturnEntity(
       { oid, id },
       procedureBody
@@ -129,9 +150,9 @@ export class ApiProcedureService {
     return { data: { procedure } }
   }
 
-  async destroyOne(oid: number, id: number): Promise<BaseResponse> {
+  async destroyOne(oid: number, procedureId: number): Promise<BaseResponse> {
     const ticketProcedureList = await this.ticketProcedureRepository.findMany({
-      condition: { oid, procedureId: id },
+      condition: { oid, procedureId },
       limit: 10,
     })
     if (ticketProcedureList.length > 0) {
@@ -141,9 +162,14 @@ export class ApiProcedureService {
       }
     }
 
-    const affected = await this.procedureRepository.delete({ oid, id })
+    await this.commissionRepository.delete({
+      oid,
+      interactId: procedureId,
+      interactType: InteractType.Radiology,
+    })
+    const affected = await this.procedureRepository.delete({ oid, id: procedureId })
     if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
 
-    return { data: { ticketProcedureList: [], procedureId: id } }
+    return { data: { ticketProcedureList: [], procedureId } }
   }
 }

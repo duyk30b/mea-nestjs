@@ -13,7 +13,7 @@ import {
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { TicketStatus, TicketType } from '../../../../../_libs/database/entities/ticket.entity'
 import { CustomerCreateBody } from '../../api-customer/request'
-import { TicketUserBasicBody } from './ticket-clinic-update-user-list.body'
+import { TicketUserBasicBody } from '../api-ticket-clinic-user/request/ticket-clinic-update-user-list.body'
 
 class TicketAttributeBody {
   @ApiProperty({ example: 'Diagnosis' })

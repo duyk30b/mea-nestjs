@@ -14,6 +14,7 @@ import {
   TicketRadiology,
   TicketUser,
 } from '../../../_libs/database/entities'
+import { InteractType } from '../../../_libs/database/entities/commission.entity'
 import { SOCKET_EVENT } from './socket.variable'
 
 @Injectable()
@@ -67,19 +68,12 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.BATCH_LIST_UPDATE, data)
   }
 
-  ticketClinicCreate(oid: number, data: { ticket: Ticket }) {
+  ticketClinicChange(
+    oid: number,
+    data: { type: 'CREATE' | 'UPDATE' | 'DESTROY'; ticket: Ticket }
+  ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CREATE, data)
-  }
-
-  ticketClinicDestroy(oid: number, data: { ticketId: number }) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_DESTROY, data)
-  }
-
-  ticketClinicUpdate(oid: number, data: { ticket: Ticket }) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE, data)
   }
 
   ticketClinicUpdateTicketAttributeList(
@@ -90,6 +84,22 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_ATTRIBUTE_LIST, data)
   }
 
+  ticketClinicChangeTicketUserList(
+    oid: number,
+    data: {
+      ticketId: number
+      interactType: InteractType
+      ticketItemId: number
+      ticketUserReplaceList?: TicketUser[]
+      ticketUserDestroyList?: TicketUser[]
+      ticketUserUpdateList?: TicketUser[]
+      ticketUserInsertList?: TicketUser[]
+    }
+  ) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE_TICKET_USER_LIST, data)
+  }
+
   ticketClinicChangeTicketProcedureList(
     oid: number,
     data: {
@@ -97,7 +107,6 @@ export class SocketEmitService {
       ticketProcedureInsert?: TicketProcedure
       ticketProcedureUpdate?: TicketProcedure
       ticketProcedureDestroy?: TicketProcedure
-      ticketProcedureUpdateList?: TicketProcedure[]
       ticketProcedureList?: TicketProcedure[]
     }
   ) {
@@ -105,17 +114,18 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE_TICKET_PROCEDURE_LIST, data)
   }
 
-  ticketClinicChangeTicketUserList(
+  ticketClinicChangeTicketRadiologyList(
     oid: number,
     data: {
       ticketId: number
-      ticketUserInsertList?: TicketUser[]
-      ticketUserUpdateList?: TicketUser[]
-      ticketUserDestroyList?: TicketUser[]
+      ticketRadiologyInsert?: TicketRadiology
+      ticketRadiologyUpdate?: TicketRadiology
+      ticketRadiologyDestroy?: TicketRadiology
+      ticketRadiologyList?: TicketRadiology[]
     }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE_TICKET_USER_LIST, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE_TICKET_RADIOLOGY_LIST, data)
   }
 
   ticketClinicUpdateTicketProductConsumableList(
@@ -160,22 +170,6 @@ export class SocketEmitService {
     this.io
       .in(oid.toString())
       .emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_RESULT, data)
-  }
-
-  ticketClinicUpdateTicketRadiologyList(
-    oid: number,
-    data: { ticketId: number; ticketRadiologyList: TicketRadiology[] }
-  ) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST, data)
-  }
-
-  ticketClinicUpdateTicketRadiologyResult(
-    oid: number,
-    data: { ticketId: number; ticketRadiology: TicketRadiology }
-  ) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_RESULT, data)
   }
 
   ticketClinicUpdateTicketUserList(

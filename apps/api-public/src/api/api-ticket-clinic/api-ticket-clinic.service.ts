@@ -3,16 +3,13 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { arrayToKeyValue, ESObject } from '../../../../_libs/common/helpers/object.helper'
+import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
 import { DTimer } from '../../../../_libs/common/helpers/time.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { DeliveryStatus } from '../../../../_libs/database/common/variable'
 import { Customer } from '../../../../_libs/database/entities'
 import { AppointmentStatus } from '../../../../_libs/database/entities/appointment.entity'
-import {
-  CommissionCalculatorType,
-  InteractType,
-} from '../../../../_libs/database/entities/commission.entity'
+import { InteractType } from '../../../../_libs/database/entities/commission.entity'
 import { TicketAttributeInsertType } from '../../../../_libs/database/entities/ticket-attribute.entity'
 import {
   TicketLaboratoryInsertType,
@@ -20,10 +17,8 @@ import {
 } from '../../../../_libs/database/entities/ticket-laboratory.entity'
 import { TicketProductType } from '../../../../_libs/database/entities/ticket-product.entity'
 import {
-  TicketRadiologyInsertType,
   TicketRadiologyStatus,
 } from '../../../../_libs/database/entities/ticket-radiology.entity'
-import { TicketUserInsertType } from '../../../../_libs/database/entities/ticket-user.entity'
 import Ticket, { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import {
   TicketClinicReopenOperation,
@@ -31,14 +26,14 @@ import {
   TicketClinicUpdateItemsMoneyOperation,
   TicketClinicUpdateTicketLaboratoryListOperation,
   TicketClinicUpdateTicketProductListOperation,
-  TicketClinicUpdateTicketRadiologyListOperation,
   TicketPayDebtOperation,
   TicketPaymentAndCloseOperation,
   TicketPrepaymentOperation,
   TicketRefundMoneyOperation,
   TicketSendProductOperation,
-  TicketUpdateTicketUserListOperation,
+  TicketUserOperation,
 } from '../../../../_libs/database/operations'
+import { TicketClinicUpdateInformationOperation } from '../../../../_libs/database/operations/ticket-clinic/ticket-clinic-update-information.operation'
 import {
   AppointmentRepository,
   CommissionRepository,
@@ -60,10 +55,8 @@ import {
   TicketClinicUpdateItemsMoneyBody,
   TicketClinicUpdatePrescriptionBody,
   TicketClinicUpdateTicketLaboratoryListBody,
-  TicketClinicUpdateTicketRadiologyListBody,
 } from './request'
 import { TicketClinicUpdateDiagnosisBody } from './request/ticket-clinic-update-diagnosis.body'
-import { TicketClinicUpdateTicketUserListBody } from './request/ticket-clinic-update-user-list.body'
 
 @Injectable()
 export class ApiTicketClinicService {
@@ -80,7 +73,6 @@ export class ApiTicketClinicService {
     private readonly ticketUserRepository: TicketUserRepository,
     private readonly ticketProductRepository: TicketProductRepository,
     private readonly ticketClinicUpdateTicketLaboratoryListOperation: TicketClinicUpdateTicketLaboratoryListOperation,
-    private readonly ticketClinicUpdateTicketRadiologyListOperation: TicketClinicUpdateTicketRadiologyListOperation,
     private readonly ticketClinicUpdateTicketProductListOperation: TicketClinicUpdateTicketProductListOperation,
     private readonly ticketClinicUpdateItemsMoneyOperation: TicketClinicUpdateItemsMoneyOperation,
     private readonly ticketClinicReturnProductOperation: TicketClinicReturnProductOperation,
@@ -90,7 +82,8 @@ export class ApiTicketClinicService {
     private readonly ticketPaymentAndCloseOperation: TicketPaymentAndCloseOperation,
     private readonly ticketPayDebtOperation: TicketPayDebtOperation,
     private readonly ticketClinicReopenOperation: TicketClinicReopenOperation,
-    private readonly ticketUpdateTicketUserListOperation: TicketUpdateTicketUserListOperation
+    private readonly ticketUserOperation: TicketUserOperation,
+    private readonly ticketClinicUpdateInformationOperation: TicketClinicUpdateInformationOperation
   ) { }
 
   async create(options: { oid: number; body: TicketClinicCreateBody }) {
@@ -104,6 +97,7 @@ export class ApiTicketClinicService {
         debt: 0,
         oid,
       })
+      this.socketEmitService.customerUpsert(oid, { customer })
     } else {
       customer = await this.customerRepository.findOneBy({
         oid,
@@ -154,65 +148,37 @@ export class ApiTicketClinicService {
     }
 
     if (body.ticketUserList) {
-      const commissionList = await this.commissionRepository.findManyBy({
+      const result = await this.ticketUserOperation.addTicketUserListAndReCalculatorTicketMoney({
         oid,
-        interactType: InteractType.Ticket,
-        interactId: 0,
+        ticketOrigin: ticket,
+        ticketUserDto: body.ticketUserList.filter((i) => !!i.userId),
       })
-      const commissionMap = ESObject.keyBy(commissionList, 'roleId')
-
-      const ticketUserInsertList = body.ticketUserList
-        .filter((i) => !!i.userId)
-        .map((i) => {
-          const dto: TicketUserInsertType = {
-            ...i,
-            oid,
-            interactType: InteractType.Ticket,
-            interactId: 0,
-            ticketItemId: 0,
-            ticketId: ticket.id,
-            createdAt: Date.now(),
-            commissionCalculatorType: CommissionCalculatorType.VND,
-            commissionMoney: commissionMap[i.roleId]?.commissionValue || 0,
-            commissionPercent: 0,
-          }
-          return dto
-        })
-      ticket.ticketUserList =
-        await this.ticketUserRepository.insertManyAndReturnEntity(ticketUserInsertList)
-
-      const commissionMoneyAdd = ticket.ticketUserList.reduce((acc, item) => {
-        return acc + item.commissionMoney
-      }, 0)
-
-      const [ticketUpdate] = await this.ticketRepository.updateAndReturnEntity(
-        { oid, id: ticket.id },
-        {
-          commissionMoney: ticket.commissionMoney + commissionMoneyAdd,
-          profit: ticket.profit - commissionMoneyAdd,
-        }
-      )
-      Object.assign(ticket, ticketUpdate)
+      Object.assign(ticket, result.ticket)
+      ticket.ticketUserList = result.ticketUserInsertList
     }
 
-    this.socketEmitService.ticketClinicCreate(oid, { ticket })
-    return { data: { ticket } }
+    this.socketEmitService.ticketClinicChange(oid, { type: 'CREATE', ticket })
+    return { data: true }
   }
 
   async update(options: { oid: number; ticketId: number; body: TicketClinicUpdateBody }) {
     const { oid, body, ticketId } = options
     const { registeredAt, customerSourceId } = body.ticketInformation
 
-    const [ticket] = await this.ticketRepository.updateAndReturnEntity(
-      { oid, id: ticketId },
-      {
-        registeredAt,
-        customerSourceId,
-        year: DTimer.info(registeredAt, 7).year,
-        month: DTimer.info(registeredAt, 7).month + 1,
-        date: DTimer.info(registeredAt, 7).date,
-      }
-    )
+    const { ticket, ticketUserChangeList } =
+      await this.ticketClinicUpdateInformationOperation.startUpdate({
+        oid,
+        ticketId,
+        information: { registeredAt, customerSourceId },
+        ticketUser: {
+          interactType: InteractType.Ticket,
+          interactId: 0,
+          ticketItemId: 0,
+          ticketItemActualPrice: 0,
+          ticketItemExpectedPrice: 0,
+          dataChange: body.ticketUserList,
+        },
+      })
 
     if (body.ticketAttributeList) {
       const attributeKeyRemove = body.ticketAttributeList.map((i) => i.key)
@@ -241,22 +207,18 @@ export class ApiTicketClinicService {
       })
     }
 
-    if (body.ticketUserList) {
-      await this.ticketUpdateTicketUserListOperation.changeList(
-        {
-          oid,
-          ticketId,
-          interactType: InteractType.Ticket,
-          interactId: 0,
-          ticketItemId: 0,
-        },
-        body.ticketUserList
-      )
-      ticket.ticketUserList = await this.ticketUserRepository.findManyBy({ oid, ticketId })
+    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
+    if (ticketUserChangeList) {
+      this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
+        ticketId,
+        interactType: InteractType.Ticket,
+        ticketItemId: 0,
+        ticketUserDestroyList: ticketUserChangeList.ticketUserDestroyList,
+        ticketUserUpdateList: ticketUserChangeList.ticketUserUpdateList,
+        ticketUserInsertList: ticketUserChangeList.ticketUserInsertList,
+      })
     }
-
-    this.socketEmitService.ticketClinicUpdate(oid, { ticket })
-    return { data: { ticket } }
+    return { data: true }
   }
 
   async startCheckup(options: { oid: number; ticketId: number }) {
@@ -273,8 +235,8 @@ export class ApiTicketClinicService {
       }
     )
     if (!ticket) throw new BusinessException('error.Database.UpdateFailed')
-    this.socketEmitService.ticketClinicUpdate(oid, { ticket })
-    return { data: { ticket } }
+    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
+    return { data: true }
   }
 
   async updateDiagnosis(options: {
@@ -284,7 +246,7 @@ export class ApiTicketClinicService {
     files: FileUploadDto[]
   }) {
     const { oid, ticketId, body, files } = options
-    const { customerChange, imagesChange, ticketAttributeChangeList, ticketAttributeKeyList } = body
+    const { imagesChange, ticketAttributeChangeList, ticketAttributeKeyList } = body
 
     // 1. Update Ticket Image
     if (imagesChange) {
@@ -311,7 +273,7 @@ export class ApiTicketClinicService {
           ticket.imageList.push(imageMap[i])
         })
 
-        this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+        this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
       }
     }
 
@@ -344,42 +306,6 @@ export class ApiTicketClinicService {
       })
     }
 
-    // 3. Update Customer
-    if (customerChange) {
-      const customerUpdateList = await this.customerRepository.updateAndReturnEntity(
-        { oid, id: customerChange.customerId },
-        { healthHistory: customerChange.healthHistory }
-      )
-      const customer = customerUpdateList[0]
-      this.socketEmitService.customerUpsert(oid, { customer })
-    }
-
-    return { data: true }
-  }
-
-  async updateTicketUserList(options: {
-    oid: number
-    ticketId: number
-    body: TicketClinicUpdateTicketUserListBody
-  }) {
-    const { oid, ticketId, body } = options
-    await this.ticketUpdateTicketUserListOperation.changeList(
-      {
-        oid,
-        ticketId,
-        interactId: body.interactId,
-        interactType: body.interactType,
-        ticketItemId: body.ticketItemId,
-      },
-      body.ticketUserList
-    )
-    const ticketUserList = await this.ticketUserRepository.findManyBy({ oid, ticketId })
-
-    this.socketEmitService.ticketClinicUpdateTicketUserList(oid, {
-      ticketId,
-      ticketUserList,
-    })
-
     return { data: true }
   }
 
@@ -405,7 +331,7 @@ export class ApiTicketClinicService {
 
     const { ticket, ticketProductList } = result
 
-    this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
     this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
       ticketId,
       ticketProductConsumableList: ticketProductList.filter((i) => {
@@ -437,7 +363,7 @@ export class ApiTicketClinicService {
       const { ticketProductList } = result
       ticket = result.ticket
 
-      this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
       this.socketEmitService.ticketClinicUpdateTicketProductPrescriptionList(oid, {
         ticketId,
         ticketProductPrescriptionList: ticketProductList.filter((i) => {
@@ -504,47 +430,10 @@ export class ApiTicketClinicService {
 
     const { ticket, ticketLaboratoryList } = result
 
-    this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
     this.socketEmitService.ticketClinicUpdateTicketLaboratoryList(oid, {
       ticketId,
       ticketLaboratoryList,
-    })
-
-    return { data: true }
-  }
-
-  async updateTicketRadiologyList(options: {
-    oid: number
-    ticketId: number
-    body: TicketClinicUpdateTicketRadiologyListBody
-  }) {
-    const { ticketId, oid, body } = options
-    const result =
-      await this.ticketClinicUpdateTicketRadiologyListOperation.updateTicketRadiologyList({
-        oid,
-        ticketId,
-        ticketRadiologyListDto: body.ticketRadiologyList.map((i) => {
-          const data: TicketRadiologyInsertType = {
-            ...i,
-            oid,
-            ticketId,
-            customerId: body.customerId,
-            imageIds: JSON.stringify([]),
-            description: '',
-            result: '',
-            startedAt: null,
-            status: TicketRadiologyStatus.Pending,
-          }
-          return data
-        }),
-      })
-
-    const { ticket, ticketRadiologyList } = result
-
-    this.socketEmitService.ticketClinicUpdate(oid, { ticket })
-    this.socketEmitService.ticketClinicUpdateTicketRadiologyList(oid, {
-      ticketId,
-      ticketRadiologyList,
     })
 
     return { data: true }
@@ -576,7 +465,7 @@ export class ApiTicketClinicService {
       ticketLaboratoryList,
       ticketRadiologyList,
     } = result
-    this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
     this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
       ticketId,
       ticketProductConsumableList: ticketProductList.filter((i) => {
@@ -617,7 +506,7 @@ export class ApiTicketClinicService {
       })
       this.socketEmitService.batchListUpdate(oid, { batchList })
       this.socketEmitService.productListUpdate(oid, { productList })
-      this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
 
       const ticketProductList = await this.ticketProductRepository.findMany({
         relation: { product: true, batch: true },
@@ -660,7 +549,7 @@ export class ApiTicketClinicService {
 
       this.socketEmitService.batchListUpdate(oid, { batchList })
       this.socketEmitService.productListUpdate(oid, { productList })
-      this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
 
       const ticketProductList = await this.ticketProductRepository.findMany({
         relation: { product: true, batch: true },
@@ -696,7 +585,7 @@ export class ApiTicketClinicService {
         money: body.money,
       })
 
-      this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
       return { data: true }
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
@@ -712,7 +601,7 @@ export class ApiTicketClinicService {
         time: Date.now(),
         money: body.money,
       })
-      this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
       return { data: { ticket } }
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
@@ -728,7 +617,7 @@ export class ApiTicketClinicService {
         time: Date.now(),
         money: body.money,
       })
-      this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
       if (customer) {
         this.socketEmitService.customerUpsert(oid, { customer })
       }
@@ -748,7 +637,7 @@ export class ApiTicketClinicService {
         money: 0,
       })
 
-      this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
       if (customer) {
         this.socketEmitService.customerUpsert(oid, { customer })
       }
@@ -768,7 +657,7 @@ export class ApiTicketClinicService {
         description: '',
       })
 
-      this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
       if (customer) {
         this.socketEmitService.customerUpsert(oid, { customer })
       }
@@ -806,7 +695,7 @@ export class ApiTicketClinicService {
       { ticketStatus: TicketStatus.Cancelled }
     )
     await this.ticketRepository.destroy({ oid, ticketId })
-    this.socketEmitService.ticketClinicDestroy(oid, { ticketId })
+    this.socketEmitService.ticketClinicChange(oid, { type: 'DESTROY', ticket })
     return { data: { ticketId } }
   }
 }

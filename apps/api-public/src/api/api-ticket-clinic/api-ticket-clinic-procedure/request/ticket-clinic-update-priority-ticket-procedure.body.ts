@@ -17,12 +17,6 @@ class TicketProcedureBody {
 }
 
 export class TicketClinicUpdatePriorityTicketProcedureBody {
-  @ApiProperty({ example: 56 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  ticketId: number
-
   @ApiProperty({ type: TicketProcedureBody, isArray: true })
   @Expose()
   @Type(() => TicketProcedureBody)

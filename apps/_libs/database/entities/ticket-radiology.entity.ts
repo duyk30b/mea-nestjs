@@ -170,9 +170,3 @@ export type TicketRadiologySortType = {
   | 'ASC'
   | 'DESC'
 }
-
-export type TicketRadiologyInsertBasicType = Omit<
-  TicketRadiology,
-  | keyof TicketRadiologyRelationType
-  | keyof Pick<TicketRadiology, 'id' | 'startedAt' | 'description' | 'result' | 'imageIds'>
->

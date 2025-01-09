@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { DiscountType } from '../../../common/variable'
 import { InteractType } from '../../../entities/commission.entity'
-import { TicketStatus } from '../../../entities/ticket.entity'
+import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import { TicketManager, TicketProcedureManager, TicketUserManager } from '../../../managers'
+import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
 
 @Injectable()
 export class TicketClinicDestroyTicketProcedureOperation {
@@ -11,7 +11,8 @@ export class TicketClinicDestroyTicketProcedureOperation {
     private dataSource: DataSource,
     private ticketManager: TicketManager,
     private ticketProcedureManager: TicketProcedureManager,
-    private ticketUserManager: TicketUserManager
+    private ticketUserManager: TicketUserManager,
+    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
   ) { }
 
   async destroyTicketProcedure(params: {
@@ -44,52 +45,25 @@ export class TicketClinicDestroyTicketProcedureOperation {
       })
 
       // === 4. UPDATE TICKET: MONEY  ===
+      const procedureMoneyDelete =
+        ticketProcedureDestroy.quantity * ticketProcedureDestroy.actualPrice
       const commissionMoneyDelete = ticketUserDestroyList.reduce((acc, item) => {
         return acc + item.commissionMoney
       }, 0)
-      const procedureMoneyDelete =
-        ticketProcedureDestroy.quantity * ticketProcedureDestroy.actualPrice
 
-      const procedureMoneyUpdate = ticketOrigin.procedureMoney - procedureMoneyDelete
-      const commissionMoneyUpdate = ticketOrigin.commissionMoney - commissionMoneyDelete
-
-      const itemsActualMoneyUpdate =
-        ticketOrigin.itemsActualMoney - ticketOrigin.procedureMoney + procedureMoneyUpdate
-
-      const discountType = ticketOrigin.discountType
-      let discountPercent = ticketOrigin.discountPercent
-      let discountMoney = ticketOrigin.discountMoney
-      if (discountType === DiscountType.VND) {
-        discountPercent =
-          itemsActualMoneyUpdate == 0
-            ? 0
-            : Math.floor((discountMoney * 100) / itemsActualMoneyUpdate)
+      let ticket: Ticket = ticketOrigin
+      if (procedureMoneyDelete != 0 || commissionMoneyDelete != 0) {
+        ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
+          manager,
+          oid,
+          ticketOrigin,
+          itemMoney: {
+            procedureMoneyAdd: -procedureMoneyDelete,
+            commissionMoneyAdd: -commissionMoneyDelete,
+          },
+        })
       }
-      if (discountType === DiscountType.Percent) {
-        discountMoney = Math.floor((discountPercent * itemsActualMoneyUpdate) / 100)
-      }
-      const totalMoneyUpdate = itemsActualMoneyUpdate - discountMoney
-      const debtUpdate = totalMoneyUpdate - ticketOrigin.paid
-      const profitUpdate =
-        totalMoneyUpdate
-        - ticketOrigin.totalCostAmount
-        - ticketOrigin.expense
-        - commissionMoneyUpdate
 
-      const ticket = await this.ticketManager.updateOneAndReturnEntity(
-        manager,
-        { oid, id: ticketId },
-        {
-          procedureMoney: procedureMoneyUpdate,
-          itemsActualMoney: itemsActualMoneyUpdate,
-          discountPercent,
-          discountMoney,
-          totalMoney: totalMoneyUpdate,
-          debt: debtUpdate,
-          commissionMoney: commissionMoneyUpdate,
-          profit: profitUpdate,
-        }
-      )
       return { ticket, ticketProcedureDestroy, ticketUserDestroyList }
     })
 

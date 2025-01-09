@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import { IsArray, IsDefined, IsNumber, ValidateNested } from 'class-validator'
-import { TicketUserBasicBody } from '../../request'
+import { TicketUserBasicBody } from '../../api-ticket-clinic-user/request/ticket-clinic-update-user-list.body'
 
 class TicketProcedureBody {
   @ApiProperty({ example: 4 })
@@ -24,10 +24,4 @@ export class TicketClinicUpdateTicketProcedureBody {
   @Type(() => TicketProcedureBody)
   @ValidateNested({ each: true })
   ticketProcedure: TicketProcedureBody
-
-  @ApiProperty({ example: 56 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  ticketProcedureId: number
 }

@@ -110,7 +110,7 @@ export class ApiTicketLaboratoryService {
         laboratoryMoney,
       })
 
-      this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
     }
 
     this.socketEmitService.ticketClinicUpdateTicketLaboratoryList(oid, {
