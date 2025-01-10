@@ -127,7 +127,7 @@ export class ApiTicketClinicRadiologyService {
         startedAt: body.ticketRadiology.startedAt,
         imageIds: JSON.stringify(imageIdsUpdate),
       },
-      ticketUserDto: body.ticketUserList?.filter((i) => !!i.userId),
+      ticketUserDto: body.ticketUserList,
     })
 
     const { ticket, ticketRadiology, ticketUserChangeList } = result

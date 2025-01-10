@@ -99,7 +99,7 @@ export class ApiTicketClinicProcedureService {
       ticketId,
       ticketProcedureId,
       ticketProcedureUpdateDto: body.ticketProcedure,
-      ticketUserDto: body.ticketUserList?.filter((i) => !!i.userId),
+      ticketUserDto: body.ticketUserList,
     })
 
     this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket: result.ticket })
