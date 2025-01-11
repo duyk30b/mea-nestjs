@@ -21246,7 +21246,8 @@ let ApiBatchService = class ApiBatchService {
             });
         }
         this.socketEmitService.batchUpsert(oid, { batch: batchUpdated });
-        if (batchOrigin.quantity === batchUpdated.quantity) {
+        if (batchOrigin.quantity === batchUpdated.quantity
+            && batchOrigin.costPrice === batchUpdated.costPrice) {
             return { data: { batch: batchUpdated } };
         }
         const batchMovement = {
@@ -21260,8 +21261,8 @@ let ApiBatchService = class ApiBatchService {
             openQuantity: batchOrigin.quantity,
             quantity: batchUpdated.quantity - batchOrigin.quantity,
             closeQuantity: batchUpdated.quantity,
-            actualPrice: 0,
-            expectedPrice: 0,
+            actualPrice: batchUpdated.costPrice,
+            expectedPrice: batchOrigin.costPrice,
             isRefund: 0,
             unitRate: 1,
             createdAt: Date.now(),
@@ -21282,8 +21283,8 @@ let ApiBatchService = class ApiBatchService {
             quantity: productUpdated.quantity - batchOrigin.product.quantity,
             closeQuantity: productUpdated.quantity,
             costPrice: batchOrigin.costPrice,
-            actualPrice: 0,
-            expectedPrice: 0,
+            actualPrice: batchUpdated.costPrice,
+            expectedPrice: batchOrigin.costPrice,
             isRefund: 0,
             unitRate: 1,
             createdAt: Date.now(),
@@ -21604,6 +21605,7 @@ class BatchUpdateInfoAndQuantityBody extends (0, swagger_1.PickType)(BatchInsert
     'lotNumber',
     'expiryDate',
     'warehouseId',
+    'costPrice',
 ]) {
 }
 exports.BatchUpdateInfoAndQuantityBody = BatchUpdateInfoAndQuantityBody;
