@@ -50,6 +50,7 @@ export class BatchUpdateInfoAndQuantityBody extends PickType(BatchInsertBody, [
   'lotNumber',
   'expiryDate',
   'warehouseId',
+  'costPrice',
 ]) {
   @ApiProperty({ example: 20_000 })
   @Expose()
