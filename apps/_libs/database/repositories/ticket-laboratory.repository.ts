@@ -28,12 +28,12 @@ export class TicketLaboratoryRepository extends _PostgreSqlRepository<
   }
 
   async updateResultList(options: {
-    oid: number,
-    ticketId: number,
+    oid: number
+    ticketId: number
     startedAt: number
     ticketLaboratoryDtoList: {
-      id: number,
-      attention: string,
+      id: number
+      attention: string
       result: string
     }[]
   }) {
@@ -41,24 +41,24 @@ export class TicketLaboratoryRepository extends _PostgreSqlRepository<
     if (!ticketLaboratoryDtoList.length) return
     const updateResult: [any[], number] = await this.manager.query(
       `
-      UPDATE  "TicketLaboratory" AS "tl"
+      UPDATE  "TicketLaboratory"
       SET     "attention" = temp.attention,
               "result" = temp.result,
               "startedAt" = ${startedAt},
               "status" = ${TicketLaboratoryStatus.Completed}
       FROM (VALUES `
-      + ticketLaboratoryDtoList.map((i) => {
-        return `(${i.id}, '${i.attention}', '${i.result}')`
-      }).join(', ')
+      + ticketLaboratoryDtoList
+        .map((i) => {
+          return `(${i.id}, '${i.attention}', '${i.result}')`
+        })
+        .join(', ')
       + `   ) AS temp("id", "attention", "result")
-      WHERE   "tl"."id" = temp."id" 
-          AND "tl"."oid" = ${oid} 
-          AND "tl"."ticketId" = ${ticketId} 
+      WHERE   "TicketLaboratory"."id"       = temp."id" 
+          AND "TicketLaboratory"."oid"      = ${oid} 
+          AND "TicketLaboratory"."ticketId" = ${ticketId} 
+      RETURNING "TicketLaboratory".*
       `
     )
-
-    if (updateResult[1] != ticketLaboratoryDtoList.length) {
-      throw new Error(`Update TicketLaboratory failed, affected = ${updateResult[1]}`)
-    }
+    return TicketLaboratory.fromRaws(updateResult[0])
   }
 }

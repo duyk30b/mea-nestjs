@@ -143,12 +143,6 @@ export type TicketLaboratoryInsertType = Omit<
   keyof TicketLaboratoryRelationType | keyof Pick<TicketLaboratory, 'id'>
 >
 
-export type TicketLaboratoryInsertBasicType = Omit<
-  TicketLaboratory,
-  | keyof TicketLaboratoryRelationType
-  | keyof Pick<TicketLaboratory, 'id' | 'startedAt' | 'result' | 'attention'>
->
-
 export type TicketLaboratoryUpdateType = {
   [K in Exclude<
     keyof TicketLaboratory,

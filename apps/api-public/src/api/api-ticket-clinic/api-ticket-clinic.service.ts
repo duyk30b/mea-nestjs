@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { FileUploadDto } from '../../../../_libs/common/dto/file'
@@ -11,19 +10,11 @@ import { Customer } from '../../../../_libs/database/entities'
 import { AppointmentStatus } from '../../../../_libs/database/entities/appointment.entity'
 import { InteractType } from '../../../../_libs/database/entities/commission.entity'
 import { TicketAttributeInsertType } from '../../../../_libs/database/entities/ticket-attribute.entity'
-import {
-  TicketLaboratoryInsertType,
-  TicketLaboratoryStatus,
-} from '../../../../_libs/database/entities/ticket-laboratory.entity'
-import { TicketProductType } from '../../../../_libs/database/entities/ticket-product.entity'
 import { TicketRadiologyStatus } from '../../../../_libs/database/entities/ticket-radiology.entity'
-import Ticket, { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
+import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import {
   TicketClinicReopenOperation,
   TicketClinicReturnProductOperation,
-  TicketClinicUpdateItemsMoneyOperation,
-  TicketClinicUpdateTicketLaboratoryListOperation,
-  TicketClinicUpdateTicketProductListOperation,
   TicketPayDebtOperation,
   TicketPaymentAndCloseOperation,
   TicketPrepaymentOperation,
@@ -34,12 +25,10 @@ import {
 import { TicketClinicUpdateInformationOperation } from '../../../../_libs/database/operations/ticket-clinic/ticket-clinic-update-information.operation'
 import {
   AppointmentRepository,
-  CommissionRepository,
   CustomerRepository,
   TicketAttributeRepository,
   TicketProductRepository,
   TicketRepository,
-  TicketUserRepository,
 } from '../../../../_libs/database/repositories'
 import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
 import { ImageManagerService } from '../../components/image-manager/image-manager.service'
@@ -49,10 +38,6 @@ import {
   TicketClinicPaymentBody,
   TicketClinicReturnProductListBody,
   TicketClinicUpdateBody,
-  TicketClinicUpdateConsumableBody,
-  TicketClinicUpdateItemsMoneyBody,
-  TicketClinicUpdatePrescriptionBody,
-  TicketClinicUpdateTicketLaboratoryListBody,
 } from './request'
 import { TicketClinicUpdateDiagnosisBody } from './request/ticket-clinic-update-diagnosis.body'
 
@@ -66,13 +51,8 @@ export class ApiTicketClinicService {
     private readonly customerRepository: CustomerRepository,
     private readonly appointmentRepository: AppointmentRepository,
     private readonly ticketRepository: TicketRepository,
-    private readonly commissionRepository: CommissionRepository,
     private readonly ticketAttributeRepository: TicketAttributeRepository,
-    private readonly ticketUserRepository: TicketUserRepository,
     private readonly ticketProductRepository: TicketProductRepository,
-    private readonly ticketClinicUpdateTicketLaboratoryListOperation: TicketClinicUpdateTicketLaboratoryListOperation,
-    private readonly ticketClinicUpdateTicketProductListOperation: TicketClinicUpdateTicketProductListOperation,
-    private readonly ticketClinicUpdateItemsMoneyOperation: TicketClinicUpdateItemsMoneyOperation,
     private readonly ticketClinicReturnProductOperation: TicketClinicReturnProductOperation,
     private readonly ticketRefundMoneyOperation: TicketRefundMoneyOperation,
     private readonly ticketSendProductOperation: TicketSendProductOperation,
@@ -209,10 +189,7 @@ export class ApiTicketClinicService {
     if (ticketUserChangeList) {
       this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
         ticketId,
-        interactType: InteractType.Ticket,
-        ticketItemId: 0,
         ticketUserDestroyList: ticketUserChangeList.ticketUserDestroyList,
-        ticketUserUpdateList: ticketUserChangeList.ticketUserUpdateList,
         ticketUserInsertList: ticketUserChangeList.ticketUserInsertList,
       })
     }
@@ -307,190 +284,6 @@ export class ApiTicketClinicService {
     return { data: true }
   }
 
-  async updateTicketProductConsumable(options: {
-    oid: number
-    ticketId: number
-    body: TicketClinicUpdateConsumableBody
-  }) {
-    const { oid, ticketId, body } = options
-
-    const result = await this.ticketClinicUpdateTicketProductListOperation.updateTicketProductList({
-      oid,
-      ticketId,
-      ticketProductListDto: body.ticketProductConsumableList.map((i) => {
-        return {
-          ...i,
-          quantityPrescription: 0,
-          hintUsage: '',
-        }
-      }),
-      type: TicketProductType.Consumable,
-    })
-
-    const { ticket, ticketProductList } = result
-
-    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
-    this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
-      ticketId,
-      ticketProductConsumableList: ticketProductList.filter((i) => {
-        return i.type === TicketProductType.Consumable
-      }),
-    })
-
-    return { data: true }
-  }
-
-  async updateTicketProductPrescription(options: {
-    oid: number
-    ticketId: number
-    body: TicketClinicUpdatePrescriptionBody
-  }) {
-    const { oid, ticketId, body } = options
-    const { ticketAttributeChangeList, ticketAttributeKeyList } = body
-
-    let ticket: Ticket
-    if (body.ticketProductPrescriptionList != null) {
-      const result =
-        await this.ticketClinicUpdateTicketProductListOperation.updateTicketProductList({
-          oid,
-          ticketId,
-          ticketProductListDto: body.ticketProductPrescriptionList,
-          type: TicketProductType.Prescription,
-        })
-
-      const { ticketProductList } = result
-      ticket = result.ticket
-
-      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
-      this.socketEmitService.ticketClinicUpdateTicketProductPrescriptionList(oid, {
-        ticketId,
-        ticketProductPrescriptionList: ticketProductList.filter((i) => {
-          return i.type === TicketProductType.Prescription
-        }),
-      })
-    }
-
-    if (ticketAttributeChangeList) {
-      await this.ticketAttributeRepository.delete({
-        oid,
-        ticketId,
-        key: { IN: ticketAttributeKeyList },
-      })
-      const ticketAttributeInsertList = ticketAttributeChangeList.map((i) => {
-        const dto: TicketAttributeInsertType = {
-          ...i,
-          oid,
-          ticketId,
-        }
-        return dto
-      })
-
-      await this.ticketAttributeRepository.insertMany(ticketAttributeInsertList)
-
-      const ticketAttributeList = await this.ticketAttributeRepository.findManyBy({
-        oid,
-        ticketId,
-      })
-
-      this.socketEmitService.ticketClinicUpdateTicketAttributeList(oid, {
-        ticketId,
-        ticketAttributeList,
-      })
-    }
-
-    return { data: true }
-  }
-
-  async updateTicketLaboratoryList(options: {
-    oid: number
-    ticketId: number
-    body: TicketClinicUpdateTicketLaboratoryListBody
-  }) {
-    const { ticketId, oid, body } = options
-    const result =
-      await this.ticketClinicUpdateTicketLaboratoryListOperation.updateTicketLaboratoryList({
-        oid,
-        ticketId,
-        ticketLaboratoryListDto: body.ticketLaboratoryList.map((i) => {
-          const data: TicketLaboratoryInsertType = {
-            ...i,
-            oid,
-            ticketId,
-            customerId: body.customerId,
-            attention: '',
-            result: '',
-            startedAt: null,
-            status: TicketLaboratoryStatus.Pending,
-          }
-          return data
-        }),
-      })
-
-    const { ticket, ticketLaboratoryList } = result
-
-    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
-    this.socketEmitService.ticketClinicUpdateTicketLaboratoryList(oid, {
-      ticketId,
-      ticketLaboratoryList,
-    })
-
-    return { data: true }
-  }
-
-  async updateItemsMoney(options: {
-    oid: number
-    ticketId: number
-    body: TicketClinicUpdateItemsMoneyBody
-  }) {
-    const { oid, ticketId, body } = options
-    const result = await this.ticketClinicUpdateItemsMoneyOperation.updateItemsMoney({
-      oid,
-      ticketId,
-      itemsActualMoney: body.itemsActualMoney,
-      discountMoney: body.discountMoney,
-      discountPercent: body.discountPercent,
-      discountType: body.discountType,
-      ticketProductUpdateList: body.ticketProductUpdateList,
-      ticketProcedureUpdateList: body.ticketProcedureUpdateList,
-      ticketLaboratoryUpdateList: body.ticketLaboratoryUpdateList,
-      ticketRadiologyUpdateList: body.ticketRadiologyUpdateList,
-    })
-
-    const {
-      ticket,
-      ticketProductList,
-      ticketProcedureList,
-      ticketLaboratoryList,
-      ticketRadiologyList,
-    } = result
-    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
-    this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
-      ticketId,
-      ticketProductConsumableList: ticketProductList.filter((i) => {
-        return i.type === TicketProductType.Consumable
-      }),
-    })
-    this.socketEmitService.ticketClinicUpdateTicketProductPrescriptionList(oid, {
-      ticketId,
-      ticketProductPrescriptionList: ticketProductList.filter((i) => {
-        return i.type === TicketProductType.Prescription
-      }),
-    })
-    this.socketEmitService.ticketClinicChangeTicketProcedureList(oid, {
-      ticketId,
-      ticketProcedureList,
-    })
-    this.socketEmitService.ticketClinicUpdateTicketLaboratoryList(oid, {
-      ticketId,
-      ticketLaboratoryList,
-    })
-    this.socketEmitService.ticketClinicChangeTicketRadiologyList(oid, {
-      ticketId,
-      ticketRadiologyList,
-    })
-    return { data: true }
-  }
-
   async sendProduct(params: { oid: number; ticketId: number }): Promise<BaseResponse> {
     const { oid, ticketId } = params
     const time = Date.now()
@@ -511,18 +304,18 @@ export class ApiTicketClinicService {
         condition: { oid, ticketId },
         sort: { id: 'ASC' },
       })
-      this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
-        ticketId,
-        ticketProductConsumableList: ticketProductList.filter((i) => {
-          return i.type === TicketProductType.Consumable
-        }),
-      })
-      this.socketEmitService.ticketClinicUpdateTicketProductPrescriptionList(oid, {
-        ticketId,
-        ticketProductPrescriptionList: ticketProductList.filter((i) => {
-          return i.type === TicketProductType.Prescription
-        }),
-      })
+      // this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
+      //   ticketId,
+      //   ticketProductConsumableList: ticketProductList.filter((i) => {
+      //     return i.type === TicketProductType.Consumable
+      //   }),
+      // })
+      // this.socketEmitService.ticketClinicUpdateTicketProductPrescriptionList(oid, {
+      //   ticketId,
+      //   ticketProductPrescriptionList: ticketProductList.filter((i) => {
+      //     return i.type === TicketProductType.Prescription
+      //   }),
+      // })
 
       return { data: { ticket } }
     } catch (error: any) {
@@ -554,18 +347,18 @@ export class ApiTicketClinicService {
         condition: { oid, ticketId },
         sort: { id: 'ASC' },
       })
-      this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
-        ticketId,
-        ticketProductConsumableList: ticketProductList.filter((i) => {
-          return i.type === TicketProductType.Consumable
-        }),
-      })
-      this.socketEmitService.ticketClinicUpdateTicketProductPrescriptionList(oid, {
-        ticketId,
-        ticketProductPrescriptionList: ticketProductList.filter((i) => {
-          return i.type === TicketProductType.Prescription
-        }),
-      })
+      // this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
+      //   ticketId,
+      //   ticketProductConsumableList: ticketProductList.filter((i) => {
+      //     return i.type === TicketProductType.Consumable
+      //   }),
+      // })
+      // this.socketEmitService.ticketClinicUpdateTicketProductPrescriptionList(oid, {
+      //   ticketId,
+      //   ticketProductPrescriptionList: ticketProductList.filter((i) => {
+      //     return i.type === TicketProductType.Prescription
+      //   }),
+      // })
 
       return { data: { ticket } }
     } catch (error: any) {

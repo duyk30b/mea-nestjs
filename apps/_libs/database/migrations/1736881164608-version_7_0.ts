@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm'
 
-export class Version611734210344255 implements MigrationInterface {
-    name = 'Version611734210344255'
+export class Version701736881164608 implements MigrationInterface {
+    name = 'Version701736881164608'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`
@@ -68,6 +68,7 @@ export class Version611734210344255 implements MigrationInterface {
                 ADD "interactType" smallint NOT NULL DEFAULT '1',
                 ADD "interactId" integer NOT NULL DEFAULT '0',
                 ADD "ticketItemId" integer NOT NULL DEFAULT '0',
+                ADD "quantity" integer NOT NULL DEFAULT '1',
                 ADD "commissionMoney" bigint NOT NULL DEFAULT '0',
                 ADD "commissionPercent" numeric(5, 3) NOT NULL DEFAULT '0',
                 ADD "commissionCalculatorType" smallint NOT NULL DEFAULT '1';

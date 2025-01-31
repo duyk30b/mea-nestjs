@@ -33,6 +33,7 @@ export class TicketUserOperation {
             interactType: InteractType.Ticket,
             interactId: 0,
             ticketItemId: 0,
+            quantity: 1,
             ticketItemActualPrice: 0,
             ticketItemExpectedPrice: 0,
           },
@@ -40,7 +41,7 @@ export class TicketUserOperation {
         })
 
         commissionMoneyAdd = ticketUserInsertList.reduce((acc, item) => {
-          return acc + item.commissionMoney
+          return acc + item.commissionMoney * item.quantity
         }, 0)
       }
 

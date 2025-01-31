@@ -18,10 +18,6 @@ import { ApiTicketClinicService } from './api-ticket-clinic.service'
 import {
   TicketClinicCreateBody,
   TicketClinicUpdateBody,
-  TicketClinicUpdateConsumableBody,
-  TicketClinicUpdateItemsMoneyBody,
-  TicketClinicUpdatePrescriptionBody,
-  TicketClinicUpdateTicketLaboratoryListBody,
 } from './request'
 import { TicketClinicPaymentBody } from './request/ticket-clinic-payment.body'
 import { TicketClinicReturnProductListBody } from './request/ticket-clinic-return-product-list.body'
@@ -78,58 +74,6 @@ export class ApiTicketClinicController {
       body,
       files,
     })
-  }
-
-  @Post(':id/update-ticket-product-consumable')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE)
-  async updateTicketProductConsumable(
-    @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: TicketClinicUpdateConsumableBody
-  ) {
-    return await this.apiTicketClinicService.updateTicketProductConsumable({
-      oid,
-      ticketId: id,
-      body,
-    })
-  }
-
-  @Post(':id/update-ticket-product-prescription')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION)
-  async updateTicketProductPrescription(
-    @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: TicketClinicUpdatePrescriptionBody
-  ) {
-    return await this.apiTicketClinicService.updateTicketProductPrescription({
-      oid,
-      ticketId: id,
-      body,
-    })
-  }
-
-  @Post(':id/update-ticket-laboratory-list')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST)
-  async updateTicketLaboratoryList(
-    @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: TicketClinicUpdateTicketLaboratoryListBody
-  ) {
-    return await this.apiTicketClinicService.updateTicketLaboratoryList({
-      oid,
-      ticketId: id,
-      body,
-    })
-  }
-
-  @Post(':id/update-items-money')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_ITEMS_MONEY)
-  async updateItemsMoney(
-    @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: TicketClinicUpdateItemsMoneyBody
-  ) {
-    return await this.apiTicketClinicService.updateItemsMoney({ oid, ticketId: id, body })
   }
 
   @Post(':id/send-product')

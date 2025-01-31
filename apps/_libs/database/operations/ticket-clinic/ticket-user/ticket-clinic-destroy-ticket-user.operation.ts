@@ -32,7 +32,7 @@ export class TicketClinicDestroyTicketUserOperation {
       })
 
       // === 4. UPDATE TICKET: MONEY  ===
-      const commissionMoneyDelete = ticketUserDestroy.commissionMoney
+      const commissionMoneyDelete = ticketUserDestroy.commissionMoney * ticketUserDestroy.quantity
 
       let ticket: Ticket = ticketOrigin
       if (commissionMoneyDelete != 0) {

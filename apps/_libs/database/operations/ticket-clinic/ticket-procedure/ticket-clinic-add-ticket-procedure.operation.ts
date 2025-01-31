@@ -81,6 +81,7 @@ export class TicketClinicAddTicketProcedureOperation {
             interactType: InteractType.Procedure,
             interactId: ticketProcedure.procedureId,
             ticketItemId: ticketProcedure.id,
+            quantity: ticketProcedure.quantity,
             ticketItemActualPrice: ticketProcedure.actualPrice,
             ticketItemExpectedPrice: ticketProcedure.expectedPrice,
           },
@@ -88,7 +89,7 @@ export class TicketClinicAddTicketProcedureOperation {
         })
 
         commissionMoneyAdd = ticketUserInsertList.reduce((acc, item) => {
-          return acc + item.commissionMoney
+          return acc + item.commissionMoney * item.quantity
         }, 0)
       }
 

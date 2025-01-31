@@ -21,17 +21,23 @@ export * from './ticket-base/ticket-statistic.operation'
 export * from './ticket-clinic/ticket-clinic-reopen.operation'
 export * from './ticket-clinic/ticket-clinic-return-product.operation'
 export * from './ticket-clinic/ticket-clinic-update-information.operation'
-export * from './ticket-clinic/ticket-clinic-update-items-money.operation'
-export * from './ticket-clinic/ticket-clinic-update-ticket-laboratory-list.operation'
-export * from './ticket-clinic/ticket-clinic-update-ticket-product-list.operation'
 
 export * from './ticket-clinic/ticket-procedure/ticket-clinic-add-ticket-procedure.operation'
 export * from './ticket-clinic/ticket-procedure/ticket-clinic-destroy-ticket-procedure.operation'
 export * from './ticket-clinic/ticket-procedure/ticket-clinic-update-ticket-procedure.operation'
 
+export * from './ticket-clinic/ticket-product/ticket-clinic-add-ticket-product.operation'
+export * from './ticket-clinic/ticket-product/ticket-clinic-destroy-ticket-product.operation'
+export * from './ticket-clinic/ticket-product/ticket-clinic-update-ticket-product-list.operation'
+export * from './ticket-clinic/ticket-product/ticket-clinic-update-ticket-product.operation'
+
 export * from './ticket-clinic/ticket-radiology/ticket-clinic-add-ticket-radiology.operation'
 export * from './ticket-clinic/ticket-radiology/ticket-clinic-destroy-ticket-radiology.operation'
 export * from './ticket-clinic/ticket-radiology/ticket-clinic-update-ticket-radiology.operation'
+
+export * from './ticket-clinic/ticket-laboratory/ticket-clinic-add-ticket-laboratory.operation'
+export * from './ticket-clinic/ticket-laboratory/ticket-clinic-destroy-ticket-laboratory.operation'
+export * from './ticket-clinic/ticket-laboratory/ticket-clinic-update-ticket-laboratory.operation'
 
 export * from './ticket-clinic/ticket-user/ticket-clinic-destroy-ticket-user.operation'
 

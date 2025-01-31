@@ -41,6 +41,10 @@ export default class TicketUser {
   @Expose()
   ticketItemId: number // ticketProcedureId hoặc ticketProductId hoặc ticketRadiologyId
 
+  @Column({ type: 'integer', default: 1 })
+  @Expose()
+  quantity: number
+
   @Column({
     type: 'bigint',
     default: 0,

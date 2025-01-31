@@ -1,7 +1,6 @@
 /* eslint-disable max-len */
 import { Injectable } from '@nestjs/common'
 import { FileUploadDto } from '../../../../../_libs/common/dto/file'
-import { InteractType } from '../../../../../_libs/database/entities/commission.entity'
 import { TicketRadiologyStatus } from '../../../../../_libs/database/entities/ticket-radiology.entity'
 import {
   TicketClinicAddTicketRadiologyOperation,
@@ -16,8 +15,9 @@ import { ImageManagerService } from '../../../components/image-manager/image-man
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import {
   TicketClinicAddTicketRadiologyBody,
+  TicketClinicUpdateMoneyTicketRadiologyBody,
   TicketClinicUpdatePriorityTicketRadiologyBody,
-  TicketClinicUpdateTicketRadiologyBody,
+  TicketClinicUpdateResultTicketRadiologyBody,
 } from './request'
 
 @Injectable()
@@ -85,8 +85,6 @@ export class ApiTicketClinicRadiologyService {
     if (result.ticketUserDestroyList.length) {
       this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
         ticketId,
-        interactType: InteractType.Radiology,
-        ticketItemId: result.ticketRadiologyDestroy.id,
         ticketUserDestroyList: result.ticketUserDestroyList,
       })
     }
@@ -94,11 +92,41 @@ export class ApiTicketClinicRadiologyService {
     return { data: true }
   }
 
-  async updateTicketRadiology(options: {
+  async updateMoneyTicketRadiology(options: {
     oid: number
     ticketId: number
     ticketRadiologyId: number
-    body: TicketClinicUpdateTicketRadiologyBody
+    body: TicketClinicUpdateMoneyTicketRadiologyBody
+  }) {
+    const { oid, ticketId, ticketRadiologyId, body } = options
+    const result = await this.ticketClinicUpdateTicketRadiologyOperation.updateTicketRadiology({
+      oid,
+      ticketId,
+      ticketRadiologyId,
+      ticketRadiologyUpdateDto: body.ticketRadiology,
+      ticketUserDto: body.ticketUserList,
+    })
+
+    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket: result.ticket })
+    this.socketEmitService.ticketClinicChangeTicketRadiologyList(oid, {
+      ticketId,
+      ticketRadiologyUpdate: result.ticketRadiology,
+    })
+    if (result.ticketUserChangeList) {
+      this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
+        ticketId,
+        ticketUserDestroyList: result.ticketUserChangeList.ticketUserDestroyList,
+        ticketUserInsertList: result.ticketUserChangeList.ticketUserInsertList,
+      })
+    }
+    return { data: true }
+  }
+
+  async updateResultTicketRadiology(options: {
+    oid: number
+    ticketId: number
+    ticketRadiologyId: number
+    body: TicketClinicUpdateResultTicketRadiologyBody
     files: FileUploadDto[]
   }) {
     const { oid, ticketId, ticketRadiologyId, body, files } = options
@@ -145,10 +173,7 @@ export class ApiTicketClinicRadiologyService {
     if (ticketUserChangeList) {
       this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
         ticketId,
-        interactType: InteractType.Ticket,
-        ticketItemId: 0,
         ticketUserDestroyList: ticketUserChangeList.ticketUserDestroyList,
-        ticketUserUpdateList: ticketUserChangeList.ticketUserUpdateList,
         ticketUserInsertList: ticketUserChangeList.ticketUserInsertList,
       })
     }

@@ -47,7 +47,7 @@ export class TicketClinicDestroyTicketRadiologyOperation {
       // === 4. UPDATE TICKET: MONEY  ===
       const radiologyMoneyDelete = ticketRadiologyDestroy.actualPrice
       const commissionMoneyDelete = ticketUserDestroyList.reduce((acc, item) => {
-        return acc + item.commissionMoney
+        return acc + item.commissionMoney * item.quantity
       }, 0)
 
       let ticket: Ticket = ticketOrigin

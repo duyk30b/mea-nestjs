@@ -29,8 +29,6 @@ export class ApiTicketClinicUserService {
 
     this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
       ticketId,
-      interactType: ticketUserDestroy.interactType,
-      ticketItemId: ticketUserDestroy.ticketItemId,
       ticketUserDestroyList: [ticketUserDestroy],
     })
 
@@ -61,10 +59,7 @@ export class ApiTicketClinicUserService {
     if (ticketUserChangeList) {
       this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
         ticketId,
-        interactType: InteractType.Ticket,
-        ticketItemId: 0,
         ticketUserDestroyList: ticketUserChangeList.ticketUserDestroyList,
-        ticketUserUpdateList: ticketUserChangeList.ticketUserUpdateList,
         ticketUserInsertList: ticketUserChangeList.ticketUserInsertList,
       })
     }

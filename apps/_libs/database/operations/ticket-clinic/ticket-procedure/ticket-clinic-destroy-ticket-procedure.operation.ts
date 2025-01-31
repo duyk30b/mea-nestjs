@@ -48,7 +48,7 @@ export class TicketClinicDestroyTicketProcedureOperation {
       const procedureMoneyDelete =
         ticketProcedureDestroy.quantity * ticketProcedureDestroy.actualPrice
       const commissionMoneyDelete = ticketUserDestroyList.reduce((acc, item) => {
-        return acc + item.commissionMoney
+        return acc + item.commissionMoney * item.quantity
       }, 0)
 
       let ticket: Ticket = ticketOrigin

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
+import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { InteractType } from '../../../entities/commission.entity'
 import TicketRadiology, { TicketRadiologyStatus } from '../../../entities/ticket-radiology.entity'
 import TicketUser from '../../../entities/ticket-user.entity'
@@ -7,6 +8,21 @@ import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import { TicketManager, TicketRadiologyManager } from '../../../managers'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
 import { TicketUserChangeListManager } from '../../ticket-user/ticket-user-change-list.manager'
+
+export type TicketRadiologyUpdateDtoType = {
+  [K in keyof Pick<
+    TicketRadiology,
+    | 'description'
+    | 'result'
+    | 'startedAt'
+    | 'imageIds'
+    | 'expectedPrice'
+    | 'discountType'
+    | 'discountMoney'
+    | 'discountPercent'
+    | 'actualPrice'
+  >]?: TicketRadiology[K] | (() => string)
+}
 
 @Injectable()
 export class TicketClinicUpdateTicketRadiologyOperation {
@@ -18,16 +34,11 @@ export class TicketClinicUpdateTicketRadiologyOperation {
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
   ) { }
 
-  async updateTicketRadiology(params: {
+  async updateTicketRadiology<T extends TicketRadiologyUpdateDtoType>(params: {
     oid: number
     ticketId: number
     ticketRadiologyId: number
-    ticketRadiologyUpdateDto?: {
-      description: string
-      result: string
-      startedAt: number
-      imageIds: string
-    }
+    ticketRadiologyUpdateDto?: NoExtra<TicketRadiologyUpdateDtoType, T>
     ticketUserDto?: { roleId: number; userId: number }[]
   }) {
     const { oid, ticketId, ticketRadiologyId, ticketRadiologyUpdateDto, ticketUserDto } = params
@@ -58,6 +69,11 @@ export class TicketClinicUpdateTicketRadiologyOperation {
             startedAt: ticketRadiologyUpdateDto.startedAt,
             imageIds: ticketRadiologyUpdateDto.imageIds,
             status: TicketRadiologyStatus.Completed,
+            expectedPrice: ticketRadiologyUpdateDto.expectedPrice,
+            discountType: ticketRadiologyUpdateDto.discountType,
+            discountMoney: ticketRadiologyUpdateDto.discountMoney,
+            discountPercent: ticketRadiologyUpdateDto.discountPercent,
+            actualPrice: ticketRadiologyUpdateDto.actualPrice,
           }
         )
       }
@@ -66,11 +82,10 @@ export class TicketClinicUpdateTicketRadiologyOperation {
       let commissionMoneyChange = 0
       let ticketUserChangeList: {
         ticketUserDestroyList: TicketUser[]
-        ticketUserUpdateList: TicketUser[]
         ticketUserInsertList: TicketUser[]
       }
       if (ticketUserDto) {
-        ticketUserChangeList = await this.ticketUserChangeListManager.changeList({
+        ticketUserChangeList = await this.ticketUserChangeListManager.replaceList({
           manager,
           information: {
             oid,
@@ -78,6 +93,7 @@ export class TicketClinicUpdateTicketRadiologyOperation {
             interactType: InteractType.Radiology,
             interactId: ticketRadiologyOrigin.radiologyId,
             ticketItemId: ticketRadiologyOrigin.id,
+            quantity: 1,
             ticketItemActualPrice: ticketRadiology.actualPrice,
             ticketItemExpectedPrice: ticketRadiology.expectedPrice,
           },
@@ -85,12 +101,12 @@ export class TicketClinicUpdateTicketRadiologyOperation {
         })
         const commissionMoneyDelete = ticketUserChangeList.ticketUserDestroyList.reduce(
           (acc, item) => {
-            return acc + item.commissionMoney
+            return acc + item.commissionMoney * item.quantity
           },
           0
         )
         const commissionMoneyAdd = ticketUserChangeList.ticketUserInsertList.reduce((acc, item) => {
-          return acc + item.commissionMoney
+          return acc + item.commissionMoney * item.quantity
         }, 0)
 
         commissionMoneyChange = commissionMoneyAdd - commissionMoneyDelete

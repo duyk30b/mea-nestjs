@@ -21,6 +21,7 @@ export class TicketUserChangeListManager {
     information: {
       oid: number
       ticketId: number
+      quantity: number
       interactType: InteractType
       interactId: number
       ticketItemId: number
@@ -69,6 +70,7 @@ export class TicketUserChangeListManager {
           interactId: information.interactId,
           interactType: information.interactType,
           ticketItemId: information.ticketItemId,
+          quantity: information.quantity,
           createdAt: Date.now(),
           commissionCalculatorType,
           commissionMoney,
@@ -84,7 +86,7 @@ export class TicketUserChangeListManager {
     return ticketUserInsertList
   }
 
-  async changeList(options: {
+  async replaceList(options: {
     manager: EntityManager
     information: {
       oid: number
@@ -92,6 +94,7 @@ export class TicketUserChangeListManager {
       interactType: InteractType
       interactId: number
       ticketItemId: number
+      quantity: number
       ticketItemActualPrice: number
       ticketItemExpectedPrice: number
     }
@@ -101,47 +104,16 @@ export class TicketUserChangeListManager {
     const { oid, ticketId } = information
 
     let ticketUserInsertList: TicketUser[] = []
-    let ticketUserUpdateList: TicketUser[] = []
     let ticketUserDestroyList: TicketUser[] = []
-
-    // === 1. DELETE EMPTY USERID ===
-    const dataDestroy = dataChange.filter((i) => !i.userId)
-    if (dataDestroy.length) {
-      ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
-        oid,
-        ticketId,
-        interactType: information.interactType,
-        ticketItemId: information.ticketItemId,
-        roleId: { IN: dataDestroy.map((i) => i.roleId) },
-      })
-    }
-
-    const dataUpdate = dataChange.filter((i) => !!i.userId)
-    if (dataUpdate.length) {
-      const queryUpdateResult: [any[], number] = await manager.query(
-        `
-        UPDATE  "TicketUser"
-        SET     "userId" = temp."userId"
-        FROM (VALUES `
-        + dataUpdate.map(({ roleId, userId }) => `(${roleId}, ${userId})`).join(', ')
-        + `   ) AS temp("roleId", "userId")
-        WHERE   "TicketUser"."oid" = ${oid} 
-            AND "TicketUser"."ticketId" = ${ticketId} 
-            AND "TicketUser"."interactType" = ${information.interactType} 
-            AND "TicketUser"."ticketItemId" = ${information.ticketItemId} 
-            AND "TicketUser"."roleId" = temp."roleId" 
-        RETURNING "TicketUser".*; 
-        `
-      )
-      ticketUserUpdateList = TicketUser.fromRaws(queryUpdateResult[0])
-    }
-
-    const roleIdUpdate = ticketUserUpdateList.map((i) => i.roleId)
-    const dataInsert = dataChange.filter((i) => {
-      if (!i.userId) return false
-      if (roleIdUpdate.includes(i.roleId)) return false
-      return true
+    // === 1. DELETE ALL ===
+    ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+      oid,
+      ticketId,
+      interactType: information.interactType,
+      ticketItemId: information.ticketItemId,
     })
+
+    const dataInsert = dataChange.filter((i) => !!i.userId)
     if (dataInsert.length) {
       ticketUserInsertList = await this.insertList({
         manager,
@@ -149,6 +121,118 @@ export class TicketUserChangeListManager {
         dataInsert,
       })
     }
-    return { ticketUserDestroyList, ticketUserUpdateList, ticketUserInsertList }
+    return { ticketUserInsertList, ticketUserDestroyList }
   }
+
+  async changeQuantity(options: {
+    manager: EntityManager
+    information: {
+      oid: number
+      ticketId: number
+      interactType: InteractType
+      interactId: number
+    }
+    dataChange?: { ticketItemId: number; quantity: number }[]
+  }) {
+    const { manager, information, dataChange } = options
+    const { oid, ticketId } = information
+
+    const updateResult: [any[], number] = await manager.query(
+      `
+      UPDATE  "TicketUser"
+      SET     "quantity"  = temp."quantity"
+      FROM (VALUES `
+      + dataChange
+        .map(({ ticketItemId, quantity }) => {
+          return `(${ticketItemId}, ${quantity})`
+        })
+        .join(', ')
+      + `   ) AS temp("roleId", "userId", "quantity")
+      WHERE   "TicketUser"."id"          = ${oid}
+          AND "TicketUser"."ticketId"     = ${ticketId}
+          AND "TicketUser"."interactType" = ${information.interactType}
+          AND "TicketUser"."interactId"   = ${information.interactId}
+          AND "TicketUser"."ticketItemId" = temp."ticketItemId"
+      RETURNING "TicketUser".*;
+      `
+    )
+    const ticketUserUpdateList = TicketUser.fromRaws(updateResult[0])
+    return { ticketUserUpdateList }
+  }
+
+  // changeList theo cách cũ đang lỗi logic nếu thay đổi giá tiền
+  // async changeList(options: {
+  //   manager: EntityManager
+  //   information: {
+  //     oid: number
+  //     ticketId: number
+  //     interactType: InteractType
+  //     interactId: number
+  //     ticketItemId: number
+  //     quantity: number
+  //     ticketItemActualPrice: number
+  //     ticketItemExpectedPrice: number
+  //   }
+  //   dataChange?: { roleId: number; userId: number }[]
+  // }) {
+  //   const { manager, information, dataChange } = options
+  //   const { oid, ticketId } = information
+
+  //   let ticketUserInsertList: TicketUser[] = []
+  //   let ticketUserUpdateList: TicketUser[] = []
+  //   let ticketUserDestroyList: TicketUser[] = []
+
+  //   // === 1. DELETE EMPTY USERID ===
+  //   const dataDestroy = dataChange.filter((i) => !i.userId)
+  //   if (dataDestroy.length) {
+  //     ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+  //       oid,
+  //       ticketId,
+  //       interactType: information.interactType,
+  //       ticketItemId: information.ticketItemId,
+  //       roleId: { IN: dataDestroy.map((i) => i.roleId) },
+  //     })
+  //   }
+
+  //   const dataUpdate = dataChange.filter((i) => !!i.userId)
+  //   if (dataUpdate.length) {
+  //     const queryUpdateResult: [any[], number] = await manager.query(
+  //       `
+  //       UPDATE  "TicketUser"
+  //       SET     "userId"    = temp."userId",
+  //               "quantity"  = temp."quantity"
+  //       FROM (VALUES `
+  //       + dataUpdate
+  //         .map(({ roleId, userId }) => {
+  //           return `(${roleId}, ${userId}, ${information.quantity})`
+  //         })
+  //         .join(', ')
+  //       + `   ) AS temp("roleId", "userId", "quantity")
+  //       WHERE   "TicketUser"."oid"          = ${oid}
+  //           AND "TicketUser"."ticketId"     = ${ticketId}
+  //           AND "TicketUser"."interactType" = ${information.interactType}
+  //           AND "TicketUser"."interactId"   = ${information.interactId}
+  //           AND "TicketUser"."ticketItemId" = ${information.ticketItemId}
+  //           AND "TicketUser"."roleId"       = temp."roleId"
+  //       RETURNING "TicketUser".*;
+  //       `
+  //     )
+  //     ticketUserUpdateList = TicketUser.fromRaws(queryUpdateResult[0])
+  //   }
+
+  //   const roleIdUpdate = ticketUserUpdateList.map((i) => i.roleId)
+  //   const dataInsert = dataChange.filter((i) => {
+  //     if (!i.userId) return false
+  //     if (roleIdUpdate.includes(i.roleId)) return false
+  //     return true
+  //   })
+  //   if (dataInsert.length) {
+  //     ticketUserInsertList = await this.insertList({
+  //       manager,
+  //       information,
+  //       dataInsert,
+  //     })
+  //   }
+  //   return { ticketUserDestroyList, ticketUserUpdateList, ticketUserInsertList }
+  // }
 }

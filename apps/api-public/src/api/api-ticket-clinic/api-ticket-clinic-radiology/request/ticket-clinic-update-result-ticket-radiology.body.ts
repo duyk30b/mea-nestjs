@@ -35,7 +35,7 @@ export class TicketRadiologyUpdateBody extends MultipleFileUpload {
   startedAt: number
 }
 
-export class TicketClinicUpdateTicketRadiologyBody extends MultipleFileUpload {
+export class TicketClinicUpdateResultTicketRadiologyBody extends MultipleFileUpload {
   @ApiProperty({ type: String, example: JSON.stringify([3, 4]) })
   @Expose()
   @Transform(({ value }) => (value != null ? JSON.parse(value) : value))

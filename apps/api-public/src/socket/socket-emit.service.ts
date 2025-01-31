@@ -15,6 +15,7 @@ import {
   TicketUser,
 } from '../../../_libs/database/entities'
 import { InteractType } from '../../../_libs/database/entities/commission.entity'
+import { TicketProductType } from '../../../_libs/database/entities/ticket-product.entity'
 import { SOCKET_EVENT } from './socket.variable'
 
 @Injectable()
@@ -68,10 +69,7 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.BATCH_LIST_UPDATE, data)
   }
 
-  ticketClinicChange(
-    oid: number,
-    data: { type: 'CREATE' | 'UPDATE' | 'DESTROY'; ticket: Ticket }
-  ) {
+  ticketClinicChange(oid: number, data: { type: 'CREATE' | 'UPDATE' | 'DESTROY'; ticket: Ticket }) {
     if (!this.io) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE, data)
   }
@@ -88,12 +86,14 @@ export class SocketEmitService {
     oid: number,
     data: {
       ticketId: number
-      interactType: InteractType
-      ticketItemId: number
-      ticketUserReplaceList?: TicketUser[]
       ticketUserDestroyList?: TicketUser[]
       ticketUserUpdateList?: TicketUser[]
       ticketUserInsertList?: TicketUser[]
+      replace?: {
+        interactType: InteractType
+        ticketItemId: number // ticketItemId = 0 là thay thế toàn bộ interactType đó
+        ticketUserList: TicketUser[]
+      }
     }
   ) {
     if (!this.io) return
@@ -128,55 +128,35 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE_TICKET_RADIOLOGY_LIST, data)
   }
 
-  ticketClinicUpdateTicketProductConsumableList(
+  ticketClinicChangeTicketLaboratoryList(
     oid: number,
     data: {
       ticketId: number
-      ticketProductConsumableList: TicketProduct[]
+      ticketLaboratoryInsert?: TicketLaboratory
+      ticketLaboratoryInsertList?: TicketLaboratory[]
+      ticketLaboratoryUpdate?: TicketLaboratory
+      ticketLaboratoryUpdateList?: TicketLaboratory[]
+      ticketLaboratoryDestroy?: TicketLaboratory
+      ticketLaboratoryList?: TicketLaboratory[]
     }
   ) {
     if (!this.io) return
-    this.io
-      .in(oid.toString())
-      .emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE_LIST, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE_TICKET_LABORATORY_LIST, data)
   }
 
-  ticketClinicUpdateTicketProductPrescriptionList(
+  ticketClinicChangeTicketProductList(
     oid: number,
     data: {
       ticketId: number
-      ticketProductPrescriptionList: TicketProduct[]
+      ticketProductType: TicketProductType
+      ticketProductInsert?: TicketProduct
+      ticketProductInsertList?: TicketProduct[]
+      ticketProductUpdate?: TicketProduct
+      ticketProductDestroy?: TicketProduct
+      ticketProductList?: TicketProduct[]
     }
   ) {
     if (!this.io) return
-    this.io
-      .in(oid.toString())
-      .emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION_LIST, data)
-  }
-
-  ticketClinicUpdateTicketLaboratoryList(
-    oid: number,
-    data: { ticketId: number; ticketLaboratoryList: TicketLaboratory[] }
-  ) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_LIST, data)
-  }
-
-  ticketClinicUpdateTicketLaboratoryResult(
-    oid: number,
-    data: { ticketId: number; ticketLaboratory: TicketLaboratory }
-  ) {
-    if (!this.io) return
-    this.io
-      .in(oid.toString())
-      .emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_RESULT, data)
-  }
-
-  ticketClinicUpdateTicketUserList(
-    oid: number,
-    data: { ticketId: number; ticketUserList: TicketUser[] }
-  ) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_UPDATE_TICKET_USER_LIST, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE_TICKET_PRODUCT_LIST, data)
   }
 }

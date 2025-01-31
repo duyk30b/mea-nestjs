@@ -53,12 +53,11 @@ export class TicketClinicUpdateInformationOperation {
       let commissionMoneyChange = 0
       let ticketUserChangeList: {
         ticketUserDestroyList: TicketUser[]
-        ticketUserUpdateList: TicketUser[]
         ticketUserInsertList: TicketUser[]
       }
 
       if (params.ticketUser) {
-        ticketUserChangeList = await this.ticketUserChangeListManager.changeList({
+        ticketUserChangeList = await this.ticketUserChangeListManager.replaceList({
           manager,
           information: {
             oid,
@@ -66,6 +65,7 @@ export class TicketClinicUpdateInformationOperation {
             interactType: params.ticketUser.interactType,
             interactId: params.ticketUser.interactId,
             ticketItemId: params.ticketUser.ticketItemId,
+            quantity: 1,
             ticketItemActualPrice: params.ticketUser.ticketItemActualPrice,
             ticketItemExpectedPrice: params.ticketUser.ticketItemExpectedPrice,
           },
@@ -73,12 +73,12 @@ export class TicketClinicUpdateInformationOperation {
         })
         const commissionMoneyDelete = ticketUserChangeList.ticketUserDestroyList.reduce(
           (acc, item) => {
-            return acc + item.commissionMoney
+            return acc + item.commissionMoney * item.quantity
           },
           0
         )
         const commissionMoneyAdd = ticketUserChangeList.ticketUserInsertList.reduce((acc, item) => {
-          return acc + item.commissionMoney
+          return acc + item.commissionMoney * item.quantity
         }, 0)
 
         commissionMoneyChange = commissionMoneyAdd - commissionMoneyDelete

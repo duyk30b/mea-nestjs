@@ -47,9 +47,7 @@ export class ApiTicketClinicProcedureService {
     if (result.ticketUserInsertList) {
       this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
         ticketId,
-        interactType: InteractType.Procedure,
-        ticketItemId: ticketProcedure.id,
-        ticketUserReplaceList: result.ticketUserInsertList,
+        ticketUserInsertList: result.ticketUserInsertList,
       })
     }
 
@@ -78,8 +76,6 @@ export class ApiTicketClinicProcedureService {
     if (result.ticketUserDestroyList) {
       this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
         ticketId,
-        interactType: InteractType.Procedure,
-        ticketItemId: result.ticketProcedureDestroy.id,
         ticketUserDestroyList: result.ticketUserDestroyList,
       })
     }
@@ -110,10 +106,7 @@ export class ApiTicketClinicProcedureService {
     if (result.ticketUserChangeList) {
       this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
         ticketId,
-        interactType: InteractType.Ticket,
-        ticketItemId: 0,
         ticketUserDestroyList: result.ticketUserChangeList.ticketUserDestroyList,
-        ticketUserUpdateList: result.ticketUserChangeList.ticketUserUpdateList,
         ticketUserInsertList: result.ticketUserChangeList.ticketUserInsertList,
       })
     }

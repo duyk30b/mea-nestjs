@@ -1,4 +1,12 @@
-import { Body, Controller, Delete, Param, Post, UploadedFiles, UseInterceptors } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Post,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common'
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../../_libs/common/dto'
 import { FileUploadDto } from '../../../../../_libs/common/dto/file'
@@ -10,8 +18,9 @@ import { ApiTicketClinicRadiologyService } from './api-ticket-clinic-radiology.s
 import {
   TicketClinicAddTicketRadiologyBody,
   TicketClinicRadiologyParams,
+  TicketClinicUpdateMoneyTicketRadiologyBody,
   TicketClinicUpdatePriorityTicketRadiologyBody,
-  TicketClinicUpdateTicketRadiologyBody,
+  TicketClinicUpdateResultTicketRadiologyBody,
 } from './request'
 
 @ApiTags('TicketClinic')
@@ -47,17 +56,32 @@ export class ApiTicketClinicRadiologyController {
     })
   }
 
-  @Post(':ticketId/update-ticket-radiology/:ticketRadiologyId')
+  @Post(':ticketId/update-money-ticket-radiology/:ticketLaboratoryId')
+  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST)
+  async updateTicketLaboratory(
+    @External() { oid }: TExternal,
+    @Param() { ticketId, ticketRadiologyId }: TicketClinicRadiologyParams,
+    @Body() body: TicketClinicUpdateMoneyTicketRadiologyBody
+  ) {
+    return await this.apiTicketClinicRadiologyService.updateMoneyTicketRadiology({
+      oid,
+      ticketId,
+      ticketRadiologyId,
+      body,
+    })
+  }
+
+  @Post(':ticketId/update-result-ticket-radiology/:ticketRadiologyId')
   @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FastifyFilesInterceptor('files', 10, {}))
   async updateTicketRadiology(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketRadiologyId }: TicketClinicRadiologyParams,
-    @Body() body: TicketClinicUpdateTicketRadiologyBody,
+    @Body() body: TicketClinicUpdateResultTicketRadiologyBody,
     @UploadedFiles() files: FileUploadDto[]
   ) {
-    return await this.apiTicketClinicRadiologyService.updateTicketRadiology({
+    return await this.apiTicketClinicRadiologyService.updateResultTicketRadiology({
       oid,
       ticketId,
       ticketRadiologyId,

@@ -10,7 +10,15 @@ import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-it
 import { TicketUserChangeListManager } from '../../ticket-user/ticket-user-change-list.manager'
 
 export type TicketProcedureUpdateDtoType = {
-  [K in keyof Pick<TicketProcedure, 'quantity'>]: TicketProcedure[K] | (() => string)
+  [K in keyof Pick<
+    TicketProcedure,
+    | 'quantity'
+    | 'expectedPrice'
+    | 'discountType'
+    | 'discountMoney'
+    | 'discountPercent'
+    | 'actualPrice'
+  >]: TicketProcedure[K] | (() => string)
 }
 
 @Injectable()
@@ -53,7 +61,14 @@ export class TicketClinicUpdateTicketProcedureOperation {
         ticketProcedure = await this.ticketProcedureManager.updateOneAndReturnEntity(
           manager,
           { oid, id: ticketProcedureId },
-          { quantity: ticketProcedureUpdateDto.quantity }
+          {
+            quantity: ticketProcedureUpdateDto.quantity,
+            expectedPrice: ticketProcedureUpdateDto.expectedPrice,
+            discountType: ticketProcedureUpdateDto.discountType,
+            discountMoney: ticketProcedureUpdateDto.discountMoney,
+            discountPercent: ticketProcedureUpdateDto.discountPercent,
+            actualPrice: ticketProcedureUpdateDto.actualPrice,
+          }
         )
         procedureMoneyChange =
           ticketProcedure.quantity * ticketProcedure.actualPrice
@@ -63,11 +78,10 @@ export class TicketClinicUpdateTicketProcedureOperation {
       let commissionMoneyChange = 0
       let ticketUserChangeList: {
         ticketUserDestroyList: TicketUser[]
-        ticketUserUpdateList: TicketUser[]
         ticketUserInsertList: TicketUser[]
       }
       if (ticketUserDto) {
-        ticketUserChangeList = await this.ticketUserChangeListManager.changeList({
+        ticketUserChangeList = await this.ticketUserChangeListManager.replaceList({
           manager,
           information: {
             oid,
@@ -75,6 +89,7 @@ export class TicketClinicUpdateTicketProcedureOperation {
             interactType: InteractType.Procedure,
             interactId: ticketProcedureOrigin.procedureId,
             ticketItemId: ticketProcedureOrigin.id,
+            quantity: ticketProcedure.quantity,
             ticketItemActualPrice: ticketProcedure.actualPrice,
             ticketItemExpectedPrice: ticketProcedure.expectedPrice,
           },
@@ -82,12 +97,12 @@ export class TicketClinicUpdateTicketProcedureOperation {
         })
         const commissionMoneyDelete = ticketUserChangeList.ticketUserDestroyList.reduce(
           (acc, item) => {
-            return acc + item.commissionMoney
+            return acc + item.commissionMoney * item.quantity
           },
           0
         )
         const commissionMoneyAdd = ticketUserChangeList.ticketUserInsertList.reduce((acc, item) => {
-          return acc + item.commissionMoney
+          return acc + item.commissionMoney * item.quantity
         }, 0)
 
         commissionMoneyChange = commissionMoneyAdd - commissionMoneyDelete
