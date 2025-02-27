@@ -1,6 +1,7 @@
 export * from './appointment.repository'
 export * from './bat-movement.repository'
 export * from './batch.repository'
+export * from './commission.repository'
 export * from './customer-payment.repository'
 export * from './customer-source.repository'
 export * from './customer.repository'

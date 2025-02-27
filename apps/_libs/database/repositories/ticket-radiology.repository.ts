@@ -25,4 +25,32 @@ export class TicketRadiologyRepository extends _PostgreSqlRepository<
   ) {
     super(TicketRadiology, ticketRadiologyRepository)
   }
+
+  async updatePriorityList(params: {
+    oid: number
+    ticketId: number
+    updateData: { id: number; priority: number }[]
+  }): Promise<TicketRadiology[]> {
+    if (!params.updateData.length) return []
+    const queryUpdateResult: [any[], number] = await this.manager.query(
+      `
+      UPDATE "TicketRadiology"
+      SET "priority" = temp.priority
+      FROM (VALUES `
+      + params.updateData
+        .map(({ id, priority }) => {
+          return `(${id}, ${priority})`
+        })
+        .join(', ')
+      + `   ) AS temp("id", "priority")
+      WHERE   "TicketRadiology"."id"  = temp."id" 
+          AND "TicketRadiology"."ticketId" = ${params.ticketId} 
+          AND "TicketRadiology"."oid" = ${params.oid} 
+      RETURNING "TicketRadiology".*; 
+      `
+    )
+
+    const ticketRadiologyList = TicketRadiology.fromRaws(queryUpdateResult[0])
+    return ticketRadiologyList
+  }
 }

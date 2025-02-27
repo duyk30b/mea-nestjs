@@ -252,6 +252,17 @@ export abstract class _PostgreSqlRepository<
     return this.entity.fromRaws(raws)
   }
 
+  async updateOneAndReturnEntity<X extends Partial<_UPDATE>>(
+    condition: BaseCondition<_ENTITY>,
+    data: NoExtra<Partial<_UPDATE>, X>
+  ): Promise<_ENTITY> {
+    const raws = await this.updateAndReturnRaw(condition, data)
+    if (raws.length !== 1) {
+      throw new Error(`Update Database failed: ` + JSON.stringify({ raws }))
+    }
+    return this.entity.fromRaw(raws[0])
+  }
+
   async delete(condition: BaseCondition<_ENTITY>) {
     const where = this.getWhereOptions(condition)
     const deleteResult = await this.repository.delete(where)

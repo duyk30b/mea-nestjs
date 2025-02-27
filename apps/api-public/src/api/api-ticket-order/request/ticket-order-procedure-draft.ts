@@ -9,6 +9,12 @@ import {
 import { DiscountType } from '../../../../../_libs/database/common/variable'
 
 export class TicketOrderProcedureDraft {
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  priority: number
+
   @ApiProperty({ example: 12 })
   @Expose()
   @IsDefined()

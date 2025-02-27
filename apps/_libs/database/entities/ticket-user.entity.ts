@@ -1,53 +1,97 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
-import { DiscountType } from '../common/variable'
+import { Exclude, Expose } from 'class-transformer'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { CommissionCalculatorType, InteractType } from './commission.entity'
 import Role from './role.entity'
 import Ticket from './ticket.entity'
 import User from './user.entity'
 
-export enum TicketUserReferenceType {
-  Ticket = 1,
-  TicketProcedure = 2,
-  TicketUser = 3,
-  TicketRadiology = 4,
-}
-
 @Entity('TicketUser')
 @Index('IDX_TicketUser__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketUser__oid_createdAt', ['oid', 'createdAt'])
-export default class TicketUser extends BaseEntity {
+export default class TicketUser {
+  @Column({ name: 'oid' })
+  @Exclude()
+  oid: number
+
+  @PrimaryGeneratedColumn({ name: 'id' })
+  @Expose({ name: 'id' })
+  id: number
+
   @Column()
   @Expose()
   ticketId: number
-
-  @Column()
-  @Expose()
-  userId: number
-
-  @Column()
-  @Expose()
-  referenceId: number // ticketProcedureId hoặc ticketProductId hoặc ticketRadiologyId
-
-  @Column({ default: 0 })
-  @Expose()
-  referenceType: TicketUserReferenceType
 
   @Column({ default: 0 })
   @Expose()
   roleId: number
 
-  @Column({ default: 0 })
+  @Column()
   @Expose()
-  bolusMoney: number
+  userId: number
 
-  @Column({ default: 0 })
+  @Column({ type: 'smallint', default: InteractType.Ticket })
   @Expose()
-  bolusPercent: number
+  interactType: InteractType
 
-  @Column({ type: 'varchar', length: 25, default: DiscountType.VND })
+  @Column({ type: 'integer', default: 0 })
   @Expose()
-  bolusType: DiscountType
+  interactId: number // procedureId hoặc productId hoặc radiologyId
+
+  @Column({ type: 'integer', default: 0 })
+  @Expose()
+  ticketItemId: number // ticketProcedureId hoặc ticketProductId hoặc ticketRadiologyId
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  ticketItemExpectedPrice: number // Giá dự kiến
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  ticketItemActualPrice: number // Giá thực tế
+
+  @Column({ type: 'integer', default: 1 })
+  @Expose()
+  quantity: number
+
+  @Column({ type: 'smallint', default: CommissionCalculatorType.VND })
+  @Expose()
+  commissionCalculatorType: CommissionCalculatorType
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  commissionMoney: number
+
+  @Column({
+    type: 'decimal',
+    default: 0,
+    precision: 5,
+    scale: 3,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  commissionPercentActual: number // % giảm giá
+
+  @Column({
+    type: 'decimal',
+    default: 0,
+    precision: 5,
+    scale: 3,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  commissionPercentExpected: number // % giảm giá
 
   @Column({
     type: 'bigint',
@@ -78,6 +122,11 @@ export default class TicketUser extends BaseEntity {
     const entity = new TicketUser()
     Object.assign(entity, raw)
 
+    entity.commissionMoney = Number(raw.commissionMoney)
+    entity.commissionPercentActual = Number(raw.commissionPercentActual)
+    entity.commissionPercentExpected = Number(raw.commissionPercentExpected)
+    entity.ticketItemExpectedPrice = Number(raw.ticketItemExpectedPrice)
+    entity.ticketItemActualPrice = Number(raw.ticketItemActualPrice)
     entity.createdAt = Number(raw.createdAt)
     return entity
   }
@@ -88,12 +137,7 @@ export default class TicketUser extends BaseEntity {
 }
 
 export type TicketUserRelationType = {
-  [P in keyof Pick<
-    TicketUser,
-    | 'ticket'
-    | 'user'
-    | 'role'
-  >]?: boolean
+  [P in keyof Pick<TicketUser, 'ticket' | 'user' | 'role'>]?: boolean
 }
 
 export type TicketUserInsertType = Omit<

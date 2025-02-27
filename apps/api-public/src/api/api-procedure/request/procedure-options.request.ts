@@ -7,6 +7,10 @@ export class ProcedureRelationQuery {
   @Expose()
   @IsBoolean()
   procedureGroup: boolean
+
+  @Expose()
+  @IsBoolean()
+  commissionList: boolean
 }
 
 export class ProcedureFilterQuery {

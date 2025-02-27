@@ -1,9 +1,13 @@
 import { Expose, Type } from 'class-transformer'
-import { IsIn, ValidateNested } from 'class-validator'
+import { IsIn, IsOptional, ValidateNested } from 'class-validator'
 import { ConditionTimestamp } from '../../../../../_libs/common/dto/condition-timestamp'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 
-export class RoleRelationQuery {}
+export class RoleRelationQuery {
+  @Expose()
+  @IsOptional()
+  userRoleList: { user?: boolean; role?: boolean } | false
+}
 
 export class RoleFilterQuery {
   @Expose()
@@ -16,4 +20,4 @@ export class RoleFilterQuery {
   updatedAt: ConditionTimestamp
 }
 
-export class RoleSortQuery extends SortQuery {}
+export class RoleSortQuery extends SortQuery { }

@@ -142,7 +142,6 @@ export class TicketClinicUpdateItemsMoneyOperation {
                       "discountPercent", "discountType", "actualPrice"
                       )
           WHERE   tp."id"           = temp."ticketProcedureId"
-              AND tp."procedureId"  = temp."procedureId"
               AND tp."ticketId"     = ${ticketId}
               AND tp."oid"          = ${oid}
           RETURNING tp.*;
@@ -259,7 +258,7 @@ export class TicketClinicUpdateItemsMoneyOperation {
         return acc + item.actualPrice
       }, 0)
 
-      const totalCostAmountUpdate = ticketProductList.reduce((acc, item) => {
+      const itemsCostAmountUpdate = ticketProductList.reduce((acc, item) => {
         return acc + item.costPrice * item.quantity
       }, 0)
 
@@ -271,14 +270,14 @@ export class TicketClinicUpdateItemsMoneyOperation {
 
       const totalMoneyUpdate = itemsActualMoneyUpdate - discountMoney
       const debtUpdate = totalMoneyUpdate - ticketOrigin.paid
-      const profitUpdate = totalMoneyUpdate - totalCostAmountUpdate - ticketOrigin.expense
+      const profitUpdate = totalMoneyUpdate - itemsCostAmountUpdate - ticketOrigin.expense
 
       // 5. UPDATE TICKET: MONEY
       const ticket = await this.ticketManager.updateOneAndReturnEntity(
         manager,
         { oid, id: ticketId },
         {
-          totalCostAmount: totalCostAmountUpdate,
+          itemsCostAmount: itemsCostAmountUpdate,
           procedureMoney: procedureMoneyUpdate,
           productMoney: productMoneyUpdate,
           laboratoryMoney: laboratoryMoneyUpdate,

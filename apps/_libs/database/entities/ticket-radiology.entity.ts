@@ -21,6 +21,10 @@ export default class TicketRadiology extends BaseEntity {
   @Expose()
   ticketId: number
 
+  @Column({ default: 1 })
+  @Expose()
+  priority: number
+
   @Column()
   @Expose()
   customerId: number
@@ -162,11 +166,7 @@ export type TicketRadiologyUpdateType = {
 }
 
 export type TicketRadiologySortType = {
-  [P in keyof Pick<TicketRadiology, 'id' | 'ticketId' | 'radiologyId'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<TicketRadiology, 'id' | 'ticketId' | 'radiologyId' | 'priority'>]?:
+  | 'ASC'
+  | 'DESC'
 }
-
-export type TicketRadiologyInsertBasicType = Omit<
-  TicketRadiology,
-  | keyof TicketRadiologyRelationType
-  | keyof Pick<TicketRadiology, 'id' | 'startedAt' | 'description' | 'result' | 'imageIds'>
->

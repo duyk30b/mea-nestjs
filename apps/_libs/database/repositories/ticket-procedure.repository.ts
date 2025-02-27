@@ -37,6 +37,34 @@ export class TicketProcedureRepository extends _PostgreSqlRepository<
     super(TicketProcedure, ticketProcedureRepository)
   }
 
+  async updatePriorityList(params: {
+    oid: number
+    ticketId: number
+    updateData: { id: number; priority: number }[]
+  }): Promise<TicketProcedure[]> {
+    if (!params.updateData.length) return
+    const queryUpdateResult: [any[], number] = await this.manager.query(
+      `
+      UPDATE "TicketProcedure"
+      SET "priority" = temp.priority
+      FROM (VALUES `
+      + params.updateData
+        .map(({ id, priority }) => {
+          return `(${id}, ${priority})`
+        })
+        .join(', ')
+      + `   ) AS temp("id", "priority")
+      WHERE   "TicketProcedure"."id"  = temp."id" 
+          AND "TicketProcedure"."ticketId" = ${params.ticketId} 
+          AND "TicketProcedure"."oid" = ${params.oid} 
+      RETURNING "TicketProcedure".*; 
+      `
+    )
+
+    const ticketProcedureList = TicketProcedure.fromRaws(queryUpdateResult[0])
+    return ticketProcedureList
+  }
+
   async updateQuantityAndDiscount(params: {
     oid: number
     ticketId: number

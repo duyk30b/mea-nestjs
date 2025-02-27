@@ -158,7 +158,7 @@ export class ApiAppointmentService {
 
     ticket.customer = customer
 
-    this.socketEmitService.ticketClinicCreate(oid, { ticket })
+    this.socketEmitService.ticketClinicChange(oid, { type: 'CREATE', ticket })
 
     await this.appointmentRepository.updateAndReturnEntity(
       { oid, id: appointmentId },

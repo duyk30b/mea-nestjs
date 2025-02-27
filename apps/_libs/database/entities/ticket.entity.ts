@@ -77,14 +77,6 @@ export default class Ticket extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  totalCostAmount: number // tổng tiền cost = tổng cost sản phẩm
-
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose()
   procedureMoney: number
 
   @Column({
@@ -110,6 +102,14 @@ export default class Ticket extends BaseEntity {
   })
   @Expose()
   laboratoryMoney: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  itemsCostAmount: number // tổng tiền cost = tổng cost sản phẩm
 
   @Column({
     type: 'bigint',
@@ -172,6 +172,14 @@ export default class Ticket extends BaseEntity {
   }) // Chi phí (người bán trả): Ví dụ: chi phí ship người bán trả, chi phí thuê người trông, tiền vé xe ...
   @Expose() // Mục này sinh ra để tính lãi cho chính xác, nghĩa là để trừ cả các chi phí sinh ra khi tạo đơn
   expense: number // Mục này sẽ không hiện trong đơn hàng, khách hàng ko nhìn thấy
+
+  @Column({
+    default: 0,
+    type: 'bigint',
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  commissionMoney: number // Tổng tiền hoa hồng
 
   @Column({
     type: 'bigint',
@@ -312,7 +320,7 @@ export default class Ticket extends BaseEntity {
     const entity = new Ticket()
     Object.assign(entity, raw)
 
-    entity.totalCostAmount = Number(raw.totalCostAmount)
+    entity.itemsCostAmount = Number(raw.itemsCostAmount)
 
     entity.procedureMoney = Number(raw.procedureMoney)
     entity.productMoney = Number(raw.productMoney)
@@ -331,6 +339,7 @@ export default class Ticket extends BaseEntity {
 
     entity.surcharge = Number(raw.surcharge)
     entity.expense = Number(raw.expense)
+    entity.commissionMoney = Number(raw.commissionMoney)
 
     entity.registeredAt = raw.registeredAt == null ? raw.registeredAt : Number(raw.registeredAt)
     entity.startedAt = raw.startedAt == null ? raw.startedAt : Number(raw.startedAt)

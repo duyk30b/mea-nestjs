@@ -2,9 +2,11 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
 import { IsDefined, IsIn, IsInt, IsNumber, IsString, Validate } from 'class-validator'
 import {
+  IsEnumValue,
   IsGmail,
   IsPhone,
 } from '../../../../../_libs/common/transform-validate/class-validator.custom'
+import { OrganizationStatus } from '../../../../../_libs/database/entities/organization.entity'
 
 export class RootOrganizationCreateBody {
   @ApiProperty({ example: '0376899866' })
@@ -91,11 +93,11 @@ export class RootOrganizationCreateBody {
   @IsString()
   addressStreet: string
 
-  @ApiProperty({ example: 1 })
+  @ApiProperty({ example: OrganizationStatus.Active })
   @Expose()
   @IsDefined()
-  @IsIn([0, 1])
-  isActive: 0 | 1
+  @IsEnumValue(OrganizationStatus)
+  status: OrganizationStatus
 
   @ApiProperty({ example: 'Đã thanh toán ngày' })
   @Expose()

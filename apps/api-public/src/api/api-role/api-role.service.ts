@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { RoleRepository } from '../../../../_libs/database/repositories/role.repository'
+import {
+  RoleRepository,
+  UserRepository,
+  UserRoleRepository,
+} from '../../../../_libs/database/repositories'
 import {
   RoleCreateBody,
   RoleGetManyQuery,
@@ -15,6 +19,8 @@ import {
 export class ApiRoleService {
   constructor(
     private readonly roleRepository: RoleRepository,
+    private readonly userRepository: UserRepository,
+    private readonly userRoleRepository: UserRoleRepository,
     private readonly cacheDataService: CacheDataService
   ) { }
 
@@ -40,9 +46,10 @@ export class ApiRoleService {
   }
 
   async getMany(oid: number, query: RoleGetManyQuery): Promise<BaseResponse> {
-    const { limit, filter } = query
+    const { limit, filter, relation } = query
 
     const data = await this.roleRepository.findMany({
+      relation,
       condition: {
         oid,
         isActive: filter?.isActive,
@@ -54,35 +61,82 @@ export class ApiRoleService {
   }
 
   async getOne(oid: number, id: number, query?: RoleGetOneQuery): Promise<BaseResponse> {
-    const role = await this.roleRepository.findOneBy({ oid, id })
+    const role = await this.roleRepository.findOne({
+      relation: query.relation,
+      condition: { oid, id },
+    })
     if (!role) throw new BusinessException('error.Database.NotFound')
     return { data: { role } }
   }
 
   async createOne(oid: number, body: RoleCreateBody): Promise<BaseResponse> {
+    const { userIdList, ...other } = body
     const role = await this.roleRepository.insertOneFullFieldAndReturnEntity({
-      ...body,
+      ...other,
       oid,
     })
+
+    if (userIdList.length) {
+      const userList = await this.userRepository.findManyBy({
+        oid,
+        id: { IN: userIdList },
+      })
+      if (userList.length !== userIdList.length) {
+        throw new BusinessException('error.Conflict')
+      }
+
+      role.userRoleList = await this.userRoleRepository.insertManyFullFieldAndReturnEntity(
+        userIdList.map((i) => ({
+          oid,
+          roleId: role.id,
+          userId: i,
+        }))
+      )
+    }
+
     this.cacheDataService.clearUserAndRole(oid)
     return { data: { role } }
   }
 
-  async updateOne(oid: number, id: number, body: RoleUpdateBody): Promise<BaseResponse> {
-    const [role] = await this.roleRepository.updateAndReturnEntity({ oid, id }, body)
+  async updateOne(oid: number, roleId: number, body: RoleUpdateBody): Promise<BaseResponse> {
+    const { userIdList, ...other } = body
+
+    const [role] = await this.roleRepository.updateAndReturnEntity({ oid, id: roleId }, other)
     if (!role) {
       throw new BusinessException('error.Database.UpdateFailed')
     }
+
+    await this.userRoleRepository.delete({ oid, roleId })
+
+    if (userIdList.length) {
+      const userList = await this.userRepository.findManyBy({
+        oid,
+        id: { IN: userIdList },
+      })
+      if (userList.length !== userIdList.length) {
+        throw new BusinessException('error.Conflict')
+      }
+
+      role.userRoleList = await this.userRoleRepository.insertManyFullFieldAndReturnEntity(
+        userIdList.map((i) => ({
+          oid,
+          roleId: role.id,
+          userId: i,
+        }))
+      )
+    }
+
     this.cacheDataService.clearUserAndRole(oid)
     return { data: { role } }
   }
 
-  async destroyOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.roleRepository.delete({ oid, id })
+  async destroyOne(oid: number, roleId: number): Promise<BaseResponse> {
+    const affected = await this.roleRepository.delete({ oid, id: roleId })
     if (affected === 0) {
       throw new BusinessException('error.Database.DeleteFailed')
     }
+    await this.userRoleRepository.delete({ oid, roleId })
     this.cacheDataService.clearUserAndRole(oid)
-    return { data: { roleId: id } }
+    return { data: { roleId } }
   }
 }

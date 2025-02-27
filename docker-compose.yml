@@ -79,6 +79,18 @@ services:
     ports:
       - ${ADMINER_PORT:-23080}:8080
 
+  pgadmin:
+    container_name: mc_pgadmin
+    image: dpage/pgadmin4:8.14.0
+    restart: unless-stopped
+    networks:
+      - mn_network
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "25050:80"
+
   redis-insight:
     container_name: mc_redis-insight
     image: redis/redisinsight:2.52

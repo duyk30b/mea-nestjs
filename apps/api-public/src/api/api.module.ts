@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { ApiAppointmentModule } from './api-appointment/api-appointment.module'
 import { ApiBatchMovementModule } from './api-batch-movement/api-batch-movement.module'
 import { ApiBatchModule } from './api-batch/api-batch.module'
+import { ApiCommissionModule } from './api-commission/api-commission.module'
 import { ApiCustomerPaymentModule } from './api-customer-payment/api-customer-payment.module'
 import { ApiCustomerSourceModule } from './api-customer-source/api-customer-source.module'
 import { ApiCustomerModule } from './api-customer/api-customer.module'
@@ -33,6 +34,7 @@ import { ApiTicketProcedureModule } from './api-ticket-procedure/api-ticket-proc
 import { ApiTicketProductModule } from './api-ticket-product/api-ticket-product.module'
 import { ApiTicketRadiologyModule } from './api-ticket-radiology/api-ticket-radiology.module'
 import { ApiTicketModule } from './api-ticket/api-ticket.module'
+import { ApiUserRoleModule } from './api-user-role/api-user-role.module'
 import { ApiUserModule } from './api-user/api-user.module'
 import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
 
@@ -46,17 +48,21 @@ import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
     ApiCustomerSourceModule,
     ApiDistributorModule,
     ApiDistributorPaymentModule,
-    ApiOrganizationModule,
     ApiPermissionModule,
     ApiProcedureModule,
     ApiProductModule,
     ApiProductMovementModule,
     ApiReceiptModule,
     ApiReceiptItemModule,
-    ApiRoleModule,
-    ApiSettingModule,
+
     ApiStatisticModule,
+    ApiSettingModule,
+
+    ApiOrganizationModule,
+    ApiRoleModule,
+    ApiCommissionModule,
     ApiUserModule,
+    ApiUserRoleModule,
 
     ApiLaboratoryModule,
     ApiLaboratoryGroupModule,

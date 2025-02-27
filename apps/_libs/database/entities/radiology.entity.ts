@@ -1,11 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import Commission from './commission.entity'
 import PrintHtml from './print-html.entity'
 import RadiologyGroup from './radiology-group.entity'
 
@@ -83,6 +78,9 @@ export default class Radiology {
   @Expose()
   printHtml: PrintHtml
 
+  @Expose()
+  commissionList: Commission[]
+
   static fromRaw(raw: { [P in keyof Radiology]: any }) {
     if (!raw) return null
     const entity = new Radiology()
@@ -103,7 +101,7 @@ export default class Radiology {
 }
 
 export type RadiologyRelationType = {
-  [P in keyof Pick<Radiology, 'radiologyGroup' | 'printHtml'>]?: boolean
+  [P in keyof Pick<Radiology, 'radiologyGroup' | 'printHtml' | 'commissionList'>]?: boolean
 }
 
 export type RadiologyInsertType = Omit<

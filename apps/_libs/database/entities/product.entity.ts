@@ -2,6 +2,7 @@ import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import Batch from './batch.entity'
+import Commission from './commission.entity'
 import ProductGroup from './product-group.entity'
 
 @Entity('Product')
@@ -118,6 +119,9 @@ export default class Product extends BaseEntity {
   @OneToMany(() => Batch, (batch) => batch.product)
   batchList: Batch[]
 
+  @Expose()
+  commissionList: Commission[]
+
   static fromRaw(raw: { [P in keyof Product]: any }) {
     if (!raw) return null
     const entity = new Product()
@@ -139,7 +143,7 @@ export default class Product extends BaseEntity {
 }
 
 export type ProductRelationType = {
-  [P in keyof Pick<Product, 'batchList' | 'productGroup'>]?: boolean
+  [P in keyof Pick<Product, 'batchList' | 'productGroup' | 'commissionList'>]?: boolean
 }
 
 export type ProductInsertType = Omit<

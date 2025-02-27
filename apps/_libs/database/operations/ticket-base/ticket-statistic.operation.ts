@@ -25,7 +25,7 @@ export class TicketStatisticOperation extends PostgreSqlCondition<Ticket> {
       .select([
         'COUNT(*) AS "countTicket"',
         'SUM("totalMoney") AS "sumTotalMoney"',
-        'SUM("totalCostAmount") AS "sumTotalCostAmount"',
+        'SUM("itemsCostAmount") AS "sumItemsCostAmount"',
         'SUM("procedureMoney") AS "sumProcedureMoney"',
         'SUM("productMoney") AS "sumProductMoney"',
         'SUM("radiologyMoney") AS "sumRadiologyMoney"',
@@ -55,7 +55,7 @@ export class TicketStatisticOperation extends PostgreSqlCondition<Ticket> {
       date: i.date as number,
       countTicket: Number(i.countTicket),
       sumTotalMoney: Number(i.sumTotalMoney),
-      sumTotalCostAmount: Number(i.sumTotalCostAmount),
+      sumItemsCostAmount: Number(i.sumItemsCostAmount),
       sumProcedureMoney: Number(i.sumProcedureMoney),
       sumProductMoney: Number(i.sumProductMoney),
       sumRadiologyMoney: Number(i.sumRadiologyMoney),
