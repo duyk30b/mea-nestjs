@@ -41,6 +41,7 @@ export class TicketClinicAddTicketRadiologyOperation {
 
       // === 5. UPDATE TICKET: MONEY  ===
       const radiologyMoneyAdd = ticketRadiology.actualPrice
+      const itemsCostAmountAdd = ticketRadiology.costPrice
       const itemsDiscountAdd = ticketRadiology.discountMoney
       let ticket: Ticket = ticketOrigin
       if (radiologyMoneyAdd != 0 || itemsDiscountAdd != 0) {
@@ -51,6 +52,7 @@ export class TicketClinicAddTicketRadiologyOperation {
           itemMoney: {
             radiologyMoneyAdd,
             itemsDiscountAdd,
+            itemsCostAmountAdd,
           },
         })
       }

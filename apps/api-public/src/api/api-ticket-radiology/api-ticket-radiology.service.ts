@@ -30,6 +30,7 @@ export class ApiTicketRadiologyService {
         customerId: filter?.customerId,
         radiologyId: filter?.radiologyId,
         ticketId: filter?.ticketId,
+        startedAt: filter?.startedAt,
       },
       sort,
     })

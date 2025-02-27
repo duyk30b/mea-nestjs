@@ -81,6 +81,7 @@ export class TicketClinicUpdateTicketRadiologyOperation {
       const radiologyMoneyChange = ticketRadiology.actualPrice - ticketRadiologyOrigin.actualPrice
       const itemsDiscountChange =
         ticketRadiology.discountMoney - ticketRadiologyOrigin.discountMoney
+      const itemsCostAmountChange = ticketRadiology.costPrice - ticketRadiologyOrigin.costPrice
       let commissionMoneyChange = 0
       let ticketUserChangeList: {
         ticketUserDestroyList: TicketUser[]
@@ -125,6 +126,7 @@ export class TicketClinicUpdateTicketRadiologyOperation {
             radiologyMoneyAdd: radiologyMoneyChange,
             commissionMoneyAdd: commissionMoneyChange,
             itemsDiscountAdd: itemsDiscountChange,
+            itemsCostAmountAdd: itemsCostAmountChange,
           },
         })
       }

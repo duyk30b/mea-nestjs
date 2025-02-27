@@ -30,7 +30,7 @@ export class TicketClinicUpdateTicketLaboratoryOperation {
     private ticketLaboratoryManager: TicketLaboratoryManager,
     private ticketUserChangeListManager: TicketUserChangeListManager,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
-  ) {}
+  ) { }
 
   async updateTicketLaboratory<T extends TicketLaboratoryUpdateDtoType>(params: {
     oid: number
@@ -59,6 +59,7 @@ export class TicketClinicUpdateTicketLaboratoryOperation {
       let ticketLaboratory: TicketLaboratory = ticketLaboratoryOrigin
       let laboratoryMoneyChange = 0
       let itemsDiscountChange = 0
+      let itemsCostAmountChange = 0
       if (ticketLaboratoryUpdateDto) {
         ticketLaboratory = await this.ticketLaboratoryManager.updateOneAndReturnEntity(
           manager,
@@ -75,6 +76,7 @@ export class TicketClinicUpdateTicketLaboratoryOperation {
         )
         laboratoryMoneyChange = ticketLaboratory.actualPrice - ticketLaboratoryOrigin.actualPrice
         itemsDiscountChange = ticketLaboratory.discountMoney - ticketLaboratoryOrigin.discountMoney
+        itemsCostAmountChange = ticketLaboratory.costPrice - ticketLaboratoryOrigin.costPrice
       }
 
       let commissionMoneyChange = 0
@@ -121,6 +123,7 @@ export class TicketClinicUpdateTicketLaboratoryOperation {
             laboratoryMoneyAdd: laboratoryMoneyChange,
             commissionMoneyAdd: commissionMoneyChange,
             itemsDiscountAdd: itemsDiscountChange,
+            itemsCostAmountAdd: itemsCostAmountChange,
           },
         })
       }

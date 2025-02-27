@@ -30,7 +30,8 @@ export class ApiTicketService {
       condition: {
         oid,
         ticketStatus: filter?.ticketStatus,
-        ticketType: filter.ticketType,
+        ticketType: filter?.ticketType,
+        customType: filter?.customType,
         customerId: filter?.customerId,
         registeredAt: filter?.registeredAt,
         startedAt: filter?.startedAt,

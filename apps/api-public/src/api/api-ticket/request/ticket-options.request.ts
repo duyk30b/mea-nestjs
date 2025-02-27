@@ -86,6 +86,10 @@ export class TicketFilterQuery {
 
   @Expose()
   @IsNumber()
+  customType: number
+
+  @Expose()
+  @IsNumber()
   customerId: number
 
   @Expose()

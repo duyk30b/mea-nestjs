@@ -4,11 +4,14 @@ import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
 // import { ApiStatisticReceiptService } from './api-statistic-receipt.service'
+import { ApiStatisticLaboratoryService } from './api-statistic-laboratory.service'
+import { ApiStatisticRadiologyService } from './api-statistic-radiology.service'
 import { ApiStatisticTicketService } from './api-statistic-ticket.service'
 import { ApiStatisticService } from './api-statistic.service'
 import {
   StatisticProductHighMoneyQuery,
   StatisticTicketQuery,
+  StatisticTimeQuery,
   StatisticTopBestSellingQuery,
   StatisticTopCustomerBestTicketQuery,
 } from './request'
@@ -20,7 +23,9 @@ export class ApiStatisticController {
   constructor(
     private readonly apiStatisticService: ApiStatisticService,
     // private readonly apiStatisticReceiptService: ApiStatisticReceiptService,
-    private readonly apiStatisticTicketService: ApiStatisticTicketService
+    private readonly apiStatisticTicketService: ApiStatisticTicketService,
+    private readonly apiStatisticLaboratoryService: ApiStatisticLaboratoryService,
+    private readonly apiStatisticRadiologyService: ApiStatisticRadiologyService
   ) { }
 
   @Get('sum-warehouse')
@@ -81,5 +86,23 @@ export class ApiStatisticController {
   @HasPermission(PermissionId.STATISTIC_TICKET)
   async statisticTicket(@External() { oid }: TExternal, @Query() query: StatisticTicketQuery) {
     return await this.apiStatisticTicketService.statisticTicket(oid, query)
+  }
+
+  @Get('ticket-laboratory/sum-money')
+  @HasPermission(PermissionId.STATISTIC_LABORATORY)
+  async sumMoneyTicketLaboratory(
+    @External() { oid }: TExternal,
+    @Query() query: StatisticTimeQuery
+  ) {
+    return await this.apiStatisticLaboratoryService.sumMoney(oid, query)
+  }
+
+  @Get('ticket-radiology/sum-money')
+  @HasPermission(PermissionId.STATISTIC_RADIOLOGY)
+  async sumMoneyTicketRadiology(
+    @External() { oid }: TExternal,
+    @Query() query: StatisticTimeQuery
+  ) {
+    return await this.apiStatisticRadiologyService.sumMoney(oid, query)
   }
 }

@@ -199,6 +199,7 @@ export class ApiRadiologyService {
       const dto: RadiologyInsertType = {
         oid,
         name: i.name,
+        costPrice: i.costPrice,
         price: i.price,
         printHtmlId: i.printHtmlId,
         radiologyGroupId: 0,

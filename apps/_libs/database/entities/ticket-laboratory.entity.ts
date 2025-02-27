@@ -15,6 +15,7 @@ export enum TicketLaboratoryStatus {
 @Entity('TicketLaboratory')
 @Index('IDX_TicketLaboratory__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketLaboratory__oid_laboratoryId', ['oid', 'laboratoryId'])
+@Index('IDX_TicketLaboratory__oid_startedAt', ['oid', 'startedAt'])
 export default class TicketLaboratory extends BaseEntity {
   @Column()
   @Expose()
@@ -72,6 +73,14 @@ export default class TicketLaboratory extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
+  costPrice: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
   actualPrice: number // Giá thực tế
 
   @Column({
@@ -106,6 +115,11 @@ export default class TicketLaboratory extends BaseEntity {
   customer: Customer
 
   @Expose()
+  @ManyToOne((type) => Laboratory, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'laboratoryId', referencedColumnName: 'id' })
+  laboratory: Laboratory
+
+  @Expose()
   @OneToMany(() => Laboratory, (laboratory) => laboratory.ticketLaboratory)
   laboratoryList: Laboratory[]
 
@@ -117,6 +131,7 @@ export default class TicketLaboratory extends BaseEntity {
     const entity = new TicketLaboratory()
     Object.assign(entity, raw)
 
+    entity.costPrice = Number(raw.costPrice)
     entity.expectedPrice = Number(raw.expectedPrice)
     entity.discountMoney = Number(raw.discountMoney)
     entity.discountPercent = Number(raw.discountPercent)
@@ -134,7 +149,7 @@ export default class TicketLaboratory extends BaseEntity {
 export type TicketLaboratoryRelationType = {
   [P in keyof Pick<
     TicketLaboratory,
-    'ticket' | 'customer' | 'ticketUserList' | 'laboratoryList'
+    'ticket' | 'customer' | 'laboratory' | 'ticketUserList' | 'laboratoryList'
   >]?: boolean
 }
 
@@ -151,7 +166,8 @@ export type TicketLaboratoryUpdateType = {
 }
 
 export type TicketLaboratorySortType = {
-  [P in keyof Pick<TicketLaboratory, 'id' | 'ticketId' | 'laboratoryId' | 'priority'>]?:
-  | 'ASC'
-  | 'DESC'
+  [P in keyof Pick<
+    TicketLaboratory,
+    'id' | 'ticketId' | 'laboratoryId' | 'startedAt' | 'priority'
+  >]?: 'ASC' | 'DESC'
 }

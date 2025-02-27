@@ -17,6 +17,12 @@ export class LaboratoryParentUpsert {
   @IsString()
   name: string
 
+  @ApiPropertyOptional({ example: 50000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  costPrice: number
+
   @ApiPropertyOptional({ example: 105000 })
   @Expose()
   @IsDefined()

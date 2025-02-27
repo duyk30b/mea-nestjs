@@ -32,6 +32,10 @@ export default class Laboratory {
   @Column({ default: 0 })
   laboratoryGroupId: number
 
+  @Column({ default: 0 })
+  @Expose()
+  costPrice: number // Giá vốn
+
   @Column({ nullable: true })
   @Expose()
   price: number
@@ -95,6 +99,7 @@ export default class Laboratory {
     if (!raw) return null
     const entity = new Laboratory()
 
+    entity.costPrice = Number(raw.costPrice)
     entity.price = Number(raw.price)
     entity.lowValue = Number(raw.lowValue)
     entity.highValue = Number(raw.highValue)
@@ -126,7 +131,9 @@ export type LaboratoryUpdateType = {
 }
 
 export type LaboratorySortType = {
-  [P in keyof Pick<Laboratory, 'oid' | 'id' | 'priority' | 'name' | 'laboratoryGroupId'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<Laboratory, 'oid' | 'id' | 'priority' | 'name' | 'laboratoryGroupId'>]?:
+  | 'ASC'
+  | 'DESC'
 }
 
 export type LaboratoryChildUpdateType = Omit<

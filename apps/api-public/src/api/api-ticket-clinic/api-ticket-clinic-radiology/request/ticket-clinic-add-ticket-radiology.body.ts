@@ -24,6 +24,12 @@ export class TicketClinicAddTicketRadiologyBody {
   @IsNumber()
   radiologyId: number
 
+  @ApiProperty({ example: 4 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  costPrice: number
+
   @ApiProperty({ example: 25_000 })
   @Expose()
   @IsDefined()

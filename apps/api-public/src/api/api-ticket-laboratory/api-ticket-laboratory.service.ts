@@ -6,10 +6,7 @@ import { LaboratoryRepository } from '../../../../_libs/database/repositories/la
 import { TicketLaboratoryRepository } from '../../../../_libs/database/repositories/ticket-laboratory.repository'
 import { UserRepository } from '../../../../_libs/database/repositories/user.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
-import {
-  TicketLaboratoryGetOneQuery,
-  TicketLaboratoryPaginationQuery,
-} from './request'
+import { TicketLaboratoryGetOneQuery, TicketLaboratoryPaginationQuery } from './request'
 
 @Injectable()
 export class ApiTicketLaboratoryService {
@@ -37,6 +34,7 @@ export class ApiTicketLaboratoryService {
         customerId: filter?.customerId,
         laboratoryId: filter?.laboratoryId,
         ticketId: filter?.ticketId,
+        startedAt: filter?.startedAt,
       },
       sort,
     })

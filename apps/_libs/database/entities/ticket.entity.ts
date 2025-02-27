@@ -51,6 +51,10 @@ export default class Ticket extends BaseEntity {
   @Expose()
   ticketType: TicketType
 
+  @Column({ type: 'smallint', default: 0 })
+  @Expose()
+  customType: number
+
   @Column({ type: 'smallint', default: TicketStatus.Draft })
   @Expose()
   ticketStatus: TicketStatus

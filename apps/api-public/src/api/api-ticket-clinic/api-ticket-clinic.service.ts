@@ -87,6 +87,8 @@ export class ApiTicketClinicService {
       registeredAt,
       startedAt: ticketStatus === TicketStatus.Executing ? registeredAt : null,
       customerSourceId: body.ticketInformation.customerSourceId,
+      customType: body.ticketInformation.customType,
+
       dailyIndex: countToday + 1,
       year: DTimer.info(registeredAt, 7).year,
       month: DTimer.info(registeredAt, 7).month + 1,
@@ -135,13 +137,13 @@ export class ApiTicketClinicService {
 
   async update(options: { oid: number; ticketId: number; body: TicketClinicUpdateBody }) {
     const { oid, body, ticketId } = options
-    const { registeredAt, customerSourceId } = body.ticketInformation
+    const { registeredAt, customerSourceId, customType } = body.ticketInformation
 
     const { ticket, ticketUserChangeList } =
       await this.ticketClinicUpdateInformationOperation.startUpdate({
         oid,
         ticketId,
-        information: { registeredAt, customerSourceId },
+        information: { registeredAt, customerSourceId, customType },
         ticketUser: {
           interactType: InteractType.Ticket,
           interactId: 0,

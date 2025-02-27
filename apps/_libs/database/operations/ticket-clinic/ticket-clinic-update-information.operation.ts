@@ -22,6 +22,7 @@ export class TicketClinicUpdateInformationOperation {
     information?: {
       registeredAt: number
       customerSourceId: number
+      customType: number
     }
     ticketUser: {
       interactType: InteractType
@@ -43,6 +44,8 @@ export class TicketClinicUpdateInformationOperation {
         {
           registeredAt: information ? information.registeredAt : undefined,
           customerSourceId: information ? information.customerSourceId : undefined,
+          customType: information ? information.customType : undefined,
+
           year: information ? DTimer.info(information.registeredAt, 7).year : undefined,
           month: information ? DTimer.info(information.registeredAt, 7).month + 1 : undefined,
           date: information ? DTimer.info(information.registeredAt, 7).date : undefined,

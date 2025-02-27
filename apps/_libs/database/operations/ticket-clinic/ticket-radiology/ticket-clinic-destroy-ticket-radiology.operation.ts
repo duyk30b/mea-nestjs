@@ -47,6 +47,8 @@ export class TicketClinicDestroyTicketRadiologyOperation {
       // === 4. UPDATE TICKET: MONEY  ===
       const radiologyMoneyDelete = ticketRadiologyDestroy.actualPrice
       const itemsDiscountDelete = ticketRadiologyDestroy.discountMoney
+      const itemsCostAmountDelete = ticketRadiologyDestroy.costPrice
+
       const commissionMoneyDelete = ticketUserDestroyList.reduce((acc, item) => {
         return acc + item.commissionMoney * item.quantity
       }, 0)
@@ -59,8 +61,9 @@ export class TicketClinicDestroyTicketRadiologyOperation {
           ticketOrigin,
           itemMoney: {
             radiologyMoneyAdd: -radiologyMoneyDelete,
-            commissionMoneyAdd: -commissionMoneyDelete,
+            itemsCostAmountAdd: -itemsCostAmountDelete,
             itemsDiscountAdd: -itemsDiscountDelete,
+            commissionMoneyAdd: -commissionMoneyDelete,
           },
         })
       }

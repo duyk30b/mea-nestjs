@@ -30,6 +30,10 @@ export default class Radiology {
   @Column({ default: 0 })
   printHtmlId: number
 
+  @Column({ default: 0 })
+  @Expose()
+  costPrice: number // Giá vốn
+
   @Column({ nullable: true })
   @Expose()
   price: number

@@ -37,7 +37,8 @@ export class TicketClinicDestroyTicketLaboratoryOperation {
 
       // === 4. UPDATE TICKET: MONEY  ===
       const laboratoryMoneyDelete = ticketLaboratoryDestroy.actualPrice
-      const itemsDiscountDelete = -ticketLaboratoryDestroy.discountMoney
+      const itemsDiscountDelete = ticketLaboratoryDestroy.discountMoney
+      const itemsCostAmountDelete = ticketLaboratoryDestroy.costPrice
 
       let ticket: Ticket = ticketOrigin
       if (laboratoryMoneyDelete != 0 || itemsDiscountDelete != 0) {
@@ -47,6 +48,7 @@ export class TicketClinicDestroyTicketLaboratoryOperation {
           ticketOrigin,
           itemMoney: {
             laboratoryMoneyAdd: -laboratoryMoneyDelete,
+            itemsCostAmountAdd: -itemsCostAmountDelete,
             itemsDiscountAdd: -itemsDiscountDelete,
           },
         })

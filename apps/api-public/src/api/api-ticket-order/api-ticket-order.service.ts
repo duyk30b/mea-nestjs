@@ -55,6 +55,7 @@ export class ApiTicketOrderService {
         oid,
         ticketOrderDraftInsertDto: {
           ...body.ticketOrderDraftInsert,
+          customType: 0,
           customerSourceId: 0,
           laboratoryMoney: 0,
           radiologyMoney: 0,
@@ -87,6 +88,7 @@ export class ApiTicketOrderService {
         ticketId,
         ticketOrderDraftApprovedUpdateDto: {
           ...body.ticketOrderDraftApprovedUpdate,
+          customType: 0,
           customerSourceId: 0,
           laboratoryMoney: 0,
           radiologyMoney: 0,
@@ -119,6 +121,7 @@ export class ApiTicketOrderService {
       oid,
       ticketOrderDraftInsertDto: {
         ...ticketOrderDraftInsert,
+        customType: 0,
         customerSourceId: 0,
         laboratoryMoney: 0,
         radiologyMoney: 0,
@@ -179,6 +182,7 @@ export class ApiTicketOrderService {
           ticketId,
           ticketOrderDebtSuccessUpdate: {
             ...body.ticketOrderDebtSuccessUpdate,
+            customType: 0,
             customerSourceId: 0,
             laboratoryMoney: 0,
             radiologyMoney: 0,

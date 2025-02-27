@@ -52,6 +52,12 @@ export class RadiologyUpsertBody {
   @Expose()
   @IsDefined()
   @IsInt()
+  costPrice: number // Giá dịch vụ
+
+  @ApiPropertyOptional({ example: 105000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
   price: number // Giá dịch vụ
 
   @ApiProperty({ example: 'Siêu âm thai, rau, ối' })

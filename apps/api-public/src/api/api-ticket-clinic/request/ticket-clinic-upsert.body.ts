@@ -64,11 +64,17 @@ class TicketInformationCreateBody {
   @Expose()
   @IsNumber()
   registeredAt: number
+
+  @ApiProperty({ example: 2 })
+  @Expose()
+  @IsNumber()
+  customType: number
 }
 
 class TicketInformationUpdateBody extends PickType(TicketInformationCreateBody, [
   'customerSourceId',
   'registeredAt',
+  'customType',
 ]) { }
 
 export class TicketClinicCreateBody {

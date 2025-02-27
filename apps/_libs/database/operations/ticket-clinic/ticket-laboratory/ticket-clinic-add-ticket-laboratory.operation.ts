@@ -72,6 +72,9 @@ export class TicketClinicAddTicketLaboratoryOperation {
       const itemsDiscountAdd = ticketLaboratoryList.reduce((acc, cur) => {
         return acc + cur.discountMoney
       }, 0)
+      const itemsCostAmountAdd = ticketLaboratoryList.reduce((acc, cur) => {
+        return acc + cur.costPrice
+      }, 0)
       let ticket: Ticket = ticketOrigin
       if (laboratoryMoneyAdd != 0 || itemsDiscountAdd != 0) {
         ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
@@ -81,6 +84,7 @@ export class TicketClinicAddTicketLaboratoryOperation {
           itemMoney: {
             laboratoryMoneyAdd,
             itemsDiscountAdd,
+            itemsCostAmountAdd,
           },
         })
       }
