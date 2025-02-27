@@ -145,7 +145,10 @@ export class ApiBatchService {
     }
     this.socketEmitService.batchUpsert(oid, { batch: batchUpdated })
 
-    if (batchOrigin.quantity === batchUpdated.quantity) {
+    if (
+      batchOrigin.quantity === batchUpdated.quantity
+      && batchOrigin.costPrice === batchUpdated.costPrice
+    ) {
       return { data: { batch: batchUpdated } }
     }
 
@@ -160,8 +163,8 @@ export class ApiBatchService {
       openQuantity: batchOrigin.quantity,
       quantity: batchUpdated.quantity - batchOrigin.quantity,
       closeQuantity: batchUpdated.quantity,
-      actualPrice: 0,
-      expectedPrice: 0,
+      actualPrice: batchUpdated.costPrice,
+      expectedPrice: batchOrigin.costPrice,
       isRefund: 0,
       unitRate: 1,
       createdAt: Date.now(),
@@ -184,8 +187,8 @@ export class ApiBatchService {
       quantity: productUpdated.quantity - batchOrigin.product.quantity,
       closeQuantity: productUpdated.quantity,
       costPrice: batchOrigin.costPrice,
-      actualPrice: 0,
-      expectedPrice: 0,
+      actualPrice: batchUpdated.costPrice,
+      expectedPrice: batchOrigin.costPrice,
       isRefund: 0,
       unitRate: 1,
       createdAt: Date.now(),

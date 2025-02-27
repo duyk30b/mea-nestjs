@@ -17,6 +17,12 @@ class TicketProductConsumableBody {
   @ApiProperty({ example: 56 })
   @Expose()
   @IsDefined()
+  @IsNumber()
+  priority: number
+
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
   @IsNumberGreaterThan(0)
   productId: number
 

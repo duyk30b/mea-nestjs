@@ -9,6 +9,8 @@ import Customer from './customer.entity'
 import Image from './image.entity'
 import TicketAttribute from './ticket-attribute.entity'
 import TicketExpense from './ticket-expense.entity'
+import TicketLaboratoryGroup from './ticket-laboratory-group.entity'
+import TicketLaboratoryResult from './ticket-laboratory-result.entity'
 import TicketLaboratory from './ticket-laboratory.entity'
 import TicketProcedure from './ticket-procedure.entity'
 import TicketProduct from './ticket-product.entity'
@@ -21,7 +23,7 @@ export enum TicketType {
   Clinic = 3,
   Spa = 4,
   Eye = 5,
-  Obstetric = 6
+  Obstetric = 6,
 }
 
 export enum TicketStatus {
@@ -51,6 +53,10 @@ export default class Ticket extends BaseEntity {
   @Expose()
   ticketType: TicketType
 
+  @Column({ type: 'smallint', default: 0 })
+  @Expose()
+  customType: number
+
   @Column({ type: 'smallint', default: TicketStatus.Draft })
   @Expose()
   ticketStatus: TicketStatus
@@ -70,14 +76,6 @@ export default class Ticket extends BaseEntity {
   @Column({ type: 'smallint', default: 0 })
   @Expose()
   dailyIndex: number
-
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose()
-  totalCostAmount: number // tổng tiền cost = tổng cost sản phẩm
 
   @Column({
     type: 'bigint',
@@ -110,6 +108,14 @@ export default class Ticket extends BaseEntity {
   })
   @Expose()
   laboratoryMoney: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  itemsCostAmount: number // tổng tiền cost = tổng cost sản phẩm
 
   @Column({
     type: 'bigint',
@@ -172,6 +178,14 @@ export default class Ticket extends BaseEntity {
   }) // Chi phí (người bán trả): Ví dụ: chi phí ship người bán trả, chi phí thuê người trông, tiền vé xe ...
   @Expose() // Mục này sinh ra để tính lãi cho chính xác, nghĩa là để trừ cả các chi phí sinh ra khi tạo đơn
   expense: number // Mục này sẽ không hiện trong đơn hàng, khách hàng ko nhìn thấy
+
+  @Column({
+    default: 0,
+    type: 'bigint',
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  commissionMoney: number // Tổng tiền hoa hồng
 
   @Column({
     type: 'bigint',
@@ -288,6 +302,17 @@ export default class Ticket extends BaseEntity {
   @Expose()
   ticketLaboratoryList: TicketLaboratory[]
 
+  @OneToMany(() => TicketLaboratoryGroup, (ticketLaboratoryGroup) => ticketLaboratoryGroup.ticket)
+  @Expose()
+  ticketLaboratoryGroupList: TicketLaboratoryGroup[]
+
+  @OneToMany(
+    () => TicketLaboratoryResult,
+    (ticketLaboratoryResult) => ticketLaboratoryResult.ticket
+  )
+  @Expose()
+  ticketLaboratoryResultList: TicketLaboratoryResult[]
+
   @OneToMany(() => TicketRadiology, (ticketRadiology) => ticketRadiology.ticket)
   @Expose()
   ticketRadiologyList: TicketRadiology[]
@@ -312,7 +337,7 @@ export default class Ticket extends BaseEntity {
     const entity = new Ticket()
     Object.assign(entity, raw)
 
-    entity.totalCostAmount = Number(raw.totalCostAmount)
+    entity.itemsCostAmount = Number(raw.itemsCostAmount)
 
     entity.procedureMoney = Number(raw.procedureMoney)
     entity.productMoney = Number(raw.productMoney)
@@ -331,6 +356,7 @@ export default class Ticket extends BaseEntity {
 
     entity.surcharge = Number(raw.surcharge)
     entity.expense = Number(raw.expense)
+    entity.commissionMoney = Number(raw.commissionMoney)
 
     entity.registeredAt = raw.registeredAt == null ? raw.registeredAt : Number(raw.registeredAt)
     entity.startedAt = raw.startedAt == null ? raw.startedAt : Number(raw.startedAt)
@@ -372,8 +398,14 @@ export type TicketRelationType = {
   | false
 } & {
   [P in keyof Pick<Ticket, 'ticketLaboratoryList'>]?:
-  | { [P in keyof Pick<TicketLaboratory, 'laboratoryList'>]?: boolean }
+  | { [P in keyof Pick<TicketLaboratory, 'laboratory' | 'laboratoryList'>]?: boolean }
   | false
+} & {
+  [P in keyof Pick<Ticket, 'ticketLaboratoryGroupList'>]?:
+  | { [P in keyof Pick<TicketLaboratoryGroup, 'laboratoryGroup'>]?: boolean }
+  | false
+} & {
+  [P in keyof Pick<Ticket, 'ticketLaboratoryResultList'>]?: boolean
 } & {
   [P in keyof Pick<Ticket, 'ticketUserList'>]?:
   | { [P in keyof Pick<TicketUser, 'user'>]?: boolean }
@@ -386,10 +418,9 @@ export type TicketInsertType = Omit<
 >
 
 export type TicketUpdateType = {
-  [K in Exclude<
-    keyof Ticket,
-    keyof TicketRelationType | keyof Pick<Ticket, 'oid' | 'id'>
-  >]: Ticket[K] | (() => string)
+  [K in Exclude<keyof Ticket, keyof TicketRelationType | keyof Pick<Ticket, 'oid' | 'id'>>]:
+  | Ticket[K]
+  | (() => string)
 }
 
 export type TicketSortType = {

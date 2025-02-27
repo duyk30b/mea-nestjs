@@ -4,7 +4,15 @@ import { BusinessException } from '../../../../_libs/common/exception-filter/exc
 import { arrayToKeyArray, uniqueArray } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { Batch, Organization } from '../../../../_libs/database/entities'
-import { BatchRepository, ProductRepository } from '../../../../_libs/database/repositories'
+import {
+  CommissionInsertType,
+  InteractType,
+} from '../../../../_libs/database/entities/commission.entity'
+import {
+  BatchRepository,
+  CommissionRepository,
+  ProductRepository,
+} from '../../../../_libs/database/repositories'
 import { BatchMovementRepository } from '../../../../_libs/database/repositories/bat-movement.repository'
 import { OrganizationRepository } from '../../../../_libs/database/repositories/organization.repository'
 import { ProductMovementRepository } from '../../../../_libs/database/repositories/product-movement.repository'
@@ -30,6 +38,7 @@ export class ApiProductService {
     private readonly productRepository: ProductRepository,
     private readonly batchRepository: BatchRepository,
     private readonly productMovementRepository: ProductMovementRepository,
+    private readonly commissionRepository: CommissionRepository,
     private readonly batchMovementRepository: BatchMovementRepository
   ) { }
 
@@ -120,19 +129,41 @@ export class ApiProductService {
         sort: { expiryDate: 'ASC' },
       })
     }
+    if (relation?.commissionList) {
+      product.commissionList = await this.commissionRepository.findManyBy({
+        oid,
+        interactType: InteractType.Product,
+        interactId: product.id,
+      })
+    }
     return { data: { product } }
   }
 
   async createOne(oid: number, body: ProductCreateBody): Promise<BaseResponse> {
+    const { commissionList, ...productBody } = body
     const product = await this.productRepository.insertOneFullFieldAndReturnEntity({
       oid,
-      ...body,
+      ...productBody,
     })
+    const commissionDtoList: CommissionInsertType[] = commissionList.map((i) => {
+      const dto: CommissionInsertType = {
+        oid,
+        roleId: i.roleId,
+        commissionCalculatorType: i.commissionCalculatorType,
+        commissionValue: i.commissionValue,
+        interactId: product.id,
+        interactType: InteractType.Product,
+      }
+      return dto
+    })
+    product.commissionList =
+      await this.commissionRepository.insertManyFullFieldAndReturnEntity(commissionDtoList)
     this.socketEmitService.productUpsert(oid, { product })
     return { data: { product } }
   }
 
   async updateOne(oid: number, productId: number, body: ProductUpdateBody): Promise<BaseResponse> {
+    const { commissionList, ...productBody } = body
     const productOrigin = await this.productRepository.findOneBy({ oid, id: productId })
     if (productOrigin.quantity) {
       if (productOrigin.hasManageQuantity !== body.hasManageQuantity) {
@@ -149,10 +180,12 @@ export class ApiProductService {
       if (bodyWarehouseIdList.includes(0)) {
         // trường hợp này được quản lý mọi kho
       } else {
-        const batchList = await this.batchRepository.findManyBy({
-          oid,
-          productId,
-          quantity: { NOT: 0 },
+        const batchList = await this.batchRepository.findMany({
+          condition: {
+            oid,
+            productId,
+            quantity: { NOT: 0 },
+          },
         })
         const batchError: Batch[] = []
         batchList.forEach((i) => {
@@ -172,10 +205,27 @@ export class ApiProductService {
     }
     const [product] = await this.productRepository.updateAndReturnEntity(
       { oid, id: productId },
-      body
+      productBody
     )
     if (!product) throw new BusinessException('error.Database.UpdateFailed')
-
+    await this.commissionRepository.delete({
+      oid,
+      interactId: product.id,
+      interactType: InteractType.Product,
+    })
+    const commissionDtoList: CommissionInsertType[] = commissionList.map((i) => {
+      const dto: CommissionInsertType = {
+        oid,
+        roleId: i.roleId,
+        commissionCalculatorType: i.commissionCalculatorType,
+        commissionValue: i.commissionValue,
+        interactId: product.id,
+        interactType: InteractType.Product,
+      }
+      return dto
+    })
+    product.commissionList =
+      await this.commissionRepository.insertManyFullFieldAndReturnEntity(commissionDtoList)
     this.socketEmitService.productUpsert(oid, { product })
     return { data: { product } }
   }

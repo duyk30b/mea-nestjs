@@ -34,44 +34,95 @@ export type NoExtra<T, U extends T = T> = U & Impossible<Exclude<keyof U, keyof 
 
 // https://stackoverflow.com/questions/49580725/is-it-possible-to-restrict-typescript-object-to-contain-only-properties-defined
 
-// interface Animal {
+// export type NoExcess<T> = T & {
+//   [K in Exclude<keyof any, keyof T>]?: never
+// }
+
+// class Animal {
 //   name: string
 //   noise: string
 // }
+// const animal = new Animal()
 
-// function thisWorks<T extends Animal>(animal: T & Impossible<Exclude<keyof T, keyof Animal>>): void {
-//   console.log(`The noise that ${animal.name.toLowerCase()}s make is ${animal.noise}.`)
-// }
-
-// function thisIsAsGoodAsICanGetIt<T extends Animal>(animal: NoExtra<Animal, T>): void {
-//   console.log(`The noise that ${animal.name.toLowerCase()}s make is ${animal.noise}.`)
-// }
-
-// // It works for variables defined as the type
-// const okay: NoExtra<Animal> = {
+// const animalBase = {
 //   name: 'Dog',
 //   noise: 'bark',
 // }
 
-// const wrong1: NoExtra<Animal> = {
-//     name: 'Cat',
-//     noise: 'meow'
-//     betterThanDogs: false, // look, an error!
-// };
+// const dog: NoExcess<Animal> = {
+//   // why error
+//   name: 'Dog',
+//   noise: 'bark',
+// }
+
+// const cat: NoExcess<Animal> = {
+//   name: 'Cat',
+//   noise: 'meow',
+//   protect: false, // look, an error!
+// }
 
 // // What happens if we try to bypass the "Excess Properties Check" done on object literals
 // // by assigning it to a variable with no explicit type?
-// const wrong2 = {
-//     name: 'Rat',
-//     noise: 'squeak',
-//     idealScenarios: ['labs', 'storehouses'],
-//     invalid: true,
-// };
+// const fish = {
+//   name: 'Rat',
+//   noise: 'squeak',
+//   swim: false, // look, an error!
+// }
 
-// thisWorks(okay);
-// thisWorks(wrong1); // doesn't flag it as an error here, but does flag it above
-// thisWorks(wrong2); // yay, an error!
+// class Bird {
+//   name: string
+//   noise: string
+//   fly: number
+// }
+// const bird = new Bird()
 
-// thisIsAsGoodAsICanGetIt(okay);
-// thisIsAsGoodAsICanGetIt(wrong1); // no error, but error above, so okay
-// thisIsAsGoodAsICanGetIt(wrong2); // yay, an error!
+// function caseOne<T extends Animal>(animal: T & Impossible<Exclude<keyof T, keyof Animal>>): void { }
+
+// function caseTwo<T extends Animal>(animal: NoExtra<Animal, T>): void { }
+
+// function caseThree<T extends Animal>(animal: NoExtra<Animal, T>[]): void { }
+
+// function caseFour(animal: NoExtra<Animal>): void { }
+
+// function caseFive(animal: NoExcess<Animal>): void { }
+
+// function caseSix(animals: NoExcess<Animal>[]): void { }
+
+// // It works for variables defined as the type
+
+// caseOne(animal)
+// caseOne(dog)
+// caseOne(cat) // doesn't flag it as an error here, but does flag it above
+// caseOne(fish) // yay, an error!
+// caseOne(bird) // yay, an error!
+
+// caseTwo(animal)
+// caseTwo(dog)
+// caseTwo(cat) // no error, but error above, so ok
+// caseTwo(fish) // yay, an error!
+// caseTwo(bird) // yay, an error!
+
+// caseThree([animal])
+// caseThree([dog])
+// caseThree([cat]) // no error, but error above, so ok
+// caseThree([fish]) // yay, an error!
+// caseThree([bird]) // yay, an error!
+
+// caseFour(animal)
+// caseFour(dog)
+// caseFour(cat) // no error, but error above, so ok
+// caseFour(fish) // no error, so bad
+// caseFour(bird) //  no error, so bad
+
+// caseFive(animal) // error ?? why is this an error?
+// caseFive(animalBase) // error ?? why is this an error?
+// caseFive(dog)
+// caseFive(cat) // no error, but error above, so ok
+// caseFive(fish) // yay, an error!
+// caseFive(bird) // yay, an error!
+
+// caseSix([animal]) // // error ?? why is this an error?
+// caseSix([dog])
+// caseSix([cat]) // no error, but error above, so ok
+// caseSix([fish]) // yay, an error!
+// caseSix([bird]) // yay, an error!

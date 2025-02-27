@@ -1,6 +1,8 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger'
-import { Expose, Transform } from 'class-transformer'
-import { IsBoolean, IsDefined, IsIn, IsInt, IsNumber, IsString, validateSync } from 'class-validator'
+import { Expose, Transform, Type } from 'class-transformer'
+import { IsArray, IsBoolean, IsDefined, IsIn, IsInt, IsNumber, IsPositive, IsString, ValidateNested, validateSync } from 'class-validator'
+import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
+import { CommissionCalculatorType } from '../../../../../_libs/database/entities/commission.entity'
 
 export class UnitConversionBody {
   @Expose()
@@ -16,6 +18,24 @@ export class UnitConversionBody {
   @Expose()
   @IsBoolean()
   default: boolean
+}
+
+export class ProductCommission {
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  @IsPositive()
+  roleId: number
+
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  commissionValue: number
+
+  @ApiProperty({ example: CommissionCalculatorType.VND })
+  @Expose()
+  @IsEnumValue(CommissionCalculatorType)
+  commissionCalculatorType: CommissionCalculatorType
 }
 
 export class ProductCreateBody {
@@ -148,6 +168,14 @@ export class ProductCreateBody {
   @IsDefined()
   @IsString({ message: `Validate warehouseIds failed: Example: ${JSON.stringify([1, 2, 3])}` })
   warehouseIds: string // đơn vị tính: lọ, ống, vỉ
+
+  @ApiProperty({ type: ProductCommission, isArray: true })
+  @Expose()
+  @Type(() => ProductCommission)
+  @IsDefined()
+  @IsArray()
+  @ValidateNested({ each: true })
+  commissionList: ProductCommission[]
 }
 
 export class ProductUpdateBody extends PartialType(ProductCreateBody) { }

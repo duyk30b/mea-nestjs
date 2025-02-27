@@ -1,7 +1,27 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { Expose, Transform } from 'class-transformer'
-import { IsDefined, IsInt, IsString } from 'class-validator'
+import { Expose, Transform, Type } from 'class-transformer'
+import { IsArray, IsDefined, IsInt, IsNumber, IsPositive, IsString, ValidateNested } from 'class-validator'
 import * as DOMPurify from 'isomorphic-dompurify'
+import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
+import { CommissionCalculatorType } from '../../../../../_libs/database/entities/commission.entity'
+
+export class RadiologyCommission {
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  @IsPositive()
+  roleId: number
+
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  commissionValue: number
+
+  @ApiProperty({ example: CommissionCalculatorType.VND })
+  @Expose()
+  @IsEnumValue(CommissionCalculatorType)
+  commissionCalculatorType: CommissionCalculatorType
+}
 
 export class RadiologyUpsertBody {
   @ApiPropertyOptional({ example: 105000 })
@@ -32,6 +52,12 @@ export class RadiologyUpsertBody {
   @Expose()
   @IsDefined()
   @IsInt()
+  costPrice: number // Giá dịch vụ
+
+  @ApiPropertyOptional({ example: 105000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
   price: number // Giá dịch vụ
 
   @ApiProperty({ example: 'Siêu âm thai, rau, ối' })
@@ -52,4 +78,12 @@ export class RadiologyUpsertBody {
   @IsDefined()
   @IsString()
   resultDefault: string // tên dịch vụ
+
+  @ApiProperty({ type: RadiologyCommission, isArray: true })
+  @Expose()
+  @Type(() => RadiologyCommission)
+  @IsDefined()
+  @IsArray()
+  @ValidateNested({ each: true })
+  commissionList: RadiologyCommission[]
 }

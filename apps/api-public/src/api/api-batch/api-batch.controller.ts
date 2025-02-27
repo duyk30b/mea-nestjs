@@ -58,8 +58,8 @@ export class ApiBatchController {
     return await this.apiBatchService.updateInfo(oid, id, body)
   }
 
-  @Patch('update-info-and-quantity/:id')
-  @HasPermission(PermissionId.BATCH_CHANGE_QUANTITY)
+  @Patch('update-info-and-quantity-and-cost-price/:id')
+  @HasPermission(PermissionId.BATCH_CHANGE_QUANTITY_AND_COST_PRICE)
   async updateInfoAndQuantity(
     @External() { oid, uid }: TExternal,
     @Param() { id }: IdParam,

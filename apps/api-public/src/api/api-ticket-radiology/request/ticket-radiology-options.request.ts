@@ -1,5 +1,6 @@
-import { Expose } from 'class-transformer'
-import { IsBoolean, IsInt, IsOptional } from 'class-validator'
+import { Expose, Type } from 'class-transformer'
+import { IsBoolean, IsIn, IsInt, IsOptional, ValidateNested } from 'class-validator'
+import { ConditionTimestamp } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 
 export class TicketRadiologyRelationQuery {
@@ -38,6 +39,15 @@ export class TicketRadiologyFilterQuery {
   @Expose()
   @IsInt()
   ticketId: number
+
+  @Expose()
+  @Type(() => ConditionTimestamp)
+  @ValidateNested({ each: true })
+  startedAt: ConditionTimestamp
 }
 
-export class TicketRadiologySortQuery extends SortQuery { }
+export class TicketRadiologySortQuery extends SortQuery {
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  startedAt: 'ASC' | 'DESC'
+}

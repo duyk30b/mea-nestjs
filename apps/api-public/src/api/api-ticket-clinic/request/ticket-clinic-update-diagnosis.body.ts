@@ -40,17 +40,6 @@ class ImagesChangeBody {
   filesPosition: number[]
 }
 
-class CustomerChangeBody {
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  customerId: number
-
-  @Expose()
-  @IsString()
-  healthHistory: string
-}
-
 export class TicketClinicUpdateDiagnosisBody extends MultipleFileUpload {
   @ApiProperty({
     type: 'string',
@@ -126,28 +115,4 @@ export class TicketClinicUpdateDiagnosisBody extends MultipleFileUpload {
       + JSON.stringify(<ImagesChangeBody>{ imageIdsKeep: [102, 103, 104], filesPosition: [2, 3] }),
   })
   imagesChange: ImagesChangeBody
-
-  @ApiProperty()
-  @Expose()
-  @Transform(({ value }) => {
-    if (value === undefined) return undefined
-    try {
-      const instance = Object.assign(new CustomerChangeBody(), JSON.parse(value))
-      const validate = validateSync(instance, {
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        skipMissingProperties: true,
-      })
-      if (validate.length) return JSON.stringify(validate)
-      return instance
-    } catch (error) {
-      return error.message
-    }
-  })
-  @IsObject({
-    message: ({ value }) =>
-      `Validate customerChange failed. Value = ${JSON.stringify(value)}. Example: `
-      + JSON.stringify(<CustomerChangeBody>{ healthHistory: 'Đau bụng' }),
-  })
-  customerChange: CustomerChangeBody
 }

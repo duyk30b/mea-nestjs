@@ -30,7 +30,7 @@ class TicketOrderBasic {
   @Expose()
   @IsDefined()
   @IsInt()
-  totalCostAmount: number // Tổng tiền cost sản phẩm
+  itemsCostAmount: number // Tổng tiền cost sản phẩm
 
   @ApiProperty({ example: 750_000 })
   @Expose()

@@ -124,7 +124,7 @@ export class StatisticOperation {
       .where(whereTicket)
       .groupBy('"ticket"."customerId"')
       .select('"ticket"."customerId"', 'customerId')
-      .addSelect('SUM("ticket"."totalCostAmount")', 'sumTotalCostAmount')
+      .addSelect('SUM("ticket"."itemsCostAmount")', 'sumItemsCostAmount')
       .addSelect('SUM("ticket"."expense")', 'sumExpense')
       .addSelect('SUM("ticket"."surcharge")', 'sumSurcharge')
       .addSelect('SUM("ticket"."totalMoney")', 'sumTotalMoney')
@@ -144,8 +144,7 @@ export class StatisticOperation {
     const data = await query.getRawMany()
     return data.map((i) => ({
       customerId: i.customerId as number,
-      sumTotalCostAmount: Number(i.sumTotalCostAmount),
-      sumItemActual: Number(i.sumItemActual),
+      sumItemsCostAmount: Number(i.sumItemsCostAmount),
       sumExpense: Number(i.sumExpense),
       sumSurcharge: Number(i.sumSurcharge),
       sumTotalMoney: Number(i.sumTotalMoney),

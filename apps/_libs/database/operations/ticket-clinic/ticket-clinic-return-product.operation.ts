@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { arrayToKeyValue } from '../../../common/helpers/object.helper'
-import { DeliveryStatus, DiscountType, MovementType } from '../../common/variable'
+import { DeliveryStatus, MovementType } from '../../common/variable'
 import { Batch, Product, TicketProduct } from '../../entities'
 import BatchMovement, { BatchMovementInsertType } from '../../entities/batch-movement.entity'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
-import { ProductMovementManager, TicketManager, TicketProductManager } from '../../managers'
+import { ProductMovementManager, TicketManager, TicketUserManager } from '../../managers'
+import { TicketChangeItemMoneyManager } from '../ticket-base/ticket-change-item-money.manager'
 
 @Injectable()
 export class TicketClinicReturnProductOperation {
@@ -14,10 +15,11 @@ export class TicketClinicReturnProductOperation {
     private dataSource: DataSource,
     private ticketManager: TicketManager,
     private productMovementManager: ProductMovementManager,
-    private ticketProductManager: TicketProductManager
+    private ticketUserManager: TicketUserManager,
+    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
   ) { }
 
-  async start(params: {
+  async startReturnProduct(params: {
     oid: number
     ticketId: number
     time: number
@@ -270,6 +272,44 @@ export class TicketClinicReturnProductOperation {
         await manager.insert(BatchMovement, batchMovementInsertList)
       }
 
+      // === 11. UPDATE Commission
+      const queryUpdateTicketUser: [any[], number] = await manager.query(
+        `
+        UPDATE "TicketUser"
+        SET   "quantity"  =  temp."quantity"
+        FROM (VALUES `
+        + ticketProductActionedList
+          .map(({ id, quantity }) => {
+            return `(${id}, ${quantity})`
+          })
+          .join(', ')
+        + `   ) AS temp("ticketItemId", "quantity")
+        WHERE   "TicketUser"."ticketItemId" = temp."ticketItemId" 
+            AND "TicketUser"."ticketId"     = ${params.ticketId} 
+            AND "TicketUser"."oid"          = ${params.oid} 
+        `
+      )
+
+      let ticketUserList = await this.ticketUserManager.findManyBy(manager, {
+        oid,
+        ticketId,
+      })
+      const ticketUserEmpty = ticketUserList.filter((i) => i.quantity === 0)
+      if (ticketUserEmpty.length) {
+        ticketUserList = ticketUserList.filter((i) => {
+          return i.quantity > 0
+        })
+        await this.ticketUserManager.delete(manager, {
+          oid,
+          ticketId,
+          quantity: 0,
+        })
+      }
+      const commissionMoneyNew = ticketUserList.reduce((acc, cur) => {
+        return acc + cur.quantity * cur.commissionMoney
+      }, 0)
+      const commissionMoneyAdd = commissionMoneyNew - ticketOrigin.commissionMoney
+
       // === 11. UPDATE TICKET: product money ===
       const returnMap = arrayToKeyValue(returnList, 'ticketProductId')
       const productMoneyReturn = ticketProductActionedList.reduce((acc, item) => {
@@ -278,53 +318,27 @@ export class TicketClinicReturnProductOperation {
       const productDiscountReturn = ticketProductActionedList.reduce((acc, item) => {
         return acc + item.discountMoney * returnMap[item.id].quantityReturn
       }, 0)
-      const totalCostAmountReturn = ticketProductActionedList.reduce((acc, item) => {
+      const itemsCostAmountReturn = ticketProductActionedList.reduce((acc, item) => {
         return acc + item.costPrice * returnMap[item.id].quantityReturn
       }, 0)
 
-      const productMoneyUpdate = ticketOrigin.productMoney - productMoneyReturn
-      const totalCostAmountUpdate = ticketOrigin.totalCostAmount - totalCostAmountReturn
-      const itemsActualMoneyUpdate = ticketOrigin.itemsActualMoney - productMoneyReturn
-      const itemsDiscountUpdate = ticketOrigin.itemsDiscount - productDiscountReturn
-
-      const discountType = ticketOrigin.discountType
-      let discountPercent = ticketOrigin.discountPercent
-      let discountMoney = ticketOrigin.discountMoney
-      if (discountType === DiscountType.VND) {
-        discountPercent =
-          itemsActualMoneyUpdate == 0
-            ? 0
-            : Math.floor((discountMoney * 100) / itemsActualMoneyUpdate)
-      }
-      if (discountType === DiscountType.Percent) {
-        discountMoney = Math.floor((discountPercent * itemsActualMoneyUpdate) / 100)
-      }
-      const totalMoneyUpdate = itemsActualMoneyUpdate - discountMoney
-      const debtUpdate = totalMoneyUpdate - ticketOrigin.paid
-
-      const ticket = await this.ticketManager.updateOneAndReturnEntity(
+      const ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
         manager,
-        {
-          oid,
-          id: ticketId,
-          ticketStatus: { IN: [TicketStatus.Executing] },
+        oid,
+        ticketOrigin,
+        itemMoney: {
+          productMoneyAdd: -productMoneyReturn,
+          itemsCostAmountAdd: -itemsCostAmountReturn,
+          itemsDiscountAdd: -productDiscountReturn,
+          commissionMoneyAdd,
         },
-        {
-          productMoney: productMoneyUpdate,
-          totalCostAmount: totalCostAmountUpdate,
-          itemsActualMoney: itemsActualMoneyUpdate,
-          itemsDiscount: itemsDiscountUpdate,
-          discountPercent,
-          discountMoney,
-          totalMoney: totalMoneyUpdate,
-          debt: debtUpdate,
-        }
-      )
+      })
 
       return {
         ticket,
         productList,
         batchList,
+        ticketUserList,
       }
     })
   }

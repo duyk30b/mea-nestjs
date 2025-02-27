@@ -13,7 +13,7 @@ export class RootUserGetQuery {
     type: String,
     example: JSON.stringify(<RootUserRelationQuery>{
       organization: true,
-      userRoleList: true,
+      userRoleList: { role: true },
     }),
   })
   @Expose()

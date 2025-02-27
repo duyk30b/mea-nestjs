@@ -1,9 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsNumber, Max, Min, ValidateNested } from 'class-validator'
+import { IsArray, IsDefined, IsInt, IsNumber, Max, Min, ValidateNested } from 'class-validator'
 import { valuesEnum } from '../../../../../_libs/common/helpers/typescript.helper'
-import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
+import { IsEnumValue, IsNumberGreaterThan } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { DiscountType } from '../../../../../_libs/database/common/variable'
+import { TicketUserBasicBody } from '../api-ticket-clinic-user/request/ticket-clinic-update-user-list.body'
 
 class TicketProcedureBody {
   @ApiProperty({ example: 56 })
@@ -54,12 +55,6 @@ class TicketProcedureBody {
 }
 
 export class TicketClinicUpdateTicketProcedureListBody {
-  @ApiProperty({ example: 56 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  customerId: number
-
   @ApiProperty({ type: TicketProcedureBody, isArray: true })
   @Expose()
   @Type(() => TicketProcedureBody)
@@ -67,4 +62,39 @@ export class TicketClinicUpdateTicketProcedureListBody {
   @IsArray()
   @ValidateNested({ each: true })
   ticketProcedureList: TicketProcedureBody[]
+}
+
+export class TicketClinicAddTicketProcedure {
+  @ApiProperty({ type: TicketUserBasicBody, isArray: true })
+  @Expose()
+  @Type(() => TicketUserBasicBody)
+  @IsDefined()
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketUserList: TicketUserBasicBody[]
+
+  @ApiProperty({ type: TicketProcedureBody })
+  @Expose()
+  @Type(() => TicketProcedureBody)
+  @IsDefined()
+  @ValidateNested({ each: true })
+  ticketProcedure: TicketProcedureBody
+}
+
+export class TicketClinicDestroyTicketProcedureParams {
+  @ApiProperty({ example: 45 })
+  @Expose()
+  @Type(() => Number)
+  @IsDefined()
+  @IsInt()
+  @IsNumberGreaterThan(0)
+  ticketId: number
+
+  @ApiProperty({ example: 45 })
+  @Expose()
+  @Type(() => Number)
+  @IsDefined()
+  @IsInt()
+  @IsNumberGreaterThan(0)
+  ticketProcedureId: number
 }

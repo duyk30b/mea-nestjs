@@ -1,5 +1,5 @@
 import { Expose, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsNotEmpty, IsString, ValidateNested } from 'class-validator'
+import { IsBoolean, IsIn, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator'
 import { ConditionTimestamp } from '../../../../../_libs/common/dto/condition-timestamp'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 
@@ -9,8 +9,8 @@ export class UserRelationQuery {
   organization: boolean
 
   @Expose()
-  @IsBoolean()
-  userRoleList: boolean
+  @IsOptional()
+  userRoleList: { user?: boolean; role?: boolean } | false
 }
 
 export class UserFilterQuery {

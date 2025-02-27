@@ -197,6 +197,7 @@ export class ApiLaboratoryService {
       const dto: LaboratoryInsertType = {
         oid,
         name: i.name,
+        costPrice: i.costPrice,
         price: i.price,
         laboratoryGroupId: 0,
         level: i.level,
@@ -236,6 +237,7 @@ export class ApiLaboratoryService {
           oid,
           name: i.name,
           price: i.price,
+          costPrice: i.costPrice,
           laboratoryGroupId: 0,
           level: i.level,
           valueType: i.valueType,

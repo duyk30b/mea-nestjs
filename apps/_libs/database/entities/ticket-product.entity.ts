@@ -20,6 +20,10 @@ export default class TicketProduct extends BaseEntity {
   @Expose()
   ticketId: number
 
+  @Column({ default: 1 })
+  @Expose()
+  priority: number
+
   @Column()
   @Expose()
   customerId: number
@@ -154,13 +158,7 @@ export default class TicketProduct extends BaseEntity {
 }
 
 export type TicketProductRelationType = {
-  [P in keyof Pick<
-    TicketProduct,
-    | 'ticket'
-    | 'customer'
-    | 'product'
-    | 'batch'
-  >]?: boolean
+  [P in keyof Pick<TicketProduct, 'ticket' | 'customer' | 'product' | 'batch'>]?: boolean
 }
 
 export type TicketProductInsertType = Omit<
@@ -176,5 +174,7 @@ export type TicketProductUpdateType = {
 }
 
 export type TicketProductSortType = {
-  [P in keyof Pick<TicketProduct, 'oid' | 'id' | 'ticketId' | 'productId'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<TicketProduct, 'oid' | 'id' | 'ticketId' | 'productId' | 'priority'>]?:
+  | 'ASC'
+  | 'DESC'
 }

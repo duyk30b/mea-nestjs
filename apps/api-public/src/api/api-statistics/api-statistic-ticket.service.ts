@@ -42,7 +42,7 @@ export class ApiStatisticTicketService {
         year: currentTime.year,
         month: currentTime.month + 1,
         date: currentTime.date,
-        sumTotalCostAmount: 0,
+        sumItemsCostAmount: 0,
         sumProcedureMoney: 0,
         sumProductMoney: 0,
         sumRadiologyMoney: 0,

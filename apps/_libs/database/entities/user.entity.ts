@@ -115,7 +115,12 @@ export default class User {
 }
 
 export type UserRelationType = {
-  [P in keyof Pick<User, 'organization' | 'userRoleList' | 'devices'>]?: boolean
+  [P in keyof Pick<User, 'organization' | 'devices'>]?: boolean
+} & {
+  [P in keyof Pick<
+    User,
+    'userRoleList'
+  >]?: { [P in keyof Pick<UserRole, 'user' | 'role'>]?: boolean } | false
 }
 
 export type UserInsertType = Omit<

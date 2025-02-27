@@ -10,6 +10,12 @@ class TicketLaboratoryBody {
   @Expose()
   @IsDefined()
   @IsNumber()
+  priority: number
+
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
   laboratoryId: number
 
   @ApiProperty({ example: 25_000 })

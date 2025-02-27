@@ -16,6 +16,10 @@ export default class Role {
   @Expose()
   name: string
 
+  @Column({ type: 'varchar', length: 255, default: '' })
+  @Expose()
+  displayName: string
+
   @Column({ type: 'text', default: '[]' })
   @Expose()
   permissionIds: string
@@ -55,7 +59,12 @@ export default class Role {
 }
 
 export type RoleRelationType = {
-  [P in keyof Pick<Role, 'userRoleList'>]?: boolean
+  [P in keyof Pick<Role, never>]?: boolean
+} & {
+  [P in keyof Pick<
+    Role,
+    'userRoleList'
+  >]?: { [P in keyof Pick<UserRole, 'user' | 'role'>]?: boolean } | false
 }
 
 export type RoleInsertType = Omit<

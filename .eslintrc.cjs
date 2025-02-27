@@ -29,7 +29,7 @@ module.exports = {
     'max-len': [
       1,
       {
-        code: 100,
+        code: 120,
         ignoreComments: true,
         ignoreUrls: true,
         ignoreStrings: true,

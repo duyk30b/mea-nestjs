@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestj
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
 import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
+import { IsUser } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
 import { ApiUserService } from './api-user.service'
@@ -22,19 +23,19 @@ export class ApiUserController {
   constructor(private readonly apiUserService: ApiUserService) { }
 
   @Get('pagination')
-  @HasPermission(PermissionId.USER_READ)
+  @IsUser()
   pagination(@External() { oid }: TExternal, @Query() query: UserPaginationQuery) {
     return this.apiUserService.pagination({ oid, query })
   }
 
   @Get('list')
-  @HasPermission(PermissionId.USER_READ)
+  @IsUser()
   list(@External() { oid }: TExternal, @Query() query: UserGetManyQuery) {
     return this.apiUserService.getMany(oid, query)
   }
 
   @Get('detail/:id')
-  @HasPermission(PermissionId.USER_READ)
+  @IsUser()
   async detail(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -44,13 +45,13 @@ export class ApiUserController {
   }
 
   @Post('create')
-  @HasPermission(PermissionId.USER_CREATE)
+  @HasPermission(PermissionId.ACCOUNT_CRUD)
   async createOne(@External() { oid }: TExternal, @Body() body: UserCreateBody) {
     return await this.apiUserService.createOne(oid, body)
   }
 
   @Patch('update/:id')
-  @HasPermission(PermissionId.USER_UPDATE)
+  @HasPermission(PermissionId.ACCOUNT_CRUD)
   async updateOne(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -60,7 +61,7 @@ export class ApiUserController {
   }
 
   @Patch('new-password/:id')
-  @HasPermission(PermissionId.USER_UPDATE)
+  @HasPermission(PermissionId.ACCOUNT_CRUD)
   async newPassword(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -70,14 +71,14 @@ export class ApiUserController {
   }
 
   @Delete('delete/:id')
-  @HasPermission(PermissionId.USER_DELETE)
+  @HasPermission(PermissionId.ACCOUNT_CRUD)
   @ApiParam({ name: 'id', example: 1 })
   async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiUserService.deleteOne(oid, id)
   }
 
   @Post('device-logout/:id')
-  @HasPermission(PermissionId.USER_DEVICE_LOGOUT)
+  @HasPermission(PermissionId.ACCOUNT_CRUD)
   deviceLogout(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,

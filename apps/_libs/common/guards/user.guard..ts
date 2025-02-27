@@ -1,5 +1,6 @@
 import { CanActivate, ExecutionContext, HttpStatus, Injectable, SetMetadata } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
+import { OrganizationStatus } from '../../database/entities/organization.entity'
 import { BusinessException } from '../exception-filter/exception-filter'
 import { RequestExternal } from '../request/external.request'
 
@@ -29,7 +30,7 @@ export class UserGuard implements CanActivate {
       || !external.user
       || !external.organization
       || !!external.user.deletedAt
-      || !external.organization.isActive
+      || external.organization.status == OrganizationStatus.Inactive
     ) {
       throw new BusinessException('error.Token.AccessTokenExpired', {}, HttpStatus.UNAUTHORIZED)
     }

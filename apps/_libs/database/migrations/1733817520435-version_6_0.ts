@@ -125,26 +125,65 @@ export class Version601733817520435 implements MigrationInterface {
         `)
 
         await queryRunner.query(`
-            WITH TicketAggregates AS (
+            WITH TicketProductAggregates AS (
                 SELECT
-                    "Ticket"."id",
+                    "TicketProduct"."ticketId",
                     COALESCE(SUM("TicketProduct"."quantity" * "TicketProduct"."costPrice"), 0) AS "totalCostAmount",
-                    COALESCE(SUM("TicketProduct"."quantity" * "TicketProduct"."discountMoney"), 0) +
-                    COALESCE(SUM("TicketProcedure"."quantity" * "TicketProcedure"."discountMoney"), 0) +
-                    COALESCE(SUM("TicketLaboratory"."discountMoney"), 0) +
-                    COALESCE(SUM("TicketRadiology"."discountMoney"), 0) AS "itemsDiscount",
-                    COALESCE(SUM("TicketProduct"."quantity" * "TicketProduct"."actualPrice"), 0) AS "productMoney",
-                    COALESCE(SUM("TicketProcedure"."quantity" * "TicketProcedure"."actualPrice"), 0) AS "procedureMoney",
-                    COALESCE(SUM("TicketRadiology"."actualPrice"), 0) AS "radiologyMoney",
+                    COALESCE(SUM("TicketProduct"."quantity" * "TicketProduct"."discountMoney"), 0) AS "productDiscount",
+                    COALESCE(SUM("TicketProduct"."quantity" * "TicketProduct"."actualPrice"), 0) AS "productMoney"
+                FROM
+                    "TicketProduct"
+                GROUP BY
+                    "TicketProduct"."ticketId"
+            ),
+            TicketProcedureAggregates AS (
+                SELECT
+                    "TicketProcedure"."ticketId",
+                    COALESCE(SUM("TicketProcedure"."quantity" * "TicketProcedure"."discountMoney"), 0) AS "procedureDiscount",
+                    COALESCE(SUM("TicketProcedure"."quantity" * "TicketProcedure"."actualPrice"), 0) AS "procedureMoney"
+                FROM
+                    "TicketProcedure"
+                GROUP BY
+                    "TicketProcedure"."ticketId"
+            ),
+            TicketLaboratoryAggregates AS (
+                SELECT
+                    "TicketLaboratory"."ticketId",
+                    COALESCE(SUM("TicketLaboratory"."discountMoney"), 0) AS "laboratoryDiscount",
                     COALESCE(SUM("TicketLaboratory"."actualPrice"), 0) AS "laboratoryMoney"
                 FROM
-                    "Ticket"
-                    LEFT JOIN "TicketProduct" ON "Ticket"."id" = "TicketProduct"."ticketId"
-                    LEFT JOIN "TicketProcedure" ON "Ticket"."id" = "TicketProcedure"."ticketId"
-                    LEFT JOIN "TicketLaboratory" ON "Ticket"."id" = "TicketLaboratory"."ticketId"
-                    LEFT JOIN "TicketRadiology" ON "Ticket"."id" = "TicketRadiology"."ticketId"
+                    "TicketLaboratory"
                 GROUP BY
-                    "Ticket"."id"
+                    "TicketLaboratory"."ticketId"
+            ),
+            TicketRadiologyAggregates AS (
+                SELECT
+                    "TicketRadiology"."ticketId",
+                    COALESCE(SUM("TicketRadiology"."discountMoney"), 0) AS "radiologyDiscount",
+                    COALESCE(SUM("TicketRadiology"."actualPrice"), 0) AS "radiologyMoney"
+                FROM
+                    "TicketRadiology"
+                GROUP BY
+                    "TicketRadiology"."ticketId"
+            ),
+            TicketAggregates AS (
+                SELECT
+                    "Ticket"."id",
+                    COALESCE(tp."totalCostAmount", 0) AS "totalCostAmount",
+                    COALESCE(tp."productDiscount", 0) +
+                    COALESCE(tpr."procedureDiscount", 0) +
+                    COALESCE(tl."laboratoryDiscount", 0) +
+                    COALESCE(tr."radiologyDiscount", 0) AS "itemsDiscount",
+                    COALESCE(tp."productMoney", 0) AS "productMoney",
+                    COALESCE(tpr."procedureMoney", 0) AS "procedureMoney",
+                    COALESCE(tr."radiologyMoney", 0) AS "radiologyMoney",
+                    COALESCE(tl."laboratoryMoney", 0) AS "laboratoryMoney"
+                FROM
+                    "Ticket"
+                    LEFT JOIN TicketProductAggregates tp ON "Ticket"."id" = tp."ticketId"
+                    LEFT JOIN TicketProcedureAggregates tpr ON "Ticket"."id" = tpr."ticketId"
+                    LEFT JOIN TicketLaboratoryAggregates tl ON "Ticket"."id" = tl."ticketId"
+                    LEFT JOIN TicketRadiologyAggregates tr ON "Ticket"."id" = tr."ticketId"
             )
             UPDATE "Ticket"
             SET

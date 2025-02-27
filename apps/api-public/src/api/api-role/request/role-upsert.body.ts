@@ -1,13 +1,19 @@
-import { ApiPropertyOptional, PartialType } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
-import { IsDefined, IsIn, IsNotEmpty, IsString } from 'class-validator'
+import { IsArray, IsDefined, IsIn, IsString } from 'class-validator'
 
 export class RoleCreateBody {
   @ApiPropertyOptional({ example: 'Bán hàng' })
   @Expose()
   @IsDefined()
   @IsString()
-  name: string // Hoạt chất
+  name: string
+
+  @ApiPropertyOptional({ example: 'Bán hàng' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  displayName: string
 
   @ApiPropertyOptional({ type: 'string', example: '[{"name":"Viên","rate":1}]' })
   @Expose()
@@ -33,6 +39,12 @@ export class RoleCreateBody {
   @Expose()
   @IsIn([0, 1])
   isActive: 0 | 1
+
+  @ApiProperty({ example: [2, 3, 4] })
+  @Expose()
+  @IsDefined()
+  @IsArray()
+  userIdList: number[]
 }
 
-export class RoleUpdateBody extends RoleCreateBody {}
+export class RoleUpdateBody extends RoleCreateBody { }

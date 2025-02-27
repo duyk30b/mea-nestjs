@@ -10,6 +10,7 @@ import { BaseResponse } from '../../../../_libs/common/interceptor/transform-res
 import { JwtExtendService } from '../../../../_libs/common/jwt-extend/jwt-extend.service'
 import { JwtConfig } from '../../../../_libs/common/jwt-extend/jwt.config'
 import { TExternal } from '../../../../_libs/common/request/external.request'
+import { OrganizationStatus } from '../../../../_libs/database/entities/organization.entity'
 import User from '../../../../_libs/database/entities/user.entity'
 import { CustomerRepository } from '../../../../_libs/database/repositories/customer.repository'
 import { DistributorRepository } from '../../../../_libs/database/repositories/distributor.repository'
@@ -117,7 +118,7 @@ export class ApiAuthService {
       },
     })
     if (!user) throw new BusinessException('error.Database.NotFound')
-    if (!user.isActive || !user.organization?.isActive) {
+    if (!user.isActive || user.organization.status == OrganizationStatus.Inactive) {
       throw new BusinessException('common.AccountInactive')
     }
 
@@ -160,7 +161,7 @@ export class ApiAuthService {
       },
     })
     if (!root) throw new BusinessException('error.Database.NotFound')
-    if (!root.isActive || !root.organization?.isActive) {
+    if (!root.isActive || root.organization.status == OrganizationStatus.Inactive) {
       throw new BusinessException('common.AccountInactive')
     }
 
@@ -209,7 +210,7 @@ export class ApiAuthService {
       where: { id: 4, oid: 4 },
     })
     if (!user) throw new BusinessException('error.Database.NotFound')
-    if (!user.isActive || !user.organization?.isActive) {
+    if (!user.isActive || user.organization.status == OrganizationStatus.Inactive) {
       throw new BusinessException('common.AccountInactive')
     }
 
@@ -243,7 +244,10 @@ export class ApiAuthService {
       email: body.organizationEmail,
     })
     if (!organization) {
-      throw BusinessException.create({ message: 'error.Database.NotFound', details: 'Organization' })
+      throw BusinessException.create({
+        message: 'error.Database.NotFound',
+        details: 'Organization',
+      })
     }
     const user = await this.userRepository.findOne({
       // relation: { organization: true },
@@ -256,7 +260,7 @@ export class ApiAuthService {
       throw BusinessException.create({ message: 'error.Database.NotFound', details: 'User' })
     }
 
-    if (!user.isActive || !organization.isActive) {
+    if (!user.isActive || user.organization.status == OrganizationStatus.Inactive) {
       throw new BusinessException('common.AccountInactive')
     }
 
@@ -288,7 +292,10 @@ export class ApiAuthService {
       phone: body.organizationPhone,
     })
     if (!organization) {
-      throw BusinessException.create({ message: 'error.Database.NotFound', details: 'Organization' })
+      throw BusinessException.create({
+        message: 'error.Database.NotFound',
+        details: 'Organization',
+      })
     }
     const user = await this.userRepository.findOne({
       // relation: { organization: true },

@@ -52,7 +52,7 @@ export class TicketOrderReturnBody {
   @Expose()
   @IsDefined()
   @IsInt()
-  totalCostAmountUpdate: number
+  itemsCostAmountUpdate: number
 
   @ApiProperty({ example: 300_000 })
   @Expose()

@@ -3,6 +3,12 @@ import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryGenerate
 import Image from './image.entity'
 import User from './user.entity'
 
+export enum OrganizationStatus {
+  Inactive = 0,
+  Active = 1,
+  Frequent = 2,
+}
+
 @Entity('Organization')
 @Index('IDX_Organization__phone', ['phone'], { unique: true })
 @Index('IDX_Organization__email', ['email'], { unique: true })
@@ -109,7 +115,7 @@ export default class Organization {
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()
-  isActive: 0 | 1
+  status: OrganizationStatus
 
   @OneToOne(() => Image, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'logoImageId', referencedColumnName: 'id' })

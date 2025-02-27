@@ -7,9 +7,7 @@ import { encrypt } from '../../../../_libs/common/helpers/string.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { User } from '../../../../_libs/database/entities'
 import Device from '../../../../_libs/database/entities/device'
-import { RoleRepository } from '../../../../_libs/database/repositories/role.repository'
-import { UserRoleRepository } from '../../../../_libs/database/repositories/user-role.repository'
-import { UserRepository } from '../../../../_libs/database/repositories/user.repository'
+import { RoleRepository, UserRepository, UserRoleRepository } from '../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   UserCreateBody,
@@ -82,9 +80,10 @@ export class ApiUserService {
   }
 
   async getMany(oid: number, query: UserGetManyQuery): Promise<BaseResponse> {
-    const { limit, filter } = query
+    const { limit, filter, relation } = query
 
     const data = await this.userRepository.findMany({
+      relation,
       condition: {
         oid,
         isAdmin: filter?.isAdmin,
@@ -117,13 +116,6 @@ export class ApiUserService {
     if (existUser) {
       throw new BusinessException('error.Register.ExistUsername')
     }
-    const roleList = await this.roleRepository.findManyBy({
-      oid,
-      id: { IN: roleIdList },
-    })
-    if (roleList.length !== roleIdList.length) {
-      throw new BusinessException('error.User.WrongRole')
-    }
 
     const hashPassword = await bcrypt.hash(password, 5)
     const secret = encrypt(password, username)
@@ -137,13 +129,22 @@ export class ApiUserService {
       hashPassword,
     })
 
-    user.userRoleList = await this.userRoleRepository.insertManyFullFieldAndReturnEntity(
-      roleIdList.map((i) => ({
+    if (roleIdList.length) {
+      const roleList = await this.roleRepository.findManyBy({
         oid,
-        roleId: i,
-        userId: user.id,
-      }))
-    )
+        id: { IN: roleIdList },
+      })
+      if (roleList.length !== roleIdList.length) {
+        throw new BusinessException('error.Conflict')
+      }
+      user.userRoleList = await this.userRoleRepository.insertManyFullFieldAndReturnEntity(
+        roleIdList.map((i) => ({
+          oid,
+          roleId: i,
+          userId: user.id,
+        }))
+      )
+    }
 
     this.cacheDataService.clearUserAndRole(user.oid)
     return { data: { user } }
@@ -152,29 +153,30 @@ export class ApiUserService {
   async updateOne(oid: number, userId: number, body: UserUpdateBody): Promise<BaseResponse> {
     const { roleIdList, ...other } = body
 
-    const roleList = await this.roleRepository.findManyBy({
-      oid,
-      id: { IN: roleIdList },
-    })
-    if (roleList.length !== roleIdList.length) {
-      throw new BusinessException('error.User.WrongRole')
-    }
-
     const [user] = await this.userRepository.updateAndReturnEntity({ oid, id: userId }, other)
     if (!user) {
       throw new BusinessException('error.Database.UpdateFailed')
     }
-
     await this.userRoleRepository.delete({ oid, userId })
-    user.userRoleList = await this.userRoleRepository.insertManyFullFieldAndReturnEntity(
-      roleIdList.map((i) => ({
-        oid,
-        roleId: i,
-        userId: user.id,
-      }))
-    )
 
-    this.cacheDataService.clearUserAndRole(user.oid)
+    if (roleIdList.length) {
+      const roleList = await this.roleRepository.findManyBy({
+        oid,
+        id: { IN: roleIdList },
+      })
+      if (roleList.length !== roleIdList.length) {
+        throw new BusinessException('error.Conflict')
+      }
+      user.userRoleList = await this.userRoleRepository.insertManyFullFieldAndReturnEntity(
+        roleIdList.map((i) => ({
+          oid,
+          roleId: i,
+          userId: user.id,
+        }))
+      )
+    }
+
+    this.cacheDataService.clearUserAndRole(oid)
     return { data: { user } }
   }
 

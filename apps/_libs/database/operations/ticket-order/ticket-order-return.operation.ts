@@ -38,7 +38,7 @@ export class TicketOrderReturnOperation {
       ticketProcedureId: number
       quantityReturn: number
     }[]
-    totalCostAmountUpdate: number
+    itemsCostAmountUpdate: number
     productMoneyUpdate: number
     procedureMoneyUpdate: number
     itemsActualMoneyUpdate: number
@@ -63,7 +63,7 @@ export class TicketOrderReturnOperation {
       ticketProductReturnList,
       ticketProcedureReturnList,
 
-      totalCostAmountUpdate,
+      itemsCostAmountUpdate,
       productMoneyUpdate,
       procedureMoneyUpdate,
       itemsActualMoneyUpdate,
@@ -402,7 +402,7 @@ export class TicketOrderReturnOperation {
             END
           `,
 
-          totalCostAmount: totalCostAmountUpdate,
+          itemsCostAmount: itemsCostAmountUpdate,
           productMoney: productMoneyUpdate,
           procedureMoney: procedureMoneyUpdate,
           itemsActualMoney: itemsActualMoneyUpdate,

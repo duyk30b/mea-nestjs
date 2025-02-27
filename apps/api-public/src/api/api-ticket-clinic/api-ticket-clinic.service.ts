@@ -1,6 +1,4 @@
-/* eslint-disable max-len */
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
-import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
@@ -9,52 +7,34 @@ import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { DeliveryStatus } from '../../../../_libs/database/common/variable'
 import { Customer } from '../../../../_libs/database/entities'
 import { AppointmentStatus } from '../../../../_libs/database/entities/appointment.entity'
+import { InteractType } from '../../../../_libs/database/entities/commission.entity'
 import { TicketAttributeInsertType } from '../../../../_libs/database/entities/ticket-attribute.entity'
+import { TicketRadiologyStatus } from '../../../../_libs/database/entities/ticket-radiology.entity'
+import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import {
-  TicketLaboratoryInsertType,
-  TicketLaboratoryStatus,
-} from '../../../../_libs/database/entities/ticket-laboratory.entity'
-import { TicketProductType } from '../../../../_libs/database/entities/ticket-product.entity'
-import {
-  TicketRadiologyInsertType,
-  TicketRadiologyStatus,
-} from '../../../../_libs/database/entities/ticket-radiology.entity'
-import Ticket, { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
-import {
+  TicketChangeDiscountOperation,
   TicketClinicReopenOperation,
-  TicketClinicReturnProductOperation,
-  TicketClinicUpdateItemsMoneyOperation,
-  TicketClinicUpdateTicketLaboratoryListOperation,
-  TicketClinicUpdateTicketProcedureListOperation,
-  TicketClinicUpdateTicketProductListOperation,
-  TicketClinicUpdateTicketRadiologyListOperation,
+  TicketClinicUpdateInformationOperation,
   TicketPayDebtOperation,
   TicketPaymentAndCloseOperation,
   TicketPrepaymentOperation,
   TicketRefundMoneyOperation,
-  TicketSendProductOperation,
+  TicketUserOperation,
 } from '../../../../_libs/database/operations'
 import {
   AppointmentRepository,
   CustomerRepository,
   TicketAttributeRepository,
-  TicketProductRepository,
   TicketRepository,
-  TicketUserRepository,
 } from '../../../../_libs/database/repositories'
 import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
 import { ImageManagerService } from '../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
+  TicketClinicChangeDiscountBody,
   TicketClinicCreateBody,
   TicketClinicPaymentBody,
-  TicketClinicReturnProductListBody,
-  TicketClinicUpdateConsumableBody,
-  TicketClinicUpdateItemsMoneyBody,
-  TicketClinicUpdatePrescriptionBody,
-  TicketClinicUpdateTicketLaboratoryListBody,
-  TicketClinicUpdateTicketProcedureListBody,
-  TicketClinicUpdateTicketRadiologyListBody,
+  TicketClinicUpdateBody,
 } from './request'
 import { TicketClinicUpdateDiagnosisBody } from './request/ticket-clinic-update-diagnosis.body'
 
@@ -62,44 +42,38 @@ import { TicketClinicUpdateDiagnosisBody } from './request/ticket-clinic-update-
 export class ApiTicketClinicService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
-    private readonly cacheDataService: CacheDataService,
     private readonly imageManagerService: ImageManagerService,
     private readonly imageRepository: ImageRepository,
     private readonly customerRepository: CustomerRepository,
     private readonly appointmentRepository: AppointmentRepository,
     private readonly ticketRepository: TicketRepository,
     private readonly ticketAttributeRepository: TicketAttributeRepository,
-    private readonly ticketUserRepository: TicketUserRepository,
-    private readonly ticketProductRepository: TicketProductRepository,
-    private readonly ticketClinicUpdateTicketProcedureListOperation: TicketClinicUpdateTicketProcedureListOperation,
-    private readonly ticketClinicUpdateTicketLaboratoryListOperation: TicketClinicUpdateTicketLaboratoryListOperation,
-    private readonly ticketClinicUpdateTicketRadiologyListOperation: TicketClinicUpdateTicketRadiologyListOperation,
-    private readonly ticketClinicUpdateTicketProductListOperation: TicketClinicUpdateTicketProductListOperation,
-    private readonly ticketClinicUpdateItemsMoneyOperation: TicketClinicUpdateItemsMoneyOperation,
-    private readonly ticketClinicReturnProductOperation: TicketClinicReturnProductOperation,
+    private readonly ticketChangeDiscountOperation: TicketChangeDiscountOperation,
     private readonly ticketRefundMoneyOperation: TicketRefundMoneyOperation,
-    private readonly ticketSendProductOperation: TicketSendProductOperation,
     private readonly ticketPrepaymentOperation: TicketPrepaymentOperation,
     private readonly ticketPaymentAndCloseOperation: TicketPaymentAndCloseOperation,
     private readonly ticketPayDebtOperation: TicketPayDebtOperation,
-    private readonly ticketClinicReopenOperation: TicketClinicReopenOperation
+    private readonly ticketClinicReopenOperation: TicketClinicReopenOperation,
+    private readonly ticketUserOperation: TicketUserOperation,
+    private readonly ticketClinicUpdateInformationOperation: TicketClinicUpdateInformationOperation
   ) { }
 
   async create(options: { oid: number; body: TicketClinicCreateBody }) {
     const { oid, body } = options
-    const { registeredAt, ticketStatus, ticketType, customerSourceId } = body.ticket
+    const { registeredAt, ticketStatus } = body.ticketInformation
 
     let customer: Customer
-    if (!body.customerId) {
+    if (!body.ticketInformation.customerId) {
       customer = await this.customerRepository.insertOneFullFieldAndReturnEntity({
         ...body.customer,
         debt: 0,
         oid,
       })
+      this.socketEmitService.customerUpsert(oid, { customer })
     } else {
       customer = await this.customerRepository.findOneBy({
         oid,
-        id: body.customerId,
+        id: body.ticketInformation.customerId,
       })
     }
     if (!customer) throw new BusinessException('error.SystemError')
@@ -108,11 +82,13 @@ export class ApiTicketClinicService {
     const ticket = await this.ticketRepository.insertOneAndReturnEntity({
       oid,
       customerId: customer.id,
-      ticketType,
+      ticketType: body.ticketInformation.ticketType,
       ticketStatus,
       registeredAt,
       startedAt: ticketStatus === TicketStatus.Executing ? registeredAt : null,
-      customerSourceId,
+      customerSourceId: body.ticketInformation.customerSourceId,
+      customType: body.ticketInformation.customType,
+
       dailyIndex: countToday + 1,
       year: DTimer.info(registeredAt, 7).year,
       month: DTimer.info(registeredAt, 7).month + 1,
@@ -120,9 +96,9 @@ export class ApiTicketClinicService {
     })
     ticket.customer = customer
 
-    if (body.fromAppointmentId) {
+    if (body.ticketInformation.fromAppointmentId) {
       await this.appointmentRepository.update(
-        { oid, id: body.fromAppointmentId },
+        { oid, id: body.ticketInformation.fromAppointmentId },
         {
           toTicketId: ticket.id,
           appointmentStatus: AppointmentStatus.Completed,
@@ -130,21 +106,90 @@ export class ApiTicketClinicService {
       )
     }
 
-    if (body.ticketAttributeList?.length) {
-      const ticketAttributeInsertList = body.ticketAttributeList.map((i) => {
-        const dto: TicketAttributeInsertType = {
-          ...i,
-          oid,
-          ticketId: ticket.id,
-        }
-        return dto
-      })
+    if (body.ticketAttributeList) {
+      const ticketAttributeInsertList = body.ticketAttributeList
+        .filter((i) => !!i.value)
+        .map((i) => {
+          const dto: TicketAttributeInsertType = {
+            ...i,
+            oid,
+            ticketId: ticket.id,
+          }
+          return dto
+        })
       ticket.ticketAttributeList =
         await this.ticketAttributeRepository.insertManyAndReturnEntity(ticketAttributeInsertList)
     }
 
-    this.socketEmitService.ticketClinicCreate(oid, { ticket })
-    return { data: { ticket } }
+    if (body.ticketUserList) {
+      const result = await this.ticketUserOperation.addTicketUserListAndReCalculatorTicketMoney({
+        oid,
+        ticketOrigin: ticket,
+        ticketUserDto: body.ticketUserList.filter((i) => !!i.userId),
+      })
+      Object.assign(ticket, result.ticket)
+      ticket.ticketUserList = result.ticketUserInsertList
+    }
+
+    this.socketEmitService.ticketClinicChange(oid, { type: 'CREATE', ticket })
+    return { data: true }
+  }
+
+  async update(options: { oid: number; ticketId: number; body: TicketClinicUpdateBody }) {
+    const { oid, body, ticketId } = options
+    const { registeredAt, customerSourceId, customType } = body.ticketInformation
+
+    const { ticket, ticketUserChangeList } =
+      await this.ticketClinicUpdateInformationOperation.startUpdate({
+        oid,
+        ticketId,
+        information: { registeredAt, customerSourceId, customType },
+        ticketUser: {
+          interactType: InteractType.Ticket,
+          interactId: 0,
+          ticketItemId: 0,
+          ticketItemActualPrice: 0,
+          ticketItemExpectedPrice: 0,
+          dataChange: body.ticketUserList,
+        },
+      })
+
+    if (body.ticketAttributeList) {
+      const attributeKeyRemove = body.ticketAttributeList.map((i) => i.key)
+      if (attributeKeyRemove.length) {
+        await this.ticketAttributeRepository.delete({
+          oid,
+          ticketId,
+          key: { IN: body.ticketAttributeList.map((i) => i.key) },
+        })
+      }
+
+      const ticketAttributeInsertList = body.ticketAttributeList
+        .filter((i) => !!i.value)
+        .map((i) => {
+          const dto: TicketAttributeInsertType = {
+            ...i,
+            oid,
+            ticketId: ticket.id,
+          }
+          return dto
+        })
+      await this.ticketAttributeRepository.insertMany(ticketAttributeInsertList)
+      ticket.ticketAttributeList = await this.ticketAttributeRepository.findManyBy({
+        oid,
+        ticketId,
+      })
+    }
+
+    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
+    if (ticketUserChangeList) {
+      this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
+        ticketId,
+        ticketUserDestroyList: ticketUserChangeList.ticketUserDestroyList,
+        ticketUserInsertList: ticketUserChangeList.ticketUserInsertList,
+      })
+    }
+    return { data: true }
   }
 
   async startCheckup(options: { oid: number; ticketId: number }) {
@@ -161,8 +206,8 @@ export class ApiTicketClinicService {
       }
     )
     if (!ticket) throw new BusinessException('error.Database.UpdateFailed')
-    this.socketEmitService.ticketClinicUpdate(oid, { ticket })
-    return { data: { ticket } }
+    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
+    return { data: true }
   }
 
   async updateDiagnosis(options: {
@@ -172,7 +217,7 @@ export class ApiTicketClinicService {
     files: FileUploadDto[]
   }) {
     const { oid, ticketId, body, files } = options
-    const { customerChange, imagesChange, ticketAttributeChangeList, ticketAttributeKeyList } = body
+    const { imagesChange, ticketAttributeChangeList, ticketAttributeKeyList } = body
 
     // 1. Update Ticket Image
     if (imagesChange) {
@@ -199,7 +244,7 @@ export class ApiTicketClinicService {
           ticket.imageList.push(imageMap[i])
         })
 
-        this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+        this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
       }
     }
 
@@ -232,344 +277,7 @@ export class ApiTicketClinicService {
       })
     }
 
-    // 3. Update Customer
-    if (customerChange) {
-      const customerUpdateList = await this.customerRepository.updateAndReturnEntity(
-        { oid, id: customerChange.customerId },
-        { healthHistory: customerChange.healthHistory }
-      )
-      const customer = customerUpdateList[0]
-      this.socketEmitService.customerUpsert(oid, { customer })
-    }
-
     return { data: true }
-  }
-
-  async updateTicketProcedureList(options: {
-    oid: number
-    ticketId: number
-    body: TicketClinicUpdateTicketProcedureListBody
-  }) {
-    const { oid, ticketId, body } = options
-    const result =
-      await this.ticketClinicUpdateTicketProcedureListOperation.updateTicketProcedureList({
-        oid,
-        ticketId,
-        ticketProcedureListDto: body.ticketProcedureList,
-      })
-
-    const { ticket, ticketProcedureList } = result
-
-    this.socketEmitService.ticketClinicUpdate(oid, { ticket })
-    this.socketEmitService.ticketClinicUpdateTicketProcedureList(oid, {
-      ticketId,
-      ticketProcedureList,
-    })
-
-    return { data: true }
-  }
-
-  async updateTicketProductConsumable(options: {
-    oid: number
-    ticketId: number
-    body: TicketClinicUpdateConsumableBody
-  }) {
-    const { oid, ticketId, body } = options
-
-    const result = await this.ticketClinicUpdateTicketProductListOperation.updateTicketProductList({
-      oid,
-      ticketId,
-      ticketProductListDto: body.ticketProductConsumableList.map((i) => {
-        return {
-          ...i,
-          quantityPrescription: 0,
-          hintUsage: '',
-        }
-      }),
-      type: TicketProductType.Consumable,
-    })
-
-    const { ticket, ticketProductList } = result
-
-    this.socketEmitService.ticketClinicUpdate(oid, { ticket })
-    this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
-      ticketId,
-      ticketProductConsumableList: ticketProductList.filter((i) => {
-        return i.type === TicketProductType.Consumable
-      }),
-    })
-
-    return { data: true }
-  }
-
-  async updateTicketProductPrescription(options: {
-    oid: number
-    ticketId: number
-    body: TicketClinicUpdatePrescriptionBody
-  }) {
-    const { oid, ticketId, body } = options
-    const { ticketAttributeChangeList, ticketAttributeKeyList } = body
-
-    let ticket: Ticket
-    if (body.ticketProductPrescriptionList != null) {
-      const result =
-        await this.ticketClinicUpdateTicketProductListOperation.updateTicketProductList({
-          oid,
-          ticketId,
-          ticketProductListDto: body.ticketProductPrescriptionList,
-          type: TicketProductType.Prescription,
-        })
-
-      const { ticketProductList } = result
-      ticket = result.ticket
-
-      this.socketEmitService.ticketClinicUpdate(oid, { ticket })
-      this.socketEmitService.ticketClinicUpdateTicketProductPrescriptionList(oid, {
-        ticketId,
-        ticketProductPrescriptionList: ticketProductList.filter((i) => {
-          return i.type === TicketProductType.Prescription
-        }),
-      })
-    }
-
-    if (ticketAttributeChangeList) {
-      await this.ticketAttributeRepository.delete({
-        oid,
-        ticketId,
-        key: { IN: ticketAttributeKeyList },
-      })
-      const ticketAttributeInsertList = ticketAttributeChangeList.map((i) => {
-        const dto: TicketAttributeInsertType = {
-          ...i,
-          oid,
-          ticketId,
-        }
-        return dto
-      })
-
-      await this.ticketAttributeRepository.insertMany(ticketAttributeInsertList)
-
-      const ticketAttributeList = await this.ticketAttributeRepository.findManyBy({
-        oid,
-        ticketId,
-      })
-
-      this.socketEmitService.ticketClinicUpdateTicketAttributeList(oid, {
-        ticketId,
-        ticketAttributeList,
-      })
-    }
-
-    return { data: true }
-  }
-
-  async updateTicketLaboratoryList(options: {
-    oid: number
-    ticketId: number
-    body: TicketClinicUpdateTicketLaboratoryListBody
-  }) {
-    const { ticketId, oid, body } = options
-    const result =
-      await this.ticketClinicUpdateTicketLaboratoryListOperation.updateTicketLaboratoryList({
-        oid,
-        ticketId,
-        ticketLaboratoryListDto: body.ticketLaboratoryList.map((i) => {
-          const data: TicketLaboratoryInsertType = {
-            ...i,
-            oid,
-            ticketId,
-            customerId: body.customerId,
-            attention: '',
-            result: '',
-            startedAt: null,
-            status: TicketLaboratoryStatus.Pending,
-          }
-          return data
-        }),
-      })
-
-    const { ticket, ticketLaboratoryList } = result
-
-    this.socketEmitService.ticketClinicUpdate(oid, { ticket })
-    this.socketEmitService.ticketClinicUpdateTicketLaboratoryList(oid, {
-      ticketId,
-      ticketLaboratoryList,
-    })
-
-    return { data: true }
-  }
-
-  async updateTicketRadiologyList(options: {
-    oid: number
-    ticketId: number
-    body: TicketClinicUpdateTicketRadiologyListBody
-  }) {
-    const { ticketId, oid, body } = options
-    const result =
-      await this.ticketClinicUpdateTicketRadiologyListOperation.updateTicketRadiologyList({
-        oid,
-        ticketId,
-        ticketRadiologyListDto: body.ticketRadiologyList.map((i) => {
-          const data: TicketRadiologyInsertType = {
-            ...i,
-            oid,
-            ticketId,
-            customerId: body.customerId,
-            imageIds: JSON.stringify([]),
-            description: '',
-            result: '',
-            startedAt: null,
-            status: TicketRadiologyStatus.Pending,
-          }
-          return data
-        }),
-      })
-
-    const { ticket, ticketRadiologyList } = result
-
-    this.socketEmitService.ticketClinicUpdate(oid, { ticket })
-    this.socketEmitService.ticketClinicUpdateTicketRadiologyList(oid, {
-      ticketId,
-      ticketRadiologyList,
-    })
-
-    return { data: true }
-  }
-
-  async updateItemsMoney(options: {
-    oid: number
-    ticketId: number
-    body: TicketClinicUpdateItemsMoneyBody
-  }) {
-    const { oid, ticketId, body } = options
-    const result = await this.ticketClinicUpdateItemsMoneyOperation.updateItemsMoney({
-      oid,
-      ticketId,
-      itemsActualMoney: body.itemsActualMoney,
-      discountMoney: body.discountMoney,
-      discountPercent: body.discountPercent,
-      discountType: body.discountType,
-      ticketProductUpdateList: body.ticketProductUpdateList,
-      ticketProcedureUpdateList: body.ticketProcedureUpdateList,
-      ticketLaboratoryUpdateList: body.ticketLaboratoryUpdateList,
-      ticketRadiologyUpdateList: body.ticketRadiologyUpdateList,
-    })
-
-    const {
-      ticket,
-      ticketProductList,
-      ticketProcedureList,
-      ticketLaboratoryList,
-      ticketRadiologyList,
-    } = result
-    this.socketEmitService.ticketClinicUpdate(oid, { ticket })
-    this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
-      ticketId,
-      ticketProductConsumableList: ticketProductList.filter((i) => {
-        return i.type === TicketProductType.Consumable
-      }),
-    })
-    this.socketEmitService.ticketClinicUpdateTicketProductPrescriptionList(oid, {
-      ticketId,
-      ticketProductPrescriptionList: ticketProductList.filter((i) => {
-        return i.type === TicketProductType.Prescription
-      }),
-    })
-    this.socketEmitService.ticketClinicUpdateTicketProcedureList(oid, {
-      ticketId,
-      ticketProcedureList,
-    })
-    this.socketEmitService.ticketClinicUpdateTicketLaboratoryList(oid, {
-      ticketId,
-      ticketLaboratoryList,
-    })
-    this.socketEmitService.ticketClinicUpdateTicketRadiologyList(oid, {
-      ticketId,
-      ticketRadiologyList,
-    })
-    return { data: true }
-  }
-
-  async sendProduct(params: { oid: number; ticketId: number }): Promise<BaseResponse> {
-    const { oid, ticketId } = params
-    const time = Date.now()
-    try {
-      const allowNegativeQuantity = await this.cacheDataService.getSettingAllowNegativeQuantity(oid)
-      const { productList, batchList, ticket } = await this.ticketSendProductOperation.sendProduct({
-        oid,
-        ticketId,
-        time,
-        allowNegativeQuantity,
-      })
-      this.socketEmitService.batchListUpdate(oid, { batchList })
-      this.socketEmitService.productListUpdate(oid, { productList })
-      this.socketEmitService.ticketClinicUpdate(oid, { ticket })
-
-      const ticketProductList = await this.ticketProductRepository.findMany({
-        relation: { product: true, batch: true },
-        condition: { oid, ticketId },
-        sort: { id: 'ASC' },
-      })
-      this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
-        ticketId,
-        ticketProductConsumableList: ticketProductList.filter((i) => {
-          return i.type === TicketProductType.Consumable
-        }),
-      })
-      this.socketEmitService.ticketClinicUpdateTicketProductPrescriptionList(oid, {
-        ticketId,
-        ticketProductPrescriptionList: ticketProductList.filter((i) => {
-          return i.type === TicketProductType.Prescription
-        }),
-      })
-
-      return { data: { ticket } }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async returnProduct(params: {
-    oid: number
-    ticketId: number
-    body: TicketClinicReturnProductListBody
-  }): Promise<BaseResponse> {
-    const { oid, ticketId, body } = params
-    try {
-      const { ticket, productList, batchList } =
-        await this.ticketClinicReturnProductOperation.start({
-          oid,
-          ticketId,
-          time: Date.now(),
-          returnList: body.returnList,
-        })
-
-      this.socketEmitService.batchListUpdate(oid, { batchList })
-      this.socketEmitService.productListUpdate(oid, { productList })
-      this.socketEmitService.ticketClinicUpdate(oid, { ticket })
-
-      const ticketProductList = await this.ticketProductRepository.findMany({
-        relation: { product: true, batch: true },
-        condition: { oid, ticketId },
-        sort: { id: 'ASC' },
-      })
-      this.socketEmitService.ticketClinicUpdateTicketProductConsumableList(oid, {
-        ticketId,
-        ticketProductConsumableList: ticketProductList.filter((i) => {
-          return i.type === TicketProductType.Consumable
-        }),
-      })
-      this.socketEmitService.ticketClinicUpdateTicketProductPrescriptionList(oid, {
-        ticketId,
-        ticketProductPrescriptionList: ticketProductList.filter((i) => {
-          return i.type === TicketProductType.Prescription
-        }),
-      })
-
-      return { data: { ticket } }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
   }
 
   async prepayment(params: { oid: number; ticketId: number; body: TicketClinicPaymentBody }) {
@@ -582,7 +290,7 @@ export class ApiTicketClinicService {
         money: body.money,
       })
 
-      this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
       return { data: true }
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
@@ -598,7 +306,7 @@ export class ApiTicketClinicService {
         time: Date.now(),
         money: body.money,
       })
-      this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
       return { data: { ticket } }
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
@@ -614,11 +322,33 @@ export class ApiTicketClinicService {
         time: Date.now(),
         money: body.money,
       })
-      this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
       if (customer) {
         this.socketEmitService.customerUpsert(oid, { customer })
       }
       return { data: { ticket } }
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+    }
+  }
+
+  async changeDiscount(params: {
+    oid: number
+    ticketId: number
+    body: TicketClinicChangeDiscountBody
+  }) {
+    const { oid, ticketId, body } = params
+    try {
+      const { ticket } = await this.ticketChangeDiscountOperation.changeDiscount({
+        oid,
+        ticketId,
+        discountType: body.discountType,
+        discountMoney: body.discountMoney,
+        discountPercent: body.discountPercent,
+      })
+      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
+
+      return { data: true }
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
@@ -634,7 +364,7 @@ export class ApiTicketClinicService {
         money: 0,
       })
 
-      this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
       if (customer) {
         this.socketEmitService.customerUpsert(oid, { customer })
       }
@@ -654,7 +384,7 @@ export class ApiTicketClinicService {
         description: '',
       })
 
-      this.socketEmitService.ticketClinicUpdate(oid, { ticket })
+      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
       if (customer) {
         this.socketEmitService.customerUpsert(oid, { customer })
       }
@@ -692,7 +422,7 @@ export class ApiTicketClinicService {
       { ticketStatus: TicketStatus.Cancelled }
     )
     await this.ticketRepository.destroy({ oid, ticketId })
-    this.socketEmitService.ticketClinicDestroy(oid, { ticketId })
+    this.socketEmitService.ticketClinicChange(oid, { type: 'DESTROY', ticket })
     return { data: { ticketId } }
   }
 }

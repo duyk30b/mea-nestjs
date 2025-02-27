@@ -129,7 +129,7 @@ export class ApiStatisticService {
 
     const topData = data.map((i) => ({
       customerId: i.customerId,
-      sumTotalCostAmount: i.sumTotalCostAmount,
+      sumItemsCostAmount: i.sumItemsCostAmount,
       sumExpense: i.sumExpense,
       sumSurcharge: i.sumSurcharge,
       sumTotalMoney: i.sumTotalMoney,

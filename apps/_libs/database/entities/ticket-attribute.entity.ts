@@ -5,7 +5,7 @@ import Ticket from './ticket.entity'
 
 @Entity('TicketAttribute')
 @Index('IDX_TicketAttribute__oid_ticketId', ['oid', 'ticketId'])
-export default class TicketAttribute extends BaseEntity {
+export default class TicketAttribute {
   @Column({ name: 'oid' })
   @Exclude()
   oid: number

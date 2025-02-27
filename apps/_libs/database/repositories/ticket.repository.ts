@@ -75,7 +75,7 @@ export class TicketRepository extends _PostgreSqlRepository<
     }
     if (relation?.ticketProductList) {
       query = query.leftJoinAndSelect('ticket.ticketProductList', 'ticketProduct')
-      query.addOrderBy('ticketProduct.id', 'ASC')
+      query.addOrderBy('ticketProduct.priority', 'ASC')
       if (relation?.ticketProductList.product) {
         query = query.leftJoinAndSelect(
           'ticketProduct.product',
@@ -98,7 +98,7 @@ export class TicketRepository extends _PostgreSqlRepository<
         'ticketProductConsumable.type = :typeConsumable',
         { typeConsumable: TicketProductType.Consumable }
       )
-      query.addOrderBy('ticketProductConsumable.id', 'ASC')
+      query.addOrderBy('ticketProductConsumable.priority', 'ASC')
       if (relation?.ticketProductConsumableList.product) {
         query = query.leftJoinAndSelect(
           'ticketProductConsumable.product',
@@ -121,7 +121,7 @@ export class TicketRepository extends _PostgreSqlRepository<
         'ticketProductPrescription.type = :typePrescription',
         { typePrescription: TicketProductType.Prescription }
       )
-      query.addOrderBy('ticketProductPrescription.id', 'ASC')
+      query.addOrderBy('ticketProductPrescription.priority', 'ASC')
       if (relation?.ticketProductPrescriptionList.product) {
         query = query.leftJoinAndSelect(
           'ticketProductPrescription.product',
@@ -139,7 +139,7 @@ export class TicketRepository extends _PostgreSqlRepository<
     }
     if (relation?.ticketProcedureList) {
       query = query.leftJoinAndSelect('ticket.ticketProcedureList', 'ticketProcedure')
-      query.addOrderBy('ticketProcedure.id', 'ASC')
+      query.addOrderBy('ticketProcedure.priority', 'ASC')
       if (relation?.ticketProcedureList?.procedure) {
         query = query.leftJoinAndSelect(
           'ticketProcedure.procedure',
@@ -151,19 +151,44 @@ export class TicketRepository extends _PostgreSqlRepository<
 
     if (relation?.ticketLaboratoryList) {
       query = query.leftJoinAndSelect('ticket.ticketLaboratoryList', 'ticketLaboratory')
-      query.addOrderBy('ticketLaboratory.id', 'ASC')
+      query.addOrderBy('ticketLaboratory.priority', 'ASC')
       if (relation?.ticketLaboratoryList?.laboratoryList) {
         query = query.leftJoinAndSelect(
           'ticketLaboratory.laboratoryList',
           'laboratory',
           'ticketLaboratory.laboratoryId = laboratory.parentId'
         )
+      } else if (relation?.ticketLaboratoryList?.laboratory) {
+        query = query.leftJoinAndSelect(
+          'ticketLaboratory.laboratory',
+          'laboratory',
+          'ticketLaboratory.laboratoryId = laboratory.id'
+        )
       }
+    }
+
+    if (relation?.ticketLaboratoryGroupList) {
+      query = query.leftJoinAndSelect('ticket.ticketLaboratoryGroupList', 'ticketLaboratoryGroup')
+      query.addOrderBy('ticketLaboratoryGroup.registeredAt', 'ASC')
+      if (relation?.ticketLaboratoryGroupList?.laboratoryGroup) {
+        query = query.leftJoinAndSelect(
+          'ticketLaboratory.laboratoryGroup',
+          'laboratoryGroup',
+          'ticketLaboratory.laboratoryGroupId = laboratoryGroup.id'
+        )
+      }
+    }
+
+    if (relation?.ticketLaboratoryResultList) {
+      query = query.leftJoinAndSelect(
+        'ticket.ticketLaboratoryResultList',
+        'ticketLaboratoryResultList'
+      )
     }
 
     if (relation?.ticketRadiologyList) {
       query = query.leftJoinAndSelect('ticket.ticketRadiologyList', 'ticketRadiology')
-      query.addOrderBy('ticketRadiology.id', 'ASC')
+      query.addOrderBy('ticketRadiology.priority', 'ASC')
       if (relation?.ticketRadiologyList?.radiology) {
         query = query.leftJoinAndSelect(
           'ticketRadiology.radiology',
@@ -226,15 +251,17 @@ export class TicketRepository extends _PostgreSqlRepository<
     const { oid, ticketId } = options
     const updateResult: [any[], number] = await this.manager.query(`
         UPDATE  "Ticket" "ticket" 
-        SET     "laboratoryMoney"  = "temp"."sumActualPrice",
-                "totalMoney"      = "ticket"."totalMoney" - "ticket"."laboratoryMoney" 
-                                        + temp."sumActualPrice",
-                "debt"            = "ticket"."debt" - "ticket"."laboratoryMoney" 
-                                        + temp."sumActualPrice",
-                "profit"          = "ticket"."profit" - "ticket"."laboratoryMoney" 
-                                        + temp."sumActualPrice"
+        SET     "laboratoryMoney"   = "temp"."sumLaboratoryActualPrice",
+                "itemsActualMoney"  = "ticket"."itemsActualMoney" - "ticket"."laboratoryMoney" 
+                                        + temp."sumLaboratoryActualPrice",
+                "totalMoney"        = "ticket"."totalMoney" - "ticket"."laboratoryMoney" 
+                                        + temp."sumLaboratoryActualPrice",
+                "debt"              = "ticket"."debt" - "ticket"."laboratoryMoney" 
+                                        + temp."sumLaboratoryActualPrice",
+                "profit"            = "ticket"."profit" - "ticket"."laboratoryMoney" 
+                                        + temp."sumLaboratoryActualPrice"
         FROM    ( 
-                SELECT "ticketId", SUM("actualPrice") as "sumActualPrice"
+                SELECT "ticketId", SUM("actualPrice") as "sumLaboratoryActualPrice"
                     FROM "TicketLaboratory" 
                     WHERE "ticketId" = (${ticketId}) AND "oid" = ${oid}
                     GROUP BY "ticketId" 
@@ -250,15 +277,17 @@ export class TicketRepository extends _PostgreSqlRepository<
     const { oid, ticketId } = options
     const updateResult: [any[], number] = await this.manager.query(`
         UPDATE  "Ticket" "ticket" 
-        SET     "radiologyMoney"  = "temp"."sumActualPrice",
-                "totalMoney"      = "ticket"."totalMoney" - "ticket"."radiologyMoney" 
-                                        + temp."sumActualPrice",
-                "debt"            = "ticket"."debt" - "ticket"."radiologyMoney" 
-                                        + temp."sumActualPrice",
-                "profit"          = "ticket"."profit" - "ticket"."radiologyMoney" 
-                                        + temp."sumActualPrice"
+        SET     "radiologyMoney"    = "temp"."sumRadiologyActualPrice",
+                "itemsActualMoney"  = "ticket"."itemsActualMoney" - "ticket"."radiologyMoney" 
+                                        + temp."sumRadiologyActualPrice",
+                "totalMoney"        = "ticket"."totalMoney" - "ticket"."radiologyMoney" 
+                                        + temp."sumRadiologyActualPrice",
+                "debt"              = "ticket"."debt" - "ticket"."radiologyMoney" 
+                                        + temp."sumRadiologyActualPrice",
+                "profit"            = "ticket"."profit" - "ticket"."radiologyMoney" 
+                                        + temp."sumRadiologyActualPrice"
         FROM    ( 
-                SELECT "ticketId", SUM("actualPrice") as "sumActualPrice"
+                SELECT "ticketId", SUM("actualPrice") as "sumRadiologyActualPrice"
                     FROM "TicketRadiology" 
                     WHERE "ticketId" = (${ticketId}) AND "oid" = ${oid}
                     GROUP BY "ticketId" 
@@ -274,12 +303,13 @@ export class TicketRepository extends _PostgreSqlRepository<
     const { oid, ticketId, laboratoryMoney } = options
     const updateResult: [any[], number] = await this.manager.query(`
         UPDATE  "Ticket" "ticket" 
-        SET     "laboratoryMoney" = ${laboratoryMoney},
-                "totalMoney"      = "totalMoney" - "laboratoryMoney" + ${laboratoryMoney},
-                "debt"            = "debt" - "laboratoryMoney"  + ${laboratoryMoney},
-                "profit"          = "profit" - "laboratoryMoney" + ${laboratoryMoney}
-        WHERE   "ticket"."id"     = ${ticketId}
-            AND "ticket"."oid"    = ${oid}
+        SET     "laboratoryMoney"   = ${laboratoryMoney},
+                "itemsActualMoney"  = "itemsActualMoney" - "laboratoryMoney" + ${laboratoryMoney},
+                "totalMoney"        = "totalMoney" - "laboratoryMoney" + ${laboratoryMoney},
+                "debt"              = "debt" - "laboratoryMoney"  + ${laboratoryMoney},
+                "profit"            = "profit" - "laboratoryMoney" + ${laboratoryMoney}
+        WHERE   "ticket"."id"       = ${ticketId}
+            AND "ticket"."oid"      = ${oid}
         RETURNING ticket.*
     `)
     return Ticket.fromRaws(updateResult[0])

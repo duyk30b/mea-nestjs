@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { PaymentType } from '../../common/variable'
+import { DeliveryStatus, PaymentType } from '../../common/variable'
 import {
   Customer,
   TicketLaboratory,
@@ -36,7 +36,7 @@ export class TicketPaymentAndCloseOperation {
         {
           oid,
           id: ticketId,
-          ticketStatus: { IN: [TicketStatus.Executing] },
+          ticketStatus: { IN: [TicketStatus.Draft, TicketStatus.Approved, TicketStatus.Executing] },
         },
         { updatedAt: Date.now() }
       )
@@ -54,6 +54,10 @@ export class TicketPaymentAndCloseOperation {
       const ticketRadiologyList = await manager.find(TicketRadiology, {
         where: { ticketId },
       })
+
+      if (ticketProductList.find((i) => i.deliveryStatus === DeliveryStatus.Pending)) {
+        throw new Error('Không thể đóng phiếu khi chưa xuất hết hàng')
+      }
 
       const procedureDiscount = ticketProcedureList.reduce((acc, item) => {
         return acc + item.discountMoney * item.quantity
@@ -82,7 +86,7 @@ export class TicketPaymentAndCloseOperation {
           paid: () => `paid + ${money}`,
           debt: () => `debt - ${money}`,
           itemsDiscount,
-          profit: () => `"totalMoney" - "totalCostAmount" - "expense"`,
+          profit: () => `"totalMoney" - "itemsCostAmount" - "expense"`,
           endedAt: time,
         }
       )

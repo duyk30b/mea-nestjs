@@ -16,10 +16,15 @@ export enum TicketRadiologyStatus {
 @Entity('TicketRadiology')
 @Index('IDX_TicketRadiology__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketRadiology__oid_radiologyId', ['oid', 'radiologyId'])
+@Index('IDX_TicketRadiology__oid_startedAt', ['oid', 'startedAt'])
 export default class TicketRadiology extends BaseEntity {
   @Column()
   @Expose()
   ticketId: number
+
+  @Column({ default: 1 })
+  @Expose()
+  priority: number
 
   @Column()
   @Expose()
@@ -32,6 +37,14 @@ export default class TicketRadiology extends BaseEntity {
   @Column({ type: 'smallint', default: TicketRadiologyStatus.Pending })
   @Expose()
   status: TicketRadiologyStatus
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  costPrice: number
 
   @Column({
     type: 'bigint',
@@ -122,6 +135,7 @@ export default class TicketRadiology extends BaseEntity {
     const entity = new TicketRadiology()
     Object.assign(entity, raw)
 
+    entity.costPrice = Number(raw.costPrice)
     entity.expectedPrice = Number(raw.expectedPrice)
     entity.discountMoney = Number(raw.discountMoney)
     entity.discountPercent = Number(raw.discountPercent)
@@ -146,7 +160,7 @@ export type TicketRadiologyRelationType = {
   | {
     [P in keyof Pick<Radiology, 'radiologyGroup' | 'printHtml'>]?: boolean
   }
-  | false
+  | boolean
 }
 
 export type TicketRadiologyInsertType = Omit<
@@ -162,11 +176,8 @@ export type TicketRadiologyUpdateType = {
 }
 
 export type TicketRadiologySortType = {
-  [P in keyof Pick<TicketRadiology, 'id' | 'ticketId' | 'radiologyId'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<
+    TicketRadiology,
+    'id' | 'ticketId' | 'radiologyId' | 'startedAt' | 'priority'
+  >]?: 'ASC' | 'DESC'
 }
-
-export type TicketRadiologyInsertBasicType = Omit<
-  TicketRadiology,
-  | keyof TicketRadiologyRelationType
-  | keyof Pick<TicketRadiology, 'id' | 'startedAt' | 'description' | 'result' | 'imageIds'>
->

@@ -15,10 +15,15 @@ export enum TicketLaboratoryStatus {
 @Entity('TicketLaboratory')
 @Index('IDX_TicketLaboratory__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketLaboratory__oid_laboratoryId', ['oid', 'laboratoryId'])
+@Index('IDX_TicketLaboratory__oid_startedAt', ['oid', 'startedAt'])
 export default class TicketLaboratory extends BaseEntity {
   @Column()
   @Expose()
   ticketId: number
+
+  @Column({ default: 1 })
+  @Expose()
+  priority: number
 
   @Column()
   @Expose()
@@ -28,9 +33,25 @@ export default class TicketLaboratory extends BaseEntity {
   @Expose()
   laboratoryId: number
 
+  @Column({ default: 0 })
+  @Expose()
+  laboratoryGroupId: number
+
+  @Column({ default: 0 })
+  @Expose()
+  ticketLaboratoryGroupId: number
+
   @Column({ type: 'smallint', default: TicketLaboratoryStatus.Pending })
   @Expose()
   status: TicketLaboratoryStatus
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  costPrice: number
 
   @Column({
     type: 'bigint',
@@ -81,14 +102,6 @@ export default class TicketLaboratory extends BaseEntity {
   @Expose()
   startedAt: number
 
-  @Column({ type: 'text', default: JSON.stringify({}) })
-  @Expose({})
-  result: string
-
-  @Column({ type: 'text', default: JSON.stringify({}) })
-  @Expose({})
-  attention: string
-
   @Expose()
   @ManyToOne((type) => Ticket, (ticket) => ticket.ticketLaboratoryList, {
     createForeignKeyConstraints: false,
@@ -102,6 +115,11 @@ export default class TicketLaboratory extends BaseEntity {
   customer: Customer
 
   @Expose()
+  @ManyToOne((type) => Laboratory, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'laboratoryId', referencedColumnName: 'id' })
+  laboratory: Laboratory
+
+  @Expose()
   @OneToMany(() => Laboratory, (laboratory) => laboratory.ticketLaboratory)
   laboratoryList: Laboratory[]
 
@@ -113,6 +131,7 @@ export default class TicketLaboratory extends BaseEntity {
     const entity = new TicketLaboratory()
     Object.assign(entity, raw)
 
+    entity.costPrice = Number(raw.costPrice)
     entity.expectedPrice = Number(raw.expectedPrice)
     entity.discountMoney = Number(raw.discountMoney)
     entity.discountPercent = Number(raw.discountPercent)
@@ -130,19 +149,13 @@ export default class TicketLaboratory extends BaseEntity {
 export type TicketLaboratoryRelationType = {
   [P in keyof Pick<
     TicketLaboratory,
-    'ticket' | 'customer' | 'ticketUserList' | 'laboratoryList'
+    'ticket' | 'customer' | 'laboratory' | 'ticketUserList' | 'laboratoryList'
   >]?: boolean
 }
 
 export type TicketLaboratoryInsertType = Omit<
   TicketLaboratory,
   keyof TicketLaboratoryRelationType | keyof Pick<TicketLaboratory, 'id'>
->
-
-export type TicketLaboratoryInsertBasicType = Omit<
-  TicketLaboratory,
-  | keyof TicketLaboratoryRelationType
-  | keyof Pick<TicketLaboratory, 'id' | 'startedAt' | 'result' | 'attention'>
 >
 
 export type TicketLaboratoryUpdateType = {
@@ -155,6 +168,6 @@ export type TicketLaboratoryUpdateType = {
 export type TicketLaboratorySortType = {
   [P in keyof Pick<
     TicketLaboratory,
-    'id' | 'ticketId' | 'laboratoryId'
+    'id' | 'ticketId' | 'laboratoryId' | 'startedAt' | 'priority'
   >]?: 'ASC' | 'DESC'
 }
