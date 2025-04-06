@@ -21,7 +21,7 @@ export enum TicketType {
   Clinic = 3,
   Spa = 4,
   Eye = 5,
-  Obstetric = 6
+  Obstetric = 6,
 }
 
 export enum TicketStatus {
@@ -385,7 +385,7 @@ export type TicketRelationType = {
   | false
 } & {
   [P in keyof Pick<Ticket, 'ticketLaboratoryList'>]?:
-  | { [P in keyof Pick<TicketLaboratory, 'laboratoryList'>]?: boolean }
+  | { [P in keyof Pick<TicketLaboratory, 'laboratory' | 'laboratoryList'>]?: boolean }
   | false
 } & {
   [P in keyof Pick<Ticket, 'ticketUserList'>]?:
@@ -399,10 +399,9 @@ export type TicketInsertType = Omit<
 >
 
 export type TicketUpdateType = {
-  [K in Exclude<
-    keyof Ticket,
-    keyof TicketRelationType | keyof Pick<Ticket, 'oid' | 'id'>
-  >]: Ticket[K] | (() => string)
+  [K in Exclude<keyof Ticket, keyof TicketRelationType | keyof Pick<Ticket, 'oid' | 'id'>>]:
+  | Ticket[K]
+  | (() => string)
 }
 
 export type TicketSortType = {

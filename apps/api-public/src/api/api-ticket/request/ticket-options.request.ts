@@ -31,15 +31,15 @@ export class TicketRelationQuery {
 
   @Expose()
   @IsOptional()
-  ticketProductList: false | { product?: boolean, batch?: boolean }
+  ticketProductList: false | { product?: boolean; batch?: boolean }
 
   @Expose()
   @IsOptional()
-  ticketProductConsumableList: false | { product?: boolean, batch?: boolean }
+  ticketProductConsumableList: false | { product?: boolean; batch?: boolean }
 
   @Expose()
   @IsOptional()
-  ticketProductPrescriptionList: false | { product?: boolean, batch?: boolean }
+  ticketProductPrescriptionList: false | { product?: boolean; batch?: boolean }
 
   @Expose()
   @IsOptional()
@@ -47,7 +47,7 @@ export class TicketRelationQuery {
 
   @Expose()
   @IsOptional()
-  ticketLaboratoryList: false | { laboratoryList?: boolean }
+  ticketLaboratoryList: false | { laboratoryList?: boolean; laboratory?: boolean }
 
   @Expose()
   @IsOptional()

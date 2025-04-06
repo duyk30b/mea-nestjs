@@ -158,6 +158,12 @@ export class TicketRepository extends _PostgreSqlRepository<
           'laboratory',
           'ticketLaboratory.laboratoryId = laboratory.parentId'
         )
+      } else if (relation?.ticketLaboratoryList?.laboratory) {
+        query = query.leftJoinAndSelect(
+          'ticketLaboratory.laboratory',
+          'laboratory',
+          'ticketLaboratory.laboratoryId = laboratory.id'
+        )
       }
     }
 
