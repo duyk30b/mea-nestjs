@@ -9,6 +9,8 @@ import Customer from './customer.entity'
 import Image from './image.entity'
 import TicketAttribute from './ticket-attribute.entity'
 import TicketExpense from './ticket-expense.entity'
+import TicketLaboratoryGroup from './ticket-laboratory-group.entity'
+import TicketLaboratoryResult from './ticket-laboratory-result.entity'
 import TicketLaboratory from './ticket-laboratory.entity'
 import TicketProcedure from './ticket-procedure.entity'
 import TicketProduct from './ticket-product.entity'
@@ -21,7 +23,7 @@ export enum TicketType {
   Clinic = 3,
   Spa = 4,
   Eye = 5,
-  Obstetric = 6
+  Obstetric = 6,
 }
 
 export enum TicketStatus {
@@ -300,6 +302,17 @@ export default class Ticket extends BaseEntity {
   @Expose()
   ticketLaboratoryList: TicketLaboratory[]
 
+  @OneToMany(() => TicketLaboratoryGroup, (ticketLaboratoryGroup) => ticketLaboratoryGroup.ticket)
+  @Expose()
+  ticketLaboratoryGroupList: TicketLaboratoryGroup[]
+
+  @OneToMany(
+    () => TicketLaboratoryResult,
+    (ticketLaboratoryResult) => ticketLaboratoryResult.ticket
+  )
+  @Expose()
+  ticketLaboratoryResultList: TicketLaboratoryResult[]
+
   @OneToMany(() => TicketRadiology, (ticketRadiology) => ticketRadiology.ticket)
   @Expose()
   ticketRadiologyList: TicketRadiology[]
@@ -385,8 +398,14 @@ export type TicketRelationType = {
   | false
 } & {
   [P in keyof Pick<Ticket, 'ticketLaboratoryList'>]?:
-  | { [P in keyof Pick<TicketLaboratory, 'laboratoryList'>]?: boolean }
+  | { [P in keyof Pick<TicketLaboratory, 'laboratory' | 'laboratoryList'>]?: boolean }
   | false
+} & {
+  [P in keyof Pick<Ticket, 'ticketLaboratoryGroupList'>]?:
+  | { [P in keyof Pick<TicketLaboratoryGroup, 'laboratoryGroup'>]?: boolean }
+  | false
+} & {
+  [P in keyof Pick<Ticket, 'ticketLaboratoryResultList'>]?: boolean
 } & {
   [P in keyof Pick<Ticket, 'ticketUserList'>]?:
   | { [P in keyof Pick<TicketUser, 'user'>]?: boolean }
@@ -399,10 +418,9 @@ export type TicketInsertType = Omit<
 >
 
 export type TicketUpdateType = {
-  [K in Exclude<
-    keyof Ticket,
-    keyof TicketRelationType | keyof Pick<Ticket, 'oid' | 'id'>
-  >]: Ticket[K] | (() => string)
+  [K in Exclude<keyof Ticket, keyof TicketRelationType | keyof Pick<Ticket, 'oid' | 'id'>>]:
+  | Ticket[K]
+  | (() => string)
 }
 
 export type TicketSortType = {

@@ -9,6 +9,8 @@ import {
   Ticket,
   TicketAttribute,
   TicketLaboratory,
+  TicketLaboratoryGroup,
+  TicketLaboratoryResult,
   TicketProcedure,
   TicketProduct,
   TicketRadiology,
@@ -131,20 +133,23 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE_TICKET_RADIOLOGY_LIST, data)
   }
 
-  ticketClinicChangeTicketLaboratoryList(
+  ticketClinicChangeLaboratory(
     oid: number,
     data: {
       ticketId: number
-      ticketLaboratoryInsert?: TicketLaboratory
       ticketLaboratoryInsertList?: TicketLaboratory[]
-      ticketLaboratoryUpdate?: TicketLaboratory
       ticketLaboratoryUpdateList?: TicketLaboratory[]
-      ticketLaboratoryDestroy?: TicketLaboratory
-      ticketLaboratoryList?: TicketLaboratory[]
+      ticketLaboratoryDestroyList?: TicketLaboratory[]
+      ticketLaboratoryGroupInsertList?: TicketLaboratoryGroup[]
+      ticketLaboratoryGroupUpdate?: TicketLaboratoryGroup
+      ticketLaboratoryGroupDestroy?: TicketLaboratoryGroup
+      ticketLaboratoryResultInsertList?: TicketLaboratoryResult[]
+      ticketLaboratoryResultUpdateList?: TicketLaboratoryResult[]
+      ticketLaboratoryResultDestroyList?: TicketLaboratoryResult[]
     }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE_TICKET_LABORATORY_LIST, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE_LABORATORY, data)
   }
 
   ticketClinicChangeTicketProductConsumableList(

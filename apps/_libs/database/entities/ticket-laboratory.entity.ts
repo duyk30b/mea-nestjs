@@ -33,9 +33,25 @@ export default class TicketLaboratory extends BaseEntity {
   @Expose()
   laboratoryId: number
 
+  @Column({ default: 0 })
+  @Expose()
+  laboratoryGroupId: number
+
+  @Column({ default: 0 })
+  @Expose()
+  ticketLaboratoryGroupId: number
+
   @Column({ type: 'smallint', default: TicketLaboratoryStatus.Pending })
   @Expose()
   status: TicketLaboratoryStatus
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  costPrice: number
 
   @Column({
     type: 'bigint',
@@ -73,14 +89,6 @@ export default class TicketLaboratory extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  costPrice: number
-
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose()
   actualPrice: number // Giá thực tế
 
   @Column({
@@ -93,14 +101,6 @@ export default class TicketLaboratory extends BaseEntity {
   })
   @Expose()
   startedAt: number
-
-  @Column({ type: 'text', default: JSON.stringify({}) })
-  @Expose({})
-  result: string
-
-  @Column({ type: 'text', default: JSON.stringify({}) })
-  @Expose({})
-  attention: string
 
   @Expose()
   @ManyToOne((type) => Ticket, (ticket) => ticket.ticketLaboratoryList, {

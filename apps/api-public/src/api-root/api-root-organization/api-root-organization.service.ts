@@ -8,6 +8,7 @@ import {
   Appointment,
   Batch,
   BatchMovement,
+  Commission,
   Customer,
   CustomerPayment,
   CustomerSource,
@@ -35,6 +36,8 @@ import {
   TicketAttribute,
   TicketExpense,
   TicketLaboratory,
+  TicketLaboratoryGroup,
+  TicketLaboratoryResult,
   TicketProcedure,
   TicketProduct,
   TicketRadiology,
@@ -119,7 +122,9 @@ export class ApiRootOrganizationService {
     if (tableNameList.includes(BatchMovement.name)) {
       await this.manager.delete(BatchMovement, { oid })
     }
-
+    if (tableNameList.includes(Commission.name)) {
+      await this.manager.delete(Commission, { oid })
+    }
     if (tableNameList.includes(Customer.name)) {
       await this.manager.delete(Customer, { oid })
     } else {
@@ -216,18 +221,24 @@ export class ApiRootOrganizationService {
       await this.manager.delete(Setting, { oid })
     }
 
+    if (tableNameList.includes(Ticket.name)) {
+      await this.manager.delete(Ticket, { oid })
+    }
     if (tableNameList.includes(TicketAttribute.name)) {
       await this.manager.delete(TicketAttribute, { oid })
     }
-
     if (tableNameList.includes(TicketExpense.name)) {
       await this.manager.delete(TicketExpense, { oid })
     }
-
     if (tableNameList.includes(TicketLaboratory.name)) {
       await this.manager.delete(TicketLaboratory, { oid })
     }
-
+    if (tableNameList.includes(TicketLaboratoryGroup.name)) {
+      await this.manager.delete(TicketLaboratoryGroup, { oid })
+    }
+    if (tableNameList.includes(TicketLaboratoryResult.name)) {
+      await this.manager.delete(TicketLaboratoryResult, { oid })
+    }
     if (tableNameList.includes(TicketProcedure.name)) {
       await this.manager.delete(TicketProcedure, { oid })
     }
@@ -243,9 +254,6 @@ export class ApiRootOrganizationService {
     if (tableNameList.includes(TicketUser.name)) {
       await this.manager.delete(TicketUser, { oid })
     }
-    if (tableNameList.includes(Ticket.name)) {
-      await this.manager.delete(Ticket, { oid })
-    }
     if (tableNameList.includes(User.name)) {
       await this.manager.delete(User, { oid })
     }
@@ -259,11 +267,7 @@ export class ApiRootOrganizationService {
     if (tableNameList.includes(Organization.name)) {
       await this.manager.delete(Organization, { id: oid })
     } else {
-      const organizationRoot = await this.organizationRepository.findOneById(oid)
-      await this.organizationRepository.updateAndReturnEntity(
-        { id: oid },
-        { dataVersion: organizationRoot.dataVersion + 1 }
-      )
+      await this.organizationRepository.updateDataVersion(oid)
     }
 
     this.cacheDataService.clearOrganization(oid)

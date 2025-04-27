@@ -1,24 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator'
+import { IsArray, IsDefined, IsNumber, ValidateNested } from 'class-validator'
 import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
 import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
 import { DiscountType } from '../../../../../../_libs/database/common/variable'
 import { TicketUserBasicBody } from '../../api-ticket-clinic-user/request/ticket-clinic-update-user-list.body'
 
 class TicketLaboratoryBody {
-  @ApiPropertyOptional({ example: JSON.stringify({ 2: true }) })
-  @Expose()
-  @IsOptional()
-  @IsString()
-  attention: string
-
-  @ApiPropertyOptional({ example: JSON.stringify({ 2: 'Âm tính' }) })
-  @Expose()
-  @IsOptional()
-  @IsString()
-  result: string
-
   @ApiProperty({ example: 25_000 })
   @Expose()
   @IsDefined()

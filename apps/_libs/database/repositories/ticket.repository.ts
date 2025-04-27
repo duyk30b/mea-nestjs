@@ -158,7 +158,32 @@ export class TicketRepository extends _PostgreSqlRepository<
           'laboratory',
           'ticketLaboratory.laboratoryId = laboratory.parentId'
         )
+      } else if (relation?.ticketLaboratoryList?.laboratory) {
+        query = query.leftJoinAndSelect(
+          'ticketLaboratory.laboratory',
+          'laboratory',
+          'ticketLaboratory.laboratoryId = laboratory.id'
+        )
       }
+    }
+
+    if (relation?.ticketLaboratoryGroupList) {
+      query = query.leftJoinAndSelect('ticket.ticketLaboratoryGroupList', 'ticketLaboratoryGroup')
+      query.addOrderBy('ticketLaboratoryGroup.registeredAt', 'ASC')
+      if (relation?.ticketLaboratoryGroupList?.laboratoryGroup) {
+        query = query.leftJoinAndSelect(
+          'ticketLaboratory.laboratoryGroup',
+          'laboratoryGroup',
+          'ticketLaboratory.laboratoryGroupId = laboratoryGroup.id'
+        )
+      }
+    }
+
+    if (relation?.ticketLaboratoryResultList) {
+      query = query.leftJoinAndSelect(
+        'ticket.ticketLaboratoryResultList',
+        'ticketLaboratoryResultList'
+      )
     }
 
     if (relation?.ticketRadiologyList) {

@@ -1,5 +1,5 @@
-export * from './ticket-clinic-add-ticket-laboratory.body'
 export * from './ticket-clinic-laboratory.params'
 export * from './ticket-clinic-update-priority-ticket-laboratory.body'
-export * from './ticket-clinic-update-result-ticket-laboratory.body copy'
+export * from './ticket-clinic-update-ticket-laboratory-result.body'
 export * from './ticket-clinic-update-ticket-laboratory.body'
+export * from './ticket-clinic-upsert-ticket-laboratory.body'

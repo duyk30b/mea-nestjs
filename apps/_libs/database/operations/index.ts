@@ -36,7 +36,9 @@ export * from './ticket-clinic/ticket-radiology/ticket-clinic-add-ticket-radiolo
 export * from './ticket-clinic/ticket-radiology/ticket-clinic-destroy-ticket-radiology.operation'
 export * from './ticket-clinic/ticket-radiology/ticket-clinic-update-ticket-radiology.operation'
 
-export * from './ticket-clinic/ticket-laboratory/ticket-clinic-add-ticket-laboratory.operation'
+export * from './ticket-clinic/ticket-laboratory/ticket-clinic-add-select-laboratory.operation'
+export * from './ticket-clinic/ticket-laboratory/ticket-clinic-change-select-laboratory.operation'
+export * from './ticket-clinic/ticket-laboratory/ticket-clinic-destroy-ticket-laboratory-group.operation'
 export * from './ticket-clinic/ticket-laboratory/ticket-clinic-destroy-ticket-laboratory.operation'
 export * from './ticket-clinic/ticket-laboratory/ticket-clinic-update-ticket-laboratory.operation'
 

@@ -5,7 +5,6 @@ import {
   EntityManager,
   FindOptionsWhere,
   LessThan,
-  MoreThan,
   MoreThanOrEqual,
   Repository,
 } from 'typeorm'
@@ -14,7 +13,6 @@ import {
   TicketLaboratoryInsertType,
   TicketLaboratoryRelationType,
   TicketLaboratorySortType,
-  TicketLaboratoryStatus,
   TicketLaboratoryUpdateType,
 } from '../entities/ticket-laboratory.entity'
 import { _PostgreSqlRepository } from './_postgresql.repository'
@@ -56,40 +54,5 @@ export class TicketLaboratoryRepository extends _PostgreSqlRepository<
       sumCostMoney: Number(result.sumCostMoney),
       sumActualMoney: Number(result.sumActualMoney),
     }
-  }
-
-  async updateResultList(options: {
-    oid: number
-    ticketId: number
-    startedAt: number
-    ticketLaboratoryDtoList: {
-      id: number
-      attention: string
-      result: string
-    }[]
-  }) {
-    const { oid, ticketId, startedAt, ticketLaboratoryDtoList } = options
-    if (!ticketLaboratoryDtoList.length) return
-    const updateResult: [any[], number] = await this.manager.query(
-      `
-      UPDATE  "TicketLaboratory"
-      SET     "attention" = temp.attention,
-              "result" = temp.result,
-              "startedAt" = ${startedAt},
-              "status" = ${TicketLaboratoryStatus.Completed}
-      FROM (VALUES `
-      + ticketLaboratoryDtoList
-        .map((i) => {
-          return `(${i.id}, '${i.attention}', '${i.result}')`
-        })
-        .join(', ')
-      + `   ) AS temp("id", "attention", "result")
-      WHERE   "TicketLaboratory"."id"       = temp."id" 
-          AND "TicketLaboratory"."oid"      = ${oid} 
-          AND "TicketLaboratory"."ticketId" = ${ticketId} 
-      RETURNING "TicketLaboratory".*
-      `
-    )
-    return TicketLaboratory.fromRaws(updateResult[0])
   }
 }

@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Param, Post } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IdParam } from '../../../../../_libs/common/dto'
 import { HasPermission } from '../../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../../_libs/database/entities/permission.entity'
+import { TicketParams } from '../../api-ticket/request/ticket.params'
 import { ApiTicketClinicUserService } from './api-ticket-clinic-user.service'
 import {
   TicketClinicUpdateTicketUserBody,
@@ -17,7 +17,7 @@ import { TicketClinicUpdateTicketUserListBody } from './request/ticket-clinic-up
 export class ApiTicketClinicUserController {
   constructor(private readonly apiTicketClinicUserService: ApiTicketClinicUserService) { }
 
-  @Delete(':ticketId/destroy-ticket-user/:ticketUserId')
+  @Delete(':ticketId/ticket-user/destroy/:ticketUserId')
   @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_USER_LIST)
   async destroyTicketUser(
     @External() { oid }: TExternal,
@@ -30,31 +30,31 @@ export class ApiTicketClinicUserController {
     })
   }
 
-    @Post(':ticketId/update-ticket-user/:ticketUserId')
-    @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_USER_LIST)
-    async updateTicketUser(
-      @External() { oid }: TExternal,
-      @Param() { ticketId, ticketUserId }: TicketClinicUserParams,
-      @Body() body: TicketClinicUpdateTicketUserBody
-    ) {
-      return await this.apiTicketClinicUserService.updateTicketUser({
-        oid,
-        ticketId,
-        ticketUserId,
-        body,
-      })
-    }
+  @Post(':ticketId/ticket-user/update/:ticketUserId')
+  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_USER_LIST)
+  async updateTicketUser(
+    @External() { oid }: TExternal,
+    @Param() { ticketId, ticketUserId }: TicketClinicUserParams,
+    @Body() body: TicketClinicUpdateTicketUserBody
+  ) {
+    return await this.apiTicketClinicUserService.updateTicketUser({
+      oid,
+      ticketId,
+      ticketUserId,
+      body,
+    })
+  }
 
-  @Post(':id/update-ticket-user-item')
+  @Post(':ticketId/ticket-user/choose-user-id-for-ticket')
   @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_USER_LIST)
   async updateTicketUserList(
     @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
+    @Param() { ticketId }: TicketParams,
     @Body() body: TicketClinicUpdateTicketUserListBody
   ) {
     return await this.apiTicketClinicUserService.updateTicketUserItem({
       oid,
-      ticketId: id,
+      ticketId,
       body,
     })
   }

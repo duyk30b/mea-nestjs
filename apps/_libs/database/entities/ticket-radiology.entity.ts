@@ -160,7 +160,7 @@ export type TicketRadiologyRelationType = {
   | {
     [P in keyof Pick<Radiology, 'radiologyGroup' | 'printHtml'>]?: boolean
   }
-  | false
+  | boolean
 }
 
 export type TicketRadiologyInsertType = Omit<

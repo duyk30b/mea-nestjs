@@ -12,13 +12,7 @@ import { TicketUserChangeListManager } from '../../ticket-user/ticket-user-chang
 export type TicketLaboratoryUpdateDtoType = {
   [K in keyof Pick<
     TicketLaboratory,
-    | 'result'
-    | 'attention'
-    | 'expectedPrice'
-    | 'discountType'
-    | 'discountMoney'
-    | 'discountPercent'
-    | 'actualPrice'
+    'expectedPrice' | 'discountType' | 'discountMoney' | 'discountPercent' | 'actualPrice'
   >]: TicketLaboratory[K] | (() => string)
 }
 
@@ -65,8 +59,6 @@ export class TicketClinicUpdateTicketLaboratoryOperation {
           manager,
           { oid, id: ticketLaboratoryId },
           {
-            result: ticketLaboratoryUpdateDto.result,
-            attention: ticketLaboratoryUpdateDto.attention,
             expectedPrice: ticketLaboratoryUpdateDto.expectedPrice,
             discountType: ticketLaboratoryUpdateDto.discountType,
             discountMoney: ticketLaboratoryUpdateDto.discountMoney,

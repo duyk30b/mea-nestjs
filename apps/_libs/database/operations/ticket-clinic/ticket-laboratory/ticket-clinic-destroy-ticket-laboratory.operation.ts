@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
+import { TicketLaboratoryGroup } from '../../../entities'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
-import { TicketLaboratoryManager, TicketManager } from '../../../managers'
+import {
+  TicketLaboratoryGroupManager,
+  TicketLaboratoryManager,
+  TicketLaboratoryResultManager,
+  TicketManager,
+} from '../../../managers'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
 
 @Injectable()
@@ -10,6 +16,8 @@ export class TicketClinicDestroyTicketLaboratoryOperation {
     private dataSource: DataSource,
     private ticketManager: TicketManager,
     private ticketLaboratoryManager: TicketLaboratoryManager,
+    private ticketLaboratoryGroupManager: TicketLaboratoryGroupManager,
+    private ticketLaboratoryResultManager: TicketLaboratoryResultManager,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
   ) { }
 
@@ -19,7 +27,7 @@ export class TicketClinicDestroyTicketLaboratoryOperation {
     ticketLaboratoryId: number
   }) {
     const { oid, ticketId, ticketLaboratoryId } = params
-    const PREFIX = `ticketId=${ticketId} addTicketLaboratory failed`
+    const PREFIX = `ticketId=${ticketId} destroyTicketLaboratory failed`
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. UPDATE TICKET FOR TRANSACTION ===
@@ -29,11 +37,35 @@ export class TicketClinicDestroyTicketLaboratoryOperation {
         { updatedAt: Date.now() }
       )
 
-      // === 2. DELETE TICKET PROCEDURE ===
+      // === 2. DELETE TICKET LABORATORY ===
       const ticketLaboratoryDestroy = await this.ticketLaboratoryManager.deleteOneAndReturnEntity(
         manager,
-        { oid, id: ticketLaboratoryId }
+        { oid, ticketId, id: ticketLaboratoryId }
       )
+
+      const ticketLaboratoryResultDestroyList =
+        await this.ticketLaboratoryResultManager.deleteAndReturnEntity(manager, {
+          oid,
+          ticketId,
+          ticketLaboratoryGroupId: ticketLaboratoryDestroy.ticketLaboratoryGroupId,
+          ticketLaboratoryId: ticketLaboratoryDestroy.id,
+          laboratoryId: ticketLaboratoryDestroy.laboratoryId,
+        })
+
+      const ticketLaboratoryRemain = await this.ticketLaboratoryManager.findOneBy(manager, {
+        oid,
+        ticketId,
+        ticketLaboratoryGroupId: ticketLaboratoryDestroy.ticketLaboratoryGroupId,
+      })
+      let ticketLaboratoryGroupDestroy: TicketLaboratoryGroup | null = null
+      if (!ticketLaboratoryRemain) {
+        ticketLaboratoryGroupDestroy =
+          await this.ticketLaboratoryGroupManager.deleteOneAndReturnEntity(manager, {
+            oid,
+            ticketId,
+            id: ticketLaboratoryDestroy.ticketLaboratoryGroupId,
+          })
+      }
 
       // === 4. UPDATE TICKET: MONEY  ===
       const laboratoryMoneyDelete = ticketLaboratoryDestroy.actualPrice
@@ -54,7 +86,12 @@ export class TicketClinicDestroyTicketLaboratoryOperation {
         })
       }
 
-      return { ticket, ticketLaboratoryDestroy }
+      return {
+        ticket,
+        ticketLaboratoryDestroy,
+        ticketLaboratoryGroupDestroy,
+        ticketLaboratoryResultDestroyList,
+      }
     })
 
     return transaction
