@@ -7,7 +7,6 @@ import { BaseResponse } from '../../../../_libs/common/interceptor/transform-res
 import {
   Appointment,
   Batch,
-  BatchMovement,
   Commission,
   Customer,
   CustomerPayment,
@@ -34,6 +33,7 @@ import {
   Setting,
   Ticket,
   TicketAttribute,
+  TicketBatch,
   TicketExpense,
   TicketLaboratory,
   TicketLaboratoryGroup,
@@ -118,9 +118,6 @@ export class ApiRootOrganizationService {
     }
     if (tableNameList.includes(Batch.name)) {
       await this.manager.delete(Batch, { oid })
-    }
-    if (tableNameList.includes(BatchMovement.name)) {
-      await this.manager.delete(BatchMovement, { oid })
     }
     if (tableNameList.includes(Commission.name)) {
       await this.manager.delete(Commission, { oid })
@@ -226,6 +223,9 @@ export class ApiRootOrganizationService {
     }
     if (tableNameList.includes(TicketAttribute.name)) {
       await this.manager.delete(TicketAttribute, { oid })
+    }
+    if (tableNameList.includes(TicketBatch.name)) {
+      await this.manager.delete(TicketBatch, { oid })
     }
     if (tableNameList.includes(TicketExpense.name)) {
       await this.manager.delete(TicketExpense, { oid })

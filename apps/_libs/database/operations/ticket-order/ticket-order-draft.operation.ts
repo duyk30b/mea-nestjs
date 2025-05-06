@@ -12,7 +12,16 @@ import {
 import { TicketProductInsertType, TicketProductType } from '../../entities/ticket-product.entity'
 import { TicketSurchargeInsertType } from '../../entities/ticket-surcharge.entity'
 import { TicketInsertType, TicketStatus, TicketType } from '../../entities/ticket.entity'
-import { TicketExpenseManager, TicketLaboratoryManager, TicketManager, TicketProcedureManager, TicketProductManager, TicketRadiologyManager, TicketSurchargeManager, TicketUserManager } from '../../managers'
+import {
+  TicketExpenseManager,
+  TicketLaboratoryManager,
+  TicketManager,
+  TicketProcedureManager,
+  TicketProductManager,
+  TicketRadiologyManager,
+  TicketSurchargeManager,
+  TicketUserManager,
+} from '../../managers'
 import { TicketAttributeManager } from '../../managers/ticket-attribute.manager'
 import {
   TicketOrderDraftInsertType,
@@ -37,11 +46,15 @@ export class TicketOrderDraftOperation {
     private ticketUserManager: TicketUserManager
   ) { }
 
-  async create<T extends TicketOrderDraftInsertType>(params: {
+  async create<
+    T extends TicketOrderDraftInsertType,
+    U extends TicketOrderProductDraftType,
+    X extends TicketOrderProcedureDraftType,
+  >(params: {
     oid: number
     ticketOrderDraftInsertDto: NoExtra<TicketOrderDraftInsertType, T>
-    ticketOrderProductDraftListDto: TicketOrderProductDraftType[]
-    ticketOrderProcedureDraftListDto: TicketOrderProcedureDraftType[]
+    ticketOrderProductDraftListDto: NoExtra<TicketOrderProductDraftType, U>[]
+    ticketOrderProcedureDraftListDto: NoExtra<TicketOrderProcedureDraftType, X>[]
     ticketOrderSurchargeDraftListDto: TicketOrderSurchargeDraftType[]
     ticketOrderExpenseDraftListDto: TicketOrderExpenseDraftType[]
     ticketAttributeDraftListDto: { key: string; value: any }[]
@@ -85,6 +98,7 @@ export class TicketOrderDraftOperation {
             deliveryStatus: DeliveryStatus.Pending,
             quantityPrescription: i.quantity,
             type: TicketProductType.Prescription,
+            costAmount: i.costAmount, // tính lãi tạm thời, chỉ có thể tính chính xác khi gửi hàng, lúc đó tính cost theo từng lô hàng
           }
           return ticketProduct
         })

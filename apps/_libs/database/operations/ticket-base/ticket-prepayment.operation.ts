@@ -33,7 +33,7 @@ export class TicketPrepaymentOperation {
             IN: [
               TicketStatus.Schedule,
               TicketStatus.Draft,
-              TicketStatus.Approved,
+              TicketStatus.Prepayment,
               TicketStatus.Executing,
             ],
           },
@@ -41,7 +41,7 @@ export class TicketPrepaymentOperation {
         {
           ticketStatus: () => `CASE 
               WHEN("ticketStatus" IN (${TicketStatus.Schedule}, ${TicketStatus.Draft})) 
-                  THEN ${TicketStatus.Approved} 
+                  THEN ${TicketStatus.Prepayment} 
               ELSE "ticketStatus"
             END
           `,

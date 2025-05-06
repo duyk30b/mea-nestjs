@@ -13,7 +13,6 @@ import {
   CommissionRepository,
   ProductRepository,
 } from '../../../../_libs/database/repositories'
-import { BatchMovementRepository } from '../../../../_libs/database/repositories/bat-movement.repository'
 import { OrganizationRepository } from '../../../../_libs/database/repositories/organization.repository'
 import { ProductMovementRepository } from '../../../../_libs/database/repositories/product-movement.repository'
 import { ReceiptItemRepository } from '../../../../_libs/database/repositories/receipt-item.repository'
@@ -38,8 +37,7 @@ export class ApiProductService {
     private readonly productRepository: ProductRepository,
     private readonly batchRepository: BatchRepository,
     private readonly productMovementRepository: ProductMovementRepository,
-    private readonly commissionRepository: CommissionRepository,
-    private readonly batchMovementRepository: BatchMovementRepository
+    private readonly commissionRepository: CommissionRepository
   ) { }
 
   async pagination(oid: number, query: ProductPaginationQuery): Promise<BaseResponse> {
@@ -203,11 +201,10 @@ export class ApiProductService {
         }
       }
     }
-    const [product] = await this.productRepository.updateAndReturnEntity(
+    const product = await this.productRepository.updateOneAndReturnEntity(
       { oid, id: productId },
       productBody
     )
-    if (!product) throw new BusinessException('error.Database.UpdateFailed')
     await this.commissionRepository.delete({
       oid,
       interactId: product.id,
@@ -257,17 +254,11 @@ export class ApiProductService {
       this.productRepository.delete({ oid, id: productId }),
       this.batchRepository.delete({ oid, id: productId }),
       this.productMovementRepository.delete({ oid, productId }),
-      this.batchMovementRepository.delete({ oid, productId }),
     ])
 
     organization.dataVersionParse.product += 1
     organization.dataVersionParse.batch += 1
-    await this.organizationRepository.update(
-      { id: oid },
-      {
-        dataVersion: JSON.stringify(organization.dataVersionParse),
-      }
-    )
+    await this.organizationRepository.updateDataVersion(oid)
     this.cacheDataService.clearOrganization(oid)
 
     return { data: { receiptItemList: [], ticketProductList: [], productId } }

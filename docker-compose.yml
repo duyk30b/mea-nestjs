@@ -4,8 +4,7 @@ networks:
 
 volumes:
   mv_api_public:
-  mv_file_service:
-
+  mv_pgadmin4:
 
 services:
   api_public:
@@ -21,7 +20,7 @@ services:
     volumes:
       - ./:/app/
       - mv_api_public:/app/node_modules/
-    command: [ 'sh', '-c', 'npm run debug api-public' ]
+    command: ['sh', '-c', 'npm run debug api-public']
     ports:
       - '${API_PUBLIC_PORT:-20000}:${API_PUBLIC_PORT:-20000}'
       - 29229:29229
@@ -58,7 +57,7 @@ services:
         '60',
         '1',
         '--dir',
-        '/data'
+        '/data',
       ]
     volumes:
       - ./data/redis:/data
@@ -81,15 +80,17 @@ services:
 
   pgadmin:
     container_name: mc_pgadmin
-    image: dpage/pgadmin4:8.14.0
+    image: dpage/pgadmin4:9.2.0
     restart: unless-stopped
     networks:
       - mn_network
+    volumes:
+      - mv_pgadmin4:/var/lib/pgadmin
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@example.com
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
-      - "25050:80"
+      - '25050:80'
 
   redis-insight:
     container_name: mc_redis-insight

@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common'
 import { ApiAppointmentModule } from './api-appointment/api-appointment.module'
-import { ApiBatchMovementModule } from './api-batch-movement/api-batch-movement.module'
 import { ApiBatchModule } from './api-batch/api-batch.module'
 import { ApiCommissionModule } from './api-commission/api-commission.module'
 import { ApiCustomerPaymentModule } from './api-customer-payment/api-customer-payment.module'
@@ -42,7 +41,6 @@ import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
   imports: [
     ApiAppointmentModule,
     ApiBatchModule,
-    ApiBatchMovementModule,
     ApiCustomerModule,
     ApiCustomerPaymentModule,
     ApiCustomerSourceModule,

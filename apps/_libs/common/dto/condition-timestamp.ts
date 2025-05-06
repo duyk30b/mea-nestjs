@@ -136,9 +136,8 @@ export class ConditionTimestamp {
 }
 
 export const transformConditionTimestamp = ({ value, key }: TransformFnParams) => {
-  if (!value) {
-    return
-  }
+  if (value == null) return
+  
   if (typeof value === 'number') {
     return value
   } else if (typeof value === 'object') {

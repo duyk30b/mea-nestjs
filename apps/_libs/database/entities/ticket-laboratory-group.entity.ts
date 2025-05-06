@@ -1,8 +1,8 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { TicketLaboratoryStatus } from '../common/variable'
 import Customer from './customer.entity'
 import LaboratoryGroup from './laboratory-group.entity'
-import { TicketLaboratoryStatus } from './ticket-laboratory.entity'
 import Ticket from './ticket.entity'
 
 @Entity('TicketLaboratoryGroup')

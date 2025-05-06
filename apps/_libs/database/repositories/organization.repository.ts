@@ -31,7 +31,6 @@ export class OrganizationRepository extends _PostgreSqlRepository<
       {
         dataVersion: JSON.stringify({
           product: randomNumber,
-          batch: randomNumber,
           customer: randomNumber,
         }),
       }

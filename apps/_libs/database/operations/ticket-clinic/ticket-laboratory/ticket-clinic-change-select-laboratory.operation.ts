@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
+import { TicketLaboratoryStatus } from '../../../common/variable'
 import { TicketLaboratoryGroup } from '../../../entities'
 import {
   TicketLaboratoryInsertType,
-  TicketLaboratoryStatus,
 } from '../../../entities/ticket-laboratory.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import {

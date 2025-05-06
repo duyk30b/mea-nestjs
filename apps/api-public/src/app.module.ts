@@ -32,7 +32,7 @@ import { SocketModule } from './socket/socket.module'
       envFilePath: [`.env.${process.env.NODE_ENV || 'local'}`, '.env'],
       isGlobal: true,
     }),
-    ThrottlerModule.forRoot([{ ttl: 5000, limit: 5 }]),
+    ThrottlerModule.forRoot([{ ttl: 5000, limit: 10 }]),
     I18nModule.forRoot({
       fallbackLanguage: 'vi',
       loader: I18nJsonLoader,

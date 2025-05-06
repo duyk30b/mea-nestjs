@@ -47,7 +47,7 @@ export class ApiTicketClinicProcedureService {
     if (result.ticketUserInsertList) {
       this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
         ticketId,
-        ticketUserInsertList: result.ticketUserInsertList,
+        ticketUserUpsertList: result.ticketUserInsertList,
       })
     }
 
@@ -107,7 +107,7 @@ export class ApiTicketClinicProcedureService {
       this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
         ticketId,
         ticketUserDestroyList: result.ticketUserChangeList.ticketUserDestroyList,
-        ticketUserInsertList: result.ticketUserChangeList.ticketUserInsertList,
+        ticketUserUpsertList: result.ticketUserChangeList.ticketUserInsertList,
       })
     }
     return { data: true }

@@ -36,7 +36,7 @@ export class TicketPaymentAndCloseOperation {
         {
           oid,
           id: ticketId,
-          ticketStatus: { IN: [TicketStatus.Draft, TicketStatus.Approved, TicketStatus.Executing] },
+          ticketStatus: { IN: [TicketStatus.Draft, TicketStatus.Prepayment, TicketStatus.Executing] },
         },
         { updatedAt: Date.now() }
       )

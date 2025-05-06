@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { arrayToKeyArray, uniqueArray } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { Batch, Distributor, Product } from '../../../../_libs/database/entities'
+import { Distributor, Product } from '../../../../_libs/database/entities'
 import { BatchInsertType } from '../../../../_libs/database/entities/batch.entity'
 import {
   ReceiptCancelOperation,
@@ -143,6 +143,7 @@ export class ApiReceiptService {
         lotNumber: receiptItem.lotNumber,
         expiryDate: receiptItem.expiryDate,
         costPrice: receiptItem.costPrice,
+        registeredAt: Date.now(),
       }
       return batchInsert
     })
@@ -203,6 +204,7 @@ export class ApiReceiptService {
         lotNumber: receiptItem.lotNumber,
         expiryDate: receiptItem.expiryDate,
         costPrice: receiptItem.costPrice,
+        registeredAt: Date.now(),
       }
       return batchInsert
     })
@@ -389,17 +391,14 @@ export class ApiReceiptService {
 
   async emitSocketAfterChangeProductAndDistributor(
     oid: number,
-    data: { distributor: Distributor; productList: Product[]; batchList: Batch[] }
+    data: { distributor: Distributor; productList: Product[] }
   ) {
-    const { distributor, productList, batchList } = data
+    const { distributor, productList } = data
     if (distributor) {
       this.socketEmitService.distributorUpsert(oid, { distributor })
     }
     if (productList.length) {
       this.socketEmitService.productListUpdate(oid, { productList })
-    }
-    if (batchList.length) {
-      this.socketEmitService.batchListUpdate(oid, { batchList })
     }
   }
 }

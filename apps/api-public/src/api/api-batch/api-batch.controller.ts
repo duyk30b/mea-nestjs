@@ -71,7 +71,7 @@ export class ApiBatchController {
   @Delete('destroy/:id')
   @HasPermission(PermissionId.PRODUCT_DELETE)
   @ApiParam({ name: 'id', example: 1 })
-  async deleteOne(@External() { oid, organization }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiBatchService.destroyOne({ organization, oid, batchId: id })
+  async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiBatchService.destroyOne({ oid, batchId: id })
   }
 }

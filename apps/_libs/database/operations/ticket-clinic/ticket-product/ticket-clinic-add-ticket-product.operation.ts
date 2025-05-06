@@ -15,7 +15,10 @@ import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-it
 export type TicketClinicProductAddDtoType = Omit<
   TicketProduct,
   | keyof TicketProductRelationType
-  | keyof Pick<TicketProduct, 'oid' | 'id' | 'ticketId' | 'customerId' | 'deliveryStatus' | 'type'>
+  | keyof Pick<
+    TicketProduct,
+    'oid' | 'id' | 'ticketId' | 'customerId' | 'deliveryStatus' | 'type' | 'costAmount'
+  >
 >
 
 @Injectable()
@@ -53,6 +56,7 @@ export class TicketClinicAddTicketProductOperation {
           ticketId,
           customerId: ticketOrigin.customerId,
           deliveryStatus: DeliveryStatus.Pending,
+          costAmount: 0, // set tạm thế, khi nào gửi hàng chọn lô mới tính được
           type: ticketProductType,
         }
         return insert
@@ -70,7 +74,7 @@ export class TicketClinicAddTicketProductOperation {
         return acc + cur.quantity * cur.discountMoney
       }, 0)
       const itemsCostAmountAdd = ticketProductList.reduce((acc, cur) => {
-        return acc + cur.quantity * cur.costPrice
+        return acc + cur.costAmount
       }, 0)
       let ticket: Ticket = ticketOrigin
       if (productMoneyAdd != 0) {

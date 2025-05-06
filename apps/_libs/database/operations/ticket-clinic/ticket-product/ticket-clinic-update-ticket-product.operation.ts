@@ -104,9 +104,7 @@ export class TicketClinicUpdateTicketProductOperation {
           itemsDiscountChange =
             ticketProduct.quantity * ticketProduct.discountMoney
             - ticketProductOrigin.quantity * ticketProductOrigin.discountMoney
-          itemsCostAmountChange =
-            ticketProduct.quantity * ticketProduct.costPrice
-            - ticketProductOrigin.quantity * ticketProductOrigin.costPrice
+          itemsCostAmountChange = ticketProduct.costAmount - ticketProductOrigin.costAmount
         } else {
           ticketProduct = await this.ticketProductManager.updateOneAndReturnEntity(
             manager,

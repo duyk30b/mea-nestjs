@@ -78,3 +78,9 @@ export enum AttributeLayoutType {
   InputAndLabelTop = 'Input và Nhãn bên trên',
   InputAndLabelLeft = 'Input và Nhãn bên trái',
 }
+
+export enum TicketLaboratoryStatus {
+  Empty = 1,
+  Pending = 2,
+  Completed = 3,
+}

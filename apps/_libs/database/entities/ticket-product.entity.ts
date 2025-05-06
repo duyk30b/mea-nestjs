@@ -2,7 +2,6 @@ import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import { DeliveryStatus, DiscountType } from '../common/variable'
-import Batch from './batch.entity'
 import Customer from './customer.entity'
 import Product from './product.entity'
 import Ticket from './ticket.entity'
@@ -16,13 +15,13 @@ export enum TicketProductType {
 @Index('IDX_TicketProduct__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketProduct__oid_customerId', ['oid', 'customerId'])
 export default class TicketProduct extends BaseEntity {
-  @Column()
-  @Expose()
-  ticketId: number
-
   @Column({ default: 1 })
   @Expose()
   priority: number
+
+  @Column({ default: 1, type: 'smallint' })
+  @Expose()
+  hasInventoryImpact: 0 | 1
 
   @Column()
   @Expose()
@@ -30,23 +29,23 @@ export default class TicketProduct extends BaseEntity {
 
   @Column()
   @Expose()
-  productId: number
-
-  @Column({ default: 0 })
-  @Expose()
-  batchId: number
+  ticketId: number
 
   @Column({ default: 0 })
   @Expose()
   warehouseId: number
 
-  @Column({ type: 'smallint', default: DeliveryStatus.Pending })
+  @Column()
   @Expose()
-  deliveryStatus: DeliveryStatus
+  productId: number
 
   @Column({ type: 'smallint', default: TicketProductType.Prescription })
   @Expose()
   type: TicketProductType
+
+  @Column({ type: 'smallint', default: DeliveryStatus.Pending })
+  @Expose()
+  deliveryStatus: DeliveryStatus
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()
@@ -72,7 +71,7 @@ export default class TicketProduct extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  costPrice: number
+  costAmount: number
 
   @Column({
     type: 'bigint',
@@ -132,11 +131,6 @@ export default class TicketProduct extends BaseEntity {
   @JoinColumn({ name: 'productId', referencedColumnName: 'id' })
   product: Product
 
-  @Expose()
-  @ManyToOne((type) => Batch, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'batchId', referencedColumnName: 'id' })
-  batch: Batch
-
   static fromRaw(raw: { [P in keyof TicketProduct]: any }) {
     if (!raw) return null
     const entity = new TicketProduct()
@@ -144,6 +138,7 @@ export default class TicketProduct extends BaseEntity {
 
     entity.quantity = Number(raw.quantity)
     entity.quantityPrescription = Number(raw.quantityPrescription)
+    entity.costAmount = Number(raw.costAmount)
     entity.expectedPrice = Number(raw.expectedPrice)
     entity.discountMoney = Number(raw.discountMoney)
     entity.discountPercent = Number(raw.discountPercent)
@@ -158,7 +153,7 @@ export default class TicketProduct extends BaseEntity {
 }
 
 export type TicketProductRelationType = {
-  [P in keyof Pick<TicketProduct, 'ticket' | 'customer' | 'product' | 'batch'>]?: boolean
+  [P in keyof Pick<TicketProduct, 'ticket' | 'customer' | 'product'>]?: boolean
 }
 
 export type TicketProductInsertType = Omit<

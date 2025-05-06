@@ -13,12 +13,12 @@ import { TicketRadiologyStatus } from '../../../../_libs/database/entities/ticke
 import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import {
   TicketChangeDiscountOperation,
-  TicketClinicReopenOperation,
   TicketClinicUpdateInformationOperation,
   TicketPayDebtOperation,
   TicketPaymentAndCloseOperation,
   TicketPrepaymentOperation,
   TicketRefundMoneyOperation,
+  TicketReopenOperation,
   TicketUserOperation,
 } from '../../../../_libs/database/operations'
 import {
@@ -53,7 +53,7 @@ export class ApiTicketClinicService {
     private readonly ticketPrepaymentOperation: TicketPrepaymentOperation,
     private readonly ticketPaymentAndCloseOperation: TicketPaymentAndCloseOperation,
     private readonly ticketPayDebtOperation: TicketPayDebtOperation,
-    private readonly ticketClinicReopenOperation: TicketClinicReopenOperation,
+    private readonly ticketReopenOperation: TicketReopenOperation,
     private readonly ticketUserOperation: TicketUserOperation,
     private readonly ticketClinicUpdateInformationOperation: TicketClinicUpdateInformationOperation
   ) { }
@@ -186,7 +186,7 @@ export class ApiTicketClinicService {
       this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
         ticketId,
         ticketUserDestroyList: ticketUserChangeList.ticketUserDestroyList,
-        ticketUserInsertList: ticketUserChangeList.ticketUserInsertList,
+        ticketUserUpsertList: ticketUserChangeList.ticketUserInsertList,
       })
     }
     return { data: true }
@@ -198,7 +198,7 @@ export class ApiTicketClinicService {
       {
         oid,
         id: ticketId,
-        ticketStatus: { IN: [TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Approved] },
+        ticketStatus: { IN: [TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Prepayment] },
       },
       {
         ticketStatus: TicketStatus.Executing,
@@ -377,7 +377,7 @@ export class ApiTicketClinicService {
   async reopen(params: { oid: number; ticketId: number }) {
     const { oid, ticketId } = params
     try {
-      const { ticket, customer } = await this.ticketClinicReopenOperation.reopen({
+      const { ticket, customer } = await this.ticketReopenOperation.reopen({
         oid,
         ticketId,
         time: Date.now(),

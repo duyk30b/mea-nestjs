@@ -29,7 +29,7 @@ export class TicketRefundMoneyOperation {
         {
           oid,
           id: ticketId,
-          ticketStatus: { IN: [TicketStatus.Approved, TicketStatus.Executing] },
+          ticketStatus: { IN: [TicketStatus.Prepayment, TicketStatus.Executing] },
         },
         {
           paid: () => `paid - ${money}`,

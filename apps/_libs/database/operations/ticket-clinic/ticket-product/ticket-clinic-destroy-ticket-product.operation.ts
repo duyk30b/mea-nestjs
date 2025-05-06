@@ -54,7 +54,7 @@ export class TicketClinicDestroyTicketProductOperation {
 
       // === 4. UPDATE TICKET: MONEY  ===
       const productMoneyDelete = ticketProductDestroy.quantity * ticketProductDestroy.actualPrice
-      const itemsCostAmountDelete = ticketProductDestroy.quantity * ticketProductDestroy.costPrice
+      const itemsCostAmountDelete = ticketProductDestroy.costAmount
       const itemsDiscountDelete = ticketProductDestroy.quantity * ticketProductDestroy.discountMoney
       const commissionMoneyDelete = ticketUserDestroyList.reduce((acc, item) => {
         return acc + item.commissionMoney * item.quantity
