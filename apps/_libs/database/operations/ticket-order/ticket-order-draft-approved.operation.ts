@@ -55,7 +55,7 @@ export class TicketOrderDraftApprovedOperation {
     ticketOrderProcedureDraftListDto: TicketOrderProcedureDraftType[]
     ticketOrderSurchargeDraftListDto: TicketOrderSurchargeDraftType[]
     ticketOrderExpenseDraftListDto: TicketOrderExpenseDraftType[]
-    ticketAttributeDraftListDto: { key: string; value: any }[]
+    ticketAttributeDraftListDto?: { key: string; value: any }[]
   }) {
     const {
       oid,
@@ -149,7 +149,7 @@ export class TicketOrderDraftApprovedOperation {
         await this.ticketExpenseManager.insertMany(manager, ticketExpenseListInsert)
       }
 
-      if (ticketAttributeDraftListDto.length) {
+      if (ticketAttributeDraftListDto?.length) {
         const ticketAttributeListInsert = ticketAttributeDraftListDto.map((i) => {
           const ticketAttribute: TicketAttributeInsertType = {
             ...i,

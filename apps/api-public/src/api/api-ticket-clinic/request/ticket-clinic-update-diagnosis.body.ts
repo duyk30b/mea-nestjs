@@ -41,6 +41,12 @@ class ImagesChangeBody {
 }
 
 export class TicketClinicUpdateDiagnosisBody extends MultipleFileUpload {
+  @ApiProperty({ example: '' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  note: string
+
   @ApiProperty({
     type: 'string',
     example: JSON.stringify(<TicketAttributeBody[]>[{ key: 'REASON', value: 'Đau bụng' }]),

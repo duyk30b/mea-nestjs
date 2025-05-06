@@ -70,7 +70,7 @@ export class ApiTicketOrderService {
         ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList,
         ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
         ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
-        ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
+        // ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
       })
       return { data: { ticket } }
     } catch (error: any) {
@@ -103,7 +103,7 @@ export class ApiTicketOrderService {
         ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList,
         ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
         ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
-        ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
+        // ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
       })
       return { data: { ticket } }
     } catch (error: any) {
@@ -136,7 +136,7 @@ export class ApiTicketOrderService {
       ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList,
       ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
       ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
-      ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
+      // ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
     })
 
     const ticketId = createDraftResponse.ticket.id

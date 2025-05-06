@@ -219,9 +219,12 @@ export class ApiTicketClinicService {
     const { oid, ticketId, body, files } = options
     const { imagesChange, ticketAttributeChangeList, ticketAttributeKeyList } = body
 
+    let ticket = await this.ticketRepository.updateOneAndReturnEntity(
+      { oid, id: ticketId },
+      { note: body.note }
+    )
     // 1. Update Ticket Image
     if (imagesChange) {
-      let ticket = await this.ticketRepository.findOneBy({ oid, id: ticketId })
       const imageIdsUpdate = await this.imageManagerService.changeImageList({
         oid,
         customerId: ticket.customerId,
@@ -243,8 +246,6 @@ export class ApiTicketClinicService {
         imageIds.forEach((i) => {
           ticket.imageList.push(imageMap[i])
         })
-
-        this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
       }
     }
 
@@ -276,7 +277,7 @@ export class ApiTicketClinicService {
         ticketAttributeList,
       })
     }
-
+    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
     return { data: true }
   }
 

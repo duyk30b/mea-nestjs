@@ -260,6 +260,10 @@ export default class Ticket extends BaseEntity {
   @Expose()
   updatedAt: number
 
+  @Column({ type: 'varchar', length: 255, default: '' })
+  @Expose()
+  note: string // Tên dịch vụ
+
   @ManyToOne((type) => CustomerSource, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'customerSourceId', referencedColumnName: 'id' })
   @Expose()

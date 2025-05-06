@@ -115,15 +115,28 @@ class TicketOrderBasic {
   @IsDefined()
   @IsNumber()
   registeredAt: number
+
+  @ApiProperty({ example: '' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  note: string
 }
 
 class TicketOrderBasicDebtSuccessInsert extends OmitType(TicketOrderBasic, ['debt']) { }
 
-class TicketOrderBasicDebtSuccessUpdate extends OmitType(TicketOrderBasic, ['customerId', 'debt']) { }
+class TicketOrderBasicDebtSuccessUpdate extends OmitType(TicketOrderBasic, [
+  'customerId',
+  'debt',
+]) { }
 
 class TicketOrderBasicDraftInsert extends OmitType(TicketOrderBasic, ['paid', 'debt']) { }
 
-class TicketOrderBasicDraftApprovedUpdate extends OmitType(TicketOrderBasic, ['customerId', 'paid', 'debt']) { }
+class TicketOrderBasicDraftApprovedUpdate extends OmitType(TicketOrderBasic, [
+  'customerId',
+  'paid',
+  'debt',
+]) { }
 
 class TicketOrderAttributeBody {
   @ApiProperty({ example: 'Diagnosis' })
@@ -187,13 +200,13 @@ class TicketOrderRelation {
   @ValidateNested({ each: true })
   ticketOrderExpenseDraftList: TicketOrderExpenseDraft[]
 
-  @ApiProperty({ type: TicketOrderAttributeBody, isArray: true })
-  @Expose()
-  @Type(() => TicketOrderAttributeBody)
-  @IsDefined()
-  @IsArray()
-  @ValidateNested({ each: true })
-  ticketOrderAttributeDaftList: TicketOrderAttributeBody[]
+  // @ApiProperty({ type: TicketOrderAttributeBody, isArray: true })
+  // @Expose()
+  // @Type(() => TicketOrderAttributeBody)
+  // @IsDefined()
+  // @IsArray()
+  // @ValidateNested({ each: true })
+  // ticketOrderAttributeDaftList: TicketOrderAttributeBody[]
 }
 
 export class TicketOrderDraftInsertBody extends TicketOrderRelation {
