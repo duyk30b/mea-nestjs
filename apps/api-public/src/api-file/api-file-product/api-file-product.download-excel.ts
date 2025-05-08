@@ -1,15 +1,17 @@
 import { Injectable } from '@nestjs/common'
 import { Cell, Workbook, Worksheet } from 'exceljs'
-import { arrayToKeyArray, arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
-import { DTimer } from '../../../../_libs/common/helpers/time.helper'
+import { ESArray } from '../../../../_libs/common/helpers/object.helper'
+import { ESTimer } from '../../../../_libs/common/helpers/time.helper'
 import { Organization, Product, ProductGroup, User } from '../../../../_libs/database/entities'
-import { BatchRepository } from '../../../../_libs/database/repositories/batch.repository'
-import { ProductGroupRepository } from '../../../../_libs/database/repositories/product-group.repository'
-import { ProductRepository } from '../../../../_libs/database/repositories/product.repository'
+import {
+  BatchRepository,
+  ProductGroupRepository,
+  ProductRepository,
+} from '../../../../_libs/database/repositories'
 import { excelOneSheetWorkbook } from '../../../../_libs/file/excel-one-sheet.util'
 
 @Injectable()
-export class ApiProductExcel {
+export class ApiFileProductDownloadExcel {
   constructor(
     private readonly productRepository: ProductRepository,
     private readonly productGroupRepository: ProductGroupRepository,
@@ -22,16 +24,19 @@ export class ApiProductExcel {
       condition: { oid: organization.id, isActive: 1 },
       sort: { id: 'ASC' },
     })
+
+    const productGroupAll = await this.productGroupRepository.findManyBy({})
+    const productGroupMap = ESArray.arrayToKeyValue(productGroupAll, 'id')
+
     const batchList = await this.batchRepository.findMany({
       condition: { oid: organization.id, quantity: { NOT: 0 } },
     })
-    const batchListMapProductId = arrayToKeyArray(batchList, 'productId')
+    const batchListMapProductId = ESArray.arrayToKeyArray(batchList, 'productId')
+
     productList.forEach((product) => {
       product.batchList = batchListMapProductId[product.id] || []
+      product.productGroup = productGroupMap[product.productGroupId]
     })
-
-    const productGroupAll = await this.productGroupRepository.findManyBy({})
-    const productGroupMap = arrayToKeyValue(productGroupAll, 'id')
 
     const workbook: Workbook = this.getWorkbookProduct(productList, {
       orgName: organization.name,
@@ -50,7 +55,6 @@ export class ApiProductExcel {
         .replace('Phường ', '')
         .replace('Xã ', ''),
       userFullName: user.fullName,
-      productGroupMap,
     })
     const buffer = await workbook.xlsx.writeBuffer()
 
@@ -70,7 +74,6 @@ export class ApiProductExcel {
       orgPhone: string
       orgAddress: string
       userFullName: string
-      productGroupMap: Record<string, ProductGroup>
     }
   ): Workbook {
     const dataRows = []
@@ -83,7 +86,7 @@ export class ApiProductExcel {
         dataRows.push({
           style: {
             num: { alignment: { horizontal: 'center' } },
-            id: { alignment: { horizontal: 'center' } },
+            code: { alignment: { horizontal: 'center' } },
             brandName: { alignment: { wrapText: true } },
             substance: { alignment: { wrapText: true } },
             lotNumber: { alignment: { horizontal: 'center' } },
@@ -92,13 +95,14 @@ export class ApiProductExcel {
             costPrice: { numFmt: '###,##0' },
             wholesalePrice: { numFmt: '###,##0' },
             retailPrice: { numFmt: '###,##0' },
+            group: {},
             unit: { alignment: { horizontal: 'center' } },
             route: { alignment: { horizontal: 'center' } },
           },
           data: [
             {
               num: productIndex + 1,
-              id: 'SP' + product.id,
+              code: 'SP' + product.code.toString().padStart(4, '0'),
               // brandName: product.brandName + '\n' + product.substance,
               // brandName: {
               //   richText: [
@@ -129,7 +133,7 @@ export class ApiProductExcel {
               costPrice: product.costPrice || 0,
               wholesalePrice: product.wholesalePrice || 0,
               retailPrice: product.retailPrice || 0,
-              group: meta.productGroupMap[product.productGroupId] || '',
+              group: product.productGroup?.name || '',
               unit: unitNameBasic,
               route: product.route || '',
               source: product.source || '',
@@ -145,7 +149,7 @@ export class ApiProductExcel {
           dataRows.push({
             style: {
               num: { alignment: { horizontal: 'center' } },
-              id: { alignment: { horizontal: 'center' } },
+              code: { alignment: { horizontal: 'center' } },
               brandName: { alignment: { wrapText: true } },
               substance: { alignment: { wrapText: true } },
               lotNumber: { alignment: { horizontal: 'center' } },
@@ -161,7 +165,7 @@ export class ApiProductExcel {
             data: [
               {
                 num: productIndex + 1,
-                id: 'SP' + product.id,
+                code: 'SP' + product.code.toString().padStart(4, '0'),
                 brandName: product.brandName || '',
                 substance: product.substance || '',
                 // brandName: product.brandName + '\n' + product.substance,
@@ -192,7 +196,7 @@ export class ApiProductExcel {
                 costPrice: batch.costPrice || 0,
                 wholesalePrice: product.wholesalePrice || 0,
                 retailPrice: product.retailPrice || 0,
-                group: meta.productGroupMap[product.productGroupId] || '',
+                group: product.productGroup?.name || '',
                 unit: unitNameBasic,
                 route: product.route || '',
                 source: product.source || '',
@@ -239,7 +243,7 @@ export class ApiProductExcel {
         worksheet.mergeCells(4, 1, 4, 15)
 
         worksheet
-          .addRow([`Thời gian: ${DTimer.timeToText(new Date(), 'hh:mm:ss DD/MM/YYYY', 7)}`])
+          .addRow([`Thời gian: ${ESTimer.timeToText(new Date(), 'hh:mm:ss DD/MM/YYYY', 7)}`])
           .eachCell((cell) => {
             cell.font = {
               size: 12,
@@ -253,7 +257,7 @@ export class ApiProductExcel {
 
         const rowTitle = worksheet.addRow([
           'STT',
-          'ID',
+          'Mã SP',
           'Tên sản phẩm',
           'Hoạt chất',
           'Lô',
@@ -291,7 +295,7 @@ export class ApiProductExcel {
       },
       columns: [
         { key: 'num', width: 5 },
-        { key: 'id', width: 10 },
+        { key: 'code', width: 10 },
         { key: 'brandName', width: 30 },
         { key: 'substance', width: 30 },
         { key: 'lotNumber', width: 10 },

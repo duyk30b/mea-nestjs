@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { DTimer } from '../../../../_libs/common/helpers/time.helper'
+import { ESTimer } from '../../../../_libs/common/helpers/time.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { AppointmentStatus } from '../../../../_libs/database/entities/appointment.entity'
 import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
@@ -139,9 +139,9 @@ export class ApiAppointmentService {
       ticketType: body.ticketType,
       registeredAt,
       dailyIndex: countToday + 1,
-      year: DTimer.info(registeredAt, 7).year,
-      month: DTimer.info(registeredAt, 7).month + 1,
-      date: DTimer.info(registeredAt, 7).date,
+      year: ESTimer.info(registeredAt, 7).year,
+      month: ESTimer.info(registeredAt, 7).month + 1,
+      date: ESTimer.info(registeredAt, 7).date,
     })
 
     if (appointment.reason) {

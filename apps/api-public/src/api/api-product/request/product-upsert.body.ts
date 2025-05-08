@@ -1,6 +1,17 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
-import { IsArray, IsBoolean, IsDefined, IsIn, IsInt, IsNumber, IsPositive, IsString, ValidateNested, validateSync } from 'class-validator'
+import {
+  IsArray,
+  IsBoolean,
+  IsDefined,
+  IsIn,
+  IsInt,
+  IsNumber,
+  IsPositive,
+  IsString,
+  ValidateNested,
+  validateSync,
+} from 'class-validator'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { CommissionCalculatorType } from '../../../../../_libs/database/entities/commission.entity'
 
@@ -75,7 +86,11 @@ export class ProductCreateBody {
   @IsInt()
   productGroupId: number
 
-  @ApiPropertyOptional({ name: 'unit', type: 'string', example: JSON.stringify([{ name: 'Viên', rate: 1 }]) })
+  @ApiPropertyOptional({
+    name: 'unit',
+    type: 'string',
+    example: JSON.stringify([{ name: 'Viên', rate: 1 }]),
+  })
   @Expose()
   @Transform(({ value }) => {
     try {
@@ -96,7 +111,9 @@ export class ProductCreateBody {
       return [error.message]
     }
   })
-  @IsString({ message: `Validate unit failed: Example: ${JSON.stringify([{ name: 'Viên', rate: 1 }])}` })
+  @IsString({
+    message: `Validate unit failed: Example: ${JSON.stringify([{ name: 'Viên', rate: 1 }])}`,
+  })
   unit: string // đơn vị tính: lọ, ống, vỉ
 
   // @ApiPropertyOptional({
@@ -148,7 +165,11 @@ export class ProductCreateBody {
   @IsIn([0, 1])
   isActive: 0 | 1
 
-  @ApiPropertyOptional({ name: 'warehouseIds', type: 'string', example: JSON.stringify([1, 5, 10]) })
+  @ApiPropertyOptional({
+    name: 'warehouseIds',
+    type: 'string',
+    example: JSON.stringify([1, 5, 10]),
+  })
   @Expose()
   @Transform(({ value }) => {
     try {

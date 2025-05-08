@@ -22,6 +22,10 @@ export class Version811746538806064 implements MigrationInterface {
             UPDATE "PrintHtml"
             SET content = REPLACE(content, 'DTimer', 'ESTimer')
             WHERE content LIKE '%DTimer%';
+
+            UPDATE "PrintHtml"
+            SET content = REPLACE(content, 'ticket.ticketAttributeMap?.diagnosis', 'ticket.note')
+            WHERE content LIKE '%ticket.ticketAttributeMap?.diagnosis%';
         `)
     }
 

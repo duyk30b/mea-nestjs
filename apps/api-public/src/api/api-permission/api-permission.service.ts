@@ -344,6 +344,16 @@ export class ApiPermissionService {
         rootId: PermissionId.PRODUCT,
       },
       {
+        id: PermissionId.PRODUCT_UPLOAD_EXCEL,
+        level: 2,
+        code: PermissionId[PermissionId.PRODUCT_UPLOAD_EXCEL],
+        isActive: 1,
+        pathId: `${PermissionId.PRODUCT}.${PermissionId.PRODUCT_UPLOAD_EXCEL}`,
+        name: 'Upload file Excel để tạo mới sản phẩm',
+        parentId: PermissionId.PRODUCT,
+        rootId: PermissionId.PRODUCT,
+      },
+      {
         id: PermissionId.BATCH_READ,
         level: 2,
         code: PermissionId[PermissionId.BATCH_READ],

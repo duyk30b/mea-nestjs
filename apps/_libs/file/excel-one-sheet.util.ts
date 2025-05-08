@@ -73,7 +73,7 @@ export const excelOneSheetWorkbook = <T extends string>(params: {
           },
           alignment: { wrapText: true, vertical: 'middle' },
         }
-        const styleAll: Partial<Style> = row.style['_all'] || {}
+        const styleAll: Partial<Style> = row.style?.['_all'] || {}
         const styleCurrent: Partial<Style> = row.style?.[keyColumn] || {}
 
         mergeObject(style, styleAll, styleCurrent)

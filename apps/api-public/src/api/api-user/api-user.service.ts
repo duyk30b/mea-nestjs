@@ -7,7 +7,11 @@ import { encrypt } from '../../../../_libs/common/helpers/string.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { User } from '../../../../_libs/database/entities'
 import Device from '../../../../_libs/database/entities/device'
-import { RoleRepository, UserRepository, UserRoleRepository } from '../../../../_libs/database/repositories'
+import {
+  RoleRepository,
+  UserRepository,
+  UserRoleRepository,
+} from '../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   UserCreateBody,
@@ -38,7 +42,7 @@ export class ApiUserService {
       limit,
       relation: {
         organization: !!relation.organization,
-        userRoleList: relation.userRoleList ? ({ role: true }) as any : false,
+        userRoleList: relation.userRoleList ? ({ role: true } as any) : false,
       },
       condition: {
         oid,
@@ -151,9 +155,24 @@ export class ApiUserService {
   }
 
   async updateOne(oid: number, userId: number, body: UserUpdateBody): Promise<BaseResponse> {
-    const { roleIdList, ...other } = body
+    const { roleIdList, password, ...other } = body
 
-    const [user] = await this.userRepository.updateAndReturnEntity({ oid, id: userId }, other)
+    let user: User
+    if (password) {
+      const hashPassword = await bcrypt.hash(password, 5)
+      const secret = encrypt(password, other.username)
+      user = await this.userRepository.updateOneAndReturnEntity(
+        { oid, id: userId },
+        {
+          ...other,
+          hashPassword,
+          secret,
+        }
+      )
+    } else {
+      user = await this.userRepository.updateOneAndReturnEntity({ oid, id: userId }, other)
+    }
+
     if (!user) {
       throw new BusinessException('error.Database.UpdateFailed')
     }
@@ -192,16 +211,14 @@ export class ApiUserService {
     return { data: true }
   }
 
-  async deleteOne(oid: number, id: number): Promise<BaseResponse> {
-    const [user] = await this.userRepository.updateAndReturnEntity(
-      { oid, id },
-      { deletedAt: Date.now() }
-    )
-    if (!user) {
+  async deleteOne(oid: number, userId: number): Promise<BaseResponse> {
+    const affected = await this.userRepository.delete({ oid, id: userId })
+    if (!affected) {
       throw new BusinessException('error.Database.DeleteFailed')
     }
-    this.cacheDataService.clearUserAndRole(user.oid)
-    return { data: { userId: id } }
+    await this.userRoleRepository.delete({ oid, userId })
+    this.cacheDataService.clearUserAndRole(oid)
+    return { data: { userId } }
   }
 
   async deviceLogout(options: { oid: number; userId: number; refreshExp: number }) {

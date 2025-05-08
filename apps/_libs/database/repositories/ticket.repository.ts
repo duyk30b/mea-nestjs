@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, EntityManager, FindOptionsWhere, In, Repository } from 'typeorm'
-import { DTimer } from '../../common/helpers/time.helper'
+import { ESTimer } from '../../common/helpers/time.helper'
 import {
   Ticket,
   TicketAttribute,
@@ -206,8 +206,8 @@ export class TicketRepository extends _PostgreSqlRepository<
     const number = await this.countBy({
       oid,
       registeredAt: {
-        GTE: DTimer.startOfDate(now, 7).getTime(),
-        LTE: DTimer.endOfDate(now, 7).getTime(),
+        GTE: ESTimer.startOfDate(now, 7).getTime(),
+        LTE: ESTimer.endOfDate(now, 7).getTime(),
       },
     })
     return number

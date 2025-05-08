@@ -18,9 +18,16 @@ export class ProductRepository extends _PostgreSqlRepository<
   ProductUpdateType,
   ProductSortType
 > {
-  constructor(
-    @InjectRepository(Product) private productRepository: Repository<Product>
-  ) {
+  constructor(@InjectRepository(Product) private productRepository: Repository<Product>) {
     super(Product, productRepository)
+  }
+
+  async getMaxCode(oid: number) {
+    const raw = await this.productRepository
+      .createQueryBuilder()
+      .select('MAX("Product".code)', 'max_code')
+      .where({ oid })
+      .getRawOne()
+    return raw?.max_code || 0
   }
 }

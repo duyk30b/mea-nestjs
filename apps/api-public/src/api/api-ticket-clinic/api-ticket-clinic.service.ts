@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
-import { DTimer } from '../../../../_libs/common/helpers/time.helper'
+import { ESTimer } from '../../../../_libs/common/helpers/time.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { DeliveryStatus } from '../../../../_libs/database/common/variable'
 import { Customer } from '../../../../_libs/database/entities'
@@ -90,9 +90,9 @@ export class ApiTicketClinicService {
       customType: body.ticketInformation.customType,
 
       dailyIndex: countToday + 1,
-      year: DTimer.info(registeredAt, 7).year,
-      month: DTimer.info(registeredAt, 7).month + 1,
-      date: DTimer.info(registeredAt, 7).date,
+      year: ESTimer.info(registeredAt, 7).year,
+      month: ESTimer.info(registeredAt, 7).month + 1,
+      date: ESTimer.info(registeredAt, 7).date,
     })
     ticket.customer = customer
 

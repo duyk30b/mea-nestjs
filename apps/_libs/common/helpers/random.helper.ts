@@ -1,6 +1,6 @@
 import { EGender } from '../../database/common/variable'
 import { convertViToEn } from './string.helper'
-import { DTimer } from './time.helper'
+import { ESTimer } from './time.helper'
 
 export const shuffleArray = <T>(origin: T[]): T[] => [...origin].sort(() => 0.5 - Math.random())
 
@@ -130,7 +130,7 @@ export const randomUsername = (fullName?: string, birthday?: Date): string => {
 
   const nameEng = convertViToEn(fullName).toLowerCase()
   const text = nameEng.split(' ').slice(-2).join('')
-  const number = DTimer.timeToText(birthday, 'DDMMYY')
+  const number = ESTimer.timeToText(birthday, 'DDMMYY')
   return text + number
 }
 

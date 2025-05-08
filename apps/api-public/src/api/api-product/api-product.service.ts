@@ -139,9 +139,11 @@ export class ApiProductService {
 
   async createOne(oid: number, body: ProductCreateBody): Promise<BaseResponse> {
     const { commissionList, ...productBody } = body
+    const maxCode = await this.productRepository.getMaxCode(oid)
     const product = await this.productRepository.insertOneFullFieldAndReturnEntity({
-      oid,
       ...productBody,
+      oid,
+      code: maxCode + 1,
     })
     const commissionDtoList: CommissionInsertType[] = commissionList.map((i) => {
       const dto: CommissionInsertType = {
