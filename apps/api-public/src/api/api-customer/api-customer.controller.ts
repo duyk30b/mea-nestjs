@@ -73,7 +73,7 @@ export class ApiCustomerController {
   }
 
   @Get('download-excel')
-  @HasPermission(PermissionId.PRODUCT_DOWNLOAD_EXCEL)
+  @HasPermission(PermissionId.CUSTOMER_DOWNLOAD_EXCEL)
   async downloadExcel(@External() { user, organization }: TExternal) {
     return await this.apiCustomerExcel.downloadExcel({ organization, user })
   }

@@ -36,7 +36,9 @@ export class TicketPaymentAndCloseOperation {
         {
           oid,
           id: ticketId,
-          ticketStatus: { IN: [TicketStatus.Draft, TicketStatus.Approved, TicketStatus.Executing] },
+          ticketStatus: {
+            IN: [TicketStatus.Draft, TicketStatus.Prepayment, TicketStatus.Executing],
+          },
         },
         { updatedAt: Date.now() }
       )
@@ -105,6 +107,9 @@ export class TicketPaymentAndCloseOperation {
         )
       } else {
         customer = await manager.findOneBy(Customer, { oid, id: ticket.customerId })
+      }
+      if (!customer) {
+        throw new Error(`Khách hàng không tồn tại trên hệ thống`)
       }
 
       const customerCloseDebt = customer.debt

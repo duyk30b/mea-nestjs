@@ -19,6 +19,7 @@ export type TicketProductUpdateDtoType = {
     | 'discountType'
     | 'discountMoney'
     | 'discountPercent'
+    | 'costAmount'
     | 'actualPrice'
     | 'hintUsage'
   >]: TicketProduct[K] | (() => string)
@@ -90,6 +91,7 @@ export class TicketClinicUpdateTicketProductOperation {
               discountType: ticketProductUpdateDto.discountType,
               discountMoney: ticketProductUpdateDto.discountMoney,
               discountPercent: ticketProductUpdateDto.discountPercent,
+              costAmount: ticketProductUpdateDto.costAmount,
               actualPrice: ticketProductUpdateDto.actualPrice,
               hintUsage: ticketProductUpdateDto.hintUsage,
               deliveryStatus:
@@ -104,9 +106,7 @@ export class TicketClinicUpdateTicketProductOperation {
           itemsDiscountChange =
             ticketProduct.quantity * ticketProduct.discountMoney
             - ticketProductOrigin.quantity * ticketProductOrigin.discountMoney
-          itemsCostAmountChange =
-            ticketProduct.quantity * ticketProduct.costPrice
-            - ticketProductOrigin.quantity * ticketProductOrigin.costPrice
+          itemsCostAmountChange = ticketProduct.costAmount - ticketProductOrigin.costAmount
         } else {
           ticketProduct = await this.ticketProductManager.updateOneAndReturnEntity(
             manager,

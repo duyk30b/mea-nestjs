@@ -3,11 +3,9 @@ import { DataSource } from 'typeorm'
 import { arrayToKeyValue } from '../../../common/helpers/object.helper'
 import { MovementType, PaymentType, ReceiptStatus } from '../../common/variable'
 import { Batch, Distributor, Product } from '../../entities'
-import { BatchMovementInsertType } from '../../entities/batch-movement.entity'
 import { DistributorPaymentInsertType } from '../../entities/distributor-payment.entity'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
 import {
-  BatchMovementManager,
   DistributorManager,
   DistributorPaymentManager,
   ProductMovementManager,
@@ -23,8 +21,7 @@ export class ReceiptCancelOperation {
     private distributorManager: DistributorManager,
     private distributorPaymentManager: DistributorPaymentManager,
     private receiptItemManager: ReceiptItemManager,
-    private productMovementManager: ProductMovementManager,
-    private batchMovementManager: BatchMovementManager
+    private productMovementManager: ProductMovementManager
   ) { }
 
   async start(params: { oid: number; receiptId: number; time: number; description?: string }) {
@@ -83,10 +80,7 @@ export class ReceiptCancelOperation {
           note: '',
           description: params.description || '',
         }
-        await this.distributorPaymentManager.insertOneFullField(
-          manager,
-          distributorPaymentInsert
-        )
+        await this.distributorPaymentManager.insertOneFullField(manager, distributorPaymentInsert)
       }
 
       // === 6. RECEIPT_ITEMS: query + CALCULATOR ===
@@ -202,10 +196,12 @@ export class ReceiptCancelOperation {
         // vẫn có thể productCalculator null vì Product chuyển từ có quản lý sang không quản lý số lượng
         const productMovementInsert: ProductMovementInsertType = {
           oid,
+          contactId: receipt.distributorId,
+          voucherId: receiptId,
+          voucherProductId: receiptItem.id,
           warehouseId: receiptItem.warehouseId,
           productId: receiptItem.productId,
-          voucherId: receiptId,
-          contactId: receipt.distributorId,
+          batchId: receiptItem.batchId,
           createdAt: time,
           movementType: MovementType.Receipt,
           isRefund: 1,
@@ -227,37 +223,6 @@ export class ReceiptCancelOperation {
         return productMovementInsert
       })
       await this.productMovementManager.insertMany(manager, productMovementInsertList)
-
-      const batchMovementInsertList = receiptItemList.map((receiptItem) => {
-        const batchCalculator = productCalculatorMap[receiptItem.productId]
-        // vẫn có thể batchCalculator null vì Product chuyển từ có quản lý sang không quản lý số lượng
-        const currentBatchMap = batchCalculatorMap[receiptItem.batchId]
-        const batchMovementInsert: BatchMovementInsertType = {
-          oid,
-          warehouseId: receiptItem.warehouseId,
-          batchId: receiptItem.batchId,
-          productId: receiptItem.productId,
-          voucherId: receiptId,
-          contactId: receipt.distributorId,
-          createdAt: time,
-          movementType: MovementType.Receipt,
-          isRefund: 1,
-          unitRate: receiptItem.unitRate,
-          actualPrice: receiptItem.costPrice,
-          expectedPrice: receiptItem.costPrice,
-          openQuantity: batchCalculator ? currentBatchMap.openQuantity : 0, // quantity đã được trả đúng số lượng ban đầu ở trên
-          quantity: -receiptItem.quantity,
-          closeQuantity: batchCalculator
-            ? currentBatchMap.openQuantity - receiptItem.quantity
-            : 0,
-        }
-        if (batchCalculator) {
-          currentBatchMap.openQuantity = batchMovementInsert.closeQuantity
-        }
-        return batchMovementInsert
-      })
-
-      await this.batchMovementManager.insertMany(manager, batchMovementInsertList)
 
       return { receipt, receiptItemList, distributor, productList, batchList }
     })

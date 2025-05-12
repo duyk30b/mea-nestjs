@@ -4,6 +4,7 @@ import { IdParam } from '../../../../_libs/common/dto'
 import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { TicketReturnProductListBody } from '../api-ticket/request'
 import { ApiTicketOrderService } from './api-ticket-order.service'
 import {
   TicketOrderDebtSuccessInsertBody,
@@ -11,7 +12,6 @@ import {
   TicketOrderDraftApprovedUpdateBody,
   TicketOrderDraftInsertBody,
   TicketOrderPaymentBody,
-  TicketOrderReturnBody,
 } from './request'
 
 @ApiTags('TicketOrder')
@@ -142,7 +142,7 @@ export class ApiTicketOrderController {
   async returnProduct(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketOrderReturnBody
+    @Body() body: TicketReturnProductListBody
   ) {
     return await this.apiTicketOrderService.returnProduct({ oid, ticketId: id, body })
   }

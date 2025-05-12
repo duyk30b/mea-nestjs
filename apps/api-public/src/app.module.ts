@@ -17,6 +17,7 @@ import { DetectClientMiddleware } from '../../_libs/common/middleware/detect-cli
 import { PostgresqlModule } from '../../_libs/database/postgresql.module'
 import { GoogleDriverModule } from '../../_libs/transporter/google-driver/google-driver.module'
 import { AuthModule } from './api-auth/auth.module'
+import { ApiFileModule } from './api-file/api-file.module'
 import { ApiRootModule } from './api-root/api-root.module'
 import { ApiModule } from './api/api.module'
 import { AppController } from './app.controller'
@@ -32,7 +33,7 @@ import { SocketModule } from './socket/socket.module'
       envFilePath: [`.env.${process.env.NODE_ENV || 'local'}`, '.env'],
       isGlobal: true,
     }),
-    ThrottlerModule.forRoot([{ ttl: 5000, limit: 5 }]),
+    ThrottlerModule.forRoot([{ ttl: 5000, limit: 10 }]),
     I18nModule.forRoot({
       fallbackLanguage: 'vi',
       loader: I18nJsonLoader,
@@ -58,6 +59,7 @@ import { SocketModule } from './socket/socket.module'
 
     AuthModule,
     ApiModule,
+    ApiFileModule,
     ApiRootModule,
   ],
   controllers: [AppController],

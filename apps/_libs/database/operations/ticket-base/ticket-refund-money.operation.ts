@@ -29,7 +29,7 @@ export class TicketRefundMoneyOperation {
         {
           oid,
           id: ticketId,
-          ticketStatus: { IN: [TicketStatus.Approved, TicketStatus.Executing] },
+          ticketStatus: { IN: [TicketStatus.Prepayment, TicketStatus.Executing] },
         },
         {
           paid: () => `paid - ${money}`,
@@ -45,6 +45,9 @@ export class TicketRefundMoneyOperation {
         oid,
         id: ticket.customerId,
       })
+      if (!customer) {
+        throw new Error(`Khách hàng không tồn tại trên hệ thống`)
+      }
       const customerCloseDebt = customer.debt
       const customerOpenDebt = customer.debt
 

@@ -50,6 +50,9 @@ export class TicketPayDebtOperation {
         { oid, id: ticket.customerId },
         { debt: () => `debt - ${money}` }
       )
+      if (!customer) {
+        throw new Error(`Khách hàng không tồn tại trên hệ thống`)
+      }
 
       const customerCloseDebt = customer.debt
       const customerOpenDebt = customerCloseDebt + money

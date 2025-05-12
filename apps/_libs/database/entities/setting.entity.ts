@@ -1,10 +1,29 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
 
+export enum BatchDistributorIdRule {
+  Inherit = 0,
+  Override = 1,
+  SplitOnDifferent = 2,
+}
+
+export enum BatchWarehouseIdRule {
+  Inherit = 0,
+  Override = 1,
+  SplitOnDifferent = 2,
+}
+
+export enum BatchCostPriceRule {
+  Inherit = 0,
+  OverrideAndMAC = 1,
+  SplitOnDifferent = 2,
+}
+
 export enum SettingKey {
   ROOT_SETTING = 'ROOT_SETTING',
   SYSTEM_SETTING = 'SYSTEM_SETTING',
   GOOGLE_DRIVER = 'GOOGLE_DRIVER',
+  BATCH_SETTING = 'BATCH_SETTING',
 }
 
 @Entity('Setting')
@@ -43,16 +62,12 @@ export type SettingRelationType = {
   [P in keyof Pick<Setting, never>]?: boolean
 }
 
-export type SettingInsertType = Omit<
-  Setting,
-  keyof SettingRelationType | keyof Pick<Setting, 'id'>
->
+export type SettingInsertType = Omit<Setting, keyof SettingRelationType | keyof Pick<Setting, 'id'>>
 
 export type SettingUpdateType = {
-  [K in Exclude<
-    keyof Setting,
-    keyof SettingRelationType | keyof Pick<Setting, 'oid' | 'id'>
-  >]: Setting[K] | (() => string)
+  [K in Exclude<keyof Setting, keyof SettingRelationType | keyof Pick<Setting, 'oid' | 'id'>>]:
+  | Setting[K]
+  | (() => string)
 }
 
 export type SettingSortType = {

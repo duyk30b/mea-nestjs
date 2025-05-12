@@ -29,7 +29,7 @@ export default class TicketUser {
   @Expose()
   userId: number
 
-  @Column({ type: 'smallint', default: InteractType.Ticket })
+  @Column({ type: 'smallint', default: 1 })
   @Expose()
   interactType: InteractType
 
@@ -61,7 +61,7 @@ export default class TicketUser {
   @Expose()
   quantity: number
 
-  @Column({ type: 'smallint', default: CommissionCalculatorType.VND })
+  @Column({ type: 'smallint', default: 1 }) // TODO TODO ...
   @Expose()
   commissionCalculatorType: CommissionCalculatorType
 

@@ -48,6 +48,9 @@ export class ReceiptRefundPrepaymentOperation {
         oid,
         id: receipt.distributorId,
       })
+      if (!distributor) {
+        throw new Error(`Nhà cung cấp không tồn tại trên hệ thống`)
+      }
       const distributorCloseDebt = distributor.debt
       const distributorOpenDebt = distributor.debt
 

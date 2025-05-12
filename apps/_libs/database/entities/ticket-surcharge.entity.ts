@@ -27,7 +27,9 @@ export default class TicketSurcharge extends BaseEntity {
   money: number
 
   @Expose()
-  @ManyToOne((type) => Ticket, { createForeignKeyConstraints: false })
+  @ManyToOne((type) => Ticket, (ticket) => ticket.ticketSurchargeList, {
+    createForeignKeyConstraints: false,
+  })
   @JoinColumn({ name: 'ticketId', referencedColumnName: 'id' })
   ticket: Ticket
 

@@ -18,6 +18,22 @@ import User from './user.entity'
   'id',
 ])
 export default class ProductMovement extends BaseEntity {
+  @Column({ type: 'smallint' })
+  @Expose()
+  movementType: MovementType
+
+  @Column({ default: 0 }) // ID customer hoặc ID distributor
+  @Expose()
+  contactId: number
+
+  @Column() // ticketId hoặc receiptId
+  @Expose()
+  voucherId: number
+
+  @Column({ default: 0 }) // ticketProductId hoặc ID receiptItemId
+  @Expose()
+  voucherProductId: number
+
   @Column({ default: 0 })
   @Expose()
   warehouseId: number
@@ -26,21 +42,17 @@ export default class ProductMovement extends BaseEntity {
   @Expose()
   productId: number
 
-  @Column() // ID ticket hoặc ID receipt
+  @Column({ default: 0 })
   @Expose()
-  voucherId: number
-
-  @Column({ default: 0 }) // ID customer hoặc ID distributor
-  @Expose()
-  contactId: number
-
-  @Column({ type: 'smallint' })
-  @Expose()
-  movementType: MovementType
+  batchId: number
 
   @Column({ type: 'smallint', default: 0 })
   @Expose()
   isRefund: 0 | 1
+
+  @Column({ type: 'smallint', default: 1 })
+  @Expose()
+  unitRate: number
 
   @Column({
     type: 'decimal',
@@ -72,17 +84,13 @@ export default class ProductMovement extends BaseEntity {
   @Expose()
   closeQuantity: number
 
-  @Column({ type: 'smallint', default: 1 })
-  @Expose()
-  unitRate: number
-
   @Column({
     type: 'bigint',
     default: 0,
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  actualPrice: number // Giá
+  costPrice: number
 
   @Column({
     type: 'bigint',
@@ -98,7 +106,7 @@ export default class ProductMovement extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  costPrice: number
+  actualPrice: number // Giá
 
   @Column({
     type: 'bigint',

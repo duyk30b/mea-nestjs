@@ -16,11 +16,11 @@ export * from './ticket-base/ticket-pay-debt.operation'
 export * from './ticket-base/ticket-payment-and-close.operation'
 export * from './ticket-base/ticket-prepayment.operation'
 export * from './ticket-base/ticket-refund-money.operation'
+export * from './ticket-base/ticket-reopen.operation'
+export * from './ticket-base/ticket-return-product.operation'
 export * from './ticket-base/ticket-send-product.operation'
 export * from './ticket-base/ticket-statistic.operation'
 
-export * from './ticket-clinic/ticket-clinic-reopen.operation'
-export * from './ticket-clinic/ticket-clinic-return-product.operation'
 export * from './ticket-clinic/ticket-clinic-update-information.operation'
 
 export * from './ticket-clinic/ticket-procedure/ticket-clinic-add-ticket-procedure.operation'
@@ -47,10 +47,7 @@ export * from './ticket-clinic/ticket-user/ticket-clinic-update-ticket-user.oper
 
 export * from './ticket-user/ticket-user.operation'
 
-export * from './ticket-order/ticket-order-cancel.operation'
-export * from './ticket-order/ticket-order-debt-success-update.operation'
 export * from './ticket-order/ticket-order-draft-approved.operation'
 export * from './ticket-order/ticket-order-draft.operation'
-export * from './ticket-order/ticket-order-return.operation'
 
 export * from './ticket-user/ticket-user-change-list.manager'

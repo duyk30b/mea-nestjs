@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
-import { IsDefined, IsNumber, IsString } from 'class-validator'
+import { IsDefined, IsIn, IsNumber, IsString } from 'class-validator'
 import { valuesEnum } from '../../../../../_libs/common/helpers/typescript.helper'
 import {
   IsEnumValue,
@@ -15,23 +15,23 @@ export class TicketOrderProductDraft {
   @IsNumber()
   priority: number
 
-  @ApiProperty({ example: 12 })
+  @ApiProperty({ example: 1 })
   @Expose()
   @IsDefined()
-  @IsNumber()
-  productId: number
-
-  @ApiProperty({ example: 12 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  batchId: number
+  @IsIn([0, 1])
+  hasInventoryImpact: 0 | 1
 
   @ApiProperty({ example: 12 })
   @Expose()
   @IsDefined()
   @IsNumber()
   warehouseId: number
+
+  @ApiProperty({ example: 12 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  productId: number
 
   @ApiPropertyOptional({ example: 1 })
   @Expose()
@@ -49,7 +49,7 @@ export class TicketOrderProductDraft {
   @Expose()
   @IsDefined()
   @IsNumber()
-  costPrice: number
+  costAmount: number
 
   @ApiProperty({ example: 25_000 })
   @Expose()

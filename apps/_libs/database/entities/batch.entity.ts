@@ -5,8 +5,12 @@ import Product from './product.entity'
 
 @Entity('Batch')
 @Index('IDX_Batch__oid_productId', ['oid', 'productId'])
-@Index('IDX_Batch__oid_updatedAt', ['oid', 'updatedAt'])
+@Index('IDX_Batch__oid_registeredAt', ['oid', 'registeredAt'])
 export default class Batch extends BaseEntity {
+  @Column({ default: 0 })
+  @Expose()
+  warehouseId: number
+
   @Column()
   @Expose()
   productId: number
@@ -14,10 +18,6 @@ export default class Batch extends BaseEntity {
   @Column({ default: 0 })
   @Expose()
   distributorId: number
-
-  @Column({ default: 0 })
-  @Expose()
-  warehouseId: number
 
   @Column({ type: 'varchar', length: 255, default: '' })
   @Expose()
@@ -35,6 +35,16 @@ export default class Batch extends BaseEntity {
   expiryDate: number
 
   @Column({
+    type: 'decimal',
+    default: 0,
+    precision: 10,
+    scale: 3,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  quantity: number
+
+  @Column({
     type: 'bigint',
     default: 0,
     transformer: {
@@ -46,14 +56,15 @@ export default class Batch extends BaseEntity {
   costPrice: number // Giá nhập
 
   @Column({
-    type: 'decimal',
+    type: 'bigint',
     default: 0,
-    precision: 10,
-    scale: 3,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
   })
   @Expose()
-  quantity: number
+  registeredAt: number
 
   @Column({
     type: 'bigint',
@@ -77,9 +88,10 @@ export default class Batch extends BaseEntity {
     Object.assign(entity, raw)
 
     entity.expiryDate = raw.expiryDate == null ? raw.expiryDate : Number(raw.expiryDate)
-    entity.costPrice = Number(raw.costPrice)
     entity.quantity = Number(raw.quantity)
+    entity.costPrice = Number(raw.costPrice)
 
+    entity.registeredAt = raw.registeredAt == null ? raw.registeredAt : Number(raw.registeredAt)
     entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)
 
     return entity
@@ -102,11 +114,12 @@ export type BatchInsertType = Omit<
 export type BatchUpdateType = {
   [K in Exclude<
     keyof Batch,
-    | keyof BatchRelationType
-    | keyof Pick<Batch, 'oid' | 'id' | 'productId' | 'distributorId' | 'updatedAt'>
+    keyof BatchRelationType | keyof Pick<Batch, 'oid' | 'id' | 'productId' | 'distributorId'>
   >]: Batch[K] | (() => string)
 }
 
 export type BatchSortType = {
-  [P in keyof Pick<Batch, 'id' | 'quantity' | 'expiryDate'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<Batch, 'id' | 'productId' | 'quantity' | 'expiryDate' | 'registeredAt'>]?:
+  | 'ASC'
+  | 'DESC'
 }

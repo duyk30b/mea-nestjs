@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { DTimer } from '../../../common/helpers/time.helper'
+import { ESTimer } from '../../../common/helpers/time.helper'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { DeliveryStatus } from '../../common/variable'
 import { TicketAttributeInsertType } from '../../entities/ticket-attribute.entity'
@@ -12,7 +12,16 @@ import {
 import { TicketProductInsertType, TicketProductType } from '../../entities/ticket-product.entity'
 import { TicketSurchargeInsertType } from '../../entities/ticket-surcharge.entity'
 import { TicketInsertType, TicketStatus, TicketType } from '../../entities/ticket.entity'
-import { TicketExpenseManager, TicketLaboratoryManager, TicketManager, TicketProcedureManager, TicketProductManager, TicketRadiologyManager, TicketSurchargeManager, TicketUserManager } from '../../managers'
+import {
+  TicketExpenseManager,
+  TicketLaboratoryManager,
+  TicketManager,
+  TicketProcedureManager,
+  TicketProductManager,
+  TicketRadiologyManager,
+  TicketSurchargeManager,
+  TicketUserManager,
+} from '../../managers'
 import { TicketAttributeManager } from '../../managers/ticket-attribute.manager'
 import {
   TicketOrderDraftInsertType,
@@ -37,14 +46,18 @@ export class TicketOrderDraftOperation {
     private ticketUserManager: TicketUserManager
   ) { }
 
-  async create<T extends TicketOrderDraftInsertType>(params: {
+  async create<
+    T extends TicketOrderDraftInsertType,
+    U extends TicketOrderProductDraftType,
+    X extends TicketOrderProcedureDraftType,
+  >(params: {
     oid: number
     ticketOrderDraftInsertDto: NoExtra<TicketOrderDraftInsertType, T>
-    ticketOrderProductDraftListDto: TicketOrderProductDraftType[]
-    ticketOrderProcedureDraftListDto: TicketOrderProcedureDraftType[]
+    ticketOrderProductDraftListDto: NoExtra<TicketOrderProductDraftType, U>[]
+    ticketOrderProcedureDraftListDto: NoExtra<TicketOrderProcedureDraftType, X>[]
     ticketOrderSurchargeDraftListDto: TicketOrderSurchargeDraftType[]
     ticketOrderExpenseDraftListDto: TicketOrderExpenseDraftType[]
-    ticketAttributeDraftListDto: { key: string; value: any }[]
+    ticketAttributeDraftListDto?: { key: string; value: any }[]
   }) {
     const {
       oid,
@@ -67,9 +80,9 @@ export class TicketOrderDraftOperation {
         debt: ticketOrderDraftInsertDto.totalMoney,
         registeredAt,
         startedAt: registeredAt,
-        year: DTimer.info(registeredAt, 7).year,
-        month: DTimer.info(registeredAt, 7).month + 1,
-        date: DTimer.info(registeredAt, 7).date,
+        year: ESTimer.info(registeredAt, 7).year,
+        month: ESTimer.info(registeredAt, 7).month + 1,
+        date: ESTimer.info(registeredAt, 7).date,
         endedAt: null,
       }
 
@@ -85,6 +98,7 @@ export class TicketOrderDraftOperation {
             deliveryStatus: DeliveryStatus.Pending,
             quantityPrescription: i.quantity,
             type: TicketProductType.Prescription,
+            costAmount: i.costAmount, // tính lãi tạm thời, chỉ có thể tính chính xác khi gửi hàng, lúc đó tính cost theo từng lô hàng
           }
           return ticketProduct
         })
@@ -132,7 +146,7 @@ export class TicketOrderDraftOperation {
         await this.ticketExpenseManager.insertMany(manager, ticketExpenseListInsert)
       }
 
-      if (ticketAttributeDraftListDto.length) {
+      if (ticketAttributeDraftListDto?.length) {
         const ticketAttributeListInsert = ticketAttributeDraftListDto.map((i) => {
           const ticketAttribute: TicketAttributeInsertType = {
             ...i,

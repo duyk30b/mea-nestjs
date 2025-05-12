@@ -143,42 +143,6 @@ export class TicketUserChangeListManager {
     return { ticketUserInsertList, ticketUserDestroyList }
   }
 
-  async changeQuantity(options: {
-    manager: EntityManager
-    information: {
-      oid: number
-      ticketId: number
-      interactType: InteractType
-      interactId: number
-    }
-    dataChange?: { ticketItemId: number; quantity: number }[]
-  }) {
-    const { manager, information, dataChange } = options
-    const { oid, ticketId } = information
-
-    const updateResult: [any[], number] = await manager.query(
-      `
-      UPDATE  "TicketUser"
-      SET     "quantity"  = temp."quantity"
-      FROM (VALUES `
-      + dataChange
-        .map(({ ticketItemId, quantity }) => {
-          return `(${ticketItemId}, ${quantity})`
-        })
-        .join(', ')
-      + `   ) AS temp("roleId", "userId", "quantity")
-      WHERE   "TicketUser"."id"          = ${oid}
-          AND "TicketUser"."ticketId"     = ${ticketId}
-          AND "TicketUser"."interactType" = ${information.interactType}
-          AND "TicketUser"."interactId"   = ${information.interactId}
-          AND "TicketUser"."ticketItemId" = temp."ticketItemId"
-      RETURNING "TicketUser".*;
-      `
-    )
-    const ticketUserUpdateList = TicketUser.fromRaws(updateResult[0])
-    return { ticketUserUpdateList }
-  }
-
   // changeList theo cách cũ đang lỗi logic nếu thay đổi giá tiền
   // async changeList(options: {
   //   manager: EntityManager

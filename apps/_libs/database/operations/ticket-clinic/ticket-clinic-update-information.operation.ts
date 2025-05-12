@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { DTimer } from '../../../common/helpers/time.helper'
+import { ESTimer } from '../../../common/helpers/time.helper'
 import { Ticket, TicketUser } from '../../entities'
 import { InteractType } from '../../entities/commission.entity'
 import { TicketManager } from '../../managers'
@@ -46,9 +46,9 @@ export class TicketClinicUpdateInformationOperation {
           customerSourceId: information ? information.customerSourceId : undefined,
           customType: information ? information.customType : undefined,
 
-          year: information ? DTimer.info(information.registeredAt, 7).year : undefined,
-          month: information ? DTimer.info(information.registeredAt, 7).month + 1 : undefined,
-          date: information ? DTimer.info(information.registeredAt, 7).date : undefined,
+          year: information ? ESTimer.info(information.registeredAt, 7).year : undefined,
+          month: information ? ESTimer.info(information.registeredAt, 7).month + 1 : undefined,
+          date: information ? ESTimer.info(information.registeredAt, 7).date : undefined,
           updatedAt: Date.now(),
         }
       )

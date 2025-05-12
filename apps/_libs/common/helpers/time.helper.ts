@@ -1,4 +1,4 @@
-export class DTimer {
+export class ESTimer {
   static startOfDate = (time: string | number | Date, utcOffset?: number) => {
     if (typeof time !== 'object') time = new Date(time) // time: '2023-09-20T22:39:46.711Z'
     if (utcOffset == null) utcOffset = time.getTimezoneOffset() / -60 // getTimezoneOffset: -420

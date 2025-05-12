@@ -130,7 +130,7 @@ export class ApiTicketClinicRadiologyService {
       this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
         ticketId,
         ticketUserDestroyList: result.ticketUserChangeList.ticketUserDestroyList,
-        ticketUserInsertList: result.ticketUserChangeList.ticketUserInsertList,
+        ticketUserUpsertList: result.ticketUserChangeList.ticketUserInsertList,
       })
     }
     return { data: true }
@@ -188,7 +188,7 @@ export class ApiTicketClinicRadiologyService {
       this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
         ticketId,
         ticketUserDestroyList: ticketUserChangeList.ticketUserDestroyList,
-        ticketUserInsertList: ticketUserChangeList.ticketUserInsertList,
+        ticketUserUpsertList: ticketUserChangeList.ticketUserInsertList,
       })
     }
     return { data: true }

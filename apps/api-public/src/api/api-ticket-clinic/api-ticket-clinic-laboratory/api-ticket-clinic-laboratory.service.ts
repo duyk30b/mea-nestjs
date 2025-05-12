@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
+import { TicketLaboratoryStatus } from '../../../../../_libs/database/common/variable'
 import { TicketLaboratoryResult } from '../../../../../_libs/database/entities'
 import { TicketLaboratoryResultInsertType } from '../../../../../_libs/database/entities/ticket-laboratory-result.entity'
-import { TicketLaboratoryStatus } from '../../../../../_libs/database/entities/ticket-laboratory.entity'
 import {
   TicketClinicAddSelectLaboratoryOperation,
   TicketClinicChangeSelectLaboratoryOperation,
@@ -150,7 +150,7 @@ export class ApiTicketClinicLaboratoryService {
       this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
         ticketId,
         ticketUserDestroyList: result.ticketUserChangeList.ticketUserDestroyList,
-        ticketUserInsertList: result.ticketUserChangeList.ticketUserInsertList,
+        ticketUserUpsertList: result.ticketUserChangeList.ticketUserInsertList,
       })
     }
     return { data: true }

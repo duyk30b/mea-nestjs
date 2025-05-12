@@ -6,7 +6,7 @@ import { DistributorPaymentInsertType } from '../../entities/distributor-payment
 
 @Injectable()
 export class ReceiptPrepaymentOperation {
-  constructor(private dataSource: DataSource) { }
+  constructor(private dataSource: DataSource) {}
 
   async prepayment(params: { oid: number; receiptId: number; time: number; money: number }) {
     const { oid, receiptId, time, money } = params
@@ -46,6 +46,9 @@ export class ReceiptPrepaymentOperation {
           oid,
           id: receipt.distributorId,
         })
+        if (!distributor) {
+          throw new Error(`Nhà cung cấp không tồn tại trên hệ thống`)
+        }
         const distributorCloseDebt = distributor.debt
         const distributorOpenDebt = distributor.debt
 

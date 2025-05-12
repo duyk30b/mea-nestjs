@@ -18,7 +18,6 @@ export class ApiTicketProductService {
         oid,
         customerId: filter?.customerId,
         productId: filter?.productId,
-        batchId: filter?.batchId,
         ticketId: filter?.ticketId,
         deliveryStatus: filter?.deliveryStatus,
       },

@@ -4,7 +4,7 @@ import { OAuth2Client } from 'google-auth-library'
 import { drive_v3, google } from 'googleapis'
 import * as stream from 'stream'
 import { FileUploadDto } from '../../../_libs/common/dto/file'
-import { DTimer } from '../../../_libs/common/helpers/time.helper'
+import { ESTimer } from '../../../_libs/common/helpers/time.helper'
 import { GoogleDriverConfig } from './google-driver.config'
 
 @Injectable()
@@ -381,7 +381,7 @@ export class GoogleDriverService {
             + '-'
             + customerId
             + '-'
-            + DTimer.timeToText(now + index, 'YYYY-MM-DD-hh-mm-ss-xxx'),
+            + ESTimer.timeToText(now + index, 'YYYY-MM-DD-hh-mm-ss-xxx'),
         })
       })
     )

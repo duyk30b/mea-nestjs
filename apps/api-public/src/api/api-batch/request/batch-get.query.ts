@@ -28,7 +28,7 @@ export class BatchGetQuery {
 
   @ApiPropertyOptional({
     type: String,
-    example: JSON.stringify(<BatchFilterQuery>{ isActive: 1, quantity: { GT: 10 } }),
+    example: JSON.stringify(<BatchFilterQuery>{ quantity: { GT: 10 } }),
   })
   @Expose()
   @Transform(({ value }) => {
@@ -66,11 +66,11 @@ export class BatchGetQuery {
   sort?: BatchSortQuery
 }
 
-export class BatchPaginationQuery extends IntersectionType(BatchGetQuery, PaginationQuery) {}
+export class BatchPaginationQuery extends IntersectionType(BatchGetQuery, PaginationQuery) { }
 
 export class BatchGetManyQuery extends IntersectionType(
   PickType(BatchGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
-) {}
+) { }
 
-export class BatchGetOneQuery extends PickType(BatchGetQuery, ['relation']) {}
+export class BatchGetOneQuery extends PickType(BatchGetQuery, ['relation']) { }

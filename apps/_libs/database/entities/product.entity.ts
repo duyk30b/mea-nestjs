@@ -1,6 +1,14 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
+import { Exclude, Expose } from 'class-transformer'
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm'
 import Batch from './batch.entity'
 import Commission from './commission.entity'
 import ProductGroup from './product-group.entity'
@@ -8,7 +16,20 @@ import ProductGroup from './product-group.entity'
 @Entity('Product')
 @Index('IDX_Product__oid_brandName', ['oid', 'brandName'])
 @Index('IDX_Product__oid_substance', ['oid', 'substance'])
-export default class Product extends BaseEntity {
+@Unique('UNIQUE_Product__oid_code', ['oid', 'code'])
+export default class Product {
+  @Column({ name: 'oid' })
+  @Exclude()
+  oid: number
+
+  @PrimaryGeneratedColumn({ name: 'id' })
+  @Expose({ name: 'id' })
+  id: number
+
+  @Column({ default: 0 })
+  @Expose()
+  code: number
+
   @Column({ type: 'varchar', length: 255 })
   @Expose()
   brandName: string // Tên biệt dược
@@ -161,5 +182,5 @@ export type ProductUpdateType = {
 }
 
 export type ProductSortType = {
-  [P in keyof Pick<Product, 'id' | 'quantity' | 'brandName'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<Product, 'id' | 'code' | 'quantity' | 'brandName'>]?: 'ASC' | 'DESC'
 }

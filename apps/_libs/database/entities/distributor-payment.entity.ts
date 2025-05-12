@@ -64,7 +64,9 @@ export default class DistributorPayment extends BaseEntity {
   description: string
 
   @Expose()
-  @ManyToOne((type) => Receipt, { createForeignKeyConstraints: false })
+  @ManyToOne((type) => Receipt, (receipt) => receipt.distributorPaymentList, {
+    createForeignKeyConstraints: false,
+  })
   @JoinColumn({ name: 'receiptId', referencedColumnName: 'id' })
   receipt: Receipt
 
@@ -99,8 +101,7 @@ export type DistributorPaymentInsertType = Omit<
 export type DistributorPaymentUpdateType = {
   [K in Exclude<
     keyof DistributorPayment,
-    | keyof DistributorPaymentRelationType
-    | keyof Pick<DistributorPayment, 'oid' | 'id'>
+    keyof DistributorPaymentRelationType | keyof Pick<DistributorPayment, 'oid' | 'id'>
   >]: DistributorPayment[K] | (() => string)
 }
 

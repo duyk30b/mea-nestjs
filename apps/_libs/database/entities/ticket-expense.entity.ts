@@ -27,7 +27,9 @@ export default class TicketExpense extends BaseEntity {
   money: number
 
   @Expose()
-  @ManyToOne((type) => Ticket, { createForeignKeyConstraints: false })
+  @ManyToOne((type) => Ticket, (ticket) => ticket.ticketExpenseList, {
+    createForeignKeyConstraints: false,
+  })
   @JoinColumn({ name: 'ticketId', referencedColumnName: 'id' })
   ticket: Ticket
 

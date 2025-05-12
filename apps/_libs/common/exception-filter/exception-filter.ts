@@ -3,6 +3,7 @@ import {
   Catch,
   ExceptionFilter,
   ForbiddenException,
+  HttpException,
   HttpStatus,
   Logger,
   NotFoundException,
@@ -97,6 +98,11 @@ export class ServerExceptionFilter implements ExceptionFilter {
       case ForbiddenException.name: {
         statusCode = HttpStatus.FORBIDDEN
         message = i18n.translate('common.Forbidden')
+        break
+      }
+      case HttpException.name: {
+        statusCode = (exception as any).status
+        message = i18n.translate(exception.message as any, {})
         break
       }
     }

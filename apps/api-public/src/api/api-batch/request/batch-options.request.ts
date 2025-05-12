@@ -1,5 +1,5 @@
 import { Expose, Transform, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsOptional, ValidateNested } from 'class-validator'
+import { IsArray, IsBoolean, IsIn, IsOptional, ValidateNested } from 'class-validator'
 import {
   ConditionNumber,
   ConditionTimestamp,
@@ -16,16 +16,27 @@ export class BatchFilterQuery {
   @Expose()
   @Transform(transformConditionNumber)
   @IsOptional()
+  id: number | ConditionNumber
+
+  @Expose()
+  @Transform(transformConditionNumber)
+  @IsOptional()
+  warehouseId: number | ConditionNumber
+
+  @Expose()
+  @Transform(transformConditionNumber)
+  @IsOptional()
+  distributorId: number | ConditionNumber
+
+  @Expose()
+  @Transform(transformConditionNumber)
+  @IsOptional()
   productId: number | ConditionNumber
 
   @Expose()
   @Type(() => ConditionNumber)
   @ValidateNested({ each: true })
   quantity: ConditionNumber
-
-  @Expose()
-  @IsIn([0, 1])
-  isActive: 0 | 1
 
   @Expose()
   @Type(() => ConditionTimestamp)
@@ -36,10 +47,29 @@ export class BatchFilterQuery {
   @Type(() => ConditionTimestamp)
   @ValidateNested({ each: true })
   updatedAt: ConditionTimestamp
+
+  @Expose()
+  @Type(() => ConditionTimestamp)
+  @ValidateNested({ each: true })
+  registeredAt: ConditionTimestamp
+
+  @Expose()
+  @Type(() => BatchFilterQuery)
+  @IsArray()
+  @ValidateNested({ each: true })
+  $OR: BatchFilterQuery[]
 }
 
 export class BatchSortQuery extends SortQuery {
   @Expose()
   @IsIn(['ASC', 'DESC'])
   expiryDate: 'ASC' | 'DESC'
+
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  registeredAt: 'ASC' | 'DESC'
+
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  productId: 'ASC' | 'DESC'
 }

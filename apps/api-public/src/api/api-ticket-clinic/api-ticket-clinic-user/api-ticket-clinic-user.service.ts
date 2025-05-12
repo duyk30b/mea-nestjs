@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import { InteractType } from '../../../../../_libs/database/entities/commission.entity'
 import {
   TicketClinicDestroyTicketUserOperation,
   TicketClinicUpdateInformationOperation,
@@ -39,26 +38,26 @@ export class ApiTicketClinicUserService {
   }
 
   async updateTicketUser(options: {
-      oid: number
-      ticketId: number
-      ticketUserId: number
-      body: TicketClinicUpdateTicketUserBody
-    }) {
-      const { oid, ticketId, ticketUserId, body } = options
-      const result = await this.ticketClinicUpdateTicketUserOperation.updateTicketUser({
-        oid,
-        ticketId,
-        ticketUserId,
-        ticketUserUpdateDto: body,
-      })
-  
-      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket: result.ticket })
-      this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
-        ticketId,
-        ticketUserUpdate: result.ticketUser,
-      })
-      return { data: true }
-    }
+    oid: number
+    ticketId: number
+    ticketUserId: number
+    body: TicketClinicUpdateTicketUserBody
+  }) {
+    const { oid, ticketId, ticketUserId, body } = options
+    const result = await this.ticketClinicUpdateTicketUserOperation.updateTicketUser({
+      oid,
+      ticketId,
+      ticketUserId,
+      ticketUserUpdateDto: body,
+    })
+
+    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket: result.ticket })
+    this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
+      ticketId,
+      ticketUserUpsertList: [result.ticketUser],
+    })
+    return { data: true }
+  }
 
   async updateTicketUserItem(options: {
     oid: number
@@ -85,7 +84,7 @@ export class ApiTicketClinicUserService {
       this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
         ticketId,
         ticketUserDestroyList: ticketUserChangeList.ticketUserDestroyList,
-        ticketUserInsertList: ticketUserChangeList.ticketUserInsertList,
+        ticketUserUpsertList: ticketUserChangeList.ticketUserInsertList,
       })
     }
     return { data: { ticket } }

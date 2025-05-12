@@ -76,6 +76,10 @@ export class ProductFilterQueryFull extends ProductFilterQuery {
 export class ProductSortQuery extends SortQuery {
   @Expose()
   @IsIn(['ASC', 'DESC'])
+  code: 'ASC' | 'DESC'
+
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
   brandName: 'ASC' | 'DESC'
 
   @Expose()

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { Cell, Workbook, Worksheet } from 'exceljs'
-import { DTimer } from '../../../../_libs/common/helpers/time.helper'
+import { ESTimer } from '../../../../_libs/common/helpers/time.helper'
 import { Customer, Organization, User } from '../../../../_libs/database/entities'
 import { CustomerRepository } from '../../../../_libs/database/repositories/customer.repository'
 import { excelOneSheetWorkbook } from '../../../../_libs/file/excel-one-sheet.util'
@@ -125,7 +125,7 @@ export class ApiCustomerExcel {
         worksheet.mergeCells(4, 1, 4, 12)
 
         worksheet
-          .addRow([`Thời gian: ${DTimer.timeToText(new Date(), 'hh:mm:ss DD/MM/YYYY', 7)}`])
+          .addRow([`Thời gian: ${ESTimer.timeToText(new Date(), 'hh:mm:ss DD/MM/YYYY', 7)}`])
           .eachCell((cell) => {
             cell.font = {
               size: 12,

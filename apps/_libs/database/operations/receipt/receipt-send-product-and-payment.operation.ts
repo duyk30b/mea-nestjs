@@ -3,11 +3,9 @@ import { DataSource } from 'typeorm'
 import { arrayToKeyValue } from '../../../common/helpers/object.helper'
 import { MovementType, PaymentType, ReceiptStatus } from '../../common/variable'
 import { Batch, Distributor, Product } from '../../entities'
-import { BatchMovementInsertType } from '../../entities/batch-movement.entity'
 import { DistributorPaymentInsertType } from '../../entities/distributor-payment.entity'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
 import {
-  BatchMovementManager,
   DistributorManager,
   DistributorPaymentManager,
   ProductMovementManager,
@@ -23,8 +21,7 @@ export class ReceiptSendProductAndPaymentOperation {
     private distributorManager: DistributorManager,
     private distributorPaymentManager: DistributorPaymentManager,
     private receiptItemManager: ReceiptItemManager,
-    private productMovementManager: ProductMovementManager,
-    private batchMovementManager: BatchMovementManager
+    private productMovementManager: ProductMovementManager
   ) { }
 
   async start(params: { oid: number; receiptId: number; time: number; money: number }) {
@@ -71,6 +68,9 @@ export class ReceiptSendProductAndPaymentOperation {
       // Lịch sử thanh toán, Trường hợp đơn 0 đồng, 0 nợ thì không VẪN ghi thanh toán
       if (!distributor) {
         distributor = await manager.findOneBy(Distributor, { oid, id: receipt.distributorId })
+      }
+      if (!distributor) {
+        throw new Error(`Nhà cung cấp không tồn tại trên hệ thống`)
       }
       const distributorCloseDebt = distributor.debt
       const distributorOpenDebt = distributorCloseDebt - receipt.debt
@@ -219,27 +219,29 @@ export class ReceiptSendProductAndPaymentOperation {
       })
 
       // === 8. PRODUCT_MOVEMENT: insert ===
-      const productMovementInsertList = receiptItemList.map((receiptItem) => {
-        const productCalculator = productCalculatorMap[receiptItem.productId]
+      const productMovementInsertList = receiptItemList.map((ri) => {
+        const productCalculator = productCalculatorMap[ri.productId]
         // vẫn có thể productCalculator null vì Product chuyển từ có quản lý sang không quản lý số lượng
         const productMovementInsert: ProductMovementInsertType = {
           oid,
-          warehouseId: receiptItem.warehouseId,
-          productId: receiptItem.productId,
-          voucherId: receiptId,
-          contactId: receiptItem.distributorId,
-          createdAt: time,
           movementType: MovementType.Receipt,
+          contactId: ri.distributorId,
+          voucherId: receiptId,
+          voucherProductId: ri.id,
+          warehouseId: ri.warehouseId,
+          productId: ri.productId,
+          batchId: ri.batchId,
           isRefund: 0,
-          unitRate: receiptItem.unitRate,
-          costPrice: receiptItem.costPrice,
-          actualPrice: receiptItem.costPrice,
-          expectedPrice: receiptItem.costPrice,
+          unitRate: ri.unitRate,
+          costPrice: ri.costPrice,
+          expectedPrice: ri.costPrice,
+          actualPrice: ri.costPrice,
           openQuantity: productCalculator ? productCalculator.openQuantity : 0, // quantity đã được trả đúng số lượng ban đầu ở trên
-          quantity: receiptItem.quantity,
+          quantity: ri.quantity,
           closeQuantity: productCalculator
-            ? productCalculator.openQuantity + receiptItem.quantity
+            ? productCalculator.openQuantity + ri.quantity
             : 0,
+          createdAt: time,
         }
         // sau khi lấy rồi cần cập nhật productCalculator vì 1 sản phẩm có thể bán 2 số lượng với 2 giá khác nhau
         // trường hợp noHasManageQuantity thì bỏ qua
@@ -249,34 +251,6 @@ export class ReceiptSendProductAndPaymentOperation {
         return productMovementInsert
       })
       await this.productMovementManager.insertMany(manager, productMovementInsertList)
-
-      // === 8. BATCH_MOVEMENT: insert ===
-      const batchMovementInsertList = receiptItemList.map((receiptItem) => {
-        const batchCalculator = batchCalculatorMap[receiptItem.batchId]
-        // vẫn có thể batchCalculator null vì Product chuyển từ có quản lý sang không quản lý số lượng
-        const batchMovementInsert: BatchMovementInsertType = {
-          oid,
-          warehouseId: receiptItem.warehouseId,
-          batchId: receiptItem.batchId,
-          productId: receiptItem.productId,
-          voucherId: receiptId,
-          contactId: receipt.distributorId,
-          createdAt: time,
-          movementType: MovementType.Receipt,
-          isRefund: 0,
-          unitRate: receiptItem.unitRate,
-          actualPrice: receiptItem.costPrice,
-          expectedPrice: receiptItem.costPrice,
-          openQuantity: batchCalculator ? batchCalculator.openQuantity : 0, // quantity đã được trả đúng số lượng ban đầu ở trên
-          quantity: receiptItem.quantity,
-          closeQuantity: batchCalculator ? batchCalculator.openQuantity + receiptItem.quantity : 0,
-        }
-        if (batchCalculator) {
-          batchCalculator.openQuantity = batchMovementInsert.closeQuantity
-        }
-        return batchMovementInsert
-      })
-      await this.batchMovementManager.insertMany(manager, batchMovementInsertList)
 
       return { receipt, receiptItemList, distributor, productList, batchList }
     })

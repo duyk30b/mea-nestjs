@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager, FindOptionsWhere, In } from 'typeorm'
-import { DTimer } from '../../../common/helpers/time.helper'
+import { ESTimer } from '../../../common/helpers/time.helper'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { ReceiptStatus } from '../../common/variable'
 import { Receipt, ReceiptItem } from '../../entities'
@@ -30,9 +30,9 @@ export class ReceiptDraftOperation {
         status: ReceiptStatus.Draft,
         paid: 0,
         debt: receiptInsertDto.totalMoney,
-        year: DTimer.info(receiptInsertDto.startedAt, 7).year,
-        month: DTimer.info(receiptInsertDto.startedAt, 7).month + 1,
-        date: DTimer.info(receiptInsertDto.startedAt, 7).date,
+        year: ESTimer.info(receiptInsertDto.startedAt, 7).year,
+        month: ESTimer.info(receiptInsertDto.startedAt, 7).month + 1,
+        date: ESTimer.info(receiptInsertDto.startedAt, 7).date,
         endedAt: null,
       }
 
@@ -80,9 +80,9 @@ export class ReceiptDraftOperation {
         status: ReceiptStatus.Draft,
         paid: 0,
         debt: receiptUpdateDto.totalMoney,
-        year: DTimer.info(receiptUpdateDto.startedAt as number, 7).year,
-        month: DTimer.info(receiptUpdateDto.startedAt as number, 7).month + 1,
-        date: DTimer.info(receiptUpdateDto.startedAt as number, 7).date,
+        year: ESTimer.info(receiptUpdateDto.startedAt as number, 7).year,
+        month: ESTimer.info(receiptUpdateDto.startedAt as number, 7).month + 1,
+        date: ESTimer.info(receiptUpdateDto.startedAt as number, 7).date,
         endedAt: null,
       }
       const receiptUpdateResult = await manager

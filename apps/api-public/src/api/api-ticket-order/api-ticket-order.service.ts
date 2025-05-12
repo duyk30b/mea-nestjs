@@ -1,28 +1,33 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
+import { DeliveryStatus } from '../../../../_libs/database/common/variable'
 import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import {
-  TicketOrderCancelOperation,
-  TicketOrderDebtSuccessUpdateOperation,
   TicketOrderDraftApprovedOperation,
   TicketOrderDraftOperation,
-  TicketOrderReturnOperation,
   TicketPayDebtOperation,
   TicketPaymentAndCloseOperation,
   TicketPrepaymentOperation,
   TicketRefundMoneyOperation,
+  TicketReopenOperation,
+  TicketReturnProductOperation,
   TicketSendProductOperation,
 } from '../../../../_libs/database/operations'
-import { TicketProductRepository, TicketRepository } from '../../../../_libs/database/repositories'
+import {
+  CustomerPaymentRepository,
+  TicketBatchRepository,
+  TicketProductRepository,
+  TicketRepository,
+} from '../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../socket/socket-emit.service'
+import { TicketReturnProductListBody } from '../api-ticket/request'
 import {
   TicketOrderDebtSuccessInsertBody,
   TicketOrderDebtSuccessUpdateBody,
   TicketOrderDraftApprovedUpdateBody,
   TicketOrderDraftInsertBody,
   TicketOrderPaymentBody,
-  TicketOrderReturnBody,
 } from './request'
 
 @Injectable()
@@ -31,17 +36,18 @@ export class ApiTicketOrderService {
     private readonly socketEmitService: SocketEmitService,
     private readonly cacheDataService: CacheDataService,
     private readonly ticketProductRepository: TicketProductRepository,
+    private readonly ticketBatchRepository: TicketBatchRepository,
     private readonly ticketOrderDraftOperation: TicketOrderDraftOperation,
     private readonly ticketOrderDraftApprovedOperation: TicketOrderDraftApprovedOperation,
-    private readonly ticketOrderDebtSuccessUpdateOperation: TicketOrderDebtSuccessUpdateOperation,
     private readonly ticketPaymentAndCloseOperation: TicketPaymentAndCloseOperation,
     private readonly ticketSendProductOperation: TicketSendProductOperation,
     private readonly ticketRepository: TicketRepository,
     private readonly ticketPrepaymentOperation: TicketPrepaymentOperation,
     private readonly ticketPayDebtOperation: TicketPayDebtOperation,
     private readonly ticketRefundMoneyOperation: TicketRefundMoneyOperation,
-    private readonly ticketOrderCancelOperation: TicketOrderCancelOperation,
-    private readonly ticketOrderReturnOperation: TicketOrderReturnOperation
+    private readonly ticketReopenOperation: TicketReopenOperation,
+    private readonly ticketReturnProductOperation: TicketReturnProductOperation,
+    private readonly customerPaymentRepository: CustomerPaymentRepository
   ) { }
 
   async createDraft(params: {
@@ -67,7 +73,7 @@ export class ApiTicketOrderService {
         ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList,
         ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
         ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
-        ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
+        // ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
       })
       return { data: { ticket } }
     } catch (error: any) {
@@ -100,7 +106,7 @@ export class ApiTicketOrderService {
         ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList,
         ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
         ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
-        ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
+        // ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
       })
       return { data: { ticket } }
     } catch (error: any) {
@@ -133,24 +139,19 @@ export class ApiTicketOrderService {
       ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList,
       ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
       ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
-      ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
+      // ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
     })
 
     const ticketId = createDraftResponse.ticket.id
 
     if (body.ticketOrderProductDraftList.length) {
-      const allowNegativeQuantity = await this.cacheDataService.getSettingAllowNegativeQuantity(oid)
-      const sendProductResponse = await this.ticketSendProductOperation.sendProduct({
+      const sendProductResponse = await this.sendAllProduct({
         oid,
         ticketId,
-        time,
-        allowNegativeQuantity,
       })
-      this.socketEmitService.batchListUpdate(oid, {
-        batchList: sendProductResponse.batchList,
-      })
+
       this.socketEmitService.productListUpdate(oid, {
-        productList: sendProductResponse.productList,
+        productList: sendProductResponse.productModifiedList,
       })
     }
 
@@ -174,35 +175,69 @@ export class ApiTicketOrderService {
     body: TicketOrderDebtSuccessUpdateBody
   }): Promise<BaseResponse> {
     const { oid, userId, ticketId, body } = params
-    try {
-      const allowNegativeQuantity = await this.cacheDataService.getSettingAllowNegativeQuantity(oid)
-      const { ticket, batchList, productList } =
-        await this.ticketOrderDebtSuccessUpdateOperation.update({
-          oid,
-          ticketId,
-          ticketOrderDebtSuccessUpdate: {
-            ...body.ticketOrderDebtSuccessUpdate,
-            customType: 0,
-            customerSourceId: 0,
-            laboratoryMoney: 0,
-            radiologyMoney: 0,
-            dailyIndex: 0,
-            commissionMoney: 0,
-            imageIds: JSON.stringify([]),
-          },
-          ticketOrderProductDraftList: body.ticketOrderProductDraftList,
-          ticketOrderProcedureDraftList: body.ticketOrderProcedureDraftList,
-          ticketOrderSurchargeDraftList: body.ticketOrderSurchargeDraftList,
-          ticketOrderExpenseDraftList: body.ticketOrderExpenseDraftList,
-          description: 'Sửa đơn',
-          allowNegativeQuantity,
-        })
-      this.socketEmitService.batchListUpdate(oid, { batchList })
-      this.socketEmitService.productListUpdate(oid, { productList })
-      return { data: { ticket } }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+    const time = Date.now()
+    const promiseData = await Promise.all([
+      this.ticketRepository.findOneBy({ oid, id: ticketId }),
+      this.ticketProductRepository.findManyBy({ oid, ticketId }),
+    ])
+    let ticket = promiseData[0]
+    const ticketProductList = promiseData[1]
+
+    if ([TicketStatus.Draft, TicketStatus.Schedule].includes(ticket.ticketStatus)) {
+      return { data: { ticketId } }
     }
+    if ([TicketStatus.Debt, TicketStatus.Completed].includes(ticket.ticketStatus)) {
+      const responseReopen = await this.ticketReopenOperation.reopen({
+        oid,
+        ticketId,
+        time,
+        description: 'Sửa đơn',
+      })
+      ticket = responseReopen.ticket
+    }
+    const responseReturnAllProduct = await this.returnAllProduct({ oid, ticketId })
+
+    ticket = await this.ticketRepository.updateOneAndReturnEntity(
+      { oid, id: ticketId },
+      {
+        ticketStatus: TicketStatus.Prepayment,
+      }
+    )
+    const { paid: paidBody, ...ticketBodyUpdate } = body.ticketOrderDebtSuccessUpdate
+    // không update paid, giữ nguyên số tiền trước update, trả paid thêm vào ở dưới cùng
+    const responseUpdate = await this.ticketOrderDraftApprovedOperation.update({
+      oid,
+      ticketId,
+      ticketOrderDraftApprovedUpdateDto: {
+        ...ticketBodyUpdate,
+        customType: 0,
+        customerSourceId: 0,
+        laboratoryMoney: 0,
+        radiologyMoney: 0,
+        dailyIndex: 0,
+        commissionMoney: 0,
+        imageIds: JSON.stringify([]),
+      },
+      ticketOrderProductDraftListDto: body.ticketOrderProductDraftList,
+      ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList,
+      ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
+      ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
+    })
+    ticket = responseUpdate.ticket
+
+    const responseSendAllProduct = await this.sendAllProduct({ ticketId, oid })
+    if (responseSendAllProduct.ticket) {
+      ticket = responseSendAllProduct.ticket
+    }
+
+    await this.ticketPaymentAndCloseOperation.paymentAndClose({
+      oid,
+      ticketId,
+      time,
+      money: paidBody - ticket.paid, // trả thêm tiền ở đây
+    })
+
+    return { data: { ticketId } }
   }
 
   async prepayment(options: {
@@ -233,13 +268,12 @@ export class ApiTicketOrderService {
     const { oid, ticketId, money } = params
     const time = Date.now()
     try {
-      const allowNegativeQuantity = await this.cacheDataService.getSettingAllowNegativeQuantity(oid)
-      const { productList, batchList } = await this.ticketSendProductOperation.sendProduct({
+      const { productModifiedList } = await this.sendAllProduct({
         oid,
         ticketId,
-        time,
-        allowNegativeQuantity,
       })
+      this.socketEmitService.productListUpdate(oid, { productList: productModifiedList })
+
       const { ticket, customer, customerPayment } =
         await this.ticketPaymentAndCloseOperation.paymentAndClose({
           oid,
@@ -247,13 +281,11 @@ export class ApiTicketOrderService {
           time,
           money,
         })
-      this.socketEmitService.batchListUpdate(oid, { batchList })
-      this.socketEmitService.productListUpdate(oid, { productList })
       if (customer) {
         this.socketEmitService.customerUpsert(oid, { customer })
       }
       const ticketProductList = await this.ticketProductRepository.findMany({
-        relation: { product: true, batch: true },
+        relation: { product: true },
         condition: {
           oid,
           ticketId,
@@ -322,55 +354,54 @@ export class ApiTicketOrderService {
   async sendProduct(params: { oid: number; ticketId: number }): Promise<BaseResponse> {
     const { oid, ticketId } = params
     const time = Date.now()
-    try {
-      const allowNegativeQuantity = await this.cacheDataService.getSettingAllowNegativeQuantity(oid)
-      const { ticket, productList, batchList } = await this.ticketSendProductOperation.sendProduct({
+
+    const { ticket, productModifiedList } = await this.sendAllProduct({ oid, ticketId })
+
+    const ticketProductList = await this.ticketProductRepository.findMany({
+      relation: { product: true },
+      condition: {
         oid,
         ticketId,
-        time,
-        allowNegativeQuantity,
-      })
+      },
+      sort: { id: 'ASC' },
+    })
 
-      const ticketProductList = await this.ticketProductRepository.findMany({
-        relation: { product: true, batch: true },
-        condition: {
-          oid,
-          ticketId,
-        },
-        sort: { id: 'ASC' },
-      })
-
-      this.socketEmitService.batchListUpdate(oid, { batchList })
-      this.socketEmitService.productListUpdate(oid, { productList })
-      return { data: { ticket, ticketProductList } }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
+    this.socketEmitService.productListUpdate(oid, { productList: productModifiedList })
+    return { data: { ticket, ticketProductList } }
   }
 
   async returnProduct(params: {
     oid: number
     ticketId: number
-    body: TicketOrderReturnBody
+    body: TicketReturnProductListBody
   }): Promise<BaseResponse> {
     const { oid, ticketId, body } = params
     try {
-      const { ticket, productList, batchList, customer, customerPayment } =
-        await this.ticketOrderReturnOperation.return({
+      const time = Date.now()
+      const promiseData = await Promise.all([
+        this.ticketRepository.findOneBy({ oid, id: ticketId }),
+      ])
+      let ticket = promiseData[0]
+      if ([TicketStatus.Debt, TicketStatus.Completed].includes(ticket.ticketStatus)) {
+        const result = await this.ticketReopenOperation.reopen({
           oid,
           ticketId,
-          time: Date.now(),
-          description: 'Trả hàng',
-          ...body,
+          time,
+          description: 'Hoàn trả',
         })
-
-      this.socketEmitService.batchListUpdate(oid, { batchList })
-      this.socketEmitService.productListUpdate(oid, { productList })
-      if (customer) {
-        this.socketEmitService.customerUpsert(oid, { customer })
+        ticket = result.ticket
       }
 
-      return { data: { ticket, customerPayment } }
+      const result = await this.ticketReturnProductOperation.returnProduct({
+        oid,
+        ticketId,
+        time: Date.now(),
+        returnList: body.returnList,
+      })
+      this.socketEmitService.productListUpdate(oid, { productList: result.productModifiedList })
+      ticket = result.ticket
+
+      return { data: { ticket } }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
@@ -400,14 +431,54 @@ export class ApiTicketOrderService {
 
   async cancel(options: { oid: number; ticketId: number }): Promise<BaseResponse> {
     const { oid, ticketId } = options
+    const time = Date.now()
+    const promiseData = await Promise.all([
+      this.ticketRepository.findOneBy({ oid, id: ticketId }),
+      this.ticketProductRepository.findManyBy({ oid, ticketId }),
+    ])
+    let ticket = promiseData[0]
+    const ticketProductList = promiseData[1]
 
-    const { ticket, customerPayment } = await this.ticketOrderCancelOperation.cancel({
-      oid,
-      ticketId,
-      time: Date.now(),
-      description: 'Hủy phiếu',
+    if ([TicketStatus.Draft, TicketStatus.Schedule].includes(ticket.ticketStatus)) {
+      await this.ticketRepository.destroy({ oid, ticketId })
+      return { data: { ticketId } }
+    }
+    if ([TicketStatus.Debt, TicketStatus.Completed].includes(ticket.ticketStatus)) {
+      const result = await this.ticketReopenOperation.reopen({
+        oid,
+        ticketId,
+        time,
+        description: 'Hủy phiếu',
+      })
+      ticket = result.ticket
+    }
+
+    const responseReturnProduct = await this.returnAllProduct({ oid, ticketId })
+    if (responseReturnProduct.ticket) {
+      ticket = responseReturnProduct.ticket
+    }
+
+    if (ticket.paid) {
+      const result = await this.ticketRefundMoneyOperation.refundMoney({
+        oid,
+        ticketId,
+        time,
+        money: ticket.paid,
+      })
+      ticket = result.ticket
+    }
+
+    ticket = await this.ticketRepository.updateOneAndReturnEntity(
+      { oid, id: ticketId },
+      {
+        ticketStatus: TicketStatus.Cancelled,
+      }
+    )
+    const customerPaymentList = await this.customerPaymentRepository.findMany({
+      condition: { oid, ticketId },
+      sort: { id: 'ASC' },
     })
-    return { data: { ticket, customerPayment } }
+    return { data: { ticket, customerPaymentList } }
   }
 
   async destroy(params: { oid: number; ticketId: number }): Promise<BaseResponse> {
@@ -415,6 +486,64 @@ export class ApiTicketOrderService {
     try {
       await this.ticketRepository.destroy({ oid, ticketId })
       return { data: { ticketId } }
+    } catch (error: any) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+    }
+  }
+
+  async sendAllProduct(params: { oid: number; ticketId: number }) {
+    const { oid, ticketId } = params
+    const time = Date.now()
+    try {
+      const allowNegativeQuantity = await this.cacheDataService.getSettingAllowNegativeQuantity(oid)
+      const sendList = await this.ticketSendProductOperation.autoGenerateSendList({
+        oid,
+        ticketId,
+        allowNegativeQuantity,
+      })
+      if (sendList.length) {
+        const { ticket, productModifiedList } = await this.ticketSendProductOperation.sendProduct({
+          oid,
+          ticketId,
+          time,
+          sendList,
+          allowNegativeQuantity,
+        })
+        return { ticket, productModifiedList }
+      } else {
+        return {}
+      }
+    } catch (error: any) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+    }
+  }
+
+  async returnAllProduct(params: { oid: number; ticketId: number }) {
+    const { oid, ticketId } = params
+    try {
+      const time = Date.now()
+      const ticketBatchList = await this.ticketBatchRepository.findManyBy({
+        oid,
+        ticketId,
+        deliveryStatus: DeliveryStatus.Delivered,
+      })
+      const returnList = ticketBatchList.map((i) => ({
+        ticketProductId: i.ticketProductId,
+        ticketBatchId: i.id,
+        quantity: i.quantity,
+      }))
+
+      if (returnList.length) {
+        const { ticket } = await this.ticketReturnProductOperation.returnProduct({
+          oid,
+          ticketId,
+          time,
+          returnList,
+        })
+        return { ticket }
+      } else {
+        return {}
+      }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }

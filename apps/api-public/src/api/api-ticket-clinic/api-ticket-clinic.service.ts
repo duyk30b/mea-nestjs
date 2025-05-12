@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
-import { DTimer } from '../../../../_libs/common/helpers/time.helper'
+import { ESTimer } from '../../../../_libs/common/helpers/time.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { DeliveryStatus } from '../../../../_libs/database/common/variable'
 import { Customer } from '../../../../_libs/database/entities'
@@ -13,12 +13,12 @@ import { TicketRadiologyStatus } from '../../../../_libs/database/entities/ticke
 import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import {
   TicketChangeDiscountOperation,
-  TicketClinicReopenOperation,
   TicketClinicUpdateInformationOperation,
   TicketPayDebtOperation,
   TicketPaymentAndCloseOperation,
   TicketPrepaymentOperation,
   TicketRefundMoneyOperation,
+  TicketReopenOperation,
   TicketUserOperation,
 } from '../../../../_libs/database/operations'
 import {
@@ -53,7 +53,7 @@ export class ApiTicketClinicService {
     private readonly ticketPrepaymentOperation: TicketPrepaymentOperation,
     private readonly ticketPaymentAndCloseOperation: TicketPaymentAndCloseOperation,
     private readonly ticketPayDebtOperation: TicketPayDebtOperation,
-    private readonly ticketClinicReopenOperation: TicketClinicReopenOperation,
+    private readonly ticketReopenOperation: TicketReopenOperation,
     private readonly ticketUserOperation: TicketUserOperation,
     private readonly ticketClinicUpdateInformationOperation: TicketClinicUpdateInformationOperation
   ) { }
@@ -90,9 +90,9 @@ export class ApiTicketClinicService {
       customType: body.ticketInformation.customType,
 
       dailyIndex: countToday + 1,
-      year: DTimer.info(registeredAt, 7).year,
-      month: DTimer.info(registeredAt, 7).month + 1,
-      date: DTimer.info(registeredAt, 7).date,
+      year: ESTimer.info(registeredAt, 7).year,
+      month: ESTimer.info(registeredAt, 7).month + 1,
+      date: ESTimer.info(registeredAt, 7).date,
     })
     ticket.customer = customer
 
@@ -186,7 +186,7 @@ export class ApiTicketClinicService {
       this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
         ticketId,
         ticketUserDestroyList: ticketUserChangeList.ticketUserDestroyList,
-        ticketUserInsertList: ticketUserChangeList.ticketUserInsertList,
+        ticketUserUpsertList: ticketUserChangeList.ticketUserInsertList,
       })
     }
     return { data: true }
@@ -198,7 +198,7 @@ export class ApiTicketClinicService {
       {
         oid,
         id: ticketId,
-        ticketStatus: { IN: [TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Approved] },
+        ticketStatus: { IN: [TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Prepayment] },
       },
       {
         ticketStatus: TicketStatus.Executing,
@@ -219,9 +219,12 @@ export class ApiTicketClinicService {
     const { oid, ticketId, body, files } = options
     const { imagesChange, ticketAttributeChangeList, ticketAttributeKeyList } = body
 
+    let ticket = await this.ticketRepository.updateOneAndReturnEntity(
+      { oid, id: ticketId },
+      { note: body.note }
+    )
     // 1. Update Ticket Image
     if (imagesChange) {
-      let ticket = await this.ticketRepository.findOneBy({ oid, id: ticketId })
       const imageIdsUpdate = await this.imageManagerService.changeImageList({
         oid,
         customerId: ticket.customerId,
@@ -243,8 +246,6 @@ export class ApiTicketClinicService {
         imageIds.forEach((i) => {
           ticket.imageList.push(imageMap[i])
         })
-
-        this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
       }
     }
 
@@ -276,7 +277,7 @@ export class ApiTicketClinicService {
         ticketAttributeList,
       })
     }
-
+    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
     return { data: true }
   }
 
@@ -377,7 +378,7 @@ export class ApiTicketClinicService {
   async reopen(params: { oid: number; ticketId: number }) {
     const { oid, ticketId } = params
     try {
-      const { ticket, customer } = await this.ticketClinicReopenOperation.reopen({
+      const { ticket, customer } = await this.ticketReopenOperation.reopen({
         oid,
         ticketId,
         time: Date.now(),

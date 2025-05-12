@@ -9,6 +9,7 @@ import {
   BatchGetManyQuery,
   BatchGetOneQuery,
   BatchInsertBody,
+  BatchMergeBody,
   BatchPaginationQuery,
   BatchUpdateInfoAndQuantityBody,
   BatchUpdateInfoBody,
@@ -22,7 +23,7 @@ export class ApiBatchController {
 
   @Get('pagination')
   @HasPermission(PermissionId.BATCH_READ)
-  pagination(@External() { oid }: TExternal, @Query() query: BatchPaginationQuery) {
+  async pagination(@External() { oid }: TExternal, @Query() query: BatchPaginationQuery) {
     return this.apiBatchService.pagination(oid, query)
   }
 
@@ -68,10 +69,16 @@ export class ApiBatchController {
     return await this.apiBatchService.updateInfoAndQuantity({ oid, batchId: id, body, userId: uid })
   }
 
+  @Patch('merge-batch')
+  @HasPermission(PermissionId.BATCH_MERGE)
+  async batchMerge(@External() { oid, uid }: TExternal, @Body() body: BatchMergeBody) {
+    return await this.apiBatchService.batchMerge({ oid, body })
+  }
+
   @Delete('destroy/:id')
   @HasPermission(PermissionId.PRODUCT_DELETE)
   @ApiParam({ name: 'id', example: 1 })
-  async deleteOne(@External() { oid, organization }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiBatchService.destroyOne({ organization, oid, batchId: id })
+  async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiBatchService.destroyOne({ oid, batchId: id })
   }
 }

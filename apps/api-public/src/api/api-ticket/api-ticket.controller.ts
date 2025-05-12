@@ -5,11 +5,7 @@ import { HasPermissionOr } from '../../../../_libs/common/guards/permission.guar
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
 import { ApiTicketService } from './api-ticket.service'
-import {
-  TicketGetManyQuery,
-  TicketGetOneQuery,
-  TicketPaginationQuery,
-} from './request'
+import { TicketGetManyQuery, TicketGetOneQuery, TicketPaginationQuery } from './request'
 
 @ApiTags('Ticket')
 @ApiBearerAuth('access-token')
@@ -36,6 +32,6 @@ export class ApiTicketController {
     @Param() { id }: IdParam,
     @Query() query: TicketGetOneQuery
   ) {
-    return await this.apiTicketService.getOne(oid, id, query)
+    return await this.apiTicketService.queryOne(oid, id, query)
   }
 }

@@ -1,9 +1,15 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
+import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { arrayToKeyArray, uniqueArray } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { Batch, Distributor, Product } from '../../../../_libs/database/entities'
+import { Distributor, Product } from '../../../../_libs/database/entities'
 import { BatchInsertType } from '../../../../_libs/database/entities/batch.entity'
+import {
+  BatchCostPriceRule,
+  BatchDistributorIdRule,
+  BatchWarehouseIdRule,
+} from '../../../../_libs/database/entities/setting.entity'
 import {
   ReceiptCancelOperation,
   ReceiptDraftOperation,
@@ -27,6 +33,7 @@ import {
 export class ApiReceiptService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
+    private readonly cacheDataService: CacheDataService,
     private readonly receiptRepository: ReceiptRepository,
     private readonly receiptDraft: ReceiptDraftOperation,
     private readonly receiptPrepaymentOperation: ReceiptPrepaymentOperation,
@@ -88,6 +95,7 @@ export class ApiReceiptService {
         distributorPaymentList: !!relation?.distributorPaymentList,
         receiptItemList: relation?.receiptItemList,
       },
+      relationLoadStrategy: 'query',
     })
     if (!receipt) {
       throw new BusinessException('error.Database.NotFound')
@@ -107,9 +115,30 @@ export class ApiReceiptService {
     return { data: receipt }
   }
 
+  async getBatchSettingDefault(oid: number) {
+    const [settingMap, settingMapRoot] = await Promise.all([
+      this.cacheDataService.getSettingMap(oid),
+      this.cacheDataService.getSettingMap(1),
+    ])
+    const batchSettingCommon = settingMap.BATCH_SETTING || {}
+    const batchSettingRoot = settingMapRoot.BATCH_SETTING || {}
+    if (batchSettingCommon.warehouseId == BatchWarehouseIdRule.Inherit) {
+      batchSettingCommon.warehouseId = batchSettingRoot.warehouseId
+    }
+    if (batchSettingCommon.distributorId == BatchDistributorIdRule.Inherit) {
+      batchSettingCommon.distributorId = batchSettingRoot.distributorId
+    }
+    if (batchSettingCommon.costPrice == BatchCostPriceRule.Inherit) {
+      batchSettingCommon.costPrice = batchSettingRoot.costPrice
+    }
+    return batchSettingCommon
+  }
+
   async createDraft(params: { oid: number; body: ReceiptUpsertBody }): Promise<BaseResponse> {
     const { oid, body } = params
     // tự động chọn lô
+    const batchSettingDefault = await this.getBatchSettingDefault(oid)
+
     const { receipt, receiptItemList, distributorId } = body
     const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId)
     const batchList = await this.batchRepository.findManyBy({
@@ -121,11 +150,23 @@ export class ApiReceiptService {
     receiptItemList.forEach((receiptItem) => {
       if (receiptItem.batchId) return
       const batchFind = (batchListMap[receiptItem.productId] || []).find((batch) => {
-        if (batch.distributorId != distributorId) return false
-        if (batch.warehouseId != receiptItem.warehouseId) return false
-        if (batch.lotNumber != receiptItem.lotNumber) return false
-        if (batch.expiryDate != receiptItem.expiryDate) return false
-        if (batch.costPrice != receiptItem.costPrice) return false
+        if (batch.distributorId != distributorId) {
+          if (batchSettingDefault.distributorId === BatchDistributorIdRule.SplitOnDifferent) {
+            return false
+          }
+        }
+        if (batch.warehouseId != receiptItem.warehouseId) {
+          if (batchSettingDefault.warehouseId === BatchWarehouseIdRule.SplitOnDifferent) {
+            return false
+          }
+        }
+        if (batch.expiryDate != receiptItem.expiryDate) return false // khác hạn sử dụng thì luôn tách phiên bản
+
+        if (batch.costPrice != receiptItem.costPrice) {
+          if (batchSettingDefault.costPrice === BatchCostPriceRule.SplitOnDifferent) {
+            return false
+          }
+        }
         return true
       })
       if (batchFind) {
@@ -143,6 +184,7 @@ export class ApiReceiptService {
         lotNumber: receiptItem.lotNumber,
         expiryDate: receiptItem.expiryDate,
         costPrice: receiptItem.costPrice,
+        registeredAt: Date.now(),
       }
       return batchInsert
     })
@@ -169,7 +211,7 @@ export class ApiReceiptService {
     body: ReceiptUpsertBody
   }): Promise<BaseResponse> {
     const { oid, receiptId, body } = params
-
+    const batchSettingDefault = await this.getBatchSettingDefault(oid)
     // tự động chọn lô
     const { receipt, receiptItemList, distributorId } = body
     const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId)
@@ -182,10 +224,23 @@ export class ApiReceiptService {
     receiptItemList.forEach((receiptItem) => {
       if (receiptItem.batchId) return
       const batchFind = (batchListMap[receiptItem.productId] || []).find((batch) => {
-        if (batch.warehouseId != receiptItem.warehouseId) return false
-        if (batch.lotNumber != receiptItem.lotNumber) return false
-        if (batch.expiryDate != receiptItem.expiryDate) return false
-        if (batch.costPrice != receiptItem.costPrice) return false
+        if (batch.distributorId != distributorId) {
+          if (batchSettingDefault.distributorId === BatchDistributorIdRule.SplitOnDifferent) {
+            return false
+          }
+        }
+        if (batch.warehouseId != receiptItem.warehouseId) {
+          if (batchSettingDefault.warehouseId === BatchWarehouseIdRule.SplitOnDifferent) {
+            return false
+          }
+        }
+        if (batch.expiryDate != receiptItem.expiryDate) return false // khác hạn sử dụng thì luôn tách phiên bản
+
+        if (batch.costPrice != receiptItem.costPrice) {
+          if (batchSettingDefault.costPrice === BatchCostPriceRule.SplitOnDifferent) {
+            return false
+          }
+        }
         return true
       })
       if (batchFind) {
@@ -203,6 +258,7 @@ export class ApiReceiptService {
         lotNumber: receiptItem.lotNumber,
         expiryDate: receiptItem.expiryDate,
         costPrice: receiptItem.costPrice,
+        registeredAt: Date.now(),
       }
       return batchInsert
     })
@@ -389,17 +445,14 @@ export class ApiReceiptService {
 
   async emitSocketAfterChangeProductAndDistributor(
     oid: number,
-    data: { distributor: Distributor; productList: Product[]; batchList: Batch[] }
+    data: { distributor: Distributor; productList: Product[] }
   ) {
-    const { distributor, productList, batchList } = data
+    const { distributor, productList } = data
     if (distributor) {
       this.socketEmitService.distributorUpsert(oid, { distributor })
     }
     if (productList.length) {
       this.socketEmitService.productListUpdate(oid, { productList })
-    }
-    if (batchList.length) {
-      this.socketEmitService.batchListUpdate(oid, { batchList })
     }
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
-import { DTimer } from '../../../common/helpers/time.helper'
+import { ESTimer } from '../../../common/helpers/time.helper'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { DeliveryStatus } from '../../common/variable'
 import { TicketAttributeInsertType } from '../../entities/ticket-attribute.entity'
@@ -45,7 +45,7 @@ export class TicketOrderDraftApprovedOperation {
     private ticketSurchargeManager: TicketSurchargeManager,
     private ticketExpenseManager: TicketExpenseManager,
     private ticketUserManager: TicketUserManager
-  ) { }
+  ) {}
 
   async update<T extends TicketOrderDraftApprovedUpdateType>(params: {
     oid: number
@@ -55,7 +55,7 @@ export class TicketOrderDraftApprovedOperation {
     ticketOrderProcedureDraftListDto: TicketOrderProcedureDraftType[]
     ticketOrderSurchargeDraftListDto: TicketOrderSurchargeDraftType[]
     ticketOrderExpenseDraftListDto: TicketOrderExpenseDraftType[]
-    ticketAttributeDraftListDto: { key: string; value: any }[]
+    ticketAttributeDraftListDto?: { key: string; value: any }[]
   }) {
     const {
       oid,
@@ -74,15 +74,15 @@ export class TicketOrderDraftApprovedOperation {
         manager,
         { id: ticketId, oid },
         {
-          ...ticketOrderDraftApprovedUpdateDto as object,
+          ...ticketOrderDraftApprovedUpdateDto,
           // ticketStatus: TicketStatus.Draft, // giữ nguyên status
-          paid: 0,
-          debt: ticketOrderDraftApprovedUpdateDto.totalMoney,
+          // paid: 0, // giữ nguyên số tiền đã trả
+          debt: () => `${ticketOrderDraftApprovedUpdateDto.totalMoney} - paid`,
           registeredAt,
           startedAt: registeredAt,
-          year: DTimer.info(registeredAt, 7).year,
-          month: DTimer.info(registeredAt, 7).month + 1,
-          date: DTimer.info(registeredAt, 7).date,
+          year: ESTimer.info(registeredAt, 7).year,
+          month: ESTimer.info(registeredAt, 7).month + 1,
+          date: ESTimer.info(registeredAt, 7).date,
         }
       )
 
@@ -149,7 +149,7 @@ export class TicketOrderDraftApprovedOperation {
         await this.ticketExpenseManager.insertMany(manager, ticketExpenseListInsert)
       }
 
-      if (ticketAttributeDraftListDto.length) {
+      if (ticketAttributeDraftListDto?.length) {
         const ticketAttributeListInsert = ticketAttributeDraftListDto.map((i) => {
           const ticketAttribute: TicketAttributeInsertType = {
             ...i,

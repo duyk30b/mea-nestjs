@@ -4,7 +4,6 @@ import { IdParam } from '../../../../_libs/common/dto/param'
 import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
-import { ApiProductExcel } from './api-product.excel'
 import { ApiProductService } from './api-product.service'
 import {
   ProductCreateBody,
@@ -19,8 +18,7 @@ import {
 @Controller('product')
 export class ApiProductController {
   constructor(
-    private readonly apiProductService: ApiProductService,
-    private readonly apiProductExcel: ApiProductExcel
+    private readonly apiProductService: ApiProductService
   ) { }
 
   @Get('pagination')
@@ -66,11 +64,5 @@ export class ApiProductController {
   @ApiParam({ name: 'id', example: 1 })
   async deleteOne(@External() { oid, organization }: TExternal, @Param() { id }: IdParam) {
     return await this.apiProductService.destroyOne({ organization, oid, productId: id })
-  }
-
-  @Get('download-excel')
-  @HasPermission(PermissionId.PRODUCT_DOWNLOAD_EXCEL)
-  async downloadExcel(@External() { user, organization }: TExternal) {
-    return await this.apiProductExcel.downloadExcel({ organization, user })
   }
 }

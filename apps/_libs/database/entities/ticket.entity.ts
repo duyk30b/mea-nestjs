@@ -8,6 +8,7 @@ import CustomerSource from './customer-source.entity'
 import Customer from './customer.entity'
 import Image from './image.entity'
 import TicketAttribute from './ticket-attribute.entity'
+import TicketBatch from './ticket-batch.entity'
 import TicketExpense from './ticket-expense.entity'
 import TicketLaboratoryGroup from './ticket-laboratory-group.entity'
 import TicketLaboratoryResult from './ticket-laboratory-result.entity'
@@ -29,7 +30,7 @@ export enum TicketType {
 export enum TicketStatus {
   Schedule = 1,
   Draft = 2,
-  Approved = 3, // Prepayment
+  Prepayment = 3,
   Executing = 4,
   Debt = 5,
   Completed = 6,
@@ -259,6 +260,10 @@ export default class Ticket extends BaseEntity {
   @Expose()
   updatedAt: number
 
+  @Column({ type: 'varchar', length: 255, default: '' })
+  @Expose()
+  note: string // Tên dịch vụ
+
   @ManyToOne((type) => CustomerSource, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'customerSourceId', referencedColumnName: 'id' })
   @Expose()
@@ -293,6 +298,10 @@ export default class Ticket extends BaseEntity {
   @OneToMany(() => TicketProduct, (ticketProductPrescription) => ticketProductPrescription.ticket)
   @Expose()
   ticketProductPrescriptionList: TicketProduct[]
+
+  @OneToMany(() => TicketBatch, (ticketBatch) => ticketBatch.ticket)
+  @Expose()
+  ticketBatchList: TicketBatch[]
 
   @OneToMany(() => TicketProcedure, (ticketProcedure) => ticketProcedure.ticket)
   @Expose()
@@ -379,15 +388,19 @@ export type TicketRelationType = {
     | 'ticketExpenseList'
     | 'ticketSurchargeList'
     | 'customerPaymentList'
-    | 'toAppointment'
     | 'customerSource'
     | 'imageList'
+    | 'toAppointment'
   >]?: boolean
 } & {
   [P in keyof Pick<
     Ticket,
     'ticketProductList' | 'ticketProductConsumableList' | 'ticketProductPrescriptionList'
-  >]?: { [P in keyof Pick<TicketProduct, 'product' | 'batch'>]?: boolean } | false
+  >]?: { [P in keyof Pick<TicketProduct, 'product'>]?: boolean } | false
+} & {
+  [P in keyof Pick<Ticket, 'ticketBatchList'>]?:
+  | { [P in keyof Pick<TicketBatch, 'batch'>]?: boolean }
+  | false
 } & {
   [P in keyof Pick<Ticket, 'ticketProcedureList'>]?:
   | { [P in keyof Pick<TicketProcedure, 'procedure'>]?: boolean }

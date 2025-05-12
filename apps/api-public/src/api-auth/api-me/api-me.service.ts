@@ -31,6 +31,7 @@ export class ApiMeService {
         permissionIds,
         permissionAll,
         settingMap,
+        settingMapRoot,
         rootSetting: settingMapRoot.ROOT_SETTING,
       },
     }

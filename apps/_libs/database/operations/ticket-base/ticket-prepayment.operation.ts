@@ -33,7 +33,7 @@ export class TicketPrepaymentOperation {
             IN: [
               TicketStatus.Schedule,
               TicketStatus.Draft,
-              TicketStatus.Approved,
+              TicketStatus.Prepayment,
               TicketStatus.Executing,
             ],
           },
@@ -41,7 +41,7 @@ export class TicketPrepaymentOperation {
         {
           ticketStatus: () => `CASE 
               WHEN("ticketStatus" IN (${TicketStatus.Schedule}, ${TicketStatus.Draft})) 
-                  THEN ${TicketStatus.Approved} 
+                  THEN ${TicketStatus.Prepayment} 
               ELSE "ticketStatus"
             END
           `,
@@ -55,6 +55,9 @@ export class TicketPrepaymentOperation {
         oid,
         id: ticket.customerId,
       })
+      if (!customer) {
+        throw new Error(`Khách hàng không tồn tại trên hệ thống`)
+      }
       const customerCloseDebt = customer.debt
       const customerOpenDebt = customer.debt
 
