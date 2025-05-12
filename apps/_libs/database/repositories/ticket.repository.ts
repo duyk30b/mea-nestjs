@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, EntityManager, FindOptionsWhere, In, Repository } from 'typeorm'
-import { DTimer } from '../../common/helpers/time.helper'
+import { ESTimer } from '../../common/helpers/time.helper'
 import {
-  Appointment,
   Ticket,
   TicketAttribute,
+  TicketBatch,
   TicketExpense,
   TicketLaboratory,
+  TicketLaboratoryGroup,
+  TicketLaboratoryResult,
   TicketProcedure,
   TicketProduct,
   TicketRadiology,
@@ -51,9 +53,9 @@ export class TicketRepository extends _PostgreSqlRepository<
       .andWhere('ticket.oid = :oid', { oid: condition.oid })
 
     if (relation?.customer) query = query.leftJoinAndSelect('ticket.customer', 'customer')
-    if (relation?.customerPaymentList) {
-      query = query.leftJoinAndSelect('ticket.customerPaymentList', 'customerPayment')
-      query.addOrderBy('customerPayment.id', 'ASC')
+    if (relation?.paymentList) {
+      query = query.leftJoinAndSelect('ticket.paymentList', 'payment')
+      query.addOrderBy('payment.id', 'ASC')
     }
     if (relation?.ticketExpenseList) {
       query = query.leftJoinAndSelect('ticket.ticketExpenseList', 'ticketExpenseList')
@@ -64,15 +66,15 @@ export class TicketRepository extends _PostgreSqlRepository<
     if (relation?.ticketAttributeList) {
       query = query.leftJoinAndSelect('ticket.ticketAttributeList', 'ticketAttributeList')
     }
-    if (relation?.toAppointment) {
-      // dùng leftJoinAndMapOne vì có lỗi Appointment và Diagnosis cùng join với cột ID, typeOrm đang lỗi, chán thật
-      query = query.leftJoinAndMapOne(
-        'ticket.toAppointment',
-        Appointment,
-        'toAppointment',
-        'toAppointment.fromTicketId = ticket.id'
-      )
-    }
+    // if (relation?.toAppointment) {
+    //   // dùng leftJoinAndMapOne vì có lỗi Appointment và Diagnosis cùng join với cột ID, typeOrm đang lỗi, chán thật
+    //   query = query.leftJoinAndMapOne(
+    //     'ticket.toAppointment',
+    //     Appointment,
+    //     'toAppointment',
+    //     'toAppointment.fromTicketId = ticket.id'
+    //   )
+    // }
     if (relation?.ticketProductList) {
       query = query.leftJoinAndSelect('ticket.ticketProductList', 'ticketProduct')
       query.addOrderBy('ticketProduct.priority', 'ASC')
@@ -81,13 +83,6 @@ export class TicketRepository extends _PostgreSqlRepository<
           'ticketProduct.product',
           'ticketProduct_product',
           'ticketProduct.productId != 0'
-        )
-      }
-      if (relation?.ticketProductList.batch) {
-        query = query.leftJoinAndSelect(
-          'ticketProduct.batch',
-          'ticketProduct_batch',
-          'ticketProduct.batchId != 0'
         )
       }
     }
@@ -106,13 +101,6 @@ export class TicketRepository extends _PostgreSqlRepository<
           'ticketProductConsumable.productId != 0'
         )
       }
-      if (relation?.ticketProductConsumableList.batch) {
-        query = query.leftJoinAndSelect(
-          'ticketProductConsumable.batch',
-          'ticketProductConsumable_batch',
-          'ticketProductConsumable.batchId != 0'
-        )
-      }
     }
     if (relation?.ticketProductPrescriptionList) {
       query = query.leftJoinAndSelect(
@@ -129,11 +117,14 @@ export class TicketRepository extends _PostgreSqlRepository<
           'ticketProductPrescription.productId != 0'
         )
       }
-      if (relation?.ticketProductPrescriptionList.batch) {
+    }
+    if (relation?.ticketBatchList) {
+      query = query.leftJoinAndSelect('ticket.ticketBatchList', 'ticketBatch')
+      if (relation?.ticketBatchList.batch) {
         query = query.leftJoinAndSelect(
-          'ticketProductPrescription.batch',
-          'ticketProductPrescription_batch',
-          'ticketProductPrescription.batchId != 0'
+          'ticketBatch.batch',
+          'ticketBatch_batch',
+          'ticketBatch.batchId != 0'
         )
       }
     }
@@ -215,8 +206,8 @@ export class TicketRepository extends _PostgreSqlRepository<
     const number = await this.countBy({
       oid,
       registeredAt: {
-        GTE: DTimer.startOfDate(now, 7).getTime(),
-        LTE: DTimer.endOfDate(now, 7).getTime(),
+        GTE: ESTimer.startOfDate(now, 7).getTime(),
+        LTE: ESTimer.endOfDate(now, 7).getTime(),
       },
     })
     return number
@@ -228,21 +219,22 @@ export class TicketRepository extends _PostgreSqlRepository<
       const whereTicket: FindOptionsWhere<Ticket> = {
         id: ticketId,
         oid,
-        ticketStatus: In([TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Cancelled]),
+        status: In([TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Cancelled]),
       }
       const ticketDeleteResult = await manager.delete(Ticket, whereTicket)
       if (ticketDeleteResult.affected !== 1) {
         throw new Error(`Destroy Ticket ${ticketId} failed: Status invalid`)
       }
       await manager.delete(TicketAttribute, { oid, ticketId })
-      await manager.delete(TicketProduct, { oid, ticketId })
-      await manager.delete(TicketProcedure, { oid, ticketId })
-      await manager.delete(TicketRadiology, { oid, ticketId })
-      await manager.delete(TicketLaboratory, { oid, ticketId })
-
-      await manager.delete(TicketSurcharge, { oid, ticketId })
+      await manager.delete(TicketBatch, { oid, ticketId })
       await manager.delete(TicketExpense, { oid, ticketId })
-
+      await manager.delete(TicketLaboratory, { oid, ticketId })
+      await manager.delete(TicketLaboratoryGroup, { oid, ticketId })
+      await manager.delete(TicketLaboratoryResult, { oid, ticketId })
+      await manager.delete(TicketProcedure, { oid, ticketId })
+      await manager.delete(TicketProduct, { oid, ticketId })
+      await manager.delete(TicketRadiology, { oid, ticketId })
+      await manager.delete(TicketSurcharge, { oid, ticketId })
       await manager.delete(TicketUser, { oid, ticketId })
     })
   }

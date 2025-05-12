@@ -40,6 +40,7 @@
     "certbot",
     "datetime",
     "dpage",
+    "exceljs",
     "Fastify",
     "jdbc",
     "kafkajs",
@@ -50,13 +51,17 @@
     "Partitioner",
     "Partitioners",
     "pgadmin",
+    "Putaway",
     "redisinsight",
     "redislabs",
     "redlock",
     "taskkill",
     "typeorm",
     "virtuals",
-    "websockets"
+    "websockets",
+    "zalo"
   ],
-  "explorer.compactFolders": false
+  "explorer.compactFolders": false,
+  "workbench.editor.enablePreview": false,
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

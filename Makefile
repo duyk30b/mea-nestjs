@@ -1,11 +1,20 @@
 up: 
 	docker compose up -d --build
 
+clear-postgres:	
+	@echo "=== Dropping and recreating database mea_sql... ==="
+	docker compose exec postgres sh -c '\
+		psql -U mea -d postgres -c "DROP DATABASE IF EXISTS mea_sql;"; \
+		psql -U mea -d postgres -c "CREATE DATABASE mea_sql;"; \
+	'
+
 restore-postgres:
+	@echo "=== Restoring database from SQL file... ==="
 	docker compose exec postgres sh -c '\
 		ls -la /restore; \
-		psql "dbname=mea_sql user=mea password=Abc12345" < /restore/$$(ls -1 /restore); \
+		psql "dbname=mea_sql user=mea password=Abc12345" < /restore/$$(ls -1 /restore | head -n 1); \
 	'
+	@echo "=== Restore database from SQL file successfully !!! ==="
 
 production-up:
 	mkdir -p ./data/backup

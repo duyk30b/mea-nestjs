@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common'
+import { TicketLaboratoryStatus } from '../../../../../_libs/database/common/variable'
 import { TicketLaboratoryResult } from '../../../../../_libs/database/entities'
+import { InteractType } from '../../../../../_libs/database/entities/commission.entity'
 import { TicketLaboratoryResultInsertType } from '../../../../../_libs/database/entities/ticket-laboratory-result.entity'
-import { TicketLaboratoryStatus } from '../../../../../_libs/database/entities/ticket-laboratory.entity'
 import {
   TicketClinicAddSelectLaboratoryOperation,
   TicketClinicChangeSelectLaboratoryOperation,
@@ -15,6 +16,7 @@ import {
   TicketLaboratoryResultRepository,
 } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
+import { ApiTicketClinicUserService } from '../api-ticket-clinic-user/api-ticket-clinic-user.service'
 import {
   TicketClinicUpdatePriorityTicketLaboratoryBody,
   TicketClinicUpdateTicketLaboratoryBody,
@@ -33,7 +35,8 @@ export class ApiTicketClinicLaboratoryService {
     private readonly ticketClinicChangeSelectLaboratoryOperation: TicketClinicChangeSelectLaboratoryOperation,
     private readonly ticketClinicUpdateTicketLaboratoryOperation: TicketClinicUpdateTicketLaboratoryOperation,
     private readonly ticketClinicDestroyTicketLaboratoryOperation: TicketClinicDestroyTicketLaboratoryOperation,
-    private readonly ticketClinicDestroyTlgOperation: TicketClinicDestroyTicketLaboratoryGroupOperation
+    private readonly ticketClinicDestroyTlgOperation: TicketClinicDestroyTicketLaboratoryGroupOperation,
+    private readonly apiTicketClinicUserService: ApiTicketClinicUserService
   ) { }
 
   async upsertLaboratory(options: {
@@ -138,19 +141,25 @@ export class ApiTicketClinicLaboratoryService {
       ticketId,
       ticketLaboratoryId,
       ticketLaboratoryUpdateDto: body.ticketLaboratory,
-      ticketUserDto: body.ticketUserList,
     })
+    const { ticket, ticketLaboratory } = result
 
-    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket: result.ticket })
+    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
     this.socketEmitService.ticketClinicChangeLaboratory(oid, {
       ticketId,
-      ticketLaboratoryUpdateList: [result.ticketLaboratory],
+      ticketLaboratoryUpdateList: [ticketLaboratory],
     })
-    if (result.ticketUserChangeList) {
-      this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
+    if (body.ticketUserList) {
+      this.apiTicketClinicUserService.changeTicketUserList({
+        oid,
         ticketId,
-        ticketUserDestroyList: result.ticketUserChangeList.ticketUserDestroyList,
-        ticketUserInsertList: result.ticketUserChangeList.ticketUserInsertList,
+        body: {
+          interactType: InteractType.Laboratory,
+          interactId: ticketLaboratory.laboratoryId,
+          ticketItemId: ticketLaboratory.id,
+          quantity: 1,
+          ticketUserList: body.ticketUserList,
+        },
       })
     }
     return { data: true }

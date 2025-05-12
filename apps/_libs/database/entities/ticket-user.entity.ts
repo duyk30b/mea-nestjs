@@ -29,7 +29,7 @@ export default class TicketUser {
   @Expose()
   userId: number
 
-  @Column({ type: 'smallint', default: InteractType.Ticket })
+  @Column({ type: 'smallint', default: 1 })
   @Expose()
   interactType: InteractType
 
@@ -61,7 +61,7 @@ export default class TicketUser {
   @Expose()
   quantity: number
 
-  @Column({ type: 'smallint', default: CommissionCalculatorType.VND })
+  @Column({ type: 'smallint', default: 1 }) // TODO TODO ...
   @Expose()
   commissionCalculatorType: CommissionCalculatorType
 
@@ -152,6 +152,10 @@ export type TicketUserUpdateType = {
   >]: TicketUser[K] | (() => string)
 }
 
+export type TicketUserUpsertType = Omit<TicketUser, keyof TicketUserRelationType>
+
 export type TicketUserSortType = {
-  [P in keyof Pick<TicketUser, 'oid' | 'id' | 'createdAt'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<TicketUser, 'oid' | 'id' | 'createdAt' | 'interactType' | 'roleId'>]?:
+  | 'ASC'
+  | 'DESC'
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { DTimer } from '../../../../_libs/common/helpers/time.helper'
+import { ESTimer } from '../../../../_libs/common/helpers/time.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { StatisticReceiptOperation } from '../../../../_libs/database/operations/statistic/statistic-receipt.operation'
 import { StatisticTimeQuery } from './request'
@@ -21,14 +21,14 @@ export class ApiStatisticReceiptService {
     const dataMap: Record<string, (typeof data)[number]> = {}
     const date = new Date(fromTime.getTime())
     do {
-      const currentTime = DTimer.info(date, 7)
+      const currentTime = ESTimer.info(date, 7)
       let time = ''
       if (timeType === 'date') {
-        time = DTimer.timeToText(date, 'DD/MM/YYYY', 7)
+        time = ESTimer.timeToText(date, 'DD/MM/YYYY', 7)
         date.setDate(date.getDate() + 1)
       }
       if (timeType === 'month') {
-        time = DTimer.timeToText(date, 'MM/YYYY', 7)
+        time = ESTimer.timeToText(date, 'MM/YYYY', 7)
         date.setMonth(date.getMonth() + 1)
       }
       dataMap[time] = {

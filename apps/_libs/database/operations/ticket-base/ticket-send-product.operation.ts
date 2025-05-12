@@ -1,269 +1,247 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { arrayToKeyValue } from '../../../common/helpers/object.helper'
-import { DTimer } from '../../../common/helpers/time.helper'
+import { ESArray } from '../../../common/helpers/object.helper'
 import { DeliveryStatus, MovementType } from '../../common/variable'
-import { Batch, Product } from '../../entities'
-import { BatchMovementInsertType } from '../../entities/batch-movement.entity'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
+import { TicketBatchInsertType } from '../../entities/ticket-batch.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
 import {
-  BatchMovementManager,
-  ProductMovementManager,
-  TicketManager,
-  TicketProductManager,
+    BatchManager,
+    ProductManager,
+    ProductMovementManager,
+    TicketBatchManager,
+    TicketManager,
+    TicketProductManager,
 } from '../../managers'
+import { ProductPickingOperation } from '../product/product-picking.operation'
+import { TicketChangeItemMoneyManager } from './ticket-change-item-money.manager'
+
+export type SendItem = {
+  ticketProductId: number
+  productId: number
+  batchId: number // batchId = 0 là chỉ định cho nhiều lô, hoặc không lô nào cả
+  quantitySend: number
+  costAmountSend: number // ticketProduct không thể tính theo costPrice được, vì phải nhân chia theo costAmount của batch (costPrice gây sai lệch)
+  warehouseId: number
+}
 
 @Injectable()
 export class TicketSendProductOperation {
   constructor(
     private dataSource: DataSource,
     private ticketManager: TicketManager,
+    private productManager: ProductManager,
+    private batchManager: BatchManager,
     private ticketProductManager: TicketProductManager,
+    private ticketBatchManager: TicketBatchManager,
     private productMovementManager: ProductMovementManager,
-    private batchMovementManager: BatchMovementManager
+    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager,
+    private productPickingOperation: ProductPickingOperation
   ) { }
 
-  async sendProduct(params: {
+  async sendAllProduct(params: {
     oid: number
     ticketId: number
     time: number
     allowNegativeQuantity: boolean
   }) {
     const { oid, ticketId, time, allowNegativeQuantity } = params
-    const PREFIX = `TicketId = ${ticketId}, sendProductAndPayment failed`
+    const PREFIX = `TicketId = ${ticketId}, sendProduct failed`
+    const ERROR_LOGIC = `TicketId = ${ticketId}, sendProduct has a logic error occurred: `
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-      // === 1. UPDATE STATUS for TICKET ===
-      const ticket = await this.ticketManager.updateOneAndReturnEntity(
+      // 1. === UPDATE TRANSACTION for TICKET ===
+      let ticket = await this.ticketManager.updateOneAndReturnEntity(
         manager,
         {
           oid,
           id: ticketId,
-          ticketStatus: { IN: [TicketStatus.Draft, TicketStatus.Approved, TicketStatus.Executing] },
+          status: {
+            IN: [TicketStatus.Draft, TicketStatus.Deposited, TicketStatus.Executing],
+          },
         },
-        { ticketStatus: TicketStatus.Executing }
+        {
+          updatedAt: Date.now(),
+          status: TicketStatus.Executing,
+          deliveryStatus: DeliveryStatus.Delivered,
+        }
       )
+      const ticketProductOriginList = await this.ticketProductManager.findManyBy(manager, {
+        oid,
+        ticketId,
+        deliveryStatus: DeliveryStatus.Pending, // chỉ update những thằng "Pending" thôi
+      })
+      if (ticketProductOriginList.length === 0) {
+        return { ticket }
+      }
+      const ticketProductOriginMap = ESArray.arrayToKeyValue(ticketProductOriginList, 'id')
 
-      // === 2. UPDATE TICKET_PRODUCT ===
-      const ticketProductSendList = await this.ticketProductManager.updateAndReturnEntity(
+      // === 2. Product and Batch origin
+      const productIdList = ticketProductOriginList.map((i) => i.productId)
+      const productOriginList = await this.productManager.updateAndReturnEntity(
         manager,
-        {
-          oid,
-          ticketId,
-          deliveryStatus: DeliveryStatus.Pending, // chỉ update những thằng "Pending" thôi
-          quantity: { GT: 0 },
-        },
-        { deliveryStatus: DeliveryStatus.Delivered }
+        { oid, id: { IN: productIdList } },
+        { updatedAt: time }
       )
-
-      // 4. === CALCULATOR: số lượng lấy của product và batch ===
-      // Có 2 trường hợp không làm thay đổi số lượng
-      // --1. Sản phẩm có hasManageQuantity = 0
-      // --2. Đơn hàng tạo tại thời điểm sản phẩm không quản lý số lượng => batchId = 0
-      const productCalculatorMap: Record<
-        string,
-        {
-          openQuantity: number
-          quantityGroupSend: number
-          allowChangeQuantity: boolean // đây là thời điểm tạo đơn có quản lý số lượng hay không, còn thời điểm xuất kho hay nhập kho vẫn có thể khác
-        }
-      > = {}
-      const batchCalculatorMap: Record<
-        string,
-        {
-          quantityGroupSend: number
-          openQuantity: number
-        }
-      > = {}
-      for (let i = 0; i < ticketProductSendList.length; i++) {
-        const { productId, batchId, quantity } = ticketProductSendList[i]
-        if (!productCalculatorMap[productId]) {
-          productCalculatorMap[productId] = {
-            openQuantity: 0,
-            quantityGroupSend: 0,
-            allowChangeQuantity: true,
+      const batchOriginList = await this.batchManager.updateAndReturnEntity(
+        manager,
+        { oid, productId: { IN: productIdList } },
+        { updatedAt: time }
+      )
+      const batchOriginMap = ESArray.arrayToKeyValue(batchOriginList, 'id')
+      const pickingContainer = this.productPickingOperation.generatePickingPlan({
+        productOriginList,
+        batchOriginList,
+        voucherBatchList: ticketProductOriginList.map((i) => {
+          return {
+            ...i,
+            voucherProductId: i.id,
+            voucherBatchId: 0,
+            costAmount: null,
           }
-        }
-        if (batchId == 0) {
-          // với batchId = 0 thì thuộc trường hợp không quản lý số lượng tồn kho
-          productCalculatorMap[productId].allowChangeQuantity = false
-        } else {
-          productCalculatorMap[productId].quantityGroupSend += quantity
-          if (!batchCalculatorMap[batchId]) {
-            batchCalculatorMap[batchId] = { quantityGroupSend: 0, openQuantity: 0 }
-          }
-          batchCalculatorMap[batchId].quantityGroupSend += quantity
-        }
-      }
-
-      // 5. === UPDATE for PRODUCT ===
-      let productList: Product[] = []
-      let productMap: Record<string, Product> = {}
-      const productCalculatorEntries = Object.entries(productCalculatorMap)
-      if (productCalculatorEntries.length) {
-        // nếu batchId = 0 hoặc "hasManageQuantity" = 0 đều không gây thay đổi số lượng
-        const productUpdateResult: [any[], number] = await manager.query(
-          `
-          UPDATE "Product" AS "product"
-          SET "quantity"    = CASE 
-                                  WHEN (product."hasManageQuantity" = 0) THEN "product"."quantity" 
-                                  ELSE "product"."quantity" - temp."quantityGroupSend"
-                              END
-          FROM (VALUES `
-          + productCalculatorEntries
-            .map(([productId, value]) => `(${productId}, ${value.quantityGroupSend})`)
-            .join(', ')
-          + `   ) AS temp("productId", "quantityGroupSend")
-          WHERE   "product"."id" = temp."productId" 
-              AND "product"."oid" = ${oid} 
-          RETURNING "product".*;   
-          `
-        )
-        if (productUpdateResult[1] != productCalculatorEntries.length) {
-          throw new Error(
-            `${PREFIX}: Update Product failed, ${JSON.stringify(productUpdateResult)}`
-          )
-        }
-        productList = Product.fromRaws(productUpdateResult[0])
-        productMap = arrayToKeyValue(productList, 'id')
-        if (!allowNegativeQuantity) {
-          productList.forEach((i) => {
-            if (i.quantity < 0) {
-              throw new Error(`Sản phẩm ${i.brandName} không đủ số lượng tồn kho`)
-            }
-          })
-        }
-      }
-
-      // 6. === UPDATE for BATCH ===
-      let batchList: Batch[] = []
-      const batchCalculatorEntries = Object.entries(batchCalculatorMap)
-
-      if (batchCalculatorEntries.length) {
-        const batchUpdateResult: [any[], number] = await manager.query(
-          `
-          UPDATE "Batch" "batch"
-          SET "quantity" = "batch"."quantity" - temp."quantityGroupSend"
-          FROM (VALUES `
-          + batchCalculatorEntries
-            .map(([batchId, value]) => `(${batchId}, ${value.quantityGroupSend})`)
-            .join(', ')
-          + `   ) AS temp("batchId", "quantityGroupSend")
-          WHERE   "batch"."id" = temp."batchId" 
-              AND "batch"."oid" = ${oid}
-          RETURNING "batch".*;        
-          `
-        )
-        // Kết quả: "KHÔNG" cho phép số lượng âm
-        if (batchUpdateResult[1] != batchCalculatorEntries.length) {
-          throw new Error(`${PREFIX}: Update Batch, affected = ${batchUpdateResult[1]}`)
-        }
-        batchList = Batch.fromRaws(batchUpdateResult[0])
-        if (!allowNegativeQuantity) {
-          batchList.forEach((i) => {
-            if (i.quantity < 0) {
-              const product = productMap[i.productId]
-              throw new Error(
-                `Sản phẩm ${product.brandName},`
-                + ` lô ${i.lotNumber} HSD ${DTimer.timeToText(i.expiryDate, 'DD/MM/YYYY')}`
-                + ` không đủ số lượng tồn kho`
-              )
-            }
-          })
-        }
-      }
-
-      // 7. === CALCULATOR: số lượng ban đầu của product và batch ===
-      productList.forEach((i) => {
-        const productCalculator = productCalculatorMap[i.id]
-        if (!i.hasManageQuantity) {
-          productCalculator.allowChangeQuantity = false //  product đã được cập nhật là không quản lý số lượng nữa
-          productCalculator.quantityGroupSend = 0
-        }
-        productCalculator.openQuantity = i.quantity + productCalculator.quantityGroupSend
-      })
-      batchList.forEach((i) => {
-        const batchCalculator = batchCalculatorMap[i.id]
-        batchCalculator.openQuantity = i.quantity + batchCalculator.quantityGroupSend
+        }),
+        allowNegativeQuantity,
       })
 
-      // 8. === CREATE: PRODUCT_MOVEMENT ===
-      const productMovementInsertList = ticketProductSendList.map((ticketProductSend) => {
-        const productCalculator = productCalculatorMap[ticketProductSend.productId]
-        if (!productCalculator) {
-          throw new Error(`${PREFIX}: Not found movement with ${ticketProductSend.productId}`)
-        }
-        const quantityCurrent = productCalculator.allowChangeQuantity
-          ? ticketProductSend.quantity // không lấy theo productCalculator được vì nó đã group nhiều record theo productId
-          : 0
+      // 3. === TICKET_PRODUCT: update Delivery ===
+      const ticketProductModifiedList = await this.ticketProductManager.bulkUpdate({
+        manager,
+        condition: { oid, ticketId, deliveryStatus: { EQUAL: DeliveryStatus.Pending } },
+        compare: ['id', 'productId', 'quantity'],
+        tempList: pickingContainer.pickingVoucherProductList.map((i) => {
+          return {
+            id: i.voucherProductId,
+            productId: i.productId,
+            quantity: i.pickingQuantity,
+            costAmount: i.pickingCostAmount,
+            deliveryStatus: DeliveryStatus.Delivered,
+          }
+        }),
+        update: ['costAmount', 'deliveryStatus'],
+        options: { requireEqualLength: true },
+      })
+      const ticketProductModifiedMap = ESArray.arrayToKeyValue(ticketProductModifiedList, 'id')
 
+      // 4. === TICKET_BATCH: insert
+      const ticketBatchInsertList = pickingContainer.pickingVoucherBatchList.map(
+        (pickingTicketBatch) => {
+          const tp = ticketProductModifiedMap[pickingTicketBatch.voucherProductId]
+          const batchOrigin = batchOriginMap[pickingTicketBatch.batchId]
+          const ticketBatchInsert: TicketBatchInsertType = {
+            oid,
+            ticketId,
+            customerId: tp.customerId,
+            ticketProductId: tp.id,
+            warehouseId: batchOrigin?.warehouseId || 0,
+            productId: tp.productId,
+            batchId: pickingTicketBatch.batchId || 0, // thằng pickupStrategy.NoImpact luôn lấy batchId = 0
+            deliveryStatus: DeliveryStatus.Delivered,
+            unitRate: tp.unitRate,
+            quantity: pickingTicketBatch.pickingQuantity,
+            costAmount: pickingTicketBatch.pickingCostAmount,
+            actualPrice: tp.actualPrice,
+            expectedPrice: tp.expectedPrice,
+          }
+          return ticketBatchInsert
+        }
+      )
+      await this.ticketBatchManager.insertManyAndReturnEntity(manager, ticketBatchInsertList)
+
+      // 4. === UPDATE for PRODUCT and BATCH ===
+      const productModifiedList = await this.productManager.bulkUpdate({
+        manager,
+        condition: { oid }, // thằng NoImpact Inventory vẫn được update nhé
+        compare: ['id'],
+        tempList: pickingContainer.pickingProductList.map((i) => {
+          return {
+            id: i.productId,
+            quantity: i.closeQuantity,
+            pickingQuantity: i.pickingQuantity, // không được cộng trừ theo thằng này, vì với trường hợp NoImpact nó vẫn nhặt
+          }
+        }),
+        update: ['quantity'],
+        options: { requireEqualLength: true },
+      })
+      const productModifiedMap = ESArray.arrayToKeyValue(productModifiedList, 'id')
+
+      const batchModifiedList = await this.batchManager.bulkUpdate({
+        manager,
+        condition: { oid },
+        compare: ['id', 'productId'],
+        tempList: pickingContainer.pickingBatchList
+          .filter((i) => !!i.batchId)
+          .map((i) => {
+            return {
+              id: i.batchId,
+              productId: i.productId,
+              pickingQuantity: i.pickingQuantity,
+              pickingCostAmount: i.pickingCostAmount,
+            }
+          }),
+        update: {
+          quantity: () => `"quantity" - "pickingQuantity"`,
+          costAmount: () => `"costAmount" - "pickingCostAmount"`,
+        },
+        options: { requireEqualLength: true },
+      })
+      const batchModifiedMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')
+
+      // === 5. Insert Movement ===
+      const productMovementInsertList = pickingContainer.pickingMovementList.map((paMovement) => {
+        const tpOrigin = ticketProductOriginMap[paMovement.voucherProductId]
+        const batch = batchModifiedMap[paMovement.batchId] // có thể null
         const productMovementInsert: ProductMovementInsertType = {
           oid,
-          warehouseId: ticketProductSend.warehouseId,
-          productId: ticketProductSend.productId,
-          voucherId: ticketId,
-          contactId: ticket.customerId,
           movementType: MovementType.Ticket,
-          isRefund: 0,
+          contactId: ticket.customerId,
+          voucherId: ticket.id,
+          voucherProductId: tpOrigin.id,
+          warehouseId: batch?.warehouseId || 0,
+          productId: paMovement.productId,
+          batchId: paMovement.batchId,
+
           createdAt: time,
-          unitRate: ticketProductSend.unitRate,
-          costPrice: ticketProductSend.costPrice,
-          actualPrice: ticketProductSend.actualPrice,
-          expectedPrice: ticketProductSend.expectedPrice,
-          openQuantity: productCalculator.openQuantity,
-          quantity: -ticketProductSend.quantity, // luôn lấy số lượng trong đơn
-          closeQuantity: productCalculator.openQuantity - quantityCurrent, // lưu số lượng xuất thực tế
+          isRefund: 0,
+          expectedPrice: tpOrigin.expectedPrice,
+          actualPrice: tpOrigin.actualPrice,
+
+          quantity: -paMovement.pickingQuantity,
+          costAmount: -paMovement.pickingCostAmount,
+          openQuantityProduct: paMovement.openQuantityProduct,
+          closeQuantityProduct: paMovement.closeQuantityProduct,
+          openQuantityBatch: paMovement.openQuantityBatch,
+          closeQuantityBatch: paMovement.closeQuantityBatch,
+          openCostAmountBatch: paMovement.openCostAmountBatch,
+          closeCostAmountBatch: paMovement.closeCostAmountBatch,
         }
-
-        // sau khi lấy rồi cần cập nhật productCalculator vì 1 sản phẩm có thể bán 2 số lượng với 2 giá khác nhau
-        productCalculator.openQuantity = productMovementInsert.closeQuantity // gán lại số lượng ban đầu vì productMovementInsert đã lấy
-
         return productMovementInsert
       })
-      if (productMovementInsertList.length) {
-        await this.productMovementManager.insertMany(manager, productMovementInsertList)
-      }
+      await this.productMovementManager.insertMany(manager, productMovementInsertList)
 
-      // 9. === CREATE: BATCH_MOVEMENT ===
-      const batchMovementInsertList = ticketProductSendList
-        .filter((i) => i.batchId !== 0)
-        .map((ticketProductSend) => {
-          const batchCalculator = batchCalculatorMap[ticketProductSend.batchId]
-          if (!batchCalculator) {
-            throw new Error(
-              `${PREFIX}: Not found ${ticketProductSend.batchId}` + ` when create batch movement`
-            )
-          }
-          const quantityCurrent = ticketProductSend.quantity // không lấy theo batchCalculator được vì nó đã group nhiều record theo productId
-
-          const batchMovementInsert: BatchMovementInsertType = {
-            oid,
-            warehouseId: ticketProductSend.warehouseId,
-            productId: ticketProductSend.productId,
-            batchId: ticketProductSend.batchId,
-            voucherId: ticketId,
-            contactId: ticket.customerId,
-            movementType: MovementType.Ticket,
-            isRefund: 0,
-            createdAt: time,
-            unitRate: ticketProductSend.unitRate,
-            actualPrice: ticketProductSend.actualPrice,
-            expectedPrice: ticketProductSend.expectedPrice,
-            openQuantity: batchCalculator.openQuantity,
-            quantity: -quantityCurrent,
-            closeQuantity: batchCalculator.openQuantity - quantityCurrent,
-          }
-          // sau khi lấy rồi cần cập nhật openQuantity vì 1 sản phẩm có thể bán 2 số lượng với 2 giá khác nhau
-          batchCalculator.openQuantity = batchMovementInsert.closeQuantity // gán lại số lượng ban đầu vì batchMovementInsert đã lấy
-
-          return batchMovementInsert
+      // 5. === CREATE: PRODUCT_MOVEMENT ===
+      const costAmountOrigin = ticketProductOriginList.reduce((acc, cur) => {
+        return acc + cur.costAmount
+      }, 0)
+      const costAmountModified = ticketProductModifiedList.reduce((acc, cur) => {
+        return acc + cur.costAmount
+      }, 0)
+      const costAmountAdd = costAmountModified - costAmountOrigin
+      if (costAmountAdd != 0) {
+        ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
+          manager,
+          oid,
+          ticketOrigin: ticket,
+          itemMoney: {
+            itemsCostAmountAdd: costAmountAdd,
+          },
         })
-      if (batchMovementInsertList.length) {
-        await this.batchMovementManager.insertMany(manager, batchMovementInsertList)
       }
 
-      return { ticket, productList, batchList }
+      return {
+        ticket,
+        ticketProductModifiedList,
+        productModifiedList,
+      }
     })
   }
 }

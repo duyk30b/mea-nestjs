@@ -7,47 +7,6 @@ import TicketSurcharge, {
 } from '../../entities/ticket-surcharge.entity'
 import Ticket, { TicketRelationType } from '../../entities/ticket.entity'
 
-export type TicketOrderDraftInsertType = Omit<
-  Ticket,
-  | keyof TicketRelationType
-  | keyof Pick<
-    Ticket,
-    | 'oid'
-    | 'id'
-    | 'ticketType'
-    | 'ticketStatus'
-    | 'paid'
-    | 'debt'
-    | 'year'
-    | 'month'
-    | 'date'
-    | 'startedAt'
-    | 'updatedAt'
-    | 'endedAt'
-  >
->
-
-export type TicketOrderDraftApprovedUpdateType = Omit<
-  Ticket,
-  | keyof TicketRelationType
-  | keyof Pick<
-    Ticket,
-    | 'oid'
-    | 'id'
-    | 'customerId' // không được update customerId
-    | 'ticketType'
-    | 'ticketStatus'
-    | 'paid'
-    | 'debt'
-    | 'year'
-    | 'month'
-    | 'date'
-    | 'startedAt'
-    | 'updatedAt'
-    | 'endedAt'
-  >
->
-
 export type TicketOrderDebtSuccessUpdateType = Omit<
   Ticket,
   | keyof TicketRelationType
@@ -57,7 +16,7 @@ export type TicketOrderDebtSuccessUpdateType = Omit<
     | 'id'
     | 'customerId' // không được update customerId
     | 'ticketType'
-    | 'ticketStatus'
+    | 'status'
     | 'debt'
     | 'year'
     | 'month'

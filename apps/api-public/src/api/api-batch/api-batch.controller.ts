@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Patch, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
 import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
@@ -8,7 +8,7 @@ import { ApiBatchService } from './api-batch.service'
 import {
   BatchGetManyQuery,
   BatchGetOneQuery,
-  BatchInsertBody,
+  BatchMergeBody,
   BatchPaginationQuery,
   BatchUpdateInfoAndQuantityBody,
   BatchUpdateInfoBody,
@@ -22,7 +22,7 @@ export class ApiBatchController {
 
   @Get('pagination')
   @HasPermission(PermissionId.BATCH_READ)
-  pagination(@External() { oid }: TExternal, @Query() query: BatchPaginationQuery) {
+  async pagination(@External() { oid }: TExternal, @Query() query: BatchPaginationQuery) {
     return this.apiBatchService.pagination(oid, query)
   }
 
@@ -40,12 +40,6 @@ export class ApiBatchController {
     @Query() query: BatchGetOneQuery
   ) {
     return await this.apiBatchService.getOne(oid, id, query)
-  }
-
-  @Post('create')
-  @HasPermission(PermissionId.BATCH_CREATE)
-  async create(@External() { oid }: TExternal, @Body() body: BatchInsertBody) {
-    return await this.apiBatchService.createOne(oid, body)
   }
 
   @Patch('update-info/:id')
@@ -71,7 +65,13 @@ export class ApiBatchController {
   @Delete('destroy/:id')
   @HasPermission(PermissionId.PRODUCT_DELETE)
   @ApiParam({ name: 'id', example: 1 })
-  async deleteOne(@External() { oid, organization }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiBatchService.destroyOne({ organization, oid, batchId: id })
+  async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiBatchService.destroyOne({ oid, batchId: id })
+  }
+
+  @Patch('merge-batch')
+  @HasPermission(PermissionId.PRODUCT_MERGE)
+  async batchMerge(@External() { oid, uid }: TExternal, @Body() body: BatchMergeBody) {
+    return await this.apiBatchService.batchMerge({ oid, body })
   }
 }

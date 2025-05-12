@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { DTimer } from '../../../../_libs/common/helpers/time.helper'
+import { ESTimer } from '../../../../_libs/common/helpers/time.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { TicketStatisticOperation } from '../../../../_libs/database/operations/ticket-base/ticket-statistic.operation'
 import { StatisticTicketQuery } from './request'
@@ -19,7 +19,7 @@ export class ApiStatisticTicketService {
           LTE: toTime.getTime(),
         },
         ticketType: filter.ticketType,
-        ticketStatus: filter.ticketStatus,
+        status: filter.status,
       },
       groupTimeType,
     })
@@ -27,14 +27,14 @@ export class ApiStatisticTicketService {
     const dataMap: Record<string, (typeof data)[number] & { oid: number }> = {}
     const date = new Date(fromTime.getTime())
     do {
-      const currentTime = DTimer.info(date, 7)
+      const currentTime = ESTimer.info(date, 7)
       let time = ''
       if (groupTimeType === 'date') {
-        time = DTimer.timeToText(date, 'DD/MM/YYYY', 7)
+        time = ESTimer.timeToText(date, 'DD/MM/YYYY', 7)
         date.setDate(date.getDate() + 1)
       }
       if (groupTimeType === 'month') {
-        time = DTimer.timeToText(date, 'MM/YYYY', 7)
+        time = ESTimer.timeToText(date, 'MM/YYYY', 7)
         date.setMonth(date.getMonth() + 1)
       }
       dataMap[time] = {

@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import { Injectable } from '@nestjs/common'
 import { FileUploadDto } from '../../../../../_libs/common/dto/file'
+import { InteractType } from '../../../../../_libs/database/entities/commission.entity'
 import { TicketRadiologyStatus } from '../../../../../_libs/database/entities/ticket-radiology.entity'
 import {
   TicketClinicAddTicketRadiologyOperation,
@@ -13,6 +14,7 @@ import {
 } from '../../../../../_libs/database/repositories'
 import { ImageManagerService } from '../../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
+import { ApiTicketClinicUserService } from '../api-ticket-clinic-user/api-ticket-clinic-user.service'
 import {
   TicketClinicAddTicketRadiologyBody,
   TicketClinicUpdateMoneyTicketRadiologyBody,
@@ -29,8 +31,9 @@ export class ApiTicketClinicRadiologyService {
     private readonly ticketRadiologyRepository: TicketRadiologyRepository,
     private readonly ticketClinicAddTicketRadiologyOperation: TicketClinicAddTicketRadiologyOperation,
     private readonly ticketClinicDestroyTicketRadiologyOperation: TicketClinicDestroyTicketRadiologyOperation,
-    private readonly ticketClinicUpdateTicketRadiologyOperation: TicketClinicUpdateTicketRadiologyOperation
-  ) { }
+    private readonly ticketClinicUpdateTicketRadiologyOperation: TicketClinicUpdateTicketRadiologyOperation,
+    private readonly apiTicketClinicUserService: ApiTicketClinicUserService
+  ) {}
 
   async addTicketRadiology(options: {
     oid: number
@@ -118,19 +121,25 @@ export class ApiTicketClinicRadiologyService {
       ticketId,
       ticketRadiologyId,
       ticketRadiologyUpdateDto: body.ticketRadiology,
-      ticketUserDto: body.ticketUserList,
     })
+    const { ticket, ticketRadiology } = result
 
     this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket: result.ticket })
     this.socketEmitService.ticketClinicChangeTicketRadiologyList(oid, {
       ticketId,
       ticketRadiologyUpdate: result.ticketRadiology,
     })
-    if (result.ticketUserChangeList) {
-      this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
+    if (body.ticketUserList?.length) {
+      this.apiTicketClinicUserService.changeTicketUserList({
+        oid,
         ticketId,
-        ticketUserDestroyList: result.ticketUserChangeList.ticketUserDestroyList,
-        ticketUserInsertList: result.ticketUserChangeList.ticketUserInsertList,
+        body: {
+          interactType: InteractType.Radiology,
+          interactId: ticketRadiology.radiologyId,
+          ticketItemId: ticketRadiology.id,
+          quantity: 1,
+          ticketUserList: body.ticketUserList,
+        },
       })
     }
     return { data: true }
@@ -159,36 +168,42 @@ export class ApiTicketClinicRadiologyService {
       imageIdsOld: JSON.parse(ticketRadiologyOrigin.imageIds),
     })
 
-    const result = await this.ticketClinicUpdateTicketRadiologyOperation.updateTicketRadiology({
-      oid,
-      ticketId,
-      ticketRadiologyId,
-      ticketRadiologyUpdateDto: {
+    const ticketRadiologyModified = await this.ticketRadiologyRepository.updateOneAndReturnEntity(
+      {
+        oid,
+        ticketId,
+        id: ticketRadiologyId,
+      },
+      {
         description: body.ticketRadiology.description,
         result: body.ticketRadiology.result,
         startedAt: body.ticketRadiology.startedAt,
         imageIds: JSON.stringify(imageIdsUpdate),
-      },
-      ticketUserDto: body.ticketUserList,
-    })
+        status: TicketRadiologyStatus.Completed,
+      }
+    )
 
-    const { ticket, ticketRadiology, ticketUserChangeList } = result
-    ticketRadiology.imageList = []
-    const imageIds: number[] = JSON.parse(ticketRadiology.imageIds)
+    ticketRadiologyModified.imageList = []
+    const imageIds: number[] = JSON.parse(ticketRadiologyModified.imageIds)
     if (imageIds.length) {
-      ticketRadiology.imageList = await this.imageRepository.findManyByIds(imageIds)
+      ticketRadiologyModified.imageList = await this.imageRepository.findManyByIds(imageIds)
     }
 
-    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
     this.socketEmitService.ticketClinicChangeTicketRadiologyList(oid, {
       ticketId,
-      ticketRadiologyUpdate: ticketRadiology,
+      ticketRadiologyUpdate: ticketRadiologyModified,
     })
-    if (ticketUserChangeList) {
-      this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
+    if (body.ticketUserList?.length) {
+      this.apiTicketClinicUserService.changeTicketUserList({
+        oid,
         ticketId,
-        ticketUserDestroyList: ticketUserChangeList.ticketUserDestroyList,
-        ticketUserInsertList: ticketUserChangeList.ticketUserInsertList,
+        body: {
+          interactType: InteractType.Radiology,
+          interactId: ticketRadiologyModified.radiologyId,
+          ticketItemId: ticketRadiologyModified.id,
+          quantity: 1,
+          ticketUserList: body.ticketUserList,
+        },
       })
     }
     return { data: true }

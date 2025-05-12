@@ -1,10 +1,11 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
+import { ReadStream } from 'fs'
 import { OAuth2Client } from 'google-auth-library'
 import { drive_v3, google } from 'googleapis'
 import * as stream from 'stream'
 import { FileUploadDto } from '../../../_libs/common/dto/file'
-import { DTimer } from '../../../_libs/common/helpers/time.helper'
+import { ESTimer } from '../../../_libs/common/helpers/time.helper'
 import { GoogleDriverConfig } from './google-driver.config'
 
 @Injectable()
@@ -298,6 +299,56 @@ export class GoogleDriverService {
     return result
   }
 
+  private async createFileByStream(
+    drive: drive_v3.Drive,
+    options: {
+      title: string
+      parent: string
+      stream: stream.PassThrough | ReadStream
+      mimetype: string
+    },
+    permission?: {
+      role: 'reader' | 'writer' | 'commenter'
+      type: 'anyone' | 'user' | 'group'
+      emailAddress?: string
+      domain?: string
+    }
+  ) {
+    const { title, parent, stream, mimetype } = options
+    const response = await drive.files.create({
+      requestBody: {
+        name: title,
+        parents: [parent],
+        mimeType: mimetype,
+      },
+      media: {
+        mimeType: mimetype,
+        body: stream,
+      },
+      fields: 'id, name, mimeType, kind, size',
+    })
+    const file = response.data as {
+      id: string
+      name: string
+      mimeType: string
+      kind: 'drive#file'
+      size: string
+    }
+
+    if (permission) {
+      await drive.permissions.create({
+        fileId: file.id,
+        requestBody: {
+          role: permission.role,
+          type: permission.type,
+          emailAddress: permission.emailAddress,
+          domain: permission.domain,
+        },
+      })
+    }
+    return file
+  }
+
   private async createFile(
     drive: drive_v3.Drive,
     options: {
@@ -311,34 +362,59 @@ export class GoogleDriverService {
     const bufferStream = new stream.PassThrough()
     bufferStream.end(buffer)
 
-    const response = await drive.files.create({
-      requestBody: {
-        name: title,
-        parents: [parent],
-        mimeType: mimetype,
+    return this.createFileByStream(
+      drive,
+      {
+        title,
+        parent,
+        stream: bufferStream,
+        mimetype,
       },
-      media: {
-        mimeType: mimetype,
-        body: bufferStream,
-      },
-      fields: 'id, name, mimeType, kind, size',
-    })
-    const file = response.data as {
-      id: string
-      name: string
-      mimeType: string
-      kind: 'drive#file'
-      size: string
+      { role: 'reader', type: 'anyone' }
+    )
+  }
+
+  public async uploadFileStream(options: {
+    oid: number
+    fileStream: stream.PassThrough | ReadStream
+    fileName: string
+    mimetype: string
+    email: string
+    permission?: {
+      role: 'reader' | 'writer' | 'commenter'
+      type: 'anyone' | 'user' | 'group'
+      emailAddress?: string
+      domain?: string
     }
-
-    await drive.permissions.create({
-      fileId: file.id,
-      requestBody: {
-        role: 'reader',
-        type: 'anyone',
+  }) {
+    const { fileStream, email, oid, fileName, mimetype, permission } = options
+    if (!fileStream) return null
+    this.logger.debug(
+      `[OID=${oid}] GoogleDriver ${email} start uploadFileStream with fine name ${fileName}`
+    )
+    const drive = this.createDrive(email)
+    if (!this.cache[email].rootFolderId) {
+      const rootFolder = await this.createRootFolder(drive)
+      this.cache[email].rootFolderId = rootFolder.id
+    }
+    if (this.cache[email].defaultFolderName !== this.getDefaultFolderName(oid)) {
+      const defaultFolder = await this.createDefaultFolder(drive, {
+        oid,
+        rootFolderId: this.cache[email].rootFolderId,
+      })
+      this.cache[email].defaultFolderId = defaultFolder.id
+      this.cache[email].defaultFolderName = defaultFolder.name
+    }
+    const file = await this.createFileByStream(
+      drive,
+      {
+        title: fileName,
+        parent: this.cache[email].defaultFolderId,
+        stream: fileStream,
+        mimetype,
       },
-    })
-
+      permission
+    )
     return file
   }
 
@@ -381,7 +457,7 @@ export class GoogleDriverService {
             + '-'
             + customerId
             + '-'
-            + DTimer.timeToText(now + index, 'YYYY-MM-DD-hh-mm-ss-xxx'),
+            + ESTimer.timeToText(now + index, 'YYYY-MM-DD-hh-mm-ss-xxx'),
         })
       })
     )

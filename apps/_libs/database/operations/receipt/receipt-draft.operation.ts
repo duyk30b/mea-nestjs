@@ -1,24 +1,38 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
-import { DataSource, EntityManager, FindOptionsWhere, In } from 'typeorm'
-import { DTimer } from '../../../common/helpers/time.helper'
+import { DataSource, EntityManager } from 'typeorm'
+import { ESTimer } from '../../../common/helpers/time.helper'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
-import { ReceiptStatus } from '../../common/variable'
+import { DeliveryStatus } from '../../common/variable'
 import { Receipt, ReceiptItem } from '../../entities'
 import { ReceiptItemInsertType } from '../../entities/receipt-item.entity'
-import { ReceiptInsertType, ReceiptUpdateType } from '../../entities/receipt.entity'
-import { ReceiptDraftInsertType, ReceiptDraftUpdateType, ReceiptItemDraftType } from './receipt.dto'
+import { ReceiptInsertType, ReceiptStatus } from '../../entities/receipt.entity'
+import { ReceiptItemManager, ReceiptManager } from '../../managers'
 
+export type ReceiptDraftUpsertType = Omit<
+  ReceiptInsertType,
+  keyof Pick<
+    Receipt,
+    'oid' | 'status' | 'deliveryStatus' | 'paid' | 'debt' | 'year' | 'month' | 'date' | 'endedAt'
+  >
+>
+
+export type ReceiptItemDraftType = Omit<
+  ReceiptItemInsertType,
+  keyof Pick<ReceiptItem, 'oid' | 'receiptId' | 'distributorId'>
+>
 @Injectable()
 export class ReceiptDraftOperation {
   constructor(
     private dataSource: DataSource,
-    @InjectEntityManager() private manager: EntityManager
+    @InjectEntityManager() private manager: EntityManager,
+    private receiptManager: ReceiptManager,
+    private receiptItemManager: ReceiptItemManager
   ) { }
 
-  async createDraft<T extends ReceiptDraftInsertType, X extends ReceiptItemDraftType>(params: {
+  async createDraft<T extends ReceiptDraftUpsertType, X extends ReceiptItemDraftType>(params: {
     oid: number
-    receiptInsertDto: NoExtra<ReceiptDraftInsertType, T>
+    receiptInsertDto: NoExtra<ReceiptDraftUpsertType, T>
     receiptItemListDto: NoExtra<ReceiptItemDraftType, X>[]
   }) {
     const { oid, receiptInsertDto, receiptItemListDto } = params
@@ -28,77 +42,65 @@ export class ReceiptDraftOperation {
         ...receiptInsertDto,
         oid,
         status: ReceiptStatus.Draft,
+        deliveryStatus: DeliveryStatus.Pending,
+        distributorId: receiptInsertDto.distributorId,
         paid: 0,
         debt: receiptInsertDto.totalMoney,
-        year: DTimer.info(receiptInsertDto.startedAt, 7).year,
-        month: DTimer.info(receiptInsertDto.startedAt, 7).month + 1,
-        date: DTimer.info(receiptInsertDto.startedAt, 7).date,
+        year: ESTimer.info(receiptInsertDto.startedAt, 7).year,
+        month: ESTimer.info(receiptInsertDto.startedAt, 7).month + 1,
+        date: ESTimer.info(receiptInsertDto.startedAt, 7).date,
         endedAt: null,
       }
 
-      const receiptResult = await manager.insert(Receipt, receiptInsert)
-      const receiptId = receiptResult.identifiers?.[0]?.id
-      if (!receiptId) {
-        throw new Error(`Create Receipt failed: Insert error ${JSON.stringify(receiptResult)}`)
-      }
+      const receipt = await this.receiptManager.insertOneAndReturnEntity(manager, receiptInsert)
 
       const receiptItemListInsert = receiptItemListDto.map((i) => {
         const receiptItem: ReceiptItemInsertType = {
           ...i,
           oid,
-          receiptId,
+          receiptId: receipt.id,
           distributorId: receiptInsert.distributorId,
         }
         return receiptItem
       })
-      await manager.insert(ReceiptItem, receiptItemListInsert)
+      await this.receiptItemManager.insertMany(manager, receiptItemListInsert)
 
-      return { receiptId }
+      return { receipt }
     })
   }
 
-  async updateDraftPrepayment<
-    T extends ReceiptDraftUpdateType,
-    X extends ReceiptItemDraftType,
-  >(params: {
+  async updateDraft<T extends ReceiptDraftUpsertType, X extends ReceiptItemDraftType>(params: {
     oid: number
     receiptId: number
-    receiptUpdateDto: NoExtra<ReceiptDraftUpdateType, T>
+    receiptUpdateDto: NoExtra<ReceiptDraftUpsertType, T>
     receiptItemListDto: NoExtra<ReceiptItemDraftType, X>[]
   }) {
     const { oid, receiptId, receiptUpdateDto, receiptItemListDto } = params
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-      const whereReceipt: FindOptionsWhere<Receipt> = {
-        id: receiptId,
-        oid,
-        status: In([ReceiptStatus.Draft, ReceiptStatus.Prepayment]),
-      }
-      const receiptUpdate: ReceiptUpdateType = {
+      const receiptUpdate: ReceiptDraftUpsertType = {
         ...receiptUpdateDto,
         oid,
+        distributorId: receiptUpdateDto.distributorId,
         status: ReceiptStatus.Draft,
         paid: 0,
         debt: receiptUpdateDto.totalMoney,
-        year: DTimer.info(receiptUpdateDto.startedAt as number, 7).year,
-        month: DTimer.info(receiptUpdateDto.startedAt as number, 7).month + 1,
-        date: DTimer.info(receiptUpdateDto.startedAt as number, 7).date,
+        year: ESTimer.info(receiptUpdateDto.startedAt as number, 7).year,
+        month: ESTimer.info(receiptUpdateDto.startedAt as number, 7).month + 1,
+        date: ESTimer.info(receiptUpdateDto.startedAt as number, 7).date,
         endedAt: null,
       }
-      const receiptUpdateResult = await manager
-        .createQueryBuilder()
-        .update(Receipt)
-        .where(whereReceipt)
-        .set(receiptUpdate)
-        .returning('*')
-        .execute()
-      if (receiptUpdateResult.affected !== 1) {
-        throw new Error(`Update Receipt ${receiptId} failed: Status invalid`)
-      }
-      const receipt = Receipt.fromRaw(receiptUpdateResult.raw[0])
+      const receipt = await this.receiptManager.updateOneAndReturnEntity(
+        manager,
+        {
+          id: receiptId,
+          oid,
+          status: ReceiptStatus.Draft,
+        },
+        receiptUpdate
+      )
 
-      await manager.delete(ReceiptItem, { oid, receiptId })
-
+      await this.receiptItemManager.delete(manager, { oid, receiptId })
       const receiptItemListInsert = receiptItemListDto.map((i) => {
         const receiptItem: ReceiptItemInsertType = {
           ...i,
@@ -108,9 +110,8 @@ export class ReceiptDraftOperation {
         }
         return receiptItem
       })
-      await manager.insert(ReceiptItem, receiptItemListInsert)
-
-      return { receiptId }
+      await this.receiptItemManager.insertMany(manager, receiptItemListInsert)
+      return { receipt }
     })
   }
 }

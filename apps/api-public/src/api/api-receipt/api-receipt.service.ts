@@ -1,41 +1,44 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
+import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { arrayToKeyArray, uniqueArray } from '../../../../_libs/common/helpers/object.helper'
+import {
+    ESArray,
+} from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { Batch, Distributor, Product } from '../../../../_libs/database/entities'
+import { Product } from '../../../../_libs/database/entities'
 import { BatchInsertType } from '../../../../_libs/database/entities/batch.entity'
+import { VoucherType } from '../../../../_libs/database/entities/payment.entity'
 import {
-  ReceiptCancelOperation,
-  ReceiptDraftOperation,
-  ReceiptPayDebtOperation,
-  ReceiptPrepaymentOperation,
-  ReceiptRefundPrepaymentOperation,
-  ReceiptSendProductAndPaymentOperation,
+    SplitBatchByCostPrice,
+    SplitBatchByDistributor,
+    SplitBatchByExpiryDate,
+    SplitBatchByWarehouse,
+} from '../../../../_libs/database/entities/product.entity'
+import {
+    ReceiptDepositedOperation,
+    ReceiptDraftOperation,
 } from '../../../../_libs/database/operations'
+import { PaymentRepository, ProductRepository } from '../../../../_libs/database/repositories'
 import { BatchRepository } from '../../../../_libs/database/repositories/batch.repository'
-import { DistributorPaymentRepository } from '../../../../_libs/database/repositories/distributor-payment.repository'
 import { ReceiptRepository } from '../../../../_libs/database/repositories/receipt.repository'
-import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
-  ReceiptGetManyQuery,
-  ReceiptGetOneQuery,
-  ReceiptPaginationQuery,
-  ReceiptUpsertBody,
+    ReceiptGetManyQuery,
+    ReceiptGetOneQuery,
+    ReceiptPaginationQuery,
+    ReceiptUpdateDepositedBody,
+    ReceiptUpsertDraftBody,
 } from './request'
 
 @Injectable()
 export class ApiReceiptService {
   constructor(
-    private readonly socketEmitService: SocketEmitService,
+    private readonly cacheDataService: CacheDataService,
     private readonly receiptRepository: ReceiptRepository,
-    private readonly receiptDraft: ReceiptDraftOperation,
-    private readonly receiptPrepaymentOperation: ReceiptPrepaymentOperation,
-    private readonly receiptRefundPrepaymentOperation: ReceiptRefundPrepaymentOperation,
-    private readonly receiptPayDebtOperation: ReceiptPayDebtOperation,
-    private readonly distributorPaymentRepository: DistributorPaymentRepository,
+    private readonly productRepository: ProductRepository,
     private readonly batchRepository: BatchRepository,
-    private readonly receiptSendProductAndPaymentOperation: ReceiptSendProductAndPaymentOperation,
-    private readonly receiptCancelOperation: ReceiptCancelOperation
+    private readonly receiptDraft: ReceiptDraftOperation,
+    private readonly receiptDepositedOperation: ReceiptDepositedOperation,
+    private readonly paymentRepository: PaymentRepository
   ) { }
 
   async pagination(oid: number, query: ReceiptPaginationQuery): Promise<BaseResponse> {
@@ -80,52 +83,98 @@ export class ApiReceiptService {
     return { data: receiptList }
   }
 
-  async getOne(oid: number, id: number, { relation }: ReceiptGetOneQuery): Promise<BaseResponse> {
+  async getOne(
+    oid: number,
+    receiptId: number,
+    { relation }: ReceiptGetOneQuery
+  ): Promise<BaseResponse> {
     const receipt = await this.receiptRepository.findOne({
-      condition: { oid, id },
+      condition: { oid, id: receiptId },
       relation: {
         distributor: !!relation?.distributor,
-        distributorPaymentList: !!relation?.distributorPaymentList,
         receiptItemList: relation?.receiptItemList,
       },
+      relationLoadStrategy: 'query',
     })
     if (!receipt) {
       throw new BusinessException('error.Database.NotFound')
     }
+    if (relation.paymentList) {
+      receipt.paymentList = await this.paymentRepository.findMany({
+        condition: { oid, voucherId: receiptId, voucherType: VoucherType.Receipt },
+        sort: { id: 'ASC' },
+      })
+    }
     return { data: { receipt } }
   }
 
-  async queryOne(oid: number, id: number, { relation }: ReceiptGetOneQuery): Promise<BaseResponse> {
+  async queryOne(
+    oid: number,
+    receiptId: number,
+    { relation }: ReceiptGetOneQuery
+  ): Promise<BaseResponse> {
     const receipt = await this.receiptRepository.queryOneBy(
-      { oid, id },
+      { oid, id: receiptId },
       {
         distributor: !!relation?.distributor,
-        distributorPaymentList: !!relation?.distributorPaymentList,
         receiptItemList: relation?.receiptItemList,
       }
     )
     return { data: receipt }
   }
 
-  async createDraft(params: { oid: number; body: ReceiptUpsertBody }): Promise<BaseResponse> {
+  async createDraft(params: { oid: number; body: ReceiptUpsertDraftBody }): Promise<BaseResponse> {
     const { oid, body } = params
-    // tự động chọn lô
-    const { receipt, receiptItemList, distributorId } = body
-    const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId)
-    const batchList = await this.batchRepository.findManyBy({
-      oid,
-      productId: { IN: uniqueArray(productIdList) },
-    })
-    const batchListMap = arrayToKeyArray(batchList, 'productId')
+    const [settingMap, settingMapRoot] = await Promise.all([
+      this.cacheDataService.getSettingMap(oid),
+      this.cacheDataService.getSettingMap(1),
+    ])
+    const productSettingCommon = settingMap.PRODUCT_SETTING || {}
+    const productSettingRoot = settingMapRoot.PRODUCT_SETTING || {}
 
-    receiptItemList.forEach((receiptItem) => {
-      if (receiptItem.batchId) return
+    const { receipt: receiptBody, receiptItemList, distributorId } = body
+    const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId)
+    const productIdUnique = ESArray.uniqueArray(productIdList)
+    const [productList, batchList] = await Promise.all([
+      this.productRepository.findManyBy({ oid, id: { IN: productIdUnique } }),
+      this.batchRepository.findManyBy({ oid, productId: { IN: productIdUnique } }),
+    ])
+    const batchListMap = ESArray.arrayToKeyArray(batchList, 'productId')
+    const productMap = ESArray.arrayToKeyValue(productList, 'id')
+
+    receiptItemList.forEach((receiptItem, index) => {
+      if (receiptItem.batchId) return // chọn lô rồi thì thôi
+      // Tự động chọn lô
       const batchFind = (batchListMap[receiptItem.productId] || []).find((batch) => {
-        if (batch.distributorId != distributorId) return false
-        if (batch.warehouseId != receiptItem.warehouseId) return false
-        if (batch.lotNumber != receiptItem.lotNumber) return false
-        if (batch.expiryDate != receiptItem.expiryDate) return false
-        if (batch.costPrice != receiptItem.costPrice) return false
+        const product = productMap[receiptItem.productId]
+        if (!product) {
+          throw new BusinessException(`Có sản phẩm không hợp lệ, vị trí ${index}` as any)
+        }
+        const splitRule = Product.getProductSettingRule(
+          product,
+          productSettingCommon,
+          productSettingRoot
+        )
+        if (batch.warehouseId != receiptItem.warehouseId) {
+          if (splitRule.splitBatchByWarehouse === SplitBatchByWarehouse.SplitOnDifferent) {
+            return false
+          }
+        }
+        if (batch.distributorId != distributorId) {
+          if (splitRule.splitBatchByDistributor === SplitBatchByDistributor.SplitOnDifferent) {
+            return false
+          }
+        }
+        if (batch.expiryDate != receiptItem.expiryDate) {
+          if (splitRule.splitBatchByExpiryDate === SplitBatchByExpiryDate.SplitOnDifferent) {
+            return false
+          }
+        }
+        if (batch.costPrice != receiptItem.costPrice) {
+          if (splitRule.splitBatchByCostPrice === SplitBatchByCostPrice.SplitOnDifferent) {
+            return false
+          }
+        }
         return true
       })
       if (batchFind) {
@@ -140,9 +189,12 @@ export class ApiReceiptService {
         distributorId,
         productId: receiptItem.productId,
         warehouseId: receiptItem.warehouseId,
-        lotNumber: receiptItem.lotNumber,
+        batchCode: receiptItem.batchCode,
         expiryDate: receiptItem.expiryDate,
         costPrice: receiptItem.costPrice,
+        quantity: 0,
+        costAmount: 0,
+        registeredAt: Date.now(),
       }
       return batchInsert
     })
@@ -152,40 +204,74 @@ export class ApiReceiptService {
     })
 
     try {
-      const { receiptId } = await this.receiptDraft.createDraft({
+      const { receipt } = await this.receiptDraft.createDraft({
         oid,
-        receiptInsertDto: { ...receipt, distributorId },
+        receiptInsertDto: { ...receiptBody, distributorId },
         receiptItemListDto: receiptItemList,
       })
-      return { data: { receiptId } }
+      return { data: { receiptId: receipt.id } }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
   }
 
-  async updateDraftPrepayment(params: {
+  async updateDraft(params: {
     oid: number
     receiptId: number
-    body: ReceiptUpsertBody
+    body: ReceiptUpsertDraftBody
   }): Promise<BaseResponse> {
     const { oid, receiptId, body } = params
+    const [settingMap, settingMapRoot] = await Promise.all([
+      this.cacheDataService.getSettingMap(oid),
+      this.cacheDataService.getSettingMap(1),
+    ])
+    const productSettingCommon = settingMap.PRODUCT_SETTING || {}
+    const productSettingRoot = settingMapRoot.PRODUCT_SETTING || {}
 
     // tự động chọn lô
-    const { receipt, receiptItemList, distributorId } = body
+    const { receipt: receiptBody, receiptItemList, distributorId } = body
     const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId)
-    const batchList = await this.batchRepository.findManyBy({
-      oid,
-      productId: { IN: uniqueArray(productIdList) },
-    })
-    const batchListMap = arrayToKeyArray(batchList, 'productId')
+    const productIdUnique = ESArray.uniqueArray(productIdList)
+    const [productList, batchList] = await Promise.all([
+      this.productRepository.findManyBy({ oid, id: { IN: productIdUnique } }),
+      this.batchRepository.findManyBy({ oid, productId: { IN: productIdUnique } }),
+    ])
+    const batchListMap = ESArray.arrayToKeyArray(batchList, 'productId')
+    const productMap = ESArray.arrayToKeyValue(productList, 'id')
 
-    receiptItemList.forEach((receiptItem) => {
-      if (receiptItem.batchId) return
+    receiptItemList.forEach((receiptItem, index) => {
+      if (receiptItem.batchId) return // chọn lô rồi thì thôi
+      // Tự động chọn lô
       const batchFind = (batchListMap[receiptItem.productId] || []).find((batch) => {
-        if (batch.warehouseId != receiptItem.warehouseId) return false
-        if (batch.lotNumber != receiptItem.lotNumber) return false
-        if (batch.expiryDate != receiptItem.expiryDate) return false
-        if (batch.costPrice != receiptItem.costPrice) return false
+        const product = productMap[receiptItem.productId]
+        if (!product) {
+          throw new BusinessException(`Có sản phẩm không hợp lệ, vị trí ${index}` as any)
+        }
+        const splitRule = Product.getProductSettingRule(
+          product,
+          productSettingCommon,
+          productSettingRoot
+        )
+        if (batch.warehouseId != receiptItem.warehouseId) {
+          if (splitRule.splitBatchByWarehouse === SplitBatchByWarehouse.SplitOnDifferent) {
+            return false
+          }
+        }
+        if (batch.distributorId != distributorId) {
+          if (splitRule.splitBatchByDistributor === SplitBatchByDistributor.SplitOnDifferent) {
+            return false
+          }
+        }
+        if (batch.expiryDate != receiptItem.expiryDate) {
+          if (splitRule.splitBatchByExpiryDate === SplitBatchByExpiryDate.SplitOnDifferent) {
+            return false
+          }
+        }
+        if (batch.costPrice != receiptItem.costPrice) {
+          if (splitRule.splitBatchByCostPrice === SplitBatchByCostPrice.SplitOnDifferent) {
+            return false
+          }
+        }
         return true
       })
       if (batchFind) {
@@ -200,9 +286,12 @@ export class ApiReceiptService {
         distributorId,
         productId: receiptItem.productId,
         warehouseId: receiptItem.warehouseId,
-        lotNumber: receiptItem.lotNumber,
+        batchCode: receiptItem.batchCode,
         expiryDate: receiptItem.expiryDate,
         costPrice: receiptItem.costPrice,
+        quantity: 0,
+        costAmount: 0,
+        registeredAt: Date.now(),
       }
       return batchInsert
     })
@@ -212,10 +301,10 @@ export class ApiReceiptService {
     })
 
     try {
-      await this.receiptDraft.updateDraftPrepayment({
+      await this.receiptDraft.updateDraft({
         oid,
         receiptId,
-        receiptUpdateDto: receipt,
+        receiptUpdateDto: { ...receiptBody, distributorId },
         receiptItemListDto: receiptItemList,
       })
       return { data: { receiptId } }
@@ -224,182 +313,101 @@ export class ApiReceiptService {
     }
   }
 
-  async prepayment(params: {
+  async depositedUpdate(params: {
     oid: number
     receiptId: number
-    money: number
+    body: ReceiptUpdateDepositedBody
   }): Promise<BaseResponse> {
-    const { oid, receiptId, money } = params
+    const { oid, receiptId, body } = params
+    const [settingMap, settingMapRoot] = await Promise.all([
+      this.cacheDataService.getSettingMap(oid),
+      this.cacheDataService.getSettingMap(1),
+    ])
+    const productSettingCommon = settingMap.PRODUCT_SETTING || {}
+    const productSettingRoot = settingMapRoot.PRODUCT_SETTING || {}
+
+    // tự động chọn lô
+    const { receipt: receiptDto, receiptItemList, distributorId } = body
+    const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId)
+    const productIdUnique = ESArray.uniqueArray(productIdList)
+    const [productList, batchList] = await Promise.all([
+      this.productRepository.findManyBy({ oid, id: { IN: productIdUnique } }),
+      this.batchRepository.findManyBy({ oid, productId: { IN: productIdUnique } }),
+    ])
+    const batchListMap = ESArray.arrayToKeyArray(batchList, 'productId')
+    const productMap = ESArray.arrayToKeyValue(productList, 'id')
+
+    receiptItemList.forEach((receiptItem, index) => {
+      if (receiptItem.batchId) return // chọn lô rồi thì thôi
+      // Tự động chọn lô
+      const batchFind = (batchListMap[receiptItem.productId] || []).find((batch) => {
+        const product = productMap[receiptItem.productId]
+        if (!product) {
+          throw new BusinessException(`Có sản phẩm không hợp lệ, vị trí ${index}` as any)
+        }
+        const splitRule = Product.getProductSettingRule(
+          product,
+          productSettingCommon,
+          productSettingRoot
+        )
+        if (batch.warehouseId != receiptItem.warehouseId) {
+          if (splitRule.splitBatchByWarehouse === SplitBatchByWarehouse.SplitOnDifferent) {
+            return false
+          }
+        }
+        if (batch.distributorId != distributorId) {
+          if (splitRule.splitBatchByDistributor === SplitBatchByDistributor.SplitOnDifferent) {
+            return false
+          }
+        }
+        if (batch.expiryDate != receiptItem.expiryDate) {
+          if (splitRule.splitBatchByExpiryDate === SplitBatchByExpiryDate.SplitOnDifferent) {
+            return false
+          }
+        }
+        if (batch.costPrice != receiptItem.costPrice) {
+          if (splitRule.splitBatchByCostPrice === SplitBatchByCostPrice.SplitOnDifferent) {
+            return false
+          }
+        }
+        return true
+      })
+      if (batchFind) {
+        receiptItem.batchId = batchFind.id
+      }
+    })
+
+    const receiptItemListNoBatch = receiptItemList.filter((i) => !i.batchId)
+    const batchInsertList: BatchInsertType[] = receiptItemListNoBatch.map((receiptItem) => {
+      const batchInsert: BatchInsertType = {
+        oid,
+        distributorId,
+        productId: receiptItem.productId,
+        warehouseId: receiptItem.warehouseId,
+        batchCode: receiptItem.batchCode,
+        expiryDate: receiptItem.expiryDate,
+        costPrice: receiptItem.costPrice,
+        quantity: 0,
+        costAmount: 0,
+        registeredAt: Date.now(),
+      }
+      return batchInsert
+    })
+    const batchIdInsertList = await this.batchRepository.insertMany(batchInsertList)
+    receiptItemListNoBatch.forEach((receiptItem, index) => {
+      receiptItem.batchId = batchIdInsertList[index]
+    })
+
     try {
-      const { receiptBasic } = await this.receiptPrepaymentOperation.prepayment({
+      await this.receiptDepositedOperation.update({
         oid,
         receiptId,
-        time: Date.now(),
-        money,
+        receiptUpdateDto: receiptDto,
+        receiptItemListDto: receiptItemList,
       })
-      const distributorPaymentList = await this.distributorPaymentRepository.findMany({
-        condition: {
-          oid,
-          distributorId: receiptBasic.distributorId,
-          receiptId,
-        },
-        sort: { id: 'ASC' },
-      })
-      return {
-        data: {
-          receiptBasic,
-          distributorPaymentList,
-        },
-      }
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async refundPrepayment(params: {
-    oid: number
-    receiptId: number
-    money: number
-  }): Promise<BaseResponse> {
-    const { oid, receiptId, money } = params
-    try {
-      const { receiptBasic } = await this.receiptRefundPrepaymentOperation.refundPrepayment({
-        oid,
-        receiptId,
-        time: Date.now(),
-        money,
-      })
-      const distributorPaymentList = await this.distributorPaymentRepository.findMany({
-        condition: {
-          oid,
-          distributorId: receiptBasic.distributorId,
-          receiptId,
-        },
-        sort: { id: 'ASC' },
-      })
-      return { data: { receiptBasic, distributorPaymentList } }
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async sendProductAndPayment(params: {
-    oid: number
-    receiptId: number
-    time: number
-    money: number
-  }): Promise<BaseResponse> {
-    const { oid, receiptId, time, money } = params
-    try {
-      const result = await this.receiptSendProductAndPaymentOperation.start({
-        oid,
-        receiptId,
-        time,
-        money,
-      })
-      const distributorPaymentList = await this.distributorPaymentRepository.findMany({
-        condition: {
-          oid,
-          distributorId: result.receipt.distributorId,
-          receiptId,
-        },
-        sort: { id: 'ASC' },
-      })
-      this.emitSocketAfterChangeProductAndDistributor(oid, result)
-      return {
-        data: {
-          receipt: result.receipt,
-          distributorPaymentList,
-        },
-      }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async payDebt(params: {
-    oid: number
-    receiptId: number
-    time: number
-    money: number
-  }): Promise<BaseResponse> {
-    const { oid, receiptId, time, money } = params
-    try {
-      const { distributor, receiptBasic } = await this.receiptPayDebtOperation.payDebt({
-        oid,
-        receiptId,
-        time,
-        money,
-      })
-      const distributorPaymentList = await this.distributorPaymentRepository.findMany({
-        condition: {
-          oid,
-          distributorId: receiptBasic.distributorId,
-          receiptId,
-        },
-        sort: { id: 'ASC' },
-      })
-      if (distributor) {
-        this.socketEmitService.distributorUpsert(oid, { distributor })
-      }
-      return {
-        data: {
-          receiptBasic,
-          distributorPaymentList,
-        },
-      }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async cancel(params: { oid: number; receiptId: number; time: number }): Promise<BaseResponse> {
-    const { oid, receiptId, time } = params
-    try {
-      const result = await this.receiptCancelOperation.start({ oid, receiptId, time })
-      const distributorPaymentList = await this.distributorPaymentRepository.findMany({
-        condition: {
-          oid,
-          distributorId: result.receipt.distributorId,
-          receiptId,
-        },
-        sort: { id: 'ASC' },
-      })
-      this.emitSocketAfterChangeProductAndDistributor(oid, result)
-      return {
-        data: {
-          receipt: result.receipt,
-          distributorPaymentList,
-        },
-      }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async destroy(params: { oid: number; receiptId: number }): Promise<BaseResponse> {
-    const { oid, receiptId } = params
-    try {
-      await this.receiptRepository.destroy({ oid, receiptId })
       return { data: { receiptId } }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async emitSocketAfterChangeProductAndDistributor(
-    oid: number,
-    data: { distributor: Distributor; productList: Product[]; batchList: Batch[] }
-  ) {
-    const { distributor, productList, batchList } = data
-    if (distributor) {
-      this.socketEmitService.distributorUpsert(oid, { distributor })
-    }
-    if (productList.length) {
-      this.socketEmitService.productListUpdate(oid, { productList })
-    }
-    if (batchList.length) {
-      this.socketEmitService.batchListUpdate(oid, { batchList })
     }
   }
 }

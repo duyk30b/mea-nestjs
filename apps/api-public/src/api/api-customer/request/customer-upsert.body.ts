@@ -16,6 +16,18 @@ export class CustomerCreateBody {
   @Validate(IsPhone)
   phone: string
 
+  @ApiPropertyOptional({ example: '0986123456' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  facebook: string
+
+  @ApiPropertyOptional({ example: '0986123456' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  zalo: string
+
   @ApiProperty({ example: 45 })
   @Expose()
   @IsDefined()

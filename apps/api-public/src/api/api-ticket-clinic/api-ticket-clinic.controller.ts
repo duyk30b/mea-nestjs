@@ -14,13 +14,13 @@ import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { FastifyFilesInterceptor } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { TicketPaymentMoneyBody } from '../api-ticket/request'
 import { ApiTicketClinicService } from './api-ticket-clinic.service'
 import {
   TicketClinicChangeDiscountBody,
   TicketClinicCreateBody,
   TicketClinicUpdateBody,
 } from './request'
-import { TicketClinicPaymentBody } from './request/ticket-clinic-payment.body'
 import { TicketClinicUpdateDiagnosisBody } from './request/ticket-clinic-update-diagnosis.body'
 
 @ApiTags('TicketClinic')
@@ -87,45 +87,50 @@ export class ApiTicketClinicController {
   }
 
   @Post(':id/prepayment')
-  @HasPermission(PermissionId.TICKET_CLINIC_PREPAYMENT)
+  @HasPermission(PermissionId.TICKET_CLINIC_PAYMENT)
   async prepayment(
-    @External() { oid }: TExternal,
+    @External() { oid, uid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketClinicPaymentBody
+    @Body() body: TicketPaymentMoneyBody
   ) {
-    return await this.apiTicketClinicService.prepayment({ oid, ticketId: id, body })
+    return await this.apiTicketClinicService.prepayment({ oid, userId: uid, ticketId: id, body })
   }
 
   @Post(':id/refund-overpaid')
   @HasPermission(PermissionId.TICKET_CLINIC_REFUND_OVERPAID)
   async refundOverpaid(
-    @External() { oid }: TExternal,
+    @External() { oid, uid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketClinicPaymentBody
+    @Body() body: TicketPaymentMoneyBody
   ) {
-    return await this.apiTicketClinicService.refundOverpaid({ oid, ticketId: id, body })
+    return await this.apiTicketClinicService.refundOverpaid({
+      oid,
+      userId: uid,
+      ticketId: id,
+      body,
+    })
   }
 
   @Post(':id/pay-debt')
-  @HasPermission(PermissionId.TICKET_CLINIC_PAY_DEBT)
+  @HasPermission(PermissionId.TICKET_CLINIC_PAYMENT)
   async payDebt(
-    @External() { oid }: TExternal,
+    @External() { oid, uid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketClinicPaymentBody
+    @Body() body: TicketPaymentMoneyBody
   ) {
-    return await this.apiTicketClinicService.payDebt({ oid, ticketId: id, body })
+    return await this.apiTicketClinicService.payDebt({ oid, userId: uid, ticketId: id, body })
   }
 
   @Post(':id/close')
   @HasPermission(PermissionId.TICKET_CLINIC_CLOSE)
-  async close(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiTicketClinicService.close({ oid, ticketId: id })
+  async close(@External() { oid, uid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiTicketClinicService.close({ oid, userId: uid, ticketId: id })
   }
 
   @Post(':id/reopen')
   @HasPermission(PermissionId.TICKET_CLINIC_REOPEN)
-  async reopen(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiTicketClinicService.reopen({ oid, ticketId: id })
+  async reopen(@External() { oid, uid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiTicketClinicService.reopen({ oid, userId: uid, ticketId: id })
   }
 
   @Delete(':id/destroy')

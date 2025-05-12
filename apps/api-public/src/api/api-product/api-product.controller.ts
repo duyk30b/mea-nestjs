@@ -2,14 +2,15 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestj
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
 import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
+import { IsUser } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
-import { ApiProductExcel } from './api-product.excel'
 import { ApiProductService } from './api-product.service'
 import {
   ProductCreateBody,
   ProductGetManyQuery,
   ProductGetOneQuery,
+  ProductMergeBody,
   ProductPaginationQuery,
   ProductUpdateBody,
 } from './request'
@@ -18,25 +19,22 @@ import {
 @ApiBearerAuth('access-token')
 @Controller('product')
 export class ApiProductController {
-  constructor(
-    private readonly apiProductService: ApiProductService,
-    private readonly apiProductExcel: ApiProductExcel
-  ) { }
+  constructor(private readonly apiProductService: ApiProductService) { }
 
   @Get('pagination')
-  @HasPermission(PermissionId.PRODUCT_READ)
+  @IsUser()
   pagination(@External() { oid }: TExternal, @Query() query: ProductPaginationQuery) {
     return this.apiProductService.pagination(oid, query)
   }
 
   @Get('list')
-  @HasPermission(PermissionId.PRODUCT_READ)
+  @IsUser()
   async list(@External() { oid }: TExternal, @Query() query: ProductGetManyQuery) {
     return await this.apiProductService.getList(oid, query)
   }
 
   @Get('detail/:id')
-  @HasPermission(PermissionId.PRODUCT_READ)
+  @IsUser()
   async detail(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -68,9 +66,9 @@ export class ApiProductController {
     return await this.apiProductService.destroyOne({ organization, oid, productId: id })
   }
 
-  @Get('download-excel')
-  @HasPermission(PermissionId.PRODUCT_DOWNLOAD_EXCEL)
-  async downloadExcel(@External() { user, organization }: TExternal) {
-    return await this.apiProductExcel.downloadExcel({ organization, user })
+  @Patch('merge-product')
+  @HasPermission(PermissionId.PRODUCT_MERGE)
+  async mergeProduct(@External() { oid, uid, organization }: TExternal, @Body() body: ProductMergeBody) {
+    return await this.apiProductService.mergeProduct({ oid, body, userId: uid })
   }
 }

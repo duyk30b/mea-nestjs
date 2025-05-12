@@ -1,12 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
-import { IsDefined, IsNumber, IsString } from 'class-validator'
+import { IsDefined, IsNumber, IsString, Max, Min } from 'class-validator'
 import { valuesEnum } from '../../../../../_libs/common/helpers/typescript.helper'
 import {
-  IsEnumValue,
-  IsNumberGreaterThan,
+    IsEnumValue,
+    IsNumberGreaterThan,
 } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType } from '../../../../../_libs/database/common/variable'
+import { DiscountType, PickupStrategy } from '../../../../../_libs/database/common/variable'
 
 export class TicketOrderProductDraft {
   @ApiProperty({ example: 56 })
@@ -15,23 +15,42 @@ export class TicketOrderProductDraft {
   @IsNumber()
   priority: number
 
+  @ApiProperty({ enum: PickupStrategy, example: PickupStrategy.AutoWithExpiryDate })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(PickupStrategy)
+  pickupStrategy: PickupStrategy
+
+  @ApiPropertyOptional({ type: 'string', example: JSON.stringify([1, 5, 10]) })
+  @Expose()
+  @IsDefined()
+  @Transform(({ value }) => {
+    try {
+      const err = []
+      const result = JSON.parse(value).map((i: any) => {
+        if (!Number.isInteger) err.push(`${i} is not integer`)
+        return i
+      })
+      if (err.length) return err
+      else return JSON.stringify(result)
+    } catch (error) {
+      return [error.message]
+    }
+  })
+  @IsString({ message: `Validate warehouseIds failed: Example: ${JSON.stringify([1, 2, 3])}` })
+  warehouseIds: string
+
   @ApiProperty({ example: 12 })
   @Expose()
   @IsDefined()
   @IsNumber()
   productId: number
 
-  @ApiProperty({ example: 12 })
+  @ApiProperty({ example: 56 })
   @Expose()
   @IsDefined()
   @IsNumber()
-  batchId: number
-
-  @ApiProperty({ example: 12 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  warehouseId: number
+  batchId: number // nếu batchId = 0, thì chỉ có thể là autoPick hoặc noImpact
 
   @ApiPropertyOptional({ example: 1 })
   @Expose()
@@ -49,7 +68,7 @@ export class TicketOrderProductDraft {
   @Expose()
   @IsDefined()
   @IsNumber()
-  costPrice: number
+  costAmount: number
 
   @ApiProperty({ example: 25_000 })
   @Expose()
@@ -68,6 +87,8 @@ export class TicketOrderProductDraft {
   @Expose()
   @IsDefined()
   @IsNumber()
+  @Max(100)
+  @Min(0)
   discountPercent: number
 
   @ApiProperty({ enum: valuesEnum(DiscountType), example: DiscountType.VND })

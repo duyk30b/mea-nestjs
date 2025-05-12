@@ -9,7 +9,7 @@ export class TicketGetQuery {
     type: String,
     example: JSON.stringify(<TicketRelationQuery>{
       customer: true,
-      customerPaymentList: true,
+      paymentList: true,
       ticketAttributeList: true,
       ticketProductList: { product: true },
       ticketProcedureList: { procedure: true },

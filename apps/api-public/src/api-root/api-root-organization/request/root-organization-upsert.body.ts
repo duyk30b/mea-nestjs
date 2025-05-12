@@ -38,6 +38,12 @@ export class RootOrganizationCreateBody {
   @IsString()
   name: string
 
+  @ApiPropertyOptional({ example: '' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  facebook: string
+
   @ApiPropertyOptional({ example: 1 })
   @Expose()
   @IsDefined()

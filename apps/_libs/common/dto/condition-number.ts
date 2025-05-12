@@ -80,9 +80,8 @@ export class ConditionNumber {
 }
 
 export const transformConditionNumber = ({ value, key }: TransformFnParams) => {
-  if (!value) {
-    return
-  }
+  if (value == null) return
+  
   if (typeof value === 'number') {
     return value
   } else if (typeof value === 'object') {

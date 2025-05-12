@@ -1,27 +1,22 @@
 import { Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { uniqueArray } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { MovementType } from '../../../../_libs/database/common/variable'
-import { Organization } from '../../../../_libs/database/entities'
-import { BatchMovementInsertType } from '../../../../_libs/database/entities/batch-movement.entity'
 import { ProductMovementInsertType } from '../../../../_libs/database/entities/product-movement.entity'
 import { ProductOperation } from '../../../../_libs/database/operations'
 import {
-  BatchMovementRepository,
   BatchRepository,
   OrganizationRepository,
   ProductMovementRepository,
-  ProductRepository,
   ReceiptItemRepository,
-  TicketProductRepository,
+  TicketBatchRepository,
 } from '../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   BatchGetManyQuery,
   BatchGetOneQuery,
-  BatchInsertBody,
+  BatchMergeBody,
   BatchPaginationQuery,
   BatchUpdateInfoAndQuantityBody,
   BatchUpdateInfoBody,
@@ -34,10 +29,8 @@ export class ApiBatchService {
     private readonly cacheDataService: CacheDataService,
     private readonly organizationRepository: OrganizationRepository,
     private readonly batchRepository: BatchRepository,
-    private readonly productRepository: ProductRepository,
-    private readonly ticketProductRepository: TicketProductRepository,
+    private readonly ticketBatchRepository: TicketBatchRepository,
     private readonly receiptItemRepository: ReceiptItemRepository,
-    private readonly batchMovementRepository: BatchMovementRepository,
     private readonly productMovementRepository: ProductMovementRepository,
     private readonly productOperation: ProductOperation
   ) { }
@@ -45,24 +38,23 @@ export class ApiBatchService {
   async pagination(oid: number, query: BatchPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, sort, relation } = query
     const { total, data } = await this.batchRepository.pagination({
-      // relation,
+      relation,
+      relationLoadStrategy: 'query',
       page,
       limit,
       condition: {
         oid,
+        id: filter?.id,
+        warehouseId: filter?.warehouseId,
+        distributorId: filter?.distributorId,
         productId: filter?.productId,
         quantity: filter?.quantity,
         expiryDate: filter?.expiryDate,
         updatedAt: filter?.updatedAt,
+        registeredAt: filter?.registeredAt,
       },
       sort,
     })
-
-    if (relation?.product && data.length) {
-      const productIds = uniqueArray(data.map((i) => i.productId))
-      const products = await this.productRepository.findManyBy({ id: { IN: productIds } })
-      data.forEach((i) => (i.product = products.find((j) => j.id === i.productId)))
-    }
 
     return {
       data,
@@ -72,53 +64,37 @@ export class ApiBatchService {
 
   async getList(oid: number, query: BatchGetManyQuery): Promise<BaseResponse> {
     const { limit, filter, relation, sort } = query
-
-    const batches = await this.batchRepository.findMany({
-      // relation,
+    const batchList = await this.batchRepository.findMany({
+      relation,
+      relationLoadStrategy: 'query',
       condition: {
         oid,
+        id: filter?.id,
+        warehouseId: filter?.warehouseId,
+        distributorId: filter?.distributorId,
         productId: filter?.productId,
         quantity: filter?.quantity,
         expiryDate: filter?.expiryDate,
         updatedAt: filter?.updatedAt,
+        registeredAt: filter?.registeredAt,
+        $OR: filter?.$OR,
       },
       limit,
       sort: sort || undefined,
     })
-    if (relation?.product && batches.length) {
-      const products = await this.productRepository.findManyBy({
-        oid,
-        id: { IN: uniqueArray(batches.map((item) => item.productId)) },
-      })
-      batches.forEach((item) => {
-        item.product = products.find((pr) => pr.id === item.productId)
-      })
-    }
-    return { data: batches }
+    return { data: { batchList } }
   }
 
   async getOne(oid: number, id: number, query: BatchGetOneQuery): Promise<BaseResponse> {
     const batch = await this.batchRepository.findOne({
-      condition: { oid, id },
       relation: query.relation,
+      condition: { oid, id },
     })
     return { data: { batch } }
   }
 
-  async createOne(oid: number, body: BatchInsertBody): Promise<BaseResponse> {
-    const batch = await this.batchRepository.insertOneFullFieldAndReturnEntity({ ...body, oid })
-    return { data: { batch } }
-  }
-
   async updateInfo(oid: number, id: number, body: BatchUpdateInfoBody): Promise<BaseResponse> {
-    const [batch] = await this.batchRepository.updateAndReturnEntity({ id, oid }, body)
-    if (!batch) {
-      throw BusinessException.create({
-        message: 'error.Database.UpdateFailed',
-        details: 'Batch',
-      })
-    }
-    this.socketEmitService.batchUpsert(oid, { batch })
+    const batch = await this.batchRepository.updateOneAndReturnEntity({ id, oid }, body)
     return { data: { batch } }
   }
 
@@ -133,64 +109,53 @@ export class ApiBatchService {
       relation: { product: true },
       condition: { oid, id: batchId },
     })
-    const [batchUpdated] = await this.batchRepository.updateAndReturnEntity(
+    const batchUpdated = await this.batchRepository.updateOneAndReturnEntity(
       { id: batchId, oid },
-      body as any
+      {
+        batchCode: body.batchCode,
+        expiryDate: body.expiryDate,
+        warehouseId: body.warehouseId,
+        distributorId: body.distributorId,
+        costPrice: body.costPrice,
+        quantity: body.quantity,
+        costAmount: body.costAmount,
+      }
     )
-    if (!batchUpdated) {
-      throw BusinessException.create({
-        message: 'error.Database.UpdateFailed',
-        details: 'Batch',
-      })
-    }
-    this.socketEmitService.batchUpsert(oid, { batch: batchUpdated })
-
     if (
       batchOrigin.quantity === batchUpdated.quantity
-      && batchOrigin.costPrice === batchUpdated.costPrice
+      && batchOrigin.costAmount === batchUpdated.costAmount
     ) {
       return { data: { batch: batchUpdated } }
     }
 
-    const batchMovement: BatchMovementInsertType = {
-      oid,
-      batchId,
-      productId: batchOrigin.productId,
-      warehouseId: batchOrigin.warehouseId,
-      contactId: userId,
-      movementType: MovementType.UserChange,
-      voucherId: 0,
-      openQuantity: batchOrigin.quantity,
-      quantity: batchUpdated.quantity - batchOrigin.quantity,
-      closeQuantity: batchUpdated.quantity,
-      actualPrice: batchUpdated.costPrice,
-      expectedPrice: batchOrigin.costPrice,
-      isRefund: 0,
-      unitRate: 1,
-      createdAt: Date.now(),
-    }
-    this.batchMovementRepository.insertOneFullField(batchMovement)
-
-    const productUpdated = await this.productOperation.calculateQuantityProduct({
+    const productUpdated = await this.productOperation.reCalculateQuantityBySumBatch({
       oid,
       productId: batchOrigin.productId,
     })
 
     const productMovement: ProductMovementInsertType = {
       oid,
-      productId: batchOrigin.productId,
-      warehouseId: batchOrigin.warehouseId,
-      contactId: userId,
       movementType: MovementType.UserChange,
+      contactId: userId,
       voucherId: 0,
-      openQuantity: batchOrigin.product.quantity,
-      quantity: productUpdated.quantity - batchOrigin.product.quantity,
-      closeQuantity: productUpdated.quantity,
-      costPrice: batchOrigin.costPrice,
+      voucherProductId: 0,
+      warehouseId: batchOrigin.warehouseId,
+      productId: batchOrigin.productId,
+      batchId: batchOrigin.id,
+      isRefund: 0,
+
+      quantity: batchUpdated.quantity - batchOrigin.quantity,
+      costAmount: batchUpdated.costAmount - batchOrigin.costAmount,
+
+      openQuantityProduct: batchOrigin.product.quantity,
+      closeQuantityProduct: productUpdated.quantity,
+      openQuantityBatch: batchOrigin.quantity,
+      closeQuantityBatch: batchUpdated.quantity,
+      openCostAmountBatch: batchOrigin.costAmount,
+      closeCostAmountBatch: batchUpdated.costAmount,
+
       actualPrice: batchUpdated.costPrice,
       expectedPrice: batchOrigin.costPrice,
-      isRefund: 0,
-      unitRate: 1,
       createdAt: Date.now(),
     }
     this.productMovementRepository.insertOneFullField(productMovement)
@@ -198,43 +163,52 @@ export class ApiBatchService {
     return { data: { batch: batchUpdated, product: productUpdated } }
   }
 
-  async destroyOne(options: {
-    oid: number
-    batchId: number
-    organization: Organization
-  }): Promise<BaseResponse> {
-    const { oid, batchId, organization } = options
-    const [receiptItemList, ticketProductList] = await Promise.all([
+  async destroyOne(options: { oid: number; batchId: number }): Promise<BaseResponse> {
+    const { oid, batchId } = options
+    const [receiptItemList, ticketBatchList] = await Promise.all([
       this.receiptItemRepository.findMany({
         condition: { oid, batchId },
         limit: 10,
       }),
-      this.ticketProductRepository.findMany({
+      this.ticketBatchRepository.findMany({
         condition: { oid, batchId },
         limit: 10,
       }),
     ])
-    if (receiptItemList.length > 0 || ticketProductList.length > 0) {
+    if (receiptItemList.length > 0 || ticketBatchList.length > 0) {
       return {
-        data: { receiptItemList, ticketProductList },
+        data: { receiptItemList, ticketBatchList },
         success: false,
       }
     }
 
-    await Promise.allSettled([
-      this.batchRepository.delete({ oid, id: batchId }),
-      this.batchMovementRepository.delete({ oid, batchId }),
-    ])
+    await this.batchRepository.delete({ oid, id: batchId })
 
-    organization.dataVersionParse.batch += 1
-    await this.organizationRepository.update(
-      { id: oid },
-      {
-        dataVersion: JSON.stringify(organization.dataVersionParse),
-      }
-    )
+    await this.organizationRepository.updateDataVersion(oid)
     this.cacheDataService.clearOrganization(oid)
 
-    return { data: { batchId, receiptItemList: [], ticketProductList: [] } }
+    return { data: { batchId, receiptItemList: [], ticketBatchList: [] } }
+  }
+
+  async batchMerge(options: { oid: number; body: BatchMergeBody }) {
+    const { oid, body } = options
+    const { batchIdSourceList, batchIdTarget, productId } = body
+
+    batchIdSourceList.forEach((i) => {
+      if (isNaN(i) || i <= 0) {
+        throw new BusinessException('error.ValidateFailed')
+      }
+    })
+    await this.batchRepository.mergeBatch({
+      oid,
+      productId,
+      batchIdSourceList,
+      batchIdTarget,
+    })
+
+    await this.organizationRepository.updateDataVersion(oid)
+    this.cacheDataService.clearOrganization(oid)
+
+    return { data: true }
   }
 }

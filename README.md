@@ -94,3 +94,6 @@ docker exec mc_nginx nginx -t
 - APP: https://www.dbsofts.com/articles/mariadb_to_postgresql/
 - Convert on app: boolean
 - shiptime => date
+
+## LOGS
+- docker logs -f mc_api_public | grep "POST\|PATCH\|PUT\|DELETE"

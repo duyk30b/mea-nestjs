@@ -1,5 +1,13 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm'
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm'
 import Image from './image.entity'
 import User from './user.entity'
 
@@ -24,6 +32,10 @@ export default class Organization {
   @Expose()
   @Column({ type: 'varchar', length: 255, nullable: true })
   email: string
+
+  @Expose()
+  @Column({ type: 'varchar', length: 255, default: '' })
+  facebook: string
 
   @Column({ type: 'smallint', default: 0 })
   @Expose()
@@ -127,7 +139,7 @@ export default class Organization {
   userList: User[]
 
   @Expose()
-  dataVersionParse: { product: number, batch: number, customer: number }
+  dataVersionParse: { product: number; batch: number; customer: number }
 
   static fromRaw(raw: { [P in keyof Organization]: any }) {
     if (!raw) return null
@@ -152,13 +164,15 @@ export type OrganizationRelationType = {
 
 export type OrganizationInsertType = Omit<
   Organization,
-  keyof OrganizationRelationType | keyof Pick<Organization, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'dataVersionParse'>
+  | keyof OrganizationRelationType
+  | keyof Pick<Organization, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt' | 'dataVersionParse'>
 >
 
 export type OrganizationUpdateType = {
   [K in Exclude<
     keyof Organization,
-    keyof OrganizationRelationType | keyof Pick<Organization, 'id' | 'createdAt' | 'dataVersionParse'>
+    | keyof OrganizationRelationType
+    | keyof Pick<Organization, 'id' | 'createdAt' | 'dataVersionParse'>
   >]: Organization[K] | (() => string)
 }
 

@@ -117,7 +117,7 @@ export class StatisticOperation {
     const whereTicket: FindOptionsWhere<Ticket> = {
       oid,
       startedAt: Between(fromTime.getTime(), toTime.getTime()),
-      ticketStatus: In([TicketStatus.Debt, TicketStatus.Completed]),
+      status: In([TicketStatus.Debt, TicketStatus.Completed]),
     }
     let query = this.manager
       .createQueryBuilder(Ticket, 'ticket')

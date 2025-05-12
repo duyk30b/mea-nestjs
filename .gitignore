@@ -1,7 +1,5 @@
 /node_modules
 
-/data/*
-!/data/backup
-!/data/restore
+/data
 
 

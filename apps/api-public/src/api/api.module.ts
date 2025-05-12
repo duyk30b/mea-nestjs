@@ -1,17 +1,16 @@
 import { Module } from '@nestjs/common'
 import { ApiAppointmentModule } from './api-appointment/api-appointment.module'
-import { ApiBatchMovementModule } from './api-batch-movement/api-batch-movement.module'
 import { ApiBatchModule } from './api-batch/api-batch.module'
 import { ApiCommissionModule } from './api-commission/api-commission.module'
-import { ApiCustomerPaymentModule } from './api-customer-payment/api-customer-payment.module'
 import { ApiCustomerSourceModule } from './api-customer-source/api-customer-source.module'
 import { ApiCustomerModule } from './api-customer/api-customer.module'
-import { ApiDistributorPaymentModule } from './api-distributor-payment/api-distributor-payment.module'
 import { ApiDistributorModule } from './api-distributor/api-distributor.module'
 import { ApiLaboratoryGroupModule } from './api-laboratory-group/api-laboratory-group.module'
 import { ApiLaboratoryKitModule } from './api-laboratory-kit/api-laboratory-kit.module'
 import { ApiLaboratoryModule } from './api-laboratory/api-laboratory.module'
 import { ApiOrganizationModule } from './api-organization/api-organization.module'
+import { ApiPaymentMethodModule } from './api-payment-method/api-payment-method.module'
+import { ApiPaymentModule } from './api-payment/api-payment.module'
 import { ApiPermissionModule } from './api-permission/api-permission.module'
 import { ApiPrescriptionSampleModule } from './api-prescription-sample/api-prescription-sample.module'
 import { ApiPrintHtmlModule } from './api-print-html/api-print-html.module'
@@ -27,6 +26,8 @@ import { ApiReceiptModule } from './api-receipt/api-receipt.module'
 import { ApiRoleModule } from './api-role/api-role.module'
 import { ApiSettingModule } from './api-setting/api-setting.module'
 import { ApiStatisticModule } from './api-statistics/api-statistic.module'
+import { ApiStockCheckModule } from './api-stock-check/api-stock-check.module'
+import { ApiTicketBatchModule } from './api-ticket-batch/api-ticket-batch.module'
 import { ApiTicketClinicModule } from './api-ticket-clinic/api-ticket-clinic.module'
 import { ApiTicketLaboratoryModule } from './api-ticket-laboratory/api-ticket-laboratory.module'
 import { ApiTicketOrderModule } from './api-ticket-order/api-ticket-order.module'
@@ -42,12 +43,9 @@ import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
   imports: [
     ApiAppointmentModule,
     ApiBatchModule,
-    ApiBatchMovementModule,
     ApiCustomerModule,
-    ApiCustomerPaymentModule,
     ApiCustomerSourceModule,
     ApiDistributorModule,
-    ApiDistributorPaymentModule,
     ApiPermissionModule,
     ApiProcedureModule,
     ApiProductModule,
@@ -80,9 +78,14 @@ import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
     ApiTicketOrderModule,
     ApiTicketProcedureModule,
     ApiTicketProductModule,
+    ApiTicketBatchModule,
     ApiTicketClinicModule,
     ApiTicketLaboratoryModule,
     ApiTicketRadiologyModule,
+    ApiPaymentMethodModule,
+
+    ApiStockCheckModule,
+    ApiPaymentModule,
   ],
   controllers: [],
   providers: [],

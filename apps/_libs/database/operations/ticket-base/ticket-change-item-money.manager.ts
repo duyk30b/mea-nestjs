@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
-import { DiscountType } from '../../common/variable'
+import { DeliveryStatus, DiscountType } from '../../common/variable'
 import { Ticket } from '../../entities'
 import { TicketManager } from '../../managers'
 
@@ -28,8 +28,11 @@ export class TicketChangeItemMoneyManager {
 
       commissionMoneyAdd?: number
     }
+    other?: {
+      deliveryStatus?: DeliveryStatus
+    }
   }) {
-    const { manager, oid, ticketOrigin, itemMoney } = options
+    const { manager, oid, ticketOrigin, itemMoney, other } = options
 
     // === 5. UPDATE TICKET: MONEY  ===
     const productMoneyUpdate = ticketOrigin.productMoney + (itemMoney.productMoneyAdd || 0)
@@ -54,7 +57,7 @@ export class TicketChangeItemMoneyManager {
     if (discountType === DiscountType.Percent) {
       discountMoney = Math.floor((discountPercent * itemsActualMoneyUpdate) / 100)
     }
-    const totalMoneyUpdate = itemsActualMoneyUpdate - discountMoney
+    const totalMoneyUpdate = itemsActualMoneyUpdate - discountMoney + ticketOrigin.surcharge
     const debtUpdate = totalMoneyUpdate - ticketOrigin.paid
     const profitUpdate =
       totalMoneyUpdate - itemsCostAmountUpdate - ticketOrigin.expense - commissionMoneyUpdate
@@ -84,6 +87,9 @@ export class TicketChangeItemMoneyManager {
         totalMoney: totalMoneyUpdate,
         debt: debtUpdate,
         profit: profitUpdate,
+
+        // === other ===
+        deliveryStatus: other?.deliveryStatus != null ? other.deliveryStatus : undefined,
       }
     )
     return ticket

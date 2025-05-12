@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
+import { TicketLaboratoryStatus } from '../../../common/variable'
 import { TicketLaboratoryGroup } from '../../../entities'
 import {
   TicketLaboratoryInsertType,
-  TicketLaboratoryStatus,
 } from '../../../entities/ticket-laboratory.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import {
@@ -44,7 +44,7 @@ export class TicketClinicChangeSelectLaboratoryOperation {
       // === 1. UPDATE TICKET FOR TRANSACTION ===
       const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(
         manager,
-        { oid, id: ticketId, ticketStatus: TicketStatus.Executing },
+        { oid, id: ticketId, status: TicketStatus.Executing },
         { updatedAt: Date.now() }
       )
 

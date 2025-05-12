@@ -6,6 +6,7 @@
 - Kiểm tra CPU: `lscpu`
 - Kiểm tra RAM: `free -h`
 - Kiểm tra dung lượng ổ đĩa: `df -h`
+- Lấy đường dẫn tuyệt đối: `readlink -f ./`
 
 2. Check App: `htop`, `git --version`
 
@@ -22,5 +23,9 @@
 - Reset permission
 - Login Google Driver
 
-6. Other
+6. Cron Job
+- Lấy list crontab: `crontab -l`
+- Thêm sửa crontab (dùng nano hoặc vim): `crontab -e`
+- Thêm cuối file crontab (chạy vào 20h hàng ngày): `* 20 * * * cd /home/duy/MEA/mea-nestjs && ./script/backup-postgres.sh`
+7. Other
 - CMD history: `sudo cat /root/.bash_history`

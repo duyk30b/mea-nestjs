@@ -1,10 +1,20 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { DiscountType, ReceiptStatus } from '../common/variable'
-import DistributorPayment from './distributor-payment.entity'
+import { DeliveryStatus, DiscountType } from '../common/variable'
 import Distributor from './distributor.entity'
+import Payment from './payment.entity'
 import ReceiptItem from './receipt-item.entity'
+
+export enum ReceiptStatus {
+  Schedule = 1,
+  Draft = 2,
+  Deposited = 3,
+  Executing = 4,
+  Debt = 5,
+  Completed = 6,
+  Cancelled = 7,
+}
 
 @Entity('Receipt')
 @Index('IDX_Receipt__oid_distributorId', ['oid', 'distributorId'])
@@ -17,6 +27,10 @@ export default class Receipt extends BaseEntity {
   @Column({ type: 'smallint' })
   @Expose()
   status: ReceiptStatus
+
+  @Column({ type: 'smallint', default: DeliveryStatus.Pending })
+  @Expose()
+  deliveryStatus: DeliveryStatus
 
   @Column({ type: 'smallint', nullable: true })
   @Expose()
@@ -123,8 +137,8 @@ export default class Receipt extends BaseEntity {
   distributor: Distributor
 
   @Expose()
-  @OneToMany(() => DistributorPayment, (distributorPayment) => distributorPayment.receipt)
-  distributorPaymentList: DistributorPayment[]
+  @OneToMany(() => Payment, (payment) => payment.receipt)
+  paymentList: Payment[]
 
   static fromRaw(raw: { [P in keyof Receipt]: any }) {
     if (!raw) return null
@@ -152,24 +166,19 @@ export default class Receipt extends BaseEntity {
 }
 
 export type ReceiptRelationType = {
-  [P in keyof Pick<Receipt, 'distributor' | 'distributorPaymentList'>]?: boolean
+  [P in keyof Pick<Receipt, 'distributor' | 'paymentList'>]?: boolean
 } & {
-  [P in keyof Pick<
-    Receipt,
-    'receiptItemList'
-  >]?: { [P in keyof Pick<ReceiptItem, 'product' | 'batch'>]?: boolean } | false
+  [P in keyof Pick<Receipt, 'receiptItemList'>]?:
+  | { [P in keyof Pick<ReceiptItem, 'product' | 'batch'>]?: boolean }
+  | false
 }
 
-export type ReceiptInsertType = Omit<
-  Receipt,
-  keyof ReceiptRelationType | keyof Pick<Receipt, 'id'>
->
+export type ReceiptInsertType = Omit<Receipt, keyof ReceiptRelationType | keyof Pick<Receipt, 'id'>>
 
 export type ReceiptUpdateType = {
-  [K in Exclude<
-    keyof Receipt,
-    keyof ReceiptRelationType | keyof Pick<Receipt, 'oid' | 'id' | 'distributorId'>
-  >]: Receipt[K] | (() => string)
+  [K in Exclude<keyof Receipt, keyof ReceiptRelationType | keyof Pick<Receipt, 'oid' | 'id'>>]:
+  | Receipt[K]
+  | (() => string)
 }
 
 export type ReceiptSortType = {

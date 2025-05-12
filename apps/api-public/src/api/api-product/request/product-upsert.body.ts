@@ -1,8 +1,26 @@
-import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
-import { IsArray, IsBoolean, IsDefined, IsIn, IsInt, IsNumber, IsPositive, IsString, ValidateNested, validateSync } from 'class-validator'
+import {
+    IsArray,
+    IsBoolean,
+    IsDefined,
+    IsIn,
+    IsInt,
+    IsNumber,
+    IsPositive,
+    IsString,
+    ValidateNested,
+    validateSync,
+} from 'class-validator'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
+import { PickupStrategy } from '../../../../../_libs/database/common/variable'
 import { CommissionCalculatorType } from '../../../../../_libs/database/entities/commission.entity'
+import {
+    SplitBatchByCostPrice,
+    SplitBatchByDistributor,
+    SplitBatchByExpiryDate,
+    SplitBatchByWarehouse,
+} from '../../../../../_libs/database/entities/product.entity'
 
 export class UnitConversionBody {
   @Expose()
@@ -45,10 +63,22 @@ export class ProductCreateBody {
   @IsString()
   brandName: string // tên biệt dược
 
+  @ApiProperty({ example: '' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  productCode: string
+
   @ApiPropertyOptional({ example: 'Clarythromycin 125mg/5ml' })
   @Expose()
   @IsString()
   substance: string // Hoạt chất
+
+  @ApiPropertyOptional({ example: 59_000 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  quantity: number
 
   @ApiPropertyOptional({ example: 45_000 })
   @Expose()
@@ -75,7 +105,11 @@ export class ProductCreateBody {
   @IsInt()
   productGroupId: number
 
-  @ApiPropertyOptional({ name: 'unit', type: 'string', example: JSON.stringify([{ name: 'Viên', rate: 1 }]) })
+  @ApiPropertyOptional({
+    name: 'unit',
+    type: 'string',
+    example: JSON.stringify([{ name: 'Viên', rate: 1 }]),
+  })
   @Expose()
   @Transform(({ value }) => {
     try {
@@ -96,7 +130,9 @@ export class ProductCreateBody {
       return [error.message]
     }
   })
-  @IsString({ message: `Validate unit failed: Example: ${JSON.stringify([{ name: 'Viên', rate: 1 }])}` })
+  @IsString({
+    message: `Validate unit failed: Example: ${JSON.stringify([{ name: 'Viên', rate: 1 }])}`,
+  })
   unit: string // đơn vị tính: lọ, ống, vỉ
 
   // @ApiPropertyOptional({
@@ -140,23 +176,48 @@ export class ProductCreateBody {
   @Expose()
   @IsDefined()
   @IsIn([0, 1])
-  hasManageQuantity: 0 | 1
-
-  @ApiPropertyOptional({ example: 1 })
-  @Expose()
-  @IsDefined()
-  @IsIn([0, 1])
   isActive: 0 | 1
 
-  @ApiPropertyOptional({ name: 'warehouseIds', type: 'string', example: JSON.stringify([1, 5, 10]) })
+  @ApiProperty({ enum: PickupStrategy, example: PickupStrategy.AutoWithExpiryDate })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(PickupStrategy)
+  pickupStrategy: PickupStrategy
+
+  @ApiProperty({ enum: SplitBatchByWarehouse, example: SplitBatchByWarehouse.Inherit })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(SplitBatchByWarehouse)
+  splitBatchByWarehouse: SplitBatchByWarehouse
+
+  @ApiProperty({
+    enum: SplitBatchByDistributor,
+    example: SplitBatchByDistributor.Inherit,
+  })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(SplitBatchByDistributor)
+  splitBatchByDistributor: SplitBatchByDistributor
+
+  @ApiProperty({ enum: SplitBatchByExpiryDate, example: SplitBatchByExpiryDate.Inherit })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(SplitBatchByExpiryDate)
+  splitBatchByExpiryDate: SplitBatchByExpiryDate
+
+  @ApiProperty({ enum: SplitBatchByCostPrice, example: SplitBatchByCostPrice.Inherit })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(SplitBatchByCostPrice)
+  splitBatchByCostPrice: SplitBatchByCostPrice
+
+  @ApiPropertyOptional({ type: 'string', example: JSON.stringify([1, 5, 10]) })
   @Expose()
   @Transform(({ value }) => {
     try {
       const err = []
       const result = JSON.parse(value).map((i: any) => {
-        if (!Number.isInteger) {
-          err.push(`${i} is not integer`)
-        }
+        if (!Number.isInteger) err.push(`${i} is not integer`)
         return i
       })
       if (err.length) return err
@@ -178,4 +239,4 @@ export class ProductCreateBody {
   commissionList: ProductCommission[]
 }
 
-export class ProductUpdateBody extends PartialType(ProductCreateBody) { }
+export class ProductUpdateBody extends OmitType(ProductCreateBody, ['quantity']) { }

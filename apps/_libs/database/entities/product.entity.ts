@@ -1,14 +1,61 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
+import { Exclude, Expose } from 'class-transformer'
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm'
+import { PickupStrategy } from '../common/variable'
 import Batch from './batch.entity'
 import Commission from './commission.entity'
 import ProductGroup from './product-group.entity'
+import { ProductSettingRule } from './setting.entity'
+
+export enum SplitBatchByWarehouse {
+  Inherit = 0,
+  Override = 1,
+  SplitOnDifferent = 2,
+}
+
+export enum SplitBatchByDistributor {
+  Inherit = 0,
+  Override = 1,
+  SplitOnDifferent = 2,
+}
+
+export enum SplitBatchByExpiryDate {
+  Inherit = 0,
+  Override = 1,
+  SplitOnDifferent = 2,
+}
+
+export enum SplitBatchByCostPrice {
+  Inherit = 0,
+  OverrideAndMAC = 1,
+  SplitOnDifferent = 2,
+}
 
 @Entity('Product')
 @Index('IDX_Product__oid_brandName', ['oid', 'brandName'])
 @Index('IDX_Product__oid_substance', ['oid', 'substance'])
-export default class Product extends BaseEntity {
+@Unique('UNIQUE_Product__oid_productCode', ['oid', 'productCode'])
+export default class Product {
+  @Column({ name: 'oid' })
+  @Exclude()
+  oid: number
+
+  @PrimaryGeneratedColumn({ name: 'id' })
+  @Expose({ name: 'id' })
+  id: number
+
+  @Column({ type: 'varchar', length: 50 })
+  @Expose()
+  productCode: string
+
   @Column({ type: 'varchar', length: 255 })
   @Expose()
   brandName: string // Tên biệt dược
@@ -27,9 +74,25 @@ export default class Product extends BaseEntity {
   @Expose()
   quantity: number
 
-  @Column({ default: 1, type: 'smallint' })
+  @Column({ default: PickupStrategy.Inherit, type: 'smallint' })
   @Expose()
-  hasManageQuantity: 0 | 1
+  pickupStrategy: PickupStrategy
+
+  @Column({ default: SplitBatchByWarehouse.Inherit, type: 'smallint' })
+  @Expose()
+  splitBatchByWarehouse: SplitBatchByWarehouse
+
+  @Column({ default: SplitBatchByDistributor.Inherit, type: 'smallint' })
+  @Expose()
+  splitBatchByDistributor: SplitBatchByDistributor
+
+  @Column({ default: SplitBatchByExpiryDate.Inherit, type: 'smallint' })
+  @Expose()
+  splitBatchByExpiryDate: SplitBatchByExpiryDate
+
+  @Column({ default: SplitBatchByCostPrice.Inherit, type: 'smallint' })
+  @Expose()
+  splitBatchByCostPrice: SplitBatchByCostPrice
 
   @Column({
     type: 'bigint',
@@ -140,6 +203,52 @@ export default class Product extends BaseEntity {
   static fromRaws(raws: { [P in keyof Product]: any }[]) {
     return raws.map((i) => Product.fromRaw(i))
   }
+
+  static getProductSettingRule(
+    product: Product,
+    productSettingCommon: ProductSettingRule,
+    productSettingRoot: ProductSettingRule
+  ) {
+    const splitRule: ProductSettingRule = {
+      allowNegativeQuantity: false, // nếu cần thì xử lý ghi đè sau
+      pickupStrategy: product.pickupStrategy,
+      splitBatchByWarehouse: product.splitBatchByWarehouse,
+      splitBatchByDistributor: product.splitBatchByDistributor,
+      splitBatchByExpiryDate: product.splitBatchByExpiryDate,
+      splitBatchByCostPrice: product.splitBatchByCostPrice,
+    }
+    if (splitRule.pickupStrategy === PickupStrategy.Inherit) {
+      splitRule.pickupStrategy = productSettingCommon.pickupStrategy
+      if (splitRule.pickupStrategy === PickupStrategy.Inherit) {
+        splitRule.pickupStrategy = productSettingRoot.pickupStrategy
+      }
+    }
+    if (splitRule.splitBatchByWarehouse === SplitBatchByWarehouse.Inherit) {
+      splitRule.splitBatchByWarehouse = productSettingCommon.splitBatchByWarehouse
+      if (splitRule.splitBatchByWarehouse === SplitBatchByWarehouse.Inherit) {
+        splitRule.splitBatchByWarehouse = productSettingRoot.splitBatchByWarehouse
+      }
+    }
+    if (splitRule.splitBatchByDistributor === SplitBatchByDistributor.Inherit) {
+      splitRule.splitBatchByDistributor = productSettingCommon.splitBatchByDistributor
+      if (splitRule.splitBatchByDistributor === SplitBatchByDistributor.Inherit) {
+        splitRule.splitBatchByDistributor = productSettingRoot.splitBatchByDistributor
+      }
+    }
+    if (splitRule.splitBatchByExpiryDate === SplitBatchByExpiryDate.Inherit) {
+      splitRule.splitBatchByExpiryDate = productSettingCommon.splitBatchByExpiryDate
+      if (splitRule.splitBatchByExpiryDate === SplitBatchByExpiryDate.Inherit) {
+        splitRule.splitBatchByExpiryDate = productSettingRoot.splitBatchByExpiryDate
+      }
+    }
+    if (splitRule.splitBatchByCostPrice === SplitBatchByCostPrice.Inherit) {
+      splitRule.splitBatchByCostPrice = productSettingCommon.splitBatchByCostPrice
+      if (splitRule.splitBatchByCostPrice === SplitBatchByCostPrice.Inherit) {
+        splitRule.splitBatchByCostPrice = productSettingRoot.splitBatchByCostPrice
+      }
+    }
+    return splitRule
+  }
 }
 
 export type ProductRelationType = {
@@ -148,18 +257,16 @@ export type ProductRelationType = {
 
 export type ProductInsertType = Omit<
   Product,
-  | keyof ProductRelationType
-  | keyof Pick<Product, 'id' | 'quantity' | 'updatedAt' | 'warehouseIdList'>
+  keyof ProductRelationType | keyof Pick<Product, 'id' | 'updatedAt' | 'warehouseIdList'>
 >
 
 export type ProductUpdateType = {
   [K in Exclude<
     keyof Product,
-    | keyof ProductRelationType
-    | keyof Pick<Product, 'oid' | 'id' | 'quantity' | 'updatedAt' | 'warehouseIdList'>
+    keyof ProductRelationType | keyof Pick<Product, 'oid' | 'id' | 'warehouseIdList'>
   >]: Product[K] | (() => string)
 }
 
 export type ProductSortType = {
-  [P in keyof Pick<Product, 'id' | 'quantity' | 'brandName'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<Product, 'id' | 'productCode' | 'quantity' | 'brandName'>]?: 'ASC' | 'DESC'
 }

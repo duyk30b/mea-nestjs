@@ -3,6 +3,7 @@ import {
   Catch,
   ExceptionFilter,
   ForbiddenException,
+  HttpException,
   HttpStatus,
   Logger,
   NotFoundException,
@@ -15,6 +16,7 @@ import { FastifyReply } from 'fastify'
 import { I18nContext } from 'nestjs-i18n'
 import { from } from 'rxjs'
 import * as url from 'url'
+import { BusinessError } from '../../database/common/error'
 import { RequestExternal } from '../request/external.request'
 
 export class ValidationException extends Error {
@@ -72,6 +74,10 @@ export class ServerExceptionFilter implements ExceptionFilter {
     const i18n = I18nContext.current<I18nTranslations>(host)
 
     switch (exception['constructor'].name) {
+      case BusinessError.name: {
+        statusCode = HttpStatus.BAD_REQUEST
+        break
+      }
       case ValidationException.name: {
         statusCode = HttpStatus.UNPROCESSABLE_ENTITY
         break
@@ -97,6 +103,11 @@ export class ServerExceptionFilter implements ExceptionFilter {
       case ForbiddenException.name: {
         statusCode = HttpStatus.FORBIDDEN
         message = i18n.translate('common.Forbidden')
+        break
+      }
+      case HttpException.name: {
+        statusCode = (exception as any).status
+        message = i18n.translate(exception.message as any, {})
         break
       }
     }

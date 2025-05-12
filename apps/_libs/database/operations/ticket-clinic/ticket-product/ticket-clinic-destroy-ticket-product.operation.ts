@@ -30,7 +30,7 @@ export class TicketClinicDestroyTicketProductOperation {
       // === 1. UPDATE TICKET FOR TRANSACTION ===
       const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(
         manager,
-        { oid, id: ticketId, ticketStatus: TicketStatus.Executing },
+        { oid, id: ticketId, status: TicketStatus.Executing },
         { updatedAt: Date.now() }
       )
 
@@ -52,9 +52,24 @@ export class TicketClinicDestroyTicketProductOperation {
         ticketItemId: ticketProductDestroy.id,
       })
 
-      // === 4. UPDATE TICKET: MONEY  ===
+      // === 4. ReCalculator DeliveryStatus
+      let deliveryStatus = ticketOrigin.deliveryStatus
+      if (ticketProductDestroy.deliveryStatus === DeliveryStatus.Pending) {
+        const ticketProductList = await this.ticketProductManager.findMany(manager, {
+          condition: { ticketId },
+        })
+        deliveryStatus = DeliveryStatus.Delivered
+        if (ticketProductList.every((i) => i.deliveryStatus === DeliveryStatus.NoStock)) {
+          deliveryStatus = DeliveryStatus.NoStock
+        }
+        if (ticketProductList.some((i) => i.deliveryStatus === DeliveryStatus.Pending)) {
+          deliveryStatus = DeliveryStatus.Pending
+        }
+      }
+
+      // === 5. UPDATE TICKET: MONEY  ===
       const productMoneyDelete = ticketProductDestroy.quantity * ticketProductDestroy.actualPrice
-      const itemsCostAmountDelete = ticketProductDestroy.quantity * ticketProductDestroy.costPrice
+      const itemsCostAmountDelete = ticketProductDestroy.costAmount
       const itemsDiscountDelete = ticketProductDestroy.quantity * ticketProductDestroy.discountMoney
       const commissionMoneyDelete = ticketUserDestroyList.reduce((acc, item) => {
         return acc + item.commissionMoney * item.quantity
@@ -72,6 +87,7 @@ export class TicketClinicDestroyTicketProductOperation {
             itemsDiscountAdd: -itemsDiscountDelete,
             commissionMoneyAdd: -commissionMoneyDelete,
           },
+          other: { deliveryStatus },
         })
       }
 

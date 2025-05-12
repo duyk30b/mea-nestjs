@@ -8,7 +8,7 @@ import {
 } from 'typeorm'
 import { BaseCondition } from '../../common/dto'
 import { NoExtra } from '../../common/helpers/typescript.helper'
-import { PostgreSqlCondition } from '../common/postgresql.condition'
+import { PostgreSqlRaw } from '../common/postgresql.raw'
 
 type EntityType<_ENTITY> = EntityTarget<_ENTITY> & {
   fromRaw: (raw: { [P in keyof _ENTITY]: any }) => _ENTITY
@@ -21,7 +21,7 @@ export abstract class _PostgreSqlManager<
   _INSERT = Omit<_ENTITY, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>,
   _UPDATE = Omit<_ENTITY, 'id' | 'createdAt' | 'updatedAt'>,
   _SORT = { [P in keyof _ENTITY]?: 'ASC' | 'DESC' },
-> extends PostgreSqlCondition<_ENTITY> {
+> extends PostgreSqlRaw<_ENTITY> {
   private entity: EntityType<_ENTITY>
 
   protected constructor(entity: EntityType<_ENTITY>) {
@@ -151,7 +151,9 @@ export abstract class _PostgreSqlManager<
     const insertResult = await manager.insert(this.entity, data)
     const id = insertResult.identifiers[0].id
     if (!id) {
-      throw new Error(`Insert Database failed: ` + JSON.stringify({ insertResult, data }))
+      throw new Error(
+        `Insert ${this.entity['name']} failed: ` + JSON.stringify({ insertResult, data })
+      )
     }
     return id
   }
@@ -176,7 +178,9 @@ export abstract class _PostgreSqlManager<
       .returning('*')
       .execute()
     if (insertResult.raw?.length !== 1) {
-      throw new Error(`Insert Database failed: ` + JSON.stringify({ insertResult, data }))
+      throw new Error(
+        `Insert ${this.entity['name']} failed: ` + JSON.stringify({ insertResult, data })
+      )
     }
     return insertResult.raw[0]
   }
@@ -248,9 +252,30 @@ export abstract class _PostgreSqlManager<
   ): Promise<_ENTITY> {
     const raws = await this.updateAndReturnRaw(manager, condition, data)
     if (raws.length !== 1) {
-      throw new Error(`Update Database failed: ` + JSON.stringify({ raws }))
+      throw new Error(`Update ${this.entity['name']} failed: ` + JSON.stringify({ raws }))
     }
     return this.entity.fromRaw(raws[0])
+  }
+
+  async upsertByConflictUnique(options: {
+    manager: EntityManager
+    upsertList: _INSERT[]
+    updateFields: (keyof _ENTITY)[]
+    conflictFields: (keyof _ENTITY)[]
+  }) {
+    const { manager, upsertList, updateFields, conflictFields } = options
+    const upsertResult: InsertResult = await manager
+      .createQueryBuilder()
+      .insert()
+      .values(upsertList as any)
+      .orUpdate(updateFields as string[], conflictFields as string[])
+      .execute()
+    if (upsertResult.raw?.length !== upsertList.length) {
+      throw new Error(
+        `Insert ${this.entity['name']} failed: ` + JSON.stringify({ upsertResult, upsertList })
+      )
+    }
+    return this.entity.fromRaws(upsertResult.raw)
   }
 
   async delete(manager: EntityManager, condition: BaseCondition<_ENTITY>) {
@@ -290,8 +315,129 @@ export abstract class _PostgreSqlManager<
   ): Promise<_ENTITY> {
     const raws = await this.deleteAndReturnRaw(manager, condition)
     if (raws.length !== 1) {
-      throw new Error(`Delete Database failed: ` + JSON.stringify({ raws }))
+      throw new Error(`Delete ${this.entity['name']} failed: ` + JSON.stringify({ raws }))
     }
     return this.entity.fromRaw(raws[0])
+  }
+
+  async bulkUpdate(options: {
+    manager: EntityManager
+    tempList: (Partial<_ENTITY> | Record<string, any>)[]
+    condition?: BaseCondition<_ENTITY>
+    compare:
+    | (keyof _ENTITY)[]
+    | { [P in keyof _ENTITY]?: boolean | ((t?: string, u?: string) => string) }
+    update:
+    | (keyof _ENTITY)[]
+    | {
+      [P in keyof _ENTITY]?:
+      | ((t?: string, u?: string) => string)
+      | boolean
+      | { cast: 'int' | 'bigint' | 'numeric' | 'text' }
+    }
+    options?: { requireEqualLength?: boolean }
+  }) {
+    const { manager } = options
+    const tableName = this.entity['name']
+
+    const tempList = options.tempList || []
+    if (!tempList.length) return []
+
+    let compareName: string[] = []
+    let compareObject: { [P in keyof _ENTITY]?: boolean | ((t?: string, u?: string) => string) } =
+      {}
+    let conditionRaw = ''
+    if (options.condition) {
+      conditionRaw = this.getRawConditions(tableName, options.condition)
+    }
+
+    if (Array.isArray(options.compare)) {
+      compareName = [...options.compare] as string[]
+      options.compare.forEach((field) => {
+        compareObject[field] = true
+      })
+    } else {
+      compareName = Object.keys(options.compare)
+      compareObject = { ...options.compare }
+    }
+
+    let updateName: string[] = []
+    let updateObject: {
+      [P in keyof _ENTITY]?:
+      | ((t?: string, u?: string) => string)
+      | boolean
+      | { cast: 'int' | 'bigint' | 'numeric' | 'text' }
+    } = {}
+
+    if (Array.isArray(options.update)) {
+      updateName = [...options.update] as string[]
+      options.update.forEach((field) => {
+        updateObject[field] = true
+      })
+    } else {
+      updateName = Object.keys(options.update)
+      updateObject = { ...options.update }
+    }
+
+    if (!updateName.length) return []
+    const tempColumns = Object.keys(tempList[0])
+
+    const modifiedRaw: [any[], number] = await manager.query(
+      `
+      UPDATE  "${tableName}"
+      SET     ${updateName.map((field) => {
+        if (typeof updateObject[field] === 'function') {
+          return `"${field}" = ${updateObject[field]('temp', tableName)}`
+        } else if (typeof updateObject[field] === 'object') {
+          return `"${field}" = "temp"."${field}"::${updateObject[field].cast}`
+        } else {
+          return `"${field}" = "temp"."${field}"`
+        }
+      }).join(`,
+              `)}
+      FROM (VALUES `
+      + tempList
+        .map((record) => {
+          return `(${tempColumns
+            .map((field) => {
+              if (record[field] === null) {
+                return `NULL`
+              } else if (typeof record[field] === 'number') {
+                return `${record[field]}`
+              } else if (typeof record[field] === 'string') {
+                return `'${record[field]}'`
+              } else {
+                return `${record[field]}`
+              }
+            })
+            .join(', ')})`
+        })
+        .join(', ')
+      + `) 
+          AS temp(${tempColumns.map((field) => `"${field}"`).join(', ')})
+      WHERE   ${conditionRaw
+        ? conditionRaw
+        + ` 
+          AND `
+        : ''
+      }${compareName.map((field) => {
+        if (typeof compareObject[field] !== 'function') {
+          return `"${tableName}"."${field}" = "temp"."${field}"`
+        } else {
+          return `"${tableName}"."${field}" = ${compareObject[field]('temp', tableName)}`
+        }
+      }).join(` 
+          AND `)}
+      RETURNING "${tableName}".*;
+      `
+    )
+
+    if (options.options?.requireEqualLength) {
+      if (modifiedRaw[0].length !== tempList.length) {
+        console.log(`Update ${tableName} failed: `, modifiedRaw)
+        throw new Error(`Update ${tableName} failed: ` + JSON.stringify({ modifiedRaw, tempList }))
+      }
+    }
+    return this.entity.fromRaws(modifiedRaw[0])
   }
 }

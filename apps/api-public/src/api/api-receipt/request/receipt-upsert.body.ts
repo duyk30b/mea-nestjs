@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import {
   ArrayMinSize,
@@ -6,9 +6,14 @@ import {
   IsDefined,
   IsNumber,
   IsString,
+  Max,
+  Min,
   ValidateNested,
 } from 'class-validator'
-import { IsEnumValue, IsNumberGreaterThan } from '../../../../../_libs/common/transform-validate/class-validator.custom'
+import {
+  IsEnumValue,
+  IsNumberGreaterThan,
+} from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { DiscountType } from '../../../../../_libs/database/common/variable'
 import { ReceiptItemBody } from './receipt-item.body'
 
@@ -35,6 +40,8 @@ export class ReceiptUpsert {
   @Expose()
   @IsDefined()
   @IsNumber()
+  @Max(100)
+  @Min(0)
   discountPercent: number
 
   @ApiProperty({ enum: DiscountType, example: DiscountType.VND })
@@ -61,7 +68,7 @@ export class ReceiptUpsert {
   note: string
 }
 
-export class ReceiptUpsertBody {
+export class ReceiptUpsertDraftBody {
   @ApiPropertyOptional({ example: 52 })
   @Expose()
   @IsDefined()
@@ -84,3 +91,5 @@ export class ReceiptUpsertBody {
   @ValidateNested({ each: true })
   receiptItemList: ReceiptItemBody[]
 }
+
+export class ReceiptUpdateDepositedBody extends ReceiptUpsertDraftBody { }

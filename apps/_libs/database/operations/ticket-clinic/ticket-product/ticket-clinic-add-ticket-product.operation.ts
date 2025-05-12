@@ -4,9 +4,9 @@ import { DataSource, EntityManager } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { DeliveryStatus } from '../../../common/variable'
 import TicketProduct, {
-  TicketProductInsertType,
-  TicketProductRelationType,
-  TicketProductType,
+    TicketProductInsertType,
+    TicketProductRelationType,
+    TicketProductType,
 } from '../../../entities/ticket-product.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import { TicketManager, TicketProductManager } from '../../../managers'
@@ -41,8 +41,12 @@ export class TicketClinicAddTicketProductOperation {
       // === 1. UPDATE TICKET FOR TRANSACTION ===
       const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(
         manager,
-        { oid, id: ticketId, ticketStatus: TicketStatus.Executing },
-        { updatedAt: Date.now() }
+        {
+          oid,
+          id: ticketId,
+          status: TicketStatus.Executing,
+        },
+        { updatedAt: Date.now(), deliveryStatus: DeliveryStatus.Pending }
       )
 
       // === 2. INSERT NEW ===
@@ -53,6 +57,8 @@ export class TicketClinicAddTicketProductOperation {
           ticketId,
           customerId: ticketOrigin.customerId,
           deliveryStatus: DeliveryStatus.Pending,
+          costAmount: i.costAmount, // set tạm thế, khi nào gửi hàng chọn lô mới tính chính xác được
+          pickupStrategy: i.pickupStrategy, // nếu không xuất kho thì costAmount lấy giá trị trên luôn
           type: ticketProductType,
         }
         return insert
@@ -70,7 +76,7 @@ export class TicketClinicAddTicketProductOperation {
         return acc + cur.quantity * cur.discountMoney
       }, 0)
       const itemsCostAmountAdd = ticketProductList.reduce((acc, cur) => {
-        return acc + cur.quantity * cur.costPrice
+        return acc + cur.costAmount
       }, 0)
       let ticket: Ticket = ticketOrigin
       if (productMoneyAdd != 0) {

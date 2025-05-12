@@ -1,23 +1,21 @@
 import { Injectable } from '@nestjs/common'
-import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
-import { DataSource, EntityManager, Repository } from 'typeorm'
+import { InjectEntityManager } from '@nestjs/typeorm'
+import { DataSource, EntityManager } from 'typeorm'
 import { BaseCondition } from '../../../common/dto'
-import { PostgreSqlCondition } from '../../common/postgresql.condition'
 import { Ticket } from '../../entities'
+import { TicketRepository } from '../../repositories'
 
 @Injectable()
-export class TicketStatisticOperation extends PostgreSqlCondition<Ticket> {
+export class TicketStatisticOperation {
   constructor(
     private dataSource: DataSource,
     @InjectEntityManager() private manager: EntityManager,
-    @InjectRepository(Ticket) private ticketRepository: Repository<Ticket>
-  ) {
-    super()
-  }
+    private ticketRepository: TicketRepository
+  ) { }
 
   async statistic(options: { condition: BaseCondition<Ticket>; groupTimeType: 'date' | 'month' }) {
     const { groupTimeType, condition } = options
-    const where = this.getWhereOptions(condition)
+    const where = this.ticketRepository.getWhereOptions(condition)
 
     let query = this.manager
       .createQueryBuilder(Ticket, 'ticket')

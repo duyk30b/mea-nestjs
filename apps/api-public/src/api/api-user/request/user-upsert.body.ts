@@ -60,4 +60,5 @@ export class UserCreateBody {
   roleIdList: number[]
 }
 
-export class UserUpdateBody extends OmitType(UserCreateBody, ['username', 'password']) { }
+// export class UserUpdateBody extends OmitType(UserCreateBody, ['username', 'password']) { }
+export class UserUpdateBody extends UserCreateBody { }

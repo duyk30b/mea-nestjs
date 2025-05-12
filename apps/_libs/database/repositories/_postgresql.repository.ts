@@ -6,9 +6,9 @@ import {
   Repository,
   UpdateResult,
 } from 'typeorm'
-import { BaseCondition } from '../../common/dto'
+import { BaseCondition, BaseOperator } from '../../common/dto'
 import { NoExtra } from '../../common/helpers/typescript.helper'
-import { PostgreSqlCondition } from '../common/postgresql.condition'
+import { PostgreSqlRaw } from '../common/postgresql.raw'
 
 type EntityType<_ENTITY> = EntityTarget<_ENTITY> & {
   fromRaw: (raw: { [P in keyof _ENTITY]: any }) => _ENTITY
@@ -21,7 +21,7 @@ export abstract class _PostgreSqlRepository<
   _INSERT = Omit<_ENTITY, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>,
   _UPDATE = Omit<_ENTITY, 'id' | 'createdAt' | 'updatedAt'>,
   _SORT = { [P in keyof _ENTITY]?: 'ASC' | 'DESC' },
-> extends PostgreSqlCondition<_ENTITY> {
+> extends PostgreSqlRaw<_ENTITY> {
   private entity: EntityType<_ENTITY>
   private repository: Repository<_ENTITY>
 
@@ -263,9 +263,157 @@ export abstract class _PostgreSqlRepository<
     return this.entity.fromRaw(raws[0])
   }
 
+  async upsertByConflictUnique(options: {
+    upsertList: _INSERT[]
+    updateFields: (keyof _ENTITY)[]
+    conflictFields: (keyof _ENTITY)[]
+  }) {
+    const { upsertList, updateFields, conflictFields } = options
+    const upsertResult: InsertResult = await this.repository
+      .createQueryBuilder()
+      .insert()
+      .values(upsertList as any)
+      .orUpdate(updateFields as string[], conflictFields as string[])
+      .returning('*')
+      .execute()
+    if (upsertResult.raw?.length !== upsertList.length) {
+      throw new Error(`Insert Database failed: ` + JSON.stringify({ upsertResult, upsertList }))
+    }
+    return this.entity.fromRaws(upsertResult.raw)
+  }
+
   async delete(condition: BaseCondition<_ENTITY>) {
     const where = this.getWhereOptions(condition)
     const deleteResult = await this.repository.delete(where)
     return deleteResult.affected
+  }
+
+  async deleteAndReturnRaw(
+    condition: BaseCondition<_ENTITY>
+  ): Promise<{ [P in keyof _ENTITY]: any }[]> {
+    const where = this.getWhereOptions(condition)
+    const deleteResult = await this.repository
+      .createQueryBuilder()
+      .delete()
+      .from(this.entity)
+      .where(where)
+      .returning('*')
+      .execute()
+    const raws = deleteResult.raw
+    return raws
+  }
+
+  async deleteAndReturnEntity(condition: BaseCondition<_ENTITY>): Promise<_ENTITY[]> {
+    const raws = await this.deleteAndReturnRaw(condition)
+    return this.entity.fromRaws(raws)
+  }
+
+  async findAndSelect<
+    Aggregate extends Record<
+      string,
+      { SUM?: (keyof _ENTITY | BaseOperator<keyof _ENTITY>)[]; COUNT?: keyof _ENTITY | '*' }
+    >,
+  >(options: {
+    condition: BaseCondition<_ENTITY>
+    select?: { [P in keyof _ENTITY]?: boolean } | (keyof _ENTITY)[]
+    aggregate?: Aggregate
+    groupBy?: (keyof _ENTITY)[]
+  }): Promise<({ [P in keyof _ENTITY]?: any } & { [P in keyof Aggregate]: any })[]> {
+    const { condition, select, aggregate, groupBy } = options
+    const where = this.getWhereOptions(condition)
+    const selectList: string[] = []
+    if (select) {
+      if (Array.isArray(select)) {
+        select.forEach((column) => {
+          selectList.push(`"${column as string}"`)
+        })
+      } else {
+        Object.keys(select).map((column) => {
+          if (select[column]) {
+            selectList.push(`"${column as string}"`)
+          }
+        })
+      }
+    }
+    if (aggregate) {
+      Object.keys(aggregate).forEach((customField) => {
+        if (aggregate[customField].COUNT) {
+          const column = aggregate[customField].COUNT as string
+          if (column === '*') {
+            selectList.push(`COUNT(${column}) AS "${customField}"`)
+          } else {
+            selectList.push(`COUNT("${column}") AS "${customField}"`)
+          }
+        } else if (aggregate[customField].SUM) {
+          const sumString = aggregate[customField].SUM.map((operator) => {
+            if (typeof operator === 'string') {
+              const column = operator as string
+              return `"${column}"`
+            }
+            if (typeof operator === 'object') {
+              return this.getOperatorRaw(operator)
+            }
+          }).join('+')
+          selectList.push(`SUM(${sumString}) AS "${customField}"`)
+        }
+      })
+    }
+
+    let query = this.repository.createQueryBuilder().select(selectList).where(where).groupBy()
+    if (groupBy && groupBy.length) {
+      const groupString = groupBy.map((field) => `"${field as string}"`).join(', ')
+      query = query.groupBy(groupString)
+    }
+
+    return await query.getRawMany()
+  }
+
+  async updateListAndReturnEntity(options: {
+    updateList: Partial<_ENTITY>[]
+    conditionFields: (keyof _ENTITY)[]
+    updateFields: (keyof _ENTITY)[]
+  }) {
+    const { updateList } = options
+    const updateFields = options.updateFields as string[]
+    const conditionFields = options.conditionFields as string[]
+
+    if (!updateList.length) return []
+    if (!conditionFields.length) return []
+    if (!conditionFields.length) return []
+
+    const tempField = [...conditionFields, ...updateFields]
+    const tableName = this.entity['name']
+
+    const modifiedRaw: [any[], number] = await this.repository.query(
+      `
+        UPDATE  "${tableName}"
+        SET     ${updateFields.map((field) => `"${field}" = temp."${field}"`).join(', ')}
+        FROM (VALUES `
+      + updateList
+        .map((record) => {
+          return `(${tempField
+            .map((field) => {
+              if (typeof record[field] === 'number') {
+                return `${record[field]}`
+              } else if (typeof record[field] === 'string') {
+                return `'${record[field]}'`
+              } else {
+                return `${record[field]}`
+              }
+            })
+            .join(', ')})`
+        })
+        .join(', ')
+      + `   ) AS temp(${tempField.map((field) => `"${field}"`).join(', ')})
+        WHERE     ${conditionFields.map((field) => `"${tableName}"."${field}" = "temp"."${field}"`).join(' AND ')}
+        RETURNING "${tableName}".*;
+        `
+    )
+    if (modifiedRaw[0].length !== updateList.length) {
+      console.log('🚀 ~ _postgresql.repository.ts:353 ~ updateList:', updateList)
+      console.log('🚀 ~ _postgresql.repository.ts:353 ~ modifiedRaw:', modifiedRaw)
+      throw new Error(`Update Database failed: ` + JSON.stringify({ modifiedRaw, updateList }))
+    }
+    return this.entity.fromRaws(modifiedRaw[0])
   }
 }

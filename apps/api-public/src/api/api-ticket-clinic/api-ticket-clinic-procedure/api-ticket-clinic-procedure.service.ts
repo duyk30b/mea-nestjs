@@ -8,6 +8,7 @@ import {
 } from '../../../../../_libs/database/operations'
 import { TicketProcedureRepository } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
+import { ApiTicketClinicUserService } from '../api-ticket-clinic-user/api-ticket-clinic-user.service'
 import {
   TicketClinicAddTicketProcedureBody,
   TicketClinicUpdatePriorityTicketProcedureBody,
@@ -21,7 +22,8 @@ export class ApiTicketClinicProcedureService {
     private readonly ticketProcedureRepository: TicketProcedureRepository,
     private readonly ticketClinicAddTicketProcedureOperation: TicketClinicAddTicketProcedureOperation,
     private readonly ticketClinicDestroyTicketProcedureOperation: TicketClinicDestroyTicketProcedureOperation,
-    private readonly ticketClinicUpdateTicketProcedureOperation: TicketClinicUpdateTicketProcedureOperation
+    private readonly ticketClinicUpdateTicketProcedureOperation: TicketClinicUpdateTicketProcedureOperation,
+    private readonly apiTicketClinicUserService: ApiTicketClinicUserService
   ) { }
 
   async addTicketProcedure(options: {
@@ -34,7 +36,6 @@ export class ApiTicketClinicProcedureService {
       oid,
       ticketId,
       ticketProcedureDto: body.ticketProcedure,
-      ticketUserDto: body.ticketUserList.filter((i) => !!i.userId),
     })
 
     const { ticket, ticketProcedure } = result
@@ -44,10 +45,17 @@ export class ApiTicketClinicProcedureService {
       ticketId,
       ticketProcedureInsert: ticketProcedure,
     })
-    if (result.ticketUserInsertList) {
-      this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
+    if (body.ticketUserList?.length) {
+      this.apiTicketClinicUserService.changeTicketUserList({
+        oid,
         ticketId,
-        ticketUserInsertList: result.ticketUserInsertList,
+        body: {
+          interactType: InteractType.Procedure,
+          interactId: ticketProcedure.procedureId,
+          ticketItemId: ticketProcedure.id,
+          quantity: ticketProcedure.quantity,
+          ticketUserList: body.ticketUserList,
+        },
       })
     }
 
@@ -95,19 +103,25 @@ export class ApiTicketClinicProcedureService {
       ticketId,
       ticketProcedureId,
       ticketProcedureUpdateDto: body.ticketProcedure,
-      ticketUserDto: body.ticketUserList,
     })
+    const { ticket, ticketProcedure } = result
 
-    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket: result.ticket })
+    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
     this.socketEmitService.ticketClinicChangeTicketProcedureList(oid, {
       ticketId,
-      ticketProcedureUpdate: result.ticketProcedure,
+      ticketProcedureUpdate: ticketProcedure,
     })
-    if (result.ticketUserChangeList) {
-      this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
+    if (body.ticketUserList) {
+      this.apiTicketClinicUserService.changeTicketUserList({
+        oid,
         ticketId,
-        ticketUserDestroyList: result.ticketUserChangeList.ticketUserDestroyList,
-        ticketUserInsertList: result.ticketUserChangeList.ticketUserInsertList,
+        body: {
+          interactType: InteractType.Procedure,
+          interactId: ticketProcedure.procedureId,
+          ticketItemId: ticketProcedure.id,
+          quantity: ticketProcedure.quantity,
+          ticketUserList: body.ticketUserList,
+        },
       })
     }
     return { data: true }

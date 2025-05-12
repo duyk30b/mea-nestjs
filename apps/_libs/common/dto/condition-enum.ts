@@ -45,7 +45,8 @@ export const transformConditionEnum = <T>(
   { value, key }: TransformFnParams,
   enumObject: object
 ) => {
-  if (!value) return
+  if (value == null) return
+
   if (typeof value === 'number' || typeof value === 'string') {
     const enumObjectValueList = valuesEnum(enumObject)
     for (let i = 0; i < enumObjectValueList.length; i++) {

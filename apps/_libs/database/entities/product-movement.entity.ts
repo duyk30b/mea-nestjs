@@ -6,6 +6,7 @@ import Customer from './customer.entity'
 import Distributor from './distributor.entity'
 import Product from './product.entity'
 import Receipt from './receipt.entity'
+import StockCheck from './stock-check.entity'
 import Ticket from './ticket.entity'
 import User from './user.entity'
 
@@ -18,6 +19,22 @@ import User from './user.entity'
   'id',
 ])
 export default class ProductMovement extends BaseEntity {
+  @Column({ type: 'smallint' })
+  @Expose()
+  movementType: MovementType
+
+  @Column({ default: 0 }) // ID customer hoặc ID distributor hoặc userId
+  @Expose()
+  contactId: number
+
+  @Column() // ticketId hoặc receiptId hoặc stockCheckId
+  @Expose()
+  voucherId: number
+
+  @Column({ default: 0 }) // ticketProductId hoặc receiptItemId hoặc stockCheckItemId
+  @Expose()
+  voucherProductId: number
+
   @Column({ default: 0 })
   @Expose()
   warehouseId: number
@@ -26,17 +43,9 @@ export default class ProductMovement extends BaseEntity {
   @Expose()
   productId: number
 
-  @Column() // ID ticket hoặc ID receipt
+  @Column({ default: 0 })
   @Expose()
-  voucherId: number
-
-  @Column({ default: 0 }) // ID customer hoặc ID distributor
-  @Expose()
-  contactId: number
-
-  @Column({ type: 'smallint' })
-  @Expose()
-  movementType: MovementType
+  batchId: number
 
   @Column({ type: 'smallint', default: 0 })
   @Expose()
@@ -50,31 +59,7 @@ export default class ProductMovement extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  openQuantity: number
-
-  @Column({
-    type: 'decimal',
-    default: 0,
-    precision: 10,
-    scale: 3,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose()
   quantity: number
-
-  @Column({
-    type: 'decimal',
-    default: 0,
-    precision: 10,
-    scale: 3,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose()
-  closeQuantity: number
-
-  @Column({ type: 'smallint', default: 1 })
-  @Expose()
-  unitRate: number
 
   @Column({
     type: 'bigint',
@@ -82,7 +67,63 @@ export default class ProductMovement extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  actualPrice: number // Giá
+  costAmount: number
+
+  @Column({
+    type: 'decimal',
+    default: 0,
+    precision: 10,
+    scale: 3,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  openQuantityProduct: number
+
+  @Column({
+    type: 'decimal',
+    default: 0,
+    precision: 10,
+    scale: 3,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  closeQuantityProduct: number
+
+  @Column({
+    type: 'decimal',
+    default: 0,
+    precision: 10,
+    scale: 3,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  openQuantityBatch: number
+
+  @Column({
+    type: 'decimal',
+    default: 0,
+    precision: 10,
+    scale: 3,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  closeQuantityBatch: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  openCostAmountBatch: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  closeCostAmountBatch: number
 
   @Column({
     type: 'bigint',
@@ -98,7 +139,7 @@ export default class ProductMovement extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  costPrice: number
+  actualPrice: number // Giá
 
   @Column({
     type: 'bigint',
@@ -133,6 +174,11 @@ export default class ProductMovement extends BaseEntity {
   ticket: Ticket
 
   @Expose()
+  @ManyToOne((type) => StockCheck, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
+  stockCheck: StockCheck
+
+  @Expose()
   @ManyToOne((type) => User, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'contactId', referencedColumnName: 'id' })
   user: User
@@ -141,12 +187,17 @@ export default class ProductMovement extends BaseEntity {
     if (!raw) return null
     const entity = new ProductMovement()
     Object.assign(entity, raw)
-    entity.openQuantity = Number(raw.openQuantity)
     entity.quantity = Number(raw.quantity)
-    entity.closeQuantity = Number(raw.closeQuantity)
-    entity.costPrice = Number(raw.costPrice)
-    entity.actualPrice = Number(raw.actualPrice)
+    entity.costAmount = Number(raw.costAmount)
+    entity.openQuantityProduct = Number(raw.openQuantityProduct)
+    entity.closeQuantityProduct = Number(raw.closeQuantityProduct)
+    entity.openQuantityBatch = Number(raw.openQuantityBatch)
+    entity.closeQuantityBatch = Number(raw.closeQuantityBatch)
+    entity.openCostAmountBatch = Number(raw.openCostAmountBatch)
+    entity.closeCostAmountBatch = Number(raw.closeCostAmountBatch)
+
     entity.expectedPrice = Number(raw.expectedPrice)
+    entity.actualPrice = Number(raw.actualPrice)
     entity.createdAt = raw.createdAt == null ? raw.createdAt : Number(raw.createdAt)
 
     return entity
@@ -160,7 +211,7 @@ export default class ProductMovement extends BaseEntity {
 export type ProductMovementRelationType = {
   [P in keyof Pick<
     ProductMovement,
-    'product' | 'distributor' | 'customer' | 'receipt' | 'ticket' | 'user'
+    'product' | 'receipt' | 'ticket' | 'stockCheck' | 'distributor' | 'customer' | 'user'
   >]?: boolean
 }
 

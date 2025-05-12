@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { DeliveryStatus, DiscountType } from '../common/variable'
+import { DeliveryStatus, DiscountType, PickupStrategy } from '../common/variable'
 import Batch from './batch.entity'
 import Customer from './customer.entity'
 import Product from './product.entity'
@@ -16,13 +16,13 @@ export enum TicketProductType {
 @Index('IDX_TicketProduct__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketProduct__oid_customerId', ['oid', 'customerId'])
 export default class TicketProduct extends BaseEntity {
-  @Column()
-  @Expose()
-  ticketId: number
-
   @Column({ default: 1 })
   @Expose()
   priority: number
+
+  @Column({ default: PickupStrategy.AutoWithFIFO, type: 'smallint' })
+  @Expose()
+  pickupStrategy: PickupStrategy
 
   @Column()
   @Expose()
@@ -30,23 +30,27 @@ export default class TicketProduct extends BaseEntity {
 
   @Column()
   @Expose()
+  ticketId: number
+
+  @Column({ type: 'varchar', length: 50, default: JSON.stringify([0]) })
+  @Expose()
+  warehouseIds: string
+
+  @Column()
+  @Expose()
   productId: number
 
   @Column({ default: 0 })
   @Expose()
-  batchId: number
-
-  @Column({ default: 0 })
-  @Expose()
-  warehouseId: number
-
-  @Column({ type: 'smallint', default: DeliveryStatus.Pending })
-  @Expose()
-  deliveryStatus: DeliveryStatus
+  batchId: number // nếu batchId = 0, thì chỉ có thể là autoPick hoặc noImpact
 
   @Column({ type: 'smallint', default: TicketProductType.Prescription })
   @Expose()
   type: TicketProductType
+
+  @Column({ type: 'smallint', default: DeliveryStatus.Pending })
+  @Expose()
+  deliveryStatus: DeliveryStatus
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()
@@ -72,7 +76,7 @@ export default class TicketProduct extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  costPrice: number
+  costAmount: number
 
   @Column({
     type: 'bigint',
@@ -144,6 +148,7 @@ export default class TicketProduct extends BaseEntity {
 
     entity.quantity = Number(raw.quantity)
     entity.quantityPrescription = Number(raw.quantityPrescription)
+    entity.costAmount = Number(raw.costAmount)
     entity.expectedPrice = Number(raw.expectedPrice)
     entity.discountMoney = Number(raw.discountMoney)
     entity.discountPercent = Number(raw.discountPercent)

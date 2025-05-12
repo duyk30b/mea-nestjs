@@ -7,6 +7,7 @@ import { encrypt } from '../../../../_libs/common/helpers/string.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { User } from '../../../../_libs/database/entities'
 import Device from '../../../../_libs/database/entities/device'
+import { OrganizationRepository } from '../../../../_libs/database/repositories'
 import { UserRepository } from '../../../../_libs/database/repositories/user.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import { RootUserPaginationQuery } from './request/root-user-get.query'
@@ -20,7 +21,8 @@ export class ApiRootUserService {
     private readonly socketEmitService: SocketEmitService,
     private readonly cacheTokenService: CacheTokenService,
     private readonly cacheDataService: CacheDataService,
-    private readonly userRepository: UserRepository
+    private readonly userRepository: UserRepository,
+    private readonly organizationRepository: OrganizationRepository
   ) { }
 
   async pagination(query: RootUserPaginationQuery): Promise<BaseResponse> {
@@ -87,10 +89,7 @@ export class ApiRootUserService {
     return { data: { user } }
   }
 
-  async update(
-    userId: number,
-    body: RootUserUpdateBody
-  ): Promise<BaseResponse<{ user: User }>> {
+  async update(userId: number, body: RootUserUpdateBody): Promise<BaseResponse<{ user: User }>> {
     const { username, password, ...other } = body
     const userOld: User = await this.userRepository.findOneBy({ id: userId })
     if (!userOld) throw new BusinessException('error.Database.NotFound')
@@ -137,6 +136,9 @@ export class ApiRootUserService {
 
   async logoutAll() {
     const result = this.cacheTokenService.removeAllExcludeRoot()
+
+    await this.organizationRepository.updateDataVersion(undefined)
+    this.cacheDataService.clearOrganization(undefined)
     return { data: result }
   }
 }

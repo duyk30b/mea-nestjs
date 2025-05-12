@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common'
 import { ScheduleModule } from '@nestjs/schedule'
+import { GoogleDriverModule } from '../../../_libs/transporter/google-driver/google-driver.module'
 import { CronJobController } from './cron-job.controller'
-import { ProductBatchJob } from './product-batch.job'
+import { PostgresqlJob } from './postgresql.job'
 
 @Module({
-  imports: [ScheduleModule.forRoot()],
+  imports: [ScheduleModule.forRoot(), GoogleDriverModule],
   controllers: [CronJobController],
-  providers: [ProductBatchJob],
+  providers: [PostgresqlJob],
 })
-export class CronJobModule {}
+export class CronJobModule { }

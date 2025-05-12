@@ -8,10 +8,12 @@ import Role from './role.entity'
 
 export enum InteractType {
   Ticket = 1,
-  Product = 2,
-  Procedure = 3,
-  Radiology = 4,
-  Laboratory = 5,
+  Product = 2, // chỉ tương tác với sản phẩm
+  Procedure = 3, // chỉ tương tác với thủ thuật
+  Radiology = 4, // chỉ tương tác với phiếu CĐHA
+  Laboratory = 5, // chỉ tương tác với phiếu xét nghiệm
+  ConsumableList = 6, // tương tác với tất cả sản phẩm trong cả tiêu hao
+  PrescriptionList = 7, // tương tác với tất cả sản phẩm trong cả toa thuốc
 }
 
 export enum CommissionCalculatorType {

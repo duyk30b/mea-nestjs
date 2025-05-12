@@ -43,18 +43,19 @@ export enum PaymentType {
   Reopen = 5, // Mở lại hồ sơ
 }
 
-export enum ReceiptStatus {
-  Cancelled = -1,
-  Draft = 0,
-  Prepayment = 1, // Chờ gửi hàng
-  Debt = 2,
-  Success = 3,
+export enum PickupStrategy {
+  Inherit = -1, // Dùng theo cấu hình mặc định hệ thống
+  NoImpact = 0, // Không tác động đến kho
+  RequireBatchSelection = 1, // Bắt buộc chọn lô
+  AutoWithFIFO = 2, // Auto theo FIFO
+  AutoWithExpiryDate = 3, // Auto ưu tiên hạn gần
 }
 
 export enum MovementType {
   Receipt = 1,
   Ticket = 2,
   UserChange = 3,
+  StockCheck = 4,
 }
 
 export enum DeliveryStatus {
@@ -77,4 +78,10 @@ export enum AttributeLayoutType {
   Table = 'Bảng',
   InputAndLabelTop = 'Input và Nhãn bên trên',
   InputAndLabelLeft = 'Input và Nhãn bên trái',
+}
+
+export enum TicketLaboratoryStatus {
+  Empty = 1,
+  Pending = 2,
+  Completed = 3,
 }

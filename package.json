@@ -70,6 +70,7 @@
     "googleapis": "^140.0.0",
     "isomorphic-dompurify": "^2.12.0",
     "kafkajs": "^2.2.4",
+    "mime-types": "^3.0.1",
     "mongoose": "^8.1.0",
     "mysql2": "^3.9.0",
     "nestjs-i18n": "^10.4.0",

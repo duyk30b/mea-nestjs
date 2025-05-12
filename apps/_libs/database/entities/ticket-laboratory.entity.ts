@@ -1,17 +1,12 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { DiscountType } from '../common/variable'
+import { DiscountType, TicketLaboratoryStatus } from '../common/variable'
 import Customer from './customer.entity'
 import Laboratory from './laboratory.entity'
 import TicketUser from './ticket-user.entity'
 import Ticket from './ticket.entity'
 
-export enum TicketLaboratoryStatus {
-  Empty = 1,
-  Pending = 2,
-  Completed = 3,
-}
 @Entity('TicketLaboratory')
 @Index('IDX_TicketLaboratory__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketLaboratory__oid_laboratoryId', ['oid', 'laboratoryId'])

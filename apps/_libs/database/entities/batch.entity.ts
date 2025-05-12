@@ -1,12 +1,23 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
+import { Exclude, Expose } from 'class-transformer'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import Product from './product.entity'
 
 @Entity('Batch')
 @Index('IDX_Batch__oid_productId', ['oid', 'productId'])
 @Index('IDX_Batch__oid_updatedAt', ['oid', 'updatedAt'])
-export default class Batch extends BaseEntity {
+export default class Batch {
+  @Column({ name: 'oid' })
+  @Exclude()
+  oid: number
+
+  @PrimaryGeneratedColumn({ name: 'id' })
+  @Expose({ name: 'id' })
+  id: number
+
+  @Column({ default: 0 })
+  @Expose()
+  warehouseId: number
+
   @Column()
   @Expose()
   productId: number
@@ -15,13 +26,9 @@ export default class Batch extends BaseEntity {
   @Expose()
   distributorId: number
 
-  @Column({ default: 0 })
+  @Column({ type: 'varchar', length: 50, default: '' })
   @Expose()
-  warehouseId: number
-
-  @Column({ type: 'varchar', length: 255, default: '' })
-  @Expose()
-  lotNumber: string // Số Lô sản phẩm
+  batchCode: string // Số Lô sản phẩm
 
   @Column({
     type: 'bigint',
@@ -35,17 +42,6 @@ export default class Batch extends BaseEntity {
   expiryDate: number
 
   @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
-  @Expose()
-  costPrice: number // Giá nhập
-
-  @Column({
     type: 'decimal',
     default: 0,
     precision: 10,
@@ -54,6 +50,39 @@ export default class Batch extends BaseEntity {
   })
   @Expose()
   quantity: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose() // Vẫn rất cần thiết giữ lại giá nhập này, dùng cho SplitBatchByCostPrice.SplitOnDifferent
+  costPrice: number // Giá nhập
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  costAmount: number // Tổng vốn
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  registeredAt: number
 
   @Column({
     type: 'bigint',
@@ -77,9 +106,11 @@ export default class Batch extends BaseEntity {
     Object.assign(entity, raw)
 
     entity.expiryDate = raw.expiryDate == null ? raw.expiryDate : Number(raw.expiryDate)
-    entity.costPrice = Number(raw.costPrice)
     entity.quantity = Number(raw.quantity)
+    entity.costPrice = Number(raw.costPrice)
+    entity.costAmount = Number(raw.costAmount)
 
+    entity.registeredAt = raw.registeredAt == null ? raw.registeredAt : Number(raw.registeredAt)
     entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)
 
     return entity
@@ -96,17 +127,17 @@ export type BatchRelationType = {
 
 export type BatchInsertType = Omit<
   Batch,
-  keyof BatchRelationType | keyof Pick<Batch, 'id' | 'quantity' | 'updatedAt'>
+  keyof BatchRelationType | keyof Pick<Batch, 'id' | 'updatedAt'>
 >
 
 export type BatchUpdateType = {
-  [K in Exclude<
-    keyof Batch,
-    | keyof BatchRelationType
-    | keyof Pick<Batch, 'oid' | 'id' | 'productId' | 'distributorId' | 'updatedAt'>
-  >]: Batch[K] | (() => string)
+  [K in Exclude<keyof Batch, keyof BatchRelationType | keyof Pick<Batch, 'oid' | 'id'>>]:
+  | Batch[K]
+  | (() => string)
 }
 
 export type BatchSortType = {
-  [P in keyof Pick<Batch, 'id' | 'quantity' | 'expiryDate'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<Batch, 'id' | 'productId' | 'quantity' | 'expiryDate' | 'registeredAt'>]?:
+  | 'ASC'
+  | 'DESC'
 }

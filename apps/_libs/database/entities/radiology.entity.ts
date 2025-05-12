@@ -50,6 +50,14 @@ export default class Radiology {
   @Expose()
   resultDefault: string
 
+  @Column({ type: 'text', default: '' })
+  @Expose()
+  customVariables: string // Dạng Javascript
+
+  @Column({ type: 'text', default: '' })
+  @Expose()
+  customStyles: string // Dạng Style
+
   @Column({
     type: 'bigint',
     default: () => '(EXTRACT(epoch FROM now()) * (1000))',

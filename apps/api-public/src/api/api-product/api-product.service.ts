@@ -13,7 +13,6 @@ import {
   CommissionRepository,
   ProductRepository,
 } from '../../../../_libs/database/repositories'
-import { BatchMovementRepository } from '../../../../_libs/database/repositories/bat-movement.repository'
 import { OrganizationRepository } from '../../../../_libs/database/repositories/organization.repository'
 import { ProductMovementRepository } from '../../../../_libs/database/repositories/product-movement.repository'
 import { ReceiptItemRepository } from '../../../../_libs/database/repositories/receipt-item.repository'
@@ -23,6 +22,7 @@ import {
   ProductCreateBody,
   ProductGetManyQuery,
   ProductGetOneQuery,
+  ProductMergeBody,
   ProductPaginationQuery,
   ProductUpdateBody,
 } from './request'
@@ -38,8 +38,7 @@ export class ApiProductService {
     private readonly productRepository: ProductRepository,
     private readonly batchRepository: BatchRepository,
     private readonly productMovementRepository: ProductMovementRepository,
-    private readonly commissionRepository: CommissionRepository,
-    private readonly batchMovementRepository: BatchMovementRepository
+    private readonly commissionRepository: CommissionRepository
   ) { }
 
   async pagination(oid: number, query: ProductPaginationQuery): Promise<BaseResponse> {
@@ -141,10 +140,41 @@ export class ApiProductService {
 
   async createOne(oid: number, body: ProductCreateBody): Promise<BaseResponse> {
     const { commissionList, ...productBody } = body
-    const product = await this.productRepository.insertOneFullFieldAndReturnEntity({
+    let productCode = body.productCode
+    if (!productCode) {
+      const count = await this.productRepository.countBy({ oid })
+      productCode = (count + 1).toString()
+    }
+
+    const existProduct = await this.productRepository.findOneBy({
       oid,
-      ...productBody,
+      productCode,
     })
+    if (existProduct) {
+      throw new BusinessException(`Trùng mã sản phẩm với ${existProduct.brandName}` as any)
+    }
+
+    const product = await this.productRepository.insertOneFullFieldAndReturnEntity({
+      ...productBody,
+      oid,
+      productCode,
+    })
+
+    if (body.quantity) {
+      await this.batchRepository.insertOne({
+        oid,
+        productId: product.id,
+        costPrice: body.costPrice,
+        quantity: body.quantity,
+        costAmount: body.costPrice * body.quantity,
+        distributorId: 0,
+        expiryDate: null,
+        batchCode: '',
+        registeredAt: Date.now(),
+        warehouseId: 0,
+      })
+    }
+
     const commissionDtoList: CommissionInsertType[] = commissionList.map((i) => {
       const dto: CommissionInsertType = {
         oid,
@@ -165,12 +195,6 @@ export class ApiProductService {
   async updateOne(oid: number, productId: number, body: ProductUpdateBody): Promise<BaseResponse> {
     const { commissionList, ...productBody } = body
     const productOrigin = await this.productRepository.findOneBy({ oid, id: productId })
-    if (productOrigin.quantity) {
-      if (productOrigin.hasManageQuantity !== body.hasManageQuantity) {
-        // đã chặn ở front-end, nếu cố tình thì vào đây
-        throw new BusinessException('error.Conflict')
-      }
-    }
 
     if (productOrigin.warehouseIds !== body.warehouseIds) {
       let bodyWarehouseIdList = []
@@ -203,11 +227,20 @@ export class ApiProductService {
         }
       }
     }
-    const [product] = await this.productRepository.updateAndReturnEntity(
+
+    const existProduct = await this.productRepository.findOneBy({
+      oid,
+      productCode: body.productCode,
+      id: { NOT: productId },
+    })
+    if (existProduct) {
+      throw new BusinessException(`Trùng mã sản phẩm với ${existProduct.brandName}` as any)
+    }
+
+    const product = await this.productRepository.updateOneAndReturnEntity(
       { oid, id: productId },
       productBody
     )
-    if (!product) throw new BusinessException('error.Database.UpdateFailed')
     await this.commissionRepository.delete({
       oid,
       interactId: product.id,
@@ -257,19 +290,36 @@ export class ApiProductService {
       this.productRepository.delete({ oid, id: productId }),
       this.batchRepository.delete({ oid, id: productId }),
       this.productMovementRepository.delete({ oid, productId }),
-      this.batchMovementRepository.delete({ oid, productId }),
     ])
 
-    organization.dataVersionParse.product += 1
-    organization.dataVersionParse.batch += 1
-    await this.organizationRepository.update(
-      { id: oid },
-      {
-        dataVersion: JSON.stringify(organization.dataVersionParse),
-      }
-    )
+    await this.organizationRepository.updateDataVersion(oid)
     this.cacheDataService.clearOrganization(oid)
 
     return { data: { receiptItemList: [], ticketProductList: [], productId } }
+  }
+
+  async mergeProduct(options: {
+    oid: number
+    userId: number
+    body: ProductMergeBody
+  }) {
+    const { oid, userId, body } = options
+    const { productIdSourceList, productIdTarget } = body
+    productIdSourceList.forEach((i) => {
+      if (isNaN(i) || i <= 0) {
+        throw new BusinessException('error.ValidateFailed')
+      }
+    })
+
+    await this.productRepository.mergeProduct({
+      oid,
+      userId,
+      productIdTarget,
+      productIdSourceList,
+    })
+
+    await this.organizationRepository.updateDataVersion(oid)
+    this.cacheDataService.clearOrganization(oid)
+    return { data: true }
   }
 }

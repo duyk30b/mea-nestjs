@@ -206,6 +206,8 @@ export class ApiRadiologyService {
         descriptionDefault: i.descriptionDefault,
         requestNoteDefault: i.requestNoteDefault,
         resultDefault: i.resultDefault,
+        customVariables: i.customVariables,
+        customStyles: i.customStyles,
         priority: 0, // cập nhật sau
       }
       return dto

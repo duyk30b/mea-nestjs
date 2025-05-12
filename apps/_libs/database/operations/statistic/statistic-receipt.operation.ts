@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { Between, EntityManager, FindOptionsWhere, In } from 'typeorm'
-import { ReceiptStatus } from '../../common/variable'
 import { Receipt } from '../../entities'
+import { ReceiptStatus } from '../../entities/receipt.entity'
 
 @Injectable()
 export class StatisticReceiptOperation {
-  constructor(@InjectEntityManager() private manager: EntityManager) {}
+  constructor(@InjectEntityManager() private manager: EntityManager) { }
 
   async statisticReceipt(options: {
     oid: number
@@ -20,7 +20,7 @@ export class StatisticReceiptOperation {
 
     const whereReceipt: FindOptionsWhere<Receipt> = {
       oid,
-      status: In([ReceiptStatus.Debt, ReceiptStatus.Success]),
+      status: In([ReceiptStatus.Debt, ReceiptStatus.Completed]),
       startedAt: Between(fromTime, toTime),
     }
 

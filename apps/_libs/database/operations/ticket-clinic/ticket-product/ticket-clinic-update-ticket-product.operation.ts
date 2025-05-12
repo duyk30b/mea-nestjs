@@ -2,13 +2,11 @@ import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { DeliveryStatus } from '../../../common/variable'
-import { TicketProduct, TicketUser } from '../../../entities'
-import { InteractType } from '../../../entities/commission.entity'
+import { TicketProduct } from '../../../entities'
 import { TicketProductType } from '../../../entities/ticket-product.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import { TicketManager, TicketProductManager } from '../../../managers'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
-import { TicketUserChangeListManager } from '../../ticket-user/ticket-user-change-list.manager'
 
 export type TicketProductUpdateDtoType = {
   [K in keyof Pick<
@@ -19,6 +17,7 @@ export type TicketProductUpdateDtoType = {
     | 'discountType'
     | 'discountMoney'
     | 'discountPercent'
+    | 'costAmount'
     | 'actualPrice'
     | 'hintUsage'
   >]: TicketProduct[K] | (() => string)
@@ -30,7 +29,6 @@ export class TicketClinicUpdateTicketProductOperation {
     private dataSource: DataSource,
     private ticketManager: TicketManager,
     private ticketProductManager: TicketProductManager,
-    private ticketUserChangeListManager: TicketUserChangeListManager,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
   ) { }
 
@@ -40,23 +38,15 @@ export class TicketClinicUpdateTicketProductOperation {
     ticketProductId: number
     ticketProductType: TicketProductType
     ticketProductUpdateDto?: NoExtra<TicketProductUpdateDtoType, T>
-    ticketUserDto?: { roleId: number; userId: number }[]
   }) {
-    const {
-      oid,
-      ticketId,
-      ticketProductId,
-      ticketProductType,
-      ticketProductUpdateDto,
-      ticketUserDto,
-    } = params
+    const { oid, ticketId, ticketProductId, ticketProductType, ticketProductUpdateDto } = params
     const PREFIX = `ticketId=${ticketId} updateTicketProduct failed: `
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. UPDATE TICKET FOR TRANSACTION ===
       const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(
         manager,
-        { oid, id: ticketId, ticketStatus: TicketStatus.Executing },
+        { oid, id: ticketId, status: TicketStatus.Executing },
         { updatedAt: Date.now() }
       )
 
@@ -71,7 +61,7 @@ export class TicketClinicUpdateTicketProductOperation {
         throw new Error(PREFIX + 'Database.NotFound ')
       }
 
-      let ticketProduct: TicketProduct = ticketProductOrigin
+      let ticketProductModified: TicketProduct = ticketProductOrigin
       let productMoneyChange = 0
       let itemsDiscountChange = 0
       let itemsCostAmountChange = 0
@@ -80,7 +70,7 @@ export class TicketClinicUpdateTicketProductOperation {
           ticketProductOrigin.deliveryStatus === DeliveryStatus.Pending
           || ticketProductOrigin.deliveryStatus === DeliveryStatus.NoStock
         ) {
-          ticketProduct = await this.ticketProductManager.updateOneAndReturnEntity(
+          ticketProductModified = await this.ticketProductManager.updateOneAndReturnEntity(
             manager,
             { oid, id: ticketProductId },
             {
@@ -90,6 +80,7 @@ export class TicketClinicUpdateTicketProductOperation {
               discountType: ticketProductUpdateDto.discountType,
               discountMoney: ticketProductUpdateDto.discountMoney,
               discountPercent: ticketProductUpdateDto.discountPercent,
+              costAmount: ticketProductUpdateDto.costAmount,
               actualPrice: ticketProductUpdateDto.actualPrice,
               hintUsage: ticketProductUpdateDto.hintUsage,
               deliveryStatus:
@@ -99,16 +90,14 @@ export class TicketClinicUpdateTicketProductOperation {
             }
           )
           productMoneyChange =
-            ticketProduct.quantity * ticketProduct.actualPrice
+            ticketProductModified.quantity * ticketProductModified.actualPrice
             - ticketProductOrigin.quantity * ticketProductOrigin.actualPrice
           itemsDiscountChange =
-            ticketProduct.quantity * ticketProduct.discountMoney
+            ticketProductModified.quantity * ticketProductModified.discountMoney
             - ticketProductOrigin.quantity * ticketProductOrigin.discountMoney
-          itemsCostAmountChange =
-            ticketProduct.quantity * ticketProduct.costPrice
-            - ticketProductOrigin.quantity * ticketProductOrigin.costPrice
+          itemsCostAmountChange = ticketProductModified.costAmount - ticketProductOrigin.costAmount
         } else {
-          ticketProduct = await this.ticketProductManager.updateOneAndReturnEntity(
+          ticketProductModified = await this.ticketProductManager.updateOneAndReturnEntity(
             manager,
             { oid, id: ticketProductId },
             {
@@ -119,42 +108,24 @@ export class TicketClinicUpdateTicketProductOperation {
         }
       }
 
-      let commissionMoneyChange = 0
-      let ticketUserChangeList: {
-        ticketUserDestroyList: TicketUser[]
-        ticketUserInsertList: TicketUser[]
-      }
-      if (ticketUserDto) {
-        ticketUserChangeList = await this.ticketUserChangeListManager.replaceList({
-          manager,
-          information: {
-            oid,
-            ticketId,
-            interactType: InteractType.Product,
-            interactId: ticketProduct.productId,
-            ticketItemId: ticketProduct.id,
-            quantity: ticketProduct.quantity,
-            ticketItemActualPrice: ticketProduct.actualPrice,
-            ticketItemExpectedPrice: ticketProduct.expectedPrice,
-          },
-          dataChange: ticketUserDto,
+      // === 4. ReCalculator DeliveryStatus
+      let deliveryStatus = ticketOrigin.deliveryStatus
+      if (ticketProductModified.quantity === 0) {
+        const ticketProductList = await this.ticketProductManager.findMany(manager, {
+          condition: { ticketId },
         })
-        const commissionMoneyDelete = ticketUserChangeList.ticketUserDestroyList.reduce(
-          (acc, item) => {
-            return acc + item.commissionMoney * item.quantity
-          },
-          0
-        )
-        const commissionMoneyAdd = ticketUserChangeList.ticketUserInsertList.reduce((acc, item) => {
-          return acc + item.commissionMoney * item.quantity
-        }, 0)
-
-        commissionMoneyChange = commissionMoneyAdd - commissionMoneyDelete
+        deliveryStatus = DeliveryStatus.Delivered
+        if (ticketProductList.every((i) => i.deliveryStatus === DeliveryStatus.NoStock)) {
+          deliveryStatus = DeliveryStatus.NoStock
+        }
+        if (ticketProductList.some((i) => i.deliveryStatus === DeliveryStatus.Pending)) {
+          deliveryStatus = DeliveryStatus.Pending
+        }
       }
 
       // === 5. UPDATE TICKET: MONEY  ===
       let ticket: Ticket = ticketOrigin
-      if (productMoneyChange != 0 || itemsDiscountChange != 0 || commissionMoneyChange != 0) {
+      if (productMoneyChange != 0 || itemsDiscountChange != 0) {
         ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
           manager,
           oid,
@@ -163,11 +134,11 @@ export class TicketClinicUpdateTicketProductOperation {
             productMoneyAdd: productMoneyChange,
             itemsCostAmountAdd: itemsCostAmountChange,
             itemsDiscountAdd: itemsDiscountChange,
-            commissionMoneyAdd: commissionMoneyChange,
           },
+          other: { deliveryStatus },
         })
       }
-      return { ticket, ticketProduct, ticketUserChangeList }
+      return { ticket, ticketProduct: ticketProductModified }
     })
 
     return transaction

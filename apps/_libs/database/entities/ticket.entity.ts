@@ -1,13 +1,14 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { DiscountType } from '../common/variable'
+import { DeliveryStatus, DiscountType } from '../common/variable'
 import Appointment from './appointment.entity'
-import CustomerPayment from './customer-payment.entity'
 import CustomerSource from './customer-source.entity'
 import Customer from './customer.entity'
 import Image from './image.entity'
+import Payment from './payment.entity'
 import TicketAttribute from './ticket-attribute.entity'
+import TicketBatch from './ticket-batch.entity'
 import TicketExpense from './ticket-expense.entity'
 import TicketLaboratoryGroup from './ticket-laboratory-group.entity'
 import TicketLaboratoryResult from './ticket-laboratory-result.entity'
@@ -29,17 +30,37 @@ export enum TicketType {
 export enum TicketStatus {
   Schedule = 1,
   Draft = 2,
-  Approved = 3, // Prepayment
+  Deposited = 3,
   Executing = 4,
   Debt = 5,
   Completed = 6,
   Cancelled = 7,
 }
 
+export const TicketOrderStatusText = {
+  [TicketStatus.Schedule]: 'Xem trước',
+  [TicketStatus.Draft]: 'Nháp',
+  [TicketStatus.Deposited]: 'Đặt hàng',
+  [TicketStatus.Executing]: 'Đang xử lý',
+  [TicketStatus.Debt]: 'Đang nợ',
+  [TicketStatus.Completed]: 'Hoàn thành',
+  [TicketStatus.Cancelled]: 'Đã hủy',
+}
+
+export const TicketClinicStatusText = {
+  [TicketStatus.Schedule]: 'Hẹn khám',
+  [TicketStatus.Draft]: 'Chờ khám',
+  [TicketStatus.Deposited]: 'Đặt khám',
+  [TicketStatus.Executing]: 'Đang khám',
+  [TicketStatus.Debt]: 'Đang nợ',
+  [TicketStatus.Completed]: 'Hoàn thành',
+  [TicketStatus.Cancelled]: 'Đã hủy',
+}
+
 @Entity('Ticket')
 @Index('IDX_Ticket__oid_registeredAt', ['oid', 'registeredAt'])
 @Index('IDX_Ticket__oid_customerId', ['oid', 'customerId'])
-@Index('IDX_Ticket__oid_ticketStatus', ['oid', 'ticketStatus'])
+@Index('IDX_Ticket__oid_status', ['oid', 'status'])
 export default class Ticket extends BaseEntity {
   @Column()
   @Expose()
@@ -59,7 +80,11 @@ export default class Ticket extends BaseEntity {
 
   @Column({ type: 'smallint', default: TicketStatus.Draft })
   @Expose()
-  ticketStatus: TicketStatus
+  status: TicketStatus
+
+  @Column({ type: 'smallint', default: DeliveryStatus.NoStock })
+  @Expose()
+  deliveryStatus: DeliveryStatus
 
   @Column({ type: 'smallint', nullable: true })
   @Expose()
@@ -259,6 +284,10 @@ export default class Ticket extends BaseEntity {
   @Expose()
   updatedAt: number
 
+  @Column({ type: 'varchar', length: 255, default: '' })
+  @Expose()
+  note: string // Tên dịch vụ
+
   @ManyToOne((type) => CustomerSource, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'customerSourceId', referencedColumnName: 'id' })
   @Expose()
@@ -269,9 +298,9 @@ export default class Ticket extends BaseEntity {
   @Expose()
   customer: Customer
 
-  @OneToMany(() => CustomerPayment, (customerPayment) => customerPayment.ticket)
+  @OneToMany(() => Payment, (payment) => payment.ticket)
   @Expose()
-  customerPaymentList: CustomerPayment[]
+  paymentList: Payment[]
 
   // @OneToOne(() => Appointment, { createForeignKeyConstraints: false })
   // @JoinColumn({ name: 'id', referencedColumnName: 'fromTicketId' }) // không JoinColumn trên cùng cột id được, vkl
@@ -293,6 +322,10 @@ export default class Ticket extends BaseEntity {
   @OneToMany(() => TicketProduct, (ticketProductPrescription) => ticketProductPrescription.ticket)
   @Expose()
   ticketProductPrescriptionList: TicketProduct[]
+
+  @OneToMany(() => TicketBatch, (ticketBatch) => ticketBatch.ticket)
+  @Expose()
+  ticketBatchList: TicketBatch[]
 
   @OneToMany(() => TicketProcedure, (ticketProcedure) => ticketProcedure.ticket)
   @Expose()
@@ -369,6 +402,15 @@ export default class Ticket extends BaseEntity {
   static fromRaws(raws: { [P in keyof Ticket]: any }[]) {
     return raws.map((i) => Ticket.fromRaw(i))
   }
+
+  static getStatusText(ticket: Ticket) {
+    if (ticket.ticketType === TicketType.Order) {
+      return TicketOrderStatusText[ticket.status]
+    } else {
+      return TicketClinicStatusText[ticket.status]
+    }
+    return ''
+  }
 }
 
 export type TicketRelationType = {
@@ -378,16 +420,20 @@ export type TicketRelationType = {
     | 'ticketAttributeList'
     | 'ticketExpenseList'
     | 'ticketSurchargeList'
-    | 'customerPaymentList'
-    | 'toAppointment'
+    | 'paymentList'
     | 'customerSource'
     | 'imageList'
+    | 'toAppointment'
   >]?: boolean
 } & {
   [P in keyof Pick<
     Ticket,
     'ticketProductList' | 'ticketProductConsumableList' | 'ticketProductPrescriptionList'
-  >]?: { [P in keyof Pick<TicketProduct, 'product' | 'batch'>]?: boolean } | false
+  >]?: { [P in keyof Pick<TicketProduct, 'product'>]?: boolean } | false
+} & {
+  [P in keyof Pick<Ticket, 'ticketBatchList'>]?:
+  | { [P in keyof Pick<TicketBatch, 'batch'>]?: boolean }
+  | false
 } & {
   [P in keyof Pick<Ticket, 'ticketProcedureList'>]?:
   | { [P in keyof Pick<TicketProcedure, 'procedure'>]?: boolean }

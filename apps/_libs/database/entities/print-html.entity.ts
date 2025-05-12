@@ -25,7 +25,11 @@ export default class PrintHtml {
 
   @Column({ type: 'text' })
   @Expose()
-  content: string // Dạng HTML
+  html: string // Dạng HTML
+
+  @Column({ type: 'text', default: '' })
+  @Expose()
+  css: string // Dạng CSS
 
   @Expose()
   @Column({

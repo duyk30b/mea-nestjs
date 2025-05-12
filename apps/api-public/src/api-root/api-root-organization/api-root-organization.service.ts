@@ -1,52 +1,17 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { All, Injectable, Logger } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { EntityManager } from 'typeorm'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import * as AllEntity from '../../../../_libs/database/entities'
 import {
-  Appointment,
-  Batch,
-  BatchMovement,
-  Commission,
   Customer,
-  CustomerPayment,
-  CustomerSource,
   Distributor,
-  DistributorPayment,
   Image,
-  Laboratory,
-  LaboratoryGroup,
-  LaboratoryKit,
   Organization,
-  PrescriptionSample,
-  PrintHtml,
-  Procedure,
-  ProcedureGroup,
   Product,
-  ProductGroup,
-  ProductMovement,
-  Radiology,
-  RadiologyGroup,
-  Receipt,
-  ReceiptItem,
-  Role,
-  Setting,
-  Ticket,
-  TicketAttribute,
-  TicketExpense,
-  TicketLaboratory,
-  TicketLaboratoryGroup,
-  TicketLaboratoryResult,
-  TicketProcedure,
-  TicketProduct,
-  TicketRadiology,
-  TicketSurcharge,
-  TicketUser,
-  User,
-  Warehouse,
 } from '../../../../_libs/database/entities'
-import UserRole from '../../../../_libs/database/entities/user-role.entity'
 import { OrganizationRepository } from '../../../../_libs/database/repositories/organization.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
@@ -112,164 +77,35 @@ export class ApiRootOrganizationService {
   }
 
   async clearOne(oid: number, body: RootOrganizationClearBody) {
-    const { tableNameList } = body
-    if (tableNameList.includes(Appointment.name)) {
-      await this.manager.delete(Appointment, { oid })
-    }
-    if (tableNameList.includes(Batch.name)) {
-      await this.manager.delete(Batch, { oid })
-    }
-    if (tableNameList.includes(BatchMovement.name)) {
-      await this.manager.delete(BatchMovement, { oid })
-    }
-    if (tableNameList.includes(Commission.name)) {
-      await this.manager.delete(Commission, { oid })
-    }
-    if (tableNameList.includes(Customer.name)) {
-      await this.manager.delete(Customer, { oid })
-    } else {
+    const { tableNameDeleteList, tableNameClearList } = body
+
+    if (tableNameClearList.includes(Customer.name)) {
       await this.manager.update(Customer, { oid }, { debt: 0 })
     }
-
-    if (tableNameList.includes(CustomerPayment.name)) {
-      await this.manager.delete(CustomerPayment, { oid })
-    }
-
-    if (tableNameList.includes(CustomerSource.name)) {
-      await this.manager.delete(CustomerSource, { oid })
-    }
-
-    if (tableNameList.includes(Distributor.name)) {
-      await this.manager.delete(Distributor, { oid })
-    } else {
+    if (tableNameClearList.includes(Distributor.name)) {
       await this.manager.update(Distributor, { oid }, { debt: 0 })
     }
-
-    if (tableNameList.includes(DistributorPayment.name)) {
-      await this.manager.delete(DistributorPayment, { oid })
-    }
-
-    if (tableNameList.includes(Image.name)) {
-      await this.manager.delete(Image, { oid })
-    } else {
+    if (tableNameClearList.includes(Image.name)) {
       await this.manager.update(Image, { oid }, { waitDelete: 1 })
     }
-
-    if (tableNameList.includes(Laboratory.name)) {
-      await this.manager.delete(Laboratory, { oid })
-    }
-
-    if (tableNameList.includes(LaboratoryGroup.name)) {
-      await this.manager.delete(LaboratoryGroup, { oid })
-    }
-
-    if (tableNameList.includes(LaboratoryKit.name)) {
-      await this.manager.delete(LaboratoryKit, { oid })
-    }
-
-    if (tableNameList.includes(PrescriptionSample.name)) {
-      await this.manager.delete(PrescriptionSample, { oid })
-    }
-
-    if (tableNameList.includes(PrintHtml.name)) {
-      await this.manager.delete(PrintHtml, { oid })
-    }
-
-    if (tableNameList.includes(Procedure.name)) {
-      await this.manager.delete(Procedure, { oid })
-    }
-
-    if (tableNameList.includes(ProcedureGroup.name)) {
-      await this.manager.delete(ProcedureGroup, { oid })
-    }
-
-    if (tableNameList.includes(Product.name)) {
-      await this.manager.delete(Product, { oid })
-    } else {
+    if (tableNameClearList.includes(Product.name)) {
       await this.manager.update(Product, { oid }, { quantity: 0 })
     }
 
-    if (tableNameList.includes(ProductGroup.name)) {
-      await this.manager.delete(ProductGroup, { oid })
+    for (let index = 0; index < body.tableNameDeleteList.length; index++) {
+      const tableName = tableNameDeleteList[index]
+      if (AllEntity[tableName]) {
+        if (tableName === AllEntity.Organization.name) {
+          await this.manager.delete(AllEntity[tableName], { id: oid })
+        } else {
+          await this.manager.delete(AllEntity[tableName], { oid })
+        }
+      }
     }
 
-    if (tableNameList.includes(ProductMovement.name)) {
-      await this.manager.delete(ProductMovement, { oid })
-    }
-
-    if (tableNameList.includes(Radiology.name)) {
-      await this.manager.delete(Radiology, { oid })
-    }
-
-    if (tableNameList.includes(RadiologyGroup.name)) {
-      await this.manager.delete(RadiologyGroup, { oid })
-    }
-
-    if (tableNameList.includes(Receipt.name)) {
-      await this.manager.delete(Receipt, { oid })
-    }
-
-    if (tableNameList.includes(ReceiptItem.name)) {
-      await this.manager.delete(ReceiptItem, { oid })
-    }
-
-    if (tableNameList.includes(Role.name)) {
-      await this.manager.delete(Role, { oid })
-    }
-
-    if (tableNameList.includes(Setting.name)) {
-      await this.manager.delete(Setting, { oid })
-    }
-
-    if (tableNameList.includes(Ticket.name)) {
-      await this.manager.delete(Ticket, { oid })
-    }
-    if (tableNameList.includes(TicketAttribute.name)) {
-      await this.manager.delete(TicketAttribute, { oid })
-    }
-    if (tableNameList.includes(TicketExpense.name)) {
-      await this.manager.delete(TicketExpense, { oid })
-    }
-    if (tableNameList.includes(TicketLaboratory.name)) {
-      await this.manager.delete(TicketLaboratory, { oid })
-    }
-    if (tableNameList.includes(TicketLaboratoryGroup.name)) {
-      await this.manager.delete(TicketLaboratoryGroup, { oid })
-    }
-    if (tableNameList.includes(TicketLaboratoryResult.name)) {
-      await this.manager.delete(TicketLaboratoryResult, { oid })
-    }
-    if (tableNameList.includes(TicketProcedure.name)) {
-      await this.manager.delete(TicketProcedure, { oid })
-    }
-    if (tableNameList.includes(TicketProduct.name)) {
-      await this.manager.delete(TicketProduct, { oid })
-    }
-    if (tableNameList.includes(TicketRadiology.name)) {
-      await this.manager.delete(TicketRadiology, { oid })
-    }
-    if (tableNameList.includes(TicketSurcharge.name)) {
-      await this.manager.delete(TicketSurcharge, { oid })
-    }
-    if (tableNameList.includes(TicketUser.name)) {
-      await this.manager.delete(TicketUser, { oid })
-    }
-    if (tableNameList.includes(User.name)) {
-      await this.manager.delete(User, { oid })
-    }
-    if (tableNameList.includes(UserRole.name)) {
-      await this.manager.delete(UserRole, { oid })
-    }
-    if (tableNameList.includes(Warehouse.name)) {
-      await this.manager.delete(Warehouse, { oid })
-    }
-
-    if (tableNameList.includes(Organization.name)) {
-      await this.manager.delete(Organization, { id: oid })
-    } else {
+    if (!tableNameDeleteList.includes(Organization.name)) {
       await this.organizationRepository.updateDataVersion(oid)
     }
-
     this.cacheDataService.clearOrganization(oid)
     return { data: { oid } }
   }

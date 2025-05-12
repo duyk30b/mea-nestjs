@@ -1,15 +1,33 @@
 import { Injectable } from '@nestjs/common'
-import { DataSource, FindOptionsWhere, Raw, UpdateResult } from 'typeorm'
-import { PaymentType, ReceiptStatus } from '../../common/variable'
-import { Distributor, DistributorPayment, Receipt } from '../../entities'
-import { DistributorPaymentInsertType } from '../../entities/distributor-payment.entity'
+import { DataSource } from 'typeorm'
+import {
+  MoneyDirection,
+  PaymentInsertType,
+  PaymentTiming,
+  PersonType,
+  VoucherType,
+} from '../../entities/payment.entity'
+import { ReceiptStatus } from '../../entities/receipt.entity'
+import { DistributorManager, PaymentManager, ReceiptManager } from '../../managers'
 
 @Injectable()
 export class ReceiptPayDebtOperation {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    private dataSource: DataSource,
+    private receiptManager: ReceiptManager,
+    private distributorManager: DistributorManager,
+    private paymentManager: PaymentManager
+  ) { }
 
-  async payDebt(params: { oid: number; receiptId: number; time: number; money: number }) {
-    const { oid, receiptId, time, money } = params
+  async payDebt(params: {
+    oid: number
+    cashierId: number
+    receiptId: number
+    paymentMethodId: number
+    time: number
+    money: number
+  }) {
+    const { oid, cashierId, receiptId, time, money, paymentMethodId } = params
     const PREFIX = `ReceiptId=${receiptId} pay debt failed`
 
     if (money <= 0) {
@@ -17,80 +35,56 @@ export class ReceiptPayDebtOperation {
     }
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-      // === 1. UPDATE INVOICE ===
-      const whereReceipt: FindOptionsWhere<Receipt> = {
-        oid,
-        id: receiptId,
-        status: ReceiptStatus.Debt,
-        totalMoney: Raw((alias) => `${alias} >= (paid + :money)`, { money }),
-      }
-      const receiptUpdateResult: UpdateResult = await manager
-        .createQueryBuilder()
-        .update(Receipt)
-        .where(whereReceipt)
-        .set({
+      // === 1. RECEIPT: update ===
+      const receipt = await this.receiptManager.updateOneAndReturnEntity(
+        manager,
+        { oid, id: receiptId, status: { IN: [ReceiptStatus.Debt] } },
+        {
           status: () => `CASE 
-                            WHEN("totalMoney" - paid = ${money}) THEN ${ReceiptStatus.Success} 
+                            WHEN("totalMoney" - paid = ${money}) THEN ${ReceiptStatus.Completed} 
                             ELSE ${ReceiptStatus.Debt}
                             END
                         `,
           debt: () => `debt - ${money}`,
           paid: () => `paid + ${money}`,
-        })
-        .returning('*')
-        .execute()
-      if (receiptUpdateResult.affected !== 1) {
-        throw new Error(`${PREFIX}: Update Receipt failed`)
+        }
+      )
+      if (receipt.paid > receipt.totalMoney) {
+        throw new Error('Số tiền thanh toán nhiều hơn số tiền cần phải trả')
       }
-      const receipt = Receipt.fromRaw(receiptUpdateResult.raw[0])
 
       // === 2. UPDATE DISTRIBUTOR ===
-      const whereDistributor: FindOptionsWhere<Distributor> = { id: receipt.distributorId }
-      const distributorUpdateResult: UpdateResult = await manager
-        .createQueryBuilder()
-        .update(Distributor)
-        .where(whereDistributor)
-        .set({
-          debt: () => `debt - ${money}`,
-        })
-        .returning('*')
-        .execute()
-      if (distributorUpdateResult.affected !== 1) {
-        throw new Error(`${PREFIX}: distributorId=${receipt.distributorId} update failed`)
-      }
-      const distributor = Distributor.fromRaw(distributorUpdateResult.raw[0])
-
+      const distributor = await this.distributorManager.updateOneAndReturnEntity(
+        manager,
+        { oid, id: receipt.distributorId },
+        { debt: () => `debt - ${money}` }
+      )
       const distributorCloseDebt = distributor.debt
       const distributorOpenDebt = distributorCloseDebt + money
 
       // === 3. INSERT DISTRIBUTOR_PAYMENT ===
-      const distributorPaymentDraft: DistributorPaymentInsertType = {
+      const paymentInsert: PaymentInsertType = {
         oid,
-        distributorId: receipt.distributorId,
-        receiptId,
+        cashierId,
+        paymentMethodId,
+        voucherType: VoucherType.Receipt,
+        voucherId: receiptId,
+        personType: PersonType.Distributor,
+        personId: receipt.distributorId,
         createdAt: time,
-        paymentType: PaymentType.PayDebt,
-        paid: money,
-        debit: -money,
+
+        paymentTiming: PaymentTiming.PayDebt,
+        moneyDirection: MoneyDirection.Out,
+        paidAmount: -money,
+        debtAmount: -money,
         openDebt: distributorOpenDebt,
         closeDebt: distributorCloseDebt,
         note: '',
         description: '',
       }
-      const distributorPaymentInsertResult = await manager.insert(
-        DistributorPayment,
-        distributorPaymentDraft
-      )
+      const payment = await this.paymentManager.insertOneAndReturnEntity(manager, paymentInsert)
 
-      const distributorPaymentId: number = distributorPaymentInsertResult.identifiers?.[0]?.id
-      if (!distributorPaymentId) {
-        throw new Error(
-          `${PREFIX}: Insert DistributorPayment failed: `
-            + `${JSON.stringify(distributorPaymentInsertResult)}`
-        )
-      }
-
-      return { distributor, receiptBasic: receipt }
+      return { distributor, receipt, payment }
     })
 
     return transaction

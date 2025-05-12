@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { DistributorPaymentRepository } from '../../../../_libs/database/repositories/distributor-payment.repository'
+import { PersonType } from '../../../../_libs/database/entities/payment.entity'
+import { PaymentRepository } from '../../../../_libs/database/repositories'
 import { DistributorRepository } from '../../../../_libs/database/repositories/distributor.repository'
 import { ReceiptRepository } from '../../../../_libs/database/repositories/receipt.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
@@ -17,7 +18,7 @@ export class ApiDistributorService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
     private readonly distributorRepository: DistributorRepository,
-    private readonly distributorPaymentRepository: DistributorPaymentRepository,
+    private readonly paymentRepository: PaymentRepository,
     private readonly receiptRepository: ReceiptRepository
   ) { }
 
@@ -92,9 +93,9 @@ export class ApiDistributorService {
     return { data: { distributor } }
   }
 
-  async destroyOne(oid: number, id: number): Promise<BaseResponse> {
+  async destroyOne(oid: number, distributorId: number): Promise<BaseResponse> {
     const receiptList = await this.receiptRepository.findMany({
-      condition: { oid, distributorId: id },
+      condition: { oid, distributorId },
       limit: 10,
     })
     if (receiptList.length > 0) {
@@ -105,10 +106,14 @@ export class ApiDistributorService {
     }
 
     await Promise.allSettled([
-      this.distributorRepository.delete({ oid, id }),
-      this.distributorPaymentRepository.delete({ oid, distributorId: id }),
+      this.distributorRepository.delete({ oid, id: distributorId }),
+      this.paymentRepository.delete({
+        oid,
+        personId: distributorId,
+        personType: PersonType.Distributor,
+      }),
     ])
 
-    return { data: { receiptList: [], distributorId: id } }
+    return { data: { receiptList: [], distributorId } }
   }
 }

@@ -24,8 +24,8 @@ export class OrganizationRepository extends _PostgreSqlRepository<
     super(Organization, organizationRepository)
   }
 
-  async updateDataVersion(oid: number) {
-    const randomNumber = Math.floor(Math.random() * 100)
+  async updateDataVersion(oid: number | undefined) {
+    const randomNumber = Math.floor(Math.random() * 1000)
     const organization = await this.updateAndReturnEntity(
       { id: oid },
       {

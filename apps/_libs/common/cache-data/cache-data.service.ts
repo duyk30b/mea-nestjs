@@ -87,7 +87,7 @@ export class CacheDataService {
 
   async getSettingAllowNegativeQuantity(oid: number) {
     const settingMap = await this.getSettingMap(oid)
-    const { allowNegativeQuantity } = settingMap?.[SettingKey.SYSTEM_SETTING] || {}
+    const { allowNegativeQuantity } = settingMap?.[SettingKey.PRODUCT_SETTING] || {}
     return !!allowNegativeQuantity
   }
 
@@ -186,7 +186,9 @@ export class CacheDataService {
     this.orgCache[oid].userRoleList = null
   }
 
-  clearOrganization(oid: number) {
+  clearOrganization(oid: number | undefined) {
+    if (oid === undefined) return (this.orgCache = {})
+
     if (!this.orgCache[oid]) this.orgCache[oid] = {}
     this.orgCache[oid].organization = null
   }

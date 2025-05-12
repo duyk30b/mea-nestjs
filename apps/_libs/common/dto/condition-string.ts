@@ -38,9 +38,8 @@ export class ConditionString {
 }
 
 export const transformConditionString = ({ value, key }: TransformFnParams) => {
-  if (!value) {
-    return
-  }
+  if (value == null) return
+  
   if (typeof value === 'string') {
     return value
   } else if (typeof value === 'object') {

@@ -25,7 +25,7 @@ export class BatchInsertBody {
   @Expose()
   @IsDefined()
   @IsString()
-  lotNumber: string
+  batchCode: string
 
   @ApiPropertyOptional({ example: 1679995369195 })
   @Expose()
@@ -41,15 +41,16 @@ export class BatchInsertBody {
 }
 
 export class BatchUpdateInfoBody extends PickType(BatchInsertBody, [
-  'lotNumber',
+  'batchCode',
   'expiryDate',
   'warehouseId',
 ]) { }
 
 export class BatchUpdateInfoAndQuantityBody extends PickType(BatchInsertBody, [
-  'lotNumber',
+  'batchCode',
   'expiryDate',
   'warehouseId',
+  'distributorId',
   'costPrice',
 ]) {
   @ApiProperty({ example: 20_000 })
@@ -57,4 +58,10 @@ export class BatchUpdateInfoAndQuantityBody extends PickType(BatchInsertBody, [
   @IsDefined()
   @IsNumber()
   quantity: number
+
+  @ApiProperty({ example: 20_000 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  costAmount: number
 }

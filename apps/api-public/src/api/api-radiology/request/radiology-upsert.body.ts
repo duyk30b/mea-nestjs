@@ -1,6 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsInt, IsNumber, IsPositive, IsString, ValidateNested } from 'class-validator'
+import {
+  IsArray,
+  IsDefined,
+  IsInt,
+  IsNumber,
+  IsPositive,
+  IsString,
+  ValidateNested,
+} from 'class-validator'
 import * as DOMPurify from 'isomorphic-dompurify'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { CommissionCalculatorType } from '../../../../../_libs/database/entities/commission.entity'
@@ -71,13 +79,25 @@ export class RadiologyUpsertBody {
   @Transform(({ value }) => DOMPurify.sanitize(value))
   @IsDefined()
   @IsString()
-  descriptionDefault: string // tên dịch vụ
+  descriptionDefault: string // mô tả mặc định
 
   @ApiProperty({ example: 'Chưa có dấu hiệu bất thường' })
   @Expose()
   @IsDefined()
   @IsString()
-  resultDefault: string // tên dịch vụ
+  resultDefault: string // kết quả mặc định
+
+  @ApiProperty({ example: '' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  customVariables: string // Tuy chỉnh biến, có thể là Javascript
+
+  @ApiProperty({ example: '' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  customStyles: string // Tuy chỉnh giao diện, có thể là CSS
 
   @ApiProperty({ type: RadiologyCommission, isArray: true })
   @Expose()

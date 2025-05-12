@@ -7,10 +7,6 @@ import { DeliveryStatus } from '../../../../../_libs/database/common/variable'
 export class TicketProductRelationQuery {
   @Expose()
   @IsBoolean()
-  batch: boolean
-
-  @Expose()
-  @IsBoolean()
   product: boolean
 
   @Expose()
@@ -28,10 +24,6 @@ export class TicketProductFilterQuery {
   @Expose()
   @IsInt()
   productId: number
-
-  @Expose()
-  @IsInt()
-  batchId: number
 
   @Expose()
   @IsInt()

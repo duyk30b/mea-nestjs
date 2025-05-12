@@ -1,6 +1,7 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity } from 'typeorm'
+import { Column, Entity, OneToMany } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
+import Payment from './payment.entity'
 
 @Entity('Distributor')
 export default class Distributor extends BaseEntity {
@@ -66,6 +67,10 @@ export default class Distributor extends BaseEntity {
   @Expose()
   deletedAt: number
 
+  @OneToMany(() => Payment, (payment) => payment.distributor)
+  @Expose()
+  paymentList: Payment[]
+
   static fromRaw(raw: { [P in keyof Distributor]: any }) {
     if (!raw) return null
     const entity = new Distributor()
@@ -85,7 +90,7 @@ export default class Distributor extends BaseEntity {
 }
 
 export type DistributorRelationType = {
-  [P in keyof Pick<Distributor, never>]?: boolean
+  [P in keyof Pick<Distributor, 'paymentList'>]?: boolean
 }
 
 export type DistributorInsertType = Omit<

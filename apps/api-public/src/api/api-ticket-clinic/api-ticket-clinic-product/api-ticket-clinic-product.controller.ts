@@ -5,11 +5,12 @@ import { HasPermission } from '../../../../../_libs/common/guards/permission.gua
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../../_libs/database/entities/permission.entity'
 import { TicketProductType } from '../../../../../_libs/database/entities/ticket-product.entity'
+import { TicketReturnProductListBody } from '../../api-ticket/request'
+import { TicketParams } from '../../api-ticket/request/ticket.params'
 import { ApiTicketClinicProductService } from './api-ticket-clinic-product.service'
 import {
   TicketClinicAddTicketProductListBody,
   TicketClinicProductParams,
-  TicketClinicReturnProductListBody,
   TicketClinicUpdatePriorityTicketProductBody,
   TicketClinicUpdateTicketProductBody,
 } from './request'
@@ -140,19 +141,19 @@ export class ApiTicketClinicProductController {
     })
   }
 
-  @Post(':id/send-product')
+  @Post(':ticketId/send-product')
   @HasPermission(PermissionId.TICKET_CLINIC_SEND_PRODUCT)
-  async sendProduct(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiTicketClinicProductService.sendProduct({ oid, ticketId: id })
+  async sendProduct(@External() { oid }: TExternal, @Param() { ticketId }: TicketParams) {
+    return await this.apiTicketClinicProductService.sendProduct({ oid, ticketId })
   }
 
-  @Post(':id/return-product')
+  @Post(':ticketId/return-product')
   @HasPermission(PermissionId.TICKET_CLINIC_RETURN_PRODUCT)
   async returnProduct(
     @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: TicketClinicReturnProductListBody
+    @Param() { ticketId }: TicketParams,
+    @Body() body: TicketReturnProductListBody
   ) {
-    return await this.apiTicketClinicProductService.returnProduct({ oid, ticketId: id, body })
+    return await this.apiTicketClinicProductService.returnProduct({ oid, ticketId, body })
   }
 }

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsNumber, Max, Min, ValidateNested } from 'class-validator'
+import { IsArray, IsDefined, IsNumber, Max, ValidateNested } from 'class-validator'
 import { valuesEnum } from '../../../../../_libs/common/helpers/typescript.helper'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { DiscountType } from '../../../../../_libs/database/common/variable'
@@ -35,8 +35,7 @@ class TicketLaboratoryBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  @Max(9999.99)
-  @Min(-9999.99)
+  @Max(100)
   discountPercent: number
 
   @ApiProperty({ enum: valuesEnum(DiscountType), example: DiscountType.VND })

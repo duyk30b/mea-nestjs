@@ -42,7 +42,6 @@ async function bootstrap() {
       exposeUnsetFields: false,
     })
   )
-
   app.useGlobalFilters(new ServerExceptionFilter())
   app.useGlobalGuards(new UserGuard(app.get(Reflector)), new RootGuard(app.get(Reflector)))
 
@@ -92,7 +91,9 @@ async function bootstrap() {
     logger.debug(
       `🚀 ===== [SQL] Database: jdbc:${SQL_TYPE}://${SQL_HOST}:${SQL_PORT}/${SQL_DATABASE} =====`
     )
-    logger.debug(`🚀 ===== [TIME] Timezone: offset ${new Date().getTimezoneOffset()} =====`)
+    logger.debug(
+      `🚀 ===== [TIME] ${new Date().toLocaleString()}, TimezoneOffset ${new Date().getTimezoneOffset()} =====`
+    )
     logger.debug(`🚀 ===== [NODE] NodeJS version: ${NODE_VERSION} =====`)
   })
 }

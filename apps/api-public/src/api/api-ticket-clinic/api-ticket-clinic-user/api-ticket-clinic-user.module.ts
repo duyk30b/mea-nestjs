@@ -6,5 +6,6 @@ import { ApiTicketClinicUserService } from './api-ticket-clinic-user.service'
   imports: [],
   controllers: [ApiTicketClinicUserController],
   providers: [ApiTicketClinicUserService],
+  exports: [ApiTicketClinicUserService],
 })
 export class ApiTicketClinicUserModule { }

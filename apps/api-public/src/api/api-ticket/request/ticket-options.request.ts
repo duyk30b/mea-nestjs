@@ -15,7 +15,7 @@ export class TicketRelationQuery {
 
   @Expose()
   @IsBoolean()
-  customerPaymentList: boolean
+  paymentList: boolean
 
   @Expose()
   @IsBoolean()
@@ -31,15 +31,19 @@ export class TicketRelationQuery {
 
   @Expose()
   @IsOptional()
-  ticketProductList: false | { product?: boolean; batch?: boolean }
+  ticketProductList: false | { product?: boolean }
 
   @Expose()
   @IsOptional()
-  ticketProductConsumableList: false | { product?: boolean; batch?: boolean }
+  ticketProductConsumableList: false | { product?: boolean }
 
   @Expose()
   @IsOptional()
-  ticketProductPrescriptionList: false | { product?: boolean; batch?: boolean }
+  ticketProductPrescriptionList: false | { product?: boolean }
+
+  @Expose()
+  @IsOptional()
+  ticketBatchList: false | { batch?: boolean }
 
   @Expose()
   @IsOptional()
@@ -80,12 +84,12 @@ const ConditionEnumTicketStatus = createConditionEnum(TicketStatus)
 export class TicketFilterQuery {
   // @Expose()
   // @IsEnumValue(TicketStatus)
-  // ticketStatus: TicketStatus
+  // status: TicketStatus
 
   @Expose()
   @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketStatus))
   @IsOptional()
-  ticketStatus: TicketStatus | InstanceType<typeof ConditionEnumTicketStatus>
+  status: TicketStatus | InstanceType<typeof ConditionEnumTicketStatus>
 
   @Expose()
   @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketType))

@@ -1,2 +1,5 @@
 export * from './ticket-get.query'
 export * from './ticket-options.request'
+export * from './ticket-payment-money.body'
+export * from './ticket-return-product-list.body'
+export * from './ticket.params'
