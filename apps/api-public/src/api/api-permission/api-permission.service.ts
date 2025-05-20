@@ -10,7 +10,7 @@ export class ApiPermissionService {
   constructor(
     private readonly cacheDataService: CacheDataService,
     private readonly permissionRepository: PermissionRepository
-  ) { }
+  ) {}
 
   async getMany(query: PermissionGetManyQuery) {
     const { limit, filter, sort } = query
@@ -413,7 +413,7 @@ export class ApiPermissionService {
         parentId: PermissionId.PRODUCT,
         rootId: PermissionId.PRODUCT,
       },
-            {
+      {
         id: PermissionId.BATCH_MERGE,
         level: 2,
         code: PermissionId[PermissionId.BATCH_MERGE],
@@ -613,32 +613,22 @@ export class ApiPermissionService {
         rootId: PermissionId.RECEIPT,
       },
       {
-        id: PermissionId.RECEIPT_CREATE_DRAFT,
+        id: PermissionId.RECEIPT_UPSERT_DRAFT,
         level: 2,
-        code: PermissionId[PermissionId.RECEIPT_CREATE_DRAFT],
+        code: PermissionId[PermissionId.RECEIPT_UPSERT_DRAFT],
         isActive: 1,
-        pathId: `${PermissionId.RECEIPT}.${PermissionId.RECEIPT_CREATE_DRAFT}`,
-        name: 'Tạo phiếu nháp',
+        pathId: `${PermissionId.RECEIPT}.${PermissionId.RECEIPT_UPSERT_DRAFT}`,
+        name: 'Tạo, sửa, xóa phiếu nháp',
         parentId: PermissionId.RECEIPT,
         rootId: PermissionId.RECEIPT,
       },
       {
-        id: PermissionId.RECEIPT_UPDATE_DRAFT_PREPAYMENT,
+        id: PermissionId.RECEIPT_UPDATE_PREPAYMENT,
         level: 2,
-        code: PermissionId[PermissionId.RECEIPT_UPDATE_DRAFT_PREPAYMENT],
+        code: PermissionId[PermissionId.RECEIPT_UPDATE_PREPAYMENT],
         isActive: 1,
-        pathId: `${PermissionId.RECEIPT}.${PermissionId.RECEIPT_UPDATE_DRAFT_PREPAYMENT}`,
-        name: 'Sửa phiếu nhập hàng nháp và phiếu nhập hàng tạm ứng',
-        parentId: PermissionId.RECEIPT,
-        rootId: PermissionId.RECEIPT,
-      },
-      {
-        id: PermissionId.RECEIPT_DESTROY_DRAFT,
-        level: 2,
-        code: PermissionId[PermissionId.RECEIPT_DESTROY_DRAFT],
-        isActive: 1,
-        pathId: `${PermissionId.RECEIPT}.${PermissionId.RECEIPT_DESTROY_DRAFT}`,
-        name: 'Xóa phiếu nháp',
+        pathId: `${PermissionId.RECEIPT}.${PermissionId.RECEIPT_UPDATE_PREPAYMENT}`,
+        name: 'Sửa phiếu nhập hàng đang tạm ứng',
         parentId: PermissionId.RECEIPT,
         rootId: PermissionId.RECEIPT,
       },
@@ -689,6 +679,26 @@ export class ApiPermissionService {
         isActive: 1,
         pathId: `${PermissionId.RECEIPT}.${PermissionId.RECEIPT_CANCEL}`,
         name: 'Hủy phiếu',
+        parentId: PermissionId.RECEIPT,
+        rootId: PermissionId.RECEIPT,
+      },
+      {
+        id: PermissionId.RECEIPT_DOWNLOAD_EXCEL,
+        level: 2,
+        code: PermissionId[PermissionId.RECEIPT_DOWNLOAD_EXCEL],
+        isActive: 1,
+        pathId: `${PermissionId.RECEIPT}.${PermissionId.RECEIPT_DOWNLOAD_EXCEL}`,
+        name: 'Download file Excel danh sách phiếu nhập hàng',
+        parentId: PermissionId.RECEIPT,
+        rootId: PermissionId.RECEIPT,
+      },
+      {
+        id: PermissionId.RECEIPT_UPLOAD_EXCEL,
+        level: 2,
+        code: PermissionId[PermissionId.RECEIPT_UPLOAD_EXCEL],
+        isActive: 1,
+        pathId: `${PermissionId.RECEIPT}.${PermissionId.RECEIPT_UPLOAD_EXCEL}`,
+        name: 'Upload file Excel để nhập hàng',
         parentId: PermissionId.RECEIPT,
         rootId: PermissionId.RECEIPT,
       },

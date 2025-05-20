@@ -26,7 +26,8 @@ import {
   ReceiptGetManyQuery,
   ReceiptGetOneQuery,
   ReceiptPaginationQuery,
-  ReceiptUpsertBody,
+  ReceiptUpdatePrepaymentBody,
+  ReceiptUpsertDraftBody,
 } from './request'
 
 @Injectable()
@@ -134,12 +135,12 @@ export class ApiReceiptService {
     return batchSettingCommon
   }
 
-  async createDraft(params: { oid: number; body: ReceiptUpsertBody }): Promise<BaseResponse> {
+  async createReceiptDraft(params: { oid: number; body: ReceiptUpsertDraftBody }): Promise<BaseResponse> {
     const { oid, body } = params
     // tự động chọn lô
     const batchSettingDefault = await this.getBatchSettingDefault(oid)
 
-    const { receipt, receiptItemList, distributorId } = body
+    const { receipt: receiptBody, receiptItemList, distributorId } = body
     const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId)
     const batchList = await this.batchRepository.findManyBy({
       oid,
@@ -181,7 +182,7 @@ export class ApiReceiptService {
         distributorId,
         productId: receiptItem.productId,
         warehouseId: receiptItem.warehouseId,
-        lotNumber: receiptItem.lotNumber,
+        batchCode: receiptItem.batchCode,
         expiryDate: receiptItem.expiryDate,
         costPrice: receiptItem.costPrice,
         registeredAt: Date.now(),
@@ -194,9 +195,84 @@ export class ApiReceiptService {
     })
 
     try {
-      const { receiptId } = await this.receiptDraft.createDraft({
+      const { receipt } = await this.receiptDraft.createDraft({
         oid,
-        receiptInsertDto: { ...receipt, distributorId },
+        receiptInsertDto: { ...receiptBody, distributorId },
+        receiptItemListDto: receiptItemList,
+      })
+      return { data: { receiptId: receipt.id } }
+    } catch (error: any) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+    }
+  }
+
+  async updateReceiptDraft(params: {
+    oid: number
+    receiptId: number
+    body: ReceiptUpsertDraftBody
+  }): Promise<BaseResponse> {
+    const { oid, receiptId, body } = params
+    const batchSettingDefault = await this.getBatchSettingDefault(oid)
+    // tự động chọn lô
+    const { receipt: receiptBody, receiptItemList, distributorId } = body
+    const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId)
+    const batchList = await this.batchRepository.findManyBy({
+      oid,
+      productId: { IN: uniqueArray(productIdList) },
+    })
+    const batchListMap = arrayToKeyArray(batchList, 'productId')
+
+    receiptItemList.forEach((receiptItem) => {
+      if (receiptItem.batchId) return
+      const batchFind = (batchListMap[receiptItem.productId] || []).find((batch) => {
+        if (batch.distributorId != distributorId) {
+          if (batchSettingDefault.distributorId === BatchDistributorIdRule.SplitOnDifferent) {
+            return false
+          }
+        }
+        if (batch.warehouseId != receiptItem.warehouseId) {
+          if (batchSettingDefault.warehouseId === BatchWarehouseIdRule.SplitOnDifferent) {
+            return false
+          }
+        }
+        if (batch.expiryDate != receiptItem.expiryDate) return false // khác hạn sử dụng thì luôn tách phiên bản
+
+        if (batch.costPrice != receiptItem.costPrice) {
+          if (batchSettingDefault.costPrice === BatchCostPriceRule.SplitOnDifferent) {
+            return false
+          }
+        }
+        return true
+      })
+      if (batchFind) {
+        receiptItem.batchId = batchFind.id
+      }
+    })
+
+    const receiptItemListNoBatch = receiptItemList.filter((i) => !i.batchId)
+    const batchInsertList: BatchInsertType[] = receiptItemListNoBatch.map((receiptItem) => {
+      const batchInsert: BatchInsertType = {
+        oid,
+        distributorId,
+        productId: receiptItem.productId,
+        warehouseId: receiptItem.warehouseId,
+        batchCode: receiptItem.batchCode,
+        expiryDate: receiptItem.expiryDate,
+        costPrice: receiptItem.costPrice,
+        registeredAt: Date.now(),
+      }
+      return batchInsert
+    })
+    const batchIdInsertList = await this.batchRepository.insertMany(batchInsertList)
+    receiptItemListNoBatch.forEach((receiptItem, index) => {
+      receiptItem.batchId = batchIdInsertList[index]
+    })
+
+    try {
+      await this.receiptDraft.updateDraft({
+        oid,
+        receiptId,
+        receiptUpdateDto: { ...receiptBody, distributorId },
         receiptItemListDto: receiptItemList,
       })
       return { data: { receiptId } }
@@ -205,15 +281,15 @@ export class ApiReceiptService {
     }
   }
 
-  async updateDraftPrepayment(params: {
+  async updateReceiptPrepayment(params: {
     oid: number
     receiptId: number
-    body: ReceiptUpsertBody
+    body: ReceiptUpdatePrepaymentBody
   }): Promise<BaseResponse> {
     const { oid, receiptId, body } = params
     const batchSettingDefault = await this.getBatchSettingDefault(oid)
     // tự động chọn lô
-    const { receipt, receiptItemList, distributorId } = body
+    const { receipt: receiptDto, receiptItemList, distributorId } = body
     const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId)
     const batchList = await this.batchRepository.findManyBy({
       oid,
@@ -255,7 +331,7 @@ export class ApiReceiptService {
         distributorId,
         productId: receiptItem.productId,
         warehouseId: receiptItem.warehouseId,
-        lotNumber: receiptItem.lotNumber,
+        batchCode: receiptItem.batchCode,
         expiryDate: receiptItem.expiryDate,
         costPrice: receiptItem.costPrice,
         registeredAt: Date.now(),
@@ -268,10 +344,10 @@ export class ApiReceiptService {
     })
 
     try {
-      await this.receiptDraft.updateDraftPrepayment({
+      await this.receiptPrepaymentOperation.updatePrepayment({
         oid,
         receiptId,
-        receiptUpdateDto: receipt,
+        receiptUpdateDto: receiptDto,
         receiptItemListDto: receiptItemList,
       })
       return { data: { receiptId } }

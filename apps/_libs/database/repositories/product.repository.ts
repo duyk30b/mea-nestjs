@@ -22,12 +22,12 @@ export class ProductRepository extends _PostgreSqlRepository<
     super(Product, productRepository)
   }
 
-  async getMaxCode(oid: number) {
-    const raw = await this.productRepository
-      .createQueryBuilder()
-      .select('MAX("Product".code)', 'max_code')
-      .where({ oid })
-      .getRawOne()
-    return raw?.max_code || 0
-  }
+  // async getMaxCode(oid: number) {
+  //   const raw = await this.productRepository
+  //     .createQueryBuilder()
+  //     .select('MAX("Product".code)', 'max_code')
+  //     .where({ oid })
+  //     .getRawOne()
+  //   return raw?.max_code || 0
+  // }
 }

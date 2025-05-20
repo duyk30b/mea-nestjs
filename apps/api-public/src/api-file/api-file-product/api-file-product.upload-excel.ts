@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { Row, Workbook } from 'exceljs'
 import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
+import { ESArray } from '../../../../_libs/common/helpers/object.helper'
 import { User } from '../../../../_libs/database/entities'
 import { ProductInsertType } from '../../../../_libs/database/entities/product.entity'
 import { ProductRepository } from '../../../../_libs/database/repositories'
@@ -25,49 +26,57 @@ const ProductExcelRules: ProductExcelRulesType[] = [
   },
   {
     column: 'B',
-    width: 40,
-    title: 'Tên sản phẩm',
+    width: 15,
+    title: 'Mã sản phẩm',
     type: 'string',
-    example: 'Augmentn',
+    example: 'SP002',
     required: true,
   },
   {
     column: 'C',
+    width: 40,
+    title: 'Tên sản phẩm',
+    type: 'string',
+    example: 'Augmentin 1g',
+    required: true,
+  },
+  {
+    column: 'D',
     width: 40,
     title: 'Hoạt chất',
     type: 'string',
     example: 'Amoxicillin 875m + Clavulanic acid 125mg',
   },
   {
-    column: 'D',
+    column: 'E',
     width: 15,
     title: 'Giá nhập',
     type: 'number',
     example: 80000,
   },
   {
-    column: 'E',
+    column: 'F',
     width: 15,
     title: 'Giá bán',
     type: 'number',
     example: 100000,
   },
   {
-    column: 'F',
+    column: 'G',
     width: 15,
     title: 'Đơn vị',
     type: 'string',
     example: 'Viên',
   },
   {
-    column: 'G',
+    column: 'H',
     width: 15,
     title: 'Đường dùng',
     type: 'string',
     example: 'Uống',
   },
   {
-    column: 'H',
+    column: 'I',
     width: 15,
     title: 'Nguồn gốc',
     type: 'string',
@@ -143,7 +152,6 @@ export class ApiFileProductUploadExcel {
     const worksheet = workbook.worksheets[0] // lấy sheet đầu tiên
 
     const productPrepareList: ProductInsertType[] = []
-    let maxCode = await this.productRepository.getMaxCode(oid)
 
     worksheet.eachRow((row: Row, rowNumber: number) => {
       if (!row.hasValues) return
@@ -166,23 +174,27 @@ export class ApiFileProductUploadExcel {
           const msg = `${msgPrefix} cột ${rule.title} cần có định dạng là ${rule.type}`
           throw new BusinessException(msg as any)
         }
-        if (rule.required && !v) {
-          const msg = `${msgPrefix} cột ${rule.title} bắt buộc phải có giá trị`
+        if (rule.required && v == null) {
+          const msg = `${msgPrefix} cột ${rule.title} không được để trống`
           throw new BusinessException(msg as any)
+        }
+        if (!values[1]) {
+          throw new BusinessException(`Mã sản phẩm không được để trống ở dòng ${index + 2}` as any)
         }
       })
 
-      maxCode++
       const productNew: ProductInsertType = {
         oid,
-        code: maxCode,
-        brandName: values[1] as string,
-        substance: values[2] as string,
-        costPrice: values[3] as number,
-        retailPrice: values[4] as number,
-        unit: JSON.stringify([{ name: values[5], rate: 1, default: true }]),
-        route: values[6] as string,
-        source: values[7] as string,
+        productCode: values[1] as string,
+        brandName: values[2] as string,
+        substance: values[3] as string,
+        costPrice: values[4] as number,
+        retailPrice: values[5] as number,
+        unit: JSON.stringify([{ name: values[6], rate: 1, default: true }]),
+        route: values[7] as string,
+        source: values[8] as string,
+
+        quantity: 0, // ======? CẨN THẬN CHỖ NÀY, CHƯA HOÀN THIỆN TÍNH NĂNG SỬA SỐ LƯỢNG
 
         hasManageQuantity: 1,
         hintUsage: '',
@@ -195,7 +207,22 @@ export class ApiFileProductUploadExcel {
 
       productPrepareList.push(productNew)
     })
-    const productIdList = await this.productRepository.insertMany(productPrepareList)
+
+    const duplicatesProductCode = ESArray.checkDuplicate(productPrepareList, 'productCode')
+    if (duplicatesProductCode.length) {
+      const { value } = duplicatesProductCode[0]
+      const indices = duplicatesProductCode[0].indices.map((i) => i + 2) // +1 do bắt đầu từ 0
+      throw new BusinessException(
+        `Có trùng lặp productCode = ${value} ở dòng ${indices.toString()}` as any
+      )
+    }
+
+    const productIdList = await this.productRepository.upsertByConflictUnique({
+      upsertList: productPrepareList,
+      updateFields: ['brandName', 'substance', 'route'],
+      conflictFields: ['oid', 'productCode'],
+    })
+
     return { data: { productIdList } }
   }
 }

@@ -18,3 +18,12 @@ export type FileUploadDto = {
   buffer: any
   size: number // tính theo bytes
 }
+
+export type ExcelColumUploadRulesType = {
+  column: string
+  width: number
+  title: string
+  type?: 'number' | 'string' | 'date'
+  example: number | string | object
+  required?: boolean
+}

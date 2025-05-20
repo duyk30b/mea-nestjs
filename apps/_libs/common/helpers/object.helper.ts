@@ -28,6 +28,22 @@ export class ESArray {
     })
     return object
   }
+
+  static checkDuplicate = <T>(array: T[], property: keyof T) => {
+    const map = new Map<any, number[]>()
+    array.forEach((item, index) => {
+      const value = item[property]
+      if (!map.has(value)) map.set(value, [])
+      map.get(value)!.push(index)
+    })
+    const result: { value: any; indices: number[] }[] = []
+    for (const [value, indices] of map.entries()) {
+      if (indices.length > 1) {
+        result.push({ value, indices })
+      }
+    }
+    return result
+  }
 }
 
 export const uniqueArray = <T>(array: T[]) => {
@@ -51,12 +67,6 @@ export const arrayToKeyArray = <T>(array: T[], property: keyof T) => {
     object[key].push(item)
   })
   return object
-}
-
-export const checkDuplicate = <T>(array: T[], property: keyof T) => {
-  const arrayProperty = array.map((item) => item[property])
-  const arrayPropertyUnique = Array.from(new Set(arrayProperty))
-  return array.length !== arrayPropertyUnique.length
 }
 
 export const mergeObject = (...params: Record<string, any>[]) => {

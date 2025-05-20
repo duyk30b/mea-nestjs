@@ -65,14 +65,15 @@ export enum PermissionId {
 
   RECEIPT = 9,
   RECEIPT_READ = 900,
-  RECEIPT_CREATE_DRAFT = 901,
-  RECEIPT_UPDATE_DRAFT_PREPAYMENT = 902,
-  RECEIPT_DESTROY_DRAFT = 903,
+  RECEIPT_UPSERT_DRAFT = 901,
+  RECEIPT_UPDATE_PREPAYMENT = 902,
   RECEIPT_PAYMENT = 904,
   RECEIPT_REFUND_PAYMENT = 905,
   RECEIPT_PAY_DEBT = 906,
   RECEIPT_SEND_PRODUCT = 907,
   RECEIPT_CANCEL = 908,
+  RECEIPT_DOWNLOAD_EXCEL = 920,
+  RECEIPT_UPLOAD_EXCEL = 921,
 
   APPOINTMENT = 10,
   APPOINTMENT_READ = 1000,
@@ -183,8 +184,8 @@ export type PermissionInsertType = Omit<
 
 export type PermissionUpdateType = {
   [K in Exclude<keyof Permission, keyof PermissionRelationType | keyof Pick<Permission, 'id'>>]:
-  | Permission[K]
-  | (() => string)
+    | Permission[K]
+    | (() => string)
 }
 
 export type PermissionSortType = {

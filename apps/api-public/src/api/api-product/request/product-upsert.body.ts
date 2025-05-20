@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional, OmitType, PartialType } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
 import {
   IsArray,
@@ -7,6 +7,7 @@ import {
   IsIn,
   IsInt,
   IsNumber,
+  IsOptional,
   IsPositive,
   IsString,
   ValidateNested,
@@ -56,10 +57,22 @@ export class ProductCreateBody {
   @IsString()
   brandName: string // tên biệt dược
 
+  @ApiProperty({ example: '' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  productCode: string
+
   @ApiPropertyOptional({ example: 'Clarythromycin 125mg/5ml' })
   @Expose()
   @IsString()
   substance: string // Hoạt chất
+
+  @ApiPropertyOptional({ example: 59_000 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  quantity: number
 
   @ApiPropertyOptional({ example: 45_000 })
   @Expose()
@@ -199,4 +212,4 @@ export class ProductCreateBody {
   commissionList: ProductCommission[]
 }
 
-export class ProductUpdateBody extends PartialType(ProductCreateBody) { }
+export class ProductUpdateBody extends OmitType(ProductCreateBody, ['quantity']) { }

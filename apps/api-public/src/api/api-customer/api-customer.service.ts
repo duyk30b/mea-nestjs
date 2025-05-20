@@ -121,9 +121,7 @@ export class ApiCustomerService {
     organization.dataVersionParse.customer += 1
     await this.organizationRepository.update(
       { id: oid },
-      {
-        dataVersion: JSON.stringify(organization.dataVersionParse),
-      }
+      { dataVersion: JSON.stringify(organization.dataVersionParse) }
     )
     this.cacheDataService.clearOrganization(oid)
 

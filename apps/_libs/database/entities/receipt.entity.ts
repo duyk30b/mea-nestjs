@@ -168,7 +168,7 @@ export type ReceiptInsertType = Omit<
 export type ReceiptUpdateType = {
   [K in Exclude<
     keyof Receipt,
-    keyof ReceiptRelationType | keyof Pick<Receipt, 'oid' | 'id' | 'distributorId'>
+    keyof ReceiptRelationType | keyof Pick<Receipt, 'oid' | 'id'>
   >]: Receipt[K] | (() => string)
 }
 

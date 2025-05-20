@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { Cell, Workbook, Worksheet } from 'exceljs'
 import { ESArray } from '../../../../_libs/common/helpers/object.helper'
 import { ESTimer } from '../../../../_libs/common/helpers/time.helper'
-import { Organization, Product, ProductGroup, User } from '../../../../_libs/database/entities'
+import { Organization, Product, User } from '../../../../_libs/database/entities'
 import {
   BatchRepository,
   ProductGroupRepository,
@@ -86,10 +86,10 @@ export class ApiFileProductDownloadExcel {
         dataRows.push({
           style: {
             num: { alignment: { horizontal: 'center' } },
-            code: { alignment: { horizontal: 'center' } },
+            productCode: { alignment: { horizontal: 'center' } },
             brandName: { alignment: { wrapText: true } },
             substance: { alignment: { wrapText: true } },
-            lotNumber: { alignment: { horizontal: 'center' } },
+            batchCode: { alignment: { horizontal: 'center' } },
             expiryDate: { alignment: { horizontal: 'center' }, numFmt: 'dd/mm/yyyy' },
             quantity: { numFmt: '###,##0', font: { bold: true } },
             costPrice: { numFmt: '###,##0' },
@@ -102,7 +102,7 @@ export class ApiFileProductDownloadExcel {
           data: [
             {
               num: productIndex + 1,
-              code: 'SP' + product.code.toString().padStart(4, '0'),
+              productCode: product.productCode,
               // brandName: product.brandName + '\n' + product.substance,
               // brandName: {
               //   richText: [
@@ -127,7 +127,7 @@ export class ApiFileProductDownloadExcel {
               // },
               brandName: product.brandName || '',
               substance: product.substance || '',
-              lotNumber: '',
+              batchCode: '',
               expiryDate: '', // fix giờ do hệ thống lệch giờ
               quantity: product.quantity || 0,
               costPrice: product.costPrice || 0,
@@ -149,10 +149,10 @@ export class ApiFileProductDownloadExcel {
           dataRows.push({
             style: {
               num: { alignment: { horizontal: 'center' } },
-              code: { alignment: { horizontal: 'center' } },
+              productCode: { alignment: { horizontal: 'center' } },
               brandName: { alignment: { wrapText: true } },
               substance: { alignment: { wrapText: true } },
-              lotNumber: { alignment: { horizontal: 'center' } },
+              batchCode: { alignment: { horizontal: 'center' } },
               expiryDate: { alignment: { horizontal: 'center' }, numFmt: 'dd/mm/yyyy' },
               quantity: { font: { bold: true } },
               costPrice: { numFmt: '###,##0' },
@@ -165,7 +165,7 @@ export class ApiFileProductDownloadExcel {
             data: [
               {
                 num: productIndex + 1,
-                code: 'SP' + product.code.toString().padStart(4, '0'),
+                productCode: product.productCode,
                 brandName: product.brandName || '',
                 substance: product.substance || '',
                 // brandName: product.brandName + '\n' + product.substance,
@@ -190,7 +190,7 @@ export class ApiFileProductDownloadExcel {
                 //     }] : []),
                 //   ],
                 // },
-                lotNumber: batch.lotNumber || '',
+                batchCode: batch.batchCode || '',
                 expiryDate: batch.expiryDate ? new Date(batch.expiryDate + 7 * 60 * 60 * 1000) : '', // fix giờ do hệ thống lệch giờ
                 quantity: batch.quantity || 0,
                 costPrice: batch.costPrice || 0,
@@ -295,10 +295,10 @@ export class ApiFileProductDownloadExcel {
       },
       columns: [
         { key: 'num', width: 5 },
-        { key: 'code', width: 10 },
+        { key: 'productCode', width: 10 },
         { key: 'brandName', width: 30 },
         { key: 'substance', width: 30 },
-        { key: 'lotNumber', width: 10 },
+        { key: 'batchCode', width: 10 },
         { key: 'expiryDate', width: 10 },
         { key: 'quantity', width: 10 },
         { key: 'costPrice', width: 10 },

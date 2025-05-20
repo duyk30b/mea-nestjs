@@ -19,9 +19,9 @@ export default class Batch extends BaseEntity {
   @Expose()
   distributorId: number
 
-  @Column({ type: 'varchar', length: 255, default: '' })
+  @Column({ type: 'varchar', length: 50, default: '' })
   @Expose()
-  lotNumber: string // Số Lô sản phẩm
+  batchCode: string // Số Lô sản phẩm
 
   @Column({
     type: 'bigint',

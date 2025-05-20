@@ -263,6 +263,22 @@ export abstract class _PostgreSqlRepository<
     return this.entity.fromRaw(raws[0])
   }
 
+  async upsertByConflictUnique(options: {
+    upsertList: _INSERT[]
+    updateFields: (keyof _ENTITY)[]
+    conflictFields: (keyof _ENTITY)[]
+  }) {
+    const { upsertList, updateFields, conflictFields } = options
+    const insertResult: InsertResult = await this.repository
+      .createQueryBuilder()
+      .insert()
+      .values(upsertList as any)
+      .orUpdate(updateFields as string[], conflictFields as string[])
+      .execute()
+    const idList = insertResult.identifiers.map((i) => i.id)
+    return idList
+  }
+
   async delete(condition: BaseCondition<_ENTITY>) {
     const where = this.getWhereOptions(condition)
     const deleteResult = await this.repository.delete(where)

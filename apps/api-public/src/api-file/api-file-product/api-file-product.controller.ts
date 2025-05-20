@@ -24,13 +24,13 @@ export class ApiFileProductController {
   }
 
   @Get('upload-excel/file-example')
-  // @HasPermission(PermissionId.PRODUCT_UPLOAD_EXCEL)
+  @HasPermission(PermissionId.PRODUCT_UPLOAD_EXCEL)
   async uploadExcelFileExample(@External() { user, organization }: TExternal) {
     return await this.apiFileProductUploadExcel.fileExample()
   }
 
   @Post('upload-excel')
-  // @HasPermission(PermissionId.PRODUCT_UPLOAD_EXCEL)
+  @HasPermission(PermissionId.PRODUCT_UPLOAD_EXCEL)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FastifyFileInterceptor('file', {}))
   async uploadExcel(

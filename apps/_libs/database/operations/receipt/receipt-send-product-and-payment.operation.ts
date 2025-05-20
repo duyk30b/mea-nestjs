@@ -118,7 +118,7 @@ export class ReceiptSendProductAndPaymentOperation {
           quantitySend: number
           openQuantity: number
           costPrice: number
-          lotNumber: string
+          batchCode: string
           expiryDate: number | null
         }
       > = {}
@@ -147,7 +147,7 @@ export class ReceiptSendProductAndPaymentOperation {
             quantitySend: 0,
             openQuantity: 0,
             costPrice: receiptItemList[i].costPrice,
-            lotNumber: receiptItemList[i].lotNumber,
+            batchCode: receiptItemList[i].batchCode,
             expiryDate: receiptItemList[i].expiryDate || null,
           }
         }

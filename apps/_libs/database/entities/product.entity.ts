@@ -16,7 +16,7 @@ import ProductGroup from './product-group.entity'
 @Entity('Product')
 @Index('IDX_Product__oid_brandName', ['oid', 'brandName'])
 @Index('IDX_Product__oid_substance', ['oid', 'substance'])
-@Unique('UNIQUE_Product__oid_code', ['oid', 'code'])
+@Unique('UNIQUE_Product__oid_productCode', ['oid', 'productCode'])
 export default class Product {
   @Column({ name: 'oid' })
   @Exclude()
@@ -26,9 +26,9 @@ export default class Product {
   @Expose({ name: 'id' })
   id: number
 
-  @Column({ default: 0 })
+  @Column({ type: 'varchar', length: 50 })
   @Expose()
-  code: number
+  productCode: string
 
   @Column({ type: 'varchar', length: 255 })
   @Expose()
@@ -169,8 +169,7 @@ export type ProductRelationType = {
 
 export type ProductInsertType = Omit<
   Product,
-  | keyof ProductRelationType
-  | keyof Pick<Product, 'id' | 'quantity' | 'updatedAt' | 'warehouseIdList'>
+  keyof ProductRelationType | keyof Pick<Product, 'id' | 'updatedAt' | 'warehouseIdList'>
 >
 
 export type ProductUpdateType = {
@@ -182,5 +181,5 @@ export type ProductUpdateType = {
 }
 
 export type ProductSortType = {
-  [P in keyof Pick<Product, 'id' | 'code' | 'quantity' | 'brandName'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<Product, 'id' | 'productCode' | 'quantity' | 'brandName'>]?: 'ASC' | 'DESC'
 }

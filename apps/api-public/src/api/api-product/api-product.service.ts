@@ -139,12 +139,39 @@ export class ApiProductService {
 
   async createOne(oid: number, body: ProductCreateBody): Promise<BaseResponse> {
     const { commissionList, ...productBody } = body
-    const maxCode = await this.productRepository.getMaxCode(oid)
+    let productCode = body.productCode
+    if (!productCode) {
+      const count = await this.productRepository.countBy({ oid })
+      productCode = (count + 1).toString()
+    }
+
+    const existProduct = await this.productRepository.findOneBy({
+      oid,
+      productCode,
+    })
+    if (existProduct) {
+      throw new BusinessException(`Trùng mã sản phẩm với ${existProduct.brandName}` as any)
+    }
+
     const product = await this.productRepository.insertOneFullFieldAndReturnEntity({
       ...productBody,
       oid,
-      code: maxCode + 1,
+      productCode,
     })
+
+    if (body.quantity) {
+      await this.batchRepository.insertOne({
+        oid,
+        productId: product.id,
+        costPrice: body.costPrice,
+        distributorId: 0,
+        expiryDate: null,
+        batchCode: '',
+        registeredAt: Date.now(),
+        warehouseId: 0,
+      })
+    }
+
     const commissionDtoList: CommissionInsertType[] = commissionList.map((i) => {
       const dto: CommissionInsertType = {
         oid,
@@ -203,6 +230,16 @@ export class ApiProductService {
         }
       }
     }
+
+    const existProduct = await this.productRepository.findOneBy({
+      oid,
+      productCode: body.productCode,
+      id: { NOT: productId },
+    })
+    if (existProduct) {
+      throw new BusinessException(`Trùng mã sản phẩm với ${existProduct.brandName}` as any)
+    }
+
     const product = await this.productRepository.updateOneAndReturnEntity(
       { oid, id: productId },
       productBody
