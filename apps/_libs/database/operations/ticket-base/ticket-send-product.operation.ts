@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { ESArray } from '../../../common/helpers/object.helper'
-import { DeliveryStatus, MovementType } from '../../common/variable'
+import { ESTimer } from '../../../common/helpers/time.helper'
+import { DeliveryStatus, InventoryStrategy, MovementType } from '../../common/variable'
 import { Batch, TicketProduct } from '../../entities'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
 import { TicketBatchInsertType } from '../../entities/ticket-batch.entity'
@@ -23,6 +24,7 @@ export type SendItem = {
   batchId: number
   quantity: number
   costPrice: number
+  warehouseId: number
 }
 
 @Injectable()
@@ -59,7 +61,7 @@ export class TicketSendProductOperation {
     const productIdList = ticketProductOriginList.map((i) => i.productId)
     const [productOriginList, batchOriginList] = await Promise.all([
       this.productRepository.findManyBy({ oid, id: { IN: productIdList } }),
-      this.batchRepository.findManyBy({ oid, productId: { IN: productIdList } }),
+      this.batchRepository.findManyBy({ oid, productId: { IN: productIdList } }), // lấy tất batch vì có thể ông chọn Batch lấy thằng số lượng 0
     ])
     const productOriginMap = ESArray.arrayToKeyValue(productOriginList, 'id')
 
@@ -76,6 +78,8 @@ export class TicketSendProductOperation {
         batch: b,
       })
     })
+
+    // mặc định chiến lược đang là FIFO
     Object.keys(batchListMapRemain).forEach((productId) => {
       batchListMapRemain[productId].sort((a, b) => {
         if (b.batch.expiryDate == null) return -1
@@ -86,13 +90,69 @@ export class TicketSendProductOperation {
     // 7. === INSERT TicketBatch
     const sendList: SendItem[] = []
     ticketProductOriginList.forEach((tpOrigin) => {
-      // nếu lựa chọn không trừ kho, hoặc sản phẩm chưa có lô thì coi như không trừ
-      if (tpOrigin.hasInventoryImpact && batchListMapRemain[tpOrigin.productId]) {
+      // nếu sản phẩm chưa có lô hoặc lựa chọn không trừ kho thì không trừ
+      const productOrigin = productOriginMap[tpOrigin.productId]
+      if (!productOrigin) {
+        throw new Error(`Sản phẩm của ID ${tpOrigin.id} không hợp lệ`)
+      }
+      if (
+        !batchListMapRemain[tpOrigin.productId]
+        || tpOrigin.inventoryStrategy === InventoryStrategy.NoImpact
+      ) {
+        const sendItem: SendItem = {
+          ticketProductId: tpOrigin.id,
+          productId: tpOrigin.productId,
+          batchId: 0,
+          warehouseId: 0,
+          quantity: tpOrigin.quantity,
+          costPrice: tpOrigin.costAmount / (tpOrigin.quantity || 1),
+        }
+        sendList.push(sendItem)
+      }
+
+      // nếu chiến lược là chọn lô thì batchId phải khác 0
+      else if (
+        tpOrigin.inventoryStrategy === InventoryStrategy.RequireBatchSelection
+        && tpOrigin.batchId !== 0
+      ) {
+        const batchRemain = batchListMapRemain[tpOrigin.productId]?.find((i) => {
+          return i.batch.id === tpOrigin.batchId
+        })
+        if (!batchRemain || !batchRemain.batch) {
+          throw new Error(`${productOrigin.brandName} không có lô hàng phù hợp`)
+        }
+        if (!allowNegativeQuantity && tpOrigin.quantity > batchRemain.batch.quantity) {
+          const expiryDateString = ESTimer.timeToText(batchRemain.batch.expiryDate, 'DD/MM/YYYY', 7)
+          throw new Error(
+            `${productOrigin.brandName} không đủ số lượng trong kho.`
+            + ` Lô hàng ${batchRemain.batch.batchCode} ${expiryDateString}:`
+            + ` còn ${batchRemain.batch.quantity}, lấy ${tpOrigin.quantity}`
+          )
+        }
+        const sendItem: SendItem = {
+          ticketProductId: tpOrigin.id,
+          productId: tpOrigin.productId,
+          batchId: batchRemain.batch.id,
+          warehouseId: batchRemain.batch.warehouseId,
+          quantity: tpOrigin.quantity,
+          costPrice: batchRemain.batch.costPrice,
+        }
+        sendList.push(sendItem)
+      }
+
+      // mặc định tạm thời chiến lược còn lại là FIFO
+      else {
         let quantitySend = tpOrigin.quantity
         const batchListRemain = batchListMapRemain[tpOrigin.productId].filter((i) => {
-          if (tpOrigin.warehouseId === 0) return true // không chọn kho thì lấy tất
+          let warehouseIdList = []
+          try {
+            warehouseIdList = JSON.parse(tpOrigin.warehouseIds)
+          } catch (error) {
+            warehouseIdList = []
+          }
+          if (!warehouseIdList.length || warehouseIdList.includes(0)) return true // không chọn kho thì lấy tất
           if (i.batch.warehouseId === 0) return true // để ở kho tự do cũng lấy
-          if (i.batch.warehouseId === tpOrigin.warehouseId) return true // lấy chính xác trong kho đó
+          if (warehouseIdList.includes(i.batch.warehouseId)) return true // lấy chính xác trong kho đó
           return false
         })
         for (let i = 0; i < batchListRemain.length; i++) {
@@ -104,6 +164,7 @@ export class TicketSendProductOperation {
             ticketProductId: tpOrigin.id,
             productId: tpOrigin.productId,
             batchId: batch.id,
+            warehouseId: batch.warehouseId,
             quantity: quantityGet,
             costPrice: batch.costPrice,
           }
@@ -115,23 +176,12 @@ export class TicketSendProductOperation {
 
           if (i === batchListRemain.length - 1 && quantitySend > 0) {
             if (!allowNegativeQuantity) {
-              const productBrandName = productOriginMap[tpOrigin.productId].brandName
-              throw new Error(`${productBrandName} không đủ số lượng trong kho`)
+              throw new Error(`${productOrigin.brandName} không đủ số lượng trong kho`)
             } else {
               sendItem.quantity += quantitySend // nếu chấp nhận cho lấy số lượng âm thì cho lấy nốt
             }
           }
         }
-      }
-      else {
-        const sendItem: SendItem = {
-          ticketProductId: tpOrigin.id,
-          productId: tpOrigin.productId,
-          batchId: 0,
-          quantity: tpOrigin.quantity,
-          costPrice: tpOrigin.costAmount / (tpOrigin.quantity || 1),
-        }
-        sendList.push(sendItem)
       }
     })
 
@@ -141,13 +191,7 @@ export class TicketSendProductOperation {
   async sendProduct(params: {
     oid: number
     ticketId: number
-    sendList: {
-      ticketProductId: number
-      productId: number
-      batchId: number
-      quantity: number
-      costPrice: number // costPrice đã được tính đúng kể cả trường hợp !hasInventoryImpact
-    }[]
+    sendList: SendItem[]
     time: number
     allowNegativeQuantity: boolean
   }) {
@@ -304,9 +348,9 @@ export class TicketSendProductOperation {
           ticketId,
           customerId: tp.customerId,
           ticketProductId: tp.id,
-          warehouseId: tp.warehouseId,
+          warehouseId: sendItem.warehouseId,
           productId: sendItem.productId,
-          batchId: sendItem.batchId || 0, // thằng !hasInventoryImpact luôn lấy batchId = 0
+          batchId: sendItem.batchId || 0, // thằng inventoryStrategy.NoImpact luôn lấy batchId = 0
           deliveryStatus: DeliveryStatus.Delivered,
           unitRate: tp.unitRate,
           quantity: sendItem.quantity,
@@ -334,7 +378,7 @@ export class TicketSendProductOperation {
           contactId: tpModified.customerId,
           voucherId: tpModified.ticketId,
           voucherProductId: tpModified.id,
-          warehouseId: tpModified.warehouseId,
+          warehouseId: sendItem.warehouseId,
           productId: tpModified.productId,
           batchId: sendItem.batchId || 0,
           isRefund: 0,

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { arrayToKeyValue } from '../../../common/helpers/object.helper'
-import { MovementType, PaymentType, ReceiptStatus } from '../../common/variable'
+import { InventoryStrategy, MovementType, PaymentType, ReceiptStatus } from '../../common/variable'
 import { Batch, Distributor, Product } from '../../entities'
 import { DistributorPaymentInsertType } from '../../entities/distributor-payment.entity'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
@@ -174,7 +174,7 @@ export class ReceiptSendProductAndPaymentOperation {
         + `   ) AS temp ("productId", "quantitySend", "costPrice")
         WHERE     "product"."id" = temp."productId" 
               AND "product"."oid" = ${oid}
-              AND "product"."hasManageQuantity" = 1
+              AND "product"."inventoryStrategy" != ${InventoryStrategy.NoImpact}
         RETURNING "product".*;        
         `
       )
@@ -238,9 +238,7 @@ export class ReceiptSendProductAndPaymentOperation {
           actualPrice: ri.costPrice,
           openQuantity: productCalculator ? productCalculator.openQuantity : 0, // quantity đã được trả đúng số lượng ban đầu ở trên
           quantity: ri.quantity,
-          closeQuantity: productCalculator
-            ? productCalculator.openQuantity + ri.quantity
-            : 0,
+          closeQuantity: productCalculator ? productCalculator.openQuantity + ri.quantity : 0,
           createdAt: time,
         }
         // sau khi lấy rồi cần cập nhật productCalculator vì 1 sản phẩm có thể bán 2 số lượng với 2 giá khác nhau

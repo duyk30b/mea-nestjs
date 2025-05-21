@@ -1,7 +1,8 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { DeliveryStatus, DiscountType } from '../common/variable'
+import { DeliveryStatus, DiscountType, InventoryStrategy } from '../common/variable'
+import Batch from './batch.entity'
 import Customer from './customer.entity'
 import Product from './product.entity'
 import Ticket from './ticket.entity'
@@ -19,9 +20,9 @@ export default class TicketProduct extends BaseEntity {
   @Expose()
   priority: number
 
-  @Column({ default: 1, type: 'smallint' })
+  @Column({ default: InventoryStrategy.AutoWithFIFO, type: 'smallint' })
   @Expose()
-  hasInventoryImpact: 0 | 1
+  inventoryStrategy: InventoryStrategy
 
   @Column()
   @Expose()
@@ -31,13 +32,17 @@ export default class TicketProduct extends BaseEntity {
   @Expose()
   ticketId: number
 
-  @Column({ default: 0 })
+  @Column({ type: 'varchar', length: 50, default: JSON.stringify([0]) })
   @Expose()
-  warehouseId: number
+  warehouseIds: string
 
   @Column()
   @Expose()
   productId: number
+
+  @Column({ default: 0 })
+  @Expose()
+  batchId: number // nếu batchId = 0, thì chỉ có thể là autoPick hoặc noImpact
 
   @Column({ type: 'smallint', default: TicketProductType.Prescription })
   @Expose()
@@ -131,6 +136,11 @@ export default class TicketProduct extends BaseEntity {
   @JoinColumn({ name: 'productId', referencedColumnName: 'id' })
   product: Product
 
+  @Expose()
+  @ManyToOne((type) => Batch, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'batchId', referencedColumnName: 'id' })
+  batch: Batch
+
   static fromRaw(raw: { [P in keyof TicketProduct]: any }) {
     if (!raw) return null
     const entity = new TicketProduct()
@@ -153,7 +163,7 @@ export default class TicketProduct extends BaseEntity {
 }
 
 export type TicketProductRelationType = {
-  [P in keyof Pick<TicketProduct, 'ticket' | 'customer' | 'product'>]?: boolean
+  [P in keyof Pick<TicketProduct, 'ticket' | 'customer' | 'product' | 'batch'>]?: boolean
 }
 
 export type TicketProductInsertType = Omit<

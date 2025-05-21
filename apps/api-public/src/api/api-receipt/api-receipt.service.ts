@@ -116,29 +116,29 @@ export class ApiReceiptService {
     return { data: receipt }
   }
 
-  async getBatchSettingDefault(oid: number) {
+  async getProductSettingDefault(oid: number) {
     const [settingMap, settingMapRoot] = await Promise.all([
       this.cacheDataService.getSettingMap(oid),
       this.cacheDataService.getSettingMap(1),
     ])
-    const batchSettingCommon = settingMap.BATCH_SETTING || {}
-    const batchSettingRoot = settingMapRoot.BATCH_SETTING || {}
-    if (batchSettingCommon.warehouseId == BatchWarehouseIdRule.Inherit) {
-      batchSettingCommon.warehouseId = batchSettingRoot.warehouseId
+    const productSettingCommon = settingMap.PRODUCT_SETTING || {}
+    const productSettingRoot = settingMapRoot.PRODUCT_SETTING || {}
+    if (productSettingCommon.warehouseId == BatchWarehouseIdRule.Inherit) {
+      productSettingCommon.warehouseId = productSettingRoot.warehouseId
     }
-    if (batchSettingCommon.distributorId == BatchDistributorIdRule.Inherit) {
-      batchSettingCommon.distributorId = batchSettingRoot.distributorId
+    if (productSettingCommon.distributorId == BatchDistributorIdRule.Inherit) {
+      productSettingCommon.distributorId = productSettingRoot.distributorId
     }
-    if (batchSettingCommon.costPrice == BatchCostPriceRule.Inherit) {
-      batchSettingCommon.costPrice = batchSettingRoot.costPrice
+    if (productSettingCommon.costPrice == BatchCostPriceRule.Inherit) {
+      productSettingCommon.costPrice = productSettingRoot.costPrice
     }
-    return batchSettingCommon
+    return productSettingCommon
   }
 
   async createReceiptDraft(params: { oid: number; body: ReceiptUpsertDraftBody }): Promise<BaseResponse> {
     const { oid, body } = params
     // tự động chọn lô
-    const batchSettingDefault = await this.getBatchSettingDefault(oid)
+    const productSettingDefault = await this.getProductSettingDefault(oid)
 
     const { receipt: receiptBody, receiptItemList, distributorId } = body
     const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId)
@@ -152,19 +152,19 @@ export class ApiReceiptService {
       if (receiptItem.batchId) return
       const batchFind = (batchListMap[receiptItem.productId] || []).find((batch) => {
         if (batch.distributorId != distributorId) {
-          if (batchSettingDefault.distributorId === BatchDistributorIdRule.SplitOnDifferent) {
+          if (productSettingDefault.distributorId === BatchDistributorIdRule.SplitOnDifferent) {
             return false
           }
         }
         if (batch.warehouseId != receiptItem.warehouseId) {
-          if (batchSettingDefault.warehouseId === BatchWarehouseIdRule.SplitOnDifferent) {
+          if (productSettingDefault.warehouseId === BatchWarehouseIdRule.SplitOnDifferent) {
             return false
           }
         }
         if (batch.expiryDate != receiptItem.expiryDate) return false // khác hạn sử dụng thì luôn tách phiên bản
 
         if (batch.costPrice != receiptItem.costPrice) {
-          if (batchSettingDefault.costPrice === BatchCostPriceRule.SplitOnDifferent) {
+          if (productSettingDefault.costPrice === BatchCostPriceRule.SplitOnDifferent) {
             return false
           }
         }
@@ -212,7 +212,7 @@ export class ApiReceiptService {
     body: ReceiptUpsertDraftBody
   }): Promise<BaseResponse> {
     const { oid, receiptId, body } = params
-    const batchSettingDefault = await this.getBatchSettingDefault(oid)
+    const productSettingDefault = await this.getProductSettingDefault(oid)
     // tự động chọn lô
     const { receipt: receiptBody, receiptItemList, distributorId } = body
     const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId)
@@ -226,19 +226,19 @@ export class ApiReceiptService {
       if (receiptItem.batchId) return
       const batchFind = (batchListMap[receiptItem.productId] || []).find((batch) => {
         if (batch.distributorId != distributorId) {
-          if (batchSettingDefault.distributorId === BatchDistributorIdRule.SplitOnDifferent) {
+          if (productSettingDefault.distributorId === BatchDistributorIdRule.SplitOnDifferent) {
             return false
           }
         }
         if (batch.warehouseId != receiptItem.warehouseId) {
-          if (batchSettingDefault.warehouseId === BatchWarehouseIdRule.SplitOnDifferent) {
+          if (productSettingDefault.warehouseId === BatchWarehouseIdRule.SplitOnDifferent) {
             return false
           }
         }
         if (batch.expiryDate != receiptItem.expiryDate) return false // khác hạn sử dụng thì luôn tách phiên bản
 
         if (batch.costPrice != receiptItem.costPrice) {
-          if (batchSettingDefault.costPrice === BatchCostPriceRule.SplitOnDifferent) {
+          if (productSettingDefault.costPrice === BatchCostPriceRule.SplitOnDifferent) {
             return false
           }
         }
@@ -287,7 +287,7 @@ export class ApiReceiptService {
     body: ReceiptUpdatePrepaymentBody
   }): Promise<BaseResponse> {
     const { oid, receiptId, body } = params
-    const batchSettingDefault = await this.getBatchSettingDefault(oid)
+    const productSettingDefault = await this.getProductSettingDefault(oid)
     // tự động chọn lô
     const { receipt: receiptDto, receiptItemList, distributorId } = body
     const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId)
@@ -301,19 +301,19 @@ export class ApiReceiptService {
       if (receiptItem.batchId) return
       const batchFind = (batchListMap[receiptItem.productId] || []).find((batch) => {
         if (batch.distributorId != distributorId) {
-          if (batchSettingDefault.distributorId === BatchDistributorIdRule.SplitOnDifferent) {
+          if (productSettingDefault.distributorId === BatchDistributorIdRule.SplitOnDifferent) {
             return false
           }
         }
         if (batch.warehouseId != receiptItem.warehouseId) {
-          if (batchSettingDefault.warehouseId === BatchWarehouseIdRule.SplitOnDifferent) {
+          if (productSettingDefault.warehouseId === BatchWarehouseIdRule.SplitOnDifferent) {
             return false
           }
         }
         if (batch.expiryDate != receiptItem.expiryDate) return false // khác hạn sử dụng thì luôn tách phiên bản
 
         if (batch.costPrice != receiptItem.costPrice) {
-          if (batchSettingDefault.costPrice === BatchCostPriceRule.SplitOnDifferent) {
+          if (productSettingDefault.costPrice === BatchCostPriceRule.SplitOnDifferent) {
             return false
           }
         }

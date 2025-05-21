@@ -87,7 +87,7 @@ export class CacheDataService {
 
   async getSettingAllowNegativeQuantity(oid: number) {
     const settingMap = await this.getSettingMap(oid)
-    const { allowNegativeQuantity } = settingMap?.[SettingKey.SYSTEM_SETTING] || {}
+    const { allowNegativeQuantity } = settingMap?.[SettingKey.PRODUCT_SETTING] || {}
     return !!allowNegativeQuantity
   }
 

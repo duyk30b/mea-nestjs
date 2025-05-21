@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional, OmitType, PartialType } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
 import {
   IsArray,
@@ -7,13 +7,13 @@ import {
   IsIn,
   IsInt,
   IsNumber,
-  IsOptional,
   IsPositive,
   IsString,
   ValidateNested,
   validateSync,
 } from 'class-validator'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
+import { InventoryStrategy } from '../../../../../_libs/database/common/variable'
 import { CommissionCalculatorType } from '../../../../../_libs/database/entities/commission.entity'
 
 export class UnitConversionBody {
@@ -170,27 +170,21 @@ export class ProductCreateBody {
   @Expose()
   @IsDefined()
   @IsIn([0, 1])
-  hasManageQuantity: 0 | 1
-
-  @ApiPropertyOptional({ example: 1 })
-  @Expose()
-  @IsDefined()
-  @IsIn([0, 1])
   isActive: 0 | 1
 
-  @ApiPropertyOptional({
-    name: 'warehouseIds',
-    type: 'string',
-    example: JSON.stringify([1, 5, 10]),
-  })
+  @ApiProperty({ enum: InventoryStrategy, example: InventoryStrategy.AutoWithExpiryDate })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(InventoryStrategy)
+  inventoryStrategy: InventoryStrategy
+
+  @ApiPropertyOptional({ type: 'string', example: JSON.stringify([1, 5, 10]) })
   @Expose()
   @Transform(({ value }) => {
     try {
       const err = []
       const result = JSON.parse(value).map((i: any) => {
-        if (!Number.isInteger) {
-          err.push(`${i} is not integer`)
-        }
+        if (!Number.isInteger) err.push(`${i} is not integer`)
         return i
       })
       if (err.length) return err

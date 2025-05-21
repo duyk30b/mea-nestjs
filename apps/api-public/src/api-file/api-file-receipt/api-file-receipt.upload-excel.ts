@@ -3,7 +3,7 @@ import { Row, Workbook } from 'exceljs'
 import { ExcelColumUploadRulesType, FileUploadDto } from '../../../../_libs/common/dto/file'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { ESArray } from '../../../../_libs/common/helpers/object.helper'
-import { DiscountType } from '../../../../_libs/database/common/variable'
+import { DiscountType, InventoryStrategy } from '../../../../_libs/database/common/variable'
 import { User } from '../../../../_libs/database/entities'
 import { ProductInsertType } from '../../../../_libs/database/entities/product.entity'
 import { ProductRepository } from '../../../../_libs/database/repositories'
@@ -213,7 +213,7 @@ export class ApiFileReceiptUploadExcel {
           productCode: i.productCode,
           brandName: i.brandName,
           costPrice: i.costPrice,
-          hasManageQuantity: 1,
+          inventoryStrategy: InventoryStrategy.AutoWithExpiryDate,
           hintUsage: '',
           image: '',
           isActive: 1,

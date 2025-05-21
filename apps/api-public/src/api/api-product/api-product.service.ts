@@ -192,12 +192,6 @@ export class ApiProductService {
   async updateOne(oid: number, productId: number, body: ProductUpdateBody): Promise<BaseResponse> {
     const { commissionList, ...productBody } = body
     const productOrigin = await this.productRepository.findOneBy({ oid, id: productId })
-    if (productOrigin.quantity) {
-      if (productOrigin.hasManageQuantity !== body.hasManageQuantity) {
-        // đã chặn ở front-end, nếu cố tình thì vào đây
-        throw new BusinessException('error.Conflict')
-      }
-    }
 
     if (productOrigin.warehouseIds !== body.warehouseIds) {
       let bodyWarehouseIdList = []

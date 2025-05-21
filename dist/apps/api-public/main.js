@@ -757,7 +757,7 @@ exports["default"] = User;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketLaboratoryStatus = exports.AttributeLayoutType = exports.AttributeInputType = exports.DeliveryStatus = exports.MovementType = exports.ReceiptStatus = exports.PaymentType = exports.DiscountType = exports.EOrder = exports.ERole = exports.EGender = void 0;
+exports.TicketLaboratoryStatus = exports.AttributeLayoutType = exports.AttributeInputType = exports.DeliveryStatus = exports.MovementType = exports.ReceiptStatus = exports.InventoryStrategy = exports.PaymentType = exports.DiscountType = exports.EOrder = exports.ERole = exports.EGender = void 0;
 var EGender;
 (function (EGender) {
     EGender[EGender["Female"] = 0] = "Female";
@@ -787,6 +787,15 @@ var PaymentType;
     PaymentType[PaymentType["PayDebt"] = 4] = "PayDebt";
     PaymentType[PaymentType["Reopen"] = 5] = "Reopen";
 })(PaymentType || (exports.PaymentType = PaymentType = {}));
+var InventoryStrategy;
+(function (InventoryStrategy) {
+    InventoryStrategy[InventoryStrategy["UseSystemDefault"] = -1] = "UseSystemDefault";
+    InventoryStrategy[InventoryStrategy["NoImpact"] = 0] = "NoImpact";
+    InventoryStrategy[InventoryStrategy["RequireBatchSelection"] = 1] = "RequireBatchSelection";
+    InventoryStrategy[InventoryStrategy["AutoWithFIFO"] = 2] = "AutoWithFIFO";
+    InventoryStrategy[InventoryStrategy["AutoWithLIFO"] = 3] = "AutoWithLIFO";
+    InventoryStrategy[InventoryStrategy["AutoWithExpiryDate"] = 4] = "AutoWithExpiryDate";
+})(InventoryStrategy || (exports.InventoryStrategy = InventoryStrategy = {}));
 var ReceiptStatus;
 (function (ReceiptStatus) {
     ReceiptStatus[ReceiptStatus["Cancelled"] = -1] = "Cancelled";
@@ -1737,7 +1746,7 @@ let CacheDataService = class CacheDataService {
     }
     async getSettingAllowNegativeQuantity(oid) {
         const settingMap = await this.getSettingMap(oid);
-        const { allowNegativeQuantity } = (settingMap === null || settingMap === void 0 ? void 0 : settingMap[setting_entity_1.SettingKey.SYSTEM_SETTING]) || {};
+        const { allowNegativeQuantity } = (settingMap === null || settingMap === void 0 ? void 0 : settingMap[setting_entity_1.SettingKey.PRODUCT_SETTING]) || {};
         return !!allowNegativeQuantity;
     }
     async getUser(oid, uid) {
@@ -1902,7 +1911,7 @@ var SettingKey;
     SettingKey["ROOT_SETTING"] = "ROOT_SETTING";
     SettingKey["SYSTEM_SETTING"] = "SYSTEM_SETTING";
     SettingKey["GOOGLE_DRIVER"] = "GOOGLE_DRIVER";
-    SettingKey["BATCH_SETTING"] = "BATCH_SETTING";
+    SettingKey["PRODUCT_SETTING"] = "PRODUCT_SETTING";
 })(SettingKey || (exports.SettingKey = SettingKey = {}));
 let Setting = Setting_1 = class Setting {
     static fromRaw(raw) {
@@ -2582,10 +2591,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var Product_1;
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const class_transformer_1 = __webpack_require__(16);
 const typeorm_1 = __webpack_require__(17);
+const variable_1 = __webpack_require__(20);
 const batch_entity_1 = __webpack_require__(47);
 const product_group_entity_1 = __webpack_require__(49);
 let Product = Product_1 = class Product {
@@ -2642,10 +2652,10 @@ __decorate([
     __metadata("design:type", Number)
 ], Product.prototype, "quantity", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 1, type: 'smallint' }),
+    (0, typeorm_1.Column)({ default: variable_1.InventoryStrategy.UseSystemDefault, type: 'smallint' }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", Number)
-], Product.prototype, "hasManageQuantity", void 0);
+    __metadata("design:type", typeof (_a = typeof variable_1.InventoryStrategy !== "undefined" && variable_1.InventoryStrategy) === "function" ? _a : Object)
+], Product.prototype, "inventoryStrategy", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         type: 'bigint',
@@ -2742,7 +2752,7 @@ __decorate([
     (0, typeorm_1.ManyToOne)((type) => product_group_entity_1.default, { createForeignKeyConstraints: false }),
     (0, typeorm_1.JoinColumn)({ name: 'productGroupId', referencedColumnName: 'id' }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", typeof (_a = typeof product_group_entity_1.default !== "undefined" && product_group_entity_1.default) === "function" ? _a : Object)
+    __metadata("design:type", typeof (_b = typeof product_group_entity_1.default !== "undefined" && product_group_entity_1.default) === "function" ? _b : Object)
 ], Product.prototype, "productGroup", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
@@ -4882,13 +4892,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var TicketProduct_1;
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketProductType = void 0;
 const class_transformer_1 = __webpack_require__(16);
 const typeorm_1 = __webpack_require__(17);
 const base_entity_1 = __webpack_require__(44);
 const variable_1 = __webpack_require__(20);
+const batch_entity_1 = __webpack_require__(47);
 const customer_entity_1 = __webpack_require__(46);
 const product_entity_1 = __webpack_require__(48);
 const ticket_entity_1 = __webpack_require__(55);
@@ -4922,10 +4933,10 @@ __decorate([
     __metadata("design:type", Number)
 ], TicketProduct.prototype, "priority", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 1, type: 'smallint' }),
+    (0, typeorm_1.Column)({ default: variable_1.InventoryStrategy.AutoWithFIFO, type: 'smallint' }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", Number)
-], TicketProduct.prototype, "hasInventoryImpact", void 0);
+    __metadata("design:type", typeof (_a = typeof variable_1.InventoryStrategy !== "undefined" && variable_1.InventoryStrategy) === "function" ? _a : Object)
+], TicketProduct.prototype, "inventoryStrategy", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     (0, class_transformer_1.Expose)(),
@@ -4937,15 +4948,20 @@ __decorate([
     __metadata("design:type", Number)
 ], TicketProduct.prototype, "ticketId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 0 }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 50, default: JSON.stringify([0]) }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", Number)
-], TicketProduct.prototype, "warehouseId", void 0);
+    __metadata("design:type", String)
+], TicketProduct.prototype, "warehouseIds", void 0);
 __decorate([
     (0, typeorm_1.Column)(),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Number)
 ], TicketProduct.prototype, "productId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 0 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], TicketProduct.prototype, "batchId", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'smallint', default: TicketProductType.Prescription }),
     (0, class_transformer_1.Expose)(),
@@ -4954,7 +4970,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ type: 'smallint', default: variable_1.DeliveryStatus.Pending }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", typeof (_a = typeof variable_1.DeliveryStatus !== "undefined" && variable_1.DeliveryStatus) === "function" ? _a : Object)
+    __metadata("design:type", typeof (_b = typeof variable_1.DeliveryStatus !== "undefined" && variable_1.DeliveryStatus) === "function" ? _b : Object)
 ], TicketProduct.prototype, "deliveryStatus", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'smallint', default: 1 }),
@@ -5018,7 +5034,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 25, default: variable_1.DiscountType.VND }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", typeof (_b = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _b : Object)
+    __metadata("design:type", typeof (_c = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _c : Object)
 ], TicketProduct.prototype, "discountType", void 0);
 __decorate([
     (0, typeorm_1.Column)({
@@ -5039,20 +5055,26 @@ __decorate([
         createForeignKeyConstraints: false,
     }),
     (0, typeorm_1.JoinColumn)({ name: 'ticketId', referencedColumnName: 'id' }),
-    __metadata("design:type", typeof (_c = typeof ticket_entity_1.default !== "undefined" && ticket_entity_1.default) === "function" ? _c : Object)
+    __metadata("design:type", typeof (_d = typeof ticket_entity_1.default !== "undefined" && ticket_entity_1.default) === "function" ? _d : Object)
 ], TicketProduct.prototype, "ticket", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
     (0, typeorm_1.ManyToOne)((type) => customer_entity_1.default, { createForeignKeyConstraints: false }),
     (0, typeorm_1.JoinColumn)({ name: 'customerId', referencedColumnName: 'id' }),
-    __metadata("design:type", typeof (_d = typeof customer_entity_1.default !== "undefined" && customer_entity_1.default) === "function" ? _d : Object)
+    __metadata("design:type", typeof (_e = typeof customer_entity_1.default !== "undefined" && customer_entity_1.default) === "function" ? _e : Object)
 ], TicketProduct.prototype, "customer", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
     (0, typeorm_1.ManyToOne)((type) => product_entity_1.default, { createForeignKeyConstraints: false }),
     (0, typeorm_1.JoinColumn)({ name: 'productId', referencedColumnName: 'id' }),
-    __metadata("design:type", typeof (_e = typeof product_entity_1.default !== "undefined" && product_entity_1.default) === "function" ? _e : Object)
+    __metadata("design:type", typeof (_f = typeof product_entity_1.default !== "undefined" && product_entity_1.default) === "function" ? _f : Object)
 ], TicketProduct.prototype, "product", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, typeorm_1.ManyToOne)((type) => batch_entity_1.default, { createForeignKeyConstraints: false }),
+    (0, typeorm_1.JoinColumn)({ name: 'batchId', referencedColumnName: 'id' }),
+    __metadata("design:type", typeof (_g = typeof batch_entity_1.default !== "undefined" && batch_entity_1.default) === "function" ? _g : Object)
+], TicketProduct.prototype, "batch", void 0);
 TicketProduct = TicketProduct_1 = __decorate([
     (0, typeorm_1.Entity)('TicketProduct'),
     (0, typeorm_1.Index)('IDX_TicketProduct__oid_ticketId', ['oid', 'ticketId']),
@@ -9821,7 +9843,7 @@ let ReceiptCancelOperation = class ReceiptCancelOperation {
                 + `   ) AS temp("productId", "quantityReturn")
         WHERE     "product"."id" = temp."productId" 
               AND "product"."oid" = ${oid}
-              AND "product"."hasManageQuantity" = 1
+              AND "product"."inventoryStrategy" != ${variable_1.InventoryStrategy.NoImpact}
         RETURNING "product".*;        
         `);
             if (productUpdateResult[1] != productQuantityList.length) {
@@ -10572,7 +10594,7 @@ let ReceiptSendProductAndPaymentOperation = class ReceiptSendProductAndPaymentOp
                 + `   ) AS temp ("productId", "quantitySend", "costPrice")
         WHERE     "product"."id" = temp."productId" 
               AND "product"."oid" = ${oid}
-              AND "product"."hasManageQuantity" = 1
+              AND "product"."inventoryStrategy" != ${variable_1.InventoryStrategy.NoImpact}
         RETURNING "product".*;        
         `);
             if (productUpdateResult[1] != productCalculatorList.length) {
@@ -10621,9 +10643,7 @@ let ReceiptSendProductAndPaymentOperation = class ReceiptSendProductAndPaymentOp
                     actualPrice: ri.costPrice,
                     openQuantity: productCalculator ? productCalculator.openQuantity : 0,
                     quantity: ri.quantity,
-                    closeQuantity: productCalculator
-                        ? productCalculator.openQuantity + ri.quantity
-                        : 0,
+                    closeQuantity: productCalculator ? productCalculator.openQuantity + ri.quantity : 0,
                     createdAt: time,
                 };
                 if (productCalculator) {
@@ -11755,6 +11775,7 @@ exports.TicketSendProductOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(17);
 const object_helper_1 = __webpack_require__(88);
+const time_helper_1 = __webpack_require__(143);
 const variable_1 = __webpack_require__(20);
 const entities_1 = __webpack_require__(42);
 const ticket_entity_1 = __webpack_require__(55);
@@ -11810,14 +11831,62 @@ let TicketSendProductOperation = class TicketSendProductOperation {
         });
         const sendList = [];
         ticketProductOriginList.forEach((tpOrigin) => {
-            if (tpOrigin.hasInventoryImpact && batchListMapRemain[tpOrigin.productId]) {
+            var _a;
+            const productOrigin = productOriginMap[tpOrigin.productId];
+            if (!productOrigin) {
+                throw new Error(`Sản phẩm của ID ${tpOrigin.id} không hợp lệ`);
+            }
+            if (!batchListMapRemain[tpOrigin.productId]
+                || tpOrigin.inventoryStrategy === variable_1.InventoryStrategy.NoImpact) {
+                const sendItem = {
+                    ticketProductId: tpOrigin.id,
+                    productId: tpOrigin.productId,
+                    batchId: 0,
+                    warehouseId: 0,
+                    quantity: tpOrigin.quantity,
+                    costPrice: tpOrigin.costAmount / (tpOrigin.quantity || 1),
+                };
+                sendList.push(sendItem);
+            }
+            else if (tpOrigin.inventoryStrategy === variable_1.InventoryStrategy.RequireBatchSelection
+                && tpOrigin.batchId !== 0) {
+                const batchRemain = (_a = batchListMapRemain[tpOrigin.productId]) === null || _a === void 0 ? void 0 : _a.find((i) => {
+                    return i.batch.id === tpOrigin.batchId;
+                });
+                if (!batchRemain || !batchRemain.batch) {
+                    throw new Error(`${productOrigin.brandName} không có lô hàng phù hợp`);
+                }
+                if (!allowNegativeQuantity && tpOrigin.quantity > batchRemain.batch.quantity) {
+                    const expiryDateString = time_helper_1.ESTimer.timeToText(batchRemain.batch.expiryDate, 'DD/MM/YYYY', 7);
+                    throw new Error(`${productOrigin.brandName} không đủ số lượng trong kho.`
+                        + ` Lô hàng ${batchRemain.batch.batchCode} ${expiryDateString}:`
+                        + ` còn ${batchRemain.batch.quantity}, lấy ${tpOrigin.quantity}`);
+                }
+                const sendItem = {
+                    ticketProductId: tpOrigin.id,
+                    productId: tpOrigin.productId,
+                    batchId: batchRemain.batch.id,
+                    warehouseId: batchRemain.batch.warehouseId,
+                    quantity: tpOrigin.quantity,
+                    costPrice: batchRemain.batch.costPrice,
+                };
+                sendList.push(sendItem);
+            }
+            else {
                 let quantitySend = tpOrigin.quantity;
                 const batchListRemain = batchListMapRemain[tpOrigin.productId].filter((i) => {
-                    if (tpOrigin.warehouseId === 0)
+                    let warehouseIdList = [];
+                    try {
+                        warehouseIdList = JSON.parse(tpOrigin.warehouseIds);
+                    }
+                    catch (error) {
+                        warehouseIdList = [];
+                    }
+                    if (!warehouseIdList.length || warehouseIdList.includes(0))
                         return true;
                     if (i.batch.warehouseId === 0)
                         return true;
-                    if (i.batch.warehouseId === tpOrigin.warehouseId)
+                    if (warehouseIdList.includes(i.batch.warehouseId))
                         return true;
                     return false;
                 });
@@ -11830,6 +11899,7 @@ let TicketSendProductOperation = class TicketSendProductOperation {
                         ticketProductId: tpOrigin.id,
                         productId: tpOrigin.productId,
                         batchId: batch.id,
+                        warehouseId: batch.warehouseId,
                         quantity: quantityGet,
                         costPrice: batch.costPrice,
                     };
@@ -11840,24 +11910,13 @@ let TicketSendProductOperation = class TicketSendProductOperation {
                         break;
                     if (i === batchListRemain.length - 1 && quantitySend > 0) {
                         if (!allowNegativeQuantity) {
-                            const productBrandName = productOriginMap[tpOrigin.productId].brandName;
-                            throw new Error(`${productBrandName} không đủ số lượng trong kho`);
+                            throw new Error(`${productOrigin.brandName} không đủ số lượng trong kho`);
                         }
                         else {
                             sendItem.quantity += quantitySend;
                         }
                     }
                 }
-            }
-            else {
-                const sendItem = {
-                    ticketProductId: tpOrigin.id,
-                    productId: tpOrigin.productId,
-                    batchId: 0,
-                    quantity: tpOrigin.quantity,
-                    costPrice: tpOrigin.costAmount / (tpOrigin.quantity || 1),
-                };
-                sendList.push(sendItem);
             }
         });
         return sendList.filter((i) => i.quantity != 0);
@@ -11978,7 +12037,7 @@ let TicketSendProductOperation = class TicketSendProductOperation {
                     ticketId,
                     customerId: tp.customerId,
                     ticketProductId: tp.id,
-                    warehouseId: tp.warehouseId,
+                    warehouseId: sendItem.warehouseId,
                     productId: sendItem.productId,
                     batchId: sendItem.batchId || 0,
                     deliveryStatus: variable_1.DeliveryStatus.Delivered,
@@ -12002,7 +12061,7 @@ let TicketSendProductOperation = class TicketSendProductOperation {
                     contactId: tpModified.customerId,
                     voucherId: tpModified.ticketId,
                     voucherProductId: tpModified.id,
-                    warehouseId: tpModified.warehouseId,
+                    warehouseId: sendItem.warehouseId,
                     productId: tpModified.productId,
                     batchId: sendItem.batchId || 0,
                     isRefund: 0,
@@ -15143,7 +15202,7 @@ let TicketClinicAddTicketProductOperation = class TicketClinicAddTicketProductOp
             const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(manager, { oid, id: ticketId, ticketStatus: ticket_entity_1.TicketStatus.Executing }, { updatedAt: Date.now() });
             const ticketProductInsertList = ticketProductDtoList.map((i) => {
                 const insert = Object.assign(Object.assign({}, i), { oid,
-                    ticketId, customerId: ticketOrigin.customerId, deliveryStatus: variable_1.DeliveryStatus.Pending, costAmount: i.costAmount, hasInventoryImpact: i.hasInventoryImpact, type: ticketProductType });
+                    ticketId, customerId: ticketOrigin.customerId, deliveryStatus: variable_1.DeliveryStatus.Pending, costAmount: i.costAmount, inventoryStrategy: i.inventoryStrategy, type: ticketProductType });
                 return insert;
             });
             const ticketProductList = await this.ticketProductManager.insertManyAndReturnEntity(manager, ticketProductInsertList);
@@ -19174,6 +19233,7 @@ const common_1 = __webpack_require__(3);
 const exceljs_1 = __webpack_require__(263);
 const exception_filter_1 = __webpack_require__(9);
 const object_helper_1 = __webpack_require__(88);
+const variable_1 = __webpack_require__(20);
 const repositories_1 = __webpack_require__(159);
 const excel_one_sheet_util_1 = __webpack_require__(262);
 const ProductExcelRules = [
@@ -19344,7 +19404,7 @@ let ApiFileProductUploadExcel = class ApiFileProductUploadExcel {
                 route: values[7],
                 source: values[8],
                 quantity: 0,
-                hasManageQuantity: 1,
+                inventoryStrategy: variable_1.InventoryStrategy.AutoWithExpiryDate,
                 hintUsage: '',
                 productGroupId: 0,
                 warehouseIds: JSON.stringify([0]),
@@ -19506,27 +19566,27 @@ let ApiReceiptService = class ApiReceiptService {
         });
         return { data: receipt };
     }
-    async getBatchSettingDefault(oid) {
+    async getProductSettingDefault(oid) {
         const [settingMap, settingMapRoot] = await Promise.all([
             this.cacheDataService.getSettingMap(oid),
             this.cacheDataService.getSettingMap(1),
         ]);
-        const batchSettingCommon = settingMap.BATCH_SETTING || {};
-        const batchSettingRoot = settingMapRoot.BATCH_SETTING || {};
-        if (batchSettingCommon.warehouseId == setting_entity_1.BatchWarehouseIdRule.Inherit) {
-            batchSettingCommon.warehouseId = batchSettingRoot.warehouseId;
+        const productSettingCommon = settingMap.PRODUCT_SETTING || {};
+        const productSettingRoot = settingMapRoot.PRODUCT_SETTING || {};
+        if (productSettingCommon.warehouseId == setting_entity_1.BatchWarehouseIdRule.Inherit) {
+            productSettingCommon.warehouseId = productSettingRoot.warehouseId;
         }
-        if (batchSettingCommon.distributorId == setting_entity_1.BatchDistributorIdRule.Inherit) {
-            batchSettingCommon.distributorId = batchSettingRoot.distributorId;
+        if (productSettingCommon.distributorId == setting_entity_1.BatchDistributorIdRule.Inherit) {
+            productSettingCommon.distributorId = productSettingRoot.distributorId;
         }
-        if (batchSettingCommon.costPrice == setting_entity_1.BatchCostPriceRule.Inherit) {
-            batchSettingCommon.costPrice = batchSettingRoot.costPrice;
+        if (productSettingCommon.costPrice == setting_entity_1.BatchCostPriceRule.Inherit) {
+            productSettingCommon.costPrice = productSettingRoot.costPrice;
         }
-        return batchSettingCommon;
+        return productSettingCommon;
     }
     async createReceiptDraft(params) {
         const { oid, body } = params;
-        const batchSettingDefault = await this.getBatchSettingDefault(oid);
+        const productSettingDefault = await this.getProductSettingDefault(oid);
         const { receipt: receiptBody, receiptItemList, distributorId } = body;
         const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId);
         const batchList = await this.batchRepository.findManyBy({
@@ -19539,19 +19599,19 @@ let ApiReceiptService = class ApiReceiptService {
                 return;
             const batchFind = (batchListMap[receiptItem.productId] || []).find((batch) => {
                 if (batch.distributorId != distributorId) {
-                    if (batchSettingDefault.distributorId === setting_entity_1.BatchDistributorIdRule.SplitOnDifferent) {
+                    if (productSettingDefault.distributorId === setting_entity_1.BatchDistributorIdRule.SplitOnDifferent) {
                         return false;
                     }
                 }
                 if (batch.warehouseId != receiptItem.warehouseId) {
-                    if (batchSettingDefault.warehouseId === setting_entity_1.BatchWarehouseIdRule.SplitOnDifferent) {
+                    if (productSettingDefault.warehouseId === setting_entity_1.BatchWarehouseIdRule.SplitOnDifferent) {
                         return false;
                     }
                 }
                 if (batch.expiryDate != receiptItem.expiryDate)
                     return false;
                 if (batch.costPrice != receiptItem.costPrice) {
-                    if (batchSettingDefault.costPrice === setting_entity_1.BatchCostPriceRule.SplitOnDifferent) {
+                    if (productSettingDefault.costPrice === setting_entity_1.BatchCostPriceRule.SplitOnDifferent) {
                         return false;
                     }
                 }
@@ -19593,7 +19653,7 @@ let ApiReceiptService = class ApiReceiptService {
     }
     async updateReceiptDraft(params) {
         const { oid, receiptId, body } = params;
-        const batchSettingDefault = await this.getBatchSettingDefault(oid);
+        const productSettingDefault = await this.getProductSettingDefault(oid);
         const { receipt: receiptBody, receiptItemList, distributorId } = body;
         const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId);
         const batchList = await this.batchRepository.findManyBy({
@@ -19606,19 +19666,19 @@ let ApiReceiptService = class ApiReceiptService {
                 return;
             const batchFind = (batchListMap[receiptItem.productId] || []).find((batch) => {
                 if (batch.distributorId != distributorId) {
-                    if (batchSettingDefault.distributorId === setting_entity_1.BatchDistributorIdRule.SplitOnDifferent) {
+                    if (productSettingDefault.distributorId === setting_entity_1.BatchDistributorIdRule.SplitOnDifferent) {
                         return false;
                     }
                 }
                 if (batch.warehouseId != receiptItem.warehouseId) {
-                    if (batchSettingDefault.warehouseId === setting_entity_1.BatchWarehouseIdRule.SplitOnDifferent) {
+                    if (productSettingDefault.warehouseId === setting_entity_1.BatchWarehouseIdRule.SplitOnDifferent) {
                         return false;
                     }
                 }
                 if (batch.expiryDate != receiptItem.expiryDate)
                     return false;
                 if (batch.costPrice != receiptItem.costPrice) {
-                    if (batchSettingDefault.costPrice === setting_entity_1.BatchCostPriceRule.SplitOnDifferent) {
+                    if (productSettingDefault.costPrice === setting_entity_1.BatchCostPriceRule.SplitOnDifferent) {
                         return false;
                     }
                 }
@@ -19661,7 +19721,7 @@ let ApiReceiptService = class ApiReceiptService {
     }
     async updateReceiptPrepayment(params) {
         const { oid, receiptId, body } = params;
-        const batchSettingDefault = await this.getBatchSettingDefault(oid);
+        const productSettingDefault = await this.getProductSettingDefault(oid);
         const { receipt: receiptDto, receiptItemList, distributorId } = body;
         const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId);
         const batchList = await this.batchRepository.findManyBy({
@@ -19674,19 +19734,19 @@ let ApiReceiptService = class ApiReceiptService {
                 return;
             const batchFind = (batchListMap[receiptItem.productId] || []).find((batch) => {
                 if (batch.distributorId != distributorId) {
-                    if (batchSettingDefault.distributorId === setting_entity_1.BatchDistributorIdRule.SplitOnDifferent) {
+                    if (productSettingDefault.distributorId === setting_entity_1.BatchDistributorIdRule.SplitOnDifferent) {
                         return false;
                     }
                 }
                 if (batch.warehouseId != receiptItem.warehouseId) {
-                    if (batchSettingDefault.warehouseId === setting_entity_1.BatchWarehouseIdRule.SplitOnDifferent) {
+                    if (productSettingDefault.warehouseId === setting_entity_1.BatchWarehouseIdRule.SplitOnDifferent) {
                         return false;
                     }
                 }
                 if (batch.expiryDate != receiptItem.expiryDate)
                     return false;
                 if (batch.costPrice != receiptItem.costPrice) {
-                    if (batchSettingDefault.costPrice === setting_entity_1.BatchCostPriceRule.SplitOnDifferent) {
+                    if (productSettingDefault.costPrice === setting_entity_1.BatchCostPriceRule.SplitOnDifferent) {
                         return false;
                     }
                 }
@@ -20302,7 +20362,7 @@ let ApiFileReceiptUploadExcel = class ApiFileReceiptUploadExcel {
                     productCode: i.productCode,
                     brandName: i.brandName,
                     costPrice: i.costPrice,
-                    hasManageQuantity: 1,
+                    inventoryStrategy: variable_1.InventoryStrategy.AutoWithExpiryDate,
                     hintUsage: '',
                     image: '',
                     isActive: 1,
@@ -34846,11 +34906,6 @@ let ApiProductService = class ApiProductService {
     async updateOne(oid, productId, body) {
         const { commissionList } = body, productBody = __rest(body, ["commissionList"]);
         const productOrigin = await this.productRepository.findOneBy({ oid, id: productId });
-        if (productOrigin.quantity) {
-            if (productOrigin.hasManageQuantity !== body.hasManageQuantity) {
-                throw new exception_filter_1.BusinessException('error.Conflict');
-            }
-        }
         if (productOrigin.warehouseIds !== body.warehouseIds) {
             let bodyWarehouseIdList = [];
             try {
@@ -35223,13 +35278,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductUpdateBody = exports.ProductCreateBody = exports.ProductCommission = exports.UnitConversionBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(16);
 const class_validator_1 = __webpack_require__(237);
 const class_validator_custom_1 = __webpack_require__(238);
+const variable_1 = __webpack_require__(20);
 const commission_entity_1 = __webpack_require__(50);
 class UnitConversionBody {
 }
@@ -35399,28 +35455,23 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsIn)([0, 1]),
     __metadata("design:type", Number)
-], ProductCreateBody.prototype, "hasManageQuantity", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({ example: 1 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsIn)([0, 1]),
-    __metadata("design:type", Number)
 ], ProductCreateBody.prototype, "isActive", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        name: 'warehouseIds',
-        type: 'string',
-        example: JSON.stringify([1, 5, 10]),
-    }),
+    (0, swagger_1.ApiProperty)({ enum: variable_1.InventoryStrategy, example: variable_1.InventoryStrategy.AutoWithExpiryDate }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsEnumValue)(variable_1.InventoryStrategy),
+    __metadata("design:type", typeof (_b = typeof variable_1.InventoryStrategy !== "undefined" && variable_1.InventoryStrategy) === "function" ? _b : Object)
+], ProductCreateBody.prototype, "inventoryStrategy", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: 'string', example: JSON.stringify([1, 5, 10]) }),
     (0, class_transformer_1.Expose)(),
     (0, class_transformer_1.Transform)(({ value }) => {
         try {
             const err = [];
             const result = JSON.parse(value).map((i) => {
-                if (!Number.isInteger) {
+                if (!Number.isInteger)
                     err.push(`${i} is not integer`);
-                }
                 return i;
             });
             if (err.length)
@@ -42430,7 +42481,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicAddTicketProductListBody = exports.TicketProductAddBody = void 0;
 const swagger_1 = __webpack_require__(6);
@@ -42450,18 +42501,36 @@ __decorate([
     __metadata("design:type", Number)
 ], TicketProductAddBody.prototype, "priority", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ enum: variable_1.InventoryStrategy, example: variable_1.InventoryStrategy.AutoWithExpiryDate }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsIn)([0, 1]),
-    __metadata("design:type", Number)
-], TicketProductAddBody.prototype, "hasInventoryImpact", void 0);
+    (0, class_validator_custom_1.IsEnumValue)(variable_1.InventoryStrategy),
+    __metadata("design:type", typeof (_a = typeof variable_1.InventoryStrategy !== "undefined" && variable_1.InventoryStrategy) === "function" ? _a : Object)
+], TicketProductAddBody.prototype, "inventoryStrategy", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 56 }),
+    (0, swagger_1.ApiPropertyOptional)({ type: 'string', example: JSON.stringify([1, 5, 10]) }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketProductAddBody.prototype, "warehouseId", void 0);
+    (0, class_transformer_1.Transform)(({ value }) => {
+        try {
+            const err = [];
+            const result = JSON.parse(value).map((i) => {
+                if (!Number.isInteger)
+                    err.push(`${i} is not integer`);
+                return i;
+            });
+            if (err.length)
+                return err;
+            else
+                return JSON.stringify(result);
+        }
+        catch (error) {
+            return [error.message];
+        }
+    }),
+    (0, class_validator_1.IsString)({ message: `Validate warehouseIds failed: Example: ${JSON.stringify([1, 2, 3])}` }),
+    __metadata("design:type", String)
+], TicketProductAddBody.prototype, "warehouseIds", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 56 }),
     (0, class_transformer_1.Expose)(),
@@ -42469,6 +42538,13 @@ __decorate([
     (0, class_validator_custom_1.IsNumberGreaterThan)(0),
     __metadata("design:type", Number)
 ], TicketProductAddBody.prototype, "productId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 56 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketProductAddBody.prototype, "batchId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 52 }),
     (0, class_transformer_1.Expose)(),
@@ -42526,7 +42602,7 @@ __decorate([
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_custom_1.IsEnumValue)(variable_1.DiscountType),
-    __metadata("design:type", typeof (_a = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _a : Object)
+    __metadata("design:type", typeof (_b = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _b : Object)
 ], TicketProductAddBody.prototype, "discountType", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 22500 }),
@@ -46733,7 +46809,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketOrderProductDraft = void 0;
 const swagger_1 = __webpack_require__(6);
@@ -46753,19 +46829,36 @@ __decorate([
     __metadata("design:type", Number)
 ], TicketOrderProductDraft.prototype, "priority", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 1 }),
+    (0, swagger_1.ApiProperty)({ enum: variable_1.InventoryStrategy, example: variable_1.InventoryStrategy.AutoWithExpiryDate }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsIn)([0, 1]),
-    __metadata("design:type", Number)
-], TicketOrderProductDraft.prototype, "hasInventoryImpact", void 0);
+    (0, class_validator_custom_1.IsEnumValue)(variable_1.InventoryStrategy),
+    __metadata("design:type", typeof (_a = typeof variable_1.InventoryStrategy !== "undefined" && variable_1.InventoryStrategy) === "function" ? _a : Object)
+], TicketOrderProductDraft.prototype, "inventoryStrategy", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 12 }),
+    (0, swagger_1.ApiPropertyOptional)({ type: 'string', example: JSON.stringify([1, 5, 10]) }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketOrderProductDraft.prototype, "warehouseId", void 0);
+    (0, class_transformer_1.Transform)(({ value }) => {
+        try {
+            const err = [];
+            const result = JSON.parse(value).map((i) => {
+                if (!Number.isInteger)
+                    err.push(`${i} is not integer`);
+                return i;
+            });
+            if (err.length)
+                return err;
+            else
+                return JSON.stringify(result);
+        }
+        catch (error) {
+            return [error.message];
+        }
+    }),
+    (0, class_validator_1.IsString)({ message: `Validate warehouseIds failed: Example: ${JSON.stringify([1, 2, 3])}` }),
+    __metadata("design:type", String)
+], TicketOrderProductDraft.prototype, "warehouseIds", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 12 }),
     (0, class_transformer_1.Expose)(),
@@ -46773,6 +46866,13 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], TicketOrderProductDraft.prototype, "productId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 56 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketOrderProductDraft.prototype, "batchId", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 1 }),
     (0, class_transformer_1.Expose)(),
@@ -46821,7 +46921,7 @@ __decorate([
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_custom_1.IsEnumValue)(variable_1.DiscountType),
-    __metadata("design:type", typeof (_a = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _a : Object)
+    __metadata("design:type", typeof (_b = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _b : Object)
 ], TicketOrderProductDraft.prototype, "discountType", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 22500 }),

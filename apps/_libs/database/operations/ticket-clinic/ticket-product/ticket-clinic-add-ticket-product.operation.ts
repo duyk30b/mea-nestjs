@@ -57,7 +57,7 @@ export class TicketClinicAddTicketProductOperation {
           customerId: ticketOrigin.customerId,
           deliveryStatus: DeliveryStatus.Pending,
           costAmount: i.costAmount, // set tạm thế, khi nào gửi hàng chọn lô mới tính chính xác được
-          hasInventoryImpact: i.hasInventoryImpact, // nếu không xuất kho thì costAmount lấy giá trị trên luôn
+          inventoryStrategy: i.inventoryStrategy, // nếu không xuất kho thì costAmount lấy giá trị trên luôn
           type: ticketProductType,
         }
         return insert

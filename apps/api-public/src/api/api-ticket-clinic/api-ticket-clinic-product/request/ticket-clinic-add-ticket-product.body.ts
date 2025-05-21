@@ -3,7 +3,6 @@ import { Expose, Transform, Type } from 'class-transformer'
 import {
   IsArray,
   IsDefined,
-  IsIn,
   IsInt,
   IsNumber,
   IsString,
@@ -16,7 +15,7 @@ import {
   IsEnumValue,
   IsNumberGreaterThan,
 } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType } from '../../../../../../_libs/database/common/variable'
+import { DiscountType, InventoryStrategy } from '../../../../../../_libs/database/common/variable'
 
 export class TicketProductAddBody {
   @ApiProperty({ example: 1 })
@@ -25,22 +24,42 @@ export class TicketProductAddBody {
   @IsNumber()
   priority: number
 
+  @ApiProperty({ enum: InventoryStrategy, example: InventoryStrategy.AutoWithExpiryDate })
   @Expose()
   @IsDefined()
-  @IsIn([0, 1])
-  hasInventoryImpact: 0 | 1
+  @IsEnumValue(InventoryStrategy)
+  inventoryStrategy: InventoryStrategy
 
-  @ApiProperty({ example: 56 })
+  @ApiPropertyOptional({ type: 'string', example: JSON.stringify([1, 5, 10]) })
   @Expose()
   @IsDefined()
-  @IsNumber()
-  warehouseId: number
+  @Transform(({ value }) => {
+    try {
+      const err = []
+      const result = JSON.parse(value).map((i: any) => {
+        if (!Number.isInteger) err.push(`${i} is not integer`)
+        return i
+      })
+      if (err.length) return err
+      else return JSON.stringify(result)
+    } catch (error) {
+      return [error.message]
+    }
+  })
+  @IsString({ message: `Validate warehouseIds failed: Example: ${JSON.stringify([1, 2, 3])}` })
+  warehouseIds: string
 
   @ApiProperty({ example: 56 })
   @Expose()
   @IsDefined()
   @IsNumberGreaterThan(0)
   productId: number
+
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  batchId: number // nếu batchId = 0, thì chỉ có thể là autoPick hoặc noImpact
 
   @ApiProperty({ example: 52 })
   @Expose()

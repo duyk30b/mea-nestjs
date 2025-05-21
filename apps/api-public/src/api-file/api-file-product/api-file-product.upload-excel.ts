@@ -3,6 +3,7 @@ import { Row, Workbook } from 'exceljs'
 import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { ESArray } from '../../../../_libs/common/helpers/object.helper'
+import { InventoryStrategy } from '../../../../_libs/database/common/variable'
 import { User } from '../../../../_libs/database/entities'
 import { ProductInsertType } from '../../../../_libs/database/entities/product.entity'
 import { ProductRepository } from '../../../../_libs/database/repositories'
@@ -196,7 +197,7 @@ export class ApiFileProductUploadExcel {
 
         quantity: 0, // ======? CẨN THẬN CHỖ NÀY, CHƯA HOÀN THIỆN TÍNH NĂNG SỬA SỐ LƯỢNG
 
-        hasManageQuantity: 1,
+        inventoryStrategy: InventoryStrategy.AutoWithExpiryDate,
         hintUsage: '',
         productGroupId: 0,
         warehouseIds: JSON.stringify([0]),

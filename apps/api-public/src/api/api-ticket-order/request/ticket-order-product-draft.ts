@@ -1,12 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
-import { IsDefined, IsIn, IsNumber, IsString } from 'class-validator'
+import { IsDefined, IsNumber, IsString } from 'class-validator'
 import { valuesEnum } from '../../../../../_libs/common/helpers/typescript.helper'
 import {
   IsEnumValue,
   IsNumberGreaterThan,
 } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType } from '../../../../../_libs/database/common/variable'
+import { DiscountType, InventoryStrategy } from '../../../../../_libs/database/common/variable'
 
 export class TicketOrderProductDraft {
   @ApiProperty({ example: 56 })
@@ -15,23 +15,42 @@ export class TicketOrderProductDraft {
   @IsNumber()
   priority: number
 
-  @ApiProperty({ example: 1 })
+  @ApiProperty({ enum: InventoryStrategy, example: InventoryStrategy.AutoWithExpiryDate })
   @Expose()
   @IsDefined()
-  @IsIn([0, 1])
-  hasInventoryImpact: 0 | 1
+  @IsEnumValue(InventoryStrategy)
+  inventoryStrategy: InventoryStrategy
 
-  @ApiProperty({ example: 12 })
+  @ApiPropertyOptional({ type: 'string', example: JSON.stringify([1, 5, 10]) })
   @Expose()
   @IsDefined()
-  @IsNumber()
-  warehouseId: number
+  @Transform(({ value }) => {
+    try {
+      const err = []
+      const result = JSON.parse(value).map((i: any) => {
+        if (!Number.isInteger) err.push(`${i} is not integer`)
+        return i
+      })
+      if (err.length) return err
+      else return JSON.stringify(result)
+    } catch (error) {
+      return [error.message]
+    }
+  })
+  @IsString({ message: `Validate warehouseIds failed: Example: ${JSON.stringify([1, 2, 3])}` })
+  warehouseIds: string
 
   @ApiProperty({ example: 12 })
   @Expose()
   @IsDefined()
   @IsNumber()
   productId: number
+
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  batchId: number // nếu batchId = 0, thì chỉ có thể là autoPick hoặc noImpact
 
   @ApiPropertyOptional({ example: 1 })
   @Expose()

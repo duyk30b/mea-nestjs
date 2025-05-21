@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { arrayToKeyValue } from '../../../common/helpers/object.helper'
-import { MovementType, PaymentType, ReceiptStatus } from '../../common/variable'
+import { InventoryStrategy, MovementType, PaymentType, ReceiptStatus } from '../../common/variable'
 import { Batch, Distributor, Product } from '../../entities'
 import { DistributorPaymentInsertType } from '../../entities/distributor-payment.entity'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
@@ -146,7 +146,7 @@ export class ReceiptCancelOperation {
         + `   ) AS temp("productId", "quantityReturn")
         WHERE     "product"."id" = temp."productId" 
               AND "product"."oid" = ${oid}
-              AND "product"."hasManageQuantity" = 1
+              AND "product"."inventoryStrategy" != ${InventoryStrategy.NoImpact}
         RETURNING "product".*;        
         `
       )

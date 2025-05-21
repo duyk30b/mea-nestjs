@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm'
+import { InventoryStrategy } from '../common/variable'
 import Batch from './batch.entity'
 import Commission from './commission.entity'
 import ProductGroup from './product-group.entity'
@@ -48,9 +49,9 @@ export default class Product {
   @Expose()
   quantity: number
 
-  @Column({ default: 1, type: 'smallint' })
+  @Column({ default: InventoryStrategy.UseSystemDefault, type: 'smallint' })
   @Expose()
-  hasManageQuantity: 0 | 1
+  inventoryStrategy: InventoryStrategy
 
   @Column({
     type: 'bigint',

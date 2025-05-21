@@ -43,6 +43,15 @@ export enum PaymentType {
   Reopen = 5, // Mở lại hồ sơ
 }
 
+export enum InventoryStrategy {
+  UseSystemDefault = -1, // Dùng theo cấu hình mặc định hệ thống
+  NoImpact = 0, // Không tác động đến kho
+  RequireBatchSelection = 1, // Bắt buộc chọn lô
+  AutoWithFIFO = 2, // Auto theo FIFO
+  AutoWithLIFO = 3, // Auto theo LIFO
+  AutoWithExpiryDate = 4, // Auto ưu tiên hạn gần
+}
+
 export enum ReceiptStatus {
   Cancelled = -1,
   Draft = 0,
