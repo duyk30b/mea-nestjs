@@ -4,14 +4,13 @@ import { IdParam } from '../../../../_libs/common/dto'
 import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
-import { TicketReturnProductListBody } from '../api-ticket/request'
+import { TicketPaymentMoneyBody, TicketReturnProductListBody } from '../api-ticket/request'
 import { ApiTicketOrderService } from './api-ticket-order.service'
 import {
   TicketOrderDebtSuccessInsertBody,
   TicketOrderDebtSuccessUpdateBody,
-  TicketOrderDraftApprovedUpdateBody,
-  TicketOrderDraftInsertBody,
-  TicketOrderPaymentBody,
+  TicketOrderDepositedUpdateBody,
+  TicketOrderDraftUpsertBody,
 } from './request'
 
 @ApiTags('TicketOrder')
@@ -20,24 +19,33 @@ import {
 export class ApiTicketOrderController {
   constructor(private readonly apiTicketOrderService: ApiTicketOrderService) { }
 
-  @Post('create-draft')
-  @HasPermission(PermissionId.TICKET_ORDER_CREATE_DRAFT)
-  async createDraft(@External() { oid, uid }: TExternal, @Body() body: TicketOrderDraftInsertBody) {
-    return await this.apiTicketOrderService.createDraft({
+  @Post('draft-upsert')
+  @HasPermission(PermissionId.TICKET_ORDER_DRAFT_UPSERT)
+  async draftUpsert(@External() { oid, uid }: TExternal, @Body() body: TicketOrderDraftUpsertBody) {
+    return await this.apiTicketOrderService.draftUpsert({
       oid,
       userId: uid,
       body,
     })
   }
 
-  @Patch(':id/update-draft-approved')
-  @HasPermission(PermissionId.TICKET_ORDER_UPDATE_DRAFT_APPROVED)
-  async updateDraftApproved(
+  @Delete(':id/draft-destroy')
+  @HasPermission(PermissionId.TICKET_ORDER_DRAFT_UPSERT)
+  async draftDestroy(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiTicketOrderService.destroy({
+      oid,
+      ticketId: id,
+    })
+  }
+
+  @Patch(':id/update-deposited')
+  @HasPermission(PermissionId.TICKET_ORDER_DRAFT_UPSERT)
+  async updateDeposited(
     @External() { oid, uid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketOrderDraftApprovedUpdateBody
+    @Body() body: TicketOrderDepositedUpdateBody
   ) {
-    return await this.apiTicketOrderService.updateDraftApproved({
+    return await this.apiTicketOrderService.updateDeposited({
       oid,
       userId: uid,
       ticketId: id,
@@ -73,13 +81,12 @@ export class ApiTicketOrderController {
     })
   }
 
-  // Khu vực cho API chung chung
   @Post(':id/prepayment')
   @HasPermission(PermissionId.TICKET_ORDER_PREPAYMENT)
   async prepayment(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketOrderPaymentBody
+    @Body() body: TicketPaymentMoneyBody
   ) {
     return await this.apiTicketOrderService.prepayment({ oid, ticketId: id, body })
   }
@@ -89,7 +96,7 @@ export class ApiTicketOrderController {
   async refundOverpaid(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketOrderPaymentBody
+    @Body() body: TicketPaymentMoneyBody
   ) {
     return await this.apiTicketOrderService.refundOverpaid({ oid, ticketId: id, body })
   }
@@ -102,12 +109,12 @@ export class ApiTicketOrderController {
   async sendProductAndPaymentAndClose(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketOrderPaymentBody
+    @Body() body: TicketPaymentMoneyBody
   ) {
     return await this.apiTicketOrderService.sendProductAndPaymentAndClose({
       oid,
       ticketId: id,
-      money: body.money,
+      body,
     })
   }
 
@@ -119,12 +126,12 @@ export class ApiTicketOrderController {
   async paymentAndClose(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketOrderPaymentBody
+    @Body() body: TicketPaymentMoneyBody
   ) {
     return await this.apiTicketOrderService.paymentAndClose({
       oid,
       ticketId: id,
-      money: body.money,
+      body,
     })
   }
 
@@ -152,7 +159,7 @@ export class ApiTicketOrderController {
   async payDebt(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketOrderPaymentBody
+    @Body() body: TicketPaymentMoneyBody
   ) {
     return await this.apiTicketOrderService.payDebt({ oid, ticketId: id, body })
   }
@@ -163,8 +170,8 @@ export class ApiTicketOrderController {
     return await this.apiTicketOrderService.cancel({ oid, ticketId: id })
   }
 
-  @Delete(':id/destroy')
-  @HasPermission(PermissionId.TICKET_ORDER_DESTROY_DRAFT)
+  @Delete(':id/cancel-destroy')
+  @HasPermission(PermissionId.TICKET_ORDER_CANCEL_DESTROY)
   async destroy(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiTicketOrderService.destroy({
       oid,

@@ -14,8 +14,15 @@ export class TicketPayDebtOperation {
     private customerPaymentManager: CustomerPaymentManager
   ) { }
 
-  async payDebt(params: { oid: number; ticketId: number; time: number; money: number }) {
-    const { oid, ticketId, time, money } = params
+  async payDebt(params: {
+    oid: number
+    ticketId: number
+    paymentMethodId: number
+    time: number
+    money: number
+    note: string
+  }) {
+    const { oid, ticketId, paymentMethodId, time, money, note } = params
     const PREFIX = `ticketId=${ticketId} pay debt failed`
 
     if (money <= 0) {
@@ -62,13 +69,14 @@ export class TicketPayDebtOperation {
         oid,
         customerId: ticket.customerId,
         ticketId,
+        paymentMethodId,
         createdAt: time,
         paymentType: PaymentType.PayDebt,
         paid: money,
         debit: -money, //
         openDebt: customerOpenDebt,
         closeDebt: customerCloseDebt,
-        note: '',
+        note,
         description: '',
       }
       const customerPayment = await this.customerPaymentManager.insertOneAndReturnEntity(

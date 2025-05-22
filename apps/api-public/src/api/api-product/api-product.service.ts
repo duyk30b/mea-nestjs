@@ -164,6 +164,7 @@ export class ApiProductService {
         oid,
         productId: product.id,
         costPrice: body.costPrice,
+        quantity: body.quantity,
         distributorId: 0,
         expiryDate: null,
         batchCode: '',

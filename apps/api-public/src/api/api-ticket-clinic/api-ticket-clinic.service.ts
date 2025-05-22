@@ -17,7 +17,7 @@ import {
   TicketPayDebtOperation,
   TicketPaymentAndCloseOperation,
   TicketPrepaymentOperation,
-  TicketRefundMoneyOperation,
+  TicketRefundOverpaidOperation,
   TicketReopenOperation,
   TicketUserOperation,
 } from '../../../../_libs/database/operations'
@@ -30,10 +30,10 @@ import {
 import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
 import { ImageManagerService } from '../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../socket/socket-emit.service'
+import { TicketPaymentMoneyBody } from '../api-ticket/request'
 import {
   TicketClinicChangeDiscountBody,
   TicketClinicCreateBody,
-  TicketClinicPaymentBody,
   TicketClinicUpdateBody,
 } from './request'
 import { TicketClinicUpdateDiagnosisBody } from './request/ticket-clinic-update-diagnosis.body'
@@ -49,7 +49,7 @@ export class ApiTicketClinicService {
     private readonly ticketRepository: TicketRepository,
     private readonly ticketAttributeRepository: TicketAttributeRepository,
     private readonly ticketChangeDiscountOperation: TicketChangeDiscountOperation,
-    private readonly ticketRefundMoneyOperation: TicketRefundMoneyOperation,
+    private readonly ticketRefundMoneyOperation: TicketRefundOverpaidOperation,
     private readonly ticketPrepaymentOperation: TicketPrepaymentOperation,
     private readonly ticketPaymentAndCloseOperation: TicketPaymentAndCloseOperation,
     private readonly ticketPayDebtOperation: TicketPayDebtOperation,
@@ -198,7 +198,7 @@ export class ApiTicketClinicService {
       {
         oid,
         id: ticketId,
-        ticketStatus: { IN: [TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Prepayment] },
+        ticketStatus: { IN: [TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Deposited] },
       },
       {
         ticketStatus: TicketStatus.Executing,
@@ -281,40 +281,44 @@ export class ApiTicketClinicService {
     return { data: true }
   }
 
-  async prepayment(params: { oid: number; ticketId: number; body: TicketClinicPaymentBody }) {
+  async prepayment(params: { oid: number; ticketId: number; body: TicketPaymentMoneyBody }) {
     const { oid, ticketId, body } = params
     try {
-      const { ticket } = await this.ticketPrepaymentOperation.prepayment({
+      const { ticket, customerPayment } = await this.ticketPrepaymentOperation.prepayment({
         oid,
         ticketId,
         time: Date.now(),
         money: body.money,
+        paymentMethodId: body.paymentMethodId,
+        note: body.note,
       })
 
       this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
-      return { data: true }
+      return { data: { ticket, customerPayment } }
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
   }
 
-  async refundOverpaid(params: { oid: number; ticketId: number; body: TicketClinicPaymentBody }) {
+  async refundOverpaid(params: { oid: number; ticketId: number; body: TicketPaymentMoneyBody }) {
     const { oid, ticketId, body } = params
     try {
-      const { ticket } = await this.ticketRefundMoneyOperation.refundMoney({
+      const { ticket, customerPayment } = await this.ticketRefundMoneyOperation.refundOverpaid({
         oid,
         ticketId,
         time: Date.now(),
         money: body.money,
+        paymentMethodId: body.paymentMethodId,
+        note: body.note,
       })
       this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
-      return { data: { ticket } }
+      return { data: { ticket, customerPayment } }
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
   }
 
-  async payDebt(params: { oid: number; ticketId: number; body: TicketClinicPaymentBody }) {
+  async payDebt(params: { oid: number; ticketId: number; body: TicketPaymentMoneyBody }) {
     const { oid, ticketId, body } = params
     try {
       const { ticket, customer } = await this.ticketPayDebtOperation.payDebt({
@@ -322,6 +326,8 @@ export class ApiTicketClinicService {
         ticketId,
         time: Date.now(),
         money: body.money,
+        paymentMethodId: body.paymentMethodId,
+        note: body.note,
       })
       this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
       if (customer) {
@@ -363,6 +369,8 @@ export class ApiTicketClinicService {
         ticketId,
         time: Date.now(),
         money: 0,
+        paymentMethodId: 0,
+        note: '',
       })
 
       this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
@@ -383,6 +391,7 @@ export class ApiTicketClinicService {
         ticketId,
         time: Date.now(),
         description: '',
+        paymentMethodId: 0,
       })
 
       this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })

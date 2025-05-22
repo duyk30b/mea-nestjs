@@ -21,8 +21,15 @@ export class TicketPaymentAndCloseOperation {
     private customerPaymentManager: CustomerPaymentManager
   ) { }
 
-  async paymentAndClose(params: { oid: number; ticketId: number; time: number; money: number }) {
-    const { oid, ticketId, time, money } = params
+  async paymentAndClose(params: {
+    oid: number
+    ticketId: number
+    paymentMethodId: number
+    time: number
+    money: number
+    note: string
+  }) {
+    const { oid, ticketId, paymentMethodId, time, money, note } = params
     const PREFIX = `ticketId=${ticketId} close failed`
 
     if (money < 0) {
@@ -37,7 +44,7 @@ export class TicketPaymentAndCloseOperation {
           oid,
           id: ticketId,
           ticketStatus: {
-            IN: [TicketStatus.Draft, TicketStatus.Prepayment, TicketStatus.Executing],
+            IN: [TicketStatus.Draft, TicketStatus.Deposited, TicketStatus.Executing],
           },
         },
         { updatedAt: Date.now() }
@@ -75,6 +82,11 @@ export class TicketPaymentAndCloseOperation {
       }, 0)
       const itemsDiscount =
         procedureDiscount + productDiscount + laboratoryDiscount + radiologyDiscount
+      const profit =
+        ticketOrigin.totalMoney
+        - ticketOrigin.itemsCostAmount
+        - ticketOrigin.expense
+        - ticketOrigin.commissionMoney
 
       const ticket = await this.ticketManager.updateOneAndReturnEntity(
         manager,
@@ -88,7 +100,7 @@ export class TicketPaymentAndCloseOperation {
           paid: () => `paid + ${money}`,
           debt: () => `debt - ${money}`,
           itemsDiscount,
-          profit: () => `"totalMoney" - "itemsCostAmount" - "expense"`,
+          profit,
           endedAt: time,
         }
       )
@@ -119,6 +131,7 @@ export class TicketPaymentAndCloseOperation {
       const customerPaymentInsert: CustomerPaymentInsertType = {
         oid,
         customerId: ticket.customerId,
+        paymentMethodId,
         ticketId,
         createdAt: time,
         paymentType: PaymentType.Close,
@@ -126,7 +139,7 @@ export class TicketPaymentAndCloseOperation {
         debit: ticket.debt,
         openDebt: customerOpenDebt,
         closeDebt: customerCloseDebt,
-        note: '',
+        note,
         description: '',
       }
       const customerPayment = await this.customerPaymentManager.insertOneAndReturnEntity(

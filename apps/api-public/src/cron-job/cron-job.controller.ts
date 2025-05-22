@@ -1,17 +1,18 @@
-import { Controller, Get } from '@nestjs/common'
+import { Controller, Get, Post } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { IsRoot } from '../../../_libs/common/guards/root.guard'
-import { ProductBatchJob } from './product-batch.job'
+import { PostgresqlJob } from './postgresql.job'
 
 @Controller('cron-job')
 @ApiTags('Cron-Job')
 @ApiBearerAuth('access-token')
 export class CronJobController {
-  constructor(private readonly productBatchJob: ProductBatchJob) {}
+  constructor(private readonly postgresqlJob: PostgresqlJob) {}
 
-  @Get('deleteBatchZeroQuantityAll')
+  @Post('job-backup-postgres')
   @IsRoot() // ===== Controller dành riêng cho ROOT =====
-  async deleteBatchZeroQuantityAll() {
-    this.productBatchJob.deleteBatchZeroQuantityAll()
+  async startJobBackupPostgres() {
+    await this.postgresqlJob.startBackupPostgres()
+    return await this.postgresqlJob.startJobUploadPostgres()
   }
 }

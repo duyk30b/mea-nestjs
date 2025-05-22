@@ -11,7 +11,11 @@ import {
 } from '../../entities/ticket-procedure.entity'
 import { TicketProductInsertType, TicketProductType } from '../../entities/ticket-product.entity'
 import { TicketSurchargeInsertType } from '../../entities/ticket-surcharge.entity'
-import { TicketInsertType, TicketStatus, TicketType } from '../../entities/ticket.entity'
+import Ticket, {
+  TicketRelationType,
+  TicketStatus,
+  TicketType,
+} from '../../entities/ticket.entity'
 import {
   TicketExpenseManager,
   TicketLaboratoryManager,
@@ -24,12 +28,31 @@ import {
 } from '../../managers'
 import { TicketAttributeManager } from '../../managers/ticket-attribute.manager'
 import {
-  TicketOrderDraftInsertType,
   TicketOrderExpenseDraftType,
   TicketOrderProcedureDraftType,
   TicketOrderProductDraftType,
   TicketOrderSurchargeDraftType,
 } from './ticket-order.dto'
+
+export type TicketOrderDraftUpsertType = Omit<
+  Ticket,
+  | keyof TicketRelationType
+  | keyof Pick<
+    Ticket,
+    | 'oid'
+    | 'id'
+    | 'ticketType'
+    | 'ticketStatus'
+    | 'paid'
+    | 'debt'
+    | 'year'
+    | 'month'
+    | 'date'
+    | 'startedAt'
+    | 'updatedAt'
+    | 'endedAt'
+  >
+>
 
 @Injectable()
 export class TicketOrderDraftOperation {
@@ -46,13 +69,14 @@ export class TicketOrderDraftOperation {
     private ticketUserManager: TicketUserManager
   ) { }
 
-  async create<
-    T extends TicketOrderDraftInsertType,
+  async upsert<
+    T extends TicketOrderDraftUpsertType,
     U extends TicketOrderProductDraftType,
     X extends TicketOrderProcedureDraftType,
   >(params: {
     oid: number
-    ticketOrderDraftInsertDto: NoExtra<TicketOrderDraftInsertType, T>
+    ticketId: number
+    ticketOrderDraftUpsertDto: NoExtra<TicketOrderDraftUpsertType, T>
     ticketOrderProductDraftListDto: NoExtra<TicketOrderProductDraftType, U>[]
     ticketOrderProcedureDraftListDto: NoExtra<TicketOrderProcedureDraftType, X>[]
     ticketOrderSurchargeDraftListDto: TicketOrderSurchargeDraftType[]
@@ -61,23 +85,24 @@ export class TicketOrderDraftOperation {
   }) {
     const {
       oid,
+      ticketId,
       ticketOrderProductDraftListDto,
       ticketOrderProcedureDraftListDto,
       ticketOrderSurchargeDraftListDto,
       ticketOrderExpenseDraftListDto,
       ticketAttributeDraftListDto,
     } = params
-    const ticketOrderDraftInsertDto: TicketOrderDraftInsertType = params.ticketOrderDraftInsertDto
-    const registeredAt = ticketOrderDraftInsertDto.registeredAt
+    const ticketOrderDraftUpsertDto: TicketOrderDraftUpsertType = params.ticketOrderDraftUpsertDto
+    const registeredAt = ticketOrderDraftUpsertDto.registeredAt
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-      const ticketInsert: NoExtra<TicketInsertType> = {
-        ...ticketOrderDraftInsertDto,
-        oid,
+      let ticket: Ticket
+      const ticketUpsert = {
+        ...ticketOrderDraftUpsertDto,
         ticketStatus: TicketStatus.Draft,
         ticketType: TicketType.Order,
         paid: 0,
-        debt: ticketOrderDraftInsertDto.totalMoney,
+        debt: ticketOrderDraftUpsertDto.totalMoney,
         registeredAt,
         startedAt: registeredAt,
         year: ESTimer.info(registeredAt, 7).year,
@@ -85,8 +110,24 @@ export class TicketOrderDraftOperation {
         date: ESTimer.info(registeredAt, 7).date,
         endedAt: null,
       }
+      if (!ticketId) {
+        ticket = await this.ticketManager.insertOneAndReturnEntity(manager, {
+          ...ticketUpsert,
+          oid,
+        })
+      } else {
+        ticket = await this.ticketManager.updateOneAndReturnEntity(
+          manager,
+          { id: ticketId, oid },
+          ticketUpsert
+        )
 
-      const ticket = await this.ticketManager.insertOneAndReturnEntity(manager, ticketInsert)
+        await this.ticketAttributeManager.delete(manager, { oid, ticketId })
+        await this.ticketProductManager.delete(manager, { oid, ticketId })
+        await this.ticketProcedureManager.delete(manager, { oid, ticketId })
+        await this.ticketSurchargeManager.delete(manager, { oid, ticketId })
+        await this.ticketExpenseManager.delete(manager, { oid, ticketId })
+      }
 
       if (ticketOrderProductDraftListDto.length) {
         const ticketProductListInsert = ticketOrderProductDraftListDto.map((i) => {
@@ -94,7 +135,7 @@ export class TicketOrderDraftOperation {
             ...i,
             oid,
             ticketId: ticket.id,
-            customerId: ticketOrderDraftInsertDto.customerId,
+            customerId: ticketOrderDraftUpsertDto.customerId,
             deliveryStatus: DeliveryStatus.Pending,
             quantityPrescription: i.quantity,
             type: TicketProductType.Prescription,
@@ -111,8 +152,8 @@ export class TicketOrderDraftOperation {
             ...i,
             oid,
             ticketId: ticket.id,
-            customerId: ticketOrderDraftInsertDto.customerId,
-            startedAt: ticketOrderDraftInsertDto.registeredAt,
+            customerId: ticketOrderDraftUpsertDto.customerId,
+            startedAt: ticketOrderDraftUpsertDto.registeredAt,
             status: TicketProcedureStatus.Completed,
             imageIds: JSON.stringify([]),
             result: '',

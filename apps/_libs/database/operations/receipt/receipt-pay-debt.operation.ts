@@ -6,10 +6,16 @@ import { DistributorPaymentInsertType } from '../../entities/distributor-payment
 
 @Injectable()
 export class ReceiptPayDebtOperation {
-  constructor(private dataSource: DataSource) {}
+  constructor(private dataSource: DataSource) { }
 
-  async payDebt(params: { oid: number; receiptId: number; time: number; money: number }) {
-    const { oid, receiptId, time, money } = params
+  async payDebt(params: {
+    oid: number
+    receiptId: number
+    paymentMethodId: number
+    time: number
+    money: number
+  }) {
+    const { oid, receiptId, time, money, paymentMethodId } = params
     const PREFIX = `ReceiptId=${receiptId} pay debt failed`
 
     if (money <= 0) {
@@ -68,6 +74,7 @@ export class ReceiptPayDebtOperation {
         oid,
         distributorId: receipt.distributorId,
         receiptId,
+        paymentMethodId,
         createdAt: time,
         paymentType: PaymentType.PayDebt,
         paid: money,
@@ -86,7 +93,7 @@ export class ReceiptPayDebtOperation {
       if (!distributorPaymentId) {
         throw new Error(
           `${PREFIX}: Insert DistributorPayment failed: `
-            + `${JSON.stringify(distributorPaymentInsertResult)}`
+          + `${JSON.stringify(distributorPaymentInsertResult)}`
         )
       }
 

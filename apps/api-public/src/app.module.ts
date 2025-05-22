@@ -25,6 +25,7 @@ import { AppService } from './app.service'
 import { EmailModule } from './components/email/email.module'
 import { HealthModule } from './components/health/health.module'
 import { ImageManagerModule } from './components/image-manager/image-manager.module'
+import { CronJobModule } from './cron-job/cron-job.module'
 import { EventListenerModule } from './event-listener/event-listener.module'
 import { SocketModule } from './socket/socket.module'
 @Module({
@@ -51,7 +52,7 @@ import { SocketModule } from './socket/socket.module'
     HealthModule,
     EmailModule,
     ImageManagerModule,
-    // CronJobModule,
+    CronJobModule,
 
     EventListenerModule,
     SocketModule,

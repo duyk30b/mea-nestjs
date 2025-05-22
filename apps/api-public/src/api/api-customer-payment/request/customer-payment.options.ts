@@ -12,6 +12,10 @@ export class CustomerPaymentRelationQuery {
   @Expose()
   @IsBoolean()
   ticket: boolean
+
+  @Expose()
+  @IsBoolean()
+  paymentMethod: boolean
 }
 
 export class CustomerPaymentFilterQuery {

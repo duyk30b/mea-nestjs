@@ -70,6 +70,7 @@ export class ReceiptCancelOperation {
         const distributorPaymentInsert: DistributorPaymentInsertType = {
           oid,
           distributorId: receiptRoot.distributorId,
+          paymentMethodId: 0,
           receiptId,
           createdAt: time,
           paymentType: PaymentType.ReceiveRefund,

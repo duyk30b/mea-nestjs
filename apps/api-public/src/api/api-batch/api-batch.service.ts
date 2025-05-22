@@ -30,7 +30,7 @@ export class ApiBatchService {
     private readonly receiptItemRepository: ReceiptItemRepository,
     private readonly productMovementRepository: ProductMovementRepository,
     private readonly productOperation: ProductOperation
-  ) { }
+  ) {}
 
   async pagination(oid: number, query: BatchPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, sort, relation } = query
@@ -94,6 +94,7 @@ export class ApiBatchService {
     const batch = await this.batchRepository.insertOneFullFieldAndReturnEntity({
       ...body,
       oid,
+      quantity: 0,
       registeredAt: Date.now(),
     })
     return { data: { batch } }

@@ -211,7 +211,7 @@ export class TicketSendProductOperation {
           oid,
           id: ticketId,
           ticketStatus: {
-            IN: [TicketStatus.Draft, TicketStatus.Prepayment, TicketStatus.Executing],
+            IN: [TicketStatus.Draft, TicketStatus.Deposited, TicketStatus.Executing],
           },
         },
         { updatedAt: Date.now(), ticketStatus: TicketStatus.Executing }

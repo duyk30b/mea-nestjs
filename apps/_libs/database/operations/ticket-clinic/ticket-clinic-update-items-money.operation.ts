@@ -259,7 +259,7 @@ export class TicketClinicUpdateItemsMoneyOperation {
       }, 0)
 
       const itemsCostAmountUpdate = ticketProductList.reduce((acc, item) => {
-        return acc + item.costPrice * item.quantity
+        return acc + item.costAmount
       }, 0)
 
       const itemsActualMoneyUpdate =

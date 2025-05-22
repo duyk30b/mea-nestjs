@@ -268,7 +268,7 @@ export class ApiFileReceiptUploadExcel {
       },
       receiptItemList: receiptItemBodyList,
     }
-    const createDraftResult = await this.apiReceiptService.createReceiptDraft({
+    const createDraftResult = await this.apiReceiptService.createDraft({
       oid,
       body: receiptBody,
     })

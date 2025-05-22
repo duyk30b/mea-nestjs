@@ -88,4 +88,4 @@ export class ReceiptUpsertDraftBody {
   receiptItemList: ReceiptItemBody[]
 }
 
-export class ReceiptUpdatePrepaymentBody extends ReceiptUpsertDraftBody { }
+export class ReceiptUpdateDepositedBody extends ReceiptUpsertDraftBody { }

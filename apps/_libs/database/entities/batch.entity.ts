@@ -108,13 +108,13 @@ export type BatchRelationType = {
 
 export type BatchInsertType = Omit<
   Batch,
-  keyof BatchRelationType | keyof Pick<Batch, 'id' | 'quantity' | 'updatedAt'>
+  keyof BatchRelationType | keyof Pick<Batch, 'id' | 'updatedAt'>
 >
 
 export type BatchUpdateType = {
   [K in Exclude<
     keyof Batch,
-    keyof BatchRelationType | keyof Pick<Batch, 'oid' | 'id' | 'productId' | 'distributorId'>
+    keyof BatchRelationType | keyof Pick<Batch, 'oid' | 'id' | 'productId' | 'updatedAt'>
   >]: Batch[K] | (() => string)
 }
 

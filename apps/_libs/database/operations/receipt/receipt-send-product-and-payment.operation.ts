@@ -6,11 +6,11 @@ import { Batch, Distributor, Product } from '../../entities'
 import { DistributorPaymentInsertType } from '../../entities/distributor-payment.entity'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
 import {
-  DistributorManager,
-  DistributorPaymentManager,
-  ProductMovementManager,
-  ReceiptItemManager,
-  ReceiptManager,
+    DistributorManager,
+    DistributorPaymentManager,
+    ProductMovementManager,
+    ReceiptItemManager,
+    ReceiptManager,
 } from '../../managers'
 
 @Injectable()
@@ -24,8 +24,14 @@ export class ReceiptSendProductAndPaymentOperation {
     private productMovementManager: ProductMovementManager
   ) { }
 
-  async start(params: { oid: number; receiptId: number; time: number; money: number }) {
-    const { oid, receiptId, time, money } = params
+  async start(params: {
+    oid: number
+    receiptId: number
+    paymentMethodId: number
+    time: number
+    money: number
+  }) {
+    const { oid, receiptId, paymentMethodId, time, money } = params
     const PREFIX = `ReceiptId=${receiptId} ship and payment failed`
 
     if (money < 0) {
@@ -35,7 +41,7 @@ export class ReceiptSendProductAndPaymentOperation {
       // === 1. RECEIPT: update ===
       const [receipt] = await this.receiptManager.updateAndReturnEntity(
         manager,
-        { oid, id: receiptId, status: { IN: [ReceiptStatus.Draft, ReceiptStatus.Prepayment] } },
+        { oid, id: receiptId, status: { IN: [ReceiptStatus.Draft, ReceiptStatus.Deposited] } },
         {
           status: () => `CASE 
                               WHEN("totalMoney" - paid = ${money}) THEN ${ReceiptStatus.Success} 
@@ -79,6 +85,7 @@ export class ReceiptSendProductAndPaymentOperation {
         oid,
         distributorId: receipt.distributorId,
         receiptId,
+        paymentMethodId,
         createdAt: time,
         paymentType: PaymentType.Close,
         paid: money,

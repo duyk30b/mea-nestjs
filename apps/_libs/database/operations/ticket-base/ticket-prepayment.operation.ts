@@ -14,8 +14,15 @@ export class TicketPrepaymentOperation {
     private customerPaymentManager: CustomerPaymentManager
   ) { }
 
-  async prepayment(params: { oid: number; ticketId: number; time: number; money: number }) {
-    const { oid, ticketId, time, money } = params
+  async prepayment(params: {
+    oid: number
+    ticketId: number
+    paymentMethodId: number
+    time: number
+    money: number
+    note: string
+  }) {
+    const { oid, ticketId, paymentMethodId, time, money, note } = params
     const PREFIX = `ticketId=${ticketId} prepayment failed`
 
     if (money <= 0) {
@@ -33,7 +40,7 @@ export class TicketPrepaymentOperation {
             IN: [
               TicketStatus.Schedule,
               TicketStatus.Draft,
-              TicketStatus.Prepayment,
+              TicketStatus.Deposited,
               TicketStatus.Executing,
             ],
           },
@@ -41,7 +48,7 @@ export class TicketPrepaymentOperation {
         {
           ticketStatus: () => `CASE 
               WHEN("ticketStatus" IN (${TicketStatus.Schedule}, ${TicketStatus.Draft})) 
-                  THEN ${TicketStatus.Prepayment} 
+                  THEN ${TicketStatus.Deposited} 
               ELSE "ticketStatus"
             END
           `,
@@ -65,6 +72,7 @@ export class TicketPrepaymentOperation {
       const customerPaymentInsert: CustomerPaymentInsertType = {
         oid,
         customerId: ticket.customerId,
+        paymentMethodId,
         ticketId,
         createdAt: time,
         paymentType: PaymentType.Prepayment,
@@ -72,7 +80,7 @@ export class TicketPrepaymentOperation {
         debit: 0,
         openDebt: customerOpenDebt,
         closeDebt: customerCloseDebt,
-        note: '',
+        note,
         description: '',
       }
       const customerPayment = await this.customerPaymentManager.insertOneAndReturnEntity(

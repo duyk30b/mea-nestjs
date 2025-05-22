@@ -1,7 +1,8 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity } from 'typeorm'
+import { Column, Entity, OneToMany } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import { EGender } from '../common/variable'
+import CustomerPayment from './customer-payment.entity'
 
 @Entity('Customer')
 export default class Customer extends BaseEntity {
@@ -98,6 +99,10 @@ export default class Customer extends BaseEntity {
   @Expose()
   deletedAt: number
 
+  @OneToMany(() => CustomerPayment, (customerPayment) => customerPayment.customer)
+  @Expose()
+  customerPaymentList: CustomerPayment[]
+
   static fromRaw(raw: { [P in keyof Customer]: any }) {
     if (!raw) return null
     const entity = new Customer()
@@ -118,7 +123,7 @@ export default class Customer extends BaseEntity {
 }
 
 export type CustomerRelationType = {
-  [P in keyof Pick<Customer, never>]?: boolean
+  [P in keyof Pick<Customer, 'customerPaymentList'>]?: boolean
 }
 
 export type CustomerInsertType = Omit<

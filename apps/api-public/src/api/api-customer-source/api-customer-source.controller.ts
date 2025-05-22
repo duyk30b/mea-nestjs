@@ -38,13 +38,13 @@ export class ApiCustomerSourceController {
   }
 
   @Post('create')
-  @HasPermission(PermissionId.MASTER_DATA_TICKET_SOURCE)
+  @HasPermission(PermissionId.MASTER_DATA_CUSTOMER_SOURCE)
   async createOne(@External() { oid }: TExternal, @Body() body: CustomerSourceCreateBody) {
     return await this.apiCustomerSourceService.createOne(oid, body)
   }
 
   @Patch('update/:id')
-  @HasPermission(PermissionId.MASTER_DATA_TICKET_SOURCE)
+  @HasPermission(PermissionId.MASTER_DATA_CUSTOMER_SOURCE)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
     @External() { oid }: TExternal,
@@ -55,7 +55,7 @@ export class ApiCustomerSourceController {
   }
 
   @Delete('destroy/:id')
-  @HasPermission(PermissionId.MASTER_DATA_TICKET_SOURCE)
+  @HasPermission(PermissionId.MASTER_DATA_CUSTOMER_SOURCE)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiCustomerSourceService.destroyOne(oid, id)

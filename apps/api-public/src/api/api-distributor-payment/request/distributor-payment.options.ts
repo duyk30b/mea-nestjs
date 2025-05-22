@@ -1,8 +1,16 @@
 import { Expose } from 'class-transformer'
-import { IsNumber } from 'class-validator'
+import { IsBoolean, IsNumber } from 'class-validator'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 
-export class DistributorPaymentRelationQuery {}
+export class DistributorPaymentRelationQuery {
+  @Expose()
+  @IsBoolean()
+  paymentMethod: boolean
+
+  @Expose()
+  @IsBoolean()
+  distributor: boolean
+}
 
 export class DistributorPaymentFilterQuery {
   @Expose()
@@ -10,4 +18,4 @@ export class DistributorPaymentFilterQuery {
   distributorId: number
 }
 
-export class DistributorPaymentSortQuery extends SortQuery {}
+export class DistributorPaymentSortQuery extends SortQuery { }

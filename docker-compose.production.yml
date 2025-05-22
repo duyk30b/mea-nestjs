@@ -16,6 +16,8 @@ services:
       dockerfile: Dockerfile
       context: './'
       target: production
+    volumes:
+      - ./data/backup:/app/data/backup
     command:
       [
         'sh',

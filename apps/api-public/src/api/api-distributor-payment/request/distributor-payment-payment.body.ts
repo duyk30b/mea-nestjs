@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import { IsArray, IsDefined, IsNumber, IsString, ValidateNested } from 'class-validator'
 
-export class ReceiptPayments {
+export class ReceiptPayment {
   @Expose()
   @IsDefined()
   @IsNumber()
@@ -21,13 +21,19 @@ export class DistributorPaymentPayDebtBody {
   @IsNumber()
   distributorId: number
 
+  @ApiProperty({ example: 12 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  paymentMethodId: number
+
   @ApiPropertyOptional({ example: 'Khách hàng còn bo thêm tiền' })
   @Expose()
   @IsString()
   note: string
 
   @ApiPropertyOptional({
-    type: ReceiptPayments,
+    type: ReceiptPayment,
     isArray: true,
     example: [
       { receiptId: 12, money: 10000 },
@@ -36,8 +42,8 @@ export class DistributorPaymentPayDebtBody {
   })
   @Expose()
   @IsDefined()
-  @Type(() => ReceiptPayments)
+  @Type(() => ReceiptPayment)
   @IsArray()
   @ValidateNested({ each: true })
-  receiptPayments: ReceiptPayments[] // Phụ phí
+  receiptPaymentList: ReceiptPayment[] // Phụ phí
 }

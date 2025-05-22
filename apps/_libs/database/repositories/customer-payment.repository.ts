@@ -32,11 +32,12 @@ export class CustomerPaymentRepository extends _PostgreSqlRepository<
   async startPayDebt(options: {
     oid: number
     customerId: number
+    paymentMethodId: number
     time: number
     ticketPaymentList: { ticketId: number; money: number }[]
     note?: string
   }) {
-    const { oid, customerId, ticketPaymentList, time, note } = options
+    const { oid, customerId, paymentMethodId, ticketPaymentList, time, note } = options
     const PREFIX = `customerId=${customerId} pay debt failed`
 
     const totalMoney = ticketPaymentList.reduce((acc, cur) => {
@@ -112,6 +113,7 @@ export class CustomerPaymentRepository extends _PostgreSqlRepository<
             oid,
             customerId,
             ticketId: i.ticketId,
+            paymentMethodId,
             createdAt: time,
             paymentType: PaymentType.PayDebt,
             paid: i.money,

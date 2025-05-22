@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { TicketRepository } from '../../../../_libs/database/repositories'
 import { CustomerPaymentRepository } from '../../../../_libs/database/repositories/customer-payment.repository'
 import {
   CustomerPaymentGetManyQuery,
@@ -11,16 +10,17 @@ import {
 @Injectable()
 export class ApiCustomerPaymentService {
   constructor(
-    private readonly customerPaymentRepository: CustomerPaymentRepository,
-    private readonly ticketRepository: TicketRepository
+    private readonly customerPaymentRepository: CustomerPaymentRepository
   ) { }
 
   async pagination(oid: number, query: CustomerPaymentPaginationQuery): Promise<BaseResponse> {
     const { page, limit, relation, filter, sort } = query
     const { data, total } = await this.customerPaymentRepository.pagination({
+      relationLoadStrategy: 'query',
       relation: {
         customer: relation?.customer,
         ticket: relation?.ticket,
+        paymentMethod: relation?.paymentMethod,
       },
       page,
       limit,
@@ -42,9 +42,11 @@ export class ApiCustomerPaymentService {
     const { relation, filter, limit, sort } = query
 
     const data = await this.customerPaymentRepository.findMany({
+      relationLoadStrategy: 'query',
       relation: {
         customer: relation?.customer,
         ticket: relation?.ticket,
+        paymentMethod: relation?.paymentMethod,
       },
       condition: {
         oid,
@@ -63,6 +65,7 @@ export class ApiCustomerPaymentService {
       const { customer } = await this.customerPaymentRepository.startPayDebt({
         oid,
         customerId: body.customerId,
+        paymentMethodId: body.paymentMethodId,
         time: Date.now(),
         ticketPaymentList: body.ticketPaymentList,
         note: body.note,

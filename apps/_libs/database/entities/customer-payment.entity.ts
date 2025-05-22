@@ -3,10 +3,12 @@ import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import { PaymentType } from '../common/variable'
 import Customer from './customer.entity'
+import PaymentMethod from './payment-method.entity'
 import Ticket from './ticket.entity'
 
 @Entity('CustomerPayment')
 @Index('IDX_CustomerPayment__oid_customerId', ['oid', 'customerId'])
+@Index('IDX_CustomerPayment__oid_paymentMethodId', ['oid', 'paymentMethodId'])
 export default class CustomerPayment extends BaseEntity {
   @Column()
   @Expose()
@@ -15,6 +17,10 @@ export default class CustomerPayment extends BaseEntity {
   @Column()
   @Expose()
   ticketId: number
+
+  @Column({ default: 0 })
+  @Expose()
+  paymentMethodId: number
 
   @Column({
     type: 'bigint',
@@ -66,9 +72,18 @@ export default class CustomerPayment extends BaseEntity {
   description: string
 
   @Expose()
-  @ManyToOne((type) => Customer, { createForeignKeyConstraints: false })
+  @ManyToOne((type) => Customer, (customer) => customer.customerPaymentList, {
+    createForeignKeyConstraints: false,
+  })
   @JoinColumn({ name: 'customerId', referencedColumnName: 'id' })
   customer: Customer
+
+  @Expose()
+  @ManyToOne((type) => PaymentMethod, (paymentMethod) => paymentMethod.customerPaymentList, {
+    createForeignKeyConstraints: false,
+  })
+  @JoinColumn({ name: 'paymentMethodId', referencedColumnName: 'id' })
+  paymentMethod: PaymentMethod
 
   @Expose()
   @ManyToOne((type) => Ticket, (ticket) => ticket.customerPaymentList, {
@@ -109,7 +124,7 @@ export default class CustomerPayment extends BaseEntity {
 // export class ViewCustomerPayment {}
 
 export type CustomerPaymentRelationType = {
-  [P in keyof Pick<CustomerPayment, 'customer' | 'ticket'>]?: boolean
+  [P in keyof Pick<CustomerPayment, 'customer' | 'ticket' | 'paymentMethod'>]?: boolean
 }
 
 export type CustomerPaymentInsertType = Omit<

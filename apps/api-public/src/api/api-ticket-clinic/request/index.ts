@@ -1,5 +1,4 @@
 export * from './ticket-clinic-change-discount.body'
-export * from './ticket-clinic-payment.body'
 export * from './ticket-clinic-update-consumable.body'
 export * from './ticket-clinic-update-diagnosis.body'
 export * from './ticket-clinic-update-laboratory-list.body'

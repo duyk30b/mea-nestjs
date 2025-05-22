@@ -10,11 +10,8 @@ import {
   ReceiptGetManyQuery,
   ReceiptGetOneQuery,
   ReceiptPaginationQuery,
-  ReceiptPayDebtBody,
-  ReceiptPrepaymentBody,
-  ReceiptRefundPrepaymentBody,
-  ReceiptSendProductAndPaymentBody,
-  ReceiptUpdatePrepaymentBody,
+  ReceiptPaymentMoneyBody,
+  ReceiptUpdateDepositedBody,
   ReceiptUpsertDraftBody,
 } from './request'
 
@@ -46,20 +43,20 @@ export class ApiReceiptController {
     return await this.apiReceiptService.getOne(oid, id, query)
   }
 
-  @Post('create-receipt-draft')
-  @HasPermission(PermissionId.RECEIPT_UPSERT_DRAFT)
-  async createReceiptDraft(@External() { oid }: TExternal, @Body() body: ReceiptUpsertDraftBody) {
-    return await this.apiReceiptService.createReceiptDraft({ oid, body })
+  @Post('create-draft')
+  @HasPermission(PermissionId.RECEIPT_DRAFT_UPSERT)
+  async createDraft(@External() { oid }: TExternal, @Body() body: ReceiptUpsertDraftBody) {
+    return await this.apiReceiptService.createDraft({ oid, body })
   }
 
-  @Patch('update-receipt-draft/:id')
-  @HasPermission(PermissionId.RECEIPT_UPSERT_DRAFT)
-  async updateReceiptDraft(
+  @Patch('update-draft/:id')
+  @HasPermission(PermissionId.RECEIPT_DRAFT_UPSERT)
+  async updateDraft(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
     @Body() body: ReceiptUpsertDraftBody
   ) {
-    return await this.apiReceiptService.updateReceiptDraft({
+    return await this.apiReceiptService.updateDraft({
       oid,
       receiptId: id,
       body,
@@ -71,23 +68,23 @@ export class ApiReceiptController {
   async prepayment(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: ReceiptPrepaymentBody
+    @Body() body: ReceiptPaymentMoneyBody
   ) {
     return await this.apiReceiptService.prepayment({
       oid,
       receiptId: id,
-      money: body.money,
+      body,
     })
   }
 
-  @Patch('update-receipt-prepayment/:id')
-  @HasPermission(PermissionId.RECEIPT_UPDATE_PREPAYMENT)
-  async updateReceiptPrepayment(
+  @Patch('update-deposited/:id')
+  @HasPermission(PermissionId.RECEIPT_DEPOSITED_UPDATE)
+  async updateDeposited(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: ReceiptUpdatePrepaymentBody
+    @Body() body: ReceiptUpdateDepositedBody
   ) {
-    return await this.apiReceiptService.updateReceiptPrepayment({
+    return await this.apiReceiptService.updateDeposited({
       oid,
       receiptId: id,
       body,
@@ -99,12 +96,12 @@ export class ApiReceiptController {
   async refundPrepayment(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: ReceiptRefundPrepaymentBody
+    @Body() body: ReceiptPaymentMoneyBody
   ) {
     return await this.apiReceiptService.refundPrepayment({
       oid,
       receiptId: id,
-      money: body.money,
+      body,
     })
   }
 
@@ -113,13 +110,12 @@ export class ApiReceiptController {
   async payDebt(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: ReceiptPayDebtBody
+    @Body() body: ReceiptPaymentMoneyBody
   ) {
     return await this.apiReceiptService.payDebt({
       oid,
       receiptId: id,
-      money: body.money,
-      time: Date.now(),
+      body,
     })
   }
 
@@ -128,13 +124,12 @@ export class ApiReceiptController {
   async sendProductAndPayment(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: ReceiptSendProductAndPaymentBody
+    @Body() body: ReceiptPaymentMoneyBody
   ) {
     return await this.apiReceiptService.sendProductAndPayment({
       oid,
       receiptId: id,
-      time: Date.now(),
-      money: body.money,
+      body,
     })
   }
 
@@ -144,12 +139,11 @@ export class ApiReceiptController {
     return await this.apiReceiptService.cancel({
       oid,
       receiptId: id,
-      time: Date.now(),
     })
   }
 
   @Delete('destroy/:id')
-  @HasPermission(PermissionId.RECEIPT_UPSERT_DRAFT)
+  @HasPermission(PermissionId.RECEIPT_DRAFT_UPSERT)
   async destroyDraft(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiReceiptService.destroy({
       oid,

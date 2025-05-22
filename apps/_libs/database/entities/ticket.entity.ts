@@ -30,7 +30,7 @@ export enum TicketType {
 export enum TicketStatus {
   Schedule = 1,
   Draft = 2,
-  Prepayment = 3,
+  Deposited = 3,
   Executing = 4,
   Debt = 5,
   Completed = 6,

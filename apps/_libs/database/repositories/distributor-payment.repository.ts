@@ -31,17 +31,18 @@ export class DistributorPaymentRepository extends _PostgreSqlRepository<
   async startPayDebt(options: {
     oid: number
     distributorId: number
+    paymentMethodId: number
     time: number
-    receiptPayments?: { receiptId: number; money: number }[]
+    receiptPaymentList?: { receiptId: number; money: number }[]
     note?: string
   }) {
-    const { oid, distributorId, receiptPayments, time, note } = options
-    if (!receiptPayments.length || receiptPayments.some((item) => (item.money || 0) <= 0)) {
+    const { oid, distributorId, paymentMethodId, receiptPaymentList, time, note } = options
+    if (!receiptPaymentList.length || receiptPaymentList.some((item) => (item.money || 0) <= 0)) {
       throw new Error(`Distributor ${distributorId} pay debt failed: Money number invalid`)
     }
 
-    const receiptIds = receiptPayments.map((i) => i.receiptId)
-    const totalMoney = receiptPayments.reduce((acc, cur) => acc + cur.money, 0)
+    const receiptIds = receiptPaymentList.map((i) => i.receiptId)
+    const totalMoney = receiptPaymentList.reduce((acc, cur) => acc + cur.money, 0)
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // Update distributor trước để lock
@@ -67,7 +68,7 @@ export class DistributorPaymentRepository extends _PostgreSqlRepository<
 
       for (let i = 0; i < receiptIds.length; i++) {
         const receiptId = receiptIds[i] || 0
-        const money = receiptPayments.find((item) => item.receiptId === receiptId)?.money
+        const money = receiptPaymentList.find((item) => item.receiptId === receiptId)?.money
 
         // Trả nợ vào từng đơn
         const receiptUpdateResult = await manager.update(
@@ -99,6 +100,7 @@ export class DistributorPaymentRepository extends _PostgreSqlRepository<
           oid,
           distributorId,
           receiptId,
+          paymentMethodId,
           createdAt: time,
           paymentType: PaymentType.PayDebt,
           paid: money,
@@ -107,8 +109,8 @@ export class DistributorPaymentRepository extends _PostgreSqlRepository<
           closeDebt: distributorOpenDebt - money,
           note,
           description:
-            receiptPayments.length > 1
-              ? `Trả ${formatNumber(totalMoney)} vào ${receiptPayments.length} phiếu nợ: `
+            receiptPaymentList.length > 1
+              ? `Trả ${formatNumber(totalMoney)} vào ${receiptPaymentList.length} phiếu nợ: `
               + `${JSON.stringify(receiptIds)}`
               : '',
         }

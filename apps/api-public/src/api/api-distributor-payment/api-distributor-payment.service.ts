@@ -9,11 +9,16 @@ export class ApiDistributorPaymentService {
   constructor(
     private readonly distributorPaymentRepository: DistributorPaymentRepository,
     private readonly distributorRepository: DistributorRepository
-  ) {}
+  ) { }
 
   async pagination(oid: number, query: DistributorPaymentPaginationQuery): Promise<BaseResponse> {
-    const { page, limit, filter, sort } = query
+    const { page, limit, relation, filter, sort } = query
     const { data, total } = await this.distributorPaymentRepository.pagination({
+      relationLoadStrategy: 'query',
+      relation: {
+        distributor: relation?.distributor,
+        paymentMethod: relation?.paymentMethod,
+      },
       page,
       limit,
       condition: {
@@ -34,8 +39,9 @@ export class ApiDistributorPaymentService {
       const { distributorId } = await this.distributorPaymentRepository.startPayDebt({
         oid,
         distributorId: body.distributorId,
+        paymentMethodId: body.paymentMethodId,
         time: Date.now(),
-        receiptPayments: body.receiptPayments,
+        receiptPaymentList: body.receiptPaymentList,
         note: body.note,
       })
       const distributor = await this.distributorRepository.findOneBy({ id: distributorId })

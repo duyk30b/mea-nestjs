@@ -4,12 +4,12 @@ import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { DeliveryStatus } from '../../../../_libs/database/common/variable'
 import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import {
-  TicketOrderDraftApprovedOperation,
+  TicketOrderDepositedOperation,
   TicketOrderDraftOperation,
   TicketPayDebtOperation,
   TicketPaymentAndCloseOperation,
   TicketPrepaymentOperation,
-  TicketRefundMoneyOperation,
+  TicketRefundOverpaidOperation,
   TicketReopenOperation,
   TicketReturnProductOperation,
   TicketSendProductOperation,
@@ -21,13 +21,12 @@ import {
   TicketRepository,
 } from '../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../socket/socket-emit.service'
-import { TicketReturnProductListBody } from '../api-ticket/request'
+import { TicketPaymentMoneyBody, TicketReturnProductListBody } from '../api-ticket/request'
 import {
   TicketOrderDebtSuccessInsertBody,
   TicketOrderDebtSuccessUpdateBody,
-  TicketOrderDraftApprovedUpdateBody,
-  TicketOrderDraftInsertBody,
-  TicketOrderPaymentBody,
+  TicketOrderDepositedUpdateBody,
+  TicketOrderDraftUpsertBody,
 } from './request'
 
 @Injectable()
@@ -38,29 +37,30 @@ export class ApiTicketOrderService {
     private readonly ticketProductRepository: TicketProductRepository,
     private readonly ticketBatchRepository: TicketBatchRepository,
     private readonly ticketOrderDraftOperation: TicketOrderDraftOperation,
-    private readonly ticketOrderDraftApprovedOperation: TicketOrderDraftApprovedOperation,
+    private readonly ticketOrderDepositedOperation: TicketOrderDepositedOperation,
     private readonly ticketPaymentAndCloseOperation: TicketPaymentAndCloseOperation,
     private readonly ticketSendProductOperation: TicketSendProductOperation,
     private readonly ticketRepository: TicketRepository,
     private readonly ticketPrepaymentOperation: TicketPrepaymentOperation,
     private readonly ticketPayDebtOperation: TicketPayDebtOperation,
-    private readonly ticketRefundMoneyOperation: TicketRefundMoneyOperation,
+    private readonly ticketRefundMoneyOperation: TicketRefundOverpaidOperation,
     private readonly ticketReopenOperation: TicketReopenOperation,
     private readonly ticketReturnProductOperation: TicketReturnProductOperation,
     private readonly customerPaymentRepository: CustomerPaymentRepository
   ) { }
 
-  async createDraft(params: {
+  async draftUpsert(params: {
     oid: number
     userId: number
-    body: TicketOrderDraftInsertBody
+    body: TicketOrderDraftUpsertBody
   }): Promise<BaseResponse> {
     const { oid, body, userId } = params
     try {
-      const { ticket } = await this.ticketOrderDraftOperation.create({
+      const { ticket } = await this.ticketOrderDraftOperation.upsert({
         oid,
-        ticketOrderDraftInsertDto: {
-          ...body.ticketOrderDraftInsert,
+        ticketId: body.ticketId,
+        ticketOrderDraftUpsertDto: {
+          ...body.ticketOrderDraftUpsert,
           customType: 0,
           customerSourceId: 0,
           laboratoryMoney: 0,
@@ -81,19 +81,19 @@ export class ApiTicketOrderService {
     }
   }
 
-  async updateDraftApproved(params: {
+  async updateDeposited(params: {
     oid: number
     userId: number
     ticketId: number
-    body: TicketOrderDraftApprovedUpdateBody
+    body: TicketOrderDepositedUpdateBody
   }): Promise<BaseResponse> {
     const { oid, userId, ticketId, body } = params
     try {
-      const { ticket } = await this.ticketOrderDraftApprovedOperation.update({
+      const { ticket } = await this.ticketOrderDepositedOperation.updateDeposited({
         oid,
         ticketId,
-        ticketOrderDraftApprovedUpdateDto: {
-          ...body.ticketOrderDraftApprovedUpdate,
+        ticketOrderDepositedUpdateDto: {
+          ...body.ticketOrderDepositedUpdate,
           customType: 0,
           customerSourceId: 0,
           laboratoryMoney: 0,
@@ -120,13 +120,14 @@ export class ApiTicketOrderService {
     body: TicketOrderDebtSuccessInsertBody
   }): Promise<BaseResponse> {
     const { oid, body, userId } = params
-    const { paid, ...ticketOrderDraftInsert } = body.ticketOrderDebtSuccessInsert
-    const time = ticketOrderDraftInsert.registeredAt
+    const { paid, ...ticketOrderDraftInsertBody } = body.ticketOrderDebtSuccessInsert
+    const time = ticketOrderDraftInsertBody.registeredAt
 
-    const createDraftResponse = await this.ticketOrderDraftOperation.create({
+    const createDraftResponse = await this.ticketOrderDraftOperation.upsert({
       oid,
-      ticketOrderDraftInsertDto: {
-        ...ticketOrderDraftInsert,
+      ticketId: 0,
+      ticketOrderDraftUpsertDto: {
+        ...ticketOrderDraftInsertBody,
         customType: 0,
         customerSourceId: 0,
         laboratoryMoney: 0,
@@ -160,6 +161,8 @@ export class ApiTicketOrderService {
       ticketId,
       money: paid,
       time,
+      paymentMethodId: 0,
+      note: '',
     })
 
     if (customer) {
@@ -192,6 +195,7 @@ export class ApiTicketOrderService {
         ticketId,
         time,
         description: 'Sửa đơn',
+        paymentMethodId: 0,
       })
       ticket = responseReopen.ticket
     }
@@ -200,15 +204,15 @@ export class ApiTicketOrderService {
     ticket = await this.ticketRepository.updateOneAndReturnEntity(
       { oid, id: ticketId },
       {
-        ticketStatus: TicketStatus.Prepayment,
+        ticketStatus: TicketStatus.Deposited,
       }
     )
     const { paid: paidBody, ...ticketBodyUpdate } = body.ticketOrderDebtSuccessUpdate
     // không update paid, giữ nguyên số tiền trước update, trả paid thêm vào ở dưới cùng
-    const responseUpdate = await this.ticketOrderDraftApprovedOperation.update({
+    const responseUpdate = await this.ticketOrderDepositedOperation.updateDeposited({
       oid,
       ticketId,
-      ticketOrderDraftApprovedUpdateDto: {
+      ticketOrderDepositedUpdateDto: {
         ...ticketBodyUpdate,
         customType: 0,
         customerSourceId: 0,
@@ -235,6 +239,8 @@ export class ApiTicketOrderService {
       ticketId,
       time,
       money: paidBody - ticket.paid, // trả thêm tiền ở đây
+      paymentMethodId: 0,
+      note: 'Sửa đơn',
     })
 
     return { data: { ticketId } }
@@ -243,7 +249,7 @@ export class ApiTicketOrderService {
   async prepayment(options: {
     oid: number
     ticketId: number
-    body: TicketOrderPaymentBody
+    body: TicketPaymentMoneyBody
   }): Promise<BaseResponse> {
     const { oid, ticketId, body } = options
     try {
@@ -252,8 +258,31 @@ export class ApiTicketOrderService {
         ticketId,
         time: Date.now(),
         money: body.money,
+        paymentMethodId: body.paymentMethodId,
+        note: body.note,
       })
 
+      return { data: { ticket, customerPayment } }
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+    }
+  }
+
+  async refundOverpaid(options: {
+    oid: number
+    ticketId: number
+    body: TicketPaymentMoneyBody
+  }): Promise<BaseResponse> {
+    const { oid, ticketId, body } = options
+    try {
+      const { ticket, customerPayment } = await this.ticketRefundMoneyOperation.refundOverpaid({
+        oid,
+        ticketId,
+        time: Date.now(),
+        money: body.money,
+        paymentMethodId: body.paymentMethodId,
+        note: body.note,
+      })
       return { data: { ticket, customerPayment } }
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
@@ -263,9 +292,9 @@ export class ApiTicketOrderService {
   async sendProductAndPaymentAndClose(params: {
     oid: number
     ticketId: number
-    money: number
+    body: TicketPaymentMoneyBody
   }): Promise<BaseResponse> {
-    const { oid, ticketId, money } = params
+    const { oid, ticketId, body } = params
     const time = Date.now()
     try {
       const { productModifiedList } = await this.sendAllProduct({
@@ -279,7 +308,9 @@ export class ApiTicketOrderService {
           oid,
           ticketId,
           time,
-          money,
+          money: body.money,
+          paymentMethodId: body.paymentMethodId,
+          note: body.note,
         })
       if (customer) {
         this.socketEmitService.customerUpsert(oid, { customer })
@@ -301,9 +332,9 @@ export class ApiTicketOrderService {
   async paymentAndClose(params: {
     oid: number
     ticketId: number
-    money: number
+    body: TicketPaymentMoneyBody
   }): Promise<BaseResponse> {
-    const { oid, ticketId, money } = params
+    const { oid, ticketId, body } = params
     const time = Date.now()
     try {
       const { ticket, customer, customerPayment } =
@@ -311,42 +342,15 @@ export class ApiTicketOrderService {
           oid,
           ticketId,
           time,
-          money,
+          money: body.money,
+          paymentMethodId: body.paymentMethodId,
+          note: body.note,
         })
       if (customer) {
         this.socketEmitService.customerUpsert(oid, { customer })
       }
       return { data: { ticket, customerPayment } }
     } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async refundOverpaid(options: {
-    oid: number
-    ticketId: number
-    body: TicketOrderPaymentBody
-  }): Promise<BaseResponse> {
-    const { oid, ticketId, body } = options
-    try {
-      const result = await this.ticketRefundMoneyOperation.refundMoney({
-        oid,
-        ticketId,
-        time: Date.now(),
-        money: body.money,
-      })
-      let ticket = result.ticket
-      const customerPayment = result.customerPayment
-      if (ticket.paid === ticket.totalMoney) {
-        const ticketUpdateList = await this.ticketRepository.updateAndReturnEntity(
-          { oid, id: ticketId },
-          { ticketStatus: TicketStatus.Completed }
-        )
-        ticket = ticketUpdateList[0]
-      }
-
-      return { data: { ticket, customerPayment } }
-    } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
   }
@@ -388,6 +392,7 @@ export class ApiTicketOrderService {
           ticketId,
           time,
           description: 'Hoàn trả',
+          paymentMethodId: 0,
         })
         ticket = result.ticket
       }
@@ -410,7 +415,7 @@ export class ApiTicketOrderService {
   async payDebt(options: {
     oid: number
     ticketId: number
-    body: TicketOrderPaymentBody
+    body: TicketPaymentMoneyBody
   }): Promise<BaseResponse> {
     const { oid, ticketId, body } = options
     try {
@@ -419,6 +424,8 @@ export class ApiTicketOrderService {
         ticketId,
         time: Date.now(),
         money: body.money,
+        paymentMethodId: body.paymentMethodId,
+        note: body.note,
       })
       if (customer) {
         this.socketEmitService.customerUpsert(oid, { customer })
@@ -448,6 +455,7 @@ export class ApiTicketOrderService {
         oid,
         ticketId,
         time,
+        paymentMethodId: 0,
         description: 'Hủy phiếu',
       })
       ticket = result.ticket
@@ -459,11 +467,13 @@ export class ApiTicketOrderService {
     }
 
     if (ticket.paid) {
-      const result = await this.ticketRefundMoneyOperation.refundMoney({
+      const result = await this.ticketRefundMoneyOperation.refundOverpaid({
         oid,
         ticketId,
         time,
+        paymentMethodId: 0,
         money: ticket.paid,
+        note: 'Hủy phiếu',
       })
       ticket = result.ticket
     }
@@ -479,16 +489,6 @@ export class ApiTicketOrderService {
       sort: { id: 'ASC' },
     })
     return { data: { ticket, customerPaymentList } }
-  }
-
-  async destroy(params: { oid: number; ticketId: number }): Promise<BaseResponse> {
-    const { oid, ticketId } = params
-    try {
-      await this.ticketRepository.destroy({ oid, ticketId })
-      return { data: { ticketId } }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
   }
 
   async sendAllProduct(params: { oid: number; ticketId: number }) {
@@ -548,4 +548,16 @@ export class ApiTicketOrderService {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
   }
+
+  async destroy(params: { oid: number; ticketId: number }): Promise<BaseResponse> {
+    const { oid, ticketId } = params
+    try {
+      await this.ticketRepository.destroy({ oid, ticketId })
+      return { data: { ticketId } }
+    } catch (error: any) {
+      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+    }
+  }
+
+  F
 }

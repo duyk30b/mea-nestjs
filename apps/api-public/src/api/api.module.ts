@@ -11,6 +11,7 @@ import { ApiLaboratoryGroupModule } from './api-laboratory-group/api-laboratory-
 import { ApiLaboratoryKitModule } from './api-laboratory-kit/api-laboratory-kit.module'
 import { ApiLaboratoryModule } from './api-laboratory/api-laboratory.module'
 import { ApiOrganizationModule } from './api-organization/api-organization.module'
+import { ApiPaymentMethodModule } from './api-payment-method/api-payment-method.module'
 import { ApiPermissionModule } from './api-permission/api-permission.module'
 import { ApiPrescriptionSampleModule } from './api-prescription-sample/api-prescription-sample.module'
 import { ApiPrintHtmlModule } from './api-print-html/api-print-html.module'
@@ -83,6 +84,7 @@ import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
     ApiTicketClinicModule,
     ApiTicketLaboratoryModule,
     ApiTicketRadiologyModule,
+    ApiPaymentMethodModule,
   ],
   controllers: [],
   providers: [],

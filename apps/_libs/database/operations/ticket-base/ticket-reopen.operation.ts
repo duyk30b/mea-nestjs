@@ -15,8 +15,14 @@ export class TicketReopenOperation {
     private customerPaymentManager: CustomerPaymentManager
   ) { }
 
-  async reopen(params: { oid: number; ticketId: number; time: number; description: string }) {
-    const { oid, ticketId, time, description } = params
+  async reopen(params: {
+    oid: number
+    ticketId: number
+    paymentMethodId: number
+    time: number
+    description: string
+  }) {
+    const { oid, ticketId, paymentMethodId, time, description } = params
     const PREFIX = `ticketId=${ticketId} reopen failed`
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
@@ -53,6 +59,7 @@ export class TicketReopenOperation {
           ticketId,
           createdAt: time,
           paymentType: PaymentType.Reopen,
+          paymentMethodId,
           paid: 0,
           debit: -ticket.debt,
           openDebt: customerOpenDebt,

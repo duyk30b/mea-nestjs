@@ -14,13 +14,13 @@ import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { FastifyFilesInterceptor } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { TicketPaymentMoneyBody } from '../api-ticket/request'
 import { ApiTicketClinicService } from './api-ticket-clinic.service'
 import {
   TicketClinicChangeDiscountBody,
   TicketClinicCreateBody,
   TicketClinicUpdateBody,
 } from './request'
-import { TicketClinicPaymentBody } from './request/ticket-clinic-payment.body'
 import { TicketClinicUpdateDiagnosisBody } from './request/ticket-clinic-update-diagnosis.body'
 
 @ApiTags('TicketClinic')
@@ -91,7 +91,7 @@ export class ApiTicketClinicController {
   async prepayment(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketClinicPaymentBody
+    @Body() body: TicketPaymentMoneyBody
   ) {
     return await this.apiTicketClinicService.prepayment({ oid, ticketId: id, body })
   }
@@ -101,7 +101,7 @@ export class ApiTicketClinicController {
   async refundOverpaid(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketClinicPaymentBody
+    @Body() body: TicketPaymentMoneyBody
   ) {
     return await this.apiTicketClinicService.refundOverpaid({ oid, ticketId: id, body })
   }
@@ -111,7 +111,7 @@ export class ApiTicketClinicController {
   async payDebt(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketClinicPaymentBody
+    @Body() body: TicketPaymentMoneyBody
   ) {
     return await this.apiTicketClinicService.payDebt({ oid, ticketId: id, body })
   }

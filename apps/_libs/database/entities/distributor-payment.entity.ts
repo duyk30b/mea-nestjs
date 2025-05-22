@@ -2,6 +2,8 @@ import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import { PaymentType } from '../common/variable'
+import Distributor from './distributor.entity'
+import PaymentMethod from './payment-method.entity'
 import Receipt from './receipt.entity'
 
 @Entity('DistributorPayment')
@@ -15,6 +17,10 @@ export default class DistributorPayment extends BaseEntity {
   @Column()
   @Expose()
   receiptId: number
+
+  @Column({ default: 0 })
+  @Expose()
+  paymentMethodId: number
 
   @Column({
     type: 'bigint',
@@ -64,6 +70,20 @@ export default class DistributorPayment extends BaseEntity {
   description: string
 
   @Expose()
+  @ManyToOne((type) => Distributor, (distributor) => distributor.distributorPaymentList, {
+    createForeignKeyConstraints: false,
+  })
+  @JoinColumn({ name: 'distributorId', referencedColumnName: 'id' })
+  distributor: Distributor
+
+  @Expose()
+  @ManyToOne((type) => PaymentMethod, (paymentMethod) => paymentMethod.distributorPaymentList, {
+    createForeignKeyConstraints: false,
+  })
+  @JoinColumn({ name: 'paymentMethodId', referencedColumnName: 'id' })
+  paymentMethod: PaymentMethod
+
+  @Expose()
   @ManyToOne((type) => Receipt, (receipt) => receipt.distributorPaymentList, {
     createForeignKeyConstraints: false,
   })
@@ -90,7 +110,7 @@ export default class DistributorPayment extends BaseEntity {
 }
 
 export type DistributorPaymentRelationType = {
-  [P in keyof Pick<DistributorPayment, 'receipt'>]?: boolean
+  [P in keyof Pick<DistributorPayment, 'receipt' | 'paymentMethod' | 'distributor'>]?: boolean
 }
 
 export type DistributorPaymentInsertType = Omit<

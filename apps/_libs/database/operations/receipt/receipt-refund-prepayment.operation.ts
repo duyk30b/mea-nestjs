@@ -8,8 +8,14 @@ import { DistributorPaymentInsertType } from '../../entities/distributor-payment
 export class ReceiptRefundPrepaymentOperation {
   constructor(private dataSource: DataSource) { }
 
-  async refundPrepayment(params: { oid: number; receiptId: number; time: number; money: number }) {
-    const { oid, receiptId, time, money } = params
+  async refundPrepayment(params: {
+    oid: number
+    receiptId: number
+    paymentMethodId: number
+    time: number
+    money: number
+  }) {
+    const { oid, receiptId, time, paymentMethodId, money } = params
     const PREFIX = `ReceiptId=${receiptId} refund money failed`
 
     const transaction = await this.dataSource.transaction('REPEATABLE READ', async (manager) => {
@@ -17,8 +23,7 @@ export class ReceiptRefundPrepaymentOperation {
       const whereReceipt: FindOptionsWhere<Receipt> = {
         oid,
         id: receiptId,
-        status: ReceiptStatus.Prepayment,
-        debt: 0,
+        status: ReceiptStatus.Deposited,
       }
       const receiptUpdateResult: UpdateResult = await manager
         .createQueryBuilder()
@@ -27,7 +32,7 @@ export class ReceiptRefundPrepaymentOperation {
         .set({
           status: () => `CASE 
                             WHEN("paid" = ${money}) THEN ${ReceiptStatus.Draft} 
-                            ELSE ${ReceiptStatus.Prepayment}
+                            ELSE ${ReceiptStatus.Deposited}
                             END
                         `,
           paid: () => `paid - ${money}`,
@@ -59,6 +64,7 @@ export class ReceiptRefundPrepaymentOperation {
         oid,
         distributorId: receipt.distributorId,
         receiptId,
+        paymentMethodId,
         createdAt: time,
         paymentType: PaymentType.ReceiveRefund,
         paid: -money,

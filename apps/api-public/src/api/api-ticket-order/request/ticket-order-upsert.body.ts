@@ -123,18 +123,18 @@ class TicketOrderBasic {
   note: string
 }
 
+class TicketOrderBasicDraftUpsert extends OmitType(TicketOrderBasic, ['paid', 'debt']) { }
+
+class TicketOrderBasicDepositedUpdate extends OmitType(TicketOrderBasic, [
+  'customerId',
+  'paid',
+  'debt',
+]) { }
+
 class TicketOrderBasicDebtSuccessInsert extends OmitType(TicketOrderBasic, ['debt']) { }
 
 class TicketOrderBasicDebtSuccessUpdate extends OmitType(TicketOrderBasic, [
   'customerId',
-  'debt',
-]) { }
-
-class TicketOrderBasicDraftInsert extends OmitType(TicketOrderBasic, ['paid', 'debt']) { }
-
-class TicketOrderBasicDraftApprovedUpdate extends OmitType(TicketOrderBasic, [
-  'customerId',
-  'paid',
   'debt',
 ]) { }
 
@@ -209,22 +209,29 @@ class TicketOrderRelation {
   // ticketOrderAttributeDaftList: TicketOrderAttributeBody[]
 }
 
-export class TicketOrderDraftInsertBody extends TicketOrderRelation {
-  @ApiProperty({ type: TicketOrderBasicDraftInsert })
+export class TicketOrderDraftUpsertBody extends TicketOrderRelation {
+  @ApiProperty({ example: 45 })
   @Expose()
-  @Type(() => TicketOrderBasicDraftInsert)
+  @Type(() => Number)
+  @IsDefined()
+  @IsInt()
+  ticketId: number
+
+  @ApiProperty({ type: TicketOrderBasicDraftUpsert })
+  @Expose()
+  @Type(() => TicketOrderBasicDraftUpsert)
   @IsDefined()
   @ValidateNested({ each: true })
-  ticketOrderDraftInsert: TicketOrderBasicDraftInsert
+  ticketOrderDraftUpsert: TicketOrderBasicDraftUpsert
 }
 
-export class TicketOrderDraftApprovedUpdateBody extends TicketOrderRelation {
-  @ApiProperty({ type: TicketOrderBasicDraftApprovedUpdate })
+export class TicketOrderDepositedUpdateBody extends TicketOrderRelation {
+  @ApiProperty({ type: TicketOrderBasicDepositedUpdate })
   @Expose()
-  @Type(() => TicketOrderBasicDraftApprovedUpdate)
+  @Type(() => TicketOrderBasicDepositedUpdate)
   @IsDefined()
   @ValidateNested({ each: true })
-  ticketOrderDraftApprovedUpdate: TicketOrderBasicDraftApprovedUpdate
+  ticketOrderDepositedUpdate: TicketOrderBasicDepositedUpdate
 }
 
 export class TicketOrderDebtSuccessInsertBody extends TicketOrderRelation {

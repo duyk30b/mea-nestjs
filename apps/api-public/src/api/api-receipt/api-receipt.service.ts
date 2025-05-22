@@ -12,9 +12,9 @@ import {
 } from '../../../../_libs/database/entities/setting.entity'
 import {
   ReceiptCancelOperation,
+  ReceiptDepositedOperation,
   ReceiptDraftOperation,
   ReceiptPayDebtOperation,
-  ReceiptPrepaymentOperation,
   ReceiptRefundPrepaymentOperation,
   ReceiptSendProductAndPaymentOperation,
 } from '../../../../_libs/database/operations'
@@ -26,7 +26,8 @@ import {
   ReceiptGetManyQuery,
   ReceiptGetOneQuery,
   ReceiptPaginationQuery,
-  ReceiptUpdatePrepaymentBody,
+  ReceiptPaymentMoneyBody,
+  ReceiptUpdateDepositedBody,
   ReceiptUpsertDraftBody,
 } from './request'
 
@@ -37,7 +38,7 @@ export class ApiReceiptService {
     private readonly cacheDataService: CacheDataService,
     private readonly receiptRepository: ReceiptRepository,
     private readonly receiptDraft: ReceiptDraftOperation,
-    private readonly receiptPrepaymentOperation: ReceiptPrepaymentOperation,
+    private readonly receiptDepositedOperation: ReceiptDepositedOperation,
     private readonly receiptRefundPrepaymentOperation: ReceiptRefundPrepaymentOperation,
     private readonly receiptPayDebtOperation: ReceiptPayDebtOperation,
     private readonly distributorPaymentRepository: DistributorPaymentRepository,
@@ -135,7 +136,10 @@ export class ApiReceiptService {
     return productSettingCommon
   }
 
-  async createReceiptDraft(params: { oid: number; body: ReceiptUpsertDraftBody }): Promise<BaseResponse> {
+  async createDraft(params: {
+    oid: number
+    body: ReceiptUpsertDraftBody
+  }): Promise<BaseResponse> {
     const { oid, body } = params
     // tự động chọn lô
     const productSettingDefault = await this.getProductSettingDefault(oid)
@@ -185,6 +189,7 @@ export class ApiReceiptService {
         batchCode: receiptItem.batchCode,
         expiryDate: receiptItem.expiryDate,
         costPrice: receiptItem.costPrice,
+        quantity: 0,
         registeredAt: Date.now(),
       }
       return batchInsert
@@ -206,7 +211,7 @@ export class ApiReceiptService {
     }
   }
 
-  async updateReceiptDraft(params: {
+  async updateDraft(params: {
     oid: number
     receiptId: number
     body: ReceiptUpsertDraftBody
@@ -259,6 +264,7 @@ export class ApiReceiptService {
         batchCode: receiptItem.batchCode,
         expiryDate: receiptItem.expiryDate,
         costPrice: receiptItem.costPrice,
+        quantity: 0,
         registeredAt: Date.now(),
       }
       return batchInsert
@@ -281,10 +287,10 @@ export class ApiReceiptService {
     }
   }
 
-  async updateReceiptPrepayment(params: {
+  async updateDeposited(params: {
     oid: number
     receiptId: number
-    body: ReceiptUpdatePrepaymentBody
+    body: ReceiptUpdateDepositedBody
   }): Promise<BaseResponse> {
     const { oid, receiptId, body } = params
     const productSettingDefault = await this.getProductSettingDefault(oid)
@@ -334,6 +340,7 @@ export class ApiReceiptService {
         batchCode: receiptItem.batchCode,
         expiryDate: receiptItem.expiryDate,
         costPrice: receiptItem.costPrice,
+        quantity: 0,
         registeredAt: Date.now(),
       }
       return batchInsert
@@ -344,7 +351,7 @@ export class ApiReceiptService {
     })
 
     try {
-      await this.receiptPrepaymentOperation.updatePrepayment({
+      await this.receiptDepositedOperation.updateDeposited({
         oid,
         receiptId,
         receiptUpdateDto: receiptDto,
@@ -359,15 +366,16 @@ export class ApiReceiptService {
   async prepayment(params: {
     oid: number
     receiptId: number
-    money: number
+    body: ReceiptPaymentMoneyBody
   }): Promise<BaseResponse> {
-    const { oid, receiptId, money } = params
+    const { oid, receiptId, body } = params
     try {
-      const { receiptBasic } = await this.receiptPrepaymentOperation.prepayment({
+      const { receiptBasic } = await this.receiptDepositedOperation.prepayment({
         oid,
         receiptId,
         time: Date.now(),
-        money,
+        money: body.money,
+        paymentMethodId: body.paymentMethodId,
       })
       const distributorPaymentList = await this.distributorPaymentRepository.findMany({
         condition: {
@@ -391,15 +399,16 @@ export class ApiReceiptService {
   async refundPrepayment(params: {
     oid: number
     receiptId: number
-    money: number
+    body: ReceiptPaymentMoneyBody
   }): Promise<BaseResponse> {
-    const { oid, receiptId, money } = params
+    const { oid, receiptId, body } = params
     try {
       const { receiptBasic } = await this.receiptRefundPrepaymentOperation.refundPrepayment({
         oid,
         receiptId,
         time: Date.now(),
-        money,
+        money: body.money,
+        paymentMethodId: body.paymentMethodId,
       })
       const distributorPaymentList = await this.distributorPaymentRepository.findMany({
         condition: {
@@ -418,16 +427,16 @@ export class ApiReceiptService {
   async sendProductAndPayment(params: {
     oid: number
     receiptId: number
-    time: number
-    money: number
+    body: ReceiptPaymentMoneyBody
   }): Promise<BaseResponse> {
-    const { oid, receiptId, time, money } = params
+    const { oid, receiptId, body } = params
     try {
       const result = await this.receiptSendProductAndPaymentOperation.start({
         oid,
         receiptId,
-        time,
-        money,
+        time: Date.now(),
+        paymentMethodId: body.paymentMethodId,
+        money: body.money,
       })
       const distributorPaymentList = await this.distributorPaymentRepository.findMany({
         condition: {
@@ -452,16 +461,16 @@ export class ApiReceiptService {
   async payDebt(params: {
     oid: number
     receiptId: number
-    time: number
-    money: number
+    body: ReceiptPaymentMoneyBody
   }): Promise<BaseResponse> {
-    const { oid, receiptId, time, money } = params
+    const { oid, receiptId, body } = params
     try {
       const { distributor, receiptBasic } = await this.receiptPayDebtOperation.payDebt({
         oid,
         receiptId,
-        time,
-        money,
+        time: Date.now(),
+        paymentMethodId: body.paymentMethodId,
+        money: body.money,
       })
       const distributorPaymentList = await this.distributorPaymentRepository.findMany({
         condition: {
@@ -485,10 +494,10 @@ export class ApiReceiptService {
     }
   }
 
-  async cancel(params: { oid: number; receiptId: number; time: number }): Promise<BaseResponse> {
-    const { oid, receiptId, time } = params
+  async cancel(params: { oid: number; receiptId: number }): Promise<BaseResponse> {
+    const { oid, receiptId } = params
     try {
-      const result = await this.receiptCancelOperation.start({ oid, receiptId, time })
+      const result = await this.receiptCancelOperation.start({ oid, receiptId, time: Date.now() })
       const distributorPaymentList = await this.distributorPaymentRepository.findMany({
         condition: {
           oid,
