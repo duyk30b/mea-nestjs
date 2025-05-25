@@ -60,7 +60,7 @@ export class ReceiptRepository extends _PostgreSqlRepository<
       const receiptDeleteResult = await manager.delete(Receipt, {
         oid,
         id: receiptId,
-        status: In([ReceiptStatus.Draft, ReceiptStatus.Cancelled]),
+        status: In([ReceiptStatus.Draft, ReceiptStatus.Voided]),
       })
       if (receiptDeleteResult.affected !== 1) {
         throw new Error(`Delete Receipt ${receiptId} failed: Status invalid`)

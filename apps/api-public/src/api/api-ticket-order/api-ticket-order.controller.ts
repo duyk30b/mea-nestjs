@@ -170,8 +170,8 @@ export class ApiTicketOrderController {
     return await this.apiTicketOrderService.cancel({ oid, ticketId: id })
   }
 
-  @Delete(':id/cancel-destroy')
-  @HasPermission(PermissionId.TICKET_ORDER_CANCEL_DESTROY)
+  @Delete(':id/voided-destroy')
+  @HasPermission(PermissionId.TICKET_ORDER_VOIDED_DESTROY)
   async destroy(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiTicketOrderService.destroy({
       oid,

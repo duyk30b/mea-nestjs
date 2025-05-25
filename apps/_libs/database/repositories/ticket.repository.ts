@@ -219,7 +219,7 @@ export class TicketRepository extends _PostgreSqlRepository<
       const whereTicket: FindOptionsWhere<Ticket> = {
         id: ticketId,
         oid,
-        ticketStatus: In([TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Cancelled]),
+        ticketStatus: In([TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Voided]),
       }
       const ticketDeleteResult = await manager.delete(Ticket, whereTicket)
       if (ticketDeleteResult.affected !== 1) {

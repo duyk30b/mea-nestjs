@@ -40,7 +40,7 @@ export class ReceiptCancelOperation {
       const [receipt] = await this.receiptManager.updateAndReturnEntity(
         manager,
         { oid, id: receiptId, status: { IN: [ReceiptStatus.Debt, ReceiptStatus.Success] } },
-        { status: ReceiptStatus.Cancelled, debt: 0, paid: 0 }
+        { status: ReceiptStatus.Voided, debt: 0, paid: 0 }
       )
       if (!receipt) throw new Error(`${PREFIX}: Update Receipt basic failed`)
 

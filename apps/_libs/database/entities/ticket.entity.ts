@@ -34,7 +34,7 @@ export enum TicketStatus {
   Executing = 4,
   Debt = 5,
   Completed = 6,
-  Cancelled = 7,
+  Voided = 7,
 }
 
 @Entity('Ticket')

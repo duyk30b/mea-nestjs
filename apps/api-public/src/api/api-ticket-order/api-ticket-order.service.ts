@@ -481,7 +481,7 @@ export class ApiTicketOrderService {
     ticket = await this.ticketRepository.updateOneAndReturnEntity(
       { oid, id: ticketId },
       {
-        ticketStatus: TicketStatus.Cancelled,
+        ticketStatus: TicketStatus.Voided,
       }
     )
     const customerPaymentList = await this.customerPaymentRepository.findMany({

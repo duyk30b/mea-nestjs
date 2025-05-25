@@ -429,7 +429,7 @@ export class ApiTicketClinicService {
     })
     await this.ticketRepository.update(
       { oid, id: ticketId },
-      { ticketStatus: TicketStatus.Cancelled }
+      { ticketStatus: TicketStatus.Voided }
     )
     await this.ticketRepository.destroy({ oid, ticketId })
     this.socketEmitService.ticketClinicChange(oid, { type: 'DESTROY', ticket })

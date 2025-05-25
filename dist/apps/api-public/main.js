@@ -798,7 +798,7 @@ var InventoryStrategy;
 })(InventoryStrategy || (exports.InventoryStrategy = InventoryStrategy = {}));
 var ReceiptStatus;
 (function (ReceiptStatus) {
-    ReceiptStatus[ReceiptStatus["Cancelled"] = -1] = "Cancelled";
+    ReceiptStatus[ReceiptStatus["Voided"] = -1] = "Voided";
     ReceiptStatus[ReceiptStatus["Draft"] = 0] = "Draft";
     ReceiptStatus[ReceiptStatus["Deposited"] = 1] = "Deposited";
     ReceiptStatus[ReceiptStatus["Debt"] = 2] = "Debt";
@@ -959,7 +959,7 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 255, default: '' }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", String)
-], Role.prototype, "displayName", void 0);
+], Role.prototype, "roleCode", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'text', default: '[]' }),
     (0, class_transformer_1.Expose)(),
@@ -3701,7 +3701,7 @@ var TicketStatus;
     TicketStatus[TicketStatus["Executing"] = 4] = "Executing";
     TicketStatus[TicketStatus["Debt"] = 5] = "Debt";
     TicketStatus[TicketStatus["Completed"] = 6] = "Completed";
-    TicketStatus[TicketStatus["Cancelled"] = 7] = "Cancelled";
+    TicketStatus[TicketStatus["Voided"] = 7] = "Voided";
 })(TicketStatus || (exports.TicketStatus = TicketStatus = {}));
 let Ticket = Ticket_1 = class Ticket extends base_entity_1.BaseEntity {
     static fromRaw(raw) {
@@ -5927,6 +5927,16 @@ __decorate([
     __metadata("design:type", String)
 ], Radiology.prototype, "resultDefault", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'text', default: '' }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", String)
+], Radiology.prototype, "customVariables", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', default: '' }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", String)
+], Radiology.prototype, "customStyles", void 0);
+__decorate([
     (0, typeorm_1.Column)({
         type: 'bigint',
         default: () => '(EXTRACT(epoch FROM now()) * (1000))',
@@ -6565,7 +6575,7 @@ var PermissionId;
     PermissionId[PermissionId["TICKET_ORDER_PAY_DEBT"] = 5011] = "TICKET_ORDER_PAY_DEBT";
     PermissionId[PermissionId["TICKET_ORDER_REOPEN"] = 5012] = "TICKET_ORDER_REOPEN";
     PermissionId[PermissionId["TICKET_ORDER_CANCEL"] = 5013] = "TICKET_ORDER_CANCEL";
-    PermissionId[PermissionId["TICKET_ORDER_CANCEL_DESTROY"] = 5014] = "TICKET_ORDER_CANCEL_DESTROY";
+    PermissionId[PermissionId["TICKET_ORDER_VOIDED_DESTROY"] = 5014] = "TICKET_ORDER_VOIDED_DESTROY";
     PermissionId[PermissionId["TICKET_CLINIC"] = 51] = "TICKET_CLINIC";
     PermissionId[PermissionId["TICKET_CLINIC_READ"] = 5100] = "TICKET_CLINIC_READ";
     PermissionId[PermissionId["TICKET_CLINIC_CREATE"] = 5101] = "TICKET_CLINIC_CREATE";
@@ -9932,7 +9942,7 @@ let ReceiptCancelOperation = class ReceiptCancelOperation {
             const [receiptRoot] = await this.receiptManager.updateAndReturnEntity(manager, { oid, id: receiptId }, { endedAt: Date.now() });
             if (!receiptRoot)
                 throw new Error(`${PREFIX}: Update Receipt root failed`);
-            const [receipt] = await this.receiptManager.updateAndReturnEntity(manager, { oid, id: receiptId, status: { IN: [variable_1.ReceiptStatus.Debt, variable_1.ReceiptStatus.Success] } }, { status: variable_1.ReceiptStatus.Cancelled, debt: 0, paid: 0 });
+            const [receipt] = await this.receiptManager.updateAndReturnEntity(manager, { oid, id: receiptId, status: { IN: [variable_1.ReceiptStatus.Debt, variable_1.ReceiptStatus.Success] } }, { status: variable_1.ReceiptStatus.Voided, debt: 0, paid: 0 });
             if (!receipt)
                 throw new Error(`${PREFIX}: Update Receipt basic failed`);
             let distributor;
@@ -13872,7 +13882,7 @@ let ReceiptRepository = class ReceiptRepository extends _postgresql_repository_1
             const receiptDeleteResult = await manager.delete(entities_1.Receipt, {
                 oid,
                 id: receiptId,
-                status: (0, typeorm_2.In)([variable_1.ReceiptStatus.Draft, variable_1.ReceiptStatus.Cancelled]),
+                status: (0, typeorm_2.In)([variable_1.ReceiptStatus.Draft, variable_1.ReceiptStatus.Voided]),
             });
             if (receiptDeleteResult.affected !== 1) {
                 throw new Error(`Delete Receipt ${receiptId} failed: Status invalid`);
@@ -14667,7 +14677,7 @@ let TicketRepository = class TicketRepository extends _postgresql_repository_1._
             const whereTicket = {
                 id: ticketId,
                 oid,
-                ticketStatus: (0, typeorm_2.In)([ticket_entity_1.TicketStatus.Schedule, ticket_entity_1.TicketStatus.Draft, ticket_entity_1.TicketStatus.Cancelled]),
+                ticketStatus: (0, typeorm_2.In)([ticket_entity_1.TicketStatus.Schedule, ticket_entity_1.TicketStatus.Draft, ticket_entity_1.TicketStatus.Voided]),
             };
             const ticketDeleteResult = await manager.delete(entities_1.Ticket, whereTicket);
             if (ticketDeleteResult.affected !== 1) {
@@ -31758,11 +31768,11 @@ let ApiPermissionService = class ApiPermissionService {
                 rootId: permission_entity_1.PermissionId.TICKET_ORDER,
             },
             {
-                id: permission_entity_1.PermissionId.TICKET_ORDER_CANCEL_DESTROY,
+                id: permission_entity_1.PermissionId.TICKET_ORDER_VOIDED_DESTROY,
                 level: 2,
-                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_ORDER_CANCEL_DESTROY],
+                code: permission_entity_1.PermissionId[permission_entity_1.PermissionId.TICKET_ORDER_VOIDED_DESTROY],
                 isActive: 1,
-                pathId: `${permission_entity_1.PermissionId.TICKET_ORDER}.${permission_entity_1.PermissionId.TICKET_ORDER_CANCEL_DESTROY}`,
+                pathId: `${permission_entity_1.PermissionId.TICKET_ORDER}.${permission_entity_1.PermissionId.TICKET_ORDER_VOIDED_DESTROY}`,
                 name: 'Xóa hoàn toàn hóa đơn ở trạng thái HỦY',
                 parentId: permission_entity_1.PermissionId.TICKET_ORDER,
                 rootId: permission_entity_1.PermissionId.TICKET_ORDER,
@@ -36961,6 +36971,8 @@ let ApiRadiologyService = class ApiRadiologyService {
                 descriptionDefault: i.descriptionDefault,
                 requestNoteDefault: i.requestNoteDefault,
                 resultDefault: i.resultDefault,
+                customVariables: i.customVariables,
+                customStyles: i.customStyles,
                 priority: 0,
             };
             return dto;
@@ -37325,6 +37337,20 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], RadiologyUpsertBody.prototype, "resultDefault", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '' }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RadiologyUpsertBody.prototype, "customVariables", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '' }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RadiologyUpsertBody.prototype, "customStyles", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: RadiologyCommission, isArray: true }),
     (0, class_transformer_1.Expose)(),
@@ -38857,19 +38883,19 @@ class RoleCreateBody {
 }
 exports.RoleCreateBody = RoleCreateBody;
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ example: 'Bán hàng' }),
+    (0, swagger_1.ApiPropertyOptional)({ example: 'DOCTOR' }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], RoleCreateBody.prototype, "roleCode", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 'Bác sĩ' }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], RoleCreateBody.prototype, "name", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({ example: 'Bán hàng' }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], RoleCreateBody.prototype, "displayName", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ type: 'string', example: '[{"name":"Viên","rate":1}]' }),
     (0, class_transformer_1.Expose)(),
@@ -45187,7 +45213,7 @@ let ApiTicketClinicService = class ApiTicketClinicService {
             imageIdsKeep: [],
             imageIdsOld: JSON.parse(ticket.imageIds || '[]'),
         });
-        await this.ticketRepository.update({ oid, id: ticketId }, { ticketStatus: ticket_entity_1.TicketStatus.Cancelled });
+        await this.ticketRepository.update({ oid, id: ticketId }, { ticketStatus: ticket_entity_1.TicketStatus.Voided });
         await this.ticketRepository.destroy({ oid, ticketId });
         this.socketEmitService.ticketClinicChange(oid, { type: 'DESTROY', ticket });
         return { data: { ticketId } };
@@ -46773,8 +46799,8 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ApiTicketOrderController.prototype, "cancel", null);
 __decorate([
-    (0, common_1.Delete)(':id/cancel-destroy'),
-    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_ORDER_CANCEL_DESTROY),
+    (0, common_1.Delete)(':id/voided-destroy'),
+    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.TICKET_ORDER_VOIDED_DESTROY),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __metadata("design:type", Function),
@@ -47160,7 +47186,7 @@ let ApiTicketOrderService = class ApiTicketOrderService {
             ticket = result.ticket;
         }
         ticket = await this.ticketRepository.updateOneAndReturnEntity({ oid, id: ticketId }, {
-            ticketStatus: ticket_entity_1.TicketStatus.Cancelled,
+            ticketStatus: ticket_entity_1.TicketStatus.Voided,
         });
         const customerPaymentList = await this.customerPaymentRepository.findMany({
             condition: { oid, ticketId },

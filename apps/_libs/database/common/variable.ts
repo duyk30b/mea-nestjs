@@ -53,7 +53,7 @@ export enum InventoryStrategy {
 }
 
 export enum ReceiptStatus {
-  Cancelled = -1,
+  Voided = -1,
   Draft = 0,
   Deposited = 1, // Chờ gửi hàng
   Debt = 2,

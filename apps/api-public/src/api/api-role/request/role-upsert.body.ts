@@ -3,17 +3,17 @@ import { Expose, Transform } from 'class-transformer'
 import { IsArray, IsDefined, IsIn, IsString } from 'class-validator'
 
 export class RoleCreateBody {
-  @ApiPropertyOptional({ example: 'Bán hàng' })
+  @ApiPropertyOptional({ example: 'DOCTOR' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  roleCode: string
+
+  @ApiPropertyOptional({ example: 'Bác sĩ' })
   @Expose()
   @IsDefined()
   @IsString()
   name: string
-
-  @ApiPropertyOptional({ example: 'Bán hàng' })
-  @Expose()
-  @IsDefined()
-  @IsString()
-  displayName: string
 
   @ApiPropertyOptional({ type: 'string', example: '[{"name":"Viên","rate":1}]' })
   @Expose()
