@@ -18,6 +18,14 @@ export default class Customer extends BaseEntity {
   @Expose()
   phone: string
 
+  @Expose()
+  @Column({ type: 'varchar', length: 255, default: '' })
+  facebook: string
+
+  @Expose()
+  @Column({ type: 'varchar', length: 255, default: '' })
+  zalo: string
+
   @Column({
     type: 'bigint',
     nullable: true,

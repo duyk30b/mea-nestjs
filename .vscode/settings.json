@@ -57,7 +57,8 @@
     "taskkill",
     "typeorm",
     "virtuals",
-    "websockets"
+    "websockets",
+    "zalo"
   ],
   "explorer.compactFolders": false
 }

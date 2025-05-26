@@ -18,7 +18,7 @@ export class ApiTicketClinicUserController {
   constructor(private readonly apiTicketClinicUserService: ApiTicketClinicUserService) { }
 
   @Delete(':ticketId/ticket-user/destroy/:ticketUserId')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_USER_LIST)
+  @HasPermission(PermissionId.TICKET_CLINIC_USER_UPDATE_COMMISSION)
   async destroyTicketUser(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketUserId }: TicketClinicUserParams
@@ -31,7 +31,7 @@ export class ApiTicketClinicUserController {
   }
 
   @Post(':ticketId/ticket-user/update/:ticketUserId')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_USER_LIST)
+  @HasPermission(PermissionId.TICKET_CLINIC_USER_UPDATE_COMMISSION)
   async updateTicketUser(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketUserId }: TicketClinicUserParams,
@@ -45,14 +45,14 @@ export class ApiTicketClinicUserController {
     })
   }
 
-  @Post(':ticketId/ticket-user/choose-user-id-for-ticket')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_USER_LIST)
-  async updateTicketUserList(
+  @Post(':ticketId/ticket-user/choose-user-id')
+  @HasPermission(PermissionId.TICKET_CLINIC_USER_CHOOSE_USERID)
+  async chooseUserId(
     @External() { oid }: TExternal,
     @Param() { ticketId }: TicketParams,
     @Body() body: TicketClinicUpdateTicketUserListBody
   ) {
-    return await this.apiTicketClinicUserService.updateTicketUserItem({
+    return await this.apiTicketClinicUserService.changeTicketUserList({
       oid,
       ticketId,
       body,

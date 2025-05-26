@@ -152,6 +152,10 @@ export type TicketUserUpdateType = {
   >]: TicketUser[K] | (() => string)
 }
 
+export type TicketUserUpsertType = Omit<TicketUser, keyof TicketUserRelationType>
+
 export type TicketUserSortType = {
-  [P in keyof Pick<TicketUser, 'oid' | 'id' | 'createdAt'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<TicketUser, 'oid' | 'id' | 'createdAt' | 'interactType' | 'roleId'>]?:
+  | 'ASC'
+  | 'DESC'
 }

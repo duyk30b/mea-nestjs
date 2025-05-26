@@ -1,21 +1,19 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../../_libs/common/cache-data/cache-data.service'
 import { BaseResponse } from '../../../../../_libs/common/interceptor'
+import { InteractType } from '../../../../../_libs/database/entities/commission.entity'
 import { TicketProductType } from '../../../../../_libs/database/entities/ticket-product.entity'
 import {
   TicketClinicAddTicketProductOperation,
   TicketClinicDestroyTicketProductOperation,
-  TicketClinicUpdateTicketProductListOperation,
   TicketClinicUpdateTicketProductOperation,
   TicketReturnProductOperation,
   TicketSendProductOperation,
 } from '../../../../../_libs/database/operations'
-import {
-  TicketBatchRepository,
-  TicketProductRepository,
-} from '../../../../../_libs/database/repositories'
+import { TicketProductRepository } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { TicketReturnProductListBody } from '../../api-ticket/request'
+import { ApiTicketClinicUserService } from '../api-ticket-clinic-user/api-ticket-clinic-user.service'
 import {
   TicketClinicAddTicketProductListBody,
   TicketClinicUpdatePriorityTicketProductBody,
@@ -29,15 +27,14 @@ export class ApiTicketClinicProductService {
     private readonly cacheDataService: CacheDataService,
 
     private readonly ticketProductRepository: TicketProductRepository,
-    private readonly ticketBatchRepository: TicketBatchRepository,
 
     private readonly ticketClinicAddTicketProductOperation: TicketClinicAddTicketProductOperation,
     private readonly ticketClinicDestroyTicketProductOperation: TicketClinicDestroyTicketProductOperation,
     private readonly ticketClinicUpdateTicketProductOperation: TicketClinicUpdateTicketProductOperation,
-    private readonly ticketClinicUpdateTicketProductListOperation: TicketClinicUpdateTicketProductListOperation,
 
     private readonly ticketSendProductOperation: TicketSendProductOperation,
-    private readonly ticketReturnProductOperation: TicketReturnProductOperation
+    private readonly ticketReturnProductOperation: TicketReturnProductOperation,
+    private readonly apiTicketClinicUserService: ApiTicketClinicUserService
   ) { }
 
   async addTicketProductList(options: {
@@ -156,27 +153,33 @@ export class ApiTicketClinicProductService {
       ticketProductId,
       ticketProductType,
       ticketProductUpdateDto: body.ticketProduct,
-      ticketUserDto: body.ticketUserList,
     })
+    const { ticket, ticketProduct } = result
 
-    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket: result.ticket })
-    if (result.ticketProduct.type === TicketProductType.Consumable) {
+    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
+    if (ticketProduct.type === TicketProductType.Consumable) {
       this.socketEmitService.ticketClinicChangeConsumable(oid, {
         ticketId,
-        ticketProductUpsertList: [result.ticketProduct],
+        ticketProductUpsertList: [ticketProduct],
       })
     }
-    if (result.ticketProduct.type === TicketProductType.Prescription) {
+    if (ticketProduct.type === TicketProductType.Prescription) {
       this.socketEmitService.ticketClinicChangePrescription(oid, {
         ticketId,
-        ticketProductUpsertList: [result.ticketProduct],
+        ticketProductUpsertList: [ticketProduct],
       })
     }
-    if (result.ticketUserChangeList) {
-      this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
+    if (body.ticketUserList) {
+      this.apiTicketClinicUserService.changeTicketUserList({
+        oid,
         ticketId,
-        ticketUserDestroyList: result.ticketUserChangeList.ticketUserDestroyList,
-        ticketUserUpsertList: result.ticketUserChangeList.ticketUserInsertList,
+        body: {
+          interactType: InteractType.Product,
+          interactId: ticketProduct.productId,
+          ticketItemId: ticketProduct.id,
+          quantity: ticketProduct.quantity,
+          ticketUserList: body.ticketUserList,
+        },
       })
     }
     return { data: true }

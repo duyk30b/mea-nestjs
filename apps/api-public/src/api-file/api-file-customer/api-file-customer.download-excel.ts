@@ -6,7 +6,7 @@ import { CustomerRepository } from '../../../../_libs/database/repositories/cust
 import { excelOneSheetWorkbook } from '../../../../_libs/file/excel-one-sheet.util'
 
 @Injectable()
-export class ApiCustomerExcel {
+export class ApiFileCustomerDownloadExcel {
   constructor(private readonly customerRepository: CustomerRepository) { }
 
   async downloadExcel(options: { user: User; organization: Organization }) {
@@ -268,9 +268,9 @@ export class ApiCustomerExcel {
         { key: 'num', width: 5 },
         { key: 'id', width: 10 },
         { key: 'fullName', width: 40 },
-        { key: 'phone', width: 10 },
+        { key: 'phone', width: 15 },
         { key: 'debt', width: 10 },
-        { key: 'birthday', width: 10 },
+        { key: 'birthday', width: 15 },
         { key: 'gender', width: 10 },
         { key: 'addressProvince', width: 20 },
         { key: 'addressDistrict', width: 20 },

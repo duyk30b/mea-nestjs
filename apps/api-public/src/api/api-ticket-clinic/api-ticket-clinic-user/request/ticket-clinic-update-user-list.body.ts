@@ -9,6 +9,12 @@ export class TicketUserBasicBody {
   @Expose()
   @IsDefined()
   @IsNumber()
+  id: number
+
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
   roleId: number
 
   @ApiProperty({ example: 56 })
@@ -36,6 +42,12 @@ export class TicketClinicUpdateTicketUserListBody {
   @IsDefined()
   @IsNumber()
   ticketItemId: number
+
+  @ApiProperty({ example: 45 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  quantity: number
 
   @ApiProperty({ type: TicketUserBasicBody, isArray: true })
   @Expose()

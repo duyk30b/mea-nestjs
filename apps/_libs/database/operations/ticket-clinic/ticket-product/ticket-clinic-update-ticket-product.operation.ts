@@ -2,13 +2,11 @@ import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { DeliveryStatus } from '../../../common/variable'
-import { TicketProduct, TicketUser } from '../../../entities'
-import { InteractType } from '../../../entities/commission.entity'
+import { TicketProduct } from '../../../entities'
 import { TicketProductType } from '../../../entities/ticket-product.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import { TicketManager, TicketProductManager } from '../../../managers'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
-import { TicketUserChangeListManager } from '../../ticket-user/ticket-user-change-list.manager'
 
 export type TicketProductUpdateDtoType = {
   [K in keyof Pick<
@@ -31,7 +29,6 @@ export class TicketClinicUpdateTicketProductOperation {
     private dataSource: DataSource,
     private ticketManager: TicketManager,
     private ticketProductManager: TicketProductManager,
-    private ticketUserChangeListManager: TicketUserChangeListManager,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
   ) { }
 
@@ -41,7 +38,6 @@ export class TicketClinicUpdateTicketProductOperation {
     ticketProductId: number
     ticketProductType: TicketProductType
     ticketProductUpdateDto?: NoExtra<TicketProductUpdateDtoType, T>
-    ticketUserDto?: { roleId: number; userId: number }[]
   }) {
     const {
       oid,
@@ -49,7 +45,6 @@ export class TicketClinicUpdateTicketProductOperation {
       ticketProductId,
       ticketProductType,
       ticketProductUpdateDto,
-      ticketUserDto,
     } = params
     const PREFIX = `ticketId=${ticketId} updateTicketProduct failed: `
 
@@ -119,42 +114,9 @@ export class TicketClinicUpdateTicketProductOperation {
         }
       }
 
-      let commissionMoneyChange = 0
-      let ticketUserChangeList: {
-        ticketUserDestroyList: TicketUser[]
-        ticketUserInsertList: TicketUser[]
-      }
-      if (ticketUserDto) {
-        ticketUserChangeList = await this.ticketUserChangeListManager.replaceList({
-          manager,
-          information: {
-            oid,
-            ticketId,
-            interactType: InteractType.Product,
-            interactId: ticketProduct.productId,
-            ticketItemId: ticketProduct.id,
-            quantity: ticketProduct.quantity,
-            ticketItemActualPrice: ticketProduct.actualPrice,
-            ticketItemExpectedPrice: ticketProduct.expectedPrice,
-          },
-          dataChange: ticketUserDto,
-        })
-        const commissionMoneyDelete = ticketUserChangeList.ticketUserDestroyList.reduce(
-          (acc, item) => {
-            return acc + item.commissionMoney * item.quantity
-          },
-          0
-        )
-        const commissionMoneyAdd = ticketUserChangeList.ticketUserInsertList.reduce((acc, item) => {
-          return acc + item.commissionMoney * item.quantity
-        }, 0)
-
-        commissionMoneyChange = commissionMoneyAdd - commissionMoneyDelete
-      }
-
       // === 5. UPDATE TICKET: MONEY  ===
       let ticket: Ticket = ticketOrigin
-      if (productMoneyChange != 0 || itemsDiscountChange != 0 || commissionMoneyChange != 0) {
+      if (productMoneyChange != 0 || itemsDiscountChange != 0) {
         ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
           manager,
           oid,
@@ -163,11 +125,10 @@ export class TicketClinicUpdateTicketProductOperation {
             productMoneyAdd: productMoneyChange,
             itemsCostAmountAdd: itemsCostAmountChange,
             itemsDiscountAdd: itemsDiscountChange,
-            commissionMoneyAdd: commissionMoneyChange,
           },
         })
       }
-      return { ticket, ticketProduct, ticketUserChangeList }
+      return { ticket, ticketProduct }
     })
 
     return transaction

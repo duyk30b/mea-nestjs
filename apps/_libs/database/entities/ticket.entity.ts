@@ -37,6 +37,26 @@ export enum TicketStatus {
   Voided = 7,
 }
 
+export const TicketOrderStatusText = {
+  [TicketStatus.Schedule]: 'Xem trước',
+  [TicketStatus.Draft]: 'Nháp',
+  [TicketStatus.Deposited]: 'Đặt hàng',
+  [TicketStatus.Executing]: 'Đang xử lý',
+  [TicketStatus.Debt]: 'Đang nợ',
+  [TicketStatus.Completed]: 'Hoàn thành',
+  [TicketStatus.Voided]: 'Đã hủy',
+}
+
+export const TicketClinicStatusText = {
+  [TicketStatus.Schedule]: 'Hẹn khám',
+  [TicketStatus.Draft]: 'Chờ khám',
+  [TicketStatus.Deposited]: 'Đặt khám',
+  [TicketStatus.Executing]: 'Đang khám',
+  [TicketStatus.Debt]: 'Đang nợ',
+  [TicketStatus.Completed]: 'Hoàn thành',
+  [TicketStatus.Voided]: 'Đã hủy',
+}
+
 @Entity('Ticket')
 @Index('IDX_Ticket__oid_registeredAt', ['oid', 'registeredAt'])
 @Index('IDX_Ticket__oid_customerId', ['oid', 'customerId'])
@@ -377,6 +397,15 @@ export default class Ticket extends BaseEntity {
 
   static fromRaws(raws: { [P in keyof Ticket]: any }[]) {
     return raws.map((i) => Ticket.fromRaw(i))
+  }
+
+  static getStatusText(ticket: Ticket) {
+    if (ticket.ticketType === TicketType.Order) {
+      return TicketOrderStatusText[ticket.ticketStatus]
+    } else {
+      return TicketClinicStatusText[ticket.ticketStatus]
+    }
+    return ''
   }
 }
 

@@ -7,8 +7,8 @@ WORKING_DIR="$(dirname "$(realpath "$0")")"
 
 # File script và stdout, stderr
 SCRIPT_FILE="./backup-postgres.sh"
-STDOUT_LOG="./backup-postgres-stdout.log"
-STDERR_LOG="./backup-postgres-stderr.log"
+STDOUT_LOG="../data/logs/backup-postgres-stdout.log"
+STDERR_LOG="../data/logs/backup-postgres-stderr.log"
 
 # JOB_ID là tên job để phân biệt với các job khác
 JOB_ID="backup_postgres"

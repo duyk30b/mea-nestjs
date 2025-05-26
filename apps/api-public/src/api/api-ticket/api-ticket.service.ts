@@ -202,6 +202,7 @@ export class ApiTicketService {
           relation: {
             user: relation?.ticketUserList?.user,
           },
+          sort: { interactType: 'ASC', roleId: 'ASC' },
         })
         : undefined,
       relation?.ticketAttributeList

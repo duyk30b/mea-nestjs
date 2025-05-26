@@ -7,16 +7,26 @@ import {
   TicketProcedure,
   TicketProduct,
   TicketRadiology,
+  TicketUser,
 } from '../../entities'
-import { CustomerPaymentInsertType } from '../../entities/customer-payment.entity'
+import { CommissionCalculatorType, InteractType } from '../../entities/commission.entity'
+import CustomerPayment, { CustomerPaymentInsertType } from '../../entities/customer-payment.entity'
+import { TicketProductType } from '../../entities/ticket-product.entity'
+import { TicketUserInsertType } from '../../entities/ticket-user.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
-import { CustomerManager, CustomerPaymentManager, TicketManager } from '../../managers'
+import {
+  CustomerManager,
+  CustomerPaymentManager,
+  TicketManager,
+  TicketUserManager,
+} from '../../managers'
 
 @Injectable()
 export class TicketPaymentAndCloseOperation {
   constructor(
     private dataSource: DataSource,
     private ticketManager: TicketManager,
+    private ticketUserManager: TicketUserManager,
     private customerManager: CustomerManager,
     private customerPaymentManager: CustomerPaymentManager
   ) { }
@@ -36,7 +46,11 @@ export class TicketPaymentAndCloseOperation {
       throw new Error(`${PREFIX}: money = ${money}`)
     }
 
-    return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
+    const queryRunner = this.dataSource.createQueryRunner()
+    await queryRunner.connect()
+    await queryRunner.startTransaction('READ UNCOMMITTED')
+    try {
+      const manager = queryRunner.manager
       // === 1. TICKET: Update status để tạo transaction ===
       const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(
         manager,
@@ -63,9 +77,158 @@ export class TicketPaymentAndCloseOperation {
       const ticketRadiologyList = await manager.find(TicketRadiology, {
         where: { ticketId },
       })
+      const ticketUserList = await this.ticketUserManager.findMany(manager, {
+        condition: { ticketId },
+      })
 
       if (ticketProductList.find((i) => i.deliveryStatus === DeliveryStatus.Pending)) {
         throw new Error('Không thể đóng phiếu khi chưa xuất hết hàng')
+      }
+
+      let commissionMoney = 0
+
+      let ticketUserModifiedList: TicketUser[] = []
+      let ticketUserDeletedList: TicketUser[] = []
+      if (ticketUserList.length) {
+        const ticketUserRemoveList: TicketUser[] = []
+        const ticketUserUpdateList = ticketUserList.map((tu) => {
+          let commissionMoney = 0
+          let commissionPercentActual = 0
+          let commissionPercentExpected = 0
+
+          let ticketItemExpectedPrice = 0
+          let ticketItemActualPrice = 0
+
+          if (tu.interactType === InteractType.Ticket) {
+            ticketItemExpectedPrice = ticketOrigin.totalMoney + ticketOrigin.discountMoney
+            ticketItemActualPrice = ticketOrigin.totalMoney
+          }
+          if (tu.interactType === InteractType.Product) {
+            const ticketProduct = ticketProductList.find((i) => i.id === tu.ticketItemId)
+            if (!ticketProduct) ticketUserRemoveList.push(tu)
+
+            ticketItemExpectedPrice = ticketProduct?.expectedPrice || 0
+            ticketItemActualPrice = ticketProduct?.actualPrice || 0
+          }
+          if (tu.interactType === InteractType.Procedure) {
+            const ticketProcedure = ticketProcedureList.find((i) => i.id === tu.ticketItemId)
+            if (!ticketProcedure) ticketUserRemoveList.push(tu)
+            ticketItemExpectedPrice = ticketProcedure.expectedPrice || 0
+            ticketItemActualPrice = ticketProcedure.actualPrice || 0
+          }
+          if (tu.interactType === InteractType.Radiology) {
+            const ticketRadiology = ticketRadiologyList.find((i) => i.id === tu.ticketItemId)
+            if (!ticketRadiology) ticketUserRemoveList.push(tu)
+            ticketItemExpectedPrice = ticketRadiology.expectedPrice || 0
+            ticketItemActualPrice = ticketRadiology.actualPrice || 0
+          }
+          if (tu.interactType === InteractType.Laboratory) {
+            const ticketLaboratory = ticketLaboratoryList.find((i) => i.id === tu.ticketItemId)
+            if (!ticketLaboratory) ticketUserRemoveList.push(tu)
+            ticketItemExpectedPrice = ticketLaboratory.expectedPrice || 0
+            ticketItemActualPrice = ticketLaboratory.actualPrice || 0
+          }
+          if (tu.interactType === InteractType.ConsumableList) {
+            const ticketProductConsumableList = ticketProductList.filter((i) => {
+              return i.type === TicketProductType.Consumable
+            })
+            ticketItemExpectedPrice = ticketProductConsumableList.reduce((acc, cur) => {
+              return acc + cur.expectedPrice * cur.quantity
+            }, 0)
+            ticketItemActualPrice = ticketProductConsumableList.reduce((acc, cur) => {
+              return acc + cur.actualPrice * cur.quantity
+            }, 0)
+          }
+          if (tu.interactType === InteractType.PrescriptionList) {
+            const ticketProductPrescriptionList = ticketProductList.filter((i) => {
+              return i.type === TicketProductType.Prescription
+            })
+            ticketItemExpectedPrice = ticketProductPrescriptionList.reduce((acc, cur) => {
+              return acc + cur.expectedPrice * cur.quantity
+            }, 0)
+            ticketItemActualPrice = ticketProductPrescriptionList.reduce((acc, cur) => {
+              return acc + cur.actualPrice * cur.quantity
+            }, 0)
+          }
+
+          const commissionCalculatorType = tu.commissionCalculatorType
+          if (commissionCalculatorType === CommissionCalculatorType.VND) {
+            commissionMoney = tu.commissionMoney
+            commissionPercentExpected =
+              ticketItemExpectedPrice === 0
+                ? 0
+                : Math.floor((commissionMoney * 100) / ticketItemExpectedPrice)
+            commissionPercentActual =
+              ticketItemActualPrice === 0
+                ? 0
+                : Math.floor((commissionMoney * 100) / ticketItemActualPrice)
+          }
+          if (commissionCalculatorType === CommissionCalculatorType.PercentExpected) {
+            commissionPercentExpected = tu.commissionPercentExpected || 0
+            commissionMoney = Math.floor(
+              (ticketItemExpectedPrice * commissionPercentExpected) / 100
+            )
+            commissionPercentActual =
+              ticketItemActualPrice === 0
+                ? 0
+                : Math.floor((commissionMoney * 100) / ticketItemActualPrice)
+          }
+          if (commissionCalculatorType === CommissionCalculatorType.PercentActual) {
+            commissionPercentActual = tu.commissionPercentActual || 0
+            commissionMoney = Math.floor((ticketItemActualPrice * commissionPercentActual) / 100)
+            commissionPercentExpected =
+              ticketItemExpectedPrice === 0
+                ? 0
+                : Math.floor((commissionMoney * 100) / ticketItemExpectedPrice)
+          }
+
+          const updateDto: TicketUserInsertType & { id: number } = {
+            id: tu.id,
+            oid,
+            ticketId,
+            roleId: tu.roleId,
+            userId: tu.userId,
+            interactId: tu.interactId,
+            interactType: tu.interactType,
+            ticketItemId: tu.ticketItemId,
+            ticketItemExpectedPrice,
+            ticketItemActualPrice,
+            quantity: tu.quantity,
+            createdAt: Date.now(),
+            commissionCalculatorType,
+            commissionMoney,
+            commissionPercentActual,
+            commissionPercentExpected,
+          }
+          return updateDto
+        })
+        commissionMoney = ticketUserUpdateList.reduce((acc, cur) => {
+          return acc + cur.commissionMoney * cur.quantity
+        }, 0)
+
+        if (ticketUserRemoveList.length) {
+          ticketUserDeletedList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+            oid,
+            id: { IN: ticketUserRemoveList.map((i) => i.id) },
+          })
+        }
+        ticketUserModifiedList = await this.ticketUserManager.updateListAndReturnEntity({
+          manager,
+          updateList: ticketUserUpdateList,
+          conditionFields: ['oid', 'id'],
+          updateFields: [
+            'ticketItemExpectedPrice',
+            'ticketItemActualPrice',
+            'commissionCalculatorType',
+            'commissionMoney',
+            'commissionPercentActual',
+            'commissionPercentExpected',
+          ],
+        })
+        console.log(
+          '🚀 ~ ticket-payment-and-close.operation.ts:228 ~ TicketPaymentAndCloseOperation ~ ticketUserModifiedList:',
+          ticketUserModifiedList
+        )
       }
 
       const procedureDiscount = ticketProcedureList.reduce((acc, item) => {
@@ -86,7 +249,7 @@ export class TicketPaymentAndCloseOperation {
         ticketOrigin.totalMoney
         - ticketOrigin.itemsCostAmount
         - ticketOrigin.expense
-        - ticketOrigin.commissionMoney
+        - commissionMoney
 
       const ticket = await this.ticketManager.updateOneAndReturnEntity(
         manager,
@@ -101,6 +264,7 @@ export class TicketPaymentAndCloseOperation {
           debt: () => `debt - ${money}`,
           itemsDiscount,
           profit,
+          commissionMoney,
           endedAt: time,
         }
       )
@@ -108,46 +272,53 @@ export class TicketPaymentAndCloseOperation {
       if (ticket.paid > ticket.totalMoney) {
         throw new Error(`${PREFIX}: Money invalid, ticket=${ticket}`)
       }
-      if (ticket.debt == 0 && money == 0) return { ticket }
-
       let customer: Customer
-      if (ticket.debt > 0) {
-        customer = await this.customerManager.updateOneAndReturnEntity(
+      let customerPayment: CustomerPayment
+      if (ticket.debt != 0 || money != 0) {
+        if (ticket.debt > 0) {
+          customer = await this.customerManager.updateOneAndReturnEntity(
+            manager,
+            { oid, id: ticket.customerId },
+            { debt: () => `debt + ${ticket.debt}` }
+          )
+        } else {
+          customer = await manager.findOneBy(Customer, { oid, id: ticket.customerId })
+        }
+        if (!customer) {
+          throw new Error(`Khách hàng không tồn tại trên hệ thống`)
+        }
+
+        const customerCloseDebt = customer.debt
+        const customerOpenDebt = customerCloseDebt - ticket.debt
+
+        // === 3. INSERT CUSTOMER_PAYMENT ===
+        const customerPaymentInsert: CustomerPaymentInsertType = {
+          oid,
+          customerId: ticket.customerId,
+          paymentMethodId,
+          ticketId,
+          createdAt: time,
+          paymentType: PaymentType.Close,
+          paid: money,
+          debit: ticket.debt,
+          openDebt: customerOpenDebt,
+          closeDebt: customerCloseDebt,
+          note,
+          description: '',
+        }
+        customerPayment = await this.customerPaymentManager.insertOneAndReturnEntity(
           manager,
-          { oid, id: ticket.customerId },
-          { debt: () => `debt + ${ticket.debt}` }
+          customerPaymentInsert
         )
-      } else {
-        customer = await manager.findOneBy(Customer, { oid, id: ticket.customerId })
       }
-      if (!customer) {
-        throw new Error(`Khách hàng không tồn tại trên hệ thống`)
-      }
-
-      const customerCloseDebt = customer.debt
-      const customerOpenDebt = customerCloseDebt - ticket.debt
-
-      // === 3. INSERT CUSTOMER_PAYMENT ===
-      const customerPaymentInsert: CustomerPaymentInsertType = {
-        oid,
-        customerId: ticket.customerId,
-        paymentMethodId,
-        ticketId,
-        createdAt: time,
-        paymentType: PaymentType.Close,
-        paid: money,
-        debit: ticket.debt,
-        openDebt: customerOpenDebt,
-        closeDebt: customerCloseDebt,
-        note,
-        description: '',
-      }
-      const customerPayment = await this.customerPaymentManager.insertOneAndReturnEntity(
-        manager,
-        customerPaymentInsert
-      )
-
-      return { ticket, customer, customerPayment }
-    })
+      await queryRunner.commitTransaction()
+      return { ticket, customer, customerPayment, ticketUserModifiedList, ticketUserDeletedList }
+    } catch (error) {
+      console.error('error:', error)
+      await queryRunner.rollbackTransaction()
+      throw error
+    } finally {
+      await queryRunner.release()
+    }
   }
 }

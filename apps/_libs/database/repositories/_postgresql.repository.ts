@@ -269,19 +269,91 @@ export abstract class _PostgreSqlRepository<
     conflictFields: (keyof _ENTITY)[]
   }) {
     const { upsertList, updateFields, conflictFields } = options
-    const insertResult: InsertResult = await this.repository
+    const upsertResult: InsertResult = await this.repository
       .createQueryBuilder()
       .insert()
       .values(upsertList as any)
       .orUpdate(updateFields as string[], conflictFields as string[])
+      .returning('*')
       .execute()
-    const idList = insertResult.identifiers.map((i) => i.id)
-    return idList
+    if (upsertResult.raw?.length !== upsertList.length) {
+      throw new Error(`Insert Database failed: ` + JSON.stringify({ upsertResult, upsertList }))
+    }
+    return this.entity.fromRaws(upsertResult.raw)
   }
 
   async delete(condition: BaseCondition<_ENTITY>) {
     const where = this.getWhereOptions(condition)
     const deleteResult = await this.repository.delete(where)
     return deleteResult.affected
+  }
+
+  async deleteAndReturnRaw(
+    condition: BaseCondition<_ENTITY>
+  ): Promise<{ [P in keyof _ENTITY]: any }[]> {
+    const where = this.getWhereOptions(condition)
+    const deleteResult = await this.repository
+      .createQueryBuilder()
+      .delete()
+      .from(this.entity)
+      .where(where)
+      .returning('*')
+      .execute()
+    const raws = deleteResult.raw
+    return raws
+  }
+
+  async deleteAndReturnEntity(condition: BaseCondition<_ENTITY>): Promise<_ENTITY[]> {
+    const raws = await this.deleteAndReturnRaw(condition)
+    return this.entity.fromRaws(raws)
+  }
+
+  async updateListAndReturnEntity(options: {
+    updateList: Partial<_ENTITY>[]
+    conditionFields: (keyof _ENTITY)[]
+    updateFields: (keyof _ENTITY)[]
+  }) {
+    const { updateList } = options
+    const updateFields = options.updateFields as string[]
+    const conditionFields = options.conditionFields as string[]
+
+    if (!updateList.length) return []
+    if (!conditionFields.length) return []
+    if (!conditionFields.length) return []
+
+    const tempField = [...conditionFields, ...updateFields]
+    const tableName = this.entity['name']
+
+    const modifiedRaw: [any[], number] =await this.repository.query(
+      `
+        UPDATE  "${tableName}"
+        SET     ${updateFields.map((field) => `"${field}" = temp."${field}"`).join(', ')}
+        FROM (VALUES `
+      + updateList
+        .map((record) => {
+          return `(${tempField
+            .map((field) => {
+              if (typeof record[field] === 'number') {
+                return `${record[field]}`
+              } else if (typeof record[field] === 'string') {
+                return `'${record[field]}'`
+              } else {
+                return `${record[field]}`
+              }
+            })
+            .join(', ')})`
+        })
+        .join(', ')
+      + `   ) AS temp(${tempField.map((field) => `"${field}"`).join(', ')})
+        WHERE     ${conditionFields.map((field) => `"${tableName}"."${field}" = "temp"."${field}"`).join(' AND ')}
+        RETURNING "${tableName}".*;
+        `
+    )
+    if (modifiedRaw[0].length !== updateList.length) {
+      console.log('🚀 ~ _postgresql.repository.ts:353 ~ updateList:', updateList)
+      console.log('🚀 ~ _postgresql.repository.ts:353 ~ modifiedRaw:', modifiedRaw)
+      throw new Error(`Update Database failed: ` + JSON.stringify({ modifiedRaw, updateList }))
+    }
+    return this.entity.fromRaws(modifiedRaw[0])
   }
 }

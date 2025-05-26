@@ -218,12 +218,12 @@ export class ApiFileProductUploadExcel {
       )
     }
 
-    const productIdList = await this.productRepository.upsertByConflictUnique({
+    const productList = await this.productRepository.upsertByConflictUnique({
       upsertList: productPrepareList,
       updateFields: ['brandName', 'substance', 'route'],
       conflictFields: ['oid', 'productCode'],
     })
 
-    return { data: { productIdList } }
+    return { data: { productIdList: productList.map((i) => i.id) } }
   }
 }

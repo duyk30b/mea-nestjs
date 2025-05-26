@@ -18,19 +18,19 @@ export class ApiFileProductController {
   ) { }
 
   @Get('download-excel')
-  @HasPermission(PermissionId.PRODUCT_DOWNLOAD_EXCEL)
+  @HasPermission(PermissionId.FILE_PRODUCT_DOWNLOAD_EXCEL)
   async downloadExcel(@External() { user, organization }: TExternal) {
     return await this.apiFileProductDownloadExcel.downloadExcel({ organization, user })
   }
 
   @Get('upload-excel/file-example')
-  @HasPermission(PermissionId.PRODUCT_UPLOAD_EXCEL)
+  @HasPermission(PermissionId.FILE_PRODUCT_UPLOAD_EXCEL)
   async uploadExcelFileExample(@External() { user, organization }: TExternal) {
     return await this.apiFileProductUploadExcel.fileExample()
   }
 
   @Post('upload-excel')
-  @HasPermission(PermissionId.PRODUCT_UPLOAD_EXCEL)
+  @HasPermission(PermissionId.FILE_PRODUCT_UPLOAD_EXCEL)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FastifyFileInterceptor('file', {}))
   async uploadExcel(

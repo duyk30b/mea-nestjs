@@ -14,13 +14,13 @@ export class ApiFileReceiptController {
   constructor(private readonly apiFileReceiptUploadExcel: ApiFileReceiptUploadExcel) { }
 
   @Get('upload-excel/file-example')
-  @HasPermission(PermissionId.RECEIPT_UPLOAD_EXCEL)
+  @HasPermission(PermissionId.FILE_RECEIPT_UPLOAD_EXCEL)
   async uploadExcelFileExample(@External() { user, organization }: TExternal) {
     return await this.apiFileReceiptUploadExcel.fileExample()
   }
 
   @Post('upload-excel-for-create-draft')
-  @HasPermission(PermissionId.RECEIPT_UPLOAD_EXCEL)
+  @HasPermission(PermissionId.FILE_RECEIPT_UPLOAD_EXCEL)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FastifyFileInterceptor('file', {}))
   async uploadExcelForCreateDraft(

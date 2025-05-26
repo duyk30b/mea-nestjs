@@ -253,6 +253,25 @@ export abstract class _PostgreSqlManager<
     return this.entity.fromRaw(raws[0])
   }
 
+  async upsertByConflictUnique(options: {
+    manager: EntityManager
+    upsertList: _INSERT[]
+    updateFields: (keyof _ENTITY)[]
+    conflictFields: (keyof _ENTITY)[]
+  }) {
+    const { manager, upsertList, updateFields, conflictFields } = options
+    const upsertResult: InsertResult = await manager
+      .createQueryBuilder()
+      .insert()
+      .values(upsertList as any)
+      .orUpdate(updateFields as string[], conflictFields as string[])
+      .execute()
+    if (upsertResult.raw?.length !== upsertList.length) {
+      throw new Error(`Insert Database failed: ` + JSON.stringify({ upsertResult, upsertList }))
+    }
+    return this.entity.fromRaws(upsertResult.raw)
+  }
+
   async delete(manager: EntityManager, condition: BaseCondition<_ENTITY>) {
     const where = this.getWhereOptions(condition)
     const deleteResult = await manager.delete(this.entity, where)
@@ -293,5 +312,53 @@ export abstract class _PostgreSqlManager<
       throw new Error(`Delete Database failed: ` + JSON.stringify({ raws }))
     }
     return this.entity.fromRaw(raws[0])
+  }
+
+  async updateListAndReturnEntity(options: {
+    manager: EntityManager
+    updateList: Partial<_ENTITY>[]
+    conditionFields: (keyof _ENTITY)[]
+    updateFields: (keyof _ENTITY)[]
+  }) {
+    const { updateList, manager } = options
+    const updateFields = options.updateFields as string[]
+    const conditionFields = options.conditionFields as string[]
+
+    if (!updateList.length) return []
+    if (!conditionFields.length) return []
+    if (!conditionFields.length) return []
+
+    const tempField = [...conditionFields, ...updateFields]
+    const tableName = this.entity['name']
+
+    const modifiedRaw: [any[], number] = await manager.query(
+      `
+        UPDATE  "${tableName}"
+        SET     ${updateFields.map((field) => `"${field}" = temp."${field}"`).join(', ')}
+        FROM (VALUES `
+      + updateList
+        .map((record) => {
+          return `(${tempField
+            .map((field) => {
+              if (typeof record[field] === 'number') {
+                return `${record[field]}`
+              } else if (typeof record[field] === 'string') {
+                return `'${record[field]}'`
+              } else {
+                return `${record[field]}`
+              }
+            })
+            .join(', ')})`
+        })
+        .join(', ')
+      + `   ) AS temp(${tempField.map((field) => `"${field}"`).join(', ')})
+        WHERE     ${conditionFields.map((field) => `"${tableName}"."${field}" = "temp"."${field}"`).join(' AND ')}
+        RETURNING "${tableName}".*;
+        `
+    )
+    if (modifiedRaw[0].length !== updateList.length) {
+      throw new Error(`Update Database failed: ` + JSON.stringify({ modifiedRaw, updateList }))
+    }
+    return this.entity.fromRaws(modifiedRaw[0])
   }
 }

@@ -4,7 +4,6 @@ import { IdParam } from '../../../../_libs/common/dto/param'
 import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
-import { ApiCustomerExcel } from './api-customer.excel'
 import { ApiCustomerService } from './api-customer.service'
 import {
   CustomerCreateBody,
@@ -19,8 +18,7 @@ import {
 @Controller('customer')
 export class ApiCustomerController {
   constructor(
-    private readonly apiCustomerService: ApiCustomerService,
-    private readonly apiCustomerExcel: ApiCustomerExcel
+    private readonly apiCustomerService: ApiCustomerService
   ) { }
 
   @Get('pagination')
@@ -70,11 +68,5 @@ export class ApiCustomerController {
       customerId: id,
       organization,
     })
-  }
-
-  @Get('download-excel')
-  @HasPermission(PermissionId.CUSTOMER_DOWNLOAD_EXCEL)
-  async downloadExcel(@External() { user, organization }: TExternal) {
-    return await this.apiCustomerExcel.downloadExcel({ organization, user })
   }
 }
