@@ -3,7 +3,7 @@ up:
 
 clear-postgres:	
 	@echo "=== Dropping and recreating database mea_sql... ==="
-	docker compose exec postgres-local sh -c '\
+	docker compose exec postgres sh -c '\
 		psql -U mea -d postgres -c "DROP DATABASE IF EXISTS mea_sql;"; \
 		psql -U mea -d postgres -c "CREATE DATABASE mea_sql;"; \
 	'

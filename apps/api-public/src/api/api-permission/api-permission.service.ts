@@ -727,6 +727,89 @@ export class ApiPermissionService {
       },
     ]
 
+    const permissionStockCheck: Permission[] = [
+      {
+        id: PermissionId.STOCK_CHECK,
+        level: 1,
+        code: PermissionId[PermissionId.STOCK_CHECK],
+        isActive: 1,
+        pathId: `${PermissionId.STOCK_CHECK}`,
+        name: 'Quản lý phiếu kiểm kê',
+        parentId: 0,
+        rootId: PermissionId.STOCK_CHECK,
+      },
+      {
+        id: PermissionId.STOCK_CHECK_READ,
+        level: 2,
+        code: PermissionId[PermissionId.STOCK_CHECK_READ],
+        isActive: 1,
+        pathId: `${PermissionId.STOCK_CHECK}.${PermissionId.STOCK_CHECK_READ}`,
+        name: 'Xem phiếu kiểm kê',
+        parentId: PermissionId.STOCK_CHECK,
+        rootId: PermissionId.STOCK_CHECK,
+      },
+      {
+        id: PermissionId.STOCK_CHECK_DRAFT_CRUD,
+        level: 2,
+        code: PermissionId[PermissionId.STOCK_CHECK_DRAFT_CRUD],
+        isActive: 1,
+        pathId: `${PermissionId.STOCK_CHECK}.${PermissionId.STOCK_CHECK_DRAFT_CRUD}`,
+        name: 'Tạo, sửa, xóa phiếu nháp',
+        parentId: PermissionId.STOCK_CHECK,
+        rootId: PermissionId.STOCK_CHECK,
+      },
+      {
+        id: PermissionId.STOCK_CHECK_DRAFT_SUBMIT,
+        level: 2,
+        code: PermissionId[PermissionId.STOCK_CHECK_DRAFT_SUBMIT],
+        isActive: 1,
+        pathId: `${PermissionId.STOCK_CHECK}.${PermissionId.STOCK_CHECK_DRAFT_SUBMIT}`,
+        name: 'Đề nghị duyệt phiếu kiểm kê',
+        parentId: PermissionId.STOCK_CHECK,
+        rootId: PermissionId.STOCK_CHECK,
+      },
+      {
+        id: PermissionId.STOCK_CHECK_PENDING_APPROVE,
+        level: 2,
+        code: PermissionId[PermissionId.STOCK_CHECK_PENDING_APPROVE],
+        isActive: 1,
+        pathId: `${PermissionId.STOCK_CHECK}.${PermissionId.STOCK_CHECK_PENDING_APPROVE}`,
+        name: 'Duyệt phiếu kiểm kê',
+        parentId: PermissionId.STOCK_CHECK,
+        rootId: PermissionId.STOCK_CHECK,
+      },
+      {
+        id: PermissionId.STOCK_CHECK_CONFIRMED_RECONCILE,
+        level: 2,
+        code: PermissionId[PermissionId.STOCK_CHECK_CONFIRMED_RECONCILE],
+        isActive: 1,
+        pathId: `${PermissionId.STOCK_CHECK}.${PermissionId.STOCK_CHECK_CONFIRMED_RECONCILE}`,
+        name: '*** Tiến hành cân bằng kho',
+        parentId: PermissionId.STOCK_CHECK,
+        rootId: PermissionId.STOCK_CHECK,
+      },
+      {
+        id: PermissionId.STOCK_CHECK_VOID,
+        level: 2,
+        code: PermissionId[PermissionId.STOCK_CHECK_VOID],
+        isActive: 1,
+        pathId: `${PermissionId.STOCK_CHECK}.${PermissionId.STOCK_CHECK_VOID}`,
+        name: 'Hủy phiếu',
+        parentId: PermissionId.STOCK_CHECK,
+        rootId: PermissionId.STOCK_CHECK,
+      },
+      {
+        id: PermissionId.STOCK_CHECK_CANCELLED_DESTROY,
+        level: 2,
+        code: PermissionId[PermissionId.STOCK_CHECK_CANCELLED_DESTROY],
+        isActive: 1,
+        pathId: `${PermissionId.STOCK_CHECK}.${PermissionId.STOCK_CHECK_CANCELLED_DESTROY}`,
+        name: 'Xóa phiếu đã hủy',
+        parentId: PermissionId.STOCK_CHECK,
+        rootId: PermissionId.STOCK_CHECK,
+      },
+    ]
+
     const permissionTicketProcedureResult: Permission[] = [
       {
         id: PermissionId.TICKET_PROCEDURE_RESULT,
@@ -1120,7 +1203,7 @@ export class ApiPermissionService {
         parentId: PermissionId.TICKET_CLINIC,
         rootId: PermissionId.TICKET_CLINIC,
       },
-            {
+      {
         id: PermissionId.TICKET_CLINIC_USER_UPDATE_COMMISSION,
         level: 2,
         code: PermissionId[PermissionId.TICKET_CLINIC_USER_UPDATE_COMMISSION],
@@ -1259,6 +1342,8 @@ export class ApiPermissionService {
       ...permissionReceipt,
 
       ...permissionAppointment,
+      ...permissionStockCheck,
+
       ...permissionTicketProcedureResult,
       ...permissionTicketLaboratoryResult,
       ...permissionTicketRadiologyResult,

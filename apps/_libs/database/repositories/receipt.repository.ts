@@ -18,9 +18,9 @@ export class ReceiptRepository extends _PostgreSqlRepository<
     private dataSource: DataSource,
     @InjectEntityManager() private manager: EntityManager,
     @InjectRepository(Receipt)
-    private readonly receiptItemRepository: Repository<Receipt>
+    private readonly receiptRepository: Repository<Receipt>
   ) {
-    super(Receipt, receiptItemRepository)
+    super(Receipt, receiptRepository)
   }
 
   async queryOneBy(

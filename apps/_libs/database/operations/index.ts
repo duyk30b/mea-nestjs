@@ -41,3 +41,5 @@ export * from './ticket-clinic/ticket-laboratory/ticket-clinic-update-ticket-lab
 
 export * from './ticket-order/ticket-order-deposited.operation'
 export * from './ticket-order/ticket-order-draft.operation'
+
+export * from './stock-check/stock-check-reconcile.operation'

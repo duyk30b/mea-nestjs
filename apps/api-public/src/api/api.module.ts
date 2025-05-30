@@ -27,6 +27,7 @@ import { ApiReceiptModule } from './api-receipt/api-receipt.module'
 import { ApiRoleModule } from './api-role/api-role.module'
 import { ApiSettingModule } from './api-setting/api-setting.module'
 import { ApiStatisticModule } from './api-statistics/api-statistic.module'
+import { ApiStockCheckModule } from './api-stock-check/api-stock-check.module'
 import { ApiTicketBatchModule } from './api-ticket-batch/api-ticket-batch.module'
 import { ApiTicketClinicModule } from './api-ticket-clinic/api-ticket-clinic.module'
 import { ApiTicketLaboratoryModule } from './api-ticket-laboratory/api-ticket-laboratory.module'
@@ -85,6 +86,8 @@ import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
     ApiTicketLaboratoryModule,
     ApiTicketRadiologyModule,
     ApiPaymentMethodModule,
+
+    ApiStockCheckModule,
   ],
   controllers: [],
   providers: [],

@@ -26,6 +26,10 @@ export class ProductMovementRelationQuery {
 
   @Expose()
   @IsBoolean()
+  stockCheck: boolean
+
+  @Expose()
+  @IsBoolean()
   customer: boolean
 
   @Expose()
@@ -57,4 +61,4 @@ export class ProductMovementFilterQuery {
   movementType: MovementType | InstanceType<typeof ConditionEnumMovementType>
 }
 
-export class ProductMovementSortQuery extends SortQuery {}
+export class ProductMovementSortQuery extends SortQuery { }

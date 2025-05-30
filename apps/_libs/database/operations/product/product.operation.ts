@@ -29,20 +29,21 @@ export class ProductOperation {
 
   async calculateQuantityProductList(options: { oid: number; productIdList: number[] }) {
     const { oid, productIdList } = options
-    await this.manager.query(`
+    const resultQuery: [any[], number] = await this.manager.query(`
         UPDATE  "Product" "product" 
-        SET     "quantity" = "spb"."sumQuantity"
+        SET     "quantity" = "sbq"."sumQuantity"
         FROM    ( 
                 SELECT "productId", SUM("quantity") as "sumQuantity" 
-                    FROM "ProductBatch" 
-                    WHERE "productBatch"."productId" IN (${productIdList.toString()})
-                        AND "productBatch"."oid" = ${oid}
+                    FROM "Batch" 
+                    WHERE "Batch"."productId" IN (${productIdList.toString()})
+                        AND "Batch"."oid" = ${oid}
                     GROUP BY "productId" 
-                ) AS "spb" 
-        WHERE   "product"."id" = "spb"."productId" 
-                    AND "product"."id" IN (${productIdList.toString()})
-                    AND "product"."oid" = ${oid}
-        RETURNING *
+                ) AS "sbq" 
+        WHERE   "product"."id" = "sbq"."productId" 
+            AND "product"."id" IN (${productIdList.toString()})
+            AND "product"."oid" = ${oid}
+        RETURNING "Product".*
     `)
+    return Product.fromRaws(resultQuery[0])
   }
 }

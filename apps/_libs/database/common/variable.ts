@@ -64,6 +64,7 @@ export enum MovementType {
   Receipt = 1,
   Ticket = 2,
   UserChange = 3,
+  StockCheck = 4,
 }
 
 export enum DeliveryStatus {
