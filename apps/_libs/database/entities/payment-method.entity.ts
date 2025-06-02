@@ -1,7 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
-import CustomerPayment from './customer-payment.entity'
-import DistributorPayment from './distributor-payment.entity'
+import Payment from './payment.entity'
 
 @Entity('PaymentMethod')
 export default class PaymentMethod {
@@ -25,13 +24,9 @@ export default class PaymentMethod {
   @Expose()
   isActive: 0 | 1
 
-  @OneToMany(() => CustomerPayment, (customerPayment) => customerPayment.paymentMethod)
+  @OneToMany(() => Payment, (payment) => payment.paymentMethod)
   @Expose()
-  customerPaymentList: CustomerPayment[]
-
-  @OneToMany(() => DistributorPayment, (distributorPayment) => distributorPayment.paymentMethod)
-  @Expose()
-  distributorPaymentList: DistributorPayment[]
+  paymentList: Payment[]
 
   static fromRaw(raw: { [P in keyof PaymentMethod]: any }) {
     if (!raw) return null
@@ -47,7 +42,7 @@ export default class PaymentMethod {
 }
 
 export type PaymentMethodRelationType = {
-  [P in keyof Pick<PaymentMethod, 'customerPaymentList' | 'distributorPaymentList'>]?: boolean
+  [P in keyof Pick<PaymentMethod, 'paymentList'>]?: boolean
 }
 
 export type PaymentMethodInsertType = Omit<

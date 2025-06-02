@@ -8,7 +8,7 @@ import {
 } from 'typeorm'
 import { BaseCondition } from '../../common/dto'
 import { NoExtra } from '../../common/helpers/typescript.helper'
-import { PostgreSqlCondition } from '../common/postgresql.condition'
+import { PostgreSqlRaw } from '../common/postgresql.raw'
 
 type EntityType<_ENTITY> = EntityTarget<_ENTITY> & {
   fromRaw: (raw: { [P in keyof _ENTITY]: any }) => _ENTITY
@@ -21,7 +21,7 @@ export abstract class _PostgreSqlManager<
   _INSERT = Omit<_ENTITY, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>,
   _UPDATE = Omit<_ENTITY, 'id' | 'createdAt' | 'updatedAt'>,
   _SORT = { [P in keyof _ENTITY]?: 'ASC' | 'DESC' },
-> extends PostgreSqlCondition<_ENTITY> {
+> extends PostgreSqlRaw<_ENTITY> {
   private entity: EntityType<_ENTITY>
 
   protected constructor(entity: EntityType<_ENTITY>) {
@@ -314,31 +314,75 @@ export abstract class _PostgreSqlManager<
     return this.entity.fromRaw(raws[0])
   }
 
-  async updateListAndReturnEntity(options: {
+  async updateListBy(options: {
     manager: EntityManager
-    updateList: Partial<_ENTITY>[]
-    conditionFields: (keyof _ENTITY)[]
-    updateFields: (keyof _ENTITY)[]
+    tempList: (Partial<_ENTITY> | Record<string, any>)[]
+    condition?: BaseCondition<_ENTITY>
+    compare:
+    | (keyof _ENTITY)[]
+    | { [P in keyof _ENTITY]?: boolean | ((t?: string, u?: string) => string) }
+    update:
+    | (keyof _ENTITY)[]
+    | { [P in keyof _ENTITY]?: boolean | ((t?: string, u?: string) => string) }
+    options?: { requireEqualLength?: boolean }
   }) {
-    const { updateList, manager } = options
-    const updateFields = options.updateFields as string[]
-    const conditionFields = options.conditionFields as string[]
-
-    if (!updateList.length) return []
-    if (!conditionFields.length) return []
-    if (!conditionFields.length) return []
-
-    const tempField = [...conditionFields, ...updateFields]
+    const { manager } = options
     const tableName = this.entity['name']
+
+    const tempList = options.tempList || []
+    if (!tempList.length) return []
+
+    let compareName: string[] = []
+    let compareObject: { [P in keyof _ENTITY]?: boolean | ((t?: string, u?: string) => string) } =
+      {}
+    let conditionRaw = ''
+    if (options.condition) {
+      conditionRaw = this.getRawConditions(tableName, options.condition)
+    }
+
+    if (Array.isArray(options.compare)) {
+      compareName = [...options.compare] as string[]
+      options.compare.forEach((field) => {
+        compareObject[field] = true
+      })
+    } else {
+      compareName = Object.keys(options.compare)
+      compareObject = { ...options.compare }
+    }
+
+    let updateName: string[] = []
+    let updateObject: { [P in keyof _ENTITY]?: boolean | (() => string) } = {}
+
+    if (Array.isArray(options.update)) {
+      updateName = [...options.update] as string[]
+      options.update.forEach((field) => {
+        updateObject[field] = true
+      })
+    } else {
+      updateName = Object.keys(options.update)
+      updateObject = { ...options.update }
+    }
+
+    if (!updateName.length) return []
+    const tempColumns = Object.keys(tempList[0])
 
     const modifiedRaw: [any[], number] = await manager.query(
       `
-        UPDATE  "${tableName}"
-        SET     ${updateFields.map((field) => `"${field}" = temp."${field}"`).join(', ')}
-        FROM (VALUES `
-      + updateList
+      UPDATE  "${tableName}"
+      SET     ${updateName
+        .map((field) => {
+          if (typeof updateObject[field] !== 'function') {
+            return `"${field}" = temp."${field}"`
+          } else {
+            return `"${field}" = ${updateObject[field]('temp', tableName)}`
+          }
+        })
+        .join(`,
+              `)}
+      FROM (VALUES `
+      + tempList
         .map((record) => {
-          return `(${tempField
+          return `(${tempColumns
             .map((field) => {
               if (typeof record[field] === 'number') {
                 return `${record[field]}`
@@ -351,13 +395,27 @@ export abstract class _PostgreSqlManager<
             .join(', ')})`
         })
         .join(', ')
-      + `   ) AS temp(${tempField.map((field) => `"${field}"`).join(', ')})
-        WHERE     ${conditionFields.map((field) => `"${tableName}"."${field}" = "temp"."${field}"`).join(' AND ')}
-        RETURNING "${tableName}".*;
-        `
+      + `) 
+          AS temp(${tempColumns.map((field) => `"${field}"`).join(', ')})
+      WHERE   ${conditionRaw ? conditionRaw + ` 
+          AND ` : ''}${compareName
+        .map((field) => {
+          if (typeof compareObject[field] !== 'function') {
+            return `"${tableName}"."${field}" = "temp"."${field}"`
+          } else {
+            return `"${tableName}"."${field}" = ${compareObject[field]('temp', tableName)}`
+          }
+        })
+        .join(` 
+          AND `)}
+      RETURNING "${tableName}".*;
+      `
     )
-    if (modifiedRaw[0].length !== updateList.length) {
-      throw new Error(`Update Database failed: ` + JSON.stringify({ modifiedRaw, updateList }))
+
+    if (options.options.requireEqualLength) {
+      if (modifiedRaw[0].length !== tempList.length) {
+        throw new Error(`Update Database failed: ` + JSON.stringify({ modifiedRaw, tempList }))
+      }
     }
     return this.entity.fromRaws(modifiedRaw[0])
   }

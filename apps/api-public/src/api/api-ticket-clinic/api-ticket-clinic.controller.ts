@@ -87,45 +87,50 @@ export class ApiTicketClinicController {
   }
 
   @Post(':id/prepayment')
-  @HasPermission(PermissionId.TICKET_CLINIC_PREPAYMENT)
+  @HasPermission(PermissionId.TICKET_CLINIC_PAYMENT)
   async prepayment(
-    @External() { oid }: TExternal,
+    @External() { oid, uid }: TExternal,
     @Param() { id }: IdParam,
     @Body() body: TicketPaymentMoneyBody
   ) {
-    return await this.apiTicketClinicService.prepayment({ oid, ticketId: id, body })
+    return await this.apiTicketClinicService.prepayment({ oid, userId: uid, ticketId: id, body })
   }
 
   @Post(':id/refund-overpaid')
   @HasPermission(PermissionId.TICKET_CLINIC_REFUND_OVERPAID)
   async refundOverpaid(
-    @External() { oid }: TExternal,
+    @External() { oid, uid }: TExternal,
     @Param() { id }: IdParam,
     @Body() body: TicketPaymentMoneyBody
   ) {
-    return await this.apiTicketClinicService.refundOverpaid({ oid, ticketId: id, body })
+    return await this.apiTicketClinicService.refundOverpaid({
+      oid,
+      userId: uid,
+      ticketId: id,
+      body,
+    })
   }
 
   @Post(':id/pay-debt')
-  @HasPermission(PermissionId.TICKET_CLINIC_PAY_DEBT)
+  @HasPermission(PermissionId.TICKET_CLINIC_PAYMENT)
   async payDebt(
-    @External() { oid }: TExternal,
+    @External() { oid, uid }: TExternal,
     @Param() { id }: IdParam,
     @Body() body: TicketPaymentMoneyBody
   ) {
-    return await this.apiTicketClinicService.payDebt({ oid, ticketId: id, body })
+    return await this.apiTicketClinicService.payDebt({ oid, userId: uid, ticketId: id, body })
   }
 
   @Post(':id/close')
   @HasPermission(PermissionId.TICKET_CLINIC_CLOSE)
-  async close(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiTicketClinicService.close({ oid, ticketId: id })
+  async close(@External() { oid, uid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiTicketClinicService.close({ oid, userId: uid, ticketId: id })
   }
 
   @Post(':id/reopen')
   @HasPermission(PermissionId.TICKET_CLINIC_REOPEN)
-  async reopen(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiTicketClinicService.reopen({ oid, ticketId: id })
+  async reopen(@External() { oid, uid }: TExternal, @Param() { id }: IdParam) {
+    return await this.apiTicketClinicService.reopen({ oid, userId: uid, ticketId: id })
   }
 
   @Delete(':id/destroy')

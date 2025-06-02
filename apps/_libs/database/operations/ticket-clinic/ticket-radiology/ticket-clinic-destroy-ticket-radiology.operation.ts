@@ -27,7 +27,7 @@ export class TicketClinicDestroyTicketRadiologyOperation {
       // === 1. UPDATE TICKET FOR TRANSACTION ===
       const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(
         manager,
-        { oid, id: ticketId, ticketStatus: TicketStatus.Executing },
+        { oid, id: ticketId, status: TicketStatus.Executing },
         { updatedAt: Date.now() }
       )
 

@@ -3,8 +3,8 @@ import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { Organization } from '../../../../_libs/database/entities'
-import { TicketRepository } from '../../../../_libs/database/repositories'
-import { CustomerPaymentRepository } from '../../../../_libs/database/repositories/customer-payment.repository'
+import { PersonType } from '../../../../_libs/database/entities/payment.entity'
+import { PaymentRepository, TicketRepository } from '../../../../_libs/database/repositories'
 import { CustomerRepository } from '../../../../_libs/database/repositories/customer.repository'
 import { OrganizationRepository } from '../../../../_libs/database/repositories/organization.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
@@ -22,7 +22,7 @@ export class ApiCustomerService {
     private readonly socketEmitService: SocketEmitService,
     private readonly cacheDataService: CacheDataService,
     private readonly customerRepository: CustomerRepository,
-    private readonly customerPaymentRepository: CustomerPaymentRepository,
+    private readonly paymentRepository: PaymentRepository,
     private readonly organizationRepository: OrganizationRepository,
     private readonly ticketRepository: TicketRepository
   ) { }
@@ -115,7 +115,7 @@ export class ApiCustomerService {
 
     await Promise.allSettled([
       this.customerRepository.delete({ oid, id: customerId }),
-      this.customerPaymentRepository.delete({ oid, customerId }),
+      this.paymentRepository.delete({ oid, personId: customerId, personType: PersonType.Customer }),
     ])
 
     organization.dataVersionParse.customer += 1

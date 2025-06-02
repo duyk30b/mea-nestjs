@@ -2,7 +2,7 @@ import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
 import { IsBoolean, IsNumber, IsOptional, ValidateNested } from 'class-validator'
 import { ConditionTimestamp, createConditionEnum, transformConditionEnum } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
-import { ReceiptStatus } from '../../../../../_libs/database/common/variable'
+import { ReceiptStatus } from '../../../../../_libs/database/entities/receipt.entity'
 
 export class ReceiptRelationQuery {
   @Expose()
@@ -11,7 +11,7 @@ export class ReceiptRelationQuery {
 
   @Expose()
   @IsBoolean()
-  distributorPaymentList: boolean
+  paymentList: boolean
 
   @Expose()
   @IsOptional()

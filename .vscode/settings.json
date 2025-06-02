@@ -60,5 +60,7 @@
     "websockets",
     "zalo"
   ],
-  "explorer.compactFolders": false
+  "explorer.compactFolders": false,
+  "workbench.editor.enablePreview": false,
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

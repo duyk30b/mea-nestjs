@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { All, Injectable, Logger } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { EntityManager } from 'typeorm'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
@@ -95,7 +95,11 @@ export class ApiRootOrganizationService {
     for (let index = 0; index < body.tableNameDeleteList.length; index++) {
       const tableName = tableNameDeleteList[index]
       if (AllEntity[tableName]) {
-        await this.manager.delete(AllEntity[tableName], { oid })
+        if (tableName === AllEntity.Organization.name) {
+          await this.manager.delete(AllEntity[tableName], { id: oid })
+        } else {
+          await this.manager.delete(AllEntity[tableName], { oid })
+        }
       }
     }
 

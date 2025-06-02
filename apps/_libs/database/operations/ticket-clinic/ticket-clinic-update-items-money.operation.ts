@@ -75,7 +75,7 @@ export class TicketClinicUpdateItemsMoneyOperation {
         {
           oid,
           id: ticketId,
-          ticketStatus: TicketStatus.Executing,
+          status: TicketStatus.Executing,
         },
         { updatedAt: Date.now() }
       )

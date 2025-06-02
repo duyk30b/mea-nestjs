@@ -195,29 +195,38 @@ export class ApiTicketClinicProductService {
         ticketId,
         allowNegativeQuantity,
       })
-      const { ticket, ticketProductModifiedList, productModifiedList } =
-        await this.ticketSendProductOperation.sendProduct({
-          oid,
-          ticketId,
-          time,
-          sendList,
-          allowNegativeQuantity,
-        })
-      this.socketEmitService.productListUpdate(oid, { productList: productModifiedList })
-      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
+      const sendProductResult = await this.ticketSendProductOperation.sendProduct({
+        oid,
+        ticketId,
+        time,
+        sendList,
+        allowNegativeQuantity,
+      })
 
-      this.socketEmitService.ticketClinicChangeConsumable(oid, {
-        ticketId,
-        ticketProductUpsertList: ticketProductModifiedList.filter((i) => {
-          return i.type === TicketProductType.Consumable
-        }),
+      this.socketEmitService.ticketClinicChange(oid, {
+        type: 'UPDATE',
+        ticket: sendProductResult.ticket,
       })
-      this.socketEmitService.ticketClinicChangePrescription(oid, {
-        ticketId,
-        ticketProductUpsertList: ticketProductModifiedList.filter((i) => {
-          return i.type === TicketProductType.Prescription
-        }),
-      })
+
+      if (sendProductResult.productModifiedList) {
+        this.socketEmitService.productListUpdate(oid, {
+          productList: sendProductResult.productModifiedList,
+        })
+      }
+      if (sendProductResult.ticketProductModifiedList) {
+        this.socketEmitService.ticketClinicChangeConsumable(oid, {
+          ticketId,
+          ticketProductUpsertList: sendProductResult.ticketProductModifiedList.filter((i) => {
+            return i.type === TicketProductType.Consumable
+          }),
+        })
+        this.socketEmitService.ticketClinicChangePrescription(oid, {
+          ticketId,
+          ticketProductUpsertList: sendProductResult.ticketProductModifiedList.filter((i) => {
+            return i.type === TicketProductType.Prescription
+          }),
+        })
+      }
 
       return { data: true }
     } catch (error: any) {

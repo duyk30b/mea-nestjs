@@ -14,12 +14,18 @@ export class TicketPayment {
   @IsNumberGreaterThan(0)
   money: number
 }
-export class CustomerPaymentPayDebtBody {
+export class CustomerPaymentBody {
   @ApiProperty({ example: 12 })
   @Expose()
   @IsDefined()
   @IsInt()
   customerId: number
+
+  @ApiProperty({ example: 12 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  cashierId: number
 
   @ApiProperty({ example: 12 })
   @Expose()
@@ -31,6 +37,11 @@ export class CustomerPaymentPayDebtBody {
   @Expose()
   @IsString()
   note: string
+
+  @Expose()
+  @IsDefined()
+  @IsNumberGreaterThan(0)
+  money: number
 
   @ApiProperty({
     type: TicketPayment,

@@ -3,15 +3,18 @@ import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
 import { ESTimer } from '../../../common/helpers/time.helper'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
-import { ReceiptStatus } from '../../common/variable'
+import { DeliveryStatus } from '../../common/variable'
 import { Receipt, ReceiptItem } from '../../entities'
 import { ReceiptItemInsertType } from '../../entities/receipt-item.entity'
-import { ReceiptInsertType } from '../../entities/receipt.entity'
+import { ReceiptInsertType, ReceiptStatus } from '../../entities/receipt.entity'
 import { ReceiptItemManager, ReceiptManager } from '../../managers'
 
 export type ReceiptDraftUpsertType = Omit<
   ReceiptInsertType,
-  keyof Pick<Receipt, 'oid' | 'status' | 'paid' | 'debt' | 'year' | 'month' | 'date' | 'endedAt'>
+  keyof Pick<
+    Receipt,
+    'oid' | 'status' | 'deliveryStatus' | 'paid' | 'debt' | 'year' | 'month' | 'date' | 'endedAt'
+  >
 >
 
 export type ReceiptItemDraftType = Omit<
@@ -39,6 +42,7 @@ export class ReceiptDraftOperation {
         ...receiptInsertDto,
         oid,
         status: ReceiptStatus.Draft,
+        deliveryStatus: DeliveryStatus.Pending,
         distributorId: receiptInsertDto.distributorId,
         paid: 0,
         debt: receiptInsertDto.totalMoney,

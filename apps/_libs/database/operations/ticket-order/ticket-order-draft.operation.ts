@@ -12,9 +12,11 @@ import {
 import { TicketProductInsertType, TicketProductType } from '../../entities/ticket-product.entity'
 import { TicketSurchargeInsertType } from '../../entities/ticket-surcharge.entity'
 import Ticket, {
+  TicketInsertType,
   TicketRelationType,
   TicketStatus,
   TicketType,
+  TicketUpdateType,
 } from '../../entities/ticket.entity'
 import {
   TicketExpenseManager,
@@ -42,7 +44,8 @@ export type TicketOrderDraftUpsertType = Omit<
     | 'oid'
     | 'id'
     | 'ticketType'
-    | 'ticketStatus'
+    | 'status'
+    | 'deliveryStatus'
     | 'paid'
     | 'debt'
     | 'year'
@@ -97,9 +100,12 @@ export class TicketOrderDraftOperation {
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       let ticket: Ticket
-      const ticketUpsert = {
+      const ticketUpsert: Omit<TicketInsertType, 'oid'> = {
         ...ticketOrderDraftUpsertDto,
-        ticketStatus: TicketStatus.Draft,
+        status: TicketStatus.Draft,
+        deliveryStatus: ticketOrderProductDraftListDto.length
+          ? DeliveryStatus.Pending
+          : DeliveryStatus.NoStock,
         ticketType: TicketType.Order,
         paid: 0,
         debt: ticketOrderDraftUpsertDto.totalMoney,

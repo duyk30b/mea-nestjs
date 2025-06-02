@@ -58,7 +58,7 @@ class TicketInformationCreateBody {
   @Expose()
   @IsDefined()
   @IsIn([TicketStatus.Draft, TicketStatus.Executing])
-  ticketStatus: TicketStatus
+  status: TicketStatus
 
   @ApiProperty({ example: 1678890707005 })
   @Expose()

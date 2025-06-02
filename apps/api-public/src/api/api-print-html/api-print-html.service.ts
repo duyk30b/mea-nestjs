@@ -22,7 +22,7 @@ export class ApiPrintHtmlService {
       limit,
       relation,
       condition: {
-        oid,
+        oid: { IN: [1, oid] },
         updatedAt: filter?.updatedAt,
       },
       sort,
@@ -39,7 +39,7 @@ export class ApiPrintHtmlService {
     const data = await this.printHtmlRepository.findMany({
       relation,
       condition: {
-        oid,
+        oid: { IN: [1, oid] },
         updatedAt: filter?.updatedAt,
       },
       limit,
@@ -52,7 +52,7 @@ export class ApiPrintHtmlService {
     const printHtml = await this.printHtmlRepository.findOne({
       relation,
       condition: {
-        oid,
+        oid: { IN: [1, oid] },
         updatedAt: filter?.updatedAt,
       },
     })
@@ -62,7 +62,7 @@ export class ApiPrintHtmlService {
   async detail(oid: number, id: number, query: PrintHtmlGetOneQuery): Promise<BaseResponse> {
     const printHtml = await this.printHtmlRepository.findOne({
       condition: {
-        oid,
+        oid: { IN: [1, oid] },
         id,
       },
       relation: query.relation,

@@ -15,10 +15,7 @@ import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-it
 export type TicketClinicProductAddDtoType = Omit<
   TicketProduct,
   | keyof TicketProductRelationType
-  | keyof Pick<
-    TicketProduct,
-    'oid' | 'id' | 'ticketId' | 'customerId' | 'deliveryStatus' | 'type'
-  >
+  | keyof Pick<TicketProduct, 'oid' | 'id' | 'ticketId' | 'customerId' | 'deliveryStatus' | 'type'>
 >
 
 @Injectable()
@@ -44,8 +41,12 @@ export class TicketClinicAddTicketProductOperation {
       // === 1. UPDATE TICKET FOR TRANSACTION ===
       const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(
         manager,
-        { oid, id: ticketId, ticketStatus: TicketStatus.Executing },
-        { updatedAt: Date.now() }
+        {
+          oid,
+          id: ticketId,
+          status: TicketStatus.Executing,
+        },
+        { updatedAt: Date.now(), deliveryStatus: DeliveryStatus.Pending }
       )
 
       // === 2. INSERT NEW ===

@@ -74,7 +74,7 @@ export class ApiStockCheckService {
       },
       sort: query.sort || { id: 'DESC' },
     })
-    return { data: stockCheckList }
+    return { data: { stockCheckList } }
   }
 
   async getOne(options: {

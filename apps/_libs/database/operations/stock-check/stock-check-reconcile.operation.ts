@@ -51,14 +51,15 @@ export class StockCheckReconcileOperation {
         throw new Error(`${PREFIX}: Có trùng lặp batchId = ${batchIdList.join('')} }`)
       }
 
-      const batchModifiedList = await this.batchManager.updateListAndReturnEntity({
+      const batchModifiedList = await this.batchManager.updateListBy({
         manager,
-        updateList: stockCheckItemList.map((i) => ({
+        tempList: stockCheckItemList.map((i) => ({
           id: i.batchId,
           quantity: i.actualQuantity,
         })),
-        conditionFields: ['id'],
-        updateFields: ['quantity'],
+        compare: ['id'],
+        update: ['quantity'],
+        condition: { oid },
       })
       const batchModifiedMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')
 

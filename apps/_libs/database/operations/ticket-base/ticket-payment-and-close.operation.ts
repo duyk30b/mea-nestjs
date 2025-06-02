@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { DeliveryStatus, PaymentType } from '../../common/variable'
+import { DeliveryStatus } from '../../common/variable'
 import {
   Customer,
   TicketLaboratory,
@@ -10,16 +10,17 @@ import {
   TicketUser,
 } from '../../entities'
 import { CommissionCalculatorType, InteractType } from '../../entities/commission.entity'
-import CustomerPayment, { CustomerPaymentInsertType } from '../../entities/customer-payment.entity'
+import Payment, {
+  MoneyDirection,
+  PaymentInsertType,
+  PaymentTiming,
+  PersonType,
+  VoucherType,
+} from '../../entities/payment.entity'
 import { TicketProductType } from '../../entities/ticket-product.entity'
 import { TicketUserInsertType } from '../../entities/ticket-user.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
-import {
-  CustomerManager,
-  CustomerPaymentManager,
-  TicketManager,
-  TicketUserManager,
-} from '../../managers'
+import { CustomerManager, PaymentManager, TicketManager, TicketUserManager } from '../../managers'
 
 @Injectable()
 export class TicketPaymentAndCloseOperation {
@@ -28,7 +29,7 @@ export class TicketPaymentAndCloseOperation {
     private ticketManager: TicketManager,
     private ticketUserManager: TicketUserManager,
     private customerManager: CustomerManager,
-    private customerPaymentManager: CustomerPaymentManager
+    private paymentManager: PaymentManager
   ) { }
 
   async paymentAndClose(params: {
@@ -38,8 +39,9 @@ export class TicketPaymentAndCloseOperation {
     time: number
     money: number
     note: string
+    cashierId: number
   }) {
-    const { oid, ticketId, paymentMethodId, time, money, note } = params
+    const { oid, ticketId, paymentMethodId, time, money, note, cashierId } = params
     const PREFIX = `ticketId=${ticketId} close failed`
 
     if (money < 0) {
@@ -57,11 +59,11 @@ export class TicketPaymentAndCloseOperation {
         {
           oid,
           id: ticketId,
-          ticketStatus: {
+          status: {
             IN: [TicketStatus.Draft, TicketStatus.Deposited, TicketStatus.Executing],
           },
         },
-        { updatedAt: Date.now() }
+        { updatedAt: time, endedAt: time }
       )
 
       // === 2. TICKET: Update profit and discountItems ===
@@ -194,7 +196,7 @@ export class TicketPaymentAndCloseOperation {
             ticketItemExpectedPrice,
             ticketItemActualPrice,
             quantity: tu.quantity,
-            createdAt: Date.now(),
+            createdAt: time,
             commissionCalculatorType,
             commissionMoney,
             commissionPercentActual,
@@ -212,11 +214,12 @@ export class TicketPaymentAndCloseOperation {
             id: { IN: ticketUserRemoveList.map((i) => i.id) },
           })
         }
-        ticketUserModifiedList = await this.ticketUserManager.updateListAndReturnEntity({
+        ticketUserModifiedList = await this.ticketUserManager.updateListBy({
           manager,
-          updateList: ticketUserUpdateList,
-          conditionFields: ['oid', 'id'],
-          updateFields: [
+          tempList: ticketUserUpdateList,
+          compare: ['id'],
+          condition: { oid },
+          update: [
             'ticketItemExpectedPrice',
             'ticketItemActualPrice',
             'commissionCalculatorType',
@@ -225,10 +228,6 @@ export class TicketPaymentAndCloseOperation {
             'commissionPercentExpected',
           ],
         })
-        console.log(
-          '🚀 ~ ticket-payment-and-close.operation.ts:228 ~ TicketPaymentAndCloseOperation ~ ticketUserModifiedList:',
-          ticketUserModifiedList
-        )
       }
 
       const procedureDiscount = ticketProcedureList.reduce((acc, item) => {
@@ -255,7 +254,7 @@ export class TicketPaymentAndCloseOperation {
         manager,
         { oid, id: ticketId },
         {
-          ticketStatus: () => `CASE 
+          status: () => `CASE 
                                 WHEN("totalMoney" = paid + ${money}) THEN ${TicketStatus.Completed} 
                                 ELSE ${TicketStatus.Debt} 
                               END
@@ -273,7 +272,7 @@ export class TicketPaymentAndCloseOperation {
         throw new Error(`${PREFIX}: Money invalid, ticket=${ticket}`)
       }
       let customer: Customer
-      let customerPayment: CustomerPayment
+      let payment: Payment
       if (ticket.debt != 0 || money != 0) {
         if (ticket.debt > 0) {
           customer = await this.customerManager.updateOneAndReturnEntity(
@@ -292,27 +291,28 @@ export class TicketPaymentAndCloseOperation {
         const customerOpenDebt = customerCloseDebt - ticket.debt
 
         // === 3. INSERT CUSTOMER_PAYMENT ===
-        const customerPaymentInsert: CustomerPaymentInsertType = {
+        const paymentInsert: PaymentInsertType = {
           oid,
-          customerId: ticket.customerId,
           paymentMethodId,
-          ticketId,
+          voucherType: VoucherType.Ticket,
+          voucherId: ticketId,
+          personType: PersonType.Customer,
+          personId: ticket.customerId,
+          paymentTiming: PaymentTiming.Close,
           createdAt: time,
-          paymentType: PaymentType.Close,
-          paid: money,
-          debit: ticket.debt,
+          moneyDirection: MoneyDirection.In,
+          paidAmount: money,
+          debtAmount: ticket.debt,
           openDebt: customerOpenDebt,
           closeDebt: customerCloseDebt,
+          cashierId,
           note,
           description: '',
         }
-        customerPayment = await this.customerPaymentManager.insertOneAndReturnEntity(
-          manager,
-          customerPaymentInsert
-        )
+        payment = await this.paymentManager.insertOneAndReturnEntity(manager, paymentInsert)
       }
       await queryRunner.commitTransaction()
-      return { ticket, customer, customerPayment, ticketUserModifiedList, ticketUserDeletedList }
+      return { ticket, customer, payment, ticketUserModifiedList, ticketUserDeletedList }
     } catch (error) {
       console.error('error:', error)
       await queryRunner.rollbackTransaction()

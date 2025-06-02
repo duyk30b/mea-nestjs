@@ -19,7 +19,7 @@ export class ApiStatisticTicketService {
           LTE: toTime.getTime(),
         },
         ticketType: filter.ticketType,
-        ticketStatus: filter.ticketStatus,
+        status: filter.status,
       },
       groupTimeType,
     })

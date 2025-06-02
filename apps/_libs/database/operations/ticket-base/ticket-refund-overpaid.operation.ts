@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { PaymentType } from '../../common/variable'
-import { CustomerPaymentInsertType } from '../../entities/customer-payment.entity'
+import {
+  MoneyDirection,
+  PaymentInsertType,
+  PaymentTiming,
+  PersonType,
+  VoucherType,
+} from '../../entities/payment.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
-import { CustomerManager, CustomerPaymentManager, TicketManager } from '../../managers'
+import { CustomerManager, PaymentManager, TicketManager } from '../../managers'
 
 @Injectable()
 export class TicketRefundOverpaidOperation {
@@ -11,18 +16,20 @@ export class TicketRefundOverpaidOperation {
     private dataSource: DataSource,
     private ticketManager: TicketManager,
     private customerManager: CustomerManager,
-    private customerPaymentManager: CustomerPaymentManager
+    private paymentManager: PaymentManager
   ) { }
 
   async refundOverpaid(params: {
     oid: number
     ticketId: number
+    cashierId: number
     paymentMethodId: number
     time: number
     money: number
     note: string
+    description: string
   }) {
-    const { oid, ticketId, paymentMethodId, time, money, note } = params
+    const { oid, ticketId, paymentMethodId, time, money, note, cashierId, description } = params
     const PREFIX = `ticketId=${ticketId} refund overpaid failed`
 
     if (money <= 0) {
@@ -36,7 +43,7 @@ export class TicketRefundOverpaidOperation {
         {
           oid,
           id: ticketId,
-          ticketStatus: { IN: [TicketStatus.Deposited, TicketStatus.Executing] },
+          status: { IN: [TicketStatus.Deposited, TicketStatus.Executing] },
         },
         {
           paid: () => `paid - ${money}`,
@@ -59,27 +66,28 @@ export class TicketRefundOverpaidOperation {
       const customerOpenDebt = customer.debt
 
       // === 3. INSERT CUSTOMER_PAYMENT ===
-      const customerPaymentInsert: CustomerPaymentInsertType = {
+      const paymentInsert: PaymentInsertType = {
         oid,
-        customerId: ticket.customerId,
-        ticketId,
-        createdAt: time,
         paymentMethodId,
-        paymentType: PaymentType.ReceiveRefund,
-        paid: -money,
-        debit: 0, // refund overpaid không phát sinh nợ
+        voucherType: VoucherType.Ticket,
+        voucherId: ticketId,
+        personType: PersonType.Customer,
+        personId: ticket.customerId,
+        paymentTiming: PaymentTiming.ReceiveRefund,
+        createdAt: time,
+        moneyDirection: MoneyDirection.Out,
+        paidAmount: -money,
+        debtAmount: 0, // refund overpaid không phát sinh nợ
         openDebt: customerOpenDebt,
         closeDebt: customerCloseDebt,
+        cashierId,
         note,
-        description: '',
+        description,
       }
 
-      const customerPayment = await this.customerPaymentManager.insertOneAndReturnEntity(
-        manager,
-        customerPaymentInsert
-      )
+      const payment = await this.paymentManager.insertOneAndReturnEntity(manager, paymentInsert)
 
-      return { ticket, customerPayment }
+      return { ticket, payment }
     })
   }
 }

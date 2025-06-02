@@ -56,7 +56,7 @@ export class SocketEmitService {
   }
 
   productListUpdate(oid: number, data: { productList: Product[] }) {
-    if (!this.io || !data.productList.length) return
+    if (!this.io || !data.productList?.length) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.PRODUCT_LIST_UPDATE, data)
   }
 

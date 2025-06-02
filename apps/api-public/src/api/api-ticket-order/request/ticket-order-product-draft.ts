@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
-import { IsDefined, IsNumber, IsString } from 'class-validator'
+import { IsDefined, IsNumber, IsString, Max, Min } from 'class-validator'
 import { valuesEnum } from '../../../../../_libs/common/helpers/typescript.helper'
 import {
   IsEnumValue,
@@ -87,6 +87,8 @@ export class TicketOrderProductDraft {
   @Expose()
   @IsDefined()
   @IsNumber()
+  @Max(100)
+  @Min(0)
   discountPercent: number
 
   @ApiProperty({ enum: valuesEnum(DiscountType), example: DiscountType.VND })

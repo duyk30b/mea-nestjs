@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { PaymentType } from '../../common/variable'
-import { CustomerPaymentInsertType } from '../../entities/customer-payment.entity'
+import {
+  MoneyDirection,
+  PaymentInsertType,
+  PaymentTiming,
+  PersonType,
+  VoucherType,
+} from '../../entities/payment.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
-import { CustomerManager, CustomerPaymentManager, TicketManager } from '../../managers'
+import { CustomerManager, PaymentManager, TicketManager } from '../../managers'
 
 @Injectable()
 export class TicketPayDebtOperation {
@@ -11,7 +16,7 @@ export class TicketPayDebtOperation {
     private dataSource: DataSource,
     private ticketManager: TicketManager,
     private customerManager: CustomerManager,
-    private customerPaymentManager: CustomerPaymentManager
+    private paymentManager: PaymentManager
   ) { }
 
   async payDebt(params: {
@@ -21,8 +26,9 @@ export class TicketPayDebtOperation {
     time: number
     money: number
     note: string
+    cashierId: number
   }) {
-    const { oid, ticketId, paymentMethodId, time, money, note } = params
+    const { oid, ticketId, paymentMethodId, time, money, note, cashierId } = params
     const PREFIX = `ticketId=${ticketId} pay debt failed`
 
     if (money <= 0) {
@@ -36,10 +42,10 @@ export class TicketPayDebtOperation {
         {
           oid,
           id: ticketId,
-          ticketStatus: TicketStatus.Debt,
+          status: TicketStatus.Debt,
         },
         {
-          ticketStatus: () => `CASE 
+          status: () => `CASE 
               WHEN("totalMoney" > paid + ${money}) THEN ${TicketStatus.Debt} 
               ELSE ${TicketStatus.Completed} 
             END
@@ -51,40 +57,38 @@ export class TicketPayDebtOperation {
       if (ticket.paid > ticket.totalMoney) {
         throw new Error(`${PREFIX}: Money invalid, ticket=${ticket}`)
       }
+
       // === 2. UPDATE CUSTOMER ===
       const customer = await this.customerManager.updateOneAndReturnEntity(
         manager,
         { oid, id: ticket.customerId },
         { debt: () => `debt - ${money}` }
       )
-      if (!customer) {
-        throw new Error(`Khách hàng không tồn tại trên hệ thống`)
-      }
-
       const customerCloseDebt = customer.debt
       const customerOpenDebt = customerCloseDebt + money
 
       // === 3. INSERT CUSTOMER_PAYMENT ===
-      const customerPaymentInsert: CustomerPaymentInsertType = {
+      const paymentInsert: PaymentInsertType = {
         oid,
-        customerId: ticket.customerId,
-        ticketId,
         paymentMethodId,
+        voucherType: VoucherType.Ticket,
+        voucherId: ticketId,
+        personType: PersonType.Customer,
+        personId: ticket.customerId,
+        paymentTiming: PaymentTiming.PayDebt,
         createdAt: time,
-        paymentType: PaymentType.PayDebt,
-        paid: money,
-        debit: -money, //
+        moneyDirection: MoneyDirection.In,
+        paidAmount: money,
+        debtAmount: -money,
         openDebt: customerOpenDebt,
         closeDebt: customerCloseDebt,
+        cashierId,
         note,
         description: '',
       }
-      const customerPayment = await this.customerPaymentManager.insertOneAndReturnEntity(
-        manager,
-        customerPaymentInsert
-      )
+      const payment = await this.paymentManager.insertOneAndReturnEntity(manager, paymentInsert)
 
-      return { ticket, customerPayment, customer }
+      return { ticket, payment, customer }
     })
   }
 }

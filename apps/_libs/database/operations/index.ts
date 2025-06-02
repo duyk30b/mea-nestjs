@@ -1,11 +1,14 @@
 export * from './product/product.operation'
 
-export * from './receipt/receipt-cancel.operation'
 export * from './receipt/receipt-deposited.operation'
 export * from './receipt/receipt-draft.operation'
 export * from './receipt/receipt-pay-debt.operation'
-export * from './receipt/receipt-refund-prepayment.operation'
-export * from './receipt/receipt-send-product-and-payment.operation'
+export * from './receipt/receipt-payment-and-close.operation'
+export * from './receipt/receipt-prepayment.operation'
+export * from './receipt/receipt-refund-overpaid.operation'
+export * from './receipt/receipt-reopen.operation'
+export * from './receipt/receipt-return-product.operation'
+export * from './receipt/receipt-send-product.operation'
 
 export * from './statistic/statistic-receipt.operation'
 export * from './statistic/statistic.operation'
@@ -42,4 +45,6 @@ export * from './ticket-clinic/ticket-laboratory/ticket-clinic-update-ticket-lab
 export * from './ticket-order/ticket-order-deposited.operation'
 export * from './ticket-order/ticket-order-draft.operation'
 
+export * from './payment/customer-payment.operation'
+export * from './payment/distributor-payment.operation'
 export * from './stock-check/stock-check-reconcile.operation'

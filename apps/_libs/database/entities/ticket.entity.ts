@@ -1,12 +1,12 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { DiscountType } from '../common/variable'
+import { DeliveryStatus, DiscountType } from '../common/variable'
 import Appointment from './appointment.entity'
-import CustomerPayment from './customer-payment.entity'
 import CustomerSource from './customer-source.entity'
 import Customer from './customer.entity'
 import Image from './image.entity'
+import Payment from './payment.entity'
 import TicketAttribute from './ticket-attribute.entity'
 import TicketBatch from './ticket-batch.entity'
 import TicketExpense from './ticket-expense.entity'
@@ -34,7 +34,7 @@ export enum TicketStatus {
   Executing = 4,
   Debt = 5,
   Completed = 6,
-  Voided = 7,
+  Cancelled = 7,
 }
 
 export const TicketOrderStatusText = {
@@ -44,7 +44,7 @@ export const TicketOrderStatusText = {
   [TicketStatus.Executing]: 'Đang xử lý',
   [TicketStatus.Debt]: 'Đang nợ',
   [TicketStatus.Completed]: 'Hoàn thành',
-  [TicketStatus.Voided]: 'Đã hủy',
+  [TicketStatus.Cancelled]: 'Đã hủy',
 }
 
 export const TicketClinicStatusText = {
@@ -54,13 +54,13 @@ export const TicketClinicStatusText = {
   [TicketStatus.Executing]: 'Đang khám',
   [TicketStatus.Debt]: 'Đang nợ',
   [TicketStatus.Completed]: 'Hoàn thành',
-  [TicketStatus.Voided]: 'Đã hủy',
+  [TicketStatus.Cancelled]: 'Đã hủy',
 }
 
 @Entity('Ticket')
 @Index('IDX_Ticket__oid_registeredAt', ['oid', 'registeredAt'])
 @Index('IDX_Ticket__oid_customerId', ['oid', 'customerId'])
-@Index('IDX_Ticket__oid_ticketStatus', ['oid', 'ticketStatus'])
+@Index('IDX_Ticket__oid_status', ['oid', 'status'])
 export default class Ticket extends BaseEntity {
   @Column()
   @Expose()
@@ -80,7 +80,11 @@ export default class Ticket extends BaseEntity {
 
   @Column({ type: 'smallint', default: TicketStatus.Draft })
   @Expose()
-  ticketStatus: TicketStatus
+  status: TicketStatus
+
+  @Column({ type: 'smallint', default: DeliveryStatus.NoStock })
+  @Expose()
+  deliveryStatus: DeliveryStatus
 
   @Column({ type: 'smallint', nullable: true })
   @Expose()
@@ -294,9 +298,9 @@ export default class Ticket extends BaseEntity {
   @Expose()
   customer: Customer
 
-  @OneToMany(() => CustomerPayment, (customerPayment) => customerPayment.ticket)
+  @OneToMany(() => Payment, (payment) => payment.ticket)
   @Expose()
-  customerPaymentList: CustomerPayment[]
+  paymentList: Payment[]
 
   // @OneToOne(() => Appointment, { createForeignKeyConstraints: false })
   // @JoinColumn({ name: 'id', referencedColumnName: 'fromTicketId' }) // không JoinColumn trên cùng cột id được, vkl
@@ -401,9 +405,9 @@ export default class Ticket extends BaseEntity {
 
   static getStatusText(ticket: Ticket) {
     if (ticket.ticketType === TicketType.Order) {
-      return TicketOrderStatusText[ticket.ticketStatus]
+      return TicketOrderStatusText[ticket.status]
     } else {
-      return TicketClinicStatusText[ticket.ticketStatus]
+      return TicketClinicStatusText[ticket.status]
     }
     return ''
   }
@@ -416,7 +420,7 @@ export type TicketRelationType = {
     | 'ticketAttributeList'
     | 'ticketExpenseList'
     | 'ticketSurchargeList'
-    | 'customerPaymentList'
+    | 'paymentList'
     | 'customerSource'
     | 'imageList'
     | 'toAppointment'

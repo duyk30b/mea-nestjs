@@ -9,7 +9,9 @@ import {
   IsNumber,
   IsPositive,
   IsString,
+  Max,
   MaxLength,
+  Min,
   ValidateNested,
 } from 'class-validator'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
@@ -66,6 +68,8 @@ class TicketOrderBasic {
   @Expose()
   @IsDefined()
   @IsNumber()
+  @Max(100)
+  @Min(0)
   discountPercent: number
 
   @ApiProperty({ enum: DiscountType, example: DiscountType.VND })

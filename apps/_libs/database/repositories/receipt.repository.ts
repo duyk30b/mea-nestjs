@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, EntityManager, In, Repository } from 'typeorm'
-import { ReceiptStatus } from '../common/variable'
 import { Receipt, ReceiptItem } from '../entities'
-import { ReceiptInsertType, ReceiptRelationType, ReceiptSortType, ReceiptUpdateType } from '../entities/receipt.entity'
+import {
+  ReceiptInsertType,
+  ReceiptRelationType,
+  ReceiptSortType,
+  ReceiptStatus,
+  ReceiptUpdateType,
+} from '../entities/receipt.entity'
 import { _PostgreSqlRepository } from './_postgresql.repository'
 
 @Injectable()
@@ -36,10 +41,6 @@ export class ReceiptRepository extends _PostgreSqlRepository<
       query = query.leftJoinAndSelect('receipt.distributor', 'distributor')
     }
 
-    if (relation?.distributorPaymentList) {
-      query = query.leftJoinAndSelect('invoice.distributorPaymentList', 'distributorPayment')
-    }
-
     if (relation?.receiptItemList) {
       query = query.leftJoinAndSelect('receipt.receiptItemList', 'receiptItem')
       if (relation?.receiptItemList?.batch) {
@@ -60,7 +61,8 @@ export class ReceiptRepository extends _PostgreSqlRepository<
       const receiptDeleteResult = await manager.delete(Receipt, {
         oid,
         id: receiptId,
-        status: In([ReceiptStatus.Draft, ReceiptStatus.Voided]),
+        paid: 0,
+        status: In([ReceiptStatus.Draft, ReceiptStatus.Deposited, ReceiptStatus.Cancelled]),
       })
       if (receiptDeleteResult.affected !== 1) {
         throw new Error(`Delete Receipt ${receiptId} failed: Status invalid`)

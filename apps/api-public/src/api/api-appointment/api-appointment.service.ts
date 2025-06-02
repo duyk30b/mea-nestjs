@@ -135,7 +135,7 @@ export class ApiAppointmentService {
     const ticket = await this.ticketRepository.insertOneAndReturnEntity({
       oid,
       customerId: customer.id,
-      ticketStatus: TicketStatus.Schedule,
+      status: TicketStatus.Schedule,
       ticketType: body.ticketType,
       registeredAt,
       dailyIndex: countToday + 1,

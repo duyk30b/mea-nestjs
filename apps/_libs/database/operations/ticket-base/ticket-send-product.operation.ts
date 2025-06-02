@@ -3,7 +3,7 @@ import { DataSource } from 'typeorm'
 import { ESArray } from '../../../common/helpers/object.helper'
 import { ESTimer } from '../../../common/helpers/time.helper'
 import { DeliveryStatus, InventoryStrategy, MovementType } from '../../common/variable'
-import { Batch, TicketProduct } from '../../entities'
+import { Batch } from '../../entities'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
 import { TicketBatchInsertType } from '../../entities/ticket-batch.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
@@ -199,9 +199,9 @@ export class TicketSendProductOperation {
     const PREFIX = `TicketId = ${ticketId}, sendProduct failed`
     const ERROR_LOGIC = `TicketId = ${ticketId}, sendProduct has a logic error occurred: `
 
-    if (!sendList.length) {
-      throw new Error(`${PREFIX}: sendList.length = 0`)
-    }
+    // if (!sendList.length) {
+    //   throw new Error(`${PREFIX}: sendList.length = 0`)
+    // }
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // 1. === UPDATE TRANSACTION for TICKET ===
@@ -210,11 +210,15 @@ export class TicketSendProductOperation {
         {
           oid,
           id: ticketId,
-          ticketStatus: {
+          status: {
             IN: [TicketStatus.Draft, TicketStatus.Deposited, TicketStatus.Executing],
           },
         },
-        { updatedAt: Date.now(), ticketStatus: TicketStatus.Executing }
+        {
+          updatedAt: Date.now(),
+          status: TicketStatus.Executing,
+          deliveryStatus: DeliveryStatus.Delivered,
+        }
       )
 
       const ticketProductOriginList = await this.ticketProductManager.findManyBy(manager, {
@@ -224,6 +228,10 @@ export class TicketSendProductOperation {
         deliveryStatus: DeliveryStatus.Pending, // chỉ update những thằng "Pending" thôi
       })
       const ticketProductOriginMap = ESArray.arrayToKeyValue(ticketProductOriginList, 'id')
+
+      if (ticketProductOriginList.length === 0) {
+        return { ticket }
+      }
 
       // 2. === CALCULATOR data ===
       const tpCalcMap: Record<
@@ -265,59 +273,48 @@ export class TicketSendProductOperation {
       })
 
       // 3. === TICKET_PRODUCT: update Delivery ===
-      const tpCalcValue = Object.values(tpCalcMap)
-      const ticketProductModifiedRaw: [any[], number] = await manager.query(
-        `
-        UPDATE  "TicketProduct" "tp"
-        SET     "deliveryStatus"  = ${DeliveryStatus.Delivered},
-                "costAmount"      = "temp"."sumCostAmount"
-        FROM (VALUES `
-        + tpCalcValue
-          .map((u) => `(${u.ticketProductId}, ${u.sumCostAmount}, ${u.sumQuantity})`)
-          .join(', ')
-        + `   ) AS temp("ticketProductId", "sumCostAmount", "sumQuantity")
-        WHERE   "tp"."oid"            = ${oid}
-            AND "tp"."ticketId"       = ${ticketId}
-            AND "tp"."id"             = temp."ticketProductId" 
-            AND "tp"."deliveryStatus" = ${DeliveryStatus.Pending}
-            AND "tp"."quantity"       = temp."sumQuantity" 
-        RETURNING "tp".*;        
-        `
-      )
-
-      if (ticketProductModifiedRaw[0].length != tpCalcValue.length) {
-        throw new Error(
-          `${PREFIX}: Update TicketProduct, affected = ${ticketProductModifiedRaw[1]}`
-        )
-      }
-      const ticketProductModifiedList = TicketProduct.fromRaws(ticketProductModifiedRaw[0])
+      const ticketProductModifiedList = await this.ticketProductManager.updateListBy({
+        manager,
+        condition: { oid, ticketId, deliveryStatus: { EQUAL: DeliveryStatus.Pending } },
+        compare: ['id', 'productId'],
+        tempList: Object.values(tpCalcMap).map((i) => {
+          return {
+            id: i.ticketProductId,
+            productId: i.productId,
+            quantity: i.sumQuantity,
+            costAmount: i.sumCostAmount,
+            deliveryStatus: DeliveryStatus.Delivered,
+          }
+        }),
+        update: ['costAmount', 'deliveryStatus'],
+        options: { requireEqualLength: true },
+      })
       const ticketProductModifiedMap = ESArray.arrayToKeyValue(ticketProductModifiedList, 'id')
 
       // 4. === UPDATE for PRODUCT and BATCH===
-      const productModifiedList = await this.productManager.changeQuantity({
+      const productModifiedList = await this.productManager.updateListBy({
         manager,
-        oid,
-        changeList: Object.values(productCalcMap).map((i) => {
-          return {
-            productId: i.productId,
-            quantity: -i.sumQuantity,
-          }
+        condition: { oid },
+        compare: ['id'],
+        tempList: Object.values(productCalcMap).map((i) => {
+          return { id: i.productId, sumQuantity: i.sumQuantity }
         }),
+        update: { quantity: (t: string) => `"quantity" - ${t}."sumQuantity"` },
+        options: { requireEqualLength: true },
       })
       const productModifiedMap = ESArray.arrayToKeyValue(productModifiedList, 'id')
 
-      const batchModifiedList = await this.batchManager.changeQuantity({
+      const batchModifiedList = await this.batchManager.updateListBy({
         manager,
-        oid,
-        changeList: Object.values(batchCalcMap)
-          .filter((i) => i.sumQuantity != 0 && i.batchId != 0)
-          .map((i) => {
-            return {
-              batchId: i.batchId,
-              quantity: -i.sumQuantity,
-            }
-          }),
+        condition: { oid },
+        compare: ['id'],
+        tempList: Object.values(batchCalcMap).map((i) => {
+          return { id: i.batchId, sumQuantity: i.sumQuantity }
+        }),
+        update: { quantity: (t: string) => `"quantity" - ${t}."sumQuantity"` },
+        options: { requireEqualLength: true },
       })
+      const batchMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')
 
       // 5. === CALCULATOR: check Negative và tính số lượng ban đầu của product và batch ===
       if (!allowNegativeQuantity) {

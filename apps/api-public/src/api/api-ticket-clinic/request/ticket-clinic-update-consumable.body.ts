@@ -73,8 +73,8 @@ class TicketProductConsumableBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  @Max(9999.99)
-  @Min(-9999.99)
+  @Max(100)
+  @Min(0)
   discountPercent: number
 
   @ApiProperty({ enum: valuesEnum(DiscountType), example: DiscountType.VND })

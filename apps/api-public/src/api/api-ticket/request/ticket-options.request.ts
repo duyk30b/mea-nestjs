@@ -15,7 +15,7 @@ export class TicketRelationQuery {
 
   @Expose()
   @IsBoolean()
-  customerPaymentList: boolean
+  paymentList: boolean
 
   @Expose()
   @IsBoolean()
@@ -84,12 +84,12 @@ const ConditionEnumTicketStatus = createConditionEnum(TicketStatus)
 export class TicketFilterQuery {
   // @Expose()
   // @IsEnumValue(TicketStatus)
-  // ticketStatus: TicketStatus
+  // status: TicketStatus
 
   @Expose()
   @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketStatus))
   @IsOptional()
-  ticketStatus: TicketStatus | InstanceType<typeof ConditionEnumTicketStatus>
+  status: TicketStatus | InstanceType<typeof ConditionEnumTicketStatus>
 
   @Expose()
   @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketType))

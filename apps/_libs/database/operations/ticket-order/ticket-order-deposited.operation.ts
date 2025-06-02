@@ -41,7 +41,8 @@ export type TicketOrderDepositedUpdateType = Omit<
     | 'id'
     | 'customerId' // không được update customerId
     | 'ticketType'
-    | 'ticketStatus'
+    | 'status'
+    | 'deliveryStatus'
     | 'paid'
     | 'debt'
     | 'year'
@@ -69,7 +70,7 @@ export class TicketOrderDepositedOperation {
     private ticketUserManager: TicketUserManager
   ) { }
 
-  async updateDeposited<T extends TicketOrderDepositedUpdateType>(params: {
+  async update<T extends TicketOrderDepositedUpdateType>(params: {
     oid: number
     ticketId: number
     ticketOrderDepositedUpdateDto: NoExtra<TicketOrderDepositedUpdateType, T>
@@ -97,7 +98,8 @@ export class TicketOrderDepositedOperation {
         { id: ticketId, oid },
         {
           ...ticketOrderDepositedUpdateDto,
-          // ticketStatus: TicketStatus.Draft, // giữ nguyên status
+          // status: TicketStatus.Draft, // giữ nguyên status
+          // deliveryStatus: DeliveryStatus.Pending, // Deposited thì chưa gửi hàng, vẫn giữ nguyên vậy
           // paid: 0, // giữ nguyên số tiền đã trả
           debt: () => `${ticketOrderDepositedUpdateDto.totalMoney} - paid`,
           registeredAt,

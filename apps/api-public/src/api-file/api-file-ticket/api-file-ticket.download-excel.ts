@@ -30,7 +30,7 @@ export class ApiFileTicketDownloadExcel {
       },
       condition: {
         oid: organization.id,
-        ticketStatus: query.filter?.ticketStatus,
+        status: query.filter?.status,
         ticketType: query.filter?.ticketType,
         customType: query.filter?.customType,
         customerId: query.filter?.customerId,
@@ -90,7 +90,7 @@ export class ApiFileTicketDownloadExcel {
           id: { alignment: { horizontal: 'center' } },
           ticketCode: { alignment: { horizontal: 'center' } },
           customerName: { alignment: { wrapText: true } },
-          ticketStatus: { alignment: { wrapText: true } },
+          status: { alignment: { wrapText: true } },
           registeredAt: { alignment: { horizontal: 'center' }, numFmt: 'dd/mm/yyyy h:mm:ss' },
           endedAt: { alignment: { horizontal: 'center' }, numFmt: 'dd/mm/yyyy h:mm:ss' },
           itemsCostAmount: { numFmt: '###,##0', font: { bold: true } },
@@ -120,7 +120,7 @@ export class ApiFileTicketDownloadExcel {
               + '_'
               + ticket.dailyIndex?.toString().padStart(2, '0'),
             customerName: ticket.customer?.fullName || '',
-            ticketStatus: Ticket.getStatusText(ticket),
+            status: Ticket.getStatusText(ticket),
             registeredAt: ticket.registeredAt
               ? new Date(ticket.registeredAt + 7 * 60 * 60 * 1000)
               : '', // fix giờ do hệ thống lệch giờ
@@ -244,7 +244,7 @@ export class ApiFileTicketDownloadExcel {
         { key: 'id', width: 10 },
         { key: 'ticketCode', width: 15 },
         { key: 'customerName', width: 30 },
-        { key: 'ticketStatus', width: 15 },
+        { key: 'status', width: 15 },
         { key: 'registeredAt', width: 20 },
         { key: 'endedAt', width: 20 },
         { key: 'itemsCostAmount', width: 10 },

@@ -6,9 +6,9 @@ import {
   Repository,
   UpdateResult,
 } from 'typeorm'
-import { BaseCondition } from '../../common/dto'
+import { BaseCondition, BaseOperator } from '../../common/dto'
 import { NoExtra } from '../../common/helpers/typescript.helper'
-import { PostgreSqlCondition } from '../common/postgresql.condition'
+import { PostgreSqlRaw } from '../common/postgresql.raw'
 
 type EntityType<_ENTITY> = EntityTarget<_ENTITY> & {
   fromRaw: (raw: { [P in keyof _ENTITY]: any }) => _ENTITY
@@ -21,7 +21,7 @@ export abstract class _PostgreSqlRepository<
   _INSERT = Omit<_ENTITY, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>,
   _UPDATE = Omit<_ENTITY, 'id' | 'createdAt' | 'updatedAt'>,
   _SORT = { [P in keyof _ENTITY]?: 'ASC' | 'DESC' },
-> extends PostgreSqlCondition<_ENTITY> {
+> extends PostgreSqlRaw<_ENTITY> {
   private entity: EntityType<_ENTITY>
   private repository: Repository<_ENTITY>
 
@@ -308,6 +308,66 @@ export abstract class _PostgreSqlRepository<
     return this.entity.fromRaws(raws)
   }
 
+  async findAndSelect<
+    Aggregate extends Record<
+      string,
+      { SUM?: (keyof _ENTITY | BaseOperator<keyof _ENTITY>)[]; COUNT?: keyof _ENTITY | '*' }
+    >,
+  >(options: {
+    condition: BaseCondition<_ENTITY>
+    select?: { [P in keyof _ENTITY]?: boolean } | (keyof _ENTITY)[]
+    aggregate?: Aggregate
+    groupBy?: (keyof _ENTITY)[]
+  }): Promise<({ [P in keyof _ENTITY]?: any } & { [P in keyof Aggregate]: any })[]> {
+    const { condition, select, aggregate, groupBy } = options
+    const where = this.getWhereOptions(condition)
+    const selectList: string[] = []
+    if (select) {
+      if (Array.isArray(select)) {
+        select.forEach((column) => {
+          selectList.push(`"${column as string}"`)
+        })
+      } else {
+        Object.keys(select).map((column) => {
+          if (select[column]) {
+            selectList.push(`"${column as string}"`)
+          }
+        })
+      }
+    }
+    if (aggregate) {
+      Object.keys(aggregate).forEach((customField) => {
+        if (aggregate[customField].COUNT) {
+          const column = aggregate[customField].COUNT as string
+          if (column === '*') {
+            selectList.push(`COUNT(${column}) AS "${customField}"`)
+          } else {
+            selectList.push(`COUNT("${column}") AS "${customField}"`)
+          }
+        } else if (aggregate[customField].SUM) {
+          const sumString = aggregate[customField].SUM.map((operator) => {
+            if (typeof operator === 'string') {
+              const column = operator as string
+              return `"${column}"`
+            }
+            if (typeof operator === 'object') {
+              return this.getOperatorRaw(operator)
+            }
+          }).join('+')
+          selectList.push(`SUM(${sumString}) AS "${customField}"`)
+        }
+      })
+    }
+
+    let query = this.repository.createQueryBuilder().select(selectList).where(where).groupBy()
+    if (groupBy && groupBy.length) {
+      const groupString = groupBy.map((field) => `"${field as string}"`).join(', ')
+      query = query.groupBy(groupString)
+    }
+
+    return await query.getRawMany()
+  }
+
   async updateListAndReturnEntity(options: {
     updateList: Partial<_ENTITY>[]
     conditionFields: (keyof _ENTITY)[]
@@ -324,7 +384,7 @@ export abstract class _PostgreSqlRepository<
     const tempField = [...conditionFields, ...updateFields]
     const tableName = this.entity['name']
 
-    const modifiedRaw: [any[], number] =await this.repository.query(
+    const modifiedRaw: [any[], number] = await this.repository.query(
       `
         UPDATE  "${tableName}"
         SET     ${updateFields.map((field) => `"${field}" = temp."${field}"`).join(', ')}

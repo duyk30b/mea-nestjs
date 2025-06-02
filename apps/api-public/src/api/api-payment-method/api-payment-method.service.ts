@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import {
-  CustomerPaymentRepository,
-  DistributorPaymentRepository,
-} from '../../../../_libs/database/repositories'
+import { PaymentRepository } from '../../../../_libs/database/repositories'
 import { PaymentMethodRepository } from '../../../../_libs/database/repositories/payment-method.repository'
 import {
   PaymentMethodCreateBody,
@@ -17,8 +14,7 @@ import {
 export class ApiPaymentMethodService {
   constructor(
     private readonly paymentMethodRepository: PaymentMethodRepository,
-    private readonly customerPaymentRepository: CustomerPaymentRepository,
-    private readonly distributorPaymentRepository: DistributorPaymentRepository
+    private readonly paymentRepository: PaymentRepository
   ) { }
 
   async pagination(oid: number, query: PaymentMethodPaginationQuery): Promise<BaseResponse> {
@@ -84,8 +80,7 @@ export class ApiPaymentMethodService {
     const { oid, paymentMethodId } = options
     await Promise.all([
       this.paymentMethodRepository.delete({ oid, id: paymentMethodId }),
-      this.customerPaymentRepository.update({ oid, paymentMethodId }, { paymentMethodId: 0 }),
-      this.distributorPaymentRepository.update({ oid, paymentMethodId }, { paymentMethodId: 0 }),
+      this.paymentRepository.update({ oid, paymentMethodId }, { paymentMethodId: 0 }),
     ])
 
     return { data: { paymentMethodId } }

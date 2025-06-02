@@ -58,7 +58,7 @@ export class ApiTicketClinicService {
 
   async create(options: { oid: number; body: TicketClinicCreateBody }) {
     const { oid, body } = options
-    const { registeredAt, ticketStatus } = body.ticketInformation
+    const { registeredAt, status } = body.ticketInformation
 
     let customer: Customer
     if (!body.ticketInformation.customerId) {
@@ -81,9 +81,9 @@ export class ApiTicketClinicService {
       oid,
       customerId: customer.id,
       ticketType: body.ticketInformation.ticketType,
-      ticketStatus,
+      status,
       registeredAt,
-      startedAt: ticketStatus === TicketStatus.Executing ? registeredAt : null,
+      startedAt: status === TicketStatus.Executing ? registeredAt : null,
       customerSourceId: body.ticketInformation.customerSourceId,
       customType: body.ticketInformation.customType,
 
@@ -206,10 +206,10 @@ export class ApiTicketClinicService {
       {
         oid,
         id: ticketId,
-        ticketStatus: { IN: [TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Deposited] },
+        status: { IN: [TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Deposited] },
       },
       {
-        ticketStatus: TicketStatus.Executing,
+        status: TicketStatus.Executing,
         startedAt: Date.now(),
       }
     )
@@ -289,11 +289,17 @@ export class ApiTicketClinicService {
     return { data: true }
   }
 
-  async prepayment(params: { oid: number; ticketId: number; body: TicketPaymentMoneyBody }) {
-    const { oid, ticketId, body } = params
+  async prepayment(params: {
+    oid: number
+    userId: number
+    ticketId: number
+    body: TicketPaymentMoneyBody
+  }) {
+    const { oid, userId, ticketId, body } = params
     try {
-      const { ticket, customerPayment } = await this.ticketPrepaymentOperation.prepayment({
+      const { ticket, payment } = await this.ticketPrepaymentOperation.prepayment({
         oid,
+        cashierId: userId,
         ticketId,
         time: Date.now(),
         money: body.money,
@@ -302,35 +308,48 @@ export class ApiTicketClinicService {
       })
 
       this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
-      return { data: { ticket, customerPayment } }
+      return { data: { ticket, payment } }
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
   }
 
-  async refundOverpaid(params: { oid: number; ticketId: number; body: TicketPaymentMoneyBody }) {
-    const { oid, ticketId, body } = params
+  async refundOverpaid(params: {
+    oid: number
+    userId: number
+    ticketId: number
+    body: TicketPaymentMoneyBody
+  }) {
+    const { oid, userId, ticketId, body } = params
     try {
-      const { ticket, customerPayment } = await this.ticketRefundMoneyOperation.refundOverpaid({
+      const { ticket, payment } = await this.ticketRefundMoneyOperation.refundOverpaid({
         oid,
+        cashierId: userId,
         ticketId,
         time: Date.now(),
         money: body.money,
         paymentMethodId: body.paymentMethodId,
         note: body.note,
+        description: '',
       })
       this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
-      return { data: { ticket, customerPayment } }
+      return { data: { ticket, payment } }
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
   }
 
-  async payDebt(params: { oid: number; ticketId: number; body: TicketPaymentMoneyBody }) {
-    const { oid, ticketId, body } = params
+  async payDebt(params: {
+    oid: number
+    userId: number
+    ticketId: number
+    body: TicketPaymentMoneyBody
+  }) {
+    const { oid, userId, ticketId, body } = params
     try {
       const { ticket, customer } = await this.ticketPayDebtOperation.payDebt({
         oid,
+        cashierId: userId,
         ticketId,
         time: Date.now(),
         money: body.money,
@@ -369,11 +388,12 @@ export class ApiTicketClinicService {
     }
   }
 
-  async close(params: { oid: number; ticketId: number }) {
-    const { oid, ticketId } = params
+  async close(params: { oid: number; userId: number; ticketId: number }) {
+    const { oid, userId, ticketId } = params
     try {
       const result = await this.ticketPaymentAndCloseOperation.paymentAndClose({
         oid,
+        cashierId: userId,
         ticketId,
         time: Date.now(),
         money: 0,
@@ -398,15 +418,18 @@ export class ApiTicketClinicService {
     }
   }
 
-  async reopen(params: { oid: number; ticketId: number }) {
-    const { oid, ticketId } = params
+  async reopen(params: { oid: number; userId: number; ticketId: number }) {
+    const { oid, userId, ticketId } = params
     try {
       const { ticket, customer } = await this.ticketReopenOperation.reopen({
         oid,
+        cashierId: userId,
         ticketId,
         time: Date.now(),
         description: '',
         paymentMethodId: 0,
+        note: '',
+        newPaid: null,
       })
 
       this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
@@ -442,7 +465,7 @@ export class ApiTicketClinicService {
       imageIdsKeep: [],
       imageIdsOld: JSON.parse(ticket.imageIds || '[]'),
     })
-    await this.ticketRepository.update({ oid, id: ticketId }, { ticketStatus: TicketStatus.Voided })
+    await this.ticketRepository.update({ oid, id: ticketId }, { status: TicketStatus.Cancelled })
     await this.ticketRepository.destroy({ oid, ticketId })
     this.socketEmitService.ticketClinicChange(oid, { type: 'DESTROY', ticket })
     return { data: { ticketId } }

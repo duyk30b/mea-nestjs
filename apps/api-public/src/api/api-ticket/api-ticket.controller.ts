@@ -32,6 +32,6 @@ export class ApiTicketController {
     @Param() { id }: IdParam,
     @Query() query: TicketGetOneQuery
   ) {
-    return await this.apiTicketService.queryOne(oid, id, query)
+    return await this.apiTicketService.getOne(oid, id, query)
   }
 }

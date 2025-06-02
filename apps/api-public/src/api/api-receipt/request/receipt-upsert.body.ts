@@ -6,6 +6,8 @@ import {
   IsDefined,
   IsNumber,
   IsString,
+  Max,
+  Min,
   ValidateNested,
 } from 'class-validator'
 import {
@@ -38,6 +40,8 @@ export class ReceiptUpsert {
   @Expose()
   @IsDefined()
   @IsNumber()
+  @Max(100)
+  @Min(0)
   discountPercent: number
 
   @ApiProperty({ enum: DiscountType, example: DiscountType.VND })

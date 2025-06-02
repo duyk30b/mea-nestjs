@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { ESArray } from '../../../common/helpers/object.helper'
 import { DeliveryStatus, MovementType } from '../../common/variable'
-import { TicketBatch, TicketProduct, TicketUser } from '../../entities'
+import { TicketUser } from '../../entities'
 import { InteractType } from '../../entities/commission.entity'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
@@ -52,11 +52,7 @@ export class TicketReturnProductOperation {
       // 1. === UPDATE TICKET FOR TRANSACTION ===
       const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(
         manager,
-        {
-          oid,
-          id: ticketId,
-          ticketStatus: { IN: [TicketStatus.Executing] },
-        },
+        { oid, id: ticketId, status: { IN: [TicketStatus.Executing] } },
         { updatedAt: Date.now() }
       )
 
@@ -117,88 +113,76 @@ export class TicketReturnProductOperation {
       })
 
       // 4. === UPDATE for TICKET_PRODUCT ===
-      const tpCalcValue = Object.values(tpCalcMap)
-      const ticketProductModifiedRaw = await manager.query(
-        `
-        UPDATE  "TicketProduct" tp
-        SET     "quantity"          = tp."quantity" - temp."sumQuantity",
-                "costAmount"        = tp."costAmount" - temp."sumCostAmount",
-                "deliveryStatus"    = CASE
-                                        WHEN  (tp."quantity" = temp."sumQuantity")
-                                          THEN ${DeliveryStatus.NoStock}
-                                        ELSE ${DeliveryStatus.Delivered}
-                                      END
-        FROM (VALUES `
-        + tpCalcValue
-          .map((i) => {
-            return `(${i.ticketProductId}, ${i.productId}, ${i.sumQuantity}, ${i.sumCostAmount})`
-          })
-          .join(', ')
-        + `   ) AS temp("ticketProductId", "productId", "sumQuantity", "sumCostAmount")
-        WHERE   tp."oid"            = ${oid}
-            AND tp."ticketId"       = ${ticketId}
-            AND tp."id"             = temp."ticketProductId"
-            AND tp."productId"      = temp."productId"
-        RETURNING tp.*;
-        `
-      )
-      if (ticketProductModifiedRaw[0].length != tpCalcValue.length) {
-        throw new Error(
-          `${PREFIX}: Update TicketProduct, affected = ${ticketProductModifiedRaw[1]}`
-        )
-      }
-      const ticketProductModifiedList = TicketProduct.fromRaws(ticketProductModifiedRaw[0])
+      const ticketProductModifiedList = await this.ticketProductManager.updateListBy({
+        manager,
+        condition: { oid, ticketId },
+        compare: ['id', 'productId'],
+        tempList: Object.values(tpCalcMap).map((i) => {
+          return {
+            id: i.ticketProductId,
+            productId: i.productId,
+            sumQuantity: i.sumQuantity,
+            sumCostAmount: i.sumCostAmount,
+          }
+        }),
+        update: {
+          quantity: (t: string) => `"quantity" - ${t}."sumQuantity"`,
+          costAmount: (t: string) => `"quantity" - ${t}."sumCostAmount"`,
+          deliveryStatus: (t: string) => ` CASE
+                                    WHEN  ("quantity" = ${t}."sumQuantity")
+                                      THEN ${DeliveryStatus.NoStock}
+                                    ELSE ${DeliveryStatus.Delivered}
+                                  END`,
+        },
+        options: { requireEqualLength: true },
+      })
       const ticketProductModifiedMap = ESArray.arrayToKeyValue(ticketProductModifiedList, 'id')
 
       // 5. === TICKET_BATCH: UPDATE ===
       const tbCalcValue = returnList.filter((i) => !!i.ticketBatchId)
-      let ticketBatchModifiedList: TicketBatch[] = []
-      if (tbCalcValue.length) {
-        const ticketBatchModifiedRaw: [any[], number] = await manager.query(
-          `
-          UPDATE  "TicketBatch" tb
-          SET     "quantity"        = tb."quantity" - temp."quantity",
-                  "deliveryStatus"  = CASE 
-                                        WHEN  (tb."quantity" = temp."quantity") 
-                                          THEN ${DeliveryStatus.NoStock} 
-                                        ELSE ${DeliveryStatus.Delivered} 
-                                      END
-          FROM (VALUES `
-          + tbCalcValue.map((i) => `(${i.ticketBatchId}, ${i.quantity})`).join(', ')
-          + `   ) AS temp("ticketBatchId", "quantity")
-          WHERE   tb."oid"            = ${oid}
-              AND tb."ticketId"       = ${ticketId}
-              AND tb."id"             = temp."ticketBatchId"
-              AND tb."deliveryStatus" = ${DeliveryStatus.Delivered}
-          RETURNING tb.*;
-          `
-        )
-        if (ticketBatchModifiedRaw[0].length != tbCalcValue.length) {
-          throw new Error(`${PREFIX}: Update TicketBatch, affected = ${ticketBatchModifiedRaw[1]}`)
-        }
-        ticketBatchModifiedList = TicketBatch.fromRaws(ticketBatchModifiedRaw[0])
-      }
+      const ticketBatchModifiedList = await this.ticketBatchManager.updateListBy({
+        manager,
+        condition: { oid, ticketId, deliveryStatus: { EQUAL: DeliveryStatus.Delivered } },
+        compare: ['id'],
+        tempList: Object.values(tbCalcValue).map((i) => {
+          return { id: i.ticketBatchId, quantity: i.quantity }
+        }),
+        update: {
+          quantity: (t: string, u: string) => `"${u}"."quantity" - ${t}."quantity"`,
+          deliveryStatus: (t: string, u: string) => ` CASE
+                                    WHEN  ("${u}"."quantity" = ${t}."quantity")
+                                      THEN ${DeliveryStatus.NoStock}
+                                    ELSE ${DeliveryStatus.Delivered}
+                                  END`,
+        },
+        options: { requireEqualLength: true },
+      })
       const ticketBatchModifiedMap = ESArray.arrayToKeyValue(ticketBatchModifiedList, 'id')
 
       // 6. === UPDATE for PRODUCT and BATCH ===
-      const productModifiedList = await this.productManager.changeQuantity({
+      const productModifiedList = await this.productManager.updateListBy({
         manager,
-        oid,
-        changeList: Object.values(productCalcMap).map((i) => {
-          return { productId: i.productId, quantity: i.sumQuantity }
+        condition: { oid },
+        compare: ['id'],
+        tempList: Object.values(productCalcMap).map((i) => {
+          return { id: i.productId, sumQuantity: i.sumQuantity }
         }),
+        update: { quantity: (t: string) => `"quantity" + ${t}."sumQuantity"` },
+        options: { requireEqualLength: true },
       })
       const productModifiedMap = ESArray.arrayToKeyValue(productModifiedList, 'id')
 
-      const batchModifiedList = await this.batchManager.changeQuantity({
+      const batchModifiedList = await this.batchManager.updateListBy({
         manager,
-        oid,
-        changeList: Object.values(batchCalcMap)
-          .filter((i) => i.sumQuantity != 0 && i.batchId != 0)
-          .map((i) => {
-            return { batchId: i.batchId, quantity: i.sumQuantity }
-          }),
+        condition: { oid },
+        compare: ['id'],
+        tempList: Object.values(batchCalcMap).map((i) => {
+          return { id: i.batchId, sumQuantity: i.sumQuantity }
+        }),
+        update: { quantity: (t: string) => `"quantity" + ${t}."sumQuantity"` },
+        options: { requireEqualLength: true },
       })
+      const batchMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')
 
       // 7. === CALCULATOR: check Negative và tính số lượng ban đầu của product và batch ===
       ticketProductModifiedList.forEach((i) => {

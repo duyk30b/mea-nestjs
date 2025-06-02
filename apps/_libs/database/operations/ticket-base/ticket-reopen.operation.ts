@@ -1,10 +1,15 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { PaymentType } from '../../common/variable'
 import { Customer } from '../../entities'
-import CustomerPayment, { CustomerPaymentInsertType } from '../../entities/customer-payment.entity'
+import {
+  MoneyDirection,
+  PaymentInsertType,
+  PaymentTiming,
+  PersonType,
+  VoucherType,
+} from '../../entities/payment.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
-import { CustomerManager, CustomerPaymentManager, TicketManager } from '../../managers'
+import { CustomerManager, PaymentManager, TicketManager } from '../../managers'
 
 @Injectable()
 export class TicketReopenOperation {
@@ -12,67 +17,93 @@ export class TicketReopenOperation {
     private dataSource: DataSource,
     private ticketManager: TicketManager,
     private customerManager: CustomerManager,
-    private customerPaymentManager: CustomerPaymentManager
+    private paymentManager: PaymentManager
   ) { }
 
   async reopen(params: {
     oid: number
     ticketId: number
+    cashierId: number
     paymentMethodId: number
     time: number
+    newPaid: number | null // null là không set giá trị mới, giữ nguyên hiện tại
+    note: string
     description: string
   }) {
-    const { oid, ticketId, paymentMethodId, time, description } = params
+    const { oid, ticketId, paymentMethodId, time, description, note, cashierId } = params
+    let newPaid = params.newPaid
     const PREFIX = `ticketId=${ticketId} reopen failed`
-
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. UPDATE TICKET FOR TRANSACTION ===
-      const ticket = await this.ticketManager.updateOneAndReturnEntity(
+      const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(
+        manager,
+        { oid, id: ticketId },
+        { endedAt: null }
+      )
+      if (newPaid == null) newPaid = ticketOrigin.paid
+      
+      const ticketModified = await this.ticketManager.updateOneAndReturnEntity(
         manager,
         {
           oid,
           id: ticketId,
-          ticketStatus: { IN: [TicketStatus.Debt, TicketStatus.Completed] },
+          status: { IN: [TicketStatus.Debt, TicketStatus.Completed] },
         },
-        { ticketStatus: TicketStatus.Executing, endedAt: null }
+        {
+          paid: newPaid,
+          debt: () => `"totalMoney" - ${newPaid}`,
+          status: TicketStatus.Executing,
+          endedAt: null,
+        }
       )
 
+      if (ticketOrigin.paid === ticketModified.paid && ticketOrigin.debt === 0) {
+        return { ticket: ticketModified } // truờng hợp này thì chả thanh toán gì
+      }
+
+      // === 2. CUSTOMER: query ===
       let customer: Customer
-      let customerPayment: CustomerPayment
-      if (ticket.debt > 0) {
+      if (ticketOrigin.debt > 0) {
         customer = await this.customerManager.updateOneAndReturnEntity(
           manager,
-          { oid, id: ticket.customerId },
-          { debt: () => `debt - ${ticket.debt}` }
+          { oid, id: ticketOrigin.customerId },
+          { debt: () => `debt - ${ticketOrigin.debt}` }
         )
-        if (!customer) {
-          throw new Error(`Khách hàng không tồn tại trên hệ thống`)
-        }
-        // === 2. UPDATE CUSTOMER ===
-        const customerCloseDebt = customer.debt
-        const customerOpenDebt = customerCloseDebt + ticket.debt
-
-        // === 3. INSERT CUSTOMER_PAYMENT ===
-        const customerPaymentInsert: CustomerPaymentInsertType = {
+      } else {
+        customer = await this.customerManager.findOneBy(manager, {
           oid,
-          customerId: ticket.customerId,
-          ticketId,
-          createdAt: time,
-          paymentType: PaymentType.Reopen,
-          paymentMethodId,
-          paid: 0,
-          debit: -ticket.debt,
-          openDebt: customerOpenDebt,
-          closeDebt: customerCloseDebt,
-          note: '',
-          description,
-        }
-        customerPayment = await this.customerPaymentManager.insertOneAndReturnEntity(
-          manager,
-          customerPaymentInsert
-        )
+          id: ticketOrigin.customerId,
+        })
       }
-      return { ticket, customer, customerPayment }
+      if (!customer) {
+        throw new Error(`Khách hàng không tồn tại trên hệ thống`)
+      }
+      // === 2. UPDATE CUSTOMER ===
+      const customerCloseDebt = customer.debt
+      const customerOpenDebt = customerCloseDebt + ticketOrigin.debt
+
+      // === 3. INSERT CUSTOMER_PAYMENT ===
+      const paymentInsert: PaymentInsertType = {
+        oid,
+        cashierId,
+        paymentMethodId,
+        voucherType: VoucherType.Ticket,
+        voucherId: ticketId,
+        personType: PersonType.Customer,
+        personId: ticketOrigin.customerId,
+        createdAt: time,
+
+        paymentTiming: PaymentTiming.Reopen,
+        moneyDirection: MoneyDirection.Out,
+        paidAmount: ticketModified.paid - ticketOrigin.paid,
+        debtAmount: -ticketOrigin.debt,
+        openDebt: customerOpenDebt,
+        closeDebt: customerCloseDebt,
+        note,
+        description,
+      }
+      const payment = await this.paymentManager.insertOneAndReturnEntity(manager, paymentInsert)
+      return { ticket: ticketModified, customer, payment }
     })
   }
 }

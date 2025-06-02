@@ -1,19 +1,26 @@
 import { Injectable } from '@nestjs/common'
-import { DataSource, FindOptionsWhere, In, Raw, UpdateResult } from 'typeorm'
+import { DataSource } from 'typeorm'
 import { ESTimer } from '../../../common/helpers/time.helper'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
-import { PaymentType, ReceiptStatus } from '../../common/variable'
-import { Distributor, DistributorPayment, Receipt } from '../../entities'
-import { DistributorPaymentInsertType } from '../../entities/distributor-payment.entity'
+import { Receipt } from '../../entities'
 import ReceiptItem, { ReceiptItemInsertType } from '../../entities/receipt-item.entity'
-import { ReceiptUpdateType } from '../../entities/receipt.entity'
+import { ReceiptStatus, ReceiptUpdateType } from '../../entities/receipt.entity'
 import { ReceiptItemManager, ReceiptManager } from '../../managers'
 
 export type ReceiptDepositedUpdateType = Omit<
   ReceiptUpdateType,
   keyof Pick<
     Receipt,
-    'oid' | 'status' | 'paid' | 'debt' | 'year' | 'month' | 'date' | 'endedAt' | 'distributorId'
+    | 'oid'
+    | 'status'
+    | 'deliveryStatus'
+    | 'paid'
+    | 'debt'
+    | 'year'
+    | 'month'
+    | 'date'
+    | 'endedAt'
+    | 'distributorId'
   >
 >
 
@@ -30,10 +37,7 @@ export class ReceiptDepositedOperation {
     private receiptItemManager: ReceiptItemManager
   ) { }
 
-  async updateDeposited<
-    T extends ReceiptDepositedUpdateType,
-    X extends ReceiptItemDepositedType,
-  >(params: {
+  async update<T extends ReceiptDepositedUpdateType, X extends ReceiptItemDepositedType>(params: {
     oid: number
     receiptId: number
     receiptUpdateDto: NoExtra<ReceiptDepositedUpdateType, T>
@@ -76,90 +80,5 @@ export class ReceiptDepositedOperation {
       await this.receiptItemManager.insertMany(manager, receiptItemListInsert)
       return { receipt }
     })
-  }
-
-  async prepayment(params: {
-    oid: number
-    receiptId: number
-    paymentMethodId: number
-    time: number
-    money: number
-  }) {
-    const { oid, receiptId, paymentMethodId, time, money } = params
-    if (money < 0) {
-      throw new Error(`Prepayment Receipt ${receiptId} failed: Money number invalid`)
-    }
-
-    const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-      // === 1. UPDATE RECEIPT ===
-      const whereReceipt: FindOptionsWhere<Receipt> = {
-        oid,
-        id: receiptId,
-        status: In([ReceiptStatus.Draft, ReceiptStatus.Deposited]),
-        totalMoney: Raw((alias) => `${alias} >= (paid + :money)`, { money }),
-      }
-      const receiptUpdateResult: UpdateResult = await manager
-        .createQueryBuilder()
-        .update(Receipt)
-        .where(whereReceipt)
-        .set({
-          status: ReceiptStatus.Deposited,
-          paid: () => `paid + ${money}`,
-          debt: () => `debt - ${money}`,
-        })
-        .returning('*')
-        .execute()
-      if (receiptUpdateResult.affected !== 1) {
-        throw new Error(`Receipt PayDebt failed: ReceiptId:${receiptId} update failed`)
-      }
-      const receipt = Receipt.fromRaw(receiptUpdateResult.raw[0])
-
-      // Prepayment có thê thanh toán 0 đồng mục đích chỉ để chuyển trạng thái
-      // Nếu thanh toán = 0 thì ko lưu lịch sử
-      if (money > 0) {
-        // === 2. GET DISTRIBUTOR ===
-        const distributor = await manager.findOneBy(Distributor, {
-          oid,
-          id: receipt.distributorId,
-        })
-        if (!distributor) {
-          throw new Error(`Nhà cung cấp không tồn tại trên hệ thống`)
-        }
-        const distributorCloseDebt = distributor.debt
-        const distributorOpenDebt = distributor.debt
-
-        // === 3. INSERT DISTRIBUTOR_PAYMENT ===
-        const distributorPaymentInsert: DistributorPaymentInsertType = {
-          oid,
-          distributorId: receipt.distributorId,
-          receiptId,
-          paymentMethodId,
-          createdAt: time,
-          paymentType: PaymentType.Prepayment,
-          paid: money,
-          debit: 0, // prepayment không phát sinh nợ
-          openDebt: distributorOpenDebt,
-          closeDebt: distributorCloseDebt,
-          note: '',
-          description: '',
-        }
-        const distributorPaymentInsertResult = await manager.insert(
-          DistributorPayment,
-          distributorPaymentInsert
-        )
-        const distributorPaymentId: number = distributorPaymentInsertResult.identifiers?.[0]?.id
-        if (!distributorPaymentId) {
-          throw new Error(
-            `Create DistributorPayment failed: Insert error ${JSON.stringify(
-              distributorPaymentInsertResult
-            )}`
-          )
-        }
-      }
-
-      return { receiptBasic: receipt }
-    })
-
-    return transaction
   }
 }

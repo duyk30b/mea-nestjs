@@ -16,7 +16,7 @@ export type TicketOrderDebtSuccessUpdateType = Omit<
     | 'id'
     | 'customerId' // không được update customerId
     | 'ticketType'
-    | 'ticketStatus'
+    | 'status'
     | 'debt'
     | 'year'
     | 'month'

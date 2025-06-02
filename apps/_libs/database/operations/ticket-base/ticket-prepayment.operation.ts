@@ -1,9 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { PaymentType } from '../../common/variable'
-import { CustomerPaymentInsertType } from '../../entities/customer-payment.entity'
+import {
+  MoneyDirection,
+  PaymentInsertType,
+  PaymentTiming,
+  PersonType,
+  VoucherType,
+} from '../../entities/payment.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
-import { CustomerManager, CustomerPaymentManager, TicketManager } from '../../managers'
+import { CustomerManager, PaymentManager, TicketManager } from '../../managers'
 
 @Injectable()
 export class TicketPrepaymentOperation {
@@ -11,21 +16,22 @@ export class TicketPrepaymentOperation {
     private dataSource: DataSource,
     private ticketManager: TicketManager,
     private customerManager: CustomerManager,
-    private customerPaymentManager: CustomerPaymentManager
+    private paymentManager: PaymentManager
   ) { }
 
   async prepayment(params: {
     oid: number
     ticketId: number
+    cashierId: number
     paymentMethodId: number
     time: number
     money: number
     note: string
   }) {
-    const { oid, ticketId, paymentMethodId, time, money, note } = params
+    const { oid, ticketId, paymentMethodId, time, money, note, cashierId } = params
     const PREFIX = `ticketId=${ticketId} prepayment failed`
 
-    if (money <= 0) {
+    if (money < 0) {
       throw new Error(`${PREFIX}: money = ${money}`)
     }
 
@@ -36,7 +42,7 @@ export class TicketPrepaymentOperation {
         {
           oid,
           id: ticketId,
-          ticketStatus: {
+          status: {
             IN: [
               TicketStatus.Schedule,
               TicketStatus.Draft,
@@ -46,16 +52,18 @@ export class TicketPrepaymentOperation {
           },
         },
         {
-          ticketStatus: () => `CASE 
-              WHEN("ticketStatus" IN (${TicketStatus.Schedule}, ${TicketStatus.Draft})) 
+          status: () => `CASE 
+              WHEN("status" IN (${TicketStatus.Schedule}, ${TicketStatus.Draft})) 
                   THEN ${TicketStatus.Deposited} 
-              ELSE "ticketStatus"
+              ELSE "status"
             END
           `,
           paid: () => `paid + ${money}`,
           debt: () => `debt - ${money}`,
         }
       )
+
+      if (money === 0) return { ticket } // Không thanh toán thì thôi, không ghi nữa, chuyển trạng thái là được rồi
 
       // === 2. CUSTOMER: query ===
       const customer = await this.customerManager.findOneBy(manager, {
@@ -69,25 +77,27 @@ export class TicketPrepaymentOperation {
       const customerOpenDebt = customer.debt
 
       // === 3. INSERT CUSTOMER_PAYMENT ===
-      const customerPaymentInsert: CustomerPaymentInsertType = {
+      const paymentInsert: PaymentInsertType = {
         oid,
-        customerId: ticket.customerId,
+        cashierId,
         paymentMethodId,
-        ticketId,
+        voucherType: VoucherType.Ticket,
+        voucherId: ticketId,
+        personType: PersonType.Customer,
+        personId: ticket.customerId,
+
+        paymentTiming: PaymentTiming.Prepayment,
         createdAt: time,
-        paymentType: PaymentType.Prepayment,
-        paid: money,
-        debit: 0,
+        moneyDirection: MoneyDirection.In,
+        paidAmount: money,
+        debtAmount: 0,
         openDebt: customerOpenDebt,
         closeDebt: customerCloseDebt,
         note,
         description: '',
       }
-      const customerPayment = await this.customerPaymentManager.insertOneAndReturnEntity(
-        manager,
-        customerPaymentInsert
-      )
-      return { ticket, customer, customerPayment }
+      const payment = await this.paymentManager.insertOneAndReturnEntity(manager, paymentInsert)
+      return { ticket, customer, payment }
     })
   }
 }

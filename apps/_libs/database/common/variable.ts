@@ -52,14 +52,6 @@ export enum InventoryStrategy {
   AutoWithExpiryDate = 4, // Auto ưu tiên hạn gần
 }
 
-export enum ReceiptStatus {
-  Voided = -1,
-  Draft = 0,
-  Deposited = 1, // Chờ gửi hàng
-  Debt = 2,
-  Success = 3,
-}
-
 export enum MovementType {
   Receipt = 1,
   Ticket = 2,

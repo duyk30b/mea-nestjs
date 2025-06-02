@@ -3,10 +3,11 @@ import { BusinessException } from '../../../../_libs/common/exception-filter/exc
 import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { Image } from '../../../../_libs/database/entities'
+import { VoucherType } from '../../../../_libs/database/entities/payment.entity'
 import { TicketProductType } from '../../../../_libs/database/entities/ticket-product.entity'
 import {
   AppointmentRepository,
-  CustomerPaymentRepository,
+  PaymentRepository,
   TicketAttributeRepository,
   TicketBatchRepository,
   TicketExpenseRepository,
@@ -37,7 +38,7 @@ export class ApiTicketService {
     private readonly ticketLaboratoryGroupRepository: TicketLaboratoryGroupRepository,
     private readonly ticketLaboratoryResultRepository: TicketLaboratoryResultRepository,
     private readonly ticketUserRepository: TicketUserRepository,
-    private readonly customerPaymentRepository: CustomerPaymentRepository,
+    private readonly paymentRepository: PaymentRepository,
     private readonly ticketExpenseRepository: TicketExpenseRepository,
     private readonly ticketSurchargeRepository: TicketSurchargeRepository,
     private readonly imageRepository: ImageRepository
@@ -58,7 +59,7 @@ export class ApiTicketService {
       },
       condition: {
         oid,
-        ticketStatus: filter?.ticketStatus,
+        status: filter?.status,
         ticketType: filter?.ticketType,
         customType: filter?.customType,
         customerId: filter?.customerId,
@@ -80,7 +81,7 @@ export class ApiTicketService {
     const data = await this.ticketRepository.findMany({
       condition: {
         oid,
-        ticketStatus: filter?.ticketStatus,
+        status: filter?.status,
         ticketType: filter?.ticketType,
         customerId: filter?.customerId,
         registeredAt: filter?.registeredAt,
@@ -94,7 +95,7 @@ export class ApiTicketService {
     return { data }
   }
 
-  async queryOne(
+  async getOne(
     oid: number,
     ticketId: number,
     { relation }: TicketGetOneQuery
@@ -113,9 +114,9 @@ export class ApiTicketService {
     }
 
     const dataPromise = await Promise.all([
-      relation?.customerPaymentList
-        ? this.customerPaymentRepository.findMany({
-          condition: { oid, ticketId },
+      relation?.paymentList
+        ? this.paymentRepository.findMany({
+          condition: { oid, voucherType: VoucherType.Ticket, voucherId: ticketId },
           sort: { id: 'ASC' },
         })
         : undefined,
@@ -215,15 +216,9 @@ export class ApiTicketService {
           condition: { oid, fromTicketId: ticketId },
         })
         : undefined,
-      relation?.customerPaymentList
-        ? this.customerPaymentRepository.findMany({
-          condition: { oid, ticketId },
-          sort: { id: 'ASC' },
-        })
-        : undefined,
     ])
 
-    ticket.customerPaymentList = dataPromise[0]
+    ticket.paymentList = dataPromise[0]
     ticket.ticketProductList = dataPromise[1]
     ticket.ticketProductPrescriptionList = dataPromise[2]
     ticket.ticketProductConsumableList = dataPromise[3]
@@ -236,7 +231,6 @@ export class ApiTicketService {
     ticket.ticketUserList = dataPromise[10]
     ticket.ticketAttributeList = dataPromise[11]
     ticket.toAppointment = dataPromise[12]
-    ticket.customerPaymentList = dataPromise[13]
 
     if (ticket.ticketRadiologyList || ticket.imageList) {
       ticket.ticketRadiologyList = ticket.ticketRadiologyList || []
