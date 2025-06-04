@@ -537,7 +537,7 @@ export class ApiTicketOrderService {
     const returnList = ticketBatchList.map((i) => ({
       ticketProductId: i.ticketProductId,
       ticketBatchId: i.id,
-      quantity: i.quantity,
+      quantityReturn: i.quantity,
     }))
 
     if (returnList.length) {

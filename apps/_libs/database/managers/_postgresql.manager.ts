@@ -314,7 +314,7 @@ export abstract class _PostgreSqlManager<
     return this.entity.fromRaw(raws[0])
   }
 
-  async updateListBy(options: {
+  async bulkUpdate(options: {
     manager: EntityManager
     tempList: (Partial<_ENTITY> | Record<string, any>)[]
     condition?: BaseCondition<_ENTITY>
@@ -323,7 +323,12 @@ export abstract class _PostgreSqlManager<
     | { [P in keyof _ENTITY]?: boolean | ((t?: string, u?: string) => string) }
     update:
     | (keyof _ENTITY)[]
-    | { [P in keyof _ENTITY]?: boolean | ((t?: string, u?: string) => string) }
+    | {
+      [P in keyof _ENTITY]?:
+      | ((t?: string, u?: string) => string)
+      | boolean
+      | { cast: 'int' | 'bigint' | 'numeric' | 'text' }
+    }
     options?: { requireEqualLength?: boolean }
   }) {
     const { manager } = options
@@ -351,7 +356,12 @@ export abstract class _PostgreSqlManager<
     }
 
     let updateName: string[] = []
-    let updateObject: { [P in keyof _ENTITY]?: boolean | (() => string) } = {}
+    let updateObject: {
+      [P in keyof _ENTITY]?:
+      | ((t?: string, u?: string) => string)
+      | boolean
+      | { cast: 'int' | 'bigint' | 'numeric' | 'text' }
+    } = {}
 
     if (Array.isArray(options.update)) {
       updateName = [...options.update] as string[]
@@ -369,22 +379,24 @@ export abstract class _PostgreSqlManager<
     const modifiedRaw: [any[], number] = await manager.query(
       `
       UPDATE  "${tableName}"
-      SET     ${updateName
-        .map((field) => {
-          if (typeof updateObject[field] !== 'function') {
-            return `"${field}" = temp."${field}"`
-          } else {
-            return `"${field}" = ${updateObject[field]('temp', tableName)}`
-          }
-        })
-        .join(`,
+      SET     ${updateName.map((field) => {
+        if (typeof updateObject[field] === 'function') {
+          return `"${field}" = ${updateObject[field]('temp', tableName)}`
+        } else if (typeof updateObject[field] === 'object') {
+          return `"${field}" = "temp"."${field}"::${updateObject[field].cast}`
+        } else {
+          return `"${field}" = "temp"."${field}"`
+        }
+      }).join(`,
               `)}
       FROM (VALUES `
       + tempList
         .map((record) => {
           return `(${tempColumns
             .map((field) => {
-              if (typeof record[field] === 'number') {
+              if (record[field] === null) {
+                return `NULL`
+              } else if (typeof record[field] === 'number') {
                 return `${record[field]}`
               } else if (typeof record[field] === 'string') {
                 return `'${record[field]}'`
@@ -397,22 +409,24 @@ export abstract class _PostgreSqlManager<
         .join(', ')
       + `) 
           AS temp(${tempColumns.map((field) => `"${field}"`).join(', ')})
-      WHERE   ${conditionRaw ? conditionRaw + ` 
-          AND ` : ''}${compareName
-        .map((field) => {
-          if (typeof compareObject[field] !== 'function') {
-            return `"${tableName}"."${field}" = "temp"."${field}"`
-          } else {
-            return `"${tableName}"."${field}" = ${compareObject[field]('temp', tableName)}`
-          }
-        })
-        .join(` 
+      WHERE   ${conditionRaw
+        ? conditionRaw
+        + ` 
+          AND `
+        : ''
+      }${compareName.map((field) => {
+        if (typeof compareObject[field] !== 'function') {
+          return `"${tableName}"."${field}" = "temp"."${field}"`
+        } else {
+          return `"${tableName}"."${field}" = ${compareObject[field]('temp', tableName)}`
+        }
+      }).join(` 
           AND `)}
       RETURNING "${tableName}".*;
       `
     )
 
-    if (options.options.requireEqualLength) {
+    if (options.options?.requireEqualLength) {
       if (modifiedRaw[0].length !== tempList.length) {
         throw new Error(`Update Database failed: ` + JSON.stringify({ modifiedRaw, tempList }))
       }

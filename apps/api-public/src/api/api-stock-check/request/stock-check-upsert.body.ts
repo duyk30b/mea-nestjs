@@ -35,6 +35,18 @@ export class StockCheckItemBody {
   @IsNumber()
   actualQuantity: number
 
+  @ApiPropertyOptional({ example: 52 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  systemCostAmount: number
+
+  @ApiPropertyOptional({ example: 52 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  actualCostAmount: number
+
   @ApiPropertyOptional({ example: '' })
   @Expose()
   @IsString()

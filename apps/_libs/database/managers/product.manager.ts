@@ -2,10 +2,10 @@ import { Injectable } from '@nestjs/common'
 import { EntityManager } from 'typeorm'
 import { Product } from '../entities'
 import {
-  ProductInsertType,
-  ProductRelationType,
-  ProductSortType,
-  ProductUpdateType,
+    ProductInsertType,
+    ProductRelationType,
+    ProductSortType,
+    ProductUpdateType,
 } from '../entities/product.entity'
 import { _PostgreSqlManager } from './_postgresql.manager'
 
@@ -21,7 +21,7 @@ export class ProductManager extends _PostgreSqlManager<
     super(Product)
   }
 
-  async calculateQuantityProductList(options: {
+  async reCalculateQuantityBySumBatchList(options: {
     manager: EntityManager
     oid: number
     productIdList: number[]

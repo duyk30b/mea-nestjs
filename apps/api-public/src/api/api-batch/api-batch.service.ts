@@ -30,7 +30,7 @@ export class ApiBatchService {
     private readonly receiptItemRepository: ReceiptItemRepository,
     private readonly productMovementRepository: ProductMovementRepository,
     private readonly productOperation: ProductOperation
-  ) {}
+  ) { }
 
   async pagination(oid: number, query: BatchPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, sort, relation } = query
@@ -90,16 +90,6 @@ export class ApiBatchService {
     return { data: { batch } }
   }
 
-  async createOne(oid: number, body: BatchInsertBody): Promise<BaseResponse> {
-    const batch = await this.batchRepository.insertOneFullFieldAndReturnEntity({
-      ...body,
-      oid,
-      quantity: 0,
-      registeredAt: Date.now(),
-    })
-    return { data: { batch } }
-  }
-
   async updateInfo(oid: number, id: number, body: BatchUpdateInfoBody): Promise<BaseResponse> {
     const batch = await this.batchRepository.updateOneAndReturnEntity({ id, oid }, body)
     return { data: { batch } }
@@ -118,7 +108,15 @@ export class ApiBatchService {
     })
     const batchUpdated = await this.batchRepository.updateOneAndReturnEntity(
       { id: batchId, oid },
-      body as any
+      {
+        batchCode: body.batchCode,
+        expiryDate: body.expiryDate,
+        warehouseId: body.warehouseId,
+        distributorId: body.distributorId,
+        costPrice: body.costPrice,
+        quantity: body.quantity,
+        costAmount: body.costAmount,
+      }
     )
     if (
       batchOrigin.quantity === batchUpdated.quantity
@@ -127,7 +125,7 @@ export class ApiBatchService {
       return { data: { batch: batchUpdated } }
     }
 
-    const productUpdated = await this.productOperation.calculateQuantityProduct({
+    const productUpdated = await this.productOperation.reCalculateQuantityBySumBatch({
       oid,
       productId: batchOrigin.productId,
     })
@@ -146,7 +144,7 @@ export class ApiBatchService {
       openQuantity: batchOrigin.product.quantity,
       quantity: batchUpdated.quantity - batchOrigin.quantity,
       closeQuantity: productUpdated.quantity,
-      costPrice: batchUpdated.costPrice,
+      costAmount: batchUpdated.costAmount - batchUpdated.costAmount,
       actualPrice: batchUpdated.costPrice,
       expectedPrice: batchOrigin.costPrice,
       createdAt: Date.now(),

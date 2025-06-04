@@ -1,22 +1,16 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
+import Product from './product.entity'
 
-export enum BatchDistributorIdRule {
-  Inherit = 0,
-  Override = 1,
-  SplitOnDifferent = 2,
-}
-
-export enum BatchWarehouseIdRule {
-  Inherit = 0,
-  Override = 1,
-  SplitOnDifferent = 2,
-}
-
-export enum BatchCostPriceRule {
-  Inherit = 0,
-  OverrideAndMAC = 1,
-  SplitOnDifferent = 2,
+export type ProductSettingRule = Pick<
+  Product,
+  | 'inventoryStrategy'
+  | 'splitBatchByWarehouse'
+  | 'splitBatchByDistributor'
+  | 'splitBatchByExpiryDate'
+  | 'splitBatchByCostPrice'
+> & {
+  allowNegativeQuantity: boolean
 }
 
 export enum SettingKey {
@@ -66,8 +60,8 @@ export type SettingInsertType = Omit<Setting, keyof SettingRelationType | keyof 
 
 export type SettingUpdateType = {
   [K in Exclude<keyof Setting, keyof SettingRelationType | keyof Pick<Setting, 'oid' | 'id'>>]:
-  | Setting[K]
-  | (() => string)
+    | Setting[K]
+    | (() => string)
 }
 
 export type SettingSortType = {

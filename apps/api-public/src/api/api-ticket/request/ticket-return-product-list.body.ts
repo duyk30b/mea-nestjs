@@ -14,7 +14,7 @@ class ReturnListBody {
   @Expose()
   @IsDefined()
   @IsNumberGreaterThan(0)
-  quantity: number
+  quantityReturn: number
 }
 
 export class TicketReturnProductListBody {

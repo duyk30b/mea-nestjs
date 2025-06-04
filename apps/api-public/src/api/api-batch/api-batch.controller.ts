@@ -43,12 +43,6 @@ export class ApiBatchController {
     return await this.apiBatchService.getOne(oid, id, query)
   }
 
-  @Post('create')
-  @HasPermission(PermissionId.BATCH_CREATE)
-  async create(@External() { oid }: TExternal, @Body() body: BatchInsertBody) {
-    return await this.apiBatchService.createOne(oid, body)
-  }
-
   @Patch('update-info/:id')
   @HasPermission(PermissionId.BATCH_UPDATE)
   async updateInfo(

@@ -21,9 +21,9 @@ import { TicketChangeItemMoneyManager } from './ticket-change-item-money.manager
 export type SendItem = {
   ticketProductId: number
   productId: number
-  batchId: number
-  quantity: number
-  costPrice: number
+  batchId: number // batchId = 0 là chỉ định cho nhiều lô, hoặc không lô nào cả
+  quantitySend: number
+  costAmountSend: number // ticketProduct không thể tính theo costPrice được, vì phải nhân chia theo costAmount của batch (costPrice gây sai lệch)
   warehouseId: number
 }
 
@@ -68,13 +68,14 @@ export class TicketSendProductOperation {
     // tạo map theo productId, list các Batch cùng số lượng theo registeredAt tăng dần ===
     const batchListMapRemain: Record<
       string,
-      { productId: number; quantityRemain: number; batch: Batch }[]
+      { productId: number; quantityRemain: number; costAmountRemain: number; batch: Batch }[]
     > = {}
     batchOriginList.forEach((b) => {
       batchListMapRemain[b.productId] ||= []
       batchListMapRemain[b.productId].push({
         productId: b.productId,
         quantityRemain: b.quantity,
+        costAmountRemain: b.costAmount,
         batch: b,
       })
     })
@@ -97,15 +98,16 @@ export class TicketSendProductOperation {
       }
       if (
         !batchListMapRemain[tpOrigin.productId]
+        || !batchListMapRemain[tpOrigin.productId].length
         || tpOrigin.inventoryStrategy === InventoryStrategy.NoImpact
       ) {
         const sendItem: SendItem = {
           ticketProductId: tpOrigin.id,
           productId: tpOrigin.productId,
-          batchId: 0,
+          batchId: 0, // không chỉ định lô bị trừ
           warehouseId: 0,
-          quantity: tpOrigin.quantity,
-          costPrice: tpOrigin.costAmount / (tpOrigin.quantity || 1),
+          quantitySend: tpOrigin.quantity,
+          costAmountSend: tpOrigin.costAmount, // chiến lược không quản lý kho thì vốn tính tương đối theo sản phẩm
         }
         sendList.push(sendItem)
       }
@@ -115,34 +117,47 @@ export class TicketSendProductOperation {
         tpOrigin.inventoryStrategy === InventoryStrategy.RequireBatchSelection
         && tpOrigin.batchId !== 0
       ) {
+        // chiến lược này thì nhặt chính xác loại lô hàng đó
         const batchRemain = batchListMapRemain[tpOrigin.productId]?.find((i) => {
           return i.batch.id === tpOrigin.batchId
         })
         if (!batchRemain || !batchRemain.batch) {
           throw new Error(`${productOrigin.brandName} không có lô hàng phù hợp`)
         }
-        if (!allowNegativeQuantity && tpOrigin.quantity > batchRemain.batch.quantity) {
+        if (!allowNegativeQuantity && tpOrigin.quantity > batchRemain.quantityRemain) {
           const expiryDateString = ESTimer.timeToText(batchRemain.batch.expiryDate, 'DD/MM/YYYY', 7)
           throw new Error(
             `${productOrigin.brandName} không đủ số lượng trong kho.`
             + ` Lô hàng ${batchRemain.batch.batchCode} ${expiryDateString}:`
-            + ` còn ${batchRemain.batch.quantity}, lấy ${tpOrigin.quantity}`
+            + ` còn ${batchRemain.quantityRemain}, lấy ${tpOrigin.quantity}`
           )
         }
+        const quantityGet = tpOrigin.quantity
+        let costAmountGet = 0
+        if (batchRemain.quantityRemain === 0) {
+          costAmountGet = batchRemain.batch.costPrice * quantityGet
+        } else {
+          costAmountGet = Math.round(
+            (batchRemain.costAmountRemain * quantityGet) / batchRemain.quantityRemain
+          )
+        }
+
         const sendItem: SendItem = {
           ticketProductId: tpOrigin.id,
           productId: tpOrigin.productId,
           batchId: batchRemain.batch.id,
           warehouseId: batchRemain.batch.warehouseId,
-          quantity: tpOrigin.quantity,
-          costPrice: batchRemain.batch.costPrice,
+          quantitySend: quantityGet,
+          costAmountSend: costAmountGet,
         }
         sendList.push(sendItem)
+        batchRemain.quantityRemain -= sendItem.quantitySend
+        batchRemain.costAmountRemain -= sendItem.costAmountSend
       }
 
       // mặc định tạm thời chiến lược còn lại là FIFO
       else {
-        let quantitySend = tpOrigin.quantity
+        let quantityCalculator = tpOrigin.quantity
         const batchListRemain = batchListMapRemain[tpOrigin.productId].filter((i) => {
           let warehouseIdList = []
           try {
@@ -156,36 +171,68 @@ export class TicketSendProductOperation {
           return false
         })
         for (let i = 0; i < batchListRemain.length; i++) {
-          const batch = batchListRemain[i].batch
-          let quantityGet = Math.min(quantitySend, batchListRemain[i].quantityRemain)
-          if (quantityGet < 0) quantityGet = 0 // khống chế trường hợp bị âm sẵn rồi lại đi lấy tiếp số âm đó
+          if (quantityCalculator <= 0) break
 
+          const batchRemain = batchListRemain[i]
+          const quantityGet = Math.min(quantityCalculator, batchRemain.quantityRemain)
+          if (quantityGet <= 0) continue
+          const costAmountGet = Math.floor(
+            (batchRemain.costAmountRemain * quantityGet) / batchRemain.quantityRemain
+          )
           const sendItem: SendItem = {
             ticketProductId: tpOrigin.id,
             productId: tpOrigin.productId,
-            batchId: batch.id,
-            warehouseId: batch.warehouseId,
-            quantity: quantityGet,
-            costPrice: batch.costPrice,
+            batchId: batchRemain.batch.id,
+            warehouseId: batchRemain.batch.warehouseId,
+            quantitySend: quantityGet,
+            costAmountSend: costAmountGet,
           }
           sendList.push(sendItem)
 
-          quantitySend = quantitySend - quantityGet
-          batchListRemain[i].quantityRemain = batchListRemain[i].quantityRemain - quantityGet
-          if (quantitySend <= 0) break
+          quantityCalculator = quantityCalculator - quantityGet
+          batchRemain.quantityRemain -= sendItem.quantitySend
+          batchRemain.costAmountRemain -= sendItem.costAmountSend
+        }
 
-          if (i === batchListRemain.length - 1 && quantitySend > 0) {
-            if (!allowNegativeQuantity) {
-              throw new Error(`${productOrigin.brandName} không đủ số lượng trong kho`)
-            } else {
-              sendItem.quantity += quantitySend // nếu chấp nhận cho lấy số lượng âm thì cho lấy nốt
+        // nếu không lấy đủ thì phải lấy và tính vào lô cuối cùng
+        if (quantityCalculator > 0) {
+          if (!allowNegativeQuantity) {
+            throw new Error(`${productOrigin.brandName} không đủ số lượng trong kho`)
+          }
+          // nhặt vào lô cuỗi cùng, logic nhặt tương tự như chiến lượng chọn lô
+          const batchRemain = batchListRemain[batchListRemain.length - 1]
+          const quantityGet = quantityCalculator
+          let costAmountGet = 0
+          if (batchRemain.quantityRemain === 0) {
+            costAmountGet = batchRemain.batch.costPrice * quantityGet
+          } else {
+            costAmountGet = Math.round(
+              (batchRemain.costAmountRemain * quantityGet) / batchRemain.quantityRemain
+            )
+          }
+
+          const sendItemExist = sendList.find((i) => {
+            return i.batchId === batchRemain.batch.id
+          })
+          if (!sendItemExist) {
+            const sendItem: SendItem = {
+              ticketProductId: tpOrigin.id,
+              productId: tpOrigin.productId,
+              batchId: batchRemain.batch.id,
+              warehouseId: batchRemain.batch.warehouseId,
+              quantitySend: quantityGet,
+              costAmountSend: costAmountGet,
             }
+            sendList.push(sendItem)
+          } else {
+            sendItemExist.quantitySend += quantityGet
+            sendItemExist.costAmountSend += costAmountGet
           }
         }
       }
     })
 
-    return sendList.filter((i) => i.quantity != 0)
+    return sendList
   }
 
   async sendProduct(params: {
@@ -242,7 +289,10 @@ export class TicketSendProductOperation {
         string,
         { productId: number; openQuantity: number; sumQuantity: number }
       > = {}
-      const batchCalcMap: Record<string, { batchId: number; sumQuantity: number }> = {}
+      const batchCalcMap: Record<
+        string,
+        { batchId: number; sumQuantity: number; sumCostAmount: number }
+      > = {}
 
       sendList.forEach((i) => {
         const { ticketProductId, productId, batchId } = i
@@ -258,22 +308,23 @@ export class TicketSendProductOperation {
         if (!productCalcMap[i.productId]) {
           productCalcMap[i.productId] = { productId, openQuantity: 0, sumQuantity: 0 }
         }
-        if (!batchCalcMap[batchId]) {
-          batchCalcMap[batchId] = { batchId, sumQuantity: 0 }
-        }
 
         // tính quantity cho tp chỉ để validate xem số lượng có bị sai lệch không
-        tpCalcMap[ticketProductId].sumQuantity += i.quantity
-        tpCalcMap[ticketProductId].sumCostAmount += i.quantity * i.costPrice
+        tpCalcMap[ticketProductId].sumQuantity += i.quantitySend
+        tpCalcMap[ticketProductId].sumCostAmount += i.costAmountSend
 
         if (batchId != 0) {
-          productCalcMap[productId].sumQuantity += i.quantity
-          batchCalcMap[batchId].sumQuantity += i.quantity
+          productCalcMap[productId].sumQuantity += i.quantitySend
+          if (!batchCalcMap[batchId]) {
+            batchCalcMap[batchId] = { batchId, sumQuantity: 0, sumCostAmount: 0 }
+          }
+          batchCalcMap[batchId].sumQuantity += i.quantitySend
+          batchCalcMap[batchId].sumCostAmount += i.costAmountSend
         }
       })
 
       // 3. === TICKET_PRODUCT: update Delivery ===
-      const ticketProductModifiedList = await this.ticketProductManager.updateListBy({
+      const ticketProductModifiedList = await this.ticketProductManager.bulkUpdate({
         manager,
         condition: { oid, ticketId, deliveryStatus: { EQUAL: DeliveryStatus.Pending } },
         compare: ['id', 'productId'],
@@ -292,7 +343,7 @@ export class TicketSendProductOperation {
       const ticketProductModifiedMap = ESArray.arrayToKeyValue(ticketProductModifiedList, 'id')
 
       // 4. === UPDATE for PRODUCT and BATCH===
-      const productModifiedList = await this.productManager.updateListBy({
+      const productModifiedList = await this.productManager.bulkUpdate({
         manager,
         condition: { oid },
         compare: ['id'],
@@ -304,17 +355,34 @@ export class TicketSendProductOperation {
       })
       const productModifiedMap = ESArray.arrayToKeyValue(productModifiedList, 'id')
 
-      const batchModifiedList = await this.batchManager.updateListBy({
+      const batchModifiedList = await this.batchManager.bulkUpdate({
         manager,
         condition: { oid },
         compare: ['id'],
         tempList: Object.values(batchCalcMap).map((i) => {
-          return { id: i.batchId, sumQuantity: i.sumQuantity }
+          return {
+            id: i.batchId,
+            sumQuantity: i.sumQuantity,
+            sumCostAmount: i.sumCostAmount,
+          }
         }),
-        update: { quantity: (t: string) => `"quantity" - ${t}."sumQuantity"` },
+        update: {
+          quantity: (t: string) => `"quantity" - "${t}"."sumQuantity"`,
+          // chú thích 1 vài trường hợp
+          // 1. Nếu bán hàng gây ra số lượng âm, lưu costAmount âm theo "costPrice của batch"
+          // 2. Nếu costAmount cũng ko đủ để trả, mặc dù số lượng đủ, thì fix lại theo "costPrice của batch"
+          // 3. Nếu số lượng đủ và costAmount đủ thì trừ bình thường
+          costAmount: (t: string, u: string) => ` CASE
+                                    WHEN  ("${u}"."quantity" <= "${t}"."sumQuantity")
+                                      THEN ("${u}".quantity - "${t}"."sumQuantity") * "${u}"."costPrice"
+                                    WHEN  ("${u}"."costAmount" <= "${t}"."sumCostAmount")
+                                      THEN ("${u}".quantity - "${t}"."sumQuantity") * "${u}"."costPrice"
+                                    ELSE "${u}"."costAmount" - "${t}"."sumCostAmount"
+                                  END`,
+        },
         options: { requireEqualLength: true },
       })
-      const batchMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')
+      const batchModifiedMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')
 
       // 5. === CALCULATOR: check Negative và tính số lượng ban đầu của product và batch ===
       if (!allowNegativeQuantity) {
@@ -350,8 +418,8 @@ export class TicketSendProductOperation {
           batchId: sendItem.batchId || 0, // thằng inventoryStrategy.NoImpact luôn lấy batchId = 0
           deliveryStatus: DeliveryStatus.Delivered,
           unitRate: tp.unitRate,
-          quantity: sendItem.quantity,
-          costPrice: sendItem.costPrice,
+          quantity: sendItem.quantitySend,
+          costAmount: sendItem.costAmountSend,
           actualPrice: tp.actualPrice,
           expectedPrice: tp.expectedPrice,
         }
@@ -367,7 +435,7 @@ export class TicketSendProductOperation {
       sendList.forEach((sendItem) => {
         const productCalc = productCalcMap[sendItem.productId]
         const tpModified = ticketProductModifiedMap[sendItem.ticketProductId]
-        const quantityActual = sendItem.batchId ? sendItem.quantity : 0
+        const quantityActual = sendItem.batchId ? sendItem.quantitySend : 0
 
         const productMovementInsert: ProductMovementInsertType = {
           oid,
@@ -380,10 +448,10 @@ export class TicketSendProductOperation {
           batchId: sendItem.batchId || 0,
           isRefund: 0,
           openQuantity: productCalc.openQuantity,
-          quantity: -sendItem.quantity, // luôn lấy số lượng trong đơn
+          quantity: -sendItem.quantitySend, // luôn lấy số lượng trong đơn
           closeQuantity: productCalc.openQuantity - quantityActual, // trừ số lượng còn thực tế
           unitRate: tpModified.unitRate,
-          costPrice: sendItem.costPrice,
+          costAmount: -sendItem.costAmountSend,
           expectedPrice: tpModified.expectedPrice,
           actualPrice: tpModified.actualPrice,
           createdAt: time,

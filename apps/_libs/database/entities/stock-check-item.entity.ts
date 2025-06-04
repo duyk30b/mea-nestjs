@@ -1,12 +1,5 @@
 import { Exclude, Expose } from 'class-transformer'
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import Batch from './batch.entity'
 import Product from './product.entity'
 import StockCheck from './stock-check.entity'
@@ -53,6 +46,22 @@ export default class StockCheckItem {
   })
   @Expose()
   actualQuantity: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  systemCostAmount: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  actualCostAmount: number
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()

@@ -43,7 +43,7 @@ export class ReceiptReturnProductOperation {
           status: ReceiptStatus.Executing,
           deliveryStatus: DeliveryStatus.Delivered,
         },
-        { deliveryStatus: DeliveryStatus.Pending } // for get ROOT and transaction
+        { deliveryStatus: DeliveryStatus.Pending } // receipt
       )
 
       // === 2. RECEIPT_ITEMS: query + CALCULATOR ===
@@ -55,10 +55,16 @@ export class ReceiptReturnProductOperation {
       > = {}
       const batchCalculatorMap: Record<
         string,
-        { batchId: number; productId: number; quantityReturn: number; openQuantity: number }
+        {
+          batchId: number
+          productId: number
+          quantityReturn: number
+          costPrice: number
+          sumCostAmount: number
+        }
       > = {}
       for (let i = 0; i < receiptItemList.length; i++) {
-        const { batchId, productId, quantity } = receiptItemList[i]
+        const { batchId, productId, quantity, costPrice } = receiptItemList[i]
         if (!productCalculatorMap[productId]) {
           productCalculatorMap[productId] = {
             productId,
@@ -71,16 +77,19 @@ export class ReceiptReturnProductOperation {
             batchId,
             productId,
             quantityReturn: 0,
-            openQuantity: 0,
+            costPrice: 0,
+            sumCostAmount: 0,
           }
         }
 
         productCalculatorMap[productId].quantityReturn += quantity
         batchCalculatorMap[batchId].quantityReturn += quantity
+        batchCalculatorMap[batchId].costPrice = costPrice
+        batchCalculatorMap[batchId].sumCostAmount += quantity * costPrice
       }
 
       // === 3. PRODUCT: update quantity ===
-      const productList = await this.productManager.updateListBy({
+      const productList = await this.productManager.bulkUpdate({
         manager,
         condition: { oid, inventoryStrategy: { NOT: InventoryStrategy.NoImpact } },
         compare: ['oid', 'id'],
@@ -88,7 +97,7 @@ export class ReceiptReturnProductOperation {
           return { oid, id: i.productId, quantityReturn: i.quantityReturn }
         }),
         update: {
-          quantity: (tempName: string) => `"quantity" - ${tempName}."quantityReturn"`,
+          quantity: (t: string) => `"quantity" - "${t}"."quantityReturn"`,
         },
         options: { requireEqualLength: true },
       })
@@ -98,14 +107,33 @@ export class ReceiptReturnProductOperation {
       const batchQuantityList = Object.values(batchCalculatorMap).filter((i) => {
         return !!productMap[i.productId]
       })
-      const batchList: Batch[] = await this.batchManager.updateListBy({
+      const batchList: Batch[] = await this.batchManager.bulkUpdate({
         manager,
         condition: { oid },
-        compare: ['id'],
+        compare: ['id', 'productId'],
         tempList: Object.values(batchQuantityList).map((i) => {
-          return { id: i.batchId, quantityReturn: i.quantityReturn }
+          return {
+            id: i.batchId,
+            productId: i.productId,
+            quantityReturn: i.quantityReturn,
+            costPrice: i.costPrice,
+            sumCostAmount: i.sumCostAmount,
+          }
         }),
-        update: { quantity: (tempName: string) => `"quantity" - ${tempName}."quantityReturn"` },
+        update: {
+          quantity: (t: string, u: string) => `"${u}"."quantity" - "${t}"."quantityReturn"`,
+          // chú thích 1 vài trường hợp
+          // 1. Nếu hoàn trả gây ra số lượng âm, lưu costAmount âm theo "costPrice của batch"
+          // 2. Nếu costAmount cũng ko đủ để trả, mặc dù số lượng đủ, thì fix lại theo "costPrice của batch"
+          // 3. Nếu số lượng đủ và costAmount đủ thì trừ bình thường
+          costAmount: (t: string, u: string) => ` CASE
+                                    WHEN  ("${u}"."quantity" <= "${t}"."quantityReturn")
+                                      THEN ("${u}".quantity - "${t}"."quantityReturn") * "${u}"."costPrice"
+                                    WHEN  ("${u}"."costAmount" <= "${t}"."sumCostAmount")
+                                      THEN ("${u}".quantity - "${t}"."quantityReturn") * "${u}"."costPrice"
+                                    ELSE "${u}"."costAmount" - "${t}"."sumCostAmount"
+                                  END`,
+        },
         options: { requireEqualLength: true },
       })
 
@@ -114,35 +142,29 @@ export class ReceiptReturnProductOperation {
         const productCalculator = productCalculatorMap[i.id]
         productCalculator.openQuantity = i.quantity + productCalculator.quantityReturn
       })
-      batchList.forEach((i) => {
-        const batchCalculator = batchCalculatorMap[i.id]
-        batchCalculator.openQuantity = i.quantity + batchCalculator.quantityReturn
-      })
 
       // === 5. PRODUCT_MOVEMENT: insert ===
-      const productMovementInsertList = receiptItemList.map((receiptItem) => {
-        const productCalculator = productCalculatorMap[receiptItem.productId]
+      const productMovementInsertList = receiptItemList.map((ri) => {
+        const productCalculator = productCalculatorMap[ri.productId]
         // vẫn có thể productCalculator null vì Product chuyển từ có quản lý sang không quản lý số lượng
         const productMovementInsert: ProductMovementInsertType = {
           oid,
           contactId: receipt.distributorId,
           voucherId: receiptId,
-          voucherProductId: receiptItem.id,
-          warehouseId: receiptItem.warehouseId,
-          productId: receiptItem.productId,
-          batchId: receiptItem.batchId,
+          voucherProductId: ri.id,
+          warehouseId: ri.warehouseId,
+          productId: ri.productId,
+          batchId: ri.batchId,
           createdAt: time,
           movementType: MovementType.Receipt,
           isRefund: 1,
-          unitRate: receiptItem.unitRate,
-          costPrice: receiptItem.costPrice,
-          actualPrice: receiptItem.costPrice,
-          expectedPrice: receiptItem.costPrice,
+          unitRate: ri.unitRate,
+          actualPrice: ri.costPrice,
+          expectedPrice: ri.costPrice,
           openQuantity: productCalculator ? productCalculator.openQuantity : 0, // quantity đã được trả đúng số lượng ban đầu ở trên
-          quantity: -receiptItem.quantity,
-          closeQuantity: productCalculator
-            ? productCalculator.openQuantity - receiptItem.quantity
-            : 0,
+          quantity: -ri.quantity,
+          costAmount: -ri.costPrice * ri.quantity,
+          closeQuantity: productCalculator ? productCalculator.openQuantity - ri.quantity : 0,
         }
         // sau khi lấy rồi cần cập nhật productCalculator vì 1 sản phẩm có thể bán 2 số lượng với 2 giá khác nhau
         // trường hợp noHasManageQuantity thì bỏ qua

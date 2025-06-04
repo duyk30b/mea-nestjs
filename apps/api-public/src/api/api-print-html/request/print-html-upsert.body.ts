@@ -14,7 +14,13 @@ export class PrintHtmlCreateBody {
   @Expose()
   @IsDefined()
   @IsString()
-  content: string
+  html: string
+
+  @ApiProperty({ example: '<div>ĐƠN THUỐC</div>' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  css: string
 
   @ApiProperty({ example: '' })
   @Expose()

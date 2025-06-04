@@ -91,7 +91,7 @@ export default class ProductMovement extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  costPrice: number
+  costAmount: number
 
   @Column({
     type: 'bigint',
@@ -158,7 +158,7 @@ export default class ProductMovement extends BaseEntity {
     entity.openQuantity = Number(raw.openQuantity)
     entity.quantity = Number(raw.quantity)
     entity.closeQuantity = Number(raw.closeQuantity)
-    entity.costPrice = Number(raw.costPrice)
+    entity.costAmount = Number(raw.costAmount)
     entity.actualPrice = Number(raw.actualPrice)
     entity.expectedPrice = Number(raw.expectedPrice)
     entity.createdAt = raw.createdAt == null ? raw.createdAt : Number(raw.createdAt)

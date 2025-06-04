@@ -52,8 +52,19 @@ export default class Batch extends BaseEntity {
       from: (value) => (value == null ? value : Number(value)),
     },
   })
-  @Expose()
+  @Expose() // Vẫn rất cần thiết giữ lại giá nhập này, vì khi thay đổi costAmount gây ra số lượng âm thì có costPrice để fix lại
   costPrice: number // Giá nhập
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  costAmount: number // Tổng vốn
 
   @Column({
     type: 'bigint',
@@ -120,6 +131,6 @@ export type BatchUpdateType = {
 
 export type BatchSortType = {
   [P in keyof Pick<Batch, 'id' | 'productId' | 'quantity' | 'expiryDate' | 'registeredAt'>]?:
-  | 'ASC'
-  | 'DESC'
+    | 'ASC'
+    | 'DESC'
 }

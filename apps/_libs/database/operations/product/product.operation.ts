@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common'
-import { InjectEntityManager } from '@nestjs/typeorm'
-import { DataSource, EntityManager } from 'typeorm'
-import { Product } from '../../entities'
+import { Injectable } from '@nestjs/common';
+import { InjectEntityManager } from '@nestjs/typeorm';
+import { DataSource, EntityManager } from 'typeorm';
+import { Product } from '../../entities';
 
 @Injectable()
 export class ProductOperation {
@@ -10,7 +10,7 @@ export class ProductOperation {
     @InjectEntityManager() private manager: EntityManager
   ) { }
 
-  async calculateQuantityProduct(options: { oid: number; productId: number }) {
+  async reCalculateQuantityBySumBatch(options: { oid: number; productId: number }) {
     const { oid, productId } = options
     const resultQuery: [any[], number] = await this.manager.query(`
         UPDATE  "Product"
@@ -27,7 +27,7 @@ export class ProductOperation {
     return Product.fromRaw(resultQuery[0][0])
   }
 
-  async calculateQuantityProductList(options: { oid: number; productIdList: number[] }) {
+  async reCalculateQuantityBySumBatchList(options: { oid: number; productIdList: number[] }) {
     const { oid, productIdList } = options
     const resultQuery: [any[], number] = await this.manager.query(`
         UPDATE  "Product" "product" 

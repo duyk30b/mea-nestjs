@@ -794,12 +794,11 @@ var PaymentType;
 })(PaymentType || (exports.PaymentType = PaymentType = {}));
 var InventoryStrategy;
 (function (InventoryStrategy) {
-    InventoryStrategy[InventoryStrategy["UseSystemDefault"] = -1] = "UseSystemDefault";
+    InventoryStrategy[InventoryStrategy["Inherit"] = -1] = "Inherit";
     InventoryStrategy[InventoryStrategy["NoImpact"] = 0] = "NoImpact";
     InventoryStrategy[InventoryStrategy["RequireBatchSelection"] = 1] = "RequireBatchSelection";
     InventoryStrategy[InventoryStrategy["AutoWithFIFO"] = 2] = "AutoWithFIFO";
-    InventoryStrategy[InventoryStrategy["AutoWithLIFO"] = 3] = "AutoWithLIFO";
-    InventoryStrategy[InventoryStrategy["AutoWithExpiryDate"] = 4] = "AutoWithExpiryDate";
+    InventoryStrategy[InventoryStrategy["AutoWithExpiryDate"] = 3] = "AutoWithExpiryDate";
 })(InventoryStrategy || (exports.InventoryStrategy = InventoryStrategy = {}));
 var MovementType;
 (function (MovementType) {
@@ -1885,27 +1884,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var Setting_1;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.SettingKey = exports.BatchCostPriceRule = exports.BatchWarehouseIdRule = exports.BatchDistributorIdRule = void 0;
+exports.SettingKey = void 0;
 const class_transformer_1 = __webpack_require__(16);
 const typeorm_1 = __webpack_require__(17);
-var BatchDistributorIdRule;
-(function (BatchDistributorIdRule) {
-    BatchDistributorIdRule[BatchDistributorIdRule["Inherit"] = 0] = "Inherit";
-    BatchDistributorIdRule[BatchDistributorIdRule["Override"] = 1] = "Override";
-    BatchDistributorIdRule[BatchDistributorIdRule["SplitOnDifferent"] = 2] = "SplitOnDifferent";
-})(BatchDistributorIdRule || (exports.BatchDistributorIdRule = BatchDistributorIdRule = {}));
-var BatchWarehouseIdRule;
-(function (BatchWarehouseIdRule) {
-    BatchWarehouseIdRule[BatchWarehouseIdRule["Inherit"] = 0] = "Inherit";
-    BatchWarehouseIdRule[BatchWarehouseIdRule["Override"] = 1] = "Override";
-    BatchWarehouseIdRule[BatchWarehouseIdRule["SplitOnDifferent"] = 2] = "SplitOnDifferent";
-})(BatchWarehouseIdRule || (exports.BatchWarehouseIdRule = BatchWarehouseIdRule = {}));
-var BatchCostPriceRule;
-(function (BatchCostPriceRule) {
-    BatchCostPriceRule[BatchCostPriceRule["Inherit"] = 0] = "Inherit";
-    BatchCostPriceRule[BatchCostPriceRule["OverrideAndMAC"] = 1] = "OverrideAndMAC";
-    BatchCostPriceRule[BatchCostPriceRule["SplitOnDifferent"] = 2] = "SplitOnDifferent";
-})(BatchCostPriceRule || (exports.BatchCostPriceRule = BatchCostPriceRule = {}));
 var SettingKey;
 (function (SettingKey) {
     SettingKey["ROOT_SETTING"] = "ROOT_SETTING";
@@ -3311,6 +3292,18 @@ __decorate([
     }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Number)
+], Batch.prototype, "costAmount", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'bigint',
+        default: 0,
+        transformer: {
+            to: (value) => value,
+            from: (value) => (value == null ? value : Number(value)),
+        },
+    }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
 ], Batch.prototype, "registeredAt", void 0);
 __decorate([
     (0, typeorm_1.Column)({
@@ -3355,11 +3348,36 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var Product_1;
 var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SplitBatchByCostPrice = exports.SplitBatchByExpiryDate = exports.SplitBatchByDistributor = exports.SplitBatchByWarehouse = void 0;
 const class_transformer_1 = __webpack_require__(16);
 const typeorm_1 = __webpack_require__(17);
 const variable_1 = __webpack_require__(20);
 const batch_entity_1 = __webpack_require__(52);
 const product_group_entity_1 = __webpack_require__(54);
+var SplitBatchByWarehouse;
+(function (SplitBatchByWarehouse) {
+    SplitBatchByWarehouse[SplitBatchByWarehouse["Inherit"] = 0] = "Inherit";
+    SplitBatchByWarehouse[SplitBatchByWarehouse["Override"] = 1] = "Override";
+    SplitBatchByWarehouse[SplitBatchByWarehouse["SplitOnDifferent"] = 2] = "SplitOnDifferent";
+})(SplitBatchByWarehouse || (exports.SplitBatchByWarehouse = SplitBatchByWarehouse = {}));
+var SplitBatchByDistributor;
+(function (SplitBatchByDistributor) {
+    SplitBatchByDistributor[SplitBatchByDistributor["Inherit"] = 0] = "Inherit";
+    SplitBatchByDistributor[SplitBatchByDistributor["Override"] = 1] = "Override";
+    SplitBatchByDistributor[SplitBatchByDistributor["SplitOnDifferent"] = 2] = "SplitOnDifferent";
+})(SplitBatchByDistributor || (exports.SplitBatchByDistributor = SplitBatchByDistributor = {}));
+var SplitBatchByExpiryDate;
+(function (SplitBatchByExpiryDate) {
+    SplitBatchByExpiryDate[SplitBatchByExpiryDate["Inherit"] = 0] = "Inherit";
+    SplitBatchByExpiryDate[SplitBatchByExpiryDate["Override"] = 1] = "Override";
+    SplitBatchByExpiryDate[SplitBatchByExpiryDate["SplitOnDifferent"] = 2] = "SplitOnDifferent";
+})(SplitBatchByExpiryDate || (exports.SplitBatchByExpiryDate = SplitBatchByExpiryDate = {}));
+var SplitBatchByCostPrice;
+(function (SplitBatchByCostPrice) {
+    SplitBatchByCostPrice[SplitBatchByCostPrice["Inherit"] = 0] = "Inherit";
+    SplitBatchByCostPrice[SplitBatchByCostPrice["OverrideAndMAC"] = 1] = "OverrideAndMAC";
+    SplitBatchByCostPrice[SplitBatchByCostPrice["SplitOnDifferent"] = 2] = "SplitOnDifferent";
+})(SplitBatchByCostPrice || (exports.SplitBatchByCostPrice = SplitBatchByCostPrice = {}));
 let Product = Product_1 = class Product {
     static fromRaw(raw) {
         if (!raw)
@@ -3375,6 +3393,47 @@ let Product = Product_1 = class Product {
     }
     static fromRaws(raws) {
         return raws.map((i) => Product_1.fromRaw(i));
+    }
+    static getProductSettingRule(product, productSettingCommon, productSettingRoot) {
+        const splitRule = {
+            allowNegativeQuantity: false,
+            inventoryStrategy: product.inventoryStrategy,
+            splitBatchByWarehouse: product.splitBatchByWarehouse,
+            splitBatchByDistributor: product.splitBatchByDistributor,
+            splitBatchByExpiryDate: product.splitBatchByExpiryDate,
+            splitBatchByCostPrice: product.splitBatchByCostPrice,
+        };
+        if (splitRule.inventoryStrategy === variable_1.InventoryStrategy.Inherit) {
+            splitRule.inventoryStrategy = productSettingCommon.inventoryStrategy;
+            if (splitRule.inventoryStrategy === variable_1.InventoryStrategy.Inherit) {
+                splitRule.inventoryStrategy = productSettingRoot.inventoryStrategy;
+            }
+        }
+        if (splitRule.splitBatchByWarehouse === SplitBatchByWarehouse.Inherit) {
+            splitRule.splitBatchByWarehouse = productSettingCommon.splitBatchByWarehouse;
+            if (splitRule.splitBatchByWarehouse === SplitBatchByWarehouse.Inherit) {
+                splitRule.splitBatchByWarehouse = productSettingRoot.splitBatchByWarehouse;
+            }
+        }
+        if (splitRule.splitBatchByDistributor === SplitBatchByDistributor.Inherit) {
+            splitRule.splitBatchByDistributor = productSettingCommon.splitBatchByDistributor;
+            if (splitRule.splitBatchByDistributor === SplitBatchByDistributor.Inherit) {
+                splitRule.splitBatchByDistributor = productSettingRoot.splitBatchByDistributor;
+            }
+        }
+        if (splitRule.splitBatchByExpiryDate === SplitBatchByExpiryDate.Inherit) {
+            splitRule.splitBatchByExpiryDate = productSettingCommon.splitBatchByExpiryDate;
+            if (splitRule.splitBatchByExpiryDate === SplitBatchByExpiryDate.Inherit) {
+                splitRule.splitBatchByExpiryDate = productSettingRoot.splitBatchByExpiryDate;
+            }
+        }
+        if (splitRule.splitBatchByCostPrice === SplitBatchByCostPrice.Inherit) {
+            splitRule.splitBatchByCostPrice = productSettingCommon.splitBatchByCostPrice;
+            if (splitRule.splitBatchByCostPrice === SplitBatchByCostPrice.Inherit) {
+                splitRule.splitBatchByCostPrice = productSettingRoot.splitBatchByCostPrice;
+            }
+        }
+        return splitRule;
     }
 };
 __decorate([
@@ -3414,10 +3473,30 @@ __decorate([
     __metadata("design:type", Number)
 ], Product.prototype, "quantity", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: variable_1.InventoryStrategy.UseSystemDefault, type: 'smallint' }),
+    (0, typeorm_1.Column)({ default: variable_1.InventoryStrategy.Inherit, type: 'smallint' }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", typeof (_a = typeof variable_1.InventoryStrategy !== "undefined" && variable_1.InventoryStrategy) === "function" ? _a : Object)
 ], Product.prototype, "inventoryStrategy", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: SplitBatchByWarehouse.Inherit, type: 'smallint' }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], Product.prototype, "splitBatchByWarehouse", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: SplitBatchByDistributor.Inherit, type: 'smallint' }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], Product.prototype, "splitBatchByDistributor", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: SplitBatchByExpiryDate.Inherit, type: 'smallint' }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], Product.prototype, "splitBatchByExpiryDate", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: SplitBatchByCostPrice.Inherit, type: 'smallint' }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], Product.prototype, "splitBatchByCostPrice", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         type: 'bigint',
@@ -4174,7 +4253,7 @@ let TicketBatch = TicketBatch_1 = class TicketBatch extends base_entity_1.BaseEn
         const entity = new TicketBatch_1();
         Object.assign(entity, raw);
         entity.quantity = Number(raw.quantity);
-        entity.costPrice = Number(raw.costPrice);
+        entity.costAmount = Number(raw.costAmount);
         entity.expectedPrice = Number(raw.expectedPrice);
         entity.actualPrice = Number(raw.actualPrice);
         return entity;
@@ -4252,7 +4331,7 @@ __decorate([
     }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Number)
-], TicketBatch.prototype, "costPrice", void 0);
+], TicketBatch.prototype, "costAmount", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         type: 'bigint',
@@ -4625,7 +4704,12 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'text' }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", String)
-], PrintHtml.prototype, "content", void 0);
+], PrintHtml.prototype, "html", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', default: '' }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", String)
+], PrintHtml.prototype, "css", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
     (0, typeorm_1.Column)({
@@ -6758,7 +6842,7 @@ let ProductMovement = ProductMovement_1 = class ProductMovement extends base_ent
         entity.openQuantity = Number(raw.openQuantity);
         entity.quantity = Number(raw.quantity);
         entity.closeQuantity = Number(raw.closeQuantity);
-        entity.costPrice = Number(raw.costPrice);
+        entity.costAmount = Number(raw.costAmount);
         entity.actualPrice = Number(raw.actualPrice);
         entity.expectedPrice = Number(raw.expectedPrice);
         entity.createdAt = raw.createdAt == null ? raw.createdAt : Number(raw.createdAt);
@@ -6854,7 +6938,7 @@ __decorate([
     }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Number)
-], ProductMovement.prototype, "costPrice", void 0);
+], ProductMovement.prototype, "costAmount", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         type: 'bigint',
@@ -7140,6 +7224,24 @@ __decorate([
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Number)
 ], StockCheckItem.prototype, "actualQuantity", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'bigint',
+        default: 0,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], StockCheckItem.prototype, "systemCostAmount", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'bigint',
+        default: 0,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], StockCheckItem.prototype, "actualCostAmount", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
     (0, class_transformer_1.Expose)(),
@@ -8960,7 +9062,8 @@ class _PostgreSqlManager extends postgresql_raw_1.PostgreSqlRaw {
         }
         return this.entity.fromRaw(raws[0]);
     }
-    async updateListBy(options) {
+    async bulkUpdate(options) {
+        var _a;
         const { manager } = options;
         const tableName = this.entity['name'];
         const tempList = options.tempList || [];
@@ -8999,23 +9102,27 @@ class _PostgreSqlManager extends postgresql_raw_1.PostgreSqlRaw {
         const tempColumns = Object.keys(tempList[0]);
         const modifiedRaw = await manager.query(`
       UPDATE  "${tableName}"
-      SET     ${updateName
-            .map((field) => {
-            if (typeof updateObject[field] !== 'function') {
-                return `"${field}" = temp."${field}"`;
-            }
-            else {
+      SET     ${updateName.map((field) => {
+            if (typeof updateObject[field] === 'function') {
                 return `"${field}" = ${updateObject[field]('temp', tableName)}`;
             }
-        })
-            .join(`,
+            else if (typeof updateObject[field] === 'object') {
+                return `"${field}" = "temp"."${field}"::${updateObject[field].cast}`;
+            }
+            else {
+                return `"${field}" = "temp"."${field}"`;
+            }
+        }).join(`,
               `)}
       FROM (VALUES `
             + tempList
                 .map((record) => {
                 return `(${tempColumns
                     .map((field) => {
-                    if (typeof record[field] === 'number') {
+                    if (record[field] === null) {
+                        return `NULL`;
+                    }
+                    else if (typeof record[field] === 'number') {
                         return `${record[field]}`;
                     }
                     else if (typeof record[field] === 'string') {
@@ -9030,21 +9137,22 @@ class _PostgreSqlManager extends postgresql_raw_1.PostgreSqlRaw {
                 .join(', ')
             + `) 
           AS temp(${tempColumns.map((field) => `"${field}"`).join(', ')})
-      WHERE   ${conditionRaw ? conditionRaw + ` 
-          AND ` : ''}${compareName
-                .map((field) => {
+      WHERE   ${conditionRaw
+                ? conditionRaw
+                    + ` 
+          AND `
+                : ''}${compareName.map((field) => {
                 if (typeof compareObject[field] !== 'function') {
                     return `"${tableName}"."${field}" = "temp"."${field}"`;
                 }
                 else {
                     return `"${tableName}"."${field}" = ${compareObject[field]('temp', tableName)}`;
                 }
-            })
-                .join(` 
+            }).join(` 
           AND `)}
       RETURNING "${tableName}".*;
       `);
-        if (options.options.requireEqualLength) {
+        if ((_a = options.options) === null || _a === void 0 ? void 0 : _a.requireEqualLength) {
             if (modifiedRaw[0].length !== tempList.length) {
                 throw new Error(`Update Database failed: ` + JSON.stringify({ modifiedRaw, tempList }));
             }
@@ -9605,7 +9713,7 @@ let ProductManager = class ProductManager extends _postgresql_manager_1._Postgre
     constructor() {
         super(entities_1.Product);
     }
-    async calculateQuantityProductList(options) {
+    async reCalculateQuantityBySumBatchList(options) {
         const { manager, oid, productIdList } = options;
         const resultQuery = await manager.query(`
         UPDATE  "Product" "product" 
@@ -10469,7 +10577,7 @@ let ProductOperation = class ProductOperation {
         this.dataSource = dataSource;
         this.manager = manager;
     }
-    async calculateQuantityProduct(options) {
+    async reCalculateQuantityBySumBatch(options) {
         const { oid, productId } = options;
         const resultQuery = await this.manager.query(`
         UPDATE  "Product"
@@ -10485,7 +10593,7 @@ let ProductOperation = class ProductOperation {
         }
         return entities_1.Product.fromRaw(resultQuery[0][0]);
     }
-    async calculateQuantityProductList(options) {
+    async reCalculateQuantityBySumBatchList(options) {
         const { oid, productIdList } = options;
         const resultQuery = await this.manager.query(`
         UPDATE  "Product" "product" 
@@ -11326,7 +11434,7 @@ let ReceiptReturnProductOperation = class ReceiptReturnProductOperation {
             const productCalculatorMap = {};
             const batchCalculatorMap = {};
             for (let i = 0; i < receiptItemList.length; i++) {
-                const { batchId, productId, quantity } = receiptItemList[i];
+                const { batchId, productId, quantity, costPrice } = receiptItemList[i];
                 if (!productCalculatorMap[productId]) {
                     productCalculatorMap[productId] = {
                         productId,
@@ -11339,13 +11447,16 @@ let ReceiptReturnProductOperation = class ReceiptReturnProductOperation {
                         batchId,
                         productId,
                         quantityReturn: 0,
-                        openQuantity: 0,
+                        costPrice: 0,
+                        sumCostAmount: 0,
                     };
                 }
                 productCalculatorMap[productId].quantityReturn += quantity;
                 batchCalculatorMap[batchId].quantityReturn += quantity;
+                batchCalculatorMap[batchId].costPrice = costPrice;
+                batchCalculatorMap[batchId].sumCostAmount += quantity * costPrice;
             }
-            const productList = await this.productManager.updateListBy({
+            const productList = await this.productManager.bulkUpdate({
                 manager,
                 condition: { oid, inventoryStrategy: { NOT: variable_1.InventoryStrategy.NoImpact } },
                 compare: ['oid', 'id'],
@@ -11353,7 +11464,7 @@ let ReceiptReturnProductOperation = class ReceiptReturnProductOperation {
                     return { oid, id: i.productId, quantityReturn: i.quantityReturn };
                 }),
                 update: {
-                    quantity: (tempName) => `"quantity" - ${tempName}."quantityReturn"`,
+                    quantity: (t) => `"quantity" - "${t}"."quantityReturn"`,
                 },
                 options: { requireEqualLength: true },
             });
@@ -11361,46 +11472,55 @@ let ReceiptReturnProductOperation = class ReceiptReturnProductOperation {
             const batchQuantityList = Object.values(batchCalculatorMap).filter((i) => {
                 return !!productMap[i.productId];
             });
-            const batchList = await this.batchManager.updateListBy({
+            const batchList = await this.batchManager.bulkUpdate({
                 manager,
                 condition: { oid },
-                compare: ['id'],
+                compare: ['id', 'productId'],
                 tempList: Object.values(batchQuantityList).map((i) => {
-                    return { id: i.batchId, quantityReturn: i.quantityReturn };
+                    return {
+                        id: i.batchId,
+                        productId: i.productId,
+                        quantityReturn: i.quantityReturn,
+                        costPrice: i.costPrice,
+                        sumCostAmount: i.sumCostAmount,
+                    };
                 }),
-                update: { quantity: (tempName) => `"quantity" - ${tempName}."quantityReturn"` },
+                update: {
+                    quantity: (t, u) => `"${u}"."quantity" - "${t}"."quantityReturn"`,
+                    costAmount: (t, u) => ` CASE
+                                    WHEN  ("${u}"."quantity" <= "${t}"."quantityReturn")
+                                      THEN ("${u}".quantity - "${t}"."quantityReturn") * "${u}"."costPrice"
+                                    WHEN  ("${u}"."costAmount" <= "${t}"."sumCostAmount")
+                                      THEN ("${u}".quantity - "${t}"."quantityReturn") * "${u}"."costPrice"
+                                    ELSE "${u}"."costAmount" - "${t}"."sumCostAmount"
+                                  END`,
+                },
                 options: { requireEqualLength: true },
             });
             productList.forEach((i) => {
                 const productCalculator = productCalculatorMap[i.id];
                 productCalculator.openQuantity = i.quantity + productCalculator.quantityReturn;
             });
-            batchList.forEach((i) => {
-                const batchCalculator = batchCalculatorMap[i.id];
-                batchCalculator.openQuantity = i.quantity + batchCalculator.quantityReturn;
-            });
-            const productMovementInsertList = receiptItemList.map((receiptItem) => {
-                const productCalculator = productCalculatorMap[receiptItem.productId];
+            const productMovementInsertList = receiptItemList.map((ri) => {
+                const productCalculator = productCalculatorMap[ri.productId];
                 const productMovementInsert = {
                     oid,
                     contactId: receipt.distributorId,
                     voucherId: receiptId,
-                    voucherProductId: receiptItem.id,
-                    warehouseId: receiptItem.warehouseId,
-                    productId: receiptItem.productId,
-                    batchId: receiptItem.batchId,
+                    voucherProductId: ri.id,
+                    warehouseId: ri.warehouseId,
+                    productId: ri.productId,
+                    batchId: ri.batchId,
                     createdAt: time,
                     movementType: variable_1.MovementType.Receipt,
                     isRefund: 1,
-                    unitRate: receiptItem.unitRate,
-                    costPrice: receiptItem.costPrice,
-                    actualPrice: receiptItem.costPrice,
-                    expectedPrice: receiptItem.costPrice,
+                    unitRate: ri.unitRate,
+                    actualPrice: ri.costPrice,
+                    expectedPrice: ri.costPrice,
                     openQuantity: productCalculator ? productCalculator.openQuantity : 0,
-                    quantity: -receiptItem.quantity,
-                    closeQuantity: productCalculator
-                        ? productCalculator.openQuantity - receiptItem.quantity
-                        : 0,
+                    quantity: -ri.quantity,
+                    costAmount: -ri.costPrice * ri.quantity,
+                    closeQuantity: productCalculator ? productCalculator.openQuantity - ri.quantity : 0,
                 };
                 if (productCalculator) {
                     productCalculator.openQuantity = productMovementInsert.closeQuantity;
@@ -11488,51 +11608,74 @@ let ReceiptSendProductOperation = class ReceiptSendProductOperation {
                     productCalculatorMap[productId].quantitySend += quantity;
                 }
                 for (let i = 0; i < receiptItemList.length; i++) {
-                    const { batchId, quantity } = receiptItemList[i];
+                    const ri = receiptItemList[i];
+                    const { batchId, quantity } = ri;
                     if (!batchCalculatorMap[batchId]) {
                         batchCalculatorMap[batchId] = {
-                            batchId: receiptItemList[i].batchId,
-                            productId: receiptItemList[i].productId,
-                            warehouseId: receiptItemList[i].warehouseId,
-                            distributorId: receiptItemList[i].distributorId,
+                            batchId: ri.batchId,
+                            productId: ri.productId,
+                            warehouseId: ri.warehouseId,
+                            distributorId: ri.distributorId,
+                            batchCode: ri.batchCode,
+                            expiryDate: ri.expiryDate || null,
                             quantitySend: 0,
-                            openQuantity: 0,
-                            costPrice: receiptItemList[i].costPrice,
-                            batchCode: receiptItemList[i].batchCode,
-                            expiryDate: receiptItemList[i].expiryDate || null,
+                            costPrice: ri.costPrice,
+                            sumCostAmount: 0,
                         };
                     }
                     batchCalculatorMap[batchId].quantitySend += quantity;
+                    batchCalculatorMap[batchId].sumCostAmount += quantity * ri.costPrice;
                 }
-                const productList = await this.productManager.updateListBy({
+                const productList = await this.productManager.bulkUpdate({
                     manager,
                     condition: { oid, inventoryStrategy: { NOT: variable_1.InventoryStrategy.NoImpact } },
                     compare: ['id'],
                     tempList: Object.values(productCalculatorMap).map((i) => {
-                        return { id: i.productId, quantitySend: i.quantitySend };
+                        return { id: i.productId, quantitySend: i.quantitySend, costPrice: i.costPrice };
                     }),
-                    update: { quantity: (tempName) => `"quantity" + ${tempName}."quantitySend"` },
+                    update: {
+                        costPrice: true,
+                        quantity: (tempName) => `"quantity" + ${tempName}."quantitySend"`,
+                    },
                     options: { requireEqualLength: true },
                 });
                 const productMap = object_helper_1.ESArray.arrayToKeyValue(productList, 'id');
-                const batchList = await this.batchManager.updateListBy({
+                const batchList = await this.batchManager.bulkUpdate({
                     manager,
                     condition: { oid },
                     compare: ['id', 'productId'],
                     tempList: Object.values(batchCalculatorMap).map((i) => {
-                        return { id: i.batchId, productId: i.productId, quantitySend: i.quantitySend };
+                        return {
+                            id: i.batchId,
+                            productId: i.productId,
+                            warehouseId: i.warehouseId,
+                            distributorId: i.distributorId,
+                            costPrice: i.costPrice,
+                            batchCode: i.batchCode,
+                            expiryDate: i.expiryDate,
+                            quantitySend: i.quantitySend,
+                            sumCostAmount: i.sumCostAmount,
+                        };
                     }),
-                    update: { quantity: (tempName) => `"quantity" + ${tempName}."quantitySend"` },
+                    update: {
+                        warehouseId: true,
+                        distributorId: true,
+                        costPrice: true,
+                        expiryDate: { cast: 'bigint' },
+                        batchCode: true,
+                        quantity: (t, u) => `"${u}"."quantity" + "${t}"."quantitySend"`,
+                        costAmount: (t, u) => ` CASE
+                                    WHEN  ("${u}"."quantity" < 0)
+                                      THEN ("${u}".quantity + "${t}"."quantitySend") * "${t}"."costPrice"
+                                    ELSE "${u}"."costAmount" + "${t}"."sumCostAmount"
+                                  END`,
+                    },
                     options: { requireEqualLength: true },
                 });
                 const batchMap = object_helper_1.ESArray.arrayToKeyValue(batchList, 'id');
                 productList.forEach((i) => {
                     const productCalculator = productCalculatorMap[i.id];
                     productCalculator.openQuantity = i.quantity - productCalculator.quantitySend;
-                });
-                batchList.forEach((i) => {
-                    const batchCalculator = batchCalculatorMap[i.id];
-                    batchCalculator.openQuantity = i.quantity - batchCalculator.quantitySend;
                 });
                 const productMovementInsertList = receiptItemList.map((ri) => {
                     const productCalculator = productCalculatorMap[ri.productId];
@@ -11547,11 +11690,11 @@ let ReceiptSendProductOperation = class ReceiptSendProductOperation {
                         batchId: ri.batchId,
                         isRefund: 0,
                         unitRate: ri.unitRate,
-                        costPrice: ri.costPrice,
                         expectedPrice: ri.costPrice,
                         actualPrice: ri.costPrice,
                         openQuantity: productCalculator ? productCalculator.openQuantity : 0,
                         quantity: ri.quantity,
+                        costAmount: ri.quantity * ri.costPrice,
                         closeQuantity: productCalculator ? productCalculator.openQuantity + ri.quantity : 0,
                         createdAt: time,
                     };
@@ -12219,7 +12362,7 @@ let TicketPaymentAndCloseOperation = class TicketPaymentAndCloseOperation {
                         id: { IN: ticketUserRemoveList.map((i) => i.id) },
                     });
                 }
-                ticketUserModifiedList = await this.ticketUserManager.updateListBy({
+                ticketUserModifiedList = await this.ticketUserManager.bulkUpdate({
                     manager,
                     tempList: ticketUserUpdateList,
                     compare: ['id'],
@@ -12665,6 +12808,11 @@ let TicketReturnProductOperation = class TicketReturnProductOperation {
                 const { ticketBatchId } = i;
                 const tbOrigin = ticketBatchOriginMap[ticketBatchId];
                 const { productId, batchId, ticketProductId } = tbOrigin;
+                let costAmountReturn = 0;
+                if (tbOrigin.quantity !== 0) {
+                    costAmountReturn = (tbOrigin.costAmount * i.quantityReturn) / tbOrigin.quantity;
+                }
+                i.costAmountReturn = costAmountReturn;
                 if (!tpCalcMap[ticketProductId]) {
                     tpCalcMap[ticketProductId] = {
                         ticketProductId,
@@ -12677,18 +12825,19 @@ let TicketReturnProductOperation = class TicketReturnProductOperation {
                     productCalcMap[productId] = { productId, openQuantity: 0, sumQuantity: 0 };
                 }
                 if (!batchCalcMap[batchId]) {
-                    batchCalcMap[batchId] = { batchId, sumQuantity: 0 };
+                    batchCalcMap[batchId] = { batchId, productId, sumQuantity: 0, sumCostAmount: 0 };
                 }
-                tpCalcMap[ticketProductId].sumQuantity += i.quantity;
-                tpCalcMap[ticketProductId].sumCostAmount += i.quantity * tbOrigin.costPrice;
+                tpCalcMap[ticketProductId].sumQuantity += i.quantityReturn;
+                tpCalcMap[ticketProductId].sumCostAmount += i.costAmountReturn;
                 if (batchId != 0) {
-                    productCalcMap[productId].sumQuantity += i.quantity;
-                    batchCalcMap[batchId].sumQuantity += i.quantity;
+                    productCalcMap[productId].sumQuantity += i.quantityReturn;
+                    batchCalcMap[batchId].sumQuantity += i.quantityReturn;
+                    batchCalcMap[batchId].sumCostAmount += i.costAmountReturn;
                 }
             });
-            const ticketProductModifiedList = await this.ticketProductManager.updateListBy({
+            const ticketProductModifiedList = await this.ticketProductManager.bulkUpdate({
                 manager,
-                condition: { oid, ticketId },
+                condition: { oid, ticketId, deliveryStatus: { EQUAL: variable_1.DeliveryStatus.Delivered } },
                 compare: ['id', 'productId'],
                 tempList: Object.values(tpCalcMap).map((i) => {
                     return {
@@ -12699,10 +12848,10 @@ let TicketReturnProductOperation = class TicketReturnProductOperation {
                     };
                 }),
                 update: {
-                    quantity: (t) => `"quantity" - ${t}."sumQuantity"`,
-                    costAmount: (t) => `"quantity" - ${t}."sumCostAmount"`,
+                    quantity: (t, u) => `"${u}"."quantity" - "${t}"."sumQuantity"`,
+                    costAmount: (t, u) => `"${u}"."costAmount" - "${t}"."sumCostAmount"`,
                     deliveryStatus: (t) => ` CASE
-                                    WHEN  ("quantity" = ${t}."sumQuantity")
+                                    WHEN  ("quantity" = "${t}"."sumQuantity")
                                       THEN ${variable_1.DeliveryStatus.NoStock}
                                     ELSE ${variable_1.DeliveryStatus.Delivered}
                                   END`,
@@ -12711,17 +12860,22 @@ let TicketReturnProductOperation = class TicketReturnProductOperation {
             });
             const ticketProductModifiedMap = object_helper_1.ESArray.arrayToKeyValue(ticketProductModifiedList, 'id');
             const tbCalcValue = returnList.filter((i) => !!i.ticketBatchId);
-            const ticketBatchModifiedList = await this.ticketBatchManager.updateListBy({
+            const ticketBatchModifiedList = await this.ticketBatchManager.bulkUpdate({
                 manager,
                 condition: { oid, ticketId, deliveryStatus: { EQUAL: variable_1.DeliveryStatus.Delivered } },
                 compare: ['id'],
                 tempList: Object.values(tbCalcValue).map((i) => {
-                    return { id: i.ticketBatchId, quantity: i.quantity };
+                    return {
+                        id: i.ticketBatchId,
+                        quantityReturn: i.quantityReturn,
+                        costAmountReturn: i.costAmountReturn,
+                    };
                 }),
                 update: {
-                    quantity: (t, u) => `"${u}"."quantity" - ${t}."quantity"`,
+                    quantity: (t, u) => `"${u}"."quantity" - "${t}"."quantityReturn"`,
+                    costAmount: (t, u) => `"${u}"."costAmount" - "${t}"."costAmountReturn"`,
                     deliveryStatus: (t, u) => ` CASE
-                                    WHEN  ("${u}"."quantity" = ${t}."quantity")
+                                    WHEN  ("${u}"."quantity" = "${t}"."quantityReturn")
                                       THEN ${variable_1.DeliveryStatus.NoStock}
                                     ELSE ${variable_1.DeliveryStatus.Delivered}
                                   END`,
@@ -12729,25 +12883,37 @@ let TicketReturnProductOperation = class TicketReturnProductOperation {
                 options: { requireEqualLength: true },
             });
             const ticketBatchModifiedMap = object_helper_1.ESArray.arrayToKeyValue(ticketBatchModifiedList, 'id');
-            const productModifiedList = await this.productManager.updateListBy({
+            const productModifiedList = await this.productManager.bulkUpdate({
                 manager,
                 condition: { oid },
                 compare: ['id'],
                 tempList: Object.values(productCalcMap).map((i) => {
                     return { id: i.productId, sumQuantity: i.sumQuantity };
                 }),
-                update: { quantity: (t) => `"quantity" + ${t}."sumQuantity"` },
+                update: { quantity: (t) => `"quantity" + "${t}"."sumQuantity"` },
                 options: { requireEqualLength: true },
             });
             const productModifiedMap = object_helper_1.ESArray.arrayToKeyValue(productModifiedList, 'id');
-            const batchModifiedList = await this.batchManager.updateListBy({
+            const batchModifiedList = await this.batchManager.bulkUpdate({
                 manager,
                 condition: { oid },
-                compare: ['id'],
+                compare: ['id', 'productId'],
                 tempList: Object.values(batchCalcMap).map((i) => {
-                    return { id: i.batchId, sumQuantity: i.sumQuantity };
+                    return {
+                        id: i.batchId,
+                        productId: i.productId,
+                        sumQuantity: i.sumQuantity,
+                        sumCostAmount: i.sumCostAmount,
+                    };
                 }),
-                update: { quantity: (t) => `"quantity" + ${t}."sumQuantity"` },
+                update: {
+                    quantity: (t, u) => `"${u}"."quantity" + "${t}"."sumQuantity"`,
+                    costAmount: (t, u) => ` CASE
+                                    WHEN  ("${u}"."quantity" < 0)
+                                      THEN ("${u}".quantity + "${t}"."sumQuantity") * "${u}"."costPrice"
+                                    ELSE "${u}"."costAmount" + "${t}"."sumCostAmount"
+                                  END`,
+                },
                 options: { requireEqualLength: true },
             });
             const batchMap = object_helper_1.ESArray.arrayToKeyValue(batchModifiedList, 'id');
@@ -12769,7 +12935,7 @@ let TicketReturnProductOperation = class TicketReturnProductOperation {
                 const tbModified = ticketBatchModifiedMap[ticketBatchId];
                 const { productId, batchId } = tbModified;
                 const productCalc = productCalcMap[productId];
-                const quantityActual = batchId ? returnItem.quantity : 0;
+                const quantityActual = batchId ? returnItem.quantityReturn : 0;
                 const productMovementInsert = {
                     oid,
                     movementType: variable_1.MovementType.Ticket,
@@ -12781,10 +12947,10 @@ let TicketReturnProductOperation = class TicketReturnProductOperation {
                     batchId: tbModified.batchId || 0,
                     isRefund: 1,
                     openQuantity: productCalc.openQuantity,
-                    quantity: returnItem.quantity,
+                    quantity: returnItem.quantityReturn,
                     closeQuantity: productCalc.openQuantity + quantityActual,
                     unitRate: tbModified.unitRate,
-                    costPrice: tbModified.costPrice,
+                    costAmount: returnItem.costAmountReturn,
                     expectedPrice: tbModified.expectedPrice,
                     actualPrice: tbModified.actualPrice,
                     createdAt: time,
@@ -12925,6 +13091,7 @@ let TicketSendProductOperation = class TicketSendProductOperation {
             batchListMapRemain[b.productId].push({
                 productId: b.productId,
                 quantityRemain: b.quantity,
+                costAmountRemain: b.costAmount,
                 batch: b,
             });
         });
@@ -12943,14 +13110,15 @@ let TicketSendProductOperation = class TicketSendProductOperation {
                 throw new Error(`Sản phẩm của ID ${tpOrigin.id} không hợp lệ`);
             }
             if (!batchListMapRemain[tpOrigin.productId]
+                || !batchListMapRemain[tpOrigin.productId].length
                 || tpOrigin.inventoryStrategy === variable_1.InventoryStrategy.NoImpact) {
                 const sendItem = {
                     ticketProductId: tpOrigin.id,
                     productId: tpOrigin.productId,
                     batchId: 0,
                     warehouseId: 0,
-                    quantity: tpOrigin.quantity,
-                    costPrice: tpOrigin.costAmount / (tpOrigin.quantity || 1),
+                    quantitySend: tpOrigin.quantity,
+                    costAmountSend: tpOrigin.costAmount,
                 };
                 sendList.push(sendItem);
             }
@@ -12962,24 +13130,34 @@ let TicketSendProductOperation = class TicketSendProductOperation {
                 if (!batchRemain || !batchRemain.batch) {
                     throw new Error(`${productOrigin.brandName} không có lô hàng phù hợp`);
                 }
-                if (!allowNegativeQuantity && tpOrigin.quantity > batchRemain.batch.quantity) {
+                if (!allowNegativeQuantity && tpOrigin.quantity > batchRemain.quantityRemain) {
                     const expiryDateString = time_helper_1.ESTimer.timeToText(batchRemain.batch.expiryDate, 'DD/MM/YYYY', 7);
                     throw new Error(`${productOrigin.brandName} không đủ số lượng trong kho.`
                         + ` Lô hàng ${batchRemain.batch.batchCode} ${expiryDateString}:`
-                        + ` còn ${batchRemain.batch.quantity}, lấy ${tpOrigin.quantity}`);
+                        + ` còn ${batchRemain.quantityRemain}, lấy ${tpOrigin.quantity}`);
+                }
+                const quantityGet = tpOrigin.quantity;
+                let costAmountGet = 0;
+                if (batchRemain.quantityRemain === 0) {
+                    costAmountGet = batchRemain.batch.costPrice * quantityGet;
+                }
+                else {
+                    costAmountGet = Math.round((batchRemain.costAmountRemain * quantityGet) / batchRemain.quantityRemain);
                 }
                 const sendItem = {
                     ticketProductId: tpOrigin.id,
                     productId: tpOrigin.productId,
                     batchId: batchRemain.batch.id,
                     warehouseId: batchRemain.batch.warehouseId,
-                    quantity: tpOrigin.quantity,
-                    costPrice: batchRemain.batch.costPrice,
+                    quantitySend: quantityGet,
+                    costAmountSend: costAmountGet,
                 };
                 sendList.push(sendItem);
+                batchRemain.quantityRemain -= sendItem.quantitySend;
+                batchRemain.costAmountRemain -= sendItem.costAmountSend;
             }
             else {
-                let quantitySend = tpOrigin.quantity;
+                let quantityCalculator = tpOrigin.quantity;
                 const batchListRemain = batchListMapRemain[tpOrigin.productId].filter((i) => {
                     let warehouseIdList = [];
                     try {
@@ -12997,35 +13175,61 @@ let TicketSendProductOperation = class TicketSendProductOperation {
                     return false;
                 });
                 for (let i = 0; i < batchListRemain.length; i++) {
-                    const batch = batchListRemain[i].batch;
-                    let quantityGet = Math.min(quantitySend, batchListRemain[i].quantityRemain);
-                    if (quantityGet < 0)
-                        quantityGet = 0;
+                    if (quantityCalculator <= 0)
+                        break;
+                    const batchRemain = batchListRemain[i];
+                    const quantityGet = Math.min(quantityCalculator, batchRemain.quantityRemain);
+                    if (quantityGet <= 0)
+                        continue;
+                    const costAmountGet = Math.floor((batchRemain.costAmountRemain * quantityGet) / batchRemain.quantityRemain);
                     const sendItem = {
                         ticketProductId: tpOrigin.id,
                         productId: tpOrigin.productId,
-                        batchId: batch.id,
-                        warehouseId: batch.warehouseId,
-                        quantity: quantityGet,
-                        costPrice: batch.costPrice,
+                        batchId: batchRemain.batch.id,
+                        warehouseId: batchRemain.batch.warehouseId,
+                        quantitySend: quantityGet,
+                        costAmountSend: costAmountGet,
                     };
                     sendList.push(sendItem);
-                    quantitySend = quantitySend - quantityGet;
-                    batchListRemain[i].quantityRemain = batchListRemain[i].quantityRemain - quantityGet;
-                    if (quantitySend <= 0)
-                        break;
-                    if (i === batchListRemain.length - 1 && quantitySend > 0) {
-                        if (!allowNegativeQuantity) {
-                            throw new Error(`${productOrigin.brandName} không đủ số lượng trong kho`);
-                        }
-                        else {
-                            sendItem.quantity += quantitySend;
-                        }
+                    quantityCalculator = quantityCalculator - quantityGet;
+                    batchRemain.quantityRemain -= sendItem.quantitySend;
+                    batchRemain.costAmountRemain -= sendItem.costAmountSend;
+                }
+                if (quantityCalculator > 0) {
+                    if (!allowNegativeQuantity) {
+                        throw new Error(`${productOrigin.brandName} không đủ số lượng trong kho`);
+                    }
+                    const batchRemain = batchListRemain[batchListRemain.length - 1];
+                    const quantityGet = quantityCalculator;
+                    let costAmountGet = 0;
+                    if (batchRemain.quantityRemain === 0) {
+                        costAmountGet = batchRemain.batch.costPrice * quantityGet;
+                    }
+                    else {
+                        costAmountGet = Math.round((batchRemain.costAmountRemain * quantityGet) / batchRemain.quantityRemain);
+                    }
+                    const sendItemExist = sendList.find((i) => {
+                        return i.batchId === batchRemain.batch.id;
+                    });
+                    if (!sendItemExist) {
+                        const sendItem = {
+                            ticketProductId: tpOrigin.id,
+                            productId: tpOrigin.productId,
+                            batchId: batchRemain.batch.id,
+                            warehouseId: batchRemain.batch.warehouseId,
+                            quantitySend: quantityGet,
+                            costAmountSend: costAmountGet,
+                        };
+                        sendList.push(sendItem);
+                    }
+                    else {
+                        sendItemExist.quantitySend += quantityGet;
+                        sendItemExist.costAmountSend += costAmountGet;
                     }
                 }
             }
         });
-        return sendList.filter((i) => i.quantity != 0);
+        return sendList;
     }
     async sendProduct(params) {
         const { oid, ticketId, time, sendList, allowNegativeQuantity } = params;
@@ -13069,17 +13273,18 @@ let TicketSendProductOperation = class TicketSendProductOperation {
                 if (!productCalcMap[i.productId]) {
                     productCalcMap[i.productId] = { productId, openQuantity: 0, sumQuantity: 0 };
                 }
-                if (!batchCalcMap[batchId]) {
-                    batchCalcMap[batchId] = { batchId, sumQuantity: 0 };
-                }
-                tpCalcMap[ticketProductId].sumQuantity += i.quantity;
-                tpCalcMap[ticketProductId].sumCostAmount += i.quantity * i.costPrice;
+                tpCalcMap[ticketProductId].sumQuantity += i.quantitySend;
+                tpCalcMap[ticketProductId].sumCostAmount += i.costAmountSend;
                 if (batchId != 0) {
-                    productCalcMap[productId].sumQuantity += i.quantity;
-                    batchCalcMap[batchId].sumQuantity += i.quantity;
+                    productCalcMap[productId].sumQuantity += i.quantitySend;
+                    if (!batchCalcMap[batchId]) {
+                        batchCalcMap[batchId] = { batchId, sumQuantity: 0, sumCostAmount: 0 };
+                    }
+                    batchCalcMap[batchId].sumQuantity += i.quantitySend;
+                    batchCalcMap[batchId].sumCostAmount += i.costAmountSend;
                 }
             });
-            const ticketProductModifiedList = await this.ticketProductManager.updateListBy({
+            const ticketProductModifiedList = await this.ticketProductManager.bulkUpdate({
                 manager,
                 condition: { oid, ticketId, deliveryStatus: { EQUAL: variable_1.DeliveryStatus.Pending } },
                 compare: ['id', 'productId'],
@@ -13096,7 +13301,7 @@ let TicketSendProductOperation = class TicketSendProductOperation {
                 options: { requireEqualLength: true },
             });
             const ticketProductModifiedMap = object_helper_1.ESArray.arrayToKeyValue(ticketProductModifiedList, 'id');
-            const productModifiedList = await this.productManager.updateListBy({
+            const productModifiedList = await this.productManager.bulkUpdate({
                 manager,
                 condition: { oid },
                 compare: ['id'],
@@ -13107,17 +13312,30 @@ let TicketSendProductOperation = class TicketSendProductOperation {
                 options: { requireEqualLength: true },
             });
             const productModifiedMap = object_helper_1.ESArray.arrayToKeyValue(productModifiedList, 'id');
-            const batchModifiedList = await this.batchManager.updateListBy({
+            const batchModifiedList = await this.batchManager.bulkUpdate({
                 manager,
                 condition: { oid },
                 compare: ['id'],
                 tempList: Object.values(batchCalcMap).map((i) => {
-                    return { id: i.batchId, sumQuantity: i.sumQuantity };
+                    return {
+                        id: i.batchId,
+                        sumQuantity: i.sumQuantity,
+                        sumCostAmount: i.sumCostAmount,
+                    };
                 }),
-                update: { quantity: (t) => `"quantity" - ${t}."sumQuantity"` },
+                update: {
+                    quantity: (t) => `"quantity" - "${t}"."sumQuantity"`,
+                    costAmount: (t, u) => ` CASE
+                                    WHEN  ("${u}"."quantity" <= "${t}"."sumQuantity")
+                                      THEN ("${u}".quantity - "${t}"."sumQuantity") * "${u}"."costPrice"
+                                    WHEN  ("${u}"."costAmount" <= "${t}"."sumCostAmount")
+                                      THEN ("${u}".quantity - "${t}"."sumQuantity") * "${u}"."costPrice"
+                                    ELSE "${u}"."costAmount" - "${t}"."sumCostAmount"
+                                  END`,
+                },
                 options: { requireEqualLength: true },
             });
-            const batchMap = object_helper_1.ESArray.arrayToKeyValue(batchModifiedList, 'id');
+            const batchModifiedMap = object_helper_1.ESArray.arrayToKeyValue(batchModifiedList, 'id');
             if (!allowNegativeQuantity) {
                 productModifiedList.forEach((i) => {
                     if (i.quantity < 0) {
@@ -13146,8 +13364,8 @@ let TicketSendProductOperation = class TicketSendProductOperation {
                     batchId: sendItem.batchId || 0,
                     deliveryStatus: variable_1.DeliveryStatus.Delivered,
                     unitRate: tp.unitRate,
-                    quantity: sendItem.quantity,
-                    costPrice: sendItem.costPrice,
+                    quantity: sendItem.quantitySend,
+                    costAmount: sendItem.costAmountSend,
                     actualPrice: tp.actualPrice,
                     expectedPrice: tp.expectedPrice,
                 };
@@ -13158,7 +13376,7 @@ let TicketSendProductOperation = class TicketSendProductOperation {
             sendList.forEach((sendItem) => {
                 const productCalc = productCalcMap[sendItem.productId];
                 const tpModified = ticketProductModifiedMap[sendItem.ticketProductId];
-                const quantityActual = sendItem.batchId ? sendItem.quantity : 0;
+                const quantityActual = sendItem.batchId ? sendItem.quantitySend : 0;
                 const productMovementInsert = {
                     oid,
                     movementType: variable_1.MovementType.Ticket,
@@ -13170,10 +13388,10 @@ let TicketSendProductOperation = class TicketSendProductOperation {
                     batchId: sendItem.batchId || 0,
                     isRefund: 0,
                     openQuantity: productCalc.openQuantity,
-                    quantity: -sendItem.quantity,
+                    quantity: -sendItem.quantitySend,
                     closeQuantity: productCalc.openQuantity - quantityActual,
                     unitRate: tpModified.unitRate,
-                    costPrice: sendItem.costPrice,
+                    costAmount: -sendItem.costAmountSend,
                     expectedPrice: tpModified.expectedPrice,
                     actualPrice: tpModified.actualPrice,
                     createdAt: time,
@@ -17423,14 +17641,15 @@ let StockCheckReconcileOperation = class StockCheckReconcileOperation {
                 const batchIdList = duplicatesBatchId.map((i) => i.value);
                 throw new Error(`${PREFIX}: Có trùng lặp batchId = ${batchIdList.join('')} }`);
             }
-            const batchModifiedList = await this.batchManager.updateListBy({
+            const batchModifiedList = await this.batchManager.bulkUpdate({
                 manager,
                 tempList: stockCheckItemList.map((i) => ({
                     id: i.batchId,
                     quantity: i.actualQuantity,
+                    costAmount: i.actualCostAmount,
                 })),
                 compare: ['id'],
-                update: ['quantity'],
+                update: ['quantity', 'costAmount'],
                 condition: { oid },
             });
             const batchModifiedMap = object_helper_1.ESArray.arrayToKeyValue(batchModifiedList, 'id');
@@ -17440,7 +17659,7 @@ let StockCheckReconcileOperation = class StockCheckReconcileOperation {
                 id: { IN: productIdList },
             });
             const productOriginMap = object_helper_1.ESArray.arrayToKeyValue(productOriginList, 'id');
-            const productModifiedList = await this.productManager.calculateQuantityProductList({
+            const productModifiedList = await this.productManager.reCalculateQuantityBySumBatchList({
                 manager,
                 oid,
                 productIdList,
@@ -17457,6 +17676,7 @@ let StockCheckReconcileOperation = class StockCheckReconcileOperation {
                 const batchModified = batchModifiedMap[scItem.batchId];
                 const productCalc = productCalcMap[scItem.productId];
                 const quantityDifferent = scItem.actualQuantity - scItem.systemQuantity;
+                const costAmountDifferent = scItem.actualCostAmount - scItem.systemCostAmount;
                 const productMovementInsert = {
                     oid,
                     movementType: variable_1.MovementType.StockCheck,
@@ -17471,7 +17691,7 @@ let StockCheckReconcileOperation = class StockCheckReconcileOperation {
                     quantity: quantityDifferent,
                     closeQuantity: productCalc.openQuantity + quantityDifferent,
                     unitRate: 1,
-                    costPrice: batchModified.costPrice,
+                    costAmount: costAmountDifferent,
                     expectedPrice: productModified.retailPrice,
                     actualPrice: productModified.retailPrice,
                     createdAt: time,
@@ -20464,6 +20684,7 @@ const exceljs_1 = __webpack_require__(264);
 const exception_filter_1 = __webpack_require__(9);
 const object_helper_1 = __webpack_require__(90);
 const variable_1 = __webpack_require__(20);
+const product_entity_1 = __webpack_require__(53);
 const repositories_1 = __webpack_require__(166);
 const excel_one_sheet_util_1 = __webpack_require__(263);
 const ProductExcelRules = [
@@ -20634,13 +20855,17 @@ let ApiFileProductUploadExcel = class ApiFileProductUploadExcel {
                 route: values[7],
                 source: values[8],
                 quantity: 0,
-                inventoryStrategy: variable_1.InventoryStrategy.AutoWithExpiryDate,
                 hintUsage: '',
                 productGroupId: 0,
                 warehouseIds: JSON.stringify([0]),
                 isActive: 1,
                 wholesalePrice: 0,
                 image: '',
+                inventoryStrategy: variable_1.InventoryStrategy.Inherit,
+                splitBatchByWarehouse: product_entity_1.SplitBatchByWarehouse.Inherit,
+                splitBatchByDistributor: product_entity_1.SplitBatchByDistributor.Inherit,
+                splitBatchByExpiryDate: product_entity_1.SplitBatchByExpiryDate.Inherit,
+                splitBatchByCostPrice: product_entity_1.SplitBatchByCostPrice.Inherit,
             };
             productPrepareList.push(productNew);
         });
@@ -20715,8 +20940,9 @@ const common_1 = __webpack_require__(3);
 const cache_data_service_1 = __webpack_require__(38);
 const exception_filter_1 = __webpack_require__(9);
 const object_helper_1 = __webpack_require__(90);
+const entities_1 = __webpack_require__(42);
 const payment_entity_1 = __webpack_require__(47);
-const setting_entity_1 = __webpack_require__(39);
+const product_entity_1 = __webpack_require__(53);
 const operations_1 = __webpack_require__(143);
 const repositories_1 = __webpack_require__(166);
 const batch_repository_1 = __webpack_require__(168);
@@ -20796,27 +21022,14 @@ let ApiReceiptService = class ApiReceiptService {
         });
         return { data: receipt };
     }
-    async getProductSettingDefault(oid) {
+    async createDraft(params) {
+        const { oid, body } = params;
         const [settingMap, settingMapRoot] = await Promise.all([
             this.cacheDataService.getSettingMap(oid),
             this.cacheDataService.getSettingMap(1),
         ]);
         const productSettingCommon = settingMap.PRODUCT_SETTING || {};
         const productSettingRoot = settingMapRoot.PRODUCT_SETTING || {};
-        if (productSettingCommon.warehouseId == setting_entity_1.BatchWarehouseIdRule.Inherit) {
-            productSettingCommon.warehouseId = productSettingRoot.warehouseId;
-        }
-        if (productSettingCommon.distributorId == setting_entity_1.BatchDistributorIdRule.Inherit) {
-            productSettingCommon.distributorId = productSettingRoot.distributorId;
-        }
-        if (productSettingCommon.costPrice == setting_entity_1.BatchCostPriceRule.Inherit) {
-            productSettingCommon.costPrice = productSettingRoot.costPrice;
-        }
-        return productSettingCommon;
-    }
-    async createDraft(params) {
-        const { oid, body } = params;
-        const productSettingDefault = await this.getProductSettingDefault(oid);
         const { receipt: receiptBody, receiptItemList, distributorId } = body;
         const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId);
         const productIdUnique = object_helper_1.ESArray.uniqueArray(productIdList);
@@ -20826,24 +21039,32 @@ let ApiReceiptService = class ApiReceiptService {
         ]);
         const batchListMap = object_helper_1.ESArray.arrayToKeyArray(batchList, 'productId');
         const productMap = object_helper_1.ESArray.arrayToKeyValue(productList, 'id');
-        receiptItemList.forEach((receiptItem) => {
+        receiptItemList.forEach((receiptItem, index) => {
             if (receiptItem.batchId)
                 return;
             const batchFind = (batchListMap[receiptItem.productId] || []).find((batch) => {
-                if (batch.distributorId != distributorId) {
-                    if (productSettingDefault.distributorId === setting_entity_1.BatchDistributorIdRule.SplitOnDifferent) {
-                        return false;
-                    }
+                const product = productMap[receiptItem.productId];
+                if (!product) {
+                    throw new exception_filter_1.BusinessException(`Có sản phẩm không hợp lệ, vị trí ${index}`);
                 }
+                const splitRule = entities_1.Product.getProductSettingRule(product, productSettingCommon, productSettingRoot);
                 if (batch.warehouseId != receiptItem.warehouseId) {
-                    if (productSettingDefault.warehouseId === setting_entity_1.BatchWarehouseIdRule.SplitOnDifferent) {
+                    if (splitRule.splitBatchByWarehouse === product_entity_1.SplitBatchByWarehouse.SplitOnDifferent) {
                         return false;
                     }
                 }
-                if (batch.expiryDate != receiptItem.expiryDate)
-                    return false;
+                if (batch.distributorId != distributorId) {
+                    if (splitRule.splitBatchByDistributor === product_entity_1.SplitBatchByDistributor.SplitOnDifferent) {
+                        return false;
+                    }
+                }
+                if (batch.expiryDate != receiptItem.expiryDate) {
+                    if (splitRule.splitBatchByExpiryDate === product_entity_1.SplitBatchByExpiryDate.SplitOnDifferent) {
+                        return false;
+                    }
+                }
                 if (batch.costPrice != receiptItem.costPrice) {
-                    if (productSettingDefault.costPrice === setting_entity_1.BatchCostPriceRule.SplitOnDifferent) {
+                    if (splitRule.splitBatchByCostPrice === product_entity_1.SplitBatchByCostPrice.SplitOnDifferent) {
                         return false;
                     }
                 }
@@ -20864,6 +21085,7 @@ let ApiReceiptService = class ApiReceiptService {
                 expiryDate: receiptItem.expiryDate,
                 costPrice: receiptItem.costPrice,
                 quantity: 0,
+                costAmount: 0,
                 registeredAt: Date.now(),
             };
             return batchInsert;
@@ -20886,32 +21108,47 @@ let ApiReceiptService = class ApiReceiptService {
     }
     async updateDraft(params) {
         const { oid, receiptId, body } = params;
-        const productSettingDefault = await this.getProductSettingDefault(oid);
+        const [settingMap, settingMapRoot] = await Promise.all([
+            this.cacheDataService.getSettingMap(oid),
+            this.cacheDataService.getSettingMap(1),
+        ]);
+        const productSettingCommon = settingMap.PRODUCT_SETTING || {};
+        const productSettingRoot = settingMapRoot.PRODUCT_SETTING || {};
         const { receipt: receiptBody, receiptItemList, distributorId } = body;
         const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId);
-        const batchList = await this.batchRepository.findManyBy({
-            oid,
-            productId: { IN: (0, object_helper_1.uniqueArray)(productIdList) },
-        });
-        const batchListMap = (0, object_helper_1.arrayToKeyArray)(batchList, 'productId');
-        receiptItemList.forEach((receiptItem) => {
+        const productIdUnique = object_helper_1.ESArray.uniqueArray(productIdList);
+        const [productList, batchList] = await Promise.all([
+            this.productRepository.findManyBy({ oid, id: { IN: productIdUnique } }),
+            this.batchRepository.findManyBy({ oid, productId: { IN: productIdUnique } }),
+        ]);
+        const batchListMap = object_helper_1.ESArray.arrayToKeyArray(batchList, 'productId');
+        const productMap = object_helper_1.ESArray.arrayToKeyValue(productList, 'id');
+        receiptItemList.forEach((receiptItem, index) => {
             if (receiptItem.batchId)
                 return;
             const batchFind = (batchListMap[receiptItem.productId] || []).find((batch) => {
-                if (batch.distributorId != distributorId) {
-                    if (productSettingDefault.distributorId === setting_entity_1.BatchDistributorIdRule.SplitOnDifferent) {
-                        return false;
-                    }
+                const product = productMap[receiptItem.productId];
+                if (!product) {
+                    throw new exception_filter_1.BusinessException(`Có sản phẩm không hợp lệ, vị trí ${index}`);
                 }
+                const splitRule = entities_1.Product.getProductSettingRule(product, productSettingCommon, productSettingRoot);
                 if (batch.warehouseId != receiptItem.warehouseId) {
-                    if (productSettingDefault.warehouseId === setting_entity_1.BatchWarehouseIdRule.SplitOnDifferent) {
+                    if (splitRule.splitBatchByWarehouse === product_entity_1.SplitBatchByWarehouse.SplitOnDifferent) {
                         return false;
                     }
                 }
-                if (batch.expiryDate != receiptItem.expiryDate)
-                    return false;
+                if (batch.distributorId != distributorId) {
+                    if (splitRule.splitBatchByDistributor === product_entity_1.SplitBatchByDistributor.SplitOnDifferent) {
+                        return false;
+                    }
+                }
+                if (batch.expiryDate != receiptItem.expiryDate) {
+                    if (splitRule.splitBatchByExpiryDate === product_entity_1.SplitBatchByExpiryDate.SplitOnDifferent) {
+                        return false;
+                    }
+                }
                 if (batch.costPrice != receiptItem.costPrice) {
-                    if (productSettingDefault.costPrice === setting_entity_1.BatchCostPriceRule.SplitOnDifferent) {
+                    if (splitRule.splitBatchByCostPrice === product_entity_1.SplitBatchByCostPrice.SplitOnDifferent) {
                         return false;
                     }
                 }
@@ -20932,6 +21169,7 @@ let ApiReceiptService = class ApiReceiptService {
                 expiryDate: receiptItem.expiryDate,
                 costPrice: receiptItem.costPrice,
                 quantity: 0,
+                costAmount: 0,
                 registeredAt: Date.now(),
             };
             return batchInsert;
@@ -20955,32 +21193,47 @@ let ApiReceiptService = class ApiReceiptService {
     }
     async depositedUpdate(params) {
         const { oid, receiptId, body } = params;
-        const productSettingDefault = await this.getProductSettingDefault(oid);
+        const [settingMap, settingMapRoot] = await Promise.all([
+            this.cacheDataService.getSettingMap(oid),
+            this.cacheDataService.getSettingMap(1),
+        ]);
+        const productSettingCommon = settingMap.PRODUCT_SETTING || {};
+        const productSettingRoot = settingMapRoot.PRODUCT_SETTING || {};
         const { receipt: receiptDto, receiptItemList, distributorId } = body;
         const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId);
-        const batchList = await this.batchRepository.findManyBy({
-            oid,
-            productId: { IN: (0, object_helper_1.uniqueArray)(productIdList) },
-        });
-        const batchListMap = (0, object_helper_1.arrayToKeyArray)(batchList, 'productId');
-        receiptItemList.forEach((receiptItem) => {
+        const productIdUnique = object_helper_1.ESArray.uniqueArray(productIdList);
+        const [productList, batchList] = await Promise.all([
+            this.productRepository.findManyBy({ oid, id: { IN: productIdUnique } }),
+            this.batchRepository.findManyBy({ oid, productId: { IN: productIdUnique } }),
+        ]);
+        const batchListMap = object_helper_1.ESArray.arrayToKeyArray(batchList, 'productId');
+        const productMap = object_helper_1.ESArray.arrayToKeyValue(productList, 'id');
+        receiptItemList.forEach((receiptItem, index) => {
             if (receiptItem.batchId)
                 return;
             const batchFind = (batchListMap[receiptItem.productId] || []).find((batch) => {
-                if (batch.distributorId != distributorId) {
-                    if (productSettingDefault.distributorId === setting_entity_1.BatchDistributorIdRule.SplitOnDifferent) {
-                        return false;
-                    }
+                const product = productMap[receiptItem.productId];
+                if (!product) {
+                    throw new exception_filter_1.BusinessException(`Có sản phẩm không hợp lệ, vị trí ${index}`);
                 }
+                const splitRule = entities_1.Product.getProductSettingRule(product, productSettingCommon, productSettingRoot);
                 if (batch.warehouseId != receiptItem.warehouseId) {
-                    if (productSettingDefault.warehouseId === setting_entity_1.BatchWarehouseIdRule.SplitOnDifferent) {
+                    if (splitRule.splitBatchByWarehouse === product_entity_1.SplitBatchByWarehouse.SplitOnDifferent) {
                         return false;
                     }
                 }
-                if (batch.expiryDate != receiptItem.expiryDate)
-                    return false;
+                if (batch.distributorId != distributorId) {
+                    if (splitRule.splitBatchByDistributor === product_entity_1.SplitBatchByDistributor.SplitOnDifferent) {
+                        return false;
+                    }
+                }
+                if (batch.expiryDate != receiptItem.expiryDate) {
+                    if (splitRule.splitBatchByExpiryDate === product_entity_1.SplitBatchByExpiryDate.SplitOnDifferent) {
+                        return false;
+                    }
+                }
                 if (batch.costPrice != receiptItem.costPrice) {
-                    if (productSettingDefault.costPrice === setting_entity_1.BatchCostPriceRule.SplitOnDifferent) {
+                    if (splitRule.splitBatchByCostPrice === product_entity_1.SplitBatchByCostPrice.SplitOnDifferent) {
                         return false;
                     }
                 }
@@ -21001,6 +21254,7 @@ let ApiReceiptService = class ApiReceiptService {
                 expiryDate: receiptItem.expiryDate,
                 costPrice: receiptItem.costPrice,
                 quantity: 0,
+                costAmount: 0,
                 registeredAt: Date.now(),
             };
             return batchInsert;
@@ -21120,6 +21374,7 @@ const exceljs_1 = __webpack_require__(264);
 const exception_filter_1 = __webpack_require__(9);
 const object_helper_1 = __webpack_require__(90);
 const variable_1 = __webpack_require__(20);
+const product_entity_1 = __webpack_require__(53);
 const repositories_1 = __webpack_require__(166);
 const excel_one_sheet_util_1 = __webpack_require__(263);
 const api_receipt_service_1 = __webpack_require__(275);
@@ -21305,7 +21560,6 @@ let ApiFileReceiptUploadExcel = class ApiFileReceiptUploadExcel {
                     productCode: i.productCode,
                     brandName: i.brandName,
                     costPrice: i.costPrice,
-                    inventoryStrategy: variable_1.InventoryStrategy.AutoWithExpiryDate,
                     hintUsage: '',
                     image: '',
                     isActive: 1,
@@ -21318,6 +21572,11 @@ let ApiFileReceiptUploadExcel = class ApiFileReceiptUploadExcel {
                     unit: JSON.stringify([]),
                     warehouseIds: JSON.stringify([0]),
                     wholesalePrice: 0,
+                    inventoryStrategy: variable_1.InventoryStrategy.Inherit,
+                    splitBatchByWarehouse: product_entity_1.SplitBatchByWarehouse.Inherit,
+                    splitBatchByDistributor: product_entity_1.SplitBatchByDistributor.Inherit,
+                    splitBatchByExpiryDate: product_entity_1.SplitBatchByExpiryDate.Inherit,
+                    splitBatchByCostPrice: product_entity_1.SplitBatchByCostPrice.Inherit,
                 };
                 productInsertList.push(productInsert);
             }
@@ -22726,7 +22985,7 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_custom_1.IsNumberGreaterThan)(0),
     __metadata("design:type", Number)
-], ReturnListBody.prototype, "quantity", void 0);
+], ReturnListBody.prototype, "quantityReturn", void 0);
 class TicketReturnProductListBody {
 }
 exports.TicketReturnProductListBody = TicketReturnProductListBody;
@@ -25754,7 +26013,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiBatchController = void 0;
 const common_1 = __webpack_require__(3);
@@ -25777,9 +26036,6 @@ let ApiBatchController = class ApiBatchController {
     }
     async detail({ oid }, { id }, query) {
         return await this.apiBatchService.getOne(oid, id, query);
-    }
-    async create({ oid }, body) {
-        return await this.apiBatchService.createOne(oid, body);
     }
     async updateInfo({ oid }, { id }, body) {
         return await this.apiBatchService.updateInfo(oid, id, body);
@@ -25824,22 +26080,13 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ApiBatchController.prototype, "detail", null);
 __decorate([
-    (0, common_1.Post)('create'),
-    (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.BATCH_CREATE),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_j = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _j : Object, typeof (_k = typeof request_1.BatchInsertBody !== "undefined" && request_1.BatchInsertBody) === "function" ? _k : Object]),
-    __metadata("design:returntype", Promise)
-], ApiBatchController.prototype, "create", null);
-__decorate([
     (0, common_1.Patch)('update-info/:id'),
     (0, permission_guard_1.HasPermission)(permission_entity_1.PermissionId.BATCH_UPDATE),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_l = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _l : Object, typeof (_m = typeof param_1.IdParam !== "undefined" && param_1.IdParam) === "function" ? _m : Object, typeof (_o = typeof request_1.BatchUpdateInfoBody !== "undefined" && request_1.BatchUpdateInfoBody) === "function" ? _o : Object]),
+    __metadata("design:paramtypes", [typeof (_j = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _j : Object, typeof (_k = typeof param_1.IdParam !== "undefined" && param_1.IdParam) === "function" ? _k : Object, typeof (_l = typeof request_1.BatchUpdateInfoBody !== "undefined" && request_1.BatchUpdateInfoBody) === "function" ? _l : Object]),
     __metadata("design:returntype", Promise)
 ], ApiBatchController.prototype, "updateInfo", null);
 __decorate([
@@ -25849,7 +26096,7 @@ __decorate([
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_p = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _p : Object, typeof (_q = typeof param_1.IdParam !== "undefined" && param_1.IdParam) === "function" ? _q : Object, typeof (_r = typeof request_1.BatchUpdateInfoAndQuantityBody !== "undefined" && request_1.BatchUpdateInfoAndQuantityBody) === "function" ? _r : Object]),
+    __metadata("design:paramtypes", [typeof (_m = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _m : Object, typeof (_o = typeof param_1.IdParam !== "undefined" && param_1.IdParam) === "function" ? _o : Object, typeof (_p = typeof request_1.BatchUpdateInfoAndQuantityBody !== "undefined" && request_1.BatchUpdateInfoAndQuantityBody) === "function" ? _p : Object]),
     __metadata("design:returntype", Promise)
 ], ApiBatchController.prototype, "updateInfoAndQuantity", null);
 __decorate([
@@ -25858,7 +26105,7 @@ __decorate([
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_s = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _s : Object, typeof (_t = typeof request_1.BatchMergeBody !== "undefined" && request_1.BatchMergeBody) === "function" ? _t : Object]),
+    __metadata("design:paramtypes", [typeof (_q = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _q : Object, typeof (_r = typeof request_1.BatchMergeBody !== "undefined" && request_1.BatchMergeBody) === "function" ? _r : Object]),
     __metadata("design:returntype", Promise)
 ], ApiBatchController.prototype, "batchMerge", null);
 __decorate([
@@ -25868,7 +26115,7 @@ __decorate([
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_u = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _u : Object, typeof (_v = typeof param_1.IdParam !== "undefined" && param_1.IdParam) === "function" ? _v : Object]),
+    __metadata("design:paramtypes", [typeof (_s = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _s : Object, typeof (_t = typeof param_1.IdParam !== "undefined" && param_1.IdParam) === "function" ? _t : Object]),
     __metadata("design:returntype", Promise)
 ], ApiBatchController.prototype, "deleteOne", null);
 exports.ApiBatchController = ApiBatchController = __decorate([
@@ -25964,10 +26211,6 @@ let ApiBatchService = class ApiBatchService {
         });
         return { data: { batch } };
     }
-    async createOne(oid, body) {
-        const batch = await this.batchRepository.insertOneFullFieldAndReturnEntity(Object.assign(Object.assign({}, body), { oid, quantity: 0, registeredAt: Date.now() }));
-        return { data: { batch } };
-    }
     async updateInfo(oid, id, body) {
         const batch = await this.batchRepository.updateOneAndReturnEntity({ id, oid }, body);
         return { data: { batch } };
@@ -25978,12 +26221,20 @@ let ApiBatchService = class ApiBatchService {
             relation: { product: true },
             condition: { oid, id: batchId },
         });
-        const batchUpdated = await this.batchRepository.updateOneAndReturnEntity({ id: batchId, oid }, body);
+        const batchUpdated = await this.batchRepository.updateOneAndReturnEntity({ id: batchId, oid }, {
+            batchCode: body.batchCode,
+            expiryDate: body.expiryDate,
+            warehouseId: body.warehouseId,
+            distributorId: body.distributorId,
+            costPrice: body.costPrice,
+            quantity: body.quantity,
+            costAmount: body.costAmount,
+        });
         if (batchOrigin.quantity === batchUpdated.quantity
             && batchOrigin.costPrice === batchUpdated.costPrice) {
             return { data: { batch: batchUpdated } };
         }
-        const productUpdated = await this.productOperation.calculateQuantityProduct({
+        const productUpdated = await this.productOperation.reCalculateQuantityBySumBatch({
             oid,
             productId: batchOrigin.productId,
         });
@@ -26001,7 +26252,7 @@ let ApiBatchService = class ApiBatchService {
             openQuantity: batchOrigin.product.quantity,
             quantity: batchUpdated.quantity - batchOrigin.quantity,
             closeQuantity: productUpdated.quantity,
-            costPrice: batchUpdated.costPrice,
+            costAmount: batchUpdated.costAmount - batchUpdated.costAmount,
             actualPrice: batchUpdated.costPrice,
             expectedPrice: batchOrigin.costPrice,
             createdAt: Date.now(),
@@ -26406,6 +26657,7 @@ class BatchUpdateInfoAndQuantityBody extends (0, swagger_1.PickType)(BatchInsert
     'batchCode',
     'expiryDate',
     'warehouseId',
+    'distributorId',
     'costPrice',
 ]) {
 }
@@ -26417,6 +26669,13 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], BatchUpdateInfoAndQuantityBody.prototype, "quantity", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 20000 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], BatchUpdateInfoAndQuantityBody.prototype, "costAmount", void 0);
 
 
 /***/ }),
@@ -34697,7 +34956,14 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], PrintHtmlCreateBody.prototype, "content", void 0);
+], PrintHtmlCreateBody.prototype, "html", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '<div>ĐƠN THUỐC</div>' }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], PrintHtmlCreateBody.prototype, "css", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '' }),
     (0, class_transformer_1.Expose)(),
@@ -37077,6 +37343,7 @@ let ApiProductService = class ApiProductService {
                 productId: product.id,
                 costPrice: body.costPrice,
                 quantity: body.quantity,
+                costAmount: body.costPrice * body.quantity,
                 distributorId: 0,
                 expiryDate: null,
                 batchCode: '',
@@ -37475,7 +37742,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b;
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductUpdateBody = exports.ProductCreateBody = exports.ProductCommission = exports.UnitConversionBody = void 0;
 const swagger_1 = __webpack_require__(6);
@@ -37484,6 +37751,7 @@ const class_validator_1 = __webpack_require__(243);
 const class_validator_custom_1 = __webpack_require__(244);
 const variable_1 = __webpack_require__(20);
 const commission_entity_1 = __webpack_require__(74);
+const product_entity_1 = __webpack_require__(53);
 class UnitConversionBody {
 }
 exports.UnitConversionBody = UnitConversionBody;
@@ -37660,6 +37928,37 @@ __decorate([
     (0, class_validator_custom_1.IsEnumValue)(variable_1.InventoryStrategy),
     __metadata("design:type", typeof (_b = typeof variable_1.InventoryStrategy !== "undefined" && variable_1.InventoryStrategy) === "function" ? _b : Object)
 ], ProductCreateBody.prototype, "inventoryStrategy", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: product_entity_1.SplitBatchByWarehouse, example: product_entity_1.SplitBatchByWarehouse.Inherit }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsEnumValue)(product_entity_1.SplitBatchByWarehouse),
+    __metadata("design:type", typeof (_c = typeof product_entity_1.SplitBatchByWarehouse !== "undefined" && product_entity_1.SplitBatchByWarehouse) === "function" ? _c : Object)
+], ProductCreateBody.prototype, "splitBatchByWarehouse", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        enum: product_entity_1.SplitBatchByDistributor,
+        example: product_entity_1.SplitBatchByDistributor.Inherit,
+    }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsEnumValue)(product_entity_1.SplitBatchByDistributor),
+    __metadata("design:type", typeof (_d = typeof product_entity_1.SplitBatchByDistributor !== "undefined" && product_entity_1.SplitBatchByDistributor) === "function" ? _d : Object)
+], ProductCreateBody.prototype, "splitBatchByDistributor", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: product_entity_1.SplitBatchByExpiryDate, example: product_entity_1.SplitBatchByExpiryDate.Inherit }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsEnumValue)(product_entity_1.SplitBatchByExpiryDate),
+    __metadata("design:type", typeof (_e = typeof product_entity_1.SplitBatchByExpiryDate !== "undefined" && product_entity_1.SplitBatchByExpiryDate) === "function" ? _e : Object)
+], ProductCreateBody.prototype, "splitBatchByExpiryDate", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: product_entity_1.SplitBatchByCostPrice, example: product_entity_1.SplitBatchByCostPrice.Inherit }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsEnumValue)(product_entity_1.SplitBatchByCostPrice),
+    __metadata("design:type", typeof (_f = typeof product_entity_1.SplitBatchByCostPrice !== "undefined" && product_entity_1.SplitBatchByCostPrice) === "function" ? _f : Object)
+], ProductCreateBody.prototype, "splitBatchByCostPrice", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ type: 'string', example: JSON.stringify([1, 5, 10]) }),
     (0, class_transformer_1.Expose)(),
@@ -42296,6 +42595,8 @@ let ApiStockCheckService = class ApiStockCheckService {
                 batchId: i.batchId,
                 systemQuantity: i.systemQuantity,
                 actualQuantity: i.actualQuantity,
+                systemCostAmount: i.systemCostAmount,
+                actualCostAmount: i.actualCostAmount,
                 note: i.note,
             };
             return insertDto;
@@ -42636,6 +42937,20 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], StockCheckItemBody.prototype, "actualQuantity", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 52 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], StockCheckItemBody.prototype, "systemCostAmount", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ example: 52 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], StockCheckItemBody.prototype, "actualCostAmount", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: '' }),
     (0, class_transformer_1.Expose)(),
@@ -49563,7 +49878,7 @@ let ApiTicketOrderService = class ApiTicketOrderService {
         const returnList = ticketBatchList.map((i) => ({
             ticketProductId: i.ticketProductId,
             ticketBatchId: i.id,
-            quantity: i.quantity,
+            quantityReturn: i.quantity,
         }));
         if (returnList.length) {
             const { ticket } = await this.ticketReturnProductOperation.returnProduct({

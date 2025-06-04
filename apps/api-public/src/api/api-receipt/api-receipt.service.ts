@@ -2,46 +2,43 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import {
-  arrayToKeyArray,
-  ESArray,
-  uniqueArray,
+    ESArray,
 } from '../../../../_libs/common/helpers/object.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { Product } from '../../../../_libs/database/entities'
 import { BatchInsertType } from '../../../../_libs/database/entities/batch.entity'
 import { VoucherType } from '../../../../_libs/database/entities/payment.entity'
 import {
-  BatchCostPriceRule,
-  BatchDistributorIdRule,
-  BatchWarehouseIdRule,
-} from '../../../../_libs/database/entities/setting.entity'
+    SplitBatchByCostPrice,
+    SplitBatchByDistributor,
+    SplitBatchByExpiryDate,
+    SplitBatchByWarehouse,
+} from '../../../../_libs/database/entities/product.entity'
 import {
-  ReceiptDepositedOperation,
-  ReceiptDraftOperation,
+    ReceiptDepositedOperation,
+    ReceiptDraftOperation,
 } from '../../../../_libs/database/operations'
 import { PaymentRepository, ProductRepository } from '../../../../_libs/database/repositories'
 import { BatchRepository } from '../../../../_libs/database/repositories/batch.repository'
 import { ReceiptRepository } from '../../../../_libs/database/repositories/receipt.repository'
 import {
-  ReceiptGetManyQuery,
-  ReceiptGetOneQuery,
-  ReceiptPaginationQuery,
-  ReceiptUpdateDepositedBody,
-  ReceiptUpsertDraftBody,
+    ReceiptGetManyQuery,
+    ReceiptGetOneQuery,
+    ReceiptPaginationQuery,
+    ReceiptUpdateDepositedBody,
+    ReceiptUpsertDraftBody,
 } from './request'
 
 @Injectable()
 export class ApiReceiptService {
   constructor(
-
     private readonly cacheDataService: CacheDataService,
     private readonly receiptRepository: ReceiptRepository,
     private readonly productRepository: ProductRepository,
     private readonly batchRepository: BatchRepository,
     private readonly receiptDraft: ReceiptDraftOperation,
     private readonly receiptDepositedOperation: ReceiptDepositedOperation,
-
     private readonly paymentRepository: PaymentRepository
-
   ) { }
 
   async pagination(oid: number, query: ReceiptPaginationQuery): Promise<BaseResponse> {
@@ -126,29 +123,14 @@ export class ApiReceiptService {
     return { data: receipt }
   }
 
-  async getProductSettingDefault(oid: number) {
+  async createDraft(params: { oid: number; body: ReceiptUpsertDraftBody }): Promise<BaseResponse> {
+    const { oid, body } = params
     const [settingMap, settingMapRoot] = await Promise.all([
       this.cacheDataService.getSettingMap(oid),
       this.cacheDataService.getSettingMap(1),
     ])
     const productSettingCommon = settingMap.PRODUCT_SETTING || {}
     const productSettingRoot = settingMapRoot.PRODUCT_SETTING || {}
-    if (productSettingCommon.warehouseId == BatchWarehouseIdRule.Inherit) {
-      productSettingCommon.warehouseId = productSettingRoot.warehouseId
-    }
-    if (productSettingCommon.distributorId == BatchDistributorIdRule.Inherit) {
-      productSettingCommon.distributorId = productSettingRoot.distributorId
-    }
-    if (productSettingCommon.costPrice == BatchCostPriceRule.Inherit) {
-      productSettingCommon.costPrice = productSettingRoot.costPrice
-    }
-    return productSettingCommon
-  }
-
-  async createDraft(params: { oid: number; body: ReceiptUpsertDraftBody }): Promise<BaseResponse> {
-    const { oid, body } = params
-    // tự động chọn lô
-    const productSettingDefault = await this.getProductSettingDefault(oid)
 
     const { receipt: receiptBody, receiptItemList, distributorId } = body
     const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId)
@@ -160,23 +142,36 @@ export class ApiReceiptService {
     const batchListMap = ESArray.arrayToKeyArray(batchList, 'productId')
     const productMap = ESArray.arrayToKeyValue(productList, 'id')
 
-    receiptItemList.forEach((receiptItem) => {
-      if (receiptItem.batchId) return
+    receiptItemList.forEach((receiptItem, index) => {
+      if (receiptItem.batchId) return // chọn lô rồi thì thôi
+      // Tự động chọn lô
       const batchFind = (batchListMap[receiptItem.productId] || []).find((batch) => {
-        if (batch.distributorId != distributorId) {
-          if (productSettingDefault.distributorId === BatchDistributorIdRule.SplitOnDifferent) {
-            return false
-          }
+        const product = productMap[receiptItem.productId]
+        if (!product) {
+          throw new BusinessException(`Có sản phẩm không hợp lệ, vị trí ${index}` as any)
         }
+        const splitRule = Product.getProductSettingRule(
+          product,
+          productSettingCommon,
+          productSettingRoot
+        )
         if (batch.warehouseId != receiptItem.warehouseId) {
-          if (productSettingDefault.warehouseId === BatchWarehouseIdRule.SplitOnDifferent) {
+          if (splitRule.splitBatchByWarehouse === SplitBatchByWarehouse.SplitOnDifferent) {
             return false
           }
         }
-        if (batch.expiryDate != receiptItem.expiryDate) return false // khác hạn sử dụng thì luôn tách phiên bản
-
+        if (batch.distributorId != distributorId) {
+          if (splitRule.splitBatchByDistributor === SplitBatchByDistributor.SplitOnDifferent) {
+            return false
+          }
+        }
+        if (batch.expiryDate != receiptItem.expiryDate) {
+          if (splitRule.splitBatchByExpiryDate === SplitBatchByExpiryDate.SplitOnDifferent) {
+            return false
+          }
+        }
         if (batch.costPrice != receiptItem.costPrice) {
-          if (productSettingDefault.costPrice === BatchCostPriceRule.SplitOnDifferent) {
+          if (splitRule.splitBatchByCostPrice === SplitBatchByCostPrice.SplitOnDifferent) {
             return false
           }
         }
@@ -198,6 +193,7 @@ export class ApiReceiptService {
         expiryDate: receiptItem.expiryDate,
         costPrice: receiptItem.costPrice,
         quantity: 0,
+        costAmount: 0,
         registeredAt: Date.now(),
       }
       return batchInsert
@@ -225,33 +221,54 @@ export class ApiReceiptService {
     body: ReceiptUpsertDraftBody
   }): Promise<BaseResponse> {
     const { oid, receiptId, body } = params
-    const productSettingDefault = await this.getProductSettingDefault(oid)
+    const [settingMap, settingMapRoot] = await Promise.all([
+      this.cacheDataService.getSettingMap(oid),
+      this.cacheDataService.getSettingMap(1),
+    ])
+    const productSettingCommon = settingMap.PRODUCT_SETTING || {}
+    const productSettingRoot = settingMapRoot.PRODUCT_SETTING || {}
+
     // tự động chọn lô
     const { receipt: receiptBody, receiptItemList, distributorId } = body
     const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId)
-    const batchList = await this.batchRepository.findManyBy({
-      oid,
-      productId: { IN: uniqueArray(productIdList) },
-    })
-    const batchListMap = arrayToKeyArray(batchList, 'productId')
+    const productIdUnique = ESArray.uniqueArray(productIdList)
+    const [productList, batchList] = await Promise.all([
+      this.productRepository.findManyBy({ oid, id: { IN: productIdUnique } }),
+      this.batchRepository.findManyBy({ oid, productId: { IN: productIdUnique } }),
+    ])
+    const batchListMap = ESArray.arrayToKeyArray(batchList, 'productId')
+    const productMap = ESArray.arrayToKeyValue(productList, 'id')
 
-    receiptItemList.forEach((receiptItem) => {
-      if (receiptItem.batchId) return
+    receiptItemList.forEach((receiptItem, index) => {
+      if (receiptItem.batchId) return // chọn lô rồi thì thôi
+      // Tự động chọn lô
       const batchFind = (batchListMap[receiptItem.productId] || []).find((batch) => {
-        if (batch.distributorId != distributorId) {
-          if (productSettingDefault.distributorId === BatchDistributorIdRule.SplitOnDifferent) {
-            return false
-          }
+        const product = productMap[receiptItem.productId]
+        if (!product) {
+          throw new BusinessException(`Có sản phẩm không hợp lệ, vị trí ${index}` as any)
         }
+        const splitRule = Product.getProductSettingRule(
+          product,
+          productSettingCommon,
+          productSettingRoot
+        )
         if (batch.warehouseId != receiptItem.warehouseId) {
-          if (productSettingDefault.warehouseId === BatchWarehouseIdRule.SplitOnDifferent) {
+          if (splitRule.splitBatchByWarehouse === SplitBatchByWarehouse.SplitOnDifferent) {
             return false
           }
         }
-        if (batch.expiryDate != receiptItem.expiryDate) return false // khác hạn sử dụng thì luôn tách phiên bản
-
+        if (batch.distributorId != distributorId) {
+          if (splitRule.splitBatchByDistributor === SplitBatchByDistributor.SplitOnDifferent) {
+            return false
+          }
+        }
+        if (batch.expiryDate != receiptItem.expiryDate) {
+          if (splitRule.splitBatchByExpiryDate === SplitBatchByExpiryDate.SplitOnDifferent) {
+            return false
+          }
+        }
         if (batch.costPrice != receiptItem.costPrice) {
-          if (productSettingDefault.costPrice === BatchCostPriceRule.SplitOnDifferent) {
+          if (splitRule.splitBatchByCostPrice === SplitBatchByCostPrice.SplitOnDifferent) {
             return false
           }
         }
@@ -273,6 +290,7 @@ export class ApiReceiptService {
         expiryDate: receiptItem.expiryDate,
         costPrice: receiptItem.costPrice,
         quantity: 0,
+        costAmount: 0,
         registeredAt: Date.now(),
       }
       return batchInsert
@@ -301,33 +319,54 @@ export class ApiReceiptService {
     body: ReceiptUpdateDepositedBody
   }): Promise<BaseResponse> {
     const { oid, receiptId, body } = params
-    const productSettingDefault = await this.getProductSettingDefault(oid)
+    const [settingMap, settingMapRoot] = await Promise.all([
+      this.cacheDataService.getSettingMap(oid),
+      this.cacheDataService.getSettingMap(1),
+    ])
+    const productSettingCommon = settingMap.PRODUCT_SETTING || {}
+    const productSettingRoot = settingMapRoot.PRODUCT_SETTING || {}
+
     // tự động chọn lô
     const { receipt: receiptDto, receiptItemList, distributorId } = body
     const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId)
-    const batchList = await this.batchRepository.findManyBy({
-      oid,
-      productId: { IN: uniqueArray(productIdList) },
-    })
-    const batchListMap = arrayToKeyArray(batchList, 'productId')
+    const productIdUnique = ESArray.uniqueArray(productIdList)
+    const [productList, batchList] = await Promise.all([
+      this.productRepository.findManyBy({ oid, id: { IN: productIdUnique } }),
+      this.batchRepository.findManyBy({ oid, productId: { IN: productIdUnique } }),
+    ])
+    const batchListMap = ESArray.arrayToKeyArray(batchList, 'productId')
+    const productMap = ESArray.arrayToKeyValue(productList, 'id')
 
-    receiptItemList.forEach((receiptItem) => {
-      if (receiptItem.batchId) return
+    receiptItemList.forEach((receiptItem, index) => {
+      if (receiptItem.batchId) return // chọn lô rồi thì thôi
+      // Tự động chọn lô
       const batchFind = (batchListMap[receiptItem.productId] || []).find((batch) => {
-        if (batch.distributorId != distributorId) {
-          if (productSettingDefault.distributorId === BatchDistributorIdRule.SplitOnDifferent) {
-            return false
-          }
+        const product = productMap[receiptItem.productId]
+        if (!product) {
+          throw new BusinessException(`Có sản phẩm không hợp lệ, vị trí ${index}` as any)
         }
+        const splitRule = Product.getProductSettingRule(
+          product,
+          productSettingCommon,
+          productSettingRoot
+        )
         if (batch.warehouseId != receiptItem.warehouseId) {
-          if (productSettingDefault.warehouseId === BatchWarehouseIdRule.SplitOnDifferent) {
+          if (splitRule.splitBatchByWarehouse === SplitBatchByWarehouse.SplitOnDifferent) {
             return false
           }
         }
-        if (batch.expiryDate != receiptItem.expiryDate) return false // khác hạn sử dụng thì luôn tách phiên bản
-
+        if (batch.distributorId != distributorId) {
+          if (splitRule.splitBatchByDistributor === SplitBatchByDistributor.SplitOnDifferent) {
+            return false
+          }
+        }
+        if (batch.expiryDate != receiptItem.expiryDate) {
+          if (splitRule.splitBatchByExpiryDate === SplitBatchByExpiryDate.SplitOnDifferent) {
+            return false
+          }
+        }
         if (batch.costPrice != receiptItem.costPrice) {
-          if (productSettingDefault.costPrice === BatchCostPriceRule.SplitOnDifferent) {
+          if (splitRule.splitBatchByCostPrice === SplitBatchByCostPrice.SplitOnDifferent) {
             return false
           }
         }
@@ -349,6 +388,7 @@ export class ApiReceiptService {
         expiryDate: receiptItem.expiryDate,
         costPrice: receiptItem.costPrice,
         quantity: 0,
+        costAmount: 0,
         registeredAt: Date.now(),
       }
       return batchInsert

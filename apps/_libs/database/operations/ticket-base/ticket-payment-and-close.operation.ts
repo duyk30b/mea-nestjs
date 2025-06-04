@@ -2,20 +2,20 @@ import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { DeliveryStatus } from '../../common/variable'
 import {
-  Customer,
-  TicketLaboratory,
-  TicketProcedure,
-  TicketProduct,
-  TicketRadiology,
-  TicketUser,
+    Customer,
+    TicketLaboratory,
+    TicketProcedure,
+    TicketProduct,
+    TicketRadiology,
+    TicketUser,
 } from '../../entities'
 import { CommissionCalculatorType, InteractType } from '../../entities/commission.entity'
 import Payment, {
-  MoneyDirection,
-  PaymentInsertType,
-  PaymentTiming,
-  PersonType,
-  VoucherType,
+    MoneyDirection,
+    PaymentInsertType,
+    PaymentTiming,
+    PersonType,
+    VoucherType,
 } from '../../entities/payment.entity'
 import { TicketProductType } from '../../entities/ticket-product.entity'
 import { TicketUserInsertType } from '../../entities/ticket-user.entity'
@@ -214,7 +214,7 @@ export class TicketPaymentAndCloseOperation {
             id: { IN: ticketUserRemoveList.map((i) => i.id) },
           })
         }
-        ticketUserModifiedList = await this.ticketUserManager.updateListBy({
+        ticketUserModifiedList = await this.ticketUserManager.bulkUpdate({
           manager,
           tempList: ticketUserUpdateList,
           compare: ['id'],

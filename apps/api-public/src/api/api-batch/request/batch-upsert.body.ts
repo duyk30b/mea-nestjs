@@ -50,6 +50,7 @@ export class BatchUpdateInfoAndQuantityBody extends PickType(BatchInsertBody, [
   'batchCode',
   'expiryDate',
   'warehouseId',
+  'distributorId',
   'costPrice',
 ]) {
   @ApiProperty({ example: 20_000 })
@@ -57,4 +58,10 @@ export class BatchUpdateInfoAndQuantityBody extends PickType(BatchInsertBody, [
   @IsDefined()
   @IsNumber()
   quantity: number
+
+  @ApiProperty({ example: 20_000 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  costAmount: number
 }

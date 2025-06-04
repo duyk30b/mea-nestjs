@@ -5,7 +5,13 @@ import { BusinessException } from '../../../../_libs/common/exception-filter/exc
 import { ESArray } from '../../../../_libs/common/helpers/object.helper'
 import { DiscountType, InventoryStrategy } from '../../../../_libs/database/common/variable'
 import { User } from '../../../../_libs/database/entities'
-import { ProductInsertType } from '../../../../_libs/database/entities/product.entity'
+import {
+  ProductInsertType,
+  SplitBatchByCostPrice,
+  SplitBatchByDistributor,
+  SplitBatchByExpiryDate,
+  SplitBatchByWarehouse,
+} from '../../../../_libs/database/entities/product.entity'
 import { ProductRepository } from '../../../../_libs/database/repositories'
 import { excelOneSheetWorkbook } from '../../../../_libs/file/excel-one-sheet.util'
 import { ApiReceiptService } from '../../api/api-receipt/api-receipt.service'
@@ -213,7 +219,6 @@ export class ApiFileReceiptUploadExcel {
           productCode: i.productCode,
           brandName: i.brandName,
           costPrice: i.costPrice,
-          inventoryStrategy: InventoryStrategy.AutoWithExpiryDate,
           hintUsage: '',
           image: '',
           isActive: 1,
@@ -226,6 +231,12 @@ export class ApiFileReceiptUploadExcel {
           unit: JSON.stringify([]),
           warehouseIds: JSON.stringify([0]),
           wholesalePrice: 0,
+
+          inventoryStrategy: InventoryStrategy.Inherit,
+          splitBatchByWarehouse: SplitBatchByWarehouse.Inherit,
+          splitBatchByDistributor: SplitBatchByDistributor.Inherit,
+          splitBatchByExpiryDate: SplitBatchByExpiryDate.Inherit,
+          splitBatchByCostPrice: SplitBatchByCostPrice.Inherit,
         }
         productInsertList.push(productInsert)
       }

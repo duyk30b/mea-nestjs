@@ -68,7 +68,7 @@ export default class TicketBatch extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  costPrice: number
+  costAmount: number
 
   @Column({
     type: 'bigint',
@@ -112,7 +112,7 @@ export default class TicketBatch extends BaseEntity {
     Object.assign(entity, raw)
 
     entity.quantity = Number(raw.quantity)
-    entity.costPrice = Number(raw.costPrice)
+    entity.costAmount = Number(raw.costAmount)
     entity.expectedPrice = Number(raw.expectedPrice)
     entity.actualPrice = Number(raw.actualPrice)
 

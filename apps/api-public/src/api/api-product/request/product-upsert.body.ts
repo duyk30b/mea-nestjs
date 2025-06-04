@@ -15,6 +15,12 @@ import {
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { InventoryStrategy } from '../../../../../_libs/database/common/variable'
 import { CommissionCalculatorType } from '../../../../../_libs/database/entities/commission.entity'
+import {
+  SplitBatchByCostPrice,
+  SplitBatchByDistributor,
+  SplitBatchByExpiryDate,
+  SplitBatchByWarehouse,
+} from '../../../../../_libs/database/entities/product.entity'
 
 export class UnitConversionBody {
   @Expose()
@@ -177,6 +183,33 @@ export class ProductCreateBody {
   @IsDefined()
   @IsEnumValue(InventoryStrategy)
   inventoryStrategy: InventoryStrategy
+
+  @ApiProperty({ enum: SplitBatchByWarehouse, example: SplitBatchByWarehouse.Inherit })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(SplitBatchByWarehouse)
+  splitBatchByWarehouse: SplitBatchByWarehouse
+
+  @ApiProperty({
+    enum: SplitBatchByDistributor,
+    example: SplitBatchByDistributor.Inherit,
+  })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(SplitBatchByDistributor)
+  splitBatchByDistributor: SplitBatchByDistributor
+
+  @ApiProperty({ enum: SplitBatchByExpiryDate, example: SplitBatchByExpiryDate.Inherit })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(SplitBatchByExpiryDate)
+  splitBatchByExpiryDate: SplitBatchByExpiryDate
+
+  @ApiProperty({ enum: SplitBatchByCostPrice, example: SplitBatchByCostPrice.Inherit })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(SplitBatchByCostPrice)
+  splitBatchByCostPrice: SplitBatchByCostPrice
 
   @ApiPropertyOptional({ type: 'string', example: JSON.stringify([1, 5, 10]) })
   @Expose()

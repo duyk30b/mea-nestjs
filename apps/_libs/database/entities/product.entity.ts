@@ -13,6 +13,31 @@ import { InventoryStrategy } from '../common/variable'
 import Batch from './batch.entity'
 import Commission from './commission.entity'
 import ProductGroup from './product-group.entity'
+import { ProductSettingRule } from './setting.entity'
+
+export enum SplitBatchByWarehouse {
+  Inherit = 0,
+  Override = 1,
+  SplitOnDifferent = 2,
+}
+
+export enum SplitBatchByDistributor {
+  Inherit = 0,
+  Override = 1,
+  SplitOnDifferent = 2,
+}
+
+export enum SplitBatchByExpiryDate {
+  Inherit = 0,
+  Override = 1,
+  SplitOnDifferent = 2,
+}
+
+export enum SplitBatchByCostPrice {
+  Inherit = 0,
+  OverrideAndMAC = 1,
+  SplitOnDifferent = 2,
+}
 
 @Entity('Product')
 @Index('IDX_Product__oid_brandName', ['oid', 'brandName'])
@@ -49,9 +74,25 @@ export default class Product {
   @Expose()
   quantity: number
 
-  @Column({ default: InventoryStrategy.UseSystemDefault, type: 'smallint' })
+  @Column({ default: InventoryStrategy.Inherit, type: 'smallint' })
   @Expose()
   inventoryStrategy: InventoryStrategy
+
+  @Column({ default: SplitBatchByWarehouse.Inherit, type: 'smallint' })
+  @Expose()
+  splitBatchByWarehouse: SplitBatchByWarehouse
+
+  @Column({ default: SplitBatchByDistributor.Inherit, type: 'smallint' })
+  @Expose()
+  splitBatchByDistributor: SplitBatchByDistributor
+
+  @Column({ default: SplitBatchByExpiryDate.Inherit, type: 'smallint' })
+  @Expose()
+  splitBatchByExpiryDate: SplitBatchByExpiryDate
+
+  @Column({ default: SplitBatchByCostPrice.Inherit, type: 'smallint' })
+  @Expose()
+  splitBatchByCostPrice: SplitBatchByCostPrice
 
   @Column({
     type: 'bigint',
@@ -161,6 +202,52 @@ export default class Product {
 
   static fromRaws(raws: { [P in keyof Product]: any }[]) {
     return raws.map((i) => Product.fromRaw(i))
+  }
+
+  static getProductSettingRule(
+    product: Product,
+    productSettingCommon: ProductSettingRule,
+    productSettingRoot: ProductSettingRule
+  ) {
+    const splitRule: ProductSettingRule = {
+      allowNegativeQuantity: false, // nếu cần thì xử lý ghi đè sau
+      inventoryStrategy: product.inventoryStrategy,
+      splitBatchByWarehouse: product.splitBatchByWarehouse,
+      splitBatchByDistributor: product.splitBatchByDistributor,
+      splitBatchByExpiryDate: product.splitBatchByExpiryDate,
+      splitBatchByCostPrice: product.splitBatchByCostPrice,
+    }
+    if (splitRule.inventoryStrategy === InventoryStrategy.Inherit) {
+      splitRule.inventoryStrategy = productSettingCommon.inventoryStrategy
+      if (splitRule.inventoryStrategy === InventoryStrategy.Inherit) {
+        splitRule.inventoryStrategy = productSettingRoot.inventoryStrategy
+      }
+    }
+    if (splitRule.splitBatchByWarehouse === SplitBatchByWarehouse.Inherit) {
+      splitRule.splitBatchByWarehouse = productSettingCommon.splitBatchByWarehouse
+      if (splitRule.splitBatchByWarehouse === SplitBatchByWarehouse.Inherit) {
+        splitRule.splitBatchByWarehouse = productSettingRoot.splitBatchByWarehouse
+      }
+    }
+    if (splitRule.splitBatchByDistributor === SplitBatchByDistributor.Inherit) {
+      splitRule.splitBatchByDistributor = productSettingCommon.splitBatchByDistributor
+      if (splitRule.splitBatchByDistributor === SplitBatchByDistributor.Inherit) {
+        splitRule.splitBatchByDistributor = productSettingRoot.splitBatchByDistributor
+      }
+    }
+    if (splitRule.splitBatchByExpiryDate === SplitBatchByExpiryDate.Inherit) {
+      splitRule.splitBatchByExpiryDate = productSettingCommon.splitBatchByExpiryDate
+      if (splitRule.splitBatchByExpiryDate === SplitBatchByExpiryDate.Inherit) {
+        splitRule.splitBatchByExpiryDate = productSettingRoot.splitBatchByExpiryDate
+      }
+    }
+    if (splitRule.splitBatchByCostPrice === SplitBatchByCostPrice.Inherit) {
+      splitRule.splitBatchByCostPrice = productSettingCommon.splitBatchByCostPrice
+      if (splitRule.splitBatchByCostPrice === SplitBatchByCostPrice.Inherit) {
+        splitRule.splitBatchByCostPrice = productSettingRoot.splitBatchByCostPrice
+      }
+    }
+    return splitRule
   }
 }
 

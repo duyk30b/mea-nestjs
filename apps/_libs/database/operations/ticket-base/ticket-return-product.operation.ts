@@ -37,7 +37,8 @@ export class TicketReturnProductOperation {
     time: number
     returnList: {
       ticketBatchId: number
-      quantity: number
+      quantityReturn: number
+      costAmountReturn?: number // chỉ để lấy type thôi, sẽ được ghi đè khi tính toán
     }[]
   }) {
     const { oid, ticketId, time, returnList } = params
@@ -80,12 +81,21 @@ export class TicketReturnProductOperation {
         string,
         { productId: number; openQuantity: number; sumQuantity: number }
       > = {}
-      const batchCalcMap: Record<string, { batchId: number; sumQuantity: number }> = {}
+      const batchCalcMap: Record<
+        string,
+        { batchId: number; productId: number; sumQuantity: number; sumCostAmount: number }
+      > = {}
 
       returnList.forEach((i) => {
         const { ticketBatchId } = i
         const tbOrigin = ticketBatchOriginMap[ticketBatchId]
         const { productId, batchId, ticketProductId } = tbOrigin
+
+        let costAmountReturn = 0
+        if (tbOrigin.quantity !== 0) {
+          costAmountReturn = (tbOrigin.costAmount * i.quantityReturn) / tbOrigin.quantity
+        }
+        i.costAmountReturn = costAmountReturn
 
         // const tpOrigin = ticketProductOriginMap[ticketProductId]
         if (!tpCalcMap[ticketProductId]) {
@@ -100,22 +110,25 @@ export class TicketReturnProductOperation {
           productCalcMap[productId] = { productId, openQuantity: 0, sumQuantity: 0 }
         }
         if (!batchCalcMap[batchId]) {
-          batchCalcMap[batchId] = { batchId, sumQuantity: 0 }
+          batchCalcMap[batchId] = { batchId, productId, sumQuantity: 0, sumCostAmount: 0 }
         }
 
-        tpCalcMap[ticketProductId].sumQuantity += i.quantity
-        tpCalcMap[ticketProductId].sumCostAmount += i.quantity * tbOrigin.costPrice
+        tpCalcMap[ticketProductId].sumQuantity += i.quantityReturn
+        tpCalcMap[ticketProductId].sumCostAmount += i.costAmountReturn
 
         if (batchId != 0) {
-          productCalcMap[productId].sumQuantity += i.quantity
-          batchCalcMap[batchId].sumQuantity += i.quantity
+          // nếu batchId = 0 thì rơi vào trường hợp không trừ kho (nghĩa là không có batch để trừ)
+          // còn batchId != 0 thì chỉ định rõ batch để trừ rồi
+          productCalcMap[productId].sumQuantity += i.quantityReturn
+          batchCalcMap[batchId].sumQuantity += i.quantityReturn
+          batchCalcMap[batchId].sumCostAmount += i.costAmountReturn
         }
       })
 
       // 4. === UPDATE for TICKET_PRODUCT ===
-      const ticketProductModifiedList = await this.ticketProductManager.updateListBy({
+      const ticketProductModifiedList = await this.ticketProductManager.bulkUpdate({
         manager,
-        condition: { oid, ticketId },
+        condition: { oid, ticketId, deliveryStatus: { EQUAL: DeliveryStatus.Delivered } },
         compare: ['id', 'productId'],
         tempList: Object.values(tpCalcMap).map((i) => {
           return {
@@ -126,10 +139,10 @@ export class TicketReturnProductOperation {
           }
         }),
         update: {
-          quantity: (t: string) => `"quantity" - ${t}."sumQuantity"`,
-          costAmount: (t: string) => `"quantity" - ${t}."sumCostAmount"`,
+          quantity: (t: string, u: string) => `"${u}"."quantity" - "${t}"."sumQuantity"`,
+          costAmount: (t: string, u: string) => `"${u}"."costAmount" - "${t}"."sumCostAmount"`,
           deliveryStatus: (t: string) => ` CASE
-                                    WHEN  ("quantity" = ${t}."sumQuantity")
+                                    WHEN  ("quantity" = "${t}"."sumQuantity")
                                       THEN ${DeliveryStatus.NoStock}
                                     ELSE ${DeliveryStatus.Delivered}
                                   END`,
@@ -140,17 +153,22 @@ export class TicketReturnProductOperation {
 
       // 5. === TICKET_BATCH: UPDATE ===
       const tbCalcValue = returnList.filter((i) => !!i.ticketBatchId)
-      const ticketBatchModifiedList = await this.ticketBatchManager.updateListBy({
+      const ticketBatchModifiedList = await this.ticketBatchManager.bulkUpdate({
         manager,
         condition: { oid, ticketId, deliveryStatus: { EQUAL: DeliveryStatus.Delivered } },
         compare: ['id'],
         tempList: Object.values(tbCalcValue).map((i) => {
-          return { id: i.ticketBatchId, quantity: i.quantity }
+          return {
+            id: i.ticketBatchId,
+            quantityReturn: i.quantityReturn,
+            costAmountReturn: i.costAmountReturn,
+          }
         }),
         update: {
-          quantity: (t: string, u: string) => `"${u}"."quantity" - ${t}."quantity"`,
+          quantity: (t: string, u: string) => `"${u}"."quantity" - "${t}"."quantityReturn"`,
+          costAmount: (t: string, u: string) => `"${u}"."costAmount" - "${t}"."costAmountReturn"`,
           deliveryStatus: (t: string, u: string) => ` CASE
-                                    WHEN  ("${u}"."quantity" = ${t}."quantity")
+                                    WHEN  ("${u}"."quantity" = "${t}"."quantityReturn")
                                       THEN ${DeliveryStatus.NoStock}
                                     ELSE ${DeliveryStatus.Delivered}
                                   END`,
@@ -160,26 +178,41 @@ export class TicketReturnProductOperation {
       const ticketBatchModifiedMap = ESArray.arrayToKeyValue(ticketBatchModifiedList, 'id')
 
       // 6. === UPDATE for PRODUCT and BATCH ===
-      const productModifiedList = await this.productManager.updateListBy({
+      const productModifiedList = await this.productManager.bulkUpdate({
         manager,
         condition: { oid },
         compare: ['id'],
         tempList: Object.values(productCalcMap).map((i) => {
           return { id: i.productId, sumQuantity: i.sumQuantity }
         }),
-        update: { quantity: (t: string) => `"quantity" + ${t}."sumQuantity"` },
+        update: { quantity: (t: string) => `"quantity" + "${t}"."sumQuantity"` },
         options: { requireEqualLength: true },
       })
       const productModifiedMap = ESArray.arrayToKeyValue(productModifiedList, 'id')
 
-      const batchModifiedList = await this.batchManager.updateListBy({
+      const batchModifiedList = await this.batchManager.bulkUpdate({
         manager,
         condition: { oid },
-        compare: ['id'],
+        compare: ['id', 'productId'],
         tempList: Object.values(batchCalcMap).map((i) => {
-          return { id: i.batchId, sumQuantity: i.sumQuantity }
+          return {
+            id: i.batchId,
+            productId: i.productId,
+            sumQuantity: i.sumQuantity,
+            sumCostAmount: i.sumCostAmount,
+          }
         }),
-        update: { quantity: (t: string) => `"quantity" + ${t}."sumQuantity"` },
+        update: {
+          quantity: (t: string, u: string) => `"${u}"."quantity" + "${t}"."sumQuantity"`,
+          // chú thích 1 vài trường hợp
+          // 1. Nếu nhập hàng từ số lượng âm, lưu costAmount theo số lượng và tỉ giá ban đầu
+          // 2. Nếu trước đó có hàng sẵn, đơn giản là cộng thêm
+          costAmount: (t: string, u: string) => ` CASE
+                                    WHEN  ("${u}"."quantity" < 0)
+                                      THEN ("${u}".quantity + "${t}"."sumQuantity") * "${u}"."costPrice"
+                                    ELSE "${u}"."costAmount" + "${t}"."sumCostAmount"
+                                  END`,
+        },
         options: { requireEqualLength: true },
       })
       const batchMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')
@@ -205,7 +238,7 @@ export class TicketReturnProductOperation {
         const { productId, batchId } = tbModified
         const productCalc = productCalcMap[productId]
 
-        const quantityActual = batchId ? returnItem.quantity : 0
+        const quantityActual = batchId ? returnItem.quantityReturn : 0
 
         const productMovementInsert: ProductMovementInsertType = {
           oid,
@@ -218,10 +251,10 @@ export class TicketReturnProductOperation {
           batchId: tbModified.batchId || 0,
           isRefund: 1,
           openQuantity: productCalc.openQuantity,
-          quantity: returnItem.quantity, // luôn lấy số lượng trong đơn
+          quantity: returnItem.quantityReturn, // luôn lấy số lượng trong đơn
           closeQuantity: productCalc.openQuantity + quantityActual, // trừ số lượng còn thực tế
           unitRate: tbModified.unitRate,
-          costPrice: tbModified.costPrice,
+          costAmount: returnItem.costAmountReturn,
           expectedPrice: tbModified.expectedPrice,
           actualPrice: tbModified.actualPrice,
           createdAt: time,

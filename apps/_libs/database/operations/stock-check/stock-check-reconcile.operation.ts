@@ -5,11 +5,11 @@ import { MovementType } from '../../common/variable'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
 import { StockCheckStatus } from '../../entities/stock-check.entity'
 import {
-  BatchManager,
-  ProductManager,
-  ProductMovementManager,
-  StockCheckItemManager,
-  StockCheckManager,
+    BatchManager,
+    ProductManager,
+    ProductMovementManager,
+    StockCheckItemManager,
+    StockCheckManager,
 } from '../../managers'
 
 @Injectable()
@@ -51,14 +51,15 @@ export class StockCheckReconcileOperation {
         throw new Error(`${PREFIX}: Có trùng lặp batchId = ${batchIdList.join('')} }`)
       }
 
-      const batchModifiedList = await this.batchManager.updateListBy({
+      const batchModifiedList = await this.batchManager.bulkUpdate({
         manager,
         tempList: stockCheckItemList.map((i) => ({
           id: i.batchId,
           quantity: i.actualQuantity,
+          costAmount: i.actualCostAmount,
         })),
         compare: ['id'],
-        update: ['quantity'],
+        update: ['quantity', 'costAmount'],
         condition: { oid },
       })
       const batchModifiedMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')
@@ -70,7 +71,7 @@ export class StockCheckReconcileOperation {
       })
       const productOriginMap = ESArray.arrayToKeyValue(productOriginList, 'id')
 
-      const productModifiedList = await this.productManager.calculateQuantityProductList({
+      const productModifiedList = await this.productManager.reCalculateQuantityBySumBatchList({
         manager,
         oid,
         productIdList,
@@ -91,6 +92,7 @@ export class StockCheckReconcileOperation {
         const batchModified = batchModifiedMap[scItem.batchId]
         const productCalc = productCalcMap[scItem.productId]
         const quantityDifferent = scItem.actualQuantity - scItem.systemQuantity
+        const costAmountDifferent = scItem.actualCostAmount - scItem.systemCostAmount
 
         const productMovementInsert: ProductMovementInsertType = {
           oid,
@@ -106,7 +108,7 @@ export class StockCheckReconcileOperation {
           quantity: quantityDifferent,
           closeQuantity: productCalc.openQuantity + quantityDifferent,
           unitRate: 1,
-          costPrice: batchModified.costPrice,
+          costAmount: costAmountDifferent,
           expectedPrice: productModified.retailPrice,
           actualPrice: productModified.retailPrice,
           createdAt: time,

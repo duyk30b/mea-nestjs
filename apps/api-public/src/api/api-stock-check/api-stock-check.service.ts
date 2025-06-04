@@ -149,6 +149,8 @@ export class ApiStockCheckService {
         batchId: i.batchId,
         systemQuantity: i.systemQuantity,
         actualQuantity: i.actualQuantity,
+        systemCostAmount: i.systemCostAmount,
+        actualCostAmount: i.actualCostAmount,
         note: i.note,
       }
       return insertDto
