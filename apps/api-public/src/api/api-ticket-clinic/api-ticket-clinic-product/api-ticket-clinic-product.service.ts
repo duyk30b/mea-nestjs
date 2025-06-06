@@ -188,50 +188,41 @@ export class ApiTicketClinicProductService {
   async sendProduct(params: { oid: number; ticketId: number }): Promise<BaseResponse> {
     const { oid, ticketId } = params
     const time = Date.now()
-    try {
-      const allowNegativeQuantity = await this.cacheDataService.getSettingAllowNegativeQuantity(oid)
-      const sendList = await this.ticketSendProductOperation.autoGenerateSendList({
-        oid,
-        ticketId,
-        allowNegativeQuantity,
-      })
-      const sendProductResult = await this.ticketSendProductOperation.sendProduct({
-        oid,
-        ticketId,
-        time,
-        sendList,
-        allowNegativeQuantity,
-      })
 
-      this.socketEmitService.ticketClinicChange(oid, {
-        type: 'UPDATE',
-        ticket: sendProductResult.ticket,
+    const allowNegativeQuantity = await this.cacheDataService.getSettingAllowNegativeQuantity(oid)
+    const sendProductResult = await this.ticketSendProductOperation.sendAllProduct({
+      oid,
+      ticketId,
+      time,
+      allowNegativeQuantity,
+    })
+
+    this.socketEmitService.ticketClinicChange(oid, {
+      type: 'UPDATE',
+      ticket: sendProductResult.ticket,
+    })
+
+    if (sendProductResult.productModifiedList) {
+      this.socketEmitService.productListUpdate(oid, {
+        productList: sendProductResult.productModifiedList,
       })
-
-      if (sendProductResult.productModifiedList) {
-        this.socketEmitService.productListUpdate(oid, {
-          productList: sendProductResult.productModifiedList,
-        })
-      }
-      if (sendProductResult.ticketProductModifiedList) {
-        this.socketEmitService.ticketClinicChangeConsumable(oid, {
-          ticketId,
-          ticketProductUpsertList: sendProductResult.ticketProductModifiedList.filter((i) => {
-            return i.type === TicketProductType.Consumable
-          }),
-        })
-        this.socketEmitService.ticketClinicChangePrescription(oid, {
-          ticketId,
-          ticketProductUpsertList: sendProductResult.ticketProductModifiedList.filter((i) => {
-            return i.type === TicketProductType.Prescription
-          }),
-        })
-      }
-
-      return { data: true }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
+    if (sendProductResult.ticketProductModifiedList) {
+      this.socketEmitService.ticketClinicChangeConsumable(oid, {
+        ticketId,
+        ticketProductUpsertList: sendProductResult.ticketProductModifiedList.filter((i) => {
+          return i.type === TicketProductType.Consumable
+        }),
+      })
+      this.socketEmitService.ticketClinicChangePrescription(oid, {
+        ticketId,
+        ticketProductUpsertList: sendProductResult.ticketProductModifiedList.filter((i) => {
+          return i.type === TicketProductType.Prescription
+        }),
+      })
+    }
+
+    return { data: true }
   }
 
   async returnProduct(params: {

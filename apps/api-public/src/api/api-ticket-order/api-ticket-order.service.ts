@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { DeliveryStatus } from '../../../../_libs/database/common/variable'
+import { TicketProduct } from '../../../../_libs/database/entities'
 import { VoucherType } from '../../../../_libs/database/entities/payment.entity'
 import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import {
@@ -147,14 +148,7 @@ export class ApiTicketOrderService {
     const ticketId = createDraftResponse.ticket.id
 
     if (body.ticketOrderProductDraftList.length) {
-      const sendProductResponse = await this.sendAllProduct({
-        oid,
-        ticketId,
-      })
-
-      this.socketEmitService.productListUpdate(oid, {
-        productList: sendProductResponse.productModifiedList,
-      })
+      await this.sendAllProduct({ oid, ticketId })
     }
 
     const { ticket, customer } = await this.ticketPaymentAndCloseOperation.paymentAndClose({
@@ -268,29 +262,25 @@ export class ApiTicketOrderService {
   }): Promise<BaseResponse> {
     const { oid, ticketId, body, userId } = params
     const time = Date.now()
-    try {
-      await this.sendAllProduct({ oid, ticketId })
-      const { ticket, payment } = await this.ticketPaymentAndCloseOperation.paymentAndClose({
+    await this.sendAllProduct({ oid, ticketId })
+    const { ticket, payment } = await this.ticketPaymentAndCloseOperation.paymentAndClose({
+      oid,
+      cashierId: userId,
+      ticketId,
+      time,
+      money: body.money,
+      paymentMethodId: body.paymentMethodId,
+      note: body.note,
+    })
+    const ticketProductList = await this.ticketProductRepository.findMany({
+      relation: { product: true },
+      condition: {
         oid,
-        cashierId: userId,
         ticketId,
-        time,
-        money: body.money,
-        paymentMethodId: body.paymentMethodId,
-        note: body.note,
-      })
-      const ticketProductList = await this.ticketProductRepository.findMany({
-        relation: { product: true },
-        condition: {
-          oid,
-          ticketId,
-        },
-        sort: { id: 'ASC' },
-      })
-      return { data: { ticket, ticketProductList, payment } }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
+      },
+      sort: { id: 'ASC' },
+    })
+    return { data: { ticket, ticketProductList, payment } }
   }
 
   async prepayment(options: {
@@ -480,8 +470,10 @@ export class ApiTicketOrderService {
       }
     }
 
+    let ticketProductList: TicketProduct[] = []
     if (ticketOrigin.deliveryStatus === DeliveryStatus.Delivered) {
-      await this.returnAllProduct({ oid, ticketId })
+      const returnProductResponse = await this.returnAllProduct({ oid, ticketId })
+      ticketProductList = returnProductResponse.ticketProductModifiedList
     }
 
     const ticket = await this.ticketRepository.updateOneAndReturnEntity(
@@ -496,33 +488,25 @@ export class ApiTicketOrderService {
       },
       sort: { id: 'ASC' },
     })
-    return { data: { ticket, paymentList } }
+    return { data: { ticket, paymentList, ticketProductList } }
   }
 
   async sendAllProduct(params: { oid: number; ticketId: number }) {
     const { oid, ticketId } = params
     const time = Date.now()
-    try {
-      const allowNegativeQuantity = await this.cacheDataService.getSettingAllowNegativeQuantity(oid)
-      const sendList = await this.ticketSendProductOperation.autoGenerateSendList({
-        oid,
-        ticketId,
-        allowNegativeQuantity,
-      })
-      if (sendList.length) {
-        const { ticket, productModifiedList } = await this.ticketSendProductOperation.sendProduct({
-          oid,
-          ticketId,
-          time,
-          sendList,
-          allowNegativeQuantity,
-        })
-        return { ticket, productModifiedList }
-      } else {
-        return {}
-      }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+
+    const allowNegativeQuantity = await this.cacheDataService.getSettingAllowNegativeQuantity(oid)
+    const sendProductResponse = await this.ticketSendProductOperation.sendAllProduct({
+      oid,
+      ticketId,
+      time,
+      allowNegativeQuantity,
+    })
+
+    return {
+      ticket: sendProductResponse.ticket,
+      productList: sendProductResponse.productModifiedList,
+      ticketProductList: sendProductResponse.ticketProductModifiedList,
     }
   }
 
@@ -541,13 +525,15 @@ export class ApiTicketOrderService {
     }))
 
     if (returnList.length) {
-      const { ticket } = await this.ticketReturnProductOperation.returnProduct({
-        oid,
-        ticketId,
-        time,
-        returnList,
-      })
-      return { ticket }
+      const { ticket, ticketProductModifiedList } =
+        await this.ticketReturnProductOperation.returnProduct({
+          oid,
+          ticketId,
+          time,
+          returnList,
+          options: { changePendingIfNoStock: true },
+        })
+      return { ticket, ticketProductModifiedList }
     } else {
       return {}
     }

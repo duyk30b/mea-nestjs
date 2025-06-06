@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { ESArray } from '../../../common/helpers/object.helper'
+import { BusinessError } from '../../common/error'
 import { MovementType } from '../../common/variable'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
 import { StockCheckStatus } from '../../entities/stock-check.entity'
 import {
-    BatchManager,
-    ProductManager,
-    ProductMovementManager,
-    StockCheckItemManager,
-    StockCheckManager,
+  BatchManager,
+  ProductManager,
+  ProductMovementManager,
+  StockCheckItemManager,
+  StockCheckManager,
 } from '../../managers'
 
 @Injectable()
@@ -48,11 +49,12 @@ export class StockCheckReconcileOperation {
       const duplicatesBatchId = ESArray.checkDuplicate(stockCheckItemList, 'batchId')
       if (duplicatesBatchId.length) {
         const batchIdList = duplicatesBatchId.map((i) => i.value)
-        throw new Error(`${PREFIX}: Có trùng lặp batchId = ${batchIdList.join('')} }`)
+        throw new BusinessError(PREFIX, `: Có trùng lặp batchId = ${batchIdList.join('')} }`)
       }
 
       const batchModifiedList = await this.batchManager.bulkUpdate({
         manager,
+        condition: { oid },
         tempList: stockCheckItemList.map((i) => ({
           id: i.batchId,
           quantity: i.actualQuantity,
@@ -60,16 +62,10 @@ export class StockCheckReconcileOperation {
         })),
         compare: ['id'],
         update: ['quantity', 'costAmount'],
-        condition: { oid },
       })
       const batchModifiedMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')
 
       const productIdList = stockCheckItemList.map((i) => i.productId)
-      const productOriginList = await this.productManager.findManyBy(manager, {
-        oid,
-        id: { IN: productIdList },
-      })
-      const productOriginMap = ESArray.arrayToKeyValue(productOriginList, 'id')
 
       const productModifiedList = await this.productManager.reCalculateQuantityBySumBatchList({
         manager,
@@ -78,16 +74,15 @@ export class StockCheckReconcileOperation {
       })
       const productModifiedMap = ESArray.arrayToKeyValue(productModifiedList, 'id')
 
-      const productCalcMap: Record<string, { productId: number; openQuantity: number }> = {}
-      productOriginList.forEach((i) => {
-        productCalcMap[i.id] = { productId: i.id, openQuantity: i.quantity }
+      const productCalcMap: Record<string, { productId: number; closeQuantity: number }> = {}
+      productModifiedList.forEach((i) => {
+        productCalcMap[i.id] = { productId: i.id, closeQuantity: i.quantity }
       })
 
       // 7. === CREATE: PRODUCT_MOVEMENT ===
       const productMovementInsertList: ProductMovementInsertType[] = []
 
-      stockCheckItemList.forEach((scItem) => {
-        const productOrigin = productOriginMap[scItem.productId]
+      stockCheckItemList.reverse().forEach((scItem) => {
         const productModified = productModifiedMap[scItem.productId]
         const batchModified = batchModifiedMap[scItem.batchId]
         const productCalc = productCalcMap[scItem.productId]
@@ -103,19 +98,24 @@ export class StockCheckReconcileOperation {
           warehouseId: batchModified.warehouseId,
           productId: scItem.productId,
           batchId: scItem.batchId || 0,
+
+          createdAt: time,
           isRefund: 0,
-          openQuantity: productCalc.openQuantity,
-          quantity: quantityDifferent,
-          closeQuantity: productCalc.openQuantity + quantityDifferent,
-          unitRate: 1,
-          costAmount: costAmountDifferent,
           expectedPrice: productModified.retailPrice,
           actualPrice: productModified.retailPrice,
-          createdAt: time,
+
+          quantity: quantityDifferent,
+          costAmount: costAmountDifferent,
+          openQuantityProduct: productCalc.closeQuantity - quantityDifferent,
+          closeQuantityProduct: productCalc.closeQuantity,
+          openQuantityBatch: batchModified.quantity - quantityDifferent,
+          closeQuantityBatch: batchModified.quantity,
+          openCostAmountBatch: batchModified.costAmount - costAmountDifferent,
+          closeCostAmountBatch: batchModified.costAmount,
         }
         // gán lại số lượng ban đầu vì productMovementInsert đã lấy
-        productCalc.openQuantity = productMovementInsert.closeQuantity
-        productMovementInsertList.push(productMovementInsert)
+        productCalc.closeQuantity = productMovementInsert.openQuantityProduct
+        productMovementInsertList.unshift(productMovementInsert)
       })
       await this.productMovementManager.insertMany(manager, productMovementInsertList)
 

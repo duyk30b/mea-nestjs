@@ -45,7 +45,10 @@ export class BatchRepository extends _PostgreSqlRepository<
       const batchTargetModified = await this.batchManager.updateOneAndReturnEntity(
         manager,
         { oid, id: batchIdTarget, productId },
-        { quantity: () => `quantity + ${batchSourceOrigin.quantity}` }
+        {
+          quantity: () => `quantity + ${batchSourceOrigin.quantity}`,
+          costAmount: () => `"costAmount" + ${batchSourceOrigin.costAmount}`,
+        }
       )
       return batchTargetModified
     })

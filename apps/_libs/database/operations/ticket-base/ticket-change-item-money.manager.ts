@@ -57,7 +57,7 @@ export class TicketChangeItemMoneyManager {
     if (discountType === DiscountType.Percent) {
       discountMoney = Math.floor((discountPercent * itemsActualMoneyUpdate) / 100)
     }
-    const totalMoneyUpdate = itemsActualMoneyUpdate - discountMoney
+    const totalMoneyUpdate = itemsActualMoneyUpdate - discountMoney + ticketOrigin.surcharge
     const debtUpdate = totalMoneyUpdate - ticketOrigin.paid
     const profitUpdate =
       totalMoneyUpdate - itemsCostAmountUpdate - ticketOrigin.expense - commissionMoneyUpdate

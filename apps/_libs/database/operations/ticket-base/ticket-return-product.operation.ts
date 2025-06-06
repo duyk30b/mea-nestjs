@@ -15,6 +15,7 @@ import {
   TicketProductManager,
   TicketUserManager,
 } from '../../managers'
+import { ProductPutawayOperation } from '../product/product-putaway.operation'
 import { TicketChangeItemMoneyManager } from './ticket-change-item-money.manager'
 
 @Injectable()
@@ -24,30 +25,27 @@ export class TicketReturnProductOperation {
     private ticketManager: TicketManager,
     private productManager: ProductManager,
     private batchManager: BatchManager,
-    private productMovementManager: ProductMovementManager,
     private ticketProductManager: TicketProductManager,
     private ticketBatchManager: TicketBatchManager,
     private ticketUserManager: TicketUserManager,
-    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
+    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager,
+    private productMovementManager: ProductMovementManager,
+    private productPutawayOperation: ProductPutawayOperation
   ) { }
 
-  async returnProduct(params: {
+  async returnProduct(data: {
     oid: number
     ticketId: number
     time: number
     returnList: {
       ticketBatchId: number
       quantityReturn: number
-      costAmountReturn?: number // chỉ để lấy type thôi, sẽ được ghi đè khi tính toán
     }[]
+    options?: { changePendingIfNoStock?: boolean }
   }) {
-    const { oid, ticketId, time, returnList } = params
+    const { oid, ticketId, time, returnList, options } = data
     const PREFIX = `TicketId = ${ticketId}, returnProduct failed`
     const ERROR_LOGIC = `TicketId = ${ticketId}, returnProduct has a logic error occurred: `
-
-    if (!returnList.length) {
-      throw new Error(`${PREFIX}: returnList.length = 0`)
-    }
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // 1. === UPDATE TICKET FOR TRANSACTION ===
@@ -57,7 +55,8 @@ export class TicketReturnProductOperation {
         { updatedAt: Date.now() }
       )
 
-      // 2. === TICKET_PRODUCT & TICKET_BATCH ===
+      if (!returnList.length) return { ticket: ticketOrigin }
+
       const ticketBatchOriginList = await this.ticketBatchManager.findManyBy(manager, {
         oid,
         ticketId,
@@ -72,103 +71,99 @@ export class TicketReturnProductOperation {
       })
       const ticketProductOriginMap = ESArray.arrayToKeyValue(ticketProductOriginList, 'id')
 
-      // 3. === CALCULATOR data ===
-      const tpCalcMap: Record<
-        string,
-        { ticketProductId: number; productId: number; sumQuantity: number; sumCostAmount: number }
-      > = {}
-      const productCalcMap: Record<
-        string,
-        { productId: number; openQuantity: number; sumQuantity: number }
-      > = {}
-      const batchCalcMap: Record<
-        string,
-        { batchId: number; productId: number; sumQuantity: number; sumCostAmount: number }
-      > = {}
-
-      returnList.forEach((i) => {
-        const { ticketBatchId } = i
-        const tbOrigin = ticketBatchOriginMap[ticketBatchId]
-        const { productId, batchId, ticketProductId } = tbOrigin
-
-        let costAmountReturn = 0
-        if (tbOrigin.quantity !== 0) {
-          costAmountReturn = (tbOrigin.costAmount * i.quantityReturn) / tbOrigin.quantity
-        }
-        i.costAmountReturn = costAmountReturn
-
-        // const tpOrigin = ticketProductOriginMap[ticketProductId]
-        if (!tpCalcMap[ticketProductId]) {
-          tpCalcMap[ticketProductId] = {
-            ticketProductId,
-            productId,
-            sumQuantity: 0,
-            sumCostAmount: 0,
+      // === 2. Product and Batch origin
+      const productIdList = ticketBatchOriginList.map((i) => i.productId)
+      const batchIdList = ticketBatchOriginList.map((i) => i.batchId)
+      const productOriginList = await this.productManager.updateAndReturnEntity(
+        manager,
+        { oid, id: { IN: ESArray.uniqueArray(productIdList) } },
+        { updatedAt: time }
+      )
+      const batchOriginList = await this.batchManager.updateAndReturnEntity(
+        manager,
+        { oid, id: { IN: ESArray.uniqueArray(batchIdList) } },
+        { updatedAt: time }
+      )
+      const putawayContainer = this.productPutawayOperation.generatePutawayPlan({
+        productOriginList,
+        batchOriginList,
+        voucherBatchList: returnList.map((i) => {
+          const ticketBatchOrigin = ticketBatchOriginMap[i.ticketBatchId]
+          return {
+            voucherProductId: ticketBatchOrigin.ticketProductId,
+            voucherBatchId: i.ticketBatchId,
+            warehouseId: ticketBatchOrigin.warehouseId,
+            productId: ticketBatchOrigin.productId,
+            batchId: ticketBatchOrigin.batchId,
+            quantity: i.quantityReturn,
+            costAmount:
+              ticketBatchOrigin.quantity == 0
+                ? 0
+                : (ticketBatchOrigin.costAmount * i.quantityReturn) / ticketBatchOrigin.quantity,
           }
-        }
-        if (!productCalcMap[productId]) {
-          productCalcMap[productId] = { productId, openQuantity: 0, sumQuantity: 0 }
-        }
-        if (!batchCalcMap[batchId]) {
-          batchCalcMap[batchId] = { batchId, productId, sumQuantity: 0, sumCostAmount: 0 }
-        }
-
-        tpCalcMap[ticketProductId].sumQuantity += i.quantityReturn
-        tpCalcMap[ticketProductId].sumCostAmount += i.costAmountReturn
-
-        if (batchId != 0) {
-          // nếu batchId = 0 thì rơi vào trường hợp không trừ kho (nghĩa là không có batch để trừ)
-          // còn batchId != 0 thì chỉ định rõ batch để trừ rồi
-          productCalcMap[productId].sumQuantity += i.quantityReturn
-          batchCalcMap[batchId].sumQuantity += i.quantityReturn
-          batchCalcMap[batchId].sumCostAmount += i.costAmountReturn
-        }
+        }),
       })
 
-      // 4. === UPDATE for TICKET_PRODUCT ===
+      // 3. === UPDATE for TICKET_PRODUCT ===
       const ticketProductModifiedList = await this.ticketProductManager.bulkUpdate({
         manager,
         condition: { oid, ticketId, deliveryStatus: { EQUAL: DeliveryStatus.Delivered } },
         compare: ['id', 'productId'],
-        tempList: Object.values(tpCalcMap).map((i) => {
+        tempList: putawayContainer.putawayVoucherProductList.map((i) => {
           return {
-            id: i.ticketProductId,
+            id: i.voucherProductId,
             productId: i.productId,
-            sumQuantity: i.sumQuantity,
-            sumCostAmount: i.sumCostAmount,
+            putawayQuantity: i.putawayQuantity,
+            putawayCostAmount: i.putawayCostAmount,
           }
         }),
-        update: {
-          quantity: (t: string, u: string) => `"${u}"."quantity" - "${t}"."sumQuantity"`,
-          costAmount: (t: string, u: string) => `"${u}"."costAmount" - "${t}"."sumCostAmount"`,
-          deliveryStatus: (t: string) => ` CASE
-                                    WHEN  ("quantity" = "${t}"."sumQuantity")
-                                      THEN ${DeliveryStatus.NoStock}
-                                    ELSE ${DeliveryStatus.Delivered}
+        update: options?.changePendingIfNoStock
+          ? {
+            quantity: (t: string, u: string) => ` CASE
+                                    WHEN  ("quantity" = "${t}"."putawayQuantity")
+                                      THEN "quantity"
+                                    ELSE "${u}"."quantity" - "${t}"."putawayQuantity"
                                   END`,
-        },
+            costAmount: () => `"costAmount" - "putawayCostAmount"`,
+            deliveryStatus: (t: string) => ` CASE
+                                    WHEN  ("quantity" = "${t}"."putawayQuantity")
+                                      THEN ${DeliveryStatus.Pending}
+                                    ELSE "deliveryStatus"
+                                  END`,
+          }
+          : {
+            quantity: () => `"quantity" - "putawayQuantity"`,
+            costAmount: () => `"costAmount" - "putawayCostAmount"`,
+            deliveryStatus: (t: string) => ` CASE
+                                    WHEN  ("quantity" = "${t}"."putawayQuantity")
+                                      THEN ${DeliveryStatus.NoStock}
+                                    ELSE "deliveryStatus"
+                                  END`,
+          },
         options: { requireEqualLength: true },
       })
       const ticketProductModifiedMap = ESArray.arrayToKeyValue(ticketProductModifiedList, 'id')
 
-      // 5. === TICKET_BATCH: UPDATE ===
-      const tbCalcValue = returnList.filter((i) => !!i.ticketBatchId)
+      // 4. === TICKET_BATCH: UPDATE ===
       const ticketBatchModifiedList = await this.ticketBatchManager.bulkUpdate({
         manager,
         condition: { oid, ticketId, deliveryStatus: { EQUAL: DeliveryStatus.Delivered } },
-        compare: ['id'],
-        tempList: Object.values(tbCalcValue).map((i) => {
+        compare: ['id', 'ticketProductId', 'productId', 'batchId'],
+        tempList: putawayContainer.putawayVoucherBatchList.map((i) => {
           return {
-            id: i.ticketBatchId,
-            quantityReturn: i.quantityReturn,
-            costAmountReturn: i.costAmountReturn,
+            id: i.voucherBatchId,
+            ticketProductId: i.voucherProductId,
+            productId: i.productId,
+            batchId: i.batchId,
+            putawayQuantity: i.putawayQuantity,
+            putawayCostAmount: i.putawayCostAmount,
           }
         }),
         update: {
-          quantity: (t: string, u: string) => `"${u}"."quantity" - "${t}"."quantityReturn"`,
-          costAmount: (t: string, u: string) => `"${u}"."costAmount" - "${t}"."costAmountReturn"`,
+          quantity: () => `"quantity" - "putawayQuantity"`,
+          costAmount: () => `"costAmount" - "putawayCostAmount"`,
           deliveryStatus: (t: string, u: string) => ` CASE
-                                    WHEN  ("${u}"."quantity" = "${t}"."quantityReturn")
+                                    WHEN  ("${u}"."quantity" = "${t}"."putawayQuantity")
                                       THEN ${DeliveryStatus.NoStock}
                                     ELSE ${DeliveryStatus.Delivered}
                                   END`,
@@ -176,16 +171,29 @@ export class TicketReturnProductOperation {
         options: { requireEqualLength: true },
       })
       const ticketBatchModifiedMap = ESArray.arrayToKeyValue(ticketBatchModifiedList, 'id')
+      const tbModifiedNoStockList = ticketBatchModifiedList.filter((i) => {
+        return i.deliveryStatus === DeliveryStatus.NoStock
+      })
+      if (tbModifiedNoStockList.length) {
+        await this.ticketBatchManager.deleteAndReturnEntity(manager, {
+          oid,
+          id: { IN: tbModifiedNoStockList.map((i) => i.id) },
+        })
+      }
 
-      // 6. === UPDATE for PRODUCT and BATCH ===
+      // 5. === UPDATE for PRODUCT and BATCH ===
       const productModifiedList = await this.productManager.bulkUpdate({
         manager,
         condition: { oid },
         compare: ['id'],
-        tempList: Object.values(productCalcMap).map((i) => {
-          return { id: i.productId, sumQuantity: i.sumQuantity }
+        tempList: putawayContainer.putawayProductList.map((i) => {
+          return {
+            id: i.productId,
+            putawayQuantity: i.putawayQuantity, // không được cộng trừ theo thằng này vì trường hợp NoImpact
+            quantity: i.closeQuantity,
+          }
         }),
-        update: { quantity: (t: string) => `"quantity" + "${t}"."sumQuantity"` },
+        update: ['quantity'],
         options: { requireEqualLength: true },
       })
       const productModifiedMap = ESArray.arrayToKeyValue(productModifiedList, 'id')
@@ -194,74 +202,52 @@ export class TicketReturnProductOperation {
         manager,
         condition: { oid },
         compare: ['id', 'productId'],
-        tempList: Object.values(batchCalcMap).map((i) => {
-          return {
-            id: i.batchId,
-            productId: i.productId,
-            sumQuantity: i.sumQuantity,
-            sumCostAmount: i.sumCostAmount,
-          }
-        }),
+        tempList: putawayContainer.putawayBatchList
+          .filter((i) => !!i.batchId)
+          .map((i) => {
+            return {
+              id: i.batchId,
+              productId: i.productId,
+              putawayQuantity: i.putawayQuantity,
+              putawayCostAmount: i.putawayCostAmount,
+            }
+          }),
         update: {
-          quantity: (t: string, u: string) => `"${u}"."quantity" + "${t}"."sumQuantity"`,
-          // chú thích 1 vài trường hợp
-          // 1. Nếu nhập hàng từ số lượng âm, lưu costAmount theo số lượng và tỉ giá ban đầu
-          // 2. Nếu trước đó có hàng sẵn, đơn giản là cộng thêm
-          costAmount: (t: string, u: string) => ` CASE
-                                    WHEN  ("${u}"."quantity" < 0)
-                                      THEN ("${u}".quantity + "${t}"."sumQuantity") * "${u}"."costPrice"
-                                    ELSE "${u}"."costAmount" + "${t}"."sumCostAmount"
-                                  END`,
+          quantity: () => `"quantity" + "putawayQuantity"`,
+          costAmount: () => `"costAmount" + "putawayCostAmount"`,
         },
         options: { requireEqualLength: true },
       })
       const batchMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')
 
-      // 7. === CALCULATOR: check Negative và tính số lượng ban đầu của product và batch ===
-      ticketProductModifiedList.forEach((i) => {
-        if (i.quantity < 0) throw new Error(ERROR_LOGIC + JSON.stringify(i))
-      })
-      ticketBatchModifiedList.forEach((i) => {
-        if (i.quantity < 0) throw new Error(ERROR_LOGIC + JSON.stringify(i))
-      })
-      productModifiedList.forEach((i) => {
-        const productCalc = productCalcMap[i.id]
-        // sumQuantity là số lượng cộng thật
-        productCalc.openQuantity = i.quantity - productCalc.sumQuantity
-      })
-
-      // 8. === CREATE: PRODUCT_MOVEMENT ===
-      const productMovementInsertList: ProductMovementInsertType[] = []
-      returnList.forEach((returnItem) => {
-        const { ticketBatchId } = returnItem
-        const tbModified = ticketBatchModifiedMap[ticketBatchId]
-        const { productId, batchId } = tbModified
-        const productCalc = productCalcMap[productId]
-
-        const quantityActual = batchId ? returnItem.quantityReturn : 0
-
+      // 6. === CREATE: PRODUCT_MOVEMENT ===
+      const productMovementInsertList = putawayContainer.putawayMovementList.map((paMovement) => {
+        const tpOrigin = ticketProductOriginMap[paMovement.voucherProductId]
         const productMovementInsert: ProductMovementInsertType = {
           oid,
           movementType: MovementType.Ticket,
-          contactId: tbModified.customerId,
-          voucherId: tbModified.ticketId,
-          voucherProductId: tbModified.id,
-          warehouseId: tbModified.warehouseId,
-          productId: tbModified.productId,
-          batchId: tbModified.batchId || 0,
-          isRefund: 1,
-          openQuantity: productCalc.openQuantity,
-          quantity: returnItem.quantityReturn, // luôn lấy số lượng trong đơn
-          closeQuantity: productCalc.openQuantity + quantityActual, // trừ số lượng còn thực tế
-          unitRate: tbModified.unitRate,
-          costAmount: returnItem.costAmountReturn,
-          expectedPrice: tbModified.expectedPrice,
-          actualPrice: tbModified.actualPrice,
+          contactId: ticketOrigin.customerId,
+          voucherId: ticketOrigin.id,
+          voucherProductId: tpOrigin.id,
+          warehouseId: paMovement.warehouseId,
+          productId: paMovement.productId,
+          batchId: paMovement.batchId,
+
           createdAt: time,
+          isRefund: 1,
+          expectedPrice: tpOrigin.expectedPrice,
+          actualPrice: tpOrigin.actualPrice,
+
+          quantity: paMovement.putawayQuantity,
+          costAmount: paMovement.putawayCostAmount,
+          openQuantityProduct: paMovement.openQuantityProduct,
+          closeQuantityProduct: paMovement.closeQuantityProduct,
+          openQuantityBatch: paMovement.openQuantityBatch,
+          closeQuantityBatch: paMovement.closeQuantityBatch,
+          openCostAmountBatch: paMovement.openCostAmountBatch,
+          closeCostAmountBatch: paMovement.closeCostAmountBatch,
         }
-        // gán lại số lượng ban đầu vì productMovementInsert đã lấy
-        productCalc.openQuantity = productMovementInsert.closeQuantity
-        productMovementInsertList.push(productMovementInsert)
+        return productMovementInsert
       })
       await this.productMovementManager.insertMany(manager, productMovementInsertList)
 
@@ -327,6 +313,7 @@ export class TicketReturnProductOperation {
       return {
         ticket,
         productModifiedList,
+        ticketProductModifiedList,
         ticketUserModifiedList,
         ticketUserDestroyedList,
       }

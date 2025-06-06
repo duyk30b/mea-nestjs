@@ -1,3 +1,5 @@
+export * from './product/product-picking.operation'
+export * from './product/product-putaway.operation'
 export * from './product/product.operation'
 
 export * from './receipt/receipt-deposited.operation'

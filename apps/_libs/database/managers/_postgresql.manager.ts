@@ -428,7 +428,8 @@ export abstract class _PostgreSqlManager<
 
     if (options.options?.requireEqualLength) {
       if (modifiedRaw[0].length !== tempList.length) {
-        throw new Error(`Update Database failed: ` + JSON.stringify({ modifiedRaw, tempList }))
+        console.log(`Update ${tableName} failed: `, modifiedRaw)
+        throw new Error(`Update ${tableName} failed: ` + JSON.stringify({ modifiedRaw, tempList }))
       }
     }
     return this.entity.fromRaws(modifiedRaw[0])

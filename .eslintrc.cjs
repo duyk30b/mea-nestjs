@@ -21,7 +21,7 @@ module.exports = {
     'no-console': 0,
     'no-tabs': 1, // không cho sử dụng tab
     'no-param-reassign': 0, // sửa params của function sẽ lỗi
-    'no-unused-vars': 0, // khai báo biến mà không sử dụng
+    // 'no-unused-vars': 0, // khai báo biến mà không sử dụng
     'no-underscore-dangle': 0, // dùng dấu gạch dưới _
     'no-multi-spaces': [1, { ignoreEOLComments: true }],
     'prefer-template': 0, // Bắt buộc dùng template string khi cộng chuỗi, vcc

@@ -263,8 +263,7 @@ export type ProductInsertType = Omit<
 export type ProductUpdateType = {
   [K in Exclude<
     keyof Product,
-    | keyof ProductRelationType
-    | keyof Pick<Product, 'oid' | 'id' | 'quantity' | 'updatedAt' | 'warehouseIdList'>
+    keyof ProductRelationType | keyof Pick<Product, 'oid' | 'id' | 'quantity' | 'warehouseIdList'>
   >]: Product[K] | (() => string)
 }
 

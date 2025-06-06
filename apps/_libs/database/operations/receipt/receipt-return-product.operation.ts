@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { arrayToKeyValue } from '../../../common/helpers/object.helper'
+import { ESArray } from '../../../common/helpers/object.helper'
 import { DeliveryStatus, InventoryStrategy, MovementType } from '../../common/variable'
-import { Batch } from '../../entities'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
 import { ReceiptStatus } from '../../entities/receipt.entity'
 import {
@@ -12,6 +11,7 @@ import {
   ReceiptItemManager,
   ReceiptManager,
 } from '../../managers'
+import { ProductPickingOperation } from '../product/product-picking.operation'
 
 @Injectable()
 export class ReceiptReturnProductOperation {
@@ -21,7 +21,8 @@ export class ReceiptReturnProductOperation {
     private receiptItemManager: ReceiptItemManager,
     private productManager: ProductManager,
     private batchManager: BatchManager,
-    private productMovementManager: ProductMovementManager
+    private productMovementManager: ProductMovementManager,
+    private productPickingOperation: ProductPickingOperation
   ) { }
 
   async returnAllProduct(params: {
@@ -46,136 +47,120 @@ export class ReceiptReturnProductOperation {
         { deliveryStatus: DeliveryStatus.Pending } // receipt
       )
 
-      // === 2. RECEIPT_ITEMS: query + CALCULATOR ===
-      const receiptItemList = await this.receiptItemManager.findManyBy(manager, { oid, receiptId })
+      const receiptItemOriginList = await this.receiptItemManager.findManyBy(manager, {
+        oid,
+        receiptId,
+      })
+      const receiptItemOriginMap = ESArray.arrayToKeyValue(receiptItemOriginList, 'id')
+      if (receiptItemOriginList.length === 0) return { receipt }
 
-      const productCalculatorMap: Record<
-        string,
-        { productId: number; quantityReturn: number; openQuantity: number }
-      > = {}
-      const batchCalculatorMap: Record<
-        string,
-        {
-          batchId: number
-          productId: number
-          quantityReturn: number
-          costPrice: number
-          sumCostAmount: number
-        }
-      > = {}
-      for (let i = 0; i < receiptItemList.length; i++) {
-        const { batchId, productId, quantity, costPrice } = receiptItemList[i]
-        if (!productCalculatorMap[productId]) {
-          productCalculatorMap[productId] = {
-            productId,
-            quantityReturn: 0,
-            openQuantity: 0,
-          }
-        }
-        if (!batchCalculatorMap[batchId]) {
-          batchCalculatorMap[batchId] = {
-            batchId,
-            productId,
-            quantityReturn: 0,
-            costPrice: 0,
-            sumCostAmount: 0,
-          }
-        }
-
-        productCalculatorMap[productId].quantityReturn += quantity
-        batchCalculatorMap[batchId].quantityReturn += quantity
-        batchCalculatorMap[batchId].costPrice = costPrice
-        batchCalculatorMap[batchId].sumCostAmount += quantity * costPrice
-      }
-
-      // === 3. PRODUCT: update quantity ===
-      const productList = await this.productManager.bulkUpdate({
+      // === 2. Product and Batch origin
+      const productIdList = receiptItemOriginList.map((i) => i.productId)
+      const batchIdList = receiptItemOriginList.map((i) => i.batchId)
+      const productOriginList = await this.productManager.updateAndReturnEntity(
         manager,
-        condition: { oid, inventoryStrategy: { NOT: InventoryStrategy.NoImpact } },
-        compare: ['oid', 'id'],
-        tempList: Object.values(productCalculatorMap).map((i) => {
-          return { oid, id: i.productId, quantityReturn: i.quantityReturn }
+        { oid, id: { IN: ESArray.uniqueArray(productIdList) } },
+        { updatedAt: time }
+      )
+      const batchOriginList = await this.batchManager.updateAndReturnEntity(
+        manager,
+        { oid, id: { IN: ESArray.uniqueArray(batchIdList) } },
+        { updatedAt: time }
+      )
+      const pickingContainer = this.productPickingOperation.generatePickingPlan({
+        productOriginList,
+        batchOriginList,
+        voucherBatchList: receiptItemOriginList.map((i) => {
+          return {
+            ...i,
+            voucherProductId: i.id,
+            voucherBatchId: 0,
+            warehouseIds: JSON.stringify([i.warehouseId]),
+            costAmount: i.costPrice * i.quantity,
+            inventoryStrategy: i.batchId
+              ? InventoryStrategy.RequireBatchSelection
+              : InventoryStrategy.NoImpact,
+          }
         }),
-        update: {
-          quantity: (t: string) => `"quantity" - "${t}"."quantityReturn"`,
-        },
+        allowNegativeQuantity: true,
+      })
+
+      // 3. === UPDATE for PRODUCT and BATCH ===
+      const productModifiedList = await this.productManager.bulkUpdate({
+        manager,
+        condition: { oid },
+        compare: ['id'],
+        tempList: pickingContainer.pickingProductList.map((i) => {
+          return {
+            id: i.productId,
+            pickingQuantity: i.pickingQuantity, // không cộng trừ theo nó
+            quantity: i.closeQuantity,
+          }
+        }),
+        update: ['quantity'],
         options: { requireEqualLength: true },
       })
-      const productMap = arrayToKeyValue(productList, 'id')
+      const productModifiedMap = ESArray.arrayToKeyValue(productModifiedList, 'id')
 
-      // product nào không cập nhật số lượng nữa thì cũng không cập nhật batch luôn
-      const batchQuantityList = Object.values(batchCalculatorMap).filter((i) => {
-        return !!productMap[i.productId]
-      })
-      const batchList: Batch[] = await this.batchManager.bulkUpdate({
+      const batchModifiedList = await this.batchManager.bulkUpdate({
         manager,
         condition: { oid },
         compare: ['id', 'productId'],
-        tempList: Object.values(batchQuantityList).map((i) => {
+        tempList: pickingContainer.pickingBatchList.map((i) => {
           return {
             id: i.batchId,
             productId: i.productId,
-            quantityReturn: i.quantityReturn,
-            costPrice: i.costPrice,
-            sumCostAmount: i.sumCostAmount,
+            pickingQuantity: i.pickingQuantity,
+            pickingCostAmount: i.pickingCostAmount,
           }
         }),
         update: {
-          quantity: (t: string, u: string) => `"${u}"."quantity" - "${t}"."quantityReturn"`,
-          // chú thích 1 vài trường hợp
-          // 1. Nếu hoàn trả gây ra số lượng âm, lưu costAmount âm theo "costPrice của batch"
-          // 2. Nếu costAmount cũng ko đủ để trả, mặc dù số lượng đủ, thì fix lại theo "costPrice của batch"
-          // 3. Nếu số lượng đủ và costAmount đủ thì trừ bình thường
-          costAmount: (t: string, u: string) => ` CASE
-                                    WHEN  ("${u}"."quantity" <= "${t}"."quantityReturn")
-                                      THEN ("${u}".quantity - "${t}"."quantityReturn") * "${u}"."costPrice"
-                                    WHEN  ("${u}"."costAmount" <= "${t}"."sumCostAmount")
-                                      THEN ("${u}".quantity - "${t}"."quantityReturn") * "${u}"."costPrice"
-                                    ELSE "${u}"."costAmount" - "${t}"."sumCostAmount"
-                                  END`,
+          quantity: () => `"quantity" - "pickingQuantity"`,
+          costAmount: () => `"costAmount" - "pickingCostAmount"`,
         },
         options: { requireEqualLength: true },
       })
-
-      // === 4. CALCULATOR: số lượng ban đầu của product và batch ===
-      productList.forEach((i) => {
-        const productCalculator = productCalculatorMap[i.id]
-        productCalculator.openQuantity = i.quantity + productCalculator.quantityReturn
-      })
+      const batchModifiedMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')
 
       // === 5. PRODUCT_MOVEMENT: insert ===
-      const productMovementInsertList = receiptItemList.map((ri) => {
-        const productCalculator = productCalculatorMap[ri.productId]
-        // vẫn có thể productCalculator null vì Product chuyển từ có quản lý sang không quản lý số lượng
+      const productMovementInsertList = pickingContainer.pickingMovementList.map((paMovement) => {
+        const riOrigin = receiptItemOriginMap[paMovement.voucherProductId]
+        const batch = batchModifiedMap[paMovement.batchId] // có thể null
         const productMovementInsert: ProductMovementInsertType = {
           oid,
+          movementType: MovementType.Receipt,
           contactId: receipt.distributorId,
           voucherId: receiptId,
-          voucherProductId: ri.id,
-          warehouseId: ri.warehouseId,
-          productId: ri.productId,
-          batchId: ri.batchId,
+          voucherProductId: riOrigin.id,
+          warehouseId: riOrigin.warehouseId,
+          productId: riOrigin.productId,
+          batchId: riOrigin.batchId,
+
           createdAt: time,
-          movementType: MovementType.Receipt,
           isRefund: 1,
-          unitRate: ri.unitRate,
-          actualPrice: ri.costPrice,
-          expectedPrice: ri.costPrice,
-          openQuantity: productCalculator ? productCalculator.openQuantity : 0, // quantity đã được trả đúng số lượng ban đầu ở trên
-          quantity: -ri.quantity,
-          costAmount: -ri.costPrice * ri.quantity,
-          closeQuantity: productCalculator ? productCalculator.openQuantity - ri.quantity : 0,
+          expectedPrice: riOrigin.costPrice,
+          actualPrice: riOrigin.costPrice,
+
+          quantity: -paMovement.pickingQuantity,
+          costAmount: -paMovement.pickingCostAmount,
+          openQuantityProduct: paMovement.openQuantityProduct,
+          closeQuantityProduct: paMovement.closeQuantityProduct,
+          openQuantityBatch: paMovement.openQuantityBatch,
+          closeQuantityBatch: paMovement.closeQuantityBatch,
+          openCostAmountBatch: paMovement.openCostAmountBatch,
+          closeCostAmountBatch: paMovement.closeCostAmountBatch,
         }
-        // sau khi lấy rồi cần cập nhật productCalculator vì 1 sản phẩm có thể bán 2 số lượng với 2 giá khác nhau
-        // trường hợp noHasManageQuantity thì bỏ qua
-        if (productCalculator) {
-          productCalculator.openQuantity = productMovementInsert.closeQuantity // gán lại số lượng ban đầu vì draft đã lấy
-        }
+
         return productMovementInsert
       })
       await this.productMovementManager.insertMany(manager, productMovementInsertList)
 
-      return { receipt, receiptItemList, productList, batchList }
+      return {
+        receipt,
+        receiptItemList: receiptItemOriginMap,
+        productList: productModifiedList,
+        batchList: batchModifiedList,
+      }
     })
 
     return transaction

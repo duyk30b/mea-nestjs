@@ -51,20 +51,6 @@ export default class ProductMovement extends BaseEntity {
   @Expose()
   isRefund: 0 | 1
 
-  @Column({ type: 'smallint', default: 1 })
-  @Expose()
-  unitRate: number
-
-  @Column({
-    type: 'decimal',
-    default: 0,
-    precision: 10,
-    scale: 3,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose()
-  openQuantity: number
-
   @Column({
     type: 'decimal',
     default: 0,
@@ -76,6 +62,14 @@ export default class ProductMovement extends BaseEntity {
   quantity: number
 
   @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  costAmount: number
+
+  @Column({
     type: 'decimal',
     default: 0,
     precision: 10,
@@ -83,7 +77,37 @@ export default class ProductMovement extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  closeQuantity: number
+  openQuantityProduct: number
+
+  @Column({
+    type: 'decimal',
+    default: 0,
+    precision: 10,
+    scale: 3,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  closeQuantityProduct: number
+
+  @Column({
+    type: 'decimal',
+    default: 0,
+    precision: 10,
+    scale: 3,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  openQuantityBatch: number
+
+  @Column({
+    type: 'decimal',
+    default: 0,
+    precision: 10,
+    scale: 3,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  closeQuantityBatch: number
 
   @Column({
     type: 'bigint',
@@ -91,7 +115,15 @@ export default class ProductMovement extends BaseEntity {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  costAmount: number
+  openCostAmountBatch: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  closeCostAmountBatch: number
 
   @Column({
     type: 'bigint',
@@ -155,12 +187,17 @@ export default class ProductMovement extends BaseEntity {
     if (!raw) return null
     const entity = new ProductMovement()
     Object.assign(entity, raw)
-    entity.openQuantity = Number(raw.openQuantity)
     entity.quantity = Number(raw.quantity)
-    entity.closeQuantity = Number(raw.closeQuantity)
     entity.costAmount = Number(raw.costAmount)
-    entity.actualPrice = Number(raw.actualPrice)
+    entity.openQuantityProduct = Number(raw.openQuantityProduct)
+    entity.closeQuantityProduct = Number(raw.closeQuantityProduct)
+    entity.openQuantityBatch = Number(raw.openQuantityBatch)
+    entity.closeQuantityBatch = Number(raw.closeQuantityBatch)
+    entity.openCostAmountBatch = Number(raw.openCostAmountBatch)
+    entity.closeCostAmountBatch = Number(raw.closeCostAmountBatch)
+
     entity.expectedPrice = Number(raw.expectedPrice)
+    entity.actualPrice = Number(raw.actualPrice)
     entity.createdAt = raw.createdAt == null ? raw.createdAt : Number(raw.createdAt)
 
     return entity

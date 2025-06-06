@@ -120,7 +120,7 @@ export class ApiBatchService {
     )
     if (
       batchOrigin.quantity === batchUpdated.quantity
-      && batchOrigin.costPrice === batchUpdated.costPrice
+      && batchOrigin.costAmount === batchUpdated.costAmount
     ) {
       return { data: { batch: batchUpdated } }
     }
@@ -140,11 +140,17 @@ export class ApiBatchService {
       productId: batchOrigin.productId,
       batchId: batchOrigin.id,
       isRefund: 0,
-      unitRate: 1,
-      openQuantity: batchOrigin.product.quantity,
+
       quantity: batchUpdated.quantity - batchOrigin.quantity,
-      closeQuantity: productUpdated.quantity,
-      costAmount: batchUpdated.costAmount - batchUpdated.costAmount,
+      costAmount: batchUpdated.costAmount - batchOrigin.costAmount,
+
+      openQuantityProduct: batchOrigin.product.quantity,
+      closeQuantityProduct: productUpdated.quantity,
+      openQuantityBatch: batchOrigin.quantity,
+      closeQuantityBatch: batchUpdated.quantity,
+      openCostAmountBatch: batchOrigin.costAmount,
+      closeCostAmountBatch: batchUpdated.costAmount,
+      
       actualPrice: batchUpdated.costPrice,
       expectedPrice: batchOrigin.costPrice,
       createdAt: Date.now(),

@@ -30,7 +30,7 @@ export class ApiReceiptAction {
     private readonly receiptPrepaymentOperation: ReceiptPrepaymentOperation,
     private readonly receiptReturnProductOperation: ReceiptReturnProductOperation,
     private readonly receiptReopenOperation: ReceiptReopenOperation
-  ) {}
+  ) { }
 
   async destroy(params: { oid: number; receiptId: number }): Promise<BaseResponse> {
     const { oid, receiptId } = params

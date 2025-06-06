@@ -52,7 +52,7 @@ export default class Batch extends BaseEntity {
       from: (value) => (value == null ? value : Number(value)),
     },
   })
-  @Expose() // Vẫn rất cần thiết giữ lại giá nhập này, vì khi thay đổi costAmount gây ra số lượng âm thì có costPrice để fix lại
+  @Expose() // Vẫn rất cần thiết giữ lại giá nhập này, dùng cho SplitBatchByCostPrice.SplitOnDifferent
   costPrice: number // Giá nhập
 
   @Column({
@@ -101,6 +101,7 @@ export default class Batch extends BaseEntity {
     entity.expiryDate = raw.expiryDate == null ? raw.expiryDate : Number(raw.expiryDate)
     entity.quantity = Number(raw.quantity)
     entity.costPrice = Number(raw.costPrice)
+    entity.costAmount = Number(raw.costAmount)
 
     entity.registeredAt = raw.registeredAt == null ? raw.registeredAt : Number(raw.registeredAt)
     entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)
@@ -123,14 +124,13 @@ export type BatchInsertType = Omit<
 >
 
 export type BatchUpdateType = {
-  [K in Exclude<
-    keyof Batch,
-    keyof BatchRelationType | keyof Pick<Batch, 'oid' | 'id' | 'productId' | 'updatedAt'>
-  >]: Batch[K] | (() => string)
+  [K in Exclude<keyof Batch, keyof BatchRelationType | keyof Pick<Batch, 'oid' | 'id'>>]:
+  | Batch[K]
+  | (() => string)
 }
 
 export type BatchSortType = {
   [P in keyof Pick<Batch, 'id' | 'productId' | 'quantity' | 'expiryDate' | 'registeredAt'>]?:
-    | 'ASC'
-    | 'DESC'
+  | 'ASC'
+  | 'DESC'
 }
