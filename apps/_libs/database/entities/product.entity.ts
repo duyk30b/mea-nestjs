@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm'
-import { InventoryStrategy } from '../common/variable'
+import { PickupStrategy } from '../common/variable'
 import Batch from './batch.entity'
 import Commission from './commission.entity'
 import ProductGroup from './product-group.entity'
@@ -74,9 +74,9 @@ export default class Product {
   @Expose()
   quantity: number
 
-  @Column({ default: InventoryStrategy.Inherit, type: 'smallint' })
+  @Column({ default: PickupStrategy.Inherit, type: 'smallint' })
   @Expose()
-  inventoryStrategy: InventoryStrategy
+  pickupStrategy: PickupStrategy
 
   @Column({ default: SplitBatchByWarehouse.Inherit, type: 'smallint' })
   @Expose()
@@ -211,16 +211,16 @@ export default class Product {
   ) {
     const splitRule: ProductSettingRule = {
       allowNegativeQuantity: false, // nếu cần thì xử lý ghi đè sau
-      inventoryStrategy: product.inventoryStrategy,
+      pickupStrategy: product.pickupStrategy,
       splitBatchByWarehouse: product.splitBatchByWarehouse,
       splitBatchByDistributor: product.splitBatchByDistributor,
       splitBatchByExpiryDate: product.splitBatchByExpiryDate,
       splitBatchByCostPrice: product.splitBatchByCostPrice,
     }
-    if (splitRule.inventoryStrategy === InventoryStrategy.Inherit) {
-      splitRule.inventoryStrategy = productSettingCommon.inventoryStrategy
-      if (splitRule.inventoryStrategy === InventoryStrategy.Inherit) {
-        splitRule.inventoryStrategy = productSettingRoot.inventoryStrategy
+    if (splitRule.pickupStrategy === PickupStrategy.Inherit) {
+      splitRule.pickupStrategy = productSettingCommon.pickupStrategy
+      if (splitRule.pickupStrategy === PickupStrategy.Inherit) {
+        splitRule.pickupStrategy = productSettingRoot.pickupStrategy
       }
     }
     if (splitRule.splitBatchByWarehouse === SplitBatchByWarehouse.Inherit) {
@@ -263,7 +263,7 @@ export type ProductInsertType = Omit<
 export type ProductUpdateType = {
   [K in Exclude<
     keyof Product,
-    keyof ProductRelationType | keyof Pick<Product, 'oid' | 'id' | 'quantity' | 'warehouseIdList'>
+    keyof ProductRelationType | keyof Pick<Product, 'oid' | 'id' | 'warehouseIdList'>
   >]: Product[K] | (() => string)
 }
 

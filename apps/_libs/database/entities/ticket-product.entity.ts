@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { DeliveryStatus, DiscountType, InventoryStrategy } from '../common/variable'
+import { DeliveryStatus, DiscountType, PickupStrategy } from '../common/variable'
 import Batch from './batch.entity'
 import Customer from './customer.entity'
 import Product from './product.entity'
@@ -20,9 +20,9 @@ export default class TicketProduct extends BaseEntity {
   @Expose()
   priority: number
 
-  @Column({ default: InventoryStrategy.AutoWithFIFO, type: 'smallint' })
+  @Column({ default: PickupStrategy.AutoWithFIFO, type: 'smallint' })
   @Expose()
-  inventoryStrategy: InventoryStrategy
+  pickupStrategy: PickupStrategy
 
   @Column()
   @Expose()

@@ -151,7 +151,9 @@ export abstract class _PostgreSqlManager<
     const insertResult = await manager.insert(this.entity, data)
     const id = insertResult.identifiers[0].id
     if (!id) {
-      throw new Error(`Insert Database failed: ` + JSON.stringify({ insertResult, data }))
+      throw new Error(
+        `Insert ${this.entity['name']} failed: ` + JSON.stringify({ insertResult, data })
+      )
     }
     return id
   }
@@ -176,7 +178,9 @@ export abstract class _PostgreSqlManager<
       .returning('*')
       .execute()
     if (insertResult.raw?.length !== 1) {
-      throw new Error(`Insert Database failed: ` + JSON.stringify({ insertResult, data }))
+      throw new Error(
+        `Insert ${this.entity['name']} failed: ` + JSON.stringify({ insertResult, data })
+      )
     }
     return insertResult.raw[0]
   }
@@ -248,7 +252,7 @@ export abstract class _PostgreSqlManager<
   ): Promise<_ENTITY> {
     const raws = await this.updateAndReturnRaw(manager, condition, data)
     if (raws.length !== 1) {
-      throw new Error(`Update Database failed: ` + JSON.stringify({ raws }))
+      throw new Error(`Update ${this.entity['name']} failed: ` + JSON.stringify({ raws }))
     }
     return this.entity.fromRaw(raws[0])
   }
@@ -267,7 +271,9 @@ export abstract class _PostgreSqlManager<
       .orUpdate(updateFields as string[], conflictFields as string[])
       .execute()
     if (upsertResult.raw?.length !== upsertList.length) {
-      throw new Error(`Insert Database failed: ` + JSON.stringify({ upsertResult, upsertList }))
+      throw new Error(
+        `Insert ${this.entity['name']} failed: ` + JSON.stringify({ upsertResult, upsertList })
+      )
     }
     return this.entity.fromRaws(upsertResult.raw)
   }
@@ -309,7 +315,7 @@ export abstract class _PostgreSqlManager<
   ): Promise<_ENTITY> {
     const raws = await this.deleteAndReturnRaw(manager, condition)
     if (raws.length !== 1) {
-      throw new Error(`Delete Database failed: ` + JSON.stringify({ raws }))
+      throw new Error(`Delete ${this.entity['name']} failed: ` + JSON.stringify({ raws }))
     }
     return this.entity.fromRaw(raws[0])
   }

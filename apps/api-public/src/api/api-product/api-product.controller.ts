@@ -10,6 +10,7 @@ import {
   ProductCreateBody,
   ProductGetManyQuery,
   ProductGetOneQuery,
+  ProductMergeBody,
   ProductPaginationQuery,
   ProductUpdateBody,
 } from './request'
@@ -63,5 +64,11 @@ export class ApiProductController {
   @ApiParam({ name: 'id', example: 1 })
   async deleteOne(@External() { oid, organization }: TExternal, @Param() { id }: IdParam) {
     return await this.apiProductService.destroyOne({ organization, oid, productId: id })
+  }
+
+  @Patch('merge-product')
+  @HasPermission(PermissionId.PRODUCT_MERGE)
+  async mergeProduct(@External() { oid, uid }: TExternal, @Body() body: ProductMergeBody) {
+    return await this.apiProductService.mergeProduct({ oid, body, userId: uid })
   }
 }

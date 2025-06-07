@@ -1,4 +1,4 @@
-import { Body, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { MovementType } from '../../../../_libs/database/common/variable'
@@ -14,7 +14,6 @@ import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   BatchGetManyQuery,
   BatchGetOneQuery,
-  BatchInsertBody,
   BatchMergeBody,
   BatchPaginationQuery,
   BatchUpdateInfoAndQuantityBody,
@@ -74,7 +73,7 @@ export class ApiBatchService {
         expiryDate: filter?.expiryDate,
         updatedAt: filter?.updatedAt,
         registeredAt: filter?.registeredAt,
-        $OR: filter.$OR,
+        $OR: filter?.$OR,
       },
       limit,
       sort: sort || undefined,
@@ -150,7 +149,7 @@ export class ApiBatchService {
       closeQuantityBatch: batchUpdated.quantity,
       openCostAmountBatch: batchOrigin.costAmount,
       closeCostAmountBatch: batchUpdated.costAmount,
-      
+
       actualPrice: batchUpdated.costPrice,
       expectedPrice: batchOrigin.costPrice,
       createdAt: Date.now(),
@@ -158,26 +157,6 @@ export class ApiBatchService {
     this.productMovementRepository.insertOneFullField(productMovement)
     this.socketEmitService.productUpsert(oid, { product: productUpdated })
     return { data: { batch: batchUpdated, product: productUpdated } }
-  }
-
-  async batchMerge(options: { oid: number; body: BatchMergeBody }) {
-    const { oid, body } = options
-    const { batchIdSource, batchIdTarget, productId } = body
-
-    await this.batchRepository.mergeBatch({ oid, productId, batchIdSource, batchIdTarget })
-    await this.receiptItemRepository.update(
-      { oid, productId, batchId: batchIdSource },
-      { batchId: batchIdTarget }
-    )
-    await this.ticketBatchRepository.update(
-      { oid, productId, batchId: batchIdSource },
-      { batchId: batchIdTarget }
-    )
-    await this.productMovementRepository.update(
-      { oid, productId, batchId: batchIdSource },
-      { batchId: batchIdTarget }
-    )
-    return { data: true }
   }
 
   async destroyOne(options: { oid: number; batchId: number }): Promise<BaseResponse> {
@@ -202,5 +181,24 @@ export class ApiBatchService {
     await this.batchRepository.delete({ oid, id: batchId })
 
     return { data: { batchId, receiptItemList: [], ticketBatchList: [] } }
+  }
+
+  async batchMerge(options: { oid: number; body: BatchMergeBody }) {
+    const { oid, body } = options
+    const { batchIdSourceList, batchIdTarget, productId } = body
+
+    batchIdSourceList.forEach((i) => {
+      if (isNaN(i) || i <= 0) {
+        throw new BusinessException('error.ValidateFailed')
+      }
+    })
+    await this.batchRepository.mergeBatch({
+      oid,
+      productId,
+      batchIdSourceList,
+      batchIdTarget,
+    })
+
+    return { data: true }
   }
 }

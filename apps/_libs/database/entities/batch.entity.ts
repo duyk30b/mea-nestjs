@@ -1,12 +1,19 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
+import { Exclude, Expose } from 'class-transformer'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import Product from './product.entity'
 
 @Entity('Batch')
 @Index('IDX_Batch__oid_productId', ['oid', 'productId'])
-@Index('IDX_Batch__oid_registeredAt', ['oid', 'registeredAt'])
-export default class Batch extends BaseEntity {
+@Index('IDX_Batch__oid_updatedAt', ['oid', 'updatedAt'])
+export default class Batch {
+  @Column({ name: 'oid' })
+  @Exclude()
+  oid: number
+
+  @PrimaryGeneratedColumn({ name: 'id' })
+  @Expose({ name: 'id' })
+  id: number
+
   @Column({ default: 0 })
   @Expose()
   warehouseId: number

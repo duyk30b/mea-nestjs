@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { ESArray } from '../../../common/helpers/object.helper'
-import { DeliveryStatus, InventoryStrategy, MovementType } from '../../common/variable'
+import { DeliveryStatus, MovementType, PickupStrategy } from '../../common/variable'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
 import { ReceiptStatus } from '../../entities/receipt.entity'
 import {
-  BatchManager,
-  ProductManager,
-  ProductMovementManager,
-  ReceiptItemManager,
-  ReceiptManager,
+    BatchManager,
+    ProductManager,
+    ProductMovementManager,
+    ReceiptItemManager,
+    ReceiptManager,
 } from '../../managers'
 import { ProductPickingOperation } from '../product/product-picking.operation'
 
@@ -77,9 +77,9 @@ export class ReceiptReturnProductOperation {
             voucherBatchId: 0,
             warehouseIds: JSON.stringify([i.warehouseId]),
             costAmount: i.costPrice * i.quantity,
-            inventoryStrategy: i.batchId
-              ? InventoryStrategy.RequireBatchSelection
-              : InventoryStrategy.NoImpact,
+            pickupStrategy: i.batchId
+              ? PickupStrategy.RequireBatchSelection
+              : PickupStrategy.NoImpact,
           }
         }),
         allowNegativeQuantity: true,

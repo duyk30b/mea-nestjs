@@ -1,25 +1,25 @@
 import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
 import {
-  IsArray,
-  IsBoolean,
-  IsDefined,
-  IsIn,
-  IsInt,
-  IsNumber,
-  IsPositive,
-  IsString,
-  ValidateNested,
-  validateSync,
+    IsArray,
+    IsBoolean,
+    IsDefined,
+    IsIn,
+    IsInt,
+    IsNumber,
+    IsPositive,
+    IsString,
+    ValidateNested,
+    validateSync,
 } from 'class-validator'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { InventoryStrategy } from '../../../../../_libs/database/common/variable'
+import { PickupStrategy } from '../../../../../_libs/database/common/variable'
 import { CommissionCalculatorType } from '../../../../../_libs/database/entities/commission.entity'
 import {
-  SplitBatchByCostPrice,
-  SplitBatchByDistributor,
-  SplitBatchByExpiryDate,
-  SplitBatchByWarehouse,
+    SplitBatchByCostPrice,
+    SplitBatchByDistributor,
+    SplitBatchByExpiryDate,
+    SplitBatchByWarehouse,
 } from '../../../../../_libs/database/entities/product.entity'
 
 export class UnitConversionBody {
@@ -178,11 +178,11 @@ export class ProductCreateBody {
   @IsIn([0, 1])
   isActive: 0 | 1
 
-  @ApiProperty({ enum: InventoryStrategy, example: InventoryStrategy.AutoWithExpiryDate })
+  @ApiProperty({ enum: PickupStrategy, example: PickupStrategy.AutoWithExpiryDate })
   @Expose()
   @IsDefined()
-  @IsEnumValue(InventoryStrategy)
-  inventoryStrategy: InventoryStrategy
+  @IsEnumValue(PickupStrategy)
+  pickupStrategy: PickupStrategy
 
   @ApiProperty({ enum: SplitBatchByWarehouse, example: SplitBatchByWarehouse.Inherit })
   @Expose()

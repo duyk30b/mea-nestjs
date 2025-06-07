@@ -3,10 +3,10 @@ import { Expose, Transform } from 'class-transformer'
 import { IsDefined, IsNumber, IsString, Max, Min } from 'class-validator'
 import { valuesEnum } from '../../../../../_libs/common/helpers/typescript.helper'
 import {
-  IsEnumValue,
-  IsNumberGreaterThan,
+    IsEnumValue,
+    IsNumberGreaterThan,
 } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType, InventoryStrategy } from '../../../../../_libs/database/common/variable'
+import { DiscountType, PickupStrategy } from '../../../../../_libs/database/common/variable'
 
 export class TicketOrderProductDraft {
   @ApiProperty({ example: 56 })
@@ -15,11 +15,11 @@ export class TicketOrderProductDraft {
   @IsNumber()
   priority: number
 
-  @ApiProperty({ enum: InventoryStrategy, example: InventoryStrategy.AutoWithExpiryDate })
+  @ApiProperty({ enum: PickupStrategy, example: PickupStrategy.AutoWithExpiryDate })
   @Expose()
   @IsDefined()
-  @IsEnumValue(InventoryStrategy)
-  inventoryStrategy: InventoryStrategy
+  @IsEnumValue(PickupStrategy)
+  pickupStrategy: PickupStrategy
 
   @ApiPropertyOptional({ type: 'string', example: JSON.stringify([1, 5, 10]) })
   @Expose()

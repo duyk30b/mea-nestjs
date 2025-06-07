@@ -4,7 +4,7 @@ import Product from './product.entity'
 
 export type ProductSettingRule = Pick<
   Product,
-  | 'inventoryStrategy'
+  | 'pickupStrategy'
   | 'splitBatchByWarehouse'
   | 'splitBatchByDistributor'
   | 'splitBatchByExpiryDate'

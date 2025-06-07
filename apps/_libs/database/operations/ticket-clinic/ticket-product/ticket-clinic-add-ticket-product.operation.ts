@@ -4,9 +4,9 @@ import { DataSource, EntityManager } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { DeliveryStatus } from '../../../common/variable'
 import TicketProduct, {
-  TicketProductInsertType,
-  TicketProductRelationType,
-  TicketProductType,
+    TicketProductInsertType,
+    TicketProductRelationType,
+    TicketProductType,
 } from '../../../entities/ticket-product.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import { TicketManager, TicketProductManager } from '../../../managers'
@@ -58,7 +58,7 @@ export class TicketClinicAddTicketProductOperation {
           customerId: ticketOrigin.customerId,
           deliveryStatus: DeliveryStatus.Pending,
           costAmount: i.costAmount, // set tạm thế, khi nào gửi hàng chọn lô mới tính chính xác được
-          inventoryStrategy: i.inventoryStrategy, // nếu không xuất kho thì costAmount lấy giá trị trên luôn
+          pickupStrategy: i.pickupStrategy, // nếu không xuất kho thì costAmount lấy giá trị trên luôn
           type: ticketProductType,
         }
         return insert

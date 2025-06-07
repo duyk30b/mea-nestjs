@@ -1,21 +1,21 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
 import {
-  IsArray,
-  IsDefined,
-  IsInt,
-  IsNumber,
-  IsString,
-  Max,
-  Min,
-  ValidateNested,
+    IsArray,
+    IsDefined,
+    IsInt,
+    IsNumber,
+    IsString,
+    Max,
+    Min,
+    ValidateNested,
 } from 'class-validator'
 import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
 import {
-  IsEnumValue,
-  IsNumberGreaterThan,
+    IsEnumValue,
+    IsNumberGreaterThan,
 } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType, InventoryStrategy } from '../../../../../../_libs/database/common/variable'
+import { DiscountType, PickupStrategy } from '../../../../../../_libs/database/common/variable'
 
 export class TicketProductAddBody {
   @ApiProperty({ example: 1 })
@@ -24,11 +24,11 @@ export class TicketProductAddBody {
   @IsNumber()
   priority: number
 
-  @ApiProperty({ enum: InventoryStrategy, example: InventoryStrategy.AutoWithExpiryDate })
+  @ApiProperty({ enum: PickupStrategy, example: PickupStrategy.AutoWithExpiryDate })
   @Expose()
   @IsDefined()
-  @IsEnumValue(InventoryStrategy)
-  inventoryStrategy: InventoryStrategy
+  @IsEnumValue(PickupStrategy)
+  pickupStrategy: PickupStrategy
 
   @ApiPropertyOptional({ type: 'string', example: JSON.stringify([1, 5, 10]) })
   @Expose()

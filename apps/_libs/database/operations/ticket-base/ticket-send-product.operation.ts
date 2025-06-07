@@ -6,12 +6,12 @@ import { ProductMovementInsertType } from '../../entities/product-movement.entit
 import { TicketBatchInsertType } from '../../entities/ticket-batch.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
 import {
-  BatchManager,
-  ProductManager,
-  ProductMovementManager,
-  TicketBatchManager,
-  TicketManager,
-  TicketProductManager,
+    BatchManager,
+    ProductManager,
+    ProductMovementManager,
+    TicketBatchManager,
+    TicketManager,
+    TicketProductManager,
 } from '../../managers'
 import { ProductPickingOperation } from '../product/product-picking.operation'
 import { TicketChangeItemMoneyManager } from './ticket-change-item-money.manager'
@@ -134,7 +134,7 @@ export class TicketSendProductOperation {
             ticketProductId: tp.id,
             warehouseId: batchOrigin?.warehouseId || 0,
             productId: tp.productId,
-            batchId: pickingTicketBatch.batchId || 0, // thằng inventoryStrategy.NoImpact luôn lấy batchId = 0
+            batchId: pickingTicketBatch.batchId || 0, // thằng pickupStrategy.NoImpact luôn lấy batchId = 0
             deliveryStatus: DeliveryStatus.Delivered,
             unitRate: tp.unitRate,
             quantity: pickingTicketBatch.pickingQuantity,

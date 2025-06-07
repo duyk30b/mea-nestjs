@@ -3,7 +3,7 @@ import { DataSource } from 'typeorm'
 import { ESArray } from '../../../common/helpers/object.helper'
 import { ESTimer } from '../../../common/helpers/time.helper'
 import { BusinessError } from '../../common/error'
-import { InventoryStrategy } from '../../common/variable'
+import { PickupStrategy } from '../../common/variable'
 import { Batch, Product } from '../../entities'
 
 export type PickingMovement = {
@@ -76,7 +76,7 @@ export class ProductPickingOperation {
       batchId: number
       costAmount: number | null // nếu truyền null thì tự nhặt costAmount, nếu không thì cần lấy theo costAMount này
       quantity: number
-      inventoryStrategy: InventoryStrategy
+      pickupStrategy: PickupStrategy
     }[]
     allowNegativeQuantity: boolean
   }) {
@@ -117,7 +117,7 @@ export class ProductPickingOperation {
 
     const pickingMovementList: PickingMovement[] = []
     voucherBatchList.forEach((voucherProduct) => {
-      const { voucherProductId, voucherBatchId, productId, inventoryStrategy } = voucherProduct
+      const { voucherProductId, voucherBatchId, productId, pickupStrategy } = voucherProduct
       // nếu sản phẩm chưa có lô hoặc lựa chọn không trừ kho thì không trừ
       const productOrigin = productOriginMap[productId]
       if (!productOrigin) {
@@ -127,7 +127,7 @@ export class ProductPickingOperation {
       if (
         !batchCalcListMap[productId]
         || !batchCalcListMap[productId].length
-        || inventoryStrategy === InventoryStrategy.NoImpact
+        || pickupStrategy === PickupStrategy.NoImpact
       ) {
         const pickingQuantity = voucherProduct.quantity
         const pickingCostAmount = voucherProduct.quantity * productOrigin.costPrice
@@ -150,7 +150,7 @@ export class ProductPickingOperation {
 
       // nếu chiến lược là chọn lô thì batchId phải khác 0
       else if (
-        voucherProduct.inventoryStrategy === InventoryStrategy.RequireBatchSelection
+        voucherProduct.pickupStrategy === PickupStrategy.RequireBatchSelection
         && voucherProduct.batchId !== 0
       ) {
         // chiến lược này thì nhặt chính xác loại lô hàng đó

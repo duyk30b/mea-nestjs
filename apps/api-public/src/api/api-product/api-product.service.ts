@@ -22,6 +22,7 @@ import {
   ProductCreateBody,
   ProductGetManyQuery,
   ProductGetOneQuery,
+  ProductMergeBody,
   ProductPaginationQuery,
   ProductUpdateBody,
 } from './request'
@@ -297,5 +298,23 @@ export class ApiProductService {
     this.cacheDataService.clearOrganization(oid)
 
     return { data: { receiptItemList: [], ticketProductList: [], productId } }
+  }
+
+  async mergeProduct(options: { oid: number; userId: number; body: ProductMergeBody }) {
+    const { oid, userId, body } = options
+    const { productIdSourceList, productIdTarget } = body
+    productIdSourceList.forEach((i) => {
+      if (isNaN(i) || i <= 0) {
+        throw new BusinessException('error.ValidateFailed')
+      }
+    })
+
+    await this.productRepository.mergeProduct({
+      oid,
+      userId,
+      productIdTarget,
+      productIdSourceList,
+    })
+    return { data: true }
   }
 }

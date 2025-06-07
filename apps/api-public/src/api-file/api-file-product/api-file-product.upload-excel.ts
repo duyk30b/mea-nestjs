@@ -3,14 +3,14 @@ import { Row, Workbook } from 'exceljs'
 import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { ESArray } from '../../../../_libs/common/helpers/object.helper'
-import { InventoryStrategy } from '../../../../_libs/database/common/variable'
+import { PickupStrategy } from '../../../../_libs/database/common/variable'
 import { User } from '../../../../_libs/database/entities'
 import {
-  ProductInsertType,
-  SplitBatchByCostPrice,
-  SplitBatchByDistributor,
-  SplitBatchByExpiryDate,
-  SplitBatchByWarehouse,
+    ProductInsertType,
+    SplitBatchByCostPrice,
+    SplitBatchByDistributor,
+    SplitBatchByExpiryDate,
+    SplitBatchByWarehouse,
 } from '../../../../_libs/database/entities/product.entity'
 import { ProductRepository } from '../../../../_libs/database/repositories'
 import { excelOneSheetWorkbook } from '../../../../_libs/file/excel-one-sheet.util'
@@ -210,7 +210,7 @@ export class ApiFileProductUploadExcel {
         wholesalePrice: 0,
         image: '',
 
-        inventoryStrategy: InventoryStrategy.Inherit,
+        pickupStrategy: PickupStrategy.Inherit,
         splitBatchByWarehouse: SplitBatchByWarehouse.Inherit,
         splitBatchByDistributor: SplitBatchByDistributor.Inherit,
         splitBatchByExpiryDate: SplitBatchByExpiryDate.Inherit,
