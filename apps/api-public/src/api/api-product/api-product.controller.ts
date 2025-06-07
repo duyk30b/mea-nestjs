@@ -68,7 +68,7 @@ export class ApiProductController {
 
   @Patch('merge-product')
   @HasPermission(PermissionId.PRODUCT_MERGE)
-  async mergeProduct(@External() { oid, uid }: TExternal, @Body() body: ProductMergeBody) {
+  async mergeProduct(@External() { oid, uid, organization }: TExternal, @Body() body: ProductMergeBody) {
     return await this.apiProductService.mergeProduct({ oid, body, userId: uid })
   }
 }

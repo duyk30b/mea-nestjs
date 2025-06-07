@@ -92,9 +92,10 @@ export class ReceiptSendProductOperation {
               quantity: i.closeQuantity,
               putawayQuantity: i.putawayQuantity, // không được cộng trừ theo thằng này, vì với trường hợp NoImpact nó vẫn nhặt
               costPrice: receiptItem.costPrice,
+              retailPrice: receiptItem.listPrice,
             }
           }),
-          update: ['costPrice', 'quantity'],
+          update: ['quantity', 'costPrice', 'retailPrice'],
           options: { requireEqualLength: true },
         })
 

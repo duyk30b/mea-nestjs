@@ -6,11 +6,11 @@ import { ESArray } from '../../../../_libs/common/helpers/object.helper'
 import { DiscountType, PickupStrategy } from '../../../../_libs/database/common/variable'
 import { User } from '../../../../_libs/database/entities'
 import {
-    ProductInsertType,
-    SplitBatchByCostPrice,
-    SplitBatchByDistributor,
-    SplitBatchByExpiryDate,
-    SplitBatchByWarehouse,
+  ProductInsertType,
+  SplitBatchByCostPrice,
+  SplitBatchByDistributor,
+  SplitBatchByExpiryDate,
+  SplitBatchByWarehouse,
 } from '../../../../_libs/database/entities/product.entity'
 import { ProductRepository } from '../../../../_libs/database/repositories'
 import { excelOneSheetWorkbook } from '../../../../_libs/file/excel-one-sheet.util'
@@ -66,6 +66,13 @@ const ReceiptItemExcelRules: ExcelColumUploadRulesType[] = [
     column: 'G',
     width: 15,
     title: 'Giá nhập',
+    type: 'number',
+    example: 10000,
+  },
+  {
+    column: 'H',
+    width: 15,
+    title: 'Giá bán',
     type: 'number',
     example: 10000,
   },
@@ -188,6 +195,7 @@ export class ApiFileReceiptUploadExcel {
       expiryDate: Date | null
       quantity: number
       costPrice: number
+      listPrice: number
     }[] = []
     worksheet.eachRow((row: Row, rowNumber: number) => {
       if (!row.hasValues) return
@@ -202,6 +210,7 @@ export class ApiFileReceiptUploadExcel {
         expiryDate: values[4] as Date,
         quantity: values[5] as number,
         costPrice: values[6] as number,
+        listPrice: values[7] as number,
       })
     })
     const productCodeList = receiptItemExcel.map((i) => i.productCode)
@@ -219,12 +228,12 @@ export class ApiFileReceiptUploadExcel {
           productCode: i.productCode,
           brandName: i.brandName,
           costPrice: i.costPrice,
+          retailPrice: i.listPrice,
           hintUsage: '',
           image: '',
           isActive: 1,
           productGroupId: 0,
           quantity: 0,
-          retailPrice: 0,
           route: '',
           source: '',
           substance: '',
@@ -257,6 +266,7 @@ export class ApiFileReceiptUploadExcel {
         quantity: i.quantity,
         unitRate: 1,
         warehouseId: 0,
+        listPrice: i.listPrice,
       }
       return item
     })

@@ -66,7 +66,6 @@ export class ApiCustomerController {
     return await this.apiCustomerService.destroyOne({
       oid,
       customerId: id,
-      organization,
     })
   }
 }

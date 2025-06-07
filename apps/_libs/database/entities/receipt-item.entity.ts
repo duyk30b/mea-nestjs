@@ -54,6 +54,14 @@ export default class ReceiptItem extends BaseEntity {
   costPrice: number // Giá cost
 
   @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  listPrice: number // Giá cost
+
+  @Column({
     type: 'decimal',
     default: 0,
     precision: 10,

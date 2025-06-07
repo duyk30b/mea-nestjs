@@ -1863,6 +1863,8 @@ let CacheDataService = class CacheDataService {
         this.orgCache[oid].userRoleList = null;
     }
     clearOrganization(oid) {
+        if (oid === undefined)
+            return (this.orgCache = {});
         if (!this.orgCache[oid])
             this.orgCache[oid] = {};
         this.orgCache[oid].organization = null;
@@ -1984,7 +1986,7 @@ let OrganizationRepository = class OrganizationRepository extends _postgresql_re
         this.organizationRepository = organizationRepository;
     }
     async updateDataVersion(oid) {
-        const randomNumber = Math.floor(Math.random() * 100);
+        const randomNumber = Math.floor(Math.random() * 1000);
         const organization = await this.updateAndReturnEntity({ id: oid }, {
             dataVersion: JSON.stringify({
                 product: randomNumber,
@@ -3164,6 +3166,15 @@ __decorate([
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Number)
 ], ReceiptItem.prototype, "costPrice", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'bigint',
+        default: 0,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], ReceiptItem.prototype, "listPrice", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         type: 'decimal',
@@ -12185,9 +12196,10 @@ let ReceiptSendProductOperation = class ReceiptSendProductOperation {
                             quantity: i.closeQuantity,
                             putawayQuantity: i.putawayQuantity,
                             costPrice: receiptItem.costPrice,
+                            retailPrice: receiptItem.listPrice,
                         };
                     }),
-                    update: ['costPrice', 'quantity'],
+                    update: ['quantity', 'costPrice', 'retailPrice'],
                     options: { requireEqualLength: true },
                 });
                 const batchModifiedList = await this.batchManager.bulkUpdate({
@@ -21861,6 +21873,13 @@ const ReceiptItemExcelRules = [
         type: 'number',
         example: 10000,
     },
+    {
+        column: 'H',
+        width: 15,
+        title: 'Giá bán',
+        type: 'number',
+        example: 10000,
+    },
 ];
 let ApiFileReceiptUploadExcel = class ApiFileReceiptUploadExcel {
     constructor(productRepository, apiReceiptService) {
@@ -21975,6 +21994,7 @@ let ApiFileReceiptUploadExcel = class ApiFileReceiptUploadExcel {
                 expiryDate: values[4],
                 quantity: values[5],
                 costPrice: values[6],
+                listPrice: values[7],
             });
         });
         const productCodeList = receiptItemExcel.map((i) => i.productCode);
@@ -21991,12 +22011,12 @@ let ApiFileReceiptUploadExcel = class ApiFileReceiptUploadExcel {
                     productCode: i.productCode,
                     brandName: i.brandName,
                     costPrice: i.costPrice,
+                    retailPrice: i.listPrice,
                     hintUsage: '',
                     image: '',
                     isActive: 1,
                     productGroupId: 0,
                     quantity: 0,
-                    retailPrice: 0,
                     route: '',
                     source: '',
                     substance: '',
@@ -22025,6 +22045,7 @@ let ApiFileReceiptUploadExcel = class ApiFileReceiptUploadExcel {
                 quantity: i.quantity,
                 unitRate: 1,
                 warehouseId: 0,
+                listPrice: i.listPrice,
             };
             return item;
         });
@@ -24820,7 +24841,7 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 var ApiRootUserService_1;
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiRootUserService = void 0;
 const common_1 = __webpack_require__(3);
@@ -24830,14 +24851,16 @@ const cache_token_service_1 = __webpack_require__(92);
 const exception_filter_1 = __webpack_require__(9);
 const string_helper_1 = __webpack_require__(226);
 const device_1 = __webpack_require__(316);
+const repositories_1 = __webpack_require__(170);
 const user_repository_1 = __webpack_require__(90);
 const socket_emit_service_1 = __webpack_require__(306);
 let ApiRootUserService = ApiRootUserService_1 = class ApiRootUserService {
-    constructor(socketEmitService, cacheTokenService, cacheDataService, userRepository) {
+    constructor(socketEmitService, cacheTokenService, cacheDataService, userRepository, organizationRepository) {
         this.socketEmitService = socketEmitService;
         this.cacheTokenService = cacheTokenService;
         this.cacheDataService = cacheDataService;
         this.userRepository = userRepository;
+        this.organizationRepository = organizationRepository;
         this.logger = new common_1.Logger(ApiRootUserService_1.name);
     }
     async pagination(query) {
@@ -24931,13 +24954,15 @@ let ApiRootUserService = ApiRootUserService_1 = class ApiRootUserService {
     }
     async logoutAll() {
         const result = this.cacheTokenService.removeAllExcludeRoot();
+        await this.organizationRepository.updateDataVersion(undefined);
+        this.cacheDataService.clearOrganization(undefined);
         return { data: result };
     }
 };
 exports.ApiRootUserService = ApiRootUserService;
 exports.ApiRootUserService = ApiRootUserService = ApiRootUserService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof cache_token_service_1.CacheTokenService !== "undefined" && cache_token_service_1.CacheTokenService) === "function" ? _b : Object, typeof (_c = typeof cache_data_service_1.CacheDataService !== "undefined" && cache_data_service_1.CacheDataService) === "function" ? _c : Object, typeof (_d = typeof user_repository_1.UserRepository !== "undefined" && user_repository_1.UserRepository) === "function" ? _d : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof cache_token_service_1.CacheTokenService !== "undefined" && cache_token_service_1.CacheTokenService) === "function" ? _b : Object, typeof (_c = typeof cache_data_service_1.CacheDataService !== "undefined" && cache_data_service_1.CacheDataService) === "function" ? _c : Object, typeof (_d = typeof user_repository_1.UserRepository !== "undefined" && user_repository_1.UserRepository) === "function" ? _d : Object, typeof (_e = typeof repositories_1.OrganizationRepository !== "undefined" && repositories_1.OrganizationRepository) === "function" ? _e : Object])
 ], ApiRootUserService);
 
 
@@ -26571,18 +26596,21 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiBatchService = void 0;
 const common_1 = __webpack_require__(3);
+const cache_data_service_1 = __webpack_require__(39);
 const exception_filter_1 = __webpack_require__(9);
 const variable_1 = __webpack_require__(21);
 const operations_1 = __webpack_require__(144);
 const repositories_1 = __webpack_require__(170);
 const socket_emit_service_1 = __webpack_require__(306);
 let ApiBatchService = class ApiBatchService {
-    constructor(socketEmitService, batchRepository, ticketBatchRepository, receiptItemRepository, productMovementRepository, productOperation) {
+    constructor(socketEmitService, cacheDataService, organizationRepository, batchRepository, ticketBatchRepository, receiptItemRepository, productMovementRepository, productOperation) {
         this.socketEmitService = socketEmitService;
+        this.cacheDataService = cacheDataService;
+        this.organizationRepository = organizationRepository;
         this.batchRepository = batchRepository;
         this.ticketBatchRepository = ticketBatchRepository;
         this.receiptItemRepository = receiptItemRepository;
@@ -26715,6 +26743,8 @@ let ApiBatchService = class ApiBatchService {
             };
         }
         await this.batchRepository.delete({ oid, id: batchId });
+        await this.organizationRepository.updateDataVersion(oid);
+        this.cacheDataService.clearOrganization(oid);
         return { data: { batchId, receiptItemList: [], ticketBatchList: [] } };
     }
     async batchMerge(options) {
@@ -26731,13 +26761,15 @@ let ApiBatchService = class ApiBatchService {
             batchIdSourceList,
             batchIdTarget,
         });
+        await this.organizationRepository.updateDataVersion(oid);
+        this.cacheDataService.clearOrganization(oid);
         return { data: true };
     }
 };
 exports.ApiBatchService = ApiBatchService;
 exports.ApiBatchService = ApiBatchService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof repositories_1.BatchRepository !== "undefined" && repositories_1.BatchRepository) === "function" ? _b : Object, typeof (_c = typeof repositories_1.TicketBatchRepository !== "undefined" && repositories_1.TicketBatchRepository) === "function" ? _c : Object, typeof (_d = typeof repositories_1.ReceiptItemRepository !== "undefined" && repositories_1.ReceiptItemRepository) === "function" ? _d : Object, typeof (_e = typeof repositories_1.ProductMovementRepository !== "undefined" && repositories_1.ProductMovementRepository) === "function" ? _e : Object, typeof (_f = typeof operations_1.ProductOperation !== "undefined" && operations_1.ProductOperation) === "function" ? _f : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof cache_data_service_1.CacheDataService !== "undefined" && cache_data_service_1.CacheDataService) === "function" ? _b : Object, typeof (_c = typeof repositories_1.OrganizationRepository !== "undefined" && repositories_1.OrganizationRepository) === "function" ? _c : Object, typeof (_d = typeof repositories_1.BatchRepository !== "undefined" && repositories_1.BatchRepository) === "function" ? _d : Object, typeof (_e = typeof repositories_1.TicketBatchRepository !== "undefined" && repositories_1.TicketBatchRepository) === "function" ? _e : Object, typeof (_f = typeof repositories_1.ReceiptItemRepository !== "undefined" && repositories_1.ReceiptItemRepository) === "function" ? _f : Object, typeof (_g = typeof repositories_1.ProductMovementRepository !== "undefined" && repositories_1.ProductMovementRepository) === "function" ? _g : Object, typeof (_h = typeof operations_1.ProductOperation !== "undefined" && operations_1.ProductOperation) === "function" ? _h : Object])
 ], ApiBatchService);
 
 
@@ -28278,7 +28310,6 @@ let ApiCustomerController = class ApiCustomerController {
         return await this.apiCustomerService.destroyOne({
             oid,
             customerId: id,
-            organization,
         });
     }
 };
@@ -28442,7 +28473,7 @@ let ApiCustomerService = class ApiCustomerService {
         return { data: { customer } };
     }
     async destroyOne(options) {
-        const { oid, customerId, organization } = options;
+        const { oid, customerId } = options;
         const ticketList = await this.ticketRepository.findMany({
             condition: { oid, customerId },
             limit: 10,
@@ -28457,8 +28488,7 @@ let ApiCustomerService = class ApiCustomerService {
             this.customerRepository.delete({ oid, id: customerId }),
             this.paymentRepository.delete({ oid, personId: customerId, personType: payment_entity_1.PersonType.Customer }),
         ]);
-        organization.dataVersionParse.customer += 1;
-        await this.organizationRepository.update({ id: oid }, { dataVersion: JSON.stringify(organization.dataVersionParse) });
+        await this.organizationRepository.updateDataVersion(oid);
         this.cacheDataService.clearOrganization(oid);
         return { data: { ticketList: [], customerId } };
     }
@@ -37556,7 +37586,7 @@ let ApiProductController = class ApiProductController {
     async deleteOne({ oid, organization }, { id }) {
         return await this.apiProductService.destroyOne({ organization, oid, productId: id });
     }
-    async mergeProduct({ oid, uid }, body) {
+    async mergeProduct({ oid, uid, organization }, body) {
         return await this.apiProductService.mergeProduct({ oid, body, userId: uid });
     }
 };
@@ -37911,8 +37941,6 @@ let ApiProductService = class ApiProductService {
             this.batchRepository.delete({ oid, id: productId }),
             this.productMovementRepository.delete({ oid, productId }),
         ]);
-        organization.dataVersionParse.product += 1;
-        organization.dataVersionParse.batch += 1;
         await this.organizationRepository.updateDataVersion(oid);
         this.cacheDataService.clearOrganization(oid);
         return { data: { receiptItemList: [], ticketProductList: [], productId } };
@@ -37931,6 +37959,8 @@ let ApiProductService = class ApiProductService {
             productIdTarget,
             productIdSourceList,
         });
+        await this.organizationRepository.updateDataVersion(oid);
+        this.cacheDataService.clearOrganization(oid);
         return { data: true };
     }
 };
@@ -40889,6 +40919,13 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], ReceiptItemBody.prototype, "costPrice", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 12000 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], ReceiptItemBody.prototype, "listPrice", void 0);
 
 
 /***/ }),

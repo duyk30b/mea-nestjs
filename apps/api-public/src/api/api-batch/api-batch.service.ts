@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { MovementType } from '../../../../_libs/database/common/variable'
@@ -6,6 +7,7 @@ import { ProductMovementInsertType } from '../../../../_libs/database/entities/p
 import { ProductOperation } from '../../../../_libs/database/operations'
 import {
   BatchRepository,
+  OrganizationRepository,
   ProductMovementRepository,
   ReceiptItemRepository,
   TicketBatchRepository,
@@ -24,6 +26,8 @@ import {
 export class ApiBatchService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
+    private readonly cacheDataService: CacheDataService,
+    private readonly organizationRepository: OrganizationRepository,
     private readonly batchRepository: BatchRepository,
     private readonly ticketBatchRepository: TicketBatchRepository,
     private readonly receiptItemRepository: ReceiptItemRepository,
@@ -180,6 +184,9 @@ export class ApiBatchService {
 
     await this.batchRepository.delete({ oid, id: batchId })
 
+    await this.organizationRepository.updateDataVersion(oid)
+    this.cacheDataService.clearOrganization(oid)
+
     return { data: { batchId, receiptItemList: [], ticketBatchList: [] } }
   }
 
@@ -198,6 +205,9 @@ export class ApiBatchService {
       batchIdSourceList,
       batchIdTarget,
     })
+
+    await this.organizationRepository.updateDataVersion(oid)
+    this.cacheDataService.clearOrganization(oid)
 
     return { data: true }
   }

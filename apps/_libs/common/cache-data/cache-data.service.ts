@@ -186,7 +186,9 @@ export class CacheDataService {
     this.orgCache[oid].userRoleList = null
   }
 
-  clearOrganization(oid: number) {
+  clearOrganization(oid: number | undefined) {
+    if (oid === undefined) return (this.orgCache = {})
+
     if (!this.orgCache[oid]) this.orgCache[oid] = {}
     this.orgCache[oid].organization = null
   }

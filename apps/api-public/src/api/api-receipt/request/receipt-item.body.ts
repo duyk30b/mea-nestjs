@@ -58,4 +58,10 @@ export class ReceiptItemBody {
   @IsDefined()
   @IsNumber()
   costPrice: number
+
+  @ApiProperty({ example: 12_000 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  listPrice: number
 }

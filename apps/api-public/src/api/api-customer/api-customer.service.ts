@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { Organization } from '../../../../_libs/database/entities'
 import { PersonType } from '../../../../_libs/database/entities/payment.entity'
 import { PaymentRepository, TicketRepository } from '../../../../_libs/database/repositories'
 import { CustomerRepository } from '../../../../_libs/database/repositories/customer.repository'
@@ -99,9 +98,8 @@ export class ApiCustomerService {
   async destroyOne(options: {
     oid: number
     customerId: number
-    organization: Organization
   }): Promise<BaseResponse> {
-    const { oid, customerId, organization } = options
+    const { oid, customerId } = options
     const ticketList = await this.ticketRepository.findMany({
       condition: { oid, customerId },
       limit: 10,
@@ -118,11 +116,7 @@ export class ApiCustomerService {
       this.paymentRepository.delete({ oid, personId: customerId, personType: PersonType.Customer }),
     ])
 
-    organization.dataVersionParse.customer += 1
-    await this.organizationRepository.update(
-      { id: oid },
-      { dataVersion: JSON.stringify(organization.dataVersionParse) }
-    )
+    await this.organizationRepository.updateDataVersion(oid)
     this.cacheDataService.clearOrganization(oid)
 
     return { data: { ticketList: [], customerId } }

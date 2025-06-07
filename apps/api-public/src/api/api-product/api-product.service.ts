@@ -292,15 +292,17 @@ export class ApiProductService {
       this.productMovementRepository.delete({ oid, productId }),
     ])
 
-    organization.dataVersionParse.product += 1
-    organization.dataVersionParse.batch += 1
     await this.organizationRepository.updateDataVersion(oid)
     this.cacheDataService.clearOrganization(oid)
 
     return { data: { receiptItemList: [], ticketProductList: [], productId } }
   }
 
-  async mergeProduct(options: { oid: number; userId: number; body: ProductMergeBody }) {
+  async mergeProduct(options: {
+    oid: number
+    userId: number
+    body: ProductMergeBody
+  }) {
     const { oid, userId, body } = options
     const { productIdSourceList, productIdTarget } = body
     productIdSourceList.forEach((i) => {
@@ -315,6 +317,9 @@ export class ApiProductService {
       productIdTarget,
       productIdSourceList,
     })
+
+    await this.organizationRepository.updateDataVersion(oid)
+    this.cacheDataService.clearOrganization(oid)
     return { data: true }
   }
 }
