@@ -1,13 +1,15 @@
-import { Cell, CellRichTextValue, CellValue, Style, Workbook, Worksheet } from 'exceljs'
-import { mergeObject } from '../common/helpers/object.helper'
+import { Cell, Style, Workbook, Worksheet } from 'exceljs'
+import { ESObject } from '../common/helpers'
 
 export type TableColumn<T> = {
   key: T
   width?: number
 }
 
+export type CustomStyleExcel = Partial<Style & { mergeCells: { colspan: number; rowspan: number } }>
+
 export type CellStyle<T extends string> = {
-  [P in T & '_all']?: Partial<Style & { mergeCells: { colspan: number; rowspan: number } }>
+  [P in T & '_all']?: CustomStyleExcel
 }
 
 export type RowData<T extends string> = {
@@ -76,7 +78,7 @@ export const excelOneSheetWorkbook = <T extends string>(params: {
         const styleAll: Partial<Style> = row.style?.['_all'] || {}
         const styleCurrent: Partial<Style> = row.style?.[keyColumn] || {}
 
-        mergeObject(style, styleAll, styleCurrent)
+        ESObject.mergeObject(style, styleAll, styleCurrent)
 
         if (style.mergeCells) {
           const { value } = cell

@@ -73,7 +73,7 @@ export class ProductRepository extends _PostgreSqlRepository<
         { quantity: () => `quantity + ${quantitySourceAdd}` }
       )
 
-      await this.batchManager.update(
+      const batchModifiedList = await this.batchManager.updateAndReturnEntity(
         manager,
         { oid, productId: { IN: productIdSourceList } },
         { productId: productIdTarget }
@@ -131,7 +131,11 @@ export class ProductRepository extends _PostgreSqlRepository<
 
       await this.productMovementManager.insertOneFullField(manager, productMovement)
 
-      return productTargetModified
+      return {
+        productDestroyedList: productSourceList,
+        productModified: productTargetModified,
+        batchModifiedList,
+      }
     })
   }
 }

@@ -7,6 +7,12 @@ export class PrescriptionSampleCreateBody {
   @Expose()
   @IsDefined()
   @IsInt()
+  userId: number
+
+  @ApiProperty({ example: 105000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
   priority: number
 
   @ApiProperty({ example: 'Nhóm ABC' })

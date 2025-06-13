@@ -8,6 +8,12 @@ export class CustomerCreateBody {
   @ApiProperty({ example: 'Phạm Hoàng Mai' })
   @Expose()
   @IsDefined()
+  @IsString()
+  customerCode: string
+
+  @ApiProperty({ example: 'Phạm Hoàng Mai' })
+  @Expose()
+  @IsDefined()
   @IsNotEmpty()
   fullName: string
 
@@ -53,11 +59,6 @@ export class CustomerCreateBody {
   @Expose()
   @IsString()
   addressProvince: string
-
-  @ApiPropertyOptional({ example: 'Huyện Khoái Châu' })
-  @Expose()
-  @IsString()
-  addressDistrict: string
 
   @ApiPropertyOptional({ example: 'Xã Dạ Trạch' })
   @Expose()

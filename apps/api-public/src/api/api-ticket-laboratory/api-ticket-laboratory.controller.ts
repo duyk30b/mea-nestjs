@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto'
-import { IsUser } from '../../../../_libs/common/guards/user.guard.'
+import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { ApiTicketLaboratoryService } from './api-ticket-laboratory.service'
 import {
@@ -21,7 +21,7 @@ export class ApiTicketLaboratoryController {
   constructor(private readonly apiTicketLaboratoryService: ApiTicketLaboratoryService) { }
 
   @Get('pagination')
-  @IsUser()
+  @UserPermission()
   async pagination(
     @External() { oid }: TExternal,
     @Query() query: TicketLaboratoryPaginationQuery
@@ -30,7 +30,7 @@ export class ApiTicketLaboratoryController {
   }
 
   @Get('detail/:id')
-  @IsUser()
+  @UserPermission()
   async detail(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,

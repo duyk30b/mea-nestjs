@@ -1,11 +1,16 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity, OneToMany } from 'typeorm'
+import { Column, Entity, OneToMany, Unique } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import { EGender } from '../common/variable'
 import Payment from './payment.entity'
 
 @Entity('Customer')
+@Unique('UNIQUE_Customer__oid_customerCode', ['oid', 'customerCode'])
 export default class Customer extends BaseEntity {
+  @Column({ type: 'varchar', length: 50 })
+  @Expose()
+  customerCode: string
+
   @Column({ type: 'varchar', length: 255 })
   @Expose()
   fullName: string
@@ -48,10 +53,6 @@ export default class Customer extends BaseEntity {
   @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   addressProvince: string
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  @Expose()
-  addressDistrict: string
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
@@ -147,5 +148,5 @@ export type CustomerUpdateType = {
 }
 
 export type CustomerSortType = {
-  [P in keyof Pick<Customer, 'id' | 'debt' | 'fullName'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<Customer, 'id' | 'customerCode' | 'debt' | 'fullName'>]?: 'ASC' | 'DESC'
 }

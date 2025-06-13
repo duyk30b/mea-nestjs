@@ -31,6 +31,17 @@ export abstract class _PostgreSqlRepository<
     this.repository = repository
   }
 
+  getManager() {
+    return this.repository.manager
+  }
+
+  async getMaxId() {
+    const queryResult = await this.repository.query(
+      `SELECT last_value FROM "${this.entity['name']}_id_seq"`
+    )
+    return Number(queryResult[0].last_value)
+  }
+
   async pagination<S extends _SORT, R extends _RELATION>(options: {
     page: number
     limit: number
@@ -173,7 +184,11 @@ export abstract class _PostgreSqlRepository<
     const insertResult = await this.repository.insert(data)
     const id = insertResult.identifiers[0].id
     if (!id) {
-      throw new Error(`Insert Database failed: ` + JSON.stringify({ insertResult, data }))
+      console.log(`Insert ${this.entity['name']} failed, insertResult: `, insertResult)
+      console.log(`Insert ${this.entity['name']} failed, data: `, data)
+      throw new Error(
+        `Insert ${this.entity['name']} failed: insertResult.identifiers[0] = ${insertResult.identifiers[0]}`
+      )
     }
     return id
   }
@@ -193,7 +208,11 @@ export abstract class _PostgreSqlRepository<
       .returning('*')
       .execute()
     if (insertResult.raw?.length !== 1) {
-      throw new Error(`Insert Database failed: ` + JSON.stringify({ insertResult, data }))
+      console.log(`Insert ${this.entity['name']} failed, insertResult.raw: `, insertResult.raw)
+      console.log(`Insert ${this.entity['name']} failed, data: `, data)
+      throw new Error(
+        `Insert ${this.entity['name']} failed: raws.length = ${insertResult.raw.length}`
+      )
     }
     return insertResult.raw[0]
   }
@@ -258,7 +277,8 @@ export abstract class _PostgreSqlRepository<
   ): Promise<_ENTITY> {
     const raws = await this.updateAndReturnRaw(condition, data)
     if (raws.length !== 1) {
-      throw new Error(`Update Database failed: ` + JSON.stringify({ raws }))
+      console.log(`Update ${this.entity['name']} failed, raws: `, raws)
+      throw new Error(`Update ${this.entity['name']} failed: raws.length = ${raws.length}`)
     }
     return this.entity.fromRaw(raws[0])
   }
@@ -277,7 +297,13 @@ export abstract class _PostgreSqlRepository<
       .returning('*')
       .execute()
     if (upsertResult.raw?.length !== upsertList.length) {
-      throw new Error(`Insert Database failed: ` + JSON.stringify({ upsertResult, upsertList }))
+      console.log(`Insert ${this.entity['name']} failed, upsertResult: `, upsertResult)
+      console.log(`Insert ${this.entity['name']} failed, upsertList: `, upsertList)
+      throw new Error(
+        `Insert ${this.entity['name']} failed: `
+        + `upsertResult.raw?.length = ${upsertResult.raw?.length}`
+        + `upsertList.length = ${upsertList.length}`
+      )
     }
     return this.entity.fromRaws(upsertResult.raw)
   }
@@ -308,18 +334,39 @@ export abstract class _PostgreSqlRepository<
     return this.entity.fromRaws(raws)
   }
 
+  async deleteOneAndReturnEntity(condition: BaseCondition<_ENTITY>): Promise<_ENTITY> {
+    const raws = await this.deleteAndReturnRaw(condition)
+    if (raws.length !== 1) {
+      console.log(`Delete ${this.entity['name']} failed, raws: `, raws)
+      throw new Error(`Delete ${this.entity['name']} failed: raws.length = ${raws.length}`)
+    }
+    return this.entity.fromRaw(raws[0])
+  }
+
   async findAndSelect<
     Aggregate extends Record<
       string,
-      { SUM?: (keyof _ENTITY | BaseOperator<keyof _ENTITY>)[]; COUNT?: keyof _ENTITY | '*' }
+      {
+        SUM?: (number | keyof _ENTITY | BaseOperator<keyof _ENTITY>)[]
+        COUNT?: keyof _ENTITY | '*'
+      }
     >,
+    SELECT extends (keyof _ENTITY)[] | { [P in keyof _ENTITY]?: boolean },
   >(options: {
     condition: BaseCondition<_ENTITY>
-    select?: { [P in keyof _ENTITY]?: boolean } | (keyof _ENTITY)[]
+    select?: SELECT
     aggregate?: Aggregate
     groupBy?: (keyof _ENTITY)[]
-  }): Promise<({ [P in keyof _ENTITY]?: any } & { [P in keyof Aggregate]: any })[]> {
-    const { condition, select, aggregate, groupBy } = options
+    orderBy?: { [P in keyof _ENTITY]?: 'ASC' | 'DESC' } | { [P in keyof Aggregate]: 'ASC' | 'DESC' }
+    limit?: number
+  }): Promise<
+    ((SELECT extends (keyof _ENTITY)[]
+      ? { [P in SELECT[number]]: _ENTITY[P] }
+      : SELECT extends { [P in keyof _ENTITY]?: boolean }
+      ? { [P in keyof SELECT as SELECT[P] extends true ? P : never]: _ENTITY }
+      : never) & { [P in keyof Aggregate]: string })[]
+  > {
+    const { condition, select, aggregate, groupBy, orderBy, limit } = options
     const where = this.getWhereOptions(condition)
     const selectList: string[] = []
     if (select) {
@@ -346,6 +393,10 @@ export abstract class _PostgreSqlRepository<
           }
         } else if (aggregate[customField].SUM) {
           const sumString = aggregate[customField].SUM.map((operator) => {
+            if (typeof operator === 'number') {
+              const column = operator as number
+              return `${column}`
+            }
             if (typeof operator === 'string') {
               const column = operator as string
               return `"${column}"`
@@ -359,61 +410,22 @@ export abstract class _PostgreSqlRepository<
       })
     }
 
-    let query = this.repository.createQueryBuilder().select(selectList).where(where).groupBy()
+    let query = this.repository.createQueryBuilder().select(selectList).where(where)
     if (groupBy && groupBy.length) {
       const groupString = groupBy.map((field) => `"${field as string}"`).join(', ')
       query = query.groupBy(groupString)
     }
+    if (orderBy) {
+      Object.keys(orderBy).forEach((column, index) => {
+        if (index == 0) {
+          query = query.orderBy(`"${column}"`, orderBy[column])
+        } else {
+          query = query.addOrderBy(`"${column}"`, orderBy[column])
+        }
+      })
+    }
+    if (limit) query = query.take(limit)
 
     return await query.getRawMany()
-  }
-
-  async updateListAndReturnEntity(options: {
-    updateList: Partial<_ENTITY>[]
-    conditionFields: (keyof _ENTITY)[]
-    updateFields: (keyof _ENTITY)[]
-  }) {
-    const { updateList } = options
-    const updateFields = options.updateFields as string[]
-    const conditionFields = options.conditionFields as string[]
-
-    if (!updateList.length) return []
-    if (!conditionFields.length) return []
-    if (!conditionFields.length) return []
-
-    const tempField = [...conditionFields, ...updateFields]
-    const tableName = this.entity['name']
-
-    const modifiedRaw: [any[], number] = await this.repository.query(
-      `
-        UPDATE  "${tableName}"
-        SET     ${updateFields.map((field) => `"${field}" = temp."${field}"`).join(', ')}
-        FROM (VALUES `
-      + updateList
-        .map((record) => {
-          return `(${tempField
-            .map((field) => {
-              if (typeof record[field] === 'number') {
-                return `${record[field]}`
-              } else if (typeof record[field] === 'string') {
-                return `'${record[field]}'`
-              } else {
-                return `${record[field]}`
-              }
-            })
-            .join(', ')})`
-        })
-        .join(', ')
-      + `   ) AS temp(${tempField.map((field) => `"${field}"`).join(', ')})
-        WHERE     ${conditionFields.map((field) => `"${tableName}"."${field}" = "temp"."${field}"`).join(' AND ')}
-        RETURNING "${tableName}".*;
-        `
-    )
-    if (modifiedRaw[0].length !== updateList.length) {
-      console.log('🚀 ~ _postgresql.repository.ts:353 ~ updateList:', updateList)
-      console.log('🚀 ~ _postgresql.repository.ts:353 ~ modifiedRaw:', modifiedRaw)
-      throw new Error(`Update Database failed: ` + JSON.stringify({ modifiedRaw, updateList }))
-    }
-    return this.entity.fromRaws(modifiedRaw[0])
   }
 }

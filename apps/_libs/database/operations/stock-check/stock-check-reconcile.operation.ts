@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { ESArray } from '../../../common/helpers/object.helper'
+import { ESArray } from '../../../common/helpers/array.helper'
 import { BusinessError } from '../../common/error'
 import { MovementType } from '../../common/variable'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'

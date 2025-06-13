@@ -1,16 +1,19 @@
 up: 
 	docker compose up -d --build
 
+logs: 
+	docker compose logs -f api_public | cut -d '|' -f2-
+
 clear-postgres:	
 	@echo "=== Dropping and recreating database mea_sql... ==="
-	docker compose exec postgres sh -c '\
+	docker compose exec postgres_local sh -c '\
 		psql -U mea -d postgres -c "DROP DATABASE IF EXISTS mea_sql;"; \
 		psql -U mea -d postgres -c "CREATE DATABASE mea_sql;"; \
 	'
 
 restore-postgres:
 	@echo "=== Restoring database from SQL file... ==="
-	docker compose exec postgres sh -c '\
+	docker compose exec postgres_local sh -c '\
 		ls -la /restore; \
 		psql "dbname=mea_sql user=mea password=Abc12345" < /restore/$$(ls -1 /restore | head -n 1); \
 	'
@@ -27,7 +30,7 @@ production-upgrade:
 	git log --all --oneline --graph -10
 	git reset --hard origin/master
 	docker compose -f docker-compose.production.yml up -d --build --force-recreate api_public
-	docker compose logs -f api_public
+	docker compose -f docker-compose.production.yml logs -f api_public
 
 production-logs:
 	docker compose logs -f api_public

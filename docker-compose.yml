@@ -7,10 +7,12 @@ volumes:
   mv_pgadmin4:
 
 services:
-  api_public:
+  api_public_local:
     container_name: mc_api_public_local
     image: mi_local:1.0.0
     restart: unless-stopped
+    tty: true
+    stdin_open: true
     networks:
       - mn_network
     build:
@@ -25,8 +27,8 @@ services:
       - '${API_PUBLIC_PORT:-20000}:${API_PUBLIC_PORT:-20000}'
       - 29229:29229
 
-  postgres:
-    container_name: mc_postgres
+  postgres_local:
+    container_name: mc_postgres_local
     image: postgres:16.1-alpine
     restart: unless-stopped
     networks:
@@ -42,8 +44,8 @@ services:
     ports:
       - 25432:5432
 
-  redis:
-    container_name: mc_redis
+  redis_local:
+    container_name: mc_redis_local
     image: redis:7.4.0-alpine
     restart: unless-stopped
     networks:
@@ -67,19 +69,19 @@ services:
     ports:
       - '26379:6379'
 
-  adminer:
-    container_name: mc_adminer
+  adminer_local:
+    container_name: mc_adminer_local
     image: adminer:4.8.1
     restart: unless-stopped
     networks:
       - mn_network
     depends_on:
-      - postgres
+      - postgres_local
     ports:
       - ${ADMINER_PORT:-23080}:8080
 
-  pgadmin:
-    container_name: mc_pgadmin
+  pgadmin_local:
+    container_name: mc_pgadmin_local
     image: dpage/pgadmin4:9.2.0
     restart: unless-stopped
     networks:
@@ -92,21 +94,21 @@ services:
     ports:
       - '25050:80'
 
-  redis-insight:
-    container_name: mc_redis-insight
+  redis_insight_local:
+    container_name: mc_redis_insight_local
     image: redis/redisinsight:2.52
     restart: unless-stopped
     networks:
       - mn_network
     depends_on:
-      - redis
+      - redis_local
     volumes:
       - ./data/redis-insight:/db
     ports:
       - '${REDIS_INSIGHT_PORT:-25540}:5540'
 
-  portainer:
-    container_name: mc_portainer
+  portainer_local:
+    container_name: mc_portainer_local
     image: portainer/portainer-ce:2.20.3-alpine
     restart: unless-stopped
     security_opt:

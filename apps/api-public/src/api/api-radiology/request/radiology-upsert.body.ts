@@ -1,42 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
-import {
-  IsArray,
-  IsDefined,
-  IsInt,
-  IsNumber,
-  IsPositive,
-  IsString,
-  ValidateNested,
-} from 'class-validator'
+import { IsArray, IsDefined, IsInt, IsString, ValidateNested } from 'class-validator'
 import * as DOMPurify from 'isomorphic-dompurify'
-import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { CommissionCalculatorType } from '../../../../../_libs/database/entities/commission.entity'
+import { DiscountUpdateBody } from '../../api-discount/request'
+import { PositionBasicBody } from '../../api-position/request'
 
-export class RadiologyCommission {
+export class RadiologyBody {
+  @ApiProperty({ example: 'ABC12345' })
   @Expose()
   @IsDefined()
-  @IsNumber()
-  @IsPositive()
-  roleId: number
-
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  commissionValue: number
-
-  @ApiProperty({ example: CommissionCalculatorType.VND })
-  @Expose()
-  @IsEnumValue(CommissionCalculatorType)
-  commissionCalculatorType: CommissionCalculatorType
-}
-
-export class RadiologyUpsertBody {
-  @ApiPropertyOptional({ example: 105000 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  priority: number
+  @IsString()
+  radiologyCode?: string
 
   @ApiProperty({ example: 'Siêu âm tuyến giáp' })
   @Expose()
@@ -97,13 +71,28 @@ export class RadiologyUpsertBody {
   @Expose()
   @IsDefined()
   @IsString()
-  customStyles: string // Tuy chỉnh giao diện, có thể là CSS
+  customStyles: string // Tùy chỉnh giao diện, có thể là CSS
+}
 
-  @ApiProperty({ type: RadiologyCommission, isArray: true })
+export class RadiologyUpsertBody {
+  @ApiProperty({ type: RadiologyBody })
   @Expose()
-  @Type(() => RadiologyCommission)
+  @Type(() => RadiologyBody)
   @IsDefined()
+  @ValidateNested({ each: true })
+  radiology: RadiologyBody
+
+  @ApiProperty({ type: PositionBasicBody, isArray: true })
+  @Expose()
+  @Type(() => PositionBasicBody)
   @IsArray()
   @ValidateNested({ each: true })
-  commissionList: RadiologyCommission[]
+  positionList: PositionBasicBody[]
+
+  @ApiProperty({ type: DiscountUpdateBody, isArray: true })
+  @Expose()
+  @Type(() => DiscountUpdateBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  discountList: DiscountUpdateBody[]
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
+import { arrayToKeyValue } from '../../../../_libs/common/helpers/array.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { Image } from '../../../../_libs/database/entities'
 import { VoucherType } from '../../../../_libs/database/entities/payment.entity'
@@ -59,10 +59,11 @@ export class ApiTicketService {
       },
       condition: {
         oid,
+        roomId: filter?.roomId,
+        customerId: filter?.customerId,
         status: filter?.status,
         ticketType: filter?.ticketType,
         customType: filter?.customType,
-        customerId: filter?.customerId,
         registeredAt: filter?.registeredAt,
         startedAt: filter?.startedAt,
         updatedAt: filter?.updatedAt,
@@ -81,9 +82,10 @@ export class ApiTicketService {
     const data = await this.ticketRepository.findMany({
       condition: {
         oid,
+        roomId: filter?.roomId,
+        customerId: filter?.customerId,
         status: filter?.status,
         ticketType: filter?.ticketType,
-        customerId: filter?.customerId,
         registeredAt: filter?.registeredAt,
         startedAt: filter?.startedAt,
         updatedAt: filter?.updatedAt,
@@ -177,7 +179,7 @@ export class ApiTicketService {
       relation?.ticketLaboratoryGroupList
         ? this.ticketLaboratoryGroupRepository.findMany({
           condition: { oid, ticketId },
-          sort: { registeredAt: 'ASC' },
+          sort: { id: 'ASC' },
           relation: {
             laboratoryGroup: relation?.ticketLaboratoryGroupList?.laboratoryGroup,
           },
@@ -203,7 +205,7 @@ export class ApiTicketService {
           relation: {
             user: relation?.ticketUserList?.user,
           },
-          sort: { interactType: 'ASC', roleId: 'ASC' },
+          sort: { positionType: 'ASC', roleId: 'ASC' },
         })
         : undefined,
       relation?.ticketAttributeList

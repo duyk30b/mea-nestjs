@@ -1,9 +1,10 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
-import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
+import { OrganizationPermission } from '../../../../_libs/common/guards/organization.guard'
+import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiDistributorService } from './api-distributor.service'
 import {
   DistributorCreateBody,
@@ -19,31 +20,31 @@ export class ApiDistributorController {
   constructor(private readonly apiDistributorService: ApiDistributorService) { }
 
   @Get('pagination')
-  @HasPermission(PermissionId.DISTRIBUTOR_READ)
+  @OrganizationPermission(PermissionId.DISTRIBUTOR)
   pagination(@External() { oid }: TExternal, @Query() query: DistributorPaginationQuery) {
     return this.apiDistributorService.pagination(oid, query)
   }
 
   @Get('list')
-  @HasPermission(PermissionId.DISTRIBUTOR_READ)
+  @OrganizationPermission(PermissionId.DISTRIBUTOR)
   list(@External() { oid }: TExternal, @Query() query: DistributorGetManyQuery) {
     return this.apiDistributorService.getMany(oid, query)
   }
 
   @Get('detail/:id')
-  @HasPermission(PermissionId.DISTRIBUTOR_READ)
+  @OrganizationPermission(PermissionId.DISTRIBUTOR)
   findOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return this.apiDistributorService.getOne(oid, id)
   }
 
   @Post('create')
-  @HasPermission(PermissionId.DISTRIBUTOR_CREATE)
+  @UserPermission(PermissionId.DISTRIBUTOR_CREATE)
   async createOne(@External() { oid }: TExternal, @Body() body: DistributorCreateBody) {
     return await this.apiDistributorService.createOne(oid, body)
   }
 
   @Patch('update/:id')
-  @HasPermission(PermissionId.DISTRIBUTOR_UPDATE)
+  @UserPermission(PermissionId.DISTRIBUTOR_UPDATE)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
     @External() { oid }: TExternal,
@@ -54,7 +55,7 @@ export class ApiDistributorController {
   }
 
   @Delete('destroy/:id')
-  @HasPermission(PermissionId.DISTRIBUTOR_DELETE)
+  @UserPermission(PermissionId.DISTRIBUTOR_DELETE)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiDistributorService.destroyOne(oid, id)

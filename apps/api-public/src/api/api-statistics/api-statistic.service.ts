@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { MovementType } from '../../../../_libs/database/common/variable'
 import { Customer, Procedure, Product } from '../../../../_libs/database/entities'
 import { StatisticOperation } from '../../../../_libs/database/operations/statistic/statistic.operation'
+import { ProductMovementRepository } from '../../../../_libs/database/repositories'
 import { CustomerRepository } from '../../../../_libs/database/repositories/customer.repository'
 import { ProcedureRepository } from '../../../../_libs/database/repositories/procedure.repository'
 import { ProductRepository } from '../../../../_libs/database/repositories/product.repository'
@@ -15,6 +17,7 @@ export class ApiStatisticService {
     private readonly statisticRepository: StatisticOperation,
     private readonly productRepository: ProductRepository,
     private readonly procedureRepository: ProcedureRepository,
+    private readonly productMovementRepository: ProductMovementRepository,
     private readonly customerRepository: CustomerRepository,
     private readonly ticketProcedureRepository: TicketProcedureRepository
   ) { }
@@ -32,15 +35,31 @@ export class ApiStatisticService {
   ): Promise<BaseResponse> {
     const { fromTime, toTime, orderBy, limit } = query
 
-    const data = await this.statisticRepository.topProductBestSelling({
-      oid,
-      fromTime: fromTime.getTime(),
-      toTime: toTime.getTime(),
+    const dataStatistic = await this.productMovementRepository.findAndSelect({
+      condition: {
+        oid,
+        movementType: MovementType.Ticket,
+        createdAt: { GTE: fromTime.getTime(), LT: toTime.getTime() },
+      },
+      groupBy: ['productId'],
+      select: ['productId'],
+      aggregate: {
+        sumQuantity: { SUM: [{ SUB: [0, 'quantity'] }] },
+        sumActualAmount: { SUM: [{ SUB: [0, { MUL: ['quantity', 'actualPrice'] }] }] },
+        sumCostAmount: { SUM: [{ SUB: [0, 'costAmount'] }] },
+        sumProfitAmount: {
+          SUM: [
+            {
+              SUB: [{ SUB: [0, { MUL: ['quantity', 'actualPrice'] }] }, { SUB: [0, 'costAmount'] }],
+            },
+          ],
+        },
+      },
+      orderBy: { [orderBy]: 'DESC' },
       limit,
-      orderBy,
     })
 
-    const productIds = data.map((i) => i.productId)
+    const productIds = dataStatistic.map((i) => i.productId)
     const productList = await this.productRepository.findManyBy({
       oid,
       id: { IN: productIds },
@@ -48,12 +67,12 @@ export class ApiStatisticService {
     const productMap: Record<string, Product> = {}
     productList.forEach((i) => (productMap[i.id] = i))
 
-    const topData = data.map((i) => ({
+    const topData = dataStatistic.map((i) => ({
       productId: i.productId,
-      sumQuantity: i.sumQuantity,
-      sumCostAmount: i.sumCostAmount,
-      sumActualAmount: i.sumActualAmount,
-      sumProfitAmount: i.sumProfitAmount,
+      sumQuantity: Number(i.sumQuantity),
+      sumCostAmount: Number(i.sumCostAmount),
+      sumActualAmount: Number(i.sumActualAmount),
+      sumProfitAmount: Number(i.sumProfitAmount),
       product: productMap[i.productId],
     }))
 

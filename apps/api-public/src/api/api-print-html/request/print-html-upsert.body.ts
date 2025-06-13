@@ -1,8 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
-import { IsDefined, IsNotEmpty, IsString } from 'class-validator'
+import { IsDefined, IsNotEmpty, IsNumber, IsString } from 'class-validator'
 
 export class PrintHtmlCreateBody {
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  priority: number
+
   @ApiProperty({ example: 'Đơn thuốc' })
   @Expose()
   @IsDefined()

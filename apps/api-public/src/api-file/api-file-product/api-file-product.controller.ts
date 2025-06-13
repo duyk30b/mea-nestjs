@@ -1,10 +1,10 @@
 import { Body, Controller, Get, Post, UploadedFile, UseInterceptors } from '@nestjs/common'
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger'
 import { FileUploadDto, SingleFileUpload } from '../../../../_libs/common/dto/file'
-import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
+import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { FastifyFileInterceptor } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiFileProductDownloadExcel } from './api-file-product.download-excel'
 import { ApiFileProductUploadExcel } from './api-file-product.upload-excel'
 
@@ -18,26 +18,26 @@ export class ApiFileProductController {
   ) { }
 
   @Get('download-excel')
-  @HasPermission(PermissionId.FILE_PRODUCT_DOWNLOAD_EXCEL)
-  async downloadExcel(@External() { user, organization }: TExternal) {
-    return await this.apiFileProductDownloadExcel.downloadExcel({ organization, user })
+  @UserPermission(PermissionId.FILE_EXCEL_DOWNLOAD_PRODUCT)
+  async downloadExcel(@External() { oid, user, organization }: TExternal) {
+    return await this.apiFileProductDownloadExcel.downloadExcel({ oid })
   }
 
-  @Get('upload-excel/file-example')
-  @HasPermission(PermissionId.FILE_PRODUCT_UPLOAD_EXCEL)
+  @Get('download-excel/file-example')
+  @UserPermission(PermissionId.FILE_EXCEL_UPLOAD_PRODUCT)
   async uploadExcelFileExample(@External() { user, organization }: TExternal) {
-    return await this.apiFileProductUploadExcel.fileExample()
+    return await this.apiFileProductDownloadExcel.downloadExcel({ oid: 1 })
   }
 
   @Post('upload-excel')
-  @HasPermission(PermissionId.FILE_PRODUCT_UPLOAD_EXCEL)
+  @UserPermission(PermissionId.FILE_EXCEL_UPLOAD_PRODUCT)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FastifyFileInterceptor('file', {}))
   async uploadExcel(
-    @External() { user, oid }: TExternal,
+    @External() { uid, oid }: TExternal,
     @UploadedFile() file: FileUploadDto,
     @Body() body: SingleFileUpload
   ) {
-    return await this.apiFileProductUploadExcel.uploadExcel({ oid, user, file })
+    return await this.apiFileProductUploadExcel.uploadExcel({ oid, userId: uid, file })
   }
 }

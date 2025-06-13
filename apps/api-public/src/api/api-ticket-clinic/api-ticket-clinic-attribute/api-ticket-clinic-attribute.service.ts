@@ -44,7 +44,7 @@ export class ApiTicketClinicAttributeService {
     const ticketAttributeList =
       await this.ticketAttributeRepository.insertManyAndReturnEntity(ticketAttributeInsertList)
 
-    this.socketEmitService.ticketClinicUpdateTicketAttributeList(oid, {
+    this.socketEmitService.socketTicketAttributeListChange(oid, {
       ticketId,
       ticketAttributeList,
     })

@@ -1,26 +1,26 @@
 import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
 import {
-    IsArray,
-    IsBoolean,
-    IsDefined,
-    IsIn,
-    IsInt,
-    IsNumber,
-    IsPositive,
-    IsString,
-    ValidateNested,
-    validateSync,
+  IsArray,
+  IsBoolean,
+  IsDefined,
+  IsIn,
+  IsInt,
+  IsNumber,
+  IsString,
+  ValidateNested,
+  validateSync,
 } from 'class-validator'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { PickupStrategy } from '../../../../../_libs/database/common/variable'
-import { CommissionCalculatorType } from '../../../../../_libs/database/entities/commission.entity'
 import {
-    SplitBatchByCostPrice,
-    SplitBatchByDistributor,
-    SplitBatchByExpiryDate,
-    SplitBatchByWarehouse,
+  ProductType,
+  SplitBatchByCostPrice,
+  SplitBatchByDistributor,
+  SplitBatchByExpiryDate,
+  SplitBatchByWarehouse,
 } from '../../../../../_libs/database/entities/product.entity'
+import { DiscountUpdateBody } from '../../api-discount/request'
+import { PositionBasicBody } from '../../api-position/request'
 
 export class UnitConversionBody {
   @Expose()
@@ -38,36 +38,18 @@ export class UnitConversionBody {
   default: boolean
 }
 
-export class ProductCommission {
+export class ProductCreate {
+  @ApiPropertyOptional({ example: 'ABC12345' })
   @Expose()
   @IsDefined()
-  @IsNumber()
-  @IsPositive()
-  roleId: number
+  @IsString()
+  productCode: string
 
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  commissionValue: number
-
-  @ApiProperty({ example: CommissionCalculatorType.VND })
-  @Expose()
-  @IsEnumValue(CommissionCalculatorType)
-  commissionCalculatorType: CommissionCalculatorType
-}
-
-export class ProductCreateBody {
   @ApiProperty({ example: 'Klacid 125mg/5ml' })
   @Expose()
   @IsDefined()
   @IsString()
   brandName: string // tên biệt dược
-
-  @ApiProperty({ example: '' })
-  @Expose()
-  @IsDefined()
-  @IsString()
-  productCode: string
 
   @ApiPropertyOptional({ example: 'Clarythromycin 125mg/5ml' })
   @Expose()
@@ -178,11 +160,11 @@ export class ProductCreateBody {
   @IsIn([0, 1])
   isActive: 0 | 1
 
-  @ApiProperty({ enum: PickupStrategy, example: PickupStrategy.AutoWithExpiryDate })
+  @ApiProperty({ enum: ProductType, example: ProductType.Basic })
   @Expose()
   @IsDefined()
-  @IsEnumValue(PickupStrategy)
-  pickupStrategy: PickupStrategy
+  @IsEnumValue(ProductType)
+  productType: ProductType
 
   @ApiProperty({ enum: SplitBatchByWarehouse, example: SplitBatchByWarehouse.Inherit })
   @Expose()
@@ -229,14 +211,52 @@ export class ProductCreateBody {
   @IsDefined()
   @IsString({ message: `Validate warehouseIds failed: Example: ${JSON.stringify([1, 2, 3])}` })
   warehouseIds: string // đơn vị tính: lọ, ống, vỉ
-
-  @ApiProperty({ type: ProductCommission, isArray: true })
-  @Expose()
-  @Type(() => ProductCommission)
-  @IsDefined()
-  @IsArray()
-  @ValidateNested({ each: true })
-  commissionList: ProductCommission[]
 }
 
-export class ProductUpdateBody extends OmitType(ProductCreateBody, ['quantity']) { }
+export class ProductUpdate extends OmitType(ProductCreate, ['quantity']) { }
+
+export class ProductCreateBody {
+  @ApiProperty({ type: ProductCreate })
+  @Expose()
+  @Type(() => ProductCreate)
+  @IsDefined()
+  @ValidateNested({ each: true })
+  product: ProductCreate
+
+  @ApiProperty({ type: PositionBasicBody, isArray: true })
+  @Expose()
+  @Type(() => PositionBasicBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  positionList: PositionBasicBody[]
+
+  @ApiProperty({ type: DiscountUpdateBody, isArray: true })
+  @Expose()
+  @Type(() => DiscountUpdateBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  discountList: DiscountUpdateBody[]
+}
+
+export class ProductUpdateBody {
+  @ApiProperty({ type: ProductUpdate })
+  @Expose()
+  @Type(() => ProductUpdate)
+  @IsDefined()
+  @ValidateNested({ each: true })
+  product: ProductUpdate
+
+  @ApiProperty({ type: PositionBasicBody, isArray: true })
+  @Expose()
+  @Type(() => PositionBasicBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  positionList: PositionBasicBody[]
+
+  @ApiProperty({ type: DiscountUpdateBody, isArray: true })
+  @Expose()
+  @Type(() => DiscountUpdateBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  discountList: DiscountUpdateBody[]
+}

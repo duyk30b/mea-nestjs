@@ -8,7 +8,8 @@ export type I18nTranslations = {
     "common": {
         "Success": string;
         "Forbidden": string;
-        "ForbiddenPermission": string;
+        "ForbiddenUserPermission": string;
+        "ForbiddenOrganizationPermission": string;
         "TooManyRequests": string;
         "AccountInactive": string;
         "AccountRequired": string;

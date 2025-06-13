@@ -2,22 +2,23 @@ import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { ESTimer } from '../../../../_libs/common/helpers/time.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { DeliveryStatus, DiscountType } from '../../../../_libs/database/common/variable'
 import { AppointmentStatus } from '../../../../_libs/database/entities/appointment.entity'
 import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import {
-  AppointmentRepository,
-  CustomerRepository,
-  TicketAttributeRepository,
-  TicketRepository,
+    AppointmentRepository,
+    CustomerRepository,
+    TicketAttributeRepository,
+    TicketRepository,
 } from '../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
-  AppointmentCreateBody,
-  AppointmentGetManyQuery,
-  AppointmentGetOneQuery,
-  AppointmentPaginationQuery,
-  AppointmentRegisterTicketClinicBody,
-  AppointmentUpdateBody,
+    AppointmentCreateBody,
+    AppointmentGetManyQuery,
+    AppointmentGetOneQuery,
+    AppointmentPaginationQuery,
+    AppointmentRegisterTicketClinicBody,
+    AppointmentUpdateBody,
 } from './request'
 
 @Injectable()
@@ -78,10 +79,17 @@ export class ApiAppointmentService {
     const { customerId: cid, customer, ...ticketBody } = body
     let customerId = cid
     if (!customerId) {
+      let customerCode = body.customer.customerCode
+      if (!customerCode) {
+        const count = await this.customerRepository.getMaxId()
+        customerCode = (count + 1).toString()
+      }
+
       customerId = await this.customerRepository.insertOneFullField({
         ...body.customer,
         debt: 0,
         oid,
+        customerCode,
       })
     }
 
@@ -132,8 +140,9 @@ export class ApiAppointmentService {
     const countToday = await this.ticketRepository.countToday(oid)
     const registeredAt = body.registeredAt
 
-    const ticket = await this.ticketRepository.insertOneAndReturnEntity({
+    const ticket = await this.ticketRepository.insertOneFullFieldAndReturnEntity({
       oid,
+      roomId: body.roomId,
       customerId: customer.id,
       status: TicketStatus.Schedule,
       ticketType: body.ticketType,
@@ -142,6 +151,31 @@ export class ApiAppointmentService {
       year: ESTimer.info(registeredAt, 7).year,
       month: ESTimer.info(registeredAt, 7).month + 1,
       date: ESTimer.info(registeredAt, 7).date,
+
+      customerSourceId: 0,
+      debt: 0,
+      note: '',
+      customType: 0,
+      deliveryStatus: DeliveryStatus.NoStock,
+      procedureMoney: 0,
+      productMoney: 0,
+      radiologyMoney: 0,
+      laboratoryMoney: 0,
+      itemsCostAmount: 0,
+      itemsDiscount: 0,
+      itemsActualMoney: 0,
+      discountMoney: 0,
+      discountPercent: 0,
+      discountType: DiscountType.Percent,
+      surcharge: 0,
+      totalMoney: 0,
+      expense: 0,
+      commissionMoney: 0,
+      profit: 0,
+      paid: 0,
+      imageIds: JSON.stringify([]),
+      startedAt: null,
+      endedAt: null,
     })
 
     if (appointment.reason) {
@@ -158,7 +192,7 @@ export class ApiAppointmentService {
 
     ticket.customer = customer
 
-    this.socketEmitService.ticketClinicChange(oid, { type: 'CREATE', ticket })
+    this.socketEmitService.socketTicketChange(oid, { type: 'CREATE', ticket })
 
     await this.appointmentRepository.updateAndReturnEntity(
       { oid, id: appointmentId },

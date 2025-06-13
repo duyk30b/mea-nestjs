@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Param, Post } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../../_libs/common/dto'
-import { HasPermission } from '../../../../../_libs/common/guards/permission.guard'
+import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../../_libs/database/entities/permission.entity'
+import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { TicketParams } from '../../api-ticket/request/ticket.params'
 import { ApiTicketClinicLaboratoryService } from './api-ticket-clinic-laboratory.service'
 import {
@@ -12,7 +12,6 @@ import {
   TicketClinicUpdatePriorityTicketLaboratoryBody,
   TicketClinicUpdateTicketLaboratoryBody,
   TicketClinicUpsertLaboratoryBody,
-  TicketLaboratoryResultUpdateBody,
 } from './request'
 
 @ApiTags('TicketClinic')
@@ -24,7 +23,7 @@ export class ApiTicketClinicLaboratoryController {
   ) { }
 
   @Post(':ticketId/upsert-laboratory')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_LIST)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_LIST)
   async upsertLaboratory(
     @External() { oid }: TExternal,
     @Param() { ticketId }: TicketParams,
@@ -38,7 +37,7 @@ export class ApiTicketClinicLaboratoryController {
   }
 
   @Delete(':ticketId/destroy-ticket-laboratory/:ticketLaboratoryId')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_LIST)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_LIST)
   async destroyTicketLaboratory(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketLaboratoryId }: TicketClinicLaboratoryParams
@@ -51,7 +50,7 @@ export class ApiTicketClinicLaboratoryController {
   }
 
   @Delete(':ticketId/destroy-ticket-laboratory-group/:ticketLaboratoryGroupId')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_LIST)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_LIST)
   async destroyTicketLaboratoryGroup(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketLaboratoryGroupId }: TicketClinicLaboratoryGroupParams
@@ -64,7 +63,7 @@ export class ApiTicketClinicLaboratoryController {
   }
 
   @Post(':ticketId/update-ticket-laboratory/:ticketLaboratoryId')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_LIST)
   async updateTicketLaboratory(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketLaboratoryId }: TicketClinicLaboratoryParams,
@@ -78,22 +77,8 @@ export class ApiTicketClinicLaboratoryController {
     })
   }
 
-  @Post(':id/update-ticket-laboratory-result')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_LIST)
-  async updateTicketLaboratoryResult(
-    @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: TicketLaboratoryResultUpdateBody
-  ) {
-    return await this.apiTicketClinicLaboratoryService.updateTicketLaboratoryResult({
-      oid,
-      ticketId: id,
-      body,
-    })
-  }
-
   @Post(':id/update-priority-ticket-laboratory')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_LIST)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_LIST)
   async updatePriorityTicketLaboratory(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,

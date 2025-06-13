@@ -11,6 +11,10 @@ export default class PrintHtml {
   @PrimaryGeneratedColumn()
   id: number
 
+  @Expose()
+  @Column({ default: 0 })
+  priority: number
+
   @Column({ type: 'varchar', length: 255 })
   @Expose()
   name: string
@@ -74,5 +78,5 @@ export type PrintHtmlUpdateType = {
 }
 
 export type PrintHtmlSortType = {
-  [P in keyof Pick<PrintHtml, 'id'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<PrintHtml, 'id' | 'priority'>]?: 'ASC' | 'DESC'
 }

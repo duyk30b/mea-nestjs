@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
-import { IsDefined, IsNumber, Max, Min } from 'class-validator'
+import { IsDefined, IsNumber, IsString, Max, Min } from 'class-validator'
 import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
 import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
 import { DiscountType } from '../../../../../../_libs/database/common/variable'
@@ -11,6 +11,12 @@ export class TicketClinicAddTicketRadiologyBody {
   @IsDefined()
   @IsNumber()
   priority: number
+
+  @ApiProperty({ example: Date.now() })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  registeredAt: number
 
   @ApiProperty({ example: 56 })
   @Expose()
@@ -23,6 +29,12 @@ export class TicketClinicAddTicketRadiologyBody {
   @IsDefined()
   @IsNumber()
   radiologyId: number
+
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  roomId: number
 
   @ApiProperty({ example: 4 })
   @Expose()
@@ -63,4 +75,34 @@ export class TicketClinicAddTicketRadiologyBody {
   @IsDefined()
   @IsNumber()
   actualPrice: number
+
+  @ApiProperty({ example: 25 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  printHtmlId: number
+
+  @ApiProperty({ example: '' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  description: string
+
+  @ApiProperty({ example: '' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  result: string
+
+  @ApiProperty({ example: '' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  customStyles: string
+
+  @ApiProperty({ example: '' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  customVariables: string
 }

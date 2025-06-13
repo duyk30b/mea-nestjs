@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { Injectable } from '@nestjs/common'
-import { InteractType } from '../../../../../_libs/database/entities/commission.entity'
+import { PositionInteractType } from '../../../../../_libs/database/entities/position.entity'
 import {
   TicketClinicAddTicketProcedureOperation,
   TicketClinicDestroyTicketProcedureOperation,
@@ -40,8 +40,8 @@ export class ApiTicketClinicProcedureService {
 
     const { ticket, ticketProcedure } = result
 
-    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
-    this.socketEmitService.ticketClinicChangeTicketProcedureList(oid, {
+    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
+    this.socketEmitService.socketTicketProcedureListChange(oid, {
       ticketId,
       ticketProcedureInsert: ticketProcedure,
     })
@@ -50,8 +50,8 @@ export class ApiTicketClinicProcedureService {
         oid,
         ticketId,
         body: {
-          interactType: InteractType.Procedure,
-          interactId: ticketProcedure.procedureId,
+          positionType: PositionInteractType.Procedure,
+          positionInteractId: ticketProcedure.procedureId,
           ticketItemId: ticketProcedure.id,
           quantity: ticketProcedure.quantity,
           ticketUserList: body.ticketUserList,
@@ -76,13 +76,13 @@ export class ApiTicketClinicProcedureService {
 
     const { ticket } = result
 
-    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
-    this.socketEmitService.ticketClinicChangeTicketProcedureList(oid, {
+    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
+    this.socketEmitService.socketTicketProcedureListChange(oid, {
       ticketId,
       ticketProcedureDestroy: result.ticketProcedureDestroy,
     })
     if (result.ticketUserDestroyList) {
-      this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
+      this.socketEmitService.socketTicketUserListChange(oid, {
         ticketId,
         ticketUserDestroyList: result.ticketUserDestroyList,
       })
@@ -106,8 +106,8 @@ export class ApiTicketClinicProcedureService {
     })
     const { ticket, ticketProcedure } = result
 
-    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
-    this.socketEmitService.ticketClinicChangeTicketProcedureList(oid, {
+    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
+    this.socketEmitService.socketTicketProcedureListChange(oid, {
       ticketId,
       ticketProcedureUpdate: ticketProcedure,
     })
@@ -116,8 +116,8 @@ export class ApiTicketClinicProcedureService {
         oid,
         ticketId,
         body: {
-          interactType: InteractType.Procedure,
-          interactId: ticketProcedure.procedureId,
+          positionType: PositionInteractType.Procedure,
+          positionInteractId: ticketProcedure.procedureId,
           ticketItemId: ticketProcedure.id,
           quantity: ticketProcedure.quantity,
           ticketUserList: body.ticketUserList,
@@ -140,7 +140,7 @@ export class ApiTicketClinicProcedureService {
     })
     ticketProcedureList.sort((a, b) => (a.priority < b.priority ? -1 : 1))
 
-    this.socketEmitService.ticketClinicChangeTicketProcedureList(oid, {
+    this.socketEmitService.socketTicketProcedureListChange(oid, {
       ticketId,
       ticketProcedureList,
     })

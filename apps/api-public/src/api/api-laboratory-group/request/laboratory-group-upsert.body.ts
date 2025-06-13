@@ -1,24 +1,8 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger'
+import { ApiProperty, OmitType } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsNotEmpty, IsNumber, ValidateNested } from 'class-validator'
+import { IsArray, IsDefined, IsInt, IsNotEmpty, IsNumber, ValidateNested } from 'class-validator'
 
-export class LaboratoryGroupCreateBody {
-  @ApiProperty({ example: 'Nhóm ABC' })
-  @Expose()
-  @IsDefined()
-  @IsNotEmpty()
-  name: string
-
-  @ApiProperty({ example: 25 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  printHtmlId: number
-}
-
-export class LaboratoryGroupUpdateBody extends PartialType(LaboratoryGroupCreateBody) { }
-
-export class LaboratoryGroupReplaceBody {
+export class LaboratoryGroupBody {
   @ApiProperty({ example: 2 })
   @Expose()
   @IsDefined()
@@ -36,14 +20,22 @@ export class LaboratoryGroupReplaceBody {
   @IsDefined()
   @IsNumber()
   printHtmlId: number
+
+  @ApiProperty({ example: 25 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  roomId: number
 }
 
+export class LaboratoryGroupUpsertBody extends OmitType(LaboratoryGroupBody, ['id']) { }
+
 export class LaboratoryGroupReplaceAllBody {
-  @ApiProperty({ type: LaboratoryGroupReplaceBody, isArray: true })
+  @ApiProperty({ type: LaboratoryGroupBody, isArray: true })
   @Expose()
-  @Type(() => LaboratoryGroupReplaceBody)
+  @Type(() => LaboratoryGroupBody)
   @IsDefined()
   @IsArray()
   @ValidateNested({ each: true })
-  laboratoryGroupReplaceAll: LaboratoryGroupReplaceBody[]
+  laboratoryGroupReplaceAll: LaboratoryGroupBody[]
 }

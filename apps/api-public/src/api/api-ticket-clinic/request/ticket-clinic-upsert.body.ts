@@ -34,6 +34,12 @@ class TicketInformationCreateBody {
   @Expose()
   @IsDefined()
   @IsNumber()
+  roomId: number
+
+  @ApiProperty({ example: 45 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
   customerSourceId: number
 
   @ApiProperty({ example: 45 })

@@ -1,0 +1,89 @@
+import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
+import { IsBoolean, IsIn, IsInt, IsObject, IsOptional, ValidateNested } from 'class-validator'
+import {
+  ConditionTimestamp,
+  createConditionEnum,
+  transformConditionEnum,
+} from '../../../../../_libs/common/dto'
+import { SortQuery } from '../../../../../_libs/common/dto/query'
+import { TicketLaboratoryStatus } from '../../../../../_libs/database/common/variable'
+
+export class TicketLaboratoryGroupRelationQuery {
+  @Expose()
+  @IsBoolean()
+  ticket: boolean
+
+  @Expose()
+  @IsBoolean()
+  customer: boolean
+
+  @Expose()
+  @IsBoolean()
+  ticketUserList: boolean
+
+  @Expose()
+  @IsBoolean()
+  ticketLaboratoryList: boolean
+
+  @Expose()
+  @IsBoolean()
+  ticketLaboratoryResultMap: boolean
+
+  @Expose()
+  @IsBoolean()
+  imageList: boolean
+}
+
+const ConditionEnumTicketLaboratoryStatus = createConditionEnum(TicketLaboratoryStatus)
+
+export class TicketLaboratoryGroupFilterQuery {
+  @Expose()
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketLaboratoryStatus))
+  @IsOptional()
+  status: TicketLaboratoryStatus | InstanceType<typeof ConditionEnumTicketLaboratoryStatus>
+
+  @Expose()
+  @IsInt()
+  customerId: number
+
+  @Expose()
+  @IsInt()
+  roomId: number
+
+  @Expose()
+  @IsInt()
+  ticketId: number
+
+  @Expose()
+  @Type(() => ConditionTimestamp)
+  @ValidateNested({ each: true })
+  registeredAt: ConditionTimestamp
+
+  @Expose()
+  @Type(() => ConditionTimestamp)
+  @ValidateNested({ each: true })
+  startedAt: ConditionTimestamp
+}
+
+export class TicketLaboratoryGroupSortQuery extends SortQuery {
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  registeredAt: 'ASC' | 'DESC'
+
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  startedAt: 'ASC' | 'DESC'
+}
+
+export class TicketLaboratoryGroupResponseQuery {
+  @Expose()
+  @IsObject()
+  ticketLaboratoryGroup: {
+    ticket?: boolean
+    customer?: boolean
+    ticketUserList?: boolean
+    ticketLaboratoryList?: boolean
+    ticketLaboratoryResultMap?: boolean
+    imageList?: boolean
+  }
+}

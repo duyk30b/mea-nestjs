@@ -11,6 +11,12 @@ export class AppointmentRegisterTicketClinicBody {
   @IsNumber()
   registeredAt: number
 
+  @ApiProperty({ example: 1678890707005 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  roomId: number
+
   @ApiProperty({ example: TicketType.Clinic })
   @Expose()
   @IsDefined()

@@ -9,11 +9,16 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm'
-import { PickupStrategy } from '../common/variable'
 import Batch from './batch.entity'
-import Commission from './commission.entity'
+import Discount from './discount.entity'
+import Position from './position.entity'
 import ProductGroup from './product-group.entity'
 import { ProductSettingRule } from './setting.entity'
+
+export enum ProductType {
+  Basic = 1,
+  SplitBatch = 2,
+}
 
 export enum SplitBatchByWarehouse {
   Inherit = 0,
@@ -54,11 +59,15 @@ export default class Product {
 
   @Column({ type: 'varchar', length: 50 })
   @Expose()
-  productCode: string
+  productCode: string // Mã sản phẩm
 
   @Column({ type: 'varchar', length: 255 })
   @Expose()
   brandName: string // Tên biệt dược
+
+  @Column({ default: ProductType.Basic, type: 'smallint' })
+  @Expose()
+  productType: ProductType
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
@@ -73,10 +82,6 @@ export default class Product {
   })
   @Expose()
   quantity: number
-
-  @Column({ default: PickupStrategy.Inherit, type: 'smallint' })
-  @Expose()
-  pickupStrategy: PickupStrategy
 
   @Column({ default: SplitBatchByWarehouse.Inherit, type: 'smallint' })
   @Expose()
@@ -183,7 +188,13 @@ export default class Product {
   batchList: Batch[]
 
   @Expose()
-  commissionList: Commission[]
+  positionList: Position[]
+
+  @Expose()
+  discountList: Discount[]
+
+  @Expose()
+  discountListExtra: Discount[]
 
   static fromRaw(raw: { [P in keyof Product]: any }) {
     if (!raw) return null
@@ -211,39 +222,56 @@ export default class Product {
   ) {
     const splitRule: ProductSettingRule = {
       allowNegativeQuantity: false, // nếu cần thì xử lý ghi đè sau
-      pickupStrategy: product.pickupStrategy,
       splitBatchByWarehouse: product.splitBatchByWarehouse,
       splitBatchByDistributor: product.splitBatchByDistributor,
       splitBatchByExpiryDate: product.splitBatchByExpiryDate,
       splitBatchByCostPrice: product.splitBatchByCostPrice,
     }
-    if (splitRule.pickupStrategy === PickupStrategy.Inherit) {
-      splitRule.pickupStrategy = productSettingCommon.pickupStrategy
-      if (splitRule.pickupStrategy === PickupStrategy.Inherit) {
-        splitRule.pickupStrategy = productSettingRoot.pickupStrategy
-      }
-    }
-    if (splitRule.splitBatchByWarehouse === SplitBatchByWarehouse.Inherit) {
+    if (
+      splitRule.splitBatchByWarehouse == null
+      || splitRule.splitBatchByWarehouse === SplitBatchByWarehouse.Inherit
+    ) {
       splitRule.splitBatchByWarehouse = productSettingCommon.splitBatchByWarehouse
-      if (splitRule.splitBatchByWarehouse === SplitBatchByWarehouse.Inherit) {
+      if (
+        splitRule.splitBatchByWarehouse == null
+        || splitRule.splitBatchByWarehouse === SplitBatchByWarehouse.Inherit
+      ) {
         splitRule.splitBatchByWarehouse = productSettingRoot.splitBatchByWarehouse
       }
     }
-    if (splitRule.splitBatchByDistributor === SplitBatchByDistributor.Inherit) {
+    if (
+      splitRule.splitBatchByDistributor == null
+      || splitRule.splitBatchByDistributor === SplitBatchByDistributor.Inherit
+    ) {
       splitRule.splitBatchByDistributor = productSettingCommon.splitBatchByDistributor
-      if (splitRule.splitBatchByDistributor === SplitBatchByDistributor.Inherit) {
+      if (
+        splitRule.splitBatchByDistributor == null
+        || splitRule.splitBatchByDistributor === SplitBatchByDistributor.Inherit
+      ) {
         splitRule.splitBatchByDistributor = productSettingRoot.splitBatchByDistributor
       }
     }
-    if (splitRule.splitBatchByExpiryDate === SplitBatchByExpiryDate.Inherit) {
+    if (
+      splitRule.splitBatchByExpiryDate == null
+      || splitRule.splitBatchByExpiryDate === SplitBatchByExpiryDate.Inherit
+    ) {
       splitRule.splitBatchByExpiryDate = productSettingCommon.splitBatchByExpiryDate
-      if (splitRule.splitBatchByExpiryDate === SplitBatchByExpiryDate.Inherit) {
+      if (
+        splitRule.splitBatchByExpiryDate == null
+        || splitRule.splitBatchByExpiryDate === SplitBatchByExpiryDate.Inherit
+      ) {
         splitRule.splitBatchByExpiryDate = productSettingRoot.splitBatchByExpiryDate
       }
     }
-    if (splitRule.splitBatchByCostPrice === SplitBatchByCostPrice.Inherit) {
+    if (
+      splitRule.splitBatchByCostPrice == null
+      || splitRule.splitBatchByCostPrice === SplitBatchByCostPrice.Inherit
+    ) {
       splitRule.splitBatchByCostPrice = productSettingCommon.splitBatchByCostPrice
-      if (splitRule.splitBatchByCostPrice === SplitBatchByCostPrice.Inherit) {
+      if (
+        splitRule.splitBatchByCostPrice == null
+        || splitRule.splitBatchByCostPrice === SplitBatchByCostPrice.Inherit
+      ) {
         splitRule.splitBatchByCostPrice = productSettingRoot.splitBatchByCostPrice
       }
     }
@@ -252,12 +280,15 @@ export default class Product {
 }
 
 export type ProductRelationType = {
-  [P in keyof Pick<Product, 'batchList' | 'productGroup' | 'commissionList'>]?: boolean
+  [P in keyof Pick<
+    Product,
+    'batchList' | 'productGroup' | 'positionList' | 'discountList' | 'discountListExtra'
+  >]?: boolean
 }
 
 export type ProductInsertType = Omit<
   Product,
-  keyof ProductRelationType | keyof Pick<Product, 'id' | 'updatedAt' | 'warehouseIdList'>
+  keyof ProductRelationType | keyof Pick<Product, 'id' | 'warehouseIdList'>
 >
 
 export type ProductUpdateType = {

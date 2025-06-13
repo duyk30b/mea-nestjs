@@ -18,6 +18,10 @@ export default class LaboratoryGroup {
 
   @Expose()
   @Column({ default: 0 })
+  roomId: number
+
+  @Expose()
+  @Column({ default: 0 })
   printHtmlId: number
 
   @ManyToOne((type) => PrintHtml, { createForeignKeyConstraints: false })

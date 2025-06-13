@@ -1,21 +1,35 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
+import { ESArray } from '../../../../_libs/common/helpers'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { Discount, PrintHtml, RadiologyGroup } from '../../../../_libs/database/entities'
 import {
+  DiscountInsertType,
+  DiscountInteractType,
+} from '../../../../_libs/database/entities/discount.entity'
+import Position, {
   CommissionCalculatorType,
-  CommissionInsertType,
-  InteractType,
-} from '../../../../_libs/database/entities/commission.entity'
-import { RadiologyInsertType } from '../../../../_libs/database/entities/radiology.entity'
+  PositionInsertType,
+  PositionInteractType,
+} from '../../../../_libs/database/entities/position.entity'
+import Radiology, {
+  RadiologyInsertType,
+} from '../../../../_libs/database/entities/radiology.entity'
 import {
-  CommissionRepository,
+  DiscountRepository,
+  PositionRepository,
+  PrintHtmlRepository,
+  RadiologyGroupRepository,
   RadiologyRepository,
   TicketRadiologyRepository,
 } from '../../../../_libs/database/repositories'
+import { SocketEmitService } from '../../socket/socket-emit.service'
+import { ApiRadiologyGroupService } from '../api-radiology-group/api-radiology-group.service'
 import {
   RadiologyGetManyQuery,
   RadiologyGetOneQuery,
   RadiologyPaginationQuery,
+  RadiologyRelationQuery,
   RadiologySystemCopyBody,
   RadiologyUpsertBody,
 } from './request'
@@ -23,18 +37,23 @@ import {
 @Injectable()
 export class ApiRadiologyService {
   constructor(
+    private readonly socketEmitService: SocketEmitService,
     private readonly radiologyRepository: RadiologyRepository,
-    private readonly commissionRepository: CommissionRepository,
-    private readonly ticketRadiologyRepository: TicketRadiologyRepository
+    private readonly radiologyGroupRepository: RadiologyGroupRepository,
+    private readonly printHtmlRepository: PrintHtmlRepository,
+    private readonly ticketRadiologyRepository: TicketRadiologyRepository,
+    private readonly positionRepository: PositionRepository,
+    private readonly discountRepository: DiscountRepository,
+    private readonly apiRadiologyGroupService: ApiRadiologyGroupService
   ) { }
 
   async pagination(oid: number, query: RadiologyPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, relation, sort } = query
     const { data, total } = await this.radiologyRepository.pagination({
-      relation: {
-        printHtml: query?.relation?.printHtml,
-        radiologyGroup: query?.relation?.radiologyGroup,
-      },
+      // relation: {
+      //   printHtml: query?.relation?.printHtml,
+      //   radiologyGroup: query?.relation?.radiologyGroup,
+      // },
       page,
       limit,
       condition: {
@@ -45,6 +64,10 @@ export class ApiRadiologyService {
       },
       sort,
     })
+
+    if (query.relation) {
+      await this.generateRelation({ oid, radiologyList: data, relation: query.relation })
+    }
     return {
       data,
       meta: { page, limit, total },
@@ -54,10 +77,10 @@ export class ApiRadiologyService {
   async getMany(oid: number, query: RadiologyGetManyQuery): Promise<BaseResponse> {
     const { limit, filter, relation, sort } = query
     const data = await this.radiologyRepository.findMany({
-      relation: {
-        printHtml: query?.relation?.printHtml,
-        radiologyGroup: query?.relation?.radiologyGroup,
-      },
+      // relation: {
+      //   printHtml: query?.relation?.printHtml,
+      //   radiologyGroup: query?.relation?.radiologyGroup,
+      // },
       condition: {
         oid,
         radiologyGroupId: filter?.radiologyGroupId,
@@ -67,31 +90,31 @@ export class ApiRadiologyService {
       sort,
       limit,
     })
+    if (query.relation) {
+      await this.generateRelation({ oid, radiologyList: data, relation: query.relation })
+    }
     return { data }
   }
 
   async getOne(oid: number, id: number, query: RadiologyGetOneQuery): Promise<BaseResponse> {
     const radiology = await this.radiologyRepository.findOne({
-      relation: {
-        printHtml: query?.relation?.printHtml,
-        radiologyGroup: query?.relation?.radiologyGroup,
-      },
+      // relation: {
+      //   printHtml: query?.relation?.printHtml,
+      //   radiologyGroup: query?.relation?.radiologyGroup,
+      // },
       condition: { oid, id },
     })
     if (!radiology) throw new BusinessException('error.Database.NotFound')
-    if (query?.relation?.commissionList) {
-      radiology.commissionList = await this.commissionRepository.findManyBy({
-        oid,
-        interactType: InteractType.Radiology,
-        interactId: radiology.id,
-      })
+    if (query.relation) {
+      await this.generateRelation({ oid, radiologyList: [radiology], relation: query.relation })
     }
+
     return { data: { radiology } }
   }
 
   async createOne(oid: number, body: RadiologyUpsertBody): Promise<BaseResponse> {
-    const { commissionList, ...radiologyBody } = body
-    commissionList.forEach((i) => {
+    const { positionList, radiology: radiologyBody, discountList } = body
+    positionList?.forEach((i) => {
       if (
         i.commissionCalculatorType === CommissionCalculatorType.PercentExpected
         || i.commissionCalculatorType === CommissionCalculatorType.PercentActual
@@ -101,29 +124,73 @@ export class ApiRadiologyService {
         }
       }
     })
-    const commissionDtoList: CommissionInsertType[] = commissionList.map((i) => {
-      const dto: CommissionInsertType = {
-        oid,
-        roleId: i.roleId,
-        commissionCalculatorType: i.commissionCalculatorType,
-        commissionValue: i.commissionValue,
-        interactId: radiology.id,
-        interactType: InteractType.Radiology,
-      }
-      return dto
-    })
-    const radiology = await this.radiologyRepository.insertOneFullFieldAndReturnEntity({
+
+    let radiologyCode = radiologyBody.radiologyCode
+    if (!radiologyCode) {
+      const maxId = await this.radiologyRepository.getMaxId()
+      radiologyCode = (maxId + 1).toString()
+    }
+
+    const existRadiology = await this.radiologyRepository.findOneBy({
       oid,
-      ...radiologyBody,
+      radiologyCode,
     })
-    radiology.commissionList =
-      await this.commissionRepository.insertManyFullFieldAndReturnEntity(commissionDtoList)
+    if (existRadiology) {
+      throw new BusinessException(`Trùng mã phiếu với ${existRadiology.name}` as any)
+    }
+
+    const radiology = await this.radiologyRepository.insertOneFullFieldAndReturnEntity({
+      ...radiologyBody,
+      oid,
+      radiologyCode,
+    })
+    this.socketEmitService.radiologyListChange(oid, { radiologyUpsertedList: [radiology] })
+
+    if (positionList?.length) {
+      const positionDtoList: PositionInsertType[] = positionList.map((i) => {
+        const dto: PositionInsertType = {
+          oid,
+          roleId: i.roleId,
+          commissionCalculatorType: i.commissionCalculatorType,
+          commissionValue: i.commissionValue,
+          positionInteractId: radiology.id,
+          positionType: PositionInteractType.Radiology,
+        }
+        return dto
+      })
+
+      const positionUpsertedList =
+        await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
+      radiology.positionList = positionUpsertedList
+      this.socketEmitService.positionListChange(oid, { positionUpsertedList })
+    }
+
+    if (discountList?.length) {
+      const discountListDto = discountList.map((i) => {
+        const dto: DiscountInsertType = {
+          ...i,
+          discountInteractId: radiology.id,
+          discountInteractType: DiscountInteractType.Radiology,
+          oid,
+        }
+        return dto
+      })
+      const discountUpsertedList =
+        await this.discountRepository.insertManyFullFieldAndReturnEntity(discountListDto)
+      radiology.discountList = discountUpsertedList
+      this.socketEmitService.discountListChange(oid, { discountUpsertedList })
+    }
+
     return { data: { radiology } }
   }
 
-  async updateOne(oid: number, id: number, body: RadiologyUpsertBody): Promise<BaseResponse> {
-    const { commissionList, ...radiologyBody } = body
-    commissionList.forEach((i) => {
+  async updateOne(
+    oid: number,
+    radiologyId: number,
+    body: RadiologyUpsertBody
+  ): Promise<BaseResponse> {
+    const { positionList, radiology: radiologyBody, discountList } = body
+    positionList?.forEach((i) => {
       if (
         i.commissionCalculatorType === CommissionCalculatorType.PercentExpected
         || i.commissionCalculatorType === CommissionCalculatorType.PercentActual
@@ -133,29 +200,71 @@ export class ApiRadiologyService {
         }
       }
     })
-    const [radiology] = await this.radiologyRepository.updateAndReturnEntity(
-      { oid, id },
+
+    const existRadiology = await this.radiologyRepository.findOneBy({
+      oid,
+      radiologyCode: radiologyBody.radiologyCode,
+      id: { NOT: radiologyId },
+    })
+    if (existRadiology) {
+      throw new BusinessException(`Trùng mã sản phẩm với ${existRadiology.name}` as any)
+    }
+
+    const radiology = await this.radiologyRepository.updateOneAndReturnEntity(
+      { oid, id: radiologyId },
       radiologyBody
     )
-    if (!radiology) throw new BusinessException('error.Database.UpdateFailed')
-    await this.commissionRepository.delete({
-      oid,
-      interactId: radiology.id,
-      interactType: InteractType.Radiology,
-    })
-    const commissionDtoList: CommissionInsertType[] = commissionList.map((i) => {
-      const dto: CommissionInsertType = {
+    this.socketEmitService.radiologyListChange(oid, { radiologyUpsertedList: [radiology] })
+    if (positionList) {
+      const positionDestroyedList = await this.positionRepository.deleteAndReturnEntity({
         oid,
-        roleId: i.roleId,
-        commissionCalculatorType: i.commissionCalculatorType,
-        commissionValue: i.commissionValue,
-        interactId: radiology.id,
-        interactType: InteractType.Radiology,
-      }
-      return dto
-    })
-    radiology.commissionList =
-      await this.commissionRepository.insertManyFullFieldAndReturnEntity(commissionDtoList)
+        positionInteractId: radiology.id,
+        positionType: PositionInteractType.Radiology,
+      })
+      const positionDtoList: PositionInsertType[] = positionList.map((i) => {
+        const dto: PositionInsertType = {
+          oid,
+          roleId: i.roleId,
+          commissionCalculatorType: i.commissionCalculatorType,
+          commissionValue: i.commissionValue,
+          positionInteractId: radiology.id,
+          positionType: PositionInteractType.Radiology,
+        }
+        return dto
+      })
+      const positionUpsertedList =
+        await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
+      radiology.positionList = positionUpsertedList
+      this.socketEmitService.positionListChange(oid, {
+        positionUpsertedList,
+        positionDestroyedList,
+      })
+    }
+
+    if (discountList) {
+      const discountDestroyedList = await this.discountRepository.deleteAndReturnEntity({
+        oid,
+        discountInteractId: radiology.id,
+        discountInteractType: DiscountInteractType.Radiology,
+      })
+      const discountListDto = discountList.map((i) => {
+        const dto: DiscountInsertType = {
+          ...i,
+          discountInteractId: radiology.id,
+          discountInteractType: DiscountInteractType.Radiology,
+          oid,
+        }
+        return dto
+      })
+      const discountUpsertedList =
+        await this.discountRepository.insertManyFullFieldAndReturnEntity(discountListDto)
+      radiology.discountList = discountUpsertedList
+      this.socketEmitService.discountListChange(oid, {
+        discountUpsertedList,
+        discountDestroyedList,
+      })
+    }
+
     return { data: { radiology } }
   }
 
@@ -171,13 +280,32 @@ export class ApiRadiologyService {
       }
     }
 
-    await this.commissionRepository.delete({
+    const [positionDestroyedList, discountDestroyedList] = await Promise.all([
+      this.positionRepository.deleteAndReturnEntity({
+        oid,
+        positionInteractId: radiologyId,
+        positionType: PositionInteractType.Radiology,
+      }),
+      this.discountRepository.deleteAndReturnEntity({
+        oid,
+        discountInteractId: radiologyId,
+        discountInteractType: DiscountInteractType.Radiology,
+      }),
+    ])
+
+    if (positionDestroyedList.length) {
+      this.socketEmitService.positionListChange(oid, { positionDestroyedList })
+    }
+
+    if (discountDestroyedList.length) {
+      this.socketEmitService.discountListChange(oid, { discountDestroyedList })
+    }
+
+    const radiology = await this.radiologyRepository.deleteOneAndReturnEntity({
       oid,
-      interactId: radiologyId,
-      interactType: InteractType.Radiology,
+      id: radiologyId,
     })
-    const affected = await this.radiologyRepository.delete({ oid, id: radiologyId })
-    if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
+    this.socketEmitService.radiologyListChange(oid, { radiologyDestroyedList: [radiology] })
 
     return { data: { ticketRadiologyList: [], radiologyId } }
   }
@@ -186,34 +314,112 @@ export class ApiRadiologyService {
     const data = await this.radiologyRepository.findMany({
       relation: { printHtml: true },
       condition: { oid: 1 },
-      sort: { priority: 'ASC' },
+      sort: { radiologyCode: 'ASC' },
     })
     return { data }
   }
 
   async systemCopy(oid: number, body: RadiologySystemCopyBody): Promise<BaseResponse> {
     const radiologySystemList = await this.radiologyRepository.findMany({
+      relation: { radiologyGroup: true },
       condition: { oid: 1, id: { IN: body.radiologyIdList } },
     })
+
+    const groupNameList = radiologySystemList.map((i) => i.radiologyGroup?.name || '')
+    const radiologyGroupList = await this.apiRadiologyGroupService.createByGroupName(
+      oid,
+      groupNameList
+    )
+    const radiologyGroupMapName = ESArray.arrayToKeyValue(radiologyGroupList, 'name')
+
+    let maxId = await this.radiologyRepository.getMaxId()
+
     const radiologyInsertList = radiologySystemList.map((i) => {
+      let radiologyGroupId = 0
+      const radiologyGroupName = i.radiologyGroup?.name
+      if (radiologyGroupName) {
+        radiologyGroupId = radiologyGroupMapName[radiologyGroupName]?.id || 0
+      }
+
+      maxId++
       const dto: RadiologyInsertType = {
         oid,
         name: i.name,
         costPrice: i.costPrice,
         price: i.price,
         printHtmlId: i.printHtmlId,
-        radiologyGroupId: 0,
+        radiologyGroupId,
         descriptionDefault: i.descriptionDefault,
         requestNoteDefault: i.requestNoteDefault,
         resultDefault: i.resultDefault,
         customVariables: i.customVariables,
         customStyles: i.customStyles,
-        priority: 0, // cập nhật sau
+        radiologyCode: maxId.toString(),
       }
       return dto
     })
     const insertIds = await this.radiologyRepository.insertMany(radiologyInsertList)
-    await this.radiologyRepository.update({ id: { IN: insertIds } }, { priority: () => `"id"` })
     return { data: true }
+  }
+
+  async generateRelation(options: {
+    oid: number
+    radiologyList: Radiology[]
+    relation: RadiologyRelationQuery
+  }) {
+    const { oid, radiologyList, relation } = options
+    const radiologyIdList = ESArray.uniqueArray(radiologyList.map((i) => i.id))
+    const radiologyGroupIdList = ESArray.uniqueArray(radiologyList.map((i) => i.radiologyGroupId))
+    const printHtmlIdList = ESArray.uniqueArray(radiologyList.map((i) => i.printHtmlId))
+
+    const [positionList, discountList, radiologyGroupList, printHtmlList] = await Promise.all([
+      relation?.positionList && radiologyIdList.length
+        ? this.positionRepository.findManyBy({
+          oid,
+          positionType: PositionInteractType.Radiology,
+          positionInteractId: { IN: radiologyIdList },
+        })
+        : <Position[]>[],
+      relation?.discountList && radiologyIdList.length
+        ? this.discountRepository.findManyBy({
+          oid,
+          discountInteractType: DiscountInteractType.Radiology,
+          discountInteractId: { IN: [...radiologyIdList, 0] }, // discountInteractId=0 là áp dụng cho tất cả
+        })
+        : <Discount[]>[],
+      relation?.radiologyGroup && radiologyGroupIdList.length
+        ? this.radiologyGroupRepository.findManyBy({
+          oid,
+          id: { IN: radiologyGroupIdList },
+        })
+        : <RadiologyGroup[]>[],
+      relation?.printHtml && printHtmlIdList.length
+        ? this.printHtmlRepository.findManyBy({
+          oid,
+          id: { IN: printHtmlIdList },
+        })
+        : <PrintHtml[]>[],
+    ])
+
+    const radiologyGroupMap = ESArray.arrayToKeyValue(radiologyGroupList, 'id')
+    const printHtmlMap = ESArray.arrayToKeyValue(printHtmlList, 'id')
+
+    radiologyList.forEach((radiology: Radiology) => {
+      if (relation?.positionList) {
+        radiology.positionList = positionList.filter((i) => i.positionInteractId === radiology.id)
+      }
+      if (relation?.discountList) {
+        radiology.discountList = discountList.filter((i) => i.discountInteractId === radiology.id)
+        radiology.discountListExtra = discountList.filter((i) => i.discountInteractId === 0)
+      }
+      if (relation?.radiologyGroup) {
+        radiology.radiologyGroup = radiologyGroupMap[radiology.radiologyGroupId]
+      }
+      if (relation?.printHtml) {
+        radiology.printHtml = printHtmlMap[radiology.printHtmlId]
+      }
+    })
+
+    return radiologyList
   }
 }

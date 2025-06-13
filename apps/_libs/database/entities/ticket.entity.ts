@@ -70,6 +70,10 @@ export default class Ticket extends BaseEntity {
   @Expose()
   customerSourceId: number
 
+  @Column({ default: 0 })
+  @Expose()
+  roomId: number
+
   @Column({ type: 'smallint', default: TicketType.Order })
   @Expose()
   ticketType: TicketType

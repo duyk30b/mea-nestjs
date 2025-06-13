@@ -1,18 +1,28 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
+import { ESArray } from '../../../../_libs/common/helpers'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { LaboratoryGroupRepository } from '../../../../_libs/database/repositories/laboratory-group.repository'
 import {
-  LaboratoryGroupCreateBody,
+  LaboratoryGroupInsertType,
+  LaboratoryGroupUpdateType,
+} from '../../../../_libs/database/entities/laboratory-group.entity'
+import {
+  LaboratoryGroupManager,
+  LaboratoryGroupRepository,
+} from '../../../../_libs/database/repositories/laboratory-group.repository'
+import {
   LaboratoryGroupGetManyQuery,
   LaboratoryGroupPaginationQuery,
   LaboratoryGroupReplaceAllBody,
-  LaboratoryGroupUpdateBody,
+  LaboratoryGroupUpsertBody,
 } from './request'
 
 @Injectable()
 export class ApiLaboratoryGroupService {
-  constructor(private readonly laboratoryGroupRepository: LaboratoryGroupRepository) { }
+  constructor(
+    private readonly laboratoryGroupRepository: LaboratoryGroupRepository,
+    private readonly laboratoryGroupManager: LaboratoryGroupManager
+  ) { }
 
   async pagination(oid: number, query: LaboratoryGroupPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, sort, relation } = query
@@ -52,7 +62,7 @@ export class ApiLaboratoryGroupService {
     return { data: { laboratoryGroup } }
   }
 
-  async createOne(oid: number, body: LaboratoryGroupCreateBody): Promise<BaseResponse> {
+  async createOne(oid: number, body: LaboratoryGroupUpsertBody): Promise<BaseResponse> {
     const laboratoryGroup = await this.laboratoryGroupRepository.insertOneFullFieldAndReturnEntity({
       ...body,
       oid,
@@ -60,7 +70,7 @@ export class ApiLaboratoryGroupService {
     return { data: { laboratoryGroup } }
   }
 
-  async updateOne(oid: number, id: number, body: LaboratoryGroupUpdateBody): Promise<BaseResponse> {
+  async updateOne(oid: number, id: number, body: LaboratoryGroupUpsertBody): Promise<BaseResponse> {
     const laboratoryGroupList = await this.laboratoryGroupRepository.updateAndReturnEntity(
       { id, oid },
       body
@@ -76,7 +86,48 @@ export class ApiLaboratoryGroupService {
   }
 
   async replaceAll(oid: number, body: LaboratoryGroupReplaceAllBody): Promise<BaseResponse> {
-    await this.laboratoryGroupRepository.replaceAll(oid, body.laboratoryGroupReplaceAll)
+    const laboratoryGroupInsertLit = body.laboratoryGroupReplaceAll
+      .filter((i) => !i.id)
+      .map((i) => {
+        const insertDto: LaboratoryGroupInsertType = {
+          name: i.name,
+          roomId: i.roomId,
+          printHtmlId: i.printHtmlId,
+          oid,
+        }
+        return insertDto
+      })
+    const laboratoryGroupUpdateLit = body.laboratoryGroupReplaceAll
+      .filter((i) => !!i.id)
+      .map((i) => {
+        const insertDto: LaboratoryGroupUpdateType & { id: number } = {
+          name: i.name,
+          roomId: i.roomId,
+          printHtmlId: i.printHtmlId,
+          id: i.id,
+        }
+        return insertDto
+      })
+
+    await this.laboratoryGroupRepository.delete({
+      oid,
+      id: { NOT_IN: laboratoryGroupUpdateLit.map((i) => i.id) },
+    })
+
+    if (laboratoryGroupInsertLit.length) {
+      await this.laboratoryGroupRepository.insertMany(laboratoryGroupInsertLit)
+    }
+    if (laboratoryGroupUpdateLit.length) {
+      await this.laboratoryGroupManager.bulkUpdate({
+        manager: this.laboratoryGroupRepository.getManager(),
+        condition: { oid },
+        compare: ['id'],
+        update: ['name', 'roomId', 'printHtmlId'],
+        tempList: laboratoryGroupUpdateLit,
+        options: { requireEqualLength: true },
+      })
+    }
+
     return { data: true }
   }
 
@@ -85,5 +136,28 @@ export class ApiLaboratoryGroupService {
       condition: { oid: 1 },
     })
     return { data }
+  }
+
+  async createByGroupName(oid: number, groupName: string[]) {
+    const laboratoryGroupAll = await this.laboratoryGroupRepository.findManyBy({ oid })
+    const groupNameList = laboratoryGroupAll.map((i) => i.name)
+
+    const groupNameClean = ESArray.uniqueArray(groupName).filter((i) => !!i)
+    const groupNameNoExist = groupNameClean.filter((i) => {
+      return !groupNameList.includes(i)
+    })
+    const lgCreateList = groupNameNoExist.map((i) => {
+      const dto: LaboratoryGroupInsertType = {
+        oid,
+        name: i,
+        printHtmlId: 0,
+        roomId: 0,
+      }
+      return dto
+    })
+    const lgInsertedList =
+      await this.laboratoryGroupRepository.insertManyAndReturnEntity(lgCreateList)
+
+    return [...laboratoryGroupAll, ...lgInsertedList]
   }
 }

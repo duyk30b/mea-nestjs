@@ -27,7 +27,6 @@
 //             distributor.fullName = fullName
 //             distributor.phone = randomPhoneNumber()
 //             distributor.addressProvince = address.province
-//             distributor.addressDistrict = address.district
 //             distributor.addressWard = address.ward
 //             distributor.addressStreet = address.street
 //             distributor.debt = 0

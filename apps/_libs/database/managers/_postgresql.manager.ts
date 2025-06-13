@@ -151,8 +151,10 @@ export abstract class _PostgreSqlManager<
     const insertResult = await manager.insert(this.entity, data)
     const id = insertResult.identifiers[0].id
     if (!id) {
+      console.log(`Insert ${this.entity['name']} failed, insertResult: `, insertResult)
+      console.log(`Insert ${this.entity['name']} failed, data: `, data)
       throw new Error(
-        `Insert ${this.entity['name']} failed: ` + JSON.stringify({ insertResult, data })
+        `Insert ${this.entity['name']} failed: insertResult.identifiers[0] = ${insertResult.identifiers[0]}`
       )
     }
     return id
@@ -178,8 +180,10 @@ export abstract class _PostgreSqlManager<
       .returning('*')
       .execute()
     if (insertResult.raw?.length !== 1) {
+      console.log(`Insert ${this.entity['name']} failed, insertResult.raw: `, insertResult.raw)
+      console.log(`Insert ${this.entity['name']} failed, data: `, data)
       throw new Error(
-        `Insert ${this.entity['name']} failed: ` + JSON.stringify({ insertResult, data })
+        `Insert ${this.entity['name']} failed: raws.length = ${insertResult.raw.length}`
       )
     }
     return insertResult.raw[0]
@@ -252,7 +256,8 @@ export abstract class _PostgreSqlManager<
   ): Promise<_ENTITY> {
     const raws = await this.updateAndReturnRaw(manager, condition, data)
     if (raws.length !== 1) {
-      throw new Error(`Update ${this.entity['name']} failed: ` + JSON.stringify({ raws }))
+      console.log(`Update ${this.entity['name']} failed, raws: `, raws)
+      throw new Error(`Update ${this.entity['name']} failed: raws.length = ${raws.length}`)
     }
     return this.entity.fromRaw(raws[0])
   }
@@ -271,8 +276,12 @@ export abstract class _PostgreSqlManager<
       .orUpdate(updateFields as string[], conflictFields as string[])
       .execute()
     if (upsertResult.raw?.length !== upsertList.length) {
+      console.log(`Insert ${this.entity['name']} failed, upsertResult: `, upsertResult)
+      console.log(`Insert ${this.entity['name']} failed, upsertList: `, upsertList)
       throw new Error(
-        `Insert ${this.entity['name']} failed: ` + JSON.stringify({ upsertResult, upsertList })
+        `Insert ${this.entity['name']} failed: `
+        + `upsertResult.raw?.length = ${upsertResult.raw?.length}`
+        + `upsertList.length = ${upsertList.length}`
       )
     }
     return this.entity.fromRaws(upsertResult.raw)
@@ -315,7 +324,8 @@ export abstract class _PostgreSqlManager<
   ): Promise<_ENTITY> {
     const raws = await this.deleteAndReturnRaw(manager, condition)
     if (raws.length !== 1) {
-      throw new Error(`Delete ${this.entity['name']} failed: ` + JSON.stringify({ raws }))
+      console.log(`Delete ${this.entity['name']} failed, raws: `, raws)
+      throw new Error(`Delete ${this.entity['name']} failed: raws.length = ${raws.length}`)
     }
     return this.entity.fromRaw(raws[0])
   }
@@ -434,8 +444,13 @@ export abstract class _PostgreSqlManager<
 
     if (options.options?.requireEqualLength) {
       if (modifiedRaw[0].length !== tempList.length) {
-        console.log(`Update ${tableName} failed: `, modifiedRaw)
-        throw new Error(`Update ${tableName} failed: ` + JSON.stringify({ modifiedRaw, tempList }))
+        console.log(`Update ${tableName} failed, modifiedRaw: `, modifiedRaw)
+        console.log(`Update ${tableName} failed, tempList: `, tempList)
+        throw new Error(
+          `Update ${tableName} failed: `
+          + `modifiedRaw[0].length = ${modifiedRaw[0].length}`
+          + `tempList.length = ${tempList.length}`
+        )
       }
     }
     return this.entity.fromRaws(modifiedRaw[0])

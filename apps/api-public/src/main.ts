@@ -11,7 +11,6 @@ import {
   ValidationException,
 } from '../../_libs/common/exception-filter/exception-filter'
 import { RootGuard } from '../../_libs/common/guards/root.guard'
-import { UserGuard } from '../../_libs/common/guards/user.guard.'
 import { AccessLogInterceptor } from '../../_libs/common/interceptor/access-log.interceptor'
 import { TimeoutInterceptor } from '../../_libs/common/interceptor/timeout.interceptor'
 import { TransformResponseInterceptor } from '../../_libs/common/interceptor/transform-response.interceptor'
@@ -43,7 +42,7 @@ async function bootstrap() {
     })
   )
   app.useGlobalFilters(new ServerExceptionFilter())
-  app.useGlobalGuards(new UserGuard(app.get(Reflector)), new RootGuard(app.get(Reflector)))
+  app.useGlobalGuards(new RootGuard(app.get(Reflector)))
 
   app.useGlobalPipes(
     new ValidationPipe({

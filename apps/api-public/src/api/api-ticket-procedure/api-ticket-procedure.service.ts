@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
+import { arrayToKeyValue } from '../../../../_libs/common/helpers/array.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { Image } from '../../../../_libs/database/entities'
-import { InteractType } from '../../../../_libs/database/entities/commission.entity'
+import { PositionInteractType } from '../../../../_libs/database/entities/position.entity'
 import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
 import { TicketProcedureRepository } from '../../../../_libs/database/repositories/ticket-procedure.repository'
 import { TicketUserRepository } from '../../../../_libs/database/repositories/ticket-user.repository'
@@ -67,8 +67,8 @@ export class ApiTicketProcedureService {
       ticketProcedure.ticketUserList = await this.ticketUserRepository.findManyBy({
         oid,
         ticketId: ticketProcedure.ticketId,
-        interactType: InteractType.Procedure,
-        interactId: ticketProcedure.id,
+        positionType: PositionInteractType.Procedure,
+        positionInteractId: ticketProcedure.id,
       })
     }
 

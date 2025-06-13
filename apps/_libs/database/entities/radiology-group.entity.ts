@@ -12,6 +12,10 @@ export default class RadiologyGroup {
   id: number
 
   @Expose()
+  @Column({ default: 0 })
+  roomId: number
+
+  @Expose()
   @Column({ type: 'varchar', length: 255 })
   name: string
 

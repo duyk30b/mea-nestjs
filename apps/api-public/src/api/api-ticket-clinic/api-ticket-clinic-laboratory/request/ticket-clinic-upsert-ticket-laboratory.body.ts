@@ -72,6 +72,12 @@ export class TicketLaboratoryGroupAddBody {
   @IsNumber()
   laboratoryGroupId: number
 
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  roomId: number
+
   @ApiProperty({ example: Date.now() })
   @Expose()
   @IsDefined()

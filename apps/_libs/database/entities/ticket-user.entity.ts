@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
-import { CommissionCalculatorType, InteractType } from './commission.entity'
+import { CommissionCalculatorType, PositionInteractType } from './position.entity'
 import Role from './role.entity'
 import Ticket from './ticket.entity'
 import User from './user.entity'
@@ -31,11 +31,11 @@ export default class TicketUser {
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()
-  interactType: InteractType
+  positionType: PositionInteractType
 
   @Column({ type: 'integer', default: 0 })
   @Expose()
-  interactId: number // procedureId hoặc productId hoặc radiologyId
+  positionInteractId: number // procedureId hoặc productId hoặc radiologyId
 
   @Column({ type: 'integer', default: 0 })
   @Expose()
@@ -155,7 +155,7 @@ export type TicketUserUpdateType = {
 export type TicketUserUpsertType = Omit<TicketUser, keyof TicketUserRelationType>
 
 export type TicketUserSortType = {
-  [P in keyof Pick<TicketUser, 'oid' | 'id' | 'createdAt' | 'interactType' | 'roleId'>]?:
+  [P in keyof Pick<TicketUser, 'oid' | 'id' | 'createdAt' | 'positionType' | 'roleId'>]?:
   | 'ASC'
   | 'DESC'
 }

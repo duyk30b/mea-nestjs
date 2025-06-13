@@ -4,9 +4,7 @@ import { DataSource, EntityManager } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { TicketLaboratoryStatus } from '../../../common/variable'
 import { TicketLaboratoryGroup } from '../../../entities'
-import {
-  TicketLaboratoryInsertType,
-} from '../../../entities/ticket-laboratory.entity'
+import { TicketLaboratoryInsertType } from '../../../entities/ticket-laboratory.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import {
   TicketLaboratoryGroupManager,
@@ -18,7 +16,7 @@ import { TicketLaboratoryInsertBasicType } from './ticket-clinic-add-select-labo
 
 export type TicketLaboratoryGroupUpdateBasicType = Pick<
   TicketLaboratoryGroup,
-  'id' | 'laboratoryGroupId' | 'registeredAt'
+  'id' | 'laboratoryGroupId' | 'registeredAt' | 'roomId'
 > & { ticketLaboratoryList: TicketLaboratoryInsertBasicType[] }
 
 @Injectable()
@@ -54,7 +52,7 @@ export class TicketClinicChangeSelectLaboratoryOperation {
         tlgUpdate = await this.ticketLaboratoryGroupManager.updateOneAndReturnEntity(
           manager,
           { oid, ticketId, id: tlgDto.id },
-          { registeredAt: tlgDto.registeredAt }
+          { registeredAt: tlgDto.registeredAt, roomId: tlgDto.roomId }
         )
       }
 
@@ -81,7 +79,8 @@ export class TicketClinicChangeSelectLaboratoryOperation {
             oid,
             ticketId,
             customerId: ticketOrigin.customerId,
-            ticketLaboratoryGroupId: tlgDto.id,
+            ticketLaboratoryGroupId: tlgDto.roomId,
+            roomId: tlgDto.id,
             status: TicketLaboratoryStatus.Pending,
             startedAt: null,
           }

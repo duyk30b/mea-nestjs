@@ -1,247 +1,87 @@
 import { Injectable } from '@nestjs/common'
 import { Cell, Workbook, Worksheet } from 'exceljs'
-import { ESTimer } from '../../../../_libs/common/helpers/time.helper'
-import { Customer, Organization, User } from '../../../../_libs/database/entities'
-import { CustomerRepository } from '../../../../_libs/database/repositories/customer.repository'
-import { excelOneSheetWorkbook } from '../../../../_libs/file/excel-one-sheet.util'
+import { Customer } from '../../../../_libs/database/entities'
+import { CustomerRepository } from '../../../../_libs/database/repositories'
+import {
+  CustomStyleExcel,
+  excelOneSheetWorkbook,
+} from '../../../../_libs/file/excel-one-sheet.util'
+import { CustomerExcelRules } from './customer-excel.rule'
 
 @Injectable()
 export class ApiFileCustomerDownloadExcel {
   constructor(private readonly customerRepository: CustomerRepository) { }
 
-  async downloadExcel(options: { user: User; organization: Organization }) {
-    const { user, organization } = options
+  async downloadExcel(options: { oid: number }) {
+    const { oid } = options
+
     const customerList = await this.customerRepository.findMany({
-      condition: { oid: organization.id, isActive: 1 },
-      sort: { id: 'ASC' },
+      condition: { oid },
+      sort: { customerCode: 'ASC' },
     })
 
-    const workbook: Workbook = this.getWorkbookProduct(customerList, {
-      orgName: organization.name,
-      orgPhone: organization.phone,
-      orgAddress: [
-        organization.addressWard,
-        organization.addressDistrict,
-        organization.addressProvince,
-      ]
-        .filter((i) => !!i)
-        .join(' - ')
-        .replace('Tỉnh', '')
-        .replace('Thành phố', '')
-        .replace('Quận ', '')
-        .replace('Huyện ', '')
-        .replace('Phường ', '')
-        .replace('Xã ', ''),
-      userFullName: user.fullName,
-    })
+    const workbook: Workbook = this.getWorkbookCustomer(customerList)
     const buffer = await workbook.xlsx.writeBuffer()
 
     return {
       data: {
         buffer,
         mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        filename: 'MEA-khach-hang.xlsx',
+        filename: 'MEA.VN-khach-hang.xlsx',
       },
     }
   }
 
-  public getWorkbookProduct(
-    customerList: Customer[],
-    meta: {
-      orgName: string
-      orgPhone: string
-      orgAddress: string
-      userFullName: string
+  public getWorkbookCustomer(customerList: Customer[]): Workbook {
+    const dataRow: {
+      style: { [P in keyof typeof CustomerExcelRules]: CustomStyleExcel }
+      data: any[]
+    } = {
+      style: {
+        _num: { alignment: { horizontal: 'center' } },
+        customerCode: { alignment: { wrapText: true } },
+        fullName: { alignment: { wrapText: true } },
+        phone: { alignment: { horizontal: 'center' } },
+        debt: { alignment: { horizontal: 'right' } },
+        birthday: { alignment: { horizontal: 'center' } },
+        yearOfBirth: { alignment: { horizontal: 'center' } },
+        gender: { alignment: { horizontal: 'center' } },
+        addressProvince: { alignment: { wrapText: true } },
+        addressWard: { alignment: { wrapText: true } },
+        addressStreet: { alignment: { wrapText: true } },
+        facebook: { alignment: { wrapText: true } },
+        zalo: { alignment: { wrapText: true } },
+        note: { alignment: { wrapText: true } },
+      },
+      data: [],
     }
-  ): Workbook {
-    const dataRows = []
 
+    let indexNumber = 0
     customerList.forEach((customer, index) => {
-      dataRows.push({
-        style: {
-          num: { alignment: { horizontal: 'center' } },
-          id: { alignment: { horizontal: 'center' } },
-          fullName: { alignment: { wrapText: true } },
-          phone: { alignment: { horizontal: 'center' } },
-          debt: { numFmt: '###,##0' },
-          birthday: { alignment: { horizontal: 'center' }, numFmt: 'dd/mm/yyyy' },
-          gender: { alignment: { horizontal: 'center' } },
-          addressProvince: { alignment: { wrapText: true } },
-          addressDistrict: { alignment: { wrapText: true } },
-          addressWard: { alignment: { wrapText: true } },
-          note: { alignment: { wrapText: true } },
-        },
-        data: [
-          {
-            num: index + 1,
-            id: 'KH' + customer.id,
-            fullName: customer.fullName || '',
-            phone: customer.phone || '',
-            debt: customer.debt || 0,
-            birthday: customer.birthday ? new Date(customer.birthday + 7 * 60 * 60 * 1000) : '', // fix giờ do hệ thống lệch giờ
-            gender: { 0: 'Nữ', 1: 'Nam' }[customer.gender] || '',
-            addressProvince: customer.addressProvince || '',
-            addressDistrict: customer.addressDistrict || '',
-            addressWard: customer.addressWard || '',
-            note: customer.note || '',
-          },
-        ],
-      })
+      indexNumber++
+      const data: { [P in keyof typeof CustomerExcelRules]: any } = {
+        _num: indexNumber,
+        customerCode: customer.customerCode || '',
+        fullName: customer.fullName || '',
+        phone: customer.phone || '',
+        debt: customer.debt || 0,
+        birthday: customer.birthday || '',
+        yearOfBirth: customer.yearOfBirth || '',
+        gender: [0, 1].includes(customer.gender) ? customer.gender : '',
+        addressProvince: customer.addressProvince || '',
+        addressWard: customer.addressWard || '',
+        addressStreet: customer.addressStreet || '',
+        facebook: customer.facebook || '',
+        zalo: customer.zalo || '',
+        note: customer.note || '',
+      }
+      dataRow.data.push(data)
     })
 
     const workbook = excelOneSheetWorkbook({
       layout: { sheetName: 'Sản phẩm' },
       headerSheet: (worksheet: Worksheet) => {
-        worksheet.addRow([meta.orgName]).eachCell((cell) => {
-          cell.font = {
-            size: 12,
-            bold: true,
-            name: 'Times New Roman',
-          }
-        })
-        worksheet.addRow([meta.orgPhone]).eachCell((cell) => {
-          cell.font = {
-            size: 12,
-            bold: true,
-            name: 'Times New Roman',
-          }
-        })
-        worksheet.addRow([meta.orgAddress]).eachCell((cell) => {
-          cell.font = {
-            size: 12,
-            bold: true,
-            name: 'Times New Roman',
-          }
-        })
-
-        worksheet.addRow(['BÁO CÁO KHÁCH HÀNG']).eachCell((cell) => {
-          cell.font = {
-            size: 16,
-            bold: true,
-            name: 'Times New Roman',
-          }
-          cell.alignment = { horizontal: 'center' }
-        })
-        worksheet.mergeCells(4, 1, 4, 12)
-
-        worksheet
-          .addRow([`Thời gian: ${ESTimer.timeToText(new Date(), 'hh:mm:ss DD/MM/YYYY', 7)}`])
-          .eachCell((cell) => {
-            cell.font = {
-              size: 12,
-              italic: true,
-              name: 'Times New Roman',
-            }
-            cell.alignment = { horizontal: 'center' }
-          })
-        worksheet.mergeCells(5, 1, 5, 12)
-
-        // worksheet
-        //   .addRow({ fullName: 'Tổng số khách hàng', phone: customerList.length })
-        //   .eachCell((cell: Cell, colNumber: number) => {
-        //     cell.style = {
-        //       border: {
-        //         top: { style: 'thin' },
-        //         left: { style: 'thin' },
-        //         bottom: { style: 'thin' },
-        //         right: { style: 'thin' },
-        //       },
-        //       font: {
-        //         size: 12,
-        //         bold: false,
-        //         name: 'Times New Roman',
-        //       },
-        //       alignment: { wrapText: true, vertical: 'middle' },
-        //     }
-        //     if (colNumber === 2) {
-        //       cell.font.bold = true
-        //       cell.style.numFmt = '###,##0'
-        //     }
-        //   })
-        // worksheet
-        //   .addRow({ fullName: 'Tổng số nợ', phone: customerList.reduce((acc, cur) => acc + cur.debt, 0) })
-        //   .eachCell((cell: Cell, colNumber: number) => {
-        //     cell.style = {
-        //       border: {
-        //         top: { style: 'thin' },
-        //         left: { style: 'thin' },
-        //         bottom: { style: 'thin' },
-        //         right: { style: 'thin' },
-        //       },
-        //       font: {
-        //         size: 12,
-        //         bold: false,
-        //         name: 'Times New Roman',
-        //       },
-        //       alignment: { wrapText: true, vertical: 'middle' },
-        //     }
-        //     if (colNumber === 2) {
-        //       cell.font.bold = true
-        //       cell.style.numFmt = '###,##0'
-        //     }
-        //   })
-
-        worksheet
-          .addRow(['Số khách hàng', '', customerList.length])
-          .eachCell({ includeEmpty: true }, (cell: Cell, colNumber: number) => {
-            cell.style = {
-              border: {
-                top: { style: 'thin' },
-                left: { style: 'thin' },
-                bottom: { style: 'thin' },
-                right: { style: 'thin' },
-              },
-              font: {
-                size: 12,
-                bold: false,
-                name: 'Times New Roman',
-              },
-              alignment: { wrapText: true, vertical: 'middle' },
-            }
-            if (colNumber === 3) {
-              cell.font.bold = true
-              cell.style.numFmt = '###,##0'
-            }
-          })
-        worksheet.mergeCells(6, 1, 6, 2)
-        worksheet
-          .addRow(['Tổng nợ', '', customerList.reduce((acc, cur) => acc + cur.debt, 0)])
-          .eachCell({ includeEmpty: true }, (cell: Cell, colNumber: number) => {
-            cell.style = {
-              border: {
-                top: { style: 'thin' },
-                left: { style: 'thin' },
-                bottom: { style: 'thin' },
-                right: { style: 'thin' },
-              },
-              font: {
-                size: 12,
-                bold: false,
-                name: 'Times New Roman',
-              },
-              alignment: { wrapText: true, vertical: 'middle' },
-            }
-            if (colNumber === 3) {
-              cell.font.bold = true
-              cell.style.numFmt = '###,##0'
-            }
-          })
-        worksheet.mergeCells(7, 1, 7, 2)
-        worksheet.addRow([])
-
-        const rowTitle = worksheet.addRow([
-          'STT',
-          'ID',
-          'Tên',
-          'SĐT',
-          'Nợ',
-          'Ngày sinh',
-          'Giới tính',
-          'Tỉnh/TP',
-          'Quận/Huyện',
-          'Phường/Xã',
-          'Ghi chú',
-        ])
+        const rowTitle = worksheet.addRow(Object.values(CustomerExcelRules).map((i) => i.title))
         rowTitle.height = 32
         rowTitle.eachCell((cell: Cell) => {
           cell.font = {
@@ -264,31 +104,11 @@ export class ApiFileCustomerDownloadExcel {
           }
         })
       },
-      columns: [
-        { key: 'num', width: 5 },
-        { key: 'id', width: 10 },
-        { key: 'fullName', width: 40 },
-        { key: 'phone', width: 15 },
-        { key: 'debt', width: 10 },
-        { key: 'birthday', width: 15 },
-        { key: 'gender', width: 10 },
-        { key: 'addressProvince', width: 20 },
-        { key: 'addressDistrict', width: 20 },
-        { key: 'addressWard', width: 20 },
-        { key: 'note', width: 30 },
-      ],
-      rows: dataRows,
-      footerSheet: (worksheet: Worksheet) => {
-        worksheet.addRow([''])
-        worksheet.addRow([`Người xuất báo cáo: ${meta.userFullName}`]).eachCell((cell) => {
-          cell.font = {
-            size: 12,
-            bold: true,
-            italic: true,
-            name: 'Times New Roman',
-          }
-        })
-      },
+      columns: Object.entries(CustomerExcelRules).map(([key, rule]) => ({
+        key,
+        width: rule.width,
+      })),
+      rows: [dataRow as any],
     })
 
     return workbook

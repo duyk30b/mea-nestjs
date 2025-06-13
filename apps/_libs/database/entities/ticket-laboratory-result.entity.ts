@@ -21,6 +21,10 @@ export default class TicketLaboratoryResult extends BaseEntity {
   @Expose()
   laboratoryId: number
 
+  @Column({ default: 0 })
+  @Expose()
+  laboratoryGroupId: number
+
   @Column()
   @Expose()
   ticketLaboratoryId: number

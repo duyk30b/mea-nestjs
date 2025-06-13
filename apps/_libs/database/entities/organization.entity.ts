@@ -63,10 +63,6 @@ export default class Organization {
 
   @Expose()
   @Column({ type: 'varchar', length: 255, nullable: true })
-  addressDistrict: string
-
-  @Expose()
-  @Column({ type: 'varchar', length: 255, nullable: true })
   addressWard: string
 
   @Expose()

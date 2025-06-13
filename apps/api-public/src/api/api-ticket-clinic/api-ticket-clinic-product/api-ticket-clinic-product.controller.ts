@@ -1,11 +1,11 @@
 import { Body, Controller, Delete, Param, Post } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../../_libs/common/dto'
-import { HasPermission } from '../../../../../_libs/common/guards/permission.guard'
+import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../../_libs/database/entities/permission.entity'
 import { TicketProductType } from '../../../../../_libs/database/entities/ticket-product.entity'
-import { TicketReturnProductListBody } from '../../api-ticket/request'
+import { PermissionId } from '../../../../../_libs/permission/permission.enum'
+import { TicketReturnProductListBody, TicketSendProductListBody } from '../../api-ticket/request'
 import { TicketParams } from '../../api-ticket/request/ticket.params'
 import { ApiTicketClinicProductService } from './api-ticket-clinic-product.service'
 import {
@@ -22,7 +22,7 @@ export class ApiTicketClinicProductController {
   constructor(private readonly apiTicketClinicProductService: ApiTicketClinicProductService) { }
 
   @Post(':id/add-ticket-product-consumable-list')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE)
   async addTicketProductConsumable(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -37,7 +37,7 @@ export class ApiTicketClinicProductController {
   }
 
   @Post(':id/add-ticket-product-prescription-list')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION)
   async addTicketProductPrescription(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -52,7 +52,7 @@ export class ApiTicketClinicProductController {
   }
 
   @Delete(':ticketId/destroy-ticket-product-consumable/:ticketProductId')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE)
   async destroyTicketProductConsumable(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketProductId }: TicketClinicProductParams
@@ -66,7 +66,7 @@ export class ApiTicketClinicProductController {
   }
 
   @Delete(':ticketId/destroy-ticket-product-prescription/:ticketProductId')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION)
   async destroyTicketProductPrescription(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketProductId }: TicketClinicProductParams
@@ -80,7 +80,7 @@ export class ApiTicketClinicProductController {
   }
 
   @Post(':id/update-priority-ticket-product-consumable')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE)
   async updatePriorityTicketProductConsumable(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -95,7 +95,7 @@ export class ApiTicketClinicProductController {
   }
 
   @Post(':id/update-priority-ticket-product-prescription')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION)
   async updatePriorityTicketProductPrescription(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -110,7 +110,7 @@ export class ApiTicketClinicProductController {
   }
 
   @Post(':ticketId/update-ticket-product-consumable/:ticketProductId')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_CONSUMABLE)
   async updateTicketProductConsumable(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketProductId }: TicketClinicProductParams,
@@ -126,7 +126,7 @@ export class ApiTicketClinicProductController {
   }
 
   @Post(':ticketId/update-ticket-product-prescription/:ticketProductId')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PRODUCT_PRESCRIPTION)
   async updateTicketProductPrescription(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketProductId }: TicketClinicProductParams,
@@ -142,13 +142,17 @@ export class ApiTicketClinicProductController {
   }
 
   @Post(':ticketId/send-product')
-  @HasPermission(PermissionId.TICKET_CLINIC_SEND_PRODUCT)
-  async sendProduct(@External() { oid }: TExternal, @Param() { ticketId }: TicketParams) {
-    return await this.apiTicketClinicProductService.sendProduct({ oid, ticketId })
+  @UserPermission(PermissionId.TICKET_CLINIC_SEND_PRODUCT)
+  async sendProduct(
+    @External() { oid }: TExternal,
+    @Param() { ticketId }: TicketParams,
+    @Body() body: TicketSendProductListBody
+  ) {
+    return await this.apiTicketClinicProductService.sendProduct({ oid, ticketId, body })
   }
 
   @Post(':ticketId/return-product')
-  @HasPermission(PermissionId.TICKET_CLINIC_RETURN_PRODUCT)
+  @UserPermission(PermissionId.TICKET_CLINIC_RETURN_PRODUCT)
   async returnProduct(
     @External() { oid }: TExternal,
     @Param() { ticketId }: TicketParams,

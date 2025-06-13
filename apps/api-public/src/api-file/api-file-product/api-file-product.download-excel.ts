@@ -1,14 +1,17 @@
 import { Injectable } from '@nestjs/common'
 import { Cell, Workbook, Worksheet } from 'exceljs'
-import { ESArray } from '../../../../_libs/common/helpers/object.helper'
-import { ESTimer } from '../../../../_libs/common/helpers/time.helper'
-import { Organization, Product, User } from '../../../../_libs/database/entities'
+import { ESArray } from '../../../../_libs/common/helpers'
+import { Product } from '../../../../_libs/database/entities'
 import {
   BatchRepository,
   ProductGroupRepository,
   ProductRepository,
 } from '../../../../_libs/database/repositories'
-import { excelOneSheetWorkbook } from '../../../../_libs/file/excel-one-sheet.util'
+import {
+  CustomStyleExcel,
+  excelOneSheetWorkbook,
+} from '../../../../_libs/file/excel-one-sheet.util'
+import { ProductExcelRules } from './product-excel.rule'
 
 @Injectable()
 export class ApiFileProductDownloadExcel {
@@ -18,44 +21,27 @@ export class ApiFileProductDownloadExcel {
     private readonly batchRepository: BatchRepository
   ) { }
 
-  async downloadExcel(options: { user: User; organization: Organization }) {
-    const { user, organization } = options
-    const productList = await this.productRepository.findMany({
-      condition: { oid: organization.id, isActive: 1 },
-      sort: { id: 'ASC' },
-    })
-
-    const productGroupAll = await this.productGroupRepository.findManyBy({})
+  async downloadExcel(options: { oid: number }) {
+    const { oid } = options
+    const productGroupAll = await this.productGroupRepository.findManyBy({ oid })
     const productGroupMap = ESArray.arrayToKeyValue(productGroupAll, 'id')
+    const productList = await this.productRepository.findMany({
+      condition: { oid, isActive: 1 },
+      sort: { productCode: 'ASC' },
+    })
 
     const batchList = await this.batchRepository.findMany({
-      condition: { oid: organization.id, quantity: { NOT: 0 } },
+      condition: { oid },
+      sort: { productId: 'ASC' },
     })
-    const batchListMapProductId = ESArray.arrayToKeyArray(batchList, 'productId')
+    const batchListMap = ESArray.arrayToKeyArray(batchList, 'productId')
 
     productList.forEach((product) => {
-      product.batchList = batchListMapProductId[product.id] || []
       product.productGroup = productGroupMap[product.productGroupId]
+      product.batchList = batchListMap[product.id] || []
     })
 
-    const workbook: Workbook = this.getWorkbookProduct(productList, {
-      orgName: organization.name,
-      orgPhone: organization.phone,
-      orgAddress: [
-        organization.addressWard,
-        organization.addressDistrict,
-        organization.addressProvince,
-      ]
-        .filter((i) => !!i)
-        .join(' - ')
-        .replace('Tỉnh', '')
-        .replace('Thành phố', '')
-        .replace('Quận ', '')
-        .replace('Huyện ', '')
-        .replace('Phường ', '')
-        .replace('Xã ', ''),
-      userFullName: user.fullName,
-    })
+    const workbook: Workbook = this.getWorkbookProduct(productList)
     const buffer = await workbook.xlsx.writeBuffer()
 
     return {
@@ -67,142 +53,77 @@ export class ApiFileProductDownloadExcel {
     }
   }
 
-  public getWorkbookProduct(
-    productList: Product[],
-    meta: {
-      orgName: string
-      orgPhone: string
-      orgAddress: string
-      userFullName: string
+  public getWorkbookProduct(productList: Product[]): Workbook {
+    const dataRow: {
+      style: { [P in keyof typeof ProductExcelRules]: CustomStyleExcel }
+      data: any[]
+    } = {
+      style: {
+        _num: { alignment: { horizontal: 'center' } },
+        productCode: { alignment: { wrapText: true } },
+        brandName: { alignment: { wrapText: true } },
+        batchId: { alignment: { horizontal: 'center' } },
+        lotNumber: { alignment: { horizontal: 'center' } },
+        expiryDate: { alignment: { horizontal: 'center' }, numFmt: 'dd/mm/yyyy' },
+        quantity: { numFmt: '###,##0', font: { bold: true } },
+        unitBasicName: { alignment: { horizontal: 'center' } },
+        costPrice: { numFmt: '###,##0' },
+        retailPrice: { numFmt: '###,##0' },
+        costAmount: { numFmt: '###,##0' },
+        substance: { alignment: { wrapText: true } },
+        productGroupName: {},
+        route: { alignment: { horizontal: 'center' } },
+        source: { alignment: { horizontal: 'center' } },
+      },
+      data: [],
     }
-  ): Workbook {
-    const dataRows = []
 
+    let indexNumber = 0
     productList.forEach((product, productIndex) => {
       const unitArray: { name: string; rate: number }[] = JSON.parse(product.unit || '[]')
-      const unitNameBasic = unitArray.find((i) => i.rate === 1)?.name || ''
+      const unitBasicName = unitArray.find((i) => i.rate === 1)?.name || ''
 
       if (product.batchList.length === 0) {
-        dataRows.push({
-          style: {
-            num: { alignment: { horizontal: 'center' } },
-            productCode: { alignment: { horizontal: 'center' } },
-            brandName: { alignment: { wrapText: true } },
-            substance: { alignment: { wrapText: true } },
-            batchCode: { alignment: { horizontal: 'center' } },
-            expiryDate: { alignment: { horizontal: 'center' }, numFmt: 'dd/mm/yyyy' },
-            quantity: { numFmt: '###,##0', font: { bold: true } },
-            costPrice: { numFmt: '###,##0' },
-            wholesalePrice: { numFmt: '###,##0' },
-            retailPrice: { numFmt: '###,##0' },
-            group: {},
-            unit: { alignment: { horizontal: 'center' } },
-            route: { alignment: { horizontal: 'center' } },
-          },
-          data: [
-            {
-              num: productIndex + 1,
-              productCode: product.productCode,
-              // brandName: product.brandName + '\n' + product.substance,
-              // brandName: {
-              //   richText: [
-              //     {
-              //       text: product.brandName,
-              //       font: {
-              //         size: 12,
-              //         bold: false,
-              //         name: 'Times New Roman',
-              //       },
-              //     },
-              //     ...(product.substance ? [{
-              //       text: '\n' + product.substance,
-              //       font: {
-              //         size: 10,
-              //         bold: false,
-              //         name: 'Times New Roman',
-              //         italic: true,
-              //       },
-              //     }] : []),
-              //   ],
-              // },
-              brandName: product.brandName || '',
-              substance: product.substance || '',
-              batchCode: '',
-              expiryDate: '', // fix giờ do hệ thống lệch giờ
-              quantity: product.quantity || 0,
-              costPrice: product.costPrice || 0,
-              wholesalePrice: product.wholesalePrice || 0,
-              retailPrice: product.retailPrice || 0,
-              group: product.productGroup?.name || '',
-              unit: unitNameBasic,
-              route: product.route || '',
-              source: product.source || '',
-            },
-          ],
-        })
+        indexNumber++
+        const data: { [P in keyof typeof ProductExcelRules]: any } = {
+          _num: indexNumber,
+          productCode: product.productCode || '',
+          brandName: product.brandName || '',
+          batchId: '',
+          lotNumber: '', // fix giờ do hệ thống lệch giờ
+          expiryDate: '', // fix giờ do hệ thống lệch giờ
+          quantity: product.quantity || 0,
+          unitBasicName,
+          costPrice: product.costPrice || 0,
+          retailPrice: product.retailPrice || 0,
+          costAmount: product.wholesalePrice || 0,
+          substance: product.substance || '',
+          productGroupName: product.productGroup?.name || '',
+          route: product.route || '',
+          source: product.source || '',
+        }
+        dataRow.data.push(data)
       } else {
         product.batchList.forEach((batch, batchIndex) => {
-          // let mergeCells = {}
-          // if (batchIndex === product.batchList.length - 1) {
-          //   mergeCells = { mergeCells: { rowspan: product.batchList.length, colspan: 1 } }
-          // }
-          dataRows.push({
-            style: {
-              num: { alignment: { horizontal: 'center' } },
-              productCode: { alignment: { horizontal: 'center' } },
-              brandName: { alignment: { wrapText: true } },
-              substance: { alignment: { wrapText: true } },
-              batchCode: { alignment: { horizontal: 'center' } },
-              expiryDate: { alignment: { horizontal: 'center' }, numFmt: 'dd/mm/yyyy' },
-              quantity: { font: { bold: true } },
-              costPrice: { numFmt: '###,##0' },
-              wholesalePrice: { numFmt: '###,##0' },
-              retailPrice: { numFmt: '###,##0' },
-              group: {},
-              unit: { alignment: { horizontal: 'center' } },
-              route: { alignment: { horizontal: 'center' } },
-            },
-            data: [
-              {
-                num: productIndex + 1,
-                productCode: product.productCode,
-                brandName: product.brandName || '',
-                substance: product.substance || '',
-                // brandName: product.brandName + '\n' + product.substance,
-                // brandName: {
-                //   richText: [
-                //     {
-                //       text: product.brandName,
-                //       font: {
-                //         size: 12,
-                //         bold: false,
-                //         name: 'Times New Roman',
-                //       },
-                //     },
-                //     ...(product.substance ? [{
-                //       text: '\n' + product.substance,
-                //       font: {
-                //         size: 10,
-                //         bold: false,
-                //         name: 'Times New Roman',
-                //         italic: true,
-                //       },
-                //     }] : []),
-                //   ],
-                // },
-                batchCode: batch.batchCode || '',
-                expiryDate: batch.expiryDate ? new Date(batch.expiryDate + 7 * 60 * 60 * 1000) : '', // fix giờ do hệ thống lệch giờ
-                quantity: batch.quantity || 0,
-                costPrice: batch.costPrice || 0,
-                wholesalePrice: product.wholesalePrice || 0,
-                retailPrice: product.retailPrice || 0,
-                group: product.productGroup?.name || '',
-                unit: unitNameBasic,
-                route: product.route || '',
-                source: product.source || '',
-              },
-            ],
-          })
+          indexNumber++
+          const data: { [P in keyof typeof ProductExcelRules]: any } = {
+            _num: indexNumber,
+            productCode: product.productCode,
+            brandName: product.brandName || '',
+            batchId: batch.id || '',
+            lotNumber: batch.lotNumber || '',
+            expiryDate: batch.expiryDate ? new Date(batch.expiryDate + 7 * 60 * 60 * 1000) : '', // fix giờ do hệ thống lệch giờ
+            quantity: batch.quantity || 0,
+            unitBasicName,
+            costPrice: batch.costPrice || 0,
+            retailPrice: product.retailPrice || 0,
+            costAmount: batch.costAmount || 0,
+            substance: product.substance || '',
+            productGroupName: product.productGroup?.name || '',
+            route: product.route || '',
+            source: product.source || '',
+          }
+          dataRow.data.push(data)
         })
       }
     })
@@ -210,67 +131,7 @@ export class ApiFileProductDownloadExcel {
     const workbook = excelOneSheetWorkbook({
       layout: { sheetName: 'Sản phẩm' },
       headerSheet: (worksheet: Worksheet) => {
-        worksheet.addRow([meta.orgName]).eachCell((cell) => {
-          cell.font = {
-            size: 12,
-            bold: true,
-            name: 'Times New Roman',
-          }
-        })
-        worksheet.addRow([meta.orgPhone]).eachCell((cell) => {
-          cell.font = {
-            size: 12,
-            bold: true,
-            name: 'Times New Roman',
-          }
-        })
-        worksheet.addRow([meta.orgAddress]).eachCell((cell) => {
-          cell.font = {
-            size: 12,
-            bold: true,
-            name: 'Times New Roman',
-          }
-        })
-
-        worksheet.addRow(['BÁO CÁO TỒN KHO']).eachCell((cell) => {
-          cell.font = {
-            size: 16,
-            bold: true,
-            name: 'Times New Roman',
-          }
-          cell.alignment = { horizontal: 'center' }
-        })
-        worksheet.mergeCells(4, 1, 4, 15)
-
-        worksheet
-          .addRow([`Thời gian: ${ESTimer.timeToText(new Date(), 'hh:mm:ss DD/MM/YYYY', 7)}`])
-          .eachCell((cell) => {
-            cell.font = {
-              size: 12,
-              italic: true,
-              name: 'Times New Roman',
-            }
-            cell.alignment = { horizontal: 'center' }
-          })
-        worksheet.mergeCells(5, 1, 5, 15)
-        worksheet.addRow([])
-
-        const rowTitle = worksheet.addRow([
-          'STT',
-          'Mã SP',
-          'Tên sản phẩm',
-          'Hoạt chất',
-          'Lô',
-          'HSD',
-          'Số Lượng',
-          'Giá nhập',
-          'Giá bán sỉ',
-          'Giá bán lẻ',
-          'Nhóm',
-          'Đơn vị',
-          'Đường dùng',
-          'Nguồn gốc',
-        ])
+        const rowTitle = worksheet.addRow(Object.values(ProductExcelRules).map((i) => i.title))
         rowTitle.height = 32
         rowTitle.eachCell((cell: Cell) => {
           cell.font = {
@@ -293,34 +154,8 @@ export class ApiFileProductDownloadExcel {
           }
         })
       },
-      columns: [
-        { key: 'num', width: 5 },
-        { key: 'productCode', width: 10 },
-        { key: 'brandName', width: 30 },
-        { key: 'substance', width: 30 },
-        { key: 'batchCode', width: 10 },
-        { key: 'expiryDate', width: 10 },
-        { key: 'quantity', width: 10 },
-        { key: 'costPrice', width: 10 },
-        { key: 'wholesalePrice', width: 10 },
-        { key: 'retailPrice', width: 10 },
-        { key: 'group', width: 20 },
-        { key: 'unit', width: 10 },
-        { key: 'route', width: 10 },
-        { key: 'source', width: 20 },
-      ],
-      rows: dataRows,
-      footerSheet: (worksheet: Worksheet) => {
-        worksheet.addRow([''])
-        worksheet.addRow([`Người xuất báo cáo: ${meta.userFullName}`]).eachCell((cell) => {
-          cell.font = {
-            size: 12,
-            bold: true,
-            italic: true,
-            name: 'Times New Roman',
-          }
-        })
-      },
+      columns: Object.entries(ProductExcelRules).map(([key, rule]) => ({ key, width: rule.width })),
+      rows: [dataRow as any],
     })
 
     return workbook

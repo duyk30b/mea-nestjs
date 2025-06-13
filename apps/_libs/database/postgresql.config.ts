@@ -1,5 +1,6 @@
 import { registerAs } from '@nestjs/config'
 import { TypeOrmModuleOptions } from '@nestjs/typeorm'
+import { PrettySqlLogger } from './postgresql.log'
 
 export const PostgresqlConfig = registerAs(
   'postgres',
@@ -11,6 +12,7 @@ export const PostgresqlConfig = registerAs(
     username: process.env.SQL_USERNAME,
     password: process.env.SQL_PASSWORD,
     autoLoadEntities: true,
+    logger: new PrettySqlLogger({ paramType: 'ReplaceParam' }),
     logging: process.env.NODE_ENV !== 'production' ? 'all' : ['error'],
   })
 )

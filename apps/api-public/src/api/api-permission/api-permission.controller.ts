@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { IsRoot } from '../../../../_libs/common/guards/root.guard'
-import { IsUser } from '../../../../_libs/common/guards/user.guard.'
+import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { ApiPermissionService } from './api-permission.service'
 import { PermissionGetManyQuery } from './request'
 
@@ -12,7 +12,7 @@ export class ApiPermissionController {
   constructor(private readonly apiPermissionService: ApiPermissionService) { }
 
   @Get('list')
-  @IsUser()
+  @UserPermission()
   list(@Query() query: PermissionGetManyQuery) {
     return this.apiPermissionService.getMany(query)
   }

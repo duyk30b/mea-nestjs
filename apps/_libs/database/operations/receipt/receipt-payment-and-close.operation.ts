@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { DeliveryStatus } from '../../common/variable'
-import {
+import { Distributor } from '../../entities'
+import Payment, {
   MoneyDirection,
   PaymentInsertType,
   PaymentTiming,
@@ -59,14 +60,16 @@ export class ReceiptPaymentAndCloseOperation {
         }
       )
 
+      let distributor: Distributor
+      let payment: Payment
+
       if (receipt.debt == 0 && money == 0) {
-        return { receipt } // không ghi nợ, cũng không ghi thanh toán
+        // return { receipt } // không ghi nợ, cũng không ghi thanh toán
       }
       // === 3. CUSTOMER + CUSTOMER_PAYMENT ===
-
-      if ([ReceiptStatus.Executing, ReceiptStatus.Completed].includes(receipt.status)) {
-        // trường hợp này không ghi nợ
-        const distributor = await this.distributorManager.findOneBy(manager, {
+      // trường hợp thanh toán không nợ
+      else if ([ReceiptStatus.Executing, ReceiptStatus.Completed].includes(receipt.status)) {
+        distributor = await this.distributorManager.findOneBy(manager, {
           oid,
           id: receipt.distributorId,
         })
@@ -96,14 +99,13 @@ export class ReceiptPaymentAndCloseOperation {
           note,
           description,
         }
-        const payment = await this.paymentManager.insertOneAndReturnEntity(manager, paymentInsert)
 
-        return { receipt, distributor, payment }
+        payment = await this.paymentManager.insertOneAndReturnEntity(manager, paymentInsert)
       }
 
-      if ([ReceiptStatus.Debt].includes(receipt.status)) {
-        // trường hợp này phải ghi nợ
-        const distributor = await this.distributorManager.updateOneAndReturnEntity(
+      // Trường hợp trả nợ
+      else if ([ReceiptStatus.Debt].includes(receipt.status)) {
+        distributor = await this.distributorManager.updateOneAndReturnEntity(
           manager,
           { oid, id: receipt.distributorId },
           { debt: () => `debt + ${receipt.debt}` }
@@ -134,10 +136,10 @@ export class ReceiptPaymentAndCloseOperation {
           note: '',
           description: '',
         }
-        const payment = await this.paymentManager.insertOneAndReturnEntity(manager, paymentInsert)
-
-        return { receipt, distributor, payment }
+        payment = await this.paymentManager.insertOneAndReturnEntity(manager, paymentInsert)
       }
+
+      return { receipt, distributor, payment }
     })
 
     return transaction

@@ -10,7 +10,11 @@ export class ProcedureRelationQuery {
 
   @Expose()
   @IsBoolean()
-  commissionList: boolean
+  positionList: boolean
+
+  @Expose()
+  @IsBoolean()
+  discountList: boolean
 }
 
 export class ProcedureFilterQuery {
@@ -37,6 +41,10 @@ export class ProcedureSortQuery extends SortQuery {
   @Expose()
   @IsIn(['ASC', 'DESC'])
   name: 'ASC' | 'DESC'
+
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  procedureCode: 'ASC' | 'DESC'
 
   @Expose()
   @IsIn(['ASC', 'DESC'])

@@ -51,11 +51,11 @@ export class TicketClinicUpdateTicketProductOperation {
       )
 
       // === 2. UPDATE TICKET PRODUCT ===
-      const ticketProductOrigin = await this.ticketProductManager.findOneBy(manager, {
-        oid,
-        id: ticketProductId,
-        type: ticketProductType,
-      })
+      const ticketProductOrigin = await this.ticketProductManager.updateOneAndReturnEntity(
+        manager,
+        { oid, id: ticketProductId, type: ticketProductType },
+        { ticketId }
+      )
 
       if (!ticketProductOrigin) {
         throw new Error(PREFIX + 'Database.NotFound ')
@@ -110,15 +110,19 @@ export class TicketClinicUpdateTicketProductOperation {
 
       // === 4. ReCalculator DeliveryStatus
       let deliveryStatus = ticketOrigin.deliveryStatus
-      if (ticketProductModified.quantity === 0) {
-        const ticketProductList = await this.ticketProductManager.findMany(manager, {
-          condition: { ticketId },
-        })
-        deliveryStatus = DeliveryStatus.Delivered
-        if (ticketProductList.every((i) => i.deliveryStatus === DeliveryStatus.NoStock)) {
-          deliveryStatus = DeliveryStatus.NoStock
-        }
-        if (ticketProductList.some((i) => i.deliveryStatus === DeliveryStatus.Pending)) {
+      if (ticketProductModified.deliveryStatus !== DeliveryStatus.Delivered) {
+        if (ticketProductModified.quantity === 0) {
+          const ticketProductList = await this.ticketProductManager.findMany(manager, {
+            condition: { ticketId },
+          })
+          deliveryStatus = DeliveryStatus.Delivered
+          if (ticketProductList.every((i) => i.deliveryStatus === DeliveryStatus.NoStock)) {
+            deliveryStatus = DeliveryStatus.NoStock
+          }
+          if (ticketProductList.some((i) => i.deliveryStatus === DeliveryStatus.Pending)) {
+            deliveryStatus = DeliveryStatus.Pending
+          }
+        } else {
           deliveryStatus = DeliveryStatus.Pending
         }
       }

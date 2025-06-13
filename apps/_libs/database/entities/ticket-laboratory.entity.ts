@@ -20,6 +20,10 @@ export default class TicketLaboratory extends BaseEntity {
   @Expose()
   priority: number
 
+  @Expose()
+  @Column({ default: 0 })
+  roomId: number
+
   @Column()
   @Expose()
   customerId: number

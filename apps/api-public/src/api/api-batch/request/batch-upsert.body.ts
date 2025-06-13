@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
-import { IsDefined, IsInt, IsNumber, IsString } from 'class-validator'
+import { IsDefined, IsIn, IsInt, IsNumber, IsString } from 'class-validator'
 
 export class BatchInsertBody {
   @ApiPropertyOptional({ example: 12 })
@@ -25,7 +25,7 @@ export class BatchInsertBody {
   @Expose()
   @IsDefined()
   @IsString()
-  batchCode: string
+  lotNumber: string
 
   @ApiPropertyOptional({ example: 1679995369195 })
   @Expose()
@@ -38,20 +38,27 @@ export class BatchInsertBody {
   @IsDefined()
   @IsInt()
   costPrice: number
+
+  @ApiPropertyOptional({ example: 1 })
+  @Expose()
+  @IsDefined()
+  @IsIn([0, 1])
+  isActive: 0 | 1
 }
 
 export class BatchUpdateInfoBody extends PickType(BatchInsertBody, [
-  'batchCode',
+  'lotNumber',
   'expiryDate',
   'warehouseId',
 ]) { }
 
 export class BatchUpdateInfoAndQuantityBody extends PickType(BatchInsertBody, [
-  'batchCode',
+  'lotNumber',
   'expiryDate',
   'warehouseId',
   'distributorId',
   'costPrice',
+  'isActive',
 ]) {
   @ApiProperty({ example: 20_000 })
   @Expose()

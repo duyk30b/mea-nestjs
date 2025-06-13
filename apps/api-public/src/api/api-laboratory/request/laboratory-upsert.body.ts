@@ -3,8 +3,16 @@ import { Expose, Type } from 'class-transformer'
 import { IsArray, IsDefined, IsInt, IsNumber, IsString, ValidateNested } from 'class-validator'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { LaboratoryValueType } from '../../../../../_libs/database/entities/laboratory.entity'
+import { DiscountUpdateBody } from '../../api-discount/request'
+import { PositionBasicBody } from '../../api-position/request'
 
 export class LaboratoryParentUpsert {
+  @ApiProperty({ example: 'ABC12345' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  laboratoryCode?: string
+
   @ApiProperty({ example: 105000 })
   @Expose()
   @IsDefined()
@@ -75,22 +83,64 @@ export class LaboratoryChildUpdate extends OmitType(LaboratoryParentUpsert, ['la
   id: number
 }
 
-export class LaboratoryCreateBody extends LaboratoryParentUpsert {
+export class LaboratoryCreateBody {
+  @ApiProperty({ type: LaboratoryParentUpsert })
+  @Expose()
+  @Type(() => LaboratoryParentUpsert)
+  @IsDefined()
+  @ValidateNested({ each: true })
+  laboratory: LaboratoryParentUpsert
+
   @ApiProperty({ type: LaboratoryChildCreate, isArray: true })
   @Expose()
   @Type(() => LaboratoryChildCreate)
   @IsDefined()
   @IsArray()
   @ValidateNested({ each: true })
-  children: LaboratoryChildCreate[]
+  laboratoryChildren: LaboratoryChildCreate[]
+
+  @ApiProperty({ type: DiscountUpdateBody, isArray: true })
+  @Expose()
+  @Type(() => DiscountUpdateBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  discountList: DiscountUpdateBody[]
+
+  @ApiProperty({ type: PositionBasicBody, isArray: true })
+  @Expose()
+  @Type(() => PositionBasicBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  positionList: PositionBasicBody[]
 }
 
-export class LaboratoryUpdateBody extends LaboratoryParentUpsert {
+export class LaboratoryUpdateBody {
+  @ApiProperty({ type: LaboratoryParentUpsert })
+  @Expose()
+  @Type(() => LaboratoryParentUpsert)
+  @IsDefined()
+  @ValidateNested({ each: true })
+  laboratory: LaboratoryParentUpsert
+
   @ApiProperty({ type: LaboratoryChildUpdate, isArray: true })
   @Expose()
   @Type(() => LaboratoryChildUpdate)
   @IsDefined()
   @IsArray()
   @ValidateNested({ each: true })
-  children: LaboratoryChildUpdate[]
+  laboratoryChildren: LaboratoryChildUpdate[]
+
+  @ApiProperty({ type: DiscountUpdateBody, isArray: true })
+  @Expose()
+  @Type(() => DiscountUpdateBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  discountList: DiscountUpdateBody[]
+
+  @ApiProperty({ type: PositionBasicBody, isArray: true })
+  @Expose()
+  @Type(() => PositionBasicBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  positionList: PositionBasicBody[]
 }

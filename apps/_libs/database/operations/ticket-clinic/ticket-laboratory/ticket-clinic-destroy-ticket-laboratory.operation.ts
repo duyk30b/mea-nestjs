@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
+import { TicketLaboratoryStatus } from '../../../common/variable'
 import { TicketLaboratoryGroup } from '../../../entities'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import {
@@ -40,7 +41,7 @@ export class TicketClinicDestroyTicketLaboratoryOperation {
       // === 2. DELETE TICKET LABORATORY ===
       const ticketLaboratoryDestroy = await this.ticketLaboratoryManager.deleteOneAndReturnEntity(
         manager,
-        { oid, ticketId, id: ticketLaboratoryId }
+        { oid, ticketId, id: ticketLaboratoryId, status: TicketLaboratoryStatus.Pending }
       )
 
       const ticketLaboratoryResultDestroyList =

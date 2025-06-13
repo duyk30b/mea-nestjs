@@ -12,6 +12,10 @@ export default class PrescriptionSample {
   @PrimaryGeneratedColumn()
   id: number
 
+  @Expose()
+  @Column({ default: 0 })
+  userId: number
+
   @Column({ default: 1 })
   @Expose()
   priority: number

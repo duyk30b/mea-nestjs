@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { InteractType } from '../../../entities/commission.entity'
+import { PositionInteractType } from '../../../entities/position.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
-import { TicketManager, TicketProcedureManager, TicketUserManager } from '../../../managers'
+import { TicketManager, TicketProcedureManager } from '../../../managers'
+import { TicketUserManager } from '../../../repositories'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
 
 @Injectable()
@@ -40,7 +41,7 @@ export class TicketClinicDestroyTicketProcedureOperation {
       // === 3. DELETE TICKET USER ===
       const ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
         oid,
-        interactType: InteractType.Procedure,
+        positionType: PositionInteractType.Procedure,
         ticketItemId: ticketProcedureDestroy.id,
       })
 

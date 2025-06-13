@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { BusinessError } from '../../../../_libs/database/common/error'
 import { PersonType } from '../../../../_libs/database/entities/payment.entity'
 import { PaymentRepository, TicketRepository } from '../../../../_libs/database/repositories'
 import { CustomerRepository } from '../../../../_libs/database/repositories/customer.repository'
@@ -74,31 +75,45 @@ export class ApiCustomerService {
   }
 
   async createOne(oid: number, body: CustomerCreateBody): Promise<BaseResponse> {
+    let customerCode = body.customerCode
+    if (!customerCode) {
+      const count = await this.customerRepository.getMaxId()
+      customerCode = (count + 1).toString()
+    }
+
     const customer = await this.customerRepository.insertOneFullFieldAndReturnEntity({
       ...body,
       oid,
       debt: 0,
+      customerCode,
     })
     this.socketEmitService.customerUpsert(oid, { customer })
     return { data: { customer } }
   }
 
-  async updateOne(oid: number, id: number, body: CustomerUpdateBody): Promise<BaseResponse> {
-    const [customer] = await this.customerRepository.updateAndReturnEntity({ oid, id }, body)
-    if (!customer) {
-      throw BusinessException.create({
-        message: 'error.Database.UpdateFailed',
-        details: 'Customer',
-      })
+  async updateOne(
+    oid: number,
+    customerId: number,
+    customerBody: CustomerUpdateBody
+  ): Promise<BaseResponse> {
+    const existCustomer = await this.customerRepository.findOneBy({
+      oid,
+      customerCode: customerBody.customerCode,
+      id: { NOT: customerId },
+    })
+    if (existCustomer) {
+      throw new BusinessError(`Trùng mã dịch vụ với ${existCustomer.fullName}`)
     }
+
+    const customer = await this.customerRepository.updateOneAndReturnEntity(
+      { oid, id: customerId },
+      customerBody
+    )
     this.socketEmitService.customerUpsert(oid, { customer })
     return { data: { customer } }
   }
 
-  async destroyOne(options: {
-    oid: number
-    customerId: number
-  }): Promise<BaseResponse> {
+  async destroyOne(options: { oid: number; customerId: number }): Promise<BaseResponse> {
     const { oid, customerId } = options
     const ticketList = await this.ticketRepository.findMany({
       condition: { oid, customerId },

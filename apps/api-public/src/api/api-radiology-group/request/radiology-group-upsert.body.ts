@@ -1,37 +1,35 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger'
+import { ApiProperty, OmitType } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsNotEmpty, ValidateNested } from 'class-validator'
+import { IsArray, IsDefined, IsInt, IsNotEmpty, ValidateNested } from 'class-validator'
 
-export class RadiologyGroupCreateBody {
-  @ApiProperty({ example: 'Nhóm ABC' })
-  @Expose()
-  @IsDefined()
-  @IsNotEmpty()
-  name: string
-}
-
-export class RadiologyGroupUpdateBody extends PartialType(RadiologyGroupCreateBody) { }
-
-export class RadiologyGroupReplaceBody {
-  @ApiProperty({ example: 'Nhóm ABC' })
-  @Expose()
-  @IsDefined()
-  @IsNotEmpty()
-  name: string
-
+export class RadiologyGroupBody {
   @ApiProperty({ example: 2 })
   @Expose()
   @IsDefined()
   @IsNotEmpty()
   id: number
+
+  @ApiProperty({ example: 'Nhóm ABC' })
+  @Expose()
+  @IsDefined()
+  @IsNotEmpty()
+  name: string
+
+  @ApiProperty({ example: 25 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  roomId: number
 }
 
+export class RadiologyGroupUpsertBody extends OmitType(RadiologyGroupBody, ['id']) { }
+
 export class RadiologyGroupReplaceAllBody {
-  @ApiProperty({ type: RadiologyGroupReplaceBody, isArray: true })
+  @ApiProperty({ type: RadiologyGroupBody, isArray: true })
   @Expose()
-  @Type(() => RadiologyGroupReplaceBody)
+  @Type(() => RadiologyGroupBody)
   @IsDefined()
   @IsArray()
   @ValidateNested({ each: true })
-  radiologyGroupReplaceAll: RadiologyGroupReplaceBody[]
+  radiologyGroupReplaceAll: RadiologyGroupBody[]
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { ESArray } from '../../../../_libs/common/helpers/object.helper'
+import { ESArray } from '../../../../_libs/common/helpers/array.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { StockCheck } from '../../../../_libs/database/entities'
 import { StockCheckItemInsertType } from '../../../../_libs/database/entities/stock-check-item.entity'

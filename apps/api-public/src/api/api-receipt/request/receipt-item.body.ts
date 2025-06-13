@@ -33,7 +33,7 @@ export class ReceiptItemBody {
   @Expose()
   @IsDefined()
   @IsString()
-  batchCode: string
+  lotNumber: string
 
   @ApiPropertyOptional({ example: 1679995369195 })
   @Expose()

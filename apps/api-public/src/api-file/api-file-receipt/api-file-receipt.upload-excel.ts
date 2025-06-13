@@ -1,299 +1,303 @@
 import { Injectable } from '@nestjs/common'
-import { Row, Workbook } from 'exceljs'
-import { ExcelColumUploadRulesType, FileUploadDto } from '../../../../_libs/common/dto/file'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { ESArray } from '../../../../_libs/common/helpers/object.helper'
-import { DiscountType, PickupStrategy } from '../../../../_libs/database/common/variable'
-import { User } from '../../../../_libs/database/entities'
-import {
+import { DataSource } from 'typeorm'
+import { FileUploadDto } from '../../../../_libs/common/dto/file'
+import { ESArray } from '../../../../_libs/common/helpers/array.helper'
+import { BusinessError } from '../../../../_libs/database/common/error'
+import { BatchInsertType } from '../../../../_libs/database/entities/batch.entity'
+import Product, {
   ProductInsertType,
+  ProductType,
+  ProductUpdateType,
   SplitBatchByCostPrice,
   SplitBatchByDistributor,
   SplitBatchByExpiryDate,
   SplitBatchByWarehouse,
 } from '../../../../_libs/database/entities/product.entity'
-import { ProductRepository } from '../../../../_libs/database/repositories'
-import { excelOneSheetWorkbook } from '../../../../_libs/file/excel-one-sheet.util'
-import { ApiReceiptService } from '../../api/api-receipt/api-receipt.service'
-import { ReceiptItemBody, ReceiptUpsertDraftBody } from '../../api/api-receipt/request'
+import { ReceiptItemInsertType } from '../../../../_libs/database/entities/receipt-item.entity'
+import { ProductManager } from '../../../../_libs/database/managers'
+import {
+  BatchRepository,
+  ProductGroupRepository,
+  ProductRepository,
+} from '../../../../_libs/database/repositories'
+import { ProductExcelRules } from '../api-file-product/product-excel.rule'
+import { ExcelProcess } from '../common/excel-process'
 
-const ReceiptItemExcelRules: ExcelColumUploadRulesType[] = [
-  {
-    column: 'A',
-    width: 5,
-    title: 'STT',
-    example: 1,
-    required: true,
-  },
-  {
-    column: 'B',
-    width: 15,
-    title: 'Mã sản phẩm',
-    type: 'string',
-    example: 'SP002',
-    required: true,
-  },
-  {
-    column: 'C',
-    width: 40,
-    title: 'Tên sản phẩm',
-    type: 'string',
-    example: 'Augmentin',
-    required: true,
-  },
-  {
-    column: 'D',
-    width: 15,
-    title: 'Mã lô',
-    type: 'string',
-    example: 'SK123',
-  },
-  {
-    column: 'E',
-    width: 20,
-    title: 'Hạn sử dụng',
-    type: 'date',
-    example: new Date(),
-  },
-  {
-    column: 'F',
-    width: 15,
-    title: 'Số lượng',
-    type: 'number',
-    example: 50,
-  },
-  {
-    column: 'G',
-    width: 15,
-    title: 'Giá nhập',
-    type: 'number',
-    example: 10000,
-  },
-  {
-    column: 'H',
-    width: 15,
-    title: 'Giá bán',
-    type: 'number',
-    example: 10000,
-  },
-]
+const dataPlainExample = {
+  _num: 0,
+  productCode: '',
+  brandName: '',
+  batchId: 0,
+  lotNumber: '',
+  expiryDate: 0,
+  quantity: 0,
+  unitBasicName: '',
+  costPrice: 0,
+  retailPrice: 0,
+  costAmount: 0,
+  substance: '',
+  productGroupName: '',
+  route: '',
+  source: '',
+} satisfies Record<keyof typeof ProductExcelRules, unknown>
+
+type DataPlain = typeof dataPlainExample & {
+  productId: number
+  productGroupId: number
+  productUpsert: ProductInsertType & { id: number }
+  batchUpsert?: BatchInsertType & { id: number }
+}
 
 @Injectable()
 export class ApiFileReceiptUploadExcel {
   constructor(
+    private dataSource: DataSource,
     private readonly productRepository: ProductRepository,
-    private readonly apiReceiptService: ApiReceiptService
+    private readonly productGroupRepository: ProductGroupRepository,
+    private readonly batchRepository: BatchRepository,
+    private readonly productManager: ProductManager
   ) { }
 
-  async fileExample() {
-    const dataRows = []
-    const rowTitleExample: Record<string, string> = {}
-    const rowTitleStyle: Record<string, any> = {}
-    ReceiptItemExcelRules.forEach((rule) => {
-      rowTitleExample[rule.column] = rule.title
-      rowTitleStyle[rule.column] = { alignment: { horizontal: 'center' }, font: { bold: true } }
-    })
-    dataRows.push({
-      style: rowTitleStyle,
-      data: [rowTitleExample],
-    })
+  async uploadExcelForGenerateReceiptItemList(options: {
+    oid: number
+    userId: number
+    file: FileUploadDto
+  }) {
+    const { oid, userId, file } = options
+    const time = Date.now()
 
-    const rowDataExample: Record<string, string | number | object> = {}
-    ReceiptItemExcelRules.forEach((rule) => {
-      rowDataExample[rule.column] = rule.example
-    })
-    dataRows.push({
-      data: [rowDataExample],
+    const productGroupAll = await this.productGroupRepository.findManyBy({ oid })
+    const productGroupMapName = ESArray.arrayToKeyValue(productGroupAll, 'name')
+
+    const excelDataGrid = await ExcelProcess.getData({
+      file,
+      excelRules: ProductExcelRules,
+      validate: { maxSize: 1 * 1024 * 1024 },
     })
 
-    const workbook = excelOneSheetWorkbook({
-      layout: { sheetName: 'Nhập hàng' },
-      columns: ReceiptItemExcelRules.map((rule) => {
-        return {
-          key: rule.column,
-          width: rule.width,
-        }
-      }),
-      rows: dataRows,
+    const dataConvertList = excelDataGrid.map((item) => {
+      const dataConvert = {}
+      Object.keys(ProductExcelRules).forEach((key, index) => {
+        dataConvert[key] = item[index]
+      })
+      return dataConvert as { [P in keyof typeof ProductExcelRules]: any }
     })
 
-    const buffer = await workbook.xlsx.writeBuffer()
-
-    return {
-      data: {
-        buffer,
-        mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        filename: 'MEA-file-nhap-hang-demo.xlsx',
-      },
-    }
-  }
-
-  async uploadExcelForCreateDraft(options: { oid: number; user: User; file: FileUploadDto }) {
-    const { oid, user, file } = options
-    const validTypes = [
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xlsx
-      'application/vnd.ms-excel', // .xls
-      'application/wps-office.xlsx', // WPS
-    ]
-    const isValidType = validTypes.includes(file.mimetype)
-    if (!isValidType) {
-      throw new BusinessException('Chỉ chấp nhận file excel' as any)
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      throw new BusinessException('Chỉ chấp nhận file dưới 5MB' as any)
-    }
-
-    const workbook = new Workbook()
-    await workbook.xlsx.load(file.buffer)
-
-    const worksheet = workbook.worksheets[0] // lấy sheet đầu tiên
-
-    // Validate
-    worksheet.eachRow((row: Row, rowNumber: number) => {
-      if (!row.hasValues) return
-      if (rowNumber === 1) {
-        const titleList = (row.values as string[]).slice(1) // bỏ index 0
-        titleList.forEach((t, index) => {
-          const rule = ReceiptItemExcelRules[index]
-          if (t !== rule.title) {
-            const msg = `Hàng ${rowNumber}, tiêu đề không đúng, cột ${rule.column} cần có tên là ${rule.title}`
-            throw new BusinessException(msg as any)
-          }
-        })
-        return // Bỏ qua hàng tiêu đề
+    const dataPlainList: DataPlain[] = dataConvertList.map((item, index) => {
+      if (!item.productCode) {
+        throw new BusinessError(`Lỗi: Dòng ${index + 2}: Mã sản phẩm không được để trống`)
       }
-      const values = (row.values as (string | number)[]).slice(1) // bỏ index 0
-      values.forEach((v, index) => {
-        const rule = ReceiptItemExcelRules[index]
-        const msgPrefix = `Hàng ${rowNumber}, STT ${values[0]}, cột ${rule.column}, ${rule.title} không đúng: `
-        let msgError = ''
-        if (rule.required && v == null) {
-          msgError = `${msgPrefix} không được để trống`
+      let productGroupId = 0
+      if (item.productGroupName) {
+        console.log('=================', item.productGroupName)
+        const productGroup = productGroupMapName[item.productGroupName]
+        if (!productGroup) {
+          throw new BusinessError(
+            `Lỗi: Dòng ${index + 2}: Hệ thống chưa có nhóm sản phẩm ${item.productGroupName}`
+          )
         }
-        if (v != null && rule.type && typeof v !== rule.type) {
-          if (rule.type === 'number' && typeof v !== 'number') {
-            msgError = `${msgPrefix} cần có định dạng là số`
-          }
-          if (rule.type === 'string' && typeof v !== 'string') {
-            msgError = `${msgPrefix} cần có định dạng là chữ`
-          }
-          if (rule.type === 'date' && Object.prototype.toString.call(v) !== '[object Date]') {
-            msgError = `${msgPrefix} cần có định dạng là ngày`
-          }
-        }
-        if (msgError) {
-          throw new BusinessException(msgError as any)
-        }
-      })
-    })
+        productGroupId = productGroup.id
+      }
+      const batchId = item.batchId || 0
+      const lotNumber = String(item.lotNumber || '')
+      const expiryDate = item.expiryDate ? (item.expiryDate as Date).getTime() : null
+      const quantity = item.quantity as number
+      const costPrice = Math.round(item.costPrice)
+      let costAmount: any
+      if (costAmount == null || costAmount === '') {
+        costAmount = costPrice * quantity
+      } else {
+        costAmount = Math.round(item.costAmount)
+      }
+      const retailPrice = Math.round(item.retailPrice || 0)
 
-    const receiptItemExcel: {
-      index: number
-      productCode: string
-      brandName: string
-      batchCode: string
-      expiryDate: Date | null
-      quantity: number
-      costPrice: number
-      listPrice: number
-    }[] = []
-    worksheet.eachRow((row: Row, rowNumber: number) => {
-      if (!row.hasValues) return
-      if (rowNumber === 1) return
-      const values = (row.values as (string | number | Date)[]).slice(1)
-
-      receiptItemExcel.push({
-        index: values[0] as number,
-        productCode: values[1] as string,
-        brandName: values[2] as string,
-        batchCode: values[3] as string,
-        expiryDate: values[4] as Date,
-        quantity: values[5] as number,
-        costPrice: values[6] as number,
-        listPrice: values[7] as number,
-      })
-    })
-    const productCodeList = receiptItemExcel.map((i) => i.productCode)
-    const productList = await this.productRepository.findManyBy({
-      oid,
-      productCode: { IN: productCodeList },
-    })
-    let productMap = ESArray.arrayToKeyValue(productList, 'productCode')
-
-    const productInsertList: ProductInsertType[] = []
-    receiptItemExcel.forEach((i) => {
-      if (!productMap[i.productCode]) {
-        const productInsert: ProductInsertType = {
+      const dataPlain: DataPlain = {
+        _num: item._num || 0,
+        productId: 0,
+        productCode: item.productCode,
+        brandName: item.brandName,
+        batchId,
+        lotNumber,
+        expiryDate,
+        quantity,
+        unitBasicName: item.unitBasicName as string,
+        costPrice,
+        retailPrice,
+        costAmount,
+        substance: item.substance,
+        productGroupName: item.productGroupName,
+        productGroupId,
+        route: item.route,
+        source: item.source,
+        productUpsert: {
           oid,
-          productCode: i.productCode,
-          brandName: i.brandName,
-          costPrice: i.costPrice,
-          retailPrice: i.listPrice,
+          id: 0, // Sẽ được update với trường hợp đã có id sau
+          productCode: item.productCode,
+          productType: ProductType.Basic,
+          brandName: item.brandName,
+          costPrice,
+          retailPrice,
+          quantity: 0, // ====== Sẽ được update sau
+          unit: JSON.stringify([{ name: item.unitBasicName, rate: 1, default: true }]),
+          warehouseIds: JSON.stringify([0]),
+          wholesalePrice: 0,
+          productGroupId,
+          substance: item.substance,
+          route: item.route,
+          source: item.source,
           hintUsage: '',
           image: '',
           isActive: 1,
-          productGroupId: 0,
-          quantity: 0,
-          route: '',
-          source: '',
-          substance: '',
-          unit: JSON.stringify([]),
-          warehouseIds: JSON.stringify([0]),
-          wholesalePrice: 0,
+          updatedAt: time,
 
-          pickupStrategy: PickupStrategy.Inherit,
           splitBatchByWarehouse: SplitBatchByWarehouse.Inherit,
           splitBatchByDistributor: SplitBatchByDistributor.Inherit,
           splitBatchByExpiryDate: SplitBatchByExpiryDate.Inherit,
           splitBatchByCostPrice: SplitBatchByCostPrice.Inherit,
-        }
-        productInsertList.push(productInsert)
-      }
+        },
+      } satisfies DataPlain
+      return dataPlain
     })
 
-    const productCreatedList =
-      await this.productRepository.insertManyFullFieldAndReturnEntity(productInsertList)
+    const { productCreatedList, productModifiedList } = await this.processDataPlainList({
+      oid,
+      userId,
+      dataPlainList,
+      time,
+    })
 
-    productMap = ESArray.arrayToKeyValue([...productList, ...productCreatedList], 'productCode')
-
-    const receiptItemBodyList: ReceiptItemBody[] = receiptItemExcel.map((i) => {
-      const item: ReceiptItemBody = {
-        productId: productMap[i.productCode].id,
-        batchCode: i.batchCode,
-        batchId: 0,
-        costPrice: i.costPrice,
-        expiryDate: i.expiryDate?.getTime() || null,
-        quantity: i.quantity,
-        unitRate: 1,
+    const receiptItemInsertList: ReceiptItemInsertType[] = dataPlainList.map((plain) => {
+      const item: ReceiptItemInsertType = {
+        oid,
+        distributorId: 0,
+        productId: plain.productId,
+        batchId: plain.batchId || 0,
         warehouseId: 0,
-        listPrice: i.listPrice,
+        lotNumber: plain.lotNumber,
+        expiryDate: plain.expiryDate,
+        unitRate: 1,
+        quantity: plain.quantity,
+        costPrice: plain.costPrice,
+        listPrice: plain.retailPrice,
+        receiptId: 0,
       }
       return item
     })
-    const itemsActualMoney = receiptItemBodyList.reduce(
-      (acc, item) => acc + item.quantity * item.costPrice,
-      0
-    )
 
-    const receiptBody: ReceiptUpsertDraftBody = {
-      distributorId: 0,
-      receipt: {
-        discountMoney: 0,
-        discountPercent: 0,
-        discountType: DiscountType.VND,
-        note: '',
-        startedAt: Date.now(),
-        surcharge: 0,
-        itemsActualMoney,
-        totalMoney: itemsActualMoney,
-      },
-      receiptItemList: receiptItemBodyList,
-    }
-    const createDraftResult = await this.apiReceiptService.createDraft({
+    return { data: { receiptItemInsertList, productCreatedList, productModifiedList } }
+  }
+
+  async processDataPlainList(data: {
+    oid: number
+    userId: number
+    dataPlainList: DataPlain[]
+    time: number
+  }) {
+    const { oid, userId, dataPlainList, time } = data
+
+    // 1. Lấy thông tin product và batch
+    const productCodeList = dataPlainList.map((i) => i.productCode)
+    const productOriginList = await this.productRepository.findManyBy({
       oid,
-      body: receiptBody,
+      productCode: { IN: productCodeList },
+    })
+    const productOriginMapCode = ESArray.arrayToKeyValue(productOriginList, 'productCode')
+
+    dataPlainList.forEach((plain, index) => {
+      const productOrigin = productOriginMapCode[plain.productCode]
+      if (productOrigin) {
+        const productId = productOrigin.id
+        plain.productId = productId
+        plain.productUpsert.id = productId
+      }
     })
 
-    return { data: createDraftResult.data }
+    // 2. Validate batchId
+    const batchOriginList = await this.batchRepository.findManyBy({
+      oid,
+      id: { IN: dataPlainList.map((i) => i.batchId).filter((i) => !!i) },
+      isActive: 1,
+    })
+    const batchOriginMap = ESArray.arrayToKeyValue(batchOriginList, 'id')
+    dataPlainList
+      .filter((plain) => !!plain.batchId)
+      .forEach((plain, index) => {
+        const rowIndex = index + 2 // 1 là do bắt đầu từ 0, 1 là do 1 dòng tiêu đề
+        const batchId = plain.batchId
+        const productOrigin = productOriginMapCode[plain.productCode]
+        const batchOrigin = batchOriginMap[batchId]
+        if (!batchOrigin || !productOrigin) {
+          throw new BusinessError(
+            `Lỗi: Dòng ${rowIndex}: Không có lô hàng nào phù hợp với ID = ${batchId}`
+            + ` và mã sản phẩm = ${plain.productCode}`
+          )
+        }
+        if (batchOrigin.productId !== plain.productId) {
+          throw new BusinessError(
+            `Lỗi: Dòng ${rowIndex}: ID lô = ${batchId} có mã sản phẩm không đúng, `
+            + `gợi ý mã sản phẩm phù hợp = ${productOrigin?.productCode || ''}`
+          )
+        }
+      })
+
+    const dataPlainInsertList = dataPlainList.filter((i) => !i.productId)
+    const dataPlainUpdateList = dataPlainList.filter((i) => !!i.productId)
+
+    // === 1. Trường hợp 1: Tạo mới Product và tạo mới Batch
+    let productCreatedList: Product[] = []
+    let productModifiedList: Product[] = []
+    if (dataPlainInsertList.length) {
+      // Có thể có trường hợp 2 dòng chung mã sản phẩm, nhưng tạo 2 lô
+      const productCodeMap = new Map<string, ProductInsertType>()
+      const productInsertList: ProductInsertType[] = []
+      dataPlainInsertList.forEach((plain) => {
+        if (productCodeMap.has(plain.productCode)) {
+          productCodeMap.get(plain.productCode).productType = ProductType.SplitBatch
+        } else {
+          const { id, ...productInsertBody } = plain.productUpsert
+          productInsertBody.quantity = 0 // không set quantity, chỉ tạo mới
+          productInsertList.push(productInsertBody)
+          productCodeMap.set(plain.productCode, productInsertBody)
+        }
+      })
+
+      productCreatedList = await this.productRepository.insertManyAndReturnEntity(productInsertList)
+      const productCreatedMapProductCode = ESArray.arrayToKeyValue(
+        productCreatedList,
+        'productCode'
+      )
+
+      dataPlainInsertList.forEach((plain, index) => {
+        const productCreated = productCreatedMapProductCode[plain.productCode]
+        plain.productId = productCreated.id
+        plain.productUpsert.id = productCreated.id
+      })
+    }
+
+    if (dataPlainUpdateList.length) {
+      // Có thể có trường hợp 2 dòng chung mã sản phẩm, nhưng tạo 2 lô
+      const productIdMap = new Map<string, ProductUpdateType>()
+      const productUpdateList: ProductUpdateType[] = []
+      dataPlainInsertList.forEach((plain) => {
+        if (productIdMap.has(plain.productCode)) {
+          productIdMap.get(plain.productCode).productType = ProductType.SplitBatch
+        } else {
+          const { id, ...productUpdateBody } = plain.productUpsert
+          productUpdateList.push(productUpdateBody)
+          productIdMap.set(plain.productCode, productUpdateBody)
+        }
+      })
+
+      productModifiedList = await this.productManager.bulkUpdate({
+        manager: this.dataSource.manager,
+        condition: { oid, id: { NOT: 0 } },
+        compare: ['id'],
+        tempList: productUpdateList,
+        update: ['brandName', 'productGroupId', 'route', 'source', 'substance'], // không update quantity
+        options: { requireEqualLength: true },
+      })
+    }
+
+    return { dataPlainList, productCreatedList, productModifiedList }
   }
 }

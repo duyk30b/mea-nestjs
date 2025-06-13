@@ -1,9 +1,9 @@
 import { Body, Controller, Delete, Param, Post } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../../_libs/common/dto'
-import { HasPermission } from '../../../../../_libs/common/guards/permission.guard'
+import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../../_libs/database/entities/permission.entity'
+import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { ApiTicketClinicProcedureService } from './api-ticket-clinic-procedure.service'
 import {
   TicketClinicAddTicketProcedureBody,
@@ -19,7 +19,7 @@ export class ApiTicketClinicProcedureController {
   constructor(private readonly apiTicketClinicProcedureService: ApiTicketClinicProcedureService) { }
 
   @Post(':id/add-ticket-procedure')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST)
   async addTicketProcedure(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -33,7 +33,7 @@ export class ApiTicketClinicProcedureController {
   }
 
   @Delete(':ticketId/destroy-ticket-procedure/:ticketProcedureId')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST)
   async destroyTicketProcedure(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketProcedureId }: TicketClinicProcedureParams
@@ -46,7 +46,7 @@ export class ApiTicketClinicProcedureController {
   }
 
   @Post(':ticketId/update-ticket-procedure/:ticketProcedureId')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST)
   async updateTicketProcedure(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketProcedureId }: TicketClinicProcedureParams,
@@ -61,7 +61,7 @@ export class ApiTicketClinicProcedureController {
   }
 
   @Post(':id/update-priority-ticket-procedure')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST)
   async updatePriorityTicketProcedure(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,

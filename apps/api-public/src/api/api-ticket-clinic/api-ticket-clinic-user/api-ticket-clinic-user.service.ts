@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
-import { CommissionCalculatorType } from '../../../../../_libs/database/entities/commission.entity'
+import { CommissionCalculatorType } from '../../../../../_libs/database/entities/position.entity'
 import TicketUser, {
-  TicketUserInsertType,
+    TicketUserInsertType,
 } from '../../../../../_libs/database/entities/ticket-user.entity'
 import {
-  CommissionRepository,
-  TicketUserRepository,
+    PositionRepository,
+    TicketUserManager,
+    TicketUserRepository,
 } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { TicketClinicUpdateTicketUserBody } from './request'
@@ -16,8 +17,9 @@ import { TicketClinicUpdateTicketUserListBody } from './request/ticket-clinic-up
 export class ApiTicketClinicUserService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
-    private readonly commissionRepository: CommissionRepository,
-    private readonly ticketUserRepository: TicketUserRepository
+    private readonly positionRepository: PositionRepository,
+    private readonly ticketUserRepository: TicketUserRepository,
+    private readonly ticketUserManager: TicketUserManager
   ) { }
 
   async destroyTicketUser(options: { oid: number; ticketId: number; ticketUserId: number }) {
@@ -27,7 +29,7 @@ export class ApiTicketClinicUserService {
       ticketId,
       id: ticketUserId,
     })
-    this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
+    this.socketEmitService.socketTicketUserListChange(oid, {
       ticketId,
       ticketUserDestroyList,
     })
@@ -51,7 +53,7 @@ export class ApiTicketClinicUserService {
         commissionPercentExpected: body.commissionPercentExpected,
       }
     )
-    this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
+    this.socketEmitService.socketTicketUserListChange(oid, {
       ticketId,
       ticketUserUpsertList: ticketUserUpdateList,
     })
@@ -77,14 +79,14 @@ export class ApiTicketClinicUserService {
     const tuInsertBodyList = body.ticketUserList.filter((i) => i.id === 0 && i.userId !== 0)
     let ticketUserCreatedList: TicketUser[] = []
     if (tuInsertBodyList.length) {
-      const commissionList = await this.commissionRepository.findManyBy({
+      const positionList = await this.positionRepository.findManyBy({
         oid,
-        interactType: body.interactType,
-        interactId: body.interactId,
+        positionType: body.positionType,
+        positionInteractId: body.positionInteractId,
       })
       const ticketUserInsertList: TicketUserInsertType[] = tuInsertBodyList.map((i) => {
-        const commission = commissionList.find((c) => c.roleId === i.roleId)
-        if (!commission) {
+        const position = positionList.find((c) => c.roleId === i.roleId)
+        if (!position) {
           throw new BusinessException('error.Conflict')
         }
         const insertDto: TicketUserInsertType = {
@@ -92,25 +94,25 @@ export class ApiTicketClinicUserService {
           ticketId,
           roleId: i.roleId,
           userId: i.userId,
-          interactType: body.interactType,
-          interactId: body.interactId,
+          positionType: body.positionType,
+          positionInteractId: body.positionInteractId,
           ticketItemId: body.ticketItemId,
           ticketItemExpectedPrice: 0,
           ticketItemActualPrice: 0,
           quantity: body.quantity,
           createdAt: Date.now(),
-          commissionCalculatorType: commission.commissionCalculatorType,
+          commissionCalculatorType: position.commissionCalculatorType,
           commissionMoney:
-            commission.commissionCalculatorType === CommissionCalculatorType.VND
-              ? commission.commissionValue
+            position.commissionCalculatorType === CommissionCalculatorType.VND
+              ? position.commissionValue
               : 0,
           commissionPercentActual:
-            commission.commissionCalculatorType === CommissionCalculatorType.PercentActual
-              ? commission.commissionValue
+            position.commissionCalculatorType === CommissionCalculatorType.PercentActual
+              ? position.commissionValue
               : 0,
           commissionPercentExpected:
-            commission.commissionCalculatorType === CommissionCalculatorType.PercentExpected
-              ? commission.commissionValue
+            position.commissionCalculatorType === CommissionCalculatorType.PercentExpected
+              ? position.commissionValue
               : 0,
         }
         return insertDto
@@ -133,14 +135,17 @@ export class ApiTicketClinicUserService {
         }
         return updateDto
       })
-      ticketUserModifiedList = await this.ticketUserRepository.updateListAndReturnEntity({
-        updateList: ticketUserUpdateList,
-        conditionFields: ['oid', 'id', 'ticketId'],
-        updateFields: ['userId', 'quantity'],
+      ticketUserModifiedList = await this.ticketUserManager.bulkUpdate({
+        manager: this.ticketUserRepository.getManager(),
+        condition: { oid },
+        compare: ['id', 'ticketId'],
+        tempList: ticketUserUpdateList,
+        update: ['userId', 'quantity'],
+        options: { requireEqualLength: false },
       })
     }
 
-    this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
+    this.socketEmitService.socketTicketUserListChange(oid, {
       ticketId,
       ticketUserDestroyList,
       ticketUserUpsertList: [...ticketUserCreatedList, ...ticketUserModifiedList],

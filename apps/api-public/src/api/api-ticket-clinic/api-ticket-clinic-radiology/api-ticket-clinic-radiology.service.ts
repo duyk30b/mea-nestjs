@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { Injectable } from '@nestjs/common'
-import { FileUploadDto } from '../../../../../_libs/common/dto/file'
-import { InteractType } from '../../../../../_libs/database/entities/commission.entity'
+import { BusinessError } from '../../../../../_libs/database/common/error'
+import { PositionInteractType } from '../../../../../_libs/database/entities/position.entity'
 import { TicketRadiologyStatus } from '../../../../../_libs/database/entities/ticket-radiology.entity'
 import {
   TicketClinicAddTicketRadiologyOperation,
@@ -19,7 +19,6 @@ import {
   TicketClinicAddTicketRadiologyBody,
   TicketClinicUpdateMoneyTicketRadiologyBody,
   TicketClinicUpdatePriorityTicketRadiologyBody,
-  TicketClinicUpdateResultTicketRadiologyBody,
 } from './request'
 
 @Injectable()
@@ -33,7 +32,7 @@ export class ApiTicketClinicRadiologyService {
     private readonly ticketClinicDestroyTicketRadiologyOperation: TicketClinicDestroyTicketRadiologyOperation,
     private readonly ticketClinicUpdateTicketRadiologyOperation: TicketClinicUpdateTicketRadiologyOperation,
     private readonly apiTicketClinicUserService: ApiTicketClinicUserService
-  ) {}
+  ) { }
 
   async addTicketRadiology(options: {
     oid: number
@@ -49,8 +48,6 @@ export class ApiTicketClinicRadiologyService {
         oid,
         ticketId,
         imageIds: JSON.stringify([]),
-        description: '',
-        result: '',
         startedAt: null,
         status: TicketRadiologyStatus.Pending,
       },
@@ -58,8 +55,8 @@ export class ApiTicketClinicRadiologyService {
 
     const { ticket, ticketRadiology } = result
 
-    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
-    this.socketEmitService.ticketClinicChangeTicketRadiologyList(oid, {
+    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
+    this.socketEmitService.socketTicketRadiologyListChange(oid, {
       ticketId,
       ticketRadiologyInsert: ticketRadiology,
     })
@@ -76,6 +73,10 @@ export class ApiTicketClinicRadiologyService {
       oid,
       id: ticketRadiologyId,
     })
+
+    if (ticketRadiologyOrigin.status === TicketRadiologyStatus.Completed) {
+      throw new BusinessError('Phiếu đã hoàn thành không thể xóa')
+    }
 
     const imageIdsUpdate = await this.imageManagerService.changeImageList({
       oid,
@@ -94,13 +95,13 @@ export class ApiTicketClinicRadiologyService {
 
     const { ticket } = result
 
-    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
-    this.socketEmitService.ticketClinicChangeTicketRadiologyList(oid, {
+    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
+    this.socketEmitService.socketTicketRadiologyListChange(oid, {
       ticketId,
       ticketRadiologyDestroy: result.ticketRadiologyDestroy,
     })
     if (result.ticketUserDestroyList.length) {
-      this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
+      this.socketEmitService.socketTicketUserListChange(oid, {
         ticketId,
         ticketUserDestroyList: result.ticketUserDestroyList,
       })
@@ -124,8 +125,8 @@ export class ApiTicketClinicRadiologyService {
     })
     const { ticket, ticketRadiology } = result
 
-    this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket: result.ticket })
-    this.socketEmitService.ticketClinicChangeTicketRadiologyList(oid, {
+    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: result.ticket })
+    this.socketEmitService.socketTicketRadiologyListChange(oid, {
       ticketId,
       ticketRadiologyUpdate: result.ticketRadiology,
     })
@@ -134,73 +135,9 @@ export class ApiTicketClinicRadiologyService {
         oid,
         ticketId,
         body: {
-          interactType: InteractType.Radiology,
-          interactId: ticketRadiology.radiologyId,
+          positionType: PositionInteractType.Radiology,
+          positionInteractId: ticketRadiology.radiologyId,
           ticketItemId: ticketRadiology.id,
-          quantity: 1,
-          ticketUserList: body.ticketUserList,
-        },
-      })
-    }
-    return { data: true }
-  }
-
-  async updateResultTicketRadiology(options: {
-    oid: number
-    ticketId: number
-    ticketRadiologyId: number
-    body: TicketClinicUpdateResultTicketRadiologyBody
-    files: FileUploadDto[]
-  }) {
-    const { oid, ticketId, ticketRadiologyId, body, files } = options
-
-    const ticketRadiologyOrigin = await this.ticketRadiologyRepository.findOneBy({
-      oid,
-      id: ticketRadiologyId,
-    })
-
-    const imageIdsUpdate = await this.imageManagerService.changeImageList({
-      oid,
-      customerId: ticketRadiologyOrigin.customerId,
-      files,
-      filesPosition: body.filesPosition,
-      imageIdsKeep: body.imageIdsKeep,
-      imageIdsOld: JSON.parse(ticketRadiologyOrigin.imageIds),
-    })
-
-    const ticketRadiologyModified = await this.ticketRadiologyRepository.updateOneAndReturnEntity(
-      {
-        oid,
-        ticketId,
-        id: ticketRadiologyId,
-      },
-      {
-        description: body.ticketRadiology.description,
-        result: body.ticketRadiology.result,
-        startedAt: body.ticketRadiology.startedAt,
-        imageIds: JSON.stringify(imageIdsUpdate),
-        status: TicketRadiologyStatus.Completed,
-      }
-    )
-
-    ticketRadiologyModified.imageList = []
-    const imageIds: number[] = JSON.parse(ticketRadiologyModified.imageIds)
-    if (imageIds.length) {
-      ticketRadiologyModified.imageList = await this.imageRepository.findManyByIds(imageIds)
-    }
-
-    this.socketEmitService.ticketClinicChangeTicketRadiologyList(oid, {
-      ticketId,
-      ticketRadiologyUpdate: ticketRadiologyModified,
-    })
-    if (body.ticketUserList?.length) {
-      this.apiTicketClinicUserService.changeTicketUserList({
-        oid,
-        ticketId,
-        body: {
-          interactType: InteractType.Radiology,
-          interactId: ticketRadiologyModified.radiologyId,
-          ticketItemId: ticketRadiologyModified.id,
           quantity: 1,
           ticketUserList: body.ticketUserList,
         },
@@ -223,7 +160,7 @@ export class ApiTicketClinicRadiologyService {
 
     ticketRadiologyList.sort((a, b) => (a.priority < b.priority ? -1 : 1))
 
-    this.socketEmitService.ticketClinicChangeTicketRadiologyList(oid, {
+    this.socketEmitService.socketTicketRadiologyListChange(oid, {
       ticketId,
       ticketRadiologyList,
     })

@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
-import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
-import { IsUser } from '../../../../_libs/common/guards/user.guard.'
+import { OrganizationPermission } from '../../../../_libs/common/guards/organization.guard'
+import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiProcedureGroupService } from './api-procedure-group.service'
 import {
   ProcedureGroupCreateBody,
@@ -21,25 +21,25 @@ export class ApiProcedureGroupController {
   constructor(private readonly apiProcedureGroupService: ApiProcedureGroupService) { }
 
   @Get('pagination')
-  @IsUser()
+  @OrganizationPermission(PermissionId.PROCEDURE)
   pagination(@External() { oid }: TExternal, @Query() query: ProcedureGroupPaginationQuery) {
     return this.apiProcedureGroupService.pagination(oid, query)
   }
 
   @Get('list')
-  @IsUser()
+  @OrganizationPermission(PermissionId.PROCEDURE)
   list(@External() { oid }: TExternal, @Query() query: ProcedureGroupGetManyQuery) {
     return this.apiProcedureGroupService.getMany(oid, query)
   }
 
   @Get('detail/:id')
-  @IsUser()
+  @OrganizationPermission(PermissionId.PROCEDURE)
   findOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return this.apiProcedureGroupService.getOne(oid, id)
   }
 
   @Put('replace-all')
-  @HasPermission(PermissionId.MASTER_DATA_PROCEDURE)
+  @UserPermission(PermissionId.PROCEDURE_GROUP_CRUD)
   async replaceAll(
     @External() { oid }: TExternal,
     @Body() body: ProcedureGroupReplaceAllBody
@@ -48,13 +48,13 @@ export class ApiProcedureGroupController {
   }
 
   @Post('create')
-  @HasPermission(PermissionId.MASTER_DATA_PROCEDURE)
+  @UserPermission(PermissionId.PROCEDURE_GROUP_CRUD)
   async createOne(@External() { oid }: TExternal, @Body() body: ProcedureGroupCreateBody) {
     return await this.apiProcedureGroupService.createOne(oid, body)
   }
 
   @Patch('update/:id')
-  @HasPermission(PermissionId.MASTER_DATA_PROCEDURE)
+  @UserPermission(PermissionId.PROCEDURE_GROUP_CRUD)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
     @External() { oid }: TExternal,
@@ -65,7 +65,7 @@ export class ApiProcedureGroupController {
   }
 
   @Delete('destroy/:id')
-  @HasPermission(PermissionId.MASTER_DATA_PROCEDURE)
+  @UserPermission(PermissionId.PROCEDURE_GROUP_CRUD)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiProcedureGroupService.destroyOne(oid, id)

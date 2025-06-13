@@ -9,7 +9,6 @@ import {
     TicketRadiology,
     TicketUser,
 } from '../../entities'
-import { CommissionCalculatorType, InteractType } from '../../entities/commission.entity'
 import Payment, {
     MoneyDirection,
     PaymentInsertType,
@@ -17,10 +16,12 @@ import Payment, {
     PersonType,
     VoucherType,
 } from '../../entities/payment.entity'
+import { CommissionCalculatorType, PositionInteractType } from '../../entities/position.entity'
 import { TicketProductType } from '../../entities/ticket-product.entity'
 import { TicketUserInsertType } from '../../entities/ticket-user.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
-import { CustomerManager, PaymentManager, TicketManager, TicketUserManager } from '../../managers'
+import { CustomerManager, PaymentManager, TicketManager } from '../../managers'
+import { TicketUserManager } from '../../repositories'
 
 @Injectable()
 export class TicketPaymentAndCloseOperation {
@@ -101,36 +102,36 @@ export class TicketPaymentAndCloseOperation {
           let ticketItemExpectedPrice = 0
           let ticketItemActualPrice = 0
 
-          if (tu.interactType === InteractType.Ticket) {
+          if (tu.positionType === PositionInteractType.Ticket) {
             ticketItemExpectedPrice = ticketOrigin.totalMoney + ticketOrigin.discountMoney
             ticketItemActualPrice = ticketOrigin.totalMoney
           }
-          if (tu.interactType === InteractType.Product) {
+          if (tu.positionType === PositionInteractType.Product) {
             const ticketProduct = ticketProductList.find((i) => i.id === tu.ticketItemId)
             if (!ticketProduct) ticketUserRemoveList.push(tu)
 
             ticketItemExpectedPrice = ticketProduct?.expectedPrice || 0
             ticketItemActualPrice = ticketProduct?.actualPrice || 0
           }
-          if (tu.interactType === InteractType.Procedure) {
+          if (tu.positionType === PositionInteractType.Procedure) {
             const ticketProcedure = ticketProcedureList.find((i) => i.id === tu.ticketItemId)
             if (!ticketProcedure) ticketUserRemoveList.push(tu)
             ticketItemExpectedPrice = ticketProcedure.expectedPrice || 0
             ticketItemActualPrice = ticketProcedure.actualPrice || 0
           }
-          if (tu.interactType === InteractType.Radiology) {
+          if (tu.positionType === PositionInteractType.Radiology) {
             const ticketRadiology = ticketRadiologyList.find((i) => i.id === tu.ticketItemId)
             if (!ticketRadiology) ticketUserRemoveList.push(tu)
             ticketItemExpectedPrice = ticketRadiology.expectedPrice || 0
             ticketItemActualPrice = ticketRadiology.actualPrice || 0
           }
-          if (tu.interactType === InteractType.Laboratory) {
+          if (tu.positionType === PositionInteractType.Laboratory) {
             const ticketLaboratory = ticketLaboratoryList.find((i) => i.id === tu.ticketItemId)
             if (!ticketLaboratory) ticketUserRemoveList.push(tu)
             ticketItemExpectedPrice = ticketLaboratory.expectedPrice || 0
             ticketItemActualPrice = ticketLaboratory.actualPrice || 0
           }
-          if (tu.interactType === InteractType.ConsumableList) {
+          if (tu.positionType === PositionInteractType.ConsumableList) {
             const ticketProductConsumableList = ticketProductList.filter((i) => {
               return i.type === TicketProductType.Consumable
             })
@@ -141,7 +142,7 @@ export class TicketPaymentAndCloseOperation {
               return acc + cur.actualPrice * cur.quantity
             }, 0)
           }
-          if (tu.interactType === InteractType.PrescriptionList) {
+          if (tu.positionType === PositionInteractType.PrescriptionList) {
             const ticketProductPrescriptionList = ticketProductList.filter((i) => {
               return i.type === TicketProductType.Prescription
             })
@@ -190,8 +191,8 @@ export class TicketPaymentAndCloseOperation {
             ticketId,
             roleId: tu.roleId,
             userId: tu.userId,
-            interactId: tu.interactId,
-            interactType: tu.interactType,
+            positionInteractId: tu.positionInteractId,
+            positionType: tu.positionType,
             ticketItemId: tu.ticketItemId,
             ticketItemExpectedPrice,
             ticketItemActualPrice,

@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
+import { ESArray } from '../../../../_libs/common/helpers'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { ProcedureGroupInsertType } from '../../../../_libs/database/entities/procedure-group.entity'
 import { ProcedureGroupRepository } from '../../../../_libs/database/repositories/procedure-group.repository'
 import {
   ProcedureGroupCreateBody,
@@ -52,10 +54,7 @@ export class ApiProcedureGroupService {
   }
 
   async replaceAll(oid: number, body: ProcedureGroupReplaceAllBody): Promise<BaseResponse> {
-    await this.procedureGroupRepository.replaceAll(
-      oid,
-      body.procedureGroupReplaceAll
-    )
+    await this.procedureGroupRepository.replaceAll(oid, body.procedureGroupReplaceAll)
     return { data: true }
   }
 
@@ -77,5 +76,26 @@ export class ApiProcedureGroupService {
       throw new BusinessException('error.Database.DeleteFailed')
     }
     return { data: true }
+  }
+
+  async createByGroupName(oid: number, groupName: string[]) {
+    const procedureGroupAll = await this.procedureGroupRepository.findManyBy({ oid })
+    const groupNameList = procedureGroupAll.map((i) => i.name)
+
+    const groupNameClean = ESArray.uniqueArray(groupName).filter((i) => !!i)
+    const groupNameNoExist = groupNameClean.filter((i) => {
+      return !groupNameList.includes(i)
+    })
+    const lgCreateList = groupNameNoExist.map((i) => {
+      const dto: ProcedureGroupInsertType = {
+        oid,
+        name: i,
+      }
+      return dto
+    })
+    const lgInsertedList =
+      await this.procedureGroupRepository.insertManyAndReturnEntity(lgCreateList)
+
+    return [...procedureGroupAll, ...lgInsertedList]
   }
 }

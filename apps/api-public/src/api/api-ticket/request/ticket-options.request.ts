@@ -1,10 +1,12 @@
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
 import { IsBoolean, IsIn, IsNumber, IsOptional, ValidateNested } from 'class-validator'
 import {
+  ConditionNumber,
   ConditionTimestamp,
   SortQuery,
   createConditionEnum,
   transformConditionEnum,
+  transformConditionNumber,
 } from '../../../../../_libs/common/dto'
 import { TicketStatus, TicketType } from '../../../../../_libs/database/entities/ticket.entity'
 
@@ -103,6 +105,11 @@ export class TicketFilterQuery {
   @Expose()
   @IsNumber()
   customerId: number
+
+  @Expose()
+  @Transform(transformConditionNumber)
+  @IsOptional()
+  roomId: number | ConditionNumber
 
   @Expose()
   @Type(() => ConditionTimestamp)

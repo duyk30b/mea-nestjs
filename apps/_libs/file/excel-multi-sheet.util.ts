@@ -1,5 +1,5 @@
 import { Cell, Style, Workbook, Worksheet } from 'exceljs'
-import { mergeObject } from '../common/helpers/object.helper'
+import { ESObject } from '../common/helpers'
 
 export type TableColumn<T> = {
   key: T
@@ -93,7 +93,7 @@ export const excelMultiSheetWorkbook = <T extends string>(params: {
         const styleAll: Partial<Style> = row.style['_all'] || {}
         const styleCurrent: Partial<Style> = row.style?.[keyColumn] || {}
 
-        mergeObject(style, styleAll, styleCurrent)
+        ESObject.mergeObject(style, styleAll, styleCurrent)
 
         if (style.mergeCells) {
           const { value } = cell

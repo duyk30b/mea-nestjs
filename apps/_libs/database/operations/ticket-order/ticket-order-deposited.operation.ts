@@ -22,7 +22,6 @@ import {
   TicketProductManager,
   TicketRadiologyManager,
   TicketSurchargeManager,
-  TicketUserManager,
 } from '../../managers'
 import { TicketAttributeManager } from '../../managers/ticket-attribute.manager'
 import {
@@ -66,8 +65,7 @@ export class TicketOrderDepositedOperation {
     private ticketLaboratoryManager: TicketLaboratoryManager,
     private ticketRadiologyManager: TicketRadiologyManager,
     private ticketSurchargeManager: TicketSurchargeManager,
-    private ticketExpenseManager: TicketExpenseManager,
-    private ticketUserManager: TicketUserManager
+    private ticketExpenseManager: TicketExpenseManager
   ) { }
 
   async update<T extends TicketOrderDepositedUpdateType>(params: {
@@ -129,7 +127,10 @@ export class TicketOrderDepositedOperation {
           }
           return ticketProduct
         })
-        await this.ticketProductManager.insertMany(manager, ticketProductListInsert)
+        ticket.ticketProductList = await this.ticketProductManager.insertManyAndReturnEntity(
+          manager,
+          ticketProductListInsert
+        )
       }
 
       if (ticketOrderProcedureDraftListDto.length) {
@@ -146,7 +147,10 @@ export class TicketOrderDepositedOperation {
           }
           return ticketProcedure
         })
-        await this.ticketProcedureManager.insertMany(manager, ticketProcedureListInsert)
+        ticket.ticketProcedureList = await this.ticketProcedureManager.insertManyAndReturnEntity(
+          manager,
+          ticketProcedureListInsert
+        )
       }
 
       if (ticketOrderSurchargeDraftListDto.length) {

@@ -81,12 +81,6 @@ export class RootOrganizationCreateBody {
   @IsString()
   addressProvince: string
 
-  @ApiPropertyOptional({ example: 'Huyện Cát Tiên' })
-  @Expose()
-  @IsDefined()
-  @IsString()
-  addressDistrict: string
-
   @ApiPropertyOptional({ example: 'Xã Tiên Hoàng' })
   @Expose()
   @IsDefined()

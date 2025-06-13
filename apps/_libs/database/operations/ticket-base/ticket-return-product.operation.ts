@@ -1,20 +1,20 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { ESArray } from '../../../common/helpers/object.helper'
+import { ESArray } from '../../../common/helpers/array.helper'
 import { DeliveryStatus, MovementType } from '../../common/variable'
 import { TicketUser } from '../../entities'
-import { InteractType } from '../../entities/commission.entity'
+import { PositionInteractType } from '../../entities/position.entity'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
 import {
-  BatchManager,
-  ProductManager,
-  ProductMovementManager,
-  TicketBatchManager,
-  TicketManager,
-  TicketProductManager,
-  TicketUserManager,
+    BatchManager,
+    ProductManager,
+    ProductMovementManager,
+    TicketBatchManager,
+    TicketManager,
+    TicketProductManager,
 } from '../../managers'
+import { TicketUserManager } from '../../repositories'
 import { ProductPutawayOperation } from '../product/product-putaway.operation'
 import { TicketChangeItemMoneyManager } from './ticket-change-item-money.manager'
 
@@ -76,12 +76,12 @@ export class TicketReturnProductOperation {
       const batchIdList = ticketBatchOriginList.map((i) => i.batchId)
       const productOriginList = await this.productManager.updateAndReturnEntity(
         manager,
-        { oid, id: { IN: ESArray.uniqueArray(productIdList) } },
+        { oid, id: { IN: ESArray.uniqueArray(productIdList) }, isActive: 1 },
         { updatedAt: time }
       )
       const batchOriginList = await this.batchManager.updateAndReturnEntity(
         manager,
-        { oid, id: { IN: ESArray.uniqueArray(batchIdList) } },
+        { oid, id: { IN: ESArray.uniqueArray(batchIdList) }, isActive: 1 },
         { updatedAt: time }
       )
       const putawayContainer = this.productPutawayOperation.generatePutawayPlan({
@@ -218,7 +218,7 @@ export class TicketReturnProductOperation {
         },
         options: { requireEqualLength: true },
       })
-      const batchMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')
+      const batchModifiedMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')
 
       // 6. === CREATE: PRODUCT_MOVEMENT ===
       const productMovementInsertList = putawayContainer.putawayMovementList.map((paMovement) => {
@@ -251,35 +251,31 @@ export class TicketReturnProductOperation {
       })
       await this.productMovementManager.insertMany(manager, productMovementInsertList)
 
-      // 9. === TICKET_USER and COMMISSION
+      // 9. === TICKET_USER and POSITION
       const ticketUserOriginList = await this.ticketUserManager.findManyBy(manager, {
         oid,
         ticketId,
-        interactType: InteractType.Product,
+        positionType: PositionInteractType.Product,
         ticketItemId: { IN: ticketProductModifiedList.map((i) => i.id) },
       })
       let ticketUserModifiedList: TicketUser[] = []
-      let ticketUserDestroyedList: TicketUser[] = []
       let commissionMoneyReturn = 0
       if (ticketUserOriginList.length) {
-        const result = await this.ticketUserManager.changeQuantityByTicketItem({
+        ticketUserModifiedList = await this.ticketUserManager.bulkUpdate({
           manager,
-          information: { oid, ticketId, interactType: InteractType.Product },
-          dataChange: ticketProductModifiedList.map((i) => {
+          condition: { oid, ticketId, positionType: PositionInteractType.Product },
+          compare: ['ticketItemId'],
+          update: ['quantity'],
+          tempList: ticketProductModifiedList.map((i) => {
             return { quantity: i.quantity, ticketItemId: i.id }
           }),
         })
-        ticketUserModifiedList = result.ticketUserModifiedList
-        ticketUserDestroyedList = result.ticketUserDestroyedList
 
         commissionMoneyReturn =
           ticketUserOriginList.reduce((acc, item) => {
             return acc + item.quantity * item.commissionMoney
           }, 0)
           - ticketUserModifiedList.reduce((acc, item) => {
-            return acc + item.quantity * item.commissionMoney
-          }, 0)
-          - ticketUserDestroyedList.reduce((acc, item) => {
             return acc + item.quantity * item.commissionMoney
           }, 0)
       }
@@ -313,9 +309,9 @@ export class TicketReturnProductOperation {
       return {
         ticket,
         productModifiedList,
+        batchModifiedList,
         ticketProductModifiedList,
         ticketUserModifiedList,
-        ticketUserDestroyedList,
       }
     })
   }

@@ -1,7 +1,8 @@
 {
   "Success": "Thành công",
   "Forbidden": "Bạn không có quyền truy cập",
-  "ForbiddenPermission": "Bạn không có quyền: {permission}",
+  "ForbiddenUserPermission": "Bạn không có quyền: {permission}",
+  "ForbiddenOrganizationPermission": "Cơ sở của bạn không có quyền: {permission}",
   "TooManyRequests": "Quá nhiều thao tác",
   "AccountInactive": "Tài khoản của bạn đang bị khóa",
   "AccountRequired": "Thao tác yêu cầu cần có tài khoản hợp lệ",

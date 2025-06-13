@@ -1,5 +1,6 @@
-import { Expose } from 'class-transformer'
-import { IsBoolean } from 'class-validator'
+import { Expose, Transform } from 'class-transformer'
+import { IsBoolean, IsIn, IsOptional } from 'class-validator'
+import { ConditionNumber, transformConditionNumber } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 
 export class PrescriptionSampleRelationQuery {
@@ -7,6 +8,15 @@ export class PrescriptionSampleRelationQuery {
   @IsBoolean()
   medicineList: boolean
 }
-export class PrescriptionSampleFilterQuery { }
+export class PrescriptionSampleFilterQuery {
+  @Expose()
+  @Transform(transformConditionNumber)
+  @IsOptional()
+  userId: number | ConditionNumber
+}
 
-export class PrescriptionSampleSortQuery extends SortQuery { }
+export class PrescriptionSampleSortQuery extends SortQuery {
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  priority: 'ASC' | 'DESC'
+}

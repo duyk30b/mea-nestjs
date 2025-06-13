@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
+import { arrayToKeyValue } from '../../../../_libs/common/helpers/array.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { PrescriptionSampleRepository } from '../../../../_libs/database/repositories/prescription-sample.repository'
 import { ProductRepository } from '../../../../_libs/database/repositories/product.repository'
@@ -16,7 +16,7 @@ export class ApiPrescriptionSampleService {
   constructor(
     private readonly prescriptionSampleRepository: PrescriptionSampleRepository,
     private readonly productRepository: ProductRepository
-  ) { }
+  ) {}
 
   async pagination(oid: number, query: PrescriptionSamplePaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, sort, relation } = query
@@ -27,6 +27,7 @@ export class ApiPrescriptionSampleService {
       // relation,
       condition: {
         oid,
+        userId: filter?.userId,
       },
       sort,
     })
@@ -41,6 +42,7 @@ export class ApiPrescriptionSampleService {
     const data = await this.prescriptionSampleRepository.findMany({
       condition: {
         oid,
+        userId: filter?.userId,
       },
       limit,
       sort,

@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { FileUploadDto } from '../../../../_libs/common/dto/file'
-import { arrayToKeyArray } from '../../../../_libs/common/helpers/object.helper'
+import { ESArray } from '../../../../_libs/common/helpers'
 import { ImageHost, ImageInsertType } from '../../../../_libs/database/entities/image.entity'
 import { SettingKey } from '../../../../_libs/database/entities/setting.entity'
 import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
@@ -52,7 +52,7 @@ export class ImageManagerService implements OnModuleInit {
       : []
     const imageRemoveList = imageOldList.filter((i) => !imageIdsKeep.includes(i.id))
     // tách các imageRemove ra làm nhiều nhóm, vì có thể mỗi image lại được quản lý bởi email khác nhau
-    const imageRemoveMapList = arrayToKeyArray(imageRemoveList, 'hostAccount')
+    const imageRemoveMapList = ESArray.arrayToKeyArray(imageRemoveList, 'hostAccount')
 
     const email = await this.cacheDataService.getEmailGoogleDriver(oid)
 

@@ -1,9 +1,12 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
-import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
+import {
+  OrganizationPermission,
+} from '../../../../_libs/common/guards/organization.guard'
+import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiAppointmentService } from './api-appointment.service'
 import {
   AppointmentCreateBody,
@@ -21,19 +24,19 @@ export class ApiAppointmentController {
   constructor(private readonly apiAppointmentService: ApiAppointmentService) { }
 
   @Get('pagination')
-  @HasPermission(PermissionId.APPOINTMENT_READ)
+  @OrganizationPermission(PermissionId.APPOINTMENT)
   pagination(@External() { oid }: TExternal, @Query() query: AppointmentPaginationQuery) {
     return this.apiAppointmentService.pagination(oid, query)
   }
 
   @Get('list')
-  @HasPermission(PermissionId.APPOINTMENT_READ)
+  @OrganizationPermission(PermissionId.APPOINTMENT)
   list(@External() { oid }: TExternal, @Query() query: AppointmentGetManyQuery) {
     return this.apiAppointmentService.getMany(oid, query)
   }
 
   @Get('detail/:id')
-  @HasPermission(PermissionId.APPOINTMENT_READ)
+  @OrganizationPermission(PermissionId.APPOINTMENT)
   async detail(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -43,13 +46,13 @@ export class ApiAppointmentController {
   }
 
   @Post('create')
-  @HasPermission(PermissionId.APPOINTMENT_CREATE)
+  @UserPermission(PermissionId.APPOINTMENT_CREATE)
   async create(@External() { oid }: TExternal, @Body() body: AppointmentCreateBody) {
     return await this.apiAppointmentService.createOne(oid, body)
   }
 
   @Patch('update/:id')
-  @HasPermission(PermissionId.APPOINTMENT_UPDATE)
+  @UserPermission(PermissionId.APPOINTMENT_UPDATE)
   async update(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -59,14 +62,14 @@ export class ApiAppointmentController {
   }
 
   @Delete('delete/:id')
-  @HasPermission(PermissionId.APPOINTMENT_DELETE)
+  @UserPermission(PermissionId.APPOINTMENT_DELETE)
   @ApiParam({ name: 'id', example: 1 })
   async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiAppointmentService.deleteOne(oid, id)
   }
 
   @Post(':id/register-ticket-clinic')
-  @HasPermission(PermissionId.APPOINTMENT_REGISTER_TICKET)
+  @UserPermission(PermissionId.APPOINTMENT_REGISTER_TICKET)
   async registerTicketClinic(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,

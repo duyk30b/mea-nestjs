@@ -26,7 +26,6 @@
 //             customer.birthday = randomDate('1965-03-28', '2020-12-29').getTime()
 //             customer.gender = gender
 //             customer.addressProvince = address.province
-//             customer.addressDistrict = address.district
 //             customer.addressWard = address.ward
 //             customer.addressStreet = address.street
 //             customer.healthHistory = faker.lorem.sentence()

@@ -1,16 +1,22 @@
 import { Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { arrayToKeyArray, uniqueArray } from '../../../../_libs/common/helpers/object.helper'
+import { ESArray } from '../../../../_libs/common/helpers'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { Batch, Organization } from '../../../../_libs/database/entities'
-import {
-  CommissionInsertType,
-  InteractType,
-} from '../../../../_libs/database/entities/commission.entity'
+import { Batch, Organization, Product, ProductGroup } from '../../../../_libs/database/entities'
+import Discount, {
+  DiscountInsertType,
+  DiscountInteractType,
+} from '../../../../_libs/database/entities/discount.entity'
+import Position, {
+  PositionInsertType,
+  PositionInteractType,
+} from '../../../../_libs/database/entities/position.entity'
 import {
   BatchRepository,
-  CommissionRepository,
+  DiscountRepository,
+  PositionRepository,
+  ProductGroupRepository,
   ProductRepository,
 } from '../../../../_libs/database/repositories'
 import { OrganizationRepository } from '../../../../_libs/database/repositories/organization.repository'
@@ -24,6 +30,7 @@ import {
   ProductGetOneQuery,
   ProductMergeBody,
   ProductPaginationQuery,
+  ProductRelationQuery,
   ProductUpdateBody,
 } from './request'
 
@@ -36,9 +43,11 @@ export class ApiProductService {
     private readonly ticketProductRepository: TicketProductRepository,
     private readonly receiptItemRepository: ReceiptItemRepository,
     private readonly productRepository: ProductRepository,
+    private readonly productGroupRepository: ProductGroupRepository,
     private readonly batchRepository: BatchRepository,
     private readonly productMovementRepository: ProductMovementRepository,
-    private readonly commissionRepository: CommissionRepository
+    private readonly positionRepository: PositionRepository,
+    private readonly discountRepository: DiscountRepository
   ) { }
 
   async pagination(oid: number, query: ProductPaginationQuery): Promise<BaseResponse> {
@@ -59,17 +68,8 @@ export class ApiProductService {
       sort,
     })
 
-    const productHasBatchesIds = uniqueArray(data.map((item) => item.id))
-    if (relation?.batchList && productHasBatchesIds.length) {
-      const batchList = await this.batchRepository.findManyBy({
-        productId: { IN: productHasBatchesIds },
-        quantity: filter?.batchList?.quantity,
-        expiryDate: filter?.batchList?.expiryDate,
-      })
-      const batchListMapProductId = arrayToKeyArray(batchList, 'productId')
-      data.forEach((item) => {
-        item.batchList = batchListMapProductId[item.id] || []
-      })
+    if (query.relation) {
+      await this.generateRelation({ oid, productList: data, relation: query.relation })
     }
 
     return {
@@ -94,17 +94,8 @@ export class ApiProductService {
       limit,
     })
 
-    const productHasBatchesIds = uniqueArray(data.map((item) => item.id))
-    if (relation?.batchList && productHasBatchesIds.length) {
-      const batchList = await this.batchRepository.findManyBy({
-        id: { IN: productHasBatchesIds },
-        quantity: filter?.batchList?.quantity,
-        expiryDate: filter?.batchList?.expiryDate,
-      })
-      const batchListMapProductId = arrayToKeyArray(batchList, 'productId')
-      data.forEach((item) => {
-        item.batchList = batchListMapProductId[item.id] || []
-      })
+    if (query.relation) {
+      await this.generateRelation({ oid, productList: data, relation: query.relation })
     }
     return { data }
   }
@@ -117,32 +108,18 @@ export class ApiProductService {
     })
     if (!product) throw new BusinessException('error.Database.NotFound')
 
-    if (relation?.batchList) {
-      product.batchList = await this.batchRepository.findMany({
-        condition: {
-          oid,
-          productId: product.id,
-          quantity: filter?.batchList?.quantity,
-          expiryDate: filter?.batchList.expiryDate,
-        },
-        sort: { expiryDate: 'ASC' },
-      })
-    }
-    if (relation?.commissionList) {
-      product.commissionList = await this.commissionRepository.findManyBy({
-        oid,
-        interactType: InteractType.Product,
-        interactId: product.id,
-      })
+    if (query.relation) {
+      await this.generateRelation({ oid, productList: [product], relation: query.relation })
     }
     return { data: { product } }
   }
 
   async createOne(oid: number, body: ProductCreateBody): Promise<BaseResponse> {
-    const { commissionList, ...productBody } = body
-    let productCode = body.productCode
+    const { positionList, discountList, product: productBody } = body
+
+    let productCode = productBody.productCode
     if (!productCode) {
-      const count = await this.productRepository.countBy({ oid })
+      const count = await this.productRepository.getMaxId()
       productCode = (count + 1).toString()
     }
 
@@ -154,52 +131,78 @@ export class ApiProductService {
       throw new BusinessException(`Trùng mã sản phẩm với ${existProduct.brandName}` as any)
     }
 
-    const product = await this.productRepository.insertOneFullFieldAndReturnEntity({
+    const productInserted = await this.productRepository.insertOneFullFieldAndReturnEntity({
       ...productBody,
       oid,
       productCode,
+      updatedAt: Date.now(),
     })
 
-    if (body.quantity) {
-      await this.batchRepository.insertOne({
+    this.socketEmitService.productListChange(oid, { productUpsertedList: [productInserted] })
+
+    if (productBody.quantity) {
+      const batchCreated = await this.batchRepository.insertOneFullFieldAndReturnEntity({
         oid,
-        productId: product.id,
-        costPrice: body.costPrice,
-        quantity: body.quantity,
-        costAmount: body.costPrice * body.quantity,
+        productId: productInserted.id,
+        costPrice: productBody.costPrice,
+        quantity: productBody.quantity,
+        costAmount: productBody.costPrice * productBody.quantity,
         distributorId: 0,
         expiryDate: null,
-        batchCode: '',
+        lotNumber: '',
         registeredAt: Date.now(),
         warehouseId: 0,
+        isActive: 1,
       })
+      this.socketEmitService.batchListChange(oid, { batchUpsertedList: [batchCreated] })
     }
 
-    const commissionDtoList: CommissionInsertType[] = commissionList.map((i) => {
-      const dto: CommissionInsertType = {
-        oid,
-        roleId: i.roleId,
-        commissionCalculatorType: i.commissionCalculatorType,
-        commissionValue: i.commissionValue,
-        interactId: product.id,
-        interactType: InteractType.Product,
-      }
-      return dto
-    })
-    product.commissionList =
-      await this.commissionRepository.insertManyFullFieldAndReturnEntity(commissionDtoList)
-    this.socketEmitService.productUpsert(oid, { product })
-    return { data: { product } }
+    if (positionList?.length) {
+      const positionDtoList: PositionInsertType[] = positionList.map((i) => {
+        const dto: PositionInsertType = {
+          oid,
+          roleId: i.roleId,
+          commissionCalculatorType: i.commissionCalculatorType,
+          commissionValue: i.commissionValue,
+          positionInteractId: productInserted.id,
+          positionType: PositionInteractType.Product,
+        }
+        return dto
+      })
+      const positionUpsertedList =
+        await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
+      productInserted.positionList = positionUpsertedList
+      this.socketEmitService.positionListChange(oid, { positionUpsertedList })
+    }
+
+    if (discountList?.length) {
+      const discountListDto = discountList.map((i) => {
+        const dto: DiscountInsertType = {
+          ...i,
+          discountInteractId: productInserted.id,
+          discountInteractType: DiscountInteractType.Product,
+          oid,
+        }
+        return dto
+      })
+      const discountUpsertedList =
+        await this.discountRepository.insertManyFullFieldAndReturnEntity(discountListDto)
+      productInserted.discountList = discountUpsertedList
+      this.socketEmitService.discountListChange(oid, { discountUpsertedList })
+    }
+
+    return { data: { product: productInserted } }
   }
 
   async updateOne(oid: number, productId: number, body: ProductUpdateBody): Promise<BaseResponse> {
-    const { commissionList, ...productBody } = body
+    const { positionList, discountList, product: productBody } = body
+
     const productOrigin = await this.productRepository.findOneBy({ oid, id: productId })
 
-    if (productOrigin.warehouseIds !== body.warehouseIds) {
+    if (productOrigin.warehouseIds !== productBody.warehouseIds) {
       let bodyWarehouseIdList = []
       try {
-        bodyWarehouseIdList = JSON.parse(body.warehouseIds)
+        bodyWarehouseIdList = JSON.parse(productBody.warehouseIds)
       } catch (error) { }
       if (bodyWarehouseIdList.includes(0)) {
         // trường hợp này được quản lý mọi kho
@@ -230,37 +233,70 @@ export class ApiProductService {
 
     const existProduct = await this.productRepository.findOneBy({
       oid,
-      productCode: body.productCode,
+      productCode: productBody.productCode,
       id: { NOT: productId },
     })
     if (existProduct) {
       throw new BusinessException(`Trùng mã sản phẩm với ${existProduct.brandName}` as any)
     }
 
-    const product = await this.productRepository.updateOneAndReturnEntity(
+    const productModified = await this.productRepository.updateOneAndReturnEntity(
       { oid, id: productId },
       productBody
     )
-    await this.commissionRepository.delete({
-      oid,
-      interactId: product.id,
-      interactType: InteractType.Product,
-    })
-    const commissionDtoList: CommissionInsertType[] = commissionList.map((i) => {
-      const dto: CommissionInsertType = {
+    this.socketEmitService.productListChange(oid, { productUpsertedList: [productModified] })
+
+    if (positionList) {
+      const positionDestroyedList = await this.positionRepository.deleteAndReturnEntity({
         oid,
-        roleId: i.roleId,
-        commissionCalculatorType: i.commissionCalculatorType,
-        commissionValue: i.commissionValue,
-        interactId: product.id,
-        interactType: InteractType.Product,
-      }
-      return dto
-    })
-    product.commissionList =
-      await this.commissionRepository.insertManyFullFieldAndReturnEntity(commissionDtoList)
-    this.socketEmitService.productUpsert(oid, { product })
-    return { data: { product } }
+        positionInteractId: productModified.id,
+        positionType: PositionInteractType.Product,
+      })
+      const positionDtoList: PositionInsertType[] = positionList.map((i) => {
+        const dto: PositionInsertType = {
+          oid,
+          roleId: i.roleId,
+          commissionCalculatorType: i.commissionCalculatorType,
+          commissionValue: i.commissionValue,
+          positionInteractId: productModified.id,
+          positionType: PositionInteractType.Product,
+        }
+        return dto
+      })
+      const positionUpsertedList =
+        await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
+      productModified.positionList = positionUpsertedList
+      this.socketEmitService.positionListChange(oid, {
+        positionUpsertedList,
+        positionDestroyedList,
+      })
+    }
+
+    if (discountList) {
+      const discountDestroyedList = await this.discountRepository.deleteAndReturnEntity({
+        oid,
+        discountInteractId: productModified.id,
+        discountInteractType: DiscountInteractType.Product,
+      })
+      const discountListDto = discountList.map((i) => {
+        const dto: DiscountInsertType = {
+          ...i,
+          discountInteractId: productModified.id,
+          discountInteractType: DiscountInteractType.Product,
+          oid,
+        }
+        return dto
+      })
+      const discountUpsertedList =
+        await this.discountRepository.insertManyFullFieldAndReturnEntity(discountListDto)
+      productModified.discountList = discountUpsertedList
+      this.socketEmitService.discountListChange(oid, {
+        discountUpsertedList,
+        discountDestroyedList,
+      })
+    }
+
+    return { data: { product: productModified } }
   }
 
   async destroyOne(options: {
@@ -286,23 +322,41 @@ export class ApiProductService {
       }
     }
 
-    await Promise.allSettled([
-      this.productRepository.delete({ oid, id: productId }),
-      this.batchRepository.delete({ oid, id: productId }),
-      this.productMovementRepository.delete({ oid, productId }),
-    ])
+    const [productDestroyed, batchDestroyedList, m, positionDestroyedList, discountDestroyedList] =
+      await Promise.all([
+        this.productRepository.deleteOneAndReturnEntity({ oid, id: productId }),
+        this.batchRepository.deleteAndReturnEntity({ oid, id: productId }),
+        this.productMovementRepository.delete({ oid, productId }),
+        this.positionRepository.deleteAndReturnEntity({
+          oid,
+          positionInteractId: productId,
+          positionType: PositionInteractType.Product,
+        }),
+        this.discountRepository.deleteAndReturnEntity({
+          oid,
+          discountInteractId: productId,
+          discountInteractType: DiscountInteractType.Product,
+        }),
+      ])
+
+    if (positionDestroyedList.length) {
+      this.socketEmitService.positionListChange(oid, { positionDestroyedList })
+    }
+
+    if (discountDestroyedList.length) {
+      this.socketEmitService.discountListChange(oid, { discountDestroyedList })
+    }
 
     await this.organizationRepository.updateDataVersion(oid)
     this.cacheDataService.clearOrganization(oid)
 
+    this.socketEmitService.productListChange(oid, { productDestroyedList: [productDestroyed] })
+    this.socketEmitService.batchListChange(oid, { batchDestroyedList })
+
     return { data: { receiptItemList: [], ticketProductList: [], productId } }
   }
 
-  async mergeProduct(options: {
-    oid: number
-    userId: number
-    body: ProductMergeBody
-  }) {
+  async mergeProduct(options: { oid: number; userId: number; body: ProductMergeBody }) {
     const { oid, userId, body } = options
     const { productIdSourceList, productIdTarget } = body
     productIdSourceList.forEach((i) => {
@@ -311,15 +365,85 @@ export class ApiProductService {
       }
     })
 
-    await this.productRepository.mergeProduct({
-      oid,
-      userId,
-      productIdTarget,
-      productIdSourceList,
-    })
+    const { productModified, productDestroyedList, batchModifiedList } =
+      await this.productRepository.mergeProduct({
+        oid,
+        userId,
+        productIdTarget,
+        productIdSourceList,
+      })
 
     await this.organizationRepository.updateDataVersion(oid)
     this.cacheDataService.clearOrganization(oid)
+
+    this.socketEmitService.productListChange(oid, {
+      productUpsertedList: [productModified],
+      productDestroyedList,
+    })
+    this.socketEmitService.batchListChange(oid, { batchUpsertedList: batchModifiedList })
+
     return { data: true }
+  }
+
+  async generateRelation(options: {
+    oid: number
+    productList: Product[]
+    relation: ProductRelationQuery
+  }) {
+    const { oid, productList, relation } = options
+    const productIdList = ESArray.uniqueArray(productList.map((i) => i.id))
+    const productGroupIdList = ESArray.uniqueArray(productList.map((i) => i.productGroupId))
+
+    const [positionList, discountList, productGroupList, batchList] = await Promise.all([
+      relation?.positionList && productIdList.length
+        ? this.positionRepository.findManyBy({
+          oid,
+          positionType: PositionInteractType.Product,
+          positionInteractId: { IN: productIdList },
+        })
+        : <Position[]>[],
+      relation?.discountList && productIdList.length
+        ? this.discountRepository.findManyBy({
+          oid,
+          discountInteractType: DiscountInteractType.Product,
+          discountInteractId: { IN: [...productIdList, 0] }, // discountInteractId=0 là áp dụng cho tất cả
+        })
+        : <Discount[]>[],
+      relation?.productGroup && productGroupIdList.length
+        ? this.productGroupRepository.findManyBy({
+          oid,
+          id: { IN: productGroupIdList },
+        })
+        : <ProductGroup[]>[],
+      relation?.productGroup && productGroupIdList.length
+        ? this.batchRepository.findMany({
+          condition: {
+            oid,
+            productId: { IN: productIdList },
+          },
+          sort: { expiryDate: 'ASC' },
+        })
+        : <Batch[]>[],
+    ])
+
+    const productGroupMap = ESArray.arrayToKeyValue(productGroupList, 'id')
+
+    productList.forEach((product: Product) => {
+      if (relation?.positionList) {
+        product.positionList = positionList.filter((i) => i.positionInteractId === product.id)
+      }
+      if (relation?.discountList) {
+        product.discountList = discountList.filter((i) => i.discountInteractId === product.id)
+        product.discountListExtra = discountList.filter((i) => i.discountInteractId === 0)
+      }
+      if (relation?.productGroup) {
+        product.productGroup = productGroupMap[product.productGroupId]
+      }
+      if (relation?.batchList) {
+        product.batchList = batchList.filter((i) => i.productId === product.id)
+      }
+    })
+
+    return productList
   }
 }
