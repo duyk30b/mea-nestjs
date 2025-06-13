@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { ESArray } from '../../../common/helpers/object.helper'
+import { ESArray } from '../../../common/helpers/array.helper'
 import { ESTimer } from '../../../common/helpers/time.helper'
 import { BusinessError } from '../../common/error'
 import { PickupStrategy } from '../../common/variable'
@@ -148,11 +148,8 @@ export class ProductPickingOperation {
         pickingMovementList.push(pickingMovement)
       }
 
-      // nếu chiến lược là chọn lô thì batchId phải khác 0
-      else if (
-        voucherProduct.pickupStrategy === PickupStrategy.RequireBatchSelection
-        && voucherProduct.batchId !== 0
-      ) {
+      // nếu chiến lược là chọn lô thì batchId phải khác 0 // voucherProduct.pickupStrategy === PickupStrategy.RequireBatchSelection
+      else if (voucherProduct.batchId !== 0) {
         // chiến lược này thì nhặt chính xác loại lô hàng đó
         const batchCalc = batchCalcListMap[productId]?.find((i) => {
           return i.batch.id === voucherProduct.batchId
@@ -164,7 +161,7 @@ export class ProductPickingOperation {
           const expiryDateString = ESTimer.timeToText(batchCalc.batch.expiryDate, 'DD/MM/YYYY', 7)
           throw new BusinessError(
             `${productOrigin.brandName} không đủ số lượng trong kho.`,
-            ` Lô hàng ${batchCalc.batch.batchCode} ${expiryDateString}:`,
+            ` Lô hàng ${batchCalc.batch.lotNumber} ${expiryDateString}:`,
             ` còn ${batchCalc.openQuantity}, lấy ${voucherProduct.quantity}`
           )
         }

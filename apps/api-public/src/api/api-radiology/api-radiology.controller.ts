@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
-import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
-import { IsUser } from '../../../../_libs/common/guards/user.guard.'
+import { OrganizationPermission } from '../../../../_libs/common/guards/organization.guard'
+import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiRadiologyService } from './api-radiology.service'
 import {
   RadiologyGetManyQuery,
@@ -21,19 +21,19 @@ export class ApiRadiologyController {
   constructor(private readonly apiRadiologyService: ApiRadiologyService) { }
 
   @Get('pagination')
-  @IsUser()
+  @OrganizationPermission()
   pagination(@External() { oid }: TExternal, @Query() query: RadiologyPaginationQuery) {
     return this.apiRadiologyService.pagination(oid, query)
   }
 
   @Get('list')
-  @IsUser()
+  @OrganizationPermission()
   async list(@External() { oid }: TExternal, @Query() query: RadiologyGetManyQuery) {
     return await this.apiRadiologyService.getMany(oid, query)
   }
 
   @Get('detail/:id')
-  @HasPermission(PermissionId.MASTER_DATA_RADIOLOGY)
+  @OrganizationPermission()
   async detail(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -43,13 +43,13 @@ export class ApiRadiologyController {
   }
 
   @Post('create')
-  @HasPermission(PermissionId.MASTER_DATA_RADIOLOGY)
+  @UserPermission(PermissionId.RADIOLOGY_CREATE)
   async create(@External() { oid }: TExternal, @Body() body: RadiologyUpsertBody) {
     return await this.apiRadiologyService.createOne(oid, body)
   }
 
   @Patch('update/:id')
-  @HasPermission(PermissionId.MASTER_DATA_RADIOLOGY)
+  @UserPermission(PermissionId.RADIOLOGY_UPDATE)
   @ApiParam({ name: 'id', example: 1 })
   async update(
     @External() { oid }: TExternal,
@@ -60,20 +60,20 @@ export class ApiRadiologyController {
   }
 
   @Delete('destroy/:id')
-  @HasPermission(PermissionId.MASTER_DATA_RADIOLOGY)
+  @UserPermission(PermissionId.RADIOLOGY_DELETE)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiRadiologyService.destroyOne(oid, id)
   }
 
   @Get('system-list')
-  @IsUser()
+  @UserPermission()
   async systemList() {
     return await this.apiRadiologyService.systemList()
   }
 
   @Post('system-copy')
-  @HasPermission(PermissionId.MASTER_DATA_RADIOLOGY)
+  @UserPermission(PermissionId.RADIOLOGY_CREATE)
   async systemCopy(@External() { oid }: TExternal, @Body() body: RadiologySystemCopyBody) {
     return await this.apiRadiologyService.systemCopy(oid, body)
   }

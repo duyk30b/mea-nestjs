@@ -1,5 +1,4 @@
 import cors from '@fastify/cors'
-import helmet from '@fastify/helmet'
 import { ClassSerializerInterceptor, Logger, ValidationError, ValidationPipe } from '@nestjs/common'
 import { NestFactory, Reflector } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
@@ -11,7 +10,6 @@ import {
   ValidationException,
 } from '../../_libs/common/exception-filter/exception-filter'
 import { RootGuard } from '../../_libs/common/guards/root.guard'
-import { UserGuard } from '../../_libs/common/guards/user.guard.'
 import {
   AccessLogInterceptor,
   TimeoutInterceptor,
@@ -45,7 +43,7 @@ async function bootstrap() {
 
   app.useGlobalFilters(new ServerExceptionFilter())
 
-  app.useGlobalGuards(new UserGuard(app.get(Reflector)), new RootGuard(app.get(Reflector)))
+  app.useGlobalGuards(new RootGuard(app.get(Reflector)))
 
   app.useGlobalPipes(
     new ValidationPipe({

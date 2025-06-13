@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { ESArray } from '../../../common/helpers/object.helper'
+import { ESArray } from '../../../common/helpers/array.helper'
 import { Batch, Product } from '../../entities'
 
 export type PutawayMovement = {

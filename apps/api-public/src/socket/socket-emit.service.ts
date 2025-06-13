@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { Server } from 'socket.io'
 import {
+  Batch,
   Customer,
   Distributor,
   Organization,
@@ -16,7 +17,7 @@ import {
   TicketRadiology,
   TicketUser,
 } from '../../../_libs/database/entities'
-import { InteractType } from '../../../_libs/database/entities/commission.entity'
+import { PositionType } from '../../../_libs/database/entities/position.entity'
 import { SOCKET_EVENT } from './socket.variable'
 
 @Injectable()
@@ -50,14 +51,20 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.DISTRIBUTOR_UPSERT, data)
   }
 
-  productUpsert(oid: number, data: { product: Product }) {
+  batchListChange(
+    oid: number,
+    data: { batchDestroyedList?: Batch[]; batchUpsertedList?: Batch[] }
+  ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.PRODUCT_UPSERT, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.BATCH_LIST_CHANGE, data)
   }
 
-  productListUpdate(oid: number, data: { productList: Product[] }) {
-    if (!this.io || !data.productList?.length) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.PRODUCT_LIST_UPDATE, data)
+  productListChange(
+    oid: number,
+    data: { productDestroyedList?: Product[]; productUpsertedList?: Product[] }
+  ) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.PRODUCT_LIST_CHANGE, data)
   }
 
   ticketClinicChange(oid: number, data: { type: 'CREATE' | 'UPDATE' | 'DESTROY'; ticket: Ticket }) {
@@ -80,8 +87,8 @@ export class SocketEmitService {
       ticketUserDestroyList?: TicketUser[]
       ticketUserUpsertList?: TicketUser[]
       replace?: {
-        interactType: InteractType
-        ticketItemId: number // ticketItemId = 0 là thay thế toàn bộ interactType đó
+        positionType: PositionType
+        ticketItemId: number // ticketItemId = 0 là thay thế toàn bộ positionType đó
         ticketUserList: TicketUser[]
       }
       replaceAll?: {

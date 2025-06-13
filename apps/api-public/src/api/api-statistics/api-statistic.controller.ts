@@ -1,9 +1,9 @@
 import { Controller, Get, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { PermissionId } from '../../../../_libs/permission/permission.enum'
 // import { ApiStatisticReceiptService } from './api-statistic-receipt.service'
+import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { ApiStatisticLaboratoryService } from './api-statistic-laboratory.service'
 import { ApiStatisticRadiologyService } from './api-statistic-radiology.service'
 import { ApiStatisticTicketService } from './api-statistic-ticket.service'
@@ -29,13 +29,13 @@ export class ApiStatisticController {
   ) { }
 
   @Get('sum-warehouse')
-  @HasPermission(PermissionId.STATISTIC_PRODUCT)
+  @UserPermission(PermissionId.STATISTIC_PRODUCT)
   async sumWarehouse(@External() { oid }: TExternal) {
     return await this.apiStatisticService.sumWarehouse(oid)
   }
 
   @Get('top-product-best-selling')
-  @HasPermission(PermissionId.STATISTIC_PRODUCT)
+  @UserPermission(PermissionId.STATISTIC_PRODUCT)
   async topProductBestSelling(
     @External() { oid }: TExternal,
     @Query() query: StatisticTopBestSellingQuery
@@ -44,7 +44,7 @@ export class ApiStatisticController {
   }
 
   @Get('top-product-high-money')
-  @HasPermission(PermissionId.STATISTIC_PRODUCT)
+  @UserPermission(PermissionId.STATISTIC_PRODUCT)
   async topProductHighSumRetailMoney(
     @External() { oid }: TExternal,
     @Query() query: StatisticProductHighMoneyQuery
@@ -53,7 +53,7 @@ export class ApiStatisticController {
   }
 
   @Get('top-procedure-best-selling')
-  @HasPermission(PermissionId.STATISTIC_PROCEDURE)
+  @UserPermission(PermissionId.STATISTIC_PROCEDURE)
   async topProcedureBestSelling(
     @External() { oid }: TExternal,
     @Query() query: StatisticTopBestSellingQuery
@@ -62,7 +62,7 @@ export class ApiStatisticController {
   }
 
   @Get('top-customer-best-ticket')
-  @HasPermission(PermissionId.STATISTIC_CUSTOMER)
+  @UserPermission(PermissionId.STATISTIC_CUSTOMER)
   async topCustomerBestTicket(
     @External() { oid }: TExternal,
     @Query() query: StatisticTopCustomerBestTicketQuery
@@ -71,25 +71,25 @@ export class ApiStatisticController {
   }
 
   @Get('sum-customer-debt')
-  @HasPermission(PermissionId.STATISTIC_CUSTOMER)
+  @UserPermission(PermissionId.STATISTIC_CUSTOMER)
   sumCustomerDebt(@External() { oid }: TExternal) {
     return this.apiStatisticService.sumCustomerDebt(oid)
   }
 
   // @Get('statistic-receipt')
-  // @HasPermission(PermissionId.STATISTIC_VISIT)
+  // @UserPermission(PermissionId.STATISTIC_VISIT)
   // async statisticReceipt(@External() { oid }: TExternal, @Query() query: StatisticTimeQuery) {
   //   return await this.apiStatisticReceiptService.statisticReceipt(oid, query)
   // }
 
   @Get('statistic-ticket')
-  @HasPermission(PermissionId.STATISTIC_TICKET)
+  @UserPermission(PermissionId.STATISTIC_TICKET)
   async statisticTicket(@External() { oid }: TExternal, @Query() query: StatisticTicketQuery) {
     return await this.apiStatisticTicketService.statisticTicket(oid, query)
   }
 
   @Get('ticket-laboratory/sum-money')
-  @HasPermission(PermissionId.STATISTIC_LABORATORY)
+  @UserPermission(PermissionId.STATISTIC_LABORATORY)
   async sumMoneyTicketLaboratory(
     @External() { oid }: TExternal,
     @Query() query: StatisticTimeQuery
@@ -98,7 +98,7 @@ export class ApiStatisticController {
   }
 
   @Get('ticket-radiology/sum-money')
-  @HasPermission(PermissionId.STATISTIC_RADIOLOGY)
+  @UserPermission(PermissionId.STATISTIC_RADIOLOGY)
   async sumMoneyTicketRadiology(
     @External() { oid }: TExternal,
     @Query() query: StatisticTimeQuery

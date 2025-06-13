@@ -56,56 +56,6 @@ export class StatisticOperation {
     }))
   }
 
-  async topProductBestSelling(options: {
-    oid: number
-    fromTime: number
-    toTime: number
-    limit: number
-    orderBy: 'sumActualAmount' | 'sumProfitAmount' | 'sumQuantity'
-  }) {
-    const { oid, fromTime, toTime, orderBy, limit } = options
-
-    let query = this.manager
-      .createQueryBuilder(ProductMovement, 'productMovement')
-      .where('"productMovement".oid = :oid', { oid })
-      .andWhere(`"productMovement"."movementType" IN (${MovementType.Ticket})`)
-      .andWhere('"productMovement"."createdAt" BETWEEN :fromTime AND :toTime', { fromTime, toTime })
-      .groupBy('"productMovement"."productId"')
-      .select('"productMovement"."productId"', 'productId')
-      .addSelect('SUM(-"productMovement"."quantity")', 'sumQuantity')
-      .addSelect(
-        'SUM(-"productMovement"."quantity" * "productMovement"."actualPrice")',
-        'sumActualAmount'
-      )
-      .addSelect(
-        'SUM(-"productMovement"."quantity" * "productMovement"."costPrice")',
-        'sumCostPrice'
-      )
-      .addSelect(
-        'SUM((-"productMovement".quantity) * ("productMovement"."actualPrice" - "productMovement"."costPrice"))',
-        'sumProfitAmount'
-      )
-      .limit(limit)
-
-    if (orderBy === 'sumActualAmount') {
-      query = query.orderBy('"sumActualAmount"', 'DESC')
-    } else if (orderBy === 'sumProfitAmount') {
-      query = query.orderBy('"sumProfitAmount"', 'DESC')
-    } else if (orderBy === 'sumQuantity') {
-      query = query.orderBy('"sumQuantity"', 'DESC')
-    }
-
-    const data = await query.getRawMany()
-
-    return data.map((i) => ({
-      productId: i.productId as number,
-      sumQuantity: Number(i.sumQuantity),
-      sumCostAmount: Number(i.sumCostAmount),
-      sumActualAmount: Number(i.sumActualAmount),
-      sumProfitAmount: Number(i.sumProfitAmount),
-    }))
-  }
-
   async topCustomerBestTicket(options: {
     oid: number
     fromTime: Date

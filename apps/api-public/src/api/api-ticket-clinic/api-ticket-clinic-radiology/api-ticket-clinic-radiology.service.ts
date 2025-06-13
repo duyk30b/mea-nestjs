@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { Injectable } from '@nestjs/common'
 import { FileUploadDto } from '../../../../../_libs/common/dto/file'
-import { InteractType } from '../../../../../_libs/database/entities/commission.entity'
+import { PositionType } from '../../../../../_libs/database/entities/position.entity'
 import { TicketRadiologyStatus } from '../../../../../_libs/database/entities/ticket-radiology.entity'
 import {
   TicketClinicAddTicketRadiologyOperation,
@@ -134,8 +134,8 @@ export class ApiTicketClinicRadiologyService {
         oid,
         ticketId,
         body: {
-          interactType: InteractType.Radiology,
-          interactId: ticketRadiology.radiologyId,
+          positionType: PositionType.Radiology,
+          positionInteractId: ticketRadiology.radiologyId,
           ticketItemId: ticketRadiology.id,
           quantity: 1,
           ticketUserList: body.ticketUserList,
@@ -198,8 +198,8 @@ export class ApiTicketClinicRadiologyService {
         oid,
         ticketId,
         body: {
-          interactType: InteractType.Radiology,
-          interactId: ticketRadiologyModified.radiologyId,
+          positionType: PositionType.Radiology,
+          positionInteractId: ticketRadiologyModified.radiologyId,
           ticketItemId: ticketRadiologyModified.id,
           quantity: 1,
           ticketUserList: body.ticketUserList,

@@ -4,7 +4,6 @@ import Product from './product.entity'
 
 export type ProductSettingRule = Pick<
   Product,
-  | 'pickupStrategy'
   | 'splitBatchByWarehouse'
   | 'splitBatchByDistributor'
   | 'splitBatchByExpiryDate'
@@ -60,8 +59,8 @@ export type SettingInsertType = Omit<Setting, keyof SettingRelationType | keyof 
 
 export type SettingUpdateType = {
   [K in Exclude<keyof Setting, keyof SettingRelationType | keyof Pick<Setting, 'oid' | 'id'>>]:
-    | Setting[K]
-    | (() => string)
+  | Setting[K]
+  | (() => string)
 }
 
 export type SettingSortType = {

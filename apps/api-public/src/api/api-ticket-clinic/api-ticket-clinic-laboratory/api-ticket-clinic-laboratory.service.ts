@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { TicketLaboratoryStatus } from '../../../../../_libs/database/common/variable'
 import { TicketLaboratoryResult } from '../../../../../_libs/database/entities'
-import { InteractType } from '../../../../../_libs/database/entities/commission.entity'
+import { PositionType } from '../../../../../_libs/database/entities/position.entity'
 import { TicketLaboratoryResultInsertType } from '../../../../../_libs/database/entities/ticket-laboratory-result.entity'
 import {
   TicketClinicAddSelectLaboratoryOperation,
@@ -154,8 +154,8 @@ export class ApiTicketClinicLaboratoryService {
         oid,
         ticketId,
         body: {
-          interactType: InteractType.Laboratory,
-          interactId: ticketLaboratory.laboratoryId,
+          positionType: PositionType.Laboratory,
+          positionInteractId: ticketLaboratory.laboratoryId,
           ticketItemId: ticketLaboratory.id,
           quantity: 1,
           ticketUserList: body.ticketUserList,

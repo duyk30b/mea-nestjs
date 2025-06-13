@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { ESArray } from '../../../common/helpers/object.helper'
+import { ESArray } from '../../../common/helpers/array.helper'
 import { DeliveryStatus, MovementType, PickupStrategy } from '../../common/variable'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
 import { ReceiptStatus } from '../../entities/receipt.entity'
 import {
-    BatchManager,
-    ProductManager,
-    ProductMovementManager,
-    ReceiptItemManager,
-    ReceiptManager,
+  BatchManager,
+  ProductManager,
+  ProductMovementManager,
+  ReceiptItemManager,
+  ReceiptManager,
 } from '../../managers'
 import { ProductPickingOperation } from '../product/product-picking.operation'
 
@@ -59,12 +59,12 @@ export class ReceiptReturnProductOperation {
       const batchIdList = receiptItemOriginList.map((i) => i.batchId)
       const productOriginList = await this.productManager.updateAndReturnEntity(
         manager,
-        { oid, id: { IN: ESArray.uniqueArray(productIdList) } },
+        { oid, id: { IN: ESArray.uniqueArray(productIdList) }, isActive: 1 },
         { updatedAt: time }
       )
       const batchOriginList = await this.batchManager.updateAndReturnEntity(
         manager,
-        { oid, id: { IN: ESArray.uniqueArray(batchIdList) } },
+        { oid, id: { IN: ESArray.uniqueArray(batchIdList) }, isActive: 1 },
         { updatedAt: time }
       )
       const pickingContainer = this.productPickingOperation.generatePickingPlan({

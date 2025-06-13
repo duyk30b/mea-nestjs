@@ -394,7 +394,7 @@ export class ApiTicketOrderService {
         time: Date.now(),
         returnList: body.returnList,
       })
-      this.socketEmitService.productListUpdate(oid, { productList: result.productModifiedList })
+      this.socketEmitService.productListChange(oid, { productUpsertedList: result.productModifiedList })
       ticket = result.ticket
 
       return { data: { ticket } }

@@ -1,9 +1,10 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
-import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
+import { OrganizationPermission } from '../../../../_libs/common/guards/organization.guard'
+import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiCustomerService } from './api-customer.service'
 import {
   CustomerCreateBody,
@@ -22,19 +23,19 @@ export class ApiCustomerController {
   ) { }
 
   @Get('pagination')
-  @HasPermission(PermissionId.CUSTOMER_READ)
+  @OrganizationPermission(PermissionId.CUSTOMER)
   pagination(@External() { oid }: TExternal, @Query() query: CustomerPaginationQuery) {
     return this.apiCustomerService.pagination(oid, query)
   }
 
   @Get('list')
-  @HasPermission(PermissionId.CUSTOMER_READ)
+  @UserPermission(PermissionId.CUSTOMER)
   list(@External() { oid }: TExternal, @Query() query: CustomerGetManyQuery) {
     return this.apiCustomerService.getMany(oid, query)
   }
 
   @Get('detail/:id')
-  @HasPermission(PermissionId.CUSTOMER_READ)
+  @UserPermission(PermissionId.CUSTOMER)
   async detail(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -44,13 +45,13 @@ export class ApiCustomerController {
   }
 
   @Post('create')
-  @HasPermission(PermissionId.CUSTOMER_CREATE)
+  @UserPermission(PermissionId.CUSTOMER_CREATE)
   async create(@External() { oid }: TExternal, @Body() body: CustomerCreateBody) {
     return await this.apiCustomerService.createOne(oid, body)
   }
 
   @Patch('update/:id')
-  @HasPermission(PermissionId.CUSTOMER_UPDATE)
+  @UserPermission(PermissionId.CUSTOMER_UPDATE)
   async update(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -60,7 +61,7 @@ export class ApiCustomerController {
   }
 
   @Delete('destroy/:id')
-  @HasPermission(PermissionId.CUSTOMER_DELETE)
+  @UserPermission(PermissionId.CUSTOMER_DELETE)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid, organization }: TExternal, @Param() { id }: IdParam) {
     return await this.apiCustomerService.destroyOne({

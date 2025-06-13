@@ -16,7 +16,7 @@ export class ProductRelationQuery {
 
   @Expose()
   @IsBoolean()
-  commissionList: boolean
+  positionList: boolean
 }
 
 export class BatchFilterQuery {
@@ -74,10 +74,6 @@ export class ProductFilterQueryFull extends ProductFilterQuery {
 }
 
 export class ProductSortQuery extends SortQuery {
-  @Expose()
-  @IsIn(['ASC', 'DESC'])
-  productCode: 'ASC' | 'DESC'
-
   @Expose()
   @IsIn(['ASC', 'DESC'])
   brandName: 'ASC' | 'DESC'

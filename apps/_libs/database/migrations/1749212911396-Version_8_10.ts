@@ -1,19 +1,19 @@
 import { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class Version8101749212911396 implements MigrationInterface {
-  name = 'Version8101749212911396'
+    name = 'Version8101749212911396'
 
-  public async up(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`
+    public async up(queryRunner: QueryRunner): Promise<void> {
+        await queryRunner.query(`
             ALTER TABLE "Product"
                 RENAME COLUMN "inventoryStrategy" TO "pickupStrategy"
         `)
-    await queryRunner.query(`
+        await queryRunner.query(`
             ALTER TABLE "TicketProduct"
                 RENAME COLUMN "inventoryStrategy" TO "pickupStrategy"
         `)
 
-    await queryRunner.query(`
+        await queryRunner.query(`
             DELETE FROM "Batch" WHERE "id" NOT IN ( 
                 SELECT MAX("id") FROM "Batch"
                 GROUP BY "productId"
@@ -28,7 +28,7 @@ export class Version8101749212911396 implements MigrationInterface {
             WHERE "Batch"."productId" = "Product"."id";
         `)
 
-    await queryRunner.query(`
+        await queryRunner.query(`
             UPDATE  "ReceiptItem"
             SET     "batchId" = CASE 
                                     WHEN("batchId" = 0) THEN 0
@@ -64,7 +64,7 @@ export class Version8101749212911396 implements MigrationInterface {
                                 END
             ;
         `)
-    await queryRunner.query(`
+        await queryRunner.query(`
             UPDATE      "Batch" 
             SET         "costPrice" = "ReceiptItem"."costPrice", 
                         "costAmount" = "ReceiptItem"."costPrice" * "Batch"."quantity" 
@@ -74,9 +74,13 @@ export class Version8101749212911396 implements MigrationInterface {
 
             DROP INDEX "public"."IDX_Batch__oid_registeredAt";
             CREATE INDEX "IDX_Batch__oid_updatedAt" ON "Batch" ("oid", "updatedAt");
-
         `)
-  }
 
-  public async down(queryRunner: QueryRunner): Promise<void> {}
+        await queryRunner.query(`
+            ALTER TABLE "ReceiptItem"
+                ADD "listPrice" bigint NOT NULL DEFAULT '0'
+        `)
+    }
+
+    public async down(queryRunner: QueryRunner): Promise<void> { }
 }

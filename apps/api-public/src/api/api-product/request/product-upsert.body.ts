@@ -1,25 +1,25 @@
 import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
 import {
-    IsArray,
-    IsBoolean,
-    IsDefined,
-    IsIn,
-    IsInt,
-    IsNumber,
-    IsPositive,
-    IsString,
-    ValidateNested,
-    validateSync,
+  IsArray,
+  IsBoolean,
+  IsDefined,
+  IsIn,
+  IsInt,
+  IsNumber,
+  IsPositive,
+  IsString,
+  ValidateNested,
+  validateSync,
 } from 'class-validator'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { PickupStrategy } from '../../../../../_libs/database/common/variable'
-import { CommissionCalculatorType } from '../../../../../_libs/database/entities/commission.entity'
+import { CommissionCalculatorType } from '../../../../../_libs/database/entities/position.entity'
 import {
-    SplitBatchByCostPrice,
-    SplitBatchByDistributor,
-    SplitBatchByExpiryDate,
-    SplitBatchByWarehouse,
+  ProductType,
+  SplitBatchByCostPrice,
+  SplitBatchByDistributor,
+  SplitBatchByExpiryDate,
+  SplitBatchByWarehouse,
 } from '../../../../../_libs/database/entities/product.entity'
 
 export class UnitConversionBody {
@@ -38,7 +38,7 @@ export class UnitConversionBody {
   default: boolean
 }
 
-export class ProductCommission {
+export class ProductPosition {
   @Expose()
   @IsDefined()
   @IsNumber()
@@ -57,17 +57,17 @@ export class ProductCommission {
 }
 
 export class ProductCreateBody {
+  @ApiPropertyOptional({ example: 'ABC12345' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  productCode: string
+
   @ApiProperty({ example: 'Klacid 125mg/5ml' })
   @Expose()
   @IsDefined()
   @IsString()
   brandName: string // tên biệt dược
-
-  @ApiProperty({ example: '' })
-  @Expose()
-  @IsDefined()
-  @IsString()
-  productCode: string
 
   @ApiPropertyOptional({ example: 'Clarythromycin 125mg/5ml' })
   @Expose()
@@ -178,11 +178,11 @@ export class ProductCreateBody {
   @IsIn([0, 1])
   isActive: 0 | 1
 
-  @ApiProperty({ enum: PickupStrategy, example: PickupStrategy.AutoWithExpiryDate })
+  @ApiProperty({ enum: ProductType, example: ProductType.Basic })
   @Expose()
   @IsDefined()
-  @IsEnumValue(PickupStrategy)
-  pickupStrategy: PickupStrategy
+  @IsEnumValue(ProductType)
+  productType: ProductType
 
   @ApiProperty({ enum: SplitBatchByWarehouse, example: SplitBatchByWarehouse.Inherit })
   @Expose()
@@ -230,13 +230,13 @@ export class ProductCreateBody {
   @IsString({ message: `Validate warehouseIds failed: Example: ${JSON.stringify([1, 2, 3])}` })
   warehouseIds: string // đơn vị tính: lọ, ống, vỉ
 
-  @ApiProperty({ type: ProductCommission, isArray: true })
+  @ApiProperty({ type: ProductPosition, isArray: true })
   @Expose()
-  @Type(() => ProductCommission)
+  @Type(() => ProductPosition)
   @IsDefined()
   @IsArray()
   @ValidateNested({ each: true })
-  commissionList: ProductCommission[]
+  positionList: ProductPosition[]
 }
 
 export class ProductUpdateBody extends OmitType(ProductCreateBody, ['quantity']) { }

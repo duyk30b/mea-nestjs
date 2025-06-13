@@ -1,6 +1,9 @@
 up: 
 	docker compose up -d --build
 
+logs: 
+	docker compose logs -f api_public | cut -d '|' -f2-
+
 clear-postgres:	
 	@echo "=== Dropping and recreating database mea_sql... ==="
 	docker compose exec postgres sh -c '\

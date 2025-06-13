@@ -2,9 +2,10 @@ import { Controller, Delete, Get, Param, Post } from '@nestjs/common'
 import { Body, Query } from '@nestjs/common/decorators/http/route-params.decorator'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
-import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
+import { OrganizationPermission } from '../../../../_libs/common/guards/organization.guard'
+import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiStockCheckService } from './api-stock-check.service'
 import {
   StockCheckGetManyQuery,
@@ -20,19 +21,19 @@ export class ApiStockCheckController {
   constructor(private readonly apiStockCheckService: ApiStockCheckService) { }
 
   @Get('pagination')
-  @HasPermission(PermissionId.STOCK_CHECK_READ)
+  @OrganizationPermission(PermissionId.STOCK_CHECK)
   async pagination(@External() { oid }: TExternal, @Query() query: StockCheckPaginationQuery) {
     return await this.apiStockCheckService.pagination(oid, query)
   }
 
   @Get('list')
-  @HasPermission(PermissionId.STOCK_CHECK_READ)
+  @OrganizationPermission(PermissionId.STOCK_CHECK)
   async list(@External() { oid }: TExternal, @Query() query: StockCheckGetManyQuery) {
     return await this.apiStockCheckService.getMany(oid, query)
   }
 
   @Get('detail/:id')
-  @HasPermission(PermissionId.STOCK_CHECK_READ)
+  @OrganizationPermission(PermissionId.STOCK_CHECK)
   async detail(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -42,7 +43,7 @@ export class ApiStockCheckController {
   }
 
   @Post('upsert-draft')
-  @HasPermission(PermissionId.STOCK_CHECK_DRAFT_CRUD)
+  @UserPermission(PermissionId.STOCK_CHECK_DRAFT_CRUD)
   async upsertDraft(@External() { oid, uid }: TExternal, @Body() body: StockCheckUpsertDraftBody) {
     return await this.apiStockCheckService.upsertDraft({
       oid,
@@ -52,7 +53,7 @@ export class ApiStockCheckController {
   }
 
   @Delete('draft-destroy/:id')
-  @HasPermission(PermissionId.STOCK_CHECK_DRAFT_CRUD)
+  @UserPermission(PermissionId.STOCK_CHECK_DRAFT_CRUD)
   async draftDestroy(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiStockCheckService.destroy({
       oid,
@@ -61,7 +62,7 @@ export class ApiStockCheckController {
   }
 
   @Post('draft-submit/:id')
-  @HasPermission(PermissionId.STOCK_CHECK_DRAFT_CRUD)
+  @UserPermission(PermissionId.STOCK_CHECK_DRAFT_CRUD)
   async draftSubmit(@External() { oid, uid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiStockCheckService.draftSubmit({
       oid,
@@ -71,7 +72,7 @@ export class ApiStockCheckController {
   }
 
   @Post('pending-approve/:id')
-  @HasPermission(PermissionId.STOCK_CHECK_DRAFT_CRUD)
+  @UserPermission(PermissionId.STOCK_CHECK_DRAFT_CRUD)
   async pendingApprove(@External() { oid, uid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiStockCheckService.pendingApprove({
       oid,
@@ -81,7 +82,7 @@ export class ApiStockCheckController {
   }
 
   @Post('confirm-reconcile/:id')
-  @HasPermission(PermissionId.STOCK_CHECK_DRAFT_CRUD)
+  @UserPermission(PermissionId.STOCK_CHECK_DRAFT_CRUD)
   async confirmReconcile(@External() { oid, uid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiStockCheckService.confirmReconcile({
       oid,
@@ -91,7 +92,7 @@ export class ApiStockCheckController {
   }
 
   @Post('void/:id')
-  @HasPermission(PermissionId.STOCK_CHECK_DRAFT_CRUD)
+  @UserPermission(PermissionId.STOCK_CHECK_DRAFT_CRUD)
   async void(@External() { oid, uid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiStockCheckService.void({
       oid,
@@ -101,7 +102,7 @@ export class ApiStockCheckController {
   }
 
   @Delete('cancelled-destroy/:id')
-  @HasPermission(PermissionId.STOCK_CHECK_CANCELLED_DESTROY)
+  @UserPermission(PermissionId.STOCK_CHECK_CANCELLED_DESTROY)
   async cancelledDestroy(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiStockCheckService.destroy({
       oid,

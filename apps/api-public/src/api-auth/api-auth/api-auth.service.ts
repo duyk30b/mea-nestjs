@@ -31,9 +31,7 @@ export class ApiAuthService {
     private readonly cacheTokenService: CacheTokenService,
     private readonly jwtExtendService: JwtExtendService,
     private readonly organizationRepository: OrganizationRepository,
-    private readonly customerRepository: CustomerRepository,
-    private readonly userRepository: UserRepository,
-    private readonly distributorRepository: DistributorRepository
+    private readonly userRepository: UserRepository
   ) { }
 
   // async register(registerDto: RegisterBody, ip: string): Promise<BaseResponse> {
@@ -168,14 +166,26 @@ export class ApiAuthService {
     const checkPassword = await bcrypt.compare(loginRootDto.password, root.hashPassword)
     if (!checkPassword) throw new BusinessException('error.User.WrongPassword')
 
-    const [user] = await this.dataSource.getRepository(User).find({
-      relations: { organization: true },
-      relationLoadStrategy: 'join',
-      where: {
-        oid: loginRootDto.oid,
-        isAdmin: 1,
-      },
-    })
+    let user: User
+    if (loginRootDto.uid) {
+      user = await this.userRepository.findOne({
+        relation: { organization: true },
+        relationLoadStrategy: 'join',
+        condition: {
+          oid: loginRootDto.oid,
+          id: loginRootDto.uid,
+        },
+      })
+    } else {
+      user = await this.userRepository.findOne({
+        relation: { organization: true },
+        relationLoadStrategy: 'join',
+        condition: {
+          oid: loginRootDto.oid,
+          isAdmin: 1,
+        },
+      })
+    }
 
     const token = this.jwtExtendService.createTokenFromUser(user, ip)
 

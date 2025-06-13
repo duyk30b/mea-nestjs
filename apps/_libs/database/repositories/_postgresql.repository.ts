@@ -31,6 +31,17 @@ export abstract class _PostgreSqlRepository<
     this.repository = repository
   }
 
+  getManager() {
+    return this.repository.manager
+  }
+
+  async getMaxId() {
+    const queryResult = await this.repository.query(
+      `SELECT last_value FROM "${this.entity['name']}_id_seq"`
+    )
+    return Number(queryResult[0].last_value)
+  }
+
   async pagination<S extends _SORT, R extends _RELATION>(options: {
     page: number
     limit: number
@@ -308,18 +319,38 @@ export abstract class _PostgreSqlRepository<
     return this.entity.fromRaws(raws)
   }
 
+  async deleteOneAndReturnEntity(condition: BaseCondition<_ENTITY>): Promise<_ENTITY> {
+    const raws = await this.deleteAndReturnRaw(condition)
+    if (raws.length !== 1) {
+      throw new Error(`Delete ${this.entity['name']} failed: ` + JSON.stringify({ raws }))
+    }
+    return this.entity.fromRaw(raws[0])
+  }
+
   async findAndSelect<
     Aggregate extends Record<
       string,
-      { SUM?: (keyof _ENTITY | BaseOperator<keyof _ENTITY>)[]; COUNT?: keyof _ENTITY | '*' }
+      {
+        SUM?: (number | keyof _ENTITY | BaseOperator<keyof _ENTITY>)[]
+        COUNT?: keyof _ENTITY | '*'
+      }
     >,
+    SELECT extends (keyof _ENTITY)[] | { [P in keyof _ENTITY]?: boolean },
   >(options: {
     condition: BaseCondition<_ENTITY>
-    select?: { [P in keyof _ENTITY]?: boolean } | (keyof _ENTITY)[]
+    select?: SELECT
     aggregate?: Aggregate
     groupBy?: (keyof _ENTITY)[]
-  }): Promise<({ [P in keyof _ENTITY]?: any } & { [P in keyof Aggregate]: any })[]> {
-    const { condition, select, aggregate, groupBy } = options
+    orderBy?: { [P in keyof _ENTITY]?: 'ASC' | 'DESC' } | { [P in keyof Aggregate]: 'ASC' | 'DESC' }
+    limit?: number
+  }): Promise<
+    ((SELECT extends (keyof _ENTITY)[]
+      ? { [P in SELECT[number]]: _ENTITY[P] }
+      : SELECT extends { [P in keyof _ENTITY]?: boolean }
+      ? { [P in keyof SELECT as SELECT[P] extends true ? P : never]: _ENTITY }
+      : never) & { [P in keyof Aggregate]: string })[]
+  > {
+    const { condition, select, aggregate, groupBy, orderBy, limit } = options
     const where = this.getWhereOptions(condition)
     const selectList: string[] = []
     if (select) {
@@ -346,6 +377,10 @@ export abstract class _PostgreSqlRepository<
           }
         } else if (aggregate[customField].SUM) {
           const sumString = aggregate[customField].SUM.map((operator) => {
+            if (typeof operator === 'number') {
+              const column = operator as number
+              return `${column}`
+            }
             if (typeof operator === 'string') {
               const column = operator as string
               return `"${column}"`
@@ -359,11 +394,21 @@ export abstract class _PostgreSqlRepository<
       })
     }
 
-    let query = this.repository.createQueryBuilder().select(selectList).where(where).groupBy()
+    let query = this.repository.createQueryBuilder().select(selectList).where(where)
     if (groupBy && groupBy.length) {
       const groupString = groupBy.map((field) => `"${field as string}"`).join(', ')
       query = query.groupBy(groupString)
     }
+    if (orderBy) {
+      Object.keys(orderBy).forEach((column, index) => {
+        if (index == 0) {
+          query = query.orderBy(`"${column}"`, orderBy[column])
+        } else {
+          query = query.addOrderBy(`"${column}"`, orderBy[column])
+        }
+      })
+    }
+    if (limit) query = query.take(limit)
 
     return await query.getRawMany()
   }

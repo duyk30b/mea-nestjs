@@ -8,7 +8,23 @@ import {
   ProductGroupSortType,
   ProductGroupUpdateType,
 } from '../entities/product-group.entity'
+import { _PostgreSqlManager } from '../managers/_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
+
+
+@Injectable()
+export class ProductGroupManager extends _PostgreSqlManager<
+  ProductGroup,
+  ProductGroupRelationType,
+  ProductGroupInsertType,
+  ProductGroupUpdateType,
+  ProductGroupSortType
+> {
+  constructor() {
+    super(ProductGroup)
+  }
+}
+
 
 @Injectable()
 export class ProductGroupRepository extends _PostgreSqlRepository<

@@ -1,10 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
-import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
-import { IsUser } from '../../../../_libs/common/guards/user.guard.'
+import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiCustomerSourceService } from './api-customer-source.service'
 import {
   CustomerSourceCreateBody,
@@ -20,31 +19,31 @@ export class ApiCustomerSourceController {
   constructor(private readonly apiCustomerSourceService: ApiCustomerSourceService) { }
 
   @Get('pagination')
-  @IsUser()
+  @UserPermission()
   pagination(@External() { oid }: TExternal, @Query() query: CustomerSourcePaginationQuery) {
     return this.apiCustomerSourceService.pagination(oid, query)
   }
 
   @Get('list')
-  @IsUser()
+  @UserPermission()
   list(@External() { oid }: TExternal, @Query() query: CustomerSourceGetManyQuery) {
     return this.apiCustomerSourceService.getMany(oid, query)
   }
 
   @Get('detail/:id')
-  @IsUser()
+  @UserPermission()
   findOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return this.apiCustomerSourceService.getOne(oid, id)
   }
 
   @Post('create')
-  @HasPermission(PermissionId.MASTER_DATA_CUSTOMER_SOURCE)
+  @UserPermission(PermissionId.MASTER_DATA_CUSTOMER_SOURCE)
   async createOne(@External() { oid }: TExternal, @Body() body: CustomerSourceCreateBody) {
     return await this.apiCustomerSourceService.createOne(oid, body)
   }
 
   @Patch('update/:id')
-  @HasPermission(PermissionId.MASTER_DATA_CUSTOMER_SOURCE)
+  @UserPermission(PermissionId.MASTER_DATA_CUSTOMER_SOURCE)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
     @External() { oid }: TExternal,
@@ -55,7 +54,7 @@ export class ApiCustomerSourceController {
   }
 
   @Delete('destroy/:id')
-  @HasPermission(PermissionId.MASTER_DATA_CUSTOMER_SOURCE)
+  @UserPermission(PermissionId.MASTER_DATA_CUSTOMER_SOURCE)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiCustomerSourceService.destroyOne(oid, id)

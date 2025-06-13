@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { uniqueArray } from '../../../../_libs/common/helpers/object.helper'
+import { uniqueArray } from '../../../../_libs/common/helpers/array.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { MovementType } from '../../../../_libs/database/common/variable'
 import {
@@ -67,7 +67,10 @@ export class ApiProductMovementService {
       .filter((i) => i.movementType === MovementType.Ticket)
       .map((i) => i.contactId)
     const userIds = data
-      .filter((i) => [MovementType.UserChange, MovementType.StockCheck].includes(i.movementType))
+      .filter((i) =>
+        [MovementType.UserChange, MovementType.StockCheck, MovementType.Excel].includes(
+          i.movementType
+        ))
       .map((i) => i.contactId)
 
     const [receiptList, ticketList, stockCheckList, distributorList, customerList, userList] =
@@ -110,6 +113,9 @@ export class ApiProductMovementService {
       }
       if (mov.movementType === MovementType.StockCheck) {
         mov.stockCheck = stockCheckList.find((v) => v.id === mov.voucherId)
+        mov.user = userList.find((c) => c.id === mov.contactId)
+      }
+      if (mov.movementType === MovementType.Excel) {
         mov.user = userList.find((c) => c.id === mov.contactId)
       }
     })

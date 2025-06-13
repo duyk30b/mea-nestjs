@@ -10,10 +10,10 @@ import {
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../../_libs/common/dto'
 import { FileUploadDto } from '../../../../../_libs/common/dto/file'
-import { HasPermission } from '../../../../../_libs/common/guards/permission.guard'
+import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
 import { FastifyFilesInterceptor } from '../../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../../_libs/database/entities/permission.entity'
+import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { ApiTicketClinicRadiologyService } from './api-ticket-clinic-radiology.service'
 import {
   TicketClinicAddTicketRadiologyBody,
@@ -30,7 +30,7 @@ export class ApiTicketClinicRadiologyController {
   constructor(private readonly apiTicketClinicRadiologyService: ApiTicketClinicRadiologyService) { }
 
   @Post(':id/add-ticket-radiology')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST)
   async addTicketRadiology(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -44,7 +44,7 @@ export class ApiTicketClinicRadiologyController {
   }
 
   @Delete(':ticketId/destroy-ticket-radiology/:ticketRadiologyId')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST)
   async destroyTicketRadiology(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketRadiologyId }: TicketClinicRadiologyParams
@@ -57,7 +57,7 @@ export class ApiTicketClinicRadiologyController {
   }
 
   @Post(':ticketId/update-money-ticket-radiology/:ticketRadiologyId')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST)
   async updateTicketLaboratory(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketRadiologyId }: TicketClinicRadiologyParams,
@@ -72,7 +72,7 @@ export class ApiTicketClinicRadiologyController {
   }
 
   @Post(':ticketId/update-result-ticket-radiology/:ticketRadiologyId')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FastifyFilesInterceptor('files', 10, {}))
   async updateTicketRadiology(
@@ -91,7 +91,7 @@ export class ApiTicketClinicRadiologyController {
   }
 
   @Post(':id/update-priority-ticket-radiology')
-  @HasPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST)
   async updatePriorityTicketRadiology(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,

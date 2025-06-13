@@ -1,32 +1,31 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import {
-    ESArray,
-} from '../../../../_libs/common/helpers/object.helper'
+import { ESArray } from '../../../../_libs/common/helpers/array.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { Product } from '../../../../_libs/database/entities'
 import { BatchInsertType } from '../../../../_libs/database/entities/batch.entity'
 import { VoucherType } from '../../../../_libs/database/entities/payment.entity'
 import {
-    SplitBatchByCostPrice,
-    SplitBatchByDistributor,
-    SplitBatchByExpiryDate,
-    SplitBatchByWarehouse,
+  ProductType,
+  SplitBatchByCostPrice,
+  SplitBatchByDistributor,
+  SplitBatchByExpiryDate,
+  SplitBatchByWarehouse,
 } from '../../../../_libs/database/entities/product.entity'
 import {
-    ReceiptDepositedOperation,
-    ReceiptDraftOperation,
+  ReceiptDepositedOperation,
+  ReceiptDraftOperation,
 } from '../../../../_libs/database/operations'
 import { PaymentRepository, ProductRepository } from '../../../../_libs/database/repositories'
 import { BatchRepository } from '../../../../_libs/database/repositories/batch.repository'
 import { ReceiptRepository } from '../../../../_libs/database/repositories/receipt.repository'
 import {
-    ReceiptGetManyQuery,
-    ReceiptGetOneQuery,
-    ReceiptPaginationQuery,
-    ReceiptUpdateDepositedBody,
-    ReceiptUpsertDraftBody,
+  ReceiptGetManyQuery,
+  ReceiptGetOneQuery,
+  ReceiptPaginationQuery,
+  ReceiptUpdateDepositedBody,
+  ReceiptUpsertDraftBody,
 } from './request'
 
 @Injectable()
@@ -136,8 +135,11 @@ export class ApiReceiptService {
     const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId)
     const productIdUnique = ESArray.uniqueArray(productIdList)
     const [productList, batchList] = await Promise.all([
-      this.productRepository.findManyBy({ oid, id: { IN: productIdUnique } }),
-      this.batchRepository.findManyBy({ oid, productId: { IN: productIdUnique } }),
+      this.productRepository.findManyBy({ oid, id: { IN: productIdUnique }, isActive: 1 }),
+      this.batchRepository.findMany({
+        condition: { oid, productId: { IN: productIdUnique }, isActive: 1 },
+        sort: { id: 'DESC' },
+      }),
     ])
     const batchListMap = ESArray.arrayToKeyArray(batchList, 'productId')
     const productMap = ESArray.arrayToKeyValue(productList, 'id')
@@ -149,6 +151,9 @@ export class ApiReceiptService {
         const product = productMap[receiptItem.productId]
         if (!product) {
           throw new BusinessException(`Có sản phẩm không hợp lệ, vị trí ${index}` as any)
+        }
+        if (product.productType === ProductType.Basic) {
+          return true // nếu là loại sản phẩm thường thì đúng luôn, không cần chọn lô
         }
         const splitRule = Product.getProductSettingRule(
           product,
@@ -189,12 +194,13 @@ export class ApiReceiptService {
         distributorId,
         productId: receiptItem.productId,
         warehouseId: receiptItem.warehouseId,
-        batchCode: receiptItem.batchCode,
+        lotNumber: receiptItem.lotNumber,
         expiryDate: receiptItem.expiryDate,
         costPrice: receiptItem.costPrice,
         quantity: 0,
         costAmount: 0,
         registeredAt: Date.now(),
+        isActive: 1,
       }
       return batchInsert
     })
@@ -233,8 +239,11 @@ export class ApiReceiptService {
     const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId)
     const productIdUnique = ESArray.uniqueArray(productIdList)
     const [productList, batchList] = await Promise.all([
-      this.productRepository.findManyBy({ oid, id: { IN: productIdUnique } }),
-      this.batchRepository.findManyBy({ oid, productId: { IN: productIdUnique } }),
+      this.productRepository.findManyBy({ oid, id: { IN: productIdUnique }, isActive: 1 }),
+      this.batchRepository.findMany({
+        condition: { oid, productId: { IN: productIdUnique }, isActive: 1 },
+        sort: { id: 'DESC' },
+      }),
     ])
     const batchListMap = ESArray.arrayToKeyArray(batchList, 'productId')
     const productMap = ESArray.arrayToKeyValue(productList, 'id')
@@ -246,6 +255,9 @@ export class ApiReceiptService {
         const product = productMap[receiptItem.productId]
         if (!product) {
           throw new BusinessException(`Có sản phẩm không hợp lệ, vị trí ${index}` as any)
+        }
+        if (product.productType === ProductType.Basic) {
+          return true // nếu là loại sản phẩm thường thì đúng luôn, không cần chọn lô
         }
         const splitRule = Product.getProductSettingRule(
           product,
@@ -286,12 +298,13 @@ export class ApiReceiptService {
         distributorId,
         productId: receiptItem.productId,
         warehouseId: receiptItem.warehouseId,
-        batchCode: receiptItem.batchCode,
+        lotNumber: receiptItem.lotNumber,
         expiryDate: receiptItem.expiryDate,
         costPrice: receiptItem.costPrice,
         quantity: 0,
         costAmount: 0,
         registeredAt: Date.now(),
+        isActive: 1,
       }
       return batchInsert
     })
@@ -331,8 +344,11 @@ export class ApiReceiptService {
     const productIdList = receiptItemList.filter((i) => !i.batchId).map((i) => i.productId)
     const productIdUnique = ESArray.uniqueArray(productIdList)
     const [productList, batchList] = await Promise.all([
-      this.productRepository.findManyBy({ oid, id: { IN: productIdUnique } }),
-      this.batchRepository.findManyBy({ oid, productId: { IN: productIdUnique } }),
+      this.productRepository.findManyBy({ oid, id: { IN: productIdUnique }, isActive: 1 }),
+      this.batchRepository.findMany({
+        condition: { oid, productId: { IN: productIdUnique }, isActive: 1 },
+        sort: { id: 'DESC' },
+      }),
     ])
     const batchListMap = ESArray.arrayToKeyArray(batchList, 'productId')
     const productMap = ESArray.arrayToKeyValue(productList, 'id')
@@ -344,6 +360,9 @@ export class ApiReceiptService {
         const product = productMap[receiptItem.productId]
         if (!product) {
           throw new BusinessException(`Có sản phẩm không hợp lệ, vị trí ${index}` as any)
+        }
+        if (product.productType === ProductType.Basic) {
+          return true // nếu là loại sản phẩm thường thì đúng luôn, không cần chọn lô
         }
         const splitRule = Product.getProductSettingRule(
           product,
@@ -384,12 +403,13 @@ export class ApiReceiptService {
         distributorId,
         productId: receiptItem.productId,
         warehouseId: receiptItem.warehouseId,
-        batchCode: receiptItem.batchCode,
+        lotNumber: receiptItem.lotNumber,
         expiryDate: receiptItem.expiryDate,
         costPrice: receiptItem.costPrice,
         quantity: 0,
         costAmount: 0,
         registeredAt: Date.now(),
+        isActive: 1,
       }
       return batchInsert
     })

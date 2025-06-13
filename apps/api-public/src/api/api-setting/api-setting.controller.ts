@@ -1,11 +1,10 @@
 import { Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { FastifyReply } from 'fastify'
-import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
 import { IsRoot } from '../../../../_libs/common/guards/root.guard'
-import { IsUser } from '../../../../_libs/common/guards/user.guard.'
+import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiSettingGoogleDriverService } from './api-setting-google-driver.service'
 import { ApiSettingService } from './api-setting.service'
 import { SettingUpsertBody, SettingUpsertParams } from './request/setting-upsert.request'
@@ -20,13 +19,13 @@ export class ApiSettingController {
   ) { }
 
   @Get('get-map')
-  @IsUser()
+  @UserPermission()
   async getMap(@External() { oid }: TExternal) {
     return await this.apiSettingService.getMap(oid)
   }
 
   @Post('upsert/:type')
-  @HasPermission(PermissionId.ORGANIZATION_SETTING_UPSERT)
+  @UserPermission(PermissionId.ORGANIZATION_SETTING_UPSERT)
   async upsert(
     @External() { oid }: TExternal,
     @Param() { type }: SettingUpsertParams,
@@ -37,13 +36,13 @@ export class ApiSettingController {
   }
 
   @Get('google-driver/get-auth-url')
-  @HasPermission(PermissionId.ORGANIZATION_SETTING_UPSERT)
+  @UserPermission(PermissionId.ORGANIZATION_SETTING_UPSERT)
   async getAuthUrl(@External() { oid }: TExternal) {
     return this.apiSettingGoogleDriverService.getAuthUrl({ state: `${oid}` })
   }
 
   @Post('google-driver/logout')
-  @HasPermission(PermissionId.ORGANIZATION_SETTING_UPSERT)
+  @UserPermission(PermissionId.ORGANIZATION_SETTING_UPSERT)
   async authLogout(@External() { oid }: TExternal) {
     return this.apiSettingGoogleDriverService.logout(oid)
   }
@@ -58,7 +57,7 @@ export class ApiSettingController {
   }
 
   @Get('google-driver/get-all-folders')
-  @IsUser()
+  @UserPermission()
   async getAllFolders() {
     return await this.apiSettingGoogleDriverService.getAllFolders('')
   }

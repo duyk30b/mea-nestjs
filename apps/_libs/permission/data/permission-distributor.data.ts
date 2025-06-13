@@ -1,0 +1,55 @@
+import { Permission } from '../../database/entities'
+import { PermissionId } from '../permission.enum'
+
+export const permissionDistributor: Permission[] = [
+  {
+    id: PermissionId.DISTRIBUTOR,
+    level: 1,
+    code: PermissionId[PermissionId.DISTRIBUTOR],
+    isActive: 1,
+    pathId: `${PermissionId.DISTRIBUTOR}`,
+    name: 'Quản lý nhà cung cấp',
+    parentId: 0,
+    rootId: PermissionId.DISTRIBUTOR,
+  },
+  {
+    id: PermissionId.DISTRIBUTOR_MENU,
+    level: 2,
+    code: PermissionId[PermissionId.DISTRIBUTOR_MENU],
+    isActive: 1,
+    pathId: `${PermissionId.DISTRIBUTOR}.${PermissionId.DISTRIBUTOR_MENU}`,
+    name: 'Xem menu nhà cung cấp',
+    parentId: PermissionId.DISTRIBUTOR,
+    rootId: PermissionId.DISTRIBUTOR,
+  },
+  {
+    id: PermissionId.DISTRIBUTOR_CREATE,
+    level: 2,
+    code: PermissionId[PermissionId.DISTRIBUTOR_CREATE],
+    isActive: 1,
+    pathId: `${PermissionId.DISTRIBUTOR}.${PermissionId.DISTRIBUTOR_CREATE}`,
+    name: 'Thêm nhà cung cấp',
+    parentId: PermissionId.DISTRIBUTOR,
+    rootId: PermissionId.DISTRIBUTOR,
+  },
+  {
+    id: PermissionId.DISTRIBUTOR_UPDATE,
+    level: 2,
+    code: PermissionId[PermissionId.DISTRIBUTOR_UPDATE],
+    isActive: 1,
+    pathId: `${PermissionId.DISTRIBUTOR}.${PermissionId.DISTRIBUTOR_UPDATE}`,
+    name: 'Sửa nhà cung cấp',
+    parentId: PermissionId.DISTRIBUTOR,
+    rootId: PermissionId.DISTRIBUTOR,
+  },
+  {
+    id: PermissionId.DISTRIBUTOR_DELETE,
+    level: 2,
+    code: PermissionId[PermissionId.DISTRIBUTOR_DELETE],
+    isActive: 1,
+    pathId: `${PermissionId.DISTRIBUTOR}.${PermissionId.DISTRIBUTOR_DELETE}`,
+    name: 'Xóa nhà cung cấp',
+    parentId: PermissionId.DISTRIBUTOR,
+    rootId: PermissionId.DISTRIBUTOR,
+  },
+]

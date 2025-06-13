@@ -1,8 +1,8 @@
 import { Controller, Get, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
+import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiProductMovementService } from './api-product-movement.service'
 import { ProductMovementPaginationQuery } from './request'
 
@@ -10,10 +10,10 @@ import { ProductMovementPaginationQuery } from './request'
 @ApiBearerAuth('access-token')
 @Controller('product-movement')
 export class ApiProductMovementController {
-  constructor(private readonly apiProductMovementService: ApiProductMovementService) {}
+  constructor(private readonly apiProductMovementService: ApiProductMovementService) { }
 
   @Get('pagination')
-  @HasPermission(PermissionId.READ_MOVEMENT)
+  @UserPermission(PermissionId.PRODUCT_READ_MOVEMENT)
   paginationProductMovement(
     @External() { oid }: TExternal,
     @Query() query: ProductMovementPaginationQuery

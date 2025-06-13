@@ -5,7 +5,7 @@ import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.he
 import {
   IsEnumValue,
 } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { CommissionCalculatorType } from '../../../../../../_libs/database/entities/commission.entity'
+import { CommissionCalculatorType } from '../../../../../../_libs/database/entities/position.entity'
 
 export class TicketClinicUpdateTicketUserBody {
   @ApiProperty({ enum: valuesEnum(CommissionCalculatorType), example: CommissionCalculatorType.VND })

@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm'
 import Product from './product.entity'
 
 @Entity('Batch')
@@ -28,7 +28,7 @@ export default class Batch {
 
   @Column({ type: 'varchar', length: 50, default: '' })
   @Expose()
-  batchCode: string // Số Lô sản phẩm
+  lotNumber: string // Số Lô sản phẩm
 
   @Column({
     type: 'bigint',
@@ -95,8 +95,14 @@ export default class Batch {
   @Expose()
   updatedAt: number
 
+  @Column({ type: 'smallint', default: 1 })
   @Expose()
-  @ManyToOne((type) => Product, { createForeignKeyConstraints: false })
+  isActive: 0 | 1
+
+  @Expose()
+  @ManyToOne((type) => Product, (product) => product.batchList, {
+    createForeignKeyConstraints: false,
+  })
   @JoinColumn({ name: 'productId', referencedColumnName: 'id' })
   product: Product
 

@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../../_libs/common/cache-data/cache-data.service'
 import { BaseResponse } from '../../../../../_libs/common/interceptor'
-import { InteractType } from '../../../../../_libs/database/entities/commission.entity'
+import { PositionType } from '../../../../../_libs/database/entities/position.entity'
 import { TicketProductType } from '../../../../../_libs/database/entities/ticket-product.entity'
 import {
   TicketClinicAddTicketProductOperation,
@@ -174,8 +174,8 @@ export class ApiTicketClinicProductService {
         oid,
         ticketId,
         body: {
-          interactType: InteractType.Product,
-          interactId: ticketProduct.productId,
+          positionType: PositionType.Product,
+          positionInteractId: ticketProduct.productId,
           ticketItemId: ticketProduct.id,
           quantity: ticketProduct.quantity,
           ticketUserList: body.ticketUserList,
@@ -203,8 +203,8 @@ export class ApiTicketClinicProductService {
     })
 
     if (sendProductResult.productModifiedList) {
-      this.socketEmitService.productListUpdate(oid, {
-        productList: sendProductResult.productModifiedList,
+      this.socketEmitService.productListChange(oid, {
+        productUpsertedList: sendProductResult.productModifiedList,
       })
     }
     if (sendProductResult.ticketProductModifiedList) {
@@ -239,13 +239,12 @@ export class ApiTicketClinicProductService {
         returnList: body.returnList,
       })
 
-      this.socketEmitService.productListUpdate(oid, { productList: result.productModifiedList })
+      this.socketEmitService.productListChange(oid, { productUpsertedList: result.productModifiedList })
       this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket: result.ticket })
 
       if (result.ticketUserModifiedList) {
         this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
           ticketId,
-          ticketUserDestroyList: result.ticketUserDestroyedList,
           ticketUserUpsertList: result.ticketUserModifiedList,
         })
       }

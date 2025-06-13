@@ -1,8 +1,8 @@
 import { Controller, Get, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
+import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { TicketGetManyQuery } from '../../api/api-ticket/request'
 import { ApiFileTicketDownloadExcel } from './api-file-ticket.download-excel'
 
@@ -13,7 +13,7 @@ export class ApiFileTicketController {
   constructor(private readonly apiFileTicketDownloadExcel: ApiFileTicketDownloadExcel) { }
 
   @Get('ticket-oder/download-excel')
-  @HasPermission(PermissionId.FILE_TICKET_ORDER_DOWNLOAD_EXCEL)
+  @UserPermission(PermissionId.FILE_EXCEL_DOWNLOAD_TICKET_ORDER)
   async ticketOrderDownloadExcel(
     @External() { user, organization }: TExternal,
     @Query() query: TicketGetManyQuery
@@ -22,7 +22,7 @@ export class ApiFileTicketController {
   }
 
   @Get('ticket-clinic/download-excel')
-  @HasPermission(PermissionId.FILE_TICKET_CLINIC_DOWNLOAD_EXCEL)
+  @UserPermission(PermissionId.FILE_EXCEL_DOWNLOAD_TICKET_CLINIC)
   async ticketClinicDownloadExcel(
     @External() { user, organization }: TExternal,
     @Query() query: TicketGetManyQuery

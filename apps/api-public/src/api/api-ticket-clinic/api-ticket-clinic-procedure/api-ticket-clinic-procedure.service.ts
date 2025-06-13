@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import { Injectable } from '@nestjs/common'
-import { InteractType } from '../../../../../_libs/database/entities/commission.entity'
+import { PositionType } from '../../../../../_libs/database/entities/position.entity'
 import {
   TicketClinicAddTicketProcedureOperation,
   TicketClinicDestroyTicketProcedureOperation,
@@ -50,8 +50,8 @@ export class ApiTicketClinicProcedureService {
         oid,
         ticketId,
         body: {
-          interactType: InteractType.Procedure,
-          interactId: ticketProcedure.procedureId,
+          positionType: PositionType.Procedure,
+          positionInteractId: ticketProcedure.procedureId,
           ticketItemId: ticketProcedure.id,
           quantity: ticketProcedure.quantity,
           ticketUserList: body.ticketUserList,
@@ -116,8 +116,8 @@ export class ApiTicketClinicProcedureService {
         oid,
         ticketId,
         body: {
-          interactType: InteractType.Procedure,
-          interactId: ticketProcedure.procedureId,
+          positionType: PositionType.Procedure,
+          positionInteractId: ticketProcedure.procedureId,
           ticketItemId: ticketProcedure.id,
           quantity: ticketProcedure.quantity,
           ticketUserList: body.ticketUserList,

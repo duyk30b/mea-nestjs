@@ -9,8 +9,10 @@ import {
   BatchRepository,
   OrganizationRepository,
   ProductMovementRepository,
+  ProductRepository,
   ReceiptItemRepository,
   TicketBatchRepository,
+  TicketProductRepository,
 } from '../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
@@ -29,7 +31,9 @@ export class ApiBatchService {
     private readonly cacheDataService: CacheDataService,
     private readonly organizationRepository: OrganizationRepository,
     private readonly batchRepository: BatchRepository,
+    private readonly productRepository: ProductRepository,
     private readonly ticketBatchRepository: TicketBatchRepository,
+    private readonly ticketProductRepository: TicketProductRepository,
     private readonly receiptItemRepository: ReceiptItemRepository,
     private readonly productMovementRepository: ProductMovementRepository,
     private readonly productOperation: ProductOperation
@@ -95,6 +99,8 @@ export class ApiBatchService {
 
   async updateInfo(oid: number, id: number, body: BatchUpdateInfoBody): Promise<BaseResponse> {
     const batch = await this.batchRepository.updateOneAndReturnEntity({ id, oid }, body)
+
+    this.socketEmitService.batchListChange(oid, { batchUpsertedList: [batch] })
     return { data: { batch } }
   }
 
@@ -112,7 +118,7 @@ export class ApiBatchService {
     const batchUpdated = await this.batchRepository.updateOneAndReturnEntity(
       { id: batchId, oid },
       {
-        batchCode: body.batchCode,
+        lotNumber: body.lotNumber,
         expiryDate: body.expiryDate,
         warehouseId: body.warehouseId,
         distributorId: body.distributorId,
@@ -159,13 +165,16 @@ export class ApiBatchService {
       createdAt: Date.now(),
     }
     this.productMovementRepository.insertOneFullField(productMovement)
-    this.socketEmitService.productUpsert(oid, { product: productUpdated })
+
+    this.socketEmitService.productListChange(oid, { productUpsertedList: [productUpdated] })
+    this.socketEmitService.batchListChange(oid, { batchUpsertedList: [batchUpdated] })
+
     return { data: { batch: batchUpdated, product: productUpdated } }
   }
 
   async destroyOne(options: { oid: number; batchId: number }): Promise<BaseResponse> {
     const { oid, batchId } = options
-    const [receiptItemList, ticketBatchList] = await Promise.all([
+    const [receiptItemList, ticketBatchList, ticketProductList] = await Promise.all([
       this.receiptItemRepository.findMany({
         condition: { oid, batchId },
         limit: 10,
@@ -174,20 +183,39 @@ export class ApiBatchService {
         condition: { oid, batchId },
         limit: 10,
       }),
+      this.ticketProductRepository.findMany({
+        condition: { oid, batchId },
+        limit: 10,
+      }),
     ])
-    if (receiptItemList.length > 0 || ticketBatchList.length > 0) {
+    if (receiptItemList.length > 0 || ticketBatchList.length > 0 || ticketProductList.length > 0) {
       return {
-        data: { receiptItemList, ticketBatchList },
+        data: { receiptItemList, ticketBatchList, ticketProductList },
         success: false,
       }
     }
 
-    await this.batchRepository.delete({ oid, id: batchId })
+    const batchDestroyed = await this.batchRepository.deleteOneAndReturnEntity({ oid, id: batchId })
+    const productUpdated = await this.productRepository.updateOneAndReturnEntity(
+      { oid, id: batchDestroyed.productId },
+      { quantity: () => `quantity - ${batchDestroyed.quantity}` }
+    )
 
     await this.organizationRepository.updateDataVersion(oid)
     this.cacheDataService.clearOrganization(oid)
 
-    return { data: { batchId, receiptItemList: [], ticketBatchList: [] } }
+    this.socketEmitService.productListChange(oid, { productUpsertedList: [productUpdated] })
+    this.socketEmitService.batchListChange(oid, { batchDestroyedList: [batchDestroyed] })
+
+    return {
+      data: {
+        batchId,
+        product: productUpdated,
+        receiptItemList: [],
+        ticketBatchList: [],
+        ticketProductList: [],
+      },
+    }
   }
 
   async batchMerge(options: { oid: number; body: BatchMergeBody }) {
@@ -199,7 +227,7 @@ export class ApiBatchService {
         throw new BusinessException('error.ValidateFailed')
       }
     })
-    await this.batchRepository.mergeBatch({
+    const { batchModified, batchDestroyedList } = await this.batchRepository.mergeBatch({
       oid,
       productId,
       batchIdSourceList,
@@ -208,6 +236,11 @@ export class ApiBatchService {
 
     await this.organizationRepository.updateDataVersion(oid)
     this.cacheDataService.clearOrganization(oid)
+
+    this.socketEmitService.batchListChange(oid, {
+      batchDestroyedList,
+      batchUpsertedList: [batchModified],
+    })
 
     return { data: true }
   }

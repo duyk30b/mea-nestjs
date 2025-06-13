@@ -10,7 +10,7 @@ export class ProcedureRelationQuery {
 
   @Expose()
   @IsBoolean()
-  commissionList: boolean
+  positionList: boolean
 }
 
 export class ProcedureFilterQuery {

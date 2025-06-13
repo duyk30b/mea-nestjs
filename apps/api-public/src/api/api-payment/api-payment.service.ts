@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
-import { ESArray } from '../../../../_libs/common/helpers/object.helper'
+import { ESArray } from '../../../../_libs/common/helpers/array.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { Customer, Distributor, Receipt, Ticket, User } from '../../../../_libs/database/entities'
 import Payment, {
@@ -193,7 +193,7 @@ export class ApiPaymentService {
       },
       groupBy: ['moneyDirection'],
     })
-    const aggregate: typeof aggregateRaw = aggregateRaw.map((i) => {
+    const aggregate = aggregateRaw.map((i) => {
       return {
         moneyDirection: i.moneyDirection,
         sumPaidAmount: Number(i.sumPaidAmount),

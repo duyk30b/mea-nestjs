@@ -12,7 +12,7 @@ import {
   validateSync,
 } from 'class-validator'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { CommissionCalculatorType } from '../../../../../_libs/database/entities/commission.entity'
+import { CommissionCalculatorType } from '../../../../../_libs/database/entities/position.entity'
 import { ProcedureType } from '../../../../../_libs/database/entities/procedure.entity'
 
 export class ConsumableConversion {
@@ -29,7 +29,7 @@ export class ConsumableConversion {
   quantity: number
 }
 
-export class ProcedureCommission {
+export class ProcedurePosition {
   @Expose()
   @IsDefined()
   @IsNumber()
@@ -120,13 +120,13 @@ export class ProcedureCreateBody {
   @IsIn([0, 1])
   isActive: 0 | 1
 
-  @ApiProperty({ type: ProcedureCommission, isArray: true })
+  @ApiProperty({ type: ProcedurePosition, isArray: true })
   @Expose()
-  @Type(() => ProcedureCommission)
+  @Type(() => ProcedurePosition)
   @IsDefined()
   @IsArray()
   @ValidateNested({ each: true })
-  commissionList: ProcedureCommission[]
+  positionList: ProcedurePosition[]
 }
 
 export class ProcedureUpdateBody extends PartialType(ProcedureCreateBody) { }
