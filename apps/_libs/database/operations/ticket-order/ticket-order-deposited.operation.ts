@@ -22,7 +22,6 @@ import {
   TicketProductManager,
   TicketRadiologyManager,
   TicketSurchargeManager,
-  TicketUserManager,
 } from '../../managers'
 import { TicketAttributeManager } from '../../managers/ticket-attribute.manager'
 import {
@@ -66,8 +65,7 @@ export class TicketOrderDepositedOperation {
     private ticketLaboratoryManager: TicketLaboratoryManager,
     private ticketRadiologyManager: TicketRadiologyManager,
     private ticketSurchargeManager: TicketSurchargeManager,
-    private ticketExpenseManager: TicketExpenseManager,
-    private ticketUserManager: TicketUserManager
+    private ticketExpenseManager: TicketExpenseManager
   ) { }
 
   async update<T extends TicketOrderDepositedUpdateType>(params: {

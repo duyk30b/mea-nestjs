@@ -11,9 +11,9 @@ import {
 } from 'class-validator'
 import * as DOMPurify from 'isomorphic-dompurify'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { CommissionCalculatorType } from '../../../../../_libs/database/entities/commission.entity'
+import { CommissionCalculatorType } from '../../../../../_libs/database/entities/position.entity'
 
-export class RadiologyCommission {
+export class RadiologyPosition {
   @Expose()
   @IsDefined()
   @IsNumber()
@@ -99,11 +99,11 @@ export class RadiologyUpsertBody {
   @IsString()
   customStyles: string // Tuy chỉnh giao diện, có thể là CSS
 
-  @ApiProperty({ type: RadiologyCommission, isArray: true })
+  @ApiProperty({ type: RadiologyPosition, isArray: true })
   @Expose()
-  @Type(() => RadiologyCommission)
+  @Type(() => RadiologyPosition)
   @IsDefined()
   @IsArray()
   @ValidateNested({ each: true })
-  commissionList: RadiologyCommission[]
+  positionList: RadiologyPosition[]
 }

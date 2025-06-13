@@ -15,7 +15,7 @@ export class RoleCreateBody {
   @IsString()
   name: string
 
-  @ApiPropertyOptional({ type: 'string', example: '[{"name":"Viên","rate":1}]' })
+  @ApiPropertyOptional({ type: 'string', example: JSON.stringify([1, 2, 3, 4]) })
   @Expose()
   @Transform(({ value }) => {
     try {

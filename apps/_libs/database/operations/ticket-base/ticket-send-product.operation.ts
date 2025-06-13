@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { ESArray } from '../../../common/helpers/object.helper'
+import { ESArray } from '../../../common/helpers/array.helper'
 import { DeliveryStatus, MovementType } from '../../common/variable'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
 import { TicketBatchInsertType } from '../../entities/ticket-batch.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
 import {
-    BatchManager,
-    ProductManager,
-    ProductMovementManager,
-    TicketBatchManager,
-    TicketManager,
-    TicketProductManager,
+  BatchManager,
+  ProductManager,
+  ProductMovementManager,
+  TicketBatchManager,
+  TicketManager,
+  TicketProductManager,
 } from '../../managers'
 import { ProductPickingOperation } from '../product/product-picking.operation'
 import { TicketChangeItemMoneyManager } from './ticket-change-item-money.manager'
@@ -80,12 +80,12 @@ export class TicketSendProductOperation {
       const productIdList = ticketProductOriginList.map((i) => i.productId)
       const productOriginList = await this.productManager.updateAndReturnEntity(
         manager,
-        { oid, id: { IN: productIdList } },
+        { oid, id: { IN: productIdList }, isActive: 1 },
         { updatedAt: time }
       )
       const batchOriginList = await this.batchManager.updateAndReturnEntity(
         manager,
-        { oid, productId: { IN: productIdList } },
+        { oid, productId: { IN: productIdList }, isActive: 1 },
         { updatedAt: time }
       )
       const batchOriginMap = ESArray.arrayToKeyValue(batchOriginList, 'id')

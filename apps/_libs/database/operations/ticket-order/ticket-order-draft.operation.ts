@@ -16,7 +16,6 @@ import Ticket, {
   TicketRelationType,
   TicketStatus,
   TicketType,
-  TicketUpdateType,
 } from '../../entities/ticket.entity'
 import {
   TicketExpenseManager,
@@ -26,7 +25,6 @@ import {
   TicketProductManager,
   TicketRadiologyManager,
   TicketSurchargeManager,
-  TicketUserManager,
 } from '../../managers'
 import { TicketAttributeManager } from '../../managers/ticket-attribute.manager'
 import {
@@ -68,8 +66,7 @@ export class TicketOrderDraftOperation {
     private ticketLaboratoryManager: TicketLaboratoryManager,
     private ticketRadiologyManager: TicketRadiologyManager,
     private ticketSurchargeManager: TicketSurchargeManager,
-    private ticketExpenseManager: TicketExpenseManager,
-    private ticketUserManager: TicketUserManager
+    private ticketExpenseManager: TicketExpenseManager
   ) { }
 
   async upsert<

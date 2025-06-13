@@ -1,6 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IsUser } from '../../../../_libs/common/guards/user.guard.'
+import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { ApiUserRoleService } from './api-user-role.service'
 import {
@@ -14,7 +14,7 @@ export class ApiUserRoleController {
   constructor(private readonly apiUserRoleService: ApiUserRoleService) { }
 
   @Get('list')
-  @IsUser()
+  @UserPermission()
   list(@External() { oid }: TExternal, @Query() query: UserRoleGetManyQuery) {
     return this.apiUserRoleService.getMany(oid, query)
   }

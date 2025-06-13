@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { arrayToKeyArray, uniqueArray } from '../../../../_libs/common/helpers/object.helper'
+import { ESArray } from '../../../../_libs/common/helpers'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { Batch, Organization } from '../../../../_libs/database/entities'
 import {
-  CommissionInsertType,
-  InteractType,
-} from '../../../../_libs/database/entities/commission.entity'
+  PositionInsertType,
+  PositionType,
+} from '../../../../_libs/database/entities/position.entity'
 import {
   BatchRepository,
-  CommissionRepository,
+  PositionRepository,
   ProductRepository,
 } from '../../../../_libs/database/repositories'
 import { OrganizationRepository } from '../../../../_libs/database/repositories/organization.repository'
@@ -38,7 +38,7 @@ export class ApiProductService {
     private readonly productRepository: ProductRepository,
     private readonly batchRepository: BatchRepository,
     private readonly productMovementRepository: ProductMovementRepository,
-    private readonly commissionRepository: CommissionRepository
+    private readonly positionRepository: PositionRepository
   ) { }
 
   async pagination(oid: number, query: ProductPaginationQuery): Promise<BaseResponse> {
@@ -59,14 +59,14 @@ export class ApiProductService {
       sort,
     })
 
-    const productHasBatchesIds = uniqueArray(data.map((item) => item.id))
+    const productHasBatchesIds = ESArray.uniqueArray(data.map((item) => item.id))
     if (relation?.batchList && productHasBatchesIds.length) {
       const batchList = await this.batchRepository.findManyBy({
         productId: { IN: productHasBatchesIds },
         quantity: filter?.batchList?.quantity,
         expiryDate: filter?.batchList?.expiryDate,
       })
-      const batchListMapProductId = arrayToKeyArray(batchList, 'productId')
+      const batchListMapProductId = ESArray.arrayToKeyArray(batchList, 'productId')
       data.forEach((item) => {
         item.batchList = batchListMapProductId[item.id] || []
       })
@@ -94,14 +94,14 @@ export class ApiProductService {
       limit,
     })
 
-    const productHasBatchesIds = uniqueArray(data.map((item) => item.id))
+    const productHasBatchesIds = ESArray.uniqueArray(data.map((item) => item.id))
     if (relation?.batchList && productHasBatchesIds.length) {
       const batchList = await this.batchRepository.findManyBy({
         id: { IN: productHasBatchesIds },
         quantity: filter?.batchList?.quantity,
         expiryDate: filter?.batchList?.expiryDate,
       })
-      const batchListMapProductId = arrayToKeyArray(batchList, 'productId')
+      const batchListMapProductId = ESArray.arrayToKeyArray(batchList, 'productId')
       data.forEach((item) => {
         item.batchList = batchListMapProductId[item.id] || []
       })
@@ -128,21 +128,22 @@ export class ApiProductService {
         sort: { expiryDate: 'ASC' },
       })
     }
-    if (relation?.commissionList) {
-      product.commissionList = await this.commissionRepository.findManyBy({
+    if (relation?.positionList) {
+      product.positionList = await this.positionRepository.findManyBy({
         oid,
-        interactType: InteractType.Product,
-        interactId: product.id,
+        positionType: PositionType.Product,
+        positionInteractId: product.id,
       })
     }
     return { data: { product } }
   }
 
   async createOne(oid: number, body: ProductCreateBody): Promise<BaseResponse> {
-    const { commissionList, ...productBody } = body
+    const { positionList, ...productBody } = body
+
     let productCode = body.productCode
     if (!productCode) {
-      const count = await this.productRepository.countBy({ oid })
+      const count = await this.productRepository.getMaxId()
       productCode = (count + 1).toString()
     }
 
@@ -154,46 +155,51 @@ export class ApiProductService {
       throw new BusinessException(`Trùng mã sản phẩm với ${existProduct.brandName}` as any)
     }
 
-    const product = await this.productRepository.insertOneFullFieldAndReturnEntity({
+    const productCreated = await this.productRepository.insertOneFullFieldAndReturnEntity({
       ...productBody,
       oid,
       productCode,
+      updatedAt: Date.now(),
     })
 
     if (body.quantity) {
-      await this.batchRepository.insertOne({
+      const batchCreated = await this.batchRepository.insertOneFullFieldAndReturnEntity({
         oid,
-        productId: product.id,
+        productId: productCreated.id,
         costPrice: body.costPrice,
         quantity: body.quantity,
         costAmount: body.costPrice * body.quantity,
         distributorId: 0,
         expiryDate: null,
-        batchCode: '',
+        lotNumber: '',
         registeredAt: Date.now(),
         warehouseId: 0,
+        isActive: 1,
       })
+      this.socketEmitService.batchListChange(oid, { batchUpsertedList: [batchCreated] })
     }
 
-    const commissionDtoList: CommissionInsertType[] = commissionList.map((i) => {
-      const dto: CommissionInsertType = {
-        oid,
-        roleId: i.roleId,
-        commissionCalculatorType: i.commissionCalculatorType,
-        commissionValue: i.commissionValue,
-        interactId: product.id,
-        interactType: InteractType.Product,
-      }
-      return dto
-    })
-    product.commissionList =
-      await this.commissionRepository.insertManyFullFieldAndReturnEntity(commissionDtoList)
-    this.socketEmitService.productUpsert(oid, { product })
-    return { data: { product } }
+    if (positionList.length) {
+      const commissionDtoList: PositionInsertType[] = positionList.map((i) => {
+        const dto: PositionInsertType = {
+          oid,
+          roleId: i.roleId,
+          commissionCalculatorType: i.commissionCalculatorType,
+          commissionValue: i.commissionValue,
+          positionInteractId: productCreated.id,
+          positionType: PositionType.Product,
+        }
+        return dto
+      })
+      productCreated.positionList =
+        await this.positionRepository.insertManyFullFieldAndReturnEntity(commissionDtoList)
+    }
+    this.socketEmitService.productListChange(oid, { productUpsertedList: [productCreated] })
+    return { data: { product: productCreated } }
   }
 
   async updateOne(oid: number, productId: number, body: ProductUpdateBody): Promise<BaseResponse> {
-    const { commissionList, ...productBody } = body
+    const { positionList, ...productBody } = body
     const productOrigin = await this.productRepository.findOneBy({ oid, id: productId })
 
     if (productOrigin.warehouseIds !== body.warehouseIds) {
@@ -237,30 +243,30 @@ export class ApiProductService {
       throw new BusinessException(`Trùng mã sản phẩm với ${existProduct.brandName}` as any)
     }
 
-    const product = await this.productRepository.updateOneAndReturnEntity(
+    const productModified = await this.productRepository.updateOneAndReturnEntity(
       { oid, id: productId },
       productBody
     )
-    await this.commissionRepository.delete({
+    await this.positionRepository.delete({
       oid,
-      interactId: product.id,
-      interactType: InteractType.Product,
+      positionInteractId: productModified.id,
+      positionType: PositionType.Product,
     })
-    const commissionDtoList: CommissionInsertType[] = commissionList.map((i) => {
-      const dto: CommissionInsertType = {
+    const commissionDtoList: PositionInsertType[] = positionList.map((i) => {
+      const dto: PositionInsertType = {
         oid,
         roleId: i.roleId,
         commissionCalculatorType: i.commissionCalculatorType,
         commissionValue: i.commissionValue,
-        interactId: product.id,
-        interactType: InteractType.Product,
+        positionInteractId: productModified.id,
+        positionType: PositionType.Product,
       }
       return dto
     })
-    product.commissionList =
-      await this.commissionRepository.insertManyFullFieldAndReturnEntity(commissionDtoList)
-    this.socketEmitService.productUpsert(oid, { product })
-    return { data: { product } }
+    productModified.positionList =
+      await this.positionRepository.insertManyFullFieldAndReturnEntity(commissionDtoList)
+    this.socketEmitService.productListChange(oid, { productUpsertedList: [productModified] })
+    return { data: { product: productModified } }
   }
 
   async destroyOne(options: {
@@ -286,23 +292,22 @@ export class ApiProductService {
       }
     }
 
-    await Promise.allSettled([
-      this.productRepository.delete({ oid, id: productId }),
-      this.batchRepository.delete({ oid, id: productId }),
+    const [productDestroyed, batchDestroyedList] = await Promise.all([
+      this.productRepository.deleteOneAndReturnEntity({ oid, id: productId }),
+      this.batchRepository.deleteAndReturnEntity({ oid, id: productId }),
       this.productMovementRepository.delete({ oid, productId }),
     ])
 
     await this.organizationRepository.updateDataVersion(oid)
     this.cacheDataService.clearOrganization(oid)
 
+    this.socketEmitService.productListChange(oid, { productDestroyedList: [productDestroyed] })
+    this.socketEmitService.batchListChange(oid, { batchDestroyedList })
+
     return { data: { receiptItemList: [], ticketProductList: [], productId } }
   }
 
-  async mergeProduct(options: {
-    oid: number
-    userId: number
-    body: ProductMergeBody
-  }) {
+  async mergeProduct(options: { oid: number; userId: number; body: ProductMergeBody }) {
     const { oid, userId, body } = options
     const { productIdSourceList, productIdTarget } = body
     productIdSourceList.forEach((i) => {
@@ -311,15 +316,23 @@ export class ApiProductService {
       }
     })
 
-    await this.productRepository.mergeProduct({
-      oid,
-      userId,
-      productIdTarget,
-      productIdSourceList,
-    })
+    const { productModified, productDestroyedList, batchModifiedList } =
+      await this.productRepository.mergeProduct({
+        oid,
+        userId,
+        productIdTarget,
+        productIdSourceList,
+      })
 
     await this.organizationRepository.updateDataVersion(oid)
     this.cacheDataService.clearOrganization(oid)
+
+    this.socketEmitService.productListChange(oid, {
+      productUpsertedList: [productModified],
+      productDestroyedList,
+    })
+    this.socketEmitService.batchListChange(oid, { batchUpsertedList: batchModifiedList })
+
     return { data: true }
   }
 }

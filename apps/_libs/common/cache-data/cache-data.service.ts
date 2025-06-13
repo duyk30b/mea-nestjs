@@ -8,7 +8,7 @@ import { RoleRepository } from '../../database/repositories/role.repository'
 import { SettingRepository } from '../../database/repositories/setting.repository'
 import { UserRoleRepository } from '../../database/repositories/user-role.repository'
 import { UserRepository } from '../../database/repositories/user.repository'
-import { arrayToKeyValue, uniqueArray } from '../helpers/object.helper'
+import { arrayToKeyValue, uniqueArray } from '../helpers/array.helper'
 
 @Injectable()
 export class CacheDataService {

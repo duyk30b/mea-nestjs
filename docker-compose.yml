@@ -11,6 +11,8 @@ services:
     container_name: mc_api_public_local
     image: mi_local:1.0.0
     restart: unless-stopped
+    tty: true
+    stdin_open: true
     networks:
       - mn_network
     build:

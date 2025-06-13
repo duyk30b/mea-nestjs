@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import { IsArray, IsDefined, IsNumber, ValidateNested } from 'class-validator'
 import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { InteractType } from '../../../../../../_libs/database/entities/commission.entity'
+import { PositionType } from '../../../../../../_libs/database/entities/position.entity'
 
 export class TicketUserBasicBody {
   @ApiProperty({ example: 56 })
@@ -25,17 +25,17 @@ export class TicketUserBasicBody {
 }
 
 export class TicketClinicUpdateTicketUserListBody {
-  @ApiProperty({ example: InteractType.Ticket })
+  @ApiProperty({ example: PositionType.Ticket })
   @Expose()
   @IsDefined()
-  @IsEnumValue(InteractType)
-  interactType: InteractType
+  @IsEnumValue(PositionType)
+  positionType: PositionType
 
   @ApiProperty({ example: 45 })
   @Expose()
   @IsDefined()
   @IsNumber()
-  interactId: number
+  positionInteractId: number
 
   @ApiProperty({ example: 45 })
   @Expose()

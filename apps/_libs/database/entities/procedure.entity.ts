@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
-import Commission from './commission.entity'
+import Position from './position.entity'
 import ProcedureGroup from './procedure-group.entity'
 
 export enum ProcedureType {
@@ -68,7 +68,7 @@ export default class Procedure {
   procedureGroup: ProcedureGroup
 
   @Expose()
-  commissionList: Commission[]
+  positionList: Position[]
 
   static fromRaw(raw: { [P in keyof Procedure]: any }) {
     if (!raw) return null
@@ -88,7 +88,7 @@ export default class Procedure {
 }
 
 export type ProcedureRelationType = {
-  [P in keyof Pick<Procedure, 'procedureGroup' | 'commissionList'>]?: boolean
+  [P in keyof Pick<Procedure, 'procedureGroup' | 'positionList'>]?: boolean
 }
 
 export type ProcedureInsertType = Omit<

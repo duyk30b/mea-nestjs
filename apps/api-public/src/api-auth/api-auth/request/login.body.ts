@@ -29,4 +29,10 @@ export class LoginRootBody extends LoginBody {
   @IsDefined()
   @IsNumber()
   oid: number
+
+  @ApiProperty({ example: 2 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  uid: number
 }

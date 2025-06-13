@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { ESArray } from '../../../common/helpers/object.helper'
+import { ESArray } from '../../../common/helpers/array.helper'
 import { DeliveryStatus, MovementType } from '../../common/variable'
 import { ReceiptItem } from '../../entities'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
@@ -55,12 +55,12 @@ export class ReceiptSendProductOperation {
         const batchIdList = receiptItemOriginList.map((i) => i.batchId)
         const productOriginList = await this.productManager.updateAndReturnEntity(
           manager,
-          { oid, id: { IN: ESArray.uniqueArray(productIdList) } },
+          { oid, id: { IN: ESArray.uniqueArray(productIdList) }, isActive: 1 },
           { updatedAt: time }
         )
         const batchOriginList = await this.batchManager.updateAndReturnEntity(
           manager,
-          { oid, id: { IN: ESArray.uniqueArray(batchIdList) } },
+          { oid, id: { IN: ESArray.uniqueArray(batchIdList) }, isActive: 1 },
           { updatedAt: time }
         )
         const putawayContainer = this.productPutawayOperation.generatePutawayPlan({
@@ -115,7 +115,7 @@ export class ReceiptSendProductOperation {
                 productId: i.productId,
                 warehouseId: receiptItem.warehouseId,
                 distributorId: receiptItem.distributorId,
-                batchCode: receiptItem.batchCode,
+                lotNumber: receiptItem.lotNumber,
                 expiryDate: receiptItem.expiryDate,
                 costPrice: receiptItem.costPrice,
                 putawayQuantity: i.putawayQuantity,
@@ -125,7 +125,7 @@ export class ReceiptSendProductOperation {
           update: {
             warehouseId: true, // luôn luôn ghi đè
             distributorId: true, // luôn luôn ghi đè
-            batchCode: true,
+            lotNumber: true,
             expiryDate: { cast: 'bigint' }, // luôn luôn ghi đè
             costPrice: true, // luôn luôn ghi đè
             quantity: () => `"quantity" + "putawayQuantity"`,

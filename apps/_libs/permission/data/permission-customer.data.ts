@@ -1,0 +1,55 @@
+import { Permission } from '../../database/entities'
+import { PermissionId } from '../permission.enum'
+
+export const permissionCustomer: Permission[] = [
+  {
+    id: PermissionId.CUSTOMER,
+    level: 1,
+    code: PermissionId[PermissionId.CUSTOMER],
+    isActive: 1,
+    pathId: `${PermissionId.CUSTOMER}`,
+    name: 'Quản lý khách hàng',
+    parentId: 0,
+    rootId: PermissionId.CUSTOMER,
+  },
+  {
+    id: PermissionId.CUSTOMER_MENU,
+    level: 2,
+    code: PermissionId[PermissionId.CUSTOMER_MENU],
+    isActive: 1,
+    pathId: `${PermissionId.CUSTOMER}.${PermissionId.CUSTOMER_MENU}`,
+    name: 'Xem menu khách hàng',
+    parentId: PermissionId.CUSTOMER,
+    rootId: PermissionId.CUSTOMER,
+  },
+  {
+    id: PermissionId.CUSTOMER_CREATE,
+    level: 2,
+    code: PermissionId[PermissionId.CUSTOMER_CREATE],
+    isActive: 1,
+    pathId: `${PermissionId.CUSTOMER}.${PermissionId.CUSTOMER_CREATE}`,
+    name: 'Thêm khách hàng',
+    parentId: PermissionId.CUSTOMER,
+    rootId: PermissionId.CUSTOMER,
+  },
+  {
+    id: PermissionId.CUSTOMER_UPDATE,
+    level: 2,
+    code: PermissionId[PermissionId.CUSTOMER_UPDATE],
+    isActive: 1,
+    pathId: `${PermissionId.CUSTOMER}.${PermissionId.CUSTOMER_UPDATE}`,
+    name: 'Sửa khách hàng',
+    parentId: PermissionId.CUSTOMER,
+    rootId: PermissionId.CUSTOMER,
+  },
+  {
+    id: PermissionId.CUSTOMER_DELETE,
+    level: 2,
+    code: PermissionId[PermissionId.CUSTOMER_DELETE],
+    isActive: 1,
+    pathId: `${PermissionId.CUSTOMER}.${PermissionId.CUSTOMER_DELETE}`,
+    name: 'Xóa khách hàng',
+    parentId: PermissionId.CUSTOMER,
+    rootId: PermissionId.CUSTOMER,
+  },
+]

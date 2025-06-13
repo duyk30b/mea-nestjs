@@ -94,7 +94,10 @@ export class BatchRepository extends _PostgreSqlRepository<
         { batchId: batchIdTarget }
       )
 
-      return batchTargetModified
+      return {
+        batchDestroyedList: batchSourceList,
+        batchModified: batchTargetModified,
+      }
     })
   }
 }

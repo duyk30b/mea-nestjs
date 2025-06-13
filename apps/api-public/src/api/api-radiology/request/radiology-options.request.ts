@@ -14,7 +14,7 @@ export class RadiologyRelationQuery {
 
   @Expose()
   @IsBoolean()
-  commissionList: boolean
+  positionList: boolean
 }
 
 export class RadiologyFilterQuery {

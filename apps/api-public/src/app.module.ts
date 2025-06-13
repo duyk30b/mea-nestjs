@@ -11,7 +11,8 @@ import {
 } from 'nestjs-i18n'
 import * as path from 'path'
 import { CacheDataModule } from '../../_libs/common/cache-data/cache-data.module'
-import { PermissionGuard } from '../../_libs/common/guards/permission.guard'
+import { OrganizationGuard } from '../../_libs/common/guards/organization.guard'
+import { UserGuard } from '../../_libs/common/guards/user.guard.'
 import { JwtExtendModule } from '../../_libs/common/jwt-extend/jwt-extend.module'
 import { DetectClientMiddleware } from '../../_libs/common/middleware/detect-client.middleware'
 import { PostgresqlModule } from '../../_libs/database/postgresql.module'
@@ -71,7 +72,11 @@ import { SocketModule } from './socket/socket.module'
     },
     {
       provide: APP_GUARD,
-      useClass: PermissionGuard,
+      useClass: UserGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: OrganizationGuard,
     },
     AppService,
   ],

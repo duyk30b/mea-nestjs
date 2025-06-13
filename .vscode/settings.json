@@ -57,6 +57,7 @@
     "redlock",
     "taskkill",
     "typeorm",
+    "Upserted",
     "virtuals",
     "websockets",
     "zalo"

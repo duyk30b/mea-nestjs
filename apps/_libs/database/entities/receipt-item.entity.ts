@@ -32,7 +32,7 @@ export default class ReceiptItem extends BaseEntity {
 
   @Column({ type: 'varchar', length: 50, default: '' })
   @Expose()
-  batchCode: string // Số Lô sản phẩm
+  lotNumber: string // Số Lô sản phẩm
 
   @Column({
     type: 'bigint',

@@ -1,10 +1,10 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
-import { HasPermission } from '../../../../_libs/common/guards/permission.guard'
-import { IsUser } from '../../../../_libs/common/guards/user.guard.'
+import { OrganizationPermission } from '../../../../_libs/common/guards/organization.guard'
+import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../_libs/database/entities/permission.entity'
+import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiProductService } from './api-product.service'
 import {
   ProductCreateBody,
@@ -22,19 +22,19 @@ export class ApiProductController {
   constructor(private readonly apiProductService: ApiProductService) { }
 
   @Get('pagination')
-  @IsUser()
+  @OrganizationPermission(PermissionId.PRODUCT)
   pagination(@External() { oid }: TExternal, @Query() query: ProductPaginationQuery) {
     return this.apiProductService.pagination(oid, query)
   }
 
   @Get('list')
-  @IsUser()
+  @OrganizationPermission(PermissionId.PRODUCT)
   async list(@External() { oid }: TExternal, @Query() query: ProductGetManyQuery) {
     return await this.apiProductService.getList(oid, query)
   }
 
   @Get('detail/:id')
-  @IsUser()
+  @OrganizationPermission(PermissionId.PRODUCT)
   async detail(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -44,13 +44,13 @@ export class ApiProductController {
   }
 
   @Post('create')
-  @HasPermission(PermissionId.PRODUCT_CREATE)
+  @UserPermission(PermissionId.PRODUCT_CREATE)
   async create(@External() { oid }: TExternal, @Body() body: ProductCreateBody) {
     return await this.apiProductService.createOne(oid, body)
   }
 
   @Patch('update/:id')
-  @HasPermission(PermissionId.PRODUCT_UPDATE)
+  @UserPermission(PermissionId.PRODUCT_UPDATE)
   async update(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -60,15 +60,18 @@ export class ApiProductController {
   }
 
   @Delete('destroy/:id')
-  @HasPermission(PermissionId.PRODUCT_DELETE)
+  @UserPermission(PermissionId.PRODUCT_DELETE)
   @ApiParam({ name: 'id', example: 1 })
   async deleteOne(@External() { oid, organization }: TExternal, @Param() { id }: IdParam) {
     return await this.apiProductService.destroyOne({ organization, oid, productId: id })
   }
 
   @Patch('merge-product')
-  @HasPermission(PermissionId.PRODUCT_MERGE)
-  async mergeProduct(@External() { oid, uid, organization }: TExternal, @Body() body: ProductMergeBody) {
+  @UserPermission(PermissionId.PRODUCT_MERGE)
+  async mergeProduct(
+    @External() { oid, uid, organization }: TExternal,
+    @Body() body: ProductMergeBody
+  ) {
     return await this.apiProductService.mergeProduct({ oid, body, userId: uid })
   }
 }

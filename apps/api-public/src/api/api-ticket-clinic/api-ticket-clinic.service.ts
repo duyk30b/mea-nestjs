@@ -1,13 +1,13 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { arrayToKeyValue } from '../../../../_libs/common/helpers/object.helper'
+import { arrayToKeyValue } from '../../../../_libs/common/helpers/array.helper'
 import { ESTimer } from '../../../../_libs/common/helpers/time.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { DeliveryStatus } from '../../../../_libs/database/common/variable'
 import { Customer } from '../../../../_libs/database/entities'
 import { AppointmentStatus } from '../../../../_libs/database/entities/appointment.entity'
-import { InteractType } from '../../../../_libs/database/entities/commission.entity'
+import { PositionType } from '../../../../_libs/database/entities/position.entity'
 import { TicketAttributeInsertType } from '../../../../_libs/database/entities/ticket-attribute.entity'
 import { TicketRadiologyStatus } from '../../../../_libs/database/entities/ticket-radiology.entity'
 import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
@@ -124,8 +124,8 @@ export class ApiTicketClinicService {
         oid,
         ticketId: ticket.id,
         body: {
-          interactType: InteractType.Ticket,
-          interactId: 0,
+          positionType: PositionType.Ticket,
+          positionInteractId: 0,
           ticketItemId: 0,
           quantity: 1,
           ticketUserList: body.ticketUserList,
@@ -189,8 +189,8 @@ export class ApiTicketClinicService {
         oid,
         ticketId,
         body: {
-          interactType: InteractType.Ticket,
-          interactId: 0,
+          positionType: PositionType.Ticket,
+          positionInteractId: 0,
           ticketItemId: 0,
           quantity: 1,
           ticketUserList: body.ticketUserList,

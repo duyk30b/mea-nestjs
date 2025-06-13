@@ -3,10 +3,10 @@ import { BusinessException } from '../../../../_libs/common/exception-filter/exc
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import {
   CommissionCalculatorType,
-  CommissionInsertType,
-  InteractType,
-} from '../../../../_libs/database/entities/commission.entity'
-import { CommissionRepository } from '../../../../_libs/database/repositories'
+  PositionInsertType,
+  PositionType,
+} from '../../../../_libs/database/entities/position.entity'
+import { PositionRepository } from '../../../../_libs/database/repositories'
 import { ProcedureRepository } from '../../../../_libs/database/repositories/procedure.repository'
 import { TicketProcedureRepository } from '../../../../_libs/database/repositories/ticket-procedure.repository'
 import {
@@ -21,7 +21,7 @@ import {
 export class ApiProcedureService {
   constructor(
     private readonly procedureRepository: ProcedureRepository,
-    private readonly commissionRepository: CommissionRepository,
+    private readonly positionRepository: PositionRepository,
     private readonly ticketProcedureRepository: TicketProcedureRepository
   ) { }
 
@@ -69,19 +69,19 @@ export class ApiProcedureService {
       condition: { oid, id },
     })
     if (!procedure) throw new BusinessException('error.Database.NotFound')
-    if (query?.relation?.commissionList) {
-      procedure.commissionList = await this.commissionRepository.findManyBy({
+    if (query?.relation?.positionList) {
+      procedure.positionList = await this.positionRepository.findManyBy({
         oid,
-        interactType: InteractType.Procedure,
-        interactId: procedure.id,
+        positionType: PositionType.Procedure,
+        positionInteractId: procedure.id,
       })
     }
     return { data: { procedure } }
   }
 
   async createOne(oid: number, body: ProcedureCreateBody): Promise<BaseResponse> {
-    const { commissionList, ...procedureBody } = body
-    commissionList.forEach((i) => {
+    const { positionList, ...procedureBody } = body
+    positionList.forEach((i) => {
       if (
         i.commissionCalculatorType === CommissionCalculatorType.PercentExpected
         || i.commissionCalculatorType === CommissionCalculatorType.PercentActual
@@ -96,25 +96,25 @@ export class ApiProcedureService {
       ...procedureBody,
     })
 
-    const commissionDtoList: CommissionInsertType[] = commissionList.map((i) => {
-      const dto: CommissionInsertType = {
+    const positionDtoList: PositionInsertType[] = positionList.map((i) => {
+      const dto: PositionInsertType = {
         oid,
         roleId: i.roleId,
         commissionCalculatorType: i.commissionCalculatorType,
         commissionValue: i.commissionValue,
-        interactId: procedure.id,
-        interactType: InteractType.Procedure,
+        positionInteractId: procedure.id,
+        positionType: PositionType.Procedure,
       }
       return dto
     })
-    procedure.commissionList =
-      await this.commissionRepository.insertManyFullFieldAndReturnEntity(commissionDtoList)
+    procedure.positionList =
+      await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
     return { data: { procedure } }
   }
 
   async updateOne(oid: number, id: number, body: ProcedureUpdateBody): Promise<BaseResponse> {
-    const { commissionList, ...procedureBody } = body
-    commissionList.forEach((i) => {
+    const { positionList, ...procedureBody } = body
+    positionList.forEach((i) => {
       if (
         i.commissionCalculatorType === CommissionCalculatorType.PercentExpected
         || i.commissionCalculatorType === CommissionCalculatorType.PercentActual
@@ -129,24 +129,24 @@ export class ApiProcedureService {
       procedureBody
     )
     if (!procedure) throw new BusinessException('error.Database.UpdateFailed')
-    await this.commissionRepository.delete({
+    await this.positionRepository.delete({
       oid,
-      interactId: procedure.id,
-      interactType: InteractType.Procedure,
+      positionInteractId: procedure.id,
+      positionType: PositionType.Procedure,
     })
-    const commissionDtoList: CommissionInsertType[] = commissionList.map((i) => {
-      const dto: CommissionInsertType = {
+    const positionDtoList: PositionInsertType[] = positionList.map((i) => {
+      const dto: PositionInsertType = {
         oid,
         roleId: i.roleId,
         commissionCalculatorType: i.commissionCalculatorType,
         commissionValue: i.commissionValue,
-        interactId: procedure.id,
-        interactType: InteractType.Procedure,
+        positionInteractId: procedure.id,
+        positionType: PositionType.Procedure,
       }
       return dto
     })
-    procedure.commissionList =
-      await this.commissionRepository.insertManyFullFieldAndReturnEntity(commissionDtoList)
+    procedure.positionList =
+      await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
     return { data: { procedure } }
   }
 
@@ -162,10 +162,10 @@ export class ApiProcedureService {
       }
     }
 
-    await this.commissionRepository.delete({
+    await this.positionRepository.delete({
       oid,
-      interactId: procedureId,
-      interactType: InteractType.Radiology,
+      positionInteractId: procedureId,
+      positionType: PositionType.Radiology,
     })
     const affected = await this.procedureRepository.delete({ oid, id: procedureId })
     if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')

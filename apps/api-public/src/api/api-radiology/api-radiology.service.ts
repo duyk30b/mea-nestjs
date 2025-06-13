@@ -3,12 +3,12 @@ import { BusinessException } from '../../../../_libs/common/exception-filter/exc
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import {
   CommissionCalculatorType,
-  CommissionInsertType,
-  InteractType,
-} from '../../../../_libs/database/entities/commission.entity'
+  PositionInsertType,
+  PositionType,
+} from '../../../../_libs/database/entities/position.entity'
 import { RadiologyInsertType } from '../../../../_libs/database/entities/radiology.entity'
 import {
-  CommissionRepository,
+  PositionRepository,
   RadiologyRepository,
   TicketRadiologyRepository,
 } from '../../../../_libs/database/repositories'
@@ -24,7 +24,7 @@ import {
 export class ApiRadiologyService {
   constructor(
     private readonly radiologyRepository: RadiologyRepository,
-    private readonly commissionRepository: CommissionRepository,
+    private readonly positionRepository: PositionRepository,
     private readonly ticketRadiologyRepository: TicketRadiologyRepository
   ) { }
 
@@ -79,19 +79,19 @@ export class ApiRadiologyService {
       condition: { oid, id },
     })
     if (!radiology) throw new BusinessException('error.Database.NotFound')
-    if (query?.relation?.commissionList) {
-      radiology.commissionList = await this.commissionRepository.findManyBy({
+    if (query?.relation?.positionList) {
+      radiology.positionList = await this.positionRepository.findManyBy({
         oid,
-        interactType: InteractType.Radiology,
-        interactId: radiology.id,
+        positionType: PositionType.Radiology,
+        positionInteractId: radiology.id,
       })
     }
     return { data: { radiology } }
   }
 
   async createOne(oid: number, body: RadiologyUpsertBody): Promise<BaseResponse> {
-    const { commissionList, ...radiologyBody } = body
-    commissionList.forEach((i) => {
+    const { positionList, ...radiologyBody } = body
+    positionList.forEach((i) => {
       if (
         i.commissionCalculatorType === CommissionCalculatorType.PercentExpected
         || i.commissionCalculatorType === CommissionCalculatorType.PercentActual
@@ -101,14 +101,14 @@ export class ApiRadiologyService {
         }
       }
     })
-    const commissionDtoList: CommissionInsertType[] = commissionList.map((i) => {
-      const dto: CommissionInsertType = {
+    const positionDtoList: PositionInsertType[] = positionList.map((i) => {
+      const dto: PositionInsertType = {
         oid,
         roleId: i.roleId,
         commissionCalculatorType: i.commissionCalculatorType,
         commissionValue: i.commissionValue,
-        interactId: radiology.id,
-        interactType: InteractType.Radiology,
+        positionInteractId: radiology.id,
+        positionType: PositionType.Radiology,
       }
       return dto
     })
@@ -116,14 +116,14 @@ export class ApiRadiologyService {
       oid,
       ...radiologyBody,
     })
-    radiology.commissionList =
-      await this.commissionRepository.insertManyFullFieldAndReturnEntity(commissionDtoList)
+    radiology.positionList =
+      await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
     return { data: { radiology } }
   }
 
   async updateOne(oid: number, id: number, body: RadiologyUpsertBody): Promise<BaseResponse> {
-    const { commissionList, ...radiologyBody } = body
-    commissionList.forEach((i) => {
+    const { positionList, ...radiologyBody } = body
+    positionList.forEach((i) => {
       if (
         i.commissionCalculatorType === CommissionCalculatorType.PercentExpected
         || i.commissionCalculatorType === CommissionCalculatorType.PercentActual
@@ -138,24 +138,24 @@ export class ApiRadiologyService {
       radiologyBody
     )
     if (!radiology) throw new BusinessException('error.Database.UpdateFailed')
-    await this.commissionRepository.delete({
+    await this.positionRepository.delete({
       oid,
-      interactId: radiology.id,
-      interactType: InteractType.Radiology,
+      positionInteractId: radiology.id,
+      positionType: PositionType.Radiology,
     })
-    const commissionDtoList: CommissionInsertType[] = commissionList.map((i) => {
-      const dto: CommissionInsertType = {
+    const positionDtoList: PositionInsertType[] = positionList.map((i) => {
+      const dto: PositionInsertType = {
         oid,
         roleId: i.roleId,
         commissionCalculatorType: i.commissionCalculatorType,
         commissionValue: i.commissionValue,
-        interactId: radiology.id,
-        interactType: InteractType.Radiology,
+        positionInteractId: radiology.id,
+        positionType: PositionType.Radiology,
       }
       return dto
     })
-    radiology.commissionList =
-      await this.commissionRepository.insertManyFullFieldAndReturnEntity(commissionDtoList)
+    radiology.positionList =
+      await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
     return { data: { radiology } }
   }
 
@@ -171,10 +171,10 @@ export class ApiRadiologyService {
       }
     }
 
-    await this.commissionRepository.delete({
+    await this.positionRepository.delete({
       oid,
-      interactId: radiologyId,
-      interactType: InteractType.Radiology,
+      positionInteractId: radiologyId,
+      positionType: PositionType.Radiology,
     })
     const affected = await this.radiologyRepository.delete({ oid, id: radiologyId })
     if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
