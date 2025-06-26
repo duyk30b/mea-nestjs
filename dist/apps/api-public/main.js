@@ -54764,9 +54764,16 @@ __decorate([
     (0, class_validator_1.IsArray)(),
     __metadata("design:type", Array)
 ], UserCreateBody.prototype, "roleIdList", void 0);
-class UserUpdateBody extends UserCreateBody {
+class UserUpdateBody extends (0, swagger_1.OmitType)(UserCreateBody, ['password']) {
 }
 exports.UserUpdateBody = UserUpdateBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Abc@123456' }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.MinLength)(6),
+    __metadata("design:type", String)
+], UserUpdateBody.prototype, "password", void 0);
 
 
 /***/ }),

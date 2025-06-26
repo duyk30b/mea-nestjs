@@ -6,6 +6,7 @@ import {
   IsIn,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   MinLength,
   Validate,
@@ -60,5 +61,10 @@ export class UserCreateBody {
   roleIdList: number[]
 }
 
-// export class UserUpdateBody extends OmitType(UserCreateBody, ['username', 'password']) { }
-export class UserUpdateBody extends UserCreateBody { }
+export class UserUpdateBody extends OmitType(UserCreateBody, ['password']) {
+  @ApiProperty({ example: 'Abc@123456' })
+  @Expose()
+  @IsOptional()
+  @MinLength(6)
+  password: string
+}
