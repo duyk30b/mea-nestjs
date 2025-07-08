@@ -51,6 +51,7 @@ export class PrettySqlLogger implements Logger {
   }
 
   logQuery(query: string, parameters?: any[], _queryRunner?: QueryRunner) {
+    if (process.env.NODE_ENV === 'production') return
     let executeQuery = query
     if (parameters?.length) {
       if (this.paramType === 'PrepareExecute') {

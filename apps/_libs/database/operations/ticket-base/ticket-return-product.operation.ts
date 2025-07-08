@@ -218,7 +218,7 @@ export class TicketReturnProductOperation {
         },
         options: { requireEqualLength: true },
       })
-      const batchMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')
+      const batchModifiedMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')
 
       // 6. === CREATE: PRODUCT_MOVEMENT ===
       const productMovementInsertList = putawayContainer.putawayMovementList.map((paMovement) => {
@@ -309,6 +309,7 @@ export class TicketReturnProductOperation {
       return {
         ticket,
         productModifiedList,
+        batchModifiedList,
         ticketProductModifiedList,
         ticketUserModifiedList,
       }

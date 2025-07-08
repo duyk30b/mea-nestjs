@@ -29,6 +29,7 @@ import { ApiStatisticModule } from './api-statistics/api-statistic.module'
 import { ApiStockCheckModule } from './api-stock-check/api-stock-check.module'
 import { ApiTicketBatchModule } from './api-ticket-batch/api-ticket-batch.module'
 import { ApiTicketClinicModule } from './api-ticket-clinic/api-ticket-clinic.module'
+import { ApiTicketLaboratoryGroupModule } from './api-ticket-laboratory-group/api-ticket-laboratory-group.module'
 import { ApiTicketLaboratoryModule } from './api-ticket-laboratory/api-ticket-laboratory.module'
 import { ApiTicketOrderModule } from './api-ticket-order/api-ticket-order.module'
 import { ApiTicketProcedureModule } from './api-ticket-procedure/api-ticket-procedure.module'
@@ -81,6 +82,7 @@ import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
     ApiTicketBatchModule,
     ApiTicketClinicModule,
     ApiTicketLaboratoryModule,
+    ApiTicketLaboratoryGroupModule,
     ApiTicketRadiologyModule,
     ApiPaymentMethodModule,
 

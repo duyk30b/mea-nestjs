@@ -3,11 +3,14 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } 
 import { TicketLaboratoryStatus } from '../common/variable'
 import Customer from './customer.entity'
 import LaboratoryGroup from './laboratory-group.entity'
+import TicketLaboratoryResult from './ticket-laboratory-result.entity'
+import TicketLaboratory from './ticket-laboratory.entity'
+import TicketUser from './ticket-user.entity'
 import Ticket from './ticket.entity'
 
 @Entity('TicketLaboratoryGroup')
 @Index('IDX_TicketLaboratoryGroup__oid_ticketId', ['oid', 'ticketId'])
-@Index('IDX_TicketLaboratoryGroup__oid_startedAt', ['oid', 'startedAt'])
+@Index('IDX_TicketLaboratoryGroup__oid_registeredAt', ['oid', 'registeredAt'])
 export default class TicketLaboratoryGroup {
   @Column({ name: 'oid' })
   @Exclude()
@@ -76,6 +79,15 @@ export default class TicketLaboratoryGroup {
   @JoinColumn({ name: 'laboratoryGroupId', referencedColumnName: 'id' })
   laboratoryGroup: LaboratoryGroup
 
+  @Expose()
+  ticketUserList: TicketUser[]
+
+  @Expose()
+  ticketLaboratoryList: TicketLaboratory[]
+
+  @Expose()
+  ticketLaboratoryResultMap: Record<string, TicketLaboratoryResult>
+
   static fromRaw(raw: { [P in keyof TicketLaboratoryGroup]: any }) {
     if (!raw) return null
     const entity = new TicketLaboratoryGroup()
@@ -92,7 +104,15 @@ export default class TicketLaboratoryGroup {
 }
 
 export type TicketLaboratoryGroupRelationType = {
-  [P in keyof Pick<TicketLaboratoryGroup, 'ticket' | 'customer' | 'laboratoryGroup'>]?: boolean
+  [P in keyof Pick<
+    TicketLaboratoryGroup,
+    | 'ticket'
+    | 'customer'
+    | 'laboratoryGroup'
+    | 'ticketUserList'
+    | 'ticketLaboratoryList'
+    | 'ticketLaboratoryResultMap'
+  >]?: boolean
 }
 
 export type TicketLaboratoryGroupInsertType = Omit<

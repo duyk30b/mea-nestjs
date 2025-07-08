@@ -62,7 +62,7 @@ export const permissionLaboratory: Permission[] = [
     parentId: PermissionId.LABORATORY,
     rootId: PermissionId.LABORATORY,
   },
-    {
+  {
     id: PermissionId.LABORATORY_SAMPLE_CRUD,
     level: 2,
     code: PermissionId[PermissionId.LABORATORY_SAMPLE_CRUD],
@@ -72,7 +72,17 @@ export const permissionLaboratory: Permission[] = [
     parentId: PermissionId.LABORATORY,
     rootId: PermissionId.LABORATORY,
   },
-    {
+  {
+    id: PermissionId.LABORATORY_ROOM_MENU,
+    level: 2,
+    code: PermissionId[PermissionId.LABORATORY_ROOM_MENU],
+    isActive: 1,
+    pathId: `${PermissionId.LABORATORY}.${PermissionId.LABORATORY_ROOM_MENU}`,
+    name: 'Hiện menu phòng xét nghiệm',
+    parentId: PermissionId.LABORATORY,
+    rootId: PermissionId.LABORATORY,
+  },
+  {
     id: PermissionId.LABORATORY_RESULT,
     level: 2,
     code: PermissionId[PermissionId.LABORATORY_RESULT],

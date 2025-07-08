@@ -12,6 +12,12 @@ export class TicketClinicAddTicketRadiologyBody {
   @IsNumber()
   priority: number
 
+  @ApiProperty({ example: Date.now() })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  registeredAt: number
+
   @ApiProperty({ example: 56 })
   @Expose()
   @IsDefined()

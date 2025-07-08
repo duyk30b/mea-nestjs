@@ -4,7 +4,12 @@ import { IdParam } from '../../../../_libs/common/dto'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/permission/permission.enum'
-import { TicketPaymentMoneyBody, TicketReturnProductListBody } from '../api-ticket/request'
+import {
+  TicketPaymentMoneyBody,
+  TicketReturnProductListBody,
+  TicketSendProductAndPaymentBody,
+  TicketSendProductListBody,
+} from '../api-ticket/request'
 import { ApiTicketOrderService } from './api-ticket-order.service'
 import {
   TicketOrderDebtSuccessInsertBody,
@@ -109,7 +114,7 @@ export class ApiTicketOrderController {
   async sendProductAndPaymentAndClose(
     @External() { oid, uid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: TicketPaymentMoneyBody
+    @Body() body: TicketSendProductAndPaymentBody
   ) {
     return await this.apiTicketOrderService.sendProductAndPaymentAndClose({
       oid,
@@ -131,10 +136,15 @@ export class ApiTicketOrderController {
 
   @Post('/:id/send-product')
   @UserPermission(PermissionId.TICKET_ORDER_SEND_PRODUCT)
-  async sendProduct(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+  async sendProduct(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam,
+    @Body() body: TicketSendProductListBody
+  ) {
     return await this.apiTicketOrderService.sendProduct({
       oid,
       ticketId: id,
+      body,
     })
   }
 

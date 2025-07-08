@@ -16,7 +16,7 @@ export enum TicketRadiologyStatus {
 @Entity('TicketRadiology')
 @Index('IDX_TicketRadiology__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketRadiology__oid_radiologyId', ['oid', 'radiologyId'])
-@Index('IDX_TicketRadiology__oid_startedAt', ['oid', 'startedAt'])
+@Index('IDX_TicketRadiology__oid_registeredAt', ['oid', 'registeredAt'])
 export default class TicketRadiology extends BaseEntity {
   @Column()
   @Expose()
@@ -83,6 +83,18 @@ export default class TicketRadiology extends BaseEntity {
   })
   @Expose()
   actualPrice: number // Giá thực tế
+
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    default: 0,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  registeredAt: number
 
   @Column({
     type: 'bigint',
@@ -178,6 +190,6 @@ export type TicketRadiologyUpdateType = {
 export type TicketRadiologySortType = {
   [P in keyof Pick<
     TicketRadiology,
-    'id' | 'ticketId' | 'radiologyId' | 'startedAt' | 'priority'
+    'id' | 'ticketId' | 'radiologyId' | 'startedAt' | 'registeredAt' | 'priority'
   >]?: 'ASC' | 'DESC'
 }

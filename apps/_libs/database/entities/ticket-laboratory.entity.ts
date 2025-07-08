@@ -4,6 +4,7 @@ import { BaseEntity } from '../common/base.entity'
 import { DiscountType, TicketLaboratoryStatus } from '../common/variable'
 import Customer from './customer.entity'
 import Laboratory from './laboratory.entity'
+import TicketLaboratoryResult from './ticket-laboratory-result.entity'
 import TicketUser from './ticket-user.entity'
 import Ticket from './ticket.entity'
 

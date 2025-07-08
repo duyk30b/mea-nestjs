@@ -87,7 +87,7 @@ export class TicketRefundOverpaidOperation {
 
       const payment = await this.paymentManager.insertOneAndReturnEntity(manager, paymentInsert)
 
-      return { ticket, payment }
+      return { ticket, payment, customer }
     })
   }
 }

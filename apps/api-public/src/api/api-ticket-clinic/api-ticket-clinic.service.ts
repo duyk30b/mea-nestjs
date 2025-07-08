@@ -76,7 +76,20 @@ export class ApiTicketClinicService {
     }
     if (!customer) throw new BusinessException('error.SystemError')
 
-    const countToday = await this.ticketRepository.countToday(oid)
+    const ticketListToday = await this.ticketRepository.findManyBy({
+      oid,
+      registeredAt: {
+        GTE: ESTimer.startOfDate(registeredAt, 7).getTime(),
+        LTE: ESTimer.endOfDate(registeredAt, 7).getTime(),
+      },
+    })
+    let maxDailyIndex = 0
+    ticketListToday.forEach((i) => {
+      if (i.dailyIndex > maxDailyIndex) {
+        maxDailyIndex = i.dailyIndex
+      }
+    })
+
     const ticket = await this.ticketRepository.insertOneAndReturnEntity({
       oid,
       customerId: customer.id,
@@ -87,7 +100,7 @@ export class ApiTicketClinicService {
       customerSourceId: body.ticketInformation.customerSourceId,
       customType: body.ticketInformation.customType,
 
-      dailyIndex: countToday + 1,
+      dailyIndex: maxDailyIndex + 1,
       year: ESTimer.info(registeredAt, 7).year,
       month: ESTimer.info(registeredAt, 7).month + 1,
       date: ESTimer.info(registeredAt, 7).date,
@@ -347,7 +360,7 @@ export class ApiTicketClinicService {
   }) {
     const { oid, userId, ticketId, body } = params
     try {
-      const { ticket, customer } = await this.ticketPayDebtOperation.payDebt({
+      const payDebtResult = await this.ticketPayDebtOperation.payDebt({
         oid,
         cashierId: userId,
         ticketId,
@@ -356,11 +369,14 @@ export class ApiTicketClinicService {
         paymentMethodId: body.paymentMethodId,
         note: body.note,
       })
-      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
-      if (customer) {
-        this.socketEmitService.customerUpsert(oid, { customer })
+      this.socketEmitService.ticketClinicChange(oid, {
+        type: 'UPDATE',
+        ticket: payDebtResult.ticket,
+      })
+      if (payDebtResult.customer) {
+        this.socketEmitService.customerUpsert(oid, { customer: payDebtResult.customer })
       }
-      return { data: { ticket } }
+      return { data: { ticket: payDebtResult.ticket } }
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
@@ -382,7 +398,7 @@ export class ApiTicketClinicService {
       })
       this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
 
-      return { data: true }
+      return { data: { ticket } }
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
@@ -391,7 +407,7 @@ export class ApiTicketClinicService {
   async close(params: { oid: number; userId: number; ticketId: number }) {
     const { oid, userId, ticketId } = params
     try {
-      const result = await this.ticketPaymentAndCloseOperation.paymentAndClose({
+      const closeResult = await this.ticketPaymentAndCloseOperation.paymentAndClose({
         oid,
         cashierId: userId,
         ticketId,
@@ -401,18 +417,18 @@ export class ApiTicketClinicService {
         note: '',
       })
 
-      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket: result.ticket })
-      if (result.customer) {
-        this.socketEmitService.customerUpsert(oid, { customer: result.customer })
+      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket: closeResult.ticket })
+      if (closeResult.customer) {
+        this.socketEmitService.customerUpsert(oid, { customer: closeResult.customer })
       }
-      if (result.ticketUserDeletedList || result.ticketUserModifiedList) {
+      if (closeResult.ticketUserDeletedList || closeResult.ticketUserModifiedList) {
         this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
           ticketId,
-          ticketUserDestroyList: result.ticketUserDeletedList,
-          ticketUserUpsertList: [...result.ticketUserModifiedList],
+          ticketUserDestroyList: closeResult.ticketUserDeletedList,
+          ticketUserUpsertList: [...closeResult.ticketUserModifiedList],
         })
       }
-      return { data: { ticket: result.ticket } }
+      return { data: { ticket: closeResult.ticket } }
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
@@ -421,7 +437,7 @@ export class ApiTicketClinicService {
   async reopen(params: { oid: number; userId: number; ticketId: number }) {
     const { oid, userId, ticketId } = params
     try {
-      const { ticket, customer } = await this.ticketReopenOperation.reopen({
+      const reopenResult = await this.ticketReopenOperation.reopen({
         oid,
         cashierId: userId,
         ticketId,
@@ -432,11 +448,14 @@ export class ApiTicketClinicService {
         newPaid: null,
       })
 
-      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket })
-      if (customer) {
-        this.socketEmitService.customerUpsert(oid, { customer })
+      this.socketEmitService.ticketClinicChange(oid, {
+        type: 'UPDATE',
+        ticket: reopenResult.ticket,
+      })
+      if (reopenResult.customer) {
+        this.socketEmitService.customerUpsert(oid, { customer: reopenResult.customer })
       }
-      return { data: { ticket } }
+      return { data: { ticket: reopenResult.ticket } }
     } catch (error) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }

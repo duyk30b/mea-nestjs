@@ -1,39 +1,60 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { arrayToKeyValue } from '../../../../_libs/common/helpers/array.helper'
+import { arrayToKeyValue, ESArray } from '../../../../_libs/common/helpers/array.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
-import { Image } from '../../../../_libs/database/entities'
+import {
+  Customer,
+  Image,
+  Ticket,
+  TicketRadiology,
+  TicketUser,
+} from '../../../../_libs/database/entities'
+import { PositionType } from '../../../../_libs/database/entities/position.entity'
+import {
+  CustomerRepository,
+  TicketRepository,
+  TicketUserRepository,
+} from '../../../../_libs/database/repositories'
 import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
 import { TicketRadiologyRepository } from '../../../../_libs/database/repositories/ticket-radiology.repository'
 import {
   TicketRadiologyGetOneQuery,
   TicketRadiologyPaginationQuery,
+  TicketRadiologyRelationQuery,
 } from './request'
 
 @Injectable()
 export class ApiTicketRadiologyService {
   constructor(
     private readonly ticketRadiologyRepository: TicketRadiologyRepository,
+    private readonly customerRepository: CustomerRepository,
+    private readonly ticketUserRepository: TicketUserRepository,
+    private readonly ticketRepository: TicketRepository,
     private readonly imageRepository: ImageRepository
   ) { }
 
   async pagination(oid: number, query: TicketRadiologyPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, relation, sort } = query
-    const { imageList, ...relationEntity } = relation // chưa xử lý imageList
 
     const { total, data } = await this.ticketRadiologyRepository.pagination({
-      relation: relationEntity,
       page,
       limit,
       condition: {
         oid,
         customerId: filter?.customerId,
+        status: filter?.status,
         radiologyId: filter?.radiologyId,
         ticketId: filter?.ticketId,
         startedAt: filter?.startedAt,
+        registeredAt: filter?.registeredAt,
       },
       sort,
     })
+
+    if (query.relation) {
+      // chưa xử lý imageList
+      await this.generateRelation(data, query.relation)
+    }
 
     return {
       data,
@@ -44,11 +65,15 @@ export class ApiTicketRadiologyService {
   async getOne(oid: number, id: number, query: TicketRadiologyGetOneQuery): Promise<BaseResponse> {
     const { imageList, ...relationEntity } = query.relation
     const ticketRadiology = await this.ticketRadiologyRepository.findOne({
-      relation: relationEntity,
+      // relation: relationEntity,
       condition: { oid, id },
     })
     if (!ticketRadiology) {
       throw new BusinessException('error.Database.NotFound')
+    }
+
+    if (query.relation) {
+      await this.generateRelation([ticketRadiology], query.relation)
     }
 
     if (imageList) {
@@ -65,5 +90,45 @@ export class ApiTicketRadiologyService {
     }
 
     return { data: { ticketRadiology } }
+  }
+
+  async generateRelation(
+    ticketRadiologyList: TicketRadiology[],
+    relation: TicketRadiologyRelationQuery
+  ) {
+    const ticketRadiologyIdList = ESArray.uniqueArray(ticketRadiologyList.map((i) => i.id))
+    const customerIdList = ESArray.uniqueArray(ticketRadiologyList.map((i) => i.customerId))
+    const ticketIdList = ESArray.uniqueArray(ticketRadiologyList.map((i) => i.ticketId))
+
+    const [ticketList, customerList, ticketUserList] = await Promise.all([
+      relation?.ticket && ticketIdList.length
+        ? this.ticketRepository.findManyBy({ id: { IN: ticketIdList } })
+        : <Ticket[]>[],
+      relation?.customer && customerIdList.length
+        ? this.customerRepository.findManyBy({ id: { IN: customerIdList } })
+        : <Customer[]>[],
+
+      relation?.ticketUserList && ticketIdList.length && ticketRadiologyIdList.length
+        ? this.ticketUserRepository.findMany({
+          condition: {
+            ticketId: { IN: ticketIdList },
+            positionType: PositionType.Radiology,
+            ticketItemId: { IN: ticketRadiologyIdList },
+          },
+          sort: { id: 'ASC' },
+        })
+        : <TicketUser[]>[],
+    ])
+
+    ticketRadiologyList.forEach((tr: TicketRadiology) => {
+      tr.ticket = ticketList.find((t) => t.id === tr.ticketId)
+      tr.customer = customerList.find((c) => c.id === tr.customerId)
+
+      if (relation.ticketUserList) {
+        tr.ticketUserList = ticketUserList.filter((tu) => tu.ticketItemId === tr.id)
+      }
+    })
+
+    return ticketRadiologyList
   }
 }

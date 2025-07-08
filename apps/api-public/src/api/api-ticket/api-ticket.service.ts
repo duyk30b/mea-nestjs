@@ -177,7 +177,7 @@ export class ApiTicketService {
       relation?.ticketLaboratoryGroupList
         ? this.ticketLaboratoryGroupRepository.findMany({
           condition: { oid, ticketId },
-          sort: { registeredAt: 'ASC' },
+          sort: { id: 'ASC' },
           relation: {
             laboratoryGroup: relation?.ticketLaboratoryGroupList?.laboratoryGroup,
           },

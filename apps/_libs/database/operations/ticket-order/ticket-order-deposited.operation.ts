@@ -127,7 +127,10 @@ export class TicketOrderDepositedOperation {
           }
           return ticketProduct
         })
-        await this.ticketProductManager.insertMany(manager, ticketProductListInsert)
+        ticket.ticketProductList = await this.ticketProductManager.insertManyAndReturnEntity(
+          manager,
+          ticketProductListInsert
+        )
       }
 
       if (ticketOrderProcedureDraftListDto.length) {
@@ -144,7 +147,10 @@ export class TicketOrderDepositedOperation {
           }
           return ticketProcedure
         })
-        await this.ticketProcedureManager.insertMany(manager, ticketProcedureListInsert)
+        ticket.ticketProcedureList = await this.ticketProcedureManager.insertManyAndReturnEntity(
+          manager,
+          ticketProcedureListInsert
+        )
       }
 
       if (ticketOrderSurchargeDraftListDto.length) {

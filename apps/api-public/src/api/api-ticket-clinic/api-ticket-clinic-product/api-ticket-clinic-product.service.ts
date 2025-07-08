@@ -12,7 +12,7 @@ import {
 } from '../../../../../_libs/database/operations'
 import { TicketProductRepository } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
-import { TicketReturnProductListBody } from '../../api-ticket/request'
+import { TicketReturnProductListBody, TicketSendProductListBody } from '../../api-ticket/request'
 import { ApiTicketClinicUserService } from '../api-ticket-clinic-user/api-ticket-clinic-user.service'
 import {
   TicketClinicAddTicketProductListBody,
@@ -185,14 +185,19 @@ export class ApiTicketClinicProductService {
     return { data: true }
   }
 
-  async sendProduct(params: { oid: number; ticketId: number }): Promise<BaseResponse> {
-    const { oid, ticketId } = params
+  async sendProduct(params: {
+    oid: number
+    ticketId: number
+    body: TicketSendProductListBody
+  }): Promise<BaseResponse> {
+    const { oid, ticketId, body } = params
     const time = Date.now()
 
     const allowNegativeQuantity = await this.cacheDataService.getSettingAllowNegativeQuantity(oid)
-    const sendProductResult = await this.ticketSendProductOperation.sendAllProduct({
+    const sendProductResult = await this.ticketSendProductOperation.sendProduct({
       oid,
       ticketId,
+      ticketProductIdList: body.ticketProductIdList,
       time,
       allowNegativeQuantity,
     })
@@ -205,6 +210,9 @@ export class ApiTicketClinicProductService {
     if (sendProductResult.productModifiedList) {
       this.socketEmitService.productListChange(oid, {
         productUpsertedList: sendProductResult.productModifiedList,
+      })
+      this.socketEmitService.batchListChange(oid, {
+        batchUpsertedList: sendProductResult.batchModifiedList,
       })
     }
     if (sendProductResult.ticketProductModifiedList) {
@@ -232,22 +240,29 @@ export class ApiTicketClinicProductService {
   }): Promise<BaseResponse> {
     const { oid, ticketId, body } = params
     try {
-      const result = await this.ticketReturnProductOperation.returnProduct({
+      const returnProductResult = await this.ticketReturnProductOperation.returnProduct({
         oid,
         ticketId,
         time: Date.now(),
         returnList: body.returnList,
       })
 
-      this.socketEmitService.productListChange(oid, { productUpsertedList: result.productModifiedList })
-      this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket: result.ticket })
+      this.socketEmitService.productListChange(oid, {
+        productUpsertedList: returnProductResult.productModifiedList || [],
+      })
+      this.socketEmitService.batchListChange(oid, {
+        batchUpsertedList: returnProductResult.batchModifiedList || [],
+      })
 
-      if (result.ticketUserModifiedList) {
-        this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
-          ticketId,
-          ticketUserUpsertList: result.ticketUserModifiedList,
-        })
-      }
+      this.socketEmitService.ticketClinicChange(oid, {
+        type: 'UPDATE',
+        ticket: returnProductResult.ticket,
+      })
+
+      this.socketEmitService.ticketClinicChangeTicketUserList(oid, {
+        ticketId,
+        ticketUserUpsertList: returnProductResult.ticketUserModifiedList || [],
+      })
 
       const [ticketProductList] = await Promise.all([
         this.ticketProductRepository.findMany({
@@ -268,7 +283,7 @@ export class ApiTicketClinicProductService {
         }),
       })
 
-      return { data: { ticket: result.ticket } }
+      return { data: { ticket: returnProductResult.ticket } }
     } catch (error: any) {
       throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }

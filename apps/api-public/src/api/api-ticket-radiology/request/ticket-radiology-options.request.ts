@@ -1,14 +1,13 @@
-import { Expose, Type } from 'class-transformer'
+import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
 import { IsBoolean, IsIn, IsInt, IsOptional, ValidateNested } from 'class-validator'
-import { ConditionTimestamp } from '../../../../../_libs/common/dto'
+import { ConditionTimestamp, createConditionEnum, transformConditionEnum } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
+import { TicketRadiologyStatus } from '../../../../../_libs/database/entities/ticket-radiology.entity'
 
 export class TicketRadiologyRelationQuery {
   @Expose()
   @IsOptional()
-  radiology:
-    | { radiologyGroup?: boolean; printHtml?: boolean }
-    | false
+  radiology: { radiologyGroup?: boolean; printHtml?: boolean } | false
 
   @Expose()
   @IsBoolean()
@@ -27,7 +26,14 @@ export class TicketRadiologyRelationQuery {
   imageList: boolean
 }
 
+const ConditionEnumTicketRadiologyStatus = createConditionEnum(TicketRadiologyStatus)
+
 export class TicketRadiologyFilterQuery {
+  @Expose()
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketRadiologyStatus))
+  @IsOptional()
+  status: TicketRadiologyStatus | InstanceType<typeof ConditionEnumTicketRadiologyStatus>
+
   @Expose()
   @IsInt()
   radiologyId: number
@@ -44,10 +50,19 @@ export class TicketRadiologyFilterQuery {
   @Type(() => ConditionTimestamp)
   @ValidateNested({ each: true })
   startedAt: ConditionTimestamp
+
+  @Expose()
+  @Type(() => ConditionTimestamp)
+  @ValidateNested({ each: true })
+  registeredAt: ConditionTimestamp
 }
 
 export class TicketRadiologySortQuery extends SortQuery {
   @Expose()
   @IsIn(['ASC', 'DESC'])
   startedAt: 'ASC' | 'DESC'
+
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  registeredAt: 'ASC' | 'DESC'
 }
