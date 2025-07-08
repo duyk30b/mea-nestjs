@@ -21,15 +21,12 @@ export class ApiFileCustomerDownloadExcel {
       orgPhone: organization.phone,
       orgAddress: [
         organization.addressWard,
-        organization.addressDistrict,
         organization.addressProvince,
       ]
         .filter((i) => !!i)
         .join(' - ')
         .replace('Tỉnh', '')
         .replace('Thành phố', '')
-        .replace('Quận ', '')
-        .replace('Huyện ', '')
         .replace('Phường ', '')
         .replace('Xã ', ''),
       userFullName: user.fullName,
@@ -67,7 +64,6 @@ export class ApiFileCustomerDownloadExcel {
           birthday: { alignment: { horizontal: 'center' }, numFmt: 'dd/mm/yyyy' },
           gender: { alignment: { horizontal: 'center' } },
           addressProvince: { alignment: { wrapText: true } },
-          addressDistrict: { alignment: { wrapText: true } },
           addressWard: { alignment: { wrapText: true } },
           note: { alignment: { wrapText: true } },
         },
@@ -81,7 +77,6 @@ export class ApiFileCustomerDownloadExcel {
             birthday: customer.birthday ? new Date(customer.birthday + 7 * 60 * 60 * 1000) : '', // fix giờ do hệ thống lệch giờ
             gender: { 0: 'Nữ', 1: 'Nam' }[customer.gender] || '',
             addressProvince: customer.addressProvince || '',
-            addressDistrict: customer.addressDistrict || '',
             addressWard: customer.addressWard || '',
             note: customer.note || '',
           },
@@ -273,7 +268,6 @@ export class ApiFileCustomerDownloadExcel {
         { key: 'birthday', width: 15 },
         { key: 'gender', width: 10 },
         { key: 'addressProvince', width: 20 },
-        { key: 'addressDistrict', width: 20 },
         { key: 'addressWard', width: 20 },
         { key: 'note', width: 30 },
       ],

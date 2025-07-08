@@ -51,10 +51,6 @@ export default class Customer extends BaseEntity {
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
-  addressDistrict: string
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  @Expose()
   addressWard: string
 
   @Column({ type: 'varchar', length: 255, nullable: true })

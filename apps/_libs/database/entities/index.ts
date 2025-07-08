@@ -1,3 +1,4 @@
+export { default as Address } from './address.entity'
 export { default as Appointment } from './appointment.entity'
 export { default as Batch } from './batch.entity'
 export { default as CustomerSource } from './customer-source.entity'

@@ -20,11 +20,6 @@ export class DistributorCreateBody {
   @IsString()
   addressProvince: string
 
-  @ApiPropertyOptional({ example: 'Huyện Cát Tiên' })
-  @Expose()
-  @IsString()
-  addressDistrict: string
-
   @ApiPropertyOptional({ example: 'Xã Tiên Hoàng' })
   @Expose()
   @IsString()
@@ -46,4 +41,4 @@ export class DistributorCreateBody {
   isActive: 0 | 1
 }
 
-export class DistributorUpdateBody extends PartialType(DistributorCreateBody) {}
+export class DistributorUpdateBody extends PartialType(DistributorCreateBody) { }

@@ -76,7 +76,6 @@ export class ApiOrganizationService {
       {
         name: body.name,
         addressProvince: body.addressProvince,
-        addressDistrict: body.addressDistrict,
         addressWard: body.addressWard,
         addressStreet: body.addressStreet,
         logoImageId,

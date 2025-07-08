@@ -54,11 +54,6 @@ export class CustomerCreateBody {
   @IsString()
   addressProvince: string
 
-  @ApiPropertyOptional({ example: 'Huyện Khoái Châu' })
-  @Expose()
-  @IsString()
-  addressDistrict: string
-
   @ApiPropertyOptional({ example: 'Xã Dạ Trạch' })
   @Expose()
   @IsString()

@@ -1,3 +1,4 @@
+export * from './address.repository'
 export * from './appointment.repository'
 export * from './batch.repository'
 export * from './customer-source.repository'

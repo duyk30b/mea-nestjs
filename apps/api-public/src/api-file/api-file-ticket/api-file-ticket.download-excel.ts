@@ -46,15 +46,12 @@ export class ApiFileTicketDownloadExcel {
       orgPhone: organization.phone,
       orgAddress: [
         organization.addressWard,
-        organization.addressDistrict,
         organization.addressProvince,
       ]
         .filter((i) => !!i)
         .join(' - ')
         .replace('Tỉnh', '')
         .replace('Thành phố', '')
-        .replace('Quận ', '')
-        .replace('Huyện ', '')
         .replace('Phường ', '')
         .replace('Xã ', ''),
       userFullName: user.fullName,
