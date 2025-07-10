@@ -1,4 +1,4 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger'
+import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
 import {
   IsArray,
@@ -12,8 +12,9 @@ import {
   validateSync,
 } from 'class-validator'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { CommissionCalculatorType } from '../../../../../_libs/database/entities/position.entity'
 import { ProcedureType } from '../../../../../_libs/database/entities/procedure.entity'
+import { DiscountUpdateBody } from '../../api-discount/request'
+import { PositionBasicBody } from '../../api-position/request'
 
 export class ConsumableConversion {
   @Expose()
@@ -29,25 +30,7 @@ export class ConsumableConversion {
   quantity: number
 }
 
-export class ProcedurePosition {
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  @IsPositive()
-  roleId: number
-
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  commissionValue: number
-
-  @ApiProperty({ example: CommissionCalculatorType.VND })
-  @Expose()
-  @IsEnumValue(CommissionCalculatorType)
-  commissionCalculatorType: CommissionCalculatorType
-}
-
-export class ProcedureCreateBody {
+export class ProcedureCreate {
   @ApiProperty({ example: 'Truyền dịch 500ml' })
   @Expose()
   @IsDefined()
@@ -119,14 +102,27 @@ export class ProcedureCreateBody {
   @IsDefined()
   @IsIn([0, 1])
   isActive: 0 | 1
-
-  @ApiProperty({ type: ProcedurePosition, isArray: true })
-  @Expose()
-  @Type(() => ProcedurePosition)
-  @IsDefined()
-  @IsArray()
-  @ValidateNested({ each: true })
-  positionList: ProcedurePosition[]
 }
 
-export class ProcedureUpdateBody extends PartialType(ProcedureCreateBody) { }
+export class ProcedureUpsertBody {
+  @ApiProperty({ type: ProcedureCreate })
+  @Expose()
+  @Type(() => ProcedureCreate)
+  @IsDefined()
+  @ValidateNested({ each: true })
+  procedure: ProcedureCreate
+
+  @ApiProperty({ type: PositionBasicBody, isArray: true })
+  @Expose()
+  @Type(() => PositionBasicBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  positionList: PositionBasicBody[]
+
+  @ApiProperty({ type: DiscountUpdateBody, isArray: true })
+  @Expose()
+  @Type(() => DiscountUpdateBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  discountList: DiscountUpdateBody[]
+}

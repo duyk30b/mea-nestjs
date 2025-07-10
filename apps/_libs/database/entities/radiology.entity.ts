@@ -1,5 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import Discount from './discount.entity'
 import Position from './position.entity'
 import PrintHtml from './print-html.entity'
 import RadiologyGroup from './radiology-group.entity'
@@ -93,6 +94,12 @@ export default class Radiology {
   @Expose()
   positionList: Position[]
 
+  @Expose()
+  discountList: Discount[]
+
+  @Expose()
+  discountListExtra: Discount[]
+
   static fromRaw(raw: { [P in keyof Radiology]: any }) {
     if (!raw) return null
     const entity = new Radiology()
@@ -113,7 +120,10 @@ export default class Radiology {
 }
 
 export type RadiologyRelationType = {
-  [P in keyof Pick<Radiology, 'radiologyGroup' | 'printHtml' | 'positionList'>]?: boolean
+  [P in keyof Pick<
+    Radiology,
+    'radiologyGroup' | 'printHtml' | 'positionList' | 'discountList' | 'discountListExtra'
+  >]?: boolean
 }
 
 export type RadiologyInsertType = Omit<

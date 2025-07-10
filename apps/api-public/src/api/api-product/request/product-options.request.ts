@@ -17,6 +17,10 @@ export class ProductRelationQuery {
   @Expose()
   @IsBoolean()
   positionList: boolean
+
+  @Expose()
+  @IsBoolean()
+  discountList: boolean
 }
 
 export class BatchFilterQuery {

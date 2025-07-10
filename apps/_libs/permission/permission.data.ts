@@ -11,6 +11,7 @@ import { permissionProcedure } from './data/permission-procedure.data'
 import { permissionProduct } from './data/permission-product.data'
 import { permissionRadiology } from './data/permission-radiology.data'
 import { permissionReceipt } from './data/permission-receipt.data'
+import { permissionReception } from './data/permission-reception.data'
 import { permissionStatistic } from './data/permission-statistic.data'
 import { permissionStockCheck } from './data/permission-stock-check.data'
 import { permissionTicketClinic } from './data/permission-ticket-clinic.data'
@@ -40,6 +41,7 @@ export const permissionDataAll = [
 
   ...permissionFile,
 
+  ...permissionReception,
   ...permissionTicketOrder,
   ...permissionTicketClinic,
 ]

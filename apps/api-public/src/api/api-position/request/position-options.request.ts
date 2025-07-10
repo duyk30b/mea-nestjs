@@ -1,15 +1,15 @@
 import { Expose, Transform, TransformFnParams } from 'class-transformer'
 import { IsBoolean, IsIn, IsNumber, IsOptional } from 'class-validator'
 import {
-  ConditionNumber,
-  createConditionEnum,
-  transformConditionEnum,
-  transformConditionNumber,
+    ConditionNumber,
+    createConditionEnum,
+    transformConditionEnum,
+    transformConditionNumber,
 } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
-import { PositionType } from '../../../../../_libs/database/entities/position.entity'
+import { PositionInteractType } from '../../../../../_libs/database/entities/position.entity'
 
-const ConditionEnumPositionType = createConditionEnum(PositionType)
+const ConditionEnumPositionInteractType = createConditionEnum(PositionInteractType)
 
 export class PositionRelationQuery {
   @Expose()
@@ -35,9 +35,9 @@ export class PositionRelationQuery {
 
 export class PositionFilterQuery {
   @Expose()
-  @Transform((params: TransformFnParams) => transformConditionEnum(params, PositionType))
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, PositionInteractType))
   @IsOptional()
-  positionType: PositionType | InstanceType<typeof ConditionEnumPositionType>
+  positionType: PositionInteractType | InstanceType<typeof ConditionEnumPositionInteractType>
 
   @Expose()
   @IsNumber()

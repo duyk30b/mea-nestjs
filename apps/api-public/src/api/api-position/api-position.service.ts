@@ -4,24 +4,24 @@ import { ESArray } from '../../../../_libs/common/helpers/array.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { Laboratory, Procedure, Product, Radiology } from '../../../../_libs/database/entities'
 import Position, {
-  PositionInsertType,
-  PositionType,
+    PositionInsertType,
+    PositionInteractType,
 } from '../../../../_libs/database/entities/position.entity'
 import {
-  LaboratoryRepository,
-  ProcedureRepository,
-  ProductRepository,
-  RadiologyRepository,
+    LaboratoryRepository,
+    ProcedureRepository,
+    ProductRepository,
+    RadiologyRepository,
 } from '../../../../_libs/database/repositories'
 import { PositionRepository } from '../../../../_libs/database/repositories/position.repository'
 import {
-  PositionCreateBody,
-  PositionGetManyQuery,
-  PositionGetOneQuery,
-  PositionPaginationQuery,
-  PositionRelationQuery,
-  PositionReplaceListBody,
-  PositionUpdateBody,
+    PositionCreateBody,
+    PositionGetManyQuery,
+    PositionGetOneQuery,
+    PositionPaginationQuery,
+    PositionRelationQuery,
+    PositionReplaceListBody,
+    PositionUpdateBody,
 } from './request'
 
 @Injectable()
@@ -166,16 +166,16 @@ export class ApiPositionService {
 
   async generateRelation(positionList: Position[], relation: PositionRelationQuery) {
     const productIdList = positionList
-      .filter((i) => i.positionType === PositionType.Product)
+      .filter((i) => i.positionType === PositionInteractType.Product)
       .map((i) => i.positionInteractId)
     const procedureIdList = positionList
-      .filter((i) => i.positionType === PositionType.Procedure)
+      .filter((i) => i.positionType === PositionInteractType.Procedure)
       .map((i) => i.positionInteractId)
     const radiologyIdList = positionList
-      .filter((i) => i.positionType === PositionType.Radiology)
+      .filter((i) => i.positionType === PositionInteractType.Radiology)
       .map((i) => i.positionInteractId)
     const laboratoryIdList = positionList
-      .filter((i) => i.positionType === PositionType.Laboratory)
+      .filter((i) => i.positionType === PositionInteractType.Laboratory)
       .map((i) => i.positionInteractId)
 
     const [productList, procedureList, radiologyList, laboratoryList] = await Promise.all([
@@ -198,16 +198,16 @@ export class ApiPositionService {
     ])
 
     positionList.forEach((position: Position) => {
-      if (position.positionType === PositionType.Product) {
+      if (position.positionType === PositionInteractType.Product) {
         position.product = productList.find((i) => i.id === position.positionInteractId)
       }
-      if (position.positionType === PositionType.Procedure) {
+      if (position.positionType === PositionInteractType.Procedure) {
         position.procedure = procedureList.find((i) => i.id === position.positionInteractId)
       }
-      if (position.positionType === PositionType.Radiology) {
+      if (position.positionType === PositionInteractType.Radiology) {
         position.radiology = radiologyList.find((i) => i.id === position.positionInteractId)
       }
-      if (position.positionType === PositionType.Laboratory) {
+      if (position.positionType === PositionInteractType.Laboratory) {
         position.laboratory = laboratoryList.find((i) => i.id === position.positionInteractId)
       }
     })

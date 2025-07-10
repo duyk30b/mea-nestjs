@@ -1,13 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
-import {
-  IsArray,
-  IsDefined,
-  IsInt,
-  IsNumber,
-  IsString,
-  ValidateNested,
-} from 'class-validator'
+import { IsArray, IsDefined, IsInt, IsNumber, IsString, ValidateNested } from 'class-validator'
 
 export class TicketLaboratoryResultUpdate {
   @ApiProperty({ example: 56 })
@@ -41,7 +34,7 @@ export class TicketLaboratoryResultUpdate {
   attention: number
 }
 
-export class TicketLaboratoryResultUpdateBody {
+export class TicketLaboratoryGroupUpdateResultBody {
   @ApiProperty({ type: TicketLaboratoryResultUpdate, isArray: true })
   @Expose()
   @Type(() => TicketLaboratoryResultUpdate)
@@ -49,12 +42,6 @@ export class TicketLaboratoryResultUpdateBody {
   @IsArray()
   @ValidateNested({ each: true })
   ticketLaboratoryResultUpdateList: TicketLaboratoryResultUpdate[]
-
-  @ApiProperty({ example: 56 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  ticketLaboratoryGroupId: number
 
   @ApiProperty({ example: Date.now() })
   @Expose()

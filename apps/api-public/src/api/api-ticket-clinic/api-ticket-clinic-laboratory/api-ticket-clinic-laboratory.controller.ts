@@ -12,7 +12,6 @@ import {
   TicketClinicUpdatePriorityTicketLaboratoryBody,
   TicketClinicUpdateTicketLaboratoryBody,
   TicketClinicUpsertLaboratoryBody,
-  TicketLaboratoryResultUpdateBody,
 } from './request'
 
 @ApiTags('TicketClinic')
@@ -64,7 +63,7 @@ export class ApiTicketClinicLaboratoryController {
   }
 
   @Post(':ticketId/update-ticket-laboratory/:ticketLaboratoryId')
-  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST)
+  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_LIST)
   async updateTicketLaboratory(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketLaboratoryId }: TicketClinicLaboratoryParams,
@@ -74,20 +73,6 @@ export class ApiTicketClinicLaboratoryController {
       oid,
       ticketId,
       ticketLaboratoryId,
-      body,
-    })
-  }
-
-  @Post(':id/update-ticket-laboratory-result')
-  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_LIST)
-  async updateTicketLaboratoryResult(
-    @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: TicketLaboratoryResultUpdateBody
-  ) {
-    return await this.apiTicketClinicLaboratoryService.updateTicketLaboratoryResult({
-      oid,
-      ticketId: id,
       body,
     })
   }

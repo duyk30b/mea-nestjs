@@ -11,6 +11,14 @@ export class LaboratoryRelationQuery {
   @Expose()
   @IsBoolean()
   children: boolean
+
+  @Expose()
+  @IsBoolean()
+  positionList: boolean
+
+  @Expose()
+  @IsBoolean()
+  discountList: boolean
 }
 
 export class LaboratoryFilterQuery {

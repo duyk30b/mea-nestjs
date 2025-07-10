@@ -3,9 +3,14 @@ import { Server } from 'socket.io'
 import {
   Batch,
   Customer,
+  Discount,
   Distributor,
+  Laboratory,
   Organization,
+  Position,
+  Procedure,
   Product,
+  Radiology,
   Ticket,
   TicketAttribute,
   TicketBatch,
@@ -17,7 +22,7 @@ import {
   TicketRadiology,
   TicketUser,
 } from '../../../_libs/database/entities'
-import { PositionType } from '../../../_libs/database/entities/position.entity'
+import { PositionInteractType } from '../../../_libs/database/entities/position.entity'
 import { SOCKET_EVENT } from './socket.variable'
 
 @Injectable()
@@ -67,6 +72,46 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.PRODUCT_LIST_CHANGE, data)
   }
 
+  procedureListChange(
+    oid: number,
+    data: { procedureDestroyedList?: Procedure[]; procedureUpsertedList?: Procedure[] }
+  ) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.PROCEDURE_LIST_CHANGE, data)
+  }
+
+  laboratoryListChange(
+    oid: number,
+    data: { laboratoryDestroyedList?: Laboratory[]; laboratoryUpsertedList?: Laboratory[] }
+  ) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.LABORATORY_LIST_CHANGE, data)
+  }
+
+  radiologyListChange(
+    oid: number,
+    data: { radiologyDestroyedList?: Radiology[]; radiologyUpsertedList?: Radiology[] }
+  ) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.RADIOLOGY_LIST_CHANGE, data)
+  }
+
+  positionListChange(
+    oid: number,
+    data: { positionDestroyedList?: Position[]; positionUpsertedList?: Position[] }
+  ) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.POSITION_LIST_CHANGE, data)
+  }
+
+  discountListChange(
+    oid: number,
+    data: { discountDestroyedList?: Discount[]; discountUpsertedList?: Discount[] }
+  ) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.DISCOUNT_LIST_CHANGE, data)
+  }
+
   ticketClinicChange(oid: number, data: { type: 'CREATE' | 'UPDATE' | 'DESTROY'; ticket: Ticket }) {
     if (!this.io) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE, data)
@@ -87,7 +132,7 @@ export class SocketEmitService {
       ticketUserDestroyList?: TicketUser[]
       ticketUserUpsertList?: TicketUser[]
       replace?: {
-        positionType: PositionType
+        positionType: PositionInteractType
         ticketItemId: number // ticketItemId = 0 là thay thế toàn bộ positionType đó
         ticketUserList: TicketUser[]
       }
@@ -114,7 +159,7 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE_TICKET_PROCEDURE_LIST, data)
   }
 
-  ticketClinicChangeTicketRadiologyList(
+  ticketRadiologyListChange(
     oid: number,
     data: {
       ticketId: number
@@ -125,10 +170,10 @@ export class SocketEmitService {
     }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE_TICKET_RADIOLOGY_LIST, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_RADIOLOGY_LIST_CHANGE, data)
   }
 
-  ticketClinicChangeLaboratory(
+  ticketLaboratoryListChange(
     oid: number,
     data: {
       ticketId: number
@@ -144,7 +189,7 @@ export class SocketEmitService {
     }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_CLINIC_CHANGE_LABORATORY, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.TICKET_LABORATORY_LIST_CHANGE, data)
   }
 
   ticketClinicChangeConsumable(

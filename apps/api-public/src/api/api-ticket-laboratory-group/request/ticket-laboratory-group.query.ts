@@ -5,11 +5,15 @@ import { LimitQuery, PaginationQuery } from '../../../../../_libs/common/dto/que
 import {
   TicketLaboratoryGroupFilterQuery,
   TicketLaboratoryGroupRelationQuery,
+  TicketLaboratoryGroupResponseQuery,
   TicketLaboratoryGroupSortQuery,
 } from './ticket-laboratory-group-options.request'
 
 export class TicketLaboratoryGroupGetQuery {
-  @ApiPropertyOptional({ type: String, example: JSON.stringify(<TicketLaboratoryGroupRelationQuery>{}) })
+  @ApiPropertyOptional({
+    type: String,
+    example: JSON.stringify(<TicketLaboratoryGroupRelationQuery>{}),
+  })
   @Expose()
   @Transform(({ value }) => {
     try {
@@ -74,6 +78,26 @@ export class TicketLaboratoryGroupGetQuery {
   sort?: TicketLaboratoryGroupSortQuery
 }
 
+export class TicketLaboratoryGroupPostQuery {
+  @ApiPropertyOptional({ type: String, example: JSON.stringify(<TicketLaboratoryGroupResponseQuery>{}) })
+  @Expose()
+  @Transform(({ value }) => {
+    try {
+      if (!value) return undefined // return undefined để không validate nữa
+      const plain = JSON.parse(value)
+      return plainToInstance(TicketLaboratoryGroupResponseQuery, plain, {
+        exposeUnsetFields: false,
+        excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
+      })
+    } catch (error) {
+      return error.message
+    }
+  })
+  @IsObject({ message: ({ value }) => value })
+  @ValidateNested({ each: true })
+  response: TicketLaboratoryGroupResponseQuery
+}
+
 export class TicketLaboratoryGroupPaginationQuery extends IntersectionType(
   TicketLaboratoryGroupGetQuery,
   PaginationQuery
@@ -84,4 +108,6 @@ export class TicketLaboratoryGroupGetManyQuery extends IntersectionType(
   LimitQuery
 ) { }
 
-export class TicketLaboratoryGroupGetOneQuery extends PickType(TicketLaboratoryGroupGetQuery, ['relation']) { }
+export class TicketLaboratoryGroupGetOneQuery extends PickType(TicketLaboratoryGroupGetQuery, [
+  'relation',
+]) { }

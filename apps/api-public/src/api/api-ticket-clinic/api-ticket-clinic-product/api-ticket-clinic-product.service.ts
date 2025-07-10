@@ -1,23 +1,23 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../../_libs/common/cache-data/cache-data.service'
 import { BaseResponse } from '../../../../../_libs/common/interceptor'
-import { PositionType } from '../../../../../_libs/database/entities/position.entity'
+import { PositionInteractType } from '../../../../../_libs/database/entities/position.entity'
 import { TicketProductType } from '../../../../../_libs/database/entities/ticket-product.entity'
 import {
-  TicketClinicAddTicketProductOperation,
-  TicketClinicDestroyTicketProductOperation,
-  TicketClinicUpdateTicketProductOperation,
-  TicketReturnProductOperation,
-  TicketSendProductOperation,
+    TicketClinicAddTicketProductOperation,
+    TicketClinicDestroyTicketProductOperation,
+    TicketClinicUpdateTicketProductOperation,
+    TicketReturnProductOperation,
+    TicketSendProductOperation,
 } from '../../../../../_libs/database/operations'
 import { TicketProductRepository } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { TicketReturnProductListBody, TicketSendProductListBody } from '../../api-ticket/request'
 import { ApiTicketClinicUserService } from '../api-ticket-clinic-user/api-ticket-clinic-user.service'
 import {
-  TicketClinicAddTicketProductListBody,
-  TicketClinicUpdatePriorityTicketProductBody,
-  TicketClinicUpdateTicketProductBody,
+    TicketClinicAddTicketProductListBody,
+    TicketClinicUpdatePriorityTicketProductBody,
+    TicketClinicUpdateTicketProductBody,
 } from './request'
 
 @Injectable()
@@ -174,7 +174,7 @@ export class ApiTicketClinicProductService {
         oid,
         ticketId,
         body: {
-          positionType: PositionType.Product,
+          positionType: PositionInteractType.Product,
           positionInteractId: ticketProduct.productId,
           ticketItemId: ticketProduct.id,
           quantity: ticketProduct.quantity,

@@ -4,34 +4,14 @@ import {
   IsArray,
   IsDefined,
   IsInt,
-  IsNumber,
-  IsPositive,
   IsString,
   ValidateNested,
 } from 'class-validator'
 import * as DOMPurify from 'isomorphic-dompurify'
-import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { CommissionCalculatorType } from '../../../../../_libs/database/entities/position.entity'
+import { DiscountUpdateBody } from '../../api-discount/request'
+import { PositionBasicBody } from '../../api-position/request'
 
-export class RadiologyPosition {
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  @IsPositive()
-  roleId: number
-
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  commissionValue: number
-
-  @ApiProperty({ example: CommissionCalculatorType.VND })
-  @Expose()
-  @IsEnumValue(CommissionCalculatorType)
-  commissionCalculatorType: CommissionCalculatorType
-}
-
-export class RadiologyUpsertBody {
+export class RadiologyBody {
   @ApiPropertyOptional({ example: 105000 })
   @Expose()
   @IsDefined()
@@ -97,13 +77,28 @@ export class RadiologyUpsertBody {
   @Expose()
   @IsDefined()
   @IsString()
-  customStyles: string // Tuy chỉnh giao diện, có thể là CSS
+  customStyles: string // Tùy chỉnh giao diện, có thể là CSS
+}
 
-  @ApiProperty({ type: RadiologyPosition, isArray: true })
+export class RadiologyUpsertBody {
+  @ApiProperty({ type: RadiologyBody })
   @Expose()
-  @Type(() => RadiologyPosition)
+  @Type(() => RadiologyBody)
   @IsDefined()
+  @ValidateNested({ each: true })
+  radiology: RadiologyBody
+
+  @ApiProperty({ type: PositionBasicBody, isArray: true })
+  @Expose()
+  @Type(() => PositionBasicBody)
   @IsArray()
   @ValidateNested({ each: true })
-  positionList: RadiologyPosition[]
+  positionList: PositionBasicBody[]
+
+  @ApiProperty({ type: DiscountUpdateBody, isArray: true })
+  @Expose()
+  @Type(() => DiscountUpdateBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  discountList: DiscountUpdateBody[]
 }

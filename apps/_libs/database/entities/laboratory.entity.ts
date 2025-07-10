@@ -1,6 +1,8 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import Discount from './discount.entity'
 import LaboratoryGroup from './laboratory-group.entity'
+import Position from './position.entity'
 import TicketLaboratory from './ticket-laboratory.entity'
 
 export enum LaboratoryValueType {
@@ -95,6 +97,15 @@ export default class Laboratory {
   @Expose()
   children: Laboratory[]
 
+  @Expose()
+  positionList: Position[]
+
+  @Expose()
+  discountList: Discount[]
+
+  @Expose()
+  discountListExtra: Discount[]
+
   static fromRaw(raw: { [P in keyof Laboratory]: any }) {
     if (!raw) return null
     const entity = new Laboratory()
@@ -115,7 +126,15 @@ export default class Laboratory {
 }
 
 export type LaboratoryRelationType = {
-  [P in keyof Pick<Laboratory, 'laboratoryGroup' | 'children' | 'ticketLaboratory'>]?: boolean
+  [P in keyof Pick<
+    Laboratory,
+    | 'laboratoryGroup'
+    | 'children'
+    | 'ticketLaboratory'
+    | 'positionList'
+    | 'discountList'
+    | 'discountListExtra'
+  >]?: boolean
 }
 
 export type LaboratoryInsertType = Omit<

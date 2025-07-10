@@ -1,11 +1,11 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsNumber, ValidateNested } from 'class-validator'
+import { IsArray, IsDefined, IsNumber, IsPositive, ValidateNested } from 'class-validator'
 import { valuesEnum } from '../../../../../_libs/common/helpers/typescript.helper'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import {
   CommissionCalculatorType,
-  PositionType,
+  PositionInteractType,
 } from '../../../../../_libs/database/entities/position.entity'
 import { PositionFilterQuery } from './position-options.request'
 
@@ -16,11 +16,11 @@ export class PositionCreateBody {
   @IsNumber()
   roleId: number
 
-  @ApiProperty({ enum: PositionType, example: PositionType.Ticket })
+  @ApiProperty({ enum: PositionInteractType, example: PositionInteractType.Ticket })
   @Expose()
   @IsDefined()
-  @IsEnumValue(PositionType)
-  positionType: PositionType
+  @IsEnumValue(PositionInteractType)
+  positionType: PositionInteractType
 
   @ApiProperty({ example: 25 })
   @Expose()
@@ -61,4 +61,22 @@ export class PositionReplaceListBody {
   @IsDefined()
   @ValidateNested({ each: true })
   filter: PositionFilterQuery
+}
+
+export class PositionBasicBody {
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  @IsPositive()
+  roleId: number
+
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  commissionValue: number
+
+  @ApiProperty({ example: CommissionCalculatorType.VND })
+  @Expose()
+  @IsEnumValue(CommissionCalculatorType)
+  commissionCalculatorType: CommissionCalculatorType
 }

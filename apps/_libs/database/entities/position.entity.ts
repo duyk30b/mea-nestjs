@@ -6,7 +6,7 @@ import Product from './product.entity'
 import Radiology from './radiology.entity'
 import Role from './role.entity'
 
-export enum PositionType {
+export enum PositionInteractType {
   Ticket = 1,
   Product = 2, // chỉ tương tác với sản phẩm
   Procedure = 3, // chỉ tương tác với thủ thuật
@@ -46,9 +46,9 @@ export default class Position {
   @Expose()
   positionInteractId: number
 
-  @Column({ type: 'smallint', default: PositionType.Ticket })
+  @Column({ type: 'smallint', default: PositionInteractType.Ticket })
   @Expose()
-  positionType: PositionType
+  positionType: PositionInteractType
 
   @Column({
     type: 'decimal',

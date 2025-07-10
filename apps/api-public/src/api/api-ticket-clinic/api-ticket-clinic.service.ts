@@ -7,7 +7,7 @@ import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { DeliveryStatus } from '../../../../_libs/database/common/variable'
 import { Customer } from '../../../../_libs/database/entities'
 import { AppointmentStatus } from '../../../../_libs/database/entities/appointment.entity'
-import { PositionType } from '../../../../_libs/database/entities/position.entity'
+import { PositionInteractType } from '../../../../_libs/database/entities/position.entity'
 import { TicketAttributeInsertType } from '../../../../_libs/database/entities/ticket-attribute.entity'
 import { TicketRadiologyStatus } from '../../../../_libs/database/entities/ticket-radiology.entity'
 import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
@@ -137,7 +137,7 @@ export class ApiTicketClinicService {
         oid,
         ticketId: ticket.id,
         body: {
-          positionType: PositionType.Ticket,
+          positionType: PositionInteractType.Ticket,
           positionInteractId: 0,
           ticketItemId: 0,
           quantity: 1,
@@ -202,7 +202,7 @@ export class ApiTicketClinicService {
         oid,
         ticketId,
         body: {
-          positionType: PositionType.Ticket,
+          positionType: PositionInteractType.Ticket,
           positionInteractId: 0,
           ticketItemId: 0,
           quantity: 1,

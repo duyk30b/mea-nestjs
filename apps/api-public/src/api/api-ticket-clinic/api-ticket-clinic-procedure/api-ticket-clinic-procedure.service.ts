@@ -1,18 +1,18 @@
 /* eslint-disable max-len */
 import { Injectable } from '@nestjs/common'
-import { PositionType } from '../../../../../_libs/database/entities/position.entity'
+import { PositionInteractType } from '../../../../../_libs/database/entities/position.entity'
 import {
-  TicketClinicAddTicketProcedureOperation,
-  TicketClinicDestroyTicketProcedureOperation,
-  TicketClinicUpdateTicketProcedureOperation,
+    TicketClinicAddTicketProcedureOperation,
+    TicketClinicDestroyTicketProcedureOperation,
+    TicketClinicUpdateTicketProcedureOperation,
 } from '../../../../../_libs/database/operations'
 import { TicketProcedureRepository } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { ApiTicketClinicUserService } from '../api-ticket-clinic-user/api-ticket-clinic-user.service'
 import {
-  TicketClinicAddTicketProcedureBody,
-  TicketClinicUpdatePriorityTicketProcedureBody,
-  TicketClinicUpdateTicketProcedureBody,
+    TicketClinicAddTicketProcedureBody,
+    TicketClinicUpdatePriorityTicketProcedureBody,
+    TicketClinicUpdateTicketProcedureBody,
 } from './request'
 
 @Injectable()
@@ -50,7 +50,7 @@ export class ApiTicketClinicProcedureService {
         oid,
         ticketId,
         body: {
-          positionType: PositionType.Procedure,
+          positionType: PositionInteractType.Procedure,
           positionInteractId: ticketProcedure.procedureId,
           ticketItemId: ticketProcedure.id,
           quantity: ticketProcedure.quantity,
@@ -116,7 +116,7 @@ export class ApiTicketClinicProcedureService {
         oid,
         ticketId,
         body: {
-          positionType: PositionType.Procedure,
+          positionType: PositionInteractType.Procedure,
           positionInteractId: ticketProcedure.procedureId,
           ticketItemId: ticketProcedure.id,
           quantity: ticketProcedure.quantity,

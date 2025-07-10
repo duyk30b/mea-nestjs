@@ -3,7 +3,7 @@ import { BusinessException } from '../../../../_libs/common/exception-filter/exc
 import { arrayToKeyValue } from '../../../../_libs/common/helpers/array.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { Image } from '../../../../_libs/database/entities'
-import { PositionType } from '../../../../_libs/database/entities/position.entity'
+import { PositionInteractType } from '../../../../_libs/database/entities/position.entity'
 import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
 import { TicketProcedureRepository } from '../../../../_libs/database/repositories/ticket-procedure.repository'
 import { TicketUserRepository } from '../../../../_libs/database/repositories/ticket-user.repository'
@@ -67,7 +67,7 @@ export class ApiTicketProcedureService {
       ticketProcedure.ticketUserList = await this.ticketUserRepository.findManyBy({
         oid,
         ticketId: ticketProcedure.ticketId,
-        positionType: PositionType.Procedure,
+        positionType: PositionInteractType.Procedure,
         positionInteractId: ticketProcedure.id,
       })
     }

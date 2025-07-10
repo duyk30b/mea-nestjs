@@ -10,6 +10,7 @@ import {
   Unique,
 } from 'typeorm'
 import Batch from './batch.entity'
+import Discount from './discount.entity'
 import Position from './position.entity'
 import ProductGroup from './product-group.entity'
 import { ProductSettingRule } from './setting.entity'
@@ -189,6 +190,12 @@ export default class Product {
   @Expose()
   positionList: Position[]
 
+  @Expose()
+  discountList: Discount[]
+
+  @Expose()
+  discountListExtra: Discount[]
+
   static fromRaw(raw: { [P in keyof Product]: any }) {
     if (!raw) return null
     const entity = new Product()
@@ -273,7 +280,10 @@ export default class Product {
 }
 
 export type ProductRelationType = {
-  [P in keyof Pick<Product, 'batchList' | 'productGroup' | 'positionList'>]?: boolean
+  [P in keyof Pick<
+    Product,
+    'batchList' | 'productGroup' | 'positionList' | 'discountList' | 'discountListExtra'
+  >]?: boolean
 }
 
 export type ProductInsertType = Omit<

@@ -4,14 +4,10 @@ import {
   Delete,
   Param,
   Post,
-  UploadedFiles,
-  UseInterceptors,
 } from '@nestjs/common'
-import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../../_libs/common/dto'
-import { FileUploadDto } from '../../../../../_libs/common/dto/file'
 import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
-import { FastifyFilesInterceptor } from '../../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { ApiTicketClinicRadiologyService } from './api-ticket-clinic-radiology.service'
@@ -20,7 +16,6 @@ import {
   TicketClinicRadiologyParams,
   TicketClinicUpdateMoneyTicketRadiologyBody,
   TicketClinicUpdatePriorityTicketRadiologyBody,
-  TicketClinicUpdateResultTicketRadiologyBody,
 } from './request'
 
 @ApiTags('TicketClinic')
@@ -68,25 +63,6 @@ export class ApiTicketClinicRadiologyController {
       ticketId,
       ticketRadiologyId,
       body,
-    })
-  }
-
-  @Post(':ticketId/update-result-ticket-radiology/:ticketRadiologyId')
-  @UserPermission(PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST)
-  @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FastifyFilesInterceptor('files', 10, {}))
-  async updateTicketRadiology(
-    @External() { oid }: TExternal,
-    @Param() { ticketId, ticketRadiologyId }: TicketClinicRadiologyParams,
-    @Body() body: TicketClinicUpdateResultTicketRadiologyBody,
-    @UploadedFiles() files: FileUploadDto[]
-  ) {
-    return await this.apiTicketClinicRadiologyService.updateResultTicketRadiology({
-      oid,
-      ticketId,
-      ticketRadiologyId,
-      body,
-      files,
     })
   }
 

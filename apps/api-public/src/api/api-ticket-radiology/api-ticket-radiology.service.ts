@@ -9,7 +9,7 @@ import {
   TicketRadiology,
   TicketUser,
 } from '../../../../_libs/database/entities'
-import { PositionType } from '../../../../_libs/database/entities/position.entity'
+import { PositionInteractType } from '../../../../_libs/database/entities/position.entity'
 import {
   CustomerRepository,
   TicketRepository,
@@ -52,7 +52,6 @@ export class ApiTicketRadiologyService {
     })
 
     if (query.relation) {
-      // chưa xử lý imageList
       await this.generateRelation(data, query.relation)
     }
 
@@ -63,7 +62,6 @@ export class ApiTicketRadiologyService {
   }
 
   async getOne(oid: number, id: number, query: TicketRadiologyGetOneQuery): Promise<BaseResponse> {
-    const { imageList, ...relationEntity } = query.relation
     const ticketRadiology = await this.ticketRadiologyRepository.findOne({
       // relation: relationEntity,
       condition: { oid, id },
@@ -76,19 +74,6 @@ export class ApiTicketRadiologyService {
       await this.generateRelation([ticketRadiology], query.relation)
     }
 
-    if (imageList) {
-      ticketRadiology.imageList = []
-      const imageIds: number[] = JSON.parse(ticketRadiology.imageIds)
-      let imageMap: Record<string, Image> = {}
-      if (imageIds.length > 0) {
-        const imageList = await this.imageRepository.findManyByIds(imageIds)
-        imageMap = arrayToKeyValue(imageList, 'id')
-      }
-      imageIds.forEach((i) => {
-        ticketRadiology.imageList.push(imageMap[i])
-      })
-    }
-
     return { data: { ticketRadiology } }
   }
 
@@ -99,8 +84,11 @@ export class ApiTicketRadiologyService {
     const ticketRadiologyIdList = ESArray.uniqueArray(ticketRadiologyList.map((i) => i.id))
     const customerIdList = ESArray.uniqueArray(ticketRadiologyList.map((i) => i.customerId))
     const ticketIdList = ESArray.uniqueArray(ticketRadiologyList.map((i) => i.ticketId))
+    const imageIdList: number[] = ESArray.uniqueArray(
+      ticketRadiologyList.map((i) => JSON.parse(i.imageIds) as number[]).flat()
+    )
 
-    const [ticketList, customerList, ticketUserList] = await Promise.all([
+    const [ticketList, customerList, ticketUserList, imageList] = await Promise.all([
       relation?.ticket && ticketIdList.length
         ? this.ticketRepository.findManyBy({ id: { IN: ticketIdList } })
         : <Ticket[]>[],
@@ -112,13 +100,17 @@ export class ApiTicketRadiologyService {
         ? this.ticketUserRepository.findMany({
           condition: {
             ticketId: { IN: ticketIdList },
-            positionType: PositionType.Radiology,
+            positionType: PositionInteractType.Radiology,
             ticketItemId: { IN: ticketRadiologyIdList },
           },
           sort: { id: 'ASC' },
         })
         : <TicketUser[]>[],
+      relation?.imageList && imageIdList.length
+        ? this.imageRepository.findManyByIds(imageIdList)
+        : <Image[]>[],
     ])
+    const imageMap = ESArray.arrayToKeyValue(imageList, 'id')
 
     ticketRadiologyList.forEach((tr: TicketRadiology) => {
       tr.ticket = ticketList.find((t) => t.id === tr.ticketId)
@@ -126,6 +118,12 @@ export class ApiTicketRadiologyService {
 
       if (relation.ticketUserList) {
         tr.ticketUserList = ticketUserList.filter((tu) => tu.ticketItemId === tr.id)
+      }
+
+      if (relation.imageList) {
+        tr.imageList = []
+        const imageIds: number[] = JSON.parse(tr.imageIds)
+        tr.imageList = imageIds.map((i) => imageMap[i])
       }
     })
 

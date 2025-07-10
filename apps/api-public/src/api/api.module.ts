@@ -4,7 +4,9 @@ import { ApiAppointmentModule } from './api-appointment/api-appointment.module'
 import { ApiBatchModule } from './api-batch/api-batch.module'
 import { ApiCustomerSourceModule } from './api-customer-source/api-customer-source.module'
 import { ApiCustomerModule } from './api-customer/api-customer.module'
+import { ApiDiscountModule } from './api-discount/api-discount.module'
 import { ApiDistributorModule } from './api-distributor/api-distributor.module'
+import { ApiICDModule } from './api-icd/api-icd.module'
 import { ApiLaboratoryGroupModule } from './api-laboratory-group/api-laboratory-group.module'
 import { ApiLaboratorySampleModule } from './api-laboratory-sample/api-laboratory-sample.module'
 import { ApiLaboratoryModule } from './api-laboratory/api-laboratory.module'
@@ -44,6 +46,8 @@ import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
 @Module({
   imports: [
     ApiAddressModule,
+    ApiICDModule,
+
     ApiAppointmentModule,
     ApiBatchModule,
     ApiCustomerModule,
@@ -90,6 +94,7 @@ import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
 
     ApiStockCheckModule,
     ApiPaymentModule,
+    ApiDiscountModule,
   ],
   controllers: [],
   providers: [],

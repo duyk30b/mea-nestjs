@@ -5,6 +5,7 @@ import { LimitQuery, PaginationQuery } from '../../../../../_libs/common/dto/que
 import {
   TicketRadiologyFilterQuery,
   TicketRadiologyRelationQuery,
+  TicketRadiologyResponseQuery,
   TicketRadiologySortQuery,
 } from './ticket-radiology-options.request'
 
@@ -72,6 +73,26 @@ export class TicketRadiologyGetQuery {
   @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
   sort?: TicketRadiologySortQuery
+}
+
+export class TicketRadiologyPostQuery {
+  @ApiPropertyOptional({ type: String, example: JSON.stringify(<TicketRadiologyResponseQuery>{}) })
+  @Expose()
+  @Transform(({ value }) => {
+    try {
+      if (!value) return undefined // return undefined để không validate nữa
+      const plain = JSON.parse(value)
+      return plainToInstance(TicketRadiologyResponseQuery, plain, {
+        exposeUnsetFields: false,
+        excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
+      })
+    } catch (error) {
+      return error.message
+    }
+  })
+  @IsObject({ message: ({ value }) => value })
+  @ValidateNested({ each: true })
+  response: TicketRadiologyResponseQuery
 }
 
 export class TicketRadiologyPaginationQuery extends IntersectionType(

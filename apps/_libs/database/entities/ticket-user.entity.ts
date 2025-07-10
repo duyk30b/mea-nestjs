@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
-import { CommissionCalculatorType, PositionType } from './position.entity'
+import { CommissionCalculatorType, PositionInteractType } from './position.entity'
 import Role from './role.entity'
 import Ticket from './ticket.entity'
 import User from './user.entity'
@@ -31,7 +31,7 @@ export default class TicketUser {
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()
-  positionType: PositionType
+  positionType: PositionInteractType
 
   @Column({ type: 'integer', default: 0 })
   @Expose()

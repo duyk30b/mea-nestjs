@@ -1,5 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import Discount from './discount.entity'
 import Position from './position.entity'
 import ProcedureGroup from './procedure-group.entity'
 
@@ -70,6 +71,12 @@ export default class Procedure {
   @Expose()
   positionList: Position[]
 
+  @Expose()
+  discountList: Discount[]
+
+  @Expose()
+  discountListExtra: Discount[]
+
   static fromRaw(raw: { [P in keyof Procedure]: any }) {
     if (!raw) return null
     const entity = new Procedure()
@@ -88,7 +95,10 @@ export default class Procedure {
 }
 
 export type ProcedureRelationType = {
-  [P in keyof Pick<Procedure, 'procedureGroup' | 'positionList'>]?: boolean
+  [P in keyof Pick<
+    Procedure,
+    'procedureGroup' | 'positionList' | 'discountList' | 'discountListExtra'
+  >]?: boolean
 }
 
 export type ProcedureInsertType = Omit<

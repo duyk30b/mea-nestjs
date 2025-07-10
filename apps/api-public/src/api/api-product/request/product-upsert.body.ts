@@ -7,13 +7,11 @@ import {
   IsIn,
   IsInt,
   IsNumber,
-  IsPositive,
   IsString,
   ValidateNested,
   validateSync,
 } from 'class-validator'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { CommissionCalculatorType } from '../../../../../_libs/database/entities/position.entity'
 import {
   ProductType,
   SplitBatchByCostPrice,
@@ -21,6 +19,8 @@ import {
   SplitBatchByExpiryDate,
   SplitBatchByWarehouse,
 } from '../../../../../_libs/database/entities/product.entity'
+import { DiscountUpdateBody } from '../../api-discount/request'
+import { PositionBasicBody } from '../../api-position/request'
 
 export class UnitConversionBody {
   @Expose()
@@ -38,25 +38,7 @@ export class UnitConversionBody {
   default: boolean
 }
 
-export class ProductPosition {
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  @IsPositive()
-  roleId: number
-
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  commissionValue: number
-
-  @ApiProperty({ example: CommissionCalculatorType.VND })
-  @Expose()
-  @IsEnumValue(CommissionCalculatorType)
-  commissionCalculatorType: CommissionCalculatorType
-}
-
-export class ProductCreateBody {
+export class ProductCreate {
   @ApiPropertyOptional({ example: 'ABC12345' })
   @Expose()
   @IsDefined()
@@ -229,14 +211,52 @@ export class ProductCreateBody {
   @IsDefined()
   @IsString({ message: `Validate warehouseIds failed: Example: ${JSON.stringify([1, 2, 3])}` })
   warehouseIds: string // đơn vị tính: lọ, ống, vỉ
-
-  @ApiProperty({ type: ProductPosition, isArray: true })
-  @Expose()
-  @Type(() => ProductPosition)
-  @IsDefined()
-  @IsArray()
-  @ValidateNested({ each: true })
-  positionList: ProductPosition[]
 }
 
-export class ProductUpdateBody extends OmitType(ProductCreateBody, ['quantity']) { }
+export class ProductUpdate extends OmitType(ProductCreate, ['quantity']) { }
+
+export class ProductCreateBody {
+  @ApiProperty({ type: ProductCreate })
+  @Expose()
+  @Type(() => ProductCreate)
+  @IsDefined()
+  @ValidateNested({ each: true })
+  product: ProductCreate
+
+  @ApiProperty({ type: PositionBasicBody, isArray: true })
+  @Expose()
+  @Type(() => PositionBasicBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  positionList: PositionBasicBody[]
+
+  @ApiProperty({ type: DiscountUpdateBody, isArray: true })
+  @Expose()
+  @Type(() => DiscountUpdateBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  discountList: DiscountUpdateBody[]
+}
+
+export class ProductUpdateBody {
+  @ApiProperty({ type: ProductUpdate })
+  @Expose()
+  @Type(() => ProductUpdate)
+  @IsDefined()
+  @ValidateNested({ each: true })
+  product: ProductUpdate
+
+  @ApiProperty({ type: PositionBasicBody, isArray: true })
+  @Expose()
+  @Type(() => PositionBasicBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  positionList: PositionBasicBody[]
+
+  @ApiProperty({ type: DiscountUpdateBody, isArray: true })
+  @Expose()
+  @Type(() => DiscountUpdateBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  discountList: DiscountUpdateBody[]
+}

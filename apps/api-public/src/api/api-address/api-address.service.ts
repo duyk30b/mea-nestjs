@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { Address } from '../../../../_libs/database/entities'
 import { AddressRepository } from '../../../../_libs/database/repositories'
-import { PositionReplaceAllBody } from './request'
+import { AddressReplaceAllBody } from './request'
 
 @Injectable()
 export class ApiAddressService {
@@ -13,7 +13,7 @@ export class ApiAddressService {
     return { data: { addressAll } }
   }
 
-  async replaceAll(body: PositionReplaceAllBody): Promise<BaseResponse> {
+  async replaceAll(body: AddressReplaceAllBody): Promise<BaseResponse> {
     await this.addressRepository.getManager().query(`TRUNCATE TABLE "${Address.name}" RESTART IDENTITY CASCADE;`)
     await this.addressRepository.insertMany(body.addressAll)
     return { data: true }

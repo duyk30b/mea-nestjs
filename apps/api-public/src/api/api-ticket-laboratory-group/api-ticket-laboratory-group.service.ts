@@ -3,29 +3,29 @@ import { BusinessException } from '../../../../_libs/common/exception-filter/exc
 import { ESArray } from '../../../../_libs/common/helpers'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import {
-  Customer,
-  Ticket,
-  TicketLaboratory,
-  TicketLaboratoryGroup,
-  TicketLaboratoryResult,
-  TicketUser,
+    Customer,
+    Ticket,
+    TicketLaboratory,
+    TicketLaboratoryGroup,
+    TicketLaboratoryResult,
+    TicketUser,
 } from '../../../../_libs/database/entities'
-import { PositionType } from '../../../../_libs/database/entities/position.entity'
+import { PositionInteractType } from '../../../../_libs/database/entities/position.entity'
 import {
-  CustomerRepository,
-  TicketLaboratoryGroupRepository,
-  TicketLaboratoryRepository,
-  TicketLaboratoryResultRepository,
-  TicketRepository,
-  TicketUserRepository,
+    CustomerRepository,
+    TicketLaboratoryGroupRepository,
+    TicketLaboratoryRepository,
+    TicketLaboratoryResultRepository,
+    TicketRepository,
+    TicketUserRepository,
 } from '../../../../_libs/database/repositories'
 import { LaboratoryRepository } from '../../../../_libs/database/repositories/laboratory.repository'
 import { UserRepository } from '../../../../_libs/database/repositories/user.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
-  TicketLaboratoryGroupGetOneQuery,
-  TicketLaboratoryGroupPaginationQuery,
-  TicketLaboratoryGroupRelationQuery,
+    TicketLaboratoryGroupGetOneQuery,
+    TicketLaboratoryGroupPaginationQuery,
+    TicketLaboratoryGroupRelationQuery,
 } from './request'
 
 @Injectable()
@@ -125,7 +125,7 @@ export class ApiTicketLaboratoryGroupService {
         ? this.ticketUserRepository.findMany({
           condition: {
             ticketId: { IN: ticketIdList },
-            positionType: PositionType.LaboratoryGroup,
+            positionType: PositionInteractType.LaboratoryGroup,
             ticketItemId: { IN: tlgIdList },
           },
           sort: { id: 'ASC' },

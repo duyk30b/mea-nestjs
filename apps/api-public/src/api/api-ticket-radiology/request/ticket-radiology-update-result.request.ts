@@ -10,8 +10,8 @@ import {
   validateSync,
 } from 'class-validator'
 import * as DOMPurify from 'isomorphic-dompurify'
-import { MultipleFileUpload } from '../../../../../../_libs/common/dto/file'
-import { TicketUserBasicBody } from '../../api-ticket-clinic-user/request/ticket-clinic-update-user-list.body'
+import { MultipleFileUpload } from '../../../../../_libs/common/dto/file'
+import { TicketUserBasicBody } from '../../api-ticket-clinic/api-ticket-clinic-user/request/ticket-clinic-update-user-list.body'
 
 export class TicketRadiologyUpdateBody extends MultipleFileUpload {
   @ApiProperty({ example: 'Mổ viêm ruột thừa 2002' })
@@ -35,7 +35,7 @@ export class TicketRadiologyUpdateBody extends MultipleFileUpload {
   startedAt: number
 }
 
-export class TicketClinicUpdateResultTicketRadiologyBody extends MultipleFileUpload {
+export class TicketRadiologyUpdateResultBody extends MultipleFileUpload {
   @ApiProperty({ type: String, example: JSON.stringify([3, 4]) })
   @Expose()
   @Transform(({ value }) => (value != null ? JSON.parse(value) : value))

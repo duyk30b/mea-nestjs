@@ -1,18 +1,34 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { arrayToKeyValue } from '../../../../_libs/common/helpers/array.helper'
+import { arrayToKeyValue, ESArray } from '../../../../_libs/common/helpers/array.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import {
+import { LaboratoryGroup } from '../../../../_libs/database/entities'
+import Discount, {
+  DiscountInsertType,
+  DiscountInteractType,
+} from '../../../../_libs/database/entities/discount.entity'
+import Laboratory, {
   LaboratoryInsertType,
   LaboratoryValueType,
 } from '../../../../_libs/database/entities/laboratory.entity'
+import Position, {
+  PositionInsertType,
+  PositionInteractType,
+} from '../../../../_libs/database/entities/position.entity'
+import {
+  DiscountRepository,
+  LaboratoryGroupRepository,
+  PositionRepository,
+} from '../../../../_libs/database/repositories'
 import { LaboratoryRepository } from '../../../../_libs/database/repositories/laboratory.repository'
 import { TicketLaboratoryRepository } from '../../../../_libs/database/repositories/ticket-laboratory.repository'
+import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   LaboratoryCreateBody,
   LaboratoryGetManyQuery,
   LaboratoryGetOneQuery,
   LaboratoryPaginationQuery,
+  LaboratoryRelationQuery,
   LaboratorySystemCopyBody,
   LaboratoryUpdateBody,
 } from './request'
@@ -20,16 +36,20 @@ import {
 @Injectable()
 export class ApiLaboratoryService {
   constructor(
+    private readonly socketEmitService: SocketEmitService,
     private readonly laboratoryRepository: LaboratoryRepository,
-    private readonly ticketLaboratoryRepository: TicketLaboratoryRepository
+    private readonly laboratoryGroupRepository: LaboratoryGroupRepository,
+    private readonly ticketLaboratoryRepository: TicketLaboratoryRepository,
+    private readonly positionRepository: PositionRepository,
+    private readonly discountRepository: DiscountRepository
   ) { }
 
   async pagination(oid: number, query: LaboratoryPaginationQuery): Promise<BaseResponse> {
     const { page, limit, filter, relation, sort } = query
     const { data, total } = await this.laboratoryRepository.pagination({
-      relation: {
-        laboratoryGroup: relation?.laboratoryGroup,
-      },
+      // relation: {
+      //   laboratoryGroup: relation?.laboratoryGroup,
+      // },
       page,
       limit,
       condition: {
@@ -40,6 +60,9 @@ export class ApiLaboratoryService {
       },
       sort,
     })
+    if (query.relation) {
+      await this.generateRelation({ oid, laboratoryList: data, relation: query.relation })
+    }
     return {
       data,
       meta: { page, limit, total },
@@ -49,9 +72,9 @@ export class ApiLaboratoryService {
   async getMany(oid: number, query: LaboratoryGetManyQuery): Promise<BaseResponse> {
     const { limit, filter, relation, sort } = query
     const data = await this.laboratoryRepository.findMany({
-      relation: {
-        laboratoryGroup: relation?.laboratoryGroup,
-      },
+      // relation: {
+      //   laboratoryGroup: relation?.laboratoryGroup,
+      // },
       condition: {
         oid,
         laboratoryGroupId: filter?.laboratoryGroupId,
@@ -61,6 +84,9 @@ export class ApiLaboratoryService {
       sort,
       limit,
     })
+    if (query.relation) {
+      await this.generateRelation({ oid, laboratoryList: data, relation: query.relation })
+    }
     return { data }
   }
 
@@ -72,6 +98,9 @@ export class ApiLaboratoryService {
       condition: { oid, id },
     })
     if (!laboratory) throw new BusinessException('error.Database.NotFound')
+    if (query.relation) {
+      await this.generateRelation({ oid, laboratoryList: [laboratory], relation: query.relation })
+    }
     if (query?.relation?.children) {
       if (laboratory.valueType === LaboratoryValueType.Children) {
         laboratory.children = await this.laboratoryRepository.findMany({
@@ -89,20 +118,20 @@ export class ApiLaboratoryService {
   }
 
   async create(oid: number, body: LaboratoryCreateBody): Promise<BaseResponse> {
-    const { children, ...laboratoryCreateDto } = body
+    const { laboratory, laboratoryChildren, discountList, positionList } = body
     const laboratoryParentId = await this.laboratoryRepository.insertOneFullField({
-      ...laboratoryCreateDto,
+      ...laboratory,
       oid,
       level: 1,
       parentId: 0,
     })
-    const [laboratoryParent] = await this.laboratoryRepository.updateAndReturnEntity(
+    const laboratoryParent = await this.laboratoryRepository.updateOneAndReturnEntity(
       { oid, id: laboratoryParentId },
       { parentId: laboratoryParentId }
     )
 
-    if (laboratoryParent.valueType === LaboratoryValueType.Children && children.length) {
-      const childrenDto = children.map((i) => {
+    if (laboratoryParent.valueType === LaboratoryValueType.Children && laboratoryChildren.length) {
+      const childrenDto = laboratoryChildren.map((i) => {
         const childDto: LaboratoryInsertType = {
           ...i,
           oid,
@@ -112,19 +141,59 @@ export class ApiLaboratoryService {
         }
         return childDto
       })
-      await this.laboratoryRepository.insertManyFullFieldAndReturnEntity(childrenDto)
+      laboratoryParent.children =
+        await this.laboratoryRepository.insertManyFullFieldAndReturnEntity(childrenDto)
+    }
+
+    this.socketEmitService.laboratoryListChange(oid, { laboratoryUpsertedList: [laboratoryParent] })
+
+    if (positionList?.length) {
+      const positionDtoList: PositionInsertType[] = positionList.map((i) => {
+        const dto: PositionInsertType = {
+          oid,
+          roleId: i.roleId,
+          commissionCalculatorType: i.commissionCalculatorType,
+          commissionValue: i.commissionValue,
+          positionInteractId: laboratoryParent.id,
+          positionType: PositionInteractType.Laboratory,
+        }
+        return dto
+      })
+      const positionUpsertedList =
+        await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
+      laboratoryParent.positionList = positionUpsertedList
+      this.socketEmitService.positionListChange(oid, {
+        positionUpsertedList,
+      })
+    }
+
+    if (discountList?.length) {
+      const discountListDto = discountList.map((i) => {
+        const dto: DiscountInsertType = {
+          ...i,
+          discountInteractId: laboratoryParent.id,
+          discountInteractType: DiscountInteractType.Laboratory,
+          oid,
+        }
+        return dto
+      })
+      const discountUpsertedList =
+        await this.discountRepository.insertManyFullFieldAndReturnEntity(discountListDto)
+      laboratoryParent.discountList = discountUpsertedList
+      this.socketEmitService.discountListChange(oid, { discountUpsertedList })
     }
 
     return { data: { laboratory: laboratoryParent } }
   }
 
   async update(oid: number, id: number, body: LaboratoryUpdateBody): Promise<BaseResponse> {
-    const { children, ...laboratoryUpdateDto } = body
+    const { laboratory: laboratoryUpdateDto, laboratoryChildren, discountList, positionList } = body
     const laboratoryOrigin = await this.laboratoryRepository.findOneBy({ oid, id })
     if (!laboratoryOrigin) {
       throw new BusinessException('error.Database.NotFound')
     }
     if (laboratoryOrigin.valueType === LaboratoryValueType.Children) {
+      // nếu trước đây nó có các laboratory con, giờ mà không dùng nữa thì xóa đi thôi
       if (laboratoryUpdateDto.valueType !== LaboratoryValueType.Children) {
         await this.laboratoryRepository.delete({
           oid,
@@ -134,25 +203,76 @@ export class ApiLaboratoryService {
       }
     }
 
-    const [laboratory] = await this.laboratoryRepository.updateAndReturnEntity(
+    const laboratory = await this.laboratoryRepository.updateOneAndReturnEntity(
       { oid, id },
       laboratoryUpdateDto
     )
-    if (!laboratory) throw new BusinessException('error.Database.UpdateFailed')
 
     if (laboratory.valueType === LaboratoryValueType.Children) {
       await this.laboratoryRepository.updateChildren({
         oid,
         laboratoryParent: laboratory,
-        laboratoryChildrenDtoList: children,
+        laboratoryChildrenDtoList: laboratoryChildren,
+      })
+    }
+
+    this.socketEmitService.laboratoryListChange(oid, { laboratoryUpsertedList: [laboratory] })
+
+    if (positionList) {
+      const positionDestroyedList = await this.positionRepository.deleteAndReturnEntity({
+        oid,
+        positionInteractId: laboratory.id,
+        positionType: PositionInteractType.Laboratory,
+      })
+      const positionDtoList: PositionInsertType[] = positionList.map((i) => {
+        const dto: PositionInsertType = {
+          oid,
+          roleId: i.roleId,
+          commissionCalculatorType: i.commissionCalculatorType,
+          commissionValue: i.commissionValue,
+          positionInteractId: laboratory.id,
+          positionType: PositionInteractType.Laboratory,
+        }
+        return dto
+      })
+      const positionUpsertedList =
+        await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
+      laboratory.positionList = positionUpsertedList
+      this.socketEmitService.positionListChange(oid, {
+        positionUpsertedList,
+        positionDestroyedList,
+      })
+    }
+
+    if (discountList) {
+      const discountDestroyedList = await this.discountRepository.deleteAndReturnEntity({
+        oid,
+        discountInteractId: laboratory.id,
+        discountInteractType: DiscountInteractType.Laboratory,
+      })
+      const discountListDto = discountList.map((i) => {
+        const dto: DiscountInsertType = {
+          ...i,
+          discountInteractId: laboratory.id,
+          discountInteractType: DiscountInteractType.Laboratory,
+          oid,
+        }
+        return dto
+      })
+      const discountUpsertedList =
+        await this.discountRepository.insertManyFullFieldAndReturnEntity(discountListDto)
+      laboratory.discountList = discountUpsertedList
+      this.socketEmitService.discountListChange(oid, {
+        discountUpsertedList,
+        discountDestroyedList,
       })
     }
     return { data: { laboratory } }
   }
 
-  async destroy(oid: number, id: number): Promise<BaseResponse> {
+  async destroy(oid: number, laboratoryId: number): Promise<BaseResponse> {
     const ticketLaboratoryList = await this.ticketLaboratoryRepository.findMany({
-      condition: { oid, laboratoryId: id },
+      condition: { oid, laboratoryId },
       limit: 10,
     })
     if (ticketLaboratoryList.length > 0) {
@@ -161,10 +281,35 @@ export class ApiLaboratoryService {
         success: false,
       }
     }
-    const affected = await this.laboratoryRepository.delete({ oid, parentId: id })
-    if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
 
-    return { data: { ticketLaboratoryList: [], laboratoryId: id } }
+    const [positionDestroyedList, discountDestroyedList] = await Promise.all([
+      this.positionRepository.deleteAndReturnEntity({
+        oid,
+        positionInteractId: laboratoryId,
+        positionType: PositionInteractType.Laboratory,
+      }),
+      this.discountRepository.deleteAndReturnEntity({
+        oid,
+        discountInteractId: laboratoryId,
+        discountInteractType: DiscountInteractType.Laboratory,
+      }),
+    ])
+
+    if (positionDestroyedList.length) {
+      this.socketEmitService.positionListChange(oid, { positionDestroyedList })
+    }
+
+    if (discountDestroyedList.length) {
+      this.socketEmitService.discountListChange(oid, { discountDestroyedList })
+    }
+
+    const laboratoryDestroyedList = await this.laboratoryRepository.deleteAndReturnEntity({
+      oid,
+      parentId: laboratoryId,
+    })
+    this.socketEmitService.laboratoryListChange(oid, { laboratoryDestroyedList })
+
+    return { data: { ticketLaboratoryList: [], laboratoryId } }
   }
 
   async systemList(): Promise<BaseResponse> {
@@ -253,5 +398,57 @@ export class ApiLaboratoryService {
     await this.laboratoryRepository.insertMany(laboratoryChildInsertList)
 
     return { data: true }
+  }
+
+  async generateRelation(options: {
+    oid: number
+    laboratoryList: Laboratory[]
+    relation: LaboratoryRelationQuery
+  }) {
+    const { oid, laboratoryList, relation } = options
+    const laboratoryIdList = ESArray.uniqueArray(laboratoryList.map((i) => i.id))
+    const laboratoryGroupIdList = ESArray.uniqueArray(
+      laboratoryList.map((i) => i.laboratoryGroupId)
+    )
+
+    const [positionList, discountList, laboratoryGroupList] = await Promise.all([
+      relation?.positionList && laboratoryIdList.length
+        ? this.positionRepository.findManyBy({
+          oid,
+          positionType: PositionInteractType.Laboratory,
+          positionInteractId: { IN: laboratoryIdList },
+        })
+        : <Position[]>[],
+      relation?.discountList && laboratoryIdList.length
+        ? this.discountRepository.findManyBy({
+          oid,
+          discountInteractType: DiscountInteractType.Laboratory,
+          discountInteractId: { IN: [...laboratoryIdList, 0] }, // discountInteractId=0 là áp dụng cho tất cả
+        })
+        : <Discount[]>[],
+      relation?.laboratoryGroup && laboratoryGroupIdList.length
+        ? this.laboratoryGroupRepository.findManyBy({
+          oid,
+          id: { IN: laboratoryGroupIdList },
+        })
+        : <LaboratoryGroup[]>[],
+    ])
+
+    const laboratoryGroupMap = ESArray.arrayToKeyValue(laboratoryGroupList, 'id')
+
+    laboratoryList.forEach((laboratory: Laboratory) => {
+      if (relation?.positionList) {
+        laboratory.positionList = positionList.filter((i) => i.positionInteractId === laboratory.id)
+      }
+      if (relation?.discountList) {
+        laboratory.discountList = discountList.filter((i) => i.discountInteractId === laboratory.id)
+        laboratory.discountListExtra = discountList.filter((i) => i.discountInteractId === 0)
+      }
+      if (relation?.laboratoryGroup) {
+        laboratory.laboratoryGroup = laboratoryGroupMap[laboratory.laboratoryGroupId]
+      }
+    })
+
+    return laboratoryList
   }
 }

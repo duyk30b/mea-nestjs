@@ -23,6 +23,16 @@ export const permissionMasterData: Permission[] = [
     rootId: PermissionId.MASTER_DATA,
   },
   {
+    id: PermissionId.MASTER_DATA_DISCOUNT,
+    level: 2,
+    code: PermissionId[PermissionId.MASTER_DATA_DISCOUNT],
+    isActive: 1,
+    pathId: `${PermissionId.MASTER_DATA}.${PermissionId.MASTER_DATA_DISCOUNT}`,
+    name: 'Quản lý chương trình khuyến mãi',
+    parentId: PermissionId.MASTER_DATA,
+    rootId: PermissionId.MASTER_DATA,
+  },
+  {
     id: PermissionId.MASTER_DATA_PRINT_HTML,
     level: 2,
     code: PermissionId[PermissionId.MASTER_DATA_PRINT_HTML],

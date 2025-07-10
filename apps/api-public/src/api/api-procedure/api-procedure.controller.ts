@@ -7,11 +7,10 @@ import { External, TExternal } from '../../../../_libs/common/request/external.r
 import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiProcedureService } from './api-procedure.service'
 import {
-  ProcedureCreateBody,
   ProcedureGetManyQuery,
   ProcedureGetOneQuery,
   ProcedurePaginationQuery,
-  ProcedureUpdateBody,
+  ProcedureUpsertBody,
 } from './request'
 
 @ApiTags('Procedure')
@@ -44,7 +43,7 @@ export class ApiProcedureController {
 
   @Post('create')
   @UserPermission(PermissionId.PROCEDURE_CREATE)
-  async create(@External() { oid }: TExternal, @Body() body: ProcedureCreateBody) {
+  async create(@External() { oid }: TExternal, @Body() body: ProcedureUpsertBody) {
     return await this.apiProcedureService.createOne(oid, body)
   }
 
@@ -54,7 +53,7 @@ export class ApiProcedureController {
   async update(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
-    @Body() body: ProcedureUpdateBody
+    @Body() body: ProcedureUpsertBody
   ) {
     return await this.apiProcedureService.updateOne(oid, id, body)
   }

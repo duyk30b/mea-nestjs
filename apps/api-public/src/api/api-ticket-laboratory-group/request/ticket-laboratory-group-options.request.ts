@@ -1,5 +1,5 @@
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsInt, IsOptional, ValidateNested } from 'class-validator'
+import { IsBoolean, IsIn, IsInt, IsObject, IsOptional, ValidateNested } from 'class-validator'
 import {
   ConditionTimestamp,
   createConditionEnum,
@@ -69,4 +69,17 @@ export class TicketLaboratoryGroupSortQuery extends SortQuery {
   @Expose()
   @IsIn(['ASC', 'DESC'])
   startedAt: 'ASC' | 'DESC'
+}
+
+export class TicketLaboratoryGroupResponseQuery {
+  @Expose()
+  @IsObject()
+  ticketLaboratoryGroup: {
+    ticket?: boolean
+    customer?: boolean
+    ticketUserList?: boolean
+    ticketLaboratoryList?: boolean
+    ticketLaboratoryResultMap?: boolean
+    imageList?: boolean
+  }
 }

@@ -1,6 +1,10 @@
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsInt, IsOptional, ValidateNested } from 'class-validator'
-import { ConditionTimestamp, createConditionEnum, transformConditionEnum } from '../../../../../_libs/common/dto'
+import { IsBoolean, IsIn, IsInt, IsObject, IsOptional, ValidateNested } from 'class-validator'
+import {
+  ConditionTimestamp,
+  createConditionEnum,
+  transformConditionEnum,
+} from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 import { TicketRadiologyStatus } from '../../../../../_libs/database/entities/ticket-radiology.entity'
 
@@ -65,4 +69,15 @@ export class TicketRadiologySortQuery extends SortQuery {
   @Expose()
   @IsIn(['ASC', 'DESC'])
   registeredAt: 'ASC' | 'DESC'
+}
+
+export class TicketRadiologyResponseQuery {
+  @Expose()
+  @IsObject()
+  ticketRadiology: {
+    ticket?: boolean
+    customer?: boolean
+    ticketUserList?: boolean
+    imageList?: boolean
+  }
 }

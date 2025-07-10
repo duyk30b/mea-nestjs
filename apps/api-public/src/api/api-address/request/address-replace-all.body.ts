@@ -16,7 +16,7 @@ export class AddressCreateBody {
   ward: string
 }
 
-export class PositionReplaceAllBody {
+export class AddressReplaceAllBody {
   @ApiProperty({ type: AddressCreateBody, isArray: true })
   @Expose()
   @Type(() => AddressCreateBody)

@@ -1254,24 +1254,24 @@ const throttler_1 = __webpack_require__(10);
 const nestjs_i18n_1 = __webpack_require__(11);
 const path = __webpack_require__(31);
 const cache_data_module_1 = __webpack_require__(32);
-const organization_guard_1 = __webpack_require__(94);
-const user_guard_1 = __webpack_require__(95);
-const jwt_extend_module_1 = __webpack_require__(96);
-const detect_client_middleware_1 = __webpack_require__(100);
-const postgresql_module_1 = __webpack_require__(101);
-const google_driver_module_1 = __webpack_require__(232);
-const auth_module_1 = __webpack_require__(237);
-const api_file_module_1 = __webpack_require__(264);
-const api_root_module_1 = __webpack_require__(309);
-const api_module_1 = __webpack_require__(332);
-const app_controller_1 = __webpack_require__(699);
-const app_service_1 = __webpack_require__(700);
-const email_module_1 = __webpack_require__(239);
-const health_module_1 = __webpack_require__(701);
-const image_manager_module_1 = __webpack_require__(706);
-const cron_job_module_1 = __webpack_require__(707);
-const event_listener_module_1 = __webpack_require__(712);
-const socket_module_1 = __webpack_require__(717);
+const organization_guard_1 = __webpack_require__(96);
+const user_guard_1 = __webpack_require__(97);
+const jwt_extend_module_1 = __webpack_require__(98);
+const detect_client_middleware_1 = __webpack_require__(102);
+const postgresql_module_1 = __webpack_require__(103);
+const google_driver_module_1 = __webpack_require__(236);
+const auth_module_1 = __webpack_require__(241);
+const api_file_module_1 = __webpack_require__(268);
+const api_root_module_1 = __webpack_require__(316);
+const api_module_1 = __webpack_require__(339);
+const app_controller_1 = __webpack_require__(721);
+const app_service_1 = __webpack_require__(722);
+const email_module_1 = __webpack_require__(243);
+const health_module_1 = __webpack_require__(723);
+const image_manager_module_1 = __webpack_require__(728);
+const cron_job_module_1 = __webpack_require__(729);
+const event_listener_module_1 = __webpack_require__(734);
+const socket_module_1 = __webpack_require__(739);
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(nestjs_i18n_1.I18nMiddleware).forRoutes('*');
@@ -1354,7 +1354,7 @@ exports.CacheDataModule = void 0;
 const common_1 = __webpack_require__(3);
 const redis_module_1 = __webpack_require__(33);
 const cache_data_service_1 = __webpack_require__(38);
-const cache_token_service_1 = __webpack_require__(93);
+const cache_token_service_1 = __webpack_require__(95);
 let CacheDataModule = class CacheDataModule {
 };
 exports.CacheDataModule = CacheDataModule;
@@ -1639,12 +1639,12 @@ exports.CacheDataService = void 0;
 const common_1 = __webpack_require__(3);
 const setting_entity_1 = __webpack_require__(39);
 const organization_repository_1 = __webpack_require__(40);
-const permission_repository_1 = __webpack_require__(87);
-const role_repository_1 = __webpack_require__(88);
-const setting_repository_1 = __webpack_require__(89);
-const user_role_repository_1 = __webpack_require__(90);
-const user_repository_1 = __webpack_require__(91);
-const array_helper_1 = __webpack_require__(92);
+const permission_repository_1 = __webpack_require__(89);
+const role_repository_1 = __webpack_require__(90);
+const setting_repository_1 = __webpack_require__(91);
+const user_role_repository_1 = __webpack_require__(92);
+const user_repository_1 = __webpack_require__(93);
+const array_helper_1 = __webpack_require__(94);
 let CacheDataService = class CacheDataService {
     constructor(organizationRepository, settingRepository, userRepository, roleRepository, userRoleRepository, permissionRepository) {
         this.organizationRepository = organizationRepository;
@@ -1922,7 +1922,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let OrganizationRepository = class OrganizationRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(organizationRepository) {
         super(entities_1.Organization, organizationRepository);
@@ -1960,7 +1960,7 @@ module.exports = require("@nestjs/typeorm");
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Warehouse = exports.User = exports.UserRole = exports.Ticket = exports.TicketUser = exports.TicketSurcharge = exports.TicketRadiology = exports.TicketProduct = exports.TicketProcedure = exports.TicketLaboratory = exports.TicketLaboratoryResult = exports.TicketLaboratoryGroup = exports.TicketExpense = exports.TicketBatch = exports.TicketAttribute = exports.StockCheck = exports.StockCheckItem = exports.Setting = exports.Role = exports.Receipt = exports.ReceiptItem = exports.Radiology = exports.RadiologyGroup = exports.Product = exports.ProductMovement = exports.ProductGroup = exports.Procedure = exports.ProcedureGroup = exports.PrintHtml = exports.PrescriptionSample = exports.Position = exports.Permission = exports.Payment = exports.PaymentMethod = exports.Organization = exports.Laboratory = exports.LaboratorySample = exports.LaboratoryGroup = exports.Image = exports.Distributor = exports.Customer = exports.CustomerSource = exports.Batch = exports.Appointment = exports.Address = void 0;
+exports.Warehouse = exports.User = exports.UserRole = exports.Ticket = exports.TicketUser = exports.TicketSurcharge = exports.TicketRadiology = exports.TicketProduct = exports.TicketProcedure = exports.TicketLaboratory = exports.TicketLaboratoryResult = exports.TicketLaboratoryGroup = exports.TicketExpense = exports.TicketBatch = exports.TicketAttribute = exports.StockCheck = exports.StockCheckItem = exports.Setting = exports.Role = exports.Receipt = exports.ReceiptItem = exports.Radiology = exports.RadiologyGroup = exports.Product = exports.ProductMovement = exports.ProductGroup = exports.Procedure = exports.ProcedureGroup = exports.PrintHtml = exports.PrescriptionSample = exports.Position = exports.Permission = exports.Payment = exports.PaymentMethod = exports.Organization = exports.Laboratory = exports.LaboratorySample = exports.LaboratoryGroup = exports.Image = exports.ICD = exports.Distributor = exports.Discount = exports.Customer = exports.CustomerSource = exports.Batch = exports.Appointment = exports.Address = void 0;
 var address_entity_1 = __webpack_require__(43);
 Object.defineProperty(exports, "Address", ({ enumerable: true, get: function () { return address_entity_1.default; } }));
 var appointment_entity_1 = __webpack_require__(44);
@@ -1971,13 +1971,17 @@ var customer_source_entity_1 = __webpack_require__(46);
 Object.defineProperty(exports, "CustomerSource", ({ enumerable: true, get: function () { return customer_source_entity_1.default; } }));
 var customer_entity_1 = __webpack_require__(47);
 Object.defineProperty(exports, "Customer", ({ enumerable: true, get: function () { return customer_entity_1.default; } }));
+var discount_entity_1 = __webpack_require__(76);
+Object.defineProperty(exports, "Discount", ({ enumerable: true, get: function () { return discount_entity_1.default; } }));
 var distributor_entity_1 = __webpack_require__(49);
 Object.defineProperty(exports, "Distributor", ({ enumerable: true, get: function () { return distributor_entity_1.default; } }));
+var icd_entity_1 = __webpack_require__(77);
+Object.defineProperty(exports, "ICD", ({ enumerable: true, get: function () { return icd_entity_1.default; } }));
 var image_entity_1 = __webpack_require__(19);
 Object.defineProperty(exports, "Image", ({ enumerable: true, get: function () { return image_entity_1.default; } }));
 var laboratory_group_entity_1 = __webpack_require__(61);
 Object.defineProperty(exports, "LaboratoryGroup", ({ enumerable: true, get: function () { return laboratory_group_entity_1.default; } }));
-var laboratory_sample_entity_1 = __webpack_require__(76);
+var laboratory_sample_entity_1 = __webpack_require__(78);
 Object.defineProperty(exports, "LaboratorySample", ({ enumerable: true, get: function () { return laboratory_sample_entity_1.default; } }));
 var laboratory_entity_1 = __webpack_require__(64);
 Object.defineProperty(exports, "Laboratory", ({ enumerable: true, get: function () { return laboratory_entity_1.default; } }));
@@ -1987,11 +1991,11 @@ var payment_method_entity_1 = __webpack_require__(50);
 Object.defineProperty(exports, "PaymentMethod", ({ enumerable: true, get: function () { return payment_method_entity_1.default; } }));
 var payment_entity_1 = __webpack_require__(48);
 Object.defineProperty(exports, "Payment", ({ enumerable: true, get: function () { return payment_entity_1.default; } }));
-var permission_entity_1 = __webpack_require__(77);
+var permission_entity_1 = __webpack_require__(79);
 Object.defineProperty(exports, "Permission", ({ enumerable: true, get: function () { return permission_entity_1.default; } }));
 var position_entity_1 = __webpack_require__(75);
 Object.defineProperty(exports, "Position", ({ enumerable: true, get: function () { return position_entity_1.default; } }));
-var prescription_sample_entity_1 = __webpack_require__(79);
+var prescription_sample_entity_1 = __webpack_require__(81);
 Object.defineProperty(exports, "PrescriptionSample", ({ enumerable: true, get: function () { return prescription_sample_entity_1.default; } }));
 var print_html_entity_1 = __webpack_require__(62);
 Object.defineProperty(exports, "PrintHtml", ({ enumerable: true, get: function () { return print_html_entity_1.default; } }));
@@ -2001,7 +2005,7 @@ var procedure_entity_1 = __webpack_require__(67);
 Object.defineProperty(exports, "Procedure", ({ enumerable: true, get: function () { return procedure_entity_1.default; } }));
 var product_group_entity_1 = __webpack_require__(55);
 Object.defineProperty(exports, "ProductGroup", ({ enumerable: true, get: function () { return product_group_entity_1.default; } }));
-var product_movement_entity_1 = __webpack_require__(80);
+var product_movement_entity_1 = __webpack_require__(82);
 Object.defineProperty(exports, "ProductMovement", ({ enumerable: true, get: function () { return product_movement_entity_1.default; } }));
 var product_entity_1 = __webpack_require__(54);
 Object.defineProperty(exports, "Product", ({ enumerable: true, get: function () { return product_entity_1.default; } }));
@@ -2017,9 +2021,9 @@ var role_entity_1 = __webpack_require__(23);
 Object.defineProperty(exports, "Role", ({ enumerable: true, get: function () { return role_entity_1.default; } }));
 var setting_entity_1 = __webpack_require__(39);
 Object.defineProperty(exports, "Setting", ({ enumerable: true, get: function () { return setting_entity_1.default; } }));
-var stock_check_item_entity_1 = __webpack_require__(82);
+var stock_check_item_entity_1 = __webpack_require__(84);
 Object.defineProperty(exports, "StockCheckItem", ({ enumerable: true, get: function () { return stock_check_item_entity_1.default; } }));
-var stock_check_entity_1 = __webpack_require__(81);
+var stock_check_entity_1 = __webpack_require__(83);
 Object.defineProperty(exports, "StockCheck", ({ enumerable: true, get: function () { return stock_check_entity_1.default; } }));
 var ticket_attribute_entity_1 = __webpack_require__(57);
 Object.defineProperty(exports, "TicketAttribute", ({ enumerable: true, get: function () { return ticket_attribute_entity_1.default; } }));
@@ -2049,7 +2053,7 @@ var user_role_entity_1 = __webpack_require__(22);
 Object.defineProperty(exports, "UserRole", ({ enumerable: true, get: function () { return user_role_entity_1.default; } }));
 var user_entity_1 = __webpack_require__(20);
 Object.defineProperty(exports, "User", ({ enumerable: true, get: function () { return user_entity_1.default; } }));
-var warehouse_entity_1 = __webpack_require__(83);
+var warehouse_entity_1 = __webpack_require__(85);
 Object.defineProperty(exports, "Warehouse", ({ enumerable: true, get: function () { return warehouse_entity_1.default; } }));
 
 
@@ -3644,6 +3648,14 @@ __decorate([
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Array)
 ], Product.prototype, "positionList", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Array)
+], Product.prototype, "discountList", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Array)
+], Product.prototype, "discountListExtra", void 0);
 Product = Product_1 = __decorate([
     (0, typeorm_1.Entity)('Product'),
     (0, typeorm_1.Index)('IDX_Product__oid_brandName', ['oid', 'brandName']),
@@ -5023,6 +5035,18 @@ __decorate([
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Array)
 ], Laboratory.prototype, "children", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Array)
+], Laboratory.prototype, "positionList", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Array)
+], Laboratory.prototype, "discountList", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Array)
+], Laboratory.prototype, "discountListExtra", void 0);
 Laboratory = Laboratory_1 = __decorate([
     (0, typeorm_1.Entity)('Laboratory'),
     (0, typeorm_1.Index)('IDX_Laboratory__oid_parentId', ['oid', 'parentId'])
@@ -5500,6 +5524,14 @@ __decorate([
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Array)
 ], Procedure.prototype, "positionList", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Array)
+], Procedure.prototype, "discountList", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Array)
+], Procedure.prototype, "discountListExtra", void 0);
 Procedure = Procedure_1 = __decorate([
     (0, typeorm_1.Entity)('Procedure')
 ], Procedure);
@@ -6107,6 +6139,14 @@ __decorate([
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Array)
 ], Radiology.prototype, "positionList", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Array)
+], Radiology.prototype, "discountList", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Array)
+], Radiology.prototype, "discountListExtra", void 0);
 Radiology = Radiology_1 = __decorate([
     (0, typeorm_1.Entity)('Radiology')
 ], Radiology);
@@ -6306,7 +6346,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ type: 'smallint', default: 1 }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", typeof (_a = typeof position_entity_1.PositionType !== "undefined" && position_entity_1.PositionType) === "function" ? _a : Object)
+    __metadata("design:type", typeof (_a = typeof position_entity_1.PositionInteractType !== "undefined" && position_entity_1.PositionInteractType) === "function" ? _a : Object)
 ], TicketUser.prototype, "positionType", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'integer', default: 0 }),
@@ -6430,7 +6470,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var Position_1;
 var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CommissionCalculatorType = exports.PositionType = void 0;
+exports.CommissionCalculatorType = exports.PositionInteractType = void 0;
 const class_transformer_1 = __webpack_require__(17);
 const typeorm_1 = __webpack_require__(18);
 const laboratory_entity_1 = __webpack_require__(64);
@@ -6438,17 +6478,17 @@ const procedure_entity_1 = __webpack_require__(67);
 const product_entity_1 = __webpack_require__(54);
 const radiology_entity_1 = __webpack_require__(71);
 const role_entity_1 = __webpack_require__(23);
-var PositionType;
-(function (PositionType) {
-    PositionType[PositionType["Ticket"] = 1] = "Ticket";
-    PositionType[PositionType["Product"] = 2] = "Product";
-    PositionType[PositionType["Procedure"] = 3] = "Procedure";
-    PositionType[PositionType["Radiology"] = 4] = "Radiology";
-    PositionType[PositionType["Laboratory"] = 5] = "Laboratory";
-    PositionType[PositionType["ConsumableList"] = 6] = "ConsumableList";
-    PositionType[PositionType["PrescriptionList"] = 7] = "PrescriptionList";
-    PositionType[PositionType["LaboratoryGroup"] = 8] = "LaboratoryGroup";
-})(PositionType || (exports.PositionType = PositionType = {}));
+var PositionInteractType;
+(function (PositionInteractType) {
+    PositionInteractType[PositionInteractType["Ticket"] = 1] = "Ticket";
+    PositionInteractType[PositionInteractType["Product"] = 2] = "Product";
+    PositionInteractType[PositionInteractType["Procedure"] = 3] = "Procedure";
+    PositionInteractType[PositionInteractType["Radiology"] = 4] = "Radiology";
+    PositionInteractType[PositionInteractType["Laboratory"] = 5] = "Laboratory";
+    PositionInteractType[PositionInteractType["ConsumableList"] = 6] = "ConsumableList";
+    PositionInteractType[PositionInteractType["PrescriptionList"] = 7] = "PrescriptionList";
+    PositionInteractType[PositionInteractType["LaboratoryGroup"] = 8] = "LaboratoryGroup";
+})(PositionInteractType || (exports.PositionInteractType = PositionInteractType = {}));
 var CommissionCalculatorType;
 (function (CommissionCalculatorType) {
     CommissionCalculatorType[CommissionCalculatorType["VND"] = 1] = "VND";
@@ -6489,7 +6529,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Position.prototype, "positionInteractId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'smallint', default: PositionType.Ticket }),
+    (0, typeorm_1.Column)({ type: 'smallint', default: PositionInteractType.Ticket }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Number)
 ], Position.prototype, "positionType", void 0);
@@ -6552,6 +6592,205 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var Discount_1;
+var _a, _b, _c, _d, _e;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DiscountRepeatType = exports.DiscountInteractType = void 0;
+const class_transformer_1 = __webpack_require__(17);
+const typeorm_1 = __webpack_require__(18);
+const variable_1 = __webpack_require__(21);
+const laboratory_entity_1 = __webpack_require__(64);
+const procedure_entity_1 = __webpack_require__(67);
+const product_entity_1 = __webpack_require__(54);
+const radiology_entity_1 = __webpack_require__(71);
+var DiscountInteractType;
+(function (DiscountInteractType) {
+    DiscountInteractType[DiscountInteractType["Product"] = 1] = "Product";
+    DiscountInteractType[DiscountInteractType["Procedure"] = 2] = "Procedure";
+    DiscountInteractType[DiscountInteractType["Laboratory"] = 3] = "Laboratory";
+    DiscountInteractType[DiscountInteractType["Radiology"] = 4] = "Radiology";
+})(DiscountInteractType || (exports.DiscountInteractType = DiscountInteractType = {}));
+var DiscountRepeatType;
+(function (DiscountRepeatType) {
+    DiscountRepeatType[DiscountRepeatType["Once"] = 1] = "Once";
+    DiscountRepeatType[DiscountRepeatType["Weekly"] = 2] = "Weekly";
+})(DiscountRepeatType || (exports.DiscountRepeatType = DiscountRepeatType = {}));
+let Discount = Discount_1 = class Discount {
+    static fromRaw(raw) {
+        if (!raw)
+            return null;
+        const entity = new Discount_1();
+        Object.assign(entity, raw);
+        entity.discountMoney = Number(raw.discountMoney);
+        entity.discountPercent = Number(raw.discountPercent);
+        return entity;
+    }
+    static fromRaws(raws) {
+        return raws.map((i) => Discount_1.fromRaw(i));
+    }
+};
+__decorate([
+    (0, typeorm_1.Column)(),
+    (0, class_transformer_1.Exclude)(),
+    __metadata("design:type", Number)
+], Discount.prototype, "oid", void 0);
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)(),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], Discount.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'smallint', default: 1 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], Discount.prototype, "isActive", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'integer', default: 0 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], Discount.prototype, "priority", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'smallint', default: DiscountInteractType.Product }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], Discount.prototype, "discountInteractType", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'integer', default: 0 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], Discount.prototype, "discountInteractId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'bigint',
+        default: 0,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], Discount.prototype, "discountMoney", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'decimal',
+        default: 0,
+        precision: 7,
+        scale: 3,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], Discount.prototype, "discountPercent", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 25, default: variable_1.DiscountType.Percent }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", typeof (_a = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _a : Object)
+], Discount.prototype, "discountType", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'smallint', default: DiscountRepeatType.Weekly }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], Discount.prototype, "discountRepeatType", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 255 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", String)
+], Discount.prototype, "periodsDay", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 255 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", String)
+], Discount.prototype, "periodsTime", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", typeof (_b = typeof product_entity_1.default !== "undefined" && product_entity_1.default) === "function" ? _b : Object)
+], Discount.prototype, "product", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", typeof (_c = typeof procedure_entity_1.default !== "undefined" && procedure_entity_1.default) === "function" ? _c : Object)
+], Discount.prototype, "procedure", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", typeof (_d = typeof radiology_entity_1.default !== "undefined" && radiology_entity_1.default) === "function" ? _d : Object)
+], Discount.prototype, "radiology", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", typeof (_e = typeof laboratory_entity_1.default !== "undefined" && laboratory_entity_1.default) === "function" ? _e : Object)
+], Discount.prototype, "laboratory", void 0);
+Discount = Discount_1 = __decorate([
+    (0, typeorm_1.Entity)('Discount'),
+    (0, typeorm_1.Index)('IDX_Discount__oid_discountInteractType_discountInteractId', [
+        'oid',
+        'discountInteractType',
+        'discountInteractId',
+    ])
+], Discount);
+exports["default"] = Discount;
+
+
+/***/ }),
+/* 77 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var ICD_1;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const class_transformer_1 = __webpack_require__(17);
+const typeorm_1 = __webpack_require__(18);
+let ICD = ICD_1 = class ICD {
+    static fromRaw(raw) {
+        if (!raw)
+            return null;
+        const entity = new ICD_1();
+        Object.assign(entity, raw);
+        return entity;
+    }
+    static fromRaws(raws) {
+        return raws.map((i) => ICD_1.fromRaw(i));
+    }
+};
+__decorate([
+    (0, typeorm_1.PrimaryGeneratedColumn)({ name: 'id' }),
+    (0, class_transformer_1.Expose)({ name: 'id' }),
+    __metadata("design:type", Number)
+], ICD.prototype, "id", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ length: 25, default: '' }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", String)
+], ICD.prototype, "code", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', default: '' }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", String)
+], ICD.prototype, "name", void 0);
+ICD = ICD_1 = __decorate([
+    (0, typeorm_1.Entity)('ICD')
+], ICD);
+exports["default"] = ICD;
+
+
+/***/ }),
+/* 78 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 var LaboratorySample_1;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const class_transformer_1 = __webpack_require__(17);
@@ -6600,7 +6839,7 @@ exports["default"] = LaboratorySample;
 
 
 /***/ }),
-/* 77 */
+/* 79 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -6618,7 +6857,7 @@ var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const class_transformer_1 = __webpack_require__(17);
 const typeorm_1 = __webpack_require__(18);
-const permission_enum_1 = __webpack_require__(78);
+const permission_enum_1 = __webpack_require__(80);
 let Permission = Permission_1 = class Permission {
     static fromRaw(raw) {
         if (!raw)
@@ -6678,7 +6917,7 @@ exports["default"] = Permission;
 
 
 /***/ }),
-/* 78 */
+/* 80 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -6716,6 +6955,7 @@ var PermissionId;
     PermissionId[PermissionId["STATISTIC_RADIOLOGY"] = 407] = "STATISTIC_RADIOLOGY";
     PermissionId[PermissionId["MASTER_DATA"] = 5] = "MASTER_DATA";
     PermissionId[PermissionId["MASTER_DATA_WAREHOUSE"] = 501] = "MASTER_DATA_WAREHOUSE";
+    PermissionId[PermissionId["MASTER_DATA_DISCOUNT"] = 502] = "MASTER_DATA_DISCOUNT";
     PermissionId[PermissionId["MASTER_DATA_PRINT_HTML"] = 505] = "MASTER_DATA_PRINT_HTML";
     PermissionId[PermissionId["MASTER_DATA_PAYMENT_METHOD"] = 506] = "MASTER_DATA_PAYMENT_METHOD";
     PermissionId[PermissionId["MASTER_DATA_CUSTOMER_SOURCE"] = 507] = "MASTER_DATA_CUSTOMER_SOURCE";
@@ -6790,7 +7030,8 @@ var PermissionId;
     PermissionId[PermissionId["LABORATORY_GROUP_CRUD"] = 1511] = "LABORATORY_GROUP_CRUD";
     PermissionId[PermissionId["LABORATORY_SAMPLE_CRUD"] = 1512] = "LABORATORY_SAMPLE_CRUD";
     PermissionId[PermissionId["LABORATORY_ROOM_MENU"] = 1520] = "LABORATORY_ROOM_MENU";
-    PermissionId[PermissionId["LABORATORY_RESULT"] = 1521] = "LABORATORY_RESULT";
+    PermissionId[PermissionId["LABORATORY_UPDATE_RESULT"] = 1521] = "LABORATORY_UPDATE_RESULT";
+    PermissionId[PermissionId["LABORATORY_CANCEL_RESULT"] = 1522] = "LABORATORY_CANCEL_RESULT";
     PermissionId[PermissionId["RADIOLOGY"] = 16] = "RADIOLOGY";
     PermissionId[PermissionId["RADIOLOGY_MENU"] = 1600] = "RADIOLOGY_MENU";
     PermissionId[PermissionId["RADIOLOGY_CREATE"] = 1601] = "RADIOLOGY_CREATE";
@@ -6798,7 +7039,8 @@ var PermissionId;
     PermissionId[PermissionId["RADIOLOGY_DELETE"] = 1603] = "RADIOLOGY_DELETE";
     PermissionId[PermissionId["RADIOLOGY_GROUP_CRUD"] = 1611] = "RADIOLOGY_GROUP_CRUD";
     PermissionId[PermissionId["RADIOLOGY_ROOM_MENU"] = 1620] = "RADIOLOGY_ROOM_MENU";
-    PermissionId[PermissionId["RADIOLOGY_RESULT"] = 1621] = "RADIOLOGY_RESULT";
+    PermissionId[PermissionId["RADIOLOGY_UPDATE_RESULT"] = 1621] = "RADIOLOGY_UPDATE_RESULT";
+    PermissionId[PermissionId["RADIOLOGY_CANCEL_RESULT"] = 1622] = "RADIOLOGY_CANCEL_RESULT";
     PermissionId[PermissionId["FILE"] = 20] = "FILE";
     PermissionId[PermissionId["FILE_EXCEL_DOWNLOAD_PRODUCT"] = 2011] = "FILE_EXCEL_DOWNLOAD_PRODUCT";
     PermissionId[PermissionId["FILE_EXCEL_DOWNLOAD_CUSTOMER"] = 2012] = "FILE_EXCEL_DOWNLOAD_CUSTOMER";
@@ -6808,6 +7050,10 @@ var PermissionId;
     PermissionId[PermissionId["FILE_EXCEL_UPLOAD_PRODUCT"] = 2061] = "FILE_EXCEL_UPLOAD_PRODUCT";
     PermissionId[PermissionId["FILE_EXCEL_UPLOAD_CUSTOMER"] = 2062] = "FILE_EXCEL_UPLOAD_CUSTOMER";
     PermissionId[PermissionId["FILE_EXCEL_UPLOAD_RECEIPT"] = 2063] = "FILE_EXCEL_UPLOAD_RECEIPT";
+    PermissionId[PermissionId["RECEPTION"] = 40] = "RECEPTION";
+    PermissionId[PermissionId["RECEPTION_MENU"] = 4001] = "RECEPTION_MENU";
+    PermissionId[PermissionId["RECEPTION_CREATE_TICKET"] = 4002] = "RECEPTION_CREATE_TICKET";
+    PermissionId[PermissionId["RECEPTION_DESTROY_TICKET"] = 4003] = "RECEPTION_DESTROY_TICKET";
     PermissionId[PermissionId["TICKET_ORDER"] = 50] = "TICKET_ORDER";
     PermissionId[PermissionId["TICKET_ORDER_MENU"] = 5000] = "TICKET_ORDER_MENU";
     PermissionId[PermissionId["TICKET_ORDER_DRAFT_CRUD"] = 5001] = "TICKET_ORDER_DRAFT_CRUD";
@@ -6847,7 +7093,7 @@ var PermissionId;
 
 
 /***/ }),
-/* 79 */
+/* 81 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -6912,7 +7158,7 @@ exports["default"] = PrescriptionSample;
 
 
 /***/ }),
-/* 80 */
+/* 82 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -6936,7 +7182,7 @@ const customer_entity_1 = __webpack_require__(47);
 const distributor_entity_1 = __webpack_require__(49);
 const product_entity_1 = __webpack_require__(54);
 const receipt_entity_1 = __webpack_require__(51);
-const stock_check_entity_1 = __webpack_require__(81);
+const stock_check_entity_1 = __webpack_require__(83);
 const ticket_entity_1 = __webpack_require__(56);
 const user_entity_1 = __webpack_require__(20);
 let ProductMovement = ProductMovement_1 = class ProductMovement extends base_entity_1.BaseEntity {
@@ -7166,7 +7412,7 @@ exports["default"] = ProductMovement;
 
 
 /***/ }),
-/* 81 */
+/* 83 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -7185,7 +7431,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.StockCheckStatus = void 0;
 const class_transformer_1 = __webpack_require__(17);
 const typeorm_1 = __webpack_require__(18);
-const stock_check_item_entity_1 = __webpack_require__(82);
+const stock_check_item_entity_1 = __webpack_require__(84);
 const user_entity_1 = __webpack_require__(20);
 var StockCheckStatus;
 (function (StockCheckStatus) {
@@ -7287,7 +7533,7 @@ exports["default"] = StockCheck;
 
 
 /***/ }),
-/* 82 */
+/* 84 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -7307,7 +7553,7 @@ const class_transformer_1 = __webpack_require__(17);
 const typeorm_1 = __webpack_require__(18);
 const batch_entity_1 = __webpack_require__(53);
 const product_entity_1 = __webpack_require__(54);
-const stock_check_entity_1 = __webpack_require__(81);
+const stock_check_entity_1 = __webpack_require__(83);
 let StockCheckItem = StockCheckItem_1 = class StockCheckItem {
     static fromRaw(raw) {
         if (!raw)
@@ -7420,7 +7666,7 @@ exports["default"] = StockCheckItem;
 
 
 /***/ }),
-/* 83 */
+/* 85 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -7497,13 +7743,13 @@ exports["default"] = Warehouse;
 
 
 /***/ }),
-/* 84 */
+/* 86 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports._PostgreSqlRepository = void 0;
-const postgresql_raw_1 = __webpack_require__(85);
+const postgresql_raw_1 = __webpack_require__(87);
 class _PostgreSqlRepository extends postgresql_raw_1.PostgreSqlRaw {
     constructor(entity, repository) {
         super();
@@ -7837,7 +8083,7 @@ exports._PostgreSqlRepository = _PostgreSqlRepository;
 
 
 /***/ }),
-/* 85 */
+/* 87 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -7855,7 +8101,7 @@ var __rest = (this && this.__rest) || function (s, e) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PostgreSqlRaw = void 0;
 const typeorm_1 = __webpack_require__(18);
-const base_condition_1 = __webpack_require__(86);
+const base_condition_1 = __webpack_require__(88);
 const _CONVERT = (value) => {
     if (typeof value === 'boolean' && value)
         return `TRUE`;
@@ -8103,7 +8349,7 @@ exports.PostgreSqlRaw = PostgreSqlRaw;
 
 
 /***/ }),
-/* 86 */
+/* 88 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -8116,7 +8362,7 @@ exports.escapeSearch = escapeSearch;
 
 
 /***/ }),
-/* 87 */
+/* 89 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -8138,8 +8384,8 @@ exports.PermissionRepository = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
-const permission_entity_1 = __webpack_require__(77);
-const _postgresql_repository_1 = __webpack_require__(84);
+const permission_entity_1 = __webpack_require__(79);
+const _postgresql_repository_1 = __webpack_require__(86);
 let PermissionRepository = class PermissionRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(permissionRepository) {
         super(permission_entity_1.default, permissionRepository);
@@ -8165,7 +8411,7 @@ exports.PermissionRepository = PermissionRepository = __decorate([
 
 
 /***/ }),
-/* 88 */
+/* 90 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -8188,7 +8434,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let RoleRepository = class RoleRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(roleRepository) {
         super(entities_1.Role, roleRepository);
@@ -8204,7 +8450,7 @@ exports.RoleRepository = RoleRepository = __decorate([
 
 
 /***/ }),
-/* 89 */
+/* 91 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -8227,7 +8473,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let SettingRepository = class SettingRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(settingRepository) {
         super(entities_1.Setting, settingRepository);
@@ -8254,7 +8500,7 @@ exports.SettingRepository = SettingRepository = __decorate([
 
 
 /***/ }),
-/* 90 */
+/* 92 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -8277,7 +8523,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const user_role_entity_1 = __webpack_require__(22);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let UserRoleRepository = class UserRoleRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(userRoleRepository) {
         super(user_role_entity_1.default, userRoleRepository);
@@ -8293,7 +8539,7 @@ exports.UserRoleRepository = UserRoleRepository = __decorate([
 
 
 /***/ }),
-/* 91 */
+/* 93 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -8316,7 +8562,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let UserRepository = class UserRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(userRepository) {
         super(entities_1.User, userRepository);
@@ -8332,7 +8578,7 @@ exports.UserRepository = UserRepository = __decorate([
 
 
 /***/ }),
-/* 92 */
+/* 94 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -8394,7 +8640,7 @@ exports.arrayToKeyValue = arrayToKeyValue;
 
 
 /***/ }),
-/* 93 */
+/* 95 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -8495,7 +8741,7 @@ exports.CacheTokenService = CacheTokenService = __decorate([
 
 
 /***/ }),
-/* 94 */
+/* 96 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -8583,7 +8829,7 @@ exports.OrganizationGuard = OrganizationGuard = __decorate([
 
 
 /***/ }),
-/* 95 */
+/* 97 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -8694,7 +8940,7 @@ exports.UserGuard = UserGuard = __decorate([
 
 
 /***/ }),
-/* 96 */
+/* 98 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -8708,9 +8954,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.JwtExtendModule = void 0;
 const common_1 = __webpack_require__(3);
 const config_1 = __webpack_require__(29);
-const jwt_1 = __webpack_require__(97);
-const jwt_extend_service_1 = __webpack_require__(98);
-const jwt_config_1 = __webpack_require__(99);
+const jwt_1 = __webpack_require__(99);
+const jwt_extend_service_1 = __webpack_require__(100);
+const jwt_config_1 = __webpack_require__(101);
 let JwtExtendModule = class JwtExtendModule {
 };
 exports.JwtExtendModule = JwtExtendModule;
@@ -8724,13 +8970,13 @@ exports.JwtExtendModule = JwtExtendModule = __decorate([
 
 
 /***/ }),
-/* 97 */
+/* 99 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/jwt");
 
 /***/ }),
-/* 98 */
+/* 100 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -8751,9 +8997,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.JwtExtendService = void 0;
 const common_1 = __webpack_require__(3);
 const config_1 = __webpack_require__(29);
-const jwt_1 = __webpack_require__(97);
+const jwt_1 = __webpack_require__(99);
 const exception_filter_1 = __webpack_require__(9);
-const jwt_config_1 = __webpack_require__(99);
+const jwt_config_1 = __webpack_require__(101);
 let JwtExtendService = class JwtExtendService {
     constructor(jwtConfig, jwtService) {
         this.jwtConfig = jwtConfig;
@@ -8844,7 +9090,7 @@ exports.JwtExtendService = JwtExtendService = __decorate([
 
 
 /***/ }),
-/* 99 */
+/* 101 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -8860,7 +9106,7 @@ exports.JwtConfig = (0, config_1.registerAs)('jwt', () => ({
 
 
 /***/ }),
-/* 100 */
+/* 102 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -8879,8 +9125,8 @@ exports.DetectClientMiddleware = void 0;
 const common_1 = __webpack_require__(3);
 const request_ip_1 = __webpack_require__(8);
 const cache_data_service_1 = __webpack_require__(38);
-const cache_token_service_1 = __webpack_require__(93);
-const jwt_extend_service_1 = __webpack_require__(98);
+const cache_token_service_1 = __webpack_require__(95);
+const jwt_extend_service_1 = __webpack_require__(100);
 let DetectClientMiddleware = class DetectClientMiddleware {
     constructor(jwtExtendService, cacheTokenService, cacheDataService) {
         this.jwtExtendService = jwtExtendService;
@@ -8949,7 +9195,7 @@ exports.DetectClientMiddleware = DetectClientMiddleware = __decorate([
 
 
 /***/ }),
-/* 101 */
+/* 103 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -8965,10 +9211,10 @@ const common_1 = __webpack_require__(3);
 const config_1 = __webpack_require__(29);
 const typeorm_1 = __webpack_require__(41);
 const EntityList = __webpack_require__(42);
-const ManagerList = __webpack_require__(102);
-const OperationList = __webpack_require__(142);
-const postgresql_config_1 = __webpack_require__(228);
-const RepositoryList = __webpack_require__(162);
+const ManagerList = __webpack_require__(104);
+const OperationList = __webpack_require__(144);
+const postgresql_config_1 = __webpack_require__(232);
+const RepositoryList = __webpack_require__(164);
 let PostgresqlModule = class PostgresqlModule {
 };
 exports.PostgresqlModule = PostgresqlModule;
@@ -8998,7 +9244,7 @@ exports.PostgresqlModule = PostgresqlModule = __decorate([
 
 
 /***/ }),
-/* 102 */
+/* 104 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -9017,9 +9263,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(103), exports);
 __exportStar(__webpack_require__(105), exports);
-__exportStar(__webpack_require__(106), exports);
 __exportStar(__webpack_require__(107), exports);
 __exportStar(__webpack_require__(108), exports);
 __exportStar(__webpack_require__(109), exports);
@@ -9055,10 +9299,12 @@ __exportStar(__webpack_require__(138), exports);
 __exportStar(__webpack_require__(139), exports);
 __exportStar(__webpack_require__(140), exports);
 __exportStar(__webpack_require__(141), exports);
+__exportStar(__webpack_require__(142), exports);
+__exportStar(__webpack_require__(143), exports);
 
 
 /***/ }),
-/* 103 */
+/* 105 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -9075,7 +9321,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AppointmentManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
+const _postgresql_manager_1 = __webpack_require__(106);
 let AppointmentManager = class AppointmentManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
         super(entities_1.Appointment);
@@ -9089,13 +9335,13 @@ exports.AppointmentManager = AppointmentManager = __decorate([
 
 
 /***/ }),
-/* 104 */
+/* 106 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports._PostgreSqlManager = void 0;
-const postgresql_raw_1 = __webpack_require__(85);
+const postgresql_raw_1 = __webpack_require__(87);
 class _PostgreSqlManager extends postgresql_raw_1.PostgreSqlRaw {
     constructor(entity) {
         super();
@@ -9381,7 +9627,7 @@ exports._PostgreSqlManager = _PostgreSqlManager;
 
 
 /***/ }),
-/* 105 */
+/* 107 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -9398,7 +9644,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.BatchManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
+const _postgresql_manager_1 = __webpack_require__(106);
 let BatchManager = class BatchManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
         super(entities_1.Batch);
@@ -9409,68 +9655,6 @@ exports.BatchManager = BatchManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
 ], BatchManager);
-
-
-/***/ }),
-/* 106 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CustomerSourceManager = void 0;
-const common_1 = __webpack_require__(3);
-const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let CustomerSourceManager = class CustomerSourceManager extends _postgresql_manager_1._PostgreSqlManager {
-    constructor() {
-        super(entities_1.CustomerSource);
-    }
-};
-exports.CustomerSourceManager = CustomerSourceManager;
-exports.CustomerSourceManager = CustomerSourceManager = __decorate([
-    (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [])
-], CustomerSourceManager);
-
-
-/***/ }),
-/* 107 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CustomerManager = void 0;
-const common_1 = __webpack_require__(3);
-const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let CustomerManager = class CustomerManager extends _postgresql_manager_1._PostgreSqlManager {
-    constructor() {
-        super(entities_1.Customer);
-    }
-};
-exports.CustomerManager = CustomerManager;
-exports.CustomerManager = CustomerManager = __decorate([
-    (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [])
-], CustomerManager);
 
 
 /***/ }),
@@ -9488,20 +9672,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.DistributorManager = void 0;
+exports.CustomerSourceManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let DistributorManager = class DistributorManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let CustomerSourceManager = class CustomerSourceManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.Distributor);
+        super(entities_1.CustomerSource);
     }
 };
-exports.DistributorManager = DistributorManager;
-exports.DistributorManager = DistributorManager = __decorate([
+exports.CustomerSourceManager = CustomerSourceManager;
+exports.CustomerSourceManager = CustomerSourceManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], DistributorManager);
+], CustomerSourceManager);
 
 
 /***/ }),
@@ -9519,20 +9703,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ImageManager = void 0;
+exports.CustomerManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let ImageManager = class ImageManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let CustomerManager = class CustomerManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.Image);
+        super(entities_1.Customer);
     }
 };
-exports.ImageManager = ImageManager;
-exports.ImageManager = ImageManager = __decorate([
+exports.CustomerManager = CustomerManager;
+exports.CustomerManager = CustomerManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], ImageManager);
+], CustomerManager);
 
 
 /***/ }),
@@ -9550,20 +9734,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.LaboratoryGroupManager = void 0;
+exports.DistributorManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let LaboratoryGroupManager = class LaboratoryGroupManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let DistributorManager = class DistributorManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.LaboratoryGroup);
+        super(entities_1.Distributor);
     }
 };
-exports.LaboratoryGroupManager = LaboratoryGroupManager;
-exports.LaboratoryGroupManager = LaboratoryGroupManager = __decorate([
+exports.DistributorManager = DistributorManager;
+exports.DistributorManager = DistributorManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], LaboratoryGroupManager);
+], DistributorManager);
 
 
 /***/ }),
@@ -9581,20 +9765,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.LaboratoryManager = void 0;
+exports.ImageManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let LaboratoryManager = class LaboratoryManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let ImageManager = class ImageManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.Laboratory);
+        super(entities_1.Image);
     }
 };
-exports.LaboratoryManager = LaboratoryManager;
-exports.LaboratoryManager = LaboratoryManager = __decorate([
+exports.ImageManager = ImageManager;
+exports.ImageManager = ImageManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], LaboratoryManager);
+], ImageManager);
 
 
 /***/ }),
@@ -9612,20 +9796,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.PaymentMethodManager = void 0;
+exports.LaboratoryGroupManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let PaymentMethodManager = class PaymentMethodManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let LaboratoryGroupManager = class LaboratoryGroupManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.PaymentMethod);
+        super(entities_1.LaboratoryGroup);
     }
 };
-exports.PaymentMethodManager = PaymentMethodManager;
-exports.PaymentMethodManager = PaymentMethodManager = __decorate([
+exports.LaboratoryGroupManager = LaboratoryGroupManager;
+exports.LaboratoryGroupManager = LaboratoryGroupManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], PaymentMethodManager);
+], LaboratoryGroupManager);
 
 
 /***/ }),
@@ -9643,20 +9827,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.PaymentManager = void 0;
+exports.LaboratoryManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let PaymentManager = class PaymentManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let LaboratoryManager = class LaboratoryManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.Payment);
+        super(entities_1.Laboratory);
     }
 };
-exports.PaymentManager = PaymentManager;
-exports.PaymentManager = PaymentManager = __decorate([
+exports.LaboratoryManager = LaboratoryManager;
+exports.LaboratoryManager = LaboratoryManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], PaymentManager);
+], LaboratoryManager);
 
 
 /***/ }),
@@ -9674,20 +9858,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.PermissionManager = void 0;
+exports.PaymentMethodManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let PermissionManager = class PermissionManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let PaymentMethodManager = class PaymentMethodManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.Permission);
+        super(entities_1.PaymentMethod);
     }
 };
-exports.PermissionManager = PermissionManager;
-exports.PermissionManager = PermissionManager = __decorate([
+exports.PaymentMethodManager = PaymentMethodManager;
+exports.PaymentMethodManager = PaymentMethodManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], PermissionManager);
+], PaymentMethodManager);
 
 
 /***/ }),
@@ -9705,20 +9889,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.PrescriptionSampleManager = void 0;
+exports.PaymentManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let PrescriptionSampleManager = class PrescriptionSampleManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let PaymentManager = class PaymentManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.PrescriptionSample);
+        super(entities_1.Payment);
     }
 };
-exports.PrescriptionSampleManager = PrescriptionSampleManager;
-exports.PrescriptionSampleManager = PrescriptionSampleManager = __decorate([
+exports.PaymentManager = PaymentManager;
+exports.PaymentManager = PaymentManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], PrescriptionSampleManager);
+], PaymentManager);
 
 
 /***/ }),
@@ -9736,20 +9920,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.PrintHtmlManager = void 0;
+exports.PermissionManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let PrintHtmlManager = class PrintHtmlManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let PermissionManager = class PermissionManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.PrintHtml);
+        super(entities_1.Permission);
     }
 };
-exports.PrintHtmlManager = PrintHtmlManager;
-exports.PrintHtmlManager = PrintHtmlManager = __decorate([
+exports.PermissionManager = PermissionManager;
+exports.PermissionManager = PermissionManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], PrintHtmlManager);
+], PermissionManager);
 
 
 /***/ }),
@@ -9767,20 +9951,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ProcedureManager = void 0;
+exports.PrescriptionSampleManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let ProcedureManager = class ProcedureManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let PrescriptionSampleManager = class PrescriptionSampleManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.Procedure);
+        super(entities_1.PrescriptionSample);
     }
 };
-exports.ProcedureManager = ProcedureManager;
-exports.ProcedureManager = ProcedureManager = __decorate([
+exports.PrescriptionSampleManager = PrescriptionSampleManager;
+exports.PrescriptionSampleManager = PrescriptionSampleManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], ProcedureManager);
+], PrescriptionSampleManager);
 
 
 /***/ }),
@@ -9798,20 +9982,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ProductMovementManager = void 0;
+exports.PrintHtmlManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let ProductMovementManager = class ProductMovementManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let PrintHtmlManager = class PrintHtmlManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.ProductMovement);
+        super(entities_1.PrintHtml);
     }
 };
-exports.ProductMovementManager = ProductMovementManager;
-exports.ProductMovementManager = ProductMovementManager = __decorate([
+exports.PrintHtmlManager = PrintHtmlManager;
+exports.PrintHtmlManager = PrintHtmlManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], ProductMovementManager);
+], PrintHtmlManager);
 
 
 /***/ }),
@@ -9829,10 +10013,72 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ProcedureManager = void 0;
+const common_1 = __webpack_require__(3);
+const entities_1 = __webpack_require__(42);
+const _postgresql_manager_1 = __webpack_require__(106);
+let ProcedureManager = class ProcedureManager extends _postgresql_manager_1._PostgreSqlManager {
+    constructor() {
+        super(entities_1.Procedure);
+    }
+};
+exports.ProcedureManager = ProcedureManager;
+exports.ProcedureManager = ProcedureManager = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [])
+], ProcedureManager);
+
+
+/***/ }),
+/* 120 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ProductMovementManager = void 0;
+const common_1 = __webpack_require__(3);
+const entities_1 = __webpack_require__(42);
+const _postgresql_manager_1 = __webpack_require__(106);
+let ProductMovementManager = class ProductMovementManager extends _postgresql_manager_1._PostgreSqlManager {
+    constructor() {
+        super(entities_1.ProductMovement);
+    }
+};
+exports.ProductMovementManager = ProductMovementManager;
+exports.ProductMovementManager = ProductMovementManager = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [])
+], ProductMovementManager);
+
+
+/***/ }),
+/* 121 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
+const _postgresql_manager_1 = __webpack_require__(106);
 let ProductManager = class ProductManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
         super(entities_1.Product);
@@ -9865,7 +10111,7 @@ exports.ProductManager = ProductManager = __decorate([
 
 
 /***/ }),
-/* 120 */
+/* 122 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -9882,7 +10128,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RadiologyGroupManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
+const _postgresql_manager_1 = __webpack_require__(106);
 let RadiologyGroupManager = class RadiologyGroupManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
         super(entities_1.RadiologyGroup);
@@ -9893,68 +10139,6 @@ exports.RadiologyGroupManager = RadiologyGroupManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
 ], RadiologyGroupManager);
-
-
-/***/ }),
-/* 121 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.RadiologyManager = void 0;
-const common_1 = __webpack_require__(3);
-const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let RadiologyManager = class RadiologyManager extends _postgresql_manager_1._PostgreSqlManager {
-    constructor() {
-        super(entities_1.Radiology);
-    }
-};
-exports.RadiologyManager = RadiologyManager;
-exports.RadiologyManager = RadiologyManager = __decorate([
-    (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [])
-], RadiologyManager);
-
-
-/***/ }),
-/* 122 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReceiptItemManager = void 0;
-const common_1 = __webpack_require__(3);
-const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let ReceiptItemManager = class ReceiptItemManager extends _postgresql_manager_1._PostgreSqlManager {
-    constructor() {
-        super(entities_1.ReceiptItem);
-    }
-};
-exports.ReceiptItemManager = ReceiptItemManager;
-exports.ReceiptItemManager = ReceiptItemManager = __decorate([
-    (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [])
-], ReceiptItemManager);
 
 
 /***/ }),
@@ -9972,20 +10156,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ReceiptManager = void 0;
+exports.RadiologyManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let ReceiptManager = class ReceiptManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let RadiologyManager = class RadiologyManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.Receipt);
+        super(entities_1.Radiology);
     }
 };
-exports.ReceiptManager = ReceiptManager;
-exports.ReceiptManager = ReceiptManager = __decorate([
+exports.RadiologyManager = RadiologyManager;
+exports.RadiologyManager = RadiologyManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], ReceiptManager);
+], RadiologyManager);
 
 
 /***/ }),
@@ -10003,20 +10187,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.RoleManager = void 0;
+exports.ReceiptItemManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let RoleManager = class RoleManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let ReceiptItemManager = class ReceiptItemManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.Role);
+        super(entities_1.ReceiptItem);
     }
 };
-exports.RoleManager = RoleManager;
-exports.RoleManager = RoleManager = __decorate([
+exports.ReceiptItemManager = ReceiptItemManager;
+exports.ReceiptItemManager = ReceiptItemManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], RoleManager);
+], ReceiptItemManager);
 
 
 /***/ }),
@@ -10034,20 +10218,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.SettingManager = void 0;
+exports.ReceiptManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let SettingManager = class SettingManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let ReceiptManager = class ReceiptManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.Setting);
+        super(entities_1.Receipt);
     }
 };
-exports.SettingManager = SettingManager;
-exports.SettingManager = SettingManager = __decorate([
+exports.ReceiptManager = ReceiptManager;
+exports.ReceiptManager = ReceiptManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], SettingManager);
+], ReceiptManager);
 
 
 /***/ }),
@@ -10065,20 +10249,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.StockCheckItemManager = void 0;
+exports.RoleManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let StockCheckItemManager = class StockCheckItemManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let RoleManager = class RoleManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.StockCheckItem);
+        super(entities_1.Role);
     }
 };
-exports.StockCheckItemManager = StockCheckItemManager;
-exports.StockCheckItemManager = StockCheckItemManager = __decorate([
+exports.RoleManager = RoleManager;
+exports.RoleManager = RoleManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], StockCheckItemManager);
+], RoleManager);
 
 
 /***/ }),
@@ -10096,20 +10280,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.StockCheckManager = void 0;
+exports.SettingManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let StockCheckManager = class StockCheckManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let SettingManager = class SettingManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.StockCheck);
+        super(entities_1.Setting);
     }
 };
-exports.StockCheckManager = StockCheckManager;
-exports.StockCheckManager = StockCheckManager = __decorate([
+exports.SettingManager = SettingManager;
+exports.SettingManager = SettingManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], StockCheckManager);
+], SettingManager);
 
 
 /***/ }),
@@ -10127,20 +10311,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketAttributeManager = void 0;
+exports.StockCheckItemManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let TicketAttributeManager = class TicketAttributeManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let StockCheckItemManager = class StockCheckItemManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.TicketAttribute);
+        super(entities_1.StockCheckItem);
     }
 };
-exports.TicketAttributeManager = TicketAttributeManager;
-exports.TicketAttributeManager = TicketAttributeManager = __decorate([
+exports.StockCheckItemManager = StockCheckItemManager;
+exports.StockCheckItemManager = StockCheckItemManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], TicketAttributeManager);
+], StockCheckItemManager);
 
 
 /***/ }),
@@ -10158,20 +10342,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketBatchManager = void 0;
+exports.StockCheckManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let TicketBatchManager = class TicketBatchManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let StockCheckManager = class StockCheckManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.TicketBatch);
+        super(entities_1.StockCheck);
     }
 };
-exports.TicketBatchManager = TicketBatchManager;
-exports.TicketBatchManager = TicketBatchManager = __decorate([
+exports.StockCheckManager = StockCheckManager;
+exports.StockCheckManager = StockCheckManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], TicketBatchManager);
+], StockCheckManager);
 
 
 /***/ }),
@@ -10189,20 +10373,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketExpenseManager = void 0;
+exports.TicketAttributeManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let TicketExpenseManager = class TicketExpenseManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let TicketAttributeManager = class TicketAttributeManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.TicketExpense);
+        super(entities_1.TicketAttribute);
     }
 };
-exports.TicketExpenseManager = TicketExpenseManager;
-exports.TicketExpenseManager = TicketExpenseManager = __decorate([
+exports.TicketAttributeManager = TicketAttributeManager;
+exports.TicketAttributeManager = TicketAttributeManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], TicketExpenseManager);
+], TicketAttributeManager);
 
 
 /***/ }),
@@ -10220,20 +10404,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketLaboratoryGroupManager = void 0;
+exports.TicketBatchManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let TicketLaboratoryGroupManager = class TicketLaboratoryGroupManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let TicketBatchManager = class TicketBatchManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.TicketLaboratoryGroup);
+        super(entities_1.TicketBatch);
     }
 };
-exports.TicketLaboratoryGroupManager = TicketLaboratoryGroupManager;
-exports.TicketLaboratoryGroupManager = TicketLaboratoryGroupManager = __decorate([
+exports.TicketBatchManager = TicketBatchManager;
+exports.TicketBatchManager = TicketBatchManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], TicketLaboratoryGroupManager);
+], TicketBatchManager);
 
 
 /***/ }),
@@ -10251,20 +10435,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketLaboratoryResultManager = void 0;
+exports.TicketExpenseManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let TicketLaboratoryResultManager = class TicketLaboratoryResultManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let TicketExpenseManager = class TicketExpenseManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.TicketLaboratoryResult);
+        super(entities_1.TicketExpense);
     }
 };
-exports.TicketLaboratoryResultManager = TicketLaboratoryResultManager;
-exports.TicketLaboratoryResultManager = TicketLaboratoryResultManager = __decorate([
+exports.TicketExpenseManager = TicketExpenseManager;
+exports.TicketExpenseManager = TicketExpenseManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], TicketLaboratoryResultManager);
+], TicketExpenseManager);
 
 
 /***/ }),
@@ -10282,20 +10466,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketLaboratoryManager = void 0;
+exports.TicketLaboratoryGroupManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let TicketLaboratoryManager = class TicketLaboratoryManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let TicketLaboratoryGroupManager = class TicketLaboratoryGroupManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.TicketLaboratory);
+        super(entities_1.TicketLaboratoryGroup);
     }
 };
-exports.TicketLaboratoryManager = TicketLaboratoryManager;
-exports.TicketLaboratoryManager = TicketLaboratoryManager = __decorate([
+exports.TicketLaboratoryGroupManager = TicketLaboratoryGroupManager;
+exports.TicketLaboratoryGroupManager = TicketLaboratoryGroupManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], TicketLaboratoryManager);
+], TicketLaboratoryGroupManager);
 
 
 /***/ }),
@@ -10313,20 +10497,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketProcedureManager = void 0;
+exports.TicketLaboratoryResultManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let TicketProcedureManager = class TicketProcedureManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let TicketLaboratoryResultManager = class TicketLaboratoryResultManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.TicketProcedure);
+        super(entities_1.TicketLaboratoryResult);
     }
 };
-exports.TicketProcedureManager = TicketProcedureManager;
-exports.TicketProcedureManager = TicketProcedureManager = __decorate([
+exports.TicketLaboratoryResultManager = TicketLaboratoryResultManager;
+exports.TicketLaboratoryResultManager = TicketLaboratoryResultManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], TicketProcedureManager);
+], TicketLaboratoryResultManager);
 
 
 /***/ }),
@@ -10344,20 +10528,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketProductManager = void 0;
+exports.TicketLaboratoryManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let TicketProductManager = class TicketProductManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let TicketLaboratoryManager = class TicketLaboratoryManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.TicketProduct);
+        super(entities_1.TicketLaboratory);
     }
 };
-exports.TicketProductManager = TicketProductManager;
-exports.TicketProductManager = TicketProductManager = __decorate([
+exports.TicketLaboratoryManager = TicketLaboratoryManager;
+exports.TicketLaboratoryManager = TicketLaboratoryManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], TicketProductManager);
+], TicketLaboratoryManager);
 
 
 /***/ }),
@@ -10375,20 +10559,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketRadiologyManager = void 0;
+exports.TicketProcedureManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let TicketRadiologyManager = class TicketRadiologyManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let TicketProcedureManager = class TicketProcedureManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.TicketRadiology);
+        super(entities_1.TicketProcedure);
     }
 };
-exports.TicketRadiologyManager = TicketRadiologyManager;
-exports.TicketRadiologyManager = TicketRadiologyManager = __decorate([
+exports.TicketProcedureManager = TicketProcedureManager;
+exports.TicketProcedureManager = TicketProcedureManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], TicketRadiologyManager);
+], TicketProcedureManager);
 
 
 /***/ }),
@@ -10406,20 +10590,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketSurchargeManager = void 0;
+exports.TicketProductManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let TicketSurchargeManager = class TicketSurchargeManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let TicketProductManager = class TicketProductManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.TicketSurcharge);
+        super(entities_1.TicketProduct);
     }
 };
-exports.TicketSurchargeManager = TicketSurchargeManager;
-exports.TicketSurchargeManager = TicketSurchargeManager = __decorate([
+exports.TicketProductManager = TicketProductManager;
+exports.TicketProductManager = TicketProductManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], TicketSurchargeManager);
+], TicketProductManager);
 
 
 /***/ }),
@@ -10437,20 +10621,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketManager = void 0;
+exports.TicketRadiologyManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let TicketManager = class TicketManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let TicketRadiologyManager = class TicketRadiologyManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.Ticket);
+        super(entities_1.TicketRadiology);
     }
 };
-exports.TicketManager = TicketManager;
-exports.TicketManager = TicketManager = __decorate([
+exports.TicketRadiologyManager = TicketRadiologyManager;
+exports.TicketRadiologyManager = TicketRadiologyManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], TicketManager);
+], TicketRadiologyManager);
 
 
 /***/ }),
@@ -10468,20 +10652,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.UserRoleManager = void 0;
+exports.TicketSurchargeManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let UserRoleManager = class UserRoleManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let TicketSurchargeManager = class TicketSurchargeManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.UserRole);
+        super(entities_1.TicketSurcharge);
     }
 };
-exports.UserRoleManager = UserRoleManager;
-exports.UserRoleManager = UserRoleManager = __decorate([
+exports.TicketSurchargeManager = TicketSurchargeManager;
+exports.TicketSurchargeManager = TicketSurchargeManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], UserRoleManager);
+], TicketSurchargeManager);
 
 
 /***/ }),
@@ -10499,20 +10683,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.UserManager = void 0;
+exports.TicketManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-let UserManager = class UserManager extends _postgresql_manager_1._PostgreSqlManager {
+const _postgresql_manager_1 = __webpack_require__(106);
+let TicketManager = class TicketManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
-        super(entities_1.User);
+        super(entities_1.Ticket);
     }
 };
-exports.UserManager = UserManager;
-exports.UserManager = UserManager = __decorate([
+exports.TicketManager = TicketManager;
+exports.TicketManager = TicketManager = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [])
-], UserManager);
+], TicketManager);
 
 
 /***/ }),
@@ -10530,10 +10714,72 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserRoleManager = void 0;
+const common_1 = __webpack_require__(3);
+const entities_1 = __webpack_require__(42);
+const _postgresql_manager_1 = __webpack_require__(106);
+let UserRoleManager = class UserRoleManager extends _postgresql_manager_1._PostgreSqlManager {
+    constructor() {
+        super(entities_1.UserRole);
+    }
+};
+exports.UserRoleManager = UserRoleManager;
+exports.UserRoleManager = UserRoleManager = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [])
+], UserRoleManager);
+
+
+/***/ }),
+/* 142 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UserManager = void 0;
+const common_1 = __webpack_require__(3);
+const entities_1 = __webpack_require__(42);
+const _postgresql_manager_1 = __webpack_require__(106);
+let UserManager = class UserManager extends _postgresql_manager_1._PostgreSqlManager {
+    constructor() {
+        super(entities_1.User);
+    }
+};
+exports.UserManager = UserManager;
+exports.UserManager = UserManager = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [])
+], UserManager);
+
+
+/***/ }),
+/* 143 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.WarehouseManager = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
+const _postgresql_manager_1 = __webpack_require__(106);
 let WarehouseManager = class WarehouseManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
         super(entities_1.Warehouse);
@@ -10547,7 +10793,7 @@ exports.WarehouseManager = WarehouseManager = __decorate([
 
 
 /***/ }),
-/* 142 */
+/* 144 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -10566,9 +10812,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(143), exports);
 __exportStar(__webpack_require__(145), exports);
-__exportStar(__webpack_require__(146), exports);
 __exportStar(__webpack_require__(147), exports);
 __exportStar(__webpack_require__(148), exports);
 __exportStar(__webpack_require__(149), exports);
@@ -10584,10 +10828,8 @@ __exportStar(__webpack_require__(158), exports);
 __exportStar(__webpack_require__(159), exports);
 __exportStar(__webpack_require__(160), exports);
 __exportStar(__webpack_require__(161), exports);
-__exportStar(__webpack_require__(202), exports);
-__exportStar(__webpack_require__(203), exports);
-__exportStar(__webpack_require__(204), exports);
-__exportStar(__webpack_require__(205), exports);
+__exportStar(__webpack_require__(162), exports);
+__exportStar(__webpack_require__(163), exports);
 __exportStar(__webpack_require__(206), exports);
 __exportStar(__webpack_require__(207), exports);
 __exportStar(__webpack_require__(208), exports);
@@ -10607,12 +10849,16 @@ __exportStar(__webpack_require__(221), exports);
 __exportStar(__webpack_require__(222), exports);
 __exportStar(__webpack_require__(223), exports);
 __exportStar(__webpack_require__(224), exports);
+__exportStar(__webpack_require__(225), exports);
 __exportStar(__webpack_require__(226), exports);
 __exportStar(__webpack_require__(227), exports);
+__exportStar(__webpack_require__(228), exports);
+__exportStar(__webpack_require__(230), exports);
+__exportStar(__webpack_require__(231), exports);
 
 
 /***/ }),
-/* 143 */
+/* 145 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -10630,8 +10876,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductPickingOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
-const array_helper_1 = __webpack_require__(92);
-const time_helper_1 = __webpack_require__(144);
+const array_helper_1 = __webpack_require__(94);
+const time_helper_1 = __webpack_require__(146);
 const error_1 = __webpack_require__(14);
 const variable_1 = __webpack_require__(21);
 let ProductPickingOperation = class ProductPickingOperation {
@@ -10917,7 +11163,7 @@ exports.ProductPickingOperation = ProductPickingOperation = __decorate([
 
 
 /***/ }),
-/* 144 */
+/* 146 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -11063,7 +11309,7 @@ ESTimer.timeToText = (time, pattern = 'DD/MM/YYYY', utcOffset) => {
 
 
 /***/ }),
-/* 145 */
+/* 147 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -11081,7 +11327,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductPutawayOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
-const array_helper_1 = __webpack_require__(92);
+const array_helper_1 = __webpack_require__(94);
 let ProductPutawayOperation = class ProductPutawayOperation {
     constructor(dataSource) {
         this.dataSource = dataSource;
@@ -11260,7 +11506,7 @@ exports.ProductPutawayOperation = ProductPutawayOperation = __decorate([
 
 
 /***/ }),
-/* 146 */
+/* 148 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -11333,7 +11579,7 @@ exports.ProductOperation = ProductOperation = __decorate([
 
 
 /***/ }),
-/* 147 */
+/* 149 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -11351,9 +11597,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReceiptDepositedOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
-const time_helper_1 = __webpack_require__(144);
+const time_helper_1 = __webpack_require__(146);
 const receipt_entity_1 = __webpack_require__(51);
-const managers_1 = __webpack_require__(102);
+const managers_1 = __webpack_require__(104);
 let ReceiptDepositedOperation = class ReceiptDepositedOperation {
     constructor(dataSource, receiptManager, receiptItemManager) {
         this.dataSource = dataSource;
@@ -11388,7 +11634,7 @@ exports.ReceiptDepositedOperation = ReceiptDepositedOperation = __decorate([
 
 
 /***/ }),
-/* 148 */
+/* 150 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -11410,10 +11656,10 @@ exports.ReceiptDraftOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
-const time_helper_1 = __webpack_require__(144);
+const time_helper_1 = __webpack_require__(146);
 const variable_1 = __webpack_require__(21);
 const receipt_entity_1 = __webpack_require__(51);
-const managers_1 = __webpack_require__(102);
+const managers_1 = __webpack_require__(104);
 let ReceiptDraftOperation = class ReceiptDraftOperation {
     constructor(dataSource, manager, receiptManager, receiptItemManager) {
         this.dataSource = dataSource;
@@ -11463,7 +11709,7 @@ exports.ReceiptDraftOperation = ReceiptDraftOperation = __decorate([
 
 
 /***/ }),
-/* 149 */
+/* 151 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -11483,7 +11729,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
 const payment_entity_1 = __webpack_require__(48);
 const receipt_entity_1 = __webpack_require__(51);
-const managers_1 = __webpack_require__(102);
+const managers_1 = __webpack_require__(104);
 let ReceiptPayDebtOperation = class ReceiptPayDebtOperation {
     constructor(dataSource, receiptManager, distributorManager, paymentManager) {
         this.dataSource = dataSource;
@@ -11545,7 +11791,7 @@ exports.ReceiptPayDebtOperation = ReceiptPayDebtOperation = __decorate([
 
 
 /***/ }),
-/* 150 */
+/* 152 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -11566,7 +11812,7 @@ const typeorm_1 = __webpack_require__(18);
 const variable_1 = __webpack_require__(21);
 const payment_entity_1 = __webpack_require__(48);
 const receipt_entity_1 = __webpack_require__(51);
-const managers_1 = __webpack_require__(102);
+const managers_1 = __webpack_require__(104);
 let ReceiptPaymentAndCloseOperation = class ReceiptPaymentAndCloseOperation {
     constructor(dataSource, receiptManager, distributorManager, paymentManager) {
         this.dataSource = dataSource;
@@ -11671,7 +11917,7 @@ exports.ReceiptPaymentAndCloseOperation = ReceiptPaymentAndCloseOperation = __de
 
 
 /***/ }),
-/* 151 */
+/* 153 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -11692,7 +11938,7 @@ const typeorm_1 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
 const payment_entity_1 = __webpack_require__(48);
 const receipt_entity_1 = __webpack_require__(51);
-const managers_1 = __webpack_require__(102);
+const managers_1 = __webpack_require__(104);
 let ReceiptPrepaymentOperation = class ReceiptPrepaymentOperation {
     constructor(dataSource, receiptManager, paymentManager) {
         this.dataSource = dataSource;
@@ -11762,7 +12008,7 @@ exports.ReceiptPrepaymentOperation = ReceiptPrepaymentOperation = __decorate([
 
 
 /***/ }),
-/* 152 */
+/* 154 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -11782,7 +12028,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
 const payment_entity_1 = __webpack_require__(48);
 const receipt_entity_1 = __webpack_require__(51);
-const managers_1 = __webpack_require__(102);
+const managers_1 = __webpack_require__(104);
 let ReceiptRefundOverpaidOperation = class ReceiptRefundOverpaidOperation {
     constructor(dataSource, receiptManager, paymentManager, distributorManager) {
         this.dataSource = dataSource;
@@ -11854,7 +12100,7 @@ exports.ReceiptRefundOverpaidOperation = ReceiptRefundOverpaidOperation = __deco
 
 
 /***/ }),
-/* 153 */
+/* 155 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -11874,7 +12120,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
 const payment_entity_1 = __webpack_require__(48);
 const receipt_entity_1 = __webpack_require__(51);
-const managers_1 = __webpack_require__(102);
+const managers_1 = __webpack_require__(104);
 let ReceiptReopenOperation = class ReceiptReopenOperation {
     constructor(dataSource, receiptManager, paymentManager, distributorManager) {
         this.dataSource = dataSource;
@@ -11954,7 +12200,7 @@ exports.ReceiptReopenOperation = ReceiptReopenOperation = __decorate([
 
 
 /***/ }),
-/* 154 */
+/* 156 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -11972,11 +12218,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReceiptReturnProductOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
-const array_helper_1 = __webpack_require__(92);
+const array_helper_1 = __webpack_require__(94);
 const variable_1 = __webpack_require__(21);
 const receipt_entity_1 = __webpack_require__(51);
-const managers_1 = __webpack_require__(102);
-const product_picking_operation_1 = __webpack_require__(143);
+const managers_1 = __webpack_require__(104);
+const product_picking_operation_1 = __webpack_require__(145);
 let ReceiptReturnProductOperation = class ReceiptReturnProductOperation {
     constructor(dataSource, receiptManager, receiptItemManager, productManager, batchManager, productMovementManager, productPickingOperation) {
         this.dataSource = dataSource;
@@ -12098,7 +12344,7 @@ exports.ReceiptReturnProductOperation = ReceiptReturnProductOperation = __decora
 
 
 /***/ }),
-/* 155 */
+/* 157 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -12116,11 +12362,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReceiptSendProductOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
-const array_helper_1 = __webpack_require__(92);
+const array_helper_1 = __webpack_require__(94);
 const variable_1 = __webpack_require__(21);
 const receipt_entity_1 = __webpack_require__(51);
-const managers_1 = __webpack_require__(102);
-const product_putaway_operation_1 = __webpack_require__(145);
+const managers_1 = __webpack_require__(104);
+const product_putaway_operation_1 = __webpack_require__(147);
 let ReceiptSendProductOperation = class ReceiptSendProductOperation {
     constructor(dataSource, receiptManager, receiptItemManager, productManager, batchManager, productMovementManager, productPutawayOperation) {
         this.dataSource = dataSource;
@@ -12264,7 +12510,7 @@ exports.ReceiptSendProductOperation = ReceiptSendProductOperation = __decorate([
 
 
 /***/ }),
-/* 156 */
+/* 158 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -12342,7 +12588,7 @@ exports.StatisticReceiptOperation = StatisticReceiptOperation = __decorate([
 
 
 /***/ }),
-/* 157 */
+/* 159 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -12455,7 +12701,7 @@ exports.StatisticOperation = StatisticOperation = __decorate([
 
 
 /***/ }),
-/* 158 */
+/* 160 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -12474,7 +12720,7 @@ exports.TicketChangeDiscountOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
+const managers_1 = __webpack_require__(104);
 let TicketChangeDiscountOperation = class TicketChangeDiscountOperation {
     constructor(dataSource, ticketManager) {
         this.dataSource = dataSource;
@@ -12515,7 +12761,7 @@ exports.TicketChangeDiscountOperation = TicketChangeDiscountOperation = __decora
 
 
 /***/ }),
-/* 159 */
+/* 161 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -12538,7 +12784,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const variable_1 = __webpack_require__(21);
-const managers_1 = __webpack_require__(102);
+const managers_1 = __webpack_require__(104);
 let TicketChangeItemMoneyManager = class TicketChangeItemMoneyManager {
     constructor(dataSource, manager, ticketManager) {
         this.dataSource = dataSource;
@@ -12596,7 +12842,7 @@ exports.TicketChangeItemMoneyManager = TicketChangeItemMoneyManager = __decorate
 
 
 /***/ }),
-/* 160 */
+/* 162 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -12616,7 +12862,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
 const payment_entity_1 = __webpack_require__(48);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
+const managers_1 = __webpack_require__(104);
 let TicketPayDebtOperation = class TicketPayDebtOperation {
     constructor(dataSource, ticketManager, customerManager, paymentManager) {
         this.dataSource = dataSource;
@@ -12681,7 +12927,7 @@ exports.TicketPayDebtOperation = TicketPayDebtOperation = __decorate([
 
 
 /***/ }),
-/* 161 */
+/* 163 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -12705,8 +12951,8 @@ const payment_entity_1 = __webpack_require__(48);
 const position_entity_1 = __webpack_require__(75);
 const ticket_product_entity_1 = __webpack_require__(69);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
-const repositories_1 = __webpack_require__(162);
+const managers_1 = __webpack_require__(104);
+const repositories_1 = __webpack_require__(164);
 let TicketPaymentAndCloseOperation = class TicketPaymentAndCloseOperation {
     constructor(dataSource, ticketManager, ticketUserManager, customerManager, paymentManager) {
         this.dataSource = dataSource;
@@ -12762,39 +13008,39 @@ let TicketPaymentAndCloseOperation = class TicketPaymentAndCloseOperation {
                     let commissionPercentExpected = 0;
                     let ticketItemExpectedPrice = 0;
                     let ticketItemActualPrice = 0;
-                    if (tu.positionType === position_entity_1.PositionType.Ticket) {
+                    if (tu.positionType === position_entity_1.PositionInteractType.Ticket) {
                         ticketItemExpectedPrice = ticketOrigin.totalMoney + ticketOrigin.discountMoney;
                         ticketItemActualPrice = ticketOrigin.totalMoney;
                     }
-                    if (tu.positionType === position_entity_1.PositionType.Product) {
+                    if (tu.positionType === position_entity_1.PositionInteractType.Product) {
                         const ticketProduct = ticketProductList.find((i) => i.id === tu.ticketItemId);
                         if (!ticketProduct)
                             ticketUserRemoveList.push(tu);
                         ticketItemExpectedPrice = (ticketProduct === null || ticketProduct === void 0 ? void 0 : ticketProduct.expectedPrice) || 0;
                         ticketItemActualPrice = (ticketProduct === null || ticketProduct === void 0 ? void 0 : ticketProduct.actualPrice) || 0;
                     }
-                    if (tu.positionType === position_entity_1.PositionType.Procedure) {
+                    if (tu.positionType === position_entity_1.PositionInteractType.Procedure) {
                         const ticketProcedure = ticketProcedureList.find((i) => i.id === tu.ticketItemId);
                         if (!ticketProcedure)
                             ticketUserRemoveList.push(tu);
                         ticketItemExpectedPrice = ticketProcedure.expectedPrice || 0;
                         ticketItemActualPrice = ticketProcedure.actualPrice || 0;
                     }
-                    if (tu.positionType === position_entity_1.PositionType.Radiology) {
+                    if (tu.positionType === position_entity_1.PositionInteractType.Radiology) {
                         const ticketRadiology = ticketRadiologyList.find((i) => i.id === tu.ticketItemId);
                         if (!ticketRadiology)
                             ticketUserRemoveList.push(tu);
                         ticketItemExpectedPrice = ticketRadiology.expectedPrice || 0;
                         ticketItemActualPrice = ticketRadiology.actualPrice || 0;
                     }
-                    if (tu.positionType === position_entity_1.PositionType.Laboratory) {
+                    if (tu.positionType === position_entity_1.PositionInteractType.Laboratory) {
                         const ticketLaboratory = ticketLaboratoryList.find((i) => i.id === tu.ticketItemId);
                         if (!ticketLaboratory)
                             ticketUserRemoveList.push(tu);
                         ticketItemExpectedPrice = ticketLaboratory.expectedPrice || 0;
                         ticketItemActualPrice = ticketLaboratory.actualPrice || 0;
                     }
-                    if (tu.positionType === position_entity_1.PositionType.ConsumableList) {
+                    if (tu.positionType === position_entity_1.PositionInteractType.ConsumableList) {
                         const ticketProductConsumableList = ticketProductList.filter((i) => {
                             return i.type === ticket_product_entity_1.TicketProductType.Consumable;
                         });
@@ -12805,7 +13051,7 @@ let TicketPaymentAndCloseOperation = class TicketPaymentAndCloseOperation {
                             return acc + cur.actualPrice * cur.quantity;
                         }, 0);
                     }
-                    if (tu.positionType === position_entity_1.PositionType.PrescriptionList) {
+                    if (tu.positionType === position_entity_1.PositionInteractType.PrescriptionList) {
                         const ticketProductPrescriptionList = ticketProductList.filter((i) => {
                             return i.type === ticket_product_entity_1.TicketProductType.Prescription;
                         });
@@ -12976,7 +13222,7 @@ exports.TicketPaymentAndCloseOperation = TicketPaymentAndCloseOperation = __deco
 
 
 /***/ }),
-/* 162 */
+/* 164 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -12995,8 +13241,6 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(163), exports);
-__exportStar(__webpack_require__(164), exports);
 __exportStar(__webpack_require__(165), exports);
 __exportStar(__webpack_require__(166), exports);
 __exportStar(__webpack_require__(167), exports);
@@ -13005,14 +13249,14 @@ __exportStar(__webpack_require__(169), exports);
 __exportStar(__webpack_require__(170), exports);
 __exportStar(__webpack_require__(171), exports);
 __exportStar(__webpack_require__(172), exports);
-__exportStar(__webpack_require__(40), exports);
 __exportStar(__webpack_require__(173), exports);
 __exportStar(__webpack_require__(174), exports);
-__exportStar(__webpack_require__(87), exports);
 __exportStar(__webpack_require__(175), exports);
 __exportStar(__webpack_require__(176), exports);
+__exportStar(__webpack_require__(40), exports);
 __exportStar(__webpack_require__(177), exports);
 __exportStar(__webpack_require__(178), exports);
+__exportStar(__webpack_require__(89), exports);
 __exportStar(__webpack_require__(179), exports);
 __exportStar(__webpack_require__(180), exports);
 __exportStar(__webpack_require__(181), exports);
@@ -13021,12 +13265,12 @@ __exportStar(__webpack_require__(183), exports);
 __exportStar(__webpack_require__(184), exports);
 __exportStar(__webpack_require__(185), exports);
 __exportStar(__webpack_require__(186), exports);
-__exportStar(__webpack_require__(88), exports);
-__exportStar(__webpack_require__(89), exports);
 __exportStar(__webpack_require__(187), exports);
 __exportStar(__webpack_require__(188), exports);
 __exportStar(__webpack_require__(189), exports);
 __exportStar(__webpack_require__(190), exports);
+__exportStar(__webpack_require__(90), exports);
+__exportStar(__webpack_require__(91), exports);
 __exportStar(__webpack_require__(191), exports);
 __exportStar(__webpack_require__(192), exports);
 __exportStar(__webpack_require__(193), exports);
@@ -13037,13 +13281,17 @@ __exportStar(__webpack_require__(197), exports);
 __exportStar(__webpack_require__(198), exports);
 __exportStar(__webpack_require__(199), exports);
 __exportStar(__webpack_require__(200), exports);
-__exportStar(__webpack_require__(90), exports);
-__exportStar(__webpack_require__(91), exports);
 __exportStar(__webpack_require__(201), exports);
+__exportStar(__webpack_require__(202), exports);
+__exportStar(__webpack_require__(203), exports);
+__exportStar(__webpack_require__(204), exports);
+__exportStar(__webpack_require__(92), exports);
+__exportStar(__webpack_require__(93), exports);
+__exportStar(__webpack_require__(205), exports);
 
 
 /***/ }),
-/* 163 */
+/* 165 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -13066,8 +13314,8 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_manager_1 = __webpack_require__(106);
+const _postgresql_repository_1 = __webpack_require__(86);
 let AddressManager = class AddressManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
         super(entities_1.Address);
@@ -13094,7 +13342,7 @@ exports.AddressRepository = AddressRepository = __decorate([
 
 
 /***/ }),
-/* 164 */
+/* 166 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -13117,7 +13365,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let AppointmentRepository = class AppointmentRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(dataSource, appointmentRepository) {
         super(entities_1.Appointment, appointmentRepository);
@@ -13134,7 +13382,7 @@ exports.AppointmentRepository = AppointmentRepository = __decorate([
 
 
 /***/ }),
-/* 165 */
+/* 167 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -13157,8 +13405,8 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const managers_1 = __webpack_require__(102);
-const _postgresql_repository_1 = __webpack_require__(84);
+const managers_1 = __webpack_require__(104);
+const _postgresql_repository_1 = __webpack_require__(86);
 let BatchRepository = class BatchRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(dataSource, batchRepository, productManager, batchManager, productMovementManager, receiptItemManager, ticketProductManager, ticketBatchManager, stockCheckItemManager) {
         super(entities_1.Batch, batchRepository);
@@ -13207,7 +13455,7 @@ exports.BatchRepository = BatchRepository = __decorate([
 
 
 /***/ }),
-/* 166 */
+/* 168 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -13230,7 +13478,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let CustomerSourceRepository = class CustomerSourceRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(dataSource, customerSourceRepository) {
         super(entities_1.CustomerSource, customerSourceRepository);
@@ -13247,7 +13495,7 @@ exports.CustomerSourceRepository = CustomerSourceRepository = __decorate([
 
 
 /***/ }),
-/* 167 */
+/* 169 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -13270,7 +13518,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let CustomerRepository = class CustomerRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(dataSource, manager, customerRepository) {
         super(entities_1.Customer, customerRepository);
@@ -13297,7 +13545,58 @@ exports.CustomerRepository = CustomerRepository = __decorate([
 
 
 /***/ }),
-/* 168 */
+/* 170 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DiscountRepository = exports.DiscountManager = void 0;
+const common_1 = __webpack_require__(3);
+const typeorm_1 = __webpack_require__(41);
+const typeorm_2 = __webpack_require__(18);
+const entities_1 = __webpack_require__(42);
+const _postgresql_manager_1 = __webpack_require__(106);
+const _postgresql_repository_1 = __webpack_require__(86);
+let DiscountManager = class DiscountManager extends _postgresql_manager_1._PostgreSqlManager {
+    constructor() {
+        super(entities_1.Discount);
+    }
+};
+exports.DiscountManager = DiscountManager;
+exports.DiscountManager = DiscountManager = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [])
+], DiscountManager);
+let DiscountRepository = class DiscountRepository extends _postgresql_repository_1._PostgreSqlRepository {
+    constructor(dataSource, discountRepository) {
+        super(entities_1.Discount, discountRepository);
+        this.dataSource = dataSource;
+        this.discountRepository = discountRepository;
+    }
+};
+exports.DiscountRepository = DiscountRepository;
+exports.DiscountRepository = DiscountRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(1, (0, typeorm_1.InjectRepository)(entities_1.Discount)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.DataSource !== "undefined" && typeorm_2.DataSource) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object])
+], DiscountRepository);
+
+
+/***/ }),
+/* 171 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -13320,7 +13619,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let DistributorRepository = class DistributorRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(dataSource, distributorRepository) {
         super(entities_1.Distributor, distributorRepository);
@@ -13337,7 +13636,58 @@ exports.DistributorRepository = DistributorRepository = __decorate([
 
 
 /***/ }),
-/* 169 */
+/* 172 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ICDRepository = exports.ICDManager = void 0;
+const common_1 = __webpack_require__(3);
+const typeorm_1 = __webpack_require__(41);
+const typeorm_2 = __webpack_require__(18);
+const entities_1 = __webpack_require__(42);
+const _postgresql_manager_1 = __webpack_require__(106);
+const _postgresql_repository_1 = __webpack_require__(86);
+let ICDManager = class ICDManager extends _postgresql_manager_1._PostgreSqlManager {
+    constructor() {
+        super(entities_1.ICD);
+    }
+};
+exports.ICDManager = ICDManager;
+exports.ICDManager = ICDManager = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [])
+], ICDManager);
+let ICDRepository = class ICDRepository extends _postgresql_repository_1._PostgreSqlRepository {
+    constructor(dataSource, icdRepository) {
+        super(entities_1.ICD, icdRepository);
+        this.dataSource = dataSource;
+        this.icdRepository = icdRepository;
+    }
+};
+exports.ICDRepository = ICDRepository;
+exports.ICDRepository = ICDRepository = __decorate([
+    (0, common_1.Injectable)(),
+    __param(1, (0, typeorm_1.InjectRepository)(entities_1.ICD)),
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_2.DataSource !== "undefined" && typeorm_2.DataSource) === "function" ? _a : Object, typeof (_b = typeof typeorm_2.Repository !== "undefined" && typeorm_2.Repository) === "function" ? _b : Object])
+], ICDRepository);
+
+
+/***/ }),
+/* 173 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -13360,7 +13710,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let ImageRepository = class ImageRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(dataSource, imageRepository) {
         super(entities_1.Image, imageRepository);
@@ -13377,7 +13727,7 @@ exports.ImageRepository = ImageRepository = __decorate([
 
 
 /***/ }),
-/* 170 */
+/* 174 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -13400,7 +13750,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let LaboratoryGroupRepository = class LaboratoryGroupRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(dataSource, laboratoryGroupRepository) {
         super(entities_1.LaboratoryGroup, laboratoryGroupRepository);
@@ -13463,7 +13813,7 @@ exports.LaboratoryGroupRepository = LaboratoryGroupRepository = __decorate([
 
 
 /***/ }),
-/* 171 */
+/* 175 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -13486,8 +13836,8 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_manager_1 = __webpack_require__(106);
+const _postgresql_repository_1 = __webpack_require__(86);
 let LaboratorySampleManager = class LaboratorySampleManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
         super(entities_1.LaboratorySample);
@@ -13514,7 +13864,7 @@ exports.LaboratorySampleRepository = LaboratorySampleRepository = __decorate([
 
 
 /***/ }),
-/* 172 */
+/* 176 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -13537,7 +13887,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let LaboratoryRepository = class LaboratoryRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(dataSource, laboratoryRepository) {
         super(entities_1.Laboratory, laboratoryRepository);
@@ -13615,7 +13965,7 @@ exports.LaboratoryRepository = LaboratoryRepository = __decorate([
 
 
 /***/ }),
-/* 173 */
+/* 177 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -13638,7 +13988,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let PaymentMethodRepository = class PaymentMethodRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(dataSource, paymentMethodRepository) {
         super(entities_1.PaymentMethod, paymentMethodRepository);
@@ -13655,7 +14005,7 @@ exports.PaymentMethodRepository = PaymentMethodRepository = __decorate([
 
 
 /***/ }),
-/* 174 */
+/* 178 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -13678,7 +14028,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let PaymentRepository = class PaymentRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(dataSource, paymentRepository) {
         super(entities_1.Payment, paymentRepository);
@@ -13695,7 +14045,7 @@ exports.PaymentRepository = PaymentRepository = __decorate([
 
 
 /***/ }),
-/* 175 */
+/* 179 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -13718,8 +14068,8 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_manager_1 = __webpack_require__(106);
+const _postgresql_repository_1 = __webpack_require__(86);
 let PositionManager = class PositionManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
         super(entities_1.Position);
@@ -13746,7 +14096,7 @@ exports.PositionRepository = PositionRepository = __decorate([
 
 
 /***/ }),
-/* 176 */
+/* 180 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -13769,7 +14119,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let PrescriptionSampleRepository = class PrescriptionSampleRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(dataSource, prescriptionSampleRepository) {
         super(entities_1.PrescriptionSample, prescriptionSampleRepository);
@@ -13786,7 +14136,7 @@ exports.PrescriptionSampleRepository = PrescriptionSampleRepository = __decorate
 
 
 /***/ }),
-/* 177 */
+/* 181 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -13809,7 +14159,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let PrintHtmlRepository = class PrintHtmlRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(printHtmlRepository) {
         super(entities_1.PrintHtml, printHtmlRepository);
@@ -13825,7 +14175,7 @@ exports.PrintHtmlRepository = PrintHtmlRepository = __decorate([
 
 
 /***/ }),
-/* 178 */
+/* 182 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -13848,7 +14198,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let ProcedureGroupRepository = class ProcedureGroupRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(dataSource, procedureGroupRepository) {
         super(entities_1.ProcedureGroup, procedureGroupRepository);
@@ -13902,7 +14252,7 @@ exports.ProcedureGroupRepository = ProcedureGroupRepository = __decorate([
 
 
 /***/ }),
-/* 179 */
+/* 183 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -13925,7 +14275,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let ProcedureRepository = class ProcedureRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(dataSource, manager, procedureRepository) {
         super(entities_1.Procedure, procedureRepository);
@@ -13944,7 +14294,7 @@ exports.ProcedureRepository = ProcedureRepository = __decorate([
 
 
 /***/ }),
-/* 180 */
+/* 184 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -13967,8 +14317,8 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_manager_1 = __webpack_require__(106);
+const _postgresql_repository_1 = __webpack_require__(86);
 let ProductGroupManager = class ProductGroupManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
         super(entities_1.ProductGroup);
@@ -14032,7 +14382,7 @@ exports.ProductGroupRepository = ProductGroupRepository = __decorate([
 
 
 /***/ }),
-/* 181 */
+/* 185 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -14056,7 +14406,7 @@ const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const variable_1 = __webpack_require__(21);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let ProductMovementRepository = class ProductMovementRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(manager, productMovementRepository) {
         super(entities_1.ProductMovement, productMovementRepository);
@@ -14110,7 +14460,7 @@ exports.ProductMovementRepository = ProductMovementRepository = __decorate([
 
 
 /***/ }),
-/* 182 */
+/* 186 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -14134,8 +14484,8 @@ const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const variable_1 = __webpack_require__(21);
 const entities_1 = __webpack_require__(42);
-const managers_1 = __webpack_require__(102);
-const _postgresql_repository_1 = __webpack_require__(84);
+const managers_1 = __webpack_require__(104);
+const _postgresql_repository_1 = __webpack_require__(86);
 let ProductRepository = class ProductRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(productRepository, dataSource, productManager, batchManager, productMovementManager, receiptItemManager, ticketProductManager, ticketBatchManager, stockCheckItemManager) {
         super(entities_1.Product, productRepository);
@@ -14207,7 +14557,7 @@ exports.ProductRepository = ProductRepository = __decorate([
 
 
 /***/ }),
-/* 183 */
+/* 187 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -14230,7 +14580,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let RadiologyGroupRepository = class RadiologyGroupRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(dataSource, radiologyGroupRepository) {
         super(entities_1.RadiologyGroup, radiologyGroupRepository);
@@ -14284,7 +14634,7 @@ exports.RadiologyGroupRepository = RadiologyGroupRepository = __decorate([
 
 
 /***/ }),
-/* 184 */
+/* 188 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -14307,7 +14657,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let RadiologyRepository = class RadiologyRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(dataSource, radiologyRepository) {
         super(entities_1.Radiology, radiologyRepository);
@@ -14324,7 +14674,7 @@ exports.RadiologyRepository = RadiologyRepository = __decorate([
 
 
 /***/ }),
-/* 185 */
+/* 189 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -14347,7 +14697,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let ReceiptItemRepository = class ReceiptItemRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(manager, receiptItemRepository) {
         super(entities_1.ReceiptItem, receiptItemRepository);
@@ -14365,7 +14715,7 @@ exports.ReceiptItemRepository = ReceiptItemRepository = __decorate([
 
 
 /***/ }),
-/* 186 */
+/* 190 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -14389,7 +14739,7 @@ const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
 const receipt_entity_1 = __webpack_require__(51);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let ReceiptRepository = class ReceiptRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(dataSource, manager, receiptRepository) {
         super(entities_1.Receipt, receiptRepository);
@@ -14444,7 +14794,7 @@ exports.ReceiptRepository = ReceiptRepository = __decorate([
 
 
 /***/ }),
-/* 187 */
+/* 191 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -14467,7 +14817,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let StockCheckItemRepository = class StockCheckItemRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(manager, stockCheckItemRepository) {
         super(entities_1.StockCheckItem, stockCheckItemRepository);
@@ -14485,7 +14835,7 @@ exports.StockCheckItemRepository = StockCheckItemRepository = __decorate([
 
 
 /***/ }),
-/* 188 */
+/* 192 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -14508,7 +14858,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let StockCheckRepository = class StockCheckRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(dataSource, manager, stockCheckRepository) {
         super(entities_1.StockCheck, stockCheckRepository);
@@ -14527,7 +14877,7 @@ exports.StockCheckRepository = StockCheckRepository = __decorate([
 
 
 /***/ }),
-/* 189 */
+/* 193 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -14550,7 +14900,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let TicketAttributeRepository = class TicketAttributeRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(manager, ticketAttributeRepository) {
         super(entities_1.TicketAttribute, ticketAttributeRepository);
@@ -14568,7 +14918,7 @@ exports.TicketAttributeRepository = TicketAttributeRepository = __decorate([
 
 
 /***/ }),
-/* 190 */
+/* 194 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -14591,7 +14941,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let TicketBatchRepository = class TicketBatchRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(manager, ticketBatchRepository) {
         super(entities_1.TicketBatch, ticketBatchRepository);
@@ -14609,7 +14959,7 @@ exports.TicketBatchRepository = TicketBatchRepository = __decorate([
 
 
 /***/ }),
-/* 191 */
+/* 195 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -14632,7 +14982,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let TicketExpenseRepository = class TicketExpenseRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(manager, ticketExpenseRepository) {
         super(entities_1.TicketExpense, ticketExpenseRepository);
@@ -14650,7 +15000,7 @@ exports.TicketExpenseRepository = TicketExpenseRepository = __decorate([
 
 
 /***/ }),
-/* 192 */
+/* 196 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -14673,7 +15023,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let TicketLaboratoryGroupRepository = class TicketLaboratoryGroupRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(manager, ticketLaboratoryGroupRepository) {
         super(entities_1.TicketLaboratoryGroup, ticketLaboratoryGroupRepository);
@@ -14691,7 +15041,7 @@ exports.TicketLaboratoryGroupRepository = TicketLaboratoryGroupRepository = __de
 
 
 /***/ }),
-/* 193 */
+/* 197 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -14714,7 +15064,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let TicketLaboratoryResultRepository = class TicketLaboratoryResultRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(manager, ticketLaboratoryResultRepository) {
         super(entities_1.TicketLaboratoryResult, ticketLaboratoryResultRepository);
@@ -14754,7 +15104,7 @@ exports.TicketLaboratoryResultRepository = TicketLaboratoryResultRepository = __
 
 
 /***/ }),
-/* 194 */
+/* 198 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -14777,7 +15127,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let TicketLaboratoryRepository = class TicketLaboratoryRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(manager, ticketLaboratoryRepository) {
         super(entities_1.TicketLaboratory, ticketLaboratoryRepository);
@@ -14819,7 +15169,7 @@ exports.TicketLaboratoryRepository = TicketLaboratoryRepository = __decorate([
 
 
 /***/ }),
-/* 195 */
+/* 199 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -14842,7 +15192,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let TicketProcedureRepository = class TicketProcedureRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(manager, ticketProcedureRepository) {
         super(entities_1.TicketProcedure, ticketProcedureRepository);
@@ -14927,7 +15277,7 @@ exports.TicketProcedureRepository = TicketProcedureRepository = __decorate([
 
 
 /***/ }),
-/* 196 */
+/* 200 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -14950,7 +15300,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let TicketProductRepository = class TicketProductRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(manager, ticketProductRepository) {
         super(entities_1.TicketProduct, ticketProductRepository);
@@ -14991,7 +15341,7 @@ exports.TicketProductRepository = TicketProductRepository = __decorate([
 
 
 /***/ }),
-/* 197 */
+/* 201 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -15014,7 +15364,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let TicketRadiologyRepository = class TicketRadiologyRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(manager, ticketRadiologyRepository) {
         super(entities_1.TicketRadiology, ticketRadiologyRepository);
@@ -15077,7 +15427,7 @@ exports.TicketRadiologyRepository = TicketRadiologyRepository = __decorate([
 
 
 /***/ }),
-/* 198 */
+/* 202 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -15100,7 +15450,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let TicketSurchargeRepository = class TicketSurchargeRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(manager, ticketSurchargeRepository) {
         super(entities_1.TicketSurcharge, ticketSurchargeRepository);
@@ -15118,7 +15468,7 @@ exports.TicketSurchargeRepository = TicketSurchargeRepository = __decorate([
 
 
 /***/ }),
-/* 199 */
+/* 203 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -15141,8 +15491,8 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_manager_1 = __webpack_require__(104);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_manager_1 = __webpack_require__(106);
+const _postgresql_repository_1 = __webpack_require__(86);
 let TicketUserManager = class TicketUserManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
         super(entities_1.TicketUser);
@@ -15170,7 +15520,7 @@ exports.TicketUserRepository = TicketUserRepository = __decorate([
 
 
 /***/ }),
-/* 200 */
+/* 204 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -15192,11 +15542,11 @@ exports.TicketRepository = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
-const time_helper_1 = __webpack_require__(144);
+const time_helper_1 = __webpack_require__(146);
 const entities_1 = __webpack_require__(42);
 const ticket_product_entity_1 = __webpack_require__(69);
 const ticket_entity_1 = __webpack_require__(56);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let TicketRepository = class TicketRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(dataSource, manager, ticketRepository) {
         super(entities_1.Ticket, ticketRepository);
@@ -15409,7 +15759,7 @@ exports.TicketRepository = TicketRepository = __decorate([
 
 
 /***/ }),
-/* 201 */
+/* 205 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -15432,7 +15782,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const _postgresql_repository_1 = __webpack_require__(84);
+const _postgresql_repository_1 = __webpack_require__(86);
 let WarehouseRepository = class WarehouseRepository extends _postgresql_repository_1._PostgreSqlRepository {
     constructor(dataSource, warehouseRepository) {
         super(entities_1.Warehouse, warehouseRepository);
@@ -15449,7 +15799,7 @@ exports.WarehouseRepository = WarehouseRepository = __decorate([
 
 
 /***/ }),
-/* 202 */
+/* 206 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -15469,7 +15819,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
 const payment_entity_1 = __webpack_require__(48);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
+const managers_1 = __webpack_require__(104);
 let TicketPrepaymentOperation = class TicketPrepaymentOperation {
     constructor(dataSource, ticketManager, customerManager, paymentManager) {
         this.dataSource = dataSource;
@@ -15547,7 +15897,7 @@ exports.TicketPrepaymentOperation = TicketPrepaymentOperation = __decorate([
 
 
 /***/ }),
-/* 203 */
+/* 207 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -15567,7 +15917,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
 const payment_entity_1 = __webpack_require__(48);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
+const managers_1 = __webpack_require__(104);
 let TicketRefundOverpaidOperation = class TicketRefundOverpaidOperation {
     constructor(dataSource, ticketManager, customerManager, paymentManager) {
         this.dataSource = dataSource;
@@ -15633,7 +15983,7 @@ exports.TicketRefundOverpaidOperation = TicketRefundOverpaidOperation = __decora
 
 
 /***/ }),
-/* 204 */
+/* 208 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -15653,7 +16003,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
 const payment_entity_1 = __webpack_require__(48);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
+const managers_1 = __webpack_require__(104);
 let TicketReopenOperation = class TicketReopenOperation {
     constructor(dataSource, ticketManager, customerManager, paymentManager) {
         this.dataSource = dataSource;
@@ -15728,7 +16078,7 @@ exports.TicketReopenOperation = TicketReopenOperation = __decorate([
 
 
 /***/ }),
-/* 205 */
+/* 209 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -15746,14 +16096,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketReturnProductOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
-const array_helper_1 = __webpack_require__(92);
+const array_helper_1 = __webpack_require__(94);
 const variable_1 = __webpack_require__(21);
 const position_entity_1 = __webpack_require__(75);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
-const repositories_1 = __webpack_require__(162);
-const product_putaway_operation_1 = __webpack_require__(145);
-const ticket_change_item_money_manager_1 = __webpack_require__(159);
+const managers_1 = __webpack_require__(104);
+const repositories_1 = __webpack_require__(164);
+const product_putaway_operation_1 = __webpack_require__(147);
+const ticket_change_item_money_manager_1 = __webpack_require__(161);
 let TicketReturnProductOperation = class TicketReturnProductOperation {
     constructor(dataSource, ticketManager, productManager, batchManager, ticketProductManager, ticketBatchManager, ticketUserManager, ticketChangeItemMoneyManager, productMovementManager, productPutawayOperation) {
         this.dataSource = dataSource;
@@ -15948,7 +16298,7 @@ let TicketReturnProductOperation = class TicketReturnProductOperation {
             const ticketUserOriginList = await this.ticketUserManager.findManyBy(manager, {
                 oid,
                 ticketId,
-                positionType: position_entity_1.PositionType.Product,
+                positionType: position_entity_1.PositionInteractType.Product,
                 ticketItemId: { IN: ticketProductModifiedList.map((i) => i.id) },
             });
             let ticketUserModifiedList = [];
@@ -15956,7 +16306,7 @@ let TicketReturnProductOperation = class TicketReturnProductOperation {
             if (ticketUserOriginList.length) {
                 ticketUserModifiedList = await this.ticketUserManager.bulkUpdate({
                     manager,
-                    condition: { oid, ticketId, positionType: position_entity_1.PositionType.Product },
+                    condition: { oid, ticketId, positionType: position_entity_1.PositionInteractType.Product },
                     compare: ['ticketItemId'],
                     update: ['quantity'],
                     tempList: ticketProductModifiedList.map((i) => {
@@ -16012,7 +16362,7 @@ exports.TicketReturnProductOperation = TicketReturnProductOperation = __decorate
 
 
 /***/ }),
-/* 206 */
+/* 210 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -16030,12 +16380,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketSendProductOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
-const array_helper_1 = __webpack_require__(92);
+const array_helper_1 = __webpack_require__(94);
 const variable_1 = __webpack_require__(21);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
-const product_picking_operation_1 = __webpack_require__(143);
-const ticket_change_item_money_manager_1 = __webpack_require__(159);
+const managers_1 = __webpack_require__(104);
+const product_picking_operation_1 = __webpack_require__(145);
+const ticket_change_item_money_manager_1 = __webpack_require__(161);
 let TicketSendProductOperation = class TicketSendProductOperation {
     constructor(dataSource, ticketManager, productManager, batchManager, ticketProductManager, ticketBatchManager, productMovementManager, ticketChangeItemMoneyManager, productPickingOperation) {
         this.dataSource = dataSource;
@@ -16229,7 +16579,7 @@ exports.TicketSendProductOperation = TicketSendProductOperation = __decorate([
 
 
 /***/ }),
-/* 207 */
+/* 211 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -16252,7 +16602,7 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const entities_1 = __webpack_require__(42);
-const repositories_1 = __webpack_require__(162);
+const repositories_1 = __webpack_require__(164);
 let TicketStatisticOperation = class TicketStatisticOperation {
     constructor(dataSource, manager, ticketRepository) {
         this.dataSource = dataSource;
@@ -16318,7 +16668,7 @@ exports.TicketStatisticOperation = TicketStatisticOperation = __decorate([
 
 
 /***/ }),
-/* 208 */
+/* 212 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -16342,8 +16692,8 @@ const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const ticket_procedure_entity_1 = __webpack_require__(66);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
-const ticket_change_item_money_manager_1 = __webpack_require__(159);
+const managers_1 = __webpack_require__(104);
+const ticket_change_item_money_manager_1 = __webpack_require__(161);
 let TicketClinicAddTicketProcedureOperation = class TicketClinicAddTicketProcedureOperation {
     constructor(dataSource, manager, ticketManager, ticketProcedureManager, ticketChangeItemMoneyManager) {
         this.dataSource = dataSource;
@@ -16388,7 +16738,7 @@ exports.TicketClinicAddTicketProcedureOperation = TicketClinicAddTicketProcedure
 
 
 /***/ }),
-/* 209 */
+/* 213 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -16408,9 +16758,9 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
 const position_entity_1 = __webpack_require__(75);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
-const repositories_1 = __webpack_require__(162);
-const ticket_change_item_money_manager_1 = __webpack_require__(159);
+const managers_1 = __webpack_require__(104);
+const repositories_1 = __webpack_require__(164);
+const ticket_change_item_money_manager_1 = __webpack_require__(161);
 let TicketClinicDestroyTicketProcedureOperation = class TicketClinicDestroyTicketProcedureOperation {
     constructor(dataSource, ticketManager, ticketProcedureManager, ticketUserManager, ticketChangeItemMoneyManager) {
         this.dataSource = dataSource;
@@ -16427,7 +16777,7 @@ let TicketClinicDestroyTicketProcedureOperation = class TicketClinicDestroyTicke
             const ticketProcedureDestroy = await this.ticketProcedureManager.deleteOneAndReturnEntity(manager, { oid, id: ticketProcedureId });
             const ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
                 oid,
-                positionType: position_entity_1.PositionType.Procedure,
+                positionType: position_entity_1.PositionInteractType.Procedure,
                 ticketItemId: ticketProcedureDestroy.id,
             });
             const procedureMoneyDelete = ticketProcedureDestroy.quantity * ticketProcedureDestroy.actualPrice;
@@ -16461,7 +16811,7 @@ exports.TicketClinicDestroyTicketProcedureOperation = TicketClinicDestroyTicketP
 
 
 /***/ }),
-/* 210 */
+/* 214 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -16480,8 +16830,8 @@ exports.TicketClinicUpdateTicketProcedureOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
-const ticket_change_item_money_manager_1 = __webpack_require__(159);
+const managers_1 = __webpack_require__(104);
+const ticket_change_item_money_manager_1 = __webpack_require__(161);
 let TicketClinicUpdateTicketProcedureOperation = class TicketClinicUpdateTicketProcedureOperation {
     constructor(dataSource, ticketManager, ticketProcedureManager, ticketChangeItemMoneyManager) {
         this.dataSource = dataSource;
@@ -16542,7 +16892,7 @@ exports.TicketClinicUpdateTicketProcedureOperation = TicketClinicUpdateTicketPro
 
 
 /***/ }),
-/* 211 */
+/* 215 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -16566,8 +16916,8 @@ const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const variable_1 = __webpack_require__(21);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
-const ticket_change_item_money_manager_1 = __webpack_require__(159);
+const managers_1 = __webpack_require__(104);
+const ticket_change_item_money_manager_1 = __webpack_require__(161);
 let TicketClinicAddTicketProductOperation = class TicketClinicAddTicketProductOperation {
     constructor(dataSource, manager, ticketManager, ticketProductManager, ticketChangeItemMoneyManager) {
         this.dataSource = dataSource;
@@ -16627,7 +16977,7 @@ exports.TicketClinicAddTicketProductOperation = TicketClinicAddTicketProductOper
 
 
 /***/ }),
-/* 212 */
+/* 216 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -16648,9 +16998,9 @@ const typeorm_1 = __webpack_require__(18);
 const variable_1 = __webpack_require__(21);
 const position_entity_1 = __webpack_require__(75);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
-const repositories_1 = __webpack_require__(162);
-const ticket_change_item_money_manager_1 = __webpack_require__(159);
+const managers_1 = __webpack_require__(104);
+const repositories_1 = __webpack_require__(164);
+const ticket_change_item_money_manager_1 = __webpack_require__(161);
 let TicketClinicDestroyTicketProductOperation = class TicketClinicDestroyTicketProductOperation {
     constructor(dataSource, ticketManager, ticketProductManager, ticketUserManager, ticketChangeItemMoneyManager) {
         this.dataSource = dataSource;
@@ -16672,7 +17022,7 @@ let TicketClinicDestroyTicketProductOperation = class TicketClinicDestroyTicketP
             });
             const ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
                 oid,
-                positionType: position_entity_1.PositionType.Product,
+                positionType: position_entity_1.PositionInteractType.Product,
                 ticketItemId: ticketProductDestroy.id,
             });
             let deliveryStatus = ticketOrigin.deliveryStatus;
@@ -16722,7 +17072,7 @@ exports.TicketClinicDestroyTicketProductOperation = TicketClinicDestroyTicketPro
 
 
 /***/ }),
-/* 213 */
+/* 217 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -16742,8 +17092,8 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
 const variable_1 = __webpack_require__(21);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
-const ticket_change_item_money_manager_1 = __webpack_require__(159);
+const managers_1 = __webpack_require__(104);
+const ticket_change_item_money_manager_1 = __webpack_require__(161);
 let TicketClinicUpdateTicketProductOperation = class TicketClinicUpdateTicketProductOperation {
     constructor(dataSource, ticketManager, ticketProductManager, ticketChangeItemMoneyManager) {
         this.dataSource = dataSource;
@@ -16841,7 +17191,7 @@ exports.TicketClinicUpdateTicketProductOperation = TicketClinicUpdateTicketProdu
 
 
 /***/ }),
-/* 214 */
+/* 218 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -16864,8 +17214,8 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
-const ticket_change_item_money_manager_1 = __webpack_require__(159);
+const managers_1 = __webpack_require__(104);
+const ticket_change_item_money_manager_1 = __webpack_require__(161);
 let TicketClinicAddTicketRadiologyOperation = class TicketClinicAddTicketRadiologyOperation {
     constructor(dataSource, manager, ticketManager, ticketRadiologyManager, ticketChangeItemMoneyManager) {
         this.dataSource = dataSource;
@@ -16910,7 +17260,7 @@ exports.TicketClinicAddTicketRadiologyOperation = TicketClinicAddTicketRadiology
 
 
 /***/ }),
-/* 215 */
+/* 219 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -16930,9 +17280,9 @@ const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
 const position_entity_1 = __webpack_require__(75);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
-const repositories_1 = __webpack_require__(162);
-const ticket_change_item_money_manager_1 = __webpack_require__(159);
+const managers_1 = __webpack_require__(104);
+const repositories_1 = __webpack_require__(164);
+const ticket_change_item_money_manager_1 = __webpack_require__(161);
 let TicketClinicDestroyTicketRadiologyOperation = class TicketClinicDestroyTicketRadiologyOperation {
     constructor(dataSource, ticketManager, ticketRadiologyManager, ticketUserManager, ticketChangeItemMoneyManager) {
         this.dataSource = dataSource;
@@ -16949,7 +17299,7 @@ let TicketClinicDestroyTicketRadiologyOperation = class TicketClinicDestroyTicke
             const ticketRadiologyDestroy = await this.ticketRadiologyManager.deleteOneAndReturnEntity(manager, { oid, id: ticketRadiologyId });
             const ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
                 oid,
-                positionType: position_entity_1.PositionType.Radiology,
+                positionType: position_entity_1.PositionInteractType.Radiology,
                 ticketItemId: ticketRadiologyDestroy.id,
             });
             const radiologyMoneyDelete = ticketRadiologyDestroy.actualPrice;
@@ -16985,7 +17335,7 @@ exports.TicketClinicDestroyTicketRadiologyOperation = TicketClinicDestroyTicketR
 
 
 /***/ }),
-/* 216 */
+/* 220 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -17004,8 +17354,8 @@ exports.TicketClinicUpdateTicketRadiologyOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
-const ticket_change_item_money_manager_1 = __webpack_require__(159);
+const managers_1 = __webpack_require__(104);
+const ticket_change_item_money_manager_1 = __webpack_require__(161);
 let TicketClinicUpdateTicketRadiologyOperation = class TicketClinicUpdateTicketRadiologyOperation {
     constructor(dataSource, ticketManager, ticketRadiologyManager, ticketChangeItemMoneyManager) {
         this.dataSource = dataSource;
@@ -17061,7 +17411,7 @@ exports.TicketClinicUpdateTicketRadiologyOperation = TicketClinicUpdateTicketRad
 
 
 /***/ }),
-/* 217 */
+/* 221 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -17085,8 +17435,8 @@ const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const variable_1 = __webpack_require__(21);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
-const ticket_change_item_money_manager_1 = __webpack_require__(159);
+const managers_1 = __webpack_require__(104);
+const ticket_change_item_money_manager_1 = __webpack_require__(161);
 let TicketClinicAddSelectLaboratoryOperation = class TicketClinicAddSelectLaboratoryOperation {
     constructor(dataSource, manager, ticketManager, ticketLaboratoryManager, ticketLaboratoryGroupManager, ticketChangeItemMoneyManager) {
         this.dataSource = dataSource;
@@ -17157,7 +17507,7 @@ exports.TicketClinicAddSelectLaboratoryOperation = TicketClinicAddSelectLaborato
 
 
 /***/ }),
-/* 218 */
+/* 222 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -17181,8 +17531,8 @@ const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
 const variable_1 = __webpack_require__(21);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
-const ticket_change_item_money_manager_1 = __webpack_require__(159);
+const managers_1 = __webpack_require__(104);
+const ticket_change_item_money_manager_1 = __webpack_require__(161);
 let TicketClinicChangeSelectLaboratoryOperation = class TicketClinicChangeSelectLaboratoryOperation {
     constructor(dataSource, manager, ticketManager, ticketLaboratoryManager, ticketLaboratoryGroupManager, ticketChangeItemMoneyManager) {
         this.dataSource = dataSource;
@@ -17271,7 +17621,7 @@ exports.TicketClinicChangeSelectLaboratoryOperation = TicketClinicChangeSelectLa
 
 
 /***/ }),
-/* 219 */
+/* 223 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -17290,8 +17640,8 @@ exports.TicketClinicDestroyTicketLaboratoryGroupOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
-const ticket_change_item_money_manager_1 = __webpack_require__(159);
+const managers_1 = __webpack_require__(104);
+const ticket_change_item_money_manager_1 = __webpack_require__(161);
 let TicketClinicDestroyTicketLaboratoryGroupOperation = class TicketClinicDestroyTicketLaboratoryGroupOperation {
     constructor(dataSource, ticketManager, ticketLaboratoryManager, ticketLaboratoryGroupManager, ticketLaboratoryResultManager, ticketChangeItemMoneyManager) {
         this.dataSource = dataSource;
@@ -17351,7 +17701,7 @@ exports.TicketClinicDestroyTicketLaboratoryGroupOperation = TicketClinicDestroyT
 
 
 /***/ }),
-/* 220 */
+/* 224 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -17369,9 +17719,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicDestroyTicketLaboratoryOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
+const variable_1 = __webpack_require__(21);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
-const ticket_change_item_money_manager_1 = __webpack_require__(159);
+const managers_1 = __webpack_require__(104);
+const ticket_change_item_money_manager_1 = __webpack_require__(161);
 let TicketClinicDestroyTicketLaboratoryOperation = class TicketClinicDestroyTicketLaboratoryOperation {
     constructor(dataSource, ticketManager, ticketLaboratoryManager, ticketLaboratoryGroupManager, ticketLaboratoryResultManager, ticketChangeItemMoneyManager) {
         this.dataSource = dataSource;
@@ -17386,7 +17737,7 @@ let TicketClinicDestroyTicketLaboratoryOperation = class TicketClinicDestroyTick
         const PREFIX = `ticketId=${ticketId} destroyTicketLaboratory failed`;
         const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
             const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(manager, { oid, id: ticketId, status: ticket_entity_1.TicketStatus.Executing }, { updatedAt: Date.now() });
-            const ticketLaboratoryDestroy = await this.ticketLaboratoryManager.deleteOneAndReturnEntity(manager, { oid, ticketId, id: ticketLaboratoryId });
+            const ticketLaboratoryDestroy = await this.ticketLaboratoryManager.deleteOneAndReturnEntity(manager, { oid, ticketId, id: ticketLaboratoryId, status: variable_1.TicketLaboratoryStatus.Pending });
             const ticketLaboratoryResultDestroyList = await this.ticketLaboratoryResultManager.deleteAndReturnEntity(manager, {
                 oid,
                 ticketId,
@@ -17442,7 +17793,7 @@ exports.TicketClinicDestroyTicketLaboratoryOperation = TicketClinicDestroyTicket
 
 
 /***/ }),
-/* 221 */
+/* 225 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -17461,8 +17812,8 @@ exports.TicketClinicUpdateTicketLaboratoryOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
-const ticket_change_item_money_manager_1 = __webpack_require__(159);
+const managers_1 = __webpack_require__(104);
+const ticket_change_item_money_manager_1 = __webpack_require__(161);
 let TicketClinicUpdateTicketLaboratoryOperation = class TicketClinicUpdateTicketLaboratoryOperation {
     constructor(dataSource, ticketManager, ticketLaboratoryManager, ticketChangeItemMoneyManager) {
         this.dataSource = dataSource;
@@ -17521,7 +17872,7 @@ exports.TicketClinicUpdateTicketLaboratoryOperation = TicketClinicUpdateTicketLa
 
 
 /***/ }),
-/* 222 */
+/* 226 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -17543,12 +17894,12 @@ exports.TicketOrderDepositedOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(41);
 const typeorm_2 = __webpack_require__(18);
-const time_helper_1 = __webpack_require__(144);
+const time_helper_1 = __webpack_require__(146);
 const variable_1 = __webpack_require__(21);
 const ticket_procedure_entity_1 = __webpack_require__(66);
 const ticket_product_entity_1 = __webpack_require__(69);
-const managers_1 = __webpack_require__(102);
-const ticket_attribute_manager_1 = __webpack_require__(128);
+const managers_1 = __webpack_require__(104);
+const ticket_attribute_manager_1 = __webpack_require__(130);
 let TicketOrderDepositedOperation = class TicketOrderDepositedOperation {
     constructor(dataSource, manager, ticketManager, ticketAttributeManager, ticketProductManager, ticketProcedureManager, ticketLaboratoryManager, ticketRadiologyManager, ticketSurchargeManager, ticketExpenseManager) {
         this.dataSource = dataSource;
@@ -17624,7 +17975,7 @@ exports.TicketOrderDepositedOperation = TicketOrderDepositedOperation = __decora
 
 
 /***/ }),
-/* 223 */
+/* 227 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -17642,13 +17993,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketOrderDraftOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
-const time_helper_1 = __webpack_require__(144);
+const time_helper_1 = __webpack_require__(146);
 const variable_1 = __webpack_require__(21);
 const ticket_procedure_entity_1 = __webpack_require__(66);
 const ticket_product_entity_1 = __webpack_require__(69);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
-const ticket_attribute_manager_1 = __webpack_require__(128);
+const managers_1 = __webpack_require__(104);
+const ticket_attribute_manager_1 = __webpack_require__(130);
 let TicketOrderDraftOperation = class TicketOrderDraftOperation {
     constructor(dataSource, ticketManager, ticketAttributeManager, ticketProductManager, ticketProcedureManager, ticketLaboratoryManager, ticketRadiologyManager, ticketSurchargeManager, ticketExpenseManager) {
         this.dataSource = dataSource;
@@ -17728,7 +18079,7 @@ exports.TicketOrderDraftOperation = TicketOrderDraftOperation = __decorate([
 
 
 /***/ }),
-/* 224 */
+/* 228 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -17746,10 +18097,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CustomerPaymentOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
-const string_helper_1 = __webpack_require__(225);
+const string_helper_1 = __webpack_require__(229);
 const payment_entity_1 = __webpack_require__(48);
 const ticket_entity_1 = __webpack_require__(56);
-const managers_1 = __webpack_require__(102);
+const managers_1 = __webpack_require__(104);
 let CustomerPaymentOperation = class CustomerPaymentOperation {
     constructor(dataSource, customerManager, paymentManager) {
         this.dataSource = dataSource;
@@ -17862,7 +18213,7 @@ exports.CustomerPaymentOperation = CustomerPaymentOperation = __decorate([
 
 
 /***/ }),
-/* 225 */
+/* 229 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -17964,7 +18315,7 @@ exports.formatUrlEncode = formatUrlEncode;
 
 
 /***/ }),
-/* 226 */
+/* 230 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -17982,10 +18333,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DistributorPaymentOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
-const string_helper_1 = __webpack_require__(225);
+const string_helper_1 = __webpack_require__(229);
 const payment_entity_1 = __webpack_require__(48);
 const receipt_entity_1 = __webpack_require__(51);
-const managers_1 = __webpack_require__(102);
+const managers_1 = __webpack_require__(104);
 let DistributorPaymentOperation = class DistributorPaymentOperation {
     constructor(dataSource, distributorManager, paymentManager) {
         this.dataSource = dataSource;
@@ -18098,7 +18449,7 @@ exports.DistributorPaymentOperation = DistributorPaymentOperation = __decorate([
 
 
 /***/ }),
-/* 227 */
+/* 231 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -18116,11 +18467,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.StockCheckReconcileOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
-const array_helper_1 = __webpack_require__(92);
+const array_helper_1 = __webpack_require__(94);
 const error_1 = __webpack_require__(14);
 const variable_1 = __webpack_require__(21);
-const stock_check_entity_1 = __webpack_require__(81);
-const managers_1 = __webpack_require__(102);
+const stock_check_entity_1 = __webpack_require__(83);
+const managers_1 = __webpack_require__(104);
 let StockCheckReconcileOperation = class StockCheckReconcileOperation {
     constructor(dataSource, stockCheckManager, stockCheckItemManager, batchManager, productManager, productMovementManager) {
         this.dataSource = dataSource;
@@ -18213,14 +18564,14 @@ exports.StockCheckReconcileOperation = StockCheckReconcileOperation = __decorate
 
 
 /***/ }),
-/* 228 */
+/* 232 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PostgresqlConfig = void 0;
 const config_1 = __webpack_require__(29);
-const postgresql_log_1 = __webpack_require__(229);
+const postgresql_log_1 = __webpack_require__(233);
 exports.PostgresqlConfig = (0, config_1.registerAs)('postgres', () => ({
     type: process.env.SQL_TYPE,
     host: process.env.SQL_HOST,
@@ -18235,14 +18586,14 @@ exports.PostgresqlConfig = (0, config_1.registerAs)('postgres', () => ({
 
 
 /***/ }),
-/* 229 */
+/* 233 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PrettySqlLogger = void 0;
-const cli_highlight_1 = __webpack_require__(230);
-const sql_formatter_1 = __webpack_require__(231);
+const cli_highlight_1 = __webpack_require__(234);
+const sql_formatter_1 = __webpack_require__(235);
 class PrettySqlLogger {
     constructor(data) {
         this.paramType = data.paramType;
@@ -18354,19 +18705,19 @@ exports.PrettySqlLogger = PrettySqlLogger;
 
 
 /***/ }),
-/* 230 */
+/* 234 */
 /***/ ((module) => {
 
 module.exports = require("cli-highlight");
 
 /***/ }),
-/* 231 */
+/* 235 */
 /***/ ((module) => {
 
 module.exports = require("sql-formatter");
 
 /***/ }),
-/* 232 */
+/* 236 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -18380,8 +18731,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GoogleDriverModule = void 0;
 const common_1 = __webpack_require__(3);
 const config_1 = __webpack_require__(29);
-const google_driver_config_1 = __webpack_require__(233);
-const google_driver_service_1 = __webpack_require__(234);
+const google_driver_config_1 = __webpack_require__(237);
+const google_driver_service_1 = __webpack_require__(238);
 let GoogleDriverModule = class GoogleDriverModule {
 };
 exports.GoogleDriverModule = GoogleDriverModule;
@@ -18396,7 +18747,7 @@ exports.GoogleDriverModule = GoogleDriverModule = __decorate([
 
 
 /***/ }),
-/* 233 */
+/* 237 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -18411,7 +18762,7 @@ exports.GoogleDriverConfig = (0, config_1.registerAs)('google_driver', () => ({
 
 
 /***/ }),
-/* 234 */
+/* 238 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -18433,10 +18784,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GoogleDriverService = void 0;
 const common_1 = __webpack_require__(3);
 const config_1 = __webpack_require__(29);
-const googleapis_1 = __webpack_require__(235);
-const stream = __webpack_require__(236);
-const time_helper_1 = __webpack_require__(144);
-const google_driver_config_1 = __webpack_require__(233);
+const googleapis_1 = __webpack_require__(239);
+const stream = __webpack_require__(240);
+const time_helper_1 = __webpack_require__(146);
+const google_driver_config_1 = __webpack_require__(237);
 let GoogleDriverService = GoogleDriverService_1 = class GoogleDriverService {
     constructor(googleDriverConfig) {
         this.googleDriverConfig = googleDriverConfig;
@@ -18759,19 +19110,19 @@ exports.GoogleDriverService = GoogleDriverService = GoogleDriverService_1 = __de
 
 
 /***/ }),
-/* 235 */
+/* 239 */
 /***/ ((module) => {
 
 module.exports = require("googleapis");
 
 /***/ }),
-/* 236 */
+/* 240 */
 /***/ ((module) => {
 
 module.exports = require("stream");
 
 /***/ }),
-/* 237 */
+/* 241 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -18784,8 +19135,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_auth_module_1 = __webpack_require__(238);
-const api_me_module_1 = __webpack_require__(255);
+const api_auth_module_1 = __webpack_require__(242);
+const api_me_module_1 = __webpack_require__(259);
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -18799,7 +19150,7 @@ exports.AuthModule = AuthModule = __decorate([
 
 
 /***/ }),
-/* 238 */
+/* 242 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -18813,12 +19164,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiAuthModule = void 0;
 const common_1 = __webpack_require__(3);
 const config_1 = __webpack_require__(29);
-const jwt_extend_module_1 = __webpack_require__(96);
-const jwt_config_1 = __webpack_require__(99);
+const jwt_extend_module_1 = __webpack_require__(98);
+const jwt_config_1 = __webpack_require__(101);
 const environments_1 = __webpack_require__(28);
-const email_module_1 = __webpack_require__(239);
-const api_auth_controller_1 = __webpack_require__(242);
-const api_auth_service_1 = __webpack_require__(244);
+const email_module_1 = __webpack_require__(243);
+const api_auth_controller_1 = __webpack_require__(246);
+const api_auth_service_1 = __webpack_require__(248);
 let ApiAuthModule = class ApiAuthModule {
 };
 exports.ApiAuthModule = ApiAuthModule;
@@ -18837,7 +19188,7 @@ exports.ApiAuthModule = ApiAuthModule = __decorate([
 
 
 /***/ }),
-/* 239 */
+/* 243 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -18849,11 +19200,11 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EmailModule = void 0;
-const mailer_1 = __webpack_require__(240);
+const mailer_1 = __webpack_require__(244);
 const common_1 = __webpack_require__(3);
 const config_1 = __webpack_require__(29);
 const environments_1 = __webpack_require__(28);
-const email_service_1 = __webpack_require__(241);
+const email_service_1 = __webpack_require__(245);
 let EmailModule = class EmailModule {
 };
 exports.EmailModule = EmailModule;
@@ -18885,13 +19236,13 @@ exports.EmailModule = EmailModule = __decorate([
 
 
 /***/ }),
-/* 240 */
+/* 244 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs-modules/mailer");
 
 /***/ }),
-/* 241 */
+/* 245 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -18908,7 +19259,7 @@ var EmailService_1;
 var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EmailService = void 0;
-const mailer_1 = __webpack_require__(240);
+const mailer_1 = __webpack_require__(244);
 const common_1 = __webpack_require__(3);
 const config_1 = __webpack_require__(29);
 let EmailService = EmailService_1 = class EmailService {
@@ -18930,7 +19281,7 @@ exports.EmailService = EmailService = EmailService_1 = __decorate([
 
 
 /***/ }),
-/* 242 */
+/* 246 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -18951,9 +19302,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiAuthController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const external_request_1 = __webpack_require__(243);
-const api_auth_service_1 = __webpack_require__(244);
-const request_1 = __webpack_require__(246);
+const external_request_1 = __webpack_require__(247);
+const api_auth_service_1 = __webpack_require__(248);
+const request_1 = __webpack_require__(250);
 let ApiAuthController = class ApiAuthController {
     constructor(apiAuthService) {
         this.apiAuthService = apiAuthService;
@@ -19041,7 +19392,7 @@ exports.ApiAuthController = ApiAuthController = __decorate([
 
 
 /***/ }),
-/* 243 */
+/* 247 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
@@ -19056,7 +19407,7 @@ exports.External = (0, common_1.createParamDecorator)((data, ctx) => {
 
 
 /***/ }),
-/* 244 */
+/* 248 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -19078,19 +19429,19 @@ exports.ApiAuthService = void 0;
 const common_1 = __webpack_require__(3);
 const config_1 = __webpack_require__(29);
 const typeorm_1 = __webpack_require__(41);
-const bcrypt = __webpack_require__(245);
+const bcrypt = __webpack_require__(249);
 const typeorm_2 = __webpack_require__(18);
-const cache_token_service_1 = __webpack_require__(93);
+const cache_token_service_1 = __webpack_require__(95);
 const exception_filter_1 = __webpack_require__(9);
-const string_helper_1 = __webpack_require__(225);
-const jwt_extend_service_1 = __webpack_require__(98);
-const jwt_config_1 = __webpack_require__(99);
+const string_helper_1 = __webpack_require__(229);
+const jwt_extend_service_1 = __webpack_require__(100);
+const jwt_config_1 = __webpack_require__(101);
 const organization_entity_1 = __webpack_require__(16);
 const user_entity_1 = __webpack_require__(20);
 const organization_repository_1 = __webpack_require__(40);
-const user_repository_1 = __webpack_require__(91);
+const user_repository_1 = __webpack_require__(93);
 const environments_1 = __webpack_require__(28);
-const email_service_1 = __webpack_require__(241);
+const email_service_1 = __webpack_require__(245);
 let ApiAuthService = class ApiAuthService {
     constructor(globalConfig, jwtConfig, dataSource, manager, emailService, cacheTokenService, jwtExtendService, organizationRepository, userRepository) {
         this.globalConfig = globalConfig;
@@ -19368,13 +19719,13 @@ exports.ApiAuthService = ApiAuthService = __decorate([
 
 
 /***/ }),
-/* 245 */
+/* 249 */
 /***/ ((module) => {
 
 module.exports = require("bcrypt");
 
 /***/ }),
-/* 246 */
+/* 250 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -19393,15 +19744,15 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(247), exports);
 __exportStar(__webpack_require__(251), exports);
-__exportStar(__webpack_require__(252), exports);
-__exportStar(__webpack_require__(253), exports);
-__exportStar(__webpack_require__(254), exports);
+__exportStar(__webpack_require__(255), exports);
+__exportStar(__webpack_require__(256), exports);
+__exportStar(__webpack_require__(257), exports);
+__exportStar(__webpack_require__(258), exports);
 
 
 /***/ }),
-/* 247 */
+/* 251 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -19418,8 +19769,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ForgotPasswordBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class ForgotPasswordBody {
 }
 exports.ForgotPasswordBody = ForgotPasswordBody;
@@ -19452,13 +19803,13 @@ __decorate([
 
 
 /***/ }),
-/* 248 */
+/* 252 */
 /***/ ((module) => {
 
 module.exports = require("class-validator");
 
 /***/ }),
-/* 249 */
+/* 253 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -19472,8 +19823,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IsGmail = exports.IsPhone = void 0;
 exports.IsNumberGreaterThan = IsNumberGreaterThan;
 exports.IsEnumValue = IsEnumValue;
-const class_validator_1 = __webpack_require__(248);
-const typescript_helper_1 = __webpack_require__(250);
+const class_validator_1 = __webpack_require__(252);
+const typescript_helper_1 = __webpack_require__(254);
 let IsPhone = class IsPhone {
     validate(text, args) {
         if (text === '')
@@ -19550,7 +19901,7 @@ function IsEnumValue(options, validationOptions) {
 
 
 /***/ }),
-/* 250 */
+/* 254 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -19581,7 +19932,7 @@ exports.stringEnum = stringEnum;
 
 
 /***/ }),
-/* 251 */
+/* 255 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -19598,8 +19949,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.LoginRootBody = exports.LoginBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class LoginBody {
 }
 exports.LoginBody = LoginBody;
@@ -19644,7 +19995,7 @@ __decorate([
 
 
 /***/ }),
-/* 252 */
+/* 256 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -19661,7 +20012,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RefreshTokenBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class RefreshTokenBody {
 }
 exports.RefreshTokenBody = RefreshTokenBody;
@@ -19674,7 +20025,7 @@ __decorate([
 
 
 /***/ }),
-/* 253 */
+/* 257 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -19691,8 +20042,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RegisterBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class RegisterBody {
 }
 exports.RegisterBody = RegisterBody;
@@ -19727,7 +20078,7 @@ __decorate([
 
 
 /***/ }),
-/* 254 */
+/* 258 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -19744,8 +20095,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ResetPasswordBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class ResetPasswordBody {
 }
 exports.ResetPasswordBody = ResetPasswordBody;
@@ -19787,7 +20138,7 @@ __decorate([
 
 
 /***/ }),
-/* 255 */
+/* 259 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -19800,8 +20151,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiMeModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_me_controller_1 = __webpack_require__(256);
-const api_me_service_1 = __webpack_require__(257);
+const api_me_controller_1 = __webpack_require__(260);
+const api_me_service_1 = __webpack_require__(261);
 let ApiMeModule = class ApiMeModule {
 };
 exports.ApiMeModule = ApiMeModule;
@@ -19816,7 +20167,7 @@ exports.ApiMeModule = ApiMeModule = __decorate([
 
 
 /***/ }),
-/* 256 */
+/* 260 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -19837,10 +20188,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiMeController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const api_me_service_1 = __webpack_require__(257);
-const request_1 = __webpack_require__(258);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const api_me_service_1 = __webpack_require__(261);
+const request_1 = __webpack_require__(262);
 let ApiMeController = class ApiMeController {
     constructor(apiUserService) {
         this.apiUserService = apiUserService;
@@ -19891,7 +20242,7 @@ exports.ApiMeController = ApiMeController = __decorate([
 
 
 /***/ }),
-/* 257 */
+/* 261 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -19908,11 +20259,11 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiMeService = void 0;
 const common_1 = __webpack_require__(3);
-const bcrypt = __webpack_require__(245);
+const bcrypt = __webpack_require__(249);
 const cache_data_service_1 = __webpack_require__(38);
 const exception_filter_1 = __webpack_require__(9);
-const string_helper_1 = __webpack_require__(225);
-const user_repository_1 = __webpack_require__(91);
+const string_helper_1 = __webpack_require__(229);
+const user_repository_1 = __webpack_require__(93);
 let ApiMeService = class ApiMeService {
     constructor(userRepository, cacheDataService) {
         this.userRepository = userRepository;
@@ -19972,7 +20323,7 @@ exports.ApiMeService = ApiMeService = __decorate([
 
 
 /***/ }),
-/* 258 */
+/* 262 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -19991,14 +20342,14 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(259), exports);
-__exportStar(__webpack_require__(260), exports);
-__exportStar(__webpack_require__(262), exports);
 __exportStar(__webpack_require__(263), exports);
+__exportStar(__webpack_require__(264), exports);
+__exportStar(__webpack_require__(266), exports);
+__exportStar(__webpack_require__(267), exports);
 
 
 /***/ }),
-/* 259 */
+/* 263 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -20015,7 +20366,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserChangePasswordBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class UserChangePasswordBody {
 }
 exports.UserChangePasswordBody = UserChangePasswordBody;
@@ -20036,7 +20387,7 @@ __decorate([
 
 
 /***/ }),
-/* 260 */
+/* 264 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -20054,9 +20405,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserGetOneQuery = exports.UserGetManyQuery = exports.UserPaginationQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const user_options_request_1 = __webpack_require__(262);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const user_options_request_1 = __webpack_require__(266);
 class UserPaginationQuery extends query_1.PaginationQuery {
 }
 exports.UserPaginationQuery = UserPaginationQuery;
@@ -20111,7 +20462,7 @@ __decorate([
 
 
 /***/ }),
-/* 261 */
+/* 265 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -20128,7 +20479,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.MultiMongoIdQuery = exports.SortQuery = exports.LimitQuery = exports.PaginationQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class PaginationQuery {
 }
 exports.PaginationQuery = PaginationQuery;
@@ -20191,7 +20542,7 @@ __decorate([
 
 
 /***/ }),
-/* 262 */
+/* 266 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -20208,8 +20559,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserSortQuery = exports.UserFilterQuery = exports.UserRelationQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
 class UserRelationQuery {
 }
 exports.UserRelationQuery = UserRelationQuery;
@@ -20255,7 +20606,7 @@ __decorate([
 
 
 /***/ }),
-/* 263 */
+/* 267 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -20273,8 +20624,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserUpdateInfoBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
 class UserUpdateInfoBody {
 }
@@ -20307,7 +20658,7 @@ __decorate([
 
 
 /***/ }),
-/* 264 */
+/* 268 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -20320,16 +20671,23 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiFileModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_file_customer_module_1 = __webpack_require__(265);
-const api_file_product_module_1 = __webpack_require__(277);
-const api_file_receipt_module_1 = __webpack_require__(288);
-const api_file_ticket_module_1 = __webpack_require__(291);
+const api_file_customer_module_1 = __webpack_require__(269);
+const api_file_icd_module_1 = __webpack_require__(281);
+const api_file_product_module_1 = __webpack_require__(290);
+const api_file_receipt_module_1 = __webpack_require__(295);
+const api_file_ticket_module_1 = __webpack_require__(298);
 let ApiFileModule = class ApiFileModule {
 };
 exports.ApiFileModule = ApiFileModule;
 exports.ApiFileModule = ApiFileModule = __decorate([
     (0, common_1.Module)({
-        imports: [api_file_product_module_1.ApiFileProductModule, api_file_receipt_module_1.ApiFileReceiptModule, api_file_customer_module_1.ApiFileCustomerModule, api_file_ticket_module_1.ApiFileTicketModule],
+        imports: [
+            api_file_icd_module_1.ApiFileICDModule,
+            api_file_product_module_1.ApiFileProductModule,
+            api_file_receipt_module_1.ApiFileReceiptModule,
+            api_file_customer_module_1.ApiFileCustomerModule,
+            api_file_ticket_module_1.ApiFileTicketModule,
+        ],
         controllers: [],
         providers: [],
     })
@@ -20337,7 +20695,7 @@ exports.ApiFileModule = ApiFileModule = __decorate([
 
 
 /***/ }),
-/* 265 */
+/* 269 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -20350,8 +20708,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiFileCustomerModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_file_customer_controller_1 = __webpack_require__(266);
-const api_file_customer_download_excel_1 = __webpack_require__(267);
+const api_file_customer_controller_1 = __webpack_require__(270);
+const api_file_customer_download_excel_1 = __webpack_require__(271);
 let ApiFileCustomerModule = class ApiFileCustomerModule {
 };
 exports.ApiFileCustomerModule = ApiFileCustomerModule;
@@ -20365,7 +20723,7 @@ exports.ApiFileCustomerModule = ApiFileCustomerModule = __decorate([
 
 
 /***/ }),
-/* 266 */
+/* 270 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -20386,10 +20744,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiFileCustomerController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_file_customer_download_excel_1 = __webpack_require__(267);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_file_customer_download_excel_1 = __webpack_require__(271);
 let ApiFileCustomerController = class ApiFileCustomerController {
     constructor(apiFileCustomerDownloadExcel) {
         this.apiFileCustomerDownloadExcel = apiFileCustomerDownloadExcel;
@@ -20416,7 +20774,7 @@ exports.ApiFileCustomerController = ApiFileCustomerController = __decorate([
 
 
 /***/ }),
-/* 267 */
+/* 271 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -20433,9 +20791,9 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiFileCustomerDownloadExcel = void 0;
 const common_1 = __webpack_require__(3);
-const time_helper_1 = __webpack_require__(144);
-const customer_repository_1 = __webpack_require__(167);
-const excel_one_sheet_util_1 = __webpack_require__(268);
+const time_helper_1 = __webpack_require__(146);
+const customer_repository_1 = __webpack_require__(169);
+const excel_one_sheet_util_1 = __webpack_require__(272);
 let ApiFileCustomerDownloadExcel = class ApiFileCustomerDownloadExcel {
     constructor(customerRepository) {
         this.customerRepository = customerRepository;
@@ -20664,14 +21022,14 @@ exports.ApiFileCustomerDownloadExcel = ApiFileCustomerDownloadExcel = __decorate
 
 
 /***/ }),
-/* 268 */
+/* 272 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.excelOneSheetWorkbook = void 0;
-const exceljs_1 = __webpack_require__(269);
-const helpers_1 = __webpack_require__(270);
+const exceljs_1 = __webpack_require__(273);
+const helpers_1 = __webpack_require__(274);
 const excelOneSheetWorkbook = (params) => {
     const { headerSheet, footerSheet, rows, layout, columns } = params;
     const sheetName = layout.sheetName || 'SHEET';
@@ -20745,13 +21103,13 @@ exports.excelOneSheetWorkbook = excelOneSheetWorkbook;
 
 
 /***/ }),
-/* 269 */
+/* 273 */
 /***/ ((module) => {
 
 module.exports = require("exceljs");
 
 /***/ }),
-/* 270 */
+/* 274 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -20770,19 +21128,19 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(92), exports);
-__exportStar(__webpack_require__(271), exports);
-__exportStar(__webpack_require__(272), exports);
-__exportStar(__webpack_require__(273), exports);
-__exportStar(__webpack_require__(274), exports);
+__exportStar(__webpack_require__(94), exports);
 __exportStar(__webpack_require__(275), exports);
-__exportStar(__webpack_require__(225), exports);
-__exportStar(__webpack_require__(144), exports);
-__exportStar(__webpack_require__(250), exports);
+__exportStar(__webpack_require__(276), exports);
+__exportStar(__webpack_require__(277), exports);
+__exportStar(__webpack_require__(278), exports);
+__exportStar(__webpack_require__(279), exports);
+__exportStar(__webpack_require__(229), exports);
+__exportStar(__webpack_require__(146), exports);
+__exportStar(__webpack_require__(254), exports);
 
 
 /***/ }),
-/* 271 */
+/* 275 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -20830,7 +21188,7 @@ exports.sleep = sleep;
 
 
 /***/ }),
-/* 272 */
+/* 276 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -20880,7 +21238,7 @@ ESObject.keyBy = (array, property) => {
 
 
 /***/ }),
-/* 273 */
+/* 277 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -20901,15 +21259,15 @@ function getAllControllers(app) {
 
 
 /***/ }),
-/* 274 */
+/* 278 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.randomBloodPressure = exports.randomUsername = exports.randomDate = exports.randomFullName = exports.randomPhoneNumber = exports.randomEnum = exports.randomNumber = exports.randomItemsInArray = exports.shuffleArray = void 0;
 const variable_1 = __webpack_require__(21);
-const string_helper_1 = __webpack_require__(225);
-const time_helper_1 = __webpack_require__(144);
+const string_helper_1 = __webpack_require__(229);
+const time_helper_1 = __webpack_require__(146);
 const shuffleArray = (origin) => [...origin].sort(() => 0.5 - Math.random());
 exports.shuffleArray = shuffleArray;
 const randomItemsInArray = (items) => items[Math.floor(Math.random() * items.length)];
@@ -21052,13 +21410,13 @@ exports.randomBloodPressure = randomBloodPressure;
 
 
 /***/ }),
-/* 275 */
+/* 279 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.HttpsGet = void 0;
-const https = __webpack_require__(276);
+const https = __webpack_require__(280);
 const HttpsGet = (url) => new Promise((resolve, reject) => {
     const request = https.get(url, (res) => {
         let data = '';
@@ -21072,13 +21430,441 @@ exports.HttpsGet = HttpsGet;
 
 
 /***/ }),
-/* 276 */
+/* 280 */
 /***/ ((module) => {
 
 module.exports = require("https");
 
 /***/ }),
-/* 277 */
+/* 281 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ApiFileICDModule = void 0;
+const common_1 = __webpack_require__(3);
+const api_file_icd_controller_1 = __webpack_require__(282);
+const api_file_icd_upload_excel_1 = __webpack_require__(288);
+let ApiFileICDModule = class ApiFileICDModule {
+};
+exports.ApiFileICDModule = ApiFileICDModule;
+exports.ApiFileICDModule = ApiFileICDModule = __decorate([
+    (0, common_1.Module)({
+        imports: [],
+        controllers: [api_file_icd_controller_1.ApiFileICDController],
+        providers: [api_file_icd_upload_excel_1.ApiFileICDUploadExcel],
+    })
+], ApiFileICDModule);
+
+
+/***/ }),
+/* 282 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ApiFileICDController = void 0;
+const common_1 = __webpack_require__(3);
+const swagger_1 = __webpack_require__(6);
+const file_1 = __webpack_require__(283);
+const root_guard_1 = __webpack_require__(15);
+const interceptor_1 = __webpack_require__(284);
+const external_request_1 = __webpack_require__(247);
+const api_file_icd_upload_excel_1 = __webpack_require__(288);
+let ApiFileICDController = class ApiFileICDController {
+    constructor(apiFileICDUploadExcel) {
+        this.apiFileICDUploadExcel = apiFileICDUploadExcel;
+    }
+    async uploadExcel({ uid, oid }, file, body) {
+        return await this.apiFileICDUploadExcel.uploadExcel({ oid, userId: uid, file });
+    }
+};
+exports.ApiFileICDController = ApiFileICDController;
+__decorate([
+    (0, common_1.Post)('upload-excel'),
+    (0, root_guard_1.IsRoot)(),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, common_1.UseInterceptors)((0, interceptor_1.FastifyFileInterceptor)('file', {})),
+    __param(0, (0, external_request_1.External)()),
+    __param(1, (0, common_1.UploadedFile)()),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _b : Object, typeof (_c = typeof file_1.FileUploadDto !== "undefined" && file_1.FileUploadDto) === "function" ? _c : Object, typeof (_d = typeof file_1.SingleFileUpload !== "undefined" && file_1.SingleFileUpload) === "function" ? _d : Object]),
+    __metadata("design:returntype", Promise)
+], ApiFileICDController.prototype, "uploadExcel", null);
+exports.ApiFileICDController = ApiFileICDController = __decorate([
+    (0, swagger_1.ApiTags)('FileICD'),
+    (0, swagger_1.ApiBearerAuth)('access-token'),
+    (0, common_1.Controller)('file-icd'),
+    __metadata("design:paramtypes", [typeof (_a = typeof api_file_icd_upload_excel_1.ApiFileICDUploadExcel !== "undefined" && api_file_icd_upload_excel_1.ApiFileICDUploadExcel) === "function" ? _a : Object])
+], ApiFileICDController);
+
+
+/***/ }),
+/* 283 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SingleFileUpload = exports.MultipleFileUpload = void 0;
+const swagger_1 = __webpack_require__(6);
+class MultipleFileUpload {
+}
+exports.MultipleFileUpload = MultipleFileUpload;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: Array, format: 'binary' }),
+    __metadata("design:type", Array)
+], MultipleFileUpload.prototype, "files", void 0);
+class SingleFileUpload {
+}
+exports.SingleFileUpload = SingleFileUpload;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: 'string', format: 'binary' }),
+    __metadata("design:type", String)
+], SingleFileUpload.prototype, "file", void 0);
+
+
+/***/ }),
+/* 284 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(24), exports);
+__exportStar(__webpack_require__(285), exports);
+__exportStar(__webpack_require__(287), exports);
+__exportStar(__webpack_require__(26), exports);
+__exportStar(__webpack_require__(27), exports);
+
+
+/***/ }),
+/* 285 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FastifyFileInterceptor = FastifyFileInterceptor;
+const common_1 = __webpack_require__(3);
+const fastify_multer_1 = __webpack_require__(7);
+const multer_1 = __webpack_require__(286);
+function FastifyFileInterceptor(fieldName, localOptions) {
+    var _a;
+    let MixinInterceptor = class MixinInterceptor {
+        constructor(options) {
+            this.multer = fastify_multer_1.default(Object.assign(Object.assign({}, options), localOptions));
+        }
+        async intercept(context, next) {
+            const ctx = context.switchToHttp();
+            await new Promise((resolve, reject) => {
+                return this.multer.single(fieldName)(ctx.getRequest(), ctx.getResponse(), (error) => {
+                    if (error) {
+                        return reject(error);
+                    }
+                    resolve();
+                });
+            });
+            return next.handle();
+        }
+    };
+    MixinInterceptor = __decorate([
+        __param(0, (0, common_1.Optional)()),
+        __param(0, (0, common_1.Inject)('MULTER_MODULE_OPTIONS')),
+        __metadata("design:paramtypes", [typeof (_a = typeof multer_1.Multer !== "undefined" && multer_1.Multer) === "function" ? _a : Object])
+    ], MixinInterceptor);
+    const Interceptor = (0, common_1.mixin)(MixinInterceptor);
+    return Interceptor;
+}
+
+
+/***/ }),
+/* 286 */
+/***/ ((module) => {
+
+module.exports = require("multer");
+
+/***/ }),
+/* 287 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FastifyFilesInterceptor = FastifyFilesInterceptor;
+const common_1 = __webpack_require__(3);
+const fastify_multer_1 = __webpack_require__(7);
+const multer_1 = __webpack_require__(286);
+function FastifyFilesInterceptor(fieldName, maxCount, localOptions) {
+    var _a;
+    let MixinInterceptor = class MixinInterceptor {
+        constructor(options) {
+            this.multer = fastify_multer_1.default(Object.assign(Object.assign({}, options), localOptions));
+        }
+        async intercept(context, next) {
+            const ctx = context.switchToHttp();
+            await new Promise((resolve, reject) => {
+                return this.multer.array(fieldName, maxCount)(ctx.getRequest(), ctx.getResponse(), (error) => {
+                    if (error) {
+                        return reject(error);
+                    }
+                    resolve();
+                });
+            });
+            return next.handle();
+        }
+    };
+    MixinInterceptor = __decorate([
+        __param(0, (0, common_1.Optional)()),
+        __param(0, (0, common_1.Inject)('MULTER_MODULE_OPTIONS')),
+        __metadata("design:paramtypes", [typeof (_a = typeof multer_1.Multer !== "undefined" && multer_1.Multer) === "function" ? _a : Object])
+    ], MixinInterceptor);
+    const Interceptor = (0, common_1.mixin)(MixinInterceptor);
+    return Interceptor;
+}
+
+
+/***/ }),
+/* 288 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ApiFileICDUploadExcel = exports.ProductExcelRules = void 0;
+const common_1 = __webpack_require__(3);
+const entities_1 = __webpack_require__(42);
+const repositories_1 = __webpack_require__(164);
+const excel_process_1 = __webpack_require__(289);
+exports.ProductExcelRules = {
+    code: {
+        title: 'Mã',
+        width: 20,
+        type: 'string',
+        required: true,
+    },
+    name: {
+        title: 'Tên',
+        width: 50,
+        type: 'string',
+        required: true,
+    },
+};
+const dataPlainExample = {
+    code: '',
+    name: '',
+};
+let ApiFileICDUploadExcel = class ApiFileICDUploadExcel {
+    constructor(icdRepository) {
+        this.icdRepository = icdRepository;
+    }
+    async uploadExcel(options) {
+        const { oid, userId, file } = options;
+        const excelDataGrid = await excel_process_1.ExcelProcess.getData({
+            file,
+            excelRules: exports.ProductExcelRules,
+            validate: { maxSize: 5 * 1024 * 1024 },
+        });
+        const dataConvertList = excelDataGrid.map((item) => {
+            const dataConvert = {};
+            Object.keys(exports.ProductExcelRules).forEach((key, index) => {
+                dataConvert[key] = item[index];
+            });
+            return dataConvert;
+        });
+        await this.processDataPlainList({ dataPlainList: dataConvertList });
+    }
+    async processDataPlainList(data) {
+        await this.icdRepository
+            .getManager()
+            .query(`TRUNCATE TABLE "${entities_1.ICD.name}" RESTART IDENTITY CASCADE;`);
+        await this.icdRepository.insertMany(data.dataPlainList);
+        return { data: true };
+    }
+};
+exports.ApiFileICDUploadExcel = ApiFileICDUploadExcel;
+exports.ApiFileICDUploadExcel = ApiFileICDUploadExcel = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof repositories_1.ICDRepository !== "undefined" && repositories_1.ICDRepository) === "function" ? _a : Object])
+], ApiFileICDUploadExcel);
+
+
+/***/ }),
+/* 289 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ExcelProcess = exports.ExcelColumnName = void 0;
+const exceljs_1 = __webpack_require__(273);
+const error_1 = __webpack_require__(14);
+exports.ExcelColumnName = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+class ExcelProcess {
+    static async getData(options) {
+        const { file, excelRules, validate } = options;
+        const maxSize = (validate === null || validate === void 0 ? void 0 : validate.maxSize) || 5;
+        const validTypes = [
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-excel',
+            'application/wps-office.xlsx',
+        ];
+        const isValidType = validTypes.includes(file.mimetype);
+        if (!isValidType) {
+            throw new error_1.BusinessError('Chỉ chấp nhận file excel');
+        }
+        if (file.size > maxSize) {
+            throw new error_1.BusinessError(`Chỉ chấp nhận file dưới ${Math.round(maxSize / 1024 / 1024)}MB`);
+        }
+        const workbook = new exceljs_1.Workbook();
+        await workbook.xlsx.load(file.buffer);
+        const worksheet = workbook.worksheets[0];
+        const excelDataGrid = [];
+        const excelRuleKeys = Object.keys(excelRules);
+        worksheet.eachRow((row, rowNumber) => {
+            if (!row.hasValues)
+                return;
+            const excelDataRow = [];
+            for (let colIndex = 0; colIndex <= excelRuleKeys.length; colIndex++) {
+                if (colIndex === 0)
+                    continue;
+                const cell = row.getCell(colIndex);
+                const value = cell.value;
+                if (value == null) {
+                    excelDataRow.push(undefined);
+                }
+                else if (typeof value === 'object' && value instanceof Date) {
+                    excelDataRow.push(value);
+                }
+                else if (typeof value === 'object' && value.hasOwnProperty('text')) {
+                    excelDataRow.push(value.text);
+                }
+                else {
+                    excelDataRow.push(value);
+                }
+            }
+            if (rowNumber === 1) {
+                excelDataRow.forEach((t, index) => {
+                    const key = excelRuleKeys[index];
+                    const rule = excelRules[key];
+                    if (t !== rule.title) {
+                        const msg = `Hàng ${rowNumber}, tiêu đề không đúng,`
+                            + ` cột ${exports.ExcelColumnName[index]} cần có tên là ${rule.title}`;
+                        throw new error_1.BusinessError(msg);
+                    }
+                });
+                return;
+            }
+            excelDataRow.forEach((v, index) => {
+                const key = excelRuleKeys[index];
+                const rule = excelRules[key];
+                const msgPrefix = `STT ${excelDataRow[0]}, hàng ${rowNumber}, `
+                    + `cột ${exports.ExcelColumnName[index]}, ${rule.title}: `;
+                let msgError = '';
+                if (rule.required && (v == null || v === '')) {
+                    msgError = `${msgPrefix} không được để trống`;
+                }
+                if (v != null && v !== '' && rule.type && typeof v !== rule.type) {
+                    if (rule.type === 'number' && typeof v !== 'number') {
+                        msgError = `${msgPrefix} cần có định dạng là số`;
+                    }
+                    if (rule.type === 'string' && typeof v !== 'string') {
+                        msgError = `${msgPrefix} cần có định dạng là chữ`;
+                    }
+                    if (rule.type === 'string_number' && !['string', 'number'].includes(typeof v)) {
+                        msgError = `${msgPrefix} cần có định dạng là chữ hoặc số`;
+                    }
+                    if (rule.type === 'date'
+                        && v !== ''
+                        && Object.prototype.toString.call(v) !== '[object Date]') {
+                        msgError = `${msgPrefix} cần có định dạng là ngày`;
+                    }
+                }
+                if (msgError) {
+                    throw new error_1.BusinessError(msgError);
+                }
+            });
+            excelDataGrid.push(excelDataRow);
+        });
+        return excelDataGrid;
+    }
+}
+exports.ExcelProcess = ExcelProcess;
+
+
+/***/ }),
+/* 290 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -21091,9 +21877,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiFileProductModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_file_product_controller_1 = __webpack_require__(278);
-const api_file_product_download_excel_1 = __webpack_require__(284);
-const api_file_product_upload_excel_1 = __webpack_require__(286);
+const api_file_product_controller_1 = __webpack_require__(291);
+const api_file_product_download_excel_1 = __webpack_require__(292);
+const api_file_product_upload_excel_1 = __webpack_require__(294);
 let ApiFileProductModule = class ApiFileProductModule {
 };
 exports.ApiFileProductModule = ApiFileProductModule;
@@ -21107,7 +21893,7 @@ exports.ApiFileProductModule = ApiFileProductModule = __decorate([
 
 
 /***/ }),
-/* 278 */
+/* 291 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -21128,13 +21914,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiFileProductController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const file_1 = __webpack_require__(279);
-const user_guard_1 = __webpack_require__(95);
-const interceptor_1 = __webpack_require__(280);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_file_product_download_excel_1 = __webpack_require__(284);
-const api_file_product_upload_excel_1 = __webpack_require__(286);
+const file_1 = __webpack_require__(283);
+const user_guard_1 = __webpack_require__(97);
+const interceptor_1 = __webpack_require__(284);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_file_product_download_excel_1 = __webpack_require__(292);
+const api_file_product_upload_excel_1 = __webpack_require__(294);
 let ApiFileProductController = class ApiFileProductController {
     constructor(apiFileProductDownloadExcel, apiFileProductUploadExcel) {
         this.apiFileProductDownloadExcel = apiFileProductDownloadExcel;
@@ -21188,175 +21974,7 @@ exports.ApiFileProductController = ApiFileProductController = __decorate([
 
 
 /***/ }),
-/* 279 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.SingleFileUpload = exports.MultipleFileUpload = void 0;
-const swagger_1 = __webpack_require__(6);
-class MultipleFileUpload {
-}
-exports.MultipleFileUpload = MultipleFileUpload;
-__decorate([
-    (0, swagger_1.ApiProperty)({ type: Array, format: 'binary' }),
-    __metadata("design:type", Array)
-], MultipleFileUpload.prototype, "files", void 0);
-class SingleFileUpload {
-}
-exports.SingleFileUpload = SingleFileUpload;
-__decorate([
-    (0, swagger_1.ApiProperty)({ type: 'string', format: 'binary' }),
-    __metadata("design:type", String)
-], SingleFileUpload.prototype, "file", void 0);
-
-
-/***/ }),
-/* 280 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(24), exports);
-__exportStar(__webpack_require__(281), exports);
-__exportStar(__webpack_require__(283), exports);
-__exportStar(__webpack_require__(26), exports);
-__exportStar(__webpack_require__(27), exports);
-
-
-/***/ }),
-/* 281 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FastifyFileInterceptor = FastifyFileInterceptor;
-const common_1 = __webpack_require__(3);
-const fastify_multer_1 = __webpack_require__(7);
-const multer_1 = __webpack_require__(282);
-function FastifyFileInterceptor(fieldName, localOptions) {
-    var _a;
-    let MixinInterceptor = class MixinInterceptor {
-        constructor(options) {
-            this.multer = fastify_multer_1.default(Object.assign(Object.assign({}, options), localOptions));
-        }
-        async intercept(context, next) {
-            const ctx = context.switchToHttp();
-            await new Promise((resolve, reject) => {
-                return this.multer.single(fieldName)(ctx.getRequest(), ctx.getResponse(), (error) => {
-                    if (error) {
-                        return reject(error);
-                    }
-                    resolve();
-                });
-            });
-            return next.handle();
-        }
-    };
-    MixinInterceptor = __decorate([
-        __param(0, (0, common_1.Optional)()),
-        __param(0, (0, common_1.Inject)('MULTER_MODULE_OPTIONS')),
-        __metadata("design:paramtypes", [typeof (_a = typeof multer_1.Multer !== "undefined" && multer_1.Multer) === "function" ? _a : Object])
-    ], MixinInterceptor);
-    const Interceptor = (0, common_1.mixin)(MixinInterceptor);
-    return Interceptor;
-}
-
-
-/***/ }),
-/* 282 */
-/***/ ((module) => {
-
-module.exports = require("multer");
-
-/***/ }),
-/* 283 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.FastifyFilesInterceptor = FastifyFilesInterceptor;
-const common_1 = __webpack_require__(3);
-const fastify_multer_1 = __webpack_require__(7);
-const multer_1 = __webpack_require__(282);
-function FastifyFilesInterceptor(fieldName, maxCount, localOptions) {
-    var _a;
-    let MixinInterceptor = class MixinInterceptor {
-        constructor(options) {
-            this.multer = fastify_multer_1.default(Object.assign(Object.assign({}, options), localOptions));
-        }
-        async intercept(context, next) {
-            const ctx = context.switchToHttp();
-            await new Promise((resolve, reject) => {
-                return this.multer.array(fieldName, maxCount)(ctx.getRequest(), ctx.getResponse(), (error) => {
-                    if (error) {
-                        return reject(error);
-                    }
-                    resolve();
-                });
-            });
-            return next.handle();
-        }
-    };
-    MixinInterceptor = __decorate([
-        __param(0, (0, common_1.Optional)()),
-        __param(0, (0, common_1.Inject)('MULTER_MODULE_OPTIONS')),
-        __metadata("design:paramtypes", [typeof (_a = typeof multer_1.Multer !== "undefined" && multer_1.Multer) === "function" ? _a : Object])
-    ], MixinInterceptor);
-    const Interceptor = (0, common_1.mixin)(MixinInterceptor);
-    return Interceptor;
-}
-
-
-/***/ }),
-/* 284 */
+/* 292 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -21373,10 +21991,10 @@ var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiFileProductDownloadExcel = void 0;
 const common_1 = __webpack_require__(3);
-const helpers_1 = __webpack_require__(270);
-const repositories_1 = __webpack_require__(162);
-const excel_one_sheet_util_1 = __webpack_require__(268);
-const product_excel_rule_1 = __webpack_require__(285);
+const helpers_1 = __webpack_require__(274);
+const repositories_1 = __webpack_require__(164);
+const excel_one_sheet_util_1 = __webpack_require__(272);
+const product_excel_rule_1 = __webpack_require__(293);
 let ApiFileProductDownloadExcel = class ApiFileProductDownloadExcel {
     constructor(productRepository, productGroupRepository, batchRepository) {
         this.productRepository = productRepository;
@@ -21550,7 +22168,7 @@ exports.ApiFileProductDownloadExcel = ApiFileProductDownloadExcel = __decorate([
 
 
 /***/ }),
-/* 285 */
+/* 293 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -21651,7 +22269,7 @@ exports.ProductExcelRules = {
 
 
 /***/ }),
-/* 286 */
+/* 294 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -21680,13 +22298,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiFileProductUploadExcel = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
-const helpers_1 = __webpack_require__(270);
+const helpers_1 = __webpack_require__(274);
 const error_1 = __webpack_require__(14);
 const variable_1 = __webpack_require__(21);
 const product_entity_1 = __webpack_require__(54);
-const managers_1 = __webpack_require__(102);
-const excel_process_1 = __webpack_require__(287);
-const product_excel_rule_1 = __webpack_require__(285);
+const managers_1 = __webpack_require__(104);
+const excel_process_1 = __webpack_require__(289);
+const product_excel_rule_1 = __webpack_require__(293);
 const dataPlainExample = {
     _num: 0,
     productCode: '',
@@ -22050,109 +22668,7 @@ exports.ApiFileProductUploadExcel = ApiFileProductUploadExcel = __decorate([
 
 
 /***/ }),
-/* 287 */
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ExcelProcess = exports.ExcelColumnName = void 0;
-const exceljs_1 = __webpack_require__(269);
-const error_1 = __webpack_require__(14);
-exports.ExcelColumnName = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-class ExcelProcess {
-    static async getData(options) {
-        const { file, excelRules, validate } = options;
-        const maxSize = (validate === null || validate === void 0 ? void 0 : validate.maxSize) || 5;
-        const validTypes = [
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'application/vnd.ms-excel',
-            'application/wps-office.xlsx',
-        ];
-        const isValidType = validTypes.includes(file.mimetype);
-        if (!isValidType) {
-            throw new error_1.BusinessError('Chỉ chấp nhận file excel');
-        }
-        if (file.size > maxSize) {
-            throw new error_1.BusinessError(`Chỉ chấp nhận file dưới ${Math.round(maxSize / 1024 / 1024)}MB`);
-        }
-        const workbook = new exceljs_1.Workbook();
-        await workbook.xlsx.load(file.buffer);
-        const worksheet = workbook.worksheets[0];
-        const excelDataGrid = [];
-        const excelRuleKeys = Object.keys(excelRules);
-        worksheet.eachRow((row, rowNumber) => {
-            if (!row.hasValues)
-                return;
-            const excelDataRow = [];
-            for (let colIndex = 0; colIndex <= excelRuleKeys.length; colIndex++) {
-                if (colIndex === 0)
-                    continue;
-                const cell = row.getCell(colIndex);
-                const value = cell.value;
-                if (value == null) {
-                    excelDataRow.push(undefined);
-                }
-                else if (typeof value === 'object' && value instanceof Date) {
-                    excelDataRow.push(value);
-                }
-                else if (typeof value === 'object' && value.hasOwnProperty('text')) {
-                    excelDataRow.push(value.text);
-                }
-                else {
-                    excelDataRow.push(value);
-                }
-            }
-            if (rowNumber === 1) {
-                excelDataRow.forEach((t, index) => {
-                    const key = excelRuleKeys[index];
-                    const rule = excelRules[key];
-                    if (t !== rule.title) {
-                        const msg = `Hàng ${rowNumber}, tiêu đề không đúng,`
-                            + ` cột ${exports.ExcelColumnName[index]} cần có tên là ${rule.title}`;
-                        throw new error_1.BusinessError(msg);
-                    }
-                });
-                return;
-            }
-            excelDataRow.forEach((v, index) => {
-                const key = excelRuleKeys[index];
-                const rule = excelRules[key];
-                const msgPrefix = `STT ${excelDataRow[0]}, hàng ${rowNumber}, `
-                    + `cột ${exports.ExcelColumnName[index]}, ${rule.title}: `;
-                let msgError = '';
-                if (rule.required && (v == null || v === '')) {
-                    msgError = `${msgPrefix} không được để trống`;
-                }
-                if (v != null && v !== '' && rule.type && typeof v !== rule.type) {
-                    if (rule.type === 'number' && typeof v !== 'number') {
-                        msgError = `${msgPrefix} cần có định dạng là số`;
-                    }
-                    if (rule.type === 'string' && typeof v !== 'string') {
-                        msgError = `${msgPrefix} cần có định dạng là chữ`;
-                    }
-                    if (rule.type === 'string_number' && !['string', 'number'].includes(typeof v)) {
-                        msgError = `${msgPrefix} cần có định dạng là chữ hoặc số`;
-                    }
-                    if (rule.type === 'date'
-                        && v !== ''
-                        && Object.prototype.toString.call(v) !== '[object Date]') {
-                        msgError = `${msgPrefix} cần có định dạng là ngày`;
-                    }
-                }
-                if (msgError) {
-                    throw new error_1.BusinessError(msgError);
-                }
-            });
-            excelDataGrid.push(excelDataRow);
-        });
-        return excelDataGrid;
-    }
-}
-exports.ExcelProcess = ExcelProcess;
-
-
-/***/ }),
-/* 288 */
+/* 295 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -22165,9 +22681,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiFileReceiptModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_file_product_download_excel_1 = __webpack_require__(284);
-const api_file_receipt_controller_1 = __webpack_require__(289);
-const api_file_receipt_upload_excel_1 = __webpack_require__(290);
+const api_file_product_download_excel_1 = __webpack_require__(292);
+const api_file_receipt_controller_1 = __webpack_require__(296);
+const api_file_receipt_upload_excel_1 = __webpack_require__(297);
 let ApiFileReceiptModule = class ApiFileReceiptModule {
 };
 exports.ApiFileReceiptModule = ApiFileReceiptModule;
@@ -22181,7 +22697,7 @@ exports.ApiFileReceiptModule = ApiFileReceiptModule = __decorate([
 
 
 /***/ }),
-/* 289 */
+/* 296 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -22202,13 +22718,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiFileReceiptController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const file_1 = __webpack_require__(279);
-const user_guard_1 = __webpack_require__(95);
-const interceptor_1 = __webpack_require__(280);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_file_product_download_excel_1 = __webpack_require__(284);
-const api_file_receipt_upload_excel_1 = __webpack_require__(290);
+const file_1 = __webpack_require__(283);
+const user_guard_1 = __webpack_require__(97);
+const interceptor_1 = __webpack_require__(284);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_file_product_download_excel_1 = __webpack_require__(292);
+const api_file_receipt_upload_excel_1 = __webpack_require__(297);
 let ApiFileReceiptController = class ApiFileReceiptController {
     constructor(apiFileReceiptUploadExcel, apiFileProductDownloadExcel) {
         this.apiFileReceiptUploadExcel = apiFileReceiptUploadExcel;
@@ -22251,7 +22767,7 @@ exports.ApiFileReceiptController = ApiFileReceiptController = __decorate([
 
 
 /***/ }),
-/* 290 */
+/* 297 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -22280,13 +22796,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiFileReceiptUploadExcel = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
-const array_helper_1 = __webpack_require__(92);
+const array_helper_1 = __webpack_require__(94);
 const error_1 = __webpack_require__(14);
 const product_entity_1 = __webpack_require__(54);
-const managers_1 = __webpack_require__(102);
-const repositories_1 = __webpack_require__(162);
-const product_excel_rule_1 = __webpack_require__(285);
-const excel_process_1 = __webpack_require__(287);
+const managers_1 = __webpack_require__(104);
+const repositories_1 = __webpack_require__(164);
+const product_excel_rule_1 = __webpack_require__(293);
+const excel_process_1 = __webpack_require__(289);
 const dataPlainExample = {
     _num: 0,
     productCode: '',
@@ -22510,7 +23026,7 @@ exports.ApiFileReceiptUploadExcel = ApiFileReceiptUploadExcel = __decorate([
 
 
 /***/ }),
-/* 291 */
+/* 298 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -22523,8 +23039,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiFileTicketModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_file_ticket_controller_1 = __webpack_require__(292);
-const api_file_ticket_download_excel_1 = __webpack_require__(308);
+const api_file_ticket_controller_1 = __webpack_require__(299);
+const api_file_ticket_download_excel_1 = __webpack_require__(315);
 let ApiFileTicketModule = class ApiFileTicketModule {
 };
 exports.ApiFileTicketModule = ApiFileTicketModule;
@@ -22538,7 +23054,7 @@ exports.ApiFileTicketModule = ApiFileTicketModule = __decorate([
 
 
 /***/ }),
-/* 292 */
+/* 299 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -22559,11 +23075,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiFileTicketController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const request_1 = __webpack_require__(293);
-const api_file_ticket_download_excel_1 = __webpack_require__(308);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const request_1 = __webpack_require__(300);
+const api_file_ticket_download_excel_1 = __webpack_require__(315);
 let ApiFileTicketController = class ApiFileTicketController {
     constructor(apiFileTicketDownloadExcel) {
         this.apiFileTicketDownloadExcel = apiFileTicketDownloadExcel;
@@ -22603,7 +23119,7 @@ exports.ApiFileTicketController = ApiFileTicketController = __decorate([
 
 
 /***/ }),
-/* 293 */
+/* 300 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -22622,16 +23138,16 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(294), exports);
-__exportStar(__webpack_require__(303), exports);
-__exportStar(__webpack_require__(304), exports);
-__exportStar(__webpack_require__(306), exports);
-__exportStar(__webpack_require__(305), exports);
-__exportStar(__webpack_require__(307), exports);
+__exportStar(__webpack_require__(301), exports);
+__exportStar(__webpack_require__(310), exports);
+__exportStar(__webpack_require__(311), exports);
+__exportStar(__webpack_require__(313), exports);
+__exportStar(__webpack_require__(312), exports);
+__exportStar(__webpack_require__(314), exports);
 
 
 /***/ }),
-/* 294 */
+/* 301 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -22649,9 +23165,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketGetOneQuery = exports.TicketGetManyQuery = exports.TicketPaginationQuery = exports.TicketGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
-const ticket_options_request_1 = __webpack_require__(303);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
+const ticket_options_request_1 = __webpack_require__(310);
 class TicketGetQuery {
 }
 exports.TicketGetQuery = TicketGetQuery;
@@ -22748,7 +23264,7 @@ exports.TicketGetOneQuery = TicketGetOneQuery;
 
 
 /***/ }),
-/* 295 */
+/* 302 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -22767,19 +23283,19 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(86), exports);
-__exportStar(__webpack_require__(296), exports);
-__exportStar(__webpack_require__(297), exports);
-__exportStar(__webpack_require__(298), exports);
-__exportStar(__webpack_require__(299), exports);
-__exportStar(__webpack_require__(300), exports);
-__exportStar(__webpack_require__(301), exports);
-__exportStar(__webpack_require__(302), exports);
-__exportStar(__webpack_require__(261), exports);
+__exportStar(__webpack_require__(88), exports);
+__exportStar(__webpack_require__(303), exports);
+__exportStar(__webpack_require__(304), exports);
+__exportStar(__webpack_require__(305), exports);
+__exportStar(__webpack_require__(306), exports);
+__exportStar(__webpack_require__(307), exports);
+__exportStar(__webpack_require__(308), exports);
+__exportStar(__webpack_require__(309), exports);
+__exportStar(__webpack_require__(265), exports);
 
 
 /***/ }),
-/* 296 */
+/* 303 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -22796,7 +23312,7 @@ var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.transformConditionDate = exports.ConditionDate = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class ConditionDate {
 }
 exports.ConditionDate = ConditionDate;
@@ -22948,7 +23464,7 @@ exports.transformConditionDate = transformConditionDate;
 
 
 /***/ }),
-/* 297 */
+/* 304 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -22965,9 +23481,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.transformConditionEnum = void 0;
 exports.createConditionEnum = createConditionEnum;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const typescript_helper_1 = __webpack_require__(250);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const typescript_helper_1 = __webpack_require__(254);
+const class_validator_custom_1 = __webpack_require__(253);
 function createConditionEnum(enumObject) {
     var _a, _b, _c, _d;
     const EValue = (0, typescript_helper_1.valuesEnum)(enumObject);
@@ -23055,7 +23571,7 @@ exports.transformConditionEnum = transformConditionEnum;
 
 
 /***/ }),
-/* 298 */
+/* 305 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -23071,7 +23587,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.transformConditionMongoId = exports.ConditionMongoId = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class ConditionMongoId {
 }
 exports.ConditionMongoId = ConditionMongoId;
@@ -23150,7 +23666,7 @@ exports.transformConditionMongoId = transformConditionMongoId;
 
 
 /***/ }),
-/* 299 */
+/* 306 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -23166,7 +23682,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.transformConditionNumber = exports.ConditionNumber = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class ConditionNumber {
 }
 exports.ConditionNumber = ConditionNumber;
@@ -23285,7 +23801,7 @@ exports.transformConditionNumber = transformConditionNumber;
 
 
 /***/ }),
-/* 300 */
+/* 307 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -23301,7 +23817,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.transformConditionString = exports.ConditionString = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class ConditionString {
 }
 exports.ConditionString = ConditionString;
@@ -23377,7 +23893,7 @@ exports.transformConditionString = transformConditionString;
 
 
 /***/ }),
-/* 301 */
+/* 308 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -23393,7 +23909,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.transformConditionTimestamp = exports.ConditionTimestamp = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class ConditionTimestamp {
 }
 exports.ConditionTimestamp = ConditionTimestamp;
@@ -23582,7 +24098,7 @@ exports.transformConditionTimestamp = transformConditionTimestamp;
 
 
 /***/ }),
-/* 302 */
+/* 309 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -23599,8 +24115,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.IdMongoParam = exports.IdParam = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class IdParam {
 }
 exports.IdParam = IdParam;
@@ -23626,7 +24142,7 @@ __decorate([
 
 
 /***/ }),
-/* 303 */
+/* 310 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -23643,8 +24159,8 @@ var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketSortQuery = exports.TicketFilterQuery = exports.TicketRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
 const ticket_entity_1 = __webpack_require__(56);
 class TicketRelationQuery {
 }
@@ -23790,7 +24306,7 @@ __decorate([
 
 
 /***/ }),
-/* 304 */
+/* 311 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -23807,8 +24323,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketSendProductAndPaymentBody = exports.TicketPaymentMoneyBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const ticket_send_product_list_body_1 = __webpack_require__(305);
+const class_validator_1 = __webpack_require__(252);
+const ticket_send_product_list_body_1 = __webpack_require__(312);
 class TicketPaymentMoneyBody {
 }
 exports.TicketPaymentMoneyBody = TicketPaymentMoneyBody;
@@ -23839,7 +24355,7 @@ exports.TicketSendProductAndPaymentBody = TicketSendProductAndPaymentBody;
 
 
 /***/ }),
-/* 305 */
+/* 312 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -23856,7 +24372,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketSendProductListBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class TicketSendProductListBody {
 }
 exports.TicketSendProductListBody = TicketSendProductListBody;
@@ -23871,7 +24387,7 @@ __decorate([
 
 
 /***/ }),
-/* 306 */
+/* 313 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -23888,8 +24404,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketReturnProductListBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class ReturnListBody {
 }
 __decorate([
@@ -23922,7 +24438,7 @@ __decorate([
 
 
 /***/ }),
-/* 307 */
+/* 314 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -23939,8 +24455,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketParams = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class TicketParams {
 }
 exports.TicketParams = TicketParams;
@@ -23956,7 +24472,7 @@ __decorate([
 
 
 /***/ }),
-/* 308 */
+/* 315 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -23973,11 +24489,11 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiFileTicketDownloadExcel = void 0;
 const common_1 = __webpack_require__(3);
-const time_helper_1 = __webpack_require__(144);
+const time_helper_1 = __webpack_require__(146);
 const entities_1 = __webpack_require__(42);
 const ticket_entity_1 = __webpack_require__(56);
-const repositories_1 = __webpack_require__(162);
-const excel_one_sheet_util_1 = __webpack_require__(268);
+const repositories_1 = __webpack_require__(164);
+const excel_one_sheet_util_1 = __webpack_require__(272);
 let ApiFileTicketDownloadExcel = class ApiFileTicketDownloadExcel {
     constructor(ticketRepository) {
         this.ticketRepository = ticketRepository;
@@ -24232,7 +24748,7 @@ exports.ApiFileTicketDownloadExcel = ApiFileTicketDownloadExcel = __decorate([
 
 
 /***/ }),
-/* 309 */
+/* 316 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -24245,9 +24761,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiRootModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_root_data_module_1 = __webpack_require__(310);
-const api_root_organization_module_1 = __webpack_require__(314);
-const api_root_user_module_1 = __webpack_require__(324);
+const api_root_data_module_1 = __webpack_require__(317);
+const api_root_organization_module_1 = __webpack_require__(321);
+const api_root_user_module_1 = __webpack_require__(331);
 let ApiRootModule = class ApiRootModule {
 };
 exports.ApiRootModule = ApiRootModule;
@@ -24261,7 +24777,7 @@ exports.ApiRootModule = ApiRootModule = __decorate([
 
 
 /***/ }),
-/* 310 */
+/* 317 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -24274,8 +24790,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiRootDataModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_root_data_controller_1 = __webpack_require__(311);
-const api_root_data_service_1 = __webpack_require__(312);
+const api_root_data_controller_1 = __webpack_require__(318);
+const api_root_data_service_1 = __webpack_require__(319);
 let ApiRootDataModule = class ApiRootDataModule {
 };
 exports.ApiRootDataModule = ApiRootDataModule;
@@ -24289,7 +24805,7 @@ exports.ApiRootDataModule = ApiRootDataModule = __decorate([
 
 
 /***/ }),
-/* 311 */
+/* 318 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -24311,8 +24827,8 @@ exports.ApiRootDataController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
 const root_guard_1 = __webpack_require__(15);
-const api_root_data_service_1 = __webpack_require__(312);
-const root_migration_data_body_1 = __webpack_require__(313);
+const api_root_data_service_1 = __webpack_require__(319);
+const root_migration_data_body_1 = __webpack_require__(320);
 let ApiRootDataController = class ApiRootDataController {
     constructor(apiRootDataService) {
         this.apiRootDataService = apiRootDataService;
@@ -24339,7 +24855,7 @@ exports.ApiRootDataController = ApiRootDataController = __decorate([
 
 
 /***/ }),
-/* 312 */
+/* 319 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -24358,7 +24874,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiRootDataService = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
-const ticket_attribute_repository_1 = __webpack_require__(189);
+const ticket_attribute_repository_1 = __webpack_require__(193);
 let ApiRootDataService = ApiRootDataService_1 = class ApiRootDataService {
     constructor(dataSource, ticketAttributeRepository) {
         this.dataSource = dataSource;
@@ -24379,7 +24895,7 @@ exports.ApiRootDataService = ApiRootDataService = ApiRootDataService_1 = __decor
 
 
 /***/ }),
-/* 313 */
+/* 320 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -24396,7 +24912,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RootMigrationDataBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class RootMigrationDataBody {
 }
 exports.RootMigrationDataBody = RootMigrationDataBody;
@@ -24411,7 +24927,7 @@ __decorate([
 
 
 /***/ }),
-/* 314 */
+/* 321 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -24424,8 +24940,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiRootOrganizationModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_root_organization_controller_1 = __webpack_require__(315);
-const api_root_organization_service_1 = __webpack_require__(316);
+const api_root_organization_controller_1 = __webpack_require__(322);
+const api_root_organization_service_1 = __webpack_require__(323);
 let ApiRootOrganizationModule = class ApiRootOrganizationModule {
 };
 exports.ApiRootOrganizationModule = ApiRootOrganizationModule;
@@ -24439,7 +24955,7 @@ exports.ApiRootOrganizationModule = ApiRootOrganizationModule = __decorate([
 
 
 /***/ }),
-/* 315 */
+/* 322 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -24460,10 +24976,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiRootOrganizationController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const dto_1 = __webpack_require__(295);
+const dto_1 = __webpack_require__(302);
 const root_guard_1 = __webpack_require__(15);
-const api_root_organization_service_1 = __webpack_require__(316);
-const request_1 = __webpack_require__(319);
+const api_root_organization_service_1 = __webpack_require__(323);
+const request_1 = __webpack_require__(326);
 let ApiRootOrganizationController = class ApiRootOrganizationController {
     constructor(apiRootOrganizationService) {
         this.apiRootOrganizationService = apiRootOrganizationService;
@@ -24524,7 +25040,7 @@ exports.ApiRootOrganizationController = ApiRootOrganizationController = __decora
 
 
 /***/ }),
-/* 316 */
+/* 323 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -24552,7 +25068,7 @@ const exception_filter_1 = __webpack_require__(9);
 const AllEntity = __webpack_require__(42);
 const entities_1 = __webpack_require__(42);
 const organization_repository_1 = __webpack_require__(40);
-const socket_emit_service_1 = __webpack_require__(317);
+const socket_emit_service_1 = __webpack_require__(324);
 let ApiRootOrganizationService = ApiRootOrganizationService_1 = class ApiRootOrganizationService {
     constructor(socketEmitService, cacheDataService, organizationRepository, manager) {
         this.socketEmitService = socketEmitService;
@@ -24630,7 +25146,7 @@ exports.ApiRootOrganizationService = ApiRootOrganizationService = ApiRootOrganiz
 
 
 /***/ }),
-/* 317 */
+/* 324 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -24643,7 +25159,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SocketEmitService = void 0;
 const common_1 = __webpack_require__(3);
-const socket_variable_1 = __webpack_require__(318);
+const socket_variable_1 = __webpack_require__(325);
 let SocketEmitService = class SocketEmitService {
     constructor() {
         this.connections = null;
@@ -24685,6 +25201,31 @@ let SocketEmitService = class SocketEmitService {
             return;
         this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.PRODUCT_LIST_CHANGE, data);
     }
+    procedureListChange(oid, data) {
+        if (!this.io)
+            return;
+        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.PROCEDURE_LIST_CHANGE, data);
+    }
+    laboratoryListChange(oid, data) {
+        if (!this.io)
+            return;
+        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.LABORATORY_LIST_CHANGE, data);
+    }
+    radiologyListChange(oid, data) {
+        if (!this.io)
+            return;
+        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.RADIOLOGY_LIST_CHANGE, data);
+    }
+    positionListChange(oid, data) {
+        if (!this.io)
+            return;
+        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.POSITION_LIST_CHANGE, data);
+    }
+    discountListChange(oid, data) {
+        if (!this.io)
+            return;
+        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.DISCOUNT_LIST_CHANGE, data);
+    }
     ticketClinicChange(oid, data) {
         if (!this.io)
             return;
@@ -24705,15 +25246,15 @@ let SocketEmitService = class SocketEmitService {
             return;
         this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_CLINIC_CHANGE_TICKET_PROCEDURE_LIST, data);
     }
-    ticketClinicChangeTicketRadiologyList(oid, data) {
+    ticketRadiologyListChange(oid, data) {
         if (!this.io)
             return;
-        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_CLINIC_CHANGE_TICKET_RADIOLOGY_LIST, data);
+        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_RADIOLOGY_LIST_CHANGE, data);
     }
-    ticketClinicChangeLaboratory(oid, data) {
+    ticketLaboratoryListChange(oid, data) {
         if (!this.io)
             return;
-        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_CLINIC_CHANGE_LABORATORY, data);
+        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.TICKET_LABORATORY_LIST_CHANGE, data);
     }
     ticketClinicChangeConsumable(oid, data) {
         if (!this.io)
@@ -24738,7 +25279,7 @@ exports.SocketEmitService = SocketEmitService = __decorate([
 
 
 /***/ }),
-/* 318 */
+/* 325 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -24751,24 +25292,29 @@ var SOCKET_EVENT;
     SOCKET_EVENT["CLIENT_EMIT_TICKET_CREATE"] = "CLIENT_EMIT_TICKET_CREATE";
     SOCKET_EVENT["ORGANIZATION_UPDATE"] = "ORGANIZATION_UPDATE";
     SOCKET_EVENT["SETTING_RELOAD"] = "SETTING_RELOAD";
-    SOCKET_EVENT["CUSTOMER_UPSERT"] = "CUSTOMER_UPSERT";
     SOCKET_EVENT["DISTRIBUTOR_UPSERT"] = "DISTRIBUTOR_UPSERT";
-    SOCKET_EVENT["BATCH_LIST_CHANGE"] = "BATCH_LIST_CHANGE";
+    SOCKET_EVENT["CUSTOMER_UPSERT"] = "CUSTOMER_UPSERT";
     SOCKET_EVENT["PRODUCT_LIST_CHANGE"] = "PRODUCT_LIST_CHANGE";
+    SOCKET_EVENT["BATCH_LIST_CHANGE"] = "BATCH_LIST_CHANGE";
+    SOCKET_EVENT["PROCEDURE_LIST_CHANGE"] = "PROCEDURE_LIST_CHANGE";
+    SOCKET_EVENT["LABORATORY_LIST_CHANGE"] = "LABORATORY_LIST_CHANGE";
+    SOCKET_EVENT["RADIOLOGY_LIST_CHANGE"] = "RADIOLOGY_LIST_CHANGE";
+    SOCKET_EVENT["POSITION_LIST_CHANGE"] = "POSITION_LIST_CHANGE";
+    SOCKET_EVENT["DISCOUNT_LIST_CHANGE"] = "DISCOUNT_LIST_CHANGE";
     SOCKET_EVENT["TICKET_CLINIC_CHANGE"] = "TICKET_CLINIC_CHANGE";
     SOCKET_EVENT["TICKET_CLINIC_UPDATE_TICKET_ATTRIBUTE_LIST"] = "TICKET_CLINIC_UPDATE_TICKET_ATTRIBUTE_LIST";
     SOCKET_EVENT["TICKET_CLINIC_CHANGE_TICKET_USER_LIST"] = "TICKET_CLINIC_CHANGE_TICKET_USER_LIST";
     SOCKET_EVENT["TICKET_CLINIC_CHANGE_TICKET_PROCEDURE_LIST"] = "TICKET_CLINIC_CHANGE_TICKET_PROCEDURE_LIST";
-    SOCKET_EVENT["TICKET_CLINIC_CHANGE_TICKET_RADIOLOGY_LIST"] = "TICKET_CLINIC_CHANGE_TICKET_RADIOLOGY_LIST";
-    SOCKET_EVENT["TICKET_CLINIC_CHANGE_LABORATORY"] = "TICKET_CLINIC_CHANGE_LABORATORY";
     SOCKET_EVENT["TICKET_CLINIC_CHANGE_CONSUMABLE"] = "TICKET_CLINIC_CHANGE_CONSUMABLE";
     SOCKET_EVENT["TICKET_CLINIC_CHANGE_PRESCRIPTION"] = "TICKET_CLINIC_CHANGE_PRESCRIPTION";
     SOCKET_EVENT["TICKET_CLINIC_CHANGE_BATCH"] = "TICKET_CLINIC_CHANGE_BATCH";
+    SOCKET_EVENT["TICKET_LABORATORY_LIST_CHANGE"] = "TICKET_LABORATORY_LIST_CHANGE";
+    SOCKET_EVENT["TICKET_RADIOLOGY_LIST_CHANGE"] = "TICKET_RADIOLOGY_LIST_CHANGE";
 })(SOCKET_EVENT || (exports.SOCKET_EVENT = SOCKET_EVENT = {}));
 
 
 /***/ }),
-/* 319 */
+/* 326 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -24787,14 +25333,14 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(320), exports);
-__exportStar(__webpack_require__(321), exports);
-__exportStar(__webpack_require__(322), exports);
-__exportStar(__webpack_require__(323), exports);
+__exportStar(__webpack_require__(327), exports);
+__exportStar(__webpack_require__(328), exports);
+__exportStar(__webpack_require__(329), exports);
+__exportStar(__webpack_require__(330), exports);
 
 
 /***/ }),
-/* 320 */
+/* 327 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -24811,7 +25357,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RootOrganizationClearBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class RootOrganizationClearBody {
 }
 exports.RootOrganizationClearBody = RootOrganizationClearBody;
@@ -24832,7 +25378,7 @@ __decorate([
 
 
 /***/ }),
-/* 321 */
+/* 328 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -24850,9 +25396,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RootOrganizationGetOneQuery = exports.RootOrganizationGetManyQuery = exports.RootOrganizationPaginationQuery = exports.RootOrganizationGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
-const root_organization_options_request_1 = __webpack_require__(322);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
+const root_organization_options_request_1 = __webpack_require__(329);
 class RootOrganizationGetQuery {
 }
 exports.RootOrganizationGetQuery = RootOrganizationGetQuery;
@@ -24943,7 +25489,7 @@ exports.RootOrganizationGetOneQuery = RootOrganizationGetOneQuery;
 
 
 /***/ }),
-/* 322 */
+/* 329 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -24959,8 +25505,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RootOrganizationSortQuery = exports.RootOrganizationFilterQuery = exports.RootOrganizationRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
 class RootOrganizationRelationQuery {
 }
 exports.RootOrganizationRelationQuery = RootOrganizationRelationQuery;
@@ -24983,7 +25529,7 @@ exports.RootOrganizationSortQuery = RootOrganizationSortQuery;
 
 
 /***/ }),
-/* 323 */
+/* 330 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -25001,8 +25547,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RootOrganizationUpdateBody = exports.RootOrganizationCreateBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 const organization_entity_1 = __webpack_require__(16);
 class RootOrganizationCreateBody {
 }
@@ -25133,7 +25679,7 @@ exports.RootOrganizationUpdateBody = RootOrganizationUpdateBody;
 
 
 /***/ }),
-/* 324 */
+/* 331 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -25146,8 +25692,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiRootUserModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_root_user_controller_1 = __webpack_require__(325);
-const api_root_user_service_1 = __webpack_require__(326);
+const api_root_user_controller_1 = __webpack_require__(332);
+const api_root_user_service_1 = __webpack_require__(333);
 let ApiRootUserModule = class ApiRootUserModule {
 };
 exports.ApiRootUserModule = ApiRootUserModule;
@@ -25161,7 +25707,7 @@ exports.ApiRootUserModule = ApiRootUserModule = __decorate([
 
 
 /***/ }),
-/* 325 */
+/* 332 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -25182,13 +25728,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiRootUserController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const dto_1 = __webpack_require__(295);
+const dto_1 = __webpack_require__(302);
 const root_guard_1 = __webpack_require__(15);
 const user_entity_1 = __webpack_require__(20);
-const api_root_user_service_1 = __webpack_require__(326);
-const device_logout_query_1 = __webpack_require__(328);
-const root_user_get_query_1 = __webpack_require__(329);
-const root_user_upsert_body_1 = __webpack_require__(331);
+const api_root_user_service_1 = __webpack_require__(333);
+const device_logout_query_1 = __webpack_require__(335);
+const root_user_get_query_1 = __webpack_require__(336);
+const root_user_upsert_body_1 = __webpack_require__(338);
 let ApiRootUserController = class ApiRootUserController {
     constructor(apiRootUserService) {
         this.apiRootUserService = apiRootUserService;
@@ -25273,7 +25819,7 @@ exports.ApiRootUserController = ApiRootUserController = __decorate([
 
 
 /***/ }),
-/* 326 */
+/* 333 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -25302,15 +25848,15 @@ var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiRootUserService = void 0;
 const common_1 = __webpack_require__(3);
-const bcrypt = __webpack_require__(245);
+const bcrypt = __webpack_require__(249);
 const cache_data_service_1 = __webpack_require__(38);
-const cache_token_service_1 = __webpack_require__(93);
+const cache_token_service_1 = __webpack_require__(95);
 const exception_filter_1 = __webpack_require__(9);
-const string_helper_1 = __webpack_require__(225);
-const device_1 = __webpack_require__(327);
-const repositories_1 = __webpack_require__(162);
-const user_repository_1 = __webpack_require__(91);
-const socket_emit_service_1 = __webpack_require__(317);
+const string_helper_1 = __webpack_require__(229);
+const device_1 = __webpack_require__(334);
+const repositories_1 = __webpack_require__(164);
+const user_repository_1 = __webpack_require__(93);
+const socket_emit_service_1 = __webpack_require__(324);
 let ApiRootUserService = ApiRootUserService_1 = class ApiRootUserService {
     constructor(socketEmitService, cacheTokenService, cacheDataService, userRepository, organizationRepository) {
         this.socketEmitService = socketEmitService;
@@ -25424,7 +25970,7 @@ exports.ApiRootUserService = ApiRootUserService = ApiRootUserService_1 = __decor
 
 
 /***/ }),
-/* 327 */
+/* 334 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -25477,7 +26023,7 @@ __decorate([
 
 
 /***/ }),
-/* 328 */
+/* 335 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -25494,7 +26040,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DeviceLogoutBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class DeviceLogoutBody {
 }
 exports.DeviceLogoutBody = DeviceLogoutBody;
@@ -25515,7 +26061,7 @@ __decorate([
 
 
 /***/ }),
-/* 329 */
+/* 336 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -25533,9 +26079,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RootUserGetOneQuery = exports.RootUserGetManyQuery = exports.RootUserPaginationQuery = exports.RootUserGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const root_user_options_request_1 = __webpack_require__(330);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const root_user_options_request_1 = __webpack_require__(337);
 class RootUserGetQuery {
 }
 exports.RootUserGetQuery = RootUserGetQuery;
@@ -25626,7 +26172,7 @@ exports.RootUserGetOneQuery = RootUserGetOneQuery;
 
 
 /***/ }),
-/* 330 */
+/* 337 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -25643,9 +26189,9 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RootUserSortQuery = exports.RootUserFilterQuery = exports.RootUserRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
+const query_1 = __webpack_require__(265);
 class RootUserRelationQuery {
 }
 exports.RootUserRelationQuery = RootUserRelationQuery;
@@ -25694,7 +26240,7 @@ __decorate([
 
 
 /***/ }),
-/* 331 */
+/* 338 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -25712,8 +26258,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RootUserUpdateBody = exports.RootUserCreateBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
 class RootUserCreateBody {
 }
@@ -25783,7 +26329,7 @@ exports.RootUserUpdateBody = RootUserUpdateBody;
 
 
 /***/ }),
-/* 332 */
+/* 339 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -25796,47 +26342,49 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_address_module_1 = __webpack_require__(333);
-const api_appointment_module_1 = __webpack_require__(338);
-const api_batch_module_1 = __webpack_require__(350);
-const api_customer_source_module_1 = __webpack_require__(358);
-const api_customer_module_1 = __webpack_require__(365);
-const api_distributor_module_1 = __webpack_require__(368);
-const api_laboratory_group_module_1 = __webpack_require__(375);
-const api_laboratory_sample_module_1 = __webpack_require__(382);
-const api_laboratory_module_1 = __webpack_require__(389);
-const api_organization_module_1 = __webpack_require__(397);
-const api_payment_method_module_1 = __webpack_require__(408);
-const api_payment_module_1 = __webpack_require__(415);
-const api_permission_module_1 = __webpack_require__(424);
-const api_position_module_1 = __webpack_require__(449);
-const api_prescription_sample_module_1 = __webpack_require__(456);
-const api_print_html_module_1 = __webpack_require__(463);
-const api_procedure_group_module_1 = __webpack_require__(470);
-const api_procedure_module_1 = __webpack_require__(477);
-const api_product_group_module_1 = __webpack_require__(484);
-const api_product_movement_module_1 = __webpack_require__(491);
-const api_product_module_1 = __webpack_require__(497);
-const api_radiology_group_module_1 = __webpack_require__(505);
-const api_radiology_module_1 = __webpack_require__(512);
-const api_receipt_item_module_1 = __webpack_require__(521);
-const api_receipt_module_1 = __webpack_require__(528);
-const api_role_module_1 = __webpack_require__(538);
-const api_setting_module_1 = __webpack_require__(545);
-const api_statistic_module_1 = __webpack_require__(550);
-const api_stock_check_module_1 = __webpack_require__(564);
-const api_ticket_batch_module_1 = __webpack_require__(571);
-const api_ticket_clinic_module_1 = __webpack_require__(577);
-const api_ticket_laboratory_group_module_1 = __webpack_require__(635);
-const api_ticket_laboratory_module_1 = __webpack_require__(641);
-const api_ticket_order_module_1 = __webpack_require__(647);
-const api_ticket_procedure_module_1 = __webpack_require__(656);
-const api_ticket_product_module_1 = __webpack_require__(662);
-const api_ticket_radiology_module_1 = __webpack_require__(668);
-const api_ticket_module_1 = __webpack_require__(674);
-const api_user_role_module_1 = __webpack_require__(677);
-const api_user_module_1 = __webpack_require__(683);
-const api_warehouse_module_1 = __webpack_require__(692);
+const api_address_module_1 = __webpack_require__(340);
+const api_appointment_module_1 = __webpack_require__(345);
+const api_batch_module_1 = __webpack_require__(357);
+const api_customer_source_module_1 = __webpack_require__(365);
+const api_customer_module_1 = __webpack_require__(372);
+const api_discount_module_1 = __webpack_require__(375);
+const api_distributor_module_1 = __webpack_require__(382);
+const api_icd_module_1 = __webpack_require__(389);
+const api_laboratory_group_module_1 = __webpack_require__(394);
+const api_laboratory_sample_module_1 = __webpack_require__(401);
+const api_laboratory_module_1 = __webpack_require__(408);
+const api_organization_module_1 = __webpack_require__(420);
+const api_payment_method_module_1 = __webpack_require__(431);
+const api_payment_module_1 = __webpack_require__(438);
+const api_permission_module_1 = __webpack_require__(447);
+const api_position_module_1 = __webpack_require__(473);
+const api_prescription_sample_module_1 = __webpack_require__(476);
+const api_print_html_module_1 = __webpack_require__(483);
+const api_procedure_group_module_1 = __webpack_require__(490);
+const api_procedure_module_1 = __webpack_require__(497);
+const api_product_group_module_1 = __webpack_require__(504);
+const api_product_movement_module_1 = __webpack_require__(511);
+const api_product_module_1 = __webpack_require__(517);
+const api_radiology_group_module_1 = __webpack_require__(525);
+const api_radiology_module_1 = __webpack_require__(532);
+const api_receipt_item_module_1 = __webpack_require__(541);
+const api_receipt_module_1 = __webpack_require__(548);
+const api_role_module_1 = __webpack_require__(558);
+const api_setting_module_1 = __webpack_require__(565);
+const api_statistic_module_1 = __webpack_require__(570);
+const api_stock_check_module_1 = __webpack_require__(584);
+const api_ticket_batch_module_1 = __webpack_require__(591);
+const api_ticket_clinic_module_1 = __webpack_require__(597);
+const api_ticket_laboratory_group_module_1 = __webpack_require__(653);
+const api_ticket_laboratory_module_1 = __webpack_require__(661);
+const api_ticket_order_module_1 = __webpack_require__(667);
+const api_ticket_procedure_module_1 = __webpack_require__(676);
+const api_ticket_product_module_1 = __webpack_require__(682);
+const api_ticket_radiology_module_1 = __webpack_require__(688);
+const api_ticket_module_1 = __webpack_require__(696);
+const api_user_role_module_1 = __webpack_require__(699);
+const api_user_module_1 = __webpack_require__(705);
+const api_warehouse_module_1 = __webpack_require__(714);
 let ApiModule = class ApiModule {
 };
 exports.ApiModule = ApiModule;
@@ -25844,6 +26392,7 @@ exports.ApiModule = ApiModule = __decorate([
     (0, common_1.Module)({
         imports: [
             api_address_module_1.ApiAddressModule,
+            api_icd_module_1.ApiICDModule,
             api_appointment_module_1.ApiAppointmentModule,
             api_batch_module_1.ApiBatchModule,
             api_customer_module_1.ApiCustomerModule,
@@ -25884,6 +26433,7 @@ exports.ApiModule = ApiModule = __decorate([
             api_payment_method_module_1.ApiPaymentMethodModule,
             api_stock_check_module_1.ApiStockCheckModule,
             api_payment_module_1.ApiPaymentModule,
+            api_discount_module_1.ApiDiscountModule,
         ],
         controllers: [],
         providers: [],
@@ -25892,7 +26442,7 @@ exports.ApiModule = ApiModule = __decorate([
 
 
 /***/ }),
-/* 333 */
+/* 340 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -25905,8 +26455,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiAddressModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_address_controller_1 = __webpack_require__(334);
-const api_address_service_1 = __webpack_require__(335);
+const api_address_controller_1 = __webpack_require__(341);
+const api_address_service_1 = __webpack_require__(342);
 let ApiAddressModule = class ApiAddressModule {
 };
 exports.ApiAddressModule = ApiAddressModule;
@@ -25920,7 +26470,7 @@ exports.ApiAddressModule = ApiAddressModule = __decorate([
 
 
 /***/ }),
-/* 334 */
+/* 341 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -25942,9 +26492,9 @@ exports.ApiAddressController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
 const root_guard_1 = __webpack_require__(15);
-const user_guard_1 = __webpack_require__(95);
-const api_address_service_1 = __webpack_require__(335);
-const request_1 = __webpack_require__(336);
+const user_guard_1 = __webpack_require__(97);
+const api_address_service_1 = __webpack_require__(342);
+const request_1 = __webpack_require__(343);
 let ApiAddressController = class ApiAddressController {
     constructor(apiAddressService) {
         this.apiAddressService = apiAddressService;
@@ -25969,7 +26519,7 @@ __decorate([
     (0, root_guard_1.IsRoot)(),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof request_1.PositionReplaceAllBody !== "undefined" && request_1.PositionReplaceAllBody) === "function" ? _b : Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof request_1.AddressReplaceAllBody !== "undefined" && request_1.AddressReplaceAllBody) === "function" ? _b : Object]),
     __metadata("design:returntype", void 0)
 ], ApiAddressController.prototype, "list", null);
 exports.ApiAddressController = ApiAddressController = __decorate([
@@ -25981,7 +26531,7 @@ exports.ApiAddressController = ApiAddressController = __decorate([
 
 
 /***/ }),
-/* 335 */
+/* 342 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -25999,7 +26549,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiAddressService = void 0;
 const common_1 = __webpack_require__(3);
 const entities_1 = __webpack_require__(42);
-const repositories_1 = __webpack_require__(162);
+const repositories_1 = __webpack_require__(164);
 let ApiAddressService = class ApiAddressService {
     constructor(addressRepository) {
         this.addressRepository = addressRepository;
@@ -26022,7 +26572,7 @@ exports.ApiAddressService = ApiAddressService = __decorate([
 
 
 /***/ }),
-/* 336 */
+/* 343 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -26041,11 +26591,11 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(337), exports);
+__exportStar(__webpack_require__(344), exports);
 
 
 /***/ }),
-/* 337 */
+/* 344 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -26059,10 +26609,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.PositionReplaceAllBody = exports.AddressCreateBody = void 0;
+exports.AddressReplaceAllBody = exports.AddressCreateBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class AddressCreateBody {
 }
 exports.AddressCreateBody = AddressCreateBody;
@@ -26080,9 +26630,9 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], AddressCreateBody.prototype, "ward", void 0);
-class PositionReplaceAllBody {
+class AddressReplaceAllBody {
 }
-exports.PositionReplaceAllBody = PositionReplaceAllBody;
+exports.AddressReplaceAllBody = AddressReplaceAllBody;
 __decorate([
     (0, swagger_1.ApiProperty)({ type: AddressCreateBody, isArray: true }),
     (0, class_transformer_1.Expose)(),
@@ -26091,11 +26641,11 @@ __decorate([
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.ValidateNested)({ each: true }),
     __metadata("design:type", Array)
-], PositionReplaceAllBody.prototype, "addressAll", void 0);
+], AddressReplaceAllBody.prototype, "addressAll", void 0);
 
 
 /***/ }),
-/* 338 */
+/* 345 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -26108,8 +26658,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiAppointmentModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_appointment_controller_1 = __webpack_require__(339);
-const api_appointment_service_1 = __webpack_require__(340);
+const api_appointment_controller_1 = __webpack_require__(346);
+const api_appointment_service_1 = __webpack_require__(347);
 let ApiAppointmentModule = class ApiAppointmentModule {
 };
 exports.ApiAppointmentModule = ApiAppointmentModule;
@@ -26123,7 +26673,7 @@ exports.ApiAppointmentModule = ApiAppointmentModule = __decorate([
 
 
 /***/ }),
-/* 339 */
+/* 346 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -26144,13 +26694,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiAppointmentController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const organization_guard_1 = __webpack_require__(94);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_appointment_service_1 = __webpack_require__(340);
-const request_1 = __webpack_require__(341);
+const param_1 = __webpack_require__(309);
+const organization_guard_1 = __webpack_require__(96);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_appointment_service_1 = __webpack_require__(347);
+const request_1 = __webpack_require__(348);
 let ApiAppointmentController = class ApiAppointmentController {
     constructor(apiAppointmentService) {
         this.apiAppointmentService = apiAppointmentService;
@@ -26258,7 +26808,7 @@ exports.ApiAppointmentController = ApiAppointmentController = __decorate([
 
 
 /***/ }),
-/* 340 */
+/* 347 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -26287,11 +26837,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiAppointmentService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const time_helper_1 = __webpack_require__(144);
+const time_helper_1 = __webpack_require__(146);
 const appointment_entity_1 = __webpack_require__(44);
 const ticket_entity_1 = __webpack_require__(56);
-const repositories_1 = __webpack_require__(162);
-const socket_emit_service_1 = __webpack_require__(317);
+const repositories_1 = __webpack_require__(164);
+const socket_emit_service_1 = __webpack_require__(324);
 let ApiAppointmentService = class ApiAppointmentService {
     constructor(socketEmitService, appointmentRepository, customerRepository, ticketRepository, ticketAttributeRepository) {
         this.socketEmitService = socketEmitService;
@@ -26416,7 +26966,7 @@ exports.ApiAppointmentService = ApiAppointmentService = __decorate([
 
 
 /***/ }),
-/* 341 */
+/* 348 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -26435,14 +26985,14 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(342), exports);
-__exportStar(__webpack_require__(343), exports);
-__exportStar(__webpack_require__(344), exports);
-__exportStar(__webpack_require__(345), exports);
+__exportStar(__webpack_require__(349), exports);
+__exportStar(__webpack_require__(350), exports);
+__exportStar(__webpack_require__(351), exports);
+__exportStar(__webpack_require__(352), exports);
 
 
 /***/ }),
-/* 342 */
+/* 349 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -26460,10 +27010,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AppointmentGetOneQuery = exports.AppointmentGetManyQuery = exports.AppointmentPaginationQuery = exports.AppointmentGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
 const appointment_entity_1 = __webpack_require__(44);
-const appointment_options_request_1 = __webpack_require__(343);
+const appointment_options_request_1 = __webpack_require__(350);
 class AppointmentGetQuery {
 }
 exports.AppointmentGetQuery = AppointmentGetQuery;
@@ -26555,7 +27105,7 @@ exports.AppointmentGetOneQuery = AppointmentGetOneQuery;
 
 
 /***/ }),
-/* 343 */
+/* 350 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -26572,11 +27122,11 @@ var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AppointmentSortQuery = exports.AppointmentFilterQuery = exports.AppointmentRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
-const condition_timestamp_1 = __webpack_require__(301);
-const query_1 = __webpack_require__(261);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
+const condition_timestamp_1 = __webpack_require__(308);
+const query_1 = __webpack_require__(265);
+const class_validator_custom_1 = __webpack_require__(253);
 const appointment_entity_1 = __webpack_require__(44);
 class AppointmentRelationQuery {
 }
@@ -26618,7 +27168,7 @@ __decorate([
 
 
 /***/ }),
-/* 344 */
+/* 351 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -26636,8 +27186,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AppointmentRegisterTicketClinicBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 const ticket_entity_1 = __webpack_require__(56);
 class AppointmentRegisterTicketClinicBody {
 }
@@ -26659,7 +27209,7 @@ __decorate([
 
 
 /***/ }),
-/* 345 */
+/* 352 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -26677,10 +27227,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AppointmentUpdateBody = exports.AppointmentCreateBody = exports.AppointmentBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 const appointment_entity_1 = __webpack_require__(44);
-const request_1 = __webpack_require__(346);
+const request_1 = __webpack_require__(353);
 class AppointmentBody {
 }
 exports.AppointmentBody = AppointmentBody;
@@ -26755,7 +27305,7 @@ __decorate([
 
 
 /***/ }),
-/* 346 */
+/* 353 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -26774,13 +27324,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(347), exports);
-__exportStar(__webpack_require__(348), exports);
-__exportStar(__webpack_require__(349), exports);
+__exportStar(__webpack_require__(354), exports);
+__exportStar(__webpack_require__(355), exports);
+__exportStar(__webpack_require__(356), exports);
 
 
 /***/ }),
-/* 347 */
+/* 354 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -26798,9 +27348,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CustomerGetOneQuery = exports.CustomerGetManyQuery = exports.CustomerPaginationQuery = exports.CustomerGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const customer_options_request_1 = __webpack_require__(348);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const customer_options_request_1 = __webpack_require__(355);
 class CustomerGetQuery {
 }
 exports.CustomerGetQuery = CustomerGetQuery;
@@ -26894,7 +27444,7 @@ exports.CustomerGetOneQuery = CustomerGetOneQuery;
 
 
 /***/ }),
-/* 348 */
+/* 355 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -26911,10 +27461,10 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CustomerSortQuery = exports.CustomerFilterQuery = exports.CustomerRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const condition_number_1 = __webpack_require__(299);
-const condition_timestamp_1 = __webpack_require__(301);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const condition_number_1 = __webpack_require__(306);
+const condition_timestamp_1 = __webpack_require__(308);
+const query_1 = __webpack_require__(265);
 class CustomerRelationQuery {
 }
 exports.CustomerRelationQuery = CustomerRelationQuery;
@@ -26960,7 +27510,7 @@ __decorate([
 
 
 /***/ }),
-/* 349 */
+/* 356 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -26978,8 +27528,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CustomerUpdateBody = exports.CustomerCreateBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
 class CustomerCreateBody {
 }
@@ -27084,7 +27634,7 @@ exports.CustomerUpdateBody = CustomerUpdateBody;
 
 
 /***/ }),
-/* 350 */
+/* 357 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -27097,8 +27647,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiBatchModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_batch_controller_1 = __webpack_require__(351);
-const api_batch_service_1 = __webpack_require__(352);
+const api_batch_controller_1 = __webpack_require__(358);
+const api_batch_service_1 = __webpack_require__(359);
 let ApiBatchModule = class ApiBatchModule {
 };
 exports.ApiBatchModule = ApiBatchModule;
@@ -27112,7 +27662,7 @@ exports.ApiBatchModule = ApiBatchModule = __decorate([
 
 
 /***/ }),
-/* 351 */
+/* 358 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -27133,13 +27683,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiBatchController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const organization_guard_1 = __webpack_require__(94);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_batch_service_1 = __webpack_require__(352);
-const request_1 = __webpack_require__(353);
+const param_1 = __webpack_require__(309);
+const organization_guard_1 = __webpack_require__(96);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_batch_service_1 = __webpack_require__(359);
+const request_1 = __webpack_require__(360);
 let ApiBatchController = class ApiBatchController {
     constructor(apiBatchService) {
         this.apiBatchService = apiBatchService;
@@ -27243,7 +27793,7 @@ exports.ApiBatchController = ApiBatchController = __decorate([
 
 
 /***/ }),
-/* 352 */
+/* 359 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -27263,9 +27813,9 @@ const common_1 = __webpack_require__(3);
 const cache_data_service_1 = __webpack_require__(38);
 const exception_filter_1 = __webpack_require__(9);
 const variable_1 = __webpack_require__(21);
-const operations_1 = __webpack_require__(142);
-const repositories_1 = __webpack_require__(162);
-const socket_emit_service_1 = __webpack_require__(317);
+const operations_1 = __webpack_require__(144);
+const repositories_1 = __webpack_require__(164);
+const socket_emit_service_1 = __webpack_require__(324);
 let ApiBatchService = class ApiBatchService {
     constructor(socketEmitService, cacheDataService, organizationRepository, batchRepository, productRepository, ticketBatchRepository, ticketProductRepository, receiptItemRepository, productMovementRepository, productOperation) {
         this.socketEmitService = socketEmitService;
@@ -27457,7 +28007,7 @@ exports.ApiBatchService = ApiBatchService = __decorate([
 
 
 /***/ }),
-/* 353 */
+/* 360 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -27476,14 +28026,14 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(354), exports);
-__exportStar(__webpack_require__(356), exports);
-__exportStar(__webpack_require__(355), exports);
-__exportStar(__webpack_require__(357), exports);
+__exportStar(__webpack_require__(361), exports);
+__exportStar(__webpack_require__(363), exports);
+__exportStar(__webpack_require__(362), exports);
+__exportStar(__webpack_require__(364), exports);
 
 
 /***/ }),
-/* 354 */
+/* 361 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -27501,9 +28051,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.BatchGetOneQuery = exports.BatchGetManyQuery = exports.BatchPaginationQuery = exports.BatchGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const batch_options_request_1 = __webpack_require__(355);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const batch_options_request_1 = __webpack_require__(362);
 class BatchGetQuery {
 }
 exports.BatchGetQuery = BatchGetQuery;
@@ -27588,7 +28138,7 @@ exports.BatchGetOneQuery = BatchGetOneQuery;
 
 
 /***/ }),
-/* 355 */
+/* 362 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -27605,9 +28155,9 @@ var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.BatchSortQuery = exports.BatchFilterQuery = exports.BatchRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
+const query_1 = __webpack_require__(265);
 class BatchRelationQuery {
 }
 exports.BatchRelationQuery = BatchRelationQuery;
@@ -27695,7 +28245,7 @@ __decorate([
 
 
 /***/ }),
-/* 356 */
+/* 363 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -27712,8 +28262,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.BatchMergeBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class BatchMergeBody {
 }
 exports.BatchMergeBody = BatchMergeBody;
@@ -27742,7 +28292,7 @@ __decorate([
 
 
 /***/ }),
-/* 357 */
+/* 364 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -27759,7 +28309,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.BatchUpdateInfoAndQuantityBody = exports.BatchUpdateInfoBody = exports.BatchInsertBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class BatchInsertBody {
 }
 exports.BatchInsertBody = BatchInsertBody;
@@ -27845,7 +28395,7 @@ __decorate([
 
 
 /***/ }),
-/* 358 */
+/* 365 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -27858,8 +28408,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiCustomerSourceModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_customer_source_controller_1 = __webpack_require__(359);
-const api_customer_source_service_1 = __webpack_require__(360);
+const api_customer_source_controller_1 = __webpack_require__(366);
+const api_customer_source_service_1 = __webpack_require__(367);
 let ApiCustomerSourceModule = class ApiCustomerSourceModule {
 };
 exports.ApiCustomerSourceModule = ApiCustomerSourceModule;
@@ -27873,7 +28423,7 @@ exports.ApiCustomerSourceModule = ApiCustomerSourceModule = __decorate([
 
 
 /***/ }),
-/* 359 */
+/* 366 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -27894,12 +28444,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiCustomerSourceController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_customer_source_service_1 = __webpack_require__(360);
-const request_1 = __webpack_require__(361);
+const param_1 = __webpack_require__(309);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_customer_source_service_1 = __webpack_require__(367);
+const request_1 = __webpack_require__(368);
 let ApiCustomerSourceController = class ApiCustomerSourceController {
     constructor(apiCustomerSourceService) {
         this.apiCustomerSourceService = apiCustomerSourceService;
@@ -27990,7 +28540,7 @@ exports.ApiCustomerSourceController = ApiCustomerSourceController = __decorate([
 
 
 /***/ }),
-/* 360 */
+/* 367 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -28008,7 +28558,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiCustomerSourceService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const customer_source_repository_1 = __webpack_require__(166);
+const customer_source_repository_1 = __webpack_require__(168);
 let ApiCustomerSourceService = class ApiCustomerSourceService {
     constructor(customerSourceRepository) {
         this.customerSourceRepository = customerSourceRepository;
@@ -28073,7 +28623,7 @@ exports.ApiCustomerSourceService = ApiCustomerSourceService = __decorate([
 
 
 /***/ }),
-/* 361 */
+/* 368 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -28092,13 +28642,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(362), exports);
-__exportStar(__webpack_require__(363), exports);
-__exportStar(__webpack_require__(364), exports);
+__exportStar(__webpack_require__(369), exports);
+__exportStar(__webpack_require__(370), exports);
+__exportStar(__webpack_require__(371), exports);
 
 
 /***/ }),
-/* 362 */
+/* 369 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -28116,9 +28666,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CustomerSourceGetOneQuery = exports.CustomerSourceGetManyQuery = exports.CustomerSourcePaginationQuery = exports.CustomerSourceGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const customer_source_options_request_1 = __webpack_require__(363);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const customer_source_options_request_1 = __webpack_require__(370);
 class CustomerSourceGetQuery {
 }
 exports.CustomerSourceGetQuery = CustomerSourceGetQuery;
@@ -28206,13 +28756,13 @@ exports.CustomerSourceGetOneQuery = CustomerSourceGetOneQuery;
 
 
 /***/ }),
-/* 363 */
+/* 370 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CustomerSourceSortQuery = exports.CustomerSourceFilterQuery = exports.CustomerSourceRelationQuery = void 0;
-const query_1 = __webpack_require__(261);
+const query_1 = __webpack_require__(265);
 class CustomerSourceRelationQuery {
 }
 exports.CustomerSourceRelationQuery = CustomerSourceRelationQuery;
@@ -28225,7 +28775,7 @@ exports.CustomerSourceSortQuery = CustomerSourceSortQuery;
 
 
 /***/ }),
-/* 364 */
+/* 371 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -28242,7 +28792,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CustomerSourceUpdateBody = exports.CustomerSourceCreateBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class CustomerSourceCreateBody {
 }
 exports.CustomerSourceCreateBody = CustomerSourceCreateBody;
@@ -28259,7 +28809,7 @@ exports.CustomerSourceUpdateBody = CustomerSourceUpdateBody;
 
 
 /***/ }),
-/* 365 */
+/* 372 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -28272,8 +28822,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiCustomerModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_customer_controller_1 = __webpack_require__(366);
-const api_customer_service_1 = __webpack_require__(367);
+const api_customer_controller_1 = __webpack_require__(373);
+const api_customer_service_1 = __webpack_require__(374);
 let ApiCustomerModule = class ApiCustomerModule {
 };
 exports.ApiCustomerModule = ApiCustomerModule;
@@ -28287,7 +28837,7 @@ exports.ApiCustomerModule = ApiCustomerModule = __decorate([
 
 
 /***/ }),
-/* 366 */
+/* 373 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -28308,13 +28858,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiCustomerController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const organization_guard_1 = __webpack_require__(94);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_customer_service_1 = __webpack_require__(367);
-const request_1 = __webpack_require__(346);
+const param_1 = __webpack_require__(309);
+const organization_guard_1 = __webpack_require__(96);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_customer_service_1 = __webpack_require__(374);
+const request_1 = __webpack_require__(353);
 let ApiCustomerController = class ApiCustomerController {
     constructor(apiCustomerService) {
         this.apiCustomerService = apiCustomerService;
@@ -28408,7 +28958,7 @@ exports.ApiCustomerController = ApiCustomerController = __decorate([
 
 
 /***/ }),
-/* 367 */
+/* 374 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -28428,10 +28978,10 @@ const common_1 = __webpack_require__(3);
 const cache_data_service_1 = __webpack_require__(38);
 const exception_filter_1 = __webpack_require__(9);
 const payment_entity_1 = __webpack_require__(48);
-const repositories_1 = __webpack_require__(162);
-const customer_repository_1 = __webpack_require__(167);
+const repositories_1 = __webpack_require__(164);
+const customer_repository_1 = __webpack_require__(169);
 const organization_repository_1 = __webpack_require__(40);
-const socket_emit_service_1 = __webpack_require__(317);
+const socket_emit_service_1 = __webpack_require__(324);
 let ApiCustomerService = class ApiCustomerService {
     constructor(socketEmitService, cacheDataService, customerRepository, paymentRepository, organizationRepository, ticketRepository) {
         this.socketEmitService = socketEmitService;
@@ -28529,7 +29079,561 @@ exports.ApiCustomerService = ApiCustomerService = __decorate([
 
 
 /***/ }),
-/* 368 */
+/* 375 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ApiDiscountModule = void 0;
+const common_1 = __webpack_require__(3);
+const api_discount_controller_1 = __webpack_require__(376);
+const api_discount_service_1 = __webpack_require__(377);
+let ApiDiscountModule = class ApiDiscountModule {
+};
+exports.ApiDiscountModule = ApiDiscountModule;
+exports.ApiDiscountModule = ApiDiscountModule = __decorate([
+    (0, common_1.Module)({
+        imports: [],
+        controllers: [api_discount_controller_1.ApiDiscountController],
+        providers: [api_discount_service_1.ApiDiscountService],
+    })
+], ApiDiscountModule);
+
+
+/***/ }),
+/* 376 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ApiDiscountController = void 0;
+const common_1 = __webpack_require__(3);
+const swagger_1 = __webpack_require__(6);
+const param_1 = __webpack_require__(309);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_discount_service_1 = __webpack_require__(377);
+const request_1 = __webpack_require__(378);
+let ApiDiscountController = class ApiDiscountController {
+    constructor(apiDiscountService) {
+        this.apiDiscountService = apiDiscountService;
+    }
+    list({ oid }, query) {
+        return this.apiDiscountService.getMany(oid, query);
+    }
+    findOne({ oid }, { id }, query) {
+        return this.apiDiscountService.getOne(oid, id, query);
+    }
+    async createOne({ oid }, body) {
+        return await this.apiDiscountService.createOne(oid, body);
+    }
+    async updateOne({ oid }, { id }, body) {
+        return await this.apiDiscountService.updateOne(oid, id, body);
+    }
+    async destroyOne({ oid }, { id }) {
+        return await this.apiDiscountService.destroyOne(oid, id);
+    }
+};
+exports.ApiDiscountController = ApiDiscountController;
+__decorate([
+    (0, common_1.Get)('list'),
+    (0, user_guard_1.UserPermission)(),
+    __param(0, (0, external_request_1.External)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _b : Object, typeof (_c = typeof request_1.DiscountGetManyQuery !== "undefined" && request_1.DiscountGetManyQuery) === "function" ? _c : Object]),
+    __metadata("design:returntype", void 0)
+], ApiDiscountController.prototype, "list", null);
+__decorate([
+    (0, common_1.Get)('detail/:id'),
+    (0, user_guard_1.UserPermission)(),
+    __param(0, (0, external_request_1.External)()),
+    __param(1, (0, common_1.Param)()),
+    __param(2, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_d = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _d : Object, typeof (_e = typeof param_1.IdParam !== "undefined" && param_1.IdParam) === "function" ? _e : Object, typeof (_f = typeof request_1.DiscountGetOneQuery !== "undefined" && request_1.DiscountGetOneQuery) === "function" ? _f : Object]),
+    __metadata("design:returntype", void 0)
+], ApiDiscountController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Post)('create'),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.POSITION_CREATE),
+    __param(0, (0, external_request_1.External)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_g = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _g : Object, typeof (_h = typeof request_1.DiscountCreateBody !== "undefined" && request_1.DiscountCreateBody) === "function" ? _h : Object]),
+    __metadata("design:returntype", Promise)
+], ApiDiscountController.prototype, "createOne", null);
+__decorate([
+    (0, common_1.Patch)('update/:id'),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.POSITION_UPDATE),
+    (0, swagger_1.ApiParam)({ name: 'id', example: 1 }),
+    __param(0, (0, external_request_1.External)()),
+    __param(1, (0, common_1.Param)()),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_j = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _j : Object, typeof (_k = typeof param_1.IdParam !== "undefined" && param_1.IdParam) === "function" ? _k : Object, typeof (_l = typeof request_1.DiscountUpdateBody !== "undefined" && request_1.DiscountUpdateBody) === "function" ? _l : Object]),
+    __metadata("design:returntype", Promise)
+], ApiDiscountController.prototype, "updateOne", null);
+__decorate([
+    (0, common_1.Delete)('destroy/:id'),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.MASTER_DATA_DISCOUNT),
+    (0, swagger_1.ApiParam)({ name: 'id', example: 1 }),
+    __param(0, (0, external_request_1.External)()),
+    __param(1, (0, common_1.Param)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_m = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _m : Object, typeof (_o = typeof param_1.IdParam !== "undefined" && param_1.IdParam) === "function" ? _o : Object]),
+    __metadata("design:returntype", Promise)
+], ApiDiscountController.prototype, "destroyOne", null);
+exports.ApiDiscountController = ApiDiscountController = __decorate([
+    (0, swagger_1.ApiTags)('Discount'),
+    (0, swagger_1.ApiBearerAuth)('access-token'),
+    (0, common_1.Controller)('discount'),
+    __metadata("design:paramtypes", [typeof (_a = typeof api_discount_service_1.ApiDiscountService !== "undefined" && api_discount_service_1.ApiDiscountService) === "function" ? _a : Object])
+], ApiDiscountController);
+
+
+/***/ }),
+/* 377 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d, _e, _f;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ApiDiscountService = void 0;
+const common_1 = __webpack_require__(3);
+const exception_filter_1 = __webpack_require__(9);
+const helpers_1 = __webpack_require__(274);
+const discount_entity_1 = __webpack_require__(76);
+const repositories_1 = __webpack_require__(164);
+const socket_emit_service_1 = __webpack_require__(324);
+let ApiDiscountService = class ApiDiscountService {
+    constructor(socketEmitService, discountRepository, productRepository, procedureRepository, radiologyRepository, laboratoryRepository) {
+        this.socketEmitService = socketEmitService;
+        this.discountRepository = discountRepository;
+        this.productRepository = productRepository;
+        this.procedureRepository = procedureRepository;
+        this.radiologyRepository = radiologyRepository;
+        this.laboratoryRepository = laboratoryRepository;
+    }
+    async getMany(oid, query) {
+        const { limit, filter, relation, sort } = query;
+        const discountList = await this.discountRepository.findMany({
+            relation: {},
+            condition: {
+                oid,
+                discountInteractId: filter === null || filter === void 0 ? void 0 : filter.discountInteractId,
+            },
+            limit,
+            sort,
+        });
+        if (query.relation) {
+            await this.generateRelation(discountList, query.relation);
+        }
+        return { data: { discountList } };
+    }
+    async getOne(oid, id, query) {
+        const discount = await this.discountRepository.findOne({
+            condition: { oid, id },
+        });
+        if (!discount)
+            throw new exception_filter_1.BusinessException('error.Database.NotFound');
+        if (query.relation) {
+            await this.generateRelation([discount], query.relation);
+        }
+        return { data: { discount } };
+    }
+    async createOne(oid, body) {
+        const discount = await this.discountRepository.insertOneFullFieldAndReturnEntity(Object.assign(Object.assign({}, body), { oid }));
+        this.socketEmitService.discountListChange(oid, { discountUpsertedList: [discount] });
+        return { data: { discount } };
+    }
+    async updateOne(oid, id, body) {
+        const discount = await this.discountRepository.updateOneAndReturnEntity({ id, oid }, body);
+        this.socketEmitService.discountListChange(oid, { discountUpsertedList: [discount] });
+        return { data: { discount } };
+    }
+    async destroyOne(oid, id) {
+        const discountDestroyedList = await this.discountRepository.deleteAndReturnEntity({ oid, id });
+        this.socketEmitService.discountListChange(oid, { discountDestroyedList });
+        return { data: true };
+    }
+    async generateRelation(discountList, relation) {
+        const productIdList = discountList
+            .filter((i) => i.discountInteractType === discount_entity_1.DiscountInteractType.Product)
+            .map((i) => i.discountInteractId);
+        const procedureIdList = discountList
+            .filter((i) => i.discountInteractType === discount_entity_1.DiscountInteractType.Procedure)
+            .map((i) => i.discountInteractId);
+        const radiologyIdList = discountList
+            .filter((i) => i.discountInteractType === discount_entity_1.DiscountInteractType.Radiology)
+            .map((i) => i.discountInteractId);
+        const laboratoryIdList = discountList
+            .filter((i) => i.discountInteractType === discount_entity_1.DiscountInteractType.Laboratory)
+            .map((i) => i.discountInteractId);
+        const [productList, procedureList, radiologyList, laboratoryList] = await Promise.all([
+            (relation === null || relation === void 0 ? void 0 : relation.product) && productIdList.length
+                ? this.productRepository.findManyBy({ id: { IN: helpers_1.ESArray.uniqueArray(productIdList) } })
+                : [],
+            (relation === null || relation === void 0 ? void 0 : relation.procedure) && procedureIdList.length
+                ? this.procedureRepository.findManyBy({ id: { IN: helpers_1.ESArray.uniqueArray(procedureIdList) } })
+                : [],
+            (relation === null || relation === void 0 ? void 0 : relation.radiology) && radiologyIdList.length
+                ? this.radiologyRepository.findManyBy({ id: { IN: helpers_1.ESArray.uniqueArray(radiologyIdList) } })
+                : [],
+            (relation === null || relation === void 0 ? void 0 : relation.laboratory) && laboratoryIdList.length
+                ? this.laboratoryRepository.findManyBy({
+                    id: { IN: helpers_1.ESArray.uniqueArray(laboratoryIdList) },
+                })
+                : [],
+        ]);
+        const productMap = helpers_1.ESArray.arrayToKeyValue(productList, 'id');
+        const procedureMap = helpers_1.ESArray.arrayToKeyValue(procedureList, 'id');
+        const laboratoryMap = helpers_1.ESArray.arrayToKeyValue(laboratoryList, 'id');
+        const radiologyMap = helpers_1.ESArray.arrayToKeyValue(radiologyList, 'id');
+        discountList.forEach((discount) => {
+            if (discount.discountInteractType === discount_entity_1.DiscountInteractType.Product) {
+                discount.product = productMap[discount.discountInteractId];
+            }
+            if (discount.discountInteractType === discount_entity_1.DiscountInteractType.Procedure) {
+                discount.procedure = procedureMap[discount.discountInteractId];
+            }
+            if (discount.discountInteractType === discount_entity_1.DiscountInteractType.Radiology) {
+                discount.radiology = radiologyMap[discount.discountInteractId];
+            }
+            if (discount.discountInteractType === discount_entity_1.DiscountInteractType.Laboratory) {
+                discount.laboratory = laboratoryMap[discount.discountInteractId];
+            }
+        });
+        return discountList;
+    }
+};
+exports.ApiDiscountService = ApiDiscountService;
+exports.ApiDiscountService = ApiDiscountService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof repositories_1.DiscountRepository !== "undefined" && repositories_1.DiscountRepository) === "function" ? _b : Object, typeof (_c = typeof repositories_1.ProductRepository !== "undefined" && repositories_1.ProductRepository) === "function" ? _c : Object, typeof (_d = typeof repositories_1.ProcedureRepository !== "undefined" && repositories_1.ProcedureRepository) === "function" ? _d : Object, typeof (_e = typeof repositories_1.RadiologyRepository !== "undefined" && repositories_1.RadiologyRepository) === "function" ? _e : Object, typeof (_f = typeof repositories_1.LaboratoryRepository !== "undefined" && repositories_1.LaboratoryRepository) === "function" ? _f : Object])
+], ApiDiscountService);
+
+
+/***/ }),
+/* 378 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(379), exports);
+__exportStar(__webpack_require__(380), exports);
+__exportStar(__webpack_require__(381), exports);
+
+
+/***/ }),
+/* 379 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DiscountGetOneQuery = exports.DiscountGetManyQuery = exports.DiscountPaginationQuery = exports.DiscountGetQuery = void 0;
+const swagger_1 = __webpack_require__(6);
+const class_transformer_1 = __webpack_require__(17);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const discount_options_request_1 = __webpack_require__(380);
+class DiscountGetQuery {
+}
+exports.DiscountGetQuery = DiscountGetQuery;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: String, example: JSON.stringify({}) }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        try {
+            if (!value)
+                return undefined;
+            const plain = JSON.parse(value);
+            return (0, class_transformer_1.plainToInstance)(discount_options_request_1.DiscountRelationQuery, plain, {
+                exposeUnsetFields: false,
+                excludeExtraneousValues: false,
+            });
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_a = typeof discount_options_request_1.DiscountRelationQuery !== "undefined" && discount_options_request_1.DiscountRelationQuery) === "function" ? _a : Object)
+], DiscountGetQuery.prototype, "relation", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        type: String,
+        example: JSON.stringify({}),
+    }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        try {
+            if (!value)
+                return undefined;
+            const plain = JSON.parse(value);
+            return (0, class_transformer_1.plainToInstance)(discount_options_request_1.DiscountFilterQuery, plain, {
+                exposeUnsetFields: false,
+                excludeExtraneousValues: false,
+            });
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_b = typeof discount_options_request_1.DiscountFilterQuery !== "undefined" && discount_options_request_1.DiscountFilterQuery) === "function" ? _b : Object)
+], DiscountGetQuery.prototype, "filter", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        type: String,
+        example: JSON.stringify({ id: 'ASC' }),
+    }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        try {
+            if (!value)
+                return undefined;
+            const plain = JSON.parse(value);
+            return (0, class_transformer_1.plainToInstance)(discount_options_request_1.DiscountSortQuery, plain, {
+                exposeUnsetFields: false,
+                excludeExtraneousValues: false,
+            });
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_c = typeof discount_options_request_1.DiscountSortQuery !== "undefined" && discount_options_request_1.DiscountSortQuery) === "function" ? _c : Object)
+], DiscountGetQuery.prototype, "sort", void 0);
+class DiscountPaginationQuery extends (0, swagger_1.IntersectionType)(DiscountGetQuery, query_1.PaginationQuery) {
+}
+exports.DiscountPaginationQuery = DiscountPaginationQuery;
+class DiscountGetManyQuery extends (0, swagger_1.IntersectionType)((0, swagger_1.PickType)(DiscountGetQuery, ['filter', 'relation', 'sort']), query_1.LimitQuery) {
+}
+exports.DiscountGetManyQuery = DiscountGetManyQuery;
+class DiscountGetOneQuery extends (0, swagger_1.PickType)(DiscountGetQuery, ['relation']) {
+}
+exports.DiscountGetOneQuery = DiscountGetOneQuery;
+
+
+/***/ }),
+/* 380 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DiscountSortQuery = exports.DiscountFilterQuery = exports.DiscountRelationQuery = void 0;
+const class_transformer_1 = __webpack_require__(17);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+class DiscountRelationQuery {
+}
+exports.DiscountRelationQuery = DiscountRelationQuery;
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], DiscountRelationQuery.prototype, "product", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], DiscountRelationQuery.prototype, "procedure", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], DiscountRelationQuery.prototype, "laboratory", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], DiscountRelationQuery.prototype, "radiology", void 0);
+class DiscountFilterQuery {
+}
+exports.DiscountFilterQuery = DiscountFilterQuery;
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], DiscountFilterQuery.prototype, "discountInteractId", void 0);
+class DiscountSortQuery extends query_1.SortQuery {
+}
+exports.DiscountSortQuery = DiscountSortQuery;
+
+
+/***/ }),
+/* 381 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.DiscountUpdateBody = exports.DiscountCreateBody = void 0;
+const swagger_1 = __webpack_require__(6);
+const class_transformer_1 = __webpack_require__(17);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
+const variable_1 = __webpack_require__(21);
+const discount_entity_1 = __webpack_require__(76);
+class DiscountCreateBody {
+}
+exports.DiscountCreateBody = DiscountCreateBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 25 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], DiscountCreateBody.prototype, "isActive", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 25 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], DiscountCreateBody.prototype, "priority", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: discount_entity_1.DiscountInteractType, example: discount_entity_1.DiscountInteractType.Product }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsEnumValue)(discount_entity_1.DiscountInteractType),
+    __metadata("design:type", typeof (_a = typeof discount_entity_1.DiscountInteractType !== "undefined" && discount_entity_1.DiscountInteractType) === "function" ? _a : Object)
+], DiscountCreateBody.prototype, "discountInteractType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 25 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], DiscountCreateBody.prototype, "discountInteractId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 22500 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], DiscountCreateBody.prototype, "discountMoney", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 22500 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], DiscountCreateBody.prototype, "discountPercent", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: variable_1.DiscountType, example: variable_1.DiscountType.Percent }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsEnumValue)(variable_1.DiscountType),
+    __metadata("design:type", typeof (_b = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _b : Object)
+], DiscountCreateBody.prototype, "discountType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: discount_entity_1.DiscountRepeatType, example: discount_entity_1.DiscountRepeatType.Weekly }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsEnumValue)(discount_entity_1.DiscountRepeatType),
+    __metadata("design:type", typeof (_c = typeof discount_entity_1.DiscountRepeatType !== "undefined" && discount_entity_1.DiscountRepeatType) === "function" ? _c : Object)
+], DiscountCreateBody.prototype, "discountRepeatType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 22500 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DiscountCreateBody.prototype, "periodsDay", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 22500 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], DiscountCreateBody.prototype, "periodsTime", void 0);
+class DiscountUpdateBody extends (0, swagger_1.OmitType)(DiscountCreateBody, [
+    'discountInteractType',
+    'discountInteractId',
+]) {
+}
+exports.DiscountUpdateBody = DiscountUpdateBody;
+
+
+/***/ }),
+/* 382 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -28542,8 +29646,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiDistributorModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_distributor_controller_1 = __webpack_require__(369);
-const api_distributor_service_1 = __webpack_require__(370);
+const api_distributor_controller_1 = __webpack_require__(383);
+const api_distributor_service_1 = __webpack_require__(384);
 let ApiDistributorModule = class ApiDistributorModule {
 };
 exports.ApiDistributorModule = ApiDistributorModule;
@@ -28557,7 +29661,7 @@ exports.ApiDistributorModule = ApiDistributorModule = __decorate([
 
 
 /***/ }),
-/* 369 */
+/* 383 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -28578,13 +29682,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiDistributorController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const organization_guard_1 = __webpack_require__(94);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_distributor_service_1 = __webpack_require__(370);
-const request_1 = __webpack_require__(371);
+const param_1 = __webpack_require__(309);
+const organization_guard_1 = __webpack_require__(96);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_distributor_service_1 = __webpack_require__(384);
+const request_1 = __webpack_require__(385);
 let ApiDistributorController = class ApiDistributorController {
     constructor(apiDistributorService) {
         this.apiDistributorService = apiDistributorService;
@@ -28675,7 +29779,7 @@ exports.ApiDistributorController = ApiDistributorController = __decorate([
 
 
 /***/ }),
-/* 370 */
+/* 384 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -28694,10 +29798,10 @@ exports.ApiDistributorService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
 const payment_entity_1 = __webpack_require__(48);
-const repositories_1 = __webpack_require__(162);
-const distributor_repository_1 = __webpack_require__(168);
-const receipt_repository_1 = __webpack_require__(186);
-const socket_emit_service_1 = __webpack_require__(317);
+const repositories_1 = __webpack_require__(164);
+const distributor_repository_1 = __webpack_require__(171);
+const receipt_repository_1 = __webpack_require__(190);
+const socket_emit_service_1 = __webpack_require__(324);
 let ApiDistributorService = class ApiDistributorService {
     constructor(socketEmitService, distributorRepository, paymentRepository, receiptRepository) {
         this.socketEmitService = socketEmitService;
@@ -28796,7 +29900,7 @@ exports.ApiDistributorService = ApiDistributorService = __decorate([
 
 
 /***/ }),
-/* 371 */
+/* 385 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -28815,13 +29919,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(372), exports);
-__exportStar(__webpack_require__(373), exports);
-__exportStar(__webpack_require__(374), exports);
+__exportStar(__webpack_require__(386), exports);
+__exportStar(__webpack_require__(387), exports);
+__exportStar(__webpack_require__(388), exports);
 
 
 /***/ }),
-/* 372 */
+/* 386 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -28839,9 +29943,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DistributorGetOneQuery = exports.DistributorGetManyQuery = exports.DistributorPaginationQuery = exports.DistributorGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const distributor_options_request_1 = __webpack_require__(373);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const distributor_options_request_1 = __webpack_require__(387);
 class DistributorGetQuery {
 }
 exports.DistributorGetQuery = DistributorGetQuery;
@@ -28926,7 +30030,7 @@ exports.DistributorGetOneQuery = DistributorGetOneQuery;
 
 
 /***/ }),
-/* 373 */
+/* 387 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -28943,10 +30047,10 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DistributorSortQuery = exports.DistributorFilterQuery = exports.DistributorRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const condition_number_1 = __webpack_require__(299);
-const condition_timestamp_1 = __webpack_require__(301);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const condition_number_1 = __webpack_require__(306);
+const condition_timestamp_1 = __webpack_require__(308);
+const query_1 = __webpack_require__(265);
 class DistributorRelationQuery {
 }
 exports.DistributorRelationQuery = DistributorRelationQuery;
@@ -28992,7 +30096,7 @@ __decorate([
 
 
 /***/ }),
-/* 374 */
+/* 388 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -29009,8 +30113,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DistributorUpdateBody = exports.DistributorCreateBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class DistributorCreateBody {
 }
 exports.DistributorCreateBody = DistributorCreateBody;
@@ -29063,7 +30167,212 @@ exports.DistributorUpdateBody = DistributorUpdateBody;
 
 
 /***/ }),
-/* 375 */
+/* 389 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ApiICDModule = void 0;
+const common_1 = __webpack_require__(3);
+const api_icd_controller_1 = __webpack_require__(390);
+const api_icd_service_1 = __webpack_require__(391);
+let ApiICDModule = class ApiICDModule {
+};
+exports.ApiICDModule = ApiICDModule;
+exports.ApiICDModule = ApiICDModule = __decorate([
+    (0, common_1.Module)({
+        imports: [],
+        controllers: [api_icd_controller_1.ApiICDController],
+        providers: [api_icd_service_1.ApiICDService],
+    })
+], ApiICDModule);
+
+
+/***/ }),
+/* 390 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ApiICDController = void 0;
+const common_1 = __webpack_require__(3);
+const swagger_1 = __webpack_require__(6);
+const root_guard_1 = __webpack_require__(15);
+const user_guard_1 = __webpack_require__(97);
+const api_icd_service_1 = __webpack_require__(391);
+const request_1 = __webpack_require__(392);
+let ApiICDController = class ApiICDController {
+    constructor(apiICDService) {
+        this.apiICDService = apiICDService;
+    }
+    getAll() {
+        return this.apiICDService.getAll();
+    }
+    list(body) {
+        return this.apiICDService.replaceAll(body);
+    }
+};
+exports.ApiICDController = ApiICDController;
+__decorate([
+    (0, common_1.Get)('all'),
+    (0, user_guard_1.UserPermission)(),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], ApiICDController.prototype, "getAll", null);
+__decorate([
+    (0, common_1.Put)('replace-all'),
+    (0, root_guard_1.IsRoot)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof request_1.ICDReplaceAllBody !== "undefined" && request_1.ICDReplaceAllBody) === "function" ? _b : Object]),
+    __metadata("design:returntype", void 0)
+], ApiICDController.prototype, "list", null);
+exports.ApiICDController = ApiICDController = __decorate([
+    (0, swagger_1.ApiTags)('ICD'),
+    (0, swagger_1.ApiBearerAuth)('access-token'),
+    (0, common_1.Controller)('icd'),
+    __metadata("design:paramtypes", [typeof (_a = typeof api_icd_service_1.ApiICDService !== "undefined" && api_icd_service_1.ApiICDService) === "function" ? _a : Object])
+], ApiICDController);
+
+
+/***/ }),
+/* 391 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ApiICDService = void 0;
+const common_1 = __webpack_require__(3);
+const entities_1 = __webpack_require__(42);
+const repositories_1 = __webpack_require__(164);
+let ApiICDService = class ApiICDService {
+    constructor(icdRepository) {
+        this.icdRepository = icdRepository;
+    }
+    async getAll() {
+        const icdAll = await this.icdRepository.findManyBy({});
+        return { data: { icdAll } };
+    }
+    async replaceAll(body) {
+        await this.icdRepository
+            .getManager()
+            .query(`TRUNCATE TABLE "${entities_1.ICD.name}" RESTART IDENTITY CASCADE;`);
+        await this.icdRepository.insertMany(body.icdAll);
+        return { data: true };
+    }
+};
+exports.ApiICDService = ApiICDService;
+exports.ApiICDService = ApiICDService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof repositories_1.ICDRepository !== "undefined" && repositories_1.ICDRepository) === "function" ? _a : Object])
+], ApiICDService);
+
+
+/***/ }),
+/* 392 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(393), exports);
+
+
+/***/ }),
+/* 393 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ICDReplaceAllBody = exports.ICDCreateBody = void 0;
+const swagger_1 = __webpack_require__(6);
+const class_transformer_1 = __webpack_require__(17);
+const class_validator_1 = __webpack_require__(252);
+class ICDCreateBody {
+}
+exports.ICDCreateBody = ICDCreateBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 25 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ICDCreateBody.prototype, "code", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 25 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ICDCreateBody.prototype, "name", void 0);
+class ICDReplaceAllBody {
+}
+exports.ICDReplaceAllBody = ICDReplaceAllBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ICDCreateBody, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => ICDCreateBody),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], ICDReplaceAllBody.prototype, "icdAll", void 0);
+
+
+/***/ }),
+/* 394 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -29076,8 +30385,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiLaboratoryGroupModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_laboratory_group_controller_1 = __webpack_require__(376);
-const api_laboratory_group_service_1 = __webpack_require__(377);
+const api_laboratory_group_controller_1 = __webpack_require__(395);
+const api_laboratory_group_service_1 = __webpack_require__(396);
 let ApiLaboratoryGroupModule = class ApiLaboratoryGroupModule {
 };
 exports.ApiLaboratoryGroupModule = ApiLaboratoryGroupModule;
@@ -29091,7 +30400,7 @@ exports.ApiLaboratoryGroupModule = ApiLaboratoryGroupModule = __decorate([
 
 
 /***/ }),
-/* 376 */
+/* 395 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -29112,13 +30421,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiLaboratoryGroupController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const organization_guard_1 = __webpack_require__(94);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_laboratory_group_service_1 = __webpack_require__(377);
-const request_1 = __webpack_require__(378);
+const param_1 = __webpack_require__(309);
+const organization_guard_1 = __webpack_require__(96);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_laboratory_group_service_1 = __webpack_require__(396);
+const request_1 = __webpack_require__(397);
 let ApiLaboratoryGroupController = class ApiLaboratoryGroupController {
     constructor(apiLaboratoryGroupService) {
         this.apiLaboratoryGroupService = apiLaboratoryGroupService;
@@ -29231,7 +30540,7 @@ exports.ApiLaboratoryGroupController = ApiLaboratoryGroupController = __decorate
 
 
 /***/ }),
-/* 377 */
+/* 396 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -29249,7 +30558,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiLaboratoryGroupService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const laboratory_group_repository_1 = __webpack_require__(170);
+const laboratory_group_repository_1 = __webpack_require__(174);
 let ApiLaboratoryGroupService = class ApiLaboratoryGroupService {
     constructor(laboratoryGroupRepository) {
         this.laboratoryGroupRepository = laboratoryGroupRepository;
@@ -29321,7 +30630,7 @@ exports.ApiLaboratoryGroupService = ApiLaboratoryGroupService = __decorate([
 
 
 /***/ }),
-/* 378 */
+/* 397 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -29340,13 +30649,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(379), exports);
-__exportStar(__webpack_require__(380), exports);
-__exportStar(__webpack_require__(381), exports);
+__exportStar(__webpack_require__(398), exports);
+__exportStar(__webpack_require__(399), exports);
+__exportStar(__webpack_require__(400), exports);
 
 
 /***/ }),
-/* 379 */
+/* 398 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -29364,9 +30673,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.LaboratoryGroupGetOneQuery = exports.LaboratoryGroupGetManyQuery = exports.LaboratoryGroupPaginationQuery = exports.LaboratoryGroupGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const laboratory_group_options_request_1 = __webpack_require__(380);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const laboratory_group_options_request_1 = __webpack_require__(399);
 class LaboratoryGroupGetQuery {
 }
 exports.LaboratoryGroupGetQuery = LaboratoryGroupGetQuery;
@@ -29451,7 +30760,7 @@ exports.LaboratoryGroupGetOneQuery = LaboratoryGroupGetOneQuery;
 
 
 /***/ }),
-/* 380 */
+/* 399 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -29467,8 +30776,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.LaboratoryGroupSortQuery = exports.LaboratoryGroupFilterQuery = exports.LaboratoryGroupRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
 class LaboratoryGroupRelationQuery {
 }
 exports.LaboratoryGroupRelationQuery = LaboratoryGroupRelationQuery;
@@ -29491,7 +30800,7 @@ exports.LaboratoryGroupSortQuery = LaboratoryGroupSortQuery;
 
 
 /***/ }),
-/* 381 */
+/* 400 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -29508,7 +30817,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.LaboratoryGroupReplaceAllBody = exports.LaboratoryGroupReplaceBody = exports.LaboratoryGroupUpdateBody = exports.LaboratoryGroupCreateBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class LaboratoryGroupCreateBody {
 }
 exports.LaboratoryGroupCreateBody = LaboratoryGroupCreateBody;
@@ -29568,7 +30877,7 @@ __decorate([
 
 
 /***/ }),
-/* 382 */
+/* 401 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -29581,8 +30890,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiLaboratorySampleModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_laboratory_sample_controller_1 = __webpack_require__(383);
-const api_laboratory_sample_service_1 = __webpack_require__(384);
+const api_laboratory_sample_controller_1 = __webpack_require__(402);
+const api_laboratory_sample_service_1 = __webpack_require__(403);
 let ApiLaboratorySampleModule = class ApiLaboratorySampleModule {
 };
 exports.ApiLaboratorySampleModule = ApiLaboratorySampleModule;
@@ -29596,7 +30905,7 @@ exports.ApiLaboratorySampleModule = ApiLaboratorySampleModule = __decorate([
 
 
 /***/ }),
-/* 383 */
+/* 402 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -29617,13 +30926,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiLaboratorySampleController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const organization_guard_1 = __webpack_require__(94);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_laboratory_sample_service_1 = __webpack_require__(384);
-const request_1 = __webpack_require__(385);
+const param_1 = __webpack_require__(309);
+const organization_guard_1 = __webpack_require__(96);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_laboratory_sample_service_1 = __webpack_require__(403);
+const request_1 = __webpack_require__(404);
 let ApiLaboratorySampleController = class ApiLaboratorySampleController {
     constructor(apiLaboratorySampleService) {
         this.apiLaboratorySampleService = apiLaboratorySampleService;
@@ -29714,7 +31023,7 @@ exports.ApiLaboratorySampleController = ApiLaboratorySampleController = __decora
 
 
 /***/ }),
-/* 384 */
+/* 403 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -29732,7 +31041,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiLaboratorySampleService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const laboratory_sample_repository_1 = __webpack_require__(171);
+const laboratory_sample_repository_1 = __webpack_require__(175);
 let ApiLaboratorySampleService = class ApiLaboratorySampleService {
     constructor(laboratorySampleRepository) {
         this.laboratorySampleRepository = laboratorySampleRepository;
@@ -29795,7 +31104,7 @@ exports.ApiLaboratorySampleService = ApiLaboratorySampleService = __decorate([
 
 
 /***/ }),
-/* 385 */
+/* 404 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -29814,13 +31123,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(386), exports);
-__exportStar(__webpack_require__(387), exports);
-__exportStar(__webpack_require__(388), exports);
+__exportStar(__webpack_require__(405), exports);
+__exportStar(__webpack_require__(406), exports);
+__exportStar(__webpack_require__(407), exports);
 
 
 /***/ }),
-/* 386 */
+/* 405 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -29838,9 +31147,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.LaboratorySampleGetOneQuery = exports.LaboratorySampleGetManyQuery = exports.LaboratorySamplePaginationQuery = exports.LaboratorySampleGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const laboratory_sample_options_request_1 = __webpack_require__(387);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const laboratory_sample_options_request_1 = __webpack_require__(406);
 class LaboratorySampleGetQuery {
 }
 exports.LaboratorySampleGetQuery = LaboratorySampleGetQuery;
@@ -29925,13 +31234,13 @@ exports.LaboratorySampleGetOneQuery = LaboratorySampleGetOneQuery;
 
 
 /***/ }),
-/* 387 */
+/* 406 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.LaboratorySampleSortQuery = exports.LaboratorySampleFilterQuery = exports.LaboratorySampleRelationQuery = void 0;
-const query_1 = __webpack_require__(261);
+const query_1 = __webpack_require__(265);
 class LaboratorySampleRelationQuery {
 }
 exports.LaboratorySampleRelationQuery = LaboratorySampleRelationQuery;
@@ -29944,7 +31253,7 @@ exports.LaboratorySampleSortQuery = LaboratorySampleSortQuery;
 
 
 /***/ }),
-/* 388 */
+/* 407 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -29961,7 +31270,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.LaboratorySampleUpdateBody = exports.LaboratorySampleCreateBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class LaboratorySampleCreateBody {
 }
 exports.LaboratorySampleCreateBody = LaboratorySampleCreateBody;
@@ -29992,7 +31301,7 @@ exports.LaboratorySampleUpdateBody = LaboratorySampleUpdateBody;
 
 
 /***/ }),
-/* 389 */
+/* 408 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -30005,8 +31314,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiLaboratoryModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_laboratory_controller_1 = __webpack_require__(390);
-const api_laboratory_service_1 = __webpack_require__(391);
+const api_laboratory_controller_1 = __webpack_require__(409);
+const api_laboratory_service_1 = __webpack_require__(410);
 let ApiLaboratoryModule = class ApiLaboratoryModule {
 };
 exports.ApiLaboratoryModule = ApiLaboratoryModule;
@@ -30020,7 +31329,7 @@ exports.ApiLaboratoryModule = ApiLaboratoryModule = __decorate([
 
 
 /***/ }),
-/* 390 */
+/* 409 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -30041,13 +31350,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiLaboratoryController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const organization_guard_1 = __webpack_require__(94);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_laboratory_service_1 = __webpack_require__(391);
-const request_1 = __webpack_require__(392);
+const param_1 = __webpack_require__(309);
+const organization_guard_1 = __webpack_require__(96);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_laboratory_service_1 = __webpack_require__(410);
+const request_1 = __webpack_require__(411);
 let ApiLaboratoryController = class ApiLaboratoryController {
     constructor(apiLaboratoryService) {
         this.apiLaboratoryService = apiLaboratoryService;
@@ -30161,7 +31470,7 @@ exports.ApiLaboratoryController = ApiLaboratoryController = __decorate([
 
 
 /***/ }),
-/* 391 */
+/* 410 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -30174,37 +31483,31 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
-var _a, _b;
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiLaboratoryService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const array_helper_1 = __webpack_require__(92);
+const array_helper_1 = __webpack_require__(94);
+const discount_entity_1 = __webpack_require__(76);
 const laboratory_entity_1 = __webpack_require__(64);
-const laboratory_repository_1 = __webpack_require__(172);
-const ticket_laboratory_repository_1 = __webpack_require__(194);
+const position_entity_1 = __webpack_require__(75);
+const repositories_1 = __webpack_require__(164);
+const laboratory_repository_1 = __webpack_require__(176);
+const ticket_laboratory_repository_1 = __webpack_require__(198);
+const socket_emit_service_1 = __webpack_require__(324);
 let ApiLaboratoryService = class ApiLaboratoryService {
-    constructor(laboratoryRepository, ticketLaboratoryRepository) {
+    constructor(socketEmitService, laboratoryRepository, laboratoryGroupRepository, ticketLaboratoryRepository, positionRepository, discountRepository) {
+        this.socketEmitService = socketEmitService;
         this.laboratoryRepository = laboratoryRepository;
+        this.laboratoryGroupRepository = laboratoryGroupRepository;
         this.ticketLaboratoryRepository = ticketLaboratoryRepository;
+        this.positionRepository = positionRepository;
+        this.discountRepository = discountRepository;
     }
     async pagination(oid, query) {
         const { page, limit, filter, relation, sort } = query;
         const { data, total } = await this.laboratoryRepository.pagination({
-            relation: {
-                laboratoryGroup: relation === null || relation === void 0 ? void 0 : relation.laboratoryGroup,
-            },
             page,
             limit,
             condition: {
@@ -30215,6 +31518,9 @@ let ApiLaboratoryService = class ApiLaboratoryService {
             },
             sort,
         });
+        if (query.relation) {
+            await this.generateRelation({ oid, laboratoryList: data, relation: query.relation });
+        }
         return {
             data,
             meta: { page, limit, total },
@@ -30223,9 +31529,6 @@ let ApiLaboratoryService = class ApiLaboratoryService {
     async getMany(oid, query) {
         const { limit, filter, relation, sort } = query;
         const data = await this.laboratoryRepository.findMany({
-            relation: {
-                laboratoryGroup: relation === null || relation === void 0 ? void 0 : relation.laboratoryGroup,
-            },
             condition: {
                 oid,
                 laboratoryGroupId: filter === null || filter === void 0 ? void 0 : filter.laboratoryGroupId,
@@ -30235,6 +31538,9 @@ let ApiLaboratoryService = class ApiLaboratoryService {
             sort,
             limit,
         });
+        if (query.relation) {
+            await this.generateRelation({ oid, laboratoryList: data, relation: query.relation });
+        }
         return { data };
     }
     async getOne(oid, id, query) {
@@ -30247,6 +31553,9 @@ let ApiLaboratoryService = class ApiLaboratoryService {
         });
         if (!laboratory)
             throw new exception_filter_1.BusinessException('error.Database.NotFound');
+        if (query.relation) {
+            await this.generateRelation({ oid, laboratoryList: [laboratory], relation: query.relation });
+        }
         if ((_b = query === null || query === void 0 ? void 0 : query.relation) === null || _b === void 0 ? void 0 : _b.children) {
             if (laboratory.valueType === laboratory_entity_1.LaboratoryValueType.Children) {
                 laboratory.children = await this.laboratoryRepository.findMany({
@@ -30262,20 +31571,49 @@ let ApiLaboratoryService = class ApiLaboratoryService {
         return { data: { laboratory } };
     }
     async create(oid, body) {
-        const { children } = body, laboratoryCreateDto = __rest(body, ["children"]);
-        const laboratoryParentId = await this.laboratoryRepository.insertOneFullField(Object.assign(Object.assign({}, laboratoryCreateDto), { oid, level: 1, parentId: 0 }));
-        const [laboratoryParent] = await this.laboratoryRepository.updateAndReturnEntity({ oid, id: laboratoryParentId }, { parentId: laboratoryParentId });
-        if (laboratoryParent.valueType === laboratory_entity_1.LaboratoryValueType.Children && children.length) {
-            const childrenDto = children.map((i) => {
+        const { laboratory, laboratoryChildren, discountList, positionList } = body;
+        const laboratoryParentId = await this.laboratoryRepository.insertOneFullField(Object.assign(Object.assign({}, laboratory), { oid, level: 1, parentId: 0 }));
+        const laboratoryParent = await this.laboratoryRepository.updateOneAndReturnEntity({ oid, id: laboratoryParentId }, { parentId: laboratoryParentId });
+        if (laboratoryParent.valueType === laboratory_entity_1.LaboratoryValueType.Children && laboratoryChildren.length) {
+            const childrenDto = laboratoryChildren.map((i) => {
                 const childDto = Object.assign(Object.assign({}, i), { oid, laboratoryGroupId: laboratoryParent.laboratoryGroupId, level: 2, parentId: laboratoryParent.id });
                 return childDto;
             });
-            await this.laboratoryRepository.insertManyFullFieldAndReturnEntity(childrenDto);
+            laboratoryParent.children =
+                await this.laboratoryRepository.insertManyFullFieldAndReturnEntity(childrenDto);
+        }
+        this.socketEmitService.laboratoryListChange(oid, { laboratoryUpsertedList: [laboratoryParent] });
+        if (positionList === null || positionList === void 0 ? void 0 : positionList.length) {
+            const positionDtoList = positionList.map((i) => {
+                const dto = {
+                    oid,
+                    roleId: i.roleId,
+                    commissionCalculatorType: i.commissionCalculatorType,
+                    commissionValue: i.commissionValue,
+                    positionInteractId: laboratoryParent.id,
+                    positionType: position_entity_1.PositionInteractType.Laboratory,
+                };
+                return dto;
+            });
+            const positionUpsertedList = await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList);
+            laboratoryParent.positionList = positionUpsertedList;
+            this.socketEmitService.positionListChange(oid, {
+                positionUpsertedList,
+            });
+        }
+        if (discountList === null || discountList === void 0 ? void 0 : discountList.length) {
+            const discountListDto = discountList.map((i) => {
+                const dto = Object.assign(Object.assign({}, i), { discountInteractId: laboratoryParent.id, discountInteractType: discount_entity_1.DiscountInteractType.Laboratory, oid });
+                return dto;
+            });
+            const discountUpsertedList = await this.discountRepository.insertManyFullFieldAndReturnEntity(discountListDto);
+            laboratoryParent.discountList = discountUpsertedList;
+            this.socketEmitService.discountListChange(oid, { discountUpsertedList });
         }
         return { data: { laboratory: laboratoryParent } };
     }
     async update(oid, id, body) {
-        const { children } = body, laboratoryUpdateDto = __rest(body, ["children"]);
+        const { laboratory: laboratoryUpdateDto, laboratoryChildren, discountList, positionList } = body;
         const laboratoryOrigin = await this.laboratoryRepository.findOneBy({ oid, id });
         if (!laboratoryOrigin) {
             throw new exception_filter_1.BusinessException('error.Database.NotFound');
@@ -30289,21 +31627,61 @@ let ApiLaboratoryService = class ApiLaboratoryService {
                 });
             }
         }
-        const [laboratory] = await this.laboratoryRepository.updateAndReturnEntity({ oid, id }, laboratoryUpdateDto);
-        if (!laboratory)
-            throw new exception_filter_1.BusinessException('error.Database.UpdateFailed');
+        const laboratory = await this.laboratoryRepository.updateOneAndReturnEntity({ oid, id }, laboratoryUpdateDto);
         if (laboratory.valueType === laboratory_entity_1.LaboratoryValueType.Children) {
             await this.laboratoryRepository.updateChildren({
                 oid,
                 laboratoryParent: laboratory,
-                laboratoryChildrenDtoList: children,
+                laboratoryChildrenDtoList: laboratoryChildren,
+            });
+        }
+        this.socketEmitService.laboratoryListChange(oid, { laboratoryUpsertedList: [laboratory] });
+        if (positionList) {
+            const positionDestroyedList = await this.positionRepository.deleteAndReturnEntity({
+                oid,
+                positionInteractId: laboratory.id,
+                positionType: position_entity_1.PositionInteractType.Laboratory,
+            });
+            const positionDtoList = positionList.map((i) => {
+                const dto = {
+                    oid,
+                    roleId: i.roleId,
+                    commissionCalculatorType: i.commissionCalculatorType,
+                    commissionValue: i.commissionValue,
+                    positionInteractId: laboratory.id,
+                    positionType: position_entity_1.PositionInteractType.Laboratory,
+                };
+                return dto;
+            });
+            const positionUpsertedList = await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList);
+            laboratory.positionList = positionUpsertedList;
+            this.socketEmitService.positionListChange(oid, {
+                positionUpsertedList,
+                positionDestroyedList,
+            });
+        }
+        if (discountList) {
+            const discountDestroyedList = await this.discountRepository.deleteAndReturnEntity({
+                oid,
+                discountInteractId: laboratory.id,
+                discountInteractType: discount_entity_1.DiscountInteractType.Laboratory,
+            });
+            const discountListDto = discountList.map((i) => {
+                const dto = Object.assign(Object.assign({}, i), { discountInteractId: laboratory.id, discountInteractType: discount_entity_1.DiscountInteractType.Laboratory, oid });
+                return dto;
+            });
+            const discountUpsertedList = await this.discountRepository.insertManyFullFieldAndReturnEntity(discountListDto);
+            laboratory.discountList = discountUpsertedList;
+            this.socketEmitService.discountListChange(oid, {
+                discountUpsertedList,
+                discountDestroyedList,
             });
         }
         return { data: { laboratory } };
     }
-    async destroy(oid, id) {
+    async destroy(oid, laboratoryId) {
         const ticketLaboratoryList = await this.ticketLaboratoryRepository.findMany({
-            condition: { oid, laboratoryId: id },
+            condition: { oid, laboratoryId },
             limit: 10,
         });
         if (ticketLaboratoryList.length > 0) {
@@ -30312,10 +31690,30 @@ let ApiLaboratoryService = class ApiLaboratoryService {
                 success: false,
             };
         }
-        const affected = await this.laboratoryRepository.delete({ oid, parentId: id });
-        if (affected === 0)
-            throw new exception_filter_1.BusinessException('error.Database.DeleteFailed');
-        return { data: { ticketLaboratoryList: [], laboratoryId: id } };
+        const [positionDestroyedList, discountDestroyedList] = await Promise.all([
+            this.positionRepository.deleteAndReturnEntity({
+                oid,
+                positionInteractId: laboratoryId,
+                positionType: position_entity_1.PositionInteractType.Laboratory,
+            }),
+            this.discountRepository.deleteAndReturnEntity({
+                oid,
+                discountInteractId: laboratoryId,
+                discountInteractType: discount_entity_1.DiscountInteractType.Laboratory,
+            }),
+        ]);
+        if (positionDestroyedList.length) {
+            this.socketEmitService.positionListChange(oid, { positionDestroyedList });
+        }
+        if (discountDestroyedList.length) {
+            this.socketEmitService.discountListChange(oid, { discountDestroyedList });
+        }
+        const laboratoryDestroyedList = await this.laboratoryRepository.deleteAndReturnEntity({
+            oid,
+            parentId: laboratoryId,
+        });
+        this.socketEmitService.laboratoryListChange(oid, { laboratoryDestroyedList });
+        return { data: { ticketLaboratoryList: [], laboratoryId } };
     }
     async systemList() {
         const data = await this.laboratoryRepository.findMany({
@@ -30393,16 +31791,57 @@ let ApiLaboratoryService = class ApiLaboratoryService {
         await this.laboratoryRepository.insertMany(laboratoryChildInsertList);
         return { data: true };
     }
+    async generateRelation(options) {
+        const { oid, laboratoryList, relation } = options;
+        const laboratoryIdList = array_helper_1.ESArray.uniqueArray(laboratoryList.map((i) => i.id));
+        const laboratoryGroupIdList = array_helper_1.ESArray.uniqueArray(laboratoryList.map((i) => i.laboratoryGroupId));
+        const [positionList, discountList, laboratoryGroupList] = await Promise.all([
+            (relation === null || relation === void 0 ? void 0 : relation.positionList) && laboratoryIdList.length
+                ? this.positionRepository.findManyBy({
+                    oid,
+                    positionType: position_entity_1.PositionInteractType.Laboratory,
+                    positionInteractId: { IN: laboratoryIdList },
+                })
+                : [],
+            (relation === null || relation === void 0 ? void 0 : relation.discountList) && laboratoryIdList.length
+                ? this.discountRepository.findManyBy({
+                    oid,
+                    discountInteractType: discount_entity_1.DiscountInteractType.Laboratory,
+                    discountInteractId: { IN: [...laboratoryIdList, 0] },
+                })
+                : [],
+            (relation === null || relation === void 0 ? void 0 : relation.laboratoryGroup) && laboratoryGroupIdList.length
+                ? this.laboratoryGroupRepository.findManyBy({
+                    oid,
+                    id: { IN: laboratoryGroupIdList },
+                })
+                : [],
+        ]);
+        const laboratoryGroupMap = array_helper_1.ESArray.arrayToKeyValue(laboratoryGroupList, 'id');
+        laboratoryList.forEach((laboratory) => {
+            if (relation === null || relation === void 0 ? void 0 : relation.positionList) {
+                laboratory.positionList = positionList.filter((i) => i.positionInteractId === laboratory.id);
+            }
+            if (relation === null || relation === void 0 ? void 0 : relation.discountList) {
+                laboratory.discountList = discountList.filter((i) => i.discountInteractId === laboratory.id);
+                laboratory.discountListExtra = discountList.filter((i) => i.discountInteractId === 0);
+            }
+            if (relation === null || relation === void 0 ? void 0 : relation.laboratoryGroup) {
+                laboratory.laboratoryGroup = laboratoryGroupMap[laboratory.laboratoryGroupId];
+            }
+        });
+        return laboratoryList;
+    }
 };
 exports.ApiLaboratoryService = ApiLaboratoryService;
 exports.ApiLaboratoryService = ApiLaboratoryService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof laboratory_repository_1.LaboratoryRepository !== "undefined" && laboratory_repository_1.LaboratoryRepository) === "function" ? _a : Object, typeof (_b = typeof ticket_laboratory_repository_1.TicketLaboratoryRepository !== "undefined" && ticket_laboratory_repository_1.TicketLaboratoryRepository) === "function" ? _b : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof laboratory_repository_1.LaboratoryRepository !== "undefined" && laboratory_repository_1.LaboratoryRepository) === "function" ? _b : Object, typeof (_c = typeof repositories_1.LaboratoryGroupRepository !== "undefined" && repositories_1.LaboratoryGroupRepository) === "function" ? _c : Object, typeof (_d = typeof ticket_laboratory_repository_1.TicketLaboratoryRepository !== "undefined" && ticket_laboratory_repository_1.TicketLaboratoryRepository) === "function" ? _d : Object, typeof (_e = typeof repositories_1.PositionRepository !== "undefined" && repositories_1.PositionRepository) === "function" ? _e : Object, typeof (_f = typeof repositories_1.DiscountRepository !== "undefined" && repositories_1.DiscountRepository) === "function" ? _f : Object])
 ], ApiLaboratoryService);
 
 
 /***/ }),
-/* 392 */
+/* 411 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -30421,14 +31860,14 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(393), exports);
-__exportStar(__webpack_require__(394), exports);
-__exportStar(__webpack_require__(395), exports);
-__exportStar(__webpack_require__(396), exports);
+__exportStar(__webpack_require__(412), exports);
+__exportStar(__webpack_require__(413), exports);
+__exportStar(__webpack_require__(414), exports);
+__exportStar(__webpack_require__(415), exports);
 
 
 /***/ }),
-/* 393 */
+/* 412 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -30446,9 +31885,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.LaboratoryGetOneQuery = exports.LaboratoryGetManyQuery = exports.LaboratoryPaginationQuery = exports.LaboratoryGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const laboratory_options_request_1 = __webpack_require__(394);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const laboratory_options_request_1 = __webpack_require__(413);
 class LaboratoryGetQuery {
 }
 exports.LaboratoryGetQuery = LaboratoryGetQuery;
@@ -30533,7 +31972,7 @@ exports.LaboratoryGetOneQuery = LaboratoryGetOneQuery;
 
 
 /***/ }),
-/* 394 */
+/* 413 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -30549,8 +31988,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.LaboratorySortQuery = exports.LaboratoryFilterQuery = exports.LaboratoryRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
 class LaboratoryRelationQuery {
 }
 exports.LaboratoryRelationQuery = LaboratoryRelationQuery;
@@ -30564,6 +32003,16 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], LaboratoryRelationQuery.prototype, "children", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], LaboratoryRelationQuery.prototype, "positionList", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], LaboratoryRelationQuery.prototype, "discountList", void 0);
 class LaboratoryFilterQuery {
 }
 exports.LaboratoryFilterQuery = LaboratoryFilterQuery;
@@ -30598,7 +32047,7 @@ __decorate([
 
 
 /***/ }),
-/* 395 */
+/* 414 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -30615,7 +32064,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.LaboratorySystemCopyBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class LaboratorySystemCopyBody {
 }
 exports.LaboratorySystemCopyBody = LaboratorySystemCopyBody;
@@ -30630,7 +32079,7 @@ __decorate([
 
 
 /***/ }),
-/* 396 */
+/* 415 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -30648,9 +32097,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.LaboratoryUpdateBody = exports.LaboratoryCreateBody = exports.LaboratoryChildUpdate = exports.LaboratoryChildCreate = exports.LaboratoryParentUpsert = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 const laboratory_entity_1 = __webpack_require__(64);
+const request_1 = __webpack_require__(378);
+const request_2 = __webpack_require__(416);
 class LaboratoryParentUpsert {
 }
 exports.LaboratoryParentUpsert = LaboratoryParentUpsert;
@@ -30737,9 +32188,17 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], LaboratoryChildUpdate.prototype, "id", void 0);
-class LaboratoryCreateBody extends LaboratoryParentUpsert {
+class LaboratoryCreateBody {
 }
 exports.LaboratoryCreateBody = LaboratoryCreateBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: LaboratoryParentUpsert }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => LaboratoryParentUpsert),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", LaboratoryParentUpsert)
+], LaboratoryCreateBody.prototype, "laboratory", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: LaboratoryChildCreate, isArray: true }),
     (0, class_transformer_1.Expose)(),
@@ -30748,10 +32207,34 @@ __decorate([
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.ValidateNested)({ each: true }),
     __metadata("design:type", Array)
-], LaboratoryCreateBody.prototype, "children", void 0);
-class LaboratoryUpdateBody extends LaboratoryParentUpsert {
+], LaboratoryCreateBody.prototype, "laboratoryChildren", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: request_1.DiscountUpdateBody, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => request_1.DiscountUpdateBody),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], LaboratoryCreateBody.prototype, "discountList", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: request_2.PositionBasicBody, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => request_2.PositionBasicBody),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], LaboratoryCreateBody.prototype, "positionList", void 0);
+class LaboratoryUpdateBody {
 }
 exports.LaboratoryUpdateBody = LaboratoryUpdateBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: LaboratoryParentUpsert }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => LaboratoryParentUpsert),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", LaboratoryParentUpsert)
+], LaboratoryUpdateBody.prototype, "laboratory", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: LaboratoryChildUpdate, isArray: true }),
     (0, class_transformer_1.Expose)(),
@@ -30760,11 +32243,358 @@ __decorate([
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.ValidateNested)({ each: true }),
     __metadata("design:type", Array)
-], LaboratoryUpdateBody.prototype, "children", void 0);
+], LaboratoryUpdateBody.prototype, "laboratoryChildren", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: request_1.DiscountUpdateBody, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => request_1.DiscountUpdateBody),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], LaboratoryUpdateBody.prototype, "discountList", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: request_2.PositionBasicBody, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => request_2.PositionBasicBody),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], LaboratoryUpdateBody.prototype, "positionList", void 0);
 
 
 /***/ }),
-/* 397 */
+/* 416 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(417), exports);
+__exportStar(__webpack_require__(418), exports);
+__exportStar(__webpack_require__(419), exports);
+
+
+/***/ }),
+/* 417 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PositionGetOneQuery = exports.PositionGetManyQuery = exports.PositionPaginationQuery = exports.PositionGetQuery = void 0;
+const swagger_1 = __webpack_require__(6);
+const class_transformer_1 = __webpack_require__(17);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const position_entity_1 = __webpack_require__(75);
+const position_options_request_1 = __webpack_require__(418);
+class PositionGetQuery {
+}
+exports.PositionGetQuery = PositionGetQuery;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: String, example: JSON.stringify({}) }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        try {
+            if (!value)
+                return undefined;
+            const plain = JSON.parse(value);
+            return (0, class_transformer_1.plainToInstance)(position_options_request_1.PositionRelationQuery, plain, {
+                exposeUnsetFields: false,
+                excludeExtraneousValues: false,
+            });
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_a = typeof position_options_request_1.PositionRelationQuery !== "undefined" && position_options_request_1.PositionRelationQuery) === "function" ? _a : Object)
+], PositionGetQuery.prototype, "relation", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        type: String,
+        example: JSON.stringify({
+            positionType: position_entity_1.PositionInteractType.Ticket,
+        }),
+    }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        try {
+            if (!value)
+                return undefined;
+            const plain = JSON.parse(value);
+            return (0, class_transformer_1.plainToInstance)(position_options_request_1.PositionFilterQuery, plain, {
+                exposeUnsetFields: false,
+                excludeExtraneousValues: false,
+            });
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_b = typeof position_options_request_1.PositionFilterQuery !== "undefined" && position_options_request_1.PositionFilterQuery) === "function" ? _b : Object)
+], PositionGetQuery.prototype, "filter", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        type: String,
+        example: JSON.stringify({ id: 'ASC' }),
+    }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        try {
+            if (!value)
+                return undefined;
+            const plain = JSON.parse(value);
+            return (0, class_transformer_1.plainToInstance)(position_options_request_1.PositionSortQuery, plain, {
+                exposeUnsetFields: false,
+                excludeExtraneousValues: false,
+            });
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_c = typeof position_options_request_1.PositionSortQuery !== "undefined" && position_options_request_1.PositionSortQuery) === "function" ? _c : Object)
+], PositionGetQuery.prototype, "sort", void 0);
+class PositionPaginationQuery extends (0, swagger_1.IntersectionType)(PositionGetQuery, query_1.PaginationQuery) {
+}
+exports.PositionPaginationQuery = PositionPaginationQuery;
+class PositionGetManyQuery extends (0, swagger_1.IntersectionType)((0, swagger_1.PickType)(PositionGetQuery, ['filter', 'relation', 'sort']), query_1.LimitQuery) {
+}
+exports.PositionGetManyQuery = PositionGetManyQuery;
+class PositionGetOneQuery extends (0, swagger_1.PickType)(PositionGetQuery, ['relation']) {
+}
+exports.PositionGetOneQuery = PositionGetOneQuery;
+
+
+/***/ }),
+/* 418 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PositionSortQuery = exports.PositionFilterQuery = exports.PositionRelationQuery = void 0;
+const class_transformer_1 = __webpack_require__(17);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
+const query_1 = __webpack_require__(265);
+const position_entity_1 = __webpack_require__(75);
+const ConditionEnumPositionInteractType = (0, dto_1.createConditionEnum)(position_entity_1.PositionInteractType);
+class PositionRelationQuery {
+}
+exports.PositionRelationQuery = PositionRelationQuery;
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], PositionRelationQuery.prototype, "role", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], PositionRelationQuery.prototype, "product", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], PositionRelationQuery.prototype, "procedure", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], PositionRelationQuery.prototype, "laboratory", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], PositionRelationQuery.prototype, "radiology", void 0);
+class PositionFilterQuery {
+}
+exports.PositionFilterQuery = PositionFilterQuery;
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)((params) => (0, dto_1.transformConditionEnum)(params, position_entity_1.PositionInteractType)),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], PositionFilterQuery.prototype, "positionType", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], PositionFilterQuery.prototype, "roleId", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(dto_1.transformConditionNumber),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Object)
+], PositionFilterQuery.prototype, "positionInteractId", void 0);
+class PositionSortQuery extends query_1.SortQuery {
+}
+exports.PositionSortQuery = PositionSortQuery;
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsIn)(['ASC', 'DESC']),
+    __metadata("design:type", String)
+], PositionSortQuery.prototype, "positionType", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsIn)(['ASC', 'DESC']),
+    __metadata("design:type", String)
+], PositionSortQuery.prototype, "roleId", void 0);
+
+
+/***/ }),
+/* 419 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.PositionBasicBody = exports.PositionReplaceListBody = exports.PositionUpdateBody = exports.PositionCreateBody = void 0;
+const swagger_1 = __webpack_require__(6);
+const class_transformer_1 = __webpack_require__(17);
+const class_validator_1 = __webpack_require__(252);
+const typescript_helper_1 = __webpack_require__(254);
+const class_validator_custom_1 = __webpack_require__(253);
+const position_entity_1 = __webpack_require__(75);
+const position_options_request_1 = __webpack_require__(418);
+class PositionCreateBody {
+}
+exports.PositionCreateBody = PositionCreateBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 25 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], PositionCreateBody.prototype, "roleId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: position_entity_1.PositionInteractType, example: position_entity_1.PositionInteractType.Ticket }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsEnumValue)(position_entity_1.PositionInteractType),
+    __metadata("design:type", typeof (_a = typeof position_entity_1.PositionInteractType !== "undefined" && position_entity_1.PositionInteractType) === "function" ? _a : Object)
+], PositionCreateBody.prototype, "positionType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 25 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], PositionCreateBody.prototype, "positionInteractId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 22500 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], PositionCreateBody.prototype, "commissionValue", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        enum: (0, typescript_helper_1.valuesEnum)(position_entity_1.CommissionCalculatorType),
+        example: position_entity_1.CommissionCalculatorType.VND,
+    }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsEnumValue)(position_entity_1.CommissionCalculatorType),
+    __metadata("design:type", typeof (_b = typeof position_entity_1.CommissionCalculatorType !== "undefined" && position_entity_1.CommissionCalculatorType) === "function" ? _b : Object)
+], PositionCreateBody.prototype, "commissionCalculatorType", void 0);
+class PositionUpdateBody extends (0, swagger_1.PartialType)(PositionCreateBody) {
+}
+exports.PositionUpdateBody = PositionUpdateBody;
+class PositionReplaceListBody {
+}
+exports.PositionReplaceListBody = PositionReplaceListBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: PositionCreateBody, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => PositionCreateBody),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], PositionReplaceListBody.prototype, "positionData", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: position_options_request_1.PositionFilterQuery }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => position_options_request_1.PositionFilterQuery),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_c = typeof position_options_request_1.PositionFilterQuery !== "undefined" && position_options_request_1.PositionFilterQuery) === "function" ? _c : Object)
+], PositionReplaceListBody.prototype, "filter", void 0);
+class PositionBasicBody {
+}
+exports.PositionBasicBody = PositionBasicBody;
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsPositive)(),
+    __metadata("design:type", Number)
+], PositionBasicBody.prototype, "roleId", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], PositionBasicBody.prototype, "commissionValue", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: position_entity_1.CommissionCalculatorType.VND }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_custom_1.IsEnumValue)(position_entity_1.CommissionCalculatorType),
+    __metadata("design:type", typeof (_d = typeof position_entity_1.CommissionCalculatorType !== "undefined" && position_entity_1.CommissionCalculatorType) === "function" ? _d : Object)
+], PositionBasicBody.prototype, "commissionCalculatorType", void 0);
+
+
+/***/ }),
+/* 420 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -30778,11 +32608,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiOrganizationModule = void 0;
 const common_1 = __webpack_require__(3);
 const config_1 = __webpack_require__(29);
-const jwt_config_1 = __webpack_require__(99);
+const jwt_config_1 = __webpack_require__(101);
 const environments_1 = __webpack_require__(28);
-const email_module_1 = __webpack_require__(239);
-const api_organization_controller_1 = __webpack_require__(398);
-const api_organization_service_1 = __webpack_require__(400);
+const email_module_1 = __webpack_require__(243);
+const api_organization_controller_1 = __webpack_require__(421);
+const api_organization_service_1 = __webpack_require__(423);
 let ApiOrganizationModule = class ApiOrganizationModule {
 };
 exports.ApiOrganizationModule = ApiOrganizationModule;
@@ -30800,7 +32630,7 @@ exports.ApiOrganizationModule = ApiOrganizationModule = __decorate([
 
 
 /***/ }),
-/* 398 */
+/* 421 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -30821,14 +32651,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiOrganizationController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const fastify_1 = __webpack_require__(399);
-const file_1 = __webpack_require__(279);
-const user_guard_1 = __webpack_require__(95);
-const interceptor_1 = __webpack_require__(280);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_organization_service_1 = __webpack_require__(400);
-const request_1 = __webpack_require__(402);
+const fastify_1 = __webpack_require__(422);
+const file_1 = __webpack_require__(283);
+const user_guard_1 = __webpack_require__(97);
+const interceptor_1 = __webpack_require__(284);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_organization_service_1 = __webpack_require__(423);
+const request_1 = __webpack_require__(425);
 let ApiOrganizationController = class ApiOrganizationController {
     constructor(apiOrganizationService) {
         this.apiOrganizationService = apiOrganizationService;
@@ -30917,13 +32747,13 @@ exports.ApiOrganizationController = ApiOrganizationController = __decorate([
 
 
 /***/ }),
-/* 399 */
+/* 422 */
 /***/ ((module) => {
 
 module.exports = require("fastify");
 
 /***/ }),
-/* 400 */
+/* 423 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -30946,13 +32776,13 @@ const common_1 = __webpack_require__(3);
 const config_1 = __webpack_require__(29);
 const cache_data_service_1 = __webpack_require__(38);
 const exception_filter_1 = __webpack_require__(9);
-const string_helper_1 = __webpack_require__(225);
-const jwt_config_1 = __webpack_require__(99);
-const image_repository_1 = __webpack_require__(169);
+const string_helper_1 = __webpack_require__(229);
+const jwt_config_1 = __webpack_require__(101);
+const image_repository_1 = __webpack_require__(173);
 const organization_repository_1 = __webpack_require__(40);
 const environments_1 = __webpack_require__(28);
-const email_service_1 = __webpack_require__(241);
-const image_manager_service_1 = __webpack_require__(401);
+const email_service_1 = __webpack_require__(245);
+const image_manager_service_1 = __webpack_require__(424);
 let ApiOrganizationService = class ApiOrganizationService {
     constructor(globalConfig, jwtConfig, emailService, cacheDataService, imageManagerService, organizationRepository, imageRepository) {
         this.globalConfig = globalConfig;
@@ -31072,7 +32902,7 @@ exports.ApiOrganizationService = ApiOrganizationService = __decorate([
 
 
 /***/ }),
-/* 401 */
+/* 424 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -31091,12 +32921,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ImageManagerService = void 0;
 const common_1 = __webpack_require__(3);
 const cache_data_service_1 = __webpack_require__(38);
-const helpers_1 = __webpack_require__(270);
+const helpers_1 = __webpack_require__(274);
 const image_entity_1 = __webpack_require__(19);
 const setting_entity_1 = __webpack_require__(39);
-const image_repository_1 = __webpack_require__(169);
-const setting_repository_1 = __webpack_require__(89);
-const google_driver_service_1 = __webpack_require__(234);
+const image_repository_1 = __webpack_require__(173);
+const setting_repository_1 = __webpack_require__(91);
+const google_driver_service_1 = __webpack_require__(238);
 let ImageManagerService = ImageManagerService_1 = class ImageManagerService {
     constructor(imageRepository, googleDriverService, cacheDataService, settingRepository) {
         this.imageRepository = imageRepository;
@@ -31193,7 +33023,7 @@ exports.ImageManagerService = ImageManagerService = ImageManagerService_1 = __de
 
 
 /***/ }),
-/* 402 */
+/* 425 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -31212,15 +33042,15 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(403), exports);
-__exportStar(__webpack_require__(404), exports);
-__exportStar(__webpack_require__(405), exports);
-__exportStar(__webpack_require__(406), exports);
-__exportStar(__webpack_require__(407), exports);
+__exportStar(__webpack_require__(426), exports);
+__exportStar(__webpack_require__(427), exports);
+__exportStar(__webpack_require__(428), exports);
+__exportStar(__webpack_require__(429), exports);
+__exportStar(__webpack_require__(430), exports);
 
 
 /***/ }),
-/* 403 */
+/* 426 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -31237,8 +33067,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OrganizationChangeEmailBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class OrganizationChangeEmailBody {
 }
 exports.OrganizationChangeEmailBody = OrganizationChangeEmailBody;
@@ -31256,7 +33086,7 @@ __decorate([
 
 
 /***/ }),
-/* 404 */
+/* 427 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -31274,9 +33104,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OrganizationGetOneQuery = exports.OrganizationGetManyQuery = exports.OrganizationPaginationQuery = exports.OrganizationGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const organization_options_request_1 = __webpack_require__(405);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const organization_options_request_1 = __webpack_require__(428);
 class OrganizationGetQuery {
 }
 exports.OrganizationGetQuery = OrganizationGetQuery;
@@ -31367,7 +33197,7 @@ exports.OrganizationGetOneQuery = OrganizationGetOneQuery;
 
 
 /***/ }),
-/* 405 */
+/* 428 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -31383,8 +33213,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OrganizationSortQuery = exports.OrganizationFilterQuery = exports.OrganizationRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
 class OrganizationRelationQuery {
 }
 exports.OrganizationRelationQuery = OrganizationRelationQuery;
@@ -31407,7 +33237,7 @@ exports.OrganizationSortQuery = OrganizationSortQuery;
 
 
 /***/ }),
-/* 406 */
+/* 429 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -31424,8 +33254,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OrganizationUpdateInfoBody = exports.OrganizationUpdateInfoAndLogoBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const file_1 = __webpack_require__(279);
+const class_validator_1 = __webpack_require__(252);
+const file_1 = __webpack_require__(283);
 class OrganizationUpdateInfoAndLogoBody extends file_1.SingleFileUpload {
 }
 exports.OrganizationUpdateInfoAndLogoBody = OrganizationUpdateInfoAndLogoBody;
@@ -31463,7 +33293,7 @@ exports.OrganizationUpdateInfoBody = OrganizationUpdateInfoBody;
 
 
 /***/ }),
-/* 407 */
+/* 430 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -31480,8 +33310,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VerifyOrganizationEmailQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class VerifyOrganizationEmailQuery {
 }
 exports.VerifyOrganizationEmailQuery = VerifyOrganizationEmailQuery;
@@ -31517,7 +33347,7 @@ __decorate([
 
 
 /***/ }),
-/* 408 */
+/* 431 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -31530,8 +33360,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiPaymentMethodModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_payment_method_controller_1 = __webpack_require__(409);
-const api_payment_method_service_1 = __webpack_require__(410);
+const api_payment_method_controller_1 = __webpack_require__(432);
+const api_payment_method_service_1 = __webpack_require__(433);
 let ApiPaymentMethodModule = class ApiPaymentMethodModule {
 };
 exports.ApiPaymentMethodModule = ApiPaymentMethodModule;
@@ -31545,7 +33375,7 @@ exports.ApiPaymentMethodModule = ApiPaymentMethodModule = __decorate([
 
 
 /***/ }),
-/* 409 */
+/* 432 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -31566,12 +33396,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiPaymentMethodController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_payment_method_service_1 = __webpack_require__(410);
-const request_1 = __webpack_require__(411);
+const param_1 = __webpack_require__(309);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_payment_method_service_1 = __webpack_require__(433);
+const request_1 = __webpack_require__(434);
 let ApiPaymentMethodController = class ApiPaymentMethodController {
     constructor(apiPaymentMethodService) {
         this.apiPaymentMethodService = apiPaymentMethodService;
@@ -31662,7 +33492,7 @@ exports.ApiPaymentMethodController = ApiPaymentMethodController = __decorate([
 
 
 /***/ }),
-/* 410 */
+/* 433 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -31680,8 +33510,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiPaymentMethodService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const repositories_1 = __webpack_require__(162);
-const payment_method_repository_1 = __webpack_require__(173);
+const repositories_1 = __webpack_require__(164);
+const payment_method_repository_1 = __webpack_require__(177);
 let ApiPaymentMethodService = class ApiPaymentMethodService {
     constructor(paymentMethodRepository, paymentRepository) {
         this.paymentMethodRepository = paymentMethodRepository;
@@ -31751,7 +33581,7 @@ exports.ApiPaymentMethodService = ApiPaymentMethodService = __decorate([
 
 
 /***/ }),
-/* 411 */
+/* 434 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -31770,13 +33600,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(412), exports);
-__exportStar(__webpack_require__(413), exports);
-__exportStar(__webpack_require__(414), exports);
+__exportStar(__webpack_require__(435), exports);
+__exportStar(__webpack_require__(436), exports);
+__exportStar(__webpack_require__(437), exports);
 
 
 /***/ }),
-/* 412 */
+/* 435 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -31794,9 +33624,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PaymentMethodGetOneQuery = exports.PaymentMethodGetManyQuery = exports.PaymentMethodPaginationQuery = exports.PaymentMethodGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const payment_method_options_request_1 = __webpack_require__(413);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const payment_method_options_request_1 = __webpack_require__(436);
 class PaymentMethodGetQuery {
 }
 exports.PaymentMethodGetQuery = PaymentMethodGetQuery;
@@ -31881,13 +33711,13 @@ exports.PaymentMethodGetOneQuery = PaymentMethodGetOneQuery;
 
 
 /***/ }),
-/* 413 */
+/* 436 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PaymentMethodSortQuery = exports.PaymentMethodFilterQuery = exports.PaymentMethodRelationQuery = void 0;
-const query_1 = __webpack_require__(261);
+const query_1 = __webpack_require__(265);
 class PaymentMethodRelationQuery {
 }
 exports.PaymentMethodRelationQuery = PaymentMethodRelationQuery;
@@ -31900,7 +33730,7 @@ exports.PaymentMethodSortQuery = PaymentMethodSortQuery;
 
 
 /***/ }),
-/* 414 */
+/* 437 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -31917,7 +33747,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PaymentMethodUpdateBody = exports.PaymentMethodCreateBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class PaymentMethodCreateBody {
 }
 exports.PaymentMethodCreateBody = PaymentMethodCreateBody;
@@ -31948,7 +33778,7 @@ exports.PaymentMethodUpdateBody = PaymentMethodUpdateBody;
 
 
 /***/ }),
-/* 415 */
+/* 438 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -31961,8 +33791,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiPaymentModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_payment_controller_1 = __webpack_require__(416);
-const api_payment_service_1 = __webpack_require__(417);
+const api_payment_controller_1 = __webpack_require__(439);
+const api_payment_service_1 = __webpack_require__(440);
 let ApiPaymentModule = class ApiPaymentModule {
 };
 exports.ApiPaymentModule = ApiPaymentModule;
@@ -31976,7 +33806,7 @@ exports.ApiPaymentModule = ApiPaymentModule = __decorate([
 
 
 /***/ }),
-/* 416 */
+/* 439 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -31997,11 +33827,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiPaymentController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_payment_service_1 = __webpack_require__(417);
-const request_1 = __webpack_require__(418);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_payment_service_1 = __webpack_require__(440);
+const request_1 = __webpack_require__(441);
 let ApiPaymentController = class ApiPaymentController {
     constructor(apiPaymentService) {
         this.apiPaymentService = apiPaymentService;
@@ -32101,7 +33931,7 @@ exports.ApiPaymentController = ApiPaymentController = __decorate([
 
 
 /***/ }),
-/* 417 */
+/* 440 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -32118,11 +33948,11 @@ var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiPaymentService = void 0;
 const common_1 = __webpack_require__(3);
-const array_helper_1 = __webpack_require__(92);
+const array_helper_1 = __webpack_require__(94);
 const payment_entity_1 = __webpack_require__(48);
-const operations_1 = __webpack_require__(142);
-const repositories_1 = __webpack_require__(162);
-const payment_repository_1 = __webpack_require__(174);
+const operations_1 = __webpack_require__(144);
+const repositories_1 = __webpack_require__(164);
+const payment_repository_1 = __webpack_require__(178);
 let ApiPaymentService = class ApiPaymentService {
     constructor(paymentRepository, receiptRepository, ticketRepository, customerRepository, distributorRepository, userRepository, customerPaymentOperation, distributorPaymentOperation) {
         this.paymentRepository = paymentRepository;
@@ -32367,7 +34197,7 @@ exports.ApiPaymentService = ApiPaymentService = __decorate([
 
 
 /***/ }),
-/* 418 */
+/* 441 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -32386,14 +34216,14 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(419), exports);
-__exportStar(__webpack_require__(420), exports);
-__exportStar(__webpack_require__(421), exports);
-__exportStar(__webpack_require__(422), exports);
+__exportStar(__webpack_require__(442), exports);
+__exportStar(__webpack_require__(443), exports);
+__exportStar(__webpack_require__(444), exports);
+__exportStar(__webpack_require__(445), exports);
 
 
 /***/ }),
-/* 419 */
+/* 442 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -32410,8 +34240,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CustomerPaymentBody = exports.TicketPayment = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class TicketPayment {
 }
 exports.TicketPayment = TicketPayment;
@@ -32482,7 +34312,7 @@ __decorate([
 
 
 /***/ }),
-/* 420 */
+/* 443 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -32499,8 +34329,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DistributorPaymentBody = exports.ReceiptPayment = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class ReceiptPayment {
 }
 exports.ReceiptPayment = ReceiptPayment;
@@ -32571,7 +34401,7 @@ __decorate([
 
 
 /***/ }),
-/* 421 */
+/* 444 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -32588,8 +34418,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OtherPaymentBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class OtherPaymentBody {
 }
 exports.OtherPaymentBody = OtherPaymentBody;
@@ -32615,7 +34445,7 @@ __decorate([
 
 
 /***/ }),
-/* 422 */
+/* 445 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -32633,9 +34463,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PaymentGetOneQuery = exports.PaymentGetManyQuery = exports.PaymentPaginationQuery = exports.PaymentGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const payment_options_1 = __webpack_require__(423);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const payment_options_1 = __webpack_require__(446);
 class PaymentGetQuery {
 }
 exports.PaymentGetQuery = PaymentGetQuery;
@@ -32724,7 +34554,7 @@ exports.PaymentGetOneQuery = PaymentGetOneQuery;
 
 
 /***/ }),
-/* 423 */
+/* 446 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -32741,11 +34571,11 @@ var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PaymentSortQuery = exports.PaymentFilterQuery = exports.PaymentRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
-const query_1 = __webpack_require__(261);
-const typescript_helper_1 = __webpack_require__(250);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
+const query_1 = __webpack_require__(265);
+const typescript_helper_1 = __webpack_require__(254);
+const class_validator_custom_1 = __webpack_require__(253);
 const payment_entity_1 = __webpack_require__(48);
 class PaymentRelationQuery {
 }
@@ -32849,7 +34679,7 @@ __decorate([
 
 
 /***/ }),
-/* 424 */
+/* 447 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -32862,8 +34692,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiPermissionModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_permission_controller_1 = __webpack_require__(425);
-const api_permission_service_1 = __webpack_require__(426);
+const api_permission_controller_1 = __webpack_require__(448);
+const api_permission_service_1 = __webpack_require__(449);
 let ApiPermissionModule = class ApiPermissionModule {
 };
 exports.ApiPermissionModule = ApiPermissionModule;
@@ -32877,7 +34707,7 @@ exports.ApiPermissionModule = ApiPermissionModule = __decorate([
 
 
 /***/ }),
-/* 425 */
+/* 448 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -32899,9 +34729,9 @@ exports.ApiPermissionController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
 const root_guard_1 = __webpack_require__(15);
-const user_guard_1 = __webpack_require__(95);
-const api_permission_service_1 = __webpack_require__(426);
-const request_1 = __webpack_require__(446);
+const user_guard_1 = __webpack_require__(97);
+const api_permission_service_1 = __webpack_require__(449);
+const request_1 = __webpack_require__(470);
 let ApiPermissionController = class ApiPermissionController {
     constructor(apiPermissionService) {
         this.apiPermissionService = apiPermissionService;
@@ -32938,7 +34768,7 @@ exports.ApiPermissionController = ApiPermissionController = __decorate([
 
 
 /***/ }),
-/* 426 */
+/* 449 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -32956,8 +34786,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiPermissionService = void 0;
 const common_1 = __webpack_require__(3);
 const cache_data_service_1 = __webpack_require__(38);
-const permission_repository_1 = __webpack_require__(87);
-const permission_data_1 = __webpack_require__(427);
+const permission_repository_1 = __webpack_require__(89);
+const permission_data_1 = __webpack_require__(450);
 let ApiPermissionService = class ApiPermissionService {
     constructor(cacheDataService, permissionRepository) {
         this.cacheDataService = cacheDataService;
@@ -32990,30 +34820,31 @@ exports.ApiPermissionService = ApiPermissionService = __decorate([
 
 
 /***/ }),
-/* 427 */
+/* 450 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.permissionDataAll = void 0;
-const permission_appointment_data_1 = __webpack_require__(428);
-const permission_customer_data_1 = __webpack_require__(429);
-const permission_distributor_data_1 = __webpack_require__(430);
-const permission_file_data_1 = __webpack_require__(431);
-const permission_laboratory_data_1 = __webpack_require__(432);
-const permission_master_data_data_1 = __webpack_require__(433);
-const permission_organization_data_1 = __webpack_require__(434);
-const permission_payment_data_1 = __webpack_require__(435);
-const permission_position_data_1 = __webpack_require__(436);
-const permission_procedure_data_1 = __webpack_require__(437);
-const permission_product_data_1 = __webpack_require__(438);
-const permission_radiology_data_1 = __webpack_require__(439);
-const permission_receipt_data_1 = __webpack_require__(440);
-const permission_statistic_data_1 = __webpack_require__(441);
-const permission_stock_check_data_1 = __webpack_require__(442);
-const permission_ticket_clinic_data_1 = __webpack_require__(443);
-const permission_ticket_order_data_1 = __webpack_require__(444);
-const permission_user_data_1 = __webpack_require__(445);
+const permission_appointment_data_1 = __webpack_require__(451);
+const permission_customer_data_1 = __webpack_require__(452);
+const permission_distributor_data_1 = __webpack_require__(453);
+const permission_file_data_1 = __webpack_require__(454);
+const permission_laboratory_data_1 = __webpack_require__(455);
+const permission_master_data_data_1 = __webpack_require__(456);
+const permission_organization_data_1 = __webpack_require__(457);
+const permission_payment_data_1 = __webpack_require__(458);
+const permission_position_data_1 = __webpack_require__(459);
+const permission_procedure_data_1 = __webpack_require__(460);
+const permission_product_data_1 = __webpack_require__(461);
+const permission_radiology_data_1 = __webpack_require__(462);
+const permission_receipt_data_1 = __webpack_require__(463);
+const permission_reception_data_1 = __webpack_require__(464);
+const permission_statistic_data_1 = __webpack_require__(465);
+const permission_stock_check_data_1 = __webpack_require__(466);
+const permission_ticket_clinic_data_1 = __webpack_require__(467);
+const permission_ticket_order_data_1 = __webpack_require__(468);
+const permission_user_data_1 = __webpack_require__(469);
 exports.permissionDataAll = [
     ...permission_organization_data_1.permissionOrganization,
     ...permission_user_data_1.permissionUser,
@@ -33031,19 +34862,20 @@ exports.permissionDataAll = [
     ...permission_laboratory_data_1.permissionLaboratory,
     ...permission_radiology_data_1.permissionRadiology,
     ...permission_file_data_1.permissionFile,
+    ...permission_reception_data_1.permissionReception,
     ...permission_ticket_order_data_1.permissionTicketOrder,
     ...permission_ticket_clinic_data_1.permissionTicketClinic,
 ];
 
 
 /***/ }),
-/* 428 */
+/* 451 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.permissionAppointment = void 0;
-const permission_enum_1 = __webpack_require__(78);
+const permission_enum_1 = __webpack_require__(80);
 exports.permissionAppointment = [
     {
         id: permission_enum_1.PermissionId.APPOINTMENT,
@@ -33109,13 +34941,13 @@ exports.permissionAppointment = [
 
 
 /***/ }),
-/* 429 */
+/* 452 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.permissionCustomer = void 0;
-const permission_enum_1 = __webpack_require__(78);
+const permission_enum_1 = __webpack_require__(80);
 exports.permissionCustomer = [
     {
         id: permission_enum_1.PermissionId.CUSTOMER,
@@ -33171,13 +35003,13 @@ exports.permissionCustomer = [
 
 
 /***/ }),
-/* 430 */
+/* 453 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.permissionDistributor = void 0;
-const permission_enum_1 = __webpack_require__(78);
+const permission_enum_1 = __webpack_require__(80);
 exports.permissionDistributor = [
     {
         id: permission_enum_1.PermissionId.DISTRIBUTOR,
@@ -33233,13 +35065,13 @@ exports.permissionDistributor = [
 
 
 /***/ }),
-/* 431 */
+/* 454 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.permissionFile = void 0;
-const permission_enum_1 = __webpack_require__(78);
+const permission_enum_1 = __webpack_require__(80);
 exports.permissionFile = [
     {
         id: permission_enum_1.PermissionId.FILE,
@@ -33335,13 +35167,13 @@ exports.permissionFile = [
 
 
 /***/ }),
-/* 432 */
+/* 455 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.permissionLaboratory = void 0;
-const permission_enum_1 = __webpack_require__(78);
+const permission_enum_1 = __webpack_require__(80);
 exports.permissionLaboratory = [
     {
         id: permission_enum_1.PermissionId.LABORATORY,
@@ -33424,12 +35256,22 @@ exports.permissionLaboratory = [
         rootId: permission_enum_1.PermissionId.LABORATORY,
     },
     {
-        id: permission_enum_1.PermissionId.LABORATORY_RESULT,
+        id: permission_enum_1.PermissionId.LABORATORY_UPDATE_RESULT,
         level: 2,
-        code: permission_enum_1.PermissionId[permission_enum_1.PermissionId.LABORATORY_RESULT],
+        code: permission_enum_1.PermissionId[permission_enum_1.PermissionId.LABORATORY_UPDATE_RESULT],
         isActive: 1,
-        pathId: `${permission_enum_1.PermissionId.LABORATORY}.${permission_enum_1.PermissionId.LABORATORY_RESULT}`,
+        pathId: `${permission_enum_1.PermissionId.LABORATORY}.${permission_enum_1.PermissionId.LABORATORY_UPDATE_RESULT}`,
         name: 'Trả kết quả xét nghiệm',
+        parentId: permission_enum_1.PermissionId.LABORATORY,
+        rootId: permission_enum_1.PermissionId.LABORATORY,
+    },
+    {
+        id: permission_enum_1.PermissionId.LABORATORY_CANCEL_RESULT,
+        level: 2,
+        code: permission_enum_1.PermissionId[permission_enum_1.PermissionId.LABORATORY_CANCEL_RESULT],
+        isActive: 1,
+        pathId: `${permission_enum_1.PermissionId.LABORATORY}.${permission_enum_1.PermissionId.LABORATORY_CANCEL_RESULT}`,
+        name: 'Hủy kết quả xét nghiệm',
         parentId: permission_enum_1.PermissionId.LABORATORY,
         rootId: permission_enum_1.PermissionId.LABORATORY,
     },
@@ -33437,13 +35279,13 @@ exports.permissionLaboratory = [
 
 
 /***/ }),
-/* 433 */
+/* 456 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.permissionMasterData = void 0;
-const permission_enum_1 = __webpack_require__(78);
+const permission_enum_1 = __webpack_require__(80);
 exports.permissionMasterData = [
     {
         id: permission_enum_1.PermissionId.MASTER_DATA,
@@ -33462,6 +35304,16 @@ exports.permissionMasterData = [
         isActive: 1,
         pathId: `${permission_enum_1.PermissionId.MASTER_DATA}.${permission_enum_1.PermissionId.MASTER_DATA_WAREHOUSE}`,
         name: 'Quản lý danh sách kho',
+        parentId: permission_enum_1.PermissionId.MASTER_DATA,
+        rootId: permission_enum_1.PermissionId.MASTER_DATA,
+    },
+    {
+        id: permission_enum_1.PermissionId.MASTER_DATA_DISCOUNT,
+        level: 2,
+        code: permission_enum_1.PermissionId[permission_enum_1.PermissionId.MASTER_DATA_DISCOUNT],
+        isActive: 1,
+        pathId: `${permission_enum_1.PermissionId.MASTER_DATA}.${permission_enum_1.PermissionId.MASTER_DATA_DISCOUNT}`,
+        name: 'Quản lý chương trình khuyến mãi',
         parentId: permission_enum_1.PermissionId.MASTER_DATA,
         rootId: permission_enum_1.PermissionId.MASTER_DATA,
     },
@@ -33509,13 +35361,13 @@ exports.permissionMasterData = [
 
 
 /***/ }),
-/* 434 */
+/* 457 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.permissionOrganization = void 0;
-const permission_enum_1 = __webpack_require__(78);
+const permission_enum_1 = __webpack_require__(80);
 exports.permissionOrganization = [
     {
         id: permission_enum_1.PermissionId.ORGANIZATION,
@@ -33561,13 +35413,13 @@ exports.permissionOrganization = [
 
 
 /***/ }),
-/* 435 */
+/* 458 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.permissionPayment = void 0;
-const permission_enum_1 = __webpack_require__(78);
+const permission_enum_1 = __webpack_require__(80);
 exports.permissionPayment = [
     {
         id: permission_enum_1.PermissionId.PAYMENT,
@@ -33633,13 +35485,13 @@ exports.permissionPayment = [
 
 
 /***/ }),
-/* 436 */
+/* 459 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.permissionPosition = void 0;
-const permission_enum_1 = __webpack_require__(78);
+const permission_enum_1 = __webpack_require__(80);
 exports.permissionPosition = [
     {
         id: permission_enum_1.PermissionId.POSITION,
@@ -33695,13 +35547,13 @@ exports.permissionPosition = [
 
 
 /***/ }),
-/* 437 */
+/* 460 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.permissionProcedure = void 0;
-const permission_enum_1 = __webpack_require__(78);
+const permission_enum_1 = __webpack_require__(80);
 exports.permissionProcedure = [
     {
         id: permission_enum_1.PermissionId.PROCEDURE,
@@ -33767,13 +35619,13 @@ exports.permissionProcedure = [
 
 
 /***/ }),
-/* 438 */
+/* 461 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.permissionProduct = void 0;
-const permission_enum_1 = __webpack_require__(78);
+const permission_enum_1 = __webpack_require__(80);
 exports.permissionProduct = [
     {
         id: permission_enum_1.PermissionId.PRODUCT,
@@ -33909,13 +35761,13 @@ exports.permissionProduct = [
 
 
 /***/ }),
-/* 439 */
+/* 462 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.permissionRadiology = void 0;
-const permission_enum_1 = __webpack_require__(78);
+const permission_enum_1 = __webpack_require__(80);
 exports.permissionRadiology = [
     {
         id: permission_enum_1.PermissionId.RADIOLOGY,
@@ -33988,12 +35840,22 @@ exports.permissionRadiology = [
         rootId: permission_enum_1.PermissionId.RADIOLOGY,
     },
     {
-        id: permission_enum_1.PermissionId.RADIOLOGY_RESULT,
+        id: permission_enum_1.PermissionId.RADIOLOGY_UPDATE_RESULT,
         level: 2,
-        code: permission_enum_1.PermissionId[permission_enum_1.PermissionId.RADIOLOGY_RESULT],
+        code: permission_enum_1.PermissionId[permission_enum_1.PermissionId.RADIOLOGY_UPDATE_RESULT],
         isActive: 1,
-        pathId: `${permission_enum_1.PermissionId.RADIOLOGY}.${permission_enum_1.PermissionId.RADIOLOGY_RESULT}`,
+        pathId: `${permission_enum_1.PermissionId.RADIOLOGY}.${permission_enum_1.PermissionId.RADIOLOGY_UPDATE_RESULT}`,
         name: 'Trả kết quả phiếu CĐHA',
+        parentId: permission_enum_1.PermissionId.RADIOLOGY,
+        rootId: permission_enum_1.PermissionId.RADIOLOGY,
+    },
+    {
+        id: permission_enum_1.PermissionId.RADIOLOGY_CANCEL_RESULT,
+        level: 2,
+        code: permission_enum_1.PermissionId[permission_enum_1.PermissionId.RADIOLOGY_CANCEL_RESULT],
+        isActive: 1,
+        pathId: `${permission_enum_1.PermissionId.RADIOLOGY}.${permission_enum_1.PermissionId.RADIOLOGY_CANCEL_RESULT}`,
+        name: 'Hủy kết quả phiếu CĐHA',
         parentId: permission_enum_1.PermissionId.RADIOLOGY,
         rootId: permission_enum_1.PermissionId.RADIOLOGY,
     },
@@ -34001,13 +35863,13 @@ exports.permissionRadiology = [
 
 
 /***/ }),
-/* 440 */
+/* 463 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.permissionReceipt = void 0;
-const permission_enum_1 = __webpack_require__(78);
+const permission_enum_1 = __webpack_require__(80);
 exports.permissionReceipt = [
     {
         id: permission_enum_1.PermissionId.RECEIPT,
@@ -34123,13 +35985,65 @@ exports.permissionReceipt = [
 
 
 /***/ }),
-/* 441 */
+/* 464 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.permissionReception = void 0;
+const permission_enum_1 = __webpack_require__(80);
+exports.permissionReception = [
+    {
+        id: permission_enum_1.PermissionId.RECEPTION,
+        level: 1,
+        code: permission_enum_1.PermissionId[permission_enum_1.PermissionId.RECEPTION],
+        isActive: 1,
+        pathId: `${permission_enum_1.PermissionId.RECEPTION}`,
+        name: 'Quản lý tiếp đón',
+        parentId: 0,
+        rootId: permission_enum_1.PermissionId.RECEPTION,
+    },
+    {
+        id: permission_enum_1.PermissionId.RECEPTION_MENU,
+        level: 2,
+        code: permission_enum_1.PermissionId[permission_enum_1.PermissionId.RECEPTION_MENU],
+        isActive: 1,
+        pathId: `${permission_enum_1.PermissionId.RECEPTION}.${permission_enum_1.PermissionId.RECEPTION_MENU}`,
+        name: 'Xem menu danh sách tiếp đón',
+        parentId: permission_enum_1.PermissionId.RECEPTION,
+        rootId: permission_enum_1.PermissionId.RECEPTION,
+    },
+    {
+        id: permission_enum_1.PermissionId.RECEPTION_CREATE_TICKET,
+        level: 2,
+        code: permission_enum_1.PermissionId[permission_enum_1.PermissionId.RECEPTION_CREATE_TICKET],
+        isActive: 1,
+        pathId: `${permission_enum_1.PermissionId.RECEPTION}.${permission_enum_1.PermissionId.RECEPTION_CREATE_TICKET}`,
+        name: 'Tiếp đón mới',
+        parentId: permission_enum_1.PermissionId.RECEPTION,
+        rootId: permission_enum_1.PermissionId.RECEPTION,
+    },
+    {
+        id: permission_enum_1.PermissionId.RECEPTION_DESTROY_TICKET,
+        level: 2,
+        code: permission_enum_1.PermissionId[permission_enum_1.PermissionId.RECEPTION_DESTROY_TICKET],
+        isActive: 1,
+        pathId: `${permission_enum_1.PermissionId.RECEPTION}.${permission_enum_1.PermissionId.RECEPTION_DESTROY_TICKET}`,
+        name: 'Xóa tiếp đón',
+        parentId: permission_enum_1.PermissionId.RECEPTION,
+        rootId: permission_enum_1.PermissionId.RECEPTION,
+    },
+];
+
+
+/***/ }),
+/* 465 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.permissionStatistic = void 0;
-const permission_enum_1 = __webpack_require__(78);
+const permission_enum_1 = __webpack_require__(80);
 exports.permissionStatistic = [
     {
         id: permission_enum_1.PermissionId.STATISTIC,
@@ -34215,13 +36129,13 @@ exports.permissionStatistic = [
 
 
 /***/ }),
-/* 442 */
+/* 466 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.permissionStockCheck = void 0;
-const permission_enum_1 = __webpack_require__(78);
+const permission_enum_1 = __webpack_require__(80);
 exports.permissionStockCheck = [
     {
         id: permission_enum_1.PermissionId.STOCK_CHECK,
@@ -34307,13 +36221,13 @@ exports.permissionStockCheck = [
 
 
 /***/ }),
-/* 443 */
+/* 467 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.permissionTicketClinic = void 0;
-const permission_enum_1 = __webpack_require__(78);
+const permission_enum_1 = __webpack_require__(80);
 exports.permissionTicketClinic = [
     {
         id: permission_enum_1.PermissionId.TICKET_CLINIC,
@@ -34519,13 +36433,13 @@ exports.permissionTicketClinic = [
 
 
 /***/ }),
-/* 444 */
+/* 468 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.permissionTicketOrder = void 0;
-const permission_enum_1 = __webpack_require__(78);
+const permission_enum_1 = __webpack_require__(80);
 exports.permissionTicketOrder = [
     {
         id: permission_enum_1.PermissionId.TICKET_ORDER,
@@ -34671,13 +36585,13 @@ exports.permissionTicketOrder = [
 
 
 /***/ }),
-/* 445 */
+/* 469 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.permissionUser = void 0;
-const permission_enum_1 = __webpack_require__(78);
+const permission_enum_1 = __webpack_require__(80);
 exports.permissionUser = [
     {
         id: permission_enum_1.PermissionId.USER,
@@ -34793,7 +36707,7 @@ exports.permissionUser = [
 
 
 /***/ }),
-/* 446 */
+/* 470 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -34812,12 +36726,12 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(447), exports);
-__exportStar(__webpack_require__(448), exports);
+__exportStar(__webpack_require__(471), exports);
+__exportStar(__webpack_require__(472), exports);
 
 
 /***/ }),
-/* 447 */
+/* 471 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -34835,9 +36749,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PermissionGetOneQuery = exports.PermissionGetManyQuery = exports.PermissionPaginationQuery = exports.PermissionGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const permission_options_request_1 = __webpack_require__(448);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const permission_options_request_1 = __webpack_require__(472);
 class PermissionGetQuery {
 }
 exports.PermissionGetQuery = PermissionGetQuery;
@@ -34926,7 +36840,7 @@ exports.PermissionGetOneQuery = PermissionGetOneQuery;
 
 
 /***/ }),
-/* 448 */
+/* 472 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -34943,9 +36857,9 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PermissionSortQuery = exports.PermissionFilterQuery = exports.PermissionRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
+const query_1 = __webpack_require__(265);
 class PermissionRelationQuery {
 }
 exports.PermissionRelationQuery = PermissionRelationQuery;
@@ -34970,7 +36884,7 @@ exports.PermissionSortQuery = PermissionSortQuery;
 
 
 /***/ }),
-/* 449 */
+/* 473 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -34983,8 +36897,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiPositionModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_position_controller_1 = __webpack_require__(450);
-const api_position_service_1 = __webpack_require__(451);
+const api_position_controller_1 = __webpack_require__(474);
+const api_position_service_1 = __webpack_require__(475);
 let ApiPositionModule = class ApiPositionModule {
 };
 exports.ApiPositionModule = ApiPositionModule;
@@ -34998,7 +36912,7 @@ exports.ApiPositionModule = ApiPositionModule = __decorate([
 
 
 /***/ }),
-/* 450 */
+/* 474 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -35019,13 +36933,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiPositionController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const organization_guard_1 = __webpack_require__(94);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_position_service_1 = __webpack_require__(451);
-const request_1 = __webpack_require__(452);
+const param_1 = __webpack_require__(309);
+const organization_guard_1 = __webpack_require__(96);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_position_service_1 = __webpack_require__(475);
+const request_1 = __webpack_require__(416);
 let ApiPositionController = class ApiPositionController {
     constructor(apiPositionService) {
         this.apiPositionService = apiPositionService;
@@ -35129,7 +37043,7 @@ exports.ApiPositionController = ApiPositionController = __decorate([
 
 
 /***/ }),
-/* 451 */
+/* 475 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -35147,10 +37061,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiPositionService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const array_helper_1 = __webpack_require__(92);
+const array_helper_1 = __webpack_require__(94);
 const position_entity_1 = __webpack_require__(75);
-const repositories_1 = __webpack_require__(162);
-const position_repository_1 = __webpack_require__(175);
+const repositories_1 = __webpack_require__(164);
+const position_repository_1 = __webpack_require__(179);
 let ApiPositionService = class ApiPositionService {
     constructor(positionRepository, productRepository, procedureRepository, radiologyRepository, laboratoryRepository) {
         this.positionRepository = positionRepository;
@@ -35270,16 +37184,16 @@ let ApiPositionService = class ApiPositionService {
     }
     async generateRelation(positionList, relation) {
         const productIdList = positionList
-            .filter((i) => i.positionType === position_entity_1.PositionType.Product)
+            .filter((i) => i.positionType === position_entity_1.PositionInteractType.Product)
             .map((i) => i.positionInteractId);
         const procedureIdList = positionList
-            .filter((i) => i.positionType === position_entity_1.PositionType.Procedure)
+            .filter((i) => i.positionType === position_entity_1.PositionInteractType.Procedure)
             .map((i) => i.positionInteractId);
         const radiologyIdList = positionList
-            .filter((i) => i.positionType === position_entity_1.PositionType.Radiology)
+            .filter((i) => i.positionType === position_entity_1.PositionInteractType.Radiology)
             .map((i) => i.positionInteractId);
         const laboratoryIdList = positionList
-            .filter((i) => i.positionType === position_entity_1.PositionType.Laboratory)
+            .filter((i) => i.positionType === position_entity_1.PositionInteractType.Laboratory)
             .map((i) => i.positionInteractId);
         const [productList, procedureList, radiologyList, laboratoryList] = await Promise.all([
             (relation === null || relation === void 0 ? void 0 : relation.product) && productIdList.length
@@ -35300,16 +37214,16 @@ let ApiPositionService = class ApiPositionService {
                 : [],
         ]);
         positionList.forEach((position) => {
-            if (position.positionType === position_entity_1.PositionType.Product) {
+            if (position.positionType === position_entity_1.PositionInteractType.Product) {
                 position.product = productList.find((i) => i.id === position.positionInteractId);
             }
-            if (position.positionType === position_entity_1.PositionType.Procedure) {
+            if (position.positionType === position_entity_1.PositionInteractType.Procedure) {
                 position.procedure = procedureList.find((i) => i.id === position.positionInteractId);
             }
-            if (position.positionType === position_entity_1.PositionType.Radiology) {
+            if (position.positionType === position_entity_1.PositionInteractType.Radiology) {
                 position.radiology = radiologyList.find((i) => i.id === position.positionInteractId);
             }
-            if (position.positionType === position_entity_1.PositionType.Laboratory) {
+            if (position.positionType === position_entity_1.PositionInteractType.Laboratory) {
                 position.laboratory = laboratoryList.find((i) => i.id === position.positionInteractId);
             }
         });
@@ -35324,316 +37238,7 @@ exports.ApiPositionService = ApiPositionService = __decorate([
 
 
 /***/ }),
-/* 452 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(453), exports);
-__exportStar(__webpack_require__(454), exports);
-__exportStar(__webpack_require__(455), exports);
-
-
-/***/ }),
-/* 453 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a, _b, _c;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.PositionGetOneQuery = exports.PositionGetManyQuery = exports.PositionPaginationQuery = exports.PositionGetQuery = void 0;
-const swagger_1 = __webpack_require__(6);
-const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const position_entity_1 = __webpack_require__(75);
-const position_options_request_1 = __webpack_require__(454);
-class PositionGetQuery {
-}
-exports.PositionGetQuery = PositionGetQuery;
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({ type: String, example: JSON.stringify({}) }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => {
-        try {
-            if (!value)
-                return undefined;
-            const plain = JSON.parse(value);
-            return (0, class_transformer_1.plainToInstance)(position_options_request_1.PositionRelationQuery, plain, {
-                exposeUnsetFields: false,
-                excludeExtraneousValues: false,
-            });
-        }
-        catch (error) {
-            return error.message;
-        }
-    }),
-    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", typeof (_a = typeof position_options_request_1.PositionRelationQuery !== "undefined" && position_options_request_1.PositionRelationQuery) === "function" ? _a : Object)
-], PositionGetQuery.prototype, "relation", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        type: String,
-        example: JSON.stringify({
-            positionType: position_entity_1.PositionType.Ticket,
-        }),
-    }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => {
-        try {
-            if (!value)
-                return undefined;
-            const plain = JSON.parse(value);
-            return (0, class_transformer_1.plainToInstance)(position_options_request_1.PositionFilterQuery, plain, {
-                exposeUnsetFields: false,
-                excludeExtraneousValues: false,
-            });
-        }
-        catch (error) {
-            return error.message;
-        }
-    }),
-    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", typeof (_b = typeof position_options_request_1.PositionFilterQuery !== "undefined" && position_options_request_1.PositionFilterQuery) === "function" ? _b : Object)
-], PositionGetQuery.prototype, "filter", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        type: String,
-        example: JSON.stringify({ id: 'ASC' }),
-    }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => {
-        try {
-            if (!value)
-                return undefined;
-            const plain = JSON.parse(value);
-            return (0, class_transformer_1.plainToInstance)(position_options_request_1.PositionSortQuery, plain, {
-                exposeUnsetFields: false,
-                excludeExtraneousValues: false,
-            });
-        }
-        catch (error) {
-            return error.message;
-        }
-    }),
-    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", typeof (_c = typeof position_options_request_1.PositionSortQuery !== "undefined" && position_options_request_1.PositionSortQuery) === "function" ? _c : Object)
-], PositionGetQuery.prototype, "sort", void 0);
-class PositionPaginationQuery extends (0, swagger_1.IntersectionType)(PositionGetQuery, query_1.PaginationQuery) {
-}
-exports.PositionPaginationQuery = PositionPaginationQuery;
-class PositionGetManyQuery extends (0, swagger_1.IntersectionType)((0, swagger_1.PickType)(PositionGetQuery, ['filter', 'relation', 'sort']), query_1.LimitQuery) {
-}
-exports.PositionGetManyQuery = PositionGetManyQuery;
-class PositionGetOneQuery extends (0, swagger_1.PickType)(PositionGetQuery, ['relation']) {
-}
-exports.PositionGetOneQuery = PositionGetOneQuery;
-
-
-/***/ }),
-/* 454 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a, _b, _c;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.PositionSortQuery = exports.PositionFilterQuery = exports.PositionRelationQuery = void 0;
-const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
-const query_1 = __webpack_require__(261);
-const position_entity_1 = __webpack_require__(75);
-const ConditionEnumPositionType = (0, dto_1.createConditionEnum)(position_entity_1.PositionType);
-class PositionRelationQuery {
-}
-exports.PositionRelationQuery = PositionRelationQuery;
-__decorate([
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], PositionRelationQuery.prototype, "role", void 0);
-__decorate([
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], PositionRelationQuery.prototype, "product", void 0);
-__decorate([
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], PositionRelationQuery.prototype, "procedure", void 0);
-__decorate([
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], PositionRelationQuery.prototype, "laboratory", void 0);
-__decorate([
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], PositionRelationQuery.prototype, "radiology", void 0);
-class PositionFilterQuery {
-}
-exports.PositionFilterQuery = PositionFilterQuery;
-__decorate([
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)((params) => (0, dto_1.transformConditionEnum)(params, position_entity_1.PositionType)),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", Object)
-], PositionFilterQuery.prototype, "positionType", void 0);
-__decorate([
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], PositionFilterQuery.prototype, "roleId", void 0);
-__decorate([
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(dto_1.transformConditionNumber),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", Object)
-], PositionFilterQuery.prototype, "positionInteractId", void 0);
-class PositionSortQuery extends query_1.SortQuery {
-}
-exports.PositionSortQuery = PositionSortQuery;
-__decorate([
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsIn)(['ASC', 'DESC']),
-    __metadata("design:type", String)
-], PositionSortQuery.prototype, "positionType", void 0);
-__decorate([
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsIn)(['ASC', 'DESC']),
-    __metadata("design:type", String)
-], PositionSortQuery.prototype, "roleId", void 0);
-
-
-/***/ }),
-/* 455 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a, _b, _c;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.PositionReplaceListBody = exports.PositionUpdateBody = exports.PositionCreateBody = void 0;
-const swagger_1 = __webpack_require__(6);
-const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const typescript_helper_1 = __webpack_require__(250);
-const class_validator_custom_1 = __webpack_require__(249);
-const position_entity_1 = __webpack_require__(75);
-const position_options_request_1 = __webpack_require__(454);
-class PositionCreateBody {
-}
-exports.PositionCreateBody = PositionCreateBody;
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 25 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], PositionCreateBody.prototype, "roleId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ enum: position_entity_1.PositionType, example: position_entity_1.PositionType.Ticket }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_custom_1.IsEnumValue)(position_entity_1.PositionType),
-    __metadata("design:type", typeof (_a = typeof position_entity_1.PositionType !== "undefined" && position_entity_1.PositionType) === "function" ? _a : Object)
-], PositionCreateBody.prototype, "positionType", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 25 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], PositionCreateBody.prototype, "positionInteractId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 22500 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], PositionCreateBody.prototype, "commissionValue", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        enum: (0, typescript_helper_1.valuesEnum)(position_entity_1.CommissionCalculatorType),
-        example: position_entity_1.CommissionCalculatorType.VND,
-    }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_custom_1.IsEnumValue)(position_entity_1.CommissionCalculatorType),
-    __metadata("design:type", typeof (_b = typeof position_entity_1.CommissionCalculatorType !== "undefined" && position_entity_1.CommissionCalculatorType) === "function" ? _b : Object)
-], PositionCreateBody.prototype, "commissionCalculatorType", void 0);
-class PositionUpdateBody extends (0, swagger_1.PartialType)(PositionCreateBody) {
-}
-exports.PositionUpdateBody = PositionUpdateBody;
-class PositionReplaceListBody {
-}
-exports.PositionReplaceListBody = PositionReplaceListBody;
-__decorate([
-    (0, swagger_1.ApiProperty)({ type: PositionCreateBody, isArray: true }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => PositionCreateBody),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", Array)
-], PositionReplaceListBody.prototype, "positionData", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ type: position_options_request_1.PositionFilterQuery }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => position_options_request_1.PositionFilterQuery),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", typeof (_c = typeof position_options_request_1.PositionFilterQuery !== "undefined" && position_options_request_1.PositionFilterQuery) === "function" ? _c : Object)
-], PositionReplaceListBody.prototype, "filter", void 0);
-
-
-/***/ }),
-/* 456 */
+/* 476 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -35646,8 +37251,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiPrescriptionSampleModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_prescription_sample_controller_1 = __webpack_require__(457);
-const api_prescription_sample_service_1 = __webpack_require__(458);
+const api_prescription_sample_controller_1 = __webpack_require__(477);
+const api_prescription_sample_service_1 = __webpack_require__(478);
 let ApiPrescriptionSampleModule = class ApiPrescriptionSampleModule {
 };
 exports.ApiPrescriptionSampleModule = ApiPrescriptionSampleModule;
@@ -35661,7 +37266,7 @@ exports.ApiPrescriptionSampleModule = ApiPrescriptionSampleModule = __decorate([
 
 
 /***/ }),
-/* 457 */
+/* 477 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -35682,12 +37287,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiPrescriptionSampleController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_prescription_sample_service_1 = __webpack_require__(458);
-const request_1 = __webpack_require__(459);
+const param_1 = __webpack_require__(309);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_prescription_sample_service_1 = __webpack_require__(478);
+const request_1 = __webpack_require__(479);
 let ApiPrescriptionSampleController = class ApiPrescriptionSampleController {
     constructor(apiPrescriptionSampleService) {
         this.apiPrescriptionSampleService = apiPrescriptionSampleService;
@@ -35778,7 +37383,7 @@ exports.ApiPrescriptionSampleController = ApiPrescriptionSampleController = __de
 
 
 /***/ }),
-/* 458 */
+/* 478 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -35796,9 +37401,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiPrescriptionSampleService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const array_helper_1 = __webpack_require__(92);
-const prescription_sample_repository_1 = __webpack_require__(176);
-const product_repository_1 = __webpack_require__(182);
+const array_helper_1 = __webpack_require__(94);
+const prescription_sample_repository_1 = __webpack_require__(180);
+const product_repository_1 = __webpack_require__(186);
 let ApiPrescriptionSampleService = class ApiPrescriptionSampleService {
     constructor(prescriptionSampleRepository, productRepository) {
         this.prescriptionSampleRepository = prescriptionSampleRepository;
@@ -35884,7 +37489,7 @@ exports.ApiPrescriptionSampleService = ApiPrescriptionSampleService = __decorate
 
 
 /***/ }),
-/* 459 */
+/* 479 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -35903,13 +37508,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(460), exports);
-__exportStar(__webpack_require__(461), exports);
-__exportStar(__webpack_require__(462), exports);
+__exportStar(__webpack_require__(480), exports);
+__exportStar(__webpack_require__(481), exports);
+__exportStar(__webpack_require__(482), exports);
 
 
 /***/ }),
-/* 460 */
+/* 480 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -35925,8 +37530,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PrescriptionSampleSortQuery = exports.PrescriptionSampleFilterQuery = exports.PrescriptionSampleRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
 class PrescriptionSampleRelationQuery {
 }
 exports.PrescriptionSampleRelationQuery = PrescriptionSampleRelationQuery;
@@ -35944,7 +37549,7 @@ exports.PrescriptionSampleSortQuery = PrescriptionSampleSortQuery;
 
 
 /***/ }),
-/* 461 */
+/* 481 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -35961,7 +37566,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PrescriptionSampleUpdateBody = exports.PrescriptionSampleCreateBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class PrescriptionSampleCreateBody {
 }
 exports.PrescriptionSampleCreateBody = PrescriptionSampleCreateBody;
@@ -35992,7 +37597,7 @@ exports.PrescriptionSampleUpdateBody = PrescriptionSampleUpdateBody;
 
 
 /***/ }),
-/* 462 */
+/* 482 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -36010,9 +37615,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PrescriptionSampleGetOneQuery = exports.PrescriptionSampleGetManyQuery = exports.PrescriptionSamplePaginationQuery = exports.PrescriptionSampleGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const prescription_sample_options_request_1 = __webpack_require__(460);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const prescription_sample_options_request_1 = __webpack_require__(480);
 class PrescriptionSampleGetQuery {
 }
 exports.PrescriptionSampleGetQuery = PrescriptionSampleGetQuery;
@@ -36102,7 +37707,7 @@ exports.PrescriptionSampleGetOneQuery = PrescriptionSampleGetOneQuery;
 
 
 /***/ }),
-/* 463 */
+/* 483 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -36115,8 +37720,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiPrintHtmlModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_print_html_controller_1 = __webpack_require__(464);
-const api_print_html_service_1 = __webpack_require__(465);
+const api_print_html_controller_1 = __webpack_require__(484);
+const api_print_html_service_1 = __webpack_require__(485);
 let ApiPrintHtmlModule = class ApiPrintHtmlModule {
 };
 exports.ApiPrintHtmlModule = ApiPrintHtmlModule;
@@ -36130,7 +37735,7 @@ exports.ApiPrintHtmlModule = ApiPrintHtmlModule = __decorate([
 
 
 /***/ }),
-/* 464 */
+/* 484 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -36151,12 +37756,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiPrintHtmlController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_print_html_service_1 = __webpack_require__(465);
-const request_1 = __webpack_require__(466);
+const param_1 = __webpack_require__(309);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_print_html_service_1 = __webpack_require__(485);
+const request_1 = __webpack_require__(486);
 let ApiPrintHtmlController = class ApiPrintHtmlController {
     constructor(apiPrintHtmlService) {
         this.apiPrintHtmlService = apiPrintHtmlService;
@@ -36270,7 +37875,7 @@ exports.ApiPrintHtmlController = ApiPrintHtmlController = __decorate([
 
 
 /***/ }),
-/* 465 */
+/* 485 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -36288,7 +37893,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiPrintHtmlService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const print_html_repository_1 = __webpack_require__(177);
+const print_html_repository_1 = __webpack_require__(181);
 let ApiPrintHtmlService = class ApiPrintHtmlService {
     constructor(printHtmlRepository) {
         this.printHtmlRepository = printHtmlRepository;
@@ -36380,7 +37985,7 @@ exports.ApiPrintHtmlService = ApiPrintHtmlService = __decorate([
 
 
 /***/ }),
-/* 466 */
+/* 486 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -36399,13 +38004,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(467), exports);
-__exportStar(__webpack_require__(468), exports);
-__exportStar(__webpack_require__(469), exports);
+__exportStar(__webpack_require__(487), exports);
+__exportStar(__webpack_require__(488), exports);
+__exportStar(__webpack_require__(489), exports);
 
 
 /***/ }),
-/* 467 */
+/* 487 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -36423,9 +38028,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PrintHtmlGetOneQuery = exports.PrintHtmlGetManyQuery = exports.PrintHtmlPaginationQuery = exports.PrintHtmlGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const print_html_options_request_1 = __webpack_require__(468);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const print_html_options_request_1 = __webpack_require__(488);
 class PrintHtmlGetQuery {
 }
 exports.PrintHtmlGetQuery = PrintHtmlGetQuery;
@@ -36510,7 +38115,7 @@ exports.PrintHtmlGetOneQuery = PrintHtmlGetOneQuery;
 
 
 /***/ }),
-/* 468 */
+/* 488 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -36527,9 +38132,9 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PrintHtmlSortQuery = exports.PrintHtmlFilterQuery = exports.PrintHtmlRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const condition_timestamp_1 = __webpack_require__(301);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const condition_timestamp_1 = __webpack_require__(308);
+const query_1 = __webpack_require__(265);
 class PrintHtmlRelationQuery {
 }
 exports.PrintHtmlRelationQuery = PrintHtmlRelationQuery;
@@ -36548,7 +38153,7 @@ exports.PrintHtmlSortQuery = PrintHtmlSortQuery;
 
 
 /***/ }),
-/* 469 */
+/* 489 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -36565,7 +38170,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PrintHtmlUpdateBody = exports.PrintHtmlCreateBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class PrintHtmlCreateBody {
 }
 exports.PrintHtmlCreateBody = PrintHtmlCreateBody;
@@ -36611,7 +38216,7 @@ exports.PrintHtmlUpdateBody = PrintHtmlUpdateBody;
 
 
 /***/ }),
-/* 470 */
+/* 490 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -36624,8 +38229,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiProcedureGroupModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_procedure_group_controller_1 = __webpack_require__(471);
-const api_procedure_group_service_1 = __webpack_require__(472);
+const api_procedure_group_controller_1 = __webpack_require__(491);
+const api_procedure_group_service_1 = __webpack_require__(492);
 let ApiProcedureGroupModule = class ApiProcedureGroupModule {
 };
 exports.ApiProcedureGroupModule = ApiProcedureGroupModule;
@@ -36639,7 +38244,7 @@ exports.ApiProcedureGroupModule = ApiProcedureGroupModule = __decorate([
 
 
 /***/ }),
-/* 471 */
+/* 491 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -36660,13 +38265,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiProcedureGroupController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const organization_guard_1 = __webpack_require__(94);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_procedure_group_service_1 = __webpack_require__(472);
-const request_1 = __webpack_require__(473);
+const param_1 = __webpack_require__(309);
+const organization_guard_1 = __webpack_require__(96);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_procedure_group_service_1 = __webpack_require__(492);
+const request_1 = __webpack_require__(493);
 let ApiProcedureGroupController = class ApiProcedureGroupController {
     constructor(apiProcedureGroupService) {
         this.apiProcedureGroupService = apiProcedureGroupService;
@@ -36769,7 +38374,7 @@ exports.ApiProcedureGroupController = ApiProcedureGroupController = __decorate([
 
 
 /***/ }),
-/* 472 */
+/* 492 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -36787,7 +38392,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiProcedureGroupService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const procedure_group_repository_1 = __webpack_require__(178);
+const procedure_group_repository_1 = __webpack_require__(182);
 let ApiProcedureGroupService = class ApiProcedureGroupService {
     constructor(procedureGroupRepository) {
         this.procedureGroupRepository = procedureGroupRepository;
@@ -36855,7 +38460,7 @@ exports.ApiProcedureGroupService = ApiProcedureGroupService = __decorate([
 
 
 /***/ }),
-/* 473 */
+/* 493 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -36874,13 +38479,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(474), exports);
-__exportStar(__webpack_require__(475), exports);
-__exportStar(__webpack_require__(476), exports);
+__exportStar(__webpack_require__(494), exports);
+__exportStar(__webpack_require__(495), exports);
+__exportStar(__webpack_require__(496), exports);
 
 
 /***/ }),
-/* 474 */
+/* 494 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -36898,9 +38503,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProcedureGroupGetOneQuery = exports.ProcedureGroupGetManyQuery = exports.ProcedureGroupPaginationQuery = exports.ProcedureGroupGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const procedure_group_options_request_1 = __webpack_require__(475);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const procedure_group_options_request_1 = __webpack_require__(495);
 class ProcedureGroupGetQuery {
 }
 exports.ProcedureGroupGetQuery = ProcedureGroupGetQuery;
@@ -36985,13 +38590,13 @@ exports.ProcedureGroupGetOneQuery = ProcedureGroupGetOneQuery;
 
 
 /***/ }),
-/* 475 */
+/* 495 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProcedureGroupSortQuery = exports.ProcedureGroupFilterQuery = exports.ProcedureGroupRelationQuery = void 0;
-const query_1 = __webpack_require__(261);
+const query_1 = __webpack_require__(265);
 class ProcedureGroupRelationQuery {
 }
 exports.ProcedureGroupRelationQuery = ProcedureGroupRelationQuery;
@@ -37004,7 +38609,7 @@ exports.ProcedureGroupSortQuery = ProcedureGroupSortQuery;
 
 
 /***/ }),
-/* 476 */
+/* 496 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -37021,7 +38626,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProcedureGroupReplaceAllBody = exports.ProcedureGroupReplaceBody = exports.ProcedureGroupUpdateBody = exports.ProcedureGroupCreateBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class ProcedureGroupCreateBody {
 }
 exports.ProcedureGroupCreateBody = ProcedureGroupCreateBody;
@@ -37067,7 +38672,7 @@ __decorate([
 
 
 /***/ }),
-/* 477 */
+/* 497 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -37080,8 +38685,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiProcedureModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_procedure_controller_1 = __webpack_require__(478);
-const api_procedure_service_1 = __webpack_require__(479);
+const api_procedure_controller_1 = __webpack_require__(498);
+const api_procedure_service_1 = __webpack_require__(499);
 let ApiProcedureModule = class ApiProcedureModule {
 };
 exports.ApiProcedureModule = ApiProcedureModule;
@@ -37095,7 +38700,7 @@ exports.ApiProcedureModule = ApiProcedureModule = __decorate([
 
 
 /***/ }),
-/* 478 */
+/* 498 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -37116,13 +38721,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiProcedureController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const organization_guard_1 = __webpack_require__(94);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_procedure_service_1 = __webpack_require__(479);
-const request_1 = __webpack_require__(480);
+const param_1 = __webpack_require__(309);
+const organization_guard_1 = __webpack_require__(96);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_procedure_service_1 = __webpack_require__(499);
+const request_1 = __webpack_require__(500);
 let ApiProcedureController = class ApiProcedureController {
     constructor(apiProcedureService) {
         this.apiProcedureService = apiProcedureService;
@@ -37181,7 +38786,7 @@ __decorate([
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_j = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _j : Object, typeof (_k = typeof request_1.ProcedureCreateBody !== "undefined" && request_1.ProcedureCreateBody) === "function" ? _k : Object]),
+    __metadata("design:paramtypes", [typeof (_j = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _j : Object, typeof (_k = typeof request_1.ProcedureUpsertBody !== "undefined" && request_1.ProcedureUpsertBody) === "function" ? _k : Object]),
     __metadata("design:returntype", Promise)
 ], ApiProcedureController.prototype, "create", null);
 __decorate([
@@ -37192,7 +38797,7 @@ __decorate([
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_l = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _l : Object, typeof (_m = typeof param_1.IdParam !== "undefined" && param_1.IdParam) === "function" ? _m : Object, typeof (_o = typeof request_1.ProcedureUpdateBody !== "undefined" && request_1.ProcedureUpdateBody) === "function" ? _o : Object]),
+    __metadata("design:paramtypes", [typeof (_l = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _l : Object, typeof (_m = typeof param_1.IdParam !== "undefined" && param_1.IdParam) === "function" ? _m : Object, typeof (_o = typeof request_1.ProcedureUpsertBody !== "undefined" && request_1.ProcedureUpsertBody) === "function" ? _o : Object]),
     __metadata("design:returntype", Promise)
 ], ApiProcedureController.prototype, "update", null);
 __decorate([
@@ -37214,7 +38819,7 @@ exports.ApiProcedureController = ApiProcedureController = __decorate([
 
 
 /***/ }),
-/* 479 */
+/* 499 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -37227,36 +38832,30 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
-var _a, _b, _c;
+var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiProcedureService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
+const helpers_1 = __webpack_require__(274);
+const discount_entity_1 = __webpack_require__(76);
 const position_entity_1 = __webpack_require__(75);
-const repositories_1 = __webpack_require__(162);
-const procedure_repository_1 = __webpack_require__(179);
-const ticket_procedure_repository_1 = __webpack_require__(195);
+const repositories_1 = __webpack_require__(164);
+const procedure_repository_1 = __webpack_require__(183);
+const ticket_procedure_repository_1 = __webpack_require__(199);
+const socket_emit_service_1 = __webpack_require__(324);
 let ApiProcedureService = class ApiProcedureService {
-    constructor(procedureRepository, positionRepository, ticketProcedureRepository) {
+    constructor(socketEmitService, procedureRepository, procedureGroupRepository, positionRepository, discountRepository, ticketProcedureRepository) {
+        this.socketEmitService = socketEmitService;
         this.procedureRepository = procedureRepository;
+        this.procedureGroupRepository = procedureGroupRepository;
         this.positionRepository = positionRepository;
+        this.discountRepository = discountRepository;
         this.ticketProcedureRepository = ticketProcedureRepository;
     }
     async pagination(oid, query) {
         const { page, limit, filter, relation, sort } = query;
         const { data, total } = await this.procedureRepository.pagination({
-            relation,
             page,
             limit,
             condition: {
@@ -37268,6 +38867,9 @@ let ApiProcedureService = class ApiProcedureService {
             },
             sort,
         });
+        if (query.relation) {
+            await this.generateRelation({ oid, procedureList: data, relation: query.relation });
+        }
         return {
             data,
             meta: { page, limit, total },
@@ -37276,7 +38878,6 @@ let ApiProcedureService = class ApiProcedureService {
     async getMany(oid, query) {
         const { limit, filter, relation } = query;
         const data = await this.procedureRepository.findMany({
-            relation,
             condition: {
                 oid,
                 name: (filter === null || filter === void 0 ? void 0 : filter.searchText) ? { LIKE: filter.searchText } : undefined,
@@ -37287,28 +38888,27 @@ let ApiProcedureService = class ApiProcedureService {
             sort: { id: 'ASC' },
             limit,
         });
+        if (query.relation) {
+            await this.generateRelation({ oid, procedureList: data, relation: query.relation });
+        }
         return { data };
     }
     async getOne(oid, id, query) {
-        var _a, _b;
+        var _a;
         const procedure = await this.procedureRepository.findOne({
             relation: { procedureGroup: (_a = query === null || query === void 0 ? void 0 : query.relation) === null || _a === void 0 ? void 0 : _a.procedureGroup },
             condition: { oid, id },
         });
         if (!procedure)
             throw new exception_filter_1.BusinessException('error.Database.NotFound');
-        if ((_b = query === null || query === void 0 ? void 0 : query.relation) === null || _b === void 0 ? void 0 : _b.positionList) {
-            procedure.positionList = await this.positionRepository.findManyBy({
-                oid,
-                positionType: position_entity_1.PositionType.Procedure,
-                positionInteractId: procedure.id,
-            });
+        if (query.relation) {
+            await this.generateRelation({ oid, procedureList: [procedure], relation: query.relation });
         }
         return { data: { procedure } };
     }
     async createOne(oid, body) {
-        const { positionList } = body, procedureBody = __rest(body, ["positionList"]);
-        positionList.forEach((i) => {
+        const { positionList, discountList, procedure: procedureBody } = body;
+        positionList === null || positionList === void 0 ? void 0 : positionList.forEach((i) => {
             if (i.commissionCalculatorType === position_entity_1.CommissionCalculatorType.PercentExpected
                 || i.commissionCalculatorType === position_entity_1.CommissionCalculatorType.PercentActual) {
                 if (i.commissionValue >= 1000) {
@@ -37317,24 +38917,37 @@ let ApiProcedureService = class ApiProcedureService {
             }
         });
         const procedure = await this.procedureRepository.insertOneFullFieldAndReturnEntity(Object.assign({ oid }, procedureBody));
-        const positionDtoList = positionList.map((i) => {
-            const dto = {
-                oid,
-                roleId: i.roleId,
-                commissionCalculatorType: i.commissionCalculatorType,
-                commissionValue: i.commissionValue,
-                positionInteractId: procedure.id,
-                positionType: position_entity_1.PositionType.Procedure,
-            };
-            return dto;
-        });
-        procedure.positionList =
-            await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList);
+        this.socketEmitService.procedureListChange(oid, { procedureUpsertedList: [procedure] });
+        if (positionList === null || positionList === void 0 ? void 0 : positionList.length) {
+            const positionDtoList = positionList.map((i) => {
+                const dto = {
+                    oid,
+                    roleId: i.roleId,
+                    commissionCalculatorType: i.commissionCalculatorType,
+                    commissionValue: i.commissionValue,
+                    positionInteractId: procedure.id,
+                    positionType: position_entity_1.PositionInteractType.Procedure,
+                };
+                return dto;
+            });
+            const positionUpsertedList = await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList);
+            procedure.positionList = positionUpsertedList;
+            this.socketEmitService.positionListChange(oid, { positionUpsertedList });
+        }
+        if (discountList === null || discountList === void 0 ? void 0 : discountList.length) {
+            const discountListDto = discountList.map((i) => {
+                const dto = Object.assign(Object.assign({}, i), { discountInteractId: procedure.id, discountInteractType: discount_entity_1.DiscountInteractType.Procedure, oid });
+                return dto;
+            });
+            const discountUpsertedList = await this.discountRepository.insertManyFullFieldAndReturnEntity(discountListDto);
+            procedure.discountList = discountUpsertedList;
+            this.socketEmitService.discountListChange(oid, { discountUpsertedList });
+        }
         return { data: { procedure } };
     }
     async updateOne(oid, id, body) {
-        const { positionList } = body, procedureBody = __rest(body, ["positionList"]);
-        positionList.forEach((i) => {
+        const { positionList, discountList, procedure: procedureBody } = body;
+        positionList === null || positionList === void 0 ? void 0 : positionList.forEach((i) => {
             if (i.commissionCalculatorType === position_entity_1.CommissionCalculatorType.PercentExpected
                 || i.commissionCalculatorType === position_entity_1.CommissionCalculatorType.PercentActual) {
                 if (i.commissionValue >= 1000) {
@@ -37342,27 +38955,49 @@ let ApiProcedureService = class ApiProcedureService {
                 }
             }
         });
-        const [procedure] = await this.procedureRepository.updateAndReturnEntity({ oid, id }, procedureBody);
-        if (!procedure)
-            throw new exception_filter_1.BusinessException('error.Database.UpdateFailed');
-        await this.positionRepository.delete({
-            oid,
-            positionInteractId: procedure.id,
-            positionType: position_entity_1.PositionType.Procedure,
-        });
-        const positionDtoList = positionList.map((i) => {
-            const dto = {
+        const procedure = await this.procedureRepository.updateOneAndReturnEntity({ oid, id }, procedureBody);
+        this.socketEmitService.procedureListChange(oid, { procedureUpsertedList: [procedure] });
+        if (positionList) {
+            const positionDestroyedList = await this.positionRepository.deleteAndReturnEntity({
                 oid,
-                roleId: i.roleId,
-                commissionCalculatorType: i.commissionCalculatorType,
-                commissionValue: i.commissionValue,
                 positionInteractId: procedure.id,
-                positionType: position_entity_1.PositionType.Procedure,
-            };
-            return dto;
-        });
-        procedure.positionList =
-            await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList);
+                positionType: position_entity_1.PositionInteractType.Procedure,
+            });
+            const positionDtoList = positionList.map((i) => {
+                const dto = {
+                    oid,
+                    roleId: i.roleId,
+                    commissionCalculatorType: i.commissionCalculatorType,
+                    commissionValue: i.commissionValue,
+                    positionInteractId: procedure.id,
+                    positionType: position_entity_1.PositionInteractType.Procedure,
+                };
+                return dto;
+            });
+            const positionUpsertedList = await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList);
+            procedure.positionList = positionUpsertedList;
+            this.socketEmitService.positionListChange(oid, {
+                positionUpsertedList,
+                positionDestroyedList,
+            });
+        }
+        if (discountList) {
+            const discountDestroyedList = await this.discountRepository.deleteAndReturnEntity({
+                oid,
+                discountInteractId: procedure.id,
+                discountInteractType: discount_entity_1.DiscountInteractType.Procedure,
+            });
+            const discountListDto = discountList.map((i) => {
+                const dto = Object.assign(Object.assign({}, i), { discountInteractId: procedure.id, discountInteractType: discount_entity_1.DiscountInteractType.Procedure, oid });
+                return dto;
+            });
+            const discountUpsertedList = await this.discountRepository.insertManyFullFieldAndReturnEntity(discountListDto);
+            procedure.discountList = discountUpsertedList;
+            this.socketEmitService.discountListChange(oid, {
+                discountUpsertedList,
+                discountDestroyedList,
+            });
+        }
         return { data: { procedure } };
     }
     async destroyOne(oid, procedureId) {
@@ -37376,26 +39011,82 @@ let ApiProcedureService = class ApiProcedureService {
                 success: false,
             };
         }
-        await this.positionRepository.delete({
+        const [positionDestroyedList, discountDestroyedList] = await Promise.all([
+            this.positionRepository.deleteAndReturnEntity({
+                oid,
+                positionInteractId: procedureId,
+                positionType: position_entity_1.PositionInteractType.Procedure,
+            }),
+            this.discountRepository.deleteAndReturnEntity({
+                oid,
+                discountInteractId: procedureId,
+                discountInteractType: discount_entity_1.DiscountInteractType.Procedure,
+            }),
+        ]);
+        if (positionDestroyedList.length) {
+            this.socketEmitService.positionListChange(oid, { positionDestroyedList });
+        }
+        if (discountDestroyedList.length) {
+            this.socketEmitService.discountListChange(oid, { discountDestroyedList });
+        }
+        const procedure = await this.procedureRepository.deleteOneAndReturnEntity({
             oid,
-            positionInteractId: procedureId,
-            positionType: position_entity_1.PositionType.Radiology,
+            id: procedureId,
         });
-        const affected = await this.procedureRepository.delete({ oid, id: procedureId });
-        if (affected === 0)
-            throw new exception_filter_1.BusinessException('error.Database.DeleteFailed');
+        this.socketEmitService.procedureListChange(oid, { procedureDestroyedList: [procedure] });
         return { data: { ticketProcedureList: [], procedureId } };
+    }
+    async generateRelation(options) {
+        const { oid, procedureList, relation } = options;
+        const procedureIdList = helpers_1.ESArray.uniqueArray(procedureList.map((i) => i.id));
+        const procedureGroupIdList = helpers_1.ESArray.uniqueArray(procedureList.map((i) => i.procedureGroupId));
+        const [positionList, discountList, procedureGroupList] = await Promise.all([
+            (relation === null || relation === void 0 ? void 0 : relation.positionList) && procedureIdList.length
+                ? this.positionRepository.findManyBy({
+                    oid,
+                    positionType: position_entity_1.PositionInteractType.Procedure,
+                    positionInteractId: { IN: procedureIdList },
+                })
+                : [],
+            (relation === null || relation === void 0 ? void 0 : relation.discountList) && procedureIdList.length
+                ? this.discountRepository.findManyBy({
+                    oid,
+                    discountInteractType: discount_entity_1.DiscountInteractType.Procedure,
+                    discountInteractId: { IN: [...procedureIdList, 0] },
+                })
+                : [],
+            (relation === null || relation === void 0 ? void 0 : relation.procedureGroup) && procedureGroupIdList.length
+                ? this.procedureGroupRepository.findManyBy({
+                    oid,
+                    id: { IN: procedureGroupIdList },
+                })
+                : [],
+        ]);
+        const procedureGroupMap = helpers_1.ESArray.arrayToKeyValue(procedureGroupList, 'id');
+        procedureList.forEach((procedure) => {
+            if (relation === null || relation === void 0 ? void 0 : relation.positionList) {
+                procedure.positionList = positionList.filter((i) => i.positionInteractId === procedure.id);
+            }
+            if (relation === null || relation === void 0 ? void 0 : relation.discountList) {
+                procedure.discountList = discountList.filter((i) => i.discountInteractId === procedure.id);
+                procedure.discountListExtra = discountList.filter((i) => i.discountInteractId === 0);
+            }
+            if (relation === null || relation === void 0 ? void 0 : relation.procedureGroup) {
+                procedure.procedureGroup = procedureGroupMap[procedure.procedureGroupId];
+            }
+        });
+        return procedureList;
     }
 };
 exports.ApiProcedureService = ApiProcedureService;
 exports.ApiProcedureService = ApiProcedureService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof procedure_repository_1.ProcedureRepository !== "undefined" && procedure_repository_1.ProcedureRepository) === "function" ? _a : Object, typeof (_b = typeof repositories_1.PositionRepository !== "undefined" && repositories_1.PositionRepository) === "function" ? _b : Object, typeof (_c = typeof ticket_procedure_repository_1.TicketProcedureRepository !== "undefined" && ticket_procedure_repository_1.TicketProcedureRepository) === "function" ? _c : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof procedure_repository_1.ProcedureRepository !== "undefined" && procedure_repository_1.ProcedureRepository) === "function" ? _b : Object, typeof (_c = typeof repositories_1.ProcedureGroupRepository !== "undefined" && repositories_1.ProcedureGroupRepository) === "function" ? _c : Object, typeof (_d = typeof repositories_1.PositionRepository !== "undefined" && repositories_1.PositionRepository) === "function" ? _d : Object, typeof (_e = typeof repositories_1.DiscountRepository !== "undefined" && repositories_1.DiscountRepository) === "function" ? _e : Object, typeof (_f = typeof ticket_procedure_repository_1.TicketProcedureRepository !== "undefined" && ticket_procedure_repository_1.TicketProcedureRepository) === "function" ? _f : Object])
 ], ApiProcedureService);
 
 
 /***/ }),
-/* 480 */
+/* 500 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -37414,13 +39105,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(481), exports);
-__exportStar(__webpack_require__(482), exports);
-__exportStar(__webpack_require__(483), exports);
+__exportStar(__webpack_require__(501), exports);
+__exportStar(__webpack_require__(502), exports);
+__exportStar(__webpack_require__(503), exports);
 
 
 /***/ }),
-/* 481 */
+/* 501 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -37438,9 +39129,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProcedureGetOneQuery = exports.ProcedureGetManyQuery = exports.ProcedurePaginationQuery = exports.ProcedureGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const procedure_options_request_1 = __webpack_require__(482);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const procedure_options_request_1 = __webpack_require__(502);
 class ProcedureGetQuery {
 }
 exports.ProcedureGetQuery = ProcedureGetQuery;
@@ -37522,7 +39213,7 @@ exports.ProcedureGetOneQuery = ProcedureGetOneQuery;
 
 
 /***/ }),
-/* 482 */
+/* 502 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -37539,9 +39230,9 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProcedureSortQuery = exports.ProcedureFilterQuery = exports.ProcedureRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
+const query_1 = __webpack_require__(265);
 class ProcedureRelationQuery {
 }
 exports.ProcedureRelationQuery = ProcedureRelationQuery;
@@ -37555,6 +39246,11 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], ProcedureRelationQuery.prototype, "positionList", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], ProcedureRelationQuery.prototype, "discountList", void 0);
 class ProcedureFilterQuery {
 }
 exports.ProcedureFilterQuery = ProcedureFilterQuery;
@@ -37596,7 +39292,7 @@ __decorate([
 
 
 /***/ }),
-/* 483 */
+/* 503 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -37609,15 +39305,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b;
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ProcedureUpdateBody = exports.ProcedureCreateBody = exports.ProcedurePosition = exports.ConsumableConversion = void 0;
+exports.ProcedureUpsertBody = exports.ProcedureCreate = exports.ConsumableConversion = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
-const position_entity_1 = __webpack_require__(75);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 const procedure_entity_1 = __webpack_require__(67);
+const request_1 = __webpack_require__(378);
+const request_2 = __webpack_require__(416);
 class ConsumableConversion {
 }
 exports.ConsumableConversion = ConsumableConversion;
@@ -37635,72 +39332,50 @@ __decorate([
     (0, class_validator_1.IsPositive)(),
     __metadata("design:type", Number)
 ], ConsumableConversion.prototype, "quantity", void 0);
-class ProcedurePosition {
+class ProcedureCreate {
 }
-exports.ProcedurePosition = ProcedurePosition;
-__decorate([
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsPositive)(),
-    __metadata("design:type", Number)
-], ProcedurePosition.prototype, "roleId", void 0);
-__decorate([
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], ProcedurePosition.prototype, "commissionValue", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: position_entity_1.CommissionCalculatorType.VND }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_custom_1.IsEnumValue)(position_entity_1.CommissionCalculatorType),
-    __metadata("design:type", typeof (_a = typeof position_entity_1.CommissionCalculatorType !== "undefined" && position_entity_1.CommissionCalculatorType) === "function" ? _a : Object)
-], ProcedurePosition.prototype, "commissionCalculatorType", void 0);
-class ProcedureCreateBody {
-}
-exports.ProcedureCreateBody = ProcedureCreateBody;
+exports.ProcedureCreate = ProcedureCreate;
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Truyền dịch 500ml' }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], ProcedureCreateBody.prototype, "name", void 0);
+], ProcedureCreate.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 25 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
-], ProcedureCreateBody.prototype, "procedureGroupId", void 0);
+], ProcedureCreate.prototype, "procedureGroupId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: procedure_entity_1.ProcedureType.Basic }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_custom_1.IsEnumValue)(procedure_entity_1.ProcedureType),
-    __metadata("design:type", typeof (_b = typeof procedure_entity_1.ProcedureType !== "undefined" && procedure_entity_1.ProcedureType) === "function" ? _b : Object)
-], ProcedureCreateBody.prototype, "procedureType", void 0);
+    __metadata("design:type", typeof (_a = typeof procedure_entity_1.ProcedureType !== "undefined" && procedure_entity_1.ProcedureType) === "function" ? _a : Object)
+], ProcedureCreate.prototype, "procedureType", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 4 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], ProcedureCreateBody.prototype, "quantityDefault", void 0);
+], ProcedureCreate.prototype, "quantityDefault", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 4 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], ProcedureCreateBody.prototype, "gapHours", void 0);
+], ProcedureCreate.prototype, "gapHours", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 105000 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
-], ProcedureCreateBody.prototype, "price", void 0);
+], ProcedureCreate.prototype, "price", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         type: 'string',
@@ -37735,30 +39410,45 @@ __decorate([
             + `${JSON.stringify([{ productId: 30, quantity: 4 }])}`,
     }),
     __metadata("design:type", String)
-], ProcedureCreateBody.prototype, "consumablesHint", void 0);
+], ProcedureCreate.prototype, "consumablesHint", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 1 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsIn)([0, 1]),
     __metadata("design:type", Number)
-], ProcedureCreateBody.prototype, "isActive", void 0);
+], ProcedureCreate.prototype, "isActive", void 0);
+class ProcedureUpsertBody {
+}
+exports.ProcedureUpsertBody = ProcedureUpsertBody;
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: ProcedurePosition, isArray: true }),
+    (0, swagger_1.ApiProperty)({ type: ProcedureCreate }),
     (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => ProcedurePosition),
+    (0, class_transformer_1.Type)(() => ProcedureCreate),
     (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", ProcedureCreate)
+], ProcedureUpsertBody.prototype, "procedure", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: request_2.PositionBasicBody, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => request_2.PositionBasicBody),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.ValidateNested)({ each: true }),
     __metadata("design:type", Array)
-], ProcedureCreateBody.prototype, "positionList", void 0);
-class ProcedureUpdateBody extends (0, swagger_1.PartialType)(ProcedureCreateBody) {
-}
-exports.ProcedureUpdateBody = ProcedureUpdateBody;
+], ProcedureUpsertBody.prototype, "positionList", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: request_1.DiscountUpdateBody, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => request_1.DiscountUpdateBody),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], ProcedureUpsertBody.prototype, "discountList", void 0);
 
 
 /***/ }),
-/* 484 */
+/* 504 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -37771,8 +39461,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiProductGroupModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_product_group_controller_1 = __webpack_require__(485);
-const api_product_group_service_1 = __webpack_require__(486);
+const api_product_group_controller_1 = __webpack_require__(505);
+const api_product_group_service_1 = __webpack_require__(506);
 let ApiProductGroupModule = class ApiProductGroupModule {
 };
 exports.ApiProductGroupModule = ApiProductGroupModule;
@@ -37786,7 +39476,7 @@ exports.ApiProductGroupModule = ApiProductGroupModule = __decorate([
 
 
 /***/ }),
-/* 485 */
+/* 505 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -37807,13 +39497,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiProductGroupController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const organization_guard_1 = __webpack_require__(94);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_product_group_service_1 = __webpack_require__(486);
-const request_1 = __webpack_require__(487);
+const param_1 = __webpack_require__(309);
+const organization_guard_1 = __webpack_require__(96);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_product_group_service_1 = __webpack_require__(506);
+const request_1 = __webpack_require__(507);
 let ApiProductGroupController = class ApiProductGroupController {
     constructor(apiProductGroupService) {
         this.apiProductGroupService = apiProductGroupService;
@@ -37916,7 +39606,7 @@ exports.ApiProductGroupController = ApiProductGroupController = __decorate([
 
 
 /***/ }),
-/* 486 */
+/* 506 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -37934,7 +39624,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiProductGroupService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const product_group_repository_1 = __webpack_require__(180);
+const product_group_repository_1 = __webpack_require__(184);
 let ApiProductGroupService = class ApiProductGroupService {
     constructor(productGroupRepository) {
         this.productGroupRepository = productGroupRepository;
@@ -38004,7 +39694,7 @@ exports.ApiProductGroupService = ApiProductGroupService = __decorate([
 
 
 /***/ }),
-/* 487 */
+/* 507 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -38023,13 +39713,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(488), exports);
-__exportStar(__webpack_require__(489), exports);
-__exportStar(__webpack_require__(490), exports);
+__exportStar(__webpack_require__(508), exports);
+__exportStar(__webpack_require__(509), exports);
+__exportStar(__webpack_require__(510), exports);
 
 
 /***/ }),
-/* 488 */
+/* 508 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -38047,9 +39737,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductGroupGetOneQuery = exports.ProductGroupGetManyQuery = exports.ProductGroupPaginationQuery = exports.ProductGroupGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const product_group_options_request_1 = __webpack_require__(489);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const product_group_options_request_1 = __webpack_require__(509);
 class ProductGroupGetQuery {
 }
 exports.ProductGroupGetQuery = ProductGroupGetQuery;
@@ -38134,7 +39824,7 @@ exports.ProductGroupGetOneQuery = ProductGroupGetOneQuery;
 
 
 /***/ }),
-/* 489 */
+/* 509 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -38151,9 +39841,9 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductGroupSortQuery = exports.ProductGroupFilterQuery = exports.ProductGroupRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const condition_timestamp_1 = __webpack_require__(301);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const condition_timestamp_1 = __webpack_require__(308);
+const query_1 = __webpack_require__(265);
 class ProductGroupRelationQuery {
 }
 exports.ProductGroupRelationQuery = ProductGroupRelationQuery;
@@ -38172,7 +39862,7 @@ exports.ProductGroupSortQuery = ProductGroupSortQuery;
 
 
 /***/ }),
-/* 490 */
+/* 510 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -38189,7 +39879,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductGroupReplaceAllBody = exports.ProductGroupReplaceBody = exports.ProductGroupUpdateBody = exports.ProductGroupCreateBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class ProductGroupCreateBody {
 }
 exports.ProductGroupCreateBody = ProductGroupCreateBody;
@@ -38235,7 +39925,7 @@ __decorate([
 
 
 /***/ }),
-/* 491 */
+/* 511 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -38248,8 +39938,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiProductMovementModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_product_movement_controller_1 = __webpack_require__(492);
-const api_product_movement_service_1 = __webpack_require__(493);
+const api_product_movement_controller_1 = __webpack_require__(512);
+const api_product_movement_service_1 = __webpack_require__(513);
 let ApiProductMovementModule = class ApiProductMovementModule {
 };
 exports.ApiProductMovementModule = ApiProductMovementModule;
@@ -38263,7 +39953,7 @@ exports.ApiProductMovementModule = ApiProductMovementModule = __decorate([
 
 
 /***/ }),
-/* 492 */
+/* 512 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -38284,11 +39974,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiProductMovementController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_product_movement_service_1 = __webpack_require__(493);
-const request_1 = __webpack_require__(494);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_product_movement_service_1 = __webpack_require__(513);
+const request_1 = __webpack_require__(514);
 let ApiProductMovementController = class ApiProductMovementController {
     constructor(apiProductMovementService) {
         this.apiProductMovementService = apiProductMovementService;
@@ -38316,7 +40006,7 @@ exports.ApiProductMovementController = ApiProductMovementController = __decorate
 
 
 /***/ }),
-/* 493 */
+/* 513 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -38333,9 +40023,9 @@ var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiProductMovementService = void 0;
 const common_1 = __webpack_require__(3);
-const array_helper_1 = __webpack_require__(92);
+const array_helper_1 = __webpack_require__(94);
 const variable_1 = __webpack_require__(21);
-const repositories_1 = __webpack_require__(162);
+const repositories_1 = __webpack_require__(164);
 let ApiProductMovementService = class ApiProductMovementService {
     constructor(productMovementRepository, receiptRepository, stockCheckRepository, ticketRepository, customerRepository, distributorRepository, userRepository) {
         this.productMovementRepository = productMovementRepository;
@@ -38435,7 +40125,7 @@ exports.ApiProductMovementService = ApiProductMovementService = __decorate([
 
 
 /***/ }),
-/* 494 */
+/* 514 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -38454,12 +40144,12 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(495), exports);
-__exportStar(__webpack_require__(496), exports);
+__exportStar(__webpack_require__(515), exports);
+__exportStar(__webpack_require__(516), exports);
 
 
 /***/ }),
-/* 495 */
+/* 515 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -38477,10 +40167,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductMovementGetOneQuery = exports.ProductMovementGetManyQuery = exports.ProductMovementPaginationQuery = exports.ProductMovementGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
 const variable_1 = __webpack_require__(21);
-const product_movement_options_request_1 = __webpack_require__(496);
+const product_movement_options_request_1 = __webpack_require__(516);
 class ProductMovementGetQuery {
 }
 exports.ProductMovementGetQuery = ProductMovementGetQuery;
@@ -38574,7 +40264,7 @@ exports.ProductMovementGetOneQuery = ProductMovementGetOneQuery;
 
 
 /***/ }),
-/* 496 */
+/* 516 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -38591,8 +40281,8 @@ var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductMovementSortQuery = exports.ProductMovementFilterQuery = exports.ProductMovementRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
 const variable_1 = __webpack_require__(21);
 const ConditionEnumMovementType = (0, dto_1.createConditionEnum)(variable_1.MovementType);
 class ProductMovementRelationQuery {
@@ -38665,7 +40355,7 @@ exports.ProductMovementSortQuery = ProductMovementSortQuery;
 
 
 /***/ }),
-/* 497 */
+/* 517 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -38678,8 +40368,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiProductModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_product_controller_1 = __webpack_require__(498);
-const api_product_service_1 = __webpack_require__(499);
+const api_product_controller_1 = __webpack_require__(518);
+const api_product_service_1 = __webpack_require__(519);
 let ApiProductModule = class ApiProductModule {
 };
 exports.ApiProductModule = ApiProductModule;
@@ -38693,7 +40383,7 @@ exports.ApiProductModule = ApiProductModule = __decorate([
 
 
 /***/ }),
-/* 498 */
+/* 518 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -38714,13 +40404,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiProductController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const organization_guard_1 = __webpack_require__(94);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_product_service_1 = __webpack_require__(499);
-const request_1 = __webpack_require__(500);
+const param_1 = __webpack_require__(309);
+const organization_guard_1 = __webpack_require__(96);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_product_service_1 = __webpack_require__(519);
+const request_1 = __webpack_require__(520);
 let ApiProductController = class ApiProductController {
     constructor(apiProductService) {
         this.apiProductService = apiProductService;
@@ -38823,7 +40513,7 @@ exports.ApiProductController = ApiProductController = __decorate([
 
 
 /***/ }),
-/* 499 */
+/* 519 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -38836,45 +40526,36 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
-var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiProductService = void 0;
 const common_1 = __webpack_require__(3);
 const cache_data_service_1 = __webpack_require__(38);
 const exception_filter_1 = __webpack_require__(9);
-const helpers_1 = __webpack_require__(270);
+const helpers_1 = __webpack_require__(274);
+const discount_entity_1 = __webpack_require__(76);
 const position_entity_1 = __webpack_require__(75);
-const repositories_1 = __webpack_require__(162);
+const repositories_1 = __webpack_require__(164);
 const organization_repository_1 = __webpack_require__(40);
-const product_movement_repository_1 = __webpack_require__(181);
-const receipt_item_repository_1 = __webpack_require__(185);
-const ticket_product_repository_1 = __webpack_require__(196);
-const socket_emit_service_1 = __webpack_require__(317);
+const product_movement_repository_1 = __webpack_require__(185);
+const receipt_item_repository_1 = __webpack_require__(189);
+const ticket_product_repository_1 = __webpack_require__(200);
+const socket_emit_service_1 = __webpack_require__(324);
 let ApiProductService = class ApiProductService {
-    constructor(socketEmitService, cacheDataService, organizationRepository, ticketProductRepository, receiptItemRepository, productRepository, batchRepository, productMovementRepository, positionRepository) {
+    constructor(socketEmitService, cacheDataService, organizationRepository, ticketProductRepository, receiptItemRepository, productRepository, productGroupRepository, batchRepository, productMovementRepository, positionRepository, discountRepository) {
         this.socketEmitService = socketEmitService;
         this.cacheDataService = cacheDataService;
         this.organizationRepository = organizationRepository;
         this.ticketProductRepository = ticketProductRepository;
         this.receiptItemRepository = receiptItemRepository;
         this.productRepository = productRepository;
+        this.productGroupRepository = productGroupRepository;
         this.batchRepository = batchRepository;
         this.productMovementRepository = productMovementRepository;
         this.positionRepository = positionRepository;
+        this.discountRepository = discountRepository;
     }
     async pagination(oid, query) {
-        var _a, _b;
         const { page, limit, filter, sort, relation } = query;
         const { total, data } = await this.productRepository.pagination({
             page,
@@ -38889,17 +40570,8 @@ let ApiProductService = class ApiProductService {
             },
             sort,
         });
-        const productHasBatchesIds = helpers_1.ESArray.uniqueArray(data.map((item) => item.id));
-        if ((relation === null || relation === void 0 ? void 0 : relation.batchList) && productHasBatchesIds.length) {
-            const batchList = await this.batchRepository.findManyBy({
-                productId: { IN: productHasBatchesIds },
-                quantity: (_a = filter === null || filter === void 0 ? void 0 : filter.batchList) === null || _a === void 0 ? void 0 : _a.quantity,
-                expiryDate: (_b = filter === null || filter === void 0 ? void 0 : filter.batchList) === null || _b === void 0 ? void 0 : _b.expiryDate,
-            });
-            const batchListMapProductId = helpers_1.ESArray.arrayToKeyArray(batchList, 'productId');
-            data.forEach((item) => {
-                item.batchList = batchListMapProductId[item.id] || [];
-            });
+        if (query.relation) {
+            await this.generateRelation({ oid, productList: data, relation: query.relation });
         }
         return {
             data,
@@ -38907,7 +40579,6 @@ let ApiProductService = class ApiProductService {
         };
     }
     async getList(oid, query) {
-        var _a, _b;
         const { filter, limit, relation } = query;
         const data = await this.productRepository.findMany({
             condition: {
@@ -38920,22 +40591,12 @@ let ApiProductService = class ApiProductService {
             },
             limit,
         });
-        const productHasBatchesIds = helpers_1.ESArray.uniqueArray(data.map((item) => item.id));
-        if ((relation === null || relation === void 0 ? void 0 : relation.batchList) && productHasBatchesIds.length) {
-            const batchList = await this.batchRepository.findManyBy({
-                id: { IN: productHasBatchesIds },
-                quantity: (_a = filter === null || filter === void 0 ? void 0 : filter.batchList) === null || _a === void 0 ? void 0 : _a.quantity,
-                expiryDate: (_b = filter === null || filter === void 0 ? void 0 : filter.batchList) === null || _b === void 0 ? void 0 : _b.expiryDate,
-            });
-            const batchListMapProductId = helpers_1.ESArray.arrayToKeyArray(batchList, 'productId');
-            data.forEach((item) => {
-                item.batchList = batchListMapProductId[item.id] || [];
-            });
+        if (query.relation) {
+            await this.generateRelation({ oid, productList: data, relation: query.relation });
         }
         return { data };
     }
     async getOne(oid, id, query) {
-        var _a;
         const { relation, filter } = query;
         const product = await this.productRepository.findOne({
             relation: { productGroup: relation === null || relation === void 0 ? void 0 : relation.productGroup },
@@ -38943,29 +40604,14 @@ let ApiProductService = class ApiProductService {
         });
         if (!product)
             throw new exception_filter_1.BusinessException('error.Database.NotFound');
-        if (relation === null || relation === void 0 ? void 0 : relation.batchList) {
-            product.batchList = await this.batchRepository.findMany({
-                condition: {
-                    oid,
-                    productId: product.id,
-                    quantity: (_a = filter === null || filter === void 0 ? void 0 : filter.batchList) === null || _a === void 0 ? void 0 : _a.quantity,
-                    expiryDate: filter === null || filter === void 0 ? void 0 : filter.batchList.expiryDate,
-                },
-                sort: { expiryDate: 'ASC' },
-            });
-        }
-        if (relation === null || relation === void 0 ? void 0 : relation.positionList) {
-            product.positionList = await this.positionRepository.findManyBy({
-                oid,
-                positionType: position_entity_1.PositionType.Product,
-                positionInteractId: product.id,
-            });
+        if (query.relation) {
+            await this.generateRelation({ oid, productList: [product], relation: query.relation });
         }
         return { data: { product } };
     }
     async createOne(oid, body) {
-        const { positionList } = body, productBody = __rest(body, ["positionList"]);
-        let productCode = body.productCode;
+        const { positionList, discountList, product: productBody } = body;
+        let productCode = productBody.productCode;
         if (!productCode) {
             const count = await this.productRepository.getMaxId();
             productCode = (count + 1).toString();
@@ -38977,15 +40623,16 @@ let ApiProductService = class ApiProductService {
         if (existProduct) {
             throw new exception_filter_1.BusinessException(`Trùng mã sản phẩm với ${existProduct.brandName}`);
         }
-        const productCreated = await this.productRepository.insertOneFullFieldAndReturnEntity(Object.assign(Object.assign({}, productBody), { oid,
+        const productInserted = await this.productRepository.insertOneFullFieldAndReturnEntity(Object.assign(Object.assign({}, productBody), { oid,
             productCode, updatedAt: Date.now() }));
-        if (body.quantity) {
+        this.socketEmitService.productListChange(oid, { productUpsertedList: [productInserted] });
+        if (productBody.quantity) {
             const batchCreated = await this.batchRepository.insertOneFullFieldAndReturnEntity({
                 oid,
-                productId: productCreated.id,
-                costPrice: body.costPrice,
-                quantity: body.quantity,
-                costAmount: body.costPrice * body.quantity,
+                productId: productInserted.id,
+                costPrice: productBody.costPrice,
+                quantity: productBody.quantity,
+                costAmount: productBody.costPrice * productBody.quantity,
                 distributorId: 0,
                 expiryDate: null,
                 lotNumber: '',
@@ -38995,31 +40642,40 @@ let ApiProductService = class ApiProductService {
             });
             this.socketEmitService.batchListChange(oid, { batchUpsertedList: [batchCreated] });
         }
-        if (positionList.length) {
-            const commissionDtoList = positionList.map((i) => {
+        if (positionList === null || positionList === void 0 ? void 0 : positionList.length) {
+            const positionDtoList = positionList.map((i) => {
                 const dto = {
                     oid,
                     roleId: i.roleId,
                     commissionCalculatorType: i.commissionCalculatorType,
                     commissionValue: i.commissionValue,
-                    positionInteractId: productCreated.id,
-                    positionType: position_entity_1.PositionType.Product,
+                    positionInteractId: productInserted.id,
+                    positionType: position_entity_1.PositionInteractType.Product,
                 };
                 return dto;
             });
-            productCreated.positionList =
-                await this.positionRepository.insertManyFullFieldAndReturnEntity(commissionDtoList);
+            const positionUpsertedList = await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList);
+            productInserted.positionList = positionUpsertedList;
+            this.socketEmitService.positionListChange(oid, { positionUpsertedList });
         }
-        this.socketEmitService.productListChange(oid, { productUpsertedList: [productCreated] });
-        return { data: { product: productCreated } };
+        if (discountList === null || discountList === void 0 ? void 0 : discountList.length) {
+            const discountListDto = discountList.map((i) => {
+                const dto = Object.assign(Object.assign({}, i), { discountInteractId: productInserted.id, discountInteractType: discount_entity_1.DiscountInteractType.Product, oid });
+                return dto;
+            });
+            const discountUpsertedList = await this.discountRepository.insertManyFullFieldAndReturnEntity(discountListDto);
+            productInserted.discountList = discountUpsertedList;
+            this.socketEmitService.discountListChange(oid, { discountUpsertedList });
+        }
+        return { data: { product: productInserted } };
     }
     async updateOne(oid, productId, body) {
-        const { positionList } = body, productBody = __rest(body, ["positionList"]);
+        const { positionList, discountList, product: productBody } = body;
         const productOrigin = await this.productRepository.findOneBy({ oid, id: productId });
-        if (productOrigin.warehouseIds !== body.warehouseIds) {
+        if (productOrigin.warehouseIds !== productBody.warehouseIds) {
             let bodyWarehouseIdList = [];
             try {
-                bodyWarehouseIdList = JSON.parse(body.warehouseIds);
+                bodyWarehouseIdList = JSON.parse(productBody.warehouseIds);
             }
             catch (error) { }
             if (bodyWarehouseIdList.includes(0)) {
@@ -39051,32 +40707,55 @@ let ApiProductService = class ApiProductService {
         }
         const existProduct = await this.productRepository.findOneBy({
             oid,
-            productCode: body.productCode,
+            productCode: productBody.productCode,
             id: { NOT: productId },
         });
         if (existProduct) {
             throw new exception_filter_1.BusinessException(`Trùng mã sản phẩm với ${existProduct.brandName}`);
         }
         const productModified = await this.productRepository.updateOneAndReturnEntity({ oid, id: productId }, productBody);
-        await this.positionRepository.delete({
-            oid,
-            positionInteractId: productModified.id,
-            positionType: position_entity_1.PositionType.Product,
-        });
-        const commissionDtoList = positionList.map((i) => {
-            const dto = {
-                oid,
-                roleId: i.roleId,
-                commissionCalculatorType: i.commissionCalculatorType,
-                commissionValue: i.commissionValue,
-                positionInteractId: productModified.id,
-                positionType: position_entity_1.PositionType.Product,
-            };
-            return dto;
-        });
-        productModified.positionList =
-            await this.positionRepository.insertManyFullFieldAndReturnEntity(commissionDtoList);
         this.socketEmitService.productListChange(oid, { productUpsertedList: [productModified] });
+        if (positionList) {
+            const positionDestroyedList = await this.positionRepository.deleteAndReturnEntity({
+                oid,
+                positionInteractId: productModified.id,
+                positionType: position_entity_1.PositionInteractType.Product,
+            });
+            const positionDtoList = positionList.map((i) => {
+                const dto = {
+                    oid,
+                    roleId: i.roleId,
+                    commissionCalculatorType: i.commissionCalculatorType,
+                    commissionValue: i.commissionValue,
+                    positionInteractId: productModified.id,
+                    positionType: position_entity_1.PositionInteractType.Product,
+                };
+                return dto;
+            });
+            const positionUpsertedList = await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList);
+            productModified.positionList = positionUpsertedList;
+            this.socketEmitService.positionListChange(oid, {
+                positionUpsertedList,
+                positionDestroyedList,
+            });
+        }
+        if (discountList) {
+            const discountDestroyedList = await this.discountRepository.deleteAndReturnEntity({
+                oid,
+                discountInteractId: productModified.id,
+                discountInteractType: discount_entity_1.DiscountInteractType.Product,
+            });
+            const discountListDto = discountList.map((i) => {
+                const dto = Object.assign(Object.assign({}, i), { discountInteractId: productModified.id, discountInteractType: discount_entity_1.DiscountInteractType.Product, oid });
+                return dto;
+            });
+            const discountUpsertedList = await this.discountRepository.insertManyFullFieldAndReturnEntity(discountListDto);
+            productModified.discountList = discountUpsertedList;
+            this.socketEmitService.discountListChange(oid, {
+                discountUpsertedList,
+                discountDestroyedList,
+            });
+        }
         return { data: { product: productModified } };
     }
     async destroyOne(options) {
@@ -39097,11 +40776,27 @@ let ApiProductService = class ApiProductService {
                 success: false,
             };
         }
-        const [productDestroyed, batchDestroyedList] = await Promise.all([
+        const [productDestroyed, batchDestroyedList, m, positionDestroyedList, discountDestroyedList] = await Promise.all([
             this.productRepository.deleteOneAndReturnEntity({ oid, id: productId }),
             this.batchRepository.deleteAndReturnEntity({ oid, id: productId }),
             this.productMovementRepository.delete({ oid, productId }),
+            this.positionRepository.deleteAndReturnEntity({
+                oid,
+                positionInteractId: productId,
+                positionType: position_entity_1.PositionInteractType.Product,
+            }),
+            this.discountRepository.deleteAndReturnEntity({
+                oid,
+                discountInteractId: productId,
+                discountInteractType: discount_entity_1.DiscountInteractType.Product,
+            }),
         ]);
+        if (positionDestroyedList.length) {
+            this.socketEmitService.positionListChange(oid, { positionDestroyedList });
+        }
+        if (discountDestroyedList.length) {
+            this.socketEmitService.discountListChange(oid, { discountDestroyedList });
+        }
         await this.organizationRepository.updateDataVersion(oid);
         this.cacheDataService.clearOrganization(oid);
         this.socketEmitService.productListChange(oid, { productDestroyedList: [productDestroyed] });
@@ -39131,16 +40826,69 @@ let ApiProductService = class ApiProductService {
         this.socketEmitService.batchListChange(oid, { batchUpsertedList: batchModifiedList });
         return { data: true };
     }
+    async generateRelation(options) {
+        const { oid, productList, relation } = options;
+        const productIdList = helpers_1.ESArray.uniqueArray(productList.map((i) => i.id));
+        const productGroupIdList = helpers_1.ESArray.uniqueArray(productList.map((i) => i.productGroupId));
+        const [positionList, discountList, productGroupList, batchList] = await Promise.all([
+            (relation === null || relation === void 0 ? void 0 : relation.positionList) && productIdList.length
+                ? this.positionRepository.findManyBy({
+                    oid,
+                    positionType: position_entity_1.PositionInteractType.Product,
+                    positionInteractId: { IN: productIdList },
+                })
+                : [],
+            (relation === null || relation === void 0 ? void 0 : relation.discountList) && productIdList.length
+                ? this.discountRepository.findManyBy({
+                    oid,
+                    discountInteractType: discount_entity_1.DiscountInteractType.Product,
+                    discountInteractId: { IN: [...productIdList, 0] },
+                })
+                : [],
+            (relation === null || relation === void 0 ? void 0 : relation.productGroup) && productGroupIdList.length
+                ? this.productGroupRepository.findManyBy({
+                    oid,
+                    id: { IN: productGroupIdList },
+                })
+                : [],
+            (relation === null || relation === void 0 ? void 0 : relation.productGroup) && productGroupIdList.length
+                ? this.batchRepository.findMany({
+                    condition: {
+                        oid,
+                        productId: { IN: productIdList },
+                    },
+                    sort: { expiryDate: 'ASC' },
+                })
+                : [],
+        ]);
+        const productGroupMap = helpers_1.ESArray.arrayToKeyValue(productGroupList, 'id');
+        productList.forEach((product) => {
+            if (relation === null || relation === void 0 ? void 0 : relation.positionList) {
+                product.positionList = positionList.filter((i) => i.positionInteractId === product.id);
+            }
+            if (relation === null || relation === void 0 ? void 0 : relation.discountList) {
+                product.discountList = discountList.filter((i) => i.discountInteractId === product.id);
+                product.discountListExtra = discountList.filter((i) => i.discountInteractId === 0);
+            }
+            if (relation === null || relation === void 0 ? void 0 : relation.productGroup) {
+                product.productGroup = productGroupMap[product.productGroupId];
+            }
+            if (relation === null || relation === void 0 ? void 0 : relation.batchList) {
+                product.batchList = batchList.filter((i) => i.productId === product.id);
+            }
+        });
+        return productList;
+    }
 };
 exports.ApiProductService = ApiProductService;
 exports.ApiProductService = ApiProductService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof cache_data_service_1.CacheDataService !== "undefined" && cache_data_service_1.CacheDataService) === "function" ? _b : Object, typeof (_c = typeof organization_repository_1.OrganizationRepository !== "undefined" && organization_repository_1.OrganizationRepository) === "function" ? _c : Object, typeof (_d = typeof ticket_product_repository_1.TicketProductRepository !== "undefined" && ticket_product_repository_1.TicketProductRepository) === "function" ? _d : Object, typeof (_e = typeof receipt_item_repository_1.ReceiptItemRepository !== "undefined" && receipt_item_repository_1.ReceiptItemRepository) === "function" ? _e : Object, typeof (_f = typeof repositories_1.ProductRepository !== "undefined" && repositories_1.ProductRepository) === "function" ? _f : Object, typeof (_g = typeof repositories_1.BatchRepository !== "undefined" && repositories_1.BatchRepository) === "function" ? _g : Object, typeof (_h = typeof product_movement_repository_1.ProductMovementRepository !== "undefined" && product_movement_repository_1.ProductMovementRepository) === "function" ? _h : Object, typeof (_j = typeof repositories_1.PositionRepository !== "undefined" && repositories_1.PositionRepository) === "function" ? _j : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof cache_data_service_1.CacheDataService !== "undefined" && cache_data_service_1.CacheDataService) === "function" ? _b : Object, typeof (_c = typeof organization_repository_1.OrganizationRepository !== "undefined" && organization_repository_1.OrganizationRepository) === "function" ? _c : Object, typeof (_d = typeof ticket_product_repository_1.TicketProductRepository !== "undefined" && ticket_product_repository_1.TicketProductRepository) === "function" ? _d : Object, typeof (_e = typeof receipt_item_repository_1.ReceiptItemRepository !== "undefined" && receipt_item_repository_1.ReceiptItemRepository) === "function" ? _e : Object, typeof (_f = typeof repositories_1.ProductRepository !== "undefined" && repositories_1.ProductRepository) === "function" ? _f : Object, typeof (_g = typeof repositories_1.ProductGroupRepository !== "undefined" && repositories_1.ProductGroupRepository) === "function" ? _g : Object, typeof (_h = typeof repositories_1.BatchRepository !== "undefined" && repositories_1.BatchRepository) === "function" ? _h : Object, typeof (_j = typeof product_movement_repository_1.ProductMovementRepository !== "undefined" && product_movement_repository_1.ProductMovementRepository) === "function" ? _j : Object, typeof (_k = typeof repositories_1.PositionRepository !== "undefined" && repositories_1.PositionRepository) === "function" ? _k : Object, typeof (_l = typeof repositories_1.DiscountRepository !== "undefined" && repositories_1.DiscountRepository) === "function" ? _l : Object])
 ], ApiProductService);
 
 
 /***/ }),
-/* 500 */
+/* 520 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -39159,14 +40907,14 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(501), exports);
-__exportStar(__webpack_require__(503), exports);
-__exportStar(__webpack_require__(502), exports);
-__exportStar(__webpack_require__(504), exports);
+__exportStar(__webpack_require__(521), exports);
+__exportStar(__webpack_require__(523), exports);
+__exportStar(__webpack_require__(522), exports);
+__exportStar(__webpack_require__(524), exports);
 
 
 /***/ }),
-/* 501 */
+/* 521 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -39184,9 +40932,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductGetOneQuery = exports.ProductGetManyQuery = exports.ProductPaginationQuery = exports.ProductGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const product_options_request_1 = __webpack_require__(502);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const product_options_request_1 = __webpack_require__(522);
 class ProductGetQuery {
 }
 exports.ProductGetQuery = ProductGetQuery;
@@ -39271,7 +41019,7 @@ exports.ProductGetOneQuery = ProductGetOneQuery;
 
 
 /***/ }),
-/* 502 */
+/* 522 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -39288,11 +41036,11 @@ var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductSortQuery = exports.ProductFilterQueryFull = exports.ProductFilterQuery = exports.BatchFilterQuery = exports.ProductRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
-const condition_number_1 = __webpack_require__(299);
-const condition_timestamp_1 = __webpack_require__(301);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
+const condition_number_1 = __webpack_require__(306);
+const condition_timestamp_1 = __webpack_require__(308);
+const query_1 = __webpack_require__(265);
 class ProductRelationQuery {
 }
 exports.ProductRelationQuery = ProductRelationQuery;
@@ -39311,6 +41059,11 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], ProductRelationQuery.prototype, "positionList", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], ProductRelationQuery.prototype, "discountList", void 0);
 class BatchFilterQuery {
 }
 exports.BatchFilterQuery = BatchFilterQuery;
@@ -39394,7 +41147,7 @@ __decorate([
 
 
 /***/ }),
-/* 503 */
+/* 523 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -39411,8 +41164,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ProductMergeBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class ProductMergeBody {
 }
 exports.ProductMergeBody = ProductMergeBody;
@@ -39434,7 +41187,7 @@ __decorate([
 
 
 /***/ }),
-/* 504 */
+/* 524 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -39447,15 +41200,16 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ProductUpdateBody = exports.ProductCreateBody = exports.ProductPosition = exports.UnitConversionBody = void 0;
+exports.ProductUpdateBody = exports.ProductCreateBody = exports.ProductUpdate = exports.ProductCreate = exports.UnitConversionBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
-const position_entity_1 = __webpack_require__(75);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 const product_entity_1 = __webpack_require__(54);
+const request_1 = __webpack_require__(378);
+const request_2 = __webpack_require__(416);
 class UnitConversionBody {
 }
 exports.UnitConversionBody = UnitConversionBody;
@@ -39476,72 +41230,50 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], UnitConversionBody.prototype, "default", void 0);
-class ProductPosition {
+class ProductCreate {
 }
-exports.ProductPosition = ProductPosition;
-__decorate([
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsPositive)(),
-    __metadata("design:type", Number)
-], ProductPosition.prototype, "roleId", void 0);
-__decorate([
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], ProductPosition.prototype, "commissionValue", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: position_entity_1.CommissionCalculatorType.VND }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_custom_1.IsEnumValue)(position_entity_1.CommissionCalculatorType),
-    __metadata("design:type", typeof (_a = typeof position_entity_1.CommissionCalculatorType !== "undefined" && position_entity_1.CommissionCalculatorType) === "function" ? _a : Object)
-], ProductPosition.prototype, "commissionCalculatorType", void 0);
-class ProductCreateBody {
-}
-exports.ProductCreateBody = ProductCreateBody;
+exports.ProductCreate = ProductCreate;
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'ABC12345' }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], ProductCreateBody.prototype, "productCode", void 0);
+], ProductCreate.prototype, "productCode", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Klacid 125mg/5ml' }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], ProductCreateBody.prototype, "brandName", void 0);
+], ProductCreate.prototype, "brandName", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'Clarythromycin 125mg/5ml' }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], ProductCreateBody.prototype, "substance", void 0);
+], ProductCreate.prototype, "substance", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 59000 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], ProductCreateBody.prototype, "quantity", void 0);
+], ProductCreate.prototype, "quantity", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 45000 }),
     (0, class_transformer_1.Expose)(),
     (0, class_transformer_1.Transform)(({ value }) => Math.round(value || 0)),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], ProductCreateBody.prototype, "costPrice", void 0);
+], ProductCreate.prototype, "costPrice", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 45000 }),
     (0, class_transformer_1.Expose)(),
     (0, class_transformer_1.Transform)(({ value }) => Math.round(value || 0)),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], ProductCreateBody.prototype, "wholesalePrice", void 0);
+], ProductCreate.prototype, "wholesalePrice", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 59000 }),
     (0, class_transformer_1.Expose)(),
@@ -39549,14 +41281,14 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], ProductCreateBody.prototype, "retailPrice", void 0);
+], ProductCreate.prototype, "retailPrice", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 25 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
-], ProductCreateBody.prototype, "productGroupId", void 0);
+], ProductCreate.prototype, "productGroupId", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         name: 'unit',
@@ -39591,19 +41323,19 @@ __decorate([
         message: `Validate unit failed: Example: ${JSON.stringify([{ name: 'Viên', rate: 1 }])}`,
     }),
     __metadata("design:type", String)
-], ProductCreateBody.prototype, "unit", void 0);
+], ProductCreate.prototype, "unit", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'Uống' }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], ProductCreateBody.prototype, "route", void 0);
+], ProductCreate.prototype, "route", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'Ấn Độ' }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], ProductCreateBody.prototype, "source", void 0);
+], ProductCreate.prototype, "source", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         example: 'https://cdn.medigoapp.com/product/Klacid_125mg_5ml_4724e139c8.jpg',
@@ -39611,34 +41343,34 @@ __decorate([
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], ProductCreateBody.prototype, "image", void 0);
+], ProductCreate.prototype, "image", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'Uống 1 viên/ngày, 9h sáng, sau ăn no' }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], ProductCreateBody.prototype, "hintUsage", void 0);
+], ProductCreate.prototype, "hintUsage", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 1 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsIn)([0, 1]),
     __metadata("design:type", Number)
-], ProductCreateBody.prototype, "isActive", void 0);
+], ProductCreate.prototype, "isActive", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: product_entity_1.ProductType, example: product_entity_1.ProductType.Basic }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_custom_1.IsEnumValue)(product_entity_1.ProductType),
-    __metadata("design:type", typeof (_b = typeof product_entity_1.ProductType !== "undefined" && product_entity_1.ProductType) === "function" ? _b : Object)
-], ProductCreateBody.prototype, "productType", void 0);
+    __metadata("design:type", typeof (_a = typeof product_entity_1.ProductType !== "undefined" && product_entity_1.ProductType) === "function" ? _a : Object)
+], ProductCreate.prototype, "productType", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: product_entity_1.SplitBatchByWarehouse, example: product_entity_1.SplitBatchByWarehouse.Inherit }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_custom_1.IsEnumValue)(product_entity_1.SplitBatchByWarehouse),
-    __metadata("design:type", typeof (_c = typeof product_entity_1.SplitBatchByWarehouse !== "undefined" && product_entity_1.SplitBatchByWarehouse) === "function" ? _c : Object)
-], ProductCreateBody.prototype, "splitBatchByWarehouse", void 0);
+    __metadata("design:type", typeof (_b = typeof product_entity_1.SplitBatchByWarehouse !== "undefined" && product_entity_1.SplitBatchByWarehouse) === "function" ? _b : Object)
+], ProductCreate.prototype, "splitBatchByWarehouse", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         enum: product_entity_1.SplitBatchByDistributor,
@@ -39647,22 +41379,22 @@ __decorate([
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_custom_1.IsEnumValue)(product_entity_1.SplitBatchByDistributor),
-    __metadata("design:type", typeof (_d = typeof product_entity_1.SplitBatchByDistributor !== "undefined" && product_entity_1.SplitBatchByDistributor) === "function" ? _d : Object)
-], ProductCreateBody.prototype, "splitBatchByDistributor", void 0);
+    __metadata("design:type", typeof (_c = typeof product_entity_1.SplitBatchByDistributor !== "undefined" && product_entity_1.SplitBatchByDistributor) === "function" ? _c : Object)
+], ProductCreate.prototype, "splitBatchByDistributor", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: product_entity_1.SplitBatchByExpiryDate, example: product_entity_1.SplitBatchByExpiryDate.Inherit }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_custom_1.IsEnumValue)(product_entity_1.SplitBatchByExpiryDate),
-    __metadata("design:type", typeof (_e = typeof product_entity_1.SplitBatchByExpiryDate !== "undefined" && product_entity_1.SplitBatchByExpiryDate) === "function" ? _e : Object)
-], ProductCreateBody.prototype, "splitBatchByExpiryDate", void 0);
+    __metadata("design:type", typeof (_d = typeof product_entity_1.SplitBatchByExpiryDate !== "undefined" && product_entity_1.SplitBatchByExpiryDate) === "function" ? _d : Object)
+], ProductCreate.prototype, "splitBatchByExpiryDate", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: product_entity_1.SplitBatchByCostPrice, example: product_entity_1.SplitBatchByCostPrice.Inherit }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_custom_1.IsEnumValue)(product_entity_1.SplitBatchByCostPrice),
-    __metadata("design:type", typeof (_f = typeof product_entity_1.SplitBatchByCostPrice !== "undefined" && product_entity_1.SplitBatchByCostPrice) === "function" ? _f : Object)
-], ProductCreateBody.prototype, "splitBatchByCostPrice", void 0);
+    __metadata("design:type", typeof (_e = typeof product_entity_1.SplitBatchByCostPrice !== "undefined" && product_entity_1.SplitBatchByCostPrice) === "function" ? _e : Object)
+], ProductCreate.prototype, "splitBatchByCostPrice", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ type: 'string', example: JSON.stringify([1, 5, 10]) }),
     (0, class_transformer_1.Expose)(),
@@ -39686,23 +41418,68 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsString)({ message: `Validate warehouseIds failed: Example: ${JSON.stringify([1, 2, 3])}` }),
     __metadata("design:type", String)
-], ProductCreateBody.prototype, "warehouseIds", void 0);
+], ProductCreate.prototype, "warehouseIds", void 0);
+class ProductUpdate extends (0, swagger_1.OmitType)(ProductCreate, ['quantity']) {
+}
+exports.ProductUpdate = ProductUpdate;
+class ProductCreateBody {
+}
+exports.ProductCreateBody = ProductCreateBody;
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: ProductPosition, isArray: true }),
+    (0, swagger_1.ApiProperty)({ type: ProductCreate }),
     (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => ProductPosition),
+    (0, class_transformer_1.Type)(() => ProductCreate),
     (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", ProductCreate)
+], ProductCreateBody.prototype, "product", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: request_2.PositionBasicBody, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => request_2.PositionBasicBody),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.ValidateNested)({ each: true }),
     __metadata("design:type", Array)
 ], ProductCreateBody.prototype, "positionList", void 0);
-class ProductUpdateBody extends (0, swagger_1.OmitType)(ProductCreateBody, ['quantity']) {
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: request_1.DiscountUpdateBody, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => request_1.DiscountUpdateBody),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], ProductCreateBody.prototype, "discountList", void 0);
+class ProductUpdateBody {
 }
 exports.ProductUpdateBody = ProductUpdateBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ProductUpdate }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => ProductUpdate),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", ProductUpdate)
+], ProductUpdateBody.prototype, "product", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: request_2.PositionBasicBody, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => request_2.PositionBasicBody),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], ProductUpdateBody.prototype, "positionList", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: request_1.DiscountUpdateBody, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => request_1.DiscountUpdateBody),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], ProductUpdateBody.prototype, "discountList", void 0);
 
 
 /***/ }),
-/* 505 */
+/* 525 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -39715,8 +41492,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiRadiologyGroupModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_radiology_group_controller_1 = __webpack_require__(506);
-const api_radiology_group_service_1 = __webpack_require__(507);
+const api_radiology_group_controller_1 = __webpack_require__(526);
+const api_radiology_group_service_1 = __webpack_require__(527);
 let ApiRadiologyGroupModule = class ApiRadiologyGroupModule {
 };
 exports.ApiRadiologyGroupModule = ApiRadiologyGroupModule;
@@ -39730,7 +41507,7 @@ exports.ApiRadiologyGroupModule = ApiRadiologyGroupModule = __decorate([
 
 
 /***/ }),
-/* 506 */
+/* 526 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -39751,13 +41528,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiRadiologyGroupController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const organization_guard_1 = __webpack_require__(94);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_radiology_group_service_1 = __webpack_require__(507);
-const request_1 = __webpack_require__(508);
+const param_1 = __webpack_require__(309);
+const organization_guard_1 = __webpack_require__(96);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_radiology_group_service_1 = __webpack_require__(527);
+const request_1 = __webpack_require__(528);
 let ApiRadiologyGroupController = class ApiRadiologyGroupController {
     constructor(apiRadiologyGroupService) {
         this.apiRadiologyGroupService = apiRadiologyGroupService;
@@ -39870,7 +41647,7 @@ exports.ApiRadiologyGroupController = ApiRadiologyGroupController = __decorate([
 
 
 /***/ }),
-/* 507 */
+/* 527 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -39888,7 +41665,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiRadiologyGroupService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const repositories_1 = __webpack_require__(162);
+const repositories_1 = __webpack_require__(164);
 let ApiRadiologyGroupService = class ApiRadiologyGroupService {
     constructor(radiologyGroupRepository) {
         this.radiologyGroupRepository = radiologyGroupRepository;
@@ -39959,7 +41736,7 @@ exports.ApiRadiologyGroupService = ApiRadiologyGroupService = __decorate([
 
 
 /***/ }),
-/* 508 */
+/* 528 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -39978,13 +41755,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(509), exports);
-__exportStar(__webpack_require__(510), exports);
-__exportStar(__webpack_require__(511), exports);
+__exportStar(__webpack_require__(529), exports);
+__exportStar(__webpack_require__(530), exports);
+__exportStar(__webpack_require__(531), exports);
 
 
 /***/ }),
-/* 509 */
+/* 529 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -40002,9 +41779,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RadiologyGroupGetOneQuery = exports.RadiologyGroupGetManyQuery = exports.RadiologyGroupPaginationQuery = exports.RadiologyGroupGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const radiology_group_options_request_1 = __webpack_require__(510);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const radiology_group_options_request_1 = __webpack_require__(530);
 class RadiologyGroupGetQuery {
 }
 exports.RadiologyGroupGetQuery = RadiologyGroupGetQuery;
@@ -40089,13 +41866,13 @@ exports.RadiologyGroupGetOneQuery = RadiologyGroupGetOneQuery;
 
 
 /***/ }),
-/* 510 */
+/* 530 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RadiologyGroupSortQuery = exports.RadiologyGroupFilterQuery = exports.RadiologyGroupRelationQuery = void 0;
-const query_1 = __webpack_require__(261);
+const query_1 = __webpack_require__(265);
 class RadiologyGroupRelationQuery {
 }
 exports.RadiologyGroupRelationQuery = RadiologyGroupRelationQuery;
@@ -40108,7 +41885,7 @@ exports.RadiologyGroupSortQuery = RadiologyGroupSortQuery;
 
 
 /***/ }),
-/* 511 */
+/* 531 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -40125,7 +41902,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RadiologyGroupReplaceAllBody = exports.RadiologyGroupReplaceBody = exports.RadiologyGroupUpdateBody = exports.RadiologyGroupCreateBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class RadiologyGroupCreateBody {
 }
 exports.RadiologyGroupCreateBody = RadiologyGroupCreateBody;
@@ -40171,7 +41948,7 @@ __decorate([
 
 
 /***/ }),
-/* 512 */
+/* 532 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -40184,8 +41961,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiRadiologyModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_radiology_controller_1 = __webpack_require__(513);
-const api_radiology_service_1 = __webpack_require__(514);
+const api_radiology_controller_1 = __webpack_require__(533);
+const api_radiology_service_1 = __webpack_require__(534);
 let ApiRadiologyModule = class ApiRadiologyModule {
 };
 exports.ApiRadiologyModule = ApiRadiologyModule;
@@ -40199,7 +41976,7 @@ exports.ApiRadiologyModule = ApiRadiologyModule = __decorate([
 
 
 /***/ }),
-/* 513 */
+/* 533 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -40220,13 +41997,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiRadiologyController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const organization_guard_1 = __webpack_require__(94);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_radiology_service_1 = __webpack_require__(514);
-const request_1 = __webpack_require__(515);
+const param_1 = __webpack_require__(309);
+const organization_guard_1 = __webpack_require__(96);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_radiology_service_1 = __webpack_require__(534);
+const request_1 = __webpack_require__(535);
 let ApiRadiologyController = class ApiRadiologyController {
     constructor(apiRadiologyService) {
         this.apiRadiologyService = apiRadiologyService;
@@ -40340,7 +42117,7 @@ exports.ApiRadiologyController = ApiRadiologyController = __decorate([
 
 
 /***/ }),
-/* 514 */
+/* 534 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -40353,38 +42130,29 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
-var _a, _b, _c;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiRadiologyService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
+const helpers_1 = __webpack_require__(274);
+const discount_entity_1 = __webpack_require__(76);
 const position_entity_1 = __webpack_require__(75);
-const repositories_1 = __webpack_require__(162);
+const repositories_1 = __webpack_require__(164);
+const socket_emit_service_1 = __webpack_require__(324);
 let ApiRadiologyService = class ApiRadiologyService {
-    constructor(radiologyRepository, positionRepository, ticketRadiologyRepository) {
+    constructor(socketEmitService, radiologyRepository, radiologyGroupRepository, printHtmlRepository, ticketRadiologyRepository, positionRepository, discountRepository) {
+        this.socketEmitService = socketEmitService;
         this.radiologyRepository = radiologyRepository;
-        this.positionRepository = positionRepository;
+        this.radiologyGroupRepository = radiologyGroupRepository;
+        this.printHtmlRepository = printHtmlRepository;
         this.ticketRadiologyRepository = ticketRadiologyRepository;
+        this.positionRepository = positionRepository;
+        this.discountRepository = discountRepository;
     }
     async pagination(oid, query) {
-        var _a, _b;
         const { page, limit, filter, relation, sort } = query;
         const { data, total } = await this.radiologyRepository.pagination({
-            relation: {
-                printHtml: (_a = query === null || query === void 0 ? void 0 : query.relation) === null || _a === void 0 ? void 0 : _a.printHtml,
-                radiologyGroup: (_b = query === null || query === void 0 ? void 0 : query.relation) === null || _b === void 0 ? void 0 : _b.radiologyGroup,
-            },
             page,
             limit,
             condition: {
@@ -40395,19 +42163,17 @@ let ApiRadiologyService = class ApiRadiologyService {
             },
             sort,
         });
+        if (query.relation) {
+            await this.generateRelation({ oid, radiologyList: data, relation: query.relation });
+        }
         return {
             data,
             meta: { page, limit, total },
         };
     }
     async getMany(oid, query) {
-        var _a, _b;
         const { limit, filter, relation, sort } = query;
         const data = await this.radiologyRepository.findMany({
-            relation: {
-                printHtml: (_a = query === null || query === void 0 ? void 0 : query.relation) === null || _a === void 0 ? void 0 : _a.printHtml,
-                radiologyGroup: (_b = query === null || query === void 0 ? void 0 : query.relation) === null || _b === void 0 ? void 0 : _b.radiologyGroup,
-            },
             condition: {
                 oid,
                 radiologyGroupId: filter === null || filter === void 0 ? void 0 : filter.radiologyGroupId,
@@ -40417,31 +42183,25 @@ let ApiRadiologyService = class ApiRadiologyService {
             sort,
             limit,
         });
+        if (query.relation) {
+            await this.generateRelation({ oid, radiologyList: data, relation: query.relation });
+        }
         return { data };
     }
     async getOne(oid, id, query) {
-        var _a, _b, _c;
         const radiology = await this.radiologyRepository.findOne({
-            relation: {
-                printHtml: (_a = query === null || query === void 0 ? void 0 : query.relation) === null || _a === void 0 ? void 0 : _a.printHtml,
-                radiologyGroup: (_b = query === null || query === void 0 ? void 0 : query.relation) === null || _b === void 0 ? void 0 : _b.radiologyGroup,
-            },
             condition: { oid, id },
         });
         if (!radiology)
             throw new exception_filter_1.BusinessException('error.Database.NotFound');
-        if ((_c = query === null || query === void 0 ? void 0 : query.relation) === null || _c === void 0 ? void 0 : _c.positionList) {
-            radiology.positionList = await this.positionRepository.findManyBy({
-                oid,
-                positionType: position_entity_1.PositionType.Radiology,
-                positionInteractId: radiology.id,
-            });
+        if (query.relation) {
+            await this.generateRelation({ oid, radiologyList: [radiology], relation: query.relation });
         }
         return { data: { radiology } };
     }
     async createOne(oid, body) {
-        const { positionList } = body, radiologyBody = __rest(body, ["positionList"]);
-        positionList.forEach((i) => {
+        const { positionList, radiology: radiologyBody, discountList } = body;
+        positionList === null || positionList === void 0 ? void 0 : positionList.forEach((i) => {
             if (i.commissionCalculatorType === position_entity_1.CommissionCalculatorType.PercentExpected
                 || i.commissionCalculatorType === position_entity_1.CommissionCalculatorType.PercentActual) {
                 if (i.commissionValue >= 1000) {
@@ -40449,25 +42209,38 @@ let ApiRadiologyService = class ApiRadiologyService {
                 }
             }
         });
-        const positionDtoList = positionList.map((i) => {
-            const dto = {
-                oid,
-                roleId: i.roleId,
-                commissionCalculatorType: i.commissionCalculatorType,
-                commissionValue: i.commissionValue,
-                positionInteractId: radiology.id,
-                positionType: position_entity_1.PositionType.Radiology,
-            };
-            return dto;
-        });
         const radiology = await this.radiologyRepository.insertOneFullFieldAndReturnEntity(Object.assign({ oid }, radiologyBody));
-        radiology.positionList =
-            await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList);
+        this.socketEmitService.radiologyListChange(oid, { radiologyUpsertedList: [radiology] });
+        if (positionList === null || positionList === void 0 ? void 0 : positionList.length) {
+            const positionDtoList = positionList.map((i) => {
+                const dto = {
+                    oid,
+                    roleId: i.roleId,
+                    commissionCalculatorType: i.commissionCalculatorType,
+                    commissionValue: i.commissionValue,
+                    positionInteractId: radiology.id,
+                    positionType: position_entity_1.PositionInteractType.Radiology,
+                };
+                return dto;
+            });
+            const positionUpsertedList = await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList);
+            radiology.positionList = positionUpsertedList;
+            this.socketEmitService.positionListChange(oid, { positionUpsertedList });
+        }
+        if (discountList === null || discountList === void 0 ? void 0 : discountList.length) {
+            const discountListDto = discountList.map((i) => {
+                const dto = Object.assign(Object.assign({}, i), { discountInteractId: radiology.id, discountInteractType: discount_entity_1.DiscountInteractType.Radiology, oid });
+                return dto;
+            });
+            const discountUpsertedList = await this.discountRepository.insertManyFullFieldAndReturnEntity(discountListDto);
+            radiology.discountList = discountUpsertedList;
+            this.socketEmitService.discountListChange(oid, { discountUpsertedList });
+        }
         return { data: { radiology } };
     }
     async updateOne(oid, id, body) {
-        const { positionList } = body, radiologyBody = __rest(body, ["positionList"]);
-        positionList.forEach((i) => {
+        const { positionList, radiology: radiologyBody, discountList } = body;
+        positionList === null || positionList === void 0 ? void 0 : positionList.forEach((i) => {
             if (i.commissionCalculatorType === position_entity_1.CommissionCalculatorType.PercentExpected
                 || i.commissionCalculatorType === position_entity_1.CommissionCalculatorType.PercentActual) {
                 if (i.commissionValue >= 1000) {
@@ -40475,27 +42248,49 @@ let ApiRadiologyService = class ApiRadiologyService {
                 }
             }
         });
-        const [radiology] = await this.radiologyRepository.updateAndReturnEntity({ oid, id }, radiologyBody);
-        if (!radiology)
-            throw new exception_filter_1.BusinessException('error.Database.UpdateFailed');
-        await this.positionRepository.delete({
-            oid,
-            positionInteractId: radiology.id,
-            positionType: position_entity_1.PositionType.Radiology,
-        });
-        const positionDtoList = positionList.map((i) => {
-            const dto = {
+        const radiology = await this.radiologyRepository.updateOneAndReturnEntity({ oid, id }, radiologyBody);
+        this.socketEmitService.radiologyListChange(oid, { radiologyUpsertedList: [radiology] });
+        if (positionList) {
+            const positionDestroyedList = await this.positionRepository.deleteAndReturnEntity({
                 oid,
-                roleId: i.roleId,
-                commissionCalculatorType: i.commissionCalculatorType,
-                commissionValue: i.commissionValue,
                 positionInteractId: radiology.id,
-                positionType: position_entity_1.PositionType.Radiology,
-            };
-            return dto;
-        });
-        radiology.positionList =
-            await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList);
+                positionType: position_entity_1.PositionInteractType.Radiology,
+            });
+            const positionDtoList = positionList.map((i) => {
+                const dto = {
+                    oid,
+                    roleId: i.roleId,
+                    commissionCalculatorType: i.commissionCalculatorType,
+                    commissionValue: i.commissionValue,
+                    positionInteractId: radiology.id,
+                    positionType: position_entity_1.PositionInteractType.Radiology,
+                };
+                return dto;
+            });
+            const positionUpsertedList = await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList);
+            radiology.positionList = positionUpsertedList;
+            this.socketEmitService.positionListChange(oid, {
+                positionUpsertedList,
+                positionDestroyedList,
+            });
+        }
+        if (discountList) {
+            const discountDestroyedList = await this.discountRepository.deleteAndReturnEntity({
+                oid,
+                discountInteractId: radiology.id,
+                discountInteractType: discount_entity_1.DiscountInteractType.Radiology,
+            });
+            const discountListDto = discountList.map((i) => {
+                const dto = Object.assign(Object.assign({}, i), { discountInteractId: radiology.id, discountInteractType: discount_entity_1.DiscountInteractType.Radiology, oid });
+                return dto;
+            });
+            const discountUpsertedList = await this.discountRepository.insertManyFullFieldAndReturnEntity(discountListDto);
+            radiology.discountList = discountUpsertedList;
+            this.socketEmitService.discountListChange(oid, {
+                discountUpsertedList,
+                discountDestroyedList,
+            });
+        }
         return { data: { radiology } };
     }
     async destroyOne(oid, radiologyId) {
@@ -40509,14 +42304,29 @@ let ApiRadiologyService = class ApiRadiologyService {
                 success: false,
             };
         }
-        await this.positionRepository.delete({
+        const [positionDestroyedList, discountDestroyedList] = await Promise.all([
+            this.positionRepository.deleteAndReturnEntity({
+                oid,
+                positionInteractId: radiologyId,
+                positionType: position_entity_1.PositionInteractType.Radiology,
+            }),
+            this.discountRepository.deleteAndReturnEntity({
+                oid,
+                discountInteractId: radiologyId,
+                discountInteractType: discount_entity_1.DiscountInteractType.Radiology,
+            }),
+        ]);
+        if (positionDestroyedList.length) {
+            this.socketEmitService.positionListChange(oid, { positionDestroyedList });
+        }
+        if (discountDestroyedList.length) {
+            this.socketEmitService.discountListChange(oid, { discountDestroyedList });
+        }
+        const radiology = await this.radiologyRepository.deleteOneAndReturnEntity({
             oid,
-            positionInteractId: radiologyId,
-            positionType: position_entity_1.PositionType.Radiology,
+            id: radiologyId,
         });
-        const affected = await this.radiologyRepository.delete({ oid, id: radiologyId });
-        if (affected === 0)
-            throw new exception_filter_1.BusinessException('error.Database.DeleteFailed');
+        this.socketEmitService.radiologyListChange(oid, { radiologyDestroyedList: [radiology] });
         return { data: { ticketRadiologyList: [], radiologyId } };
     }
     async systemList() {
@@ -40552,16 +42362,68 @@ let ApiRadiologyService = class ApiRadiologyService {
         await this.radiologyRepository.update({ id: { IN: insertIds } }, { priority: () => `"id"` });
         return { data: true };
     }
+    async generateRelation(options) {
+        const { oid, radiologyList, relation } = options;
+        const radiologyIdList = helpers_1.ESArray.uniqueArray(radiologyList.map((i) => i.id));
+        const radiologyGroupIdList = helpers_1.ESArray.uniqueArray(radiologyList.map((i) => i.radiologyGroupId));
+        const printHtmlIdList = helpers_1.ESArray.uniqueArray(radiologyList.map((i) => i.printHtmlId));
+        const [positionList, discountList, radiologyGroupList, printHtmlList] = await Promise.all([
+            (relation === null || relation === void 0 ? void 0 : relation.positionList) && radiologyIdList.length
+                ? this.positionRepository.findManyBy({
+                    oid,
+                    positionType: position_entity_1.PositionInteractType.Radiology,
+                    positionInteractId: { IN: radiologyIdList },
+                })
+                : [],
+            (relation === null || relation === void 0 ? void 0 : relation.discountList) && radiologyIdList.length
+                ? this.discountRepository.findManyBy({
+                    oid,
+                    discountInteractType: discount_entity_1.DiscountInteractType.Radiology,
+                    discountInteractId: { IN: [...radiologyIdList, 0] },
+                })
+                : [],
+            (relation === null || relation === void 0 ? void 0 : relation.radiologyGroup) && radiologyGroupIdList.length
+                ? this.radiologyGroupRepository.findManyBy({
+                    oid,
+                    id: { IN: radiologyGroupIdList },
+                })
+                : [],
+            (relation === null || relation === void 0 ? void 0 : relation.printHtml) && printHtmlIdList.length
+                ? this.printHtmlRepository.findManyBy({
+                    oid,
+                    id: { IN: printHtmlIdList },
+                })
+                : [],
+        ]);
+        const radiologyGroupMap = helpers_1.ESArray.arrayToKeyValue(radiologyGroupList, 'id');
+        const printHtmlMap = helpers_1.ESArray.arrayToKeyValue(printHtmlList, 'id');
+        radiologyList.forEach((radiology) => {
+            if (relation === null || relation === void 0 ? void 0 : relation.positionList) {
+                radiology.positionList = positionList.filter((i) => i.positionInteractId === radiology.id);
+            }
+            if (relation === null || relation === void 0 ? void 0 : relation.discountList) {
+                radiology.discountList = discountList.filter((i) => i.discountInteractId === radiology.id);
+                radiology.discountListExtra = discountList.filter((i) => i.discountInteractId === 0);
+            }
+            if (relation === null || relation === void 0 ? void 0 : relation.radiologyGroup) {
+                radiology.radiologyGroup = radiologyGroupMap[radiology.radiologyGroupId];
+            }
+            if (relation === null || relation === void 0 ? void 0 : relation.printHtml) {
+                radiology.printHtml = printHtmlMap[radiology.printHtmlId];
+            }
+        });
+        return radiologyList;
+    }
 };
 exports.ApiRadiologyService = ApiRadiologyService;
 exports.ApiRadiologyService = ApiRadiologyService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof repositories_1.RadiologyRepository !== "undefined" && repositories_1.RadiologyRepository) === "function" ? _a : Object, typeof (_b = typeof repositories_1.PositionRepository !== "undefined" && repositories_1.PositionRepository) === "function" ? _b : Object, typeof (_c = typeof repositories_1.TicketRadiologyRepository !== "undefined" && repositories_1.TicketRadiologyRepository) === "function" ? _c : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof repositories_1.RadiologyRepository !== "undefined" && repositories_1.RadiologyRepository) === "function" ? _b : Object, typeof (_c = typeof repositories_1.RadiologyGroupRepository !== "undefined" && repositories_1.RadiologyGroupRepository) === "function" ? _c : Object, typeof (_d = typeof repositories_1.PrintHtmlRepository !== "undefined" && repositories_1.PrintHtmlRepository) === "function" ? _d : Object, typeof (_e = typeof repositories_1.TicketRadiologyRepository !== "undefined" && repositories_1.TicketRadiologyRepository) === "function" ? _e : Object, typeof (_f = typeof repositories_1.PositionRepository !== "undefined" && repositories_1.PositionRepository) === "function" ? _f : Object, typeof (_g = typeof repositories_1.DiscountRepository !== "undefined" && repositories_1.DiscountRepository) === "function" ? _g : Object])
 ], ApiRadiologyService);
 
 
 /***/ }),
-/* 515 */
+/* 535 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -40580,14 +42442,14 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(516), exports);
-__exportStar(__webpack_require__(517), exports);
-__exportStar(__webpack_require__(518), exports);
-__exportStar(__webpack_require__(519), exports);
+__exportStar(__webpack_require__(536), exports);
+__exportStar(__webpack_require__(537), exports);
+__exportStar(__webpack_require__(538), exports);
+__exportStar(__webpack_require__(539), exports);
 
 
 /***/ }),
-/* 516 */
+/* 536 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -40605,9 +42467,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RadiologyGetOneQuery = exports.RadiologyGetManyQuery = exports.RadiologyPaginationQuery = exports.RadiologyGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const radiology_options_request_1 = __webpack_require__(517);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const radiology_options_request_1 = __webpack_require__(537);
 class RadiologyGetQuery {
 }
 exports.RadiologyGetQuery = RadiologyGetQuery;
@@ -40692,7 +42554,7 @@ exports.RadiologyGetOneQuery = RadiologyGetOneQuery;
 
 
 /***/ }),
-/* 517 */
+/* 537 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -40709,9 +42571,9 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RadiologySortQuery = exports.RadiologyFilterQuery = exports.RadiologyRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
+const query_1 = __webpack_require__(265);
 class RadiologyRelationQuery {
 }
 exports.RadiologyRelationQuery = RadiologyRelationQuery;
@@ -40730,6 +42592,11 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], RadiologyRelationQuery.prototype, "positionList", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], RadiologyRelationQuery.prototype, "discountList", void 0);
 class RadiologyFilterQuery {
 }
 exports.RadiologyFilterQuery = RadiologyFilterQuery;
@@ -40765,7 +42632,7 @@ __decorate([
 
 
 /***/ }),
-/* 518 */
+/* 538 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -40782,7 +42649,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RadiologySystemCopyBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class RadiologySystemCopyBody {
 }
 exports.RadiologySystemCopyBody = RadiologySystemCopyBody;
@@ -40797,7 +42664,7 @@ __decorate([
 
 
 /***/ }),
-/* 519 */
+/* 539 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -40810,89 +42677,66 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.RadiologyUpsertBody = exports.RadiologyPosition = void 0;
+exports.RadiologyUpsertBody = exports.RadiologyBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const DOMPurify = __webpack_require__(520);
-const class_validator_custom_1 = __webpack_require__(249);
-const position_entity_1 = __webpack_require__(75);
-class RadiologyPosition {
+const class_validator_1 = __webpack_require__(252);
+const DOMPurify = __webpack_require__(540);
+const request_1 = __webpack_require__(378);
+const request_2 = __webpack_require__(416);
+class RadiologyBody {
 }
-exports.RadiologyPosition = RadiologyPosition;
-__decorate([
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsPositive)(),
-    __metadata("design:type", Number)
-], RadiologyPosition.prototype, "roleId", void 0);
-__decorate([
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], RadiologyPosition.prototype, "commissionValue", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: position_entity_1.CommissionCalculatorType.VND }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_custom_1.IsEnumValue)(position_entity_1.CommissionCalculatorType),
-    __metadata("design:type", typeof (_a = typeof position_entity_1.CommissionCalculatorType !== "undefined" && position_entity_1.CommissionCalculatorType) === "function" ? _a : Object)
-], RadiologyPosition.prototype, "commissionCalculatorType", void 0);
-class RadiologyUpsertBody {
-}
-exports.RadiologyUpsertBody = RadiologyUpsertBody;
+exports.RadiologyBody = RadiologyBody;
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 105000 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
-], RadiologyUpsertBody.prototype, "priority", void 0);
+], RadiologyBody.prototype, "priority", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Siêu âm tuyến giáp' }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], RadiologyUpsertBody.prototype, "name", void 0);
+], RadiologyBody.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 25 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
-], RadiologyUpsertBody.prototype, "radiologyGroupId", void 0);
+], RadiologyBody.prototype, "radiologyGroupId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 25 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
-], RadiologyUpsertBody.prototype, "printHtmlId", void 0);
+], RadiologyBody.prototype, "printHtmlId", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 105000 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
-], RadiologyUpsertBody.prototype, "costPrice", void 0);
+], RadiologyBody.prototype, "costPrice", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 105000 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
-], RadiologyUpsertBody.prototype, "price", void 0);
+], RadiologyBody.prototype, "price", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Siêu âm thai, rau, ối' }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], RadiologyUpsertBody.prototype, "requestNoteDefault", void 0);
+], RadiologyBody.prototype, "requestNoteDefault", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '<h1>Âm tính</h1>' }),
     (0, class_transformer_1.Expose)(),
@@ -40900,47 +42744,65 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], RadiologyUpsertBody.prototype, "descriptionDefault", void 0);
+], RadiologyBody.prototype, "descriptionDefault", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 'Chưa có dấu hiệu bất thường' }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], RadiologyUpsertBody.prototype, "resultDefault", void 0);
+], RadiologyBody.prototype, "resultDefault", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '' }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], RadiologyUpsertBody.prototype, "customVariables", void 0);
+], RadiologyBody.prototype, "customVariables", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '' }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], RadiologyUpsertBody.prototype, "customStyles", void 0);
+], RadiologyBody.prototype, "customStyles", void 0);
+class RadiologyUpsertBody {
+}
+exports.RadiologyUpsertBody = RadiologyUpsertBody;
 __decorate([
-    (0, swagger_1.ApiProperty)({ type: RadiologyPosition, isArray: true }),
+    (0, swagger_1.ApiProperty)({ type: RadiologyBody }),
     (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => RadiologyPosition),
+    (0, class_transformer_1.Type)(() => RadiologyBody),
     (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", RadiologyBody)
+], RadiologyUpsertBody.prototype, "radiology", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: request_2.PositionBasicBody, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => request_2.PositionBasicBody),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.ValidateNested)({ each: true }),
     __metadata("design:type", Array)
 ], RadiologyUpsertBody.prototype, "positionList", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: request_1.DiscountUpdateBody, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => request_1.DiscountUpdateBody),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], RadiologyUpsertBody.prototype, "discountList", void 0);
 
 
 /***/ }),
-/* 520 */
+/* 540 */
 /***/ ((module) => {
 
 module.exports = require("isomorphic-dompurify");
 
 /***/ }),
-/* 521 */
+/* 541 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -40953,8 +42815,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiReceiptItemModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_receipt_item_controller_1 = __webpack_require__(522);
-const api_receipt_item_service_1 = __webpack_require__(524);
+const api_receipt_item_controller_1 = __webpack_require__(542);
+const api_receipt_item_service_1 = __webpack_require__(544);
 let ApiReceiptItemModule = class ApiReceiptItemModule {
 };
 exports.ApiReceiptItemModule = ApiReceiptItemModule;
@@ -40968,7 +42830,7 @@ exports.ApiReceiptItemModule = ApiReceiptItemModule = __decorate([
 
 
 /***/ }),
-/* 522 */
+/* 542 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -40988,13 +42850,13 @@ var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiReceiptItemController = void 0;
 const common_1 = __webpack_require__(3);
-const route_params_decorator_1 = __webpack_require__(523);
+const route_params_decorator_1 = __webpack_require__(543);
 const swagger_1 = __webpack_require__(6);
-const organization_guard_1 = __webpack_require__(94);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_receipt_item_service_1 = __webpack_require__(524);
-const request_1 = __webpack_require__(525);
+const organization_guard_1 = __webpack_require__(96);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_receipt_item_service_1 = __webpack_require__(544);
+const request_1 = __webpack_require__(545);
 let ApiReceiptItemController = class ApiReceiptItemController {
     constructor(apiReceiptItemService) {
         this.apiReceiptItemService = apiReceiptItemService;
@@ -41022,13 +42884,13 @@ exports.ApiReceiptItemController = ApiReceiptItemController = __decorate([
 
 
 /***/ }),
-/* 523 */
+/* 543 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/common/decorators/http/route-params.decorator");
 
 /***/ }),
-/* 524 */
+/* 544 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -41045,7 +42907,7 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiReceiptItemService = void 0;
 const common_1 = __webpack_require__(3);
-const receipt_item_repository_1 = __webpack_require__(185);
+const receipt_item_repository_1 = __webpack_require__(189);
 let ApiReceiptItemService = class ApiReceiptItemService {
     constructor(receiptItemRepository) {
         this.receiptItemRepository = receiptItemRepository;
@@ -41079,7 +42941,7 @@ exports.ApiReceiptItemService = ApiReceiptItemService = __decorate([
 
 
 /***/ }),
-/* 525 */
+/* 545 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -41098,12 +42960,12 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(526), exports);
-__exportStar(__webpack_require__(527), exports);
+__exportStar(__webpack_require__(546), exports);
+__exportStar(__webpack_require__(547), exports);
 
 
 /***/ }),
-/* 526 */
+/* 546 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -41121,9 +42983,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReceiptItemGetOneQuery = exports.ReceiptItemGetManyQuery = exports.ReceiptItemPaginationQuery = exports.ReceiptItemGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const receipt_item_options_request_1 = __webpack_require__(527);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const receipt_item_options_request_1 = __webpack_require__(547);
 class ReceiptItemGetQuery {
 }
 exports.ReceiptItemGetQuery = ReceiptItemGetQuery;
@@ -41212,7 +43074,7 @@ exports.ReceiptItemGetOneQuery = ReceiptItemGetOneQuery;
 
 
 /***/ }),
-/* 527 */
+/* 547 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -41228,8 +43090,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReceiptItemSortQuery = exports.ReceiptItemFilterQuery = exports.ReceiptItemRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
 class ReceiptItemRelationQuery {
 }
 exports.ReceiptItemRelationQuery = ReceiptItemRelationQuery;
@@ -41277,7 +43139,7 @@ exports.ReceiptItemSortQuery = ReceiptItemSortQuery;
 
 
 /***/ }),
-/* 528 */
+/* 548 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -41290,9 +43152,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiReceiptModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_receipt_action_1 = __webpack_require__(529);
-const api_receipt_controller_1 = __webpack_require__(530);
-const api_receipt_service_1 = __webpack_require__(531);
+const api_receipt_action_1 = __webpack_require__(549);
+const api_receipt_controller_1 = __webpack_require__(550);
+const api_receipt_service_1 = __webpack_require__(551);
 let ApiReceiptModule = class ApiReceiptModule {
 };
 exports.ApiReceiptModule = ApiReceiptModule;
@@ -41306,7 +43168,7 @@ exports.ApiReceiptModule = ApiReceiptModule = __decorate([
 
 
 /***/ }),
-/* 529 */
+/* 549 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -41326,10 +43188,10 @@ const common_1 = __webpack_require__(3);
 const variable_1 = __webpack_require__(21);
 const payment_entity_1 = __webpack_require__(48);
 const receipt_entity_1 = __webpack_require__(51);
-const operations_1 = __webpack_require__(142);
-const repositories_1 = __webpack_require__(162);
-const receipt_repository_1 = __webpack_require__(186);
-const socket_emit_service_1 = __webpack_require__(317);
+const operations_1 = __webpack_require__(144);
+const repositories_1 = __webpack_require__(164);
+const receipt_repository_1 = __webpack_require__(190);
+const socket_emit_service_1 = __webpack_require__(324);
 let ApiReceiptAction = class ApiReceiptAction {
     constructor(socketEmitService, receiptRepository, receiptRefundOverpaidOperation, receiptPayDebtOperation, paymentRepository, receiptSendProductOperation, receiptPaymentAndCloseOperation, receiptPrepaymentOperation, receiptReturnProductOperation, receiptReopenOperation) {
         this.socketEmitService = socketEmitService;
@@ -41563,7 +43425,7 @@ exports.ApiReceiptAction = ApiReceiptAction = __decorate([
 
 
 /***/ }),
-/* 530 */
+/* 550 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -41583,16 +43445,16 @@ var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiReceiptController = void 0;
 const common_1 = __webpack_require__(3);
-const route_params_decorator_1 = __webpack_require__(523);
+const route_params_decorator_1 = __webpack_require__(543);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const organization_guard_1 = __webpack_require__(94);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_receipt_action_1 = __webpack_require__(529);
-const api_receipt_service_1 = __webpack_require__(531);
-const request_1 = __webpack_require__(532);
+const param_1 = __webpack_require__(309);
+const organization_guard_1 = __webpack_require__(96);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_receipt_action_1 = __webpack_require__(549);
+const api_receipt_service_1 = __webpack_require__(551);
+const request_1 = __webpack_require__(552);
 let ApiReceiptController = class ApiReceiptController {
     constructor(apiReceiptService, apiReceiptAction) {
         this.apiReceiptService = apiReceiptService;
@@ -41857,7 +43719,7 @@ exports.ApiReceiptController = ApiReceiptController = __decorate([
 
 
 /***/ }),
-/* 531 */
+/* 551 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -41876,14 +43738,14 @@ exports.ApiReceiptService = void 0;
 const common_1 = __webpack_require__(3);
 const cache_data_service_1 = __webpack_require__(38);
 const exception_filter_1 = __webpack_require__(9);
-const array_helper_1 = __webpack_require__(92);
+const array_helper_1 = __webpack_require__(94);
 const entities_1 = __webpack_require__(42);
 const payment_entity_1 = __webpack_require__(48);
 const product_entity_1 = __webpack_require__(54);
-const operations_1 = __webpack_require__(142);
-const repositories_1 = __webpack_require__(162);
-const batch_repository_1 = __webpack_require__(165);
-const receipt_repository_1 = __webpack_require__(186);
+const operations_1 = __webpack_require__(144);
+const repositories_1 = __webpack_require__(164);
+const batch_repository_1 = __webpack_require__(167);
+const receipt_repository_1 = __webpack_require__(190);
 let ApiReceiptService = class ApiReceiptService {
     constructor(cacheDataService, receiptRepository, receiptItemRepository, distributorRepository, productRepository, batchRepository, receiptDraft, receiptDepositedOperation, paymentRepository) {
         this.cacheDataService = cacheDataService;
@@ -42272,7 +44134,7 @@ exports.ApiReceiptService = ApiReceiptService = __decorate([
 
 
 /***/ }),
-/* 532 */
+/* 552 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -42291,15 +44153,15 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(533), exports);
-__exportStar(__webpack_require__(535), exports);
-__exportStar(__webpack_require__(534), exports);
-__exportStar(__webpack_require__(536), exports);
-__exportStar(__webpack_require__(537), exports);
+__exportStar(__webpack_require__(553), exports);
+__exportStar(__webpack_require__(555), exports);
+__exportStar(__webpack_require__(554), exports);
+__exportStar(__webpack_require__(556), exports);
+__exportStar(__webpack_require__(557), exports);
 
 
 /***/ }),
-/* 533 */
+/* 553 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -42317,9 +44179,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReceiptGetOneQuery = exports.ReceiptGetManyQuery = exports.ReceiptPaginationQuery = exports.ReceiptGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const receipt_options_request_1 = __webpack_require__(534);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const receipt_options_request_1 = __webpack_require__(554);
 class ReceiptGetQuery {
 }
 exports.ReceiptGetQuery = ReceiptGetQuery;
@@ -42407,7 +44269,7 @@ exports.ReceiptGetOneQuery = ReceiptGetOneQuery;
 
 
 /***/ }),
-/* 534 */
+/* 554 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -42424,9 +44286,9 @@ var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReceiptSortQuery = exports.ReceiptFilterQuery = exports.ReceiptRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
+const query_1 = __webpack_require__(265);
 const receipt_entity_1 = __webpack_require__(51);
 class ReceiptRelationQuery {
 }
@@ -42473,7 +44335,7 @@ exports.ReceiptSortQuery = ReceiptSortQuery;
 
 
 /***/ }),
-/* 535 */
+/* 555 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -42490,8 +44352,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReceiptItemBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class ReceiptItemBody {
 }
 exports.ReceiptItemBody = ReceiptItemBody;
@@ -42560,7 +44422,7 @@ __decorate([
 
 
 /***/ }),
-/* 536 */
+/* 556 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -42577,7 +44439,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReceiptPaymentMoneyBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class ReceiptPaymentMoneyBody {
 }
 exports.ReceiptPaymentMoneyBody = ReceiptPaymentMoneyBody;
@@ -42598,7 +44460,7 @@ __decorate([
 
 
 /***/ }),
-/* 537 */
+/* 557 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -42616,10 +44478,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReceiptUpdateDepositedBody = exports.ReceiptUpsertDraftBody = exports.ReceiptUpsert = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
-const receipt_item_body_1 = __webpack_require__(535);
+const receipt_item_body_1 = __webpack_require__(555);
 class ReceiptUpsert {
 }
 exports.ReceiptUpsert = ReceiptUpsert;
@@ -42714,7 +44576,7 @@ exports.ReceiptUpdateDepositedBody = ReceiptUpdateDepositedBody;
 
 
 /***/ }),
-/* 538 */
+/* 558 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -42727,8 +44589,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiRoleModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_role_controller_1 = __webpack_require__(539);
-const api_role_service_1 = __webpack_require__(540);
+const api_role_controller_1 = __webpack_require__(559);
+const api_role_service_1 = __webpack_require__(560);
 let ApiRoleModule = class ApiRoleModule {
 };
 exports.ApiRoleModule = ApiRoleModule;
@@ -42742,7 +44604,7 @@ exports.ApiRoleModule = ApiRoleModule = __decorate([
 
 
 /***/ }),
-/* 539 */
+/* 559 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -42763,12 +44625,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiRoleController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_role_service_1 = __webpack_require__(540);
-const request_1 = __webpack_require__(541);
+const param_1 = __webpack_require__(309);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_role_service_1 = __webpack_require__(560);
+const request_1 = __webpack_require__(561);
 let ApiRoleController = class ApiRoleController {
     constructor(apiRoleService) {
         this.apiRoleService = apiRoleService;
@@ -42859,7 +44721,7 @@ exports.ApiRoleController = ApiRoleController = __decorate([
 
 
 /***/ }),
-/* 540 */
+/* 560 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -42889,7 +44751,7 @@ exports.ApiRoleService = void 0;
 const common_1 = __webpack_require__(3);
 const cache_data_service_1 = __webpack_require__(38);
 const exception_filter_1 = __webpack_require__(9);
-const repositories_1 = __webpack_require__(162);
+const repositories_1 = __webpack_require__(164);
 let ApiRoleService = class ApiRoleService {
     constructor(roleRepository, userRepository, userRoleRepository, cacheDataService) {
         this.roleRepository = roleRepository;
@@ -42999,7 +44861,7 @@ exports.ApiRoleService = ApiRoleService = __decorate([
 
 
 /***/ }),
-/* 541 */
+/* 561 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -43018,13 +44880,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(542), exports);
-__exportStar(__webpack_require__(543), exports);
-__exportStar(__webpack_require__(544), exports);
+__exportStar(__webpack_require__(562), exports);
+__exportStar(__webpack_require__(563), exports);
+__exportStar(__webpack_require__(564), exports);
 
 
 /***/ }),
-/* 542 */
+/* 562 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -43042,9 +44904,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RoleGetOneQuery = exports.RoleGetManyQuery = exports.RolePaginationQuery = exports.RoleGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const role_options_request_1 = __webpack_require__(543);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const role_options_request_1 = __webpack_require__(563);
 class RoleGetQuery {
 }
 exports.RoleGetQuery = RoleGetQuery;
@@ -43135,7 +44997,7 @@ exports.RoleGetOneQuery = RoleGetOneQuery;
 
 
 /***/ }),
-/* 543 */
+/* 563 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -43152,9 +45014,9 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RoleSortQuery = exports.RoleFilterQuery = exports.RoleRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const condition_timestamp_1 = __webpack_require__(301);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const condition_timestamp_1 = __webpack_require__(308);
+const query_1 = __webpack_require__(265);
 class RoleRelationQuery {
 }
 exports.RoleRelationQuery = RoleRelationQuery;
@@ -43183,7 +45045,7 @@ exports.RoleSortQuery = RoleSortQuery;
 
 
 /***/ }),
-/* 544 */
+/* 564 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -43200,7 +45062,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.RoleUpdateBody = exports.RoleCreateBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class RoleCreateBody {
 }
 exports.RoleCreateBody = RoleCreateBody;
@@ -43261,7 +45123,7 @@ exports.RoleUpdateBody = RoleUpdateBody;
 
 
 /***/ }),
-/* 545 */
+/* 565 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -43274,10 +45136,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiSettingModule = void 0;
 const common_1 = __webpack_require__(3);
-const google_driver_module_1 = __webpack_require__(232);
-const api_setting_google_driver_service_1 = __webpack_require__(546);
-const api_setting_controller_1 = __webpack_require__(547);
-const api_setting_service_1 = __webpack_require__(548);
+const google_driver_module_1 = __webpack_require__(236);
+const api_setting_google_driver_service_1 = __webpack_require__(566);
+const api_setting_controller_1 = __webpack_require__(567);
+const api_setting_service_1 = __webpack_require__(568);
 let ApiSettingModule = class ApiSettingModule {
 };
 exports.ApiSettingModule = ApiSettingModule;
@@ -43291,7 +45153,7 @@ exports.ApiSettingModule = ApiSettingModule = __decorate([
 
 
 /***/ }),
-/* 546 */
+/* 566 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -43310,9 +45172,9 @@ exports.ApiSettingGoogleDriverService = void 0;
 const common_1 = __webpack_require__(3);
 const cache_data_service_1 = __webpack_require__(38);
 const setting_entity_1 = __webpack_require__(39);
-const setting_repository_1 = __webpack_require__(89);
-const google_driver_service_1 = __webpack_require__(234);
-const socket_emit_service_1 = __webpack_require__(317);
+const setting_repository_1 = __webpack_require__(91);
+const google_driver_service_1 = __webpack_require__(238);
+const socket_emit_service_1 = __webpack_require__(324);
 let ApiSettingGoogleDriverService = class ApiSettingGoogleDriverService {
     constructor(googleDriverService, cacheDataService, socketEmitService, settingRepository) {
         this.googleDriverService = googleDriverService;
@@ -43366,7 +45228,7 @@ exports.ApiSettingGoogleDriverService = ApiSettingGoogleDriverService = __decora
 
 
 /***/ }),
-/* 547 */
+/* 567 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -43387,14 +45249,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiSettingController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const fastify_1 = __webpack_require__(399);
+const fastify_1 = __webpack_require__(422);
 const root_guard_1 = __webpack_require__(15);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_setting_google_driver_service_1 = __webpack_require__(546);
-const api_setting_service_1 = __webpack_require__(548);
-const setting_upsert_request_1 = __webpack_require__(549);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_setting_google_driver_service_1 = __webpack_require__(566);
+const api_setting_service_1 = __webpack_require__(568);
+const setting_upsert_request_1 = __webpack_require__(569);
 let ApiSettingController = class ApiSettingController {
     constructor(apiSettingService, apiSettingGoogleDriverService) {
         this.apiSettingService = apiSettingService;
@@ -43490,7 +45352,7 @@ exports.ApiSettingController = ApiSettingController = __decorate([
 
 
 /***/ }),
-/* 548 */
+/* 568 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -43508,8 +45370,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiSettingService = void 0;
 const common_1 = __webpack_require__(3);
 const cache_data_service_1 = __webpack_require__(38);
-const setting_repository_1 = __webpack_require__(89);
-const socket_emit_service_1 = __webpack_require__(317);
+const setting_repository_1 = __webpack_require__(91);
+const socket_emit_service_1 = __webpack_require__(324);
 let ApiSettingService = class ApiSettingService {
     constructor(cacheDataService, socketEmitService, settingRepository) {
         this.cacheDataService = cacheDataService;
@@ -43539,7 +45401,7 @@ exports.ApiSettingService = ApiSettingService = __decorate([
 
 
 /***/ }),
-/* 549 */
+/* 569 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -43557,7 +45419,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SettingUpsertBody = exports.SettingUpsertParams = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 const setting_entity_1 = __webpack_require__(39);
 class SettingUpsertParams {
 }
@@ -43581,7 +45443,7 @@ __decorate([
 
 
 /***/ }),
-/* 550 */
+/* 570 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -43594,12 +45456,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiStatisticModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_statistic_laboratory_service_1 = __webpack_require__(551);
-const api_statistic_radiology_service_1 = __webpack_require__(552);
-const api_statistic_receipt_service_1 = __webpack_require__(553);
-const api_statistic_ticket_service_1 = __webpack_require__(554);
-const api_statistic_controller_1 = __webpack_require__(555);
-const api_statistic_service_1 = __webpack_require__(556);
+const api_statistic_laboratory_service_1 = __webpack_require__(571);
+const api_statistic_radiology_service_1 = __webpack_require__(572);
+const api_statistic_receipt_service_1 = __webpack_require__(573);
+const api_statistic_ticket_service_1 = __webpack_require__(574);
+const api_statistic_controller_1 = __webpack_require__(575);
+const api_statistic_service_1 = __webpack_require__(576);
 let ApiStatisticModule = class ApiStatisticModule {
 };
 exports.ApiStatisticModule = ApiStatisticModule;
@@ -43619,7 +45481,7 @@ exports.ApiStatisticModule = ApiStatisticModule = __decorate([
 
 
 /***/ }),
-/* 551 */
+/* 571 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -43636,7 +45498,7 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiStatisticLaboratoryService = void 0;
 const common_1 = __webpack_require__(3);
-const repositories_1 = __webpack_require__(162);
+const repositories_1 = __webpack_require__(164);
 let ApiStatisticLaboratoryService = class ApiStatisticLaboratoryService {
     constructor(ticketLaboratoryRepository) {
         this.ticketLaboratoryRepository = ticketLaboratoryRepository;
@@ -43659,7 +45521,7 @@ exports.ApiStatisticLaboratoryService = ApiStatisticLaboratoryService = __decora
 
 
 /***/ }),
-/* 552 */
+/* 572 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -43676,7 +45538,7 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiStatisticRadiologyService = void 0;
 const common_1 = __webpack_require__(3);
-const repositories_1 = __webpack_require__(162);
+const repositories_1 = __webpack_require__(164);
 let ApiStatisticRadiologyService = class ApiStatisticRadiologyService {
     constructor(ticketRadiologyRepository) {
         this.ticketRadiologyRepository = ticketRadiologyRepository;
@@ -43699,7 +45561,7 @@ exports.ApiStatisticRadiologyService = ApiStatisticRadiologyService = __decorate
 
 
 /***/ }),
-/* 553 */
+/* 573 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -43716,8 +45578,8 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiStatisticReceiptService = void 0;
 const common_1 = __webpack_require__(3);
-const time_helper_1 = __webpack_require__(144);
-const statistic_receipt_operation_1 = __webpack_require__(156);
+const time_helper_1 = __webpack_require__(146);
+const statistic_receipt_operation_1 = __webpack_require__(158);
 let ApiStatisticReceiptService = class ApiStatisticReceiptService {
     constructor(statisticReceiptOperation) {
         this.statisticReceiptOperation = statisticReceiptOperation;
@@ -43776,7 +45638,7 @@ exports.ApiStatisticReceiptService = ApiStatisticReceiptService = __decorate([
 
 
 /***/ }),
-/* 554 */
+/* 574 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -43793,8 +45655,8 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiStatisticTicketService = void 0;
 const common_1 = __webpack_require__(3);
-const time_helper_1 = __webpack_require__(144);
-const ticket_statistic_operation_1 = __webpack_require__(207);
+const time_helper_1 = __webpack_require__(146);
+const ticket_statistic_operation_1 = __webpack_require__(211);
 let ApiStatisticTicketService = class ApiStatisticTicketService {
     constructor(ticketStatisticOperation) {
         this.ticketStatisticOperation = ticketStatisticOperation;
@@ -43867,7 +45729,7 @@ exports.ApiStatisticTicketService = ApiStatisticTicketService = __decorate([
 
 
 /***/ }),
-/* 555 */
+/* 575 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -43888,14 +45750,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiStatisticController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const user_guard_1 = __webpack_require__(95);
-const api_statistic_laboratory_service_1 = __webpack_require__(551);
-const api_statistic_radiology_service_1 = __webpack_require__(552);
-const api_statistic_ticket_service_1 = __webpack_require__(554);
-const api_statistic_service_1 = __webpack_require__(556);
-const request_1 = __webpack_require__(557);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const user_guard_1 = __webpack_require__(97);
+const api_statistic_laboratory_service_1 = __webpack_require__(571);
+const api_statistic_radiology_service_1 = __webpack_require__(572);
+const api_statistic_ticket_service_1 = __webpack_require__(574);
+const api_statistic_service_1 = __webpack_require__(576);
+const request_1 = __webpack_require__(577);
 let ApiStatisticController = class ApiStatisticController {
     constructor(apiStatisticService, apiStatisticTicketService, apiStatisticLaboratoryService, apiStatisticRadiologyService) {
         this.apiStatisticService = apiStatisticService;
@@ -44020,7 +45882,7 @@ exports.ApiStatisticController = ApiStatisticController = __decorate([
 
 
 /***/ }),
-/* 556 */
+/* 576 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -44038,12 +45900,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiStatisticService = void 0;
 const common_1 = __webpack_require__(3);
 const variable_1 = __webpack_require__(21);
-const statistic_operation_1 = __webpack_require__(157);
-const repositories_1 = __webpack_require__(162);
-const customer_repository_1 = __webpack_require__(167);
-const procedure_repository_1 = __webpack_require__(179);
-const product_repository_1 = __webpack_require__(182);
-const ticket_procedure_repository_1 = __webpack_require__(195);
+const statistic_operation_1 = __webpack_require__(159);
+const repositories_1 = __webpack_require__(164);
+const customer_repository_1 = __webpack_require__(169);
+const procedure_repository_1 = __webpack_require__(183);
+const product_repository_1 = __webpack_require__(186);
+const ticket_procedure_repository_1 = __webpack_require__(199);
 let ApiStatisticService = class ApiStatisticService {
     constructor(statisticRepository, productRepository, procedureRepository, productMovementRepository, customerRepository, ticketProcedureRepository) {
         this.statisticRepository = statisticRepository;
@@ -44177,7 +46039,7 @@ exports.ApiStatisticService = ApiStatisticService = __decorate([
 
 
 /***/ }),
-/* 557 */
+/* 577 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -44196,16 +46058,16 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(558), exports);
-__exportStar(__webpack_require__(559), exports);
-__exportStar(__webpack_require__(560), exports);
-__exportStar(__webpack_require__(561), exports);
-__exportStar(__webpack_require__(562), exports);
-__exportStar(__webpack_require__(563), exports);
+__exportStar(__webpack_require__(578), exports);
+__exportStar(__webpack_require__(579), exports);
+__exportStar(__webpack_require__(580), exports);
+__exportStar(__webpack_require__(581), exports);
+__exportStar(__webpack_require__(582), exports);
+__exportStar(__webpack_require__(583), exports);
 
 
 /***/ }),
-/* 558 */
+/* 578 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -44222,7 +46084,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.StatisticMonthQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class StatisticMonthQuery {
 }
 exports.StatisticMonthQuery = StatisticMonthQuery;
@@ -44247,7 +46109,7 @@ __decorate([
 
 
 /***/ }),
-/* 559 */
+/* 579 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -44265,8 +46127,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.StatisticTicketQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const request_1 = __webpack_require__(293);
+const class_validator_1 = __webpack_require__(252);
+const request_1 = __webpack_require__(300);
 class StatisticTicketQuery extends (0, swagger_1.PickType)(request_1.TicketGetQuery, ['filter']) {
 }
 exports.StatisticTicketQuery = StatisticTicketQuery;
@@ -44295,7 +46157,7 @@ __decorate([
 
 
 /***/ }),
-/* 560 */
+/* 580 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -44313,8 +46175,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.StatisticTimeQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
 class StatisticTimeQuery extends query_1.LimitQuery {
 }
 exports.StatisticTimeQuery = StatisticTimeQuery;
@@ -44341,7 +46203,7 @@ __decorate([
 
 
 /***/ }),
-/* 561 */
+/* 581 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -44358,8 +46220,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.StatisticTopBestSellingQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const statistic_time_query_1 = __webpack_require__(560);
+const class_validator_1 = __webpack_require__(252);
+const statistic_time_query_1 = __webpack_require__(580);
 class StatisticTopBestSellingQuery extends statistic_time_query_1.StatisticTimeQuery {
 }
 exports.StatisticTopBestSellingQuery = StatisticTopBestSellingQuery;
@@ -44375,7 +46237,7 @@ __decorate([
 
 
 /***/ }),
-/* 562 */
+/* 582 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -44392,8 +46254,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.StatisticTopCustomerBestTicketQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const statistic_time_query_1 = __webpack_require__(560);
+const class_validator_1 = __webpack_require__(252);
+const statistic_time_query_1 = __webpack_require__(580);
 class StatisticTopCustomerBestTicketQuery extends statistic_time_query_1.StatisticTimeQuery {
 }
 exports.StatisticTopCustomerBestTicketQuery = StatisticTopCustomerBestTicketQuery;
@@ -44409,7 +46271,7 @@ __decorate([
 
 
 /***/ }),
-/* 563 */
+/* 583 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -44426,8 +46288,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.StatisticProductHighMoneyQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
 class StatisticProductHighMoneyQuery extends dto_1.LimitQuery {
 }
 exports.StatisticProductHighMoneyQuery = StatisticProductHighMoneyQuery;
@@ -44443,7 +46305,7 @@ __decorate([
 
 
 /***/ }),
-/* 564 */
+/* 584 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -44456,8 +46318,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiStockCheckModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_stock_check_controller_1 = __webpack_require__(565);
-const api_stock_check_service_1 = __webpack_require__(566);
+const api_stock_check_controller_1 = __webpack_require__(585);
+const api_stock_check_service_1 = __webpack_require__(586);
 let ApiStockCheckModule = class ApiStockCheckModule {
 };
 exports.ApiStockCheckModule = ApiStockCheckModule;
@@ -44471,7 +46333,7 @@ exports.ApiStockCheckModule = ApiStockCheckModule = __decorate([
 
 
 /***/ }),
-/* 565 */
+/* 585 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -44491,15 +46353,15 @@ var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiStockCheckController = void 0;
 const common_1 = __webpack_require__(3);
-const route_params_decorator_1 = __webpack_require__(523);
+const route_params_decorator_1 = __webpack_require__(543);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const organization_guard_1 = __webpack_require__(94);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_stock_check_service_1 = __webpack_require__(566);
-const request_1 = __webpack_require__(567);
+const param_1 = __webpack_require__(309);
+const organization_guard_1 = __webpack_require__(96);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_stock_check_service_1 = __webpack_require__(586);
+const request_1 = __webpack_require__(587);
 let ApiStockCheckController = class ApiStockCheckController {
     constructor(apiStockCheckService) {
         this.apiStockCheckService = apiStockCheckService;
@@ -44662,7 +46524,7 @@ exports.ApiStockCheckController = ApiStockCheckController = __decorate([
 
 
 /***/ }),
-/* 566 */
+/* 586 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -44680,10 +46542,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiStockCheckService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const array_helper_1 = __webpack_require__(92);
-const stock_check_entity_1 = __webpack_require__(81);
-const operations_1 = __webpack_require__(142);
-const repositories_1 = __webpack_require__(162);
+const array_helper_1 = __webpack_require__(94);
+const stock_check_entity_1 = __webpack_require__(83);
+const operations_1 = __webpack_require__(144);
+const repositories_1 = __webpack_require__(164);
 let ApiStockCheckService = class ApiStockCheckService {
     constructor(stockCheckRepository, stockCheckItemRepository, stockCheckReconcileOperation) {
         this.stockCheckRepository = stockCheckRepository;
@@ -44868,7 +46730,7 @@ exports.ApiStockCheckService = ApiStockCheckService = __decorate([
 
 
 /***/ }),
-/* 567 */
+/* 587 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -44887,13 +46749,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(568), exports);
-__exportStar(__webpack_require__(569), exports);
-__exportStar(__webpack_require__(570), exports);
+__exportStar(__webpack_require__(588), exports);
+__exportStar(__webpack_require__(589), exports);
+__exportStar(__webpack_require__(590), exports);
 
 
 /***/ }),
-/* 568 */
+/* 588 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -44911,9 +46773,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.StockCheckGetOneQuery = exports.StockCheckGetManyQuery = exports.StockCheckPaginationQuery = exports.StockCheckGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const stock_check_options_request_1 = __webpack_require__(569);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const stock_check_options_request_1 = __webpack_require__(589);
 class StockCheckGetQuery {
 }
 exports.StockCheckGetQuery = StockCheckGetQuery;
@@ -45004,7 +46866,7 @@ exports.StockCheckGetOneQuery = StockCheckGetOneQuery;
 
 
 /***/ }),
-/* 569 */
+/* 589 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -45021,10 +46883,10 @@ var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.StockCheckSortQuery = exports.StockCheckFilterQuery = exports.StockCheckRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
-const query_1 = __webpack_require__(261);
-const stock_check_entity_1 = __webpack_require__(81);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
+const query_1 = __webpack_require__(265);
+const stock_check_entity_1 = __webpack_require__(83);
 class StockCheckRelationQuery {
 }
 exports.StockCheckRelationQuery = StockCheckRelationQuery;
@@ -45085,7 +46947,7 @@ __decorate([
 
 
 /***/ }),
-/* 570 */
+/* 590 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -45102,8 +46964,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.StockCheckUpsertDraftBody = exports.StockCheckBody = exports.StockCheckItemBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class StockCheckItemBody {
 }
 exports.StockCheckItemBody = StockCheckItemBody;
@@ -45209,7 +47071,7 @@ __decorate([
 
 
 /***/ }),
-/* 571 */
+/* 591 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -45222,8 +47084,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketBatchModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_ticket_batch_controller_1 = __webpack_require__(572);
-const api_ticket_batch_service_1 = __webpack_require__(573);
+const api_ticket_batch_controller_1 = __webpack_require__(592);
+const api_ticket_batch_service_1 = __webpack_require__(593);
 let ApiTicketBatchModule = class ApiTicketBatchModule {
 };
 exports.ApiTicketBatchModule = ApiTicketBatchModule;
@@ -45237,7 +47099,7 @@ exports.ApiTicketBatchModule = ApiTicketBatchModule = __decorate([
 
 
 /***/ }),
-/* 572 */
+/* 592 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -45258,10 +47120,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketBatchController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const api_ticket_batch_service_1 = __webpack_require__(573);
-const request_1 = __webpack_require__(574);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const api_ticket_batch_service_1 = __webpack_require__(593);
+const request_1 = __webpack_require__(594);
 let ApiTicketBatchController = class ApiTicketBatchController {
     constructor(apiTicketBatchService) {
         this.apiTicketBatchService = apiTicketBatchService;
@@ -45301,7 +47163,7 @@ exports.ApiTicketBatchController = ApiTicketBatchController = __decorate([
 
 
 /***/ }),
-/* 573 */
+/* 593 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -45318,7 +47180,7 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketBatchService = void 0;
 const common_1 = __webpack_require__(3);
-const ticket_batch_repository_1 = __webpack_require__(190);
+const ticket_batch_repository_1 = __webpack_require__(194);
 let ApiTicketBatchService = class ApiTicketBatchService {
     constructor(ticketBatchRepository) {
         this.ticketBatchRepository = ticketBatchRepository;
@@ -45369,7 +47231,7 @@ exports.ApiTicketBatchService = ApiTicketBatchService = __decorate([
 
 
 /***/ }),
-/* 574 */
+/* 594 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -45388,12 +47250,12 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(575), exports);
-__exportStar(__webpack_require__(576), exports);
+__exportStar(__webpack_require__(595), exports);
+__exportStar(__webpack_require__(596), exports);
 
 
 /***/ }),
-/* 575 */
+/* 595 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -45411,9 +47273,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketBatchGetOneQuery = exports.TicketBatchGetManyQuery = exports.TicketBatchPaginationQuery = exports.TicketBatchGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const ticket_batch_options_request_1 = __webpack_require__(576);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const ticket_batch_options_request_1 = __webpack_require__(596);
 class TicketBatchGetQuery {
 }
 exports.TicketBatchGetQuery = TicketBatchGetQuery;
@@ -45502,7 +47364,7 @@ exports.TicketBatchGetOneQuery = TicketBatchGetOneQuery;
 
 
 /***/ }),
-/* 576 */
+/* 596 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -45519,9 +47381,9 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketBatchSortQuery = exports.TicketBatchFilterQuery = exports.TicketBatchRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
+const query_1 = __webpack_require__(265);
 const variable_1 = __webpack_require__(21);
 class TicketBatchRelationQuery {
 }
@@ -45582,7 +47444,7 @@ __decorate([
 
 
 /***/ }),
-/* 577 */
+/* 597 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -45595,14 +47457,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_ticket_clinic_attribute_module_1 = __webpack_require__(578);
-const api_ticket_clinic_laboratory_module_1 = __webpack_require__(583);
-const api_ticket_clinic_procedure_module_1 = __webpack_require__(599);
-const api_ticket_clinic_product_module_1 = __webpack_require__(607);
-const api_ticket_clinic_radiology_module_1 = __webpack_require__(616);
-const api_ticket_clinic_user_module_1 = __webpack_require__(584);
-const api_ticket_clinic_controller_1 = __webpack_require__(625);
-const api_ticket_clinic_service_1 = __webpack_require__(626);
+const api_ticket_clinic_attribute_module_1 = __webpack_require__(598);
+const api_ticket_clinic_laboratory_module_1 = __webpack_require__(603);
+const api_ticket_clinic_procedure_module_1 = __webpack_require__(618);
+const api_ticket_clinic_product_module_1 = __webpack_require__(626);
+const api_ticket_clinic_radiology_module_1 = __webpack_require__(635);
+const api_ticket_clinic_user_module_1 = __webpack_require__(604);
+const api_ticket_clinic_controller_1 = __webpack_require__(643);
+const api_ticket_clinic_service_1 = __webpack_require__(644);
 let ApiTicketClinicModule = class ApiTicketClinicModule {
 };
 exports.ApiTicketClinicModule = ApiTicketClinicModule;
@@ -45623,7 +47485,7 @@ exports.ApiTicketClinicModule = ApiTicketClinicModule = __decorate([
 
 
 /***/ }),
-/* 578 */
+/* 598 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -45636,8 +47498,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicAttributeModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_ticket_clinic_attribute_controller_1 = __webpack_require__(579);
-const api_ticket_clinic_attribute_service_1 = __webpack_require__(580);
+const api_ticket_clinic_attribute_controller_1 = __webpack_require__(599);
+const api_ticket_clinic_attribute_service_1 = __webpack_require__(600);
 let ApiTicketClinicAttributeModule = class ApiTicketClinicAttributeModule {
 };
 exports.ApiTicketClinicAttributeModule = ApiTicketClinicAttributeModule;
@@ -45651,7 +47513,7 @@ exports.ApiTicketClinicAttributeModule = ApiTicketClinicAttributeModule = __deco
 
 
 /***/ }),
-/* 579 */
+/* 599 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -45672,12 +47534,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicAttributeController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const dto_1 = __webpack_require__(295);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_ticket_clinic_attribute_service_1 = __webpack_require__(580);
-const request_1 = __webpack_require__(581);
+const dto_1 = __webpack_require__(302);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_ticket_clinic_attribute_service_1 = __webpack_require__(600);
+const request_1 = __webpack_require__(601);
 let ApiTicketClinicAttributeController = class ApiTicketClinicAttributeController {
     constructor(apiTicketClinicAttributeService) {
         this.apiTicketClinicAttributeService = apiTicketClinicAttributeService;
@@ -45710,7 +47572,7 @@ exports.ApiTicketClinicAttributeController = ApiTicketClinicAttributeController 
 
 
 /***/ }),
-/* 580 */
+/* 600 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -45727,8 +47589,8 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicAttributeService = void 0;
 const common_1 = __webpack_require__(3);
-const repositories_1 = __webpack_require__(162);
-const socket_emit_service_1 = __webpack_require__(317);
+const repositories_1 = __webpack_require__(164);
+const socket_emit_service_1 = __webpack_require__(324);
 let ApiTicketClinicAttributeService = class ApiTicketClinicAttributeService {
     constructor(socketEmitService, ticketAttributeRepository) {
         this.socketEmitService = socketEmitService;
@@ -45769,7 +47631,7 @@ exports.ApiTicketClinicAttributeService = ApiTicketClinicAttributeService = __de
 
 
 /***/ }),
-/* 581 */
+/* 601 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -45788,11 +47650,11 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(582), exports);
+__exportStar(__webpack_require__(602), exports);
 
 
 /***/ }),
-/* 582 */
+/* 602 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -45809,7 +47671,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdateTicketAttributeListBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class TicketAttributeBody {
 }
 __decorate([
@@ -45838,7 +47700,7 @@ __decorate([
 
 
 /***/ }),
-/* 583 */
+/* 603 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -45851,9 +47713,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicLaboratoryModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_ticket_clinic_user_module_1 = __webpack_require__(584);
-const api_ticket_clinic_laboratory_controller_1 = __webpack_require__(591);
-const api_ticket_clinic_laboratory_service_1 = __webpack_require__(592);
+const api_ticket_clinic_user_module_1 = __webpack_require__(604);
+const api_ticket_clinic_laboratory_controller_1 = __webpack_require__(611);
+const api_ticket_clinic_laboratory_service_1 = __webpack_require__(612);
 let ApiTicketClinicLaboratoryModule = class ApiTicketClinicLaboratoryModule {
 };
 exports.ApiTicketClinicLaboratoryModule = ApiTicketClinicLaboratoryModule;
@@ -45867,7 +47729,7 @@ exports.ApiTicketClinicLaboratoryModule = ApiTicketClinicLaboratoryModule = __de
 
 
 /***/ }),
-/* 584 */
+/* 604 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -45880,8 +47742,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicUserModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_ticket_clinic_user_controller_1 = __webpack_require__(585);
-const api_ticket_clinic_user_service_1 = __webpack_require__(586);
+const api_ticket_clinic_user_controller_1 = __webpack_require__(605);
+const api_ticket_clinic_user_service_1 = __webpack_require__(606);
 let ApiTicketClinicUserModule = class ApiTicketClinicUserModule {
 };
 exports.ApiTicketClinicUserModule = ApiTicketClinicUserModule;
@@ -45896,7 +47758,7 @@ exports.ApiTicketClinicUserModule = ApiTicketClinicUserModule = __decorate([
 
 
 /***/ }),
-/* 585 */
+/* 605 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -45917,13 +47779,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicUserController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const ticket_params_1 = __webpack_require__(307);
-const api_ticket_clinic_user_service_1 = __webpack_require__(586);
-const request_1 = __webpack_require__(587);
-const ticket_clinic_update_user_list_body_1 = __webpack_require__(590);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const ticket_params_1 = __webpack_require__(314);
+const api_ticket_clinic_user_service_1 = __webpack_require__(606);
+const request_1 = __webpack_require__(607);
+const ticket_clinic_update_user_list_body_1 = __webpack_require__(610);
 let ApiTicketClinicUserController = class ApiTicketClinicUserController {
     constructor(apiTicketClinicUserService) {
         this.apiTicketClinicUserService = apiTicketClinicUserService;
@@ -45990,7 +47852,7 @@ exports.ApiTicketClinicUserController = ApiTicketClinicUserController = __decora
 
 
 /***/ }),
-/* 586 */
+/* 606 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -46009,8 +47871,8 @@ exports.ApiTicketClinicUserService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
 const position_entity_1 = __webpack_require__(75);
-const repositories_1 = __webpack_require__(162);
-const socket_emit_service_1 = __webpack_require__(317);
+const repositories_1 = __webpack_require__(164);
+const socket_emit_service_1 = __webpack_require__(324);
 let ApiTicketClinicUserService = class ApiTicketClinicUserService {
     constructor(socketEmitService, positionRepository, ticketUserRepository) {
         this.socketEmitService = socketEmitService;
@@ -46131,7 +47993,7 @@ exports.ApiTicketClinicUserService = ApiTicketClinicUserService = __decorate([
 
 
 /***/ }),
-/* 587 */
+/* 607 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -46150,12 +48012,12 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(588), exports);
-__exportStar(__webpack_require__(589), exports);
+__exportStar(__webpack_require__(608), exports);
+__exportStar(__webpack_require__(609), exports);
 
 
 /***/ }),
-/* 588 */
+/* 608 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -46173,9 +48035,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdateTicketUserBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const typescript_helper_1 = __webpack_require__(250);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const typescript_helper_1 = __webpack_require__(254);
+const class_validator_custom_1 = __webpack_require__(253);
 const position_entity_1 = __webpack_require__(75);
 class TicketClinicUpdateTicketUserBody {
 }
@@ -46211,7 +48073,7 @@ __decorate([
 
 
 /***/ }),
-/* 589 */
+/* 609 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -46228,9 +48090,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUserParams = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
-const ticket_params_1 = __webpack_require__(307);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
+const ticket_params_1 = __webpack_require__(314);
 class TicketClinicUserParams extends ticket_params_1.TicketParams {
 }
 exports.TicketClinicUserParams = TicketClinicUserParams;
@@ -46246,7 +48108,7 @@ __decorate([
 
 
 /***/ }),
-/* 590 */
+/* 610 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -46264,8 +48126,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdateTicketUserListBody = exports.TicketUserBasicBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 const position_entity_1 = __webpack_require__(75);
 class TicketUserBasicBody {
 }
@@ -46295,11 +48157,11 @@ class TicketClinicUpdateTicketUserListBody {
 }
 exports.TicketClinicUpdateTicketUserListBody = TicketClinicUpdateTicketUserListBody;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: position_entity_1.PositionType.Ticket }),
+    (0, swagger_1.ApiProperty)({ example: position_entity_1.PositionInteractType.Ticket }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
-    (0, class_validator_custom_1.IsEnumValue)(position_entity_1.PositionType),
-    __metadata("design:type", typeof (_a = typeof position_entity_1.PositionType !== "undefined" && position_entity_1.PositionType) === "function" ? _a : Object)
+    (0, class_validator_custom_1.IsEnumValue)(position_entity_1.PositionInteractType),
+    __metadata("design:type", typeof (_a = typeof position_entity_1.PositionInteractType !== "undefined" && position_entity_1.PositionInteractType) === "function" ? _a : Object)
 ], TicketClinicUpdateTicketUserListBody.prototype, "positionType", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 45 }),
@@ -46334,7 +48196,7 @@ __decorate([
 
 
 /***/ }),
-/* 591 */
+/* 611 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -46350,18 +48212,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicLaboratoryController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const dto_1 = __webpack_require__(295);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const ticket_params_1 = __webpack_require__(307);
-const api_ticket_clinic_laboratory_service_1 = __webpack_require__(592);
-const request_1 = __webpack_require__(593);
+const dto_1 = __webpack_require__(302);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const ticket_params_1 = __webpack_require__(314);
+const api_ticket_clinic_laboratory_service_1 = __webpack_require__(612);
+const request_1 = __webpack_require__(613);
 let ApiTicketClinicLaboratoryController = class ApiTicketClinicLaboratoryController {
     constructor(apiTicketClinicLaboratoryService) {
         this.apiTicketClinicLaboratoryService = apiTicketClinicLaboratoryService;
@@ -46392,13 +48254,6 @@ let ApiTicketClinicLaboratoryController = class ApiTicketClinicLaboratoryControl
             oid,
             ticketId,
             ticketLaboratoryId,
-            body,
-        });
-    }
-    async updateTicketLaboratoryResult({ oid }, { id }, body) {
-        return await this.apiTicketClinicLaboratoryService.updateTicketLaboratoryResult({
-            oid,
-            ticketId: id,
             body,
         });
     }
@@ -46441,7 +48296,7 @@ __decorate([
 ], ApiTicketClinicLaboratoryController.prototype, "destroyTicketLaboratoryGroup", null);
 __decorate([
     (0, common_1.Post)(':ticketId/update-ticket-laboratory/:ticketLaboratoryId'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CLINIC_UPDATE_TICKET_PROCEDURE_LIST),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_LIST),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
@@ -46450,23 +48305,13 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ApiTicketClinicLaboratoryController.prototype, "updateTicketLaboratory", null);
 __decorate([
-    (0, common_1.Post)(':id/update-ticket-laboratory-result'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_LIST),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_m = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _m : Object, typeof (_o = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _o : Object, typeof (_p = typeof request_1.TicketLaboratoryResultUpdateBody !== "undefined" && request_1.TicketLaboratoryResultUpdateBody) === "function" ? _p : Object]),
-    __metadata("design:returntype", Promise)
-], ApiTicketClinicLaboratoryController.prototype, "updateTicketLaboratoryResult", null);
-__decorate([
     (0, common_1.Post)(':id/update-priority-ticket-laboratory'),
     (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CLINIC_UPDATE_TICKET_LABORATORY_LIST),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_q = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _q : Object, typeof (_r = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _r : Object, typeof (_s = typeof request_1.TicketClinicUpdatePriorityTicketLaboratoryBody !== "undefined" && request_1.TicketClinicUpdatePriorityTicketLaboratoryBody) === "function" ? _s : Object]),
+    __metadata("design:paramtypes", [typeof (_m = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _m : Object, typeof (_o = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _o : Object, typeof (_p = typeof request_1.TicketClinicUpdatePriorityTicketLaboratoryBody !== "undefined" && request_1.TicketClinicUpdatePriorityTicketLaboratoryBody) === "function" ? _p : Object]),
     __metadata("design:returntype", Promise)
 ], ApiTicketClinicLaboratoryController.prototype, "updatePriorityTicketLaboratory", null);
 exports.ApiTicketClinicLaboratoryController = ApiTicketClinicLaboratoryController = __decorate([
@@ -46478,7 +48323,7 @@ exports.ApiTicketClinicLaboratoryController = ApiTicketClinicLaboratoryControlle
 
 
 /***/ }),
-/* 592 */
+/* 612 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -46495,12 +48340,13 @@ var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicLaboratoryService = void 0;
 const common_1 = __webpack_require__(3);
+const error_1 = __webpack_require__(14);
 const variable_1 = __webpack_require__(21);
 const position_entity_1 = __webpack_require__(75);
-const operations_1 = __webpack_require__(142);
-const repositories_1 = __webpack_require__(162);
-const socket_emit_service_1 = __webpack_require__(317);
-const api_ticket_clinic_user_service_1 = __webpack_require__(586);
+const operations_1 = __webpack_require__(144);
+const repositories_1 = __webpack_require__(164);
+const socket_emit_service_1 = __webpack_require__(324);
+const api_ticket_clinic_user_service_1 = __webpack_require__(606);
 let ApiTicketClinicLaboratoryService = class ApiTicketClinicLaboratoryService {
     constructor(socketEmitService, ticketLaboratoryRepository, ticketLaboratoryGroupRepository, ticketLaboratoryResultRepository, ticketClinicAddSelectLaboratoryOperation, ticketClinicChangeSelectLaboratoryOperation, ticketClinicUpdateTicketLaboratoryOperation, ticketClinicDestroyTicketLaboratoryOperation, ticketClinicDestroyTlgOperation, apiTicketClinicUserService) {
         this.socketEmitService = socketEmitService;
@@ -46523,7 +48369,7 @@ let ApiTicketClinicLaboratoryService = class ApiTicketClinicLaboratoryService {
                 tlgDtoList: body.ticketLaboratoryGroupAddList,
             });
             this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket: result.ticket });
-            this.socketEmitService.ticketClinicChangeLaboratory(oid, {
+            this.socketEmitService.ticketLaboratoryListChange(oid, {
                 ticketId,
                 ticketLaboratoryInsertList: result.ticketLaboratoryInsertList,
                 ticketLaboratoryGroupInsertList: result.ticketLaboratoryGroupInsertList,
@@ -46536,7 +48382,7 @@ let ApiTicketClinicLaboratoryService = class ApiTicketClinicLaboratoryService {
                 tlgDto: body.ticketLaboratoryGroupUpdate,
             });
             this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket: result.ticket });
-            this.socketEmitService.ticketClinicChangeLaboratory(oid, {
+            this.socketEmitService.ticketLaboratoryListChange(oid, {
                 ticketId,
                 ticketLaboratoryInsertList: result.ticketLaboratoryInsertList,
                 ticketLaboratoryDestroyList: result.ticketLaboratoryDestroyList,
@@ -46554,7 +48400,7 @@ let ApiTicketClinicLaboratoryService = class ApiTicketClinicLaboratoryService {
         });
         const { ticket } = result;
         this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket });
-        this.socketEmitService.ticketClinicChangeLaboratory(oid, {
+        this.socketEmitService.ticketLaboratoryListChange(oid, {
             ticketId,
             ticketLaboratoryDestroyList: [result.ticketLaboratoryDestroy],
             ticketLaboratoryGroupDestroy: result.ticketLaboratoryGroupDestroy,
@@ -46563,6 +48409,13 @@ let ApiTicketClinicLaboratoryService = class ApiTicketClinicLaboratoryService {
     }
     async destroyTicketLaboratoryGroup(options) {
         const { oid, ticketId, ticketLaboratoryGroupId } = options;
+        const ticketLaboratoryGroupOrigin = await this.ticketLaboratoryGroupRepository.findOneBy({
+            oid,
+            id: ticketLaboratoryGroupId,
+        });
+        if (ticketLaboratoryGroupOrigin.status === variable_1.TicketLaboratoryStatus.Completed) {
+            throw new error_1.BusinessError('Phiếu đã hoàn thành không thể xóa');
+        }
         const result = await this.ticketClinicDestroyTlgOperation.destroyTicketLaboratoryGroup({
             oid,
             ticketId,
@@ -46570,7 +48423,7 @@ let ApiTicketClinicLaboratoryService = class ApiTicketClinicLaboratoryService {
         });
         const { ticket } = result;
         this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket });
-        this.socketEmitService.ticketClinicChangeLaboratory(oid, {
+        this.socketEmitService.ticketLaboratoryListChange(oid, {
             ticketId,
             ticketLaboratoryGroupDestroy: result.ticketLaboratoryGroupDestroy,
             ticketLaboratoryDestroyList: result.ticketLaboratoryDestroyList,
@@ -46588,7 +48441,7 @@ let ApiTicketClinicLaboratoryService = class ApiTicketClinicLaboratoryService {
         });
         const { ticket, ticketLaboratory } = result;
         this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket });
-        this.socketEmitService.ticketClinicChangeLaboratory(oid, {
+        this.socketEmitService.ticketLaboratoryListChange(oid, {
             ticketId,
             ticketLaboratoryUpdateList: [ticketLaboratory],
         });
@@ -46597,7 +48450,7 @@ let ApiTicketClinicLaboratoryService = class ApiTicketClinicLaboratoryService {
                 oid,
                 ticketId,
                 body: {
-                    positionType: position_entity_1.PositionType.Laboratory,
+                    positionType: position_entity_1.PositionInteractType.Laboratory,
                     positionInteractId: ticketLaboratory.laboratoryId,
                     ticketItemId: ticketLaboratory.id,
                     quantity: 1,
@@ -46605,53 +48458,6 @@ let ApiTicketClinicLaboratoryService = class ApiTicketClinicLaboratoryService {
                 },
             });
         }
-        return { data: true };
-    }
-    async updateTicketLaboratoryResult(options) {
-        const { oid, ticketId, body } = options;
-        const [ticketLaboratoryGroupUpdate] = await this.ticketLaboratoryGroupRepository.updateAndReturnEntity({ oid, ticketId, id: body.ticketLaboratoryGroupId }, {
-            startedAt: body.startedAt,
-            status: variable_1.TicketLaboratoryStatus.Completed,
-        });
-        const ticketLaboratoryUpdateList = await this.ticketLaboratoryRepository.updateAndReturnEntity({
-            oid,
-            ticketId,
-            ticketLaboratoryGroupId: body.ticketLaboratoryGroupId,
-        }, {
-            startedAt: body.startedAt,
-            status: variable_1.TicketLaboratoryStatus.Completed,
-        });
-        const tlrBodyInsertList = body.ticketLaboratoryResultUpdateList.filter((i) => {
-            return !i.id;
-        });
-        const tlrBodyUpdateList = body.ticketLaboratoryResultUpdateList.filter((i) => {
-            return !!i.id;
-        });
-        let tlrInsertList = [];
-        let tlrUpdateList = [];
-        if (tlrBodyInsertList.length) {
-            const tlrDtoInsertList = tlrBodyInsertList.map((i) => {
-                const dtoInsert = Object.assign(Object.assign({}, i), { oid,
-                    ticketId, ticketLaboratoryGroupId: body.ticketLaboratoryGroupId, customerId: (ticketLaboratoryGroupUpdate === null || ticketLaboratoryGroupUpdate === void 0 ? void 0 : ticketLaboratoryGroupUpdate.customerId) || 0 });
-                return dtoInsert;
-            });
-            tlrInsertList =
-                await this.ticketLaboratoryResultRepository.insertManyAndReturnEntity(tlrDtoInsertList);
-        }
-        if (tlrBodyUpdateList.length) {
-            tlrUpdateList = await this.ticketLaboratoryResultRepository.updateResultList({
-                oid,
-                ticketId,
-                ticketLaboratoryResultDtoList: body.ticketLaboratoryResultUpdateList,
-            });
-        }
-        this.socketEmitService.ticketClinicChangeLaboratory(oid, {
-            ticketId,
-            ticketLaboratoryGroupUpdate,
-            ticketLaboratoryUpdateList,
-            ticketLaboratoryResultInsertList: tlrInsertList,
-            ticketLaboratoryResultUpdateList: tlrUpdateList,
-        });
         return { data: true };
     }
     async updatePriorityTicketLaboratory(options) {
@@ -46667,7 +48473,7 @@ exports.ApiTicketClinicLaboratoryService = ApiTicketClinicLaboratoryService = __
 
 
 /***/ }),
-/* 593 */
+/* 613 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -46686,15 +48492,14 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(594), exports);
-__exportStar(__webpack_require__(595), exports);
-__exportStar(__webpack_require__(596), exports);
-__exportStar(__webpack_require__(597), exports);
-__exportStar(__webpack_require__(598), exports);
+__exportStar(__webpack_require__(614), exports);
+__exportStar(__webpack_require__(615), exports);
+__exportStar(__webpack_require__(616), exports);
+__exportStar(__webpack_require__(617), exports);
 
 
 /***/ }),
-/* 594 */
+/* 614 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -46711,8 +48516,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicLaboratoryGroupParams = exports.TicketClinicLaboratoryParams = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class TicketClinicLaboratoryParams {
 }
 exports.TicketClinicLaboratoryParams = TicketClinicLaboratoryParams;
@@ -46758,7 +48563,7 @@ __decorate([
 
 
 /***/ }),
-/* 595 */
+/* 615 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -46775,7 +48580,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdatePriorityTicketLaboratoryBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class TicketLaboratoryBody {
 }
 __decorate([
@@ -46807,92 +48612,7 @@ __decorate([
 
 
 /***/ }),
-/* 596 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketLaboratoryResultUpdateBody = exports.TicketLaboratoryResultUpdate = void 0;
-const swagger_1 = __webpack_require__(6);
-const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-class TicketLaboratoryResultUpdate {
-}
-exports.TicketLaboratoryResultUpdate = TicketLaboratoryResultUpdate;
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 56 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsInt)(),
-    __metadata("design:type", Number)
-], TicketLaboratoryResultUpdate.prototype, "id", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 56 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketLaboratoryResultUpdate.prototype, "laboratoryId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 56 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketLaboratoryResultUpdate.prototype, "ticketLaboratoryId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Âm tính' }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], TicketLaboratoryResultUpdate.prototype, "result", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 1 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketLaboratoryResultUpdate.prototype, "attention", void 0);
-class TicketLaboratoryResultUpdateBody {
-}
-exports.TicketLaboratoryResultUpdateBody = TicketLaboratoryResultUpdateBody;
-__decorate([
-    (0, swagger_1.ApiProperty)({ type: TicketLaboratoryResultUpdate, isArray: true }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => TicketLaboratoryResultUpdate),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", Array)
-], TicketLaboratoryResultUpdateBody.prototype, "ticketLaboratoryResultUpdateList", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 56 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketLaboratoryResultUpdateBody.prototype, "ticketLaboratoryGroupId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: Date.now() }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsInt)(),
-    __metadata("design:type", Number)
-], TicketLaboratoryResultUpdateBody.prototype, "startedAt", void 0);
-
-
-/***/ }),
-/* 597 */
+/* 616 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -46910,11 +48630,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdateTicketLaboratoryBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const typescript_helper_1 = __webpack_require__(250);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const typescript_helper_1 = __webpack_require__(254);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
-const ticket_clinic_update_user_list_body_1 = __webpack_require__(590);
+const ticket_clinic_update_user_list_body_1 = __webpack_require__(610);
 class TicketLaboratoryBody {
 }
 __decorate([
@@ -46977,7 +48697,7 @@ __decorate([
 
 
 /***/ }),
-/* 598 */
+/* 617 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -46995,9 +48715,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpsertLaboratoryBody = exports.TicketLaboratoryGroupUpdateBody = exports.TicketLaboratoryGroupAddBody = exports.TicketLaboratoryAddBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const typescript_helper_1 = __webpack_require__(250);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const typescript_helper_1 = __webpack_require__(254);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
 class TicketLaboratoryAddBody {
 }
@@ -47125,7 +48845,7 @@ __decorate([
 
 
 /***/ }),
-/* 599 */
+/* 618 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -47138,9 +48858,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicProcedureModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_ticket_clinic_user_module_1 = __webpack_require__(584);
-const api_ticket_clinic_procedure_controller_1 = __webpack_require__(600);
-const api_ticket_clinic_procedure_service_1 = __webpack_require__(601);
+const api_ticket_clinic_user_module_1 = __webpack_require__(604);
+const api_ticket_clinic_procedure_controller_1 = __webpack_require__(619);
+const api_ticket_clinic_procedure_service_1 = __webpack_require__(620);
 let ApiTicketClinicProcedureModule = class ApiTicketClinicProcedureModule {
 };
 exports.ApiTicketClinicProcedureModule = ApiTicketClinicProcedureModule;
@@ -47154,7 +48874,7 @@ exports.ApiTicketClinicProcedureModule = ApiTicketClinicProcedureModule = __deco
 
 
 /***/ }),
-/* 600 */
+/* 619 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -47175,12 +48895,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicProcedureController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const dto_1 = __webpack_require__(295);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_ticket_clinic_procedure_service_1 = __webpack_require__(601);
-const request_1 = __webpack_require__(602);
+const dto_1 = __webpack_require__(302);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_ticket_clinic_procedure_service_1 = __webpack_require__(620);
+const request_1 = __webpack_require__(621);
 let ApiTicketClinicProcedureController = class ApiTicketClinicProcedureController {
     constructor(apiTicketClinicProcedureService) {
         this.apiTicketClinicProcedureService = apiTicketClinicProcedureService;
@@ -47264,7 +48984,7 @@ exports.ApiTicketClinicProcedureController = ApiTicketClinicProcedureController 
 
 
 /***/ }),
-/* 601 */
+/* 620 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -47282,10 +49002,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicProcedureService = void 0;
 const common_1 = __webpack_require__(3);
 const position_entity_1 = __webpack_require__(75);
-const operations_1 = __webpack_require__(142);
-const repositories_1 = __webpack_require__(162);
-const socket_emit_service_1 = __webpack_require__(317);
-const api_ticket_clinic_user_service_1 = __webpack_require__(586);
+const operations_1 = __webpack_require__(144);
+const repositories_1 = __webpack_require__(164);
+const socket_emit_service_1 = __webpack_require__(324);
+const api_ticket_clinic_user_service_1 = __webpack_require__(606);
 let ApiTicketClinicProcedureService = class ApiTicketClinicProcedureService {
     constructor(socketEmitService, ticketProcedureRepository, ticketClinicAddTicketProcedureOperation, ticketClinicDestroyTicketProcedureOperation, ticketClinicUpdateTicketProcedureOperation, apiTicketClinicUserService) {
         this.socketEmitService = socketEmitService;
@@ -47314,7 +49034,7 @@ let ApiTicketClinicProcedureService = class ApiTicketClinicProcedureService {
                 oid,
                 ticketId,
                 body: {
-                    positionType: position_entity_1.PositionType.Procedure,
+                    positionType: position_entity_1.PositionInteractType.Procedure,
                     positionInteractId: ticketProcedure.procedureId,
                     ticketItemId: ticketProcedure.id,
                     quantity: ticketProcedure.quantity,
@@ -47364,7 +49084,7 @@ let ApiTicketClinicProcedureService = class ApiTicketClinicProcedureService {
                 oid,
                 ticketId,
                 body: {
-                    positionType: position_entity_1.PositionType.Procedure,
+                    positionType: position_entity_1.PositionInteractType.Procedure,
                     positionInteractId: ticketProcedure.procedureId,
                     ticketItemId: ticketProcedure.id,
                     quantity: ticketProcedure.quantity,
@@ -47397,7 +49117,7 @@ exports.ApiTicketClinicProcedureService = ApiTicketClinicProcedureService = __de
 
 
 /***/ }),
-/* 602 */
+/* 621 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -47416,14 +49136,14 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(603), exports);
-__exportStar(__webpack_require__(604), exports);
-__exportStar(__webpack_require__(605), exports);
-__exportStar(__webpack_require__(606), exports);
+__exportStar(__webpack_require__(622), exports);
+__exportStar(__webpack_require__(623), exports);
+__exportStar(__webpack_require__(624), exports);
+__exportStar(__webpack_require__(625), exports);
 
 
 /***/ }),
-/* 603 */
+/* 622 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -47441,11 +49161,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicAddTicketProcedureBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const typescript_helper_1 = __webpack_require__(250);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const typescript_helper_1 = __webpack_require__(254);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
-const ticket_clinic_update_user_list_body_1 = __webpack_require__(590);
+const ticket_clinic_update_user_list_body_1 = __webpack_require__(610);
 class TicketProcedureBody {
 }
 __decorate([
@@ -47531,7 +49251,7 @@ __decorate([
 
 
 /***/ }),
-/* 604 */
+/* 623 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -47548,8 +49268,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicProcedureParams = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class TicketClinicProcedureParams {
 }
 exports.TicketClinicProcedureParams = TicketClinicProcedureParams;
@@ -47574,7 +49294,7 @@ __decorate([
 
 
 /***/ }),
-/* 605 */
+/* 624 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -47591,7 +49311,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdatePriorityTicketProcedureBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class TicketProcedureBody {
 }
 __decorate([
@@ -47623,7 +49343,7 @@ __decorate([
 
 
 /***/ }),
-/* 606 */
+/* 625 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -47641,11 +49361,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdateTicketProcedureBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const typescript_helper_1 = __webpack_require__(250);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const typescript_helper_1 = __webpack_require__(254);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
-const ticket_clinic_update_user_list_body_1 = __webpack_require__(590);
+const ticket_clinic_update_user_list_body_1 = __webpack_require__(610);
 class TicketProcedureBody {
 }
 __decorate([
@@ -47715,7 +49435,7 @@ __decorate([
 
 
 /***/ }),
-/* 607 */
+/* 626 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -47728,9 +49448,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicProductModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_ticket_clinic_user_module_1 = __webpack_require__(584);
-const api_ticket_clinic_product_controller_1 = __webpack_require__(608);
-const api_ticket_clinic_product_service_1 = __webpack_require__(609);
+const api_ticket_clinic_user_module_1 = __webpack_require__(604);
+const api_ticket_clinic_product_controller_1 = __webpack_require__(627);
+const api_ticket_clinic_product_service_1 = __webpack_require__(628);
 let ApiTicketClinicProductModule = class ApiTicketClinicProductModule {
 };
 exports.ApiTicketClinicProductModule = ApiTicketClinicProductModule;
@@ -47744,7 +49464,7 @@ exports.ApiTicketClinicProductModule = ApiTicketClinicProductModule = __decorate
 
 
 /***/ }),
-/* 608 */
+/* 627 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -47765,15 +49485,15 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicProductController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const dto_1 = __webpack_require__(295);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
+const dto_1 = __webpack_require__(302);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
 const ticket_product_entity_1 = __webpack_require__(69);
-const permission_enum_1 = __webpack_require__(78);
-const request_1 = __webpack_require__(293);
-const ticket_params_1 = __webpack_require__(307);
-const api_ticket_clinic_product_service_1 = __webpack_require__(609);
-const request_2 = __webpack_require__(610);
+const permission_enum_1 = __webpack_require__(80);
+const request_1 = __webpack_require__(300);
+const ticket_params_1 = __webpack_require__(314);
+const api_ticket_clinic_product_service_1 = __webpack_require__(628);
+const request_2 = __webpack_require__(629);
 let ApiTicketClinicProductController = class ApiTicketClinicProductController {
     constructor(apiTicketClinicProductService) {
         this.apiTicketClinicProductService = apiTicketClinicProductService;
@@ -47959,7 +49679,7 @@ exports.ApiTicketClinicProductController = ApiTicketClinicProductController = __
 
 
 /***/ }),
-/* 609 */
+/* 628 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -47979,10 +49699,10 @@ const common_1 = __webpack_require__(3);
 const cache_data_service_1 = __webpack_require__(38);
 const position_entity_1 = __webpack_require__(75);
 const ticket_product_entity_1 = __webpack_require__(69);
-const operations_1 = __webpack_require__(142);
-const repositories_1 = __webpack_require__(162);
-const socket_emit_service_1 = __webpack_require__(317);
-const api_ticket_clinic_user_service_1 = __webpack_require__(586);
+const operations_1 = __webpack_require__(144);
+const repositories_1 = __webpack_require__(164);
+const socket_emit_service_1 = __webpack_require__(324);
+const api_ticket_clinic_user_service_1 = __webpack_require__(606);
 let ApiTicketClinicProductService = class ApiTicketClinicProductService {
     constructor(socketEmitService, cacheDataService, ticketProductRepository, ticketClinicAddTicketProductOperation, ticketClinicDestroyTicketProductOperation, ticketClinicUpdateTicketProductOperation, ticketSendProductOperation, ticketReturnProductOperation, apiTicketClinicUserService) {
         this.socketEmitService = socketEmitService;
@@ -48099,7 +49819,7 @@ let ApiTicketClinicProductService = class ApiTicketClinicProductService {
                 oid,
                 ticketId,
                 body: {
-                    positionType: position_entity_1.PositionType.Product,
+                    positionType: position_entity_1.PositionInteractType.Product,
                     positionInteractId: ticketProduct.productId,
                     ticketItemId: ticketProduct.id,
                     quantity: ticketProduct.quantity,
@@ -48204,7 +49924,7 @@ exports.ApiTicketClinicProductService = ApiTicketClinicProductService = __decora
 
 
 /***/ }),
-/* 610 */
+/* 629 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -48223,15 +49943,15 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(611), exports);
-__exportStar(__webpack_require__(612), exports);
-__exportStar(__webpack_require__(613), exports);
-__exportStar(__webpack_require__(614), exports);
-__exportStar(__webpack_require__(615), exports);
+__exportStar(__webpack_require__(630), exports);
+__exportStar(__webpack_require__(631), exports);
+__exportStar(__webpack_require__(632), exports);
+__exportStar(__webpack_require__(633), exports);
+__exportStar(__webpack_require__(634), exports);
 
 
 /***/ }),
-/* 611 */
+/* 630 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -48249,9 +49969,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicAddTicketProductListBody = exports.TicketProductAddBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const typescript_helper_1 = __webpack_require__(250);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const typescript_helper_1 = __webpack_require__(254);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
 class TicketProductAddBody {
 }
@@ -48395,7 +50115,7 @@ __decorate([
 
 
 /***/ }),
-/* 612 */
+/* 631 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -48412,8 +50132,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicProductParams = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class TicketClinicProductParams {
 }
 exports.TicketClinicProductParams = TicketClinicProductParams;
@@ -48438,7 +50158,7 @@ __decorate([
 
 
 /***/ }),
-/* 613 */
+/* 632 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -48455,7 +50175,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdatePriorityTicketProductBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class TicketProductBody {
 }
 __decorate([
@@ -48487,7 +50207,7 @@ __decorate([
 
 
 /***/ }),
-/* 614 */
+/* 633 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -48504,7 +50224,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdateTicketProductListBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class TicketProductBody {
 }
 __decorate([
@@ -48556,7 +50276,7 @@ __decorate([
 
 
 /***/ }),
-/* 615 */
+/* 634 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -48574,11 +50294,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdateTicketProductBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const typescript_helper_1 = __webpack_require__(250);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const typescript_helper_1 = __webpack_require__(254);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
-const ticket_clinic_update_user_list_body_1 = __webpack_require__(590);
+const ticket_clinic_update_user_list_body_1 = __webpack_require__(610);
 class TicketProductBody {
 }
 __decorate([
@@ -48668,7 +50388,7 @@ __decorate([
 
 
 /***/ }),
-/* 616 */
+/* 635 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -48681,9 +50401,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicRadiologyModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_ticket_clinic_user_module_1 = __webpack_require__(584);
-const api_ticket_clinic_radiology_controller_1 = __webpack_require__(617);
-const api_ticket_clinic_radiology_service_1 = __webpack_require__(618);
+const api_ticket_clinic_user_module_1 = __webpack_require__(604);
+const api_ticket_clinic_radiology_controller_1 = __webpack_require__(636);
+const api_ticket_clinic_radiology_service_1 = __webpack_require__(637);
 let ApiTicketClinicRadiologyModule = class ApiTicketClinicRadiologyModule {
 };
 exports.ApiTicketClinicRadiologyModule = ApiTicketClinicRadiologyModule;
@@ -48697,7 +50417,7 @@ exports.ApiTicketClinicRadiologyModule = ApiTicketClinicRadiologyModule = __deco
 
 
 /***/ }),
-/* 617 */
+/* 636 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -48713,18 +50433,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicRadiologyController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const dto_1 = __webpack_require__(295);
-const user_guard_1 = __webpack_require__(95);
-const interceptor_1 = __webpack_require__(280);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_ticket_clinic_radiology_service_1 = __webpack_require__(618);
-const request_1 = __webpack_require__(619);
+const dto_1 = __webpack_require__(302);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_ticket_clinic_radiology_service_1 = __webpack_require__(637);
+const request_1 = __webpack_require__(638);
 let ApiTicketClinicRadiologyController = class ApiTicketClinicRadiologyController {
     constructor(apiTicketClinicRadiologyService) {
         this.apiTicketClinicRadiologyService = apiTicketClinicRadiologyService;
@@ -48749,15 +50468,6 @@ let ApiTicketClinicRadiologyController = class ApiTicketClinicRadiologyControlle
             ticketId,
             ticketRadiologyId,
             body,
-        });
-    }
-    async updateTicketRadiology({ oid }, { ticketId, ticketRadiologyId }, body, files) {
-        return await this.apiTicketClinicRadiologyService.updateResultTicketRadiology({
-            oid,
-            ticketId,
-            ticketRadiologyId,
-            body,
-            files,
         });
     }
     async updatePriorityTicketRadiology({ oid }, { id }, body) {
@@ -48799,26 +50509,13 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ApiTicketClinicRadiologyController.prototype, "updateTicketLaboratory", null);
 __decorate([
-    (0, common_1.Post)(':ticketId/update-result-ticket-radiology/:ticketRadiologyId'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST),
-    (0, swagger_1.ApiConsumes)('multipart/form-data'),
-    (0, common_1.UseInterceptors)((0, interceptor_1.FastifyFilesInterceptor)('files', 10, {})),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __param(2, (0, common_1.Body)()),
-    __param(3, (0, common_1.UploadedFiles)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_k = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _k : Object, typeof (_l = typeof request_1.TicketClinicRadiologyParams !== "undefined" && request_1.TicketClinicRadiologyParams) === "function" ? _l : Object, typeof (_m = typeof request_1.TicketClinicUpdateResultTicketRadiologyBody !== "undefined" && request_1.TicketClinicUpdateResultTicketRadiologyBody) === "function" ? _m : Object, Array]),
-    __metadata("design:returntype", Promise)
-], ApiTicketClinicRadiologyController.prototype, "updateTicketRadiology", null);
-__decorate([
     (0, common_1.Post)(':id/update-priority-ticket-radiology'),
     (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CLINIC_UPDATE_TICKET_RADIOLOGY_LIST),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_o = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _o : Object, typeof (_p = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _p : Object, typeof (_q = typeof request_1.TicketClinicUpdatePriorityTicketRadiologyBody !== "undefined" && request_1.TicketClinicUpdatePriorityTicketRadiologyBody) === "function" ? _q : Object]),
+    __metadata("design:paramtypes", [typeof (_k = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _k : Object, typeof (_l = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _l : Object, typeof (_m = typeof request_1.TicketClinicUpdatePriorityTicketRadiologyBody !== "undefined" && request_1.TicketClinicUpdatePriorityTicketRadiologyBody) === "function" ? _m : Object]),
     __metadata("design:returntype", Promise)
 ], ApiTicketClinicRadiologyController.prototype, "updatePriorityTicketRadiology", null);
 exports.ApiTicketClinicRadiologyController = ApiTicketClinicRadiologyController = __decorate([
@@ -48830,7 +50527,7 @@ exports.ApiTicketClinicRadiologyController = ApiTicketClinicRadiologyController 
 
 
 /***/ }),
-/* 618 */
+/* 637 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -48847,13 +50544,14 @@ var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicRadiologyService = void 0;
 const common_1 = __webpack_require__(3);
+const error_1 = __webpack_require__(14);
 const position_entity_1 = __webpack_require__(75);
 const ticket_radiology_entity_1 = __webpack_require__(70);
-const operations_1 = __webpack_require__(142);
-const repositories_1 = __webpack_require__(162);
-const image_manager_service_1 = __webpack_require__(401);
-const socket_emit_service_1 = __webpack_require__(317);
-const api_ticket_clinic_user_service_1 = __webpack_require__(586);
+const operations_1 = __webpack_require__(144);
+const repositories_1 = __webpack_require__(164);
+const image_manager_service_1 = __webpack_require__(424);
+const socket_emit_service_1 = __webpack_require__(324);
+const api_ticket_clinic_user_service_1 = __webpack_require__(606);
 let ApiTicketClinicRadiologyService = class ApiTicketClinicRadiologyService {
     constructor(socketEmitService, imageManagerService, imageRepository, ticketRadiologyRepository, ticketClinicAddTicketRadiologyOperation, ticketClinicDestroyTicketRadiologyOperation, ticketClinicUpdateTicketRadiologyOperation, apiTicketClinicUserService) {
         this.socketEmitService = socketEmitService;
@@ -48875,7 +50573,7 @@ let ApiTicketClinicRadiologyService = class ApiTicketClinicRadiologyService {
         });
         const { ticket, ticketRadiology } = result;
         this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket });
-        this.socketEmitService.ticketClinicChangeTicketRadiologyList(oid, {
+        this.socketEmitService.ticketRadiologyListChange(oid, {
             ticketId,
             ticketRadiologyInsert: ticketRadiology,
         });
@@ -48887,6 +50585,9 @@ let ApiTicketClinicRadiologyService = class ApiTicketClinicRadiologyService {
             oid,
             id: ticketRadiologyId,
         });
+        if (ticketRadiologyOrigin.status === ticket_radiology_entity_1.TicketRadiologyStatus.Completed) {
+            throw new error_1.BusinessError('Phiếu đã hoàn thành không thể xóa');
+        }
         const imageIdsUpdate = await this.imageManagerService.changeImageList({
             oid,
             customerId: ticketRadiologyOrigin.customerId,
@@ -48902,7 +50603,7 @@ let ApiTicketClinicRadiologyService = class ApiTicketClinicRadiologyService {
         });
         const { ticket } = result;
         this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket });
-        this.socketEmitService.ticketClinicChangeTicketRadiologyList(oid, {
+        this.socketEmitService.ticketRadiologyListChange(oid, {
             ticketId,
             ticketRadiologyDestroy: result.ticketRadiologyDestroy,
         });
@@ -48925,7 +50626,7 @@ let ApiTicketClinicRadiologyService = class ApiTicketClinicRadiologyService {
         });
         const { ticket, ticketRadiology } = result;
         this.socketEmitService.ticketClinicChange(oid, { type: 'UPDATE', ticket: result.ticket });
-        this.socketEmitService.ticketClinicChangeTicketRadiologyList(oid, {
+        this.socketEmitService.ticketRadiologyListChange(oid, {
             ticketId,
             ticketRadiologyUpdate: result.ticketRadiology,
         });
@@ -48934,59 +50635,9 @@ let ApiTicketClinicRadiologyService = class ApiTicketClinicRadiologyService {
                 oid,
                 ticketId,
                 body: {
-                    positionType: position_entity_1.PositionType.Radiology,
+                    positionType: position_entity_1.PositionInteractType.Radiology,
                     positionInteractId: ticketRadiology.radiologyId,
                     ticketItemId: ticketRadiology.id,
-                    quantity: 1,
-                    ticketUserList: body.ticketUserList,
-                },
-            });
-        }
-        return { data: true };
-    }
-    async updateResultTicketRadiology(options) {
-        var _a;
-        const { oid, ticketId, ticketRadiologyId, body, files } = options;
-        const ticketRadiologyOrigin = await this.ticketRadiologyRepository.findOneBy({
-            oid,
-            id: ticketRadiologyId,
-        });
-        const imageIdsUpdate = await this.imageManagerService.changeImageList({
-            oid,
-            customerId: ticketRadiologyOrigin.customerId,
-            files,
-            filesPosition: body.filesPosition,
-            imageIdsKeep: body.imageIdsKeep,
-            imageIdsOld: JSON.parse(ticketRadiologyOrigin.imageIds),
-        });
-        const ticketRadiologyModified = await this.ticketRadiologyRepository.updateOneAndReturnEntity({
-            oid,
-            ticketId,
-            id: ticketRadiologyId,
-        }, {
-            description: body.ticketRadiology.description,
-            result: body.ticketRadiology.result,
-            startedAt: body.ticketRadiology.startedAt,
-            imageIds: JSON.stringify(imageIdsUpdate),
-            status: ticket_radiology_entity_1.TicketRadiologyStatus.Completed,
-        });
-        ticketRadiologyModified.imageList = [];
-        const imageIds = JSON.parse(ticketRadiologyModified.imageIds);
-        if (imageIds.length) {
-            ticketRadiologyModified.imageList = await this.imageRepository.findManyByIds(imageIds);
-        }
-        this.socketEmitService.ticketClinicChangeTicketRadiologyList(oid, {
-            ticketId,
-            ticketRadiologyUpdate: ticketRadiologyModified,
-        });
-        if ((_a = body.ticketUserList) === null || _a === void 0 ? void 0 : _a.length) {
-            this.apiTicketClinicUserService.changeTicketUserList({
-                oid,
-                ticketId,
-                body: {
-                    positionType: position_entity_1.PositionType.Radiology,
-                    positionInteractId: ticketRadiologyModified.radiologyId,
-                    ticketItemId: ticketRadiologyModified.id,
                     quantity: 1,
                     ticketUserList: body.ticketUserList,
                 },
@@ -49002,7 +50653,7 @@ let ApiTicketClinicRadiologyService = class ApiTicketClinicRadiologyService {
             updateData: body.ticketRadiologyList,
         });
         ticketRadiologyList.sort((a, b) => (a.priority < b.priority ? -1 : 1));
-        this.socketEmitService.ticketClinicChangeTicketRadiologyList(oid, {
+        this.socketEmitService.ticketRadiologyListChange(oid, {
             ticketId,
             ticketRadiologyList,
         });
@@ -49017,7 +50668,7 @@ exports.ApiTicketClinicRadiologyService = ApiTicketClinicRadiologyService = __de
 
 
 /***/ }),
-/* 619 */
+/* 638 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -49036,15 +50687,14 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(620), exports);
-__exportStar(__webpack_require__(621), exports);
-__exportStar(__webpack_require__(622), exports);
-__exportStar(__webpack_require__(623), exports);
-__exportStar(__webpack_require__(624), exports);
+__exportStar(__webpack_require__(639), exports);
+__exportStar(__webpack_require__(640), exports);
+__exportStar(__webpack_require__(641), exports);
+__exportStar(__webpack_require__(642), exports);
 
 
 /***/ }),
-/* 620 */
+/* 639 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -49062,9 +50712,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicAddTicketRadiologyBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const typescript_helper_1 = __webpack_require__(250);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const typescript_helper_1 = __webpack_require__(254);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
 class TicketClinicAddTicketRadiologyBody {
 }
@@ -49146,7 +50796,7 @@ __decorate([
 
 
 /***/ }),
-/* 621 */
+/* 640 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -49163,8 +50813,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicRadiologyParams = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class TicketClinicRadiologyParams {
 }
 exports.TicketClinicRadiologyParams = TicketClinicRadiologyParams;
@@ -49189,7 +50839,7 @@ __decorate([
 
 
 /***/ }),
-/* 622 */
+/* 641 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -49207,11 +50857,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdateMoneyTicketRadiologyBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const typescript_helper_1 = __webpack_require__(250);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const typescript_helper_1 = __webpack_require__(254);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
-const ticket_clinic_update_user_list_body_1 = __webpack_require__(590);
+const ticket_clinic_update_user_list_body_1 = __webpack_require__(610);
 class TicketRadiologyBody {
 }
 __decorate([
@@ -49274,7 +50924,7 @@ __decorate([
 
 
 /***/ }),
-/* 623 */
+/* 642 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -49291,7 +50941,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdatePriorityTicketRadiologyBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class TicketRadiologyBody {
 }
 __decorate([
@@ -49323,149 +50973,7 @@ __decorate([
 
 
 /***/ }),
-/* 624 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketClinicUpdateResultTicketRadiologyBody = exports.TicketRadiologyUpdateBody = void 0;
-const swagger_1 = __webpack_require__(6);
-const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const DOMPurify = __webpack_require__(520);
-const file_1 = __webpack_require__(279);
-const ticket_clinic_update_user_list_body_1 = __webpack_require__(590);
-class TicketRadiologyUpdateBody extends file_1.MultipleFileUpload {
-}
-exports.TicketRadiologyUpdateBody = TicketRadiologyUpdateBody;
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Mổ viêm ruột thừa 2002' }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => DOMPurify.sanitize(value)),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], TicketRadiologyUpdateBody.prototype, "description", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Trước khi vào khám 5 ngày, bla...bla...' }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], TicketRadiologyUpdateBody.prototype, "result", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: Date.now() }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => (value != null ? Number(value) : value)),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsInt)(),
-    __metadata("design:type", Number)
-], TicketRadiologyUpdateBody.prototype, "startedAt", void 0);
-class TicketClinicUpdateResultTicketRadiologyBody extends file_1.MultipleFileUpload {
-}
-exports.TicketClinicUpdateResultTicketRadiologyBody = TicketClinicUpdateResultTicketRadiologyBody;
-__decorate([
-    (0, swagger_1.ApiProperty)({ type: String, example: JSON.stringify([3, 4]) }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => (value != null ? JSON.parse(value) : value)),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.IsNumber)({}, { each: true }),
-    __metadata("design:type", Array)
-], TicketClinicUpdateResultTicketRadiologyBody.prototype, "imageIdsKeep", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ type: String, example: JSON.stringify([3, 4]) }),
-    __metadata("design:type", Object)
-], TicketClinicUpdateResultTicketRadiologyBody.prototype, "G", void 0);
-__decorate([
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => (value != null ? JSON.parse(value) : value)),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.IsNumber)({}, { each: true }),
-    __metadata("design:type", Array)
-], TicketClinicUpdateResultTicketRadiologyBody.prototype, "filesPosition", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        type: 'string',
-        example: JSON.stringify([{ userId: 1, roleId: 2 }]),
-    }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => {
-        if (value === undefined)
-            return undefined;
-        try {
-            const err = [];
-            const result = JSON.parse(value).map((i) => {
-                const instance = Object.assign(new ticket_clinic_update_user_list_body_1.TicketUserBasicBody(), i);
-                const validate = (0, class_validator_1.validateSync)(instance, {
-                    whitelist: true,
-                    forbidNonWhitelisted: true,
-                    skipMissingProperties: true,
-                });
-                if (validate.length)
-                    err.push(...validate);
-                return instance;
-            });
-            if (err.length)
-                return JSON.stringify(err);
-            else
-                return result;
-        }
-        catch (error) {
-            return error.message;
-        }
-    }),
-    (0, class_validator_1.IsArray)({
-        message: ({ value }) => `Validate TicketUserBasicBody failed. Value = ${JSON.stringify(value)}. Example: `
-            + JSON.stringify([{ userId: 1, roleId: 2 }]),
-    }),
-    __metadata("design:type", Array)
-], TicketClinicUpdateResultTicketRadiologyBody.prototype, "ticketUserList", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)(),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => {
-        if (value === undefined)
-            return undefined;
-        try {
-            const instance = Object.assign(new TicketRadiologyUpdateBody(), JSON.parse(value));
-            const validate = (0, class_validator_1.validateSync)(instance, {
-                whitelist: true,
-                forbidNonWhitelisted: true,
-                skipMissingProperties: true,
-            });
-            if (validate.length)
-                return JSON.stringify(validate);
-            return instance;
-        }
-        catch (error) {
-            return error.message;
-        }
-    }),
-    (0, class_validator_1.IsObject)({
-        message: ({ value }) => `Validate imagesChange failed. Value = ${JSON.stringify(value)}. Example: `
-            + JSON.stringify({
-                description: '',
-                startedAt: Date.now(),
-                result: '',
-            }),
-    }),
-    __metadata("design:type", TicketRadiologyUpdateBody)
-], TicketClinicUpdateResultTicketRadiologyBody.prototype, "ticketRadiology", void 0);
-
-
-/***/ }),
-/* 625 */
+/* 643 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -49486,15 +50994,15 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const dto_1 = __webpack_require__(295);
-const user_guard_1 = __webpack_require__(95);
-const interceptor_1 = __webpack_require__(280);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const request_1 = __webpack_require__(293);
-const api_ticket_clinic_service_1 = __webpack_require__(626);
-const request_2 = __webpack_require__(627);
-const ticket_clinic_update_diagnosis_body_1 = __webpack_require__(630);
+const dto_1 = __webpack_require__(302);
+const user_guard_1 = __webpack_require__(97);
+const interceptor_1 = __webpack_require__(284);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const request_1 = __webpack_require__(300);
+const api_ticket_clinic_service_1 = __webpack_require__(644);
+const request_2 = __webpack_require__(645);
+const ticket_clinic_update_diagnosis_body_1 = __webpack_require__(648);
 let ApiTicketClinicController = class ApiTicketClinicController {
     constructor(apiTicketClinicService) {
         this.apiTicketClinicService = apiTicketClinicService;
@@ -49671,7 +51179,7 @@ exports.ApiTicketClinicController = ApiTicketClinicController = __decorate([
 
 
 /***/ }),
-/* 626 */
+/* 644 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -49689,19 +51197,19 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const array_helper_1 = __webpack_require__(92);
-const time_helper_1 = __webpack_require__(144);
+const array_helper_1 = __webpack_require__(94);
+const time_helper_1 = __webpack_require__(146);
 const variable_1 = __webpack_require__(21);
 const appointment_entity_1 = __webpack_require__(44);
 const position_entity_1 = __webpack_require__(75);
 const ticket_radiology_entity_1 = __webpack_require__(70);
 const ticket_entity_1 = __webpack_require__(56);
-const operations_1 = __webpack_require__(142);
-const repositories_1 = __webpack_require__(162);
-const image_repository_1 = __webpack_require__(169);
-const image_manager_service_1 = __webpack_require__(401);
-const socket_emit_service_1 = __webpack_require__(317);
-const api_ticket_clinic_user_service_1 = __webpack_require__(586);
+const operations_1 = __webpack_require__(144);
+const repositories_1 = __webpack_require__(164);
+const image_repository_1 = __webpack_require__(173);
+const image_manager_service_1 = __webpack_require__(424);
+const socket_emit_service_1 = __webpack_require__(324);
+const api_ticket_clinic_user_service_1 = __webpack_require__(606);
 let ApiTicketClinicService = class ApiTicketClinicService {
     constructor(socketEmitService, imageManagerService, imageRepository, customerRepository, appointmentRepository, ticketRepository, ticketAttributeRepository, ticketChangeDiscountOperation, ticketRefundMoneyOperation, ticketPrepaymentOperation, ticketPaymentAndCloseOperation, ticketPayDebtOperation, ticketReopenOperation, apiTicketClinicUserService) {
         this.socketEmitService = socketEmitService;
@@ -49784,7 +51292,7 @@ let ApiTicketClinicService = class ApiTicketClinicService {
                 oid,
                 ticketId: ticket.id,
                 body: {
-                    positionType: position_entity_1.PositionType.Ticket,
+                    positionType: position_entity_1.PositionInteractType.Ticket,
                     positionInteractId: 0,
                     ticketItemId: 0,
                     quantity: 1,
@@ -49836,7 +51344,7 @@ let ApiTicketClinicService = class ApiTicketClinicService {
                 oid,
                 ticketId,
                 body: {
-                    positionType: position_entity_1.PositionType.Ticket,
+                    positionType: position_entity_1.PositionInteractType.Ticket,
                     positionInteractId: 0,
                     ticketItemId: 0,
                     quantity: 1,
@@ -50080,7 +51588,7 @@ exports.ApiTicketClinicService = ApiTicketClinicService = __decorate([
 
 
 /***/ }),
-/* 627 */
+/* 645 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -50099,17 +51607,17 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(628), exports);
-__exportStar(__webpack_require__(629), exports);
-__exportStar(__webpack_require__(630), exports);
-__exportStar(__webpack_require__(631), exports);
-__exportStar(__webpack_require__(632), exports);
-__exportStar(__webpack_require__(633), exports);
-__exportStar(__webpack_require__(634), exports);
+__exportStar(__webpack_require__(646), exports);
+__exportStar(__webpack_require__(647), exports);
+__exportStar(__webpack_require__(648), exports);
+__exportStar(__webpack_require__(649), exports);
+__exportStar(__webpack_require__(650), exports);
+__exportStar(__webpack_require__(651), exports);
+__exportStar(__webpack_require__(652), exports);
 
 
 /***/ }),
-/* 628 */
+/* 646 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -50127,9 +51635,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicChangeDiscountBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const typescript_helper_1 = __webpack_require__(250);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const typescript_helper_1 = __webpack_require__(254);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
 class TicketClinicChangeDiscountBody {
 }
@@ -50161,7 +51669,7 @@ __decorate([
 
 
 /***/ }),
-/* 629 */
+/* 647 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -50179,9 +51687,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdateConsumableBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const typescript_helper_1 = __webpack_require__(250);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const typescript_helper_1 = __webpack_require__(254);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
 class TicketProductConsumableBody {
 }
@@ -50288,7 +51796,7 @@ __decorate([
 
 
 /***/ }),
-/* 630 */
+/* 648 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -50305,8 +51813,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdateDiagnosisBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const file_1 = __webpack_require__(279);
+const class_validator_1 = __webpack_require__(252);
+const file_1 = __webpack_require__(283);
 class TicketAttributeBody {
 }
 __decorate([
@@ -50438,7 +51946,7 @@ __decorate([
 
 
 /***/ }),
-/* 631 */
+/* 649 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -50456,9 +51964,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdateTicketLaboratoryListBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const typescript_helper_1 = __webpack_require__(250);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const typescript_helper_1 = __webpack_require__(254);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
 class TicketLaboratoryBody {
 }
@@ -50536,7 +52044,7 @@ __decorate([
 
 
 /***/ }),
-/* 632 */
+/* 650 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -50554,9 +52062,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdatePrescriptionBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const typescript_helper_1 = __webpack_require__(250);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const typescript_helper_1 = __webpack_require__(254);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
 class TicketProductPrescriptionBody {
 }
@@ -50706,7 +52214,7 @@ __decorate([
 
 
 /***/ }),
-/* 633 */
+/* 651 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -50724,11 +52232,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicDestroyTicketProcedureParams = exports.TicketClinicAddTicketProcedure = exports.TicketClinicUpdateTicketProcedureListBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const typescript_helper_1 = __webpack_require__(250);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const typescript_helper_1 = __webpack_require__(254);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
-const ticket_clinic_update_user_list_body_1 = __webpack_require__(590);
+const ticket_clinic_update_user_list_body_1 = __webpack_require__(610);
 class TicketProcedureBody {
 }
 __decorate([
@@ -50840,7 +52348,7 @@ __decorate([
 
 
 /***/ }),
-/* 634 */
+/* 652 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -50858,11 +52366,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdateBody = exports.TicketClinicCreateBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 const ticket_entity_1 = __webpack_require__(56);
-const request_1 = __webpack_require__(346);
-const ticket_clinic_update_user_list_body_1 = __webpack_require__(590);
+const request_1 = __webpack_require__(353);
+const ticket_clinic_update_user_list_body_1 = __webpack_require__(610);
 class TicketAttributeBody {
 }
 __decorate([
@@ -51002,7 +52510,7 @@ __decorate([
 
 
 /***/ }),
-/* 635 */
+/* 653 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -51015,8 +52523,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketLaboratoryGroupModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_ticket_laboratory_group_controller_1 = __webpack_require__(636);
-const api_ticket_laboratory_group_service_1 = __webpack_require__(637);
+const api_ticket_laboratory_group_action_1 = __webpack_require__(654);
+const api_ticket_laboratory_group_controller_1 = __webpack_require__(656);
+const api_ticket_laboratory_group_service_1 = __webpack_require__(655);
 let ApiTicketLaboratoryGroupModule = class ApiTicketLaboratoryGroupModule {
 };
 exports.ApiTicketLaboratoryGroupModule = ApiTicketLaboratoryGroupModule;
@@ -51024,13 +52533,13 @@ exports.ApiTicketLaboratoryGroupModule = ApiTicketLaboratoryGroupModule = __deco
     (0, common_1.Module)({
         imports: [],
         controllers: [api_ticket_laboratory_group_controller_1.ApiTicketLaboratoryGroupController],
-        providers: [api_ticket_laboratory_group_service_1.ApiTicketLaboratoryGroupService],
+        providers: [api_ticket_laboratory_group_service_1.ApiTicketLaboratoryGroupService, api_ticket_laboratory_group_action_1.ApiTicketLaboratoryGroupAction],
     })
 ], ApiTicketLaboratoryGroupModule);
 
 
 /***/ }),
-/* 636 */
+/* 654 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -51043,60 +52552,100 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ApiTicketLaboratoryGroupController = void 0;
+exports.ApiTicketLaboratoryGroupAction = void 0;
 const common_1 = __webpack_require__(3);
-const swagger_1 = __webpack_require__(6);
-const dto_1 = __webpack_require__(295);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const api_ticket_laboratory_group_service_1 = __webpack_require__(637);
-const request_1 = __webpack_require__(638);
-let ApiTicketLaboratoryGroupController = class ApiTicketLaboratoryGroupController {
-    constructor(apiTicketLaboratoryGroupService) {
+const variable_1 = __webpack_require__(21);
+const repositories_1 = __webpack_require__(164);
+const socket_emit_service_1 = __webpack_require__(324);
+const api_ticket_laboratory_group_service_1 = __webpack_require__(655);
+let ApiTicketLaboratoryGroupAction = class ApiTicketLaboratoryGroupAction {
+    constructor(socketEmitService, ticketLaboratoryGroupRepository, ticketLaboratoryRepository, ticketLaboratoryResultRepository, apiTicketLaboratoryGroupService) {
+        this.socketEmitService = socketEmitService;
+        this.ticketLaboratoryGroupRepository = ticketLaboratoryGroupRepository;
+        this.ticketLaboratoryRepository = ticketLaboratoryRepository;
+        this.ticketLaboratoryResultRepository = ticketLaboratoryResultRepository;
         this.apiTicketLaboratoryGroupService = apiTicketLaboratoryGroupService;
     }
-    async pagination({ oid }, query) {
-        return await this.apiTicketLaboratoryGroupService.pagination(oid, query);
+    async updateResult(options) {
+        var _a, _b, _c, _d, _e, _f;
+        const { oid, ticketLaboratoryGroupId, body } = options;
+        const response = (_a = options.query) === null || _a === void 0 ? void 0 : _a.response;
+        const ticketLaboratoryGroupUpdate = await this.ticketLaboratoryGroupRepository.updateOneAndReturnEntity({ oid, id: ticketLaboratoryGroupId }, { startedAt: body.startedAt, status: variable_1.TicketLaboratoryStatus.Completed });
+        const { ticketId } = ticketLaboratoryGroupUpdate;
+        const ticketLaboratoryUpdateList = await this.ticketLaboratoryRepository.updateAndReturnEntity({ oid, ticketId, ticketLaboratoryGroupId }, { startedAt: body.startedAt, status: variable_1.TicketLaboratoryStatus.Completed });
+        const tlrBodyInsertList = body.ticketLaboratoryResultUpdateList.filter((i) => {
+            return !i.id;
+        });
+        const tlrBodyUpdateList = body.ticketLaboratoryResultUpdateList.filter((i) => {
+            return !!i.id;
+        });
+        let tlrInsertList = [];
+        let tlrUpdateList = [];
+        if (tlrBodyInsertList.length) {
+            const tlrDtoInsertList = tlrBodyInsertList.map((i) => {
+                const dtoInsert = Object.assign(Object.assign({}, i), { oid,
+                    ticketId,
+                    ticketLaboratoryGroupId, customerId: (ticketLaboratoryGroupUpdate === null || ticketLaboratoryGroupUpdate === void 0 ? void 0 : ticketLaboratoryGroupUpdate.customerId) || 0 });
+                return dtoInsert;
+            });
+            tlrInsertList =
+                await this.ticketLaboratoryResultRepository.insertManyAndReturnEntity(tlrDtoInsertList);
+        }
+        if (tlrBodyUpdateList.length) {
+            tlrUpdateList = await this.ticketLaboratoryResultRepository.updateResultList({
+                oid,
+                ticketId,
+                ticketLaboratoryResultDtoList: body.ticketLaboratoryResultUpdateList,
+            });
+        }
+        this.socketEmitService.ticketLaboratoryListChange(oid, {
+            ticketId,
+            ticketLaboratoryGroupUpdate,
+            ticketLaboratoryUpdateList,
+            ticketLaboratoryResultInsertList: tlrInsertList,
+            ticketLaboratoryResultUpdateList: tlrUpdateList,
+        });
+        ticketLaboratoryGroupUpdate.ticketLaboratoryList = ticketLaboratoryUpdateList;
+        await this.apiTicketLaboratoryGroupService.generateRelation([ticketLaboratoryGroupUpdate], {
+            ticket: (_b = response === null || response === void 0 ? void 0 : response.ticketLaboratoryGroup) === null || _b === void 0 ? void 0 : _b.ticket,
+            customer: (_c = response === null || response === void 0 ? void 0 : response.ticketLaboratoryGroup) === null || _c === void 0 ? void 0 : _c.customer,
+            ticketUserList: (_d = response === null || response === void 0 ? void 0 : response.ticketLaboratoryGroup) === null || _d === void 0 ? void 0 : _d.customer,
+            ticketLaboratoryList: false,
+            ticketLaboratoryResultMap: (_e = response === null || response === void 0 ? void 0 : response.ticketLaboratoryGroup) === null || _e === void 0 ? void 0 : _e.ticketLaboratoryResultMap,
+            imageList: (_f = response === null || response === void 0 ? void 0 : response.ticketLaboratoryGroup) === null || _f === void 0 ? void 0 : _f.imageList,
+        });
+        return { data: { ticketLaboratoryGroup: ticketLaboratoryGroupUpdate } };
     }
-    async detail({ oid }, { id }, query) {
-        return await this.apiTicketLaboratoryGroupService.getOne(oid, id, query);
+    async cancelResult(options) {
+        const { oid, ticketLaboratoryGroupId } = options;
+        const ticketLaboratoryGroupUpdate = await this.ticketLaboratoryGroupRepository.updateOneAndReturnEntity({ oid, id: ticketLaboratoryGroupId }, { status: variable_1.TicketLaboratoryStatus.Pending });
+        const { ticketId } = ticketLaboratoryGroupUpdate;
+        const ticketLaboratoryUpdateList = await this.ticketLaboratoryRepository.updateAndReturnEntity({ oid, ticketId, ticketLaboratoryGroupId }, { status: variable_1.TicketLaboratoryStatus.Pending });
+        const ticketLaboratoryResultDestroyList = await this.ticketLaboratoryResultRepository.deleteAndReturnEntity({
+            oid,
+            ticketId,
+            ticketLaboratoryGroupId,
+        });
+        this.socketEmitService.ticketLaboratoryListChange(oid, {
+            ticketId,
+            ticketLaboratoryGroupUpdate,
+            ticketLaboratoryUpdateList,
+            ticketLaboratoryResultDestroyList,
+        });
+        return { data: true };
     }
 };
-exports.ApiTicketLaboratoryGroupController = ApiTicketLaboratoryGroupController;
-__decorate([
-    (0, common_1.Get)('pagination'),
-    (0, user_guard_1.UserPermission)(),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Query)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _b : Object, typeof (_c = typeof request_1.TicketLaboratoryGroupPaginationQuery !== "undefined" && request_1.TicketLaboratoryGroupPaginationQuery) === "function" ? _c : Object]),
-    __metadata("design:returntype", Promise)
-], ApiTicketLaboratoryGroupController.prototype, "pagination", null);
-__decorate([
-    (0, common_1.Get)('detail/:id'),
-    (0, user_guard_1.UserPermission)(),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __param(2, (0, common_1.Query)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _d : Object, typeof (_e = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _e : Object, typeof (_f = typeof request_1.TicketLaboratoryGroupGetOneQuery !== "undefined" && request_1.TicketLaboratoryGroupGetOneQuery) === "function" ? _f : Object]),
-    __metadata("design:returntype", Promise)
-], ApiTicketLaboratoryGroupController.prototype, "detail", null);
-exports.ApiTicketLaboratoryGroupController = ApiTicketLaboratoryGroupController = __decorate([
-    (0, swagger_1.ApiTags)('TicketLaboratoryGroup'),
-    (0, swagger_1.ApiBearerAuth)('access-token'),
-    (0, common_1.Controller)('ticket-laboratory-group'),
-    __metadata("design:paramtypes", [typeof (_a = typeof api_ticket_laboratory_group_service_1.ApiTicketLaboratoryGroupService !== "undefined" && api_ticket_laboratory_group_service_1.ApiTicketLaboratoryGroupService) === "function" ? _a : Object])
-], ApiTicketLaboratoryGroupController);
+exports.ApiTicketLaboratoryGroupAction = ApiTicketLaboratoryGroupAction;
+exports.ApiTicketLaboratoryGroupAction = ApiTicketLaboratoryGroupAction = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof repositories_1.TicketLaboratoryGroupRepository !== "undefined" && repositories_1.TicketLaboratoryGroupRepository) === "function" ? _b : Object, typeof (_c = typeof repositories_1.TicketLaboratoryRepository !== "undefined" && repositories_1.TicketLaboratoryRepository) === "function" ? _c : Object, typeof (_d = typeof repositories_1.TicketLaboratoryResultRepository !== "undefined" && repositories_1.TicketLaboratoryResultRepository) === "function" ? _d : Object, typeof (_e = typeof api_ticket_laboratory_group_service_1.ApiTicketLaboratoryGroupService !== "undefined" && api_ticket_laboratory_group_service_1.ApiTicketLaboratoryGroupService) === "function" ? _e : Object])
+], ApiTicketLaboratoryGroupAction);
 
 
 /***/ }),
-/* 637 */
+/* 655 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -51114,12 +52663,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketLaboratoryGroupService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const helpers_1 = __webpack_require__(270);
+const helpers_1 = __webpack_require__(274);
 const position_entity_1 = __webpack_require__(75);
-const repositories_1 = __webpack_require__(162);
-const laboratory_repository_1 = __webpack_require__(172);
-const user_repository_1 = __webpack_require__(91);
-const socket_emit_service_1 = __webpack_require__(317);
+const repositories_1 = __webpack_require__(164);
+const laboratory_repository_1 = __webpack_require__(176);
+const user_repository_1 = __webpack_require__(93);
+const socket_emit_service_1 = __webpack_require__(324);
 let ApiTicketLaboratoryGroupService = class ApiTicketLaboratoryGroupService {
     constructor(socketEmitService, ticketLaboratoryGroupRepository, ticketLaboratoryRepository, ticketLaboratoryResultRepository, laboratoryRepository, userRepository, customerRepository, ticketUserRepository, ticketRepository) {
         this.socketEmitService = socketEmitService;
@@ -51183,7 +52732,7 @@ let ApiTicketLaboratoryGroupService = class ApiTicketLaboratoryGroupService {
                 ? this.ticketUserRepository.findMany({
                     condition: {
                         ticketId: { IN: ticketIdList },
-                        positionType: position_entity_1.PositionType.LaboratoryGroup,
+                        positionType: position_entity_1.PositionInteractType.LaboratoryGroup,
                         ticketItemId: { IN: tlgIdList },
                     },
                     sort: { id: 'ASC' },
@@ -51231,7 +52780,110 @@ exports.ApiTicketLaboratoryGroupService = ApiTicketLaboratoryGroupService = __de
 
 
 /***/ }),
-/* 638 */
+/* 656 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ApiTicketLaboratoryGroupController = void 0;
+const common_1 = __webpack_require__(3);
+const swagger_1 = __webpack_require__(6);
+const dto_1 = __webpack_require__(302);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_ticket_laboratory_group_action_1 = __webpack_require__(654);
+const api_ticket_laboratory_group_service_1 = __webpack_require__(655);
+const request_1 = __webpack_require__(657);
+let ApiTicketLaboratoryGroupController = class ApiTicketLaboratoryGroupController {
+    constructor(apiTicketLaboratoryGroupService, apiTicketLaboratoryGroupAction) {
+        this.apiTicketLaboratoryGroupService = apiTicketLaboratoryGroupService;
+        this.apiTicketLaboratoryGroupAction = apiTicketLaboratoryGroupAction;
+    }
+    async pagination({ oid }, query) {
+        return await this.apiTicketLaboratoryGroupService.pagination(oid, query);
+    }
+    async detail({ oid }, { id }, query) {
+        return await this.apiTicketLaboratoryGroupService.getOne(oid, id, query);
+    }
+    async updateResultTicketLaboratory({ oid }, { id }, body, query) {
+        return await this.apiTicketLaboratoryGroupAction.updateResult({
+            oid,
+            ticketLaboratoryGroupId: id,
+            body,
+            query,
+        });
+    }
+    async cancelResultTicketLaboratory({ oid }, { id }) {
+        return await this.apiTicketLaboratoryGroupAction.cancelResult({
+            oid,
+            ticketLaboratoryGroupId: id,
+        });
+    }
+};
+exports.ApiTicketLaboratoryGroupController = ApiTicketLaboratoryGroupController;
+__decorate([
+    (0, common_1.Get)('pagination'),
+    (0, user_guard_1.UserPermission)(),
+    __param(0, (0, external_request_1.External)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_c = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _c : Object, typeof (_d = typeof request_1.TicketLaboratoryGroupPaginationQuery !== "undefined" && request_1.TicketLaboratoryGroupPaginationQuery) === "function" ? _d : Object]),
+    __metadata("design:returntype", Promise)
+], ApiTicketLaboratoryGroupController.prototype, "pagination", null);
+__decorate([
+    (0, common_1.Get)('detail/:id'),
+    (0, user_guard_1.UserPermission)(),
+    __param(0, (0, external_request_1.External)()),
+    __param(1, (0, common_1.Param)()),
+    __param(2, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_e = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _e : Object, typeof (_f = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _f : Object, typeof (_g = typeof request_1.TicketLaboratoryGroupGetOneQuery !== "undefined" && request_1.TicketLaboratoryGroupGetOneQuery) === "function" ? _g : Object]),
+    __metadata("design:returntype", Promise)
+], ApiTicketLaboratoryGroupController.prototype, "detail", null);
+__decorate([
+    (0, common_1.Post)('update-result/:id'),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.LABORATORY_UPDATE_RESULT),
+    __param(0, (0, external_request_1.External)()),
+    __param(1, (0, common_1.Param)()),
+    __param(2, (0, common_1.Body)()),
+    __param(3, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_h = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _h : Object, typeof (_j = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _j : Object, typeof (_k = typeof request_1.TicketLaboratoryGroupUpdateResultBody !== "undefined" && request_1.TicketLaboratoryGroupUpdateResultBody) === "function" ? _k : Object, typeof (_l = typeof request_1.TicketLaboratoryGroupPostQuery !== "undefined" && request_1.TicketLaboratoryGroupPostQuery) === "function" ? _l : Object]),
+    __metadata("design:returntype", Promise)
+], ApiTicketLaboratoryGroupController.prototype, "updateResultTicketLaboratory", null);
+__decorate([
+    (0, common_1.Post)('cancel-result/:id'),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.LABORATORY_CANCEL_RESULT),
+    __param(0, (0, external_request_1.External)()),
+    __param(1, (0, common_1.Param)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_m = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _m : Object, typeof (_o = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _o : Object]),
+    __metadata("design:returntype", Promise)
+], ApiTicketLaboratoryGroupController.prototype, "cancelResultTicketLaboratory", null);
+exports.ApiTicketLaboratoryGroupController = ApiTicketLaboratoryGroupController = __decorate([
+    (0, swagger_1.ApiTags)('TicketLaboratoryGroup'),
+    (0, swagger_1.ApiBearerAuth)('access-token'),
+    (0, common_1.Controller)('ticket-laboratory-group'),
+    __metadata("design:paramtypes", [typeof (_a = typeof api_ticket_laboratory_group_service_1.ApiTicketLaboratoryGroupService !== "undefined" && api_ticket_laboratory_group_service_1.ApiTicketLaboratoryGroupService) === "function" ? _a : Object, typeof (_b = typeof api_ticket_laboratory_group_action_1.ApiTicketLaboratoryGroupAction !== "undefined" && api_ticket_laboratory_group_action_1.ApiTicketLaboratoryGroupAction) === "function" ? _b : Object])
+], ApiTicketLaboratoryGroupController);
+
+
+/***/ }),
+/* 657 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -51250,121 +52902,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(639), exports);
-__exportStar(__webpack_require__(640), exports);
+__exportStar(__webpack_require__(658), exports);
+__exportStar(__webpack_require__(659), exports);
+__exportStar(__webpack_require__(660), exports);
 
 
 /***/ }),
-/* 639 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a, _b, _c;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketLaboratoryGroupGetOneQuery = exports.TicketLaboratoryGroupGetManyQuery = exports.TicketLaboratoryGroupPaginationQuery = exports.TicketLaboratoryGroupGetQuery = void 0;
-const swagger_1 = __webpack_require__(6);
-const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const ticket_laboratory_group_options_request_1 = __webpack_require__(640);
-class TicketLaboratoryGroupGetQuery {
-}
-exports.TicketLaboratoryGroupGetQuery = TicketLaboratoryGroupGetQuery;
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({ type: String, example: JSON.stringify({}) }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => {
-        try {
-            if (!value)
-                return undefined;
-            const plain = JSON.parse(value);
-            return (0, class_transformer_1.plainToInstance)(ticket_laboratory_group_options_request_1.TicketLaboratoryGroupRelationQuery, plain, {
-                exposeUnsetFields: false,
-                excludeExtraneousValues: false,
-            });
-        }
-        catch (error) {
-            return error.message;
-        }
-    }),
-    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", typeof (_a = typeof ticket_laboratory_group_options_request_1.TicketLaboratoryGroupRelationQuery !== "undefined" && ticket_laboratory_group_options_request_1.TicketLaboratoryGroupRelationQuery) === "function" ? _a : Object)
-], TicketLaboratoryGroupGetQuery.prototype, "relation", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        type: String,
-        example: JSON.stringify({
-            customerId: 1,
-        }),
-    }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => {
-        try {
-            if (!value)
-                return undefined;
-            const plain = JSON.parse(value);
-            return (0, class_transformer_1.plainToInstance)(ticket_laboratory_group_options_request_1.TicketLaboratoryGroupFilterQuery, plain, {
-                exposeUnsetFields: false,
-                excludeExtraneousValues: false,
-            });
-        }
-        catch (error) {
-            return error.message;
-        }
-    }),
-    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", typeof (_b = typeof ticket_laboratory_group_options_request_1.TicketLaboratoryGroupFilterQuery !== "undefined" && ticket_laboratory_group_options_request_1.TicketLaboratoryGroupFilterQuery) === "function" ? _b : Object)
-], TicketLaboratoryGroupGetQuery.prototype, "filter", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        type: String,
-        example: JSON.stringify({
-            id: 'ASC',
-        }),
-    }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => {
-        try {
-            if (!value)
-                return undefined;
-            const plain = JSON.parse(value);
-            return (0, class_transformer_1.plainToInstance)(ticket_laboratory_group_options_request_1.TicketLaboratoryGroupSortQuery, plain, {
-                exposeUnsetFields: false,
-                excludeExtraneousValues: false,
-            });
-        }
-        catch (error) {
-            return error.message;
-        }
-    }),
-    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", typeof (_c = typeof ticket_laboratory_group_options_request_1.TicketLaboratoryGroupSortQuery !== "undefined" && ticket_laboratory_group_options_request_1.TicketLaboratoryGroupSortQuery) === "function" ? _c : Object)
-], TicketLaboratoryGroupGetQuery.prototype, "sort", void 0);
-class TicketLaboratoryGroupPaginationQuery extends (0, swagger_1.IntersectionType)(TicketLaboratoryGroupGetQuery, query_1.PaginationQuery) {
-}
-exports.TicketLaboratoryGroupPaginationQuery = TicketLaboratoryGroupPaginationQuery;
-class TicketLaboratoryGroupGetManyQuery extends (0, swagger_1.IntersectionType)((0, swagger_1.PickType)(TicketLaboratoryGroupGetQuery, ['filter', 'relation', 'sort']), query_1.LimitQuery) {
-}
-exports.TicketLaboratoryGroupGetManyQuery = TicketLaboratoryGroupGetManyQuery;
-class TicketLaboratoryGroupGetOneQuery extends (0, swagger_1.PickType)(TicketLaboratoryGroupGetQuery, ['relation']) {
-}
-exports.TicketLaboratoryGroupGetOneQuery = TicketLaboratoryGroupGetOneQuery;
-
-
-/***/ }),
-/* 640 */
+/* 658 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -51379,11 +52923,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketLaboratoryGroupSortQuery = exports.TicketLaboratoryGroupFilterQuery = exports.TicketLaboratoryGroupRelationQuery = void 0;
+exports.TicketLaboratoryGroupResponseQuery = exports.TicketLaboratoryGroupSortQuery = exports.TicketLaboratoryGroupFilterQuery = exports.TicketLaboratoryGroupRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
+const query_1 = __webpack_require__(265);
 const variable_1 = __webpack_require__(21);
 class TicketLaboratoryGroupRelationQuery {
 }
@@ -51463,10 +53007,234 @@ __decorate([
     (0, class_validator_1.IsIn)(['ASC', 'DESC']),
     __metadata("design:type", String)
 ], TicketLaboratoryGroupSortQuery.prototype, "startedAt", void 0);
+class TicketLaboratoryGroupResponseQuery {
+}
+exports.TicketLaboratoryGroupResponseQuery = TicketLaboratoryGroupResponseQuery;
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsObject)(),
+    __metadata("design:type", Object)
+], TicketLaboratoryGroupResponseQuery.prototype, "ticketLaboratoryGroup", void 0);
 
 
 /***/ }),
-/* 641 */
+/* 659 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TicketLaboratoryGroupUpdateResultBody = exports.TicketLaboratoryResultUpdate = void 0;
+const swagger_1 = __webpack_require__(6);
+const class_transformer_1 = __webpack_require__(17);
+const class_validator_1 = __webpack_require__(252);
+class TicketLaboratoryResultUpdate {
+}
+exports.TicketLaboratoryResultUpdate = TicketLaboratoryResultUpdate;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 56 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], TicketLaboratoryResultUpdate.prototype, "id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 56 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketLaboratoryResultUpdate.prototype, "laboratoryId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 56 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketLaboratoryResultUpdate.prototype, "ticketLaboratoryId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Âm tính' }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TicketLaboratoryResultUpdate.prototype, "result", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 1 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketLaboratoryResultUpdate.prototype, "attention", void 0);
+class TicketLaboratoryGroupUpdateResultBody {
+}
+exports.TicketLaboratoryGroupUpdateResultBody = TicketLaboratoryGroupUpdateResultBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: TicketLaboratoryResultUpdate, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => TicketLaboratoryResultUpdate),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], TicketLaboratoryGroupUpdateResultBody.prototype, "ticketLaboratoryResultUpdateList", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: Date.now() }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], TicketLaboratoryGroupUpdateResultBody.prototype, "startedAt", void 0);
+
+
+/***/ }),
+/* 660 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TicketLaboratoryGroupGetOneQuery = exports.TicketLaboratoryGroupGetManyQuery = exports.TicketLaboratoryGroupPaginationQuery = exports.TicketLaboratoryGroupPostQuery = exports.TicketLaboratoryGroupGetQuery = void 0;
+const swagger_1 = __webpack_require__(6);
+const class_transformer_1 = __webpack_require__(17);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const ticket_laboratory_group_options_request_1 = __webpack_require__(658);
+class TicketLaboratoryGroupGetQuery {
+}
+exports.TicketLaboratoryGroupGetQuery = TicketLaboratoryGroupGetQuery;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        type: String,
+        example: JSON.stringify({}),
+    }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        try {
+            if (!value)
+                return undefined;
+            const plain = JSON.parse(value);
+            return (0, class_transformer_1.plainToInstance)(ticket_laboratory_group_options_request_1.TicketLaboratoryGroupRelationQuery, plain, {
+                exposeUnsetFields: false,
+                excludeExtraneousValues: false,
+            });
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_a = typeof ticket_laboratory_group_options_request_1.TicketLaboratoryGroupRelationQuery !== "undefined" && ticket_laboratory_group_options_request_1.TicketLaboratoryGroupRelationQuery) === "function" ? _a : Object)
+], TicketLaboratoryGroupGetQuery.prototype, "relation", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        type: String,
+        example: JSON.stringify({
+            customerId: 1,
+        }),
+    }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        try {
+            if (!value)
+                return undefined;
+            const plain = JSON.parse(value);
+            return (0, class_transformer_1.plainToInstance)(ticket_laboratory_group_options_request_1.TicketLaboratoryGroupFilterQuery, plain, {
+                exposeUnsetFields: false,
+                excludeExtraneousValues: false,
+            });
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_b = typeof ticket_laboratory_group_options_request_1.TicketLaboratoryGroupFilterQuery !== "undefined" && ticket_laboratory_group_options_request_1.TicketLaboratoryGroupFilterQuery) === "function" ? _b : Object)
+], TicketLaboratoryGroupGetQuery.prototype, "filter", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        type: String,
+        example: JSON.stringify({
+            id: 'ASC',
+        }),
+    }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        try {
+            if (!value)
+                return undefined;
+            const plain = JSON.parse(value);
+            return (0, class_transformer_1.plainToInstance)(ticket_laboratory_group_options_request_1.TicketLaboratoryGroupSortQuery, plain, {
+                exposeUnsetFields: false,
+                excludeExtraneousValues: false,
+            });
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_c = typeof ticket_laboratory_group_options_request_1.TicketLaboratoryGroupSortQuery !== "undefined" && ticket_laboratory_group_options_request_1.TicketLaboratoryGroupSortQuery) === "function" ? _c : Object)
+], TicketLaboratoryGroupGetQuery.prototype, "sort", void 0);
+class TicketLaboratoryGroupPostQuery {
+}
+exports.TicketLaboratoryGroupPostQuery = TicketLaboratoryGroupPostQuery;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: String, example: JSON.stringify({}) }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        try {
+            if (!value)
+                return undefined;
+            const plain = JSON.parse(value);
+            return (0, class_transformer_1.plainToInstance)(ticket_laboratory_group_options_request_1.TicketLaboratoryGroupResponseQuery, plain, {
+                exposeUnsetFields: false,
+                excludeExtraneousValues: false,
+            });
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_d = typeof ticket_laboratory_group_options_request_1.TicketLaboratoryGroupResponseQuery !== "undefined" && ticket_laboratory_group_options_request_1.TicketLaboratoryGroupResponseQuery) === "function" ? _d : Object)
+], TicketLaboratoryGroupPostQuery.prototype, "response", void 0);
+class TicketLaboratoryGroupPaginationQuery extends (0, swagger_1.IntersectionType)(TicketLaboratoryGroupGetQuery, query_1.PaginationQuery) {
+}
+exports.TicketLaboratoryGroupPaginationQuery = TicketLaboratoryGroupPaginationQuery;
+class TicketLaboratoryGroupGetManyQuery extends (0, swagger_1.IntersectionType)((0, swagger_1.PickType)(TicketLaboratoryGroupGetQuery, ['filter', 'relation', 'sort']), query_1.LimitQuery) {
+}
+exports.TicketLaboratoryGroupGetManyQuery = TicketLaboratoryGroupGetManyQuery;
+class TicketLaboratoryGroupGetOneQuery extends (0, swagger_1.PickType)(TicketLaboratoryGroupGetQuery, [
+    'relation',
+]) {
+}
+exports.TicketLaboratoryGroupGetOneQuery = TicketLaboratoryGroupGetOneQuery;
+
+
+/***/ }),
+/* 661 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -51479,8 +53247,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketLaboratoryModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_ticket_laboratory_controller_1 = __webpack_require__(642);
-const api_ticket_laboratory_service_1 = __webpack_require__(643);
+const api_ticket_laboratory_controller_1 = __webpack_require__(662);
+const api_ticket_laboratory_service_1 = __webpack_require__(663);
 let ApiTicketLaboratoryModule = class ApiTicketLaboratoryModule {
 };
 exports.ApiTicketLaboratoryModule = ApiTicketLaboratoryModule;
@@ -51494,7 +53262,7 @@ exports.ApiTicketLaboratoryModule = ApiTicketLaboratoryModule = __decorate([
 
 
 /***/ }),
-/* 642 */
+/* 662 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -51515,11 +53283,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketLaboratoryController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const dto_1 = __webpack_require__(295);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const api_ticket_laboratory_service_1 = __webpack_require__(643);
-const request_1 = __webpack_require__(644);
+const dto_1 = __webpack_require__(302);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const api_ticket_laboratory_service_1 = __webpack_require__(663);
+const request_1 = __webpack_require__(664);
 let ApiTicketLaboratoryController = class ApiTicketLaboratoryController {
     constructor(apiTicketLaboratoryService) {
         this.apiTicketLaboratoryService = apiTicketLaboratoryService;
@@ -51560,7 +53328,7 @@ exports.ApiTicketLaboratoryController = ApiTicketLaboratoryController = __decora
 
 
 /***/ }),
-/* 643 */
+/* 663 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -51578,11 +53346,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketLaboratoryService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const repositories_1 = __webpack_require__(162);
-const laboratory_repository_1 = __webpack_require__(172);
-const ticket_laboratory_repository_1 = __webpack_require__(194);
-const user_repository_1 = __webpack_require__(91);
-const socket_emit_service_1 = __webpack_require__(317);
+const repositories_1 = __webpack_require__(164);
+const laboratory_repository_1 = __webpack_require__(176);
+const ticket_laboratory_repository_1 = __webpack_require__(198);
+const user_repository_1 = __webpack_require__(93);
+const socket_emit_service_1 = __webpack_require__(324);
 let ApiTicketLaboratoryService = class ApiTicketLaboratoryService {
     constructor(socketEmitService, ticketLaboratoryRepository, laboratoryRepository, userRepository, ticketRepository) {
         this.socketEmitService = socketEmitService;
@@ -51639,7 +53407,7 @@ exports.ApiTicketLaboratoryService = ApiTicketLaboratoryService = __decorate([
 
 
 /***/ }),
-/* 644 */
+/* 664 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -51658,12 +53426,12 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(645), exports);
-__exportStar(__webpack_require__(646), exports);
+__exportStar(__webpack_require__(665), exports);
+__exportStar(__webpack_require__(666), exports);
 
 
 /***/ }),
-/* 645 */
+/* 665 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -51681,9 +53449,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketLaboratoryGetOneQuery = exports.TicketLaboratoryGetManyQuery = exports.TicketLaboratoryPaginationQuery = exports.TicketLaboratoryGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const ticket_laboratory_options_request_1 = __webpack_require__(646);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const ticket_laboratory_options_request_1 = __webpack_require__(666);
 class TicketLaboratoryGetQuery {
 }
 exports.TicketLaboratoryGetQuery = TicketLaboratoryGetQuery;
@@ -51772,7 +53540,7 @@ exports.TicketLaboratoryGetOneQuery = TicketLaboratoryGetOneQuery;
 
 
 /***/ }),
-/* 646 */
+/* 666 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -51789,9 +53557,9 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketLaboratorySortQuery = exports.TicketLaboratoryFilterQuery = exports.TicketLaboratoryRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
+const query_1 = __webpack_require__(265);
 class TicketLaboratoryRelationQuery {
 }
 exports.TicketLaboratoryRelationQuery = TicketLaboratoryRelationQuery;
@@ -51850,7 +53618,7 @@ __decorate([
 
 
 /***/ }),
-/* 647 */
+/* 667 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -51863,8 +53631,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketOrderModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_ticket_order_controller_1 = __webpack_require__(648);
-const api_ticket_order_service_1 = __webpack_require__(649);
+const api_ticket_order_controller_1 = __webpack_require__(668);
+const api_ticket_order_service_1 = __webpack_require__(669);
 let ApiTicketOrderModule = class ApiTicketOrderModule {
 };
 exports.ApiTicketOrderModule = ApiTicketOrderModule;
@@ -51878,7 +53646,7 @@ exports.ApiTicketOrderModule = ApiTicketOrderModule = __decorate([
 
 
 /***/ }),
-/* 648 */
+/* 668 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -51899,13 +53667,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketOrderController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const dto_1 = __webpack_require__(295);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const request_1 = __webpack_require__(293);
-const api_ticket_order_service_1 = __webpack_require__(649);
-const request_2 = __webpack_require__(650);
+const dto_1 = __webpack_require__(302);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const request_1 = __webpack_require__(300);
+const api_ticket_order_service_1 = __webpack_require__(669);
+const request_2 = __webpack_require__(670);
 let ApiTicketOrderController = class ApiTicketOrderController {
     constructor(apiTicketOrderService) {
         this.apiTicketOrderService = apiTicketOrderService;
@@ -52149,7 +53917,7 @@ exports.ApiTicketOrderController = ApiTicketOrderController = __decorate([
 
 
 /***/ }),
-/* 649 */
+/* 669 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -52181,9 +53949,9 @@ const cache_data_service_1 = __webpack_require__(38);
 const variable_1 = __webpack_require__(21);
 const payment_entity_1 = __webpack_require__(48);
 const ticket_entity_1 = __webpack_require__(56);
-const operations_1 = __webpack_require__(142);
-const repositories_1 = __webpack_require__(162);
-const socket_emit_service_1 = __webpack_require__(317);
+const operations_1 = __webpack_require__(144);
+const repositories_1 = __webpack_require__(164);
+const socket_emit_service_1 = __webpack_require__(324);
 let ApiTicketOrderService = class ApiTicketOrderService {
     constructor(socketEmitService, cacheDataService, ticketProductRepository, ticketBatchRepository, ticketOrderDraftOperation, ticketOrderDepositedOperation, ticketPaymentAndCloseOperation, ticketSendProductOperation, ticketRepository, ticketPrepaymentOperation, ticketPayDebtOperation, ticketRefundOverpaidOperation, ticketReopenOperation, ticketReturnProductOperation, paymentRepository) {
         this.socketEmitService = socketEmitService;
@@ -52644,7 +54412,7 @@ exports.ApiTicketOrderService = ApiTicketOrderService = __decorate([
 
 
 /***/ }),
-/* 650 */
+/* 670 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -52663,15 +54431,15 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(651), exports);
-__exportStar(__webpack_require__(652), exports);
-__exportStar(__webpack_require__(653), exports);
-__exportStar(__webpack_require__(654), exports);
-__exportStar(__webpack_require__(655), exports);
+__exportStar(__webpack_require__(671), exports);
+__exportStar(__webpack_require__(672), exports);
+__exportStar(__webpack_require__(673), exports);
+__exportStar(__webpack_require__(674), exports);
+__exportStar(__webpack_require__(675), exports);
 
 
 /***/ }),
-/* 651 */
+/* 671 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -52687,8 +54455,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketOrderExpenseDraft = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class TicketOrderExpenseDraft {
 }
 exports.TicketOrderExpenseDraft = TicketOrderExpenseDraft;
@@ -52713,7 +54481,7 @@ __decorate([
 
 
 /***/ }),
-/* 652 */
+/* 672 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -52731,9 +54499,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketOrderProcedureDraft = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const typescript_helper_1 = __webpack_require__(250);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const typescript_helper_1 = __webpack_require__(254);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
 class TicketOrderProcedureDraft {
 }
@@ -52801,7 +54569,7 @@ __decorate([
 
 
 /***/ }),
-/* 653 */
+/* 673 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -52819,9 +54587,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketOrderProductDraft = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const typescript_helper_1 = __webpack_require__(250);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const typescript_helper_1 = __webpack_require__(254);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
 class TicketOrderProductDraft {
 }
@@ -52947,7 +54715,7 @@ __decorate([
 
 
 /***/ }),
-/* 654 */
+/* 674 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -52963,8 +54731,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketOrderSurchargeDraft = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 class TicketOrderSurchargeDraft {
 }
 exports.TicketOrderSurchargeDraft = TicketOrderSurchargeDraft;
@@ -52989,7 +54757,7 @@ __decorate([
 
 
 /***/ }),
-/* 655 */
+/* 675 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -53007,13 +54775,13 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketOrderDebtSuccessUpdateBody = exports.TicketOrderDebtSuccessInsertBody = exports.TicketOrderDepositedUpdateBody = exports.TicketOrderDraftUpsertBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
-const ticket_order_expense_draft_1 = __webpack_require__(651);
-const ticket_order_procedure_draft_1 = __webpack_require__(652);
-const ticket_order_product_draft_1 = __webpack_require__(653);
-const ticket_order_surcharge_draft_1 = __webpack_require__(654);
+const ticket_order_expense_draft_1 = __webpack_require__(671);
+const ticket_order_procedure_draft_1 = __webpack_require__(672);
+const ticket_order_product_draft_1 = __webpack_require__(673);
+const ticket_order_surcharge_draft_1 = __webpack_require__(674);
 class TicketOrderBasic {
 }
 __decorate([
@@ -53276,7 +55044,7 @@ __decorate([
 
 
 /***/ }),
-/* 656 */
+/* 676 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -53289,8 +55057,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketProcedureModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_ticket_procedure_controller_1 = __webpack_require__(657);
-const api_ticket_procedure_service_1 = __webpack_require__(658);
+const api_ticket_procedure_controller_1 = __webpack_require__(677);
+const api_ticket_procedure_service_1 = __webpack_require__(678);
 let ApiTicketProcedureModule = class ApiTicketProcedureModule {
 };
 exports.ApiTicketProcedureModule = ApiTicketProcedureModule;
@@ -53304,7 +55072,7 @@ exports.ApiTicketProcedureModule = ApiTicketProcedureModule = __decorate([
 
 
 /***/ }),
-/* 657 */
+/* 677 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -53324,13 +55092,13 @@ var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketProcedureController = void 0;
 const common_1 = __webpack_require__(3);
-const route_params_decorator_1 = __webpack_require__(523);
+const route_params_decorator_1 = __webpack_require__(543);
 const swagger_1 = __webpack_require__(6);
-const dto_1 = __webpack_require__(295);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const api_ticket_procedure_service_1 = __webpack_require__(658);
-const request_1 = __webpack_require__(659);
+const dto_1 = __webpack_require__(302);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const api_ticket_procedure_service_1 = __webpack_require__(678);
+const request_1 = __webpack_require__(679);
 let ApiTicketProcedureController = class ApiTicketProcedureController {
     constructor(apiTicketProcedureService) {
         this.apiTicketProcedureService = apiTicketProcedureService;
@@ -53371,7 +55139,7 @@ exports.ApiTicketProcedureController = ApiTicketProcedureController = __decorate
 
 
 /***/ }),
-/* 658 */
+/* 678 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -53400,11 +55168,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketProcedureService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const array_helper_1 = __webpack_require__(92);
+const array_helper_1 = __webpack_require__(94);
 const position_entity_1 = __webpack_require__(75);
-const image_repository_1 = __webpack_require__(169);
-const ticket_procedure_repository_1 = __webpack_require__(195);
-const ticket_user_repository_1 = __webpack_require__(199);
+const image_repository_1 = __webpack_require__(173);
+const ticket_procedure_repository_1 = __webpack_require__(199);
+const ticket_user_repository_1 = __webpack_require__(203);
 let ApiTicketProcedureService = class ApiTicketProcedureService {
     constructor(ticketProcedureRepository, ticketUserRepository, imageRepository) {
         this.ticketProcedureRepository = ticketProcedureRepository;
@@ -53456,7 +55224,7 @@ let ApiTicketProcedureService = class ApiTicketProcedureService {
             ticketProcedure.ticketUserList = await this.ticketUserRepository.findManyBy({
                 oid,
                 ticketId: ticketProcedure.ticketId,
-                positionType: position_entity_1.PositionType.Procedure,
+                positionType: position_entity_1.PositionInteractType.Procedure,
                 positionInteractId: ticketProcedure.id,
             });
         }
@@ -53471,7 +55239,7 @@ exports.ApiTicketProcedureService = ApiTicketProcedureService = __decorate([
 
 
 /***/ }),
-/* 659 */
+/* 679 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -53490,12 +55258,12 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(660), exports);
-__exportStar(__webpack_require__(661), exports);
+__exportStar(__webpack_require__(680), exports);
+__exportStar(__webpack_require__(681), exports);
 
 
 /***/ }),
-/* 660 */
+/* 680 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -53513,9 +55281,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketProcedureGetOneQuery = exports.TicketProcedureGetManyQuery = exports.TicketProcedurePaginationQuery = exports.TicketProcedureGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const ticket_procedure_options_request_1 = __webpack_require__(661);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const ticket_procedure_options_request_1 = __webpack_require__(681);
 class TicketProcedureGetQuery {
 }
 exports.TicketProcedureGetQuery = TicketProcedureGetQuery;
@@ -53604,7 +55372,7 @@ exports.TicketProcedureGetOneQuery = TicketProcedureGetOneQuery;
 
 
 /***/ }),
-/* 661 */
+/* 681 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -53620,8 +55388,8 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketProcedureSortQuery = exports.TicketProcedureFilterQuery = exports.TicketProcedureRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
 class TicketProcedureRelationQuery {
 }
 exports.TicketProcedureRelationQuery = TicketProcedureRelationQuery;
@@ -53674,7 +55442,7 @@ exports.TicketProcedureSortQuery = TicketProcedureSortQuery;
 
 
 /***/ }),
-/* 662 */
+/* 682 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -53687,8 +55455,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketProductModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_ticket_product_controller_1 = __webpack_require__(663);
-const api_ticket_product_service_1 = __webpack_require__(664);
+const api_ticket_product_controller_1 = __webpack_require__(683);
+const api_ticket_product_service_1 = __webpack_require__(684);
 let ApiTicketProductModule = class ApiTicketProductModule {
 };
 exports.ApiTicketProductModule = ApiTicketProductModule;
@@ -53702,7 +55470,7 @@ exports.ApiTicketProductModule = ApiTicketProductModule = __decorate([
 
 
 /***/ }),
-/* 663 */
+/* 683 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -53718,22 +55486,25 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketProductController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const dto_1 = __webpack_require__(295);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const api_ticket_product_service_1 = __webpack_require__(664);
-const request_1 = __webpack_require__(665);
+const dto_1 = __webpack_require__(302);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const api_ticket_product_service_1 = __webpack_require__(684);
+const request_1 = __webpack_require__(685);
 let ApiTicketProductController = class ApiTicketProductController {
     constructor(apiTicketProductService) {
         this.apiTicketProductService = apiTicketProductService;
     }
     async pagination({ oid }, query) {
         return await this.apiTicketProductService.pagination(oid, query);
+    }
+    async list({ oid }, query) {
+        return await this.apiTicketProductService.getList(oid, query);
     }
     async destroyZero({ oid }, { id }) {
         return await this.apiTicketProductService.destroyZero(oid, id);
@@ -53750,12 +55521,21 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], ApiTicketProductController.prototype, "pagination", null);
 __decorate([
+    (0, common_1.Get)('list'),
+    (0, user_guard_1.UserPermission)(),
+    __param(0, (0, external_request_1.External)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_d = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _d : Object, typeof (_e = typeof request_1.TicketProductGetManyQuery !== "undefined" && request_1.TicketProductGetManyQuery) === "function" ? _e : Object]),
+    __metadata("design:returntype", Promise)
+], ApiTicketProductController.prototype, "list", null);
+__decorate([
     (0, common_1.Delete)('destroy-zero/:id'),
     (0, user_guard_1.UserPermission)(),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _d : Object, typeof (_e = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _e : Object]),
+    __metadata("design:paramtypes", [typeof (_f = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _f : Object, typeof (_g = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _g : Object]),
     __metadata("design:returntype", Promise)
 ], ApiTicketProductController.prototype, "destroyZero", null);
 exports.ApiTicketProductController = ApiTicketProductController = __decorate([
@@ -53767,7 +55547,7 @@ exports.ApiTicketProductController = ApiTicketProductController = __decorate([
 
 
 /***/ }),
-/* 664 */
+/* 684 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -53784,7 +55564,7 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketProductService = void 0;
 const common_1 = __webpack_require__(3);
-const ticket_product_repository_1 = __webpack_require__(196);
+const ticket_product_repository_1 = __webpack_require__(200);
 let ApiTicketProductService = class ApiTicketProductService {
     constructor(ticketProductRepository) {
         this.ticketProductRepository = ticketProductRepository;
@@ -53809,6 +55589,21 @@ let ApiTicketProductService = class ApiTicketProductService {
             meta: { page, limit, total },
         };
     }
+    async getList(oid, query) {
+        const { filter, limit, relation, sort } = query;
+        const ticketProductList = await this.ticketProductRepository.findMany({
+            condition: {
+                oid,
+                customerId: filter === null || filter === void 0 ? void 0 : filter.customerId,
+                productId: filter === null || filter === void 0 ? void 0 : filter.productId,
+                ticketId: filter === null || filter === void 0 ? void 0 : filter.ticketId,
+                deliveryStatus: filter === null || filter === void 0 ? void 0 : filter.deliveryStatus,
+            },
+            limit,
+            sort,
+        });
+        return { data: { ticketProductList } };
+    }
     async destroyZero(oid, ticketProductId) {
         await this.ticketProductRepository.delete({
             oid,
@@ -53826,7 +55621,7 @@ exports.ApiTicketProductService = ApiTicketProductService = __decorate([
 
 
 /***/ }),
-/* 665 */
+/* 685 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -53845,12 +55640,12 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(666), exports);
-__exportStar(__webpack_require__(667), exports);
+__exportStar(__webpack_require__(686), exports);
+__exportStar(__webpack_require__(687), exports);
 
 
 /***/ }),
-/* 666 */
+/* 686 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -53868,9 +55663,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketProductGetOneQuery = exports.TicketProductGetManyQuery = exports.TicketProductPaginationQuery = exports.TicketProductGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const ticket_product_options_request_1 = __webpack_require__(667);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const ticket_product_options_request_1 = __webpack_require__(687);
 class TicketProductGetQuery {
 }
 exports.TicketProductGetQuery = TicketProductGetQuery;
@@ -53959,7 +55754,7 @@ exports.TicketProductGetOneQuery = TicketProductGetOneQuery;
 
 
 /***/ }),
-/* 667 */
+/* 687 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -53976,9 +55771,9 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketProductSortQuery = exports.TicketProductFilterQuery = exports.TicketProductRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
+const query_1 = __webpack_require__(265);
 const variable_1 = __webpack_require__(21);
 class TicketProductRelationQuery {
 }
@@ -54029,7 +55824,7 @@ exports.TicketProductSortQuery = TicketProductSortQuery;
 
 
 /***/ }),
-/* 668 */
+/* 688 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -54042,22 +55837,24 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketRadiologyModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_ticket_radiology_controller_1 = __webpack_require__(669);
-const api_ticket_radiology_service_1 = __webpack_require__(670);
+const api_ticket_clinic_user_module_1 = __webpack_require__(604);
+const api_ticket_radiology_action_1 = __webpack_require__(689);
+const api_ticket_radiology_controller_1 = __webpack_require__(691);
+const api_ticket_radiology_service_1 = __webpack_require__(690);
 let ApiTicketRadiologyModule = class ApiTicketRadiologyModule {
 };
 exports.ApiTicketRadiologyModule = ApiTicketRadiologyModule;
 exports.ApiTicketRadiologyModule = ApiTicketRadiologyModule = __decorate([
     (0, common_1.Module)({
-        imports: [],
+        imports: [api_ticket_clinic_user_module_1.ApiTicketClinicUserModule],
         controllers: [api_ticket_radiology_controller_1.ApiTicketRadiologyController],
-        providers: [api_ticket_radiology_service_1.ApiTicketRadiologyService],
+        providers: [api_ticket_radiology_service_1.ApiTicketRadiologyService, api_ticket_radiology_action_1.ApiTicketRadiologyAction],
     })
 ], ApiTicketRadiologyModule);
 
 
 /***/ }),
-/* 669 */
+/* 689 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -54070,60 +55867,125 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ApiTicketRadiologyController = void 0;
+exports.ApiTicketRadiologyAction = void 0;
 const common_1 = __webpack_require__(3);
-const swagger_1 = __webpack_require__(6);
-const dto_1 = __webpack_require__(295);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const api_ticket_radiology_service_1 = __webpack_require__(670);
-const request_1 = __webpack_require__(671);
-let ApiTicketRadiologyController = class ApiTicketRadiologyController {
-    constructor(apiTicketRadiologyService) {
+const position_entity_1 = __webpack_require__(75);
+const ticket_radiology_entity_1 = __webpack_require__(70);
+const repositories_1 = __webpack_require__(164);
+const image_repository_1 = __webpack_require__(173);
+const ticket_radiology_repository_1 = __webpack_require__(201);
+const image_manager_service_1 = __webpack_require__(424);
+const socket_emit_service_1 = __webpack_require__(324);
+const api_ticket_clinic_user_service_1 = __webpack_require__(606);
+const api_ticket_radiology_service_1 = __webpack_require__(690);
+let ApiTicketRadiologyAction = class ApiTicketRadiologyAction {
+    constructor(ticketRadiologyRepository, customerRepository, ticketUserRepository, ticketRepository, socketEmitService, imageManagerService, imageRepository, apiTicketRadiologyService, apiTicketClinicUserService) {
+        this.ticketRadiologyRepository = ticketRadiologyRepository;
+        this.customerRepository = customerRepository;
+        this.ticketUserRepository = ticketUserRepository;
+        this.ticketRepository = ticketRepository;
+        this.socketEmitService = socketEmitService;
+        this.imageManagerService = imageManagerService;
+        this.imageRepository = imageRepository;
         this.apiTicketRadiologyService = apiTicketRadiologyService;
+        this.apiTicketClinicUserService = apiTicketClinicUserService;
     }
-    async pagination({ oid }, query) {
-        return await this.apiTicketRadiologyService.pagination(oid, query);
+    async updateResult(options) {
+        var _a, _b, _c, _d, _e, _f;
+        const { oid, ticketRadiologyId, body, files } = options;
+        const response = (_a = options.query) === null || _a === void 0 ? void 0 : _a.response;
+        const ticketRadiologyOrigin = await this.ticketRadiologyRepository.findOneBy({
+            oid,
+            id: ticketRadiologyId,
+        });
+        const { ticketId, customerId } = ticketRadiologyOrigin;
+        const imageIdsUpdate = await this.imageManagerService.changeImageList({
+            oid,
+            customerId,
+            files,
+            filesPosition: body.filesPosition,
+            imageIdsKeep: body.imageIdsKeep,
+            imageIdsOld: JSON.parse(ticketRadiologyOrigin.imageIds),
+        });
+        const ticketRadiologyModified = await this.ticketRadiologyRepository.updateOneAndReturnEntity({
+            oid,
+            ticketId,
+            id: ticketRadiologyId,
+        }, {
+            description: body.ticketRadiology.description,
+            result: body.ticketRadiology.result,
+            startedAt: body.ticketRadiology.startedAt,
+            imageIds: JSON.stringify(imageIdsUpdate),
+            status: ticket_radiology_entity_1.TicketRadiologyStatus.Completed,
+        });
+        this.socketEmitService.ticketRadiologyListChange(oid, {
+            ticketId,
+            ticketRadiologyUpdate: ticketRadiologyModified,
+        });
+        if ((_b = body.ticketUserList) === null || _b === void 0 ? void 0 : _b.length) {
+            this.apiTicketClinicUserService.changeTicketUserList({
+                oid,
+                ticketId,
+                body: {
+                    positionType: position_entity_1.PositionInteractType.Radiology,
+                    positionInteractId: ticketRadiologyModified.radiologyId,
+                    ticketItemId: ticketRadiologyModified.id,
+                    quantity: 1,
+                    ticketUserList: body.ticketUserList,
+                },
+            });
+        }
+        await this.apiTicketRadiologyService.generateRelation([ticketRadiologyModified], {
+            radiology: false,
+            ticket: (_c = response === null || response === void 0 ? void 0 : response.ticketRadiology) === null || _c === void 0 ? void 0 : _c.ticket,
+            customer: (_d = response === null || response === void 0 ? void 0 : response.ticketRadiology) === null || _d === void 0 ? void 0 : _d.customer,
+            ticketUserList: (_e = response === null || response === void 0 ? void 0 : response.ticketRadiology) === null || _e === void 0 ? void 0 : _e.ticketUserList,
+            imageList: (_f = response === null || response === void 0 ? void 0 : response.ticketRadiology) === null || _f === void 0 ? void 0 : _f.imageList,
+        });
+        return { data: { ticketRadiology: ticketRadiologyModified } };
     }
-    async detail({ oid }, { id }, query) {
-        return await this.apiTicketRadiologyService.getOne(oid, id, query);
+    async cancelResult(options) {
+        const { oid, ticketRadiologyId } = options;
+        const ticketRadiologyOrigin = await this.ticketRadiologyRepository.findOneBy({
+            oid,
+            id: ticketRadiologyId,
+        });
+        const imageIdsUpdate = await this.imageManagerService.changeImageList({
+            oid,
+            customerId: ticketRadiologyOrigin.customerId,
+            files: [],
+            filesPosition: [],
+            imageIdsKeep: [],
+            imageIdsOld: JSON.parse(ticketRadiologyOrigin.imageIds),
+        });
+        const ticketRadiologyModified = await this.ticketRadiologyRepository.updateOneAndReturnEntity({
+            oid,
+            ticketId: ticketRadiologyOrigin.ticketId,
+            id: ticketRadiologyId,
+        }, {
+            description: '',
+            result: '',
+            startedAt: null,
+            imageIds: JSON.stringify(imageIdsUpdate),
+            status: ticket_radiology_entity_1.TicketRadiologyStatus.Pending,
+        });
+        this.socketEmitService.ticketRadiologyListChange(oid, {
+            ticketId: ticketRadiologyOrigin.ticketId,
+            ticketRadiologyUpdate: ticketRadiologyModified,
+        });
     }
 };
-exports.ApiTicketRadiologyController = ApiTicketRadiologyController;
-__decorate([
-    (0, common_1.Get)('pagination'),
-    (0, user_guard_1.UserPermission)(),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Query)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _b : Object, typeof (_c = typeof request_1.TicketRadiologyPaginationQuery !== "undefined" && request_1.TicketRadiologyPaginationQuery) === "function" ? _c : Object]),
-    __metadata("design:returntype", Promise)
-], ApiTicketRadiologyController.prototype, "pagination", null);
-__decorate([
-    (0, common_1.Get)('detail/:id'),
-    (0, user_guard_1.UserPermission)(),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __param(2, (0, common_1.Query)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _d : Object, typeof (_e = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _e : Object, typeof (_f = typeof request_1.TicketRadiologyGetOneQuery !== "undefined" && request_1.TicketRadiologyGetOneQuery) === "function" ? _f : Object]),
-    __metadata("design:returntype", Promise)
-], ApiTicketRadiologyController.prototype, "detail", null);
-exports.ApiTicketRadiologyController = ApiTicketRadiologyController = __decorate([
-    (0, swagger_1.ApiTags)('TicketRadiology'),
-    (0, swagger_1.ApiBearerAuth)('access-token'),
-    (0, common_1.Controller)('ticket-radiology'),
-    __metadata("design:paramtypes", [typeof (_a = typeof api_ticket_radiology_service_1.ApiTicketRadiologyService !== "undefined" && api_ticket_radiology_service_1.ApiTicketRadiologyService) === "function" ? _a : Object])
-], ApiTicketRadiologyController);
+exports.ApiTicketRadiologyAction = ApiTicketRadiologyAction;
+exports.ApiTicketRadiologyAction = ApiTicketRadiologyAction = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof ticket_radiology_repository_1.TicketRadiologyRepository !== "undefined" && ticket_radiology_repository_1.TicketRadiologyRepository) === "function" ? _a : Object, typeof (_b = typeof repositories_1.CustomerRepository !== "undefined" && repositories_1.CustomerRepository) === "function" ? _b : Object, typeof (_c = typeof repositories_1.TicketUserRepository !== "undefined" && repositories_1.TicketUserRepository) === "function" ? _c : Object, typeof (_d = typeof repositories_1.TicketRepository !== "undefined" && repositories_1.TicketRepository) === "function" ? _d : Object, typeof (_e = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _e : Object, typeof (_f = typeof image_manager_service_1.ImageManagerService !== "undefined" && image_manager_service_1.ImageManagerService) === "function" ? _f : Object, typeof (_g = typeof image_repository_1.ImageRepository !== "undefined" && image_repository_1.ImageRepository) === "function" ? _g : Object, typeof (_h = typeof api_ticket_radiology_service_1.ApiTicketRadiologyService !== "undefined" && api_ticket_radiology_service_1.ApiTicketRadiologyService) === "function" ? _h : Object, typeof (_j = typeof api_ticket_clinic_user_service_1.ApiTicketClinicUserService !== "undefined" && api_ticket_clinic_user_service_1.ApiTicketClinicUserService) === "function" ? _j : Object])
+], ApiTicketRadiologyAction);
 
 
 /***/ }),
-/* 670 */
+/* 690 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -54135,28 +55997,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
 };
 var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketRadiologyService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const array_helper_1 = __webpack_require__(92);
+const array_helper_1 = __webpack_require__(94);
 const position_entity_1 = __webpack_require__(75);
-const repositories_1 = __webpack_require__(162);
-const image_repository_1 = __webpack_require__(169);
-const ticket_radiology_repository_1 = __webpack_require__(197);
+const repositories_1 = __webpack_require__(164);
+const image_repository_1 = __webpack_require__(173);
+const ticket_radiology_repository_1 = __webpack_require__(201);
 let ApiTicketRadiologyService = class ApiTicketRadiologyService {
     constructor(ticketRadiologyRepository, customerRepository, ticketUserRepository, ticketRepository, imageRepository) {
         this.ticketRadiologyRepository = ticketRadiologyRepository;
@@ -54190,7 +56041,6 @@ let ApiTicketRadiologyService = class ApiTicketRadiologyService {
         };
     }
     async getOne(oid, id, query) {
-        const _a = query.relation, { imageList } = _a, relationEntity = __rest(_a, ["imageList"]);
         const ticketRadiology = await this.ticketRadiologyRepository.findOne({
             condition: { oid, id },
         });
@@ -54200,25 +56050,14 @@ let ApiTicketRadiologyService = class ApiTicketRadiologyService {
         if (query.relation) {
             await this.generateRelation([ticketRadiology], query.relation);
         }
-        if (imageList) {
-            ticketRadiology.imageList = [];
-            const imageIds = JSON.parse(ticketRadiology.imageIds);
-            let imageMap = {};
-            if (imageIds.length > 0) {
-                const imageList = await this.imageRepository.findManyByIds(imageIds);
-                imageMap = (0, array_helper_1.arrayToKeyValue)(imageList, 'id');
-            }
-            imageIds.forEach((i) => {
-                ticketRadiology.imageList.push(imageMap[i]);
-            });
-        }
         return { data: { ticketRadiology } };
     }
     async generateRelation(ticketRadiologyList, relation) {
         const ticketRadiologyIdList = array_helper_1.ESArray.uniqueArray(ticketRadiologyList.map((i) => i.id));
         const customerIdList = array_helper_1.ESArray.uniqueArray(ticketRadiologyList.map((i) => i.customerId));
         const ticketIdList = array_helper_1.ESArray.uniqueArray(ticketRadiologyList.map((i) => i.ticketId));
-        const [ticketList, customerList, ticketUserList] = await Promise.all([
+        const imageIdList = array_helper_1.ESArray.uniqueArray(ticketRadiologyList.map((i) => JSON.parse(i.imageIds)).flat());
+        const [ticketList, customerList, ticketUserList, imageList] = await Promise.all([
             (relation === null || relation === void 0 ? void 0 : relation.ticket) && ticketIdList.length
                 ? this.ticketRepository.findManyBy({ id: { IN: ticketIdList } })
                 : [],
@@ -54229,18 +56068,27 @@ let ApiTicketRadiologyService = class ApiTicketRadiologyService {
                 ? this.ticketUserRepository.findMany({
                     condition: {
                         ticketId: { IN: ticketIdList },
-                        positionType: position_entity_1.PositionType.Radiology,
+                        positionType: position_entity_1.PositionInteractType.Radiology,
                         ticketItemId: { IN: ticketRadiologyIdList },
                     },
                     sort: { id: 'ASC' },
                 })
                 : [],
+            (relation === null || relation === void 0 ? void 0 : relation.imageList) && imageIdList.length
+                ? this.imageRepository.findManyByIds(imageIdList)
+                : [],
         ]);
+        const imageMap = array_helper_1.ESArray.arrayToKeyValue(imageList, 'id');
         ticketRadiologyList.forEach((tr) => {
             tr.ticket = ticketList.find((t) => t.id === tr.ticketId);
             tr.customer = customerList.find((c) => c.id === tr.customerId);
             if (relation.ticketUserList) {
                 tr.ticketUserList = ticketUserList.filter((tu) => tu.ticketItemId === tr.id);
+            }
+            if (relation.imageList) {
+                tr.imageList = [];
+                const imageIds = JSON.parse(tr.imageIds);
+                tr.imageList = imageIds.map((i) => imageMap[i]);
             }
         });
         return ticketRadiologyList;
@@ -54254,7 +56102,116 @@ exports.ApiTicketRadiologyService = ApiTicketRadiologyService = __decorate([
 
 
 /***/ }),
-/* 671 */
+/* 691 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ApiTicketRadiologyController = void 0;
+const common_1 = __webpack_require__(3);
+const swagger_1 = __webpack_require__(6);
+const dto_1 = __webpack_require__(302);
+const user_guard_1 = __webpack_require__(97);
+const interceptor_1 = __webpack_require__(284);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_ticket_radiology_action_1 = __webpack_require__(689);
+const api_ticket_radiology_service_1 = __webpack_require__(690);
+const request_1 = __webpack_require__(692);
+let ApiTicketRadiologyController = class ApiTicketRadiologyController {
+    constructor(apiTicketRadiologyService, apiTicketRadiologyAction) {
+        this.apiTicketRadiologyService = apiTicketRadiologyService;
+        this.apiTicketRadiologyAction = apiTicketRadiologyAction;
+    }
+    async pagination({ oid }, query) {
+        return await this.apiTicketRadiologyService.pagination(oid, query);
+    }
+    async detail({ oid }, { id }, query) {
+        return await this.apiTicketRadiologyService.getOne(oid, id, query);
+    }
+    async updateResult({ oid }, { id }, body, query, files) {
+        console.log('🚀 ~ api-ticket-radiology.controller.ts:58 ~ ApiTicketRadiologyController ~ query:', query);
+        return await this.apiTicketRadiologyAction.updateResult({
+            oid,
+            ticketRadiologyId: id,
+            body,
+            query,
+            files,
+        });
+    }
+    async cancelResultTicketRadiology({ oid }, { id }) {
+        return await this.apiTicketRadiologyAction.cancelResult({
+            oid,
+            ticketRadiologyId: id,
+        });
+    }
+};
+exports.ApiTicketRadiologyController = ApiTicketRadiologyController;
+__decorate([
+    (0, common_1.Get)('pagination'),
+    (0, user_guard_1.UserPermission)(),
+    __param(0, (0, external_request_1.External)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_c = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _c : Object, typeof (_d = typeof request_1.TicketRadiologyPaginationQuery !== "undefined" && request_1.TicketRadiologyPaginationQuery) === "function" ? _d : Object]),
+    __metadata("design:returntype", Promise)
+], ApiTicketRadiologyController.prototype, "pagination", null);
+__decorate([
+    (0, common_1.Get)('detail/:id'),
+    (0, user_guard_1.UserPermission)(),
+    __param(0, (0, external_request_1.External)()),
+    __param(1, (0, common_1.Param)()),
+    __param(2, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_e = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _e : Object, typeof (_f = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _f : Object, typeof (_g = typeof request_1.TicketRadiologyGetOneQuery !== "undefined" && request_1.TicketRadiologyGetOneQuery) === "function" ? _g : Object]),
+    __metadata("design:returntype", Promise)
+], ApiTicketRadiologyController.prototype, "detail", null);
+__decorate([
+    (0, common_1.Post)('update-result/:id'),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.RADIOLOGY_UPDATE_RESULT),
+    (0, swagger_1.ApiConsumes)('multipart/form-data'),
+    (0, common_1.UseInterceptors)((0, interceptor_1.FastifyFilesInterceptor)('files', 10, {})),
+    __param(0, (0, external_request_1.External)()),
+    __param(1, (0, common_1.Param)()),
+    __param(2, (0, common_1.Body)()),
+    __param(3, (0, common_1.Query)()),
+    __param(4, (0, common_1.UploadedFiles)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_h = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _h : Object, typeof (_j = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _j : Object, typeof (_k = typeof request_1.TicketRadiologyUpdateResultBody !== "undefined" && request_1.TicketRadiologyUpdateResultBody) === "function" ? _k : Object, typeof (_l = typeof request_1.TicketRadiologyPostQuery !== "undefined" && request_1.TicketRadiologyPostQuery) === "function" ? _l : Object, Array]),
+    __metadata("design:returntype", Promise)
+], ApiTicketRadiologyController.prototype, "updateResult", null);
+__decorate([
+    (0, common_1.Post)('cancel-result/:id'),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.RADIOLOGY_CANCEL_RESULT),
+    __param(0, (0, external_request_1.External)()),
+    __param(1, (0, common_1.Param)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_m = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _m : Object, typeof (_o = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _o : Object]),
+    __metadata("design:returntype", Promise)
+], ApiTicketRadiologyController.prototype, "cancelResultTicketRadiology", null);
+exports.ApiTicketRadiologyController = ApiTicketRadiologyController = __decorate([
+    (0, swagger_1.ApiTags)('TicketRadiology'),
+    (0, swagger_1.ApiBearerAuth)('access-token'),
+    (0, common_1.Controller)('ticket-radiology'),
+    __metadata("design:paramtypes", [typeof (_a = typeof api_ticket_radiology_service_1.ApiTicketRadiologyService !== "undefined" && api_ticket_radiology_service_1.ApiTicketRadiologyService) === "function" ? _a : Object, typeof (_b = typeof api_ticket_radiology_action_1.ApiTicketRadiologyAction !== "undefined" && api_ticket_radiology_action_1.ApiTicketRadiologyAction) === "function" ? _b : Object])
+], ApiTicketRadiologyController);
+
+
+/***/ }),
+/* 692 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -54273,121 +56230,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(672), exports);
-__exportStar(__webpack_require__(673), exports);
+__exportStar(__webpack_require__(693), exports);
+__exportStar(__webpack_require__(694), exports);
+__exportStar(__webpack_require__(695), exports);
 
 
 /***/ }),
-/* 672 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a, _b, _c;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketRadiologyGetOneQuery = exports.TicketRadiologyGetManyQuery = exports.TicketRadiologyPaginationQuery = exports.TicketRadiologyGetQuery = void 0;
-const swagger_1 = __webpack_require__(6);
-const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const ticket_radiology_options_request_1 = __webpack_require__(673);
-class TicketRadiologyGetQuery {
-}
-exports.TicketRadiologyGetQuery = TicketRadiologyGetQuery;
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({ type: String, example: JSON.stringify({}) }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => {
-        try {
-            if (!value)
-                return undefined;
-            const plain = JSON.parse(value);
-            return (0, class_transformer_1.plainToInstance)(ticket_radiology_options_request_1.TicketRadiologyRelationQuery, plain, {
-                exposeUnsetFields: false,
-                excludeExtraneousValues: false,
-            });
-        }
-        catch (error) {
-            return error.message;
-        }
-    }),
-    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", typeof (_a = typeof ticket_radiology_options_request_1.TicketRadiologyRelationQuery !== "undefined" && ticket_radiology_options_request_1.TicketRadiologyRelationQuery) === "function" ? _a : Object)
-], TicketRadiologyGetQuery.prototype, "relation", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        type: String,
-        example: JSON.stringify({
-            customerId: 1,
-        }),
-    }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => {
-        try {
-            if (!value)
-                return undefined;
-            const plain = JSON.parse(value);
-            return (0, class_transformer_1.plainToInstance)(ticket_radiology_options_request_1.TicketRadiologyFilterQuery, plain, {
-                exposeUnsetFields: false,
-                excludeExtraneousValues: false,
-            });
-        }
-        catch (error) {
-            return error.message;
-        }
-    }),
-    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", typeof (_b = typeof ticket_radiology_options_request_1.TicketRadiologyFilterQuery !== "undefined" && ticket_radiology_options_request_1.TicketRadiologyFilterQuery) === "function" ? _b : Object)
-], TicketRadiologyGetQuery.prototype, "filter", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({
-        type: String,
-        example: JSON.stringify({
-            id: 'ASC',
-        }),
-    }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => {
-        try {
-            if (!value)
-                return undefined;
-            const plain = JSON.parse(value);
-            return (0, class_transformer_1.plainToInstance)(ticket_radiology_options_request_1.TicketRadiologySortQuery, plain, {
-                exposeUnsetFields: false,
-                excludeExtraneousValues: false,
-            });
-        }
-        catch (error) {
-            return error.message;
-        }
-    }),
-    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", typeof (_c = typeof ticket_radiology_options_request_1.TicketRadiologySortQuery !== "undefined" && ticket_radiology_options_request_1.TicketRadiologySortQuery) === "function" ? _c : Object)
-], TicketRadiologyGetQuery.prototype, "sort", void 0);
-class TicketRadiologyPaginationQuery extends (0, swagger_1.IntersectionType)(TicketRadiologyGetQuery, query_1.PaginationQuery) {
-}
-exports.TicketRadiologyPaginationQuery = TicketRadiologyPaginationQuery;
-class TicketRadiologyGetManyQuery extends (0, swagger_1.IntersectionType)((0, swagger_1.PickType)(TicketRadiologyGetQuery, ['filter', 'relation', 'sort']), query_1.LimitQuery) {
-}
-exports.TicketRadiologyGetManyQuery = TicketRadiologyGetManyQuery;
-class TicketRadiologyGetOneQuery extends (0, swagger_1.PickType)(TicketRadiologyGetQuery, ['relation']) {
-}
-exports.TicketRadiologyGetOneQuery = TicketRadiologyGetOneQuery;
-
-
-/***/ }),
-/* 673 */
+/* 693 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -54402,11 +56251,11 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketRadiologySortQuery = exports.TicketRadiologyFilterQuery = exports.TicketRadiologyRelationQuery = void 0;
+exports.TicketRadiologyResponseQuery = exports.TicketRadiologySortQuery = exports.TicketRadiologyFilterQuery = exports.TicketRadiologyRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const dto_1 = __webpack_require__(295);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const dto_1 = __webpack_require__(302);
+const query_1 = __webpack_require__(265);
 const ticket_radiology_entity_1 = __webpack_require__(70);
 class TicketRadiologyRelationQuery {
 }
@@ -54486,10 +56335,293 @@ __decorate([
     (0, class_validator_1.IsIn)(['ASC', 'DESC']),
     __metadata("design:type", String)
 ], TicketRadiologySortQuery.prototype, "registeredAt", void 0);
+class TicketRadiologyResponseQuery {
+}
+exports.TicketRadiologyResponseQuery = TicketRadiologyResponseQuery;
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsObject)(),
+    __metadata("design:type", Object)
+], TicketRadiologyResponseQuery.prototype, "ticketRadiology", void 0);
 
 
 /***/ }),
-/* 674 */
+/* 694 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TicketRadiologyUpdateResultBody = exports.TicketRadiologyUpdateBody = void 0;
+const swagger_1 = __webpack_require__(6);
+const class_transformer_1 = __webpack_require__(17);
+const class_validator_1 = __webpack_require__(252);
+const DOMPurify = __webpack_require__(540);
+const file_1 = __webpack_require__(283);
+const ticket_clinic_update_user_list_body_1 = __webpack_require__(610);
+class TicketRadiologyUpdateBody extends file_1.MultipleFileUpload {
+}
+exports.TicketRadiologyUpdateBody = TicketRadiologyUpdateBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Mổ viêm ruột thừa 2002' }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => DOMPurify.sanitize(value)),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TicketRadiologyUpdateBody.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Trước khi vào khám 5 ngày, bla...bla...' }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TicketRadiologyUpdateBody.prototype, "result", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: Date.now() }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => (value != null ? Number(value) : value)),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], TicketRadiologyUpdateBody.prototype, "startedAt", void 0);
+class TicketRadiologyUpdateResultBody extends file_1.MultipleFileUpload {
+}
+exports.TicketRadiologyUpdateResultBody = TicketRadiologyUpdateResultBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: String, example: JSON.stringify([3, 4]) }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => (value != null ? JSON.parse(value) : value)),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsNumber)({}, { each: true }),
+    __metadata("design:type", Array)
+], TicketRadiologyUpdateResultBody.prototype, "imageIdsKeep", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: String, example: JSON.stringify([3, 4]) }),
+    __metadata("design:type", Object)
+], TicketRadiologyUpdateResultBody.prototype, "G", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => (value != null ? JSON.parse(value) : value)),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsNumber)({}, { each: true }),
+    __metadata("design:type", Array)
+], TicketRadiologyUpdateResultBody.prototype, "filesPosition", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: 'string',
+        example: JSON.stringify([{ userId: 1, roleId: 2 }]),
+    }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        if (value === undefined)
+            return undefined;
+        try {
+            const err = [];
+            const result = JSON.parse(value).map((i) => {
+                const instance = Object.assign(new ticket_clinic_update_user_list_body_1.TicketUserBasicBody(), i);
+                const validate = (0, class_validator_1.validateSync)(instance, {
+                    whitelist: true,
+                    forbidNonWhitelisted: true,
+                    skipMissingProperties: true,
+                });
+                if (validate.length)
+                    err.push(...validate);
+                return instance;
+            });
+            if (err.length)
+                return JSON.stringify(err);
+            else
+                return result;
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsArray)({
+        message: ({ value }) => `Validate TicketUserBasicBody failed. Value = ${JSON.stringify(value)}. Example: `
+            + JSON.stringify([{ userId: 1, roleId: 2 }]),
+    }),
+    __metadata("design:type", Array)
+], TicketRadiologyUpdateResultBody.prototype, "ticketUserList", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        if (value === undefined)
+            return undefined;
+        try {
+            const instance = Object.assign(new TicketRadiologyUpdateBody(), JSON.parse(value));
+            const validate = (0, class_validator_1.validateSync)(instance, {
+                whitelist: true,
+                forbidNonWhitelisted: true,
+                skipMissingProperties: true,
+            });
+            if (validate.length)
+                return JSON.stringify(validate);
+            return instance;
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsObject)({
+        message: ({ value }) => `Validate imagesChange failed. Value = ${JSON.stringify(value)}. Example: `
+            + JSON.stringify({
+                description: '',
+                startedAt: Date.now(),
+                result: '',
+            }),
+    }),
+    __metadata("design:type", TicketRadiologyUpdateBody)
+], TicketRadiologyUpdateResultBody.prototype, "ticketRadiology", void 0);
+
+
+/***/ }),
+/* 695 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c, _d;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TicketRadiologyGetOneQuery = exports.TicketRadiologyGetManyQuery = exports.TicketRadiologyPaginationQuery = exports.TicketRadiologyPostQuery = exports.TicketRadiologyGetQuery = void 0;
+const swagger_1 = __webpack_require__(6);
+const class_transformer_1 = __webpack_require__(17);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const ticket_radiology_options_request_1 = __webpack_require__(693);
+class TicketRadiologyGetQuery {
+}
+exports.TicketRadiologyGetQuery = TicketRadiologyGetQuery;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: String, example: JSON.stringify({}) }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        try {
+            if (!value)
+                return undefined;
+            const plain = JSON.parse(value);
+            return (0, class_transformer_1.plainToInstance)(ticket_radiology_options_request_1.TicketRadiologyRelationQuery, plain, {
+                exposeUnsetFields: false,
+                excludeExtraneousValues: false,
+            });
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_a = typeof ticket_radiology_options_request_1.TicketRadiologyRelationQuery !== "undefined" && ticket_radiology_options_request_1.TicketRadiologyRelationQuery) === "function" ? _a : Object)
+], TicketRadiologyGetQuery.prototype, "relation", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        type: String,
+        example: JSON.stringify({
+            customerId: 1,
+        }),
+    }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        try {
+            if (!value)
+                return undefined;
+            const plain = JSON.parse(value);
+            return (0, class_transformer_1.plainToInstance)(ticket_radiology_options_request_1.TicketRadiologyFilterQuery, plain, {
+                exposeUnsetFields: false,
+                excludeExtraneousValues: false,
+            });
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_b = typeof ticket_radiology_options_request_1.TicketRadiologyFilterQuery !== "undefined" && ticket_radiology_options_request_1.TicketRadiologyFilterQuery) === "function" ? _b : Object)
+], TicketRadiologyGetQuery.prototype, "filter", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        type: String,
+        example: JSON.stringify({
+            id: 'ASC',
+        }),
+    }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        try {
+            if (!value)
+                return undefined;
+            const plain = JSON.parse(value);
+            return (0, class_transformer_1.plainToInstance)(ticket_radiology_options_request_1.TicketRadiologySortQuery, plain, {
+                exposeUnsetFields: false,
+                excludeExtraneousValues: false,
+            });
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_c = typeof ticket_radiology_options_request_1.TicketRadiologySortQuery !== "undefined" && ticket_radiology_options_request_1.TicketRadiologySortQuery) === "function" ? _c : Object)
+], TicketRadiologyGetQuery.prototype, "sort", void 0);
+class TicketRadiologyPostQuery {
+}
+exports.TicketRadiologyPostQuery = TicketRadiologyPostQuery;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: String, example: JSON.stringify({}) }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        try {
+            if (!value)
+                return undefined;
+            const plain = JSON.parse(value);
+            return (0, class_transformer_1.plainToInstance)(ticket_radiology_options_request_1.TicketRadiologyResponseQuery, plain, {
+                exposeUnsetFields: false,
+                excludeExtraneousValues: false,
+            });
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_d = typeof ticket_radiology_options_request_1.TicketRadiologyResponseQuery !== "undefined" && ticket_radiology_options_request_1.TicketRadiologyResponseQuery) === "function" ? _d : Object)
+], TicketRadiologyPostQuery.prototype, "response", void 0);
+class TicketRadiologyPaginationQuery extends (0, swagger_1.IntersectionType)(TicketRadiologyGetQuery, query_1.PaginationQuery) {
+}
+exports.TicketRadiologyPaginationQuery = TicketRadiologyPaginationQuery;
+class TicketRadiologyGetManyQuery extends (0, swagger_1.IntersectionType)((0, swagger_1.PickType)(TicketRadiologyGetQuery, ['filter', 'relation', 'sort']), query_1.LimitQuery) {
+}
+exports.TicketRadiologyGetManyQuery = TicketRadiologyGetManyQuery;
+class TicketRadiologyGetOneQuery extends (0, swagger_1.PickType)(TicketRadiologyGetQuery, ['relation']) {
+}
+exports.TicketRadiologyGetOneQuery = TicketRadiologyGetOneQuery;
+
+
+/***/ }),
+/* 696 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -54502,8 +56634,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_ticket_controller_1 = __webpack_require__(675);
-const api_ticket_service_1 = __webpack_require__(676);
+const api_ticket_controller_1 = __webpack_require__(697);
+const api_ticket_service_1 = __webpack_require__(698);
 let ApiTicketModule = class ApiTicketModule {
 };
 exports.ApiTicketModule = ApiTicketModule;
@@ -54517,7 +56649,7 @@ exports.ApiTicketModule = ApiTicketModule = __decorate([
 
 
 /***/ }),
-/* 675 */
+/* 697 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -54538,12 +56670,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const dto_1 = __webpack_require__(295);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_ticket_service_1 = __webpack_require__(676);
-const request_1 = __webpack_require__(293);
+const dto_1 = __webpack_require__(302);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_ticket_service_1 = __webpack_require__(698);
+const request_1 = __webpack_require__(300);
 let ApiTicketController = class ApiTicketController {
     constructor(apiTicketService) {
         this.apiTicketService = apiTicketService;
@@ -54596,7 +56728,7 @@ exports.ApiTicketController = ApiTicketController = __decorate([
 
 
 /***/ }),
-/* 676 */
+/* 698 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -54614,12 +56746,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const array_helper_1 = __webpack_require__(92);
+const array_helper_1 = __webpack_require__(94);
 const payment_entity_1 = __webpack_require__(48);
 const ticket_product_entity_1 = __webpack_require__(69);
-const repositories_1 = __webpack_require__(162);
-const image_repository_1 = __webpack_require__(169);
-const ticket_repository_1 = __webpack_require__(200);
+const repositories_1 = __webpack_require__(164);
+const image_repository_1 = __webpack_require__(173);
+const ticket_repository_1 = __webpack_require__(204);
 let ApiTicketService = class ApiTicketService {
     constructor(ticketRepository, appointmentRepository, ticketAttributeRepository, ticketProductRepository, ticketBatchRepository, ticketProcedureRepository, ticketRadiologyRepository, ticketLaboratoryRepository, ticketLaboratoryGroupRepository, ticketLaboratoryResultRepository, ticketUserRepository, paymentRepository, ticketExpenseRepository, ticketSurchargeRepository, imageRepository) {
         this.ticketRepository = ticketRepository;
@@ -54852,7 +56984,7 @@ exports.ApiTicketService = ApiTicketService = __decorate([
 
 
 /***/ }),
-/* 677 */
+/* 699 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -54865,8 +56997,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiUserRoleModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_user_role_controller_1 = __webpack_require__(678);
-const api_user_role_service_1 = __webpack_require__(679);
+const api_user_role_controller_1 = __webpack_require__(700);
+const api_user_role_service_1 = __webpack_require__(701);
 let ApiUserRoleModule = class ApiUserRoleModule {
 };
 exports.ApiUserRoleModule = ApiUserRoleModule;
@@ -54880,7 +57012,7 @@ exports.ApiUserRoleModule = ApiUserRoleModule = __decorate([
 
 
 /***/ }),
-/* 678 */
+/* 700 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -54901,10 +57033,10 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiUserRoleController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const api_user_role_service_1 = __webpack_require__(679);
-const request_1 = __webpack_require__(680);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const api_user_role_service_1 = __webpack_require__(701);
+const request_1 = __webpack_require__(702);
 let ApiUserRoleController = class ApiUserRoleController {
     constructor(apiUserRoleService) {
         this.apiUserRoleService = apiUserRoleService;
@@ -54932,7 +57064,7 @@ exports.ApiUserRoleController = ApiUserRoleController = __decorate([
 
 
 /***/ }),
-/* 679 */
+/* 701 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -54949,7 +57081,7 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiUserRoleService = void 0;
 const common_1 = __webpack_require__(3);
-const repositories_1 = __webpack_require__(162);
+const repositories_1 = __webpack_require__(164);
 let ApiUserRoleService = class ApiUserRoleService {
     constructor(userRoleRepository) {
         this.userRoleRepository = userRoleRepository;
@@ -54974,7 +57106,7 @@ exports.ApiUserRoleService = ApiUserRoleService = __decorate([
 
 
 /***/ }),
-/* 680 */
+/* 702 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -54993,12 +57125,12 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(681), exports);
-__exportStar(__webpack_require__(682), exports);
+__exportStar(__webpack_require__(703), exports);
+__exportStar(__webpack_require__(704), exports);
 
 
 /***/ }),
-/* 681 */
+/* 703 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -55016,9 +57148,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserRoleGetOneQuery = exports.UserRoleGetManyQuery = exports.UserRolePaginationQuery = exports.UserRoleGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const user_role_options_request_1 = __webpack_require__(682);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const user_role_options_request_1 = __webpack_require__(704);
 class UserRoleGetQuery {
 }
 exports.UserRoleGetQuery = UserRoleGetQuery;
@@ -55106,13 +57238,13 @@ exports.UserRoleGetOneQuery = UserRoleGetOneQuery;
 
 
 /***/ }),
-/* 682 */
+/* 704 */
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserRoleSortQuery = exports.UserRoleFilterQuery = exports.UserRoleRelationQuery = void 0;
-const query_1 = __webpack_require__(261);
+const query_1 = __webpack_require__(265);
 class UserRoleRelationQuery {
 }
 exports.UserRoleRelationQuery = UserRoleRelationQuery;
@@ -55125,7 +57257,7 @@ exports.UserRoleSortQuery = UserRoleSortQuery;
 
 
 /***/ }),
-/* 683 */
+/* 705 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -55138,8 +57270,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiUserModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_user_controller_1 = __webpack_require__(684);
-const api_user_service_1 = __webpack_require__(685);
+const api_user_controller_1 = __webpack_require__(706);
+const api_user_service_1 = __webpack_require__(707);
 let ApiUserModule = class ApiUserModule {
 };
 exports.ApiUserModule = ApiUserModule;
@@ -55153,7 +57285,7 @@ exports.ApiUserModule = ApiUserModule = __decorate([
 
 
 /***/ }),
-/* 684 */
+/* 706 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -55174,14 +57306,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiUserController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_user_service_1 = __webpack_require__(685);
-const request_1 = __webpack_require__(686);
-const device_logout_query_1 = __webpack_require__(690);
-const new_password_body_1 = __webpack_require__(691);
+const param_1 = __webpack_require__(309);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_user_service_1 = __webpack_require__(707);
+const request_1 = __webpack_require__(708);
+const device_logout_query_1 = __webpack_require__(712);
+const new_password_body_1 = __webpack_require__(713);
 let ApiUserController = class ApiUserController {
     constructor(apiUserService) {
         this.apiUserService = apiUserService;
@@ -55302,7 +57434,7 @@ exports.ApiUserController = ApiUserController = __decorate([
 
 
 /***/ }),
-/* 685 */
+/* 707 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -55330,14 +57462,14 @@ var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiUserService = void 0;
 const common_1 = __webpack_require__(3);
-const bcrypt = __webpack_require__(245);
+const bcrypt = __webpack_require__(249);
 const cache_data_service_1 = __webpack_require__(38);
-const cache_token_service_1 = __webpack_require__(93);
+const cache_token_service_1 = __webpack_require__(95);
 const exception_filter_1 = __webpack_require__(9);
-const string_helper_1 = __webpack_require__(225);
-const device_1 = __webpack_require__(327);
-const repositories_1 = __webpack_require__(162);
-const socket_emit_service_1 = __webpack_require__(317);
+const string_helper_1 = __webpack_require__(229);
+const device_1 = __webpack_require__(334);
+const repositories_1 = __webpack_require__(164);
+const socket_emit_service_1 = __webpack_require__(324);
 let ApiUserService = class ApiUserService {
     constructor(socketEmitService, userRepository, userRoleRepository, roleRepository, cacheTokenService, cacheDataService) {
         this.socketEmitService = socketEmitService;
@@ -55520,7 +57652,7 @@ exports.ApiUserService = ApiUserService = __decorate([
 
 
 /***/ }),
-/* 686 */
+/* 708 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -55539,13 +57671,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(687), exports);
-__exportStar(__webpack_require__(688), exports);
-__exportStar(__webpack_require__(689), exports);
+__exportStar(__webpack_require__(709), exports);
+__exportStar(__webpack_require__(710), exports);
+__exportStar(__webpack_require__(711), exports);
 
 
 /***/ }),
-/* 687 */
+/* 709 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -55563,9 +57695,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserGetOneQuery = exports.UserGetManyQuery = exports.UserPaginationQuery = exports.UserGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const user_options_request_1 = __webpack_require__(688);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const user_options_request_1 = __webpack_require__(710);
 class UserGetQuery {
 }
 exports.UserGetQuery = UserGetQuery;
@@ -55662,7 +57794,7 @@ exports.UserGetOneQuery = UserGetOneQuery;
 
 
 /***/ }),
-/* 688 */
+/* 710 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -55679,9 +57811,9 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserSortQuery = exports.UserFilterQuery = exports.UserRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const condition_timestamp_1 = __webpack_require__(301);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const condition_timestamp_1 = __webpack_require__(308);
+const query_1 = __webpack_require__(265);
 class UserRelationQuery {
 }
 exports.UserRelationQuery = UserRelationQuery;
@@ -55736,7 +57868,7 @@ __decorate([
 
 
 /***/ }),
-/* 689 */
+/* 711 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -55754,8 +57886,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.UserUpdateBody = exports.UserCreateBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const class_validator_custom_1 = __webpack_require__(249);
+const class_validator_1 = __webpack_require__(252);
+const class_validator_custom_1 = __webpack_require__(253);
 const variable_1 = __webpack_require__(21);
 class UserCreateBody {
 }
@@ -55826,7 +57958,7 @@ __decorate([
 
 
 /***/ }),
-/* 690 */
+/* 712 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -55843,7 +57975,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.DeviceLogoutBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class DeviceLogoutBody {
 }
 exports.DeviceLogoutBody = DeviceLogoutBody;
@@ -55857,7 +57989,7 @@ __decorate([
 
 
 /***/ }),
-/* 691 */
+/* 713 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -55874,7 +58006,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.NewPasswordBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class NewPasswordBody {
 }
 exports.NewPasswordBody = NewPasswordBody;
@@ -55888,7 +58020,7 @@ __decorate([
 
 
 /***/ }),
-/* 692 */
+/* 714 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -55901,8 +58033,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiWarehouseModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_warehouse_controller_1 = __webpack_require__(693);
-const api_warehouse_service_1 = __webpack_require__(694);
+const api_warehouse_controller_1 = __webpack_require__(715);
+const api_warehouse_service_1 = __webpack_require__(716);
 let ApiWarehouseModule = class ApiWarehouseModule {
 };
 exports.ApiWarehouseModule = ApiWarehouseModule;
@@ -55916,7 +58048,7 @@ exports.ApiWarehouseModule = ApiWarehouseModule = __decorate([
 
 
 /***/ }),
-/* 693 */
+/* 715 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -55937,12 +58069,12 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiWarehouseController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const param_1 = __webpack_require__(302);
-const user_guard_1 = __webpack_require__(95);
-const external_request_1 = __webpack_require__(243);
-const permission_enum_1 = __webpack_require__(78);
-const api_warehouse_service_1 = __webpack_require__(694);
-const request_1 = __webpack_require__(695);
+const param_1 = __webpack_require__(309);
+const user_guard_1 = __webpack_require__(97);
+const external_request_1 = __webpack_require__(247);
+const permission_enum_1 = __webpack_require__(80);
+const api_warehouse_service_1 = __webpack_require__(716);
+const request_1 = __webpack_require__(717);
 let ApiWarehouseController = class ApiWarehouseController {
     constructor(apiWarehouseService) {
         this.apiWarehouseService = apiWarehouseService;
@@ -56033,7 +58165,7 @@ exports.ApiWarehouseController = ApiWarehouseController = __decorate([
 
 
 /***/ }),
-/* 694 */
+/* 716 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -56051,8 +58183,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiWarehouseService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const batch_repository_1 = __webpack_require__(165);
-const warehouse_repository_1 = __webpack_require__(201);
+const batch_repository_1 = __webpack_require__(167);
+const warehouse_repository_1 = __webpack_require__(205);
 let ApiWarehouseService = class ApiWarehouseService {
     constructor(warehouseRepository, batchRepository) {
         this.warehouseRepository = warehouseRepository;
@@ -56128,7 +58260,7 @@ exports.ApiWarehouseService = ApiWarehouseService = __decorate([
 
 
 /***/ }),
-/* 695 */
+/* 717 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -56147,13 +58279,13 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(696), exports);
-__exportStar(__webpack_require__(697), exports);
-__exportStar(__webpack_require__(698), exports);
+__exportStar(__webpack_require__(718), exports);
+__exportStar(__webpack_require__(719), exports);
+__exportStar(__webpack_require__(720), exports);
 
 
 /***/ }),
-/* 696 */
+/* 718 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -56171,9 +58303,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.WarehouseGetOneQuery = exports.WarehouseGetManyQuery = exports.WarehousePaginationQuery = exports.WarehouseGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const query_1 = __webpack_require__(261);
-const warehouse_options_request_1 = __webpack_require__(697);
+const class_validator_1 = __webpack_require__(252);
+const query_1 = __webpack_require__(265);
+const warehouse_options_request_1 = __webpack_require__(719);
 class WarehouseGetQuery {
 }
 exports.WarehouseGetQuery = WarehouseGetQuery;
@@ -56258,7 +58390,7 @@ exports.WarehouseGetOneQuery = WarehouseGetOneQuery;
 
 
 /***/ }),
-/* 697 */
+/* 719 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -56275,9 +58407,9 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.WarehouseSortQuery = exports.WarehouseFilterQuery = exports.WarehouseRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
-const condition_timestamp_1 = __webpack_require__(301);
-const query_1 = __webpack_require__(261);
+const class_validator_1 = __webpack_require__(252);
+const condition_timestamp_1 = __webpack_require__(308);
+const query_1 = __webpack_require__(265);
 class WarehouseRelationQuery {
 }
 exports.WarehouseRelationQuery = WarehouseRelationQuery;
@@ -56296,7 +58428,7 @@ exports.WarehouseSortQuery = WarehouseSortQuery;
 
 
 /***/ }),
-/* 698 */
+/* 720 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -56313,7 +58445,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.WarehouseUpdateBody = exports.WarehouseCreateBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(248);
+const class_validator_1 = __webpack_require__(252);
 class WarehouseCreateBody {
 }
 exports.WarehouseCreateBody = WarehouseCreateBody;
@@ -56330,7 +58462,7 @@ exports.WarehouseUpdateBody = WarehouseUpdateBody;
 
 
 /***/ }),
-/* 699 */
+/* 721 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -56351,7 +58483,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AppController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const app_service_1 = __webpack_require__(700);
+const app_service_1 = __webpack_require__(722);
 let AppController = class AppController {
     constructor(appService) {
         this.appService = appService;
@@ -56376,7 +58508,7 @@ exports.AppController = AppController = __decorate([
 
 
 /***/ }),
-/* 700 */
+/* 722 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -56407,7 +58539,7 @@ exports.AppService = AppService = AppService_1 = __decorate([
 
 
 /***/ }),
-/* 701 */
+/* 723 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -56419,10 +58551,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.HealthModule = void 0;
-const axios_1 = __webpack_require__(702);
+const axios_1 = __webpack_require__(724);
 const common_1 = __webpack_require__(3);
-const terminus_1 = __webpack_require__(703);
-const health_controller_1 = __webpack_require__(704);
+const terminus_1 = __webpack_require__(725);
+const health_controller_1 = __webpack_require__(726);
 let HealthModule = class HealthModule {
 };
 exports.HealthModule = HealthModule;
@@ -56435,19 +58567,19 @@ exports.HealthModule = HealthModule = __decorate([
 
 
 /***/ }),
-/* 702 */
+/* 724 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/axios");
 
 /***/ }),
-/* 703 */
+/* 725 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/terminus");
 
 /***/ }),
-/* 704 */
+/* 726 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -56464,9 +58596,9 @@ var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.HealthController = void 0;
 const common_1 = __webpack_require__(3);
-const schedule_1 = __webpack_require__(705);
+const schedule_1 = __webpack_require__(727);
 const swagger_1 = __webpack_require__(6);
-const terminus_1 = __webpack_require__(703);
+const terminus_1 = __webpack_require__(725);
 let HealthController = class HealthController {
     constructor(health, http, db, disk, memory) {
         this.health = health;
@@ -56500,13 +58632,13 @@ exports.HealthController = HealthController = __decorate([
 
 
 /***/ }),
-/* 705 */
+/* 727 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/schedule");
 
 /***/ }),
-/* 706 */
+/* 728 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -56519,8 +58651,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ImageManagerModule = void 0;
 const common_1 = __webpack_require__(3);
-const google_driver_module_1 = __webpack_require__(232);
-const image_manager_service_1 = __webpack_require__(401);
+const google_driver_module_1 = __webpack_require__(236);
+const image_manager_service_1 = __webpack_require__(424);
 let ImageManagerModule = class ImageManagerModule {
 };
 exports.ImageManagerModule = ImageManagerModule;
@@ -56535,7 +58667,7 @@ exports.ImageManagerModule = ImageManagerModule = __decorate([
 
 
 /***/ }),
-/* 707 */
+/* 729 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -56548,10 +58680,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CronJobModule = void 0;
 const common_1 = __webpack_require__(3);
-const schedule_1 = __webpack_require__(705);
-const google_driver_module_1 = __webpack_require__(232);
-const cron_job_controller_1 = __webpack_require__(708);
-const postgresql_job_1 = __webpack_require__(709);
+const schedule_1 = __webpack_require__(727);
+const google_driver_module_1 = __webpack_require__(236);
+const cron_job_controller_1 = __webpack_require__(730);
+const postgresql_job_1 = __webpack_require__(731);
 let CronJobModule = class CronJobModule {
 };
 exports.CronJobModule = CronJobModule;
@@ -56565,7 +58697,7 @@ exports.CronJobModule = CronJobModule = __decorate([
 
 
 /***/ }),
-/* 708 */
+/* 730 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -56584,7 +58716,7 @@ exports.CronJobController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
 const root_guard_1 = __webpack_require__(15);
-const postgresql_job_1 = __webpack_require__(709);
+const postgresql_job_1 = __webpack_require__(731);
 let CronJobController = class CronJobController {
     constructor(postgresqlJob) {
         this.postgresqlJob = postgresqlJob;
@@ -56611,7 +58743,7 @@ exports.CronJobController = CronJobController = __decorate([
 
 
 /***/ }),
-/* 709 */
+/* 731 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -56629,12 +58761,12 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PostgresqlJob = void 0;
 const common_1 = __webpack_require__(3);
-const schedule_1 = __webpack_require__(705);
-const fs_1 = __webpack_require__(710);
-const mime_types_1 = __webpack_require__(711);
+const schedule_1 = __webpack_require__(727);
+const fs_1 = __webpack_require__(732);
+const mime_types_1 = __webpack_require__(733);
 const path_1 = __webpack_require__(31);
 const cache_data_service_1 = __webpack_require__(38);
-const google_driver_service_1 = __webpack_require__(234);
+const google_driver_service_1 = __webpack_require__(238);
 let PostgresqlJob = PostgresqlJob_1 = class PostgresqlJob {
     constructor(cacheDataService, googleDriverService) {
         this.cacheDataService = cacheDataService;
@@ -56693,19 +58825,19 @@ exports.PostgresqlJob = PostgresqlJob = PostgresqlJob_1 = __decorate([
 
 
 /***/ }),
-/* 710 */
+/* 732 */
 /***/ ((module) => {
 
 module.exports = require("fs");
 
 /***/ }),
-/* 711 */
+/* 733 */
 /***/ ((module) => {
 
 module.exports = require("mime-types");
 
 /***/ }),
-/* 712 */
+/* 734 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -56718,9 +58850,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EventListenerModule = void 0;
 const common_1 = __webpack_require__(3);
-const event_emitter_1 = __webpack_require__(713);
-const visit_event_emit_1 = __webpack_require__(714);
-const visit_event_listener_1 = __webpack_require__(716);
+const event_emitter_1 = __webpack_require__(735);
+const visit_event_emit_1 = __webpack_require__(736);
+const visit_event_listener_1 = __webpack_require__(738);
 let EventListenerModule = class EventListenerModule {
 };
 exports.EventListenerModule = EventListenerModule;
@@ -56736,13 +58868,13 @@ exports.EventListenerModule = EventListenerModule = __decorate([
 
 
 /***/ }),
-/* 713 */
+/* 735 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/event-emitter");
 
 /***/ }),
-/* 714 */
+/* 736 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -56759,8 +58891,8 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VisitEventEmit = void 0;
 const common_1 = __webpack_require__(3);
-const event_emitter_1 = __webpack_require__(713);
-const visit_event_constants_1 = __webpack_require__(715);
+const event_emitter_1 = __webpack_require__(735);
+const visit_event_constants_1 = __webpack_require__(737);
 let VisitEventEmit = class VisitEventEmit {
     constructor(eventEmitter) {
         this.eventEmitter = eventEmitter;
@@ -56780,7 +58912,7 @@ exports.VisitEventEmit = VisitEventEmit = __decorate([
 
 
 /***/ }),
-/* 715 */
+/* 737 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -56793,7 +58925,7 @@ exports.VISIT_EVENT = {
 
 
 /***/ }),
-/* 716 */
+/* 738 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -56810,8 +58942,8 @@ var VisitEventListener_1;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VisitEventListener = void 0;
 const common_1 = __webpack_require__(3);
-const event_emitter_1 = __webpack_require__(713);
-const visit_event_constants_1 = __webpack_require__(715);
+const event_emitter_1 = __webpack_require__(735);
+const visit_event_constants_1 = __webpack_require__(737);
 let VisitEventListener = VisitEventListener_1 = class VisitEventListener {
     constructor() {
         this.logger = new common_1.Logger(VisitEventListener_1.name);
@@ -56841,7 +58973,7 @@ exports.VisitEventListener = VisitEventListener = VisitEventListener_1 = __decor
 
 
 /***/ }),
-/* 717 */
+/* 739 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -56854,10 +58986,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SocketModule = void 0;
 const common_1 = __webpack_require__(3);
-const jwt_extend_module_1 = __webpack_require__(96);
-const socket_emit_service_1 = __webpack_require__(317);
-const socket_controller_1 = __webpack_require__(718);
-const socket_gateway_1 = __webpack_require__(719);
+const jwt_extend_module_1 = __webpack_require__(98);
+const socket_emit_service_1 = __webpack_require__(324);
+const socket_controller_1 = __webpack_require__(740);
+const socket_gateway_1 = __webpack_require__(741);
 let SocketModule = class SocketModule {
 };
 exports.SocketModule = SocketModule;
@@ -56873,7 +59005,7 @@ exports.SocketModule = SocketModule = __decorate([
 
 
 /***/ }),
-/* 718 */
+/* 740 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -56894,8 +59026,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SocketController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const external_request_1 = __webpack_require__(243);
-const socket_emit_service_1 = __webpack_require__(317);
+const external_request_1 = __webpack_require__(247);
+const socket_emit_service_1 = __webpack_require__(324);
 let SocketController = class SocketController {
     constructor(socketEmitService) {
         this.socketEmitService = socketEmitService;
@@ -56921,7 +59053,7 @@ exports.SocketController = SocketController = __decorate([
 
 
 /***/ }),
-/* 719 */
+/* 741 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -56939,13 +59071,13 @@ var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SocketGateway = void 0;
 const common_1 = __webpack_require__(3);
-const websockets_1 = __webpack_require__(720);
+const websockets_1 = __webpack_require__(742);
 const request_ip_1 = __webpack_require__(8);
-const socket_io_1 = __webpack_require__(721);
+const socket_io_1 = __webpack_require__(743);
 const cache_data_service_1 = __webpack_require__(38);
-const jwt_extend_service_1 = __webpack_require__(98);
-const socket_emit_service_1 = __webpack_require__(317);
-const socket_variable_1 = __webpack_require__(318);
+const jwt_extend_service_1 = __webpack_require__(100);
+const socket_emit_service_1 = __webpack_require__(324);
+const socket_variable_1 = __webpack_require__(325);
 let SocketGateway = SocketGateway_1 = class SocketGateway {
     constructor(socketEmitService, jwtExtendService, cacheDataService) {
         this.socketEmitService = socketEmitService;
@@ -57017,13 +59149,13 @@ exports.SocketGateway = SocketGateway = SocketGateway_1 = __decorate([
 
 
 /***/ }),
-/* 720 */
+/* 742 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/websockets");
 
 /***/ }),
-/* 721 */
+/* 743 */
 /***/ ((module) => {
 
 module.exports = require("socket.io");
