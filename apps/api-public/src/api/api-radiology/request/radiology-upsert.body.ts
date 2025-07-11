@@ -1,22 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
-import {
-  IsArray,
-  IsDefined,
-  IsInt,
-  IsString,
-  ValidateNested,
-} from 'class-validator'
+import { IsArray, IsDefined, IsInt, IsString, ValidateNested } from 'class-validator'
 import * as DOMPurify from 'isomorphic-dompurify'
 import { DiscountUpdateBody } from '../../api-discount/request'
 import { PositionBasicBody } from '../../api-position/request'
 
 export class RadiologyBody {
-  @ApiPropertyOptional({ example: 105000 })
+  @ApiProperty({ example: 'ABC12345' })
   @Expose()
   @IsDefined()
-  @IsInt()
-  priority: number
+  @IsString()
+  radiologyCode?: string
 
   @ApiProperty({ example: 'Siêu âm tuyến giáp' })
   @Expose()

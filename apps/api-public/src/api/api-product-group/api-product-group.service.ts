@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
+import { ESArray } from '../../../../_libs/common/helpers'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { ProductGroupInsertType } from '../../../../_libs/database/entities/product-group.entity'
 import { ProductGroupRepository } from '../../../../_libs/database/repositories/product-group.repository'
 import {
   ProductGroupCreateBody,
@@ -54,10 +56,7 @@ export class ApiProductGroupService {
   }
 
   async replaceAll(oid: number, body: ProductGroupReplaceAllBody): Promise<BaseResponse> {
-    await this.productGroupRepository.replaceAll(
-      oid,
-      body.productGroupReplaceAll
-    )
+    await this.productGroupRepository.replaceAll(oid, body.productGroupReplaceAll)
     return { data: true }
   }
 
@@ -79,5 +78,26 @@ export class ApiProductGroupService {
       throw new BusinessException('error.Database.DeleteFailed')
     }
     return { data: true }
+  }
+
+  async createByGroupName(oid: number, groupName: string[]) {
+    const productGroupAll = await this.productGroupRepository.findManyBy({ oid })
+    const groupNameList = productGroupAll.map((i) => i.name)
+
+    const groupNameClean = ESArray.uniqueArray(groupName).filter((i) => !!i)
+    const groupNameNoExist = groupNameClean.filter((i) => {
+      return !groupNameList.includes(i)
+    })
+    const lgCreateList = groupNameNoExist.map((i) => {
+      const dto: ProductGroupInsertType = {
+        oid,
+        name: i,
+      }
+      return dto
+    })
+    const lgInsertedList =
+      await this.productGroupRepository.insertManyAndReturnEntity(lgCreateList)
+
+    return [...productGroupAll, ...lgInsertedList]
   }
 }

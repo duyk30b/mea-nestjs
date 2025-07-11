@@ -8,7 +8,21 @@ import {
   ProcedureGroupSortType,
   ProcedureGroupUpdateType,
 } from '../entities/procedure-group.entity'
+import { _PostgreSqlManager } from '../managers/_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
+
+@Injectable()
+export class ProcedureGroupManager extends _PostgreSqlManager<
+  ProcedureGroup,
+  ProcedureGroupRelationType,
+  ProcedureGroupInsertType,
+  ProcedureGroupUpdateType,
+  ProcedureGroupSortType
+> {
+  constructor() {
+    super(ProcedureGroup)
+  }
+}
 
 @Injectable()
 export class ProcedureGroupRepository extends _PostgreSqlRepository<
@@ -58,9 +72,7 @@ export class ProcedureGroupRepository extends _PostgreSqlRepository<
           UPDATE "ProcedureGroup" AS "group"
           SET "name" = temp.name
           FROM (VALUES `
-          + procedureGroupUpdateDto
-            .map(({ id, name }) => `(${id}, '${name}')`)
-            .join(', ')
+          + procedureGroupUpdateDto.map(({ id, name }) => `(${id}, '${name}')`).join(', ')
           + `   ) AS temp("id", "name")
           WHERE   "group"."id" = temp."id" 
               AND "group"."oid" = ${oid} 

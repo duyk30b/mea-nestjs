@@ -43,5 +43,5 @@ export class RadiologySortQuery extends SortQuery {
 
   @Expose()
   @IsIn(['ASC', 'DESC'])
-  priority: 'ASC' | 'DESC'
+  radiologyCode: 'ASC' | 'DESC'
 }

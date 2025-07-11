@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { ESArray } from '../../../../_libs/common/helpers'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { BusinessError } from '../../../../_libs/database/common/error'
 import { Discount, Procedure, ProcedureGroup } from '../../../../_libs/database/entities'
 import {
   DiscountInsertType,
@@ -112,9 +113,25 @@ export class ApiProcedureService {
         }
       }
     })
+
+    let procedureCode = procedureBody.procedureCode
+    if (!procedureCode) {
+      const count = await this.procedureRepository.getMaxId()
+      procedureCode = (count + 1).toString()
+    }
+
+    const existProcedure = await this.procedureRepository.findOneBy({
+      oid,
+      procedureCode,
+    })
+    if (existProcedure) {
+      throw new BusinessError(`Trùng mã dịch vụ với ${existProcedure.name}`)
+    }
+
     const procedure = await this.procedureRepository.insertOneFullFieldAndReturnEntity({
       oid,
       ...procedureBody,
+      procedureCode,
     })
 
     this.socketEmitService.procedureListChange(oid, { procedureUpsertedList: [procedure] })
@@ -156,7 +173,11 @@ export class ApiProcedureService {
     return { data: { procedure } }
   }
 
-  async updateOne(oid: number, id: number, body: ProcedureUpsertBody): Promise<BaseResponse> {
+  async updateOne(
+    oid: number,
+    procedureId: number,
+    body: ProcedureUpsertBody
+  ): Promise<BaseResponse> {
     const { positionList, discountList, procedure: procedureBody } = body
     positionList?.forEach((i) => {
       if (
@@ -168,8 +189,17 @@ export class ApiProcedureService {
         }
       }
     })
+
+    const existProcedure = await this.procedureRepository.findOneBy({
+      oid,
+      procedureCode: procedureBody.procedureCode,
+      id: { NOT: procedureId },
+    })
+    if (existProcedure) {
+      throw new BusinessError(`Trùng mã dịch vụ với ${existProcedure.name}`)
+    }
     const procedure = await this.procedureRepository.updateOneAndReturnEntity(
-      { oid, id },
+      { oid, id: procedureId },
       procedureBody
     )
 

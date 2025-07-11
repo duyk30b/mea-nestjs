@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
+import { ESArray } from '../../../../_libs/common/helpers'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { LaboratoryGroupInsertType } from '../../../../_libs/database/entities/laboratory-group.entity'
 import { LaboratoryGroupRepository } from '../../../../_libs/database/repositories/laboratory-group.repository'
 import {
   LaboratoryGroupCreateBody,
@@ -85,5 +87,27 @@ export class ApiLaboratoryGroupService {
       condition: { oid: 1 },
     })
     return { data }
+  }
+
+  async createByGroupName(oid: number, groupName: string[]) {
+    const laboratoryGroupAll = await this.laboratoryGroupRepository.findManyBy({ oid })
+    const groupNameList = laboratoryGroupAll.map((i) => i.name)
+
+    const groupNameClean = ESArray.uniqueArray(groupName).filter((i) => !!i)
+    const groupNameNoExist = groupNameClean.filter((i) => {
+      return !groupNameList.includes(i)
+    })
+    const lgCreateList = groupNameNoExist.map((i) => {
+      const dto: LaboratoryGroupInsertType = {
+        oid,
+        name: i,
+        printHtmlId: 0,
+      }
+      return dto
+    })
+    const lgInsertedList =
+      await this.laboratoryGroupRepository.insertManyAndReturnEntity(lgCreateList)
+
+    return [...laboratoryGroupAll, ...lgInsertedList]
   }
 }

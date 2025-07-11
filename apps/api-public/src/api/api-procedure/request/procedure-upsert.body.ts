@@ -31,6 +31,12 @@ export class ConsumableConversion {
 }
 
 export class ProcedureCreate {
+  @ApiProperty({ example: 'ABC12345' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  procedureCode?: string
+
   @ApiProperty({ example: 'Truyền dịch 500ml' })
   @Expose()
   @IsDefined()

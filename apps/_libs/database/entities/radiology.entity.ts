@@ -1,11 +1,12 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm'
 import Discount from './discount.entity'
 import Position from './position.entity'
 import PrintHtml from './print-html.entity'
 import RadiologyGroup from './radiology-group.entity'
 
 @Entity('Radiology')
+@Unique('UNIQUE_Radiology__oid_radiologyCode', ['oid', 'radiologyCode'])
 export default class Radiology {
   @Exclude()
   @Column()
@@ -15,9 +16,9 @@ export default class Radiology {
   @PrimaryGeneratedColumn()
   id: number
 
-  @Column({ default: 1 })
+  @Column({ type: 'varchar', length: 50 })
   @Expose()
-  priority: number
+  radiologyCode: string
 
   @Column({ type: 'varchar', length: 255 })
   @Expose()
@@ -139,5 +140,5 @@ export type RadiologyUpdateType = {
 }
 
 export type RadiologySortType = {
-  [P in keyof Pick<Radiology, 'oid' | 'id' | 'name' | 'priority'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<Radiology, 'oid' | 'id' | 'name' | 'radiologyCode'>]?: 'ASC' | 'DESC'
 }

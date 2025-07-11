@@ -5,7 +5,7 @@ export const ProductExcelRules = {
     title: 'STT',
     width: 5,
     type: 'number',
-    required: true,
+    required: false,
   },
   productCode: {
     title: 'Mã sản phẩm',
@@ -73,7 +73,7 @@ export const ProductExcelRules = {
     type: 'string',
     required: false,
   },
-  groupName: {
+  productGroupName: {
     title: 'Nhóm',
     width: 24,
     type: 'string',

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { Cell, Style, Workbook, Worksheet } from 'exceljs'
+import { Cell, Workbook, Worksheet } from 'exceljs'
 import { ESArray } from '../../../../_libs/common/helpers'
 import { Product } from '../../../../_libs/database/entities'
 import {
@@ -8,7 +8,6 @@ import {
   ProductRepository,
 } from '../../../../_libs/database/repositories'
 import {
-  CellStyle,
   CustomStyleExcel,
   excelOneSheetWorkbook,
 } from '../../../../_libs/file/excel-one-sheet.util'
@@ -105,7 +104,7 @@ export class ApiFileProductDownloadExcel {
         retailPrice: { numFmt: '###,##0' },
         costAmount: { numFmt: '###,##0' },
         substance: { alignment: { wrapText: true } },
-        groupName: {},
+        productGroupName: {},
         route: { alignment: { horizontal: 'center' } },
         source: { alignment: { horizontal: 'center' } },
       },
@@ -132,7 +131,7 @@ export class ApiFileProductDownloadExcel {
           retailPrice: product.retailPrice || 0,
           costAmount: product.wholesalePrice || 0,
           substance: product.substance || '',
-          groupName: product.productGroup?.name || '',
+          productGroupName: product.productGroup?.name || '',
           route: product.route || '',
           source: product.source || '',
         }
@@ -153,7 +152,7 @@ export class ApiFileProductDownloadExcel {
             retailPrice: product.retailPrice || 0,
             costAmount: batch.costAmount || 0,
             substance: product.substance || '',
-            groupName: product.productGroup?.name || '',
+            productGroupName: product.productGroup?.name || '',
             route: product.route || '',
             source: product.source || '',
           }

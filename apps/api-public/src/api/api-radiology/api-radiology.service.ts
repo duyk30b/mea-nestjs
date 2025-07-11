@@ -12,6 +12,7 @@ import Position, {
   PositionInsertType,
   PositionInteractType,
 } from '../../../../_libs/database/entities/position.entity'
+import { RadiologyGroupInsertType } from '../../../../_libs/database/entities/radiology-group.entity'
 import Radiology, {
   RadiologyInsertType,
 } from '../../../../_libs/database/entities/radiology.entity'
@@ -24,6 +25,7 @@ import {
   TicketRadiologyRepository,
 } from '../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../socket/socket-emit.service'
+import { ApiRadiologyGroupService } from '../api-radiology-group/api-radiology-group.service'
 import {
   RadiologyGetManyQuery,
   RadiologyGetOneQuery,
@@ -42,7 +44,8 @@ export class ApiRadiologyService {
     private readonly printHtmlRepository: PrintHtmlRepository,
     private readonly ticketRadiologyRepository: TicketRadiologyRepository,
     private readonly positionRepository: PositionRepository,
-    private readonly discountRepository: DiscountRepository
+    private readonly discountRepository: DiscountRepository,
+    private readonly apiRadiologyGroupService: ApiRadiologyGroupService
   ) { }
 
   async pagination(oid: number, query: RadiologyPaginationQuery): Promise<BaseResponse> {
@@ -123,9 +126,24 @@ export class ApiRadiologyService {
       }
     })
 
-    const radiology = await this.radiologyRepository.insertOneFullFieldAndReturnEntity({
+    let radiologyCode = radiologyBody.radiologyCode
+    if (!radiologyCode) {
+      const maxId = await this.radiologyRepository.getMaxId()
+      radiologyCode = (maxId + 1).toString()
+    }
+
+    const existRadiology = await this.radiologyRepository.findOneBy({
       oid,
+      radiologyCode,
+    })
+    if (existRadiology) {
+      throw new BusinessException(`Trùng mã phiếu với ${existRadiology.name}` as any)
+    }
+
+    const radiology = await this.radiologyRepository.insertOneFullFieldAndReturnEntity({
       ...radiologyBody,
+      oid,
+      radiologyCode,
     })
     this.socketEmitService.radiologyListChange(oid, { radiologyUpsertedList: [radiology] })
 
@@ -167,7 +185,11 @@ export class ApiRadiologyService {
     return { data: { radiology } }
   }
 
-  async updateOne(oid: number, id: number, body: RadiologyUpsertBody): Promise<BaseResponse> {
+  async updateOne(
+    oid: number,
+    radiologyId: number,
+    body: RadiologyUpsertBody
+  ): Promise<BaseResponse> {
     const { positionList, radiology: radiologyBody, discountList } = body
     positionList?.forEach((i) => {
       if (
@@ -179,8 +201,18 @@ export class ApiRadiologyService {
         }
       }
     })
+
+    const existRadiology = await this.radiologyRepository.findOneBy({
+      oid,
+      radiologyCode: radiologyBody.radiologyCode,
+      id: { NOT: radiologyId },
+    })
+    if (existRadiology) {
+      throw new BusinessException(`Trùng mã sản phẩm với ${existRadiology.name}` as any)
+    }
+
     const radiology = await this.radiologyRepository.updateOneAndReturnEntity(
-      { oid, id },
+      { oid, id: radiologyId },
       radiologyBody
     )
     this.socketEmitService.radiologyListChange(oid, { radiologyUpsertedList: [radiology] })
@@ -283,34 +315,51 @@ export class ApiRadiologyService {
     const data = await this.radiologyRepository.findMany({
       relation: { printHtml: true },
       condition: { oid: 1 },
-      sort: { priority: 'ASC' },
+      sort: { radiologyCode: 'ASC' },
     })
     return { data }
   }
 
   async systemCopy(oid: number, body: RadiologySystemCopyBody): Promise<BaseResponse> {
     const radiologySystemList = await this.radiologyRepository.findMany({
+      relation: { radiologyGroup: true },
       condition: { oid: 1, id: { IN: body.radiologyIdList } },
     })
+
+    const groupNameList = radiologySystemList.map((i) => i.radiologyGroup?.name || '')
+    const radiologyGroupList = await this.apiRadiologyGroupService.createByGroupName(
+      oid,
+      groupNameList
+    )
+    const radiologyGroupMapName = ESArray.arrayToKeyValue(radiologyGroupList, 'name')
+
+    let maxId = await this.radiologyRepository.getMaxId()
+
     const radiologyInsertList = radiologySystemList.map((i) => {
+      let radiologyGroupId = 0
+      const radiologyGroupName = i.radiologyGroup?.name
+      if (radiologyGroupName) {
+        radiologyGroupId = radiologyGroupMapName[radiologyGroupName]?.id || 0
+      }
+
+      maxId++
       const dto: RadiologyInsertType = {
         oid,
         name: i.name,
         costPrice: i.costPrice,
         price: i.price,
         printHtmlId: i.printHtmlId,
-        radiologyGroupId: 0,
+        radiologyGroupId,
         descriptionDefault: i.descriptionDefault,
         requestNoteDefault: i.requestNoteDefault,
         resultDefault: i.resultDefault,
         customVariables: i.customVariables,
         customStyles: i.customStyles,
-        priority: 0, // cập nhật sau
+        radiologyCode: maxId.toString(),
       }
       return dto
     })
     const insertIds = await this.radiologyRepository.insertMany(radiologyInsertList)
-    await this.radiologyRepository.update({ id: { IN: insertIds } }, { priority: () => `"id"` })
     return { data: true }
   }
 

@@ -19,6 +19,8 @@ import {
   ProductManager,
   ProductMovementManager,
 } from '../../../../_libs/database/managers'
+import { ProductGroupRepository } from '../../../../_libs/database/repositories'
+import { ApiProductGroupService } from '../../api/api-product-group/api-product-group.service'
 import { ExcelProcess } from '../common/excel-process'
 import { ProductExcelRules } from './product-excel.rule'
 
@@ -35,13 +37,14 @@ const dataPlainExample = {
   retailPrice: 0,
   costAmount: 0,
   substance: '',
-  groupName: '',
+  productGroupName: '',
   route: '',
   source: '',
 } satisfies Record<keyof typeof ProductExcelRules, unknown>
 
 type DataPlain = typeof dataPlainExample & {
   productId: number
+  productGroupId: number
   productUpsert: ProductInsertType & { id: number }
   batchUpsert: BatchInsertType & { id: number }
 }
@@ -50,9 +53,11 @@ type DataPlain = typeof dataPlainExample & {
 export class ApiFileProductUploadExcel {
   constructor(
     private dataSource: DataSource,
+    private readonly productGroupRepository: ProductGroupRepository,
     private readonly productManager: ProductManager,
     private readonly batchManager: BatchManager,
-    private readonly productMovementManager: ProductMovementManager
+    private readonly productMovementManager: ProductMovementManager,
+    private readonly apiProductGroupService: ApiProductGroupService
   ) { }
 
   async uploadExcel(options: { oid: number; userId: number; file: FileUploadDto }) {
@@ -73,9 +78,18 @@ export class ApiFileProductUploadExcel {
       return dataConvert as { [P in keyof typeof ProductExcelRules]: any }
     })
 
+    const groupNameList = dataConvertList.map((i) => i.productGroupName || '')
+    const productGroupList = await this.apiProductGroupService.createByGroupName(oid, groupNameList)
+    const productGroupMapName = ESArray.arrayToKeyValue(productGroupList, 'name')
+
     const dataPlainList: DataPlain[] = dataConvertList.map((item, index) => {
       if (!item.productCode) {
         throw new BusinessError(`Lỗi: Dòng ${index + 2}: Mã sản phẩm không được để trống`)
+      }
+      let productGroupId = 0
+      const productGroupName = item.productGroupName
+      if (productGroupName) {
+        productGroupId = productGroupMapName[productGroupName]?.id || 0
       }
       const batchId = item.batchId || 0
       const lotNumber = String(item.lotNumber || '')
@@ -91,7 +105,7 @@ export class ApiFileProductUploadExcel {
       const retailPrice = Math.round(item.retailPrice || 0)
 
       const dataPlain: DataPlain = {
-        _num: item._num,
+        _num: item._num || 0,
         productId: 0,
         productCode: item.productCode,
         brandName: item.brandName,
@@ -104,7 +118,8 @@ export class ApiFileProductUploadExcel {
         retailPrice,
         costAmount: costAmount as number,
         substance: item.substance,
-        groupName: item.groupName,
+        productGroupId,
+        productGroupName: item.productGroupName,
         route: item.route,
         source: item.source,
         productUpsert: {
@@ -113,13 +128,13 @@ export class ApiFileProductUploadExcel {
           productCode: item.productCode,
           productType: ProductType.Basic,
           brandName: item.brandName,
+          productGroupId,
           costPrice,
           retailPrice,
           quantity: 0, // ====== Sẽ được update sau
           unit: JSON.stringify([{ name: item.unitBasicName, rate: 1, default: true }]),
           warehouseIds: JSON.stringify([0]),
           wholesalePrice: 0,
-          productGroupId: 0,
           substance: item.substance,
           route: item.route,
           source: item.source,
@@ -463,6 +478,7 @@ export class ApiFileProductUploadExcel {
           })),
           update: [
             'brandName',
+            'productGroupId',
             'costPrice',
             'retailPrice',
             'quantity',

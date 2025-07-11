@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
+import { ESArray } from '../../../../_libs/common/helpers'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { RadiologyGroupInsertType } from '../../../../_libs/database/entities/radiology-group.entity'
 import { RadiologyGroupRepository } from '../../../../_libs/database/repositories'
 import {
   RadiologyGroupCreateBody,
@@ -84,5 +86,26 @@ export class ApiRadiologyGroupService {
       condition: { oid: 1 },
     })
     return { data }
+  }
+
+  async createByGroupName(oid: number, groupName: string[]) {
+    const radiologyGroupAll = await this.radiologyGroupRepository.findManyBy({ oid })
+    const groupNameList = radiologyGroupAll.map((i) => i.name)
+
+    const groupNameClean = ESArray.uniqueArray(groupName).filter((i) => !!i)
+    const groupNameNoExist = groupNameClean.filter((i) => {
+      return !groupNameList.includes(i)
+    })
+    const lgCreateList = groupNameNoExist.map((i) => {
+      const dto: RadiologyGroupInsertType = {
+        oid,
+        name: i,
+      }
+      return dto
+    })
+    const lgInsertedList =
+      await this.radiologyGroupRepository.insertManyAndReturnEntity(lgCreateList)
+
+    return [...radiologyGroupAll, ...lgInsertedList]
   }
 }

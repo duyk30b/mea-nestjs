@@ -42,5 +42,5 @@ export class LaboratorySortQuery extends SortQuery {
 
   @Expose()
   @IsIn(['ASC', 'DESC'])
-  priority: 'ASC' | 'DESC'
+  laboratoryCode: 'ASC' | 'DESC'
 }

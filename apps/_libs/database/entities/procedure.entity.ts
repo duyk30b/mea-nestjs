@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm'
 import Discount from './discount.entity'
 import Position from './position.entity'
 import ProcedureGroup from './procedure-group.entity'
@@ -11,6 +11,7 @@ export enum ProcedureType {
 }
 
 @Entity('Procedure')
+@Unique('UNIQUE_Procedure__oid_procedureCode', ['oid', 'procedureCode'])
 export default class Procedure {
   @Column({ name: 'oid' })
   @Exclude()
@@ -20,9 +21,13 @@ export default class Procedure {
   @Expose({ name: 'id' })
   id: number
 
+  @Column({ type: 'varchar', length: 50 })
+  @Expose()
+  procedureCode: string // Mã dịch vụ
+
   @Column({ type: 'varchar', length: 255 })
   @Expose()
-  name: string // Tên dịch vụ
+  name: string
 
   @Column({ type: 'smallint', default: ProcedureType.Basic })
   @Expose()
@@ -114,5 +119,5 @@ export type ProcedureUpdateType = {
 }
 
 export type ProcedureSortType = {
-  [P in keyof Pick<Procedure, 'oid' | 'id' | 'name' | 'price'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<Procedure, 'oid' | 'id' | 'procedureCode' | 'name' | 'price'>]?: 'ASC' | 'DESC'
 }

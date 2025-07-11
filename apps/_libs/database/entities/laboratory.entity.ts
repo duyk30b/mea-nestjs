@@ -1,5 +1,13 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  Unique,
+} from 'typeorm'
 import Discount from './discount.entity'
 import LaboratoryGroup from './laboratory-group.entity'
 import Position from './position.entity'
@@ -13,6 +21,7 @@ export enum LaboratoryValueType {
 }
 @Entity('Laboratory')
 @Index('IDX_Laboratory__oid_parentId', ['oid', 'parentId'])
+@Unique('UNIQUE_Laboratory__oid_laboratoryCode', ['oid', 'laboratoryCode'])
 export default class Laboratory {
   @Exclude()
   @Column()
@@ -22,9 +31,13 @@ export default class Laboratory {
   @PrimaryGeneratedColumn()
   id: number
 
+  @Column({ type: 'varchar', length: 50 })
+  @Expose()
+  laboratoryCode: string
+
   @Column({ default: 1 })
   @Expose()
-  priority: number
+  priority: number // Sắp xết thứ tự các xét nghiệm trong phiếu
 
   @Column({ type: 'varchar', length: 255 })
   @Expose()
@@ -150,9 +163,10 @@ export type LaboratoryUpdateType = {
 }
 
 export type LaboratorySortType = {
-  [P in keyof Pick<Laboratory, 'oid' | 'id' | 'priority' | 'name' | 'laboratoryGroupId'>]?:
-  | 'ASC'
-  | 'DESC'
+  [P in keyof Pick<
+    Laboratory,
+    'oid' | 'id' | 'laboratoryCode' | 'priority' | 'name' | 'laboratoryGroupId'
+  >]?: 'ASC' | 'DESC'
 }
 
 export type LaboratoryChildUpdateType = Omit<

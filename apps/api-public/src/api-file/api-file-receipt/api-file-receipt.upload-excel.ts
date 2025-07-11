@@ -15,7 +15,11 @@ import Product, {
 } from '../../../../_libs/database/entities/product.entity'
 import { ReceiptItemInsertType } from '../../../../_libs/database/entities/receipt-item.entity'
 import { ProductManager } from '../../../../_libs/database/managers'
-import { BatchRepository, ProductRepository } from '../../../../_libs/database/repositories'
+import {
+  BatchRepository,
+  ProductGroupRepository,
+  ProductRepository,
+} from '../../../../_libs/database/repositories'
 import { ProductExcelRules } from '../api-file-product/product-excel.rule'
 import { ExcelProcess } from '../common/excel-process'
 
@@ -32,13 +36,14 @@ const dataPlainExample = {
   retailPrice: 0,
   costAmount: 0,
   substance: '',
-  groupName: '',
+  productGroupName: '',
   route: '',
   source: '',
 } satisfies Record<keyof typeof ProductExcelRules, unknown>
 
 type DataPlain = typeof dataPlainExample & {
   productId: number
+  productGroupId: number
   productUpsert: ProductInsertType & { id: number }
   batchUpsert?: BatchInsertType & { id: number }
 }
@@ -48,6 +53,7 @@ export class ApiFileReceiptUploadExcel {
   constructor(
     private dataSource: DataSource,
     private readonly productRepository: ProductRepository,
+    private readonly productGroupRepository: ProductGroupRepository,
     private readonly batchRepository: BatchRepository,
     private readonly productManager: ProductManager
   ) { }
@@ -59,6 +65,9 @@ export class ApiFileReceiptUploadExcel {
   }) {
     const { oid, userId, file } = options
     const time = Date.now()
+
+    const productGroupAll = await this.productGroupRepository.findManyBy({ oid })
+    const productGroupMapName = ESArray.arrayToKeyValue(productGroupAll, 'name')
 
     const excelDataGrid = await ExcelProcess.getData({
       file,
@@ -78,6 +87,17 @@ export class ApiFileReceiptUploadExcel {
       if (!item.productCode) {
         throw new BusinessError(`Lỗi: Dòng ${index + 2}: Mã sản phẩm không được để trống`)
       }
+      let productGroupId = 0
+      if (item.productGroupName) {
+        console.log('=================', item.productGroupName)
+        const productGroup = productGroupMapName[item.productGroupName]
+        if (!productGroup) {
+          throw new BusinessError(
+            `Lỗi: Dòng ${index + 2}: Hệ thống chưa có nhóm sản phẩm ${item.productGroupName}`
+          )
+        }
+        productGroupId = productGroup.id
+      }
       const batchId = item.batchId || 0
       const lotNumber = String(item.lotNumber || '')
       const expiryDate = item.expiryDate ? (item.expiryDate as Date).getTime() : null
@@ -90,9 +110,9 @@ export class ApiFileReceiptUploadExcel {
         costAmount = Math.round(item.costAmount)
       }
       const retailPrice = Math.round(item.retailPrice || 0)
-      
+
       const dataPlain: DataPlain = {
-        _num: item._num,
+        _num: item._num || 0,
         productId: 0,
         productCode: item.productCode,
         brandName: item.brandName,
@@ -105,7 +125,8 @@ export class ApiFileReceiptUploadExcel {
         retailPrice,
         costAmount,
         substance: item.substance,
-        groupName: item.groupName,
+        productGroupName: item.productGroupName,
+        productGroupId,
         route: item.route,
         source: item.source,
         productUpsert: {
@@ -120,7 +141,7 @@ export class ApiFileReceiptUploadExcel {
           unit: JSON.stringify([{ name: item.unitBasicName, rate: 1, default: true }]),
           warehouseIds: JSON.stringify([0]),
           wholesalePrice: 0,
-          productGroupId: 0,
+          productGroupId,
           substance: item.substance,
           route: item.route,
           source: item.source,
@@ -272,7 +293,7 @@ export class ApiFileReceiptUploadExcel {
         condition: { oid, id: { NOT: 0 } },
         compare: ['id'],
         tempList: productUpdateList,
-        update: ['brandName', 'route', 'source', 'substance'], // không update quantity
+        update: ['brandName', 'productGroupId', 'route', 'source', 'substance'], // không update quantity
         options: { requireEqualLength: true },
       })
     }

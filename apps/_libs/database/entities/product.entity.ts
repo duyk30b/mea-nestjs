@@ -59,7 +59,7 @@ export default class Product {
 
   @Column({ type: 'varchar', length: 50 })
   @Expose()
-  productCode: string // Số Lô sản phẩm
+  productCode: string // Mã sản phẩm
 
   @Column({ type: 'varchar', length: 255 })
   @Expose()

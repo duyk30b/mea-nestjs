@@ -7,6 +7,12 @@ import { DiscountUpdateBody } from '../../api-discount/request'
 import { PositionBasicBody } from '../../api-position/request'
 
 export class LaboratoryParentUpsert {
+  @ApiProperty({ example: 'ABC12345' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  laboratoryCode?: string
+
   @ApiProperty({ example: 105000 })
   @Expose()
   @IsDefined()
