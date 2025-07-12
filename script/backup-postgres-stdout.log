@@ -1,0 +1,583 @@
+---------------------------------------------------------------------------------------
+2025-05-23 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+1414d20 Version 8.3 - PaymentMethod & Job backup-postgresql
+6037b59 Version 8.2 - InventoryStrategy
+total 13580
+drwxr-xr-x    2 root     root          4096 May 23 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23 14:41 ..
+-rw-r--r--    1 root     root      13895371 May 23 19:00 2025-05-23_19-00-01.sql
+2025-05-23 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-05-23 21:37:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+1414d20 Version 8.3 - PaymentMethod & Job backup-postgresql
+6037b59 Version 8.2 - InventoryStrategy
+total 13580
+drwxr-xr-x    2 root     root          4096 May 23 21:37 .
+drwxr-xr-x    1 root     root          4096 Nov 23 14:41 ..
+-rw-r--r--    1 root     root      13895371 May 23 21:37 2025-05-23_21-37-01.sql
+2025-05-23 21:37:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-05-23 21:38:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+1414d20 Version 8.3 - PaymentMethod & Job backup-postgresql
+6037b59 Version 8.2 - InventoryStrategy
+total 13580
+drwxr-xr-x    2 root     root          4096 May 23 21:38 .
+drwxr-xr-x    1 root     root          4096 Nov 23 14:41 ..
+-rw-r--r--    1 root     root      13895371 May 23 21:38 2025-05-23_21-38-01.sql
+2025-05-23 21:38:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-05-23 21:39:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+1414d20 Version 8.3 - PaymentMethod & Job backup-postgresql
+6037b59 Version 8.2 - InventoryStrategy
+total 13580
+drwxr-xr-x    2 root     root          4096 May 23 21:39 .
+drwxr-xr-x    1 root     root          4096 Nov 23 14:41 ..
+-rw-r--r--    1 root     root      13895371 May 23 21:39 2025-05-23_21-39-01.sql
+2025-05-23 21:39:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-05-24 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+c838fb3 Version 8.3 - PaymentMethod & Job backup-postgresql
+6037b59 Version 8.2 - InventoryStrategy
+total 13628
+drwxr-xr-x    2 root     root          4096 May 24 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23 14:41 ..
+-rw-r--r--    1 root     root      13944608 May 24 19:00 2025-05-24_19-00-02.sql
+2025-05-24 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-05-25 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+049aff2 Version 8.4 - PrintHtml custom
+c838fb3 Version 8.3 - PaymentMethod & Job backup-postgresql
+total 13688
+drwxr-xr-x    2 root     root          4096 May 25 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      14005427 May 25 19:00 2025-05-25_19-00-01.sql
+2025-05-25 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-05-26 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+049aff2 Version 8.4 - PrintHtml custom
+c838fb3 Version 8.3 - PaymentMethod & Job backup-postgresql
+total 13744
+drwxr-xr-x    2 root     root          4096 May 26 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      14065159 May 26 19:00 2025-05-26_19-00-01.sql
+2025-05-26 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-05-27 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+dfe6013 Version 8.5 - Ticket Excel
+049aff2 Version 8.4 - PrintHtml custom
+total 13776
+drwxr-xr-x    2 root     root          4096 May 27 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      14095557 May 27 19:00 2025-05-27_19-00-01.sql
+2025-05-27 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-05-28 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+3646b38 8.5.2
+ed8cdfd 8.5.1
+total 13820
+drwxr-xr-x    2 root     root          4096 May 28 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      14141775 May 28 19:00 2025-05-28_19-00-01.sql
+2025-05-28 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-05-29 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+3646b38 8.5.2
+ed8cdfd 8.5.1
+total 13836
+drwxr-xr-x    2 root     root          4096 May 29 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      14156185 May 29 19:00 2025-05-29_19-00-02.sql
+2025-05-29 19:00:03 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-05-30 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+273bb5c Version 8.6 - StockCheck
+3086758 Version 8.5 - Ticket Excel & Commission
+total 13880
+drwxr-xr-x    2 root     root          4096 May 30 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      14204093 May 30 19:00 2025-05-30_19-00-01.sql
+2025-05-30 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-05-31 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+273bb5c Version 8.6 - StockCheck
+3086758 Version 8.5 - Ticket Excel & Commission
+total 13936
+drwxr-xr-x    2 root     root          4096 May 31 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      14258509 May 31 19:00 2025-05-31_19-00-01.sql
+2025-05-31 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-01 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+273bb5c Version 8.6 - StockCheck
+3086758 Version 8.5 - Ticket Excel & Commission
+total 13984
+drwxr-xr-x    2 root     root          4096 Jun  1 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      14307859 Jun  1 19:00 2025-06-01_19-00-01.sql
+2025-06-01 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-02 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+273bb5c Version 8.6 - StockCheck
+3086758 Version 8.5 - Ticket Excel & Commission
+total 14016
+drwxr-xr-x    2 root     root          4096 Jun  2 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      14341666 Jun  2 19:00 2025-06-02_19-00-01.sql
+2025-06-02 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-03 19:00:02 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+a24c80e Version 8.7 - Payment
+273bb5c Version 8.6 - StockCheck
+total 14176
+drwxr-xr-x    2 root     root          4096 Jun  3 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      14506571 Jun  3 19:00 2025-06-03_19-00-02.sql
+2025-06-03 19:00:03 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-04 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+772abdd Version 8.8 - CostAmount and PrintLayout
+a24c80e Version 8.7 - Payment
+total 14260
+drwxr-xr-x    2 root     root          4096 Jun  4 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      14590576 Jun  4 19:00 2025-06-04_19-00-02.sql
+2025-06-04 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-05 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+772abdd Version 8.8 - CostAmount and PrintLayout
+a24c80e Version 8.7 - Payment
+total 14308
+drwxr-xr-x    2 root     root          4096 Jun  5 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      14641499 Jun  5 19:00 2025-06-05_19-00-01.sql
+2025-06-05 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-06 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+400e3de Version 8.9 - Picking and Putaway
+772abdd Version 8.8 - CostAmount and PrintLayout
+total 14720
+drwxr-xr-x    2 root     root          4096 Jun  6 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15062128 Jun  6 19:00 2025-06-06_19-00-01.sql
+2025-06-06 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-07 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+9fec429 8.10.1
+7bc5b13 Version 8.10 - Merge Batch and Product
+total 14632
+drwxr-xr-x    2 root     root          4096 Jun  7 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      14973328 Jun  7 19:00 2025-06-07_19-00-01.sql
+2025-06-07 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-08 19:00:02 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+9fec429 8.10.1
+7bc5b13 Version 8.10 - Merge Batch and Product
+total 14680
+drwxr-xr-x    2 root     root          4096 Jun  8 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15022396 Jun  8 19:00 2025-06-08_19-00-02.sql
+2025-06-08 19:00:03 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-09 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+9fec429 8.10.1
+7bc5b13 Version 8.10 - Merge Batch and Product
+total 14764
+drwxr-xr-x    2 root     root          4096 Jun  9 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15107340 Jun  9 19:00 2025-06-09_19-00-02.sql
+2025-06-09 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-10 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+9fec429 8.10.1
+7bc5b13 Version 8.10 - Merge Batch and Product
+total 14800
+drwxr-xr-x    2 root     root          4096 Jun 10 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15144556 Jun 10 19:00 2025-06-10_19-00-01.sql
+2025-06-10 19:00:03 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-11 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+9fec429 8.10.1
+7bc5b13 Version 8.10 - Merge Batch and Product
+total 14836
+drwxr-xr-x    2 root     root          4096 Jun 11 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15181248 Jun 11 19:00 2025-06-11_19-00-02.sql
+2025-06-11 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-12 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+9fec429 8.10.1
+7bc5b13 Version 8.10 - Merge Batch and Product
+total 14880
+drwxr-xr-x    2 root     root          4096 Jun 12 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15226650 Jun 12 19:00 2025-06-12_19-00-01.sql
+2025-06-12 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-13 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+8fbdad4 9.0.1
+9e0c70c Version 9.0 - ProductType, Permission and Position
+total 14952
+drwxr-xr-x    2 root     root          4096 Jun 13 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15300699 Jun 13 19:00 2025-06-13_19-00-01.sql
+2025-06-13 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-14 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+d23c172 Version 9.0 - ProductType, Permission and Position
+9fec429 8.10.1
+total 14944
+drwxr-xr-x    2 root     root          4096 Jun 14 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15292396 Jun 14 19:00 2025-06-14_19-00-01.sql
+2025-06-14 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-15 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+d23c172 Version 9.0 - ProductType, Permission and Position
+9fec429 8.10.1
+total 14996
+drwxr-xr-x    2 root     root          4096 Jun 15 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15347546 Jun 15 19:00 2025-06-15_19-00-02.sql
+2025-06-15 19:00:03 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-16 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+d23c172 Version 9.0 - ProductType, Permission and Position
+9fec429 8.10.1
+total 15028
+drwxr-xr-x    2 root     root          4096 Jun 16 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15378474 Jun 16 19:00 2025-06-16_19-00-02.sql
+2025-06-16 19:00:03 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-17 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+d23c172 Version 9.0 - ProductType, Permission and Position
+9fec429 8.10.1
+total 15052
+drwxr-xr-x    2 root     root          4096 Jun 17 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15402564 Jun 17 19:00 2025-06-17_19-00-01.sql
+2025-06-17 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-18 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+d23c172 Version 9.0 - ProductType, Permission and Position
+9fec429 8.10.1
+total 15084
+drwxr-xr-x    2 root     root          4096 Jun 18 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15437590 Jun 18 19:00 2025-06-18_19-00-01.sql
+2025-06-18 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-19 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+d23c172 Version 9.0 - ProductType, Permission and Position
+9fec429 8.10.1
+total 15116
+drwxr-xr-x    2 root     root          4096 Jun 19 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15469179 Jun 19 19:00 2025-06-19_19-00-01.sql
+2025-06-19 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-20 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+d23c172 Version 9.0 - ProductType, Permission and Position
+9fec429 8.10.1
+total 15148
+drwxr-xr-x    2 root     root          4096 Jun 20 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15501680 Jun 20 19:00 2025-06-20_19-00-02.sql
+2025-06-20 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-21 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+d23c172 Version 9.0 - ProductType, Permission and Position
+9fec429 8.10.1
+total 15180
+drwxr-xr-x    2 root     root          4096 Jun 21 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15533958 Jun 21 19:00 2025-06-21_19-00-01.sql
+2025-06-21 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-22 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+8df4295 Version 9.0 - ProductType, Permission and Position
+9fec429 8.10.1
+total 15496
+drwxr-xr-x    2 root     root          4096 Jun 22 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15858415 Jun 22 19:00 2025-06-22_19-00-01.sql
+2025-06-22 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-23 19:00:02 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+dc0a86c Version 9.0 - ProductType, Permission and Position
+9fec429 8.10.1
+total 15524
+drwxr-xr-x    2 root     root          4096 Jun 23 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15885101 Jun 23 19:00 2025-06-23_19-00-02.sql
+2025-06-23 19:00:03 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-24 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+dc0a86c Version 9.0 - ProductType, Permission and Position
+9fec429 8.10.1
+total 15540
+drwxr-xr-x    2 root     root          4096 Jun 24 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15901244 Jun 24 19:00 2025-06-24_19-00-01.sql
+2025-06-24 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-25 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+dc0a86c Version 9.0 - ProductType, Permission and Position
+9fec429 8.10.1
+total 15564
+drwxr-xr-x    2 root     root          4096 Jun 25 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15928267 Jun 25 19:00 2025-06-25_19-00-01.sql
+2025-06-25 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-26 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+dc0a86c Version 9.0 - ProductType, Permission and Position
+9fec429 8.10.1
+total 15576
+drwxr-xr-x    2 root     root          4096 Jun 26 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15938620 Jun 26 19:00 2025-06-26_19-00-01.sql
+2025-06-26 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-27 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+39a58d5 9.0.1
+dc0a86c Version 9.0 - ProductType, Permission and Position
+total 15624
+drwxr-xr-x    2 root     root          4096 Jun 27 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      15988901 Jun 27 19:00 2025-06-27_19-00-01.sql
+2025-06-27 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-28 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+39a58d5 9.0.1
+dc0a86c Version 9.0 - ProductType, Permission and Position
+total 15716
+drwxr-xr-x    2 root     root          4096 Jun 28 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      16082223 Jun 28 19:00 2025-06-28_19-00-01.sql
+2025-06-28 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-29 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+39a58d5 9.0.1
+dc0a86c Version 9.0 - ProductType, Permission and Position
+total 15784
+drwxr-xr-x    2 root     root          4096 Jun 29 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      16153019 Jun 29 19:00 2025-06-29_19-00-02.sql
+2025-06-29 19:00:03 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-06-30 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+39a58d5 9.0.1
+dc0a86c Version 9.0 - ProductType, Permission and Position
+total 15832
+drwxr-xr-x    2 root     root          4096 Jun 30 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      16200954 Jun 30 19:00 2025-06-30_19-00-02.sql
+2025-06-30 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-07-01 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+39a58d5 9.0.1
+dc0a86c Version 9.0 - ProductType, Permission and Position
+total 15860
+drwxr-xr-x    2 root     root          4096 Jul  1 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      16231654 Jul  1 19:00 2025-07-01_19-00-01.sql
+2025-07-01 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-07-02 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+39a58d5 9.0.1
+dc0a86c Version 9.0 - ProductType, Permission and Position
+total 15904
+drwxr-xr-x    2 root     root          4096 Jul  2 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      16273991 Jul  2 19:00 2025-07-02_19-00-01.sql
+2025-07-02 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-07-03 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+39a58d5 9.0.1
+dc0a86c Version 9.0 - ProductType, Permission and Position
+total 15920
+drwxr-xr-x    2 root     root          4096 Jul  3 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      16290306 Jul  3 19:00 2025-07-03_19-00-01.sql
+2025-07-03 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-07-04 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+39a58d5 9.0.1
+dc0a86c Version 9.0 - ProductType, Permission and Position
+total 15952
+drwxr-xr-x    2 root     root          4096 Jul  4 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      16324802 Jul  4 19:00 2025-07-04_19-00-01.sql
+2025-07-04 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-07-05 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+39a58d5 9.0.1
+dc0a86c Version 9.0 - ProductType, Permission and Position
+total 16028
+drwxr-xr-x    2 root     root          4096 Jul  5 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      16402151 Jul  5 19:00 2025-07-05_19-00-02.sql
+2025-07-05 19:00:03 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-07-06 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+bf82a36 9.0.7
+39a58d5 9.0.1
+total 16084
+drwxr-xr-x    2 root     root          4096 Jul  6 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      16460707 Jul  6 19:00 2025-07-06_19-00-02.sql
+2025-07-06 19:00:03 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-07-07 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+bf82a36 9.0.7
+39a58d5 9.0.1
+total 16112
+drwxr-xr-x    2 root     root          4096 Jul  7 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      16488762 Jul  7 19:00 2025-07-07_19-00-02.sql
+2025-07-07 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-07-08 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+1b34ea9 Version 9.2 - Address
+c19974b Version 9.1 - Room Radiology & Laboratory
+total 16272
+drwxr-xr-x    2 root     root          4096 Jul  8 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      16650374 Jul  8 19:00 2025-07-08_19-00-01.sql
+2025-07-08 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-07-09 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+ba784fa 9.2.2
+99c26f0 9.2.1
+total 16288
+drwxr-xr-x    2 root     root          4096 Jul  9 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      16669941 Jul  9 19:00 2025-07-09_19-00-01.sql
+2025-07-09 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-07-10 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+ba784fa 9.2.2
+99c26f0 9.2.1
+total 16316
+drwxr-xr-x    2 root     root          4096 Jul 10 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      16696971 Jul 10 19:00 2025-07-10_19-00-01.sql
+2025-07-10 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-07-11 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+72be02c Version 9.4 - Excel Procedure,Laboratory,Radiology
+8ab5f07 Version 9.3 - Discount
+total 17236
+drwxr-xr-x    2 root     root          4096 Jul 11 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      17638366 Jul 11 19:00 2025-07-11_19-00-01.sql
+2025-07-11 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
