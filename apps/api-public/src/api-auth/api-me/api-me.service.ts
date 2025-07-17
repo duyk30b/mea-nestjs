@@ -16,9 +16,10 @@ export class ApiMeService {
 
   async info(params: { oid: number; uid: number; permissionIds: number[] }): Promise<BaseResponse> {
     const { uid, oid, permissionIds } = params
-    const [user, organization, permissionAll, settingMap, settingMapRoot] = await Promise.all([
+    const [user, organization, roomIdList, permissionAll, settingMap, settingMapRoot] = await Promise.all([
       this.cacheDataService.getUser(oid, uid),
       this.cacheDataService.getOrganization(oid),
+      this.cacheDataService.getRoomIdList(oid, uid),
       this.cacheDataService.getPermissionAllList(),
       this.cacheDataService.getSettingMap(oid),
       this.cacheDataService.getSettingMap(1),
@@ -28,6 +29,7 @@ export class ApiMeService {
       data: {
         user,
         organization,
+        roomIdList,
         permissionIds,
         permissionAll,
         settingMap,
@@ -67,7 +69,7 @@ export class ApiMeService {
       }
     )
     const user = await this.userRepository.findOneBy({ oid, id })
-    this.cacheDataService.clearUserAndRole(oid)
+    this.cacheDataService.clearUserAndRoleAndRoom(oid)
     return { data: { user } }
   }
 }

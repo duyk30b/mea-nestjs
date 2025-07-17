@@ -4,6 +4,7 @@ import { EGender } from '../common/variable'
 import Device from './device'
 import Organization from './organization.entity'
 import UserRole from './user-role.entity'
+import UserRoom from './user-room.entity'
 
 export enum UserGroup {
   ROOT = 'ROOT',
@@ -96,6 +97,10 @@ export default class User {
   userRoleList: UserRole[]
 
   @Expose()
+  @OneToMany((type) => UserRoom, (userRoom) => userRoom.user)
+  userRoomList: UserRoom[]
+
+  @Expose()
   devices: Device[]
 
   static fromRaw(raw: { [P in keyof User]: any }) {
@@ -121,6 +126,11 @@ export type UserRelationType = {
     User,
     'userRoleList'
   >]?: { [P in keyof Pick<UserRole, 'user' | 'role'>]?: boolean } | false
+} & {
+  [P in keyof Pick<
+    User,
+    'userRoomList'
+  >]?: { [P in keyof Pick<UserRoom, 'user' | 'room'>]?: boolean } | false
 }
 
 export type UserInsertType = Omit<

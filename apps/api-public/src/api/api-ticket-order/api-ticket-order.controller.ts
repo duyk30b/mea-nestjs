@@ -9,7 +9,7 @@ import {
   TicketReturnProductListBody,
   TicketSendProductAndPaymentBody,
   TicketSendProductListBody,
-} from '../api-ticket/request'
+} from '../ticket/request'
 import { ApiTicketOrderService } from './api-ticket-order.service'
 import {
   TicketOrderDebtSuccessInsertBody,

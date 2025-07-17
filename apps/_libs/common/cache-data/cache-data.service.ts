@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { Organization, Permission, Role, User } from '../../database/entities'
+import { Organization, Permission, Role, Room, User, UserRoom } from '../../database/entities'
 import { SettingKey } from '../../database/entities/setting.entity'
 import UserRole from '../../database/entities/user-role.entity'
+import { UserRoomRepository } from '../../database/repositories'
 import { OrganizationRepository } from '../../database/repositories/organization.repository'
 import { PermissionRepository } from '../../database/repositories/permission.repository'
 import { RoleRepository } from '../../database/repositories/role.repository'
@@ -19,6 +20,7 @@ export class CacheDataService {
       userMap?: Record<string, User>
       roleMap?: Record<string, Role>
       userRoleList?: UserRole[]
+      userRoomList?: UserRoom[]
       settingMapMap?: { -readonly [P in keyof typeof SettingKey]?: any }
     }
   > = {}
@@ -31,6 +33,7 @@ export class CacheDataService {
     private readonly userRepository: UserRepository,
     private readonly roleRepository: RoleRepository,
     private readonly userRoleRepository: UserRoleRepository,
+    private readonly userRoomRepository: UserRoomRepository,
     private readonly permissionRepository: PermissionRepository
   ) { }
 
@@ -129,6 +132,17 @@ export class CacheDataService {
     return result
   }
 
+  async getRoomIdList(oid: number, uid: number) {
+    if (!this.orgCache[oid].userRoomList) {
+      this.orgCache[oid].userRoomList = await this.userRoomRepository.findManyBy({ oid })
+    }
+    const roomIdList = this.orgCache[oid].userRoomList
+      .filter((i) => i.userId === uid)
+      .map((i) => i.roomId)
+
+    return roomIdList
+  }
+
   async getPermissionIdsByUserId(oid: number, uid: number) {
     if (!oid || !uid) return null
     if (!this.orgCache[oid]) this.orgCache[oid] = {}
@@ -179,11 +193,12 @@ export class CacheDataService {
     this.orgCache[oid].organization = organization
   }
 
-  clearUserAndRole(oid: number) {
+  clearUserAndRoleAndRoom(oid: number) {
     if (!this.orgCache[oid]) this.orgCache[oid] = {}
     this.orgCache[oid].userMap = {}
     this.orgCache[oid].roleMap = {}
     this.orgCache[oid].userRoleList = null
+    this.orgCache[oid].userRoomList = null
   }
 
   clearOrganization(oid: number | undefined) {

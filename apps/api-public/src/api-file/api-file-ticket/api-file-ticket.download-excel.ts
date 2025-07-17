@@ -5,7 +5,7 @@ import { Organization, Ticket, User } from '../../../../_libs/database/entities'
 import { TicketType } from '../../../../_libs/database/entities/ticket.entity'
 import { TicketRepository } from '../../../../_libs/database/repositories'
 import { excelOneSheetWorkbook } from '../../../../_libs/file/excel-one-sheet.util'
-import { TicketGetManyQuery } from '../../api/api-ticket/request'
+import { TicketGetManyQuery } from '../../api/ticket/request'
 
 @Injectable()
 export class ApiFileTicketDownloadExcel {

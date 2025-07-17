@@ -5,7 +5,7 @@ import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiRoomService } from './api-room.service'
-import { RoomCreateBody, RoomGetManyQuery, RoomPaginationQuery, RoomUpdateBody } from './request'
+import { RoomCreateBody, RoomGetManyQuery, RoomGetOneQuery, RoomPaginationQuery, RoomUpdateBody } from './request'
 
 @ApiTags('Room')
 @ApiBearerAuth('access-token')
@@ -27,8 +27,12 @@ export class ApiRoomController {
 
   @Get('detail/:id')
   @UserPermission()
-  findOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return this.apiRoomService.getOne(oid, id)
+  findOne(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam,
+    @Query() query: RoomGetOneQuery
+  ) {
+    return this.apiRoomService.getOne({ oid, roomId: id, query })
   }
 
   @Post('create')

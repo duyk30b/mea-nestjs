@@ -4,7 +4,7 @@ import { IdParam } from '../../../../../_libs/common/dto'
 import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../../_libs/permission/permission.enum'
-import { TicketParams } from '../../api-ticket/request/ticket.params'
+import { TicketParams } from '../../ticket/request/ticket.params'
 import { ApiTicketClinicLaboratoryService } from './api-ticket-clinic-laboratory.service'
 import {
   TicketClinicLaboratoryGroupParams,

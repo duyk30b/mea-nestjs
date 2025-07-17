@@ -12,7 +12,7 @@ import {
 } from '../../../../../_libs/database/operations'
 import { TicketProductRepository } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
-import { TicketReturnProductListBody, TicketSendProductListBody } from '../../api-ticket/request'
+import { TicketReturnProductListBody, TicketSendProductListBody } from '../../ticket/request'
 import { ApiTicketClinicUserService } from '../api-ticket-clinic-user/api-ticket-clinic-user.service'
 import {
   TicketClinicAddTicketProductListBody,

@@ -2,19 +2,19 @@ import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { DeliveryStatus } from '../../common/variable'
 import {
-    Customer,
-    TicketLaboratory,
-    TicketProcedure,
-    TicketProduct,
-    TicketRadiology,
-    TicketUser,
+  Customer,
+  TicketLaboratory,
+  TicketProcedure,
+  TicketProduct,
+  TicketRadiology,
+  TicketUser,
 } from '../../entities'
 import Payment, {
-    MoneyDirection,
-    PaymentInsertType,
-    PaymentTiming,
-    PersonType,
-    VoucherType,
+  MoneyDirection,
+  PaymentInsertType,
+  PaymentTiming,
+  PersonType,
+  VoucherType,
 } from '../../entities/payment.entity'
 import { CommissionCalculatorType, PositionInteractType } from '../../entities/position.entity'
 import { TicketProductType } from '../../entities/ticket-product.entity'
@@ -63,6 +63,7 @@ export class TicketPaymentAndCloseOperation {
           status: {
             IN: [TicketStatus.Draft, TicketStatus.Deposited, TicketStatus.Executing],
           },
+          debt: { GTE: money }, // số tiền thanh toán đương nhiên phải nhỏ hơn số nợ
         },
         { updatedAt: time, endedAt: time }
       )
@@ -251,17 +252,35 @@ export class TicketPaymentAndCloseOperation {
         - ticketOrigin.expense
         - commissionMoney
 
+      const customerOrigin = await this.customerManager.updateOneAndReturnEntity(
+        manager,
+        { id: ticketOrigin.customerId },
+        { updatedAt: Date.now() }
+      )
+      const customerOpenDebt = customerOrigin.debt
+      const customerTopUpMoney = -customerOpenDebt // quỹ thực chất là nợ ở dạng số âm
+
+      let topUpMoney = 0 // số tiền lấy thêm từ quỹ
+      let newPaidTicket = ticketOrigin.paid + money
+      let newDebtTicket = ticketOrigin.debt - money
+      let newDebtCustomer = customerOrigin.debt + newDebtTicket
+      if (newDebtTicket > 0 && customerTopUpMoney > 0) {
+        // Nếu thiếu tiền, mà trong quỹ có tiền thì phải lấy thêm tiền từ quỹ ra
+        topUpMoney = Math.min(newDebtTicket, customerTopUpMoney)
+        newDebtTicket = newDebtTicket - topUpMoney
+        newPaidTicket = newPaidTicket + topUpMoney
+
+        // tính thế nào đi chăng nữa thì số nợ hay quỹ thì vẫn thế, nhưng cứ viết vào để hiểu
+        newDebtCustomer = customerOrigin.debt + topUpMoney + newDebtTicket
+      }
+
       const ticket = await this.ticketManager.updateOneAndReturnEntity(
         manager,
         { oid, id: ticketId },
         {
-          status: () => `CASE 
-                                WHEN("totalMoney" = paid + ${money}) THEN ${TicketStatus.Completed} 
-                                ELSE ${TicketStatus.Debt} 
-                              END
-                            `,
-          paid: () => `paid + ${money}`,
-          debt: () => `debt - ${money}`,
+          status: newDebtTicket > 0 ? TicketStatus.Debt : TicketStatus.Completed,
+          paid: newPaidTicket,
+          debt: newDebtTicket,
           itemsDiscount,
           profit,
           commissionMoney,
@@ -269,51 +288,70 @@ export class TicketPaymentAndCloseOperation {
         }
       )
 
-      if (ticket.paid > ticket.totalMoney) {
-        throw new Error(`${PREFIX}: Money invalid, ticket=${ticket}`)
-      }
       let customer: Customer
-      let payment: Payment
-      if (ticket.debt != 0 || money != 0) {
-        if (ticket.debt > 0) {
-          customer = await this.customerManager.updateOneAndReturnEntity(
-            manager,
-            { oid, id: ticket.customerId },
-            { debt: () => `debt + ${ticket.debt}` }
-          )
-        } else {
-          customer = await manager.findOneBy(Customer, { oid, id: ticket.customerId })
-        }
-        if (!customer) {
-          throw new Error(`Khách hàng không tồn tại trên hệ thống`)
-        }
+      let paymentList: Payment[]
+      if (ticket.debt != 0 || money != 0 || topUpMoney != 0) {
+        customer = await this.customerManager.updateOneAndReturnEntity(
+          manager,
+          { oid, id: ticket.customerId },
+          { debt: newDebtCustomer }
+        )
 
         const customerCloseDebt = customer.debt
-        const customerOpenDebt = customerCloseDebt - ticket.debt
 
-        // === 3. INSERT CUSTOMER_PAYMENT ===
-        const paymentInsert: PaymentInsertType = {
-          oid,
-          paymentMethodId,
-          voucherType: VoucherType.Ticket,
-          voucherId: ticketId,
-          personType: PersonType.Customer,
-          personId: ticket.customerId,
-          paymentTiming: PaymentTiming.Close,
-          createdAt: time,
-          moneyDirection: MoneyDirection.In,
-          paidAmount: money,
-          debtAmount: ticket.debt,
-          openDebt: customerOpenDebt,
-          closeDebt: customerCloseDebt,
-          cashierId,
-          note,
-          description: '',
+        const paymentInsertList: PaymentInsertType[] = []
+
+        if (topUpMoney != 0) {
+          const paymentInsert: PaymentInsertType = {
+            oid,
+            paymentMethodId,
+            voucherType: VoucherType.Ticket,
+            voucherId: ticketId,
+            personType: PersonType.Customer,
+            personId: ticket.customerId,
+            paymentTiming: PaymentTiming.Close,
+            createdAt: time,
+            moneyDirection: MoneyDirection.In,
+            paidAmount: topUpMoney,
+            debtAmount: topUpMoney,
+            openDebt: customerOpenDebt,
+            closeDebt: customerOpenDebt + topUpMoney,
+            cashierId,
+            note,
+            description: '',
+          }
+          paymentInsertList.push(paymentInsert)
         }
-        payment = await this.paymentManager.insertOneAndReturnEntity(manager, paymentInsert)
+        if (money != 0 || ticket.debt != 0) {
+          const paymentInsert: PaymentInsertType = {
+            oid,
+            paymentMethodId,
+            voucherType: VoucherType.Ticket,
+            voucherId: ticketId,
+            personType: PersonType.Customer,
+            personId: ticket.customerId,
+            paymentTiming: PaymentTiming.Close,
+            createdAt: time,
+            moneyDirection: MoneyDirection.In,
+            paidAmount: money,
+            debtAmount: ticket.debt,
+            openDebt: customerOpenDebt + topUpMoney,
+            closeDebt: customerOpenDebt + topUpMoney + ticket.debt,
+            cashierId,
+            note,
+            description: '',
+          }
+          paymentInsertList.push(paymentInsert)
+        }
+        // === 3. INSERT CUSTOMER_PAYMENT ===
+
+        paymentList = await this.paymentManager.insertManyAndReturnEntity(
+          manager,
+          paymentInsertList
+        )
       }
       await queryRunner.commitTransaction()
-      return { ticket, customer, payment, ticketUserModifiedList, ticketUserDeletedList }
+      return { ticket, customer, paymentList, ticketUserModifiedList, ticketUserDeletedList }
     } catch (error) {
       console.error('error:', error)
       await queryRunner.rollbackTransaction()

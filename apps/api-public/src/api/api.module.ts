@@ -40,11 +40,11 @@ import { ApiTicketOrderModule } from './api-ticket-order/api-ticket-order.module
 import { ApiTicketProcedureModule } from './api-ticket-procedure/api-ticket-procedure.module'
 import { ApiTicketProductModule } from './api-ticket-product/api-ticket-product.module'
 import { ApiTicketRadiologyModule } from './api-ticket-radiology/api-ticket-radiology.module'
-import { ApiTicketReceptionModule } from './api-ticket-reception/api-ticket-reception.module'
-import { ApiTicketModule } from './api-ticket/api-ticket.module'
 import { ApiUserRoleModule } from './api-user-role/api-user-role.module'
+import { ApiUserRoomModule } from './api-user-room/api-user-room.module'
 import { ApiUserModule } from './api-user/api-user.module'
 import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
+import { TicketModule } from './ticket/ticket.module'
 
 @Module({
   imports: [
@@ -71,6 +71,7 @@ import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
     ApiPositionModule,
     ApiUserModule,
     ApiUserRoleModule,
+    ApiUserRoomModule,
 
     ApiLaboratoryModule,
     ApiLaboratoryGroupModule,
@@ -84,9 +85,8 @@ import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
     ApiProcedureGroupModule,
     ApiPrintHtmlModule,
 
-    ApiTicketModule,
+    TicketModule,
     ApiTicketOrderModule,
-    ApiTicketReceptionModule,
     ApiTicketProcedureModule,
     ApiTicketProductModule,
     ApiTicketBatchModule,

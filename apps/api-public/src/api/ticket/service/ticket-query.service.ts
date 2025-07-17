@@ -1,31 +1,29 @@
 import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { arrayToKeyValue } from '../../../../_libs/common/helpers/array.helper'
-import { BaseResponse } from '../../../../_libs/common/interceptor'
-import { Image } from '../../../../_libs/database/entities'
-import { VoucherType } from '../../../../_libs/database/entities/payment.entity'
-import { TicketProductType } from '../../../../_libs/database/entities/ticket-product.entity'
+import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
+import { arrayToKeyValue } from '../../../../../_libs/common/helpers/array.helper'
+import { BaseResponse } from '../../../../../_libs/common/interceptor'
+import { Image } from '../../../../../_libs/database/entities'
+import { VoucherType } from '../../../../../_libs/database/entities/payment.entity'
+import { TicketProductType } from '../../../../../_libs/database/entities/ticket-product.entity'
 import {
   AppointmentRepository,
   PaymentRepository,
   TicketAttributeRepository,
   TicketBatchRepository,
-  TicketExpenseRepository,
   TicketLaboratoryGroupRepository,
   TicketLaboratoryRepository,
   TicketLaboratoryResultRepository,
   TicketProcedureRepository,
   TicketProductRepository,
   TicketRadiologyRepository,
-  TicketSurchargeRepository,
   TicketUserRepository,
-} from '../../../../_libs/database/repositories'
-import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
-import { TicketRepository } from '../../../../_libs/database/repositories/ticket.repository'
-import { TicketGetManyQuery, TicketGetOneQuery, TicketPaginationQuery } from './request'
+} from '../../../../../_libs/database/repositories'
+import { ImageRepository } from '../../../../../_libs/database/repositories/image.repository'
+import { TicketRepository } from '../../../../../_libs/database/repositories/ticket.repository'
+import { TicketGetManyQuery, TicketGetOneQuery, TicketPaginationQuery } from '../request'
 
 @Injectable()
-export class ApiTicketService {
+export class TicketQueryService {
   constructor(
     private readonly ticketRepository: TicketRepository,
     private readonly appointmentRepository: AppointmentRepository,
@@ -39,8 +37,6 @@ export class ApiTicketService {
     private readonly ticketLaboratoryResultRepository: TicketLaboratoryResultRepository,
     private readonly ticketUserRepository: TicketUserRepository,
     private readonly paymentRepository: PaymentRepository,
-    private readonly ticketExpenseRepository: TicketExpenseRepository,
-    private readonly ticketSurchargeRepository: TicketSurchargeRepository,
     private readonly imageRepository: ImageRepository
   ) { }
 

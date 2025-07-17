@@ -28,7 +28,7 @@ import {
   TicketReturnProductListBody,
   TicketSendProductAndPaymentBody,
   TicketSendProductListBody,
-} from '../api-ticket/request'
+} from '../ticket/request'
 import {
   TicketOrderDebtSuccessInsertBody,
   TicketOrderDebtSuccessUpdateBody,
@@ -305,7 +305,7 @@ export class ApiTicketOrderService {
       data: {
         ticket: closeResult.ticket,
         ticketProductList,
-        payment: closeResult.payment,
+        paymentList: closeResult.paymentList,
       },
     }
   }
@@ -386,7 +386,7 @@ export class ApiTicketOrderService {
       return {
         data: {
           ticket: closeResult.ticket,
-          payment: closeResult.payment,
+          paymentList: closeResult.paymentList,
         },
       }
     } catch (error: any) {

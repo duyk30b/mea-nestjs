@@ -3,7 +3,7 @@ import { Expose, Type } from 'class-transformer'
 import { IsArray, IsDefined, IsInt, IsString, ValidateNested } from 'class-validator'
 import { IsNumberGreaterThan } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 
-export class TicketPayment {
+class TicketPayment {
   @Expose()
   @IsDefined()
   @IsInt()
@@ -14,6 +14,7 @@ export class TicketPayment {
   @IsNumberGreaterThan(0)
   money: number
 }
+
 export class CustomerPaymentBody {
   @ApiProperty({ example: 12 })
   @Expose()

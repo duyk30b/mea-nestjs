@@ -117,6 +117,14 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE, data)
   }
 
+  socketTicketListChange(
+    oid: number,
+    data: { ticketDestroyedList?: Ticket[]; ticketUpsertedList?: Ticket[] }
+  ) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_LIST_CHANGE, data)
+  }
+
   socketTicketAttributeListChange(
     oid: number,
     data: { ticketId: number; ticketAttributeList: TicketAttribute[] }

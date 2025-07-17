@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../../_libs/permission/permission.enum'
-import { TicketParams } from '../../api-ticket/request/ticket.params'
+import { TicketParams } from '../../ticket/request/ticket.params'
 import { ApiTicketClinicUserService } from './api-ticket-clinic-user.service'
 import {
   TicketClinicUpdateTicketUserBody,

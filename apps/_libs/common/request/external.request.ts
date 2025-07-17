@@ -14,6 +14,7 @@ export type TExternal = {
   user: User
   organization: Organization
   permissionIds: number[]
+  roomIds: number[]
   error?: I18nPath
 }
 

@@ -7,7 +7,21 @@ import UserRole, {
   UserRoleSortType,
   UserRoleUpdateType,
 } from '../entities/user-role.entity'
+import { _PostgreSqlManager } from '../managers/_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
+
+@Injectable()
+export class UserRoleManager extends _PostgreSqlManager<
+  UserRole,
+  UserRoleRelationType,
+  UserRoleInsertType,
+  UserRoleUpdateType,
+  UserRoleSortType
+> {
+  constructor() {
+    super(UserRole)
+  }
+}
 
 @Injectable()
 export class UserRoleRepository extends _PostgreSqlRepository<

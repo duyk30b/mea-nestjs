@@ -36,6 +36,7 @@ export class DetectClientMiddleware implements NestMiddleware {
       user: null,
       organization: null,
       permissionIds: [],
+      roomIds: [],
       error: null,
     }
 
@@ -60,6 +61,7 @@ export class DetectClientMiddleware implements NestMiddleware {
             oid,
             uid
           )
+          dataExternal.roomIds = await this.cacheDataService.getRoomIdList(oid, uid)
         } else {
           dataExternal.error = 'error.Token.AccessTokenNoCache'
           if (process.env.NODE_ENV !== 'production') {

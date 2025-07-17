@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import { IsDefined, IsInt } from 'class-validator'
 import { IsNumberGreaterThan } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { TicketParams } from '../../../api-ticket/request/ticket.params'
+import { TicketParams } from '../../../ticket/request/ticket.params'
 
 export class TicketClinicUserParams extends TicketParams {
   @ApiProperty({ example: 45 })

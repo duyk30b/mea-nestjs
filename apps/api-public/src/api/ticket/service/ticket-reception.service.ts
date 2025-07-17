@@ -1,39 +1,34 @@
 import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { ESTimer } from '../../../../_libs/common/helpers/time.helper'
-import { DeliveryStatus, DiscountType } from '../../../../_libs/database/common/variable'
-import { Customer } from '../../../../_libs/database/entities'
-import { AppointmentStatus } from '../../../../_libs/database/entities/appointment.entity'
-import { PositionInteractType } from '../../../../_libs/database/entities/position.entity'
-import { TicketAttributeInsertType } from '../../../../_libs/database/entities/ticket-attribute.entity'
-import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
+import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
+import { ESTimer } from '../../../../../_libs/common/helpers/time.helper'
+import { DeliveryStatus, DiscountType } from '../../../../../_libs/database/common/variable'
+import { Customer } from '../../../../../_libs/database/entities'
+import { AppointmentStatus } from '../../../../../_libs/database/entities/appointment.entity'
+import { PositionInteractType } from '../../../../../_libs/database/entities/position.entity'
+import { TicketAttributeInsertType } from '../../../../../_libs/database/entities/ticket-attribute.entity'
+import { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
 import {
   AppointmentRepository,
   CustomerRepository,
   TicketAttributeRepository,
   TicketRepository,
-  TicketUserRepository,
-} from '../../../../_libs/database/repositories'
-import { ImageManagerService } from '../../components/image-manager/image-manager.service'
-import { SocketEmitService } from '../../socket/socket-emit.service'
-import { ApiTicketClinicUserService } from '../api-ticket-clinic/api-ticket-clinic-user/api-ticket-clinic-user.service'
-import { TicketReceptionCreateTicketBody, TicketReceptionUpdateTicketBody } from './request'
+} from '../../../../../_libs/database/repositories'
+import { SocketEmitService } from '../../../socket/socket-emit.service'
+import { TicketReceptionCreateTicketBody, TicketReceptionUpdateTicketBody } from '../request'
+import { TicketUserService } from './ticket-user.service'
 
 @Injectable()
-export class ApiTicketReceptionService {
+export class TicketReceptionService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
-    private readonly imageManagerService: ImageManagerService,
     private readonly customerRepository: CustomerRepository,
     private readonly appointmentRepository: AppointmentRepository,
     private readonly ticketRepository: TicketRepository,
-    private readonly ticketUserRepository: TicketUserRepository,
     private readonly ticketAttributeRepository: TicketAttributeRepository,
-
-    private readonly apiTicketClinicUserService: ApiTicketClinicUserService
+    private readonly ticketUserService: TicketUserService
   ) { }
 
-  async create(options: { oid: number; body: TicketReceptionCreateTicketBody }) {
+  async receptionCreate(options: { oid: number; body: TicketReceptionCreateTicketBody }) {
     const { oid, body } = options
     const { ticketReception } = body
 
@@ -141,7 +136,7 @@ export class ApiTicketReceptionService {
     }
 
     if (body.ticketUserList) {
-      this.apiTicketClinicUserService.changeTicketUserList({
+      this.ticketUserService.changeTicketUserList({
         oid,
         ticketId: ticket.id,
         body: {
@@ -155,10 +150,14 @@ export class ApiTicketReceptionService {
     }
 
     this.socketEmitService.socketTicketChange(oid, { type: 'CREATE', ticket })
-    return { data: true }
+    return { data: { ticket } }
   }
 
-  async update(options: { oid: number; ticketId: number; body: TicketReceptionUpdateTicketBody }) {
+  async receptionUpdate(options: {
+    oid: number
+    ticketId: number
+    body: TicketReceptionUpdateTicketBody
+  }) {
     const { oid, body, ticketId } = options
     const { ticketReception } = body
     const registeredTime = ESTimer.info(ticketReception.registeredAt, 7)
@@ -205,7 +204,7 @@ export class ApiTicketReceptionService {
     }
 
     if (body.ticketUserList) {
-      this.apiTicketClinicUserService.changeTicketUserList({
+      this.ticketUserService.changeTicketUserList({
         oid,
         ticketId,
         body: {
@@ -222,33 +221,5 @@ export class ApiTicketReceptionService {
 
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified })
     return { data: { ticket: ticketModified } }
-  }
-
-  async destroy(params: { oid: number; ticketId: number }) {
-    const { oid, ticketId } = params
-    const ticket = await this.ticketRepository.findOne({
-      condition: {
-        id: ticketId,
-        oid,
-        status: { IN: [TicketStatus.Draft, TicketStatus.Schedule] },
-      },
-    })
-
-    await this.imageManagerService.changeImageList({
-      oid,
-      customerId: ticket.customerId,
-      files: [],
-      filesPosition: [],
-      imageIdsKeep: [],
-      imageIdsOld: JSON.parse(ticket.imageIds || '[]'),
-    })
-    await Promise.all([
-      this.ticketRepository.delete({ oid, id: ticketId }),
-      this.ticketAttributeRepository.delete({ oid, ticketId }),
-      this.ticketUserRepository.delete({ oid, ticketId }),
-    ])
-
-    this.socketEmitService.socketTicketChange(oid, { type: 'DESTROY', ticket })
-    return { data: { ticketId } }
   }
 }

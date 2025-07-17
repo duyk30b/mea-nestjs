@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/permission/permission.enum'
-import { TicketGetManyQuery } from '../../api/api-ticket/request'
+import { TicketGetManyQuery } from '../../api/ticket/request'
 import { ApiFileTicketDownloadExcel } from './api-file-ticket.download-excel'
 
 @ApiTags('FileTicket')

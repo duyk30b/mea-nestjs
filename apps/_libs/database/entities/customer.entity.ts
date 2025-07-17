@@ -141,10 +141,9 @@ export type CustomerInsertType = Omit<
 >
 
 export type CustomerUpdateType = {
-  [K in Exclude<
-    keyof Customer,
-    keyof CustomerRelationType | keyof Pick<Customer, 'oid' | 'id' | 'updatedAt'>
-  >]: Customer[K] | (() => string)
+  [K in Exclude<keyof Customer, keyof CustomerRelationType | keyof Pick<Customer, 'oid' | 'id'>>]:
+  | Customer[K]
+  | (() => string)
 }
 
 export type CustomerSortType = {

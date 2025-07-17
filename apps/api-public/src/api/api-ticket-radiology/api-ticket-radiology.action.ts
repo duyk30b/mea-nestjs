@@ -76,11 +76,6 @@ export class ApiTicketRadiologyAction {
       }
     )
 
-    this.socketEmitService.socketTicketRadiologyListChange(oid, {
-      ticketId,
-      ticketRadiologyUpdate: ticketRadiologyModified,
-    })
-
     // check ?.length, vì nếu có setup user, thì dù không điền vẫn gửi userId = 0 lên
     if (body.ticketUserList?.length) {
       this.apiTicketClinicUserService.changeTicketUserList({
@@ -102,6 +97,11 @@ export class ApiTicketRadiologyAction {
       customer: response?.ticketRadiology?.customer,
       ticketUserList: response?.ticketRadiology?.ticketUserList,
       imageList: response?.ticketRadiology?.imageList,
+    })
+
+    this.socketEmitService.socketTicketRadiologyListChange(oid, {
+      ticketId,
+      ticketRadiologyUpdate: ticketRadiologyModified,
     })
 
     return { data: { ticketRadiology: ticketRadiologyModified } }

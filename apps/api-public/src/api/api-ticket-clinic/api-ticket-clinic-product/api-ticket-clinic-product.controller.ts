@@ -5,8 +5,8 @@ import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
 import { TicketProductType } from '../../../../../_libs/database/entities/ticket-product.entity'
 import { PermissionId } from '../../../../../_libs/permission/permission.enum'
-import { TicketReturnProductListBody, TicketSendProductListBody } from '../../api-ticket/request'
-import { TicketParams } from '../../api-ticket/request/ticket.params'
+import { TicketReturnProductListBody, TicketSendProductListBody } from '../../ticket/request'
+import { TicketParams } from '../../ticket/request/ticket.params'
 import { ApiTicketClinicProductService } from './api-ticket-clinic-product.service'
 import {
   TicketClinicAddTicketProductListBody,

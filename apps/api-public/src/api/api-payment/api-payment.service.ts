@@ -1,11 +1,8 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { ESArray } from '../../../../_libs/common/helpers/array.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { Customer, Distributor, Receipt, Ticket, User } from '../../../../_libs/database/entities'
 import Payment, {
-  MoneyDirection,
-  PaymentInsertType,
-  PaymentTiming,
   PersonType,
   VoucherType,
 } from '../../../../_libs/database/entities/payment.entity'
@@ -22,9 +19,6 @@ import {
 } from '../../../../_libs/database/repositories'
 import { PaymentRepository } from '../../../../_libs/database/repositories/payment.repository'
 import {
-  CustomerPaymentBody,
-  DistributorPaymentBody,
-  OtherPaymentBody,
   PaymentGetManyQuery,
   PaymentPaginationQuery,
 } from './request'
@@ -201,104 +195,5 @@ export class ApiPaymentService {
       }
     })
     return { data: { aggregate } }
-  }
-
-  async customerPaymentMoneyIn(oid: number, body: CustomerPaymentBody): Promise<BaseResponse> {
-    try {
-      const { customer } = await this.customerPaymentOperation.startPayment({
-        oid,
-        customerId: body.customerId,
-        paymentMethodId: body.paymentMethodId,
-        time: Date.now(),
-        ticketPaymentList: body.ticketPaymentList,
-        note: body.note,
-        money: body.money,
-        cashierId: body.cashierId,
-      })
-      return { data: { customer } }
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async distributorPaymentMoneyOut(
-    oid: number,
-    body: DistributorPaymentBody
-  ): Promise<BaseResponse> {
-    try {
-      const { distributor } = await this.distributorPaymentOperation.startPayment({
-        oid,
-        distributorId: body.distributorId,
-        paymentMethodId: body.paymentMethodId,
-        time: Date.now(),
-        receiptPaymentList: body.receiptPaymentList,
-        note: body.note,
-        money: body.money,
-        cashierId: body.cashierId,
-      })
-      return { data: { distributor } }
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async otherPaymentMoneyIn(options: {
-    oid: number
-    userId: number
-    body: OtherPaymentBody
-  }): Promise<BaseResponse> {
-    const { oid, userId, body } = options
-    const paymentInsert: PaymentInsertType = {
-      oid,
-      paymentMethodId: body.paymentMethodId,
-      voucherType: VoucherType.Unknown,
-      voucherId: 0,
-      personType: PersonType.Unknown,
-      personId: 0,
-      paymentTiming: PaymentTiming.Other,
-      createdAt: Date.now(),
-      moneyDirection: MoneyDirection.In,
-      paidAmount: body.money,
-      debtAmount: 0,
-      openDebt: 0,
-      closeDebt: 0,
-      cashierId: userId,
-      note: body.note || '',
-      description: '',
-    }
-    const payment = await this.paymentRepository.insertOneAndReturnEntity(paymentInsert)
-    return {
-      data: { payment },
-    }
-  }
-
-  async otherPaymentMoneyOut(options: {
-    oid: number
-    userId: number
-    body: OtherPaymentBody
-  }): Promise<BaseResponse> {
-    const { oid, userId, body } = options
-    const paymentInsert: PaymentInsertType = {
-      oid,
-      paymentMethodId: body.paymentMethodId,
-      voucherType: VoucherType.Unknown,
-      voucherId: 0,
-      personType: PersonType.Unknown,
-      personId: 0,
-      paymentTiming: PaymentTiming.Other,
-      createdAt: Date.now(),
-      moneyDirection: MoneyDirection.Out,
-      paidAmount: body.money,
-      debtAmount: 0,
-      openDebt: 0,
-      closeDebt: 0,
-      cashierId: userId,
-      note: body.note || '',
-      description: '',
-    }
-    const payment = await this.paymentRepository.insertOneAndReturnEntity(paymentInsert)
-    return {
-      data: { payment },
-    }
   }
 }

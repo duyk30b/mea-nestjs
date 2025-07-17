@@ -94,7 +94,7 @@ export class ApiRoleService {
       )
     }
 
-    this.cacheDataService.clearUserAndRole(oid)
+    this.cacheDataService.clearUserAndRoleAndRoom(oid)
     return { data: { role } }
   }
 
@@ -126,7 +126,7 @@ export class ApiRoleService {
       )
     }
 
-    this.cacheDataService.clearUserAndRole(oid)
+    this.cacheDataService.clearUserAndRoleAndRoom(oid)
     return { data: { role } }
   }
 
@@ -136,7 +136,7 @@ export class ApiRoleService {
       throw new BusinessException('error.Database.DeleteFailed')
     }
     await this.userRoleRepository.delete({ oid, roleId })
-    this.cacheDataService.clearUserAndRole(oid)
+    this.cacheDataService.clearUserAndRoleAndRoom(oid)
     return { data: { roleId } }
   }
 }

@@ -85,7 +85,7 @@ export class ApiRootUserService {
       secret,
       hashPassword,
     })
-    this.cacheDataService.clearUserAndRole(user.oid)
+    this.cacheDataService.clearUserAndRoleAndRoom(user.oid)
     return { data: { user } }
   }
 
@@ -108,7 +108,7 @@ export class ApiRootUserService {
     if (!user) {
       throw new BusinessException('error.Database.UpdateFailed')
     }
-    this.cacheDataService.clearUserAndRole(user.oid)
+    this.cacheDataService.clearUserAndRoleAndRoom(user.oid)
     return { data: { user } }
   }
 
@@ -120,7 +120,7 @@ export class ApiRootUserService {
     if (!user) {
       throw new BusinessException('error.Database.DeleteFailed')
     }
-    this.cacheDataService.clearUserAndRole(user.oid)
+    this.cacheDataService.clearUserAndRoleAndRoom(user.oid)
     return { data: { userId: user.id } }
   }
 

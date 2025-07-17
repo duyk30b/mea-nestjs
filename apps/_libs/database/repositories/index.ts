@@ -45,6 +45,6 @@ export * from './ticket-surcharge.repository'
 export * from './ticket-user.repository'
 export * from './ticket.repository'
 export * from './user-role.repository'
+export * from './user-room.repository'
 export * from './user.repository'
 export * from './warehouse.repository'
-

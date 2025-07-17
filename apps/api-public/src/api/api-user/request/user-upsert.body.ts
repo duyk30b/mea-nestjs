@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger'
-import { Expose } from 'class-transformer'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { Expose, Type } from 'class-transformer'
 import {
   IsArray,
   IsDefined,
@@ -10,16 +10,12 @@ import {
   IsString,
   MinLength,
   Validate,
+  ValidateNested,
 } from 'class-validator'
 import { IsPhone } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { EGender } from '../../../../../_libs/database/common/variable'
 
-export class UserCreateBody {
-  @ApiProperty({ example: '0376123456' })
-  @Expose()
-  @Validate(IsPhone)
-  phone: string
-
+export class AccountBody {
   @ApiProperty({ example: 'admin' })
   @Expose()
   @IsDefined()
@@ -32,6 +28,13 @@ export class UserCreateBody {
   @IsDefined()
   @MinLength(6)
   password: string
+}
+
+export class UserBody {
+  @ApiProperty({ example: '0376123456' })
+  @Expose()
+  @Validate(IsPhone)
+  phone: string
 
   @ApiProperty({ example: 'Phạm Hoàng Mai' })
   @Expose()
@@ -53,18 +56,60 @@ export class UserCreateBody {
   @Expose()
   @IsIn([0, 1])
   isActive: 0 | 1
+}
+
+export class UserCreateBody {
+  @ApiProperty({ type: UserBody })
+  @Expose()
+  @Type(() => UserBody)
+  @IsDefined()
+  @ValidateNested({ each: true })
+  user: UserBody
+
+  @ApiProperty({ type: AccountBody })
+  @Expose()
+  @Type(() => AccountBody)
+  @IsDefined()
+  @ValidateNested({ each: true })
+  account: AccountBody
 
   @ApiProperty({ example: [2, 3, 4] })
   @Expose()
   @IsDefined()
   @IsArray()
   roleIdList: number[]
+
+  @ApiProperty({ example: [2, 3, 4] })
+  @Expose()
+  @IsDefined()
+  @IsArray()
+  roomIdList: number[]
 }
 
-export class UserUpdateBody extends OmitType(UserCreateBody, ['password']) {
-  @ApiProperty({ example: 'Abc@123456' })
+export class UserUpdateBody {
+  @ApiProperty({ type: UserBody })
+  @Expose()
+  @Type(() => UserBody)
+  @IsDefined()
+  @ValidateNested({ each: true })
+  user: UserBody
+
+  @ApiProperty({ type: AccountBody })
+  @Expose()
+  @Type(() => AccountBody)
+  @IsOptional()
+  @ValidateNested({ each: true })
+  account?: AccountBody
+
+  @ApiProperty({ example: [2, 3, 4] })
   @Expose()
   @IsOptional()
-  @MinLength(6)
-  password: string
+  @IsArray()
+  roleIdList?: number[]
+
+  @ApiProperty({ example: [2, 3, 4] })
+  @Expose()
+  @IsOptional()
+  @IsArray()
+  roomIdList?: number[]
 }

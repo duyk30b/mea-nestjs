@@ -73,16 +73,6 @@ export const permissionRadiology: Permission[] = [
     rootId: PermissionId.RADIOLOGY,
   },
   {
-    id: PermissionId.RADIOLOGY_ROOM_MENU,
-    level: 2,
-    code: PermissionId[PermissionId.RADIOLOGY_ROOM_MENU],
-    isActive: 1,
-    pathId: `${PermissionId.RADIOLOGY}.${PermissionId.RADIOLOGY_ROOM_MENU}`,
-    name: 'Hiện menu phòng CĐHA',
-    parentId: PermissionId.RADIOLOGY,
-    rootId: PermissionId.RADIOLOGY,
-  },
-  {
     id: PermissionId.RADIOLOGY_UPDATE_RESULT,
     level: 2,
     code: PermissionId[PermissionId.RADIOLOGY_UPDATE_RESULT],

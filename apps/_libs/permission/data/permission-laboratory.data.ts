@@ -73,16 +73,6 @@ export const permissionLaboratory: Permission[] = [
     rootId: PermissionId.LABORATORY,
   },
   {
-    id: PermissionId.LABORATORY_ROOM_MENU,
-    level: 2,
-    code: PermissionId[PermissionId.LABORATORY_ROOM_MENU],
-    isActive: 1,
-    pathId: `${PermissionId.LABORATORY}.${PermissionId.LABORATORY_ROOM_MENU}`,
-    name: 'Hiện menu phòng xét nghiệm',
-    parentId: PermissionId.LABORATORY,
-    rootId: PermissionId.LABORATORY,
-  },
-  {
     id: PermissionId.LABORATORY_UPDATE_RESULT,
     level: 2,
     code: PermissionId[PermissionId.LABORATORY_UPDATE_RESULT],

@@ -1,5 +1,6 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import UserRoom from './user-room.entity'
 
 export enum RoomInteractType {
   Ticket = 1,
@@ -7,6 +8,7 @@ export enum RoomInteractType {
   Procedure = 3,
   Laboratory = 4,
   Radiology = 5,
+  Reception = 6,
 }
 
 @Entity('Room')
@@ -31,9 +33,9 @@ export default class Room {
   @Expose()
   isCommon: 0 | 1
 
-  @Column({ type: 'smallint', default: 1 })
   @Expose()
-  showMenu: 0 | 1
+  @OneToMany((type) => UserRoom, (userRoom) => userRoom.room)
+  userRoomList: UserRoom[]
 
   static fromRaw(raw: { [P in keyof Room]: any }) {
     if (!raw) return null
@@ -49,19 +51,17 @@ export default class Room {
 }
 
 export type RoomRelationType = {
-  [P in keyof Pick<Room, never>]?: boolean
+  [P in keyof Pick<Room, 'userRoomList'>]?:
+  | { [P in keyof Pick<UserRoom, 'user' | 'room'>]?: boolean }
+  | false
 }
 
-export type RoomInsertType = Omit<
-  Room,
-  keyof RoomRelationType | keyof Pick<Room, 'id'>
->
+export type RoomInsertType = Omit<Room, keyof RoomRelationType | keyof Pick<Room, 'id'>>
 
 export type RoomUpdateType = {
-  [K in Exclude<
-    keyof Room,
-    keyof RoomRelationType | keyof Pick<Room, 'oid' | 'id'>
-  >]: Room[K] | (() => string)
+  [K in Exclude<keyof Room, keyof RoomRelationType | keyof Pick<Room, 'oid' | 'id'>>]:
+  | Room[K]
+  | (() => string)
 }
 
 export type RoomSortType = {

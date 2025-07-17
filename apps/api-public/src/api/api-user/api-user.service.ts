@@ -7,10 +7,14 @@ import { encrypt } from '../../../../_libs/common/helpers/string.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { User } from '../../../../_libs/database/entities'
 import Device from '../../../../_libs/database/entities/device'
+import { UserRoleInsertType } from '../../../../_libs/database/entities/user-role.entity'
+import { UserRoomInsertType } from '../../../../_libs/database/entities/user-room.entity'
 import {
   RoleRepository,
+  RoomRepository,
   UserRepository,
   UserRoleRepository,
+  UserRoomRepository,
 } from '../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
@@ -27,7 +31,9 @@ export class ApiUserService {
     private readonly socketEmitService: SocketEmitService,
     private readonly userRepository: UserRepository,
     private readonly userRoleRepository: UserRoleRepository,
+    private readonly userRoomRepository: UserRoomRepository,
     private readonly roleRepository: RoleRepository,
+    private readonly roomRepository: RoomRepository,
     private readonly cacheTokenService: CacheTokenService,
     private readonly cacheDataService: CacheDataService
   ) { }
@@ -112,22 +118,22 @@ export class ApiUserService {
   }
 
   async createOne(oid: number, body: UserCreateBody): Promise<BaseResponse> {
-    const { username, password, roleIdList, ...other } = body
+    const { user: userBody, account, roleIdList, roomIdList } = body
     const existUser = await this.userRepository.findOneBy({
       oid,
-      username,
+      username: account.username,
     })
     if (existUser) {
       throw new BusinessException('error.Register.ExistUsername')
     }
 
-    const hashPassword = await bcrypt.hash(password, 5)
-    const secret = encrypt(password, username)
+    const hashPassword = await bcrypt.hash(account.password, 5)
+    const secret = encrypt(account.password, account.username)
 
     const user = await this.userRepository.insertOneFullFieldAndReturnEntity({
-      ...other,
+      ...userBody,
       oid,
-      username,
+      username: account.username,
       isAdmin: 0,
       secret,
       hashPassword,
@@ -141,44 +147,68 @@ export class ApiUserService {
       if (roleList.length !== roleIdList.length) {
         throw new BusinessException('error.Conflict')
       }
-      user.userRoleList = await this.userRoleRepository.insertManyFullFieldAndReturnEntity(
-        roleIdList.map((i) => ({
+      const userRoleInsertList = roleIdList.map((i) => {
+        const insert: UserRoleInsertType = {
           oid,
           roleId: i,
           userId: user.id,
-        }))
-      )
+        }
+        return insert
+      })
+      user.userRoleList =
+        await this.userRoleRepository.insertManyAndReturnEntity(userRoleInsertList)
     }
 
-    this.cacheDataService.clearUserAndRole(user.oid)
+    if (roomIdList.length) {
+      const roomList = await this.roomRepository.findManyBy({
+        oid,
+        id: { IN: roomIdList },
+      })
+      if (roomList.length !== roomIdList.length) {
+        throw new BusinessException('error.Conflict')
+      }
+      const userRoomInsertList = roomIdList.map((i) => {
+        const insert: UserRoomInsertType = {
+          oid,
+          roomId: i,
+          userId: user.id,
+        }
+        return insert
+      })
+      user.userRoomList =
+        await this.userRoomRepository.insertManyAndReturnEntity(userRoomInsertList)
+    }
+
+    this.cacheDataService.clearUserAndRoleAndRoom(user.oid)
     return { data: { user } }
   }
 
   async updateOne(oid: number, userId: number, body: UserUpdateBody): Promise<BaseResponse> {
-    const { roleIdList, password, ...other } = body
+    const { user: userBody, account, roleIdList, roomIdList } = body
 
     let user: User
-    if (password) {
-      const hashPassword = await bcrypt.hash(password, 5)
-      const secret = encrypt(password, other.username)
+    if (account) {
+      const hashPassword = await bcrypt.hash(account.password, 5)
+      const secret = encrypt(account.password, account.username)
       user = await this.userRepository.updateOneAndReturnEntity(
         { oid, id: userId },
         {
-          ...other,
+          ...userBody,
+          username: account.username,
           hashPassword,
           secret,
         }
       )
     } else {
-      user = await this.userRepository.updateOneAndReturnEntity({ oid, id: userId }, other)
+      user = await this.userRepository.updateOneAndReturnEntity({ oid, id: userId }, userBody)
     }
 
     if (!user) {
       throw new BusinessException('error.Database.UpdateFailed')
     }
-    await this.userRoleRepository.delete({ oid, userId })
 
-    if (roleIdList.length) {
+    if (roleIdList) {
+      await this.userRoleRepository.delete({ oid, userId })
       const roleList = await this.roleRepository.findManyBy({
         oid,
         id: { IN: roleIdList },
@@ -186,16 +216,40 @@ export class ApiUserService {
       if (roleList.length !== roleIdList.length) {
         throw new BusinessException('error.Conflict')
       }
-      user.userRoleList = await this.userRoleRepository.insertManyFullFieldAndReturnEntity(
-        roleIdList.map((i) => ({
+      const userRoleInsertList = roleIdList.map((i) => {
+        const insert: UserRoleInsertType = {
           oid,
           roleId: i,
           userId: user.id,
-        }))
-      )
+        }
+        return insert
+      })
+      user.userRoleList =
+        await this.userRoleRepository.insertManyAndReturnEntity(userRoleInsertList)
     }
 
-    this.cacheDataService.clearUserAndRole(oid)
+    if (roomIdList) {
+      await this.userRoomRepository.delete({ oid, userId })
+      const roomList = await this.roomRepository.findManyBy({
+        oid,
+        id: { IN: roomIdList },
+      })
+      if (roomList.length !== roomIdList.length) {
+        throw new BusinessException('error.Conflict')
+      }
+      const userRoomInsertList = roomIdList.map((i) => {
+        const insert: UserRoomInsertType = {
+          oid,
+          roomId: i,
+          userId: user.id,
+        }
+        return insert
+      })
+      user.userRoomList =
+        await this.userRoomRepository.insertManyAndReturnEntity(userRoomInsertList)
+    }
+
+    this.cacheDataService.clearUserAndRoleAndRoom(oid)
     return { data: { user } }
   }
 
@@ -212,12 +266,12 @@ export class ApiUserService {
   }
 
   async deleteOne(oid: number, userId: number): Promise<BaseResponse> {
-    const affected = await this.userRepository.delete({ oid, id: userId })
-    if (!affected) {
-      throw new BusinessException('error.Database.DeleteFailed')
-    }
-    await this.userRoleRepository.delete({ oid, userId })
-    this.cacheDataService.clearUserAndRole(oid)
+    const user = await this.userRepository.deleteOneAndReturnEntity({ oid, id: userId })
+    await Promise.all([
+      this.userRoleRepository.delete({ oid, userId }),
+      this.userRoomRepository.delete({ oid, userId }),
+    ])
+    this.cacheDataService.clearUserAndRoleAndRoom(oid)
     return { data: { userId } }
   }
 
