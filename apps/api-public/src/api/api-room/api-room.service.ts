@@ -91,7 +91,7 @@ export class ApiRoomService {
 
   async createOne(oid: number, body: RoomCreateBody): Promise<BaseResponse> {
     const { room: roomBody, userIdList } = body
-    const room = await this.roomRepository.insertOneAndReturnEntity({
+    const room = await this.roomRepository.insertOneFullFieldAndReturnEntity({
       ...roomBody,
       oid,
     })

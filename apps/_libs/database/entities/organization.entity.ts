@@ -18,12 +18,15 @@ export enum OrganizationStatus {
 }
 
 @Entity('Organization')
-@Index('IDX_Organization__phone', ['phone'], { unique: true })
-@Index('IDX_Organization__email', ['email'], { unique: true })
+@Index('IDX_Organization__organization_code', ['organizationCode'], { unique: true })
 export default class Organization {
   @Expose()
   @PrimaryGeneratedColumn()
   id: number
+
+  @Column({ type: 'varchar', length: 50 })
+  @Expose()
+  organizationCode: string
 
   @Expose()
   @Column({ type: 'char', length: 10, nullable: false })

@@ -430,37 +430,37 @@ export type TicketRelationType = {
     | 'toAppointment'
   >]?: boolean
 } & {
-  [P in keyof Pick<
-    Ticket,
-    'ticketProductList' | 'ticketProductConsumableList' | 'ticketProductPrescriptionList'
-  >]?: { [P in keyof Pick<TicketProduct, 'product'>]?: boolean } | false
-} & {
-  [P in keyof Pick<Ticket, 'ticketBatchList'>]?:
-  | { [P in keyof Pick<TicketBatch, 'batch'>]?: boolean }
-  | false
-} & {
-  [P in keyof Pick<Ticket, 'ticketProcedureList'>]?:
-  | { [P in keyof Pick<TicketProcedure, 'procedure'>]?: boolean }
-  | false
-} & {
-  [P in keyof Pick<Ticket, 'ticketRadiologyList'>]?:
-  | { [P in keyof Pick<TicketRadiology, 'radiology'>]?: boolean }
-  | false
-} & {
-  [P in keyof Pick<Ticket, 'ticketLaboratoryList'>]?:
-  | { [P in keyof Pick<TicketLaboratory, 'laboratory' | 'laboratoryList'>]?: boolean }
-  | false
-} & {
-  [P in keyof Pick<Ticket, 'ticketLaboratoryGroupList'>]?:
-  | { [P in keyof Pick<TicketLaboratoryGroup, 'laboratoryGroup'>]?: boolean }
-  | false
-} & {
-  [P in keyof Pick<Ticket, 'ticketLaboratoryResultList'>]?: boolean
-} & {
-  [P in keyof Pick<Ticket, 'ticketUserList'>]?:
-  | { [P in keyof Pick<TicketUser, 'user'>]?: boolean }
-  | false
-}
+    [P in keyof Pick<
+      Ticket,
+      'ticketProductList' | 'ticketProductConsumableList' | 'ticketProductPrescriptionList'
+    >]?: { [P in keyof Pick<TicketProduct, 'product'>]?: boolean } | false
+  } & {
+    [P in keyof Pick<Ticket, 'ticketBatchList'>]?:
+    | { [P in keyof Pick<TicketBatch, 'batch'>]?: boolean }
+    | false
+  } & {
+    [P in keyof Pick<Ticket, 'ticketProcedureList'>]?:
+    | { [P in keyof Pick<TicketProcedure, 'procedure'>]?: boolean }
+    | false
+  } & {
+    [P in keyof Pick<Ticket, 'ticketRadiologyList'>]?:
+    | { [P in keyof Pick<TicketRadiology, 'radiology'>]?: boolean }
+    | false
+  } & {
+    [P in keyof Pick<Ticket, 'ticketLaboratoryList'>]?:
+    | { [P in keyof Pick<TicketLaboratory, 'laboratory' | 'laboratoryList'>]?: boolean }
+    | false
+  } & {
+    [P in keyof Pick<Ticket, 'ticketLaboratoryGroupList'>]?:
+    | { [P in keyof Pick<TicketLaboratoryGroup, 'laboratoryGroup'>]?: boolean }
+    | false
+  } & {
+    [P in keyof Pick<Ticket, 'ticketLaboratoryResultList'>]?: boolean
+  } & {
+    [P in keyof Pick<Ticket, 'ticketUserList'>]?:
+    | { [P in keyof Pick<TicketUser, 'user'>]?: boolean }
+    | false
+  }
 
 export type TicketInsertType = Omit<
   Ticket,

@@ -23,19 +23,19 @@ export class ApiCustomerController {
   ) { }
 
   @Get('pagination')
-  @OrganizationPermission(PermissionId.CUSTOMER)
+  @UserPermission()
   pagination(@External() { oid }: TExternal, @Query() query: CustomerPaginationQuery) {
     return this.apiCustomerService.pagination(oid, query)
   }
 
   @Get('list')
-  @UserPermission(PermissionId.CUSTOMER)
+  @UserPermission()
   list(@External() { oid }: TExternal, @Query() query: CustomerGetManyQuery) {
     return this.apiCustomerService.getMany(oid, query)
   }
 
   @Get('detail/:id')
-  @UserPermission(PermissionId.CUSTOMER)
+  @UserPermission()
   async detail(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,

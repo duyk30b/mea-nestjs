@@ -1,14 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
-import { IsDefined, IsNumber, MinLength, Validate } from 'class-validator'
-import { IsPhone } from '../../../../../_libs/common/transform-validate/class-validator.custom'
+import { IsDefined, IsNumber, IsString, MinLength } from 'class-validator'
 
 export class ResetPasswordBody {
   @ApiProperty({ example: '0376899866' })
   @Expose()
   @IsDefined()
-  @Validate(IsPhone)
-  organizationPhone: string
+  @IsString()
+  organizationCode: string
 
   @ApiProperty({ example: 'admin' })
   @Expose()

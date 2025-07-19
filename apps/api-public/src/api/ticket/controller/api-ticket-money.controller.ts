@@ -1,6 +1,6 @@
 import { Body, Controller, Param, Post } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
+import { UserPermission, UserPermissionOr } from '../../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { TicketClinicChangeDiscountBody, TicketParams, TicketPaymentMoneyBody } from '../request'
@@ -13,7 +13,7 @@ export class ApiTicketMoneyController {
   constructor(private readonly ticketMoneyService: TicketMoneyService) { }
 
   @Post('prepayment/:ticketId')
-  @UserPermission(PermissionId.RECEIPT_PAYMENT, PermissionId.TICKET_CLINIC_PAYMENT)
+  @UserPermissionOr(PermissionId.RECEIPT_PAYMENT, PermissionId.TICKET_CLINIC_PAYMENT)
   async prepayment(
     @External() { oid, uid }: TExternal,
     @Param() { ticketId }: TicketParams,
@@ -23,7 +23,7 @@ export class ApiTicketMoneyController {
   }
 
   @Post('refund-overpaid/:ticketId')
-  @UserPermission(PermissionId.RECEPTION_REFUND_OVER_PAID)
+  @UserPermissionOr(PermissionId.RECEPTION_REFUND_OVER_PAID, PermissionId.TICKET_CLINIC_REFUND_OVERPAID)
   async refundOverpaid(
     @External() { oid, uid }: TExternal,
     @Param() { ticketId }: TicketParams,

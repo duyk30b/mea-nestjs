@@ -1,19 +1,19 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
 import {
-    IsArray,
-    IsDefined,
-    IsInt,
-    IsNumber,
-    IsString,
-    Max,
-    Min,
-    ValidateNested,
+  IsArray,
+  IsDefined,
+  IsInt,
+  IsNumber,
+  IsString,
+  Max,
+  Min,
+  ValidateNested,
 } from 'class-validator'
 import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
 import {
-    IsEnumValue,
-    IsNumberGreaterThan,
+  IsEnumValue,
+  IsNumberGreaterThan,
 } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
 import { DiscountType, PickupStrategy } from '../../../../../../_libs/database/common/variable'
 
@@ -72,6 +72,12 @@ export class TicketProductAddBody {
   @IsDefined()
   @IsNumber()
   quantityPrescription: number
+
+  @ApiProperty({ example: 1 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  printPrescription: number
 
   @ApiProperty({ example: 4 })
   @Expose()

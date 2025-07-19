@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../../_libs/common/cache-data/cache-data.service'
-import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../../_libs/common/interceptor'
 import { BusinessError } from '../../../../../_libs/database/common/error'
 import { DeliveryStatus } from '../../../../../_libs/database/common/variable'
@@ -8,6 +7,7 @@ import { TicketProductType } from '../../../../../_libs/database/entities/ticket
 import { TicketRadiologyStatus } from '../../../../../_libs/database/entities/ticket-radiology.entity'
 import { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
 import {
+  TicketChangeAllMoneyOperator,
   TicketPaymentAndCloseOperation,
   TicketReopenOperation,
   TicketReturnProductOperation,
@@ -20,6 +20,7 @@ import {
 import { ImageManagerService } from '../../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { TicketReturnProductListBody, TicketSendProductListBody } from '../request'
+import { TicketChangeAllMoneyBody } from '../request/ticket-change-all-money.body'
 
 @Injectable()
 export class TicketActionService {
@@ -33,8 +34,27 @@ export class TicketActionService {
     private readonly cacheDataService: CacheDataService,
     private readonly ticketProductRepository: TicketProductRepository,
     private readonly ticketSendProductOperation: TicketSendProductOperation,
-    private readonly ticketReturnProductOperation: TicketReturnProductOperation
-  ) {}
+    private readonly ticketReturnProductOperation: TicketReturnProductOperation,
+    private readonly ticketChangeAllMoneyOperator: TicketChangeAllMoneyOperator
+  ) { }
+
+  async changeAllMoney(params: { oid: number; ticketId: number; body: TicketChangeAllMoneyBody }) {
+    const { oid, ticketId, body } = params
+    const time = Date.now()
+
+    const { ticket } = await this.ticketChangeAllMoneyOperator.changeItemMoney({
+      oid,
+      ticketUpdate: { id: ticketId },
+      ticketProductUpdate: body.ticketProductList,
+      ticketProcedureUpdate: body.ticketProcedureList,
+      ticketLaboratoryUpdate: body.ticketLaboratoryList,
+      ticketRadiologyUpdate: body.ticketRadiologyList,
+    })
+
+    // Còn tất cả các item khác cũng cần bắn, nhưng mệt, làm sau
+    this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticket] })
+    return { data: { ticket } }
+  }
 
   async sendProduct(params: {
     oid: number

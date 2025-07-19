@@ -60,6 +60,10 @@ export default class TicketProduct extends BaseEntity {
   @Expose()
   quantityPrescription: number
 
+  @Column({ type: 'smallint', default: 1 })
+  @Expose()
+  printPrescription: number
+
   @Column({
     type: 'decimal',
     default: 0,

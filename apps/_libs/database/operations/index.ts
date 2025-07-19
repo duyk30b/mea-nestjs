@@ -15,6 +15,8 @@ export * from './receipt/receipt-send-product.operation'
 export * from './statistic/statistic-receipt.operation'
 export * from './statistic/statistic.operation'
 
+export * from './ticket-base/ticket-calculator-money.operator'
+export * from './ticket-base/ticket-change-all-money.operator'
 export * from './ticket-base/ticket-change-discount.operation'
 export * from './ticket-base/ticket-change-item-money.manager'
 export * from './ticket-base/ticket-pay-debt.operation'

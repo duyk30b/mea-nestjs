@@ -13,6 +13,7 @@ export type TicketProductUpdateDtoType = {
     TicketProduct,
     | 'quantity'
     | 'quantityPrescription'
+    | 'printPrescription'
     | 'expectedPrice'
     | 'discountType'
     | 'discountMoney'
@@ -76,6 +77,7 @@ export class TicketClinicUpdateTicketProductOperation {
             {
               quantity: ticketProductUpdateDto.quantity,
               quantityPrescription: ticketProductUpdateDto.quantityPrescription,
+              printPrescription: ticketProductUpdateDto.printPrescription,
               expectedPrice: ticketProductUpdateDto.expectedPrice,
               discountType: ticketProductUpdateDto.discountType,
               discountMoney: ticketProductUpdateDto.discountMoney,
@@ -102,6 +104,7 @@ export class TicketClinicUpdateTicketProductOperation {
             { oid, id: ticketProductId },
             {
               quantityPrescription: ticketProductUpdateDto.quantityPrescription,
+              printPrescription: ticketProductUpdateDto.printPrescription,
               hintUsage: ticketProductUpdateDto.hintUsage,
             }
           )

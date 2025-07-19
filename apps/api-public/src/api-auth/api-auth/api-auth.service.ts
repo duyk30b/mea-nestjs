@@ -112,11 +112,11 @@ export class ApiAuthService {
       relationLoadStrategy: 'join',
       where: {
         username: loginDto.username,
-        organization: { phone: loginDto.orgPhone },
+        organization: { organizationCode: loginDto.organizationCode },
       },
     })
     if (!user) throw new BusinessException('error.Database.NotFound')
-    if (!user.isActive || user.organization.status == OrganizationStatus.Inactive) {
+    if (!user.isActive || user.organization?.status == OrganizationStatus.Inactive) {
       throw new BusinessException('common.AccountInactive')
     }
 
@@ -155,7 +155,7 @@ export class ApiAuthService {
       relationLoadStrategy: 'join',
       where: {
         username: loginRootDto.username,
-        organization: { phone: loginRootDto.orgPhone },
+        organization: { organizationCode: loginRootDto.organizationCode },
       },
     })
     if (!root) throw new BusinessException('error.Database.NotFound')
@@ -250,7 +250,7 @@ export class ApiAuthService {
 
   async forgotPassword(body: ForgotPasswordBody): Promise<BaseResponse> {
     const organization = await this.organizationRepository.findOneBy({
-      phone: body.organizationPhone,
+      organizationCode: body.organizationCode,
       email: body.organizationEmail,
     })
     if (!organization) {
@@ -279,7 +279,7 @@ export class ApiAuthService {
     )
     const link =
       `${this.globalConfig.DOMAIN_FRONT_END}/auth/reset-password`
-      + `?token=${token}&organizationPhone=${body.organizationPhone}`
+      + `?token=${token}&organizationCode=${body.organizationCode}`
       + `&username=${body.username}&updatedAt=${user.updatedAt}`
       + `&ver=1`
 
@@ -299,7 +299,7 @@ export class ApiAuthService {
 
   async resetPassword(body: ResetPasswordBody): Promise<BaseResponse> {
     const organization = await this.organizationRepository.findOneBy({
-      phone: body.organizationPhone,
+      organizationCode: body.organizationCode,
     })
     if (!organization) {
       throw BusinessException.create({

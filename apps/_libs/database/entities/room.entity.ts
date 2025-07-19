@@ -21,6 +21,10 @@ export default class Room {
   @PrimaryGeneratedColumn()
   id: number
 
+  @Column({ type: 'varchar', length: 50, default: '' })
+  @Expose()
+  roomCode: string
+
   @Expose()
   @Column({ type: 'varchar', length: 255 })
   name: string
@@ -65,5 +69,5 @@ export type RoomUpdateType = {
 }
 
 export type RoomSortType = {
-  [P in keyof Pick<Room, 'oid' | 'id' | 'name'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<Room, 'oid' | 'id' | 'roomCode' | 'name'>]?: 'ASC' | 'DESC'
 }

@@ -6,12 +6,19 @@ import {
   IsNotEmpty,
   IsNumber,
   IsOptional,
+  IsString,
   ValidateNested,
 } from 'class-validator'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { RoomInteractType } from '../../../../../_libs/database/entities/room.entity'
 
 export class RoomBody {
+  @ApiProperty({ example: 'ABC12345' })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  roomCode: string
+
   @ApiProperty({ example: '' })
   @Expose()
   @IsDefined()

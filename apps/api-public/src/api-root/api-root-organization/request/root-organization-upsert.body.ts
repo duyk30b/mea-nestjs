@@ -12,6 +12,12 @@ export class RootOrganizationCreateBody {
   @ApiProperty({ example: '0376899866' })
   @Expose()
   @IsDefined()
+  @IsString()
+  organizationCode: string
+
+  @ApiProperty({ example: '0376899866' })
+  @Expose()
+  @IsDefined()
   @Validate(IsPhone)
   phone: string
 

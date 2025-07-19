@@ -77,7 +77,12 @@ export class ApiTicketOrderService {
           commissionMoney: 0,
           imageIds: JSON.stringify([]),
         },
-        ticketOrderProductDraftListDto: body.ticketOrderProductDraftList,
+        ticketOrderProductDraftListDto: body.ticketOrderProductDraftList.map((i) => {
+          return {
+            ...i,
+            printPrescription: 1,
+          }
+        }),
         ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList,
         ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
         ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
@@ -111,7 +116,12 @@ export class ApiTicketOrderService {
           commissionMoney: 0,
           imageIds: JSON.stringify([]),
         },
-        ticketOrderProductDraftListDto: body.ticketOrderProductDraftList,
+        ticketOrderProductDraftListDto: body.ticketOrderProductDraftList.map((i) => {
+          return {
+            ...i,
+            printPrescription: 1,
+          }
+        }),
         ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList,
         ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
         ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
@@ -146,7 +156,12 @@ export class ApiTicketOrderService {
         commissionMoney: 0,
         imageIds: JSON.stringify([]),
       },
-      ticketOrderProductDraftListDto: body.ticketOrderProductDraftList,
+      ticketOrderProductDraftListDto: body.ticketOrderProductDraftList.map((i) => {
+        return {
+          ...i,
+          printPrescription: 1,
+        }
+      }),
       ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList,
       ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
       ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
@@ -234,7 +249,12 @@ export class ApiTicketOrderService {
         commissionMoney: 0,
         imageIds: JSON.stringify([]),
       },
-      ticketOrderProductDraftListDto: body.ticketOrderProductDraftList,
+      ticketOrderProductDraftListDto: body.ticketOrderProductDraftList.map((i) => {
+        return {
+          ...i,
+          printPrescription: 1,
+        }
+      }),
       ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList,
       ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
       ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,

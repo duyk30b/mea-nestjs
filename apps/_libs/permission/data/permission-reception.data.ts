@@ -83,6 +83,16 @@ export const permissionReception: Permission[] = [
     rootId: PermissionId.RECEPTION,
   },
   {
+    id: PermissionId.RECEPTION_CHANGE_ALL_MONEY,
+    level: 2,
+    code: PermissionId[PermissionId.RECEPTION_CHANGE_ALL_MONEY],
+    isActive: 1,
+    pathId: `${PermissionId.RECEPTION}.${PermissionId.RECEPTION_CHANGE_ALL_MONEY}`,
+    name: 'Chỉnh sửa tiền, khuyến mãi',
+    parentId: PermissionId.RECEPTION,
+    rootId: PermissionId.RECEPTION,
+  },
+  {
     id: PermissionId.RECEPTION_CLOSE_TICKET,
     level: 2,
     code: PermissionId[PermissionId.RECEPTION_CLOSE_TICKET],

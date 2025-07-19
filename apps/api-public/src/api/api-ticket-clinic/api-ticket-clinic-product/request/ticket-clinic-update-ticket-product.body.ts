@@ -19,6 +19,12 @@ class TicketProductBody {
   @IsNumber()
   quantityPrescription: number
 
+  @ApiProperty({ example: 4 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  printPrescription: number
+
   @ApiProperty({ example: 25_000 })
   @Expose()
   @IsDefined()
