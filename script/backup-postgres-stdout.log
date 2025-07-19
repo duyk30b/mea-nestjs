@@ -1,0 +1,33 @@
+---------------------------------------------------------------------------------------
+2025-07-16 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+ca2e2a3 9.6.1
+a62bdef Version 9.6 - Print
+total 18080
+drwxr-xr-x    2 root     root          4096 Jul 16 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      18505444 Jul 16 19:00 2025-07-16_19-00-01.sql
+2025-07-16 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-07-17 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+ca2e2a3 9.6.1
+a62bdef Version 9.6 - Print
+total 18116
+drwxr-xr-x    2 root     root          4096 Jul 17 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      18540032 Jul 17 19:00 2025-07-17_19-00-01.sql
+2025-07-17 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------
+2025-07-18 19:00:01 - [BACKUP_POSTGRES][root] Starting backup process...
+Working directory: /root/mea-nestjs/script
+1cc8477 9.1.1
+9671faa Version 9.1 - UserRoom
+total 18120
+drwxr-xr-x    2 root     root          4096 Jul 18 19:00 .
+drwxr-xr-x    1 root     root          4096 Nov 23  2024 ..
+-rw-r--r--    1 root     root      18543289 Jul 18 19:00 2025-07-18_19-00-01.sql
+2025-07-18 19:00:02 - [BACKUP_POSTGRES][root] Finished backup process !!!
+---------------------------------------------------------------------------------------
