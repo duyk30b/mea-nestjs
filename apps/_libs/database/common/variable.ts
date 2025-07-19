@@ -83,6 +83,7 @@ export enum AttributeLayoutType {
 
 export enum TicketLaboratoryStatus {
   Empty = 1,
-  Pending = 2,
-  Completed = 3,
+  PendingPayMoney = 2,
+  PendingResult = 3,
+  Completed = 4,
 }

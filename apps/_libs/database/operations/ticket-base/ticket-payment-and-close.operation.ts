@@ -15,7 +15,7 @@ import Payment, {
   PaymentTiming,
   PersonType,
   VoucherType,
-} from '../../entities/payment.entity'
+} from '../../entities/payment-item.entity'
 import { CommissionCalculatorType, PositionInteractType } from '../../entities/position.entity'
 import { TicketProductType } from '../../entities/ticket-product.entity'
 import { TicketUserInsertType } from '../../entities/ticket-user.entity'

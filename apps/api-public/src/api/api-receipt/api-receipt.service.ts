@@ -5,7 +5,7 @@ import { ESArray } from '../../../../_libs/common/helpers/array.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { Distributor, Product, Receipt, ReceiptItem } from '../../../../_libs/database/entities'
 import Batch, { BatchInsertType } from '../../../../_libs/database/entities/batch.entity'
-import Payment, { VoucherType } from '../../../../_libs/database/entities/payment.entity'
+import Payment, { VoucherType } from '../../../../_libs/database/entities/payment-item.entity'
 import {
   ProductType,
   SplitBatchByCostPrice,

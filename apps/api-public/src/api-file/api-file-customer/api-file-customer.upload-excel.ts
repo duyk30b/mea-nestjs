@@ -10,7 +10,7 @@ import {
   PaymentTiming,
   PersonType,
   VoucherType,
-} from '../../../../_libs/database/entities/payment.entity'
+} from '../../../../_libs/database/entities/payment-item.entity'
 import { CustomerManager, PaymentManager } from '../../../../_libs/database/managers'
 import { ExcelProcess } from '../common/excel-process'
 import { CustomerExcelRules } from './customer-excel.rule'

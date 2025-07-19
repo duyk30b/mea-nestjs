@@ -8,7 +8,21 @@ import {
   PaymentMethodSortType,
   PaymentMethodUpdateType,
 } from '../entities/payment-method.entity'
+import { _PostgreSqlManager } from '../managers/_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
+
+@Injectable()
+export class PaymentMethodManager extends _PostgreSqlManager<
+  PaymentMethod,
+  PaymentMethodRelationType,
+  PaymentMethodInsertType,
+  PaymentMethodUpdateType,
+  PaymentMethodSortType
+> {
+  constructor() {
+    super(PaymentMethod)
+  }
+}
 
 @Injectable()
 export class PaymentMethodRepository extends _PostgreSqlRepository<

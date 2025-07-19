@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { PersonType } from '../../../../_libs/database/entities/payment.entity'
+import { PersonType } from '../../../../_libs/database/entities/payment-item.entity'
 import { PaymentRepository } from '../../../../_libs/database/repositories'
 import { DistributorRepository } from '../../../../_libs/database/repositories/distributor.repository'
 import { ReceiptRepository } from '../../../../_libs/database/repositories/receipt.repository'

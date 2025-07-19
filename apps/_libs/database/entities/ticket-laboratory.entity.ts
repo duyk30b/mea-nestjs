@@ -40,7 +40,7 @@ export default class TicketLaboratory extends BaseEntity {
   @Expose()
   ticketLaboratoryGroupId: number
 
-  @Column({ type: 'smallint', default: TicketLaboratoryStatus.Pending })
+  @Column({ type: 'smallint', default: TicketLaboratoryStatus.PendingPayMoney })
   @Expose()
   status: TicketLaboratoryStatus
 

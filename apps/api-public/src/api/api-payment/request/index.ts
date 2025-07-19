@@ -1,4 +1,3 @@
-export * from './customer-payment-common.body'
 export * from './customer-payment.body'
 export * from './distributor-payment.body'
 export * from './other-payment.body'

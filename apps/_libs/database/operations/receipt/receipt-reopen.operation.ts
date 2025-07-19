@@ -7,7 +7,7 @@ import {
   PaymentTiming,
   PersonType,
   VoucherType,
-} from '../../entities/payment.entity'
+} from '../../entities/payment-item.entity'
 import { ReceiptStatus } from '../../entities/receipt.entity'
 import { DistributorManager, PaymentManager, ReceiptManager } from '../../managers'
 

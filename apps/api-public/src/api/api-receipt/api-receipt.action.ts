@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { DeliveryStatus } from '../../../../_libs/database/common/variable'
 import { Distributor } from '../../../../_libs/database/entities'
-import { VoucherType } from '../../../../_libs/database/entities/payment.entity'
+import { VoucherType } from '../../../../_libs/database/entities/payment-item.entity'
 import { ReceiptStatus } from '../../../../_libs/database/entities/receipt.entity'
 import {
   ReceiptPayDebtOperation,

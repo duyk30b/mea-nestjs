@@ -3,7 +3,7 @@ import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { DeliveryStatus } from '../../../../_libs/database/common/variable'
 import { Customer, TicketProduct } from '../../../../_libs/database/entities'
-import { VoucherType } from '../../../../_libs/database/entities/payment.entity'
+import { VoucherType } from '../../../../_libs/database/entities/payment-item.entity'
 import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import {
   TicketOrderDepositedOperation,

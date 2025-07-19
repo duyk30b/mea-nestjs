@@ -1,9 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsInt, IsString, ValidateNested } from 'class-validator'
-import { IsNumberGreaterThan } from '../../../../../_libs/common/transform-validate/class-validator.custom'
+import { IsArray, IsDefined, IsInt, IsNumber, IsString, ValidateNested } from 'class-validator'
+import {
+  IsEnumValue,
+  IsNumberGreaterThan,
+} from '../../../../../_libs/common/transform-validate/class-validator.custom'
+import { PaymentVoucherItemType } from '../../../../../_libs/database/entities/payment-item.entity'
 
-class TicketPayment {
+class PaymentPayDebt {
+  @ApiProperty({ example: 12 })
   @Expose()
   @IsDefined()
   @IsInt()
@@ -12,7 +17,55 @@ class TicketPayment {
   @Expose()
   @IsDefined()
   @IsNumberGreaterThan(0)
-  money: number
+  amount: number
+}
+
+class PaymentPrepayment {
+  @ApiProperty({ example: 12 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  ticketId: number
+
+  @ApiProperty({ example: 12 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  ticketItemId: number
+
+  @Expose()
+  @IsDefined()
+  @IsNumberGreaterThan(0)
+  amount: number
+
+  @ApiProperty({ enum: PaymentVoucherItemType })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(PaymentVoucherItemType)
+  voucherItemType: PaymentVoucherItemType
+}
+
+class PaymentItemData {
+  @ApiProperty({ type: PaymentPayDebt, isArray: true })
+  @Expose()
+  @IsDefined()
+  @Type(() => PaymentPayDebt)
+  @IsArray()
+  @ValidateNested({ each: true })
+  payDebt: PaymentPayDebt[]
+
+  @ApiProperty({ type: PaymentPrepayment, isArray: true })
+  @Expose()
+  @IsDefined()
+  @IsArray()
+  @Type(() => PaymentPrepayment)
+  @ValidateNested({ each: true })
+  prepayment: PaymentPrepayment[]
+
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  moneyTopUpAdd: number
 }
 
 export class CustomerPaymentBody {
@@ -34,28 +87,25 @@ export class CustomerPaymentBody {
   @IsInt()
   paymentMethodId: number
 
+  @Expose()
+  @IsDefined()
+  @IsNumberGreaterThan(0)
+  totalMoney: number
+
+  @ApiPropertyOptional({ example: 'Khách hàng tạm ứng' })
+  @Expose()
+  @IsString()
+  reason: string
+
   @ApiPropertyOptional({ example: 'Khách hàng còn bo thêm tiền' })
   @Expose()
   @IsString()
   note: string
 
+  @ApiProperty({ type: PaymentItemData })
   @Expose()
   @IsDefined()
-  @IsNumberGreaterThan(0)
-  money: number
-
-  @ApiProperty({
-    type: TicketPayment,
-    isArray: true,
-    example: [
-      { ticketId: 12, money: 10000 },
-      { ticketId: 13, money: 200000 },
-    ],
-  })
-  @Expose()
-  @IsDefined()
-  @Type(() => TicketPayment)
-  @IsArray()
+  @Type(() => PaymentItemData)
   @ValidateNested({ each: true })
-  ticketPaymentList: TicketPayment[]
+  paymentItemData: PaymentItemData
 }

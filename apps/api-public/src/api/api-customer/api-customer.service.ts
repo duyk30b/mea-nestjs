@@ -3,8 +3,12 @@ import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { BusinessError } from '../../../../_libs/database/common/error'
-import { PersonType } from '../../../../_libs/database/entities/payment.entity'
-import { PaymentRepository, TicketRepository } from '../../../../_libs/database/repositories'
+import { PaymentPersonType } from '../../../../_libs/database/entities/payment.entity'
+import {
+  PaymentItemRepository,
+  PaymentRepository,
+  TicketRepository,
+} from '../../../../_libs/database/repositories'
 import { CustomerRepository } from '../../../../_libs/database/repositories/customer.repository'
 import { OrganizationRepository } from '../../../../_libs/database/repositories/organization.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
@@ -23,6 +27,7 @@ export class ApiCustomerService {
     private readonly cacheDataService: CacheDataService,
     private readonly customerRepository: CustomerRepository,
     private readonly paymentRepository: PaymentRepository,
+    private readonly paymentItemRepository: PaymentItemRepository,
     private readonly organizationRepository: OrganizationRepository,
     private readonly ticketRepository: TicketRepository
   ) { }
@@ -128,7 +133,16 @@ export class ApiCustomerService {
 
     await Promise.allSettled([
       this.customerRepository.delete({ oid, id: customerId }),
-      this.paymentRepository.delete({ oid, personId: customerId, personType: PersonType.Customer }),
+      this.paymentRepository.delete({
+        oid,
+        personId: customerId,
+        paymentPersonType: PaymentPersonType.Customer,
+      }),
+      this.paymentItemRepository.delete({
+        oid,
+        personId: customerId,
+        paymentPersonType: PaymentPersonType.Customer,
+      }),
     ])
 
     await this.organizationRepository.updateDataVersion(oid)

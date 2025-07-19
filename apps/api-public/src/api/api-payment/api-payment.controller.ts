@@ -7,7 +7,6 @@ import { ApiPaymentActionService } from './api-payment-action.service'
 import { ApiPaymentService } from './api-payment.service'
 import {
   CustomerPaymentBody,
-  CustomerPaymentCommonBody,
   DistributorPaymentBody,
   OtherPaymentBody,
   PaymentGetManyQuery,
@@ -38,27 +37,21 @@ export class ApiPaymentController {
   @Get('sum-money')
   @UserPermission() // tạm thời để thế này trước
   async sumMoney(@External() { oid }: TExternal, @Query() query: PaymentGetManyQuery) {
-    return await this.apiPaymentService.sumMoney(oid, query)
+    return await this.apiPaymentActionService.sumMoney(oid, query)
   }
 
-  @Post('customer-money-in')
+  @Post('customer-payment')
   @UserPermission(PermissionId.PAYMENT_CUSTOMER_MONEY_IN)
-  customerPaymentMoneyIn(@External() { oid }: TExternal, @Body() body: CustomerPaymentBody) {
-    return this.apiPaymentActionService.customerPaymentMoneyIn(oid, body)
-  }
-
-  @Post('customer-payment-common')
-  @UserPermission(PermissionId.PAYMENT_CUSTOMER_MONEY_IN)
-  customerPaymentCommon(@External() { oid }: TExternal, @Body() body: CustomerPaymentCommonBody) {
-    return this.apiPaymentActionService.customerPaymentCommon(oid, body)
+  customerPayment(@External() { oid }: TExternal, @Body() body: CustomerPaymentBody) {
+    return this.apiPaymentActionService.customerPayment(oid, body)
   }
 
   V
 
-  @Post('distributor-money-out')
+  @Post('distributor-payment')
   @UserPermission(PermissionId.PAYMENT_DISTRIBUTOR_MONEY_OUT)
-  distributorPaymentMoneyOut(@External() { oid }: TExternal, @Body() body: DistributorPaymentBody) {
-    return this.apiPaymentActionService.distributorPaymentMoneyOut(oid, body)
+  distributorPayment(@External() { oid }: TExternal, @Body() body: DistributorPaymentBody) {
+    return this.apiPaymentActionService.distributorPayment(oid, body)
   }
 
   @Post('other-money-in')

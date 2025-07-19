@@ -3,7 +3,7 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm
 import { BaseEntity } from '../common/base.entity'
 import { DeliveryStatus, DiscountType } from '../common/variable'
 import Distributor from './distributor.entity'
-import Payment from './payment.entity'
+import Payment from './payment-item.entity'
 import ReceiptItem from './receipt-item.entity'
 
 export enum ReceiptStatus {

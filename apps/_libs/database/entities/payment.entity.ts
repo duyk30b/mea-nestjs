@@ -2,29 +2,12 @@ import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import Customer from './customer.entity'
 import Distributor from './distributor.entity'
+import PaymentItem from './payment-item.entity'
 import PaymentMethod from './payment-method.entity'
-import Receipt from './receipt.entity'
-import Ticket from './ticket.entity'
 import User from './user.entity'
 
-export enum PaymentTiming {
-  Other = 0, // Khác
-  Prepayment = 1, // Thanh toán trước mua hàng
-  ReceiveRefund = 2, // Nhận tiền hoàn trả
-  Close = 3, // Thanh toán trực tiếp
-  PayDebt = 4, // Trả nợ (thanh toán sau mua hàng )
-  Reopen = 5, // Mở lại hồ sơ
-  TopUp = 10, // Thanh toán để ghi quỹ (cộng vào quỹ của khách hàng)
-}
-
-export enum VoucherType {
-  Unknown = 0,
-  Receipt = 1,
-  Ticket = 2,
-}
-
-export enum PersonType {
-  Unknown = 0,
+export enum PaymentPersonType {
+  Other = 0,
   Distributor = 1,
   Customer = 2,
   Employee = 3,
@@ -37,7 +20,6 @@ export enum MoneyDirection {
 
 @Entity('Payment')
 @Index('IDX_Payment__oid_createdAt', ['oid', 'createdAt'])
-@Index('IDX_Payment__oid_voucherId', ['oid', 'voucherId'])
 @Index('IDX_Payment__oid_personId', ['oid', 'personId'])
 @Index('IDX_Payment__oid_moneyDirection', ['oid', 'moneyDirection'])
 @Index('IDX_Payment__oid_paymentMethodId', ['oid', 'paymentMethodId'])
@@ -54,25 +36,13 @@ export default class Payment {
   @Expose()
   paymentMethodId: number
 
-  @Column({ type: 'smallint', default: VoucherType.Unknown })
+  @Column({ type: 'smallint', default: PaymentPersonType.Other })
   @Expose()
-  voucherType: VoucherType
-
-  @Column({ default: 0 }) // ticketId hoặc receiptId
-  @Expose()
-  voucherId: number
-
-  @Column({ type: 'smallint', default: PersonType.Unknown })
-  @Expose()
-  personType: PersonType
+  paymentPersonType: PaymentPersonType
 
   @Column({ default: 0 }) // distributorId hoặc customerId hoặc userId
   @Expose()
   personId: number
-
-  @Column({ type: 'smallint', default: PaymentTiming.TopUp })
-  @Expose()
-  paymentTiming: PaymentTiming
 
   @Column({
     type: 'bigint',
@@ -91,7 +61,7 @@ export default class Payment {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose() // VD: Đơn 1tr, moneyIn = 300 ==> debit = 700
-  paidAmount: number // Số tiền thu
+  money: number // Số tiền thu
 
   @Column({
     type: 'bigint',
@@ -127,7 +97,7 @@ export default class Payment {
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
-  description: string
+  reason: string
 
   @Expose()
   customer: Customer
@@ -139,13 +109,10 @@ export default class Payment {
   employee: User
 
   @Expose()
-  ticket: Ticket
-
-  @Expose()
-  receipt: Receipt
-
-  @Expose()
   cashier: User
+
+  @Expose()
+  paymentItemList: PaymentItem[]
 
   @Expose()
   @ManyToOne((type) => PaymentMethod, (paymentMethod) => paymentMethod.paymentList, {
@@ -160,9 +127,9 @@ export default class Payment {
     Object.assign(entity, raw)
 
     entity.createdAt = Number(raw.createdAt)
-    entity.paidAmount = Number(raw.paidAmount)
-    entity.debtAmount = Number(raw.debtAmount)
+    entity.money = Number(raw.money)
     entity.openDebt = Number(raw.openDebt)
+    entity.debtAmount = Number(raw.debtAmount)
     entity.closeDebt = Number(raw.closeDebt)
 
     return entity
@@ -176,7 +143,7 @@ export default class Payment {
 export type PaymentRelationType = {
   [P in keyof Pick<
     Payment,
-    'customer' | 'distributor' | 'employee' | 'ticket' | 'receipt' | 'paymentMethod' | 'cashier'
+    'customer' | 'distributor' | 'employee' | 'paymentMethod' | 'cashier' | 'paymentItemList'
   >]?: boolean
 }
 

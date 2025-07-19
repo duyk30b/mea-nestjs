@@ -3,7 +3,7 @@ import { BusinessException } from '../../../../../_libs/common/exception-filter/
 import { arrayToKeyValue } from '../../../../../_libs/common/helpers/array.helper'
 import { BaseResponse } from '../../../../../_libs/common/interceptor'
 import { Image } from '../../../../../_libs/database/entities'
-import { VoucherType } from '../../../../../_libs/database/entities/payment.entity'
+import { VoucherType } from '../../../../../_libs/database/entities/payment-item.entity'
 import { TicketProductType } from '../../../../../_libs/database/entities/ticket-product.entity'
 import {
   AppointmentRepository,
