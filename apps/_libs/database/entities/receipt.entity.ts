@@ -3,7 +3,7 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm
 import { BaseEntity } from '../common/base.entity'
 import { DeliveryStatus, DiscountType } from '../common/variable'
 import Distributor from './distributor.entity'
-import Payment from './payment.entity'
+import { default as Payment, default as PaymentItem } from './payment-item.entity'
 import ReceiptItem from './receipt-item.entity'
 
 export enum ReceiptStatus {
@@ -138,7 +138,7 @@ export default class Receipt extends BaseEntity {
 
   @Expose()
   @OneToMany(() => Payment, (payment) => payment.receipt)
-  paymentList: Payment[]
+  paymentItemList: PaymentItem[]
 
   static fromRaw(raw: { [P in keyof Receipt]: any }) {
     if (!raw) return null
@@ -166,7 +166,7 @@ export default class Receipt extends BaseEntity {
 }
 
 export type ReceiptRelationType = {
-  [P in keyof Pick<Receipt, 'distributor' | 'paymentList'>]?: boolean
+  [P in keyof Pick<Receipt, 'distributor' | 'paymentItemList'>]?: boolean
 } & {
   [P in keyof Pick<Receipt, 'receiptItemList'>]?:
   | { [P in keyof Pick<ReceiptItem, 'product' | 'batch'>]?: boolean }

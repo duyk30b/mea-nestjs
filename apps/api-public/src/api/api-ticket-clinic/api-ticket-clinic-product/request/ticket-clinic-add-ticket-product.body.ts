@@ -3,6 +3,7 @@ import { Expose, Transform, Type } from 'class-transformer'
 import {
   IsArray,
   IsDefined,
+  IsIn,
   IsInt,
   IsNumber,
   IsString,
@@ -15,7 +16,7 @@ import {
   IsEnumValue,
   IsNumberGreaterThan,
 } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType, PickupStrategy } from '../../../../../../_libs/database/common/variable'
+import { DiscountType, PaymentMoneyStatus, PickupStrategy } from '../../../../../../_libs/database/common/variable'
 
 export class TicketProductAddBody {
   @ApiProperty({ example: 1 })
@@ -29,6 +30,13 @@ export class TicketProductAddBody {
   @IsDefined()
   @IsEnumValue(PickupStrategy)
   pickupStrategy: PickupStrategy
+
+  @ApiProperty({ example: PaymentMoneyStatus.NoEffect })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(PaymentMoneyStatus)
+  @IsIn([PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending])
+  paymentMoneyStatus: PaymentMoneyStatus
 
   @ApiPropertyOptional({ type: 'string', example: JSON.stringify([1, 5, 10]) })
   @Expose()

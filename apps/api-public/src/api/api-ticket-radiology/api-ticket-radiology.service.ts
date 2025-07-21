@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { arrayToKeyValue, ESArray } from '../../../../_libs/common/helpers/array.helper'
+import { ESArray } from '../../../../_libs/common/helpers/array.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import {
   Customer,
@@ -44,6 +44,7 @@ export class ApiTicketRadiologyService {
         roomId: filter?.roomId,
         customerId: filter?.customerId,
         status: filter?.status,
+        paymentMoneyStatus: filter?.paymentMoneyStatus,
         radiologyId: filter?.radiologyId,
         ticketId: filter?.ticketId,
         startedAt: filter?.startedAt,

@@ -8,7 +8,6 @@ export enum RoomInteractType {
   Procedure = 3,
   Laboratory = 4,
   Radiology = 5,
-  Reception = 6,
 }
 
 @Entity('Room')

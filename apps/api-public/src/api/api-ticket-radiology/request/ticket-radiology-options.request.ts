@@ -6,6 +6,7 @@ import {
   transformConditionEnum,
 } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
+import { PaymentMoneyStatus } from '../../../../../_libs/database/common/variable'
 import { TicketRadiologyStatus } from '../../../../../_libs/database/entities/ticket-radiology.entity'
 
 export class TicketRadiologyRelationQuery {
@@ -31,12 +32,18 @@ export class TicketRadiologyRelationQuery {
 }
 
 const ConditionEnumTicketRadiologyStatus = createConditionEnum(TicketRadiologyStatus)
+const ConditionEnumPaymentMoneyStatus = createConditionEnum(PaymentMoneyStatus)
 
 export class TicketRadiologyFilterQuery {
   @Expose()
   @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketRadiologyStatus))
   @IsOptional()
   status: TicketRadiologyStatus | InstanceType<typeof ConditionEnumTicketRadiologyStatus>
+
+  @Expose()
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, PaymentMoneyStatus))
+  @IsOptional()
+  paymentMoneyStatus: PaymentMoneyStatus | InstanceType<typeof ConditionEnumPaymentMoneyStatus>
 
   @Expose()
   @IsInt()

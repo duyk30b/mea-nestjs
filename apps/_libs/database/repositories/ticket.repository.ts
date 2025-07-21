@@ -53,10 +53,10 @@ export class TicketRepository extends _PostgreSqlRepository<
       .andWhere('ticket.oid = :oid', { oid: condition.oid })
 
     if (relation?.customer) query = query.leftJoinAndSelect('ticket.customer', 'customer')
-    if (relation?.paymentList) {
-      query = query.leftJoinAndSelect('ticket.paymentList', 'payment')
-      query.addOrderBy('payment.id', 'ASC')
-    }
+    // if (relation?.paymentList) {
+    //   query = query.leftJoinAndSelect('ticket.paymentList', 'payment')
+    //   query.addOrderBy('payment.id', 'ASC')
+    // }
     if (relation?.ticketExpenseList) {
       query = query.leftJoinAndSelect('ticket.ticketExpenseList', 'ticketExpenseList')
     }

@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
-import { IsDefined, IsNumber, IsString, Max, Min } from 'class-validator'
+import { IsDefined, IsIn, IsNumber, IsString, Max, Min } from 'class-validator'
 import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
 import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType } from '../../../../../../_libs/database/common/variable'
+import { DiscountType, PaymentMoneyStatus } from '../../../../../../_libs/database/common/variable'
 
 export class TicketClinicAddTicketRadiologyBody {
   @ApiProperty({ example: 1 })
@@ -11,6 +11,13 @@ export class TicketClinicAddTicketRadiologyBody {
   @IsDefined()
   @IsNumber()
   priority: number
+
+  @ApiProperty({ example: PaymentMoneyStatus.NoEffect })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(PaymentMoneyStatus)
+  @IsIn([PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending])
+  paymentMoneyStatus: PaymentMoneyStatus
 
   @ApiProperty({ example: Date.now() })
   @Expose()

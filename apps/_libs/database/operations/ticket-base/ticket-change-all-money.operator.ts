@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
-import { ESArray } from '../../../common/helpers'
 import { DeliveryStatus, DiscountType } from '../../common/variable'
-import { TicketUser } from '../../entities'
-import { PositionInteractType } from '../../entities/position.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
 import {
   TicketLaboratoryManager,
@@ -13,8 +10,8 @@ import {
   TicketProductManager,
   TicketRadiologyManager,
 } from '../../managers'
-import { TicketUserManager } from '../../repositories'
 import { TicketCalculatorMoney } from './ticket-calculator-money.operator'
+import { TicketUpdateCommissionTicketUserOperator } from './ticket-update-commission-ticket-user.operator'
 
 export type TicketItemChangeMoney = {
   id: number
@@ -34,8 +31,8 @@ export class TicketChangeAllMoneyOperator {
     private ticketProductManager: TicketProductManager,
     private ticketLaboratoryManager: TicketLaboratoryManager,
     private ticketRadiologyManager: TicketRadiologyManager,
-    private ticketUserManager: TicketUserManager,
-    private ticketCalculatorMoney: TicketCalculatorMoney
+    private ticketCalculatorMoney: TicketCalculatorMoney,
+    private ticketUpdateCommissionTicketUserOperator: TicketUpdateCommissionTicketUserOperator
   ) { }
 
   async changeItemMoney(options: {
@@ -70,7 +67,6 @@ export class TicketChangeAllMoneyOperator {
           ticketId,
         })
       }
-      const ticketProductModifiedMap = ESArray.arrayToKeyValue(ticketProductModifiedList, 'id')
 
       const ticketProcedureModifiedList = await this.ticketProcedureManager.bulkUpdate({
         manager,
@@ -80,7 +76,6 @@ export class TicketChangeAllMoneyOperator {
         update: ['quantity', 'discountMoney', 'discountPercent', 'discountType', 'actualPrice'],
         options: { requireEqualLength: true },
       })
-      const ticketProcedureModifiedMap = ESArray.arrayToKeyValue(ticketProcedureModifiedList, 'id')
 
       const ticketLaboratoryModifiedList = await this.ticketLaboratoryManager.bulkUpdate({
         manager,
@@ -90,10 +85,6 @@ export class TicketChangeAllMoneyOperator {
         update: ['discountMoney', 'discountPercent', 'discountType', 'actualPrice'],
         options: { requireEqualLength: true },
       })
-      const ticketLaboratoryModifiedMap = ESArray.arrayToKeyValue(
-        ticketLaboratoryModifiedList,
-        'id'
-      )
 
       const ticketRadiologyModifiedList = await this.ticketRadiologyManager.bulkUpdate({
         manager,
@@ -103,66 +94,20 @@ export class TicketChangeAllMoneyOperator {
         update: ['discountMoney', 'discountPercent', 'discountType', 'actualPrice'],
         options: { requireEqualLength: true },
       })
-      const ticketRadiologyModifiedMap = ESArray.arrayToKeyValue(ticketRadiologyModifiedList, 'id')
 
-      const ticketUserListOrigin = await this.ticketUserManager.findManyBy(manager, {
-        oid,
-        ticketId,
-      })
+      const { ticketUserModifiedList } =
+        await this.ticketUpdateCommissionTicketUserOperator.updateCommissionTicketUser({
+          manager,
+          oid,
+          ticketId,
+          ticketOrigin,
+          ticketLaboratoryList: ticketLaboratoryModifiedList,
+          ticketProcedureList: ticketProcedureModifiedList,
+          ticketRadiologyList: ticketRadiologyModifiedList,
+          ticketProductList: ticketProductModifiedList,
+        })
 
-      const ticketUserListUpdate = ticketUserListOrigin.map((tu) => {
-        if (tu.positionType === PositionInteractType.Procedure) {
-          const ticketItem = ticketProcedureModifiedMap[tu.ticketItemId]
-          return TicketUser.changeTicketItemMoney(tu, {
-            actualPrice: ticketItem.actualPrice,
-            expectedPrice: ticketItem.expectedPrice,
-            quantity: ticketItem.quantity,
-          })
-        }
-        if (tu.positionType === PositionInteractType.Product) {
-          const ticketItem = ticketProductModifiedMap[tu.ticketItemId]
-          return TicketUser.changeTicketItemMoney(tu, {
-            actualPrice: ticketItem.actualPrice,
-            expectedPrice: ticketItem.expectedPrice,
-            quantity: ticketItem.quantity,
-          })
-        }
-        if (tu.positionType === PositionInteractType.Laboratory) {
-          const ticketItem = ticketLaboratoryModifiedMap[tu.ticketItemId]
-          return TicketUser.changeTicketItemMoney(tu, {
-            actualPrice: ticketItem.actualPrice,
-            expectedPrice: ticketItem.expectedPrice,
-            quantity: 1,
-          })
-        }
-        if (tu.positionType === PositionInteractType.Radiology) {
-          const ticketItem = ticketRadiologyModifiedMap[tu.ticketItemId]
-          return TicketUser.changeTicketItemMoney(tu, {
-            actualPrice: ticketItem.actualPrice,
-            expectedPrice: ticketItem.expectedPrice,
-            quantity: 1,
-          })
-        }
-        return tu
-      })
-
-      const ticketUserModifiedList = await this.ticketUserManager.bulkUpdate({
-        manager,
-        tempList: ticketUserListUpdate,
-        compare: ['id'],
-        condition: { oid },
-        update: [
-          'ticketItemExpectedPrice',
-          'ticketItemActualPrice',
-          'quantity',
-          'commissionCalculatorType',
-          'commissionMoney',
-          'commissionPercentActual',
-          'commissionPercentExpected',
-        ],
-      })
-
-      const ticketFix = this.ticketCalculatorMoney.reCalculatorMoney({
+      const ticketMoneyBody = this.ticketCalculatorMoney.reCalculatorMoney({
         oid,
         ticketOrigin,
         ticketProcedureList: ticketProcedureModifiedList,
@@ -175,7 +120,7 @@ export class TicketChangeAllMoneyOperator {
       const ticket = await this.ticketManager.updateOneAndReturnEntity(
         manager,
         { oid, id: ticketOrigin.id },
-        ticketFix as any
+        ticketMoneyBody
       )
       return { ticket }
     })

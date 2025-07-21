@@ -140,24 +140,4 @@ export class ApiTicketClinicProductController {
       body,
     })
   }
-
-  @Post(':ticketId/send-product')
-  @UserPermission(PermissionId.TICKET_CLINIC_SEND_PRODUCT)
-  async sendProduct(
-    @External() { oid }: TExternal,
-    @Param() { ticketId }: TicketParams,
-    @Body() body: TicketSendProductListBody
-  ) {
-    return await this.apiTicketClinicProductService.sendProduct({ oid, ticketId, body })
-  }
-
-  @Post(':ticketId/return-product')
-  @UserPermission(PermissionId.TICKET_CLINIC_RETURN_PRODUCT)
-  async returnProduct(
-    @External() { oid }: TExternal,
-    @Param() { ticketId }: TicketParams,
-    @Body() body: TicketReturnProductListBody
-  ) {
-    return await this.apiTicketClinicProductService.returnProduct({ oid, ticketId, body })
-  }
 }

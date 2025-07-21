@@ -20,5 +20,10 @@ export class OtherPaymentBody {
   @ApiPropertyOptional({ example: 'Khách hàng còn bo thêm tiền' })
   @Expose()
   @IsString()
+  reason: string
+
+  @ApiPropertyOptional({ example: 'Khách hàng còn bo thêm tiền' })
+  @Expose()
+  @IsString()
   note: string
 }

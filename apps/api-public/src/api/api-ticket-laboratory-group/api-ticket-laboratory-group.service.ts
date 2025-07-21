@@ -58,6 +58,7 @@ export class ApiTicketLaboratoryGroupService {
       condition: {
         oid,
         status: filter?.status,
+        paymentMoneyStatus: filter?.paymentMoneyStatus,
         customerId: filter?.customerId,
         roomId: filter?.roomId,
         ticketId: filter?.ticketId,

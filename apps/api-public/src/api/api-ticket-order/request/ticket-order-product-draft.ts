@@ -3,8 +3,8 @@ import { Expose, Transform } from 'class-transformer'
 import { IsDefined, IsNumber, IsString, Max, Min } from 'class-validator'
 import { valuesEnum } from '../../../../../_libs/common/helpers/typescript.helper'
 import {
-    IsEnumValue,
-    IsNumberGreaterThan,
+  IsEnumValue,
+  IsNumberGreaterThan,
 } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { DiscountType, PickupStrategy } from '../../../../../_libs/database/common/variable'
 

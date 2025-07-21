@@ -7,13 +7,7 @@ import { TicketFilterQuery, TicketRelationQuery, TicketSortQuery } from './ticke
 export class TicketGetQuery {
   @ApiPropertyOptional({
     type: String,
-    example: JSON.stringify(<TicketRelationQuery>{
-      customer: true,
-      paymentList: true,
-      ticketAttributeList: true,
-      ticketProductList: { product: true },
-      ticketProcedureList: { procedure: true },
-    }),
+    example: JSON.stringify(<TicketRelationQuery>{}),
   })
   @Expose()
   @Transform(({ value }) => {

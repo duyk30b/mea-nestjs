@@ -1,34 +1,19 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
-import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
-import { BaseResponse } from '../../../../_libs/common/interceptor'
-import { DeliveryStatus } from '../../../../_libs/database/common/variable'
-import { Customer, TicketProduct } from '../../../../_libs/database/entities'
-import { VoucherType } from '../../../../_libs/database/entities/payment.entity'
-import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
+import { Injectable } from '@nestjs/common'
+import { PaymentMoneyStatus } from '../../../../_libs/database/common/variable'
+import { Customer } from '../../../../_libs/database/entities'
+import PaymentItem, {
+  PaymentVoucherItemType,
+} from '../../../../_libs/database/entities/payment-item.entity'
+import Ticket, { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import {
   TicketOrderDepositedOperation,
   TicketOrderDraftOperation,
-  TicketPayDebtOperation,
-  TicketPaymentAndCloseOperation,
-  TicketPrepaymentOperation,
-  TicketRefundOverpaidOperation,
-  TicketReopenOperation,
-  TicketReturnProductOperation,
-  TicketSendProductOperation,
 } from '../../../../_libs/database/operations'
-import {
-  PaymentRepository,
-  TicketBatchRepository,
-  TicketProductRepository,
-  TicketRepository,
-} from '../../../../_libs/database/repositories'
+import { TicketRepository } from '../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../socket/socket-emit.service'
-import {
-  TicketPaymentMoneyBody,
-  TicketReturnProductListBody,
-  TicketSendProductAndPaymentBody,
-  TicketSendProductListBody,
-} from '../ticket/request'
+import { PaymentActionService } from '../api-payment/payment-action.service'
+import { TicketSendProductAndPaymentBody } from '../ticket/request'
+import { TicketActionService } from '../ticket/service/ticket-action.service'
 import {
   TicketOrderDebtSuccessInsertBody,
   TicketOrderDebtSuccessUpdateBody,
@@ -40,58 +25,48 @@ import {
 export class ApiTicketOrderService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
-    private readonly cacheDataService: CacheDataService,
-    private readonly ticketProductRepository: TicketProductRepository,
-    private readonly ticketBatchRepository: TicketBatchRepository,
     private readonly ticketOrderDraftOperation: TicketOrderDraftOperation,
     private readonly ticketOrderDepositedOperation: TicketOrderDepositedOperation,
-    private readonly ticketPaymentAndCloseOperation: TicketPaymentAndCloseOperation,
-    private readonly ticketSendProductOperation: TicketSendProductOperation,
     private readonly ticketRepository: TicketRepository,
-    private readonly ticketPrepaymentOperation: TicketPrepaymentOperation,
-    private readonly ticketPayDebtOperation: TicketPayDebtOperation,
-    private readonly ticketRefundOverpaidOperation: TicketRefundOverpaidOperation,
-    private readonly ticketReopenOperation: TicketReopenOperation,
-    private readonly ticketReturnProductOperation: TicketReturnProductOperation,
-    private readonly paymentRepository: PaymentRepository
+    private readonly ticketActionService: TicketActionService,
+    private readonly paymentActionService: PaymentActionService
   ) { }
 
-  async draftUpsert(params: {
-    oid: number
-    userId: number
-    body: TicketOrderDraftUpsertBody
-  }): Promise<BaseResponse> {
+  async draftUpsert(params: { oid: number; userId: number; body: TicketOrderDraftUpsertBody }) {
     const { oid, body, userId } = params
-    try {
-      const { ticket } = await this.ticketOrderDraftOperation.upsert({
-        oid,
-        ticketId: body.ticketId,
-        ticketOrderDraftUpsertDto: {
-          ...body.ticketOrderDraftUpsert,
-          customType: 0,
-          roomId: 0,
-          customerSourceId: 0,
-          laboratoryMoney: 0,
-          radiologyMoney: 0,
-          dailyIndex: 0,
-          commissionMoney: 0,
-          imageIds: JSON.stringify([]),
-        },
-        ticketOrderProductDraftListDto: body.ticketOrderProductDraftList.map((i) => {
-          return {
-            ...i,
-            printPrescription: 1,
-          }
-        }),
-        ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList,
-        ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
-        ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
-        // ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
-      })
-      return { data: { ticket } }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
+
+    const { ticket } = await this.ticketOrderDraftOperation.upsert({
+      oid,
+      ticketId: body.ticketId,
+      ticketOrderDraftUpsertDto: {
+        ...body.ticketOrderDraftUpsert,
+        customType: 0,
+        roomId: 0,
+        customerSourceId: 0,
+        laboratoryMoney: 0,
+        radiologyMoney: 0,
+        dailyIndex: 0,
+        commissionMoney: 0,
+        imageIds: JSON.stringify([]),
+      },
+      ticketOrderProductDraftListDto: body.ticketOrderProductDraftList.map((i) => {
+        return {
+          ...i,
+          printPrescription: 1,
+          paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
+        }
+      }),
+      ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
+        return {
+          ...i,
+          paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
+        }
+      }),
+      ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
+      ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
+      // ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
+    })
+    return { data: { ticket } }
   }
 
   async depositedUpdate(params: {
@@ -99,45 +74,48 @@ export class ApiTicketOrderService {
     userId: number
     ticketId: number
     body: TicketOrderDepositedUpdateBody
-  }): Promise<BaseResponse> {
+  }) {
     const { oid, userId, ticketId, body } = params
-    try {
-      const { ticket } = await this.ticketOrderDepositedOperation.update({
-        oid,
-        ticketId,
-        ticketOrderDepositedUpdateDto: {
-          ...body.ticketOrderDepositedUpdate,
-          customType: 0,
-          roomId: 0,
-          customerSourceId: 0,
-          laboratoryMoney: 0,
-          radiologyMoney: 0,
-          dailyIndex: 0,
-          commissionMoney: 0,
-          imageIds: JSON.stringify([]),
-        },
-        ticketOrderProductDraftListDto: body.ticketOrderProductDraftList.map((i) => {
-          return {
-            ...i,
-            printPrescription: 1,
-          }
-        }),
-        ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList,
-        ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
-        ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
-        // ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
-      })
-      return { data: { ticket } }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
+
+    const { ticket } = await this.ticketOrderDepositedOperation.update({
+      oid,
+      ticketId,
+      ticketOrderDepositedUpdateDto: {
+        ...body.ticketOrderDepositedUpdate,
+        customType: 0,
+        roomId: 0,
+        customerSourceId: 0,
+        laboratoryMoney: 0,
+        radiologyMoney: 0,
+        dailyIndex: 0,
+        commissionMoney: 0,
+        imageIds: JSON.stringify([]),
+      },
+      ticketOrderProductDraftListDto: body.ticketOrderProductDraftList.map((i) => {
+        return {
+          ...i,
+          printPrescription: 1,
+          paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
+        }
+      }),
+      ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
+        return {
+          ...i,
+          paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
+        }
+      }),
+      ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
+      ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
+      // ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
+    })
+    return { data: { ticket } }
   }
 
   async debtSuccessCreate(params: {
     oid: number
     userId: number
     body: TicketOrderDebtSuccessInsertBody
-  }): Promise<BaseResponse> {
+  }) {
     const { oid, body, userId } = params
     const { paid, ...ticketOrderDraftInsertBody } = body.ticketOrderDebtSuccessInsert
     const time = ticketOrderDraftInsertBody.registeredAt
@@ -160,38 +138,64 @@ export class ApiTicketOrderService {
         return {
           ...i,
           printPrescription: 1,
+          paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
         }
       }),
-      ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList,
+      ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
+        return {
+          ...i,
+          paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
+        }
+      }),
       ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
       ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
       // ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
     })
 
     const ticketId = draftResponse.ticket.id
+    const customerId = draftResponse.ticket.customerId
 
     if (body.ticketOrderProductDraftList.length) {
-      await this.sendProductCommon({
+      await this.ticketActionService.sendProduct({
         oid,
         ticketId,
         ticketProductIdList: draftResponse.ticket.ticketProductList || [].map((i) => i.id),
+        sendAll: true,
       })
     }
 
-    const { ticket, customer } = await this.ticketPaymentAndCloseOperation.paymentAndClose({
-      oid,
-      ticketId,
-      cashierId: userId,
-      money: paid,
-      time,
-      paymentMethodId: 0,
-      note: '',
-    })
-
-    if (customer) {
-      this.socketEmitService.customerUpsert(oid, { customer })
+    if (paid > 0) {
+      await this.paymentActionService.customerPayment({
+        oid,
+        userId,
+        body: {
+          customerId,
+          note: 'Cập nhật phiếu',
+          reason: '',
+          totalMoney: paid,
+          paymentMethodId: 0,
+          paymentItemData: {
+            moneyTopUpAdd: 0,
+            payDebt: [],
+            prepayment: {
+              ticketId,
+              itemList: [
+                {
+                  amount: paid,
+                  ticketItemId: 0,
+                  voucherItemType: PaymentVoucherItemType.Other,
+                  paymentInteractId: 0,
+                },
+              ],
+            },
+          },
+        },
+      })
     }
-    return { data: { ticket } }
+
+    const closeResult = await this.ticketActionService.close({ oid, userId, ticketId })
+
+    return { data: { ticket: closeResult.ticketModified } }
   }
 
   async debtSuccessUpdate(params: {
@@ -199,40 +203,31 @@ export class ApiTicketOrderService {
     userId: number
     ticketId: number
     body: TicketOrderDebtSuccessUpdateBody
-  }): Promise<BaseResponse> {
+  }) {
     const { oid, userId, ticketId, body } = params
     const time = Date.now()
-    const promiseData = await Promise.all([
-      this.ticketRepository.findOneBy({ oid, id: ticketId }),
-      this.ticketProductRepository.findManyBy({ oid, ticketId }),
-    ])
+    const promiseData = await Promise.all([this.ticketRepository.findOneBy({ oid, id: ticketId })])
     let ticket = promiseData[0]
-    const ticketProductList = promiseData[1]
+    const customerId = ticket.customerId
 
     if ([TicketStatus.Draft, TicketStatus.Schedule].includes(ticket.status)) {
       return { data: { ticketId } }
     }
     if ([TicketStatus.Debt, TicketStatus.Completed].includes(ticket.status)) {
-      const responseReopen = await this.ticketReopenOperation.reopen({
+      const responseReopen = await this.ticketActionService.reopen({
         oid,
         ticketId,
-        cashierId: userId,
-        time,
-        description: 'Sửa đơn',
-        paymentMethodId: 0,
-        note: '',
-        newPaid: 0,
+        userId,
       })
-      ticket = responseReopen.ticket
+      ticket = responseReopen.ticketModified
     }
-    const responseReturnAllProduct = await this.returnAllProduct({ oid, ticketId })
+    await this.ticketActionService.returnProduct({
+      oid,
+      returnAll: true,
+      ticketId,
+      returnList: [],
+    })
 
-    ticket = await this.ticketRepository.updateOneAndReturnEntity(
-      { oid, id: ticketId },
-      {
-        status: TicketStatus.Deposited,
-      }
-    )
     const { paid: paidBody, ...ticketBodyUpdate } = body.ticketOrderDebtSuccessUpdate
     // không update paid, giữ nguyên số tiền trước update, trả paid thêm vào ở dưới cùng
     const responseUpdate = await this.ticketOrderDepositedOperation.update({
@@ -253,31 +248,60 @@ export class ApiTicketOrderService {
         return {
           ...i,
           printPrescription: 1,
+          paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
         }
       }),
-      ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList,
+      ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
+        return {
+          ...i,
+          paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
+        }
+      }),
       ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
       ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
     })
     ticket = responseUpdate.ticket
 
-    const responseSendAllProduct = await this.sendProductCommon({
+    const responseSendAllProduct = await this.ticketActionService.sendProduct({
       ticketId,
       oid,
+      sendAll: true,
       ticketProductIdList: responseUpdate.ticket.ticketProductList.map((i) => i.id),
     })
-    if (responseSendAllProduct.ticket) {
-      ticket = responseSendAllProduct.ticket
+
+    if (paidBody > 0) {
+      await this.paymentActionService.customerPayment({
+        oid,
+        userId,
+        body: {
+          customerId,
+          note: 'Sửa đơn',
+          reason: '',
+          totalMoney: paidBody,
+          paymentMethodId: 0,
+          paymentItemData: {
+            moneyTopUpAdd: 0,
+            payDebt: [],
+            prepayment: {
+              ticketId,
+              itemList: [
+                {
+                  amount: paidBody,
+                  ticketItemId: 0,
+                  voucherItemType: PaymentVoucherItemType.Other,
+                  paymentInteractId: 0,
+                },
+              ],
+            },
+          },
+        },
+      })
     }
 
-    await this.ticketPaymentAndCloseOperation.paymentAndClose({
+    await this.ticketActionService.close({
       oid,
       ticketId,
-      cashierId: userId,
-      time,
-      money: paidBody - ticket.paid, // trả thêm tiền ở đây
-      paymentMethodId: 0,
-      note: 'Sửa đơn',
+      userId,
     })
 
     return { data: { ticketId } }
@@ -285,10 +309,10 @@ export class ApiTicketOrderService {
 
   // ================= ACTION ================= //
 
-  async destroy(params: { oid: number; ticketId: number }): Promise<BaseResponse> {
+  async destroy(params: { oid: number; ticketId: number }) {
     const { oid, ticketId } = params
     await this.ticketRepository.destroy({ oid, ticketId })
-    return { data: { ticketId } }
+    return { ticketId }
   }
 
   async sendProductAndPaymentAndClose(params: {
@@ -296,360 +320,83 @@ export class ApiTicketOrderService {
     ticketId: number
     userId: number
     body: TicketSendProductAndPaymentBody
-  }): Promise<BaseResponse> {
+  }) {
     const { oid, ticketId, body, userId } = params
     const time = Date.now()
-    await this.sendProductCommon({ oid, ticketId, ticketProductIdList: body.ticketProductIdList })
-    const closeResult = await this.ticketPaymentAndCloseOperation.paymentAndClose({
+    const paymentItemCreatedList: PaymentItem[] = []
+    let ticketModified: Ticket
+    let customerModified: Customer
+
+    const sendProductResult = await this.ticketActionService.sendProduct({
       oid,
-      cashierId: userId,
+      sendAll: true,
       ticketId,
-      time,
-      money: body.money,
-      paymentMethodId: body.paymentMethodId,
-      note: body.note,
+      ticketProductIdList: [],
+      options: { noEmitTicket: true },
     })
-    if (closeResult.customer) {
-      this.socketEmitService.customerUpsert(oid, { customer: closeResult.customer })
+    if (sendProductResult.ticketModified) {
+      ticketModified = sendProductResult.ticketModified
     }
 
-    const ticketProductList = await this.ticketProductRepository.findMany({
-      relation: { product: true },
-      condition: {
+    const customerId = sendProductResult.ticketModified.customerId
+
+    if (body.money > 0) {
+      const paymentResult = await this.paymentActionService.customerPayment({
         oid,
-        ticketId,
-      },
-      sort: { id: 'ASC' },
-    })
-    return {
-      data: {
-        ticket: closeResult.ticket,
-        ticketProductList,
-        paymentList: closeResult.paymentList,
-      },
-    }
-  }
-
-  async prepayment(options: {
-    oid: number
-    userId: number
-    ticketId: number
-    body: TicketPaymentMoneyBody
-  }): Promise<BaseResponse> {
-    const { oid, ticketId, body, userId } = options
-    try {
-      const prepaymentResult = await this.ticketPrepaymentOperation.prepayment({
-        oid,
-        ticketId,
-        time: Date.now(),
-        money: body.money,
-        paymentMethodId: body.paymentMethodId,
-        note: body.note,
-        cashierId: userId,
-      })
-
-      return {
-        data: {
-          ticket: prepaymentResult.ticket,
-          payment: prepaymentResult.payment,
-        },
-      }
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async sendProduct(params: {
-    oid: number
-    ticketId: number
-    body: TicketSendProductListBody
-  }): Promise<BaseResponse> {
-    const { oid, ticketId, body } = params
-    const time = Date.now()
-
-    const sendProductResult = await this.sendProductCommon({
-      oid,
-      ticketId,
-      ticketProductIdList: body.ticketProductIdList,
-    })
-
-    const ticketProductList = await this.ticketProductRepository.findMany({
-      relation: { product: true },
-      condition: { oid, ticketId },
-      sort: { id: 'ASC' },
-    })
-
-    return {
-      data: {
-        ticket: sendProductResult.ticket,
-        ticketProductList,
-      },
-    }
-  }
-
-  async close(params: { oid: number; userId: number; ticketId: number }) {
-    const { oid, ticketId, userId } = params
-    const time = Date.now()
-    try {
-      const closeResult = await this.ticketPaymentAndCloseOperation.paymentAndClose({
-        oid,
-        cashierId: userId,
-        ticketId,
-        time,
-        money: 0,
-        paymentMethodId: 0,
-        note: '',
-      })
-      if (closeResult.customer) {
-        this.socketEmitService.customerUpsert(oid, { customer: closeResult.customer })
-      }
-      return {
-        data: {
-          ticket: closeResult.ticket,
-          paymentList: closeResult.paymentList,
-        },
-      }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async refundOverpaid(options: {
-    oid: number
-    userId: number
-    ticketId: number
-    body: TicketPaymentMoneyBody
-  }): Promise<BaseResponse> {
-    const { oid, ticketId, body, userId } = options
-
-    const refundOverpaidResult = await this.ticketRefundOverpaidOperation.refundOverpaid({
-      oid,
-      ticketId,
-      cashierId: userId,
-      time: Date.now(),
-      money: body.money,
-      paymentMethodId: body.paymentMethodId,
-      note: body.note,
-      description: '',
-    })
-    if (refundOverpaidResult.customer) {
-      this.socketEmitService.customerUpsert(oid, { customer: refundOverpaidResult.customer })
-    }
-
-    return {
-      data: {
-        ticket: refundOverpaidResult.ticket,
-        payment: refundOverpaidResult.payment,
-      },
-    }
-  }
-
-  async returnProduct(params: {
-    oid: number
-    userId: number
-    ticketId: number
-    body: TicketReturnProductListBody
-  }): Promise<BaseResponse> {
-    const { oid, userId, ticketId, body } = params
-    try {
-      const time = Date.now()
-
-      let ticket = await this.ticketRepository.findOneBy({ oid, id: ticketId })
-      if ([TicketStatus.Debt, TicketStatus.Completed].includes(ticket.status)) {
-        const reopenResult = await this.ticketReopenOperation.reopen({
-          oid,
-          cashierId: userId,
-          ticketId,
-          time,
-          description: 'Hoàn trả',
-          note: '',
+        userId,
+        body: {
+          customerId,
+          note: 'Gửi hàng',
+          reason: '',
+          totalMoney: body.money,
           paymentMethodId: 0,
-          newPaid: ticket.paid,
-        })
-        ticket = reopenResult.ticket
-      }
-
-      const returnProductResult = await this.ticketReturnProductOperation.returnProduct({
-        oid,
-        ticketId,
-        time: Date.now(),
-        returnList: body.returnList,
-      })
-      this.socketEmitService.productListChange(oid, {
-        productUpsertedList: returnProductResult.productModifiedList || [],
-      })
-      ticket = returnProductResult.ticket
-
-      return { data: { ticket } }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async payDebt(options: {
-    oid: number
-    userId: number
-    ticketId: number
-    body: TicketPaymentMoneyBody
-  }): Promise<BaseResponse> {
-    const { oid, userId, ticketId, body } = options
-    try {
-      const payDebtResult = await this.ticketPayDebtOperation.payDebt({
-        oid,
-        cashierId: userId,
-        ticketId,
-        time: Date.now(),
-        money: body.money,
-        paymentMethodId: body.paymentMethodId,
-        note: body.note,
-      })
-      if (payDebtResult.customer) {
-        this.socketEmitService.customerUpsert(oid, { customer: payDebtResult.customer })
-      }
-      return {
-        data: {
-          ticket: payDebtResult.customer,
-          payment: payDebtResult.payment,
+          paymentItemData: {
+            moneyTopUpAdd: 0,
+            payDebt: [],
+            prepayment: {
+              ticketId,
+              itemList: [
+                {
+                  amount: body.money,
+                  ticketItemId: 0,
+                  voucherItemType: PaymentVoucherItemType.Other,
+                  paymentInteractId: 0,
+                },
+              ],
+            },
+          },
         },
-      }
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async terminate(options: {
-    oid: number
-    userId: number
-    ticketId: number
-  }): Promise<BaseResponse> {
-    const { oid, userId, ticketId } = options
-    const time = Date.now()
-    const promiseData = await Promise.all([
-      this.ticketRepository.findOneBy({ oid, id: ticketId }),
-      this.ticketProductRepository.findManyBy({ oid, ticketId }),
-    ])
-    const ticketOrigin = promiseData[0]
-
-    let customer: Customer
-    if ([TicketStatus.Debt, TicketStatus.Completed].includes(ticketOrigin.status)) {
-      const reopenResult = await this.ticketReopenOperation.reopen({
-        oid,
-        cashierId: userId,
-        ticketId,
-        time,
-        paymentMethodId: 0,
-        description: 'Hủy phiếu',
-        note: '',
-        newPaid: 0,
+        options: { noEmitTicket: true, noEmitCustomer: true },
       })
-      customer = reopenResult.customer
-    }
-
-    if ([TicketStatus.Deposited, TicketStatus.Executing].includes(ticketOrigin.status)) {
-      if (ticketOrigin.paid > 0) {
-        const refundOverpaidResult = await this.ticketRefundOverpaidOperation.refundOverpaid({
-          oid,
-          cashierId: userId,
-          time,
-          ticketId,
-          paymentMethodId: 0,
-          money: ticketOrigin.paid,
-          description: 'Hủy phiếu',
-          note: '',
-        })
-        customer = refundOverpaidResult.customer
+      paymentItemCreatedList.push(...paymentResult.paymentItemCreatedList)
+      if (paymentResult.ticketModifiedList.length) {
+        ticketModified = paymentResult.ticketModifiedList[0]
       }
     }
 
-    if (customer) {
-      this.socketEmitService.customerUpsert(oid, { customer })
-    }
-
-    let ticketProductList: TicketProduct[] = []
-    if (ticketOrigin.deliveryStatus === DeliveryStatus.Delivered) {
-      const returnProductResponse = await this.returnAllProduct({ oid, ticketId })
-      ticketProductList = returnProductResponse.ticketProductModifiedList
-    }
-
-    const ticket = await this.ticketRepository.updateOneAndReturnEntity(
-      { oid, id: ticketId },
-      { status: TicketStatus.Cancelled }
-    )
-    const paymentList = await this.paymentRepository.findMany({
-      condition: {
-        oid,
-        voucherId: ticketId,
-        voucherType: VoucherType.Ticket,
-      },
-      sort: { id: 'ASC' },
-    })
-    return { data: { ticket, paymentList, ticketProductList } }
-  }
-
-  async sendProductCommon(params: {
-    oid: number
-    ticketId: number
-    ticketProductIdList: number[]
-  }) {
-    const { oid, ticketId, ticketProductIdList } = params
-    const time = Date.now()
-
-    const allowNegativeQuantity = await this.cacheDataService.getSettingAllowNegativeQuantity(oid)
-    const sendProductResult = await this.ticketSendProductOperation.sendProduct({
+    const closeResult = await this.ticketActionService.close({
       oid,
       ticketId,
-      time,
-      allowNegativeQuantity,
-      ticketProductIdList,
+      userId,
+      options: { noEmitCustomer: true, noEmitTicket: true },
     })
-    this.socketEmitService.productListChange(oid, {
-      productUpsertedList: sendProductResult.productModifiedList || [],
-    })
-    this.socketEmitService.batchListChange(oid, {
-      batchUpsertedList: sendProductResult.batchModifiedList || [],
-    })
-
+    paymentItemCreatedList.push(...closeResult.paymentItemCreatedList)
+    if (closeResult.ticketModified) {
+      ticketModified = closeResult.ticketModified
+    }
+    if (closeResult.customerModified) {
+      customerModified = closeResult.customerModified
+    }
+    if (ticketModified) {
+      this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+    }
+    if (customerModified) {
+      this.socketEmitService.customerUpsert(oid, { customer: customerModified })
+    }
     return {
-      ticket: sendProductResult.ticket,
-      ticketProductList: sendProductResult.ticketProductModifiedList,
-    }
-  }
-
-  async returnAllProduct(params: { oid: number; ticketId: number }) {
-    const { oid, ticketId } = params
-    const time = Date.now()
-    const ticketBatchList = await this.ticketBatchRepository.findManyBy({
-      oid,
-      ticketId,
-      deliveryStatus: DeliveryStatus.Delivered,
-    })
-    const returnList = ticketBatchList.map((i) => ({
-      ticketProductId: i.ticketProductId,
-      ticketBatchId: i.id,
-      quantityReturn: i.quantity,
-    }))
-
-    if (returnList.length) {
-      const returnProductResult = await this.ticketReturnProductOperation.returnProduct({
-        oid,
-        ticketId,
-        time,
-        returnList,
-        options: { changePendingIfNoStock: true },
-      })
-
-      this.socketEmitService.productListChange(oid, {
-        productUpsertedList: returnProductResult.productModifiedList || [],
-      })
-      this.socketEmitService.batchListChange(oid, {
-        batchUpsertedList: returnProductResult.batchModifiedList || [],
-      })
-      return {
-        ticket: returnProductResult.ticket,
-        ticketProductModifiedList: returnProductResult.ticketProductModifiedList,
-      }
-    } else {
-      return {}
+      ticketModified: closeResult.ticketModified,
+      paymentItemCreatedList,
+      ticketProductModifiedAll: sendProductResult.ticketProductModifiedAll,
     }
   }
 }

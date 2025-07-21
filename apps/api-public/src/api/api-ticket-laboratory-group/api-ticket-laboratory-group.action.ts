@@ -76,10 +76,9 @@ export class ApiTicketLaboratoryGroupAction {
 
     this.socketEmitService.socketTicketLaboratoryListChange(oid, {
       ticketId,
-      ticketLaboratoryGroupUpdate,
-      ticketLaboratoryUpdateList,
-      ticketLaboratoryResultInsertList: tlrInsertList,
-      ticketLaboratoryResultUpdateList: tlrUpdateList,
+      ticketLaboratoryGroupUpsertList: [ticketLaboratoryGroupUpdate],
+      ticketLaboratoryUpsertList: ticketLaboratoryUpdateList,
+      ticketLaboratoryResultUpsertList: [...tlrInsertList, ...tlrUpdateList],
     })
 
     ticketLaboratoryGroupUpdate.ticketLaboratoryList = ticketLaboratoryUpdateList
@@ -121,8 +120,8 @@ export class ApiTicketLaboratoryGroupAction {
 
     this.socketEmitService.socketTicketLaboratoryListChange(oid, {
       ticketId,
-      ticketLaboratoryGroupUpdate,
-      ticketLaboratoryUpdateList,
+      ticketLaboratoryGroupUpsertList: [ticketLaboratoryGroupUpdate],
+      ticketLaboratoryUpsertList: ticketLaboratoryUpdateList,
       ticketLaboratoryResultDestroyList,
     })
     return { data: true }

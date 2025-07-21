@@ -7,12 +7,12 @@ import { PositionInteractType } from '../../entities/position.entity'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
 import {
-    BatchManager,
-    ProductManager,
-    ProductMovementManager,
-    TicketBatchManager,
-    TicketManager,
-    TicketProductManager,
+  BatchManager,
+  ProductManager,
+  ProductMovementManager,
+  TicketBatchManager,
+  TicketManager,
+  TicketProductManager,
 } from '../../managers'
 import { TicketUserManager } from '../../repositories'
 import { ProductPutawayOperation } from '../product/product-putaway.operation'
@@ -41,11 +41,11 @@ export class TicketReturnProductOperation {
       ticketBatchId: number
       quantityReturn: number
     }[]
+    returnAll: boolean
     options?: { changePendingIfNoStock?: boolean }
   }) {
-    const { oid, ticketId, time, returnList, options } = data
-    const PREFIX = `TicketId = ${ticketId}, returnProduct failed`
-    const ERROR_LOGIC = `TicketId = ${ticketId}, returnProduct has a logic error occurred: `
+    const { oid, ticketId, time, options, returnAll } = data
+    let returnList = data.returnList
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // 1. === UPDATE TICKET FOR TRANSACTION ===
@@ -55,18 +55,33 @@ export class TicketReturnProductOperation {
         { updatedAt: Date.now() }
       )
 
-      if (!returnList.length) return { ticket: ticketOrigin }
+      if (!returnList.length && !returnAll) return { ticket: ticketOrigin }
 
       const ticketBatchOriginList = await this.ticketBatchManager.findManyBy(manager, {
         oid,
         ticketId,
-        id: { IN: returnList.filter((i) => !!i.ticketBatchId).map((i) => i.ticketBatchId) },
+        deliveryStatus: DeliveryStatus.Delivered,
+        ...(returnAll
+          ? {}
+          : {
+            id: { IN: returnList.filter((i) => !!i.ticketBatchId).map((i) => i.ticketBatchId) },
+          }),
       })
+      if (returnAll) {
+        returnList = ticketBatchOriginList.map((i) => {
+          return {
+            ticketBatchId: i.id,
+            quantityReturn: i.quantity,
+          }
+        })
+      }
+
       const ticketBatchOriginMap = ESArray.arrayToKeyValue(ticketBatchOriginList, 'id')
 
       const ticketProductOriginList = await this.ticketProductManager.findManyBy(manager, {
         oid,
         ticketId,
+        deliveryStatus: DeliveryStatus.Delivered,
         id: { IN: ticketBatchOriginList.map((i) => i.ticketProductId) },
       })
       const ticketProductOriginMap = ESArray.arrayToKeyValue(ticketProductOriginList, 'id')
@@ -294,6 +309,13 @@ export class TicketReturnProductOperation {
         itemsCostAmountReturn += tpOrigin.costAmount - tpModified.costAmount
       })
 
+      const { deliveryStatus, ticketProductList } =
+        await this.ticketProductManager.calculatorDeliveryStatus({
+          manager,
+          oid,
+          ticketId,
+        })
+
       const ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
         manager,
         oid,
@@ -304,14 +326,15 @@ export class TicketReturnProductOperation {
           itemsDiscountAdd: -productDiscountReturn,
           commissionMoneyAdd: -commissionMoneyReturn,
         },
+        other: { deliveryStatus },
       })
 
       return {
         ticket,
         productModifiedList,
         batchModifiedList,
-        ticketProductModifiedList,
         ticketUserModifiedList,
+        ticketProductModifiedAll: ticketProductList,
       }
     })
   }

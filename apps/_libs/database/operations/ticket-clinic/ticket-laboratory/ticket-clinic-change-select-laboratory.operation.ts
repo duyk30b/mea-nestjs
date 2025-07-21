@@ -4,7 +4,9 @@ import { DataSource, EntityManager } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { TicketLaboratoryStatus } from '../../../common/variable'
 import { TicketLaboratoryGroup } from '../../../entities'
-import { TicketLaboratoryInsertType } from '../../../entities/ticket-laboratory.entity'
+import {
+  TicketLaboratoryInsertType,
+} from '../../../entities/ticket-laboratory.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import {
   TicketLaboratoryGroupManager,
@@ -14,10 +16,15 @@ import {
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
 import { TicketLaboratoryInsertBasicType } from './ticket-clinic-add-select-laboratory.operation'
 
+export type TicketLaboratoryUpdateBasicType = Omit<
+  TicketLaboratoryInsertBasicType,
+  keyof Pick<TicketLaboratoryInsertBasicType, 'paymentMoneyStatus'>
+>
+
 export type TicketLaboratoryGroupUpdateBasicType = Pick<
   TicketLaboratoryGroup,
   'id' | 'laboratoryGroupId' | 'registeredAt' | 'roomId'
-> & { ticketLaboratoryList: TicketLaboratoryInsertBasicType[] }
+> & { ticketLaboratoryList: TicketLaboratoryUpdateBasicType[] }
 
 @Injectable()
 export class TicketClinicChangeSelectLaboratoryOperation {
@@ -83,6 +90,7 @@ export class TicketClinicChangeSelectLaboratoryOperation {
             roomId: tlgDto.id,
             status: TicketLaboratoryStatus.Pending,
             startedAt: null,
+            paymentMoneyStatus: tlgUpdate.paymentMoneyStatus,
           }
           return tlEntity
         })

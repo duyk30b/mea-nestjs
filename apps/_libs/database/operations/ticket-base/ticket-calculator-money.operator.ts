@@ -8,6 +8,7 @@ import {
   TicketRadiology,
   TicketUser,
 } from '../../entities'
+import { TicketUpdateType } from '../../entities/ticket.entity'
 
 @Injectable()
 export class TicketCalculatorMoney {
@@ -97,27 +98,23 @@ export class TicketCalculatorMoney {
     const debt = totalMoney - ticketOrigin.paid
     const profit = totalMoney - itemsCostAmount - ticketOrigin.expense - commissionMoney
 
-    const ticketFix = Ticket.fromRaw(ticketOrigin)
+    const ticketMoneyUpdate: Partial<TicketUpdateType> = {
+      productMoney,
+      procedureMoney,
+      laboratoryMoney,
+      radiologyMoney,
+      itemsActualMoney,
+      itemsDiscount,
+      itemsCostAmount,
+      commissionMoney,
+      discountType,
+      discountPercent,
+      discountMoney,
+      totalMoney,
+      debt,
+      profit,
+    }
 
-    ticketFix.productMoney = productMoney
-    ticketFix.procedureMoney = procedureMoney
-    ticketFix.laboratoryMoney = laboratoryMoney
-    ticketFix.radiologyMoney = radiologyMoney
-
-    ticketFix.itemsActualMoney = itemsActualMoney
-    ticketFix.itemsDiscount = itemsDiscount
-    ticketFix.itemsCostAmount = itemsCostAmount
-
-    ticketFix.commissionMoney = commissionMoney
-
-    ticketFix.discountType = discountType
-    ticketFix.discountPercent = discountPercent
-    ticketFix.discountMoney = discountMoney
-
-    ticketFix.totalMoney = totalMoney
-    ticketFix.debt = debt
-    ticketFix.profit = profit
-
-    return ticketFix
+    return ticketMoneyUpdate
   }
 }

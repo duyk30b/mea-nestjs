@@ -43,16 +43,17 @@ export class TicketSendProductOperation {
     oid: number
     ticketId: number
     ticketProductIdList: number[]
+    sendAll: boolean
     time: number
     allowNegativeQuantity: boolean
   }) {
-    const { oid, ticketId, time, ticketProductIdList, allowNegativeQuantity } = data
+    const { oid, ticketId, time, sendAll, ticketProductIdList, allowNegativeQuantity } = data
     const PREFIX = `TicketId = ${ticketId}, sendProduct failed`
     const ERROR_LOGIC = `TicketId = ${ticketId}, sendProduct has a logic error occurred: `
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // 1. === UPDATE TRANSACTION for TICKET ===
-      let ticket = await this.ticketManager.updateOneAndReturnEntity(
+      let ticketModified = await this.ticketManager.updateOneAndReturnEntity(
         manager,
         {
           oid,
@@ -66,11 +67,11 @@ export class TicketSendProductOperation {
       const ticketProductOriginList = await this.ticketProductManager.findManyBy(manager, {
         oid,
         ticketId,
-        id: { IN: ticketProductIdList },
+        ...(sendAll ? {} : { id: { IN: ticketProductIdList } }),
         deliveryStatus: DeliveryStatus.Pending, // chỉ update những thằng "Pending" thôi
       })
       if (ticketProductOriginList.length === 0) {
-        return { ticket }
+        return { ticketModified }
       }
       const ticketProductOriginMap = ESArray.arrayToKeyValue(ticketProductOriginList, 'id')
 
@@ -191,8 +192,8 @@ export class TicketSendProductOperation {
         const productMovementInsert: ProductMovementInsertType = {
           oid,
           movementType: MovementType.Ticket,
-          contactId: ticket.customerId,
-          voucherId: ticket.id,
+          contactId: ticketModified.customerId,
+          voucherId: ticketModified.id,
           voucherProductId: tpOrigin.id,
           warehouseId: batch?.warehouseId || 0,
           productId: paMovement.productId,
@@ -226,22 +227,18 @@ export class TicketSendProductOperation {
       const costAmountAdd = costAmountModified - costAmountOrigin
 
       // === 4. ReCalculator DeliveryStatus
-      const ticketProductAfterAll = await this.ticketProductManager.findMany(manager, {
-        condition: { ticketId },
-      })
-      let deliveryStatus = DeliveryStatus.Delivered
-      if (ticketProductAfterAll.every((i) => i.deliveryStatus === DeliveryStatus.NoStock)) {
-        deliveryStatus = DeliveryStatus.NoStock
-      }
-      if (ticketProductAfterAll.some((i) => i.deliveryStatus === DeliveryStatus.Pending)) {
-        deliveryStatus = DeliveryStatus.Pending
-      }
-
-      if (costAmountAdd != 0 || deliveryStatus !== ticket.deliveryStatus) {
-        ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
+      const { deliveryStatus, ticketProductList } =
+        await this.ticketProductManager.calculatorDeliveryStatus({
           manager,
           oid,
-          ticketOrigin: ticket,
+          ticketId,
+        })
+
+      if (costAmountAdd != 0 || deliveryStatus !== ticketModified.deliveryStatus) {
+        ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
+          manager,
+          oid,
+          ticketOrigin: ticketModified,
           itemMoney: {
             itemsCostAmountAdd: costAmountAdd,
           },
@@ -250,8 +247,8 @@ export class TicketSendProductOperation {
       }
 
       return {
-        ticket,
-        ticketProductModifiedList,
+        ticketModified,
+        ticketProductModifiedAll: ticketProductList,
         productModifiedList,
         batchModifiedList,
       }

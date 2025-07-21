@@ -28,6 +28,7 @@ export class ApiTicketProcedureService {
       condition: {
         oid,
         customerId: filter?.customerId,
+        paymentMoneyStatus: filter?.paymentMoneyStatus,
         procedureId: filter?.procedureId,
         ticketId: filter?.ticketId,
       },

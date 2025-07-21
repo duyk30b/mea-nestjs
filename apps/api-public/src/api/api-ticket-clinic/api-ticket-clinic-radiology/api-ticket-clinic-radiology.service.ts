@@ -9,7 +9,6 @@ import {
   TicketClinicUpdateTicketRadiologyOperation,
 } from '../../../../../_libs/database/operations'
 import {
-  ImageRepository,
   TicketRadiologyRepository,
 } from '../../../../../_libs/database/repositories'
 import { ImageManagerService } from '../../../components/image-manager/image-manager.service'
@@ -26,7 +25,6 @@ export class ApiTicketClinicRadiologyService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
     private readonly imageManagerService: ImageManagerService,
-    private readonly imageRepository: ImageRepository,
     private readonly ticketRadiologyRepository: TicketRadiologyRepository,
     private readonly ticketClinicAddTicketRadiologyOperation: TicketClinicAddTicketRadiologyOperation,
     private readonly ticketClinicDestroyTicketRadiologyOperation: TicketClinicDestroyTicketRadiologyOperation,
@@ -58,7 +56,7 @@ export class ApiTicketClinicRadiologyService {
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
     this.socketEmitService.socketTicketRadiologyListChange(oid, {
       ticketId,
-      ticketRadiologyInsert: ticketRadiology,
+      ticketRadiologyUpsertList: [ticketRadiology],
     })
     return { data: true }
   }
@@ -98,7 +96,7 @@ export class ApiTicketClinicRadiologyService {
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
     this.socketEmitService.socketTicketRadiologyListChange(oid, {
       ticketId,
-      ticketRadiologyDestroy: result.ticketRadiologyDestroy,
+      ticketRadiologyDestroyList: [result.ticketRadiologyDestroy],
     })
     if (result.ticketUserDestroyList.length) {
       this.socketEmitService.socketTicketUserListChange(oid, {
@@ -117,18 +115,20 @@ export class ApiTicketClinicRadiologyService {
     body: TicketClinicUpdateMoneyTicketRadiologyBody
   }) {
     const { oid, ticketId, ticketRadiologyId, body } = options
-    const result = await this.ticketClinicUpdateTicketRadiologyOperation.updateTicketRadiology({
-      oid,
-      ticketId,
-      ticketRadiologyId,
-      ticketRadiologyUpdateDto: body.ticketRadiology,
-    })
+    const result = await this.ticketClinicUpdateTicketRadiologyOperation.updateMoneyTicketRadiology(
+      {
+        oid,
+        ticketId,
+        ticketRadiologyId,
+        ticketRadiologyUpdateDto: body.ticketRadiology,
+      }
+    )
     const { ticket, ticketRadiology } = result
 
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: result.ticket })
     this.socketEmitService.socketTicketRadiologyListChange(oid, {
       ticketId,
-      ticketRadiologyUpdate: result.ticketRadiology,
+      ticketRadiologyUpsertList: [result.ticketRadiology],
     })
     if (body.ticketUserList?.length) {
       this.apiTicketClinicUserService.changeTicketUserList({
@@ -162,7 +162,7 @@ export class ApiTicketClinicRadiologyService {
 
     this.socketEmitService.socketTicketRadiologyListChange(oid, {
       ticketId,
-      ticketRadiologyList,
+      ticketRadiologyUpsertList: ticketRadiologyList,
     })
 
     return { data: true }

@@ -6,7 +6,7 @@ import Appointment from './appointment.entity'
 import CustomerSource from './customer-source.entity'
 import Customer from './customer.entity'
 import Image from './image.entity'
-import Payment from './payment.entity'
+import PaymentItem from './payment-item.entity'
 import TicketAttribute from './ticket-attribute.entity'
 import TicketBatch from './ticket-batch.entity'
 import TicketExpense from './ticket-expense.entity'
@@ -302,9 +302,8 @@ export default class Ticket extends BaseEntity {
   @Expose()
   customer: Customer
 
-  @OneToMany(() => Payment, (payment) => payment.ticket)
   @Expose()
-  paymentList: Payment[]
+  paymentItemList: PaymentItem[]
 
   // @OneToOne(() => Appointment, { createForeignKeyConstraints: false })
   // @JoinColumn({ name: 'id', referencedColumnName: 'fromTicketId' }) // không JoinColumn trên cùng cột id được, vkl
@@ -424,43 +423,43 @@ export type TicketRelationType = {
     | 'ticketAttributeList'
     | 'ticketExpenseList'
     | 'ticketSurchargeList'
-    | 'paymentList'
+    | 'paymentItemList'
     | 'customerSource'
     | 'imageList'
     | 'toAppointment'
   >]?: boolean
 } & {
-    [P in keyof Pick<
-      Ticket,
-      'ticketProductList' | 'ticketProductConsumableList' | 'ticketProductPrescriptionList'
-    >]?: { [P in keyof Pick<TicketProduct, 'product'>]?: boolean } | false
-  } & {
-    [P in keyof Pick<Ticket, 'ticketBatchList'>]?:
-    | { [P in keyof Pick<TicketBatch, 'batch'>]?: boolean }
-    | false
-  } & {
-    [P in keyof Pick<Ticket, 'ticketProcedureList'>]?:
-    | { [P in keyof Pick<TicketProcedure, 'procedure'>]?: boolean }
-    | false
-  } & {
-    [P in keyof Pick<Ticket, 'ticketRadiologyList'>]?:
-    | { [P in keyof Pick<TicketRadiology, 'radiology'>]?: boolean }
-    | false
-  } & {
-    [P in keyof Pick<Ticket, 'ticketLaboratoryList'>]?:
-    | { [P in keyof Pick<TicketLaboratory, 'laboratory' | 'laboratoryList'>]?: boolean }
-    | false
-  } & {
-    [P in keyof Pick<Ticket, 'ticketLaboratoryGroupList'>]?:
-    | { [P in keyof Pick<TicketLaboratoryGroup, 'laboratoryGroup'>]?: boolean }
-    | false
-  } & {
-    [P in keyof Pick<Ticket, 'ticketLaboratoryResultList'>]?: boolean
-  } & {
-    [P in keyof Pick<Ticket, 'ticketUserList'>]?:
-    | { [P in keyof Pick<TicketUser, 'user'>]?: boolean }
-    | false
-  }
+  [P in keyof Pick<
+    Ticket,
+    'ticketProductList' | 'ticketProductConsumableList' | 'ticketProductPrescriptionList'
+  >]?: { [P in keyof Pick<TicketProduct, 'product'>]?: boolean } | false
+} & {
+  [P in keyof Pick<Ticket, 'ticketBatchList'>]?:
+  | { [P in keyof Pick<TicketBatch, 'batch'>]?: boolean }
+  | false
+} & {
+  [P in keyof Pick<Ticket, 'ticketProcedureList'>]?:
+  | { [P in keyof Pick<TicketProcedure, 'procedure'>]?: boolean }
+  | false
+} & {
+  [P in keyof Pick<Ticket, 'ticketRadiologyList'>]?:
+  | { [P in keyof Pick<TicketRadiology, 'radiology'>]?: boolean }
+  | false
+} & {
+  [P in keyof Pick<Ticket, 'ticketLaboratoryList'>]?:
+  | { [P in keyof Pick<TicketLaboratory, 'laboratory' | 'laboratoryList'>]?: boolean }
+  | false
+} & {
+  [P in keyof Pick<Ticket, 'ticketLaboratoryGroupList'>]?:
+  | { [P in keyof Pick<TicketLaboratoryGroup, 'laboratoryGroup'>]?: boolean }
+  | false
+} & {
+  [P in keyof Pick<Ticket, 'ticketLaboratoryResultList'>]?: boolean
+} & {
+  [P in keyof Pick<Ticket, 'ticketUserList'>]?:
+  | { [P in keyof Pick<TicketUser, 'user'>]?: boolean }
+  | false
+}
 
 export type TicketInsertType = Omit<
   Ticket,

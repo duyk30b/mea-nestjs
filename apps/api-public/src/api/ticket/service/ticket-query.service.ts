@@ -1,33 +1,64 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
-import { arrayToKeyValue } from '../../../../../_libs/common/helpers/array.helper'
-import { BaseResponse } from '../../../../../_libs/common/interceptor'
-import { Image } from '../../../../../_libs/database/entities'
-import { VoucherType } from '../../../../../_libs/database/entities/payment.entity'
-import { TicketProductType } from '../../../../../_libs/database/entities/ticket-product.entity'
+import { ESArray } from '../../../../../_libs/common/helpers'
+import {
+  Appointment,
+  Customer,
+  CustomerSource,
+  Image,
+  Ticket,
+  TicketAttribute,
+  TicketBatch,
+  TicketExpense,
+  TicketLaboratory,
+  TicketLaboratoryGroup,
+  TicketLaboratoryResult,
+  TicketProcedure,
+  TicketRadiology,
+  TicketSurcharge,
+  TicketUser,
+} from '../../../../../_libs/database/entities'
+import PaymentItem, {
+  PaymentVoucherType,
+} from '../../../../../_libs/database/entities/payment-item.entity'
+import TicketProduct, {
+  TicketProductType,
+} from '../../../../../_libs/database/entities/ticket-product.entity'
 import {
   AppointmentRepository,
-  PaymentRepository,
+  CustomerRepository,
+  CustomerSourceRepository,
+  PaymentItemRepository,
   TicketAttributeRepository,
   TicketBatchRepository,
+  TicketExpenseRepository,
   TicketLaboratoryGroupRepository,
   TicketLaboratoryRepository,
   TicketLaboratoryResultRepository,
   TicketProcedureRepository,
   TicketProductRepository,
   TicketRadiologyRepository,
+  TicketSurchargeRepository,
   TicketUserRepository,
 } from '../../../../../_libs/database/repositories'
 import { ImageRepository } from '../../../../../_libs/database/repositories/image.repository'
 import { TicketRepository } from '../../../../../_libs/database/repositories/ticket.repository'
-import { TicketGetManyQuery, TicketGetOneQuery, TicketPaginationQuery } from '../request'
+import {
+  TicketGetManyQuery,
+  TicketGetOneQuery,
+  TicketPaginationQuery,
+  TicketRelationQuery,
+} from '../request'
 
 @Injectable()
 export class TicketQueryService {
   constructor(
     private readonly ticketRepository: TicketRepository,
+    private readonly customerRepository: CustomerRepository,
     private readonly appointmentRepository: AppointmentRepository,
     private readonly ticketAttributeRepository: TicketAttributeRepository,
+    private readonly ticketSurchargeRepository: TicketSurchargeRepository,
+    private readonly ticketExpenseRepository: TicketExpenseRepository,
     private readonly ticketProductRepository: TicketProductRepository,
     private readonly ticketBatchRepository: TicketBatchRepository,
     private readonly ticketProcedureRepository: TicketProcedureRepository,
@@ -36,28 +67,23 @@ export class TicketQueryService {
     private readonly ticketLaboratoryGroupRepository: TicketLaboratoryGroupRepository,
     private readonly ticketLaboratoryResultRepository: TicketLaboratoryResultRepository,
     private readonly ticketUserRepository: TicketUserRepository,
-    private readonly paymentRepository: PaymentRepository,
+    private readonly paymentItemRepository: PaymentItemRepository,
+    private readonly customerSourceRepository: CustomerSourceRepository,
     private readonly imageRepository: ImageRepository
   ) { }
 
-  async pagination(oid: number, query: TicketPaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: TicketPaginationQuery) {
     const { page, limit, sort, relation, filter } = query
 
-    const { data, total } = await this.ticketRepository.pagination({
+    const { data: ticketList, total } = await this.ticketRepository.pagination({
       page,
       limit,
-      relation: {
-        customer: relation?.customer,
-        ticketUserList: relation?.ticketUserList,
-        ticketAttributeList: relation?.ticketAttributeList,
-        ticketProductList: relation?.ticketProductList,
-        ticketProcedureList: relation?.ticketProcedureList,
-      },
       condition: {
         oid,
         roomId: filter?.roomId,
         customerId: filter?.customerId,
         status: filter?.status,
+        deliveryStatus: filter?.deliveryStatus,
         ticketType: filter?.ticketType,
         customType: filter?.customType,
         registeredAt: filter?.registeredAt,
@@ -66,88 +92,125 @@ export class TicketQueryService {
       },
       sort,
     })
-    return {
-      data,
-      meta: { total, page, limit },
+
+    if (relation) {
+      await this.generateRelation({ oid, ticketList, relation })
     }
+
+    return { ticketList, total, page, limit }
   }
 
-  async getMany(oid: number, query: TicketGetManyQuery): Promise<BaseResponse> {
+  async getMany(oid: number, query: TicketGetManyQuery) {
     const { relation, limit, sort, filter } = query
 
-    const data = await this.ticketRepository.findMany({
+    const ticketList = await this.ticketRepository.findMany({
       condition: {
         oid,
         roomId: filter?.roomId,
         customerId: filter?.customerId,
         status: filter?.status,
+        deliveryStatus: filter?.deliveryStatus,
         ticketType: filter?.ticketType,
         registeredAt: filter?.registeredAt,
         startedAt: filter?.startedAt,
         updatedAt: filter?.updatedAt,
       },
-      relation: { customer: relation?.customer },
       limit,
       sort,
     })
-    return { data }
+
+    if (relation) {
+      await this.generateRelation({ oid, ticketList, relation })
+    }
+
+    return { ticketList }
   }
 
-  async getOne(
-    oid: number,
-    ticketId: number,
-    { relation }: TicketGetOneQuery
-  ): Promise<BaseResponse> {
-    const ticket = await this.ticketRepository.findOne({
-      condition: { oid, id: ticketId },
-      relation: {
-        customer: !!relation?.customer,
-        ticketSurchargeList: !!relation?.ticketSurchargeList,
-        ticketExpenseList: !!relation?.ticketExpenseList,
-      },
-      relationLoadStrategy: 'query',
-    })
+  async getOne(oid: number, ticketId: number, { relation }: TicketGetOneQuery) {
+    const ticket = await this.ticketRepository.findOneBy({ oid, id: ticketId })
     if (!ticket) {
       throw new BusinessException('error.Database.NotFound')
     }
 
+    if (relation) {
+      await this.generateRelation({ oid, ticketList: [ticket], relation })
+    }
+
+    return { ticket }
+  }
+
+  async generateRelation(options: {
+    oid: number
+    ticketList: Ticket[]
+    relation: TicketRelationQuery
+  }) {
+    const { oid, ticketList, relation } = options
+    const ticketIdList = ticketList.map((i) => i.id)
+    const customerIdList = ticketList.map((i) => i.customerId)
+    const customerSourceIdList = ticketList.map((i) => i.customerSourceId).filter((i) => !!i)
+    const imageIdList = ticketList
+      .map((i) => {
+        try {
+          return JSON.parse(i.imageIds) as number[]
+        } catch (error) {
+          return []
+        }
+      })
+      .flat()
+
     const dataPromise = await Promise.all([
-      relation?.paymentList
-        ? this.paymentRepository.findMany({
-          condition: { oid, voucherType: VoucherType.Ticket, voucherId: ticketId },
+      relation?.customer
+        ? this.customerRepository.findMany({ condition: { oid, id: { IN: customerIdList } } })
+        : undefined,
+      relation?.paymentItemList
+        ? this.paymentItemRepository.findMany({
+          condition: {
+            oid,
+            voucherType: PaymentVoucherType.Ticket,
+            voucherId: { IN: ticketIdList },
+          },
           sort: { id: 'ASC' },
         })
         : undefined,
       relation?.ticketProductList
         ? this.ticketProductRepository.findMany({
-          condition: { oid, ticketId },
-          sort: { priority: 'ASC' },
-          relation: {
-            product: relation?.ticketProductList?.product,
+          relation: relation?.ticketProductList?.relation || {},
+          condition: {
+            ...(relation?.ticketProductList.filter || {}),
+            oid,
+            ticketId: { IN: ticketIdList },
           },
+          sort: relation?.ticketProductList.sort || { priority: 'ASC' },
         })
         : undefined,
       relation?.ticketProductPrescriptionList
         ? this.ticketProductRepository.findMany({
-          condition: { oid, ticketId, type: TicketProductType.Prescription },
-          sort: { priority: 'ASC' },
-          relation: {
-            product: relation?.ticketProductPrescriptionList?.product,
+          relationLoadStrategy: 'query',
+          relation: relation?.ticketProductPrescriptionList?.relation || {},
+          condition: {
+            ...(relation?.ticketProductPrescriptionList.filter || {}),
+            oid,
+            ticketId: { IN: ticketIdList },
+            type: TicketProductType.Prescription,
           },
+          sort: relation?.ticketProductPrescriptionList.sort || { priority: 'ASC' },
         })
         : undefined,
       relation?.ticketProductConsumableList
         ? this.ticketProductRepository.findMany({
-          condition: { oid, ticketId, type: TicketProductType.Consumable },
-          sort: { priority: 'ASC' },
-          relation: {
-            product: relation?.ticketProductConsumableList?.product,
+          relation: relation?.ticketProductConsumableList?.relation || {},
+          condition: {
+            ...(relation?.ticketProductConsumableList.filter || {}),
+            oid,
+            ticketId: { IN: ticketIdList },
+            type: TicketProductType.Consumable,
           },
+          sort: relation?.ticketProductConsumableList.sort || { priority: 'ASC' },
         })
         : undefined,
       relation?.ticketBatchList
         ? this.ticketBatchRepository.findMany({
-          condition: { oid, ticketId },
+          condition: { oid, ticketId: { IN: ticketIdList } },
           relation: {
             batch: relation?.ticketBatchList?.batch,
           },
@@ -155,49 +218,56 @@ export class TicketQueryService {
         : undefined,
       relation?.ticketProcedureList
         ? this.ticketProcedureRepository.findMany({
-          condition: { oid, ticketId },
-          sort: { priority: 'ASC' },
-          relation: {
-            procedure: relation?.ticketProcedureList?.procedure,
+          relation: relation?.ticketProcedureList?.relation || {},
+          condition: {
+            ...(relation?.ticketProcedureList.filter || {}),
+            oid,
+            ticketId: { IN: ticketIdList },
           },
+          sort: { priority: 'ASC' },
         })
         : undefined,
       relation?.ticketLaboratoryList
         ? this.ticketLaboratoryRepository.findMany({
-          condition: { oid, ticketId },
-          sort: { priority: 'ASC' },
-          relation: {
-            laboratory: relation?.ticketLaboratoryList?.laboratory,
-            laboratoryList: relation?.ticketLaboratoryList?.laboratoryList,
+          relation: relation?.ticketLaboratoryList?.relation || {},
+          condition: {
+            ...(relation?.ticketLaboratoryList.filter || {}),
+            oid,
+            ticketId: { IN: ticketIdList },
           },
+          sort: { priority: 'ASC' },
         })
         : undefined,
       relation?.ticketLaboratoryGroupList
         ? this.ticketLaboratoryGroupRepository.findMany({
-          condition: { oid, ticketId },
-          sort: { id: 'ASC' },
-          relation: {
-            laboratoryGroup: relation?.ticketLaboratoryGroupList?.laboratoryGroup,
+          relation: relation?.ticketLaboratoryGroupList?.relation || {},
+          condition: {
+            ...(relation?.ticketLaboratoryGroupList.filter || {}),
+            oid,
+            ticketId: { IN: ticketIdList },
           },
+          sort: { id: 'ASC' },
         })
         : undefined,
       relation?.ticketLaboratoryResultList
         ? this.ticketLaboratoryResultRepository.findMany({
-          condition: { oid, ticketId },
+          condition: { oid, ticketId: { IN: ticketIdList } },
         })
         : undefined,
       relation?.ticketRadiologyList
         ? this.ticketRadiologyRepository.findMany({
-          condition: { oid, ticketId },
-          sort: { priority: 'ASC' },
-          relation: {
-            radiology: relation?.ticketRadiologyList?.radiology,
+          relation: relation?.ticketRadiologyList?.relation || {},
+          condition: {
+            ...(relation?.ticketRadiologyList.filter || {}),
+            oid,
+            ticketId: { IN: ticketIdList },
           },
+          sort: { priority: 'ASC' },
         })
         : undefined,
       relation?.ticketUserList
         ? this.ticketUserRepository.findMany({
-          condition: { oid, ticketId },
+          condition: { oid, ticketId: { IN: ticketIdList } },
           relation: {
             user: relation?.ticketUserList?.user,
           },
@@ -206,60 +276,153 @@ export class TicketQueryService {
         : undefined,
       relation?.ticketAttributeList
         ? this.ticketAttributeRepository.findMany({
-          condition: { oid, ticketId },
+          condition: { oid, ticketId: { IN: ticketIdList } },
         })
         : undefined,
-      relation?.toAppointment
-        ? this.appointmentRepository.findOne({
-          condition: { oid, fromTicketId: ticketId },
+      relation?.ticketSurchargeList
+        ? this.ticketSurchargeRepository.findMany({
+          condition: { oid, ticketId: { IN: ticketIdList } },
+        })
+        : undefined,
+      relation?.ticketExpenseList
+        ? this.ticketExpenseRepository.findMany({
+          condition: { oid, ticketId: { IN: ticketIdList } },
+        })
+        : undefined,
+      relation?.imageList && imageIdList.length
+        ? this.imageRepository.findMany({
+          condition: { oid, id: { IN: imageIdList } },
+        })
+        : undefined,
+      relation?.customerSource && customerSourceIdList?.length
+        ? this.customerSourceRepository.findMany({
+          condition: { oid, id: { IN: customerSourceIdList } },
+        })
+        : undefined,
+      relation?.toAppointment && relation?.toAppointment
+        ? this.appointmentRepository.findMany({
+          condition: { oid, fromTicketId: { IN: ticketIdList } },
         })
         : undefined,
     ])
 
-    ticket.paymentList = dataPromise[0]
-    ticket.ticketProductList = dataPromise[1]
-    ticket.ticketProductPrescriptionList = dataPromise[2]
-    ticket.ticketProductConsumableList = dataPromise[3]
-    ticket.ticketBatchList = dataPromise[4]
-    ticket.ticketProcedureList = dataPromise[5]
-    ticket.ticketLaboratoryList = dataPromise[6]
-    ticket.ticketLaboratoryGroupList = dataPromise[7]
-    ticket.ticketLaboratoryResultList = dataPromise[8]
-    ticket.ticketRadiologyList = dataPromise[9]
-    ticket.ticketUserList = dataPromise[10]
-    ticket.ticketAttributeList = dataPromise[11]
-    ticket.toAppointment = dataPromise[12]
+    const customerList: Customer[] = dataPromise[0]
+    const paymentItemList: PaymentItem[] = dataPromise[1]
+    const ticketProductList: TicketProduct[] = dataPromise[2]
+    const ticketProductPrescriptionList: TicketProduct[] = dataPromise[3]
+    const ticketProductConsumableList: TicketProduct[] = dataPromise[4]
+    const ticketBatchList: TicketBatch[] = dataPromise[5]
+    const ticketProcedureList: TicketProcedure[] = dataPromise[6]
+    const ticketLaboratoryList: TicketLaboratory[] = dataPromise[7]
+    const ticketLaboratoryGroupList: TicketLaboratoryGroup[] = dataPromise[8]
+    const ticketLaboratoryResultList: TicketLaboratoryResult[] = dataPromise[9]
+    const ticketRadiologyList: TicketRadiology[] = dataPromise[10]
+    const ticketUserList: TicketUser[] = dataPromise[11]
+    const ticketAttributeList: TicketAttribute[] = dataPromise[12]
+    const ticketSurchargeList: TicketSurcharge[] = dataPromise[13]
+    const ticketExpenseList: TicketExpense[] = dataPromise[14]
+    const imageList: Image[] = dataPromise[15]
+    const customerSourceList: CustomerSource[] = dataPromise[16]
+    const toAppointmentList: Appointment[] = dataPromise[17]
 
-    if (ticket.ticketRadiologyList || ticket.imageList) {
-      ticket.ticketRadiologyList = ticket.ticketRadiologyList || []
-      ticket.imageList = []
+    const imageMap = ESArray.arrayToKeyValue(imageList || [], 'id')
 
-      const ticketImageIds: number[] = JSON.parse(ticket.imageIds || '[]')
-      const ticketRadiologyImageIds: number[] = ticket.ticketRadiologyList
-        .map((i) => JSON.parse(i.imageIds))
-        .flat()
-
-      const imageIds = [...ticketImageIds, ...ticketRadiologyImageIds]
-
-      let imageMap: Record<string, Image> = {}
-      if (imageIds.length > 0) {
-        const imageList = await this.imageRepository.findMany({
-          condition: { id: { IN: imageIds } },
-          sort: { id: 'ASC' },
+    ticketList.forEach((ticket: Ticket) => {
+      if (relation?.customer) {
+        ticket.customer = customerList.find((i) => {
+          return i.id === ticket.customerId
         })
-        imageMap = arrayToKeyValue(imageList, 'id')
       }
-
-      // push để lấy image đúng thứ tự
-      ticketImageIds.forEach((i) => ticket.imageList.push(imageMap[i]))
-      ticket.ticketRadiologyList.forEach((ticketRadiology) => {
-        const ticketDiagnosisImageIds: number[] = JSON.parse(ticketRadiology.imageIds)
-        ticketRadiology.imageList = []
-        ticketDiagnosisImageIds.forEach((i) => {
-          ticketRadiology.imageList.push(imageMap[i])
+      if (relation?.paymentItemList) {
+        ticket.paymentItemList = paymentItemList.filter((i) => {
+          return i.voucherId === ticket.id
         })
-      })
-    }
-    return { data: { ticket } }
+      }
+      if (relation?.ticketProductList) {
+        ticket.ticketProductList = ticketProductList.filter((i) => {
+          return i.ticketId === ticket.id
+        })
+      }
+      if (relation?.ticketProductPrescriptionList) {
+        ticket.ticketProductPrescriptionList = ticketProductPrescriptionList.filter((i) => {
+          return i.ticketId === ticket.id
+        })
+      }
+      if (relation?.ticketProductConsumableList) {
+        ticket.ticketProductConsumableList = ticketProductConsumableList.filter((i) => {
+          return i.ticketId === ticket.id
+        })
+      }
+      if (relation?.ticketBatchList) {
+        ticket.ticketBatchList = ticketBatchList.filter((i) => {
+          return i.ticketId === ticket.id
+        })
+      }
+      if (relation?.ticketProcedureList) {
+        ticket.ticketProcedureList = ticketProcedureList.filter((i) => {
+          return i.ticketId === ticket.id
+        })
+      }
+      if (relation?.ticketLaboratoryList) {
+        ticket.ticketLaboratoryList = ticketLaboratoryList.filter((i) => {
+          return i.ticketId === ticket.id
+        })
+      }
+      if (relation?.ticketLaboratoryGroupList) {
+        ticket.ticketLaboratoryGroupList = ticketLaboratoryGroupList.filter((i) => {
+          return i.ticketId === ticket.id
+        })
+      }
+      if (relation?.ticketLaboratoryResultList) {
+        ticket.ticketLaboratoryResultList = ticketLaboratoryResultList.filter((i) => {
+          return i.ticketId === ticket.id
+        })
+      }
+      if (relation?.ticketRadiologyList) {
+        ticket.ticketRadiologyList = ticketRadiologyList.filter((i) => {
+          return i.ticketId === ticket.id
+        })
+      }
+      if (relation?.ticketUserList) {
+        ticket.ticketUserList = ticketUserList.filter((i) => {
+          return i.ticketId === ticket.id
+        })
+      }
+      if (relation?.ticketAttributeList) {
+        ticket.ticketAttributeList = ticketAttributeList.filter((i) => {
+          return i.ticketId === ticket.id
+        })
+      }
+      if (relation?.ticketSurchargeList) {
+        ticket.ticketSurchargeList = ticketSurchargeList.filter((i) => {
+          return i.ticketId === ticket.id
+        })
+      }
+      if (relation?.ticketExpenseList) {
+        ticket.ticketExpenseList = ticketExpenseList.filter((i) => {
+          return i.ticketId === ticket.id
+        })
+      }
+      if (relation?.imageList) {
+        try {
+          const imageIdList: number[] = JSON.parse(ticket.imageIds)
+          ticket.imageList = imageIdList.map((imageId) => imageMap[imageId]).filter((i) => !!i)
+        } catch (error) {
+          ticket.imageList = []
+        }
+      }
+      if (relation?.customerSource) {
+        ticket.customerSource = (customerSourceList || []).find((i) => {
+          return i.id === ticket.customerSourceId
+        })
+      }
+      if (relation?.toAppointment) {
+        ticket.toAppointment = toAppointmentList.find((i) => {
+          return i.fromTicketId === ticket.id
+        })
+      }
+    })
+
+    return ticketList
   }
 }

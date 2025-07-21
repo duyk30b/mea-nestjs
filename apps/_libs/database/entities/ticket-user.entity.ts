@@ -134,56 +134,6 @@ export default class TicketUser {
   static fromRaws(raws: { [P in keyof TicketUser]: any }[]) {
     return raws.map((i) => TicketUser.fromRaw(i))
   }
-
-  static changeTicketItemMoney(
-    ticketUserOrigin: TicketUser,
-    ticketItem: { quantity: number; expectedPrice: number; actualPrice: number }
-  ) {
-    const quantity = ticketItem.quantity
-    const ticketItemExpectedPrice = ticketItem.expectedPrice
-    const ticketItemActualPrice = ticketItem.actualPrice
-
-    let commissionMoney = 0
-    let commissionPercentActual = 0
-    let commissionPercentExpected = 0
-
-    if (ticketUserOrigin.commissionCalculatorType === CommissionCalculatorType.VND) {
-      commissionMoney = ticketUserOrigin.commissionMoney
-      commissionPercentExpected =
-        ticketItemExpectedPrice === 0
-          ? 0
-          : Math.floor((commissionMoney * 100) / ticketItemExpectedPrice)
-      commissionPercentActual =
-        ticketItemActualPrice === 0
-          ? 0
-          : Math.floor((commissionMoney * 100) / ticketItemActualPrice)
-    }
-    if (ticketUserOrigin.commissionCalculatorType === CommissionCalculatorType.PercentExpected) {
-      commissionPercentExpected = ticketUserOrigin.commissionPercentExpected || 0
-      commissionMoney = Math.floor((ticketItemExpectedPrice * commissionPercentExpected) / 100)
-      commissionPercentActual =
-        ticketItemActualPrice === 0
-          ? 0
-          : Math.floor((commissionMoney * 100) / ticketItemActualPrice)
-    }
-    if (ticketUserOrigin.commissionCalculatorType === CommissionCalculatorType.PercentActual) {
-      commissionPercentActual = ticketUserOrigin.commissionPercentActual || 0
-      commissionMoney = Math.floor((ticketItem.actualPrice * commissionPercentActual) / 100)
-      commissionPercentExpected =
-        ticketItemExpectedPrice === 0
-          ? 0
-          : Math.floor((commissionMoney * 100) / ticketItemExpectedPrice)
-    }
-
-    const ticketUserFix = TicketUser.fromRaw(ticketUserOrigin)
-    ticketUserFix.quantity = quantity
-    ticketUserFix.ticketItemExpectedPrice = ticketItemExpectedPrice
-    ticketUserFix.ticketItemActualPrice = ticketItemActualPrice
-    ticketUserFix.commissionMoney = commissionMoney
-    ticketUserFix.commissionPercentActual = commissionPercentActual
-    ticketUserFix.commissionPercentExpected = commissionPercentExpected
-    return ticketUserFix
-  }
 }
 
 export type TicketUserRelationType = {

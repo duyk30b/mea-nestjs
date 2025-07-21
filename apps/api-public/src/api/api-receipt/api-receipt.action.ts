@@ -1,19 +1,23 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { DeliveryStatus } from '../../../../_libs/database/common/variable'
 import { Distributor } from '../../../../_libs/database/entities'
-import { VoucherType } from '../../../../_libs/database/entities/payment.entity'
+import PaymentItem, {
+  PaymentVoucherItemType,
+} from '../../../../_libs/database/entities/payment-item.entity'
 import { ReceiptStatus } from '../../../../_libs/database/entities/receipt.entity'
 import {
-  ReceiptPayDebtOperation,
-  ReceiptPaymentAndCloseOperation,
-  ReceiptPrepaymentOperation,
-  ReceiptRefundOverpaidOperation,
+  DistributorPaymentOperation,
+  DistributorRefundOperation,
+  ReceiptCloseOperation,
   ReceiptReopenOperation,
   ReceiptReturnProductOperation,
   ReceiptSendProductOperation,
 } from '../../../../_libs/database/operations'
-import { PaymentRepository } from '../../../../_libs/database/repositories'
+import {
+  PaymentItemRepository,
+  ReceiptItemRepository,
+} from '../../../../_libs/database/repositories'
 import { ReceiptRepository } from '../../../../_libs/database/repositories/receipt.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import { ReceiptPaymentMoneyBody } from './request'
@@ -23,14 +27,14 @@ export class ApiReceiptAction {
   constructor(
     private readonly socketEmitService: SocketEmitService,
     private readonly receiptRepository: ReceiptRepository,
-    private readonly receiptRefundOverpaidOperation: ReceiptRefundOverpaidOperation,
-    private readonly receiptPayDebtOperation: ReceiptPayDebtOperation,
-    private readonly paymentRepository: PaymentRepository,
+    private readonly receiptItemRepository: ReceiptItemRepository,
+    private readonly paymentItemRepository: PaymentItemRepository,
     private readonly receiptSendProductOperation: ReceiptSendProductOperation,
-    private readonly receiptPaymentAndCloseOperation: ReceiptPaymentAndCloseOperation,
-    private readonly receiptPrepaymentOperation: ReceiptPrepaymentOperation,
+    private readonly receiptCloseOperation: ReceiptCloseOperation,
     private readonly receiptReturnProductOperation: ReceiptReturnProductOperation,
-    private readonly receiptReopenOperation: ReceiptReopenOperation
+    private readonly receiptReopenOperation: ReceiptReopenOperation,
+    private readonly distributorPaymentOperation: DistributorPaymentOperation,
+    private readonly distributorRefundOperation: DistributorRefundOperation
   ) { }
 
   async destroy(params: { oid: number; receiptId: number }): Promise<BaseResponse> {
@@ -46,66 +50,71 @@ export class ApiReceiptAction {
     body: ReceiptPaymentMoneyBody
   }): Promise<BaseResponse> {
     const { oid, userId, receiptId, body } = params
-    try {
-      const sendProductResult = await this.receiptSendProductOperation.sendProduct({
-        oid,
-        userId,
-        receiptId,
-        time: Date.now(),
-      })
 
-      const closeResult = await this.receiptPaymentAndCloseOperation.paymentAndClose({
-        oid,
+    const sendProductResult = await this.receiptSendProductOperation.sendProduct({
+      oid,
+      userId,
+      receiptId,
+      time: Date.now(),
+    })
+
+    const paymentItemCreatedList: PaymentItem[] = []
+    if (body.money > 0) {
+      const prepaymentResult = await this.distributorPaymentOperation.startPayment({
         cashierId: userId,
-        receiptId,
-        time: Date.now(),
-        paymentMethodId: body.paymentMethodId,
-        money: body.money,
-        note: '',
-        description: '',
-      })
-
-      if (closeResult.distributor) {
-        this.socketEmitService.distributorUpsert(oid, { distributor: closeResult.distributor })
-      }
-      this.socketEmitService.productListChange(oid, {
-        productUpsertedList: sendProductResult.productList || [],
-      })
-      this.socketEmitService.batchListChange(oid, {
-        batchUpsertedList: sendProductResult.batchList || [],
-      })
-
-      return {
-        data: {
-          receipt: closeResult.receipt,
-          payment: closeResult.payment,
-          distributor: closeResult.distributor,
+        distributorId: body.distributorId,
+        note: 'Đóng phiếu',
+        oid,
+        paymentItemData: {
+          moneyTopUpAdd: 0,
+          payDebt: [],
+          prepayment: {
+            receiptId,
+            itemList: [
+              {
+                amount: body.money,
+                receiptItemId: 0,
+                voucherItemType: PaymentVoucherItemType.Other,
+                paymentInteractId: 0,
+              },
+            ],
+          },
         },
-      }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async prepayment(params: {
-    oid: number
-    userId: number
-    receiptId: number
-    body: ReceiptPaymentMoneyBody
-  }): Promise<BaseResponse> {
-    const { oid, userId, receiptId, body } = params
-    try {
-      const { receipt, payment } = await this.receiptPrepaymentOperation.prepayment({
-        oid,
-        cashierId: userId,
-        receiptId,
-        time: Date.now(),
-        money: body.money,
         paymentMethodId: body.paymentMethodId,
+        reason: body.reason,
+        totalMoney: body.money,
+        time: Date.now(),
       })
-      return { data: { receipt, payment } }
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
+      paymentItemCreatedList.push(...prepaymentResult.paymentItemCreatedList)
+    }
+
+    const closeResult = await this.receiptCloseOperation.startClose({
+      oid,
+      userId,
+      receiptId,
+      time: Date.now(),
+      note: 'Đóng phiếu',
+    })
+    paymentItemCreatedList.push(...closeResult.paymentItemCreatedList)
+
+    if (closeResult.distributorModified) {
+      this.socketEmitService.distributorUpsert(oid, {
+        distributor: closeResult.distributorModified,
+      })
+    }
+    this.socketEmitService.productListChange(oid, {
+      productUpsertedList: sendProductResult.productList || [],
+    })
+    this.socketEmitService.batchListChange(oid, {
+      batchUpsertedList: sendProductResult.batchList || [],
+    })
+
+    return {
+      data: {
+        receiptModified: closeResult.receiptModified,
+        distributorModified: closeResult.distributorModified,
+        paymentItemCreatedList,
+      },
     }
   }
 
@@ -115,106 +124,44 @@ export class ApiReceiptAction {
     receiptId: number
   }): Promise<BaseResponse> {
     const { oid, userId, receiptId } = params
-    try {
-      const sendProductResult = await this.receiptSendProductOperation.sendProduct({
-        oid,
-        userId,
-        receiptId,
-        time: Date.now(),
-      })
 
-      this.socketEmitService.productListChange(oid, {
-        productUpsertedList: sendProductResult.productList || [],
-      })
-      this.socketEmitService.batchListChange(oid, {
-        batchUpsertedList: sendProductResult.batchList || [],
-      })
-      return { data: { receipt: sendProductResult.receipt } }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
-    }
-  }
-
-  async refundOverpaid(params: {
-    oid: number
-    userId: number
-    receiptId: number
-    body: ReceiptPaymentMoneyBody
-  }): Promise<BaseResponse> {
-    const { oid, userId, receiptId, body } = params
-
-    const refundResult = await this.receiptRefundOverpaidOperation.refundOverpaid({
+    const sendProductResult = await this.receiptSendProductOperation.sendProduct({
       oid,
-      cashierId: userId,
+      userId,
       receiptId,
       time: Date.now(),
-      money: body.money,
-      paymentMethodId: body.paymentMethodId,
-      note: '',
-      description: '',
     })
 
-    return {
-      data: {
-        receipt: refundResult.receipt,
-        payment: refundResult.payment,
-      },
-    }
+    this.socketEmitService.productListChange(oid, {
+      productUpsertedList: sendProductResult.productList || [],
+    })
+    this.socketEmitService.batchListChange(oid, {
+      batchUpsertedList: sendProductResult.batchList || [],
+    })
+    return { data: { receiptModified: sendProductResult.receipt } }
   }
 
   async close(params: { oid: number; userId: number; receiptId: number }): Promise<BaseResponse> {
     const { oid, userId, receiptId } = params
 
-    const closeResult = await this.receiptPaymentAndCloseOperation.paymentAndClose({
+    const closeResult = await this.receiptCloseOperation.startClose({
       oid,
-      cashierId: userId,
+      userId,
       receiptId,
       time: Date.now(),
-      paymentMethodId: 0,
-      money: 0,
       note: '',
-      description: '',
     })
-    if (closeResult.distributor) {
-      this.socketEmitService.distributorUpsert(oid, { distributor: closeResult.distributor })
+    if (closeResult.distributorModified) {
+      this.socketEmitService.distributorUpsert(oid, {
+        distributor: closeResult.distributorModified,
+      })
     }
     return {
       data: {
-        receipt: closeResult.receipt,
-        payment: closeResult.payment,
-        distributor: closeResult.distributor,
+        receiptModified: closeResult.receiptModified,
+        paymentItemCreatedList: closeResult.paymentItemCreatedList,
+        distributorModified: closeResult.distributorModified,
       },
-    }
-  }
-
-  async payDebt(params: {
-    oid: number
-    userId: number
-    receiptId: number
-    body: ReceiptPaymentMoneyBody
-  }): Promise<BaseResponse> {
-    const { oid, userId, receiptId, body } = params
-    try {
-      const payResult = await this.receiptPayDebtOperation.payDebt({
-        oid,
-        cashierId: userId,
-        receiptId,
-        time: Date.now(),
-        paymentMethodId: body.paymentMethodId,
-        money: body.money,
-      })
-      if (payResult.distributor) {
-        this.socketEmitService.distributorUpsert(oid, { distributor: payResult.distributor })
-      }
-      return {
-        data: {
-          receipt: payResult.receipt,
-          payment: payResult.payment,
-          distributor: payResult.distributor,
-        },
-      }
-    } catch (error: any) {
-      throw new HttpException(error.message, HttpStatus.BAD_REQUEST)
     }
   }
 
@@ -225,36 +172,36 @@ export class ApiReceiptAction {
   }): Promise<BaseResponse> {
     const { oid, userId, receiptId } = params
     const time = Date.now()
-    let distributor: Distributor
+    let distributorModified: Distributor
 
     const receiptOrigin = await this.receiptRepository.findOneBy({ oid, id: receiptId })
+    const paymentItemCreatedList: PaymentItem[] = []
+
     if ([ReceiptStatus.Completed, ReceiptStatus.Debt].includes(receiptOrigin.status)) {
       const reopenResult = await this.receiptReopenOperation.reopen({
+        oid,
+        userId,
+        time,
+        receiptId,
+        note: 'Hủy phiếu',
+      })
+      distributorModified = reopenResult.distributorModified
+      paymentItemCreatedList.push(...reopenResult.paymentItemCreatedList)
+    }
+    if (receiptOrigin.paid > 0) {
+      const refundResult = await this.distributorRefundOperation.startRefund({
         oid,
         cashierId: userId,
         time,
         receiptId,
         paymentMethodId: 0,
-        newPaid: 0,
-        description: 'Hủy phiếu',
-        note: '',
+        money: receiptOrigin.paid,
+        note: 'Hủy phiếu',
+        distributorId: receiptOrigin.distributorId,
+        reason: '',
       })
-      distributor = reopenResult.distributor
-    }
-    if ([ReceiptStatus.Deposited, ReceiptStatus.Executing].includes(receiptOrigin.status)) {
-      if (receiptOrigin.paid > 0) {
-        const refundResult = await this.receiptRefundOverpaidOperation.refundOverpaid({
-          oid,
-          cashierId: userId,
-          time,
-          receiptId,
-          paymentMethodId: 0,
-          money: receiptOrigin.paid,
-          description: 'Hủy phiếu',
-          note: '',
-        })
-        distributor = refundResult.distributor
-      }
+      distributorModified = refundResult.distributor
+      paymentItemCreatedList.push(refundResult.paymentItemCreated)
     }
 
     if (receiptOrigin.deliveryStatus === DeliveryStatus.Delivered) {
@@ -271,22 +218,15 @@ export class ApiReceiptAction {
       })
     }
 
-    if (distributor) {
-      this.socketEmitService.distributorUpsert(oid, { distributor })
+    if (distributorModified) {
+      this.socketEmitService.distributorUpsert(oid, { distributor: distributorModified })
     }
 
-    const receipt = await this.receiptRepository.updateOneAndReturnEntity(
-      { oid, id: receiptId, deliveryStatus: DeliveryStatus.Pending, paid: 0 },
+    const receiptModified = await this.receiptRepository.updateOneAndReturnEntity(
+      { oid, id: receiptId, deliveryStatus: DeliveryStatus.Pending },
       { status: ReceiptStatus.Cancelled }
     )
-    const paymentList = await this.paymentRepository.findMany({
-      condition: {
-        oid,
-        voucherType: VoucherType.Receipt,
-        voucherId: receiptId,
-      },
-      sort: { id: 'ASC' },
-    })
-    return { data: { receipt, paymentList } }
+
+    return { data: { receiptModified, paymentItemCreatedList, distributorModified } }
   }
 }

@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { DiscountType } from '../common/variable'
+import { DiscountType, PaymentMoneyStatus } from '../common/variable'
 import Customer from './customer.entity'
 import Image from './image.entity'
 import Radiology from './radiology.entity'
@@ -53,6 +53,10 @@ export default class TicketRadiology extends BaseEntity {
   @Column({ type: 'smallint', default: TicketRadiologyStatus.Pending })
   @Expose()
   status: TicketRadiologyStatus
+
+  @Column({ type: 'smallint', default: PaymentMoneyStatus.NoEffect })
+  @Expose()
+  paymentMoneyStatus: PaymentMoneyStatus
 
   @Column({
     type: 'bigint',

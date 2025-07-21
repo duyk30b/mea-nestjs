@@ -27,11 +27,12 @@ export type TicketLaboratoryInsertBasicType = Pick<
   | 'discountPercent'
   | 'discountType'
   | 'actualPrice'
+  | 'paymentMoneyStatus'
 >
 
 export type TicketLaboratoryGroupInsertBasicType = Pick<
   TicketLaboratoryGroup,
-  'laboratoryGroupId' | 'registeredAt' | 'roomId'
+  'laboratoryGroupId' | 'registeredAt' | 'roomId' | 'paymentMoneyStatus'
 > & { ticketLaboratoryList: TicketLaboratoryInsertBasicType[] }
 
 @Injectable()

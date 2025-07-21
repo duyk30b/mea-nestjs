@@ -1,9 +1,18 @@
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, OmitType } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsInt, IsNumber, Max, Min, ValidateNested } from 'class-validator'
+import {
+  IsArray,
+  IsDefined,
+  IsIn,
+  IsInt,
+  IsNumber,
+  Max,
+  Min,
+  ValidateNested,
+} from 'class-validator'
 import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
 import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType } from '../../../../../../_libs/database/common/variable'
+import { DiscountType, PaymentMoneyStatus } from '../../../../../../_libs/database/common/variable'
 
 export class TicketLaboratoryAddBody {
   @ApiProperty({ example: 56 })
@@ -63,7 +72,18 @@ export class TicketLaboratoryAddBody {
   @IsDefined()
   @IsNumber()
   actualPrice: number
+
+  @ApiProperty({ example: PaymentMoneyStatus.NoEffect })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(PaymentMoneyStatus)
+  @IsIn([PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending])
+  paymentMoneyStatus: PaymentMoneyStatus
 }
+
+export class TicketLaboratoryUpdateBody extends OmitType(TicketLaboratoryAddBody, [
+  'paymentMoneyStatus',
+]) { }
 
 export class TicketLaboratoryGroupAddBody {
   @ApiProperty({ example: 56 })
@@ -84,6 +104,13 @@ export class TicketLaboratoryGroupAddBody {
   @IsInt()
   registeredAt: number
 
+  @ApiProperty({ example: PaymentMoneyStatus.NoEffect })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(PaymentMoneyStatus)
+  @IsIn([PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending])
+  paymentMoneyStatus: PaymentMoneyStatus
+
   @ApiProperty({ type: TicketLaboratoryAddBody, isArray: true })
   @Expose()
   @Type(() => TicketLaboratoryAddBody)
@@ -92,12 +119,37 @@ export class TicketLaboratoryGroupAddBody {
   ticketLaboratoryList: TicketLaboratoryAddBody[]
 }
 
-export class TicketLaboratoryGroupUpdateBody extends TicketLaboratoryGroupAddBody {
+export class TicketLaboratoryGroupUpdateBody {
   @ApiProperty({ example: 56 })
   @Expose()
   @IsDefined()
   @IsNumber()
   id: number
+
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  laboratoryGroupId: number
+
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  roomId: number
+
+  @ApiProperty({ example: Date.now() })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  registeredAt: number
+
+  @ApiProperty({ type: TicketLaboratoryUpdateBody, isArray: true })
+  @Expose()
+  @Type(() => TicketLaboratoryUpdateBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketLaboratoryList: TicketLaboratoryUpdateBody[]
 }
 
 export class TicketClinicUpsertLaboratoryBody {

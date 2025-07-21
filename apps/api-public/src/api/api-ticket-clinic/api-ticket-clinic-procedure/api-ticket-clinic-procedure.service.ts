@@ -43,7 +43,7 @@ export class ApiTicketClinicProcedureService {
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
     this.socketEmitService.socketTicketProcedureListChange(oid, {
       ticketId,
-      ticketProcedureInsert: ticketProcedure,
+      ticketProcedureUpsertList: [ticketProcedure],
     })
     if (body.ticketUserList?.length) {
       this.apiTicketClinicUserService.changeTicketUserList({
@@ -79,7 +79,7 @@ export class ApiTicketClinicProcedureService {
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
     this.socketEmitService.socketTicketProcedureListChange(oid, {
       ticketId,
-      ticketProcedureDestroy: result.ticketProcedureDestroy,
+      ticketProcedureDestroyList: [result.ticketProcedureDestroy],
     })
     if (result.ticketUserDestroyList) {
       this.socketEmitService.socketTicketUserListChange(oid, {
@@ -109,7 +109,7 @@ export class ApiTicketClinicProcedureService {
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
     this.socketEmitService.socketTicketProcedureListChange(oid, {
       ticketId,
-      ticketProcedureUpdate: ticketProcedure,
+      ticketProcedureUpsertList: [ticketProcedure],
     })
     if (body.ticketUserList) {
       this.apiTicketClinicUserService.changeTicketUserList({
@@ -142,7 +142,7 @@ export class ApiTicketClinicProcedureService {
 
     this.socketEmitService.socketTicketProcedureListChange(oid, {
       ticketId,
-      ticketProcedureList,
+      ticketProcedureUpsertList: ticketProcedureList,
     })
 
     return { data: true }

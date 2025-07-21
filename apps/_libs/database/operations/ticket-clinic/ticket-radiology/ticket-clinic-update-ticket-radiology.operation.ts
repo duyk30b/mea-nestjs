@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
+import { BusinessError } from '../../../common/error'
+import { PaymentMoneyStatus } from '../../../common/variable'
 import TicketRadiology from '../../../entities/ticket-radiology.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import { TicketManager, TicketRadiologyManager } from '../../../managers'
@@ -9,10 +11,6 @@ import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-it
 export type TicketRadiologyUpdateDtoType = {
   [K in keyof Pick<
     TicketRadiology,
-    | 'description'
-    | 'result'
-    | 'startedAt'
-    | 'imageIds'
     | 'expectedPrice'
     | 'discountType'
     | 'discountMoney'
@@ -30,14 +28,13 @@ export class TicketClinicUpdateTicketRadiologyOperation {
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
   ) { }
 
-  async updateTicketRadiology<T extends TicketRadiologyUpdateDtoType>(params: {
+  async updateMoneyTicketRadiology<T extends TicketRadiologyUpdateDtoType>(params: {
     oid: number
     ticketId: number
     ticketRadiologyId: number
-    ticketRadiologyUpdateDto?: NoExtra<TicketRadiologyUpdateDtoType, T>
+    ticketRadiologyUpdateDto: NoExtra<TicketRadiologyUpdateDtoType, T>
   }) {
     const { oid, ticketId, ticketRadiologyId, ticketRadiologyUpdateDto } = params
-    const PREFIX = `ticketId=${ticketId} updateTicketRadiology failed`
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. UPDATE TICKET FOR TRANSACTION ===
@@ -52,6 +49,10 @@ export class TicketClinicUpdateTicketRadiologyOperation {
         oid,
         id: ticketRadiologyId,
       })
+
+      if (ticketRadiologyOrigin.paymentMoneyStatus === PaymentMoneyStatus.Paid) {
+        throw new BusinessError('Phiếu đã thanh toán không thể sửa')
+      }
 
       let ticketRadiology: TicketRadiology = ticketRadiologyOrigin
       if (ticketRadiologyUpdateDto) {

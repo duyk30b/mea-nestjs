@@ -112,11 +112,7 @@ export class ApiReceiptController {
   }
 
   @Post('/:id/send-product-and-payment-and-close')
-  @UserPermission(
-    PermissionId.RECEIPT_SEND_PRODUCT,
-    PermissionId.RECEIPT_PAYMENT,
-    PermissionId.RECEIPT_CLOSE
-  )
+  @UserPermission(PermissionId.RECEIPT_SEND_PRODUCT, PermissionId.RECEIPT_CLOSE)
   async sendProductAndPaymentAndClose(
     @External() { oid, uid }: TExternal,
     @Param() { id }: IdParam,
@@ -125,21 +121,6 @@ export class ApiReceiptController {
     return await this.apiReceiptAction.sendProductAndPaymentAndClose({
       oid,
       userId: uid,
-      receiptId: id,
-      body,
-    })
-  }
-
-  @Post('/:id/prepayment')
-  @UserPermission(PermissionId.RECEIPT_PAYMENT)
-  async prepayment(
-    @External() { oid, uid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: ReceiptPaymentMoneyBody
-  ) {
-    return await this.apiReceiptAction.prepayment({
-      userId: uid,
-      oid,
       receiptId: id,
       body,
     })
@@ -162,36 +143,6 @@ export class ApiReceiptController {
       oid,
       userId: uid,
       receiptId: id,
-    })
-  }
-
-  @Post('/:id/refund-overpaid')
-  @UserPermission(PermissionId.RECEIPT_REFUND_OVERPAID)
-  async refundOverpaid(
-    @External() { oid, uid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: ReceiptPaymentMoneyBody
-  ) {
-    return await this.apiReceiptAction.refundOverpaid({
-      oid,
-      userId: uid,
-      receiptId: id,
-      body,
-    })
-  }
-
-  @Post('/:id/pay-debt')
-  @UserPermission(PermissionId.RECEIPT_PAYMENT)
-  async payDebt(
-    @External() { oid, uid }: TExternal,
-    @Param() { id }: IdParam,
-    @Body() body: ReceiptPaymentMoneyBody
-  ) {
-    return await this.apiReceiptAction.payDebt({
-      oid,
-      userId: uid,
-      receiptId: id,
-      body,
     })
   }
 

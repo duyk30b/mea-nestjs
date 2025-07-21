@@ -4,9 +4,9 @@ import { DataSource, EntityManager } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { DeliveryStatus } from '../../../common/variable'
 import TicketProduct, {
-    TicketProductInsertType,
-    TicketProductRelationType,
-    TicketProductType,
+  TicketProductInsertType,
+  TicketProductRelationType,
+  TicketProductType,
 } from '../../../entities/ticket-product.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import { TicketManager, TicketProductManager } from '../../../managers'

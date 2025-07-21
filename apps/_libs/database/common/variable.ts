@@ -86,3 +86,9 @@ export enum TicketLaboratoryStatus {
   Pending = 2,
   Completed = 3,
 }
+
+export enum PaymentMoneyStatus {
+  NoEffect = 1,
+  Pending = 2,
+  Paid = 3,
+}

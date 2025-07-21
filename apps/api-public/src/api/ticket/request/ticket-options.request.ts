@@ -8,7 +8,13 @@ import {
   transformConditionEnum,
   transformConditionNumber,
 } from '../../../../../_libs/common/dto'
+import { DeliveryStatus } from '../../../../../_libs/database/common/variable'
 import { TicketStatus, TicketType } from '../../../../../_libs/database/entities/ticket.entity'
+import { TicketLaboratoryGroupGetManyQuery } from '../../api-ticket-laboratory-group/request'
+import { TicketLaboratoryGetManyQuery } from '../../api-ticket-laboratory/request'
+import { TicketProcedureGetManyQuery } from '../../api-ticket-procedure/request'
+import { TicketProductGetManyQuery } from '../../api-ticket-product/request'
+import { TicketRadiologyGetManyQuery } from '../../api-ticket-radiology/request'
 
 export class TicketRelationQuery {
   @Expose()
@@ -17,7 +23,7 @@ export class TicketRelationQuery {
 
   @Expose()
   @IsBoolean()
-  paymentList: boolean
+  paymentItemList: boolean
 
   @Expose()
   @IsBoolean()
@@ -33,15 +39,15 @@ export class TicketRelationQuery {
 
   @Expose()
   @IsOptional()
-  ticketProductList: false | { product?: boolean }
+  ticketProductList: TicketProductGetManyQuery
 
   @Expose()
   @IsOptional()
-  ticketProductConsumableList: false | { product?: boolean }
+  ticketProductConsumableList: TicketProductGetManyQuery
 
   @Expose()
   @IsOptional()
-  ticketProductPrescriptionList: false | { product?: boolean }
+  ticketProductPrescriptionList: TicketProductGetManyQuery
 
   @Expose()
   @IsOptional()
@@ -49,11 +55,11 @@ export class TicketRelationQuery {
 
   @Expose()
   @IsOptional()
-  ticketProcedureList: false | { procedure?: boolean }
+  ticketProcedureList: TicketProcedureGetManyQuery
 
   @Expose()
   @IsOptional()
-  ticketLaboratoryGroupList: false | { laboratoryGroup?: boolean }
+  ticketLaboratoryGroupList: TicketLaboratoryGroupGetManyQuery
 
   @Expose()
   @IsOptional()
@@ -61,11 +67,11 @@ export class TicketRelationQuery {
 
   @Expose()
   @IsOptional()
-  ticketLaboratoryList: false | { laboratoryList?: boolean; laboratory?: boolean }
+  ticketLaboratoryList: TicketLaboratoryGetManyQuery
 
   @Expose()
   @IsOptional()
-  ticketRadiologyList: false | { radiology?: boolean }
+  ticketRadiologyList: TicketRadiologyGetManyQuery
 
   @Expose()
   @IsOptional()
@@ -78,10 +84,15 @@ export class TicketRelationQuery {
   @Expose()
   @IsBoolean()
   customerSource: boolean
+
+  @Expose()
+  @IsBoolean()
+  imageList: boolean
 }
 
 const ConditionEnumTicketType = createConditionEnum(TicketType)
 const ConditionEnumTicketStatus = createConditionEnum(TicketStatus)
+const ConditionEnumDeliveryStatus = createConditionEnum(DeliveryStatus)
 
 export class TicketFilterQuery {
   // @Expose()
@@ -92,6 +103,11 @@ export class TicketFilterQuery {
   @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketStatus))
   @IsOptional()
   status: TicketStatus | InstanceType<typeof ConditionEnumTicketStatus>
+
+  @Expose()
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, DeliveryStatus))
+  @IsOptional()
+  deliveryStatus: DeliveryStatus | InstanceType<typeof ConditionEnumDeliveryStatus>
 
   @Expose()
   @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketType))

@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
-import { TicketLaboratoryStatus } from '../common/variable'
+import { PaymentMoneyStatus, TicketLaboratoryStatus } from '../common/variable'
 import Customer from './customer.entity'
 import LaboratoryGroup from './laboratory-group.entity'
 import TicketLaboratoryResult from './ticket-laboratory-result.entity'
@@ -39,6 +39,10 @@ export default class TicketLaboratoryGroup {
   @Column({ type: 'smallint', default: TicketLaboratoryStatus.Pending })
   @Expose()
   status: TicketLaboratoryStatus
+
+  @Column({ type: 'smallint', default: PaymentMoneyStatus.NoEffect })
+  @Expose()
+  paymentMoneyStatus: PaymentMoneyStatus
 
   @Column({
     type: 'bigint',

@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { DiscountType } from '../common/variable'
+import { DiscountType, PaymentMoneyStatus } from '../common/variable'
 import Customer from './customer.entity'
 import Image from './image.entity'
 import Procedure from './procedure.entity'
@@ -25,6 +25,10 @@ export default class TicketProcedure extends BaseEntity {
   @Column({ default: 1 })
   @Expose()
   priority: number
+
+  @Column({ type: 'smallint', default: PaymentMoneyStatus.NoEffect })
+  @Expose()
+  paymentMoneyStatus: PaymentMoneyStatus
 
   @Column()
   @Expose()

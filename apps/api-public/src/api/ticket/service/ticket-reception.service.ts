@@ -150,7 +150,7 @@ export class TicketReceptionService {
     }
 
     this.socketEmitService.socketTicketChange(oid, { type: 'CREATE', ticket })
-    return { data: { ticket } }
+    return { ticket }
   }
 
   async receptionUpdate(options: {
@@ -220,6 +220,6 @@ export class TicketReceptionService {
     ticketModified.customer = await this.customerRepository.findOneById(ticketModified.customerId)
 
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified })
-    return { data: { ticket: ticketModified } }
+    return { ticket: ticketModified }
   }
 }

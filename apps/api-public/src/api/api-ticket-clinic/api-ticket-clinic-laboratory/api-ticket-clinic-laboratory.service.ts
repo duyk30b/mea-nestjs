@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessError } from '../../../../../_libs/database/common/error'
-import { TicketLaboratoryStatus } from '../../../../../_libs/database/common/variable'
+import {
+  PaymentMoneyStatus,
+  TicketLaboratoryStatus,
+} from '../../../../../_libs/database/common/variable'
 import { PositionInteractType } from '../../../../../_libs/database/entities/position.entity'
 import {
   TicketClinicAddSelectLaboratoryOperation,
@@ -54,8 +57,8 @@ export class ApiTicketClinicLaboratoryService {
       this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: result.ticket })
       this.socketEmitService.socketTicketLaboratoryListChange(oid, {
         ticketId,
-        ticketLaboratoryInsertList: result.ticketLaboratoryInsertList,
-        ticketLaboratoryGroupInsertList: result.ticketLaboratoryGroupInsertList,
+        ticketLaboratoryUpsertList: result.ticketLaboratoryInsertList,
+        ticketLaboratoryGroupUpsertList: result.ticketLaboratoryGroupInsertList,
       })
     }
 
@@ -70,9 +73,9 @@ export class ApiTicketClinicLaboratoryService {
       this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: result.ticket })
       this.socketEmitService.socketTicketLaboratoryListChange(oid, {
         ticketId,
-        ticketLaboratoryInsertList: result.ticketLaboratoryInsertList,
+        ticketLaboratoryUpsertList: result.ticketLaboratoryInsertList,
         ticketLaboratoryDestroyList: result.ticketLaboratoryDestroyList,
-        ticketLaboratoryGroupUpdate: result.ticketLaboratoryGroupUpdate,
+        ticketLaboratoryGroupUpsertList: [result.ticketLaboratoryGroupUpdate],
       })
     }
     return { data: true }
@@ -96,7 +99,7 @@ export class ApiTicketClinicLaboratoryService {
     this.socketEmitService.socketTicketLaboratoryListChange(oid, {
       ticketId,
       ticketLaboratoryDestroyList: [result.ticketLaboratoryDestroy],
-      ticketLaboratoryGroupDestroy: result.ticketLaboratoryGroupDestroy,
+      ticketLaboratoryGroupDestroyList: [result.ticketLaboratoryGroupDestroy],
     })
 
     return { data: true }
@@ -117,6 +120,9 @@ export class ApiTicketClinicLaboratoryService {
     if (ticketLaboratoryGroupOrigin.status === TicketLaboratoryStatus.Completed) {
       throw new BusinessError('Phiếu đã hoàn thành không thể xóa')
     }
+    if (ticketLaboratoryGroupOrigin.paymentMoneyStatus === PaymentMoneyStatus.Paid) {
+      throw new BusinessError('Phiếu đã đóng tiền không thể xóa')
+    }
 
     const result = await this.ticketClinicDestroyTlgOperation.destroyTicketLaboratoryGroup({
       oid,
@@ -129,7 +135,7 @@ export class ApiTicketClinicLaboratoryService {
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
     this.socketEmitService.socketTicketLaboratoryListChange(oid, {
       ticketId,
-      ticketLaboratoryGroupDestroy: result.ticketLaboratoryGroupDestroy,
+      ticketLaboratoryGroupDestroyList: [result.ticketLaboratoryGroupDestroy],
       ticketLaboratoryDestroyList: result.ticketLaboratoryDestroyList,
       ticketLaboratoryResultDestroyList: result.ticketLaboratoryResultDestroyList,
     })
@@ -155,7 +161,7 @@ export class ApiTicketClinicLaboratoryService {
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
     this.socketEmitService.socketTicketLaboratoryListChange(oid, {
       ticketId,
-      ticketLaboratoryUpdateList: [ticketLaboratory],
+      ticketLaboratoryUpsertList: [ticketLaboratory],
     })
     if (body.ticketUserList) {
       this.apiTicketClinicUserService.changeTicketUserList({
@@ -179,17 +185,6 @@ export class ApiTicketClinicLaboratoryService {
     body: TicketClinicUpdatePriorityTicketLaboratoryBody
   }) {
     const { oid, ticketId, body } = options
-    // const ticketLaboratoryList = await this.ticketLaboratoryRepository.updatePriorityList({
-    //   oid,
-    //   ticketId,
-    //   updateData: body.ticketLaboratoryList,
-    // })
-    // ticketLaboratoryList.sort((a, b) => (a.priority < b.priority ? -1 : 1))
-
-    // this.socketEmitService.socketTicketLaboratoryListChange(oid, {
-    //   ticketId,
-    //   ticketLaboratoryList,
-    // })
 
     return { data: true }
   }

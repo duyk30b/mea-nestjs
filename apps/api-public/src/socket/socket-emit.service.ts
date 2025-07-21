@@ -11,6 +11,7 @@ import {
   Procedure,
   Product,
   Radiology,
+  Receipt,
   Ticket,
   TicketAttribute,
   TicketBatch,
@@ -112,6 +113,14 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_DISCOUNT_LIST_CHANGE, data)
   }
 
+  socketReceiptListChange(
+    oid: number,
+    data: { receiptDestroyedList?: Receipt[]; receiptUpsertedList?: Receipt[] }
+  ) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_RECEIPT_LIST_CHANGE, data)
+  }
+
   socketTicketChange(oid: number, data: { type: 'CREATE' | 'UPDATE' | 'DESTROY'; ticket: Ticket }) {
     if (!this.io) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE, data)
@@ -157,10 +166,8 @@ export class SocketEmitService {
     oid: number,
     data: {
       ticketId: number
-      ticketProcedureInsert?: TicketProcedure
-      ticketProcedureUpdate?: TicketProcedure
-      ticketProcedureDestroy?: TicketProcedure
-      ticketProcedureList?: TicketProcedure[]
+      ticketProcedureUpsertList?: TicketProcedure[]
+      ticketProcedureDestroyList?: TicketProcedure[]
     }
   ) {
     if (!this.io) return
@@ -171,10 +178,8 @@ export class SocketEmitService {
     oid: number,
     data: {
       ticketId: number
-      ticketRadiologyInsert?: TicketRadiology
-      ticketRadiologyUpdate?: TicketRadiology
-      ticketRadiologyDestroy?: TicketRadiology
-      ticketRadiologyList?: TicketRadiology[]
+      ticketRadiologyUpsertList?: TicketRadiology[]
+      ticketRadiologyDestroyList?: TicketRadiology[]
     }
   ) {
     if (!this.io) return
@@ -185,14 +190,11 @@ export class SocketEmitService {
     oid: number,
     data: {
       ticketId: number
-      ticketLaboratoryInsertList?: TicketLaboratory[]
-      ticketLaboratoryUpdateList?: TicketLaboratory[]
+      ticketLaboratoryUpsertList?: TicketLaboratory[]
       ticketLaboratoryDestroyList?: TicketLaboratory[]
-      ticketLaboratoryGroupInsertList?: TicketLaboratoryGroup[]
-      ticketLaboratoryGroupUpdate?: TicketLaboratoryGroup
-      ticketLaboratoryGroupDestroy?: TicketLaboratoryGroup
-      ticketLaboratoryResultInsertList?: TicketLaboratoryResult[]
-      ticketLaboratoryResultUpdateList?: TicketLaboratoryResult[]
+      ticketLaboratoryGroupUpsertList?: TicketLaboratoryGroup[]
+      ticketLaboratoryGroupDestroyList?: TicketLaboratoryGroup[]
+      ticketLaboratoryResultUpsertList?: TicketLaboratoryResult[]
       ticketLaboratoryResultDestroyList?: TicketLaboratoryResult[]
     }
   ) {

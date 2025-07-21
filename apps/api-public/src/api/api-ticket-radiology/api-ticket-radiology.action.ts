@@ -101,7 +101,7 @@ export class ApiTicketRadiologyAction {
 
     this.socketEmitService.socketTicketRadiologyListChange(oid, {
       ticketId,
-      ticketRadiologyUpdate: ticketRadiologyModified,
+      ticketRadiologyUpsertList: [ticketRadiologyModified],
     })
 
     return { data: { ticketRadiology: ticketRadiologyModified } }
@@ -149,7 +149,7 @@ export class ApiTicketRadiologyAction {
 
     this.socketEmitService.socketTicketRadiologyListChange(oid, {
       ticketId: ticketRadiologyOrigin.ticketId,
-      ticketRadiologyUpdate: ticketRadiologyModified,
+      ticketRadiologyUpsertList: [ticketRadiologyModified],
     })
     return { data: { ticketRadiology: ticketRadiologyModified } }
     // Không cần xóa TicketUser, nếu thay đổi kết quả hoặc xóa phiếu thì cập nhật sau cũng không sao

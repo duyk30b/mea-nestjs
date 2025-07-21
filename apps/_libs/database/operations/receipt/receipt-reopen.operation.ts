@@ -2,14 +2,14 @@ import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { Distributor } from '../../entities'
 import {
-  MoneyDirection,
-  PaymentInsertType,
-  PaymentTiming,
-  PersonType,
-  VoucherType,
-} from '../../entities/payment.entity'
+  PaymentItemInsertType,
+  PaymentVoucherItemType,
+  PaymentVoucherType,
+} from '../../entities/payment-item.entity'
+import { PaymentPersonType } from '../../entities/payment.entity'
 import { ReceiptStatus } from '../../entities/receipt.entity'
-import { DistributorManager, PaymentManager, ReceiptManager } from '../../managers'
+import { DistributorManager, ReceiptManager } from '../../managers'
+import { PaymentItemManager, PaymentManager } from '../../repositories'
 
 @Injectable()
 export class ReceiptReopenOperation {
@@ -17,102 +17,71 @@ export class ReceiptReopenOperation {
     private dataSource: DataSource,
     private receiptManager: ReceiptManager,
     private paymentManager: PaymentManager,
+    private paymentItemManager: PaymentItemManager,
     private distributorManager: DistributorManager
   ) { }
 
   // Hàm này mục đích để quay về tạo thành 1 trường hợp chưa thanh toán
   async reopen(params: {
     oid: number
-    cashierId: number
+    userId: number
     receiptId: number
-    paymentMethodId: number
     time: number
-    newPaid: number
     note: string
-    description: string
   }) {
-    const { oid, cashierId, receiptId, time, paymentMethodId, newPaid, note, description } = params
-    const PREFIX = `ReceiptId=${receiptId} refund money failed`
-    if (newPaid < 0) {
-      throw new Error(`${PREFIX} newPaid number invalid`)
-    }
+    const { oid, userId, receiptId, time, note } = params
 
-    try {
-      const transaction = await this.dataSource.transaction('REPEATABLE READ', async (manager) => {
-        // === 1. RECEIPT: update ===
-        const receiptOrigin = await this.receiptManager.updateOneAndReturnEntity(
+    const transaction = await this.dataSource.transaction('REPEATABLE READ', async (manager) => {
+      // === 1. RECEIPT: update ===
+      const receiptModified = await this.receiptManager.updateOneAndReturnEntity(
+        manager,
+        { oid, id: receiptId },
+        { endedAt: null, status: ReceiptStatus.Executing }
+      )
+
+      const paymentItemCreatedList = []
+      let distributorModified: Distributor
+      if (receiptModified.debt > 0) {
+        const distributorModified = await this.distributorManager.updateOneAndReturnEntity(
           manager,
-          { oid, id: receiptId },
-          { endedAt: null }
+          { oid, id: receiptModified.distributorId },
+          { debt: () => `debt - ${receiptModified.debt}` }
         )
 
-        const receiptModified = await this.receiptManager.updateOneAndReturnEntity(
-          manager,
-          {
-            oid,
-            id: receiptId,
-            status: { IN: [ReceiptStatus.Debt, ReceiptStatus.Completed] },
-          },
-          {
-            paid: newPaid,
-            debt: () => `"totalMoney" - ${newPaid}`,
-            status: ReceiptStatus.Executing,
-          }
-        )
-
-        if (receiptOrigin.paid === receiptModified.paid && receiptOrigin.debt === 0) {
-          return { receipt: receiptModified } // truờng hợp này thì chả thanh toán gì
-        }
-
-        // === 2. CUSTOMER: query ===
-        let distributor: Distributor
-        if (receiptOrigin.debt > 0) {
-          distributor = await this.distributorManager.updateOneAndReturnEntity(
-            manager,
-            { oid, id: receiptOrigin.distributorId },
-            { debt: () => `debt - ${receiptOrigin.debt}` }
-          )
-        } else {
-          distributor = await this.distributorManager.findOneBy(manager, {
-            oid,
-            id: receiptOrigin.distributorId,
-          })
-        }
-
-        if (!distributor) {
-          throw new Error(`Nhà cung cấp không tồn tại trên hệ thống`)
-        }
-        const distributorCloseDebt = distributor.debt
-        const distributorOpenDebt = distributor.debt - receiptOrigin.debt
+        const distributorCloseDebt = distributorModified.debt
+        const distributorOpenDebt = distributorCloseDebt + receiptModified.debt
 
         // === 3. INSERT CUSTOMER_PAYMENT ===
-        const paymentInsert: PaymentInsertType = {
+        const paymentItemInsert: PaymentItemInsertType = {
           oid,
-          cashierId,
-          paymentMethodId,
-          voucherType: VoucherType.Receipt,
-          voucherId: receiptId,
-          personType: PersonType.Distributor,
-          personId: receiptOrigin.distributorId,
+          paymentId: 0,
+          paymentPersonType: PaymentPersonType.Distributor,
+          personId: receiptModified.distributorId,
           createdAt: time,
 
-          paymentTiming: PaymentTiming.Reopen,
-          moneyDirection: MoneyDirection.In, //
-          paidAmount: -(receiptModified.paid - receiptOrigin.paid), // cần thanh toán thêm số tiền mới, nếu để 0 tương đương nhận lại hết tiền
-          debtAmount: -receiptOrigin.debt, // return hủy tất cả nợ trước đó
+          voucherType: PaymentVoucherType.Receipt,
+          voucherId: receiptId,
+          voucherItemType: PaymentVoucherItemType.Other,
+          voucherItemId: 0,
+          paymentInteractId: 0,
+
+          paidAmount: 0,
+          debtAmount: -receiptModified.debt,
           openDebt: distributorOpenDebt,
           closeDebt: distributorCloseDebt,
-          note,
-          description,
+          cashierId: userId,
+          note: note || '',
         }
-        const payment = await this.paymentManager.insertOneAndReturnEntity(manager, paymentInsert)
+        const paymentItemCreated = await this.paymentItemManager.insertOneAndReturnEntity(
+          manager,
+          paymentItemInsert
+        )
+        paymentItemCreatedList.push(paymentItemCreated)
+      }
 
-        return { receipt: receiptModified, distributor, payment }
-      })
+      return { receiptModified, paymentItemCreatedList, distributorModified }
+    })
 
-      return transaction
-    } catch (error) {
-      throw error
-    }
+    return transaction
   }
 }

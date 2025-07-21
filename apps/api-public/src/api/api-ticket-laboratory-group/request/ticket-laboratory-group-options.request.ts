@@ -6,7 +6,7 @@ import {
   transformConditionEnum,
 } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
-import { TicketLaboratoryStatus } from '../../../../../_libs/database/common/variable'
+import { PaymentMoneyStatus, TicketLaboratoryStatus } from '../../../../../_libs/database/common/variable'
 
 export class TicketLaboratoryGroupRelationQuery {
   @Expose()
@@ -35,12 +35,18 @@ export class TicketLaboratoryGroupRelationQuery {
 }
 
 const ConditionEnumTicketLaboratoryStatus = createConditionEnum(TicketLaboratoryStatus)
+const ConditionEnumPaymentMoneyStatus = createConditionEnum(PaymentMoneyStatus)
 
 export class TicketLaboratoryGroupFilterQuery {
   @Expose()
   @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketLaboratoryStatus))
   @IsOptional()
   status: TicketLaboratoryStatus | InstanceType<typeof ConditionEnumTicketLaboratoryStatus>
+
+  @Expose()
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, PaymentMoneyStatus))
+  @IsOptional()
+  paymentMoneyStatus: PaymentMoneyStatus | InstanceType<typeof ConditionEnumPaymentMoneyStatus>
 
   @Expose()
   @IsInt()

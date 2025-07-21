@@ -1,6 +1,10 @@
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
 import { IsBoolean, IsNumber, IsOptional, ValidateNested } from 'class-validator'
-import { ConditionTimestamp, createConditionEnum, transformConditionEnum } from '../../../../../_libs/common/dto'
+import {
+  ConditionTimestamp,
+  createConditionEnum,
+  transformConditionEnum,
+} from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 import { ReceiptStatus } from '../../../../../_libs/database/entities/receipt.entity'
 
@@ -11,11 +15,11 @@ export class ReceiptRelationQuery {
 
   @Expose()
   @IsBoolean()
-  paymentList: boolean
+  paymentItemList: boolean
 
   @Expose()
   @IsOptional()
-  receiptItemList: false | { product?: boolean, batch?: boolean }
+  receiptItemList: false | { product?: boolean; batch?: boolean }
 }
 
 const ConditionEnumDeliveryStatus = createConditionEnum(ReceiptStatus)
