@@ -15,6 +15,14 @@ export default class PrintHtml {
   @Column({ default: 0 })
   priority: number
 
+  @Expose()
+  @Column({ default: 0 })
+  printHtmlType: number
+
+  @Column({ type: 'smallint', default: 0 })
+  @Expose()
+  isDefault: 0 | 1
+
   @Column({ type: 'varchar', length: 255 })
   @Expose()
   name: string

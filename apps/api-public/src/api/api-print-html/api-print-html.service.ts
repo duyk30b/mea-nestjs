@@ -1,20 +1,26 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { PrintHtmlRepository } from '../../../../_libs/database/repositories/print-html.repository'
+import {
+  PrintHtmlManager,
+  PrintHtmlRepository,
+} from '../../../../_libs/database/repositories/print-html.repository'
 import {
   PrintHtmlCreateBody,
   PrintHtmlGetManyQuery,
   PrintHtmlGetOneQuery,
   PrintHtmlPaginationQuery,
+  PrintHtmlSetDefaultBody,
   PrintHtmlUpdateBody,
 } from './request'
 
 @Injectable()
 export class ApiPrintHtmlService {
-  constructor(private readonly printHtmlRepository: PrintHtmlRepository) { }
+  constructor(
+    private readonly printHtmlRepository: PrintHtmlRepository,
+    private readonly printHtmlManager: PrintHtmlManager
+  ) { }
 
-  async pagination(oid: number, query: PrintHtmlPaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: PrintHtmlPaginationQuery) {
     const { page, limit, filter, sort, relation } = query
 
     const { data, total } = await this.printHtmlRepository.pagination({
@@ -25,29 +31,27 @@ export class ApiPrintHtmlService {
         oid: { IN: [1, oid] },
         updatedAt: filter?.updatedAt,
       },
-      sort,
+      sort: sort || { priority: 'ASC' },
     })
-    return {
-      data,
-      meta: { total, page, limit },
-    }
+    return { printHtmlList: data, total, page, limit }
   }
 
-  async getList(oid: number, query: PrintHtmlGetManyQuery): Promise<BaseResponse> {
-    const { limit, filter, relation } = query
+  async getList(oid: number, query: PrintHtmlGetManyQuery) {
+    const { limit, filter, relation, sort } = query
 
-    const data = await this.printHtmlRepository.findMany({
+    const printHtmlList = await this.printHtmlRepository.findMany({
       relation,
       condition: {
         oid: { IN: [1, oid] },
         updatedAt: filter?.updatedAt,
       },
       limit,
+      sort: sort || { priority: 'ASC' },
     })
-    return { data }
+    return { printHtmlList }
   }
 
-  async getOne(oid: number, query: PrintHtmlGetOneQuery): Promise<BaseResponse> {
+  async getOne(oid: number, query: PrintHtmlGetOneQuery) {
     const { filter, relation } = query
     const printHtml = await this.printHtmlRepository.findOne({
       relation,
@@ -56,10 +60,10 @@ export class ApiPrintHtmlService {
         updatedAt: filter?.updatedAt,
       },
     })
-    return { data: { printHtml } }
+    return { printHtml }
   }
 
-  async detail(oid: number, id: number, query: PrintHtmlGetOneQuery): Promise<BaseResponse> {
+  async detail(oid: number, id: number, query: PrintHtmlGetOneQuery) {
     const printHtml = await this.printHtmlRepository.findOne({
       condition: {
         oid: { IN: [1, oid] },
@@ -68,37 +72,64 @@ export class ApiPrintHtmlService {
       relation: query.relation,
     })
     if (!printHtml) throw new BusinessException('error.Database.NotFound')
-    return { data: { printHtml } }
+    return { printHtml }
   }
 
-  async createOne(oid: number, body: PrintHtmlCreateBody): Promise<BaseResponse> {
+  async createOne(oid: number, body: PrintHtmlCreateBody) {
     const printHtml = await this.printHtmlRepository.insertOneFullFieldAndReturnEntity({
       oid,
       ...body,
     })
     if (!printHtml) throw new BusinessException('error.Database.InsertFailed')
-    return { data: { printHtml } }
+    return { printHtml }
   }
 
-  async updateOne(oid: number, id: number, body: PrintHtmlUpdateBody): Promise<BaseResponse> {
-    const [printHtml] = await this.printHtmlRepository.updateAndReturnEntity({ id, oid }, body)
+  async updateOne(oid: number, id: number, body: PrintHtmlUpdateBody) {
+    if (body.isDefault) {
+      await this.printHtmlRepository.update(
+        { oid, printHtmlType: body.printHtmlType },
+        { isDefault: 0 }
+      )
+    }
+    const printHtml = await this.printHtmlRepository.updateOneAndReturnEntity({ id, oid }, body)
     if (!printHtml) throw new BusinessException('error.Database.UpdateFailed')
-    return { data: { printHtml } }
+    return { printHtml }
   }
 
-  async destroyOne(oid: number, id: number): Promise<BaseResponse> {
+  async destroyOne(oid: number, id: number) {
     const affected = await this.printHtmlRepository.delete({ oid, id })
     if (affected === 0) {
       throw new BusinessException('error.Database.DeleteFailed')
     }
-    return { data: true }
+    return { printHtmlId: id }
   }
 
-  async systemList(): Promise<BaseResponse> {
-    const data = await this.printHtmlRepository.findMany({
+  async systemList() {
+    const printHtmlSystem = await this.printHtmlRepository.findMany({
       condition: { oid: 1 },
       sort: { id: 'ASC' },
     })
-    return { data }
+    return { printHtmlSystem }
+  }
+
+  async saveListDefault(oid: number, body: PrintHtmlSetDefaultBody) {
+    await this.printHtmlRepository.update({ oid }, { isDefault: 0 })
+
+    const tempList = body.listDefault
+      .filter((i) => !!i.printHtmlId)
+      .map((i) => {
+        return { id: i.printHtmlId, printHtmlType: i.printHtmlType, isDefault: 1 }
+      })
+
+    await this.printHtmlManager.bulkUpdate({
+      manager: this.printHtmlRepository.getManager(),
+      condition: { oid },
+      compare: ['id'],
+      update: ['isDefault', 'printHtmlType'],
+      tempList,
+      options: { requireEqualLength: true },
+    })
+
+    return true
   }
 }

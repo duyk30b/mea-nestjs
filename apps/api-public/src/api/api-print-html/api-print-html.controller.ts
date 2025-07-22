@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
+import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiPrintHtmlService } from './api-print-html.service'
@@ -10,6 +11,7 @@ import {
   PrintHtmlGetManyQuery,
   PrintHtmlGetOneQuery,
   PrintHtmlPaginationQuery,
+  PrintHtmlSetDefaultBody,
   PrintHtmlUpdateBody,
 } from './request'
 
@@ -21,36 +23,53 @@ export class ApiPrintHtmlController {
 
   @Get('pagination')
   @UserPermission()
-  pagination(@External() { oid }: TExternal, @Query() query: PrintHtmlPaginationQuery) {
-    return this.apiPrintHtmlService.pagination(oid, query)
+  async pagination(
+    @External() { oid }: TExternal,
+    @Query() query: PrintHtmlPaginationQuery
+  ): Promise<BaseResponse> {
+    const data = await this.apiPrintHtmlService.pagination(oid, query)
+    return { data }
   }
 
   @Get('get-list')
   @UserPermission()
-  getList(@External() { oid }: TExternal, @Query() query: PrintHtmlGetManyQuery) {
-    return this.apiPrintHtmlService.getList(oid, query)
+  async getList(
+    @External() { oid }: TExternal,
+    @Query() query: PrintHtmlGetManyQuery
+  ): Promise<BaseResponse> {
+    const data = await this.apiPrintHtmlService.getList(oid, query)
+    return { data }
   }
 
   @Get('get-one')
   @UserPermission()
-  getOne(@External() { oid }: TExternal, @Query() query: PrintHtmlGetOneQuery) {
-    return this.apiPrintHtmlService.getOne(oid, query)
+  async getOne(
+    @External() { oid }: TExternal,
+    @Query() query: PrintHtmlGetOneQuery
+  ): Promise<BaseResponse> {
+    const data = await this.apiPrintHtmlService.getOne(oid, query)
+    return { data }
   }
 
   @Get('detail/:id')
   @UserPermission()
-  findOne(
+  async findOne(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
     @Query() query: PrintHtmlGetOneQuery
-  ) {
-    return this.apiPrintHtmlService.detail(oid, id, query)
+  ): Promise<BaseResponse> {
+    const data = await this.apiPrintHtmlService.detail(oid, id, query)
+    return { data }
   }
 
   @Post('create')
   @UserPermission(PermissionId.MASTER_DATA_PRINT_HTML)
-  async createOne(@External() { oid }: TExternal, @Body() body: PrintHtmlCreateBody) {
-    return await this.apiPrintHtmlService.createOne(oid, body)
+  async createOne(
+    @External() { oid }: TExternal,
+    @Body() body: PrintHtmlCreateBody
+  ): Promise<BaseResponse> {
+    const data = await this.apiPrintHtmlService.createOne(oid, body)
+    return { data }
   }
 
   @Patch('update/:id')
@@ -60,20 +79,36 @@ export class ApiPrintHtmlController {
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
     @Body() body: PrintHtmlUpdateBody
-  ) {
-    return await this.apiPrintHtmlService.updateOne(oid, id, body)
+  ): Promise<BaseResponse> {
+    const data = await this.apiPrintHtmlService.updateOne(oid, id, body)
+    return { data }
   }
 
   @Delete('destroy/:id')
   @UserPermission(PermissionId.MASTER_DATA_PRINT_HTML)
   @ApiParam({ name: 'id', example: 1 })
-  async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiPrintHtmlService.destroyOne(oid, id)
+  async destroyOne(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam
+  ): Promise<BaseResponse> {
+    const data = await this.apiPrintHtmlService.destroyOne(oid, id)
+    return { data }
   }
 
   @Get('system-list')
   @UserPermission()
   async systemList() {
-    return await this.apiPrintHtmlService.systemList()
+    const data = await this.apiPrintHtmlService.systemList()
+    return { data }
+  }
+
+  @Put('save-list-default')
+  @UserPermission(PermissionId.PRODUCT_UPDATE)
+  async saveListDefault(
+    @External() { oid }: TExternal,
+    @Body() body: PrintHtmlSetDefaultBody
+  ): Promise<BaseResponse> {
+    const data = await this.apiPrintHtmlService.saveListDefault(oid, body)
+    return { data }
   }
 }

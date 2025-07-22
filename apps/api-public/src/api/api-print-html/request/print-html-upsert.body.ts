@@ -8,6 +8,16 @@ export class PrintHtmlCreateBody {
   @IsNumber()
   priority: number
 
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  printHtmlType: number
+
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  isDefault: 0 | 1
+
   @ApiProperty({ example: 'Đơn thuốc' })
   @Expose()
   @IsDefined()
