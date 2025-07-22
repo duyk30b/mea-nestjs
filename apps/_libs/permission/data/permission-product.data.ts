@@ -132,4 +132,36 @@ export const permissionProduct: Permission[] = [
     parentId: PermissionId.PRODUCT,
     rootId: PermissionId.PRODUCT,
   },
+
+  {
+    id: PermissionId.PRODUCT_RECEIPT_PRODUCT,
+    level: 2,
+    code: PermissionId[PermissionId.PRODUCT_RECEIPT_PRODUCT],
+    isActive: 1,
+    pathId: `${PermissionId.PRODUCT}.${PermissionId.PRODUCT_RECEIPT_PRODUCT}`,
+    name: 'Nhập sản phẩm từ phiếu nhập hàng',
+    parentId: PermissionId.PRODUCT,
+    rootId: PermissionId.PRODUCT,
+  },
+
+  {
+    id: PermissionId.PRODUCT_SEND_PRODUCT,
+    level: 2,
+    code: PermissionId[PermissionId.PRODUCT_SEND_PRODUCT],
+    isActive: 1,
+    pathId: `${PermissionId.PRODUCT}.${PermissionId.PRODUCT_SEND_PRODUCT}`,
+    name: 'Xuất thuốc và vật tư',
+    parentId: PermissionId.PRODUCT,
+    rootId: PermissionId.PRODUCT,
+  },
+  {
+    id: PermissionId.PRODUCT_RETURN_PRODUCT,
+    level: 2,
+    code: PermissionId[PermissionId.PRODUCT_RETURN_PRODUCT],
+    isActive: 1,
+    pathId: `${PermissionId.PRODUCT}.${PermissionId.PRODUCT_RETURN_PRODUCT}`,
+    name: 'Hoàn trả thuốc và vật tư',
+    parentId: PermissionId.PRODUCT,
+    rootId: PermissionId.PRODUCT,
+  },
 ]

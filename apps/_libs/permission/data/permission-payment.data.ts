@@ -82,4 +82,14 @@ export const permissionPayment: Permission[] = [
     parentId: PermissionId.PAYMENT,
     rootId: PermissionId.PAYMENT,
   },
+  {
+    id: PermissionId.PAYMENT_CHANGE_DISCOUNT_TICKET,
+    level: 2,
+    code: PermissionId[PermissionId.PAYMENT_CHANGE_DISCOUNT_TICKET],
+    isActive: 1,
+    pathId: `${PermissionId.PAYMENT}.${PermissionId.PAYMENT_CHANGE_DISCOUNT_TICKET}`,
+    name: 'Chỉnh sửa giá tiền và chiết khấu của phiếu khách hàng',
+    parentId: PermissionId.PAYMENT,
+    rootId: PermissionId.PAYMENT,
+  },
 ]

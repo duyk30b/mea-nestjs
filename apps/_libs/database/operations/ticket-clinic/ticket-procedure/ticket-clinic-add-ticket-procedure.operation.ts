@@ -42,7 +42,18 @@ export class TicketClinicAddTicketProcedureOperation {
       // === 1. UPDATE TICKET FOR TRANSACTION ===
       const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(
         manager,
-        { oid, id: ticketId, status: TicketStatus.Executing },
+        {
+          oid,
+          id: ticketId,
+          status: {
+            IN: [
+              TicketStatus.Draft,
+              TicketStatus.Schedule,
+              TicketStatus.Deposited,
+              TicketStatus.Executing,
+            ],
+          },
+        },
         { updatedAt: Date.now() }
       )
 

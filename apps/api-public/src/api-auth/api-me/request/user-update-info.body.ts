@@ -1,28 +1,109 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { Expose } from 'class-transformer'
-import { IsDefined, IsIn, IsNotEmpty, IsNumber, Validate } from 'class-validator'
+import { ValidationError } from '@nestjs/common'
+import { ApiProperty } from '@nestjs/swagger'
+import { Expose, Transform } from 'class-transformer'
+import {
+  IsArray,
+  IsDefined,
+  IsIn,
+  IsNotEmpty,
+  IsNumber,
+  IsObject,
+  Validate,
+  validateSync,
+} from 'class-validator'
+import { MultipleFileUpload } from '../../../../../_libs/common/dto/file'
 import { IsPhone } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import { EGender } from '../../../../../_libs/database/common/variable'
 
-export class UserUpdateInfoBody {
-  @ApiProperty({ example: 'Phạm Hoàng Mai' })
+class ImagesChangeBody {
+  @Expose()
+  @IsDefined()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  imageIdsKeep: number[]
+
+  @Expose()
+  @IsDefined()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  filesPosition: number[]
+}
+
+class UserInfo {
   @Expose()
   @IsDefined()
   @IsNotEmpty()
   fullName: string
 
-  @ApiPropertyOptional({ example: 1678890707005 })
   @Expose()
   @IsNumber()
-  birthday: number
+  birthday?: number
 
-  @ApiProperty({ example: '0376899866' })
   @Expose()
   @Validate(IsPhone)
-  phone: string
+  phone?: string
 
-  @ApiPropertyOptional({ enum: [0, 1], example: EGender.Female })
   @Expose()
   @IsIn([0, 1])
-  gender: EGender
+  gender?: EGender
+}
+
+export class UserUpdateInfoBody extends MultipleFileUpload {
+  @ApiProperty()
+  @Expose()
+  @Transform(({ value }) => {
+    if (value === undefined) return undefined
+    try {
+      const instance = Object.assign(new UserInfo(), JSON.parse(value))
+      const validate = validateSync(instance, {
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        skipMissingProperties: true,
+      })
+      if (validate.length) {
+        const errValidate = validate.map((i: ValidationError) => {
+          const { target, ...other } = i
+          return other
+        })
+        return JSON.stringify(errValidate)
+      }
+      return instance
+    } catch (error) {
+      return error.message
+    }
+  })
+  @IsObject({
+    message: ({ value }) => `Validate userInfo failed. Value = ${JSON.stringify(value)} `,
+  })
+  userInfo: UserInfo
+
+  @ApiProperty()
+  @Expose()
+  @Transform(({ value }) => {
+    if (value === undefined) return undefined
+    try {
+      const instance = Object.assign(new ImagesChangeBody(), JSON.parse(value))
+      const validate = validateSync(instance, {
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        skipMissingProperties: true,
+      })
+      if (validate.length) {
+        const errValidate = validate.map((i: ValidationError) => {
+          const { target, ...other } = i
+          return other
+        })
+        return JSON.stringify(errValidate)
+      }
+      return instance
+    } catch (error) {
+      return error.message
+    }
+  })
+  @IsObject({
+    message: ({ value }) =>
+      `Validate imagesChange failed. Value = ${JSON.stringify(value)}. Example: `
+      + JSON.stringify(<ImagesChangeBody>{ imageIdsKeep: [102, 103, 104], filesPosition: [2, 3] }),
+  })
+  imagesChange: ImagesChangeBody
 }

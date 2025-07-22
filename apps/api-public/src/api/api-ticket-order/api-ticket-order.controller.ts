@@ -113,7 +113,7 @@ export class ApiTicketOrderController {
   }
 
   @Post('/:id/send-product-and-payment-and-close')
-  @UserPermission(PermissionId.TICKET_ORDER_SEND_PRODUCT, PermissionId.TICKET_ORDER_CLOSE)
+  @UserPermission(PermissionId.PRODUCT_SEND_PRODUCT, PermissionId.TICKET_ORDER_CLOSE)
   async sendProductAndPaymentAndClose(
     @External() { oid, uid }: TExternal,
     @Param() { id }: IdParam,

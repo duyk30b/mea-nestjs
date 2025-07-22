@@ -2,6 +2,7 @@ import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import { EGender } from '../common/variable'
 import Device from './device'
+import Image from './image.entity'
 import Organization from './organization.entity'
 import UserRole from './user-role.entity'
 import UserRoom from './user-room.entity'
@@ -63,6 +64,10 @@ export default class User {
   @Column({ type: 'smallint', default: 1 })
   isActive: 0 | 1
 
+  @Column({ type: 'varchar', length: 100, default: JSON.stringify([]) })
+  @Expose()
+  imageIds: string
+
   @Expose()
   @Column({
     type: 'bigint',
@@ -103,6 +108,9 @@ export default class User {
   @Expose()
   devices: Device[]
 
+  @Expose()
+  imageList: Image[]
+
   static fromRaw(raw: { [P in keyof User]: any }) {
     if (!raw) return null
     const entity = new User()
@@ -120,17 +128,15 @@ export default class User {
 }
 
 export type UserRelationType = {
-  [P in keyof Pick<User, 'organization' | 'devices'>]?: boolean
+  [P in keyof Pick<User, 'organization' | 'devices' | 'imageList'>]?: boolean
 } & {
-  [P in keyof Pick<
-    User,
-    'userRoleList'
-  >]?: { [P in keyof Pick<UserRole, 'user' | 'role'>]?: boolean } | false
+  [P in keyof Pick<User, 'userRoleList'>]?:
+  | { [P in keyof Pick<UserRole, 'user' | 'role'>]?: boolean }
+  | false
 } & {
-  [P in keyof Pick<
-    User,
-    'userRoomList'
-  >]?: { [P in keyof Pick<UserRoom, 'user' | 'room'>]?: boolean } | false
+  [P in keyof Pick<User, 'userRoomList'>]?:
+  | { [P in keyof Pick<UserRoom, 'user' | 'room'>]?: boolean }
+  | false
 }
 
 export type UserInsertType = Omit<

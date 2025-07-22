@@ -53,16 +53,6 @@ export const permissionReceipt: Permission[] = [
     rootId: PermissionId.RECEIPT,
   },
   {
-    id: PermissionId.RECEIPT_SEND_PRODUCT,
-    level: 2,
-    code: PermissionId[PermissionId.RECEIPT_SEND_PRODUCT],
-    isActive: 1,
-    pathId: `${PermissionId.RECEIPT}.${PermissionId.RECEIPT_SEND_PRODUCT}`,
-    name: 'Nhập hàng',
-    parentId: PermissionId.RECEIPT,
-    rootId: PermissionId.RECEIPT,
-  },
-  {
     id: PermissionId.RECEIPT_CLOSE,
     level: 2,
     code: PermissionId[PermissionId.RECEIPT_CLOSE],

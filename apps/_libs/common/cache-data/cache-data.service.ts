@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common'
-import { Organization, Permission, Role, Room, User, UserRoom } from '../../database/entities'
+import { Organization, Permission, Role, User, UserRoom } from '../../database/entities'
 import { SettingKey } from '../../database/entities/setting.entity'
 import UserRole from '../../database/entities/user-role.entity'
-import { UserRoomRepository } from '../../database/repositories'
+import { ImageRepository, UserRoomRepository } from '../../database/repositories'
 import { OrganizationRepository } from '../../database/repositories/organization.repository'
 import { PermissionRepository } from '../../database/repositories/permission.repository'
 import { RoleRepository } from '../../database/repositories/role.repository'
 import { SettingRepository } from '../../database/repositories/setting.repository'
 import { UserRoleRepository } from '../../database/repositories/user-role.repository'
 import { UserRepository } from '../../database/repositories/user.repository'
-import { arrayToKeyValue, uniqueArray } from '../helpers/array.helper'
+import { arrayToKeyValue, ESArray, uniqueArray } from '../helpers/array.helper'
 
 @Injectable()
 export class CacheDataService {
@@ -34,7 +34,8 @@ export class CacheDataService {
     private readonly roleRepository: RoleRepository,
     private readonly userRoleRepository: UserRoleRepository,
     private readonly userRoomRepository: UserRoomRepository,
-    private readonly permissionRepository: PermissionRepository
+    private readonly permissionRepository: PermissionRepository,
+    private readonly imageRepository: ImageRepository
   ) { }
 
   async getOrganization(oid: number) {
@@ -100,7 +101,12 @@ export class CacheDataService {
     if (!this.orgCache[oid].userMap) this.orgCache[oid].userMap = {}
 
     if (!this.orgCache[oid].userMap[uid]) {
-      this.orgCache[oid].userMap[uid] = await this.userRepository.findOneBy({ oid, id: uid })
+      const user = await this.userRepository.findOneBy({ oid, id: uid })
+      const imageIdList: number[] = JSON.parse(user.imageIds)
+      const imageList = await this.imageRepository.findManyByIds(imageIdList)
+      const imageMap = ESArray.arrayToKeyValue(imageList, 'id')
+      user.imageList = imageIdList.map((imageId) => imageMap[imageId]).filter((i) => !!i)
+      this.orgCache[oid].userMap[uid] = user
     }
     return this.orgCache[oid].userMap[uid]
   }

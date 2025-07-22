@@ -20,7 +20,7 @@ export class ApiTicketActionController {
   constructor(private readonly ticketActionService: TicketActionService) { }
 
   @Post('change-discount/:ticketId')
-  @UserPermission(PermissionId.RECEPTION_CHANGE_DISCOUNT_TICKET)
+  @UserPermission(PermissionId.PAYMENT_CHANGE_DISCOUNT_TICKET)
   async changeDiscount(
     @External() { oid }: TExternal,
     @Param() { ticketId }: TicketParams,
@@ -31,7 +31,7 @@ export class ApiTicketActionController {
   }
 
   @Post('change-all-money/:ticketId')
-  @UserPermissionOr(PermissionId.RECEPTION_CHANGE_ALL_MONEY)
+  @UserPermission(PermissionId.PAYMENT_CHANGE_DISCOUNT_TICKET)
   async changeAllMoney(
     @External() { oid, uid }: TExternal,
     @Param() { ticketId }: TicketParams,
@@ -42,7 +42,7 @@ export class ApiTicketActionController {
   }
 
   @Post('send-product/:ticketId')
-  @UserPermissionOr(PermissionId.RECEPTION_SEND_PRODUCT, PermissionId.TICKET_CLINIC_SEND_PRODUCT)
+  @UserPermission(PermissionId.PRODUCT_SEND_PRODUCT)
   async sendProduct(
     @External() { oid, uid }: TExternal,
     @Param() { ticketId }: TicketParams,
@@ -58,10 +58,7 @@ export class ApiTicketActionController {
   }
 
   @Post('return-product/:ticketId')
-  @UserPermissionOr(
-    PermissionId.RECEPTION_RETURN_PRODUCT,
-    PermissionId.TICKET_CLINIC_RETURN_PRODUCT
-  )
+  @UserPermission(PermissionId.PRODUCT_RETURN_PRODUCT)
   async returnProduct(
     @External() { oid, uid }: TExternal,
     @Param() { ticketId }: TicketParams,

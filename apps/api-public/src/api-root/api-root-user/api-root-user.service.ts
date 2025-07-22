@@ -84,6 +84,7 @@ export class ApiRootUserService {
       username,
       secret,
       hashPassword,
+      imageIds: JSON.stringify([]),
     })
     this.cacheDataService.clearUserAndRoleAndRoom(user.oid)
     return { data: { user } }

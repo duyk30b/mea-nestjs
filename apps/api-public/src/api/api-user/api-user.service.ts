@@ -137,6 +137,7 @@ export class ApiUserService {
       isAdmin: 0,
       secret,
       hashPassword,
+      imageIds: JSON.stringify([]),
     })
 
     if (roleIdList.length) {

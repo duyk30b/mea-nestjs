@@ -112,7 +112,7 @@ export class ApiReceiptController {
   }
 
   @Post('/:id/send-product-and-payment-and-close')
-  @UserPermission(PermissionId.RECEIPT_SEND_PRODUCT, PermissionId.RECEIPT_CLOSE)
+  @UserPermission(PermissionId.PRODUCT_RECEIPT_PRODUCT, PermissionId.RECEIPT_CLOSE)
   async sendProductAndPaymentAndClose(
     @External() { oid, uid }: TExternal,
     @Param() { id }: IdParam,
@@ -127,7 +127,7 @@ export class ApiReceiptController {
   }
 
   @Post('/:id/send-product')
-  @UserPermission(PermissionId.TICKET_ORDER_SEND_PRODUCT)
+  @UserPermission(PermissionId.PRODUCT_RECEIPT_PRODUCT)
   async sendProduct(@External() { oid, uid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiReceiptAction.sendProduct({
       oid,
