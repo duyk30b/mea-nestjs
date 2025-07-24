@@ -49,12 +49,12 @@ export class ApiTicketRadiologyAction {
     })
     const { ticketId, customerId } = ticketRadiologyOrigin
 
-    const imageIdsUpdate = await this.imageManagerService.changeImageList({
+    const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
       oid,
       customerId,
       files,
-      filesPosition: body.filesPosition,
-      imageIdsKeep: body.imageIdsKeep,
+      imageIdsWait: body.imagesChange.imageIdsWait,
+      externalUrlList: body.imagesChange.externalUrlList,
       imageIdsOld: JSON.parse(ticketRadiologyOrigin.imageIds),
     })
 
@@ -119,13 +119,9 @@ export class ApiTicketRadiologyAction {
       id: ticketRadiologyId,
     })
 
-    const imageIdsUpdate = await this.imageManagerService.changeImageList({
+    const imageIdsUpdate = await this.imageManagerService.removeImageList({
       oid,
-      customerId: ticketRadiologyOrigin.customerId,
-      files: [],
-      filesPosition: [],
-      imageIdsKeep: [],
-      imageIdsOld: JSON.parse(ticketRadiologyOrigin.imageIds),
+      idRemoveList: JSON.parse(ticketRadiologyOrigin.imageIds),
     })
 
     const ticketRadiologyModified = await this.ticketRadiologyRepository.updateOneAndReturnEntity(

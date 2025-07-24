@@ -1,9 +1,10 @@
-import { ApiPropertyOptional, OmitType } from '@nestjs/swagger'
-import { Expose } from 'class-transformer'
-import { IsDefined, IsString } from 'class-validator'
-import { SingleFileUpload } from '../../../../../_libs/common/dto/file'
+import { ValidationError } from '@nestjs/common'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { Expose, Transform } from 'class-transformer'
+import { IsArray, IsDefined, IsNumber, IsObject, IsString, validateSync } from 'class-validator'
+import { MultipleFileUpload } from '../../../../../_libs/common/dto/file'
 
-export class OrganizationUpdateInfoAndLogoBody extends SingleFileUpload {
+export class OrganizationInfoBody {
   @ApiPropertyOptional({ example: 'Phòng khám đa khoa Medical' })
   @Expose()
   @IsDefined()
@@ -29,4 +30,73 @@ export class OrganizationUpdateInfoAndLogoBody extends SingleFileUpload {
   addressStreet: string
 }
 
-export class OrganizationUpdateInfoBody extends OmitType(OrganizationUpdateInfoAndLogoBody, ['file']) { }
+class ImagesChangeBody {
+  @Expose()
+  @IsDefined()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  imageIdsWait: number[]
+
+  @Expose()
+  @IsDefined()
+  @IsArray()
+  externalUrlList: string[]
+}
+
+export class OrganizationUpdateBody extends MultipleFileUpload {
+  @ApiProperty()
+  @Expose()
+  @Transform(({ value }) => {
+    if (value === undefined) return undefined
+    try {
+      const instance = Object.assign(new OrganizationInfoBody(), JSON.parse(value))
+      const validate = validateSync(instance, {
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        skipMissingProperties: true,
+      })
+      if (validate.length) {
+        const errValidate = validate.map((i: ValidationError) => {
+          const { target, ...other } = i
+          return other
+        })
+        return JSON.stringify(errValidate)
+      }
+      return instance
+    } catch (error) {
+      return error.message
+    }
+  })
+  @IsObject({
+    message: ({ value }) => `Validate organizationInfoBody failed. Value = ${value} `,
+  })
+  organizationInfo: OrganizationInfoBody
+
+  @ApiProperty()
+  @Expose()
+  @Transform(({ value }) => {
+    if (value === undefined) return undefined
+    try {
+      const instance = Object.assign(new ImagesChangeBody(), JSON.parse(value))
+      const validate = validateSync(instance, {
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        skipMissingProperties: true,
+      })
+      if (validate.length) {
+        const errValidate = validate.map((i: ValidationError) => {
+          const { target, ...other } = i
+          return other
+        })
+        return JSON.stringify(errValidate)
+      }
+      return instance
+    } catch (error) {
+      return error.message
+    }
+  })
+  @IsObject({
+    message: ({ value }) => `Validate imagesChange failed. Value = ${value}`,
+  })
+  imagesChange: ImagesChangeBody
+}

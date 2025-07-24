@@ -1,16 +1,25 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
 import { ESTimer } from '../../../../../_libs/common/helpers/time.helper'
-import { DeliveryStatus, DiscountType } from '../../../../../_libs/database/common/variable'
+import {
+  DeliveryStatus,
+  DiscountType,
+} from '../../../../../_libs/database/common/variable'
 import { Customer } from '../../../../../_libs/database/entities'
 import { AppointmentStatus } from '../../../../../_libs/database/entities/appointment.entity'
 import { PositionInteractType } from '../../../../../_libs/database/entities/position.entity'
 import { TicketAttributeInsertType } from '../../../../../_libs/database/entities/ticket-attribute.entity'
+import {
+  TicketProcedureInsertType,
+  TicketProcedureStatus,
+} from '../../../../../_libs/database/entities/ticket-procedure.entity'
 import { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
+import { TicketChangeItemMoneyManager } from '../../../../../_libs/database/operations'
 import {
   AppointmentRepository,
   CustomerRepository,
   TicketAttributeRepository,
+  TicketProcedureRepository,
   TicketRepository,
 } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
@@ -21,11 +30,13 @@ import { TicketUserService } from './ticket-user.service'
 export class TicketReceptionService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
+    private readonly ticketRepository: TicketRepository,
+    private readonly ticketProcedureRepository: TicketProcedureRepository,
     private readonly customerRepository: CustomerRepository,
     private readonly appointmentRepository: AppointmentRepository,
-    private readonly ticketRepository: TicketRepository,
     private readonly ticketAttributeRepository: TicketAttributeRepository,
-    private readonly ticketUserService: TicketUserService
+    private readonly ticketUserService: TicketUserService,
+    private readonly ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
   ) { }
 
   async receptionCreate(options: { oid: number; body: TicketReceptionCreateTicketBody }) {
@@ -69,7 +80,7 @@ export class TicketReceptionService {
       }
     })
 
-    const ticket = await this.ticketRepository.insertOneFullFieldAndReturnEntity({
+    let ticket = await this.ticketRepository.insertOneFullFieldAndReturnEntity({
       oid,
       customerId: customer.id,
       roomId: ticketReception.roomId,
@@ -145,6 +156,39 @@ export class TicketReceptionService {
           ticketItemId: 0,
           quantity: 1,
           ticketUserList: body.ticketUserList,
+        },
+      })
+    }
+
+    if (body.ticketProcedureList?.length) {
+      const ticketProcedureInsertList = body.ticketProcedureList!.map((i) => {
+        const insert: TicketProcedureInsertType = {
+          ...i,
+          customerId: ticket.customerId,
+          status: TicketProcedureStatus.Completed,
+          oid,
+          imageIds: JSON.stringify([]),
+          startedAt: Date.now(),
+          ticketId: ticket.id,
+          result: '',
+        }
+        return insert
+      })
+      const ticketProcedureCreatedList =
+        await this.ticketProcedureRepository.insertManyAndReturnEntity(ticketProcedureInsertList)
+      const procedureMoney = ticketProcedureCreatedList.reduce((acc, cur) => {
+        return acc + cur.quantity * cur.actualPrice
+      }, 0)
+      const procedureDiscount = ticketProcedureCreatedList.reduce((acc, cur) => {
+        return acc + cur.quantity * cur.discountMoney
+      }, 0)
+      ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
+        manager: this.ticketRepository.getManager(),
+        oid,
+        ticketOrigin: ticket,
+        itemMoney: {
+          procedureMoneyAdd: procedureMoney,
+          itemsDiscountAdd: procedureDiscount,
         },
       })
     }

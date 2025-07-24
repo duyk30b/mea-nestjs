@@ -12,7 +12,7 @@ import { OrganizationRepository } from '../../../../_libs/database/repositories/
 import { GlobalConfig } from '../../../../_libs/environments'
 import { EmailService } from '../../components/email/email.service'
 import { ImageManagerService } from '../../components/image-manager/image-manager.service'
-import { OrganizationUpdateInfoBody, VerifyOrganizationEmailQuery } from './request'
+import { OrganizationUpdateBody, VerifyOrganizationEmailQuery } from './request'
 
 @Injectable()
 export class ApiOrganizationService {
@@ -35,49 +35,38 @@ export class ApiOrganizationService {
     return { data: { organization } }
   }
 
-  async updateInfo(oid: number, body: OrganizationUpdateInfoBody): Promise<BaseResponse> {
-    const [organization] = await this.organizationRepository.updateAndReturnEntity(
-      { id: oid },
-      body
-    )
-    if (!organization) {
-      throw new BusinessException('error.Database.UpdateFailed')
-    }
-    this.cacheDataService.updateOrganizationInfo(organization)
-    return { data: { organization } }
-  }
+  async updateInfo(options: {
+    oid: number
+    body: OrganizationUpdateBody
+    files: FileUploadDto[]
+  }): Promise<BaseResponse> {
+    const { oid, body, files } = options
+    const { organizationInfo } = body
 
-  async updateInfoAndLogo(
-    options: {
-      oid: number,
-      body: OrganizationUpdateInfoBody,
-      file: FileUploadDto
-    }
-  ): Promise<BaseResponse> {
-    const { oid, body, file } = options
     const organizationOrigin = await this.organizationRepository.findOneById(oid)
 
     let image: Image | undefined
-    if (organizationOrigin.logoImageId) {
-      image = await this.imageRepository.findOneBy({ oid, id: organizationOrigin.logoImageId })
+    let logoImageId = organizationOrigin.logoImageId || 0
+
+    if (body.imagesChange) {
+      const logoIdNewList = await this.imageManagerService.changeCloudinaryImageLink({
+        oid,
+        customerId: 0,
+        files,
+        imageIdsWait: [0],
+        externalUrlList: body.imagesChange.externalUrlList,
+        imageIdsOld: [organizationOrigin.logoImageId || 0],
+      })
+      logoImageId = logoIdNewList[0]
     }
 
-    const [logoImageId] = await this.imageManagerService.changeImageList({
-      oid,
-      customerId: 0,
-      files: [file],
-      filesPosition: [0],
-      imageIdsKeep: [],
-      imageIdsOld: image ? [image.id] : [],
-    })
-
-    const [organization] = await this.organizationRepository.updateAndReturnEntity(
+    const organization = await this.organizationRepository.updateOneAndReturnEntity(
       { id: oid },
       {
-        name: body.name,
-        addressProvince: body.addressProvince,
-        addressWard: body.addressWard,
-        addressStreet: body.addressStreet,
+        name: organizationInfo.name,
+        addressProvince: organizationInfo.addressProvince,
+        addressWard: organizationInfo.addressWard,
+        addressStreet: organizationInfo.addressStreet,
         logoImageId,
       }
     )

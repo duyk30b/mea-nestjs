@@ -2,7 +2,10 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { ESArray } from '../../../../_libs/common/helpers'
-import { ImageHost, ImageInsertType } from '../../../../_libs/database/entities/image.entity'
+import Image, {
+  ImageHostType,
+  ImageInsertType,
+} from '../../../../_libs/database/entities/image.entity'
 import { SettingKey } from '../../../../_libs/database/entities/setting.entity'
 import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
 import { SettingRepository } from '../../../../_libs/database/repositories/setting.repository'
@@ -37,7 +40,7 @@ export class ImageManagerService implements OnModuleInit {
     }
   }
 
-  async changeImageList(options: {
+  async changeGoogleDriverImageList(options: {
     oid: number
     customerId: number
     imageIdsOld: number[]
@@ -67,7 +70,7 @@ export class ImageManagerService implements OnModuleInit {
         return this.googleDriverService.trashMultipleFiles({
           oid,
           email: curEmail,
-          fileIds: imageList.map((i) => i.hostId),
+          fileIds: imageList.map((i) => i.externalId),
         })
       }),
     ])
@@ -79,19 +82,20 @@ export class ImageManagerService implements OnModuleInit {
         name: i.name,
         size: Number(i.size),
         mimeType: i.mimeType,
-        hostType: ImageHost.GoogleDriver,
+        hostType: ImageHostType.GoogleDriver,
         hostAccount: email,
-        hostId: i.id,
+        externalId: i.id,
+        externalUrl: '',
       }
       return draft
     })
     const imageHostTrashSuccess = imageHostTrashResponse.map((i) => i.success).flat()
     const imageHostTrashFailed = imageHostTrashResponse.map((i) => i.failed).flat()
     const imageIdsRemoveSuccess = imageRemoveList
-      .filter((i) => imageHostTrashSuccess.includes(i.hostId))
+      .filter((i) => imageHostTrashSuccess.includes(i.externalId))
       .map((i) => i.id)
     const imageIdsRemoveFailed = imageRemoveList
-      .filter((i) => imageHostTrashFailed.includes(i.hostId))
+      .filter((i) => imageHostTrashFailed.includes(i.externalId))
       .map((i) => i.id)
 
     const [imageIdsNew] = await Promise.all([
@@ -112,5 +116,104 @@ export class ImageManagerService implements OnModuleInit {
     }
 
     return imageIdsUpdate
+  }
+
+  async changeCloudinaryImageLink(options: {
+    oid: number
+    customerId: number
+    files: FileUploadDto[]
+    externalUrlList: string[]
+    imageIdsOld: number[] // ví dụ [1,4,3,20,21,12,7,3]
+    imageIdsWait: number[] // ví dụ [1,4,3,0,0,0,12,7,3] // số 0 tương ứng với mỗi image mới chưa có ID
+  }) {
+    const { oid, customerId, imageIdsWait, imageIdsOld, files, externalUrlList } = options
+    const imageIdsRemove = imageIdsOld.filter((i) => !imageIdsWait.includes(i))
+
+    // chưa xử lý việc xóa ảnh thực sự trên host
+    if (imageIdsRemove.length) {
+      await this.imageRepository.updateAndReturnEntity(
+        { oid, id: { IN: imageIdsRemove } },
+        { waitDelete: 1 }
+      )
+    }
+
+    const imageInsertList = externalUrlList.map((i) => {
+      const insert: ImageInsertType = {
+        oid,
+        customerId,
+        name: '',
+        mimeType: '',
+        size: 0,
+        hostType: ImageHostType.Cloudinary,
+        hostAccount: '',
+        externalId: '',
+        externalUrl: i,
+      }
+      return insert
+    })
+    const imageCreatedList = await this.imageRepository.insertManyAndReturnEntity(imageInsertList)
+
+    // sắp xếp sao cho đúng vị trí
+    const imageIdsNew = []
+    for (let i = 0; i < imageIdsWait.length; i++) {
+      if (imageIdsWait[i] !== 0) {
+        imageIdsNew[i] = imageIdsWait[i]
+      }
+      if (imageIdsWait[i] === 0) {
+        const imageCreated = imageCreatedList.shift() // push từng phần tư vào thôi
+        imageIdsNew[i] = imageCreated.id
+      }
+    }
+
+    return imageIdsNew
+  }
+
+  async removeImageGoogleDriver(oid: number, imageRemoveList: Image[]) {
+    const imageMapAccount = ESArray.arrayToKeyArray(imageRemoveList, 'hostAccount')
+    const imageHostTrashResponse = await Promise.all(
+      Object.entries(imageMapAccount).map(([curEmail, curImageList]) => {
+        return this.googleDriverService.trashMultipleFiles({
+          oid,
+          email: curEmail,
+          fileIds: curImageList.map((i) => i.externalId),
+        })
+      })
+    )
+    const imageHostTrashSuccess = imageHostTrashResponse.map((i) => i.success).flat()
+    const imageHostTrashFailed = imageHostTrashResponse.map((i) => i.failed).flat()
+    const imageIdsRemoveSuccess = imageRemoveList
+      .filter((i) => imageHostTrashSuccess.includes(i.externalId))
+      .map((i) => i.id)
+    const imageIdsRemoveFailed = imageRemoveList
+      .filter((i) => imageHostTrashFailed.includes(i.externalId))
+      .map((i) => i.id)
+
+    if (imageIdsRemoveSuccess.length) {
+      await this.imageRepository.delete({ id: { IN: imageIdsRemoveSuccess } })
+    }
+  }
+
+  async removeImageCloudinary(oid: number, imageRemoveList: Image[]) {
+    // tạm thời chưa làm gì cả
+  }
+
+  async removeImageList(options: { oid: number; idRemoveList: number[] }) {
+    const { oid, idRemoveList } = options
+    const imageWaitDeleteList = await this.imageRepository.updateAndReturnEntity(
+      { oid, id: { IN: idRemoveList } },
+      { waitDelete: 1 }
+    )
+
+    const imageCloudinaryWaitDelete = imageWaitDeleteList.filter((i) => {
+      return i.hostType === ImageHostType.Cloudinary
+    })
+    const imageGoogleWaitDelete = imageWaitDeleteList.filter((i) => {
+      return i.hostType === ImageHostType.Cloudinary
+    })
+
+    await Promise.all([
+      this.removeImageCloudinary(oid, imageCloudinaryWaitDelete),
+      this.removeImageGoogleDriver(oid, imageGoogleWaitDelete),
+    ])
   }
 }

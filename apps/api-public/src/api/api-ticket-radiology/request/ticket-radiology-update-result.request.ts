@@ -54,23 +54,20 @@ export class TicketRadiologyUpdateBody extends MultipleFileUpload {
   startedAt: number
 }
 
+class ImagesChangeBody {
+  @Expose()
+  @IsDefined()
+  @IsArray()
+  @IsNumber({}, { each: true })
+  imageIdsWait: number[]
+
+  @Expose()
+  @IsDefined()
+  @IsArray()
+  externalUrlList: string[]
+}
+
 export class TicketRadiologyUpdateResultBody extends MultipleFileUpload {
-  @ApiProperty({ type: String, example: JSON.stringify([3, 4]) })
-  @Expose()
-  @Transform(({ value }) => (value != null ? JSON.parse(value) : value))
-  @IsDefined()
-  @IsArray()
-  @IsNumber({}, { each: true })
-  imageIdsKeep: number[]
-
-  @ApiProperty({ type: String, example: JSON.stringify([3, 4]) }) G
-  @Expose()
-  @Transform(({ value }) => (value != null ? JSON.parse(value) : value))
-  @IsDefined()
-  @IsArray()
-  @IsNumber({}, { each: true })
-  filesPosition: number[]
-
   @ApiProperty({
     type: 'string',
     example: JSON.stringify(<TicketUserBasicBody[]>[{ userId: 1, roleId: 2 }]),
@@ -87,7 +84,13 @@ export class TicketRadiologyUpdateResultBody extends MultipleFileUpload {
           forbidNonWhitelisted: true,
           skipMissingProperties: true,
         })
-        if (validate.length) err.push(...validate)
+        if (validate.length) {
+          const errValidate = validate.map((i: ValidationError) => {
+            const { target, ...other } = i
+            return other
+          })
+          err.push(...errValidate)
+        }
         return instance
       })
       if (err.length) return JSON.stringify(err)
@@ -98,8 +101,7 @@ export class TicketRadiologyUpdateResultBody extends MultipleFileUpload {
   })
   @IsArray({
     message: ({ value }) =>
-      `Validate TicketUserBasicBody failed. Value = ${JSON.stringify(value)}. Example: `
-      + JSON.stringify(<TicketUserBasicBody[]>[{ userId: 1, roleId: 2 }]),
+      `Validate TicketUserBasicBody failed. Value = ${JSON.stringify(value)}.`,
   })
   ticketUserList: TicketUserBasicBody[]
 
@@ -132,4 +134,32 @@ export class TicketRadiologyUpdateResultBody extends MultipleFileUpload {
     },
   })
   ticketRadiology: TicketRadiologyUpdateBody
+
+  @ApiProperty()
+  @Expose()
+  @Transform(({ value }) => {
+    if (value === undefined) return undefined
+    try {
+      const instance = Object.assign(new ImagesChangeBody(), JSON.parse(value))
+      const validate = validateSync(instance, {
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        skipMissingProperties: true,
+      })
+      if (validate.length) {
+        const errValidate = validate.map((i: ValidationError) => {
+          const { target, ...other } = i
+          return other
+        })
+        return JSON.stringify(errValidate)
+      }
+      return instance
+    } catch (error) {
+      return error.message
+    }
+  })
+  @IsObject({
+    message: ({ value }) => `Validate imagesChange failed. Value = ${value}`,
+  })
+  imagesChange: ImagesChangeBody
 }

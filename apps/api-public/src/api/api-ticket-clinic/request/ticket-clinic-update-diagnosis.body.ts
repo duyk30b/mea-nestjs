@@ -1,3 +1,4 @@
+import { ValidationError } from '@nestjs/common'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
 import {
@@ -31,13 +32,12 @@ class ImagesChangeBody {
   @IsDefined()
   @IsArray()
   @IsNumber({}, { each: true })
-  imageIdsKeep: number[]
+  imageIdsWait: number[]
 
   @Expose()
   @IsDefined()
   @IsArray()
-  @IsNumber({}, { each: true })
-  filesPosition: number[]
+  externalUrlList: string[]
 }
 
 export class TicketClinicUpdateDiagnosisBody extends MultipleFileUpload {
@@ -63,7 +63,13 @@ export class TicketClinicUpdateDiagnosisBody extends MultipleFileUpload {
           forbidNonWhitelisted: true,
           skipMissingProperties: true,
         })
-        if (validate.length) err.push(...validate)
+        if (validate.length) {
+          const errValidate = validate.map((i: ValidationError) => {
+            const { target, ...other } = i
+            return other
+          })
+          err.push(...errValidate)
+        }
         return instance
       })
       if (err.length) return JSON.stringify(err)
@@ -109,16 +115,18 @@ export class TicketClinicUpdateDiagnosisBody extends MultipleFileUpload {
         forbidNonWhitelisted: true,
         skipMissingProperties: true,
       })
-      if (validate.length) return JSON.stringify(validate)
+      if (validate.length) {
+        const errValidate = validate.map((i: ValidationError) => {
+          const { target, ...other } = i
+          return other
+        })
+        return JSON.stringify(errValidate)
+      }
       return instance
     } catch (error) {
       return error.message
     }
   })
-  @IsObject({
-    message: ({ value }) =>
-      `Validate imagesChange failed. Value = ${JSON.stringify(value)}. Example: `
-      + JSON.stringify(<ImagesChangeBody>{ imageIdsKeep: [102, 103, 104], filesPosition: [2, 3] }),
-  })
+  @IsObject({ message: ({ value }) => `Validate imagesChange failed. Value = ${value}` })
   imagesChange: ImagesChangeBody
 }

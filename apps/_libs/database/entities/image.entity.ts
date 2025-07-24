@@ -1,8 +1,9 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 
-export enum ImageHost {
+export enum ImageHostType {
   GoogleDriver = 'GoogleDriver',
+  Cloudinary = 'Cloudinary',
 }
 
 @Entity('Image')
@@ -31,9 +32,9 @@ export default class Image {
   @Expose()
   size: number // tính theo bytes nhé
 
-  @Column({ type: 'varchar', length: 50, default: ImageHost.GoogleDriver })
+  @Column({ type: 'varchar', length: 50, default: ImageHostType.GoogleDriver })
   @Expose()
-  hostType: ImageHost
+  hostType: ImageHostType
 
   @Column({ type: 'varchar', length: 50 })
   @Expose()
@@ -41,7 +42,11 @@ export default class Image {
 
   @Column({ type: 'varchar', length: 50 })
   @Expose()
-  hostId: string
+  externalId: string
+
+  @Column({ type: 'varchar', length: 255, default: '' })
+  @Expose()
+  externalUrl: string
 
   @Column({ type: 'smallint', default: 0 })
   @Expose()
@@ -70,10 +75,9 @@ export type ImageInsertType = Omit<
 >
 
 export type ImageUpdateType = {
-  [K in Exclude<
-    keyof Image,
-    keyof ImageRelationType | keyof Pick<Image, 'oid' | 'id'>
-  >]: Image[K] | (() => string)
+  [K in Exclude<keyof Image, keyof ImageRelationType | keyof Pick<Image, 'oid' | 'id'>>]:
+  | Image[K]
+  | (() => string)
 }
 
 export type ImageSortType = {

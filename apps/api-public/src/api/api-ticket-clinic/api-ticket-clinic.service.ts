@@ -56,12 +56,12 @@ export class ApiTicketClinicService {
     )
     // 1. Update Ticket Image
     if (imagesChange) {
-      const imageIdsUpdate = await this.imageManagerService.changeImageList({
+      const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
         oid,
         customerId: ticket.customerId,
         files,
-        filesPosition: imagesChange.filesPosition,
-        imageIdsKeep: imagesChange.imageIdsKeep,
+        imageIdsWait: imagesChange.imageIdsWait,
+        externalUrlList: imagesChange.externalUrlList,
         imageIdsOld: JSON.parse(ticket.imageIds || '[]'),
       })
       if (ticket.imageIds !== JSON.stringify(imageIdsUpdate)) {

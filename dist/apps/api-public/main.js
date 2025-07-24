@@ -556,13 +556,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var Image_1;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ImageHost = void 0;
+exports.ImageHostType = void 0;
 const class_transformer_1 = __webpack_require__(17);
 const typeorm_1 = __webpack_require__(18);
-var ImageHost;
-(function (ImageHost) {
-    ImageHost["GoogleDriver"] = "GoogleDriver";
-})(ImageHost || (exports.ImageHost = ImageHost = {}));
+var ImageHostType;
+(function (ImageHostType) {
+    ImageHostType["GoogleDriver"] = "GoogleDriver";
+    ImageHostType["Cloudinary"] = "Cloudinary";
+})(ImageHostType || (exports.ImageHostType = ImageHostType = {}));
 let Image = Image_1 = class Image {
     static fromRaw(raw) {
         if (!raw)
@@ -606,7 +607,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Image.prototype, "size", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 50, default: ImageHost.GoogleDriver }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 50, default: ImageHostType.GoogleDriver }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", String)
 ], Image.prototype, "hostType", void 0);
@@ -619,7 +620,12 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 50 }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", String)
-], Image.prototype, "hostId", void 0);
+], Image.prototype, "externalId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 255, default: '' }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", String)
+], Image.prototype, "externalUrl", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'smallint', default: 0 }),
     (0, class_transformer_1.Expose)(),
@@ -21578,12 +21584,12 @@ let ApiMeService = class ApiMeService {
         let userModified;
         let imageIdsStringifyUpdate = userOrigin.imageIds;
         if (imagesChange) {
-            const imageIdsUpdate = await this.imageManagerService.changeImageList({
+            const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
                 oid,
                 customerId: userId,
                 files,
-                filesPosition: imagesChange.filesPosition,
-                imageIdsKeep: imagesChange.imageIdsKeep,
+                imageIdsWait: body.imagesChange.imageIdsWait,
+                externalUrlList: body.imagesChange.externalUrlList,
                 imageIdsOld: JSON.parse(userOrigin.imageIds || '[]'),
             });
             imageIdsStringifyUpdate = JSON.stringify(imageIdsUpdate);
@@ -21662,7 +21668,7 @@ let ImageManagerService = ImageManagerService_1 = class ImageManagerService {
             this.logger.error(error.message);
         }
     }
-    async changeImageList(options) {
+    async changeGoogleDriverImageList(options) {
         const { oid, customerId, imageIdsKeep, imageIdsOld, files, filesPosition } = options;
         const imageOldList = imageIdsOld.length
             ? await this.imageRepository.findManyByIds(imageIdsOld)
@@ -21681,7 +21687,7 @@ let ImageManagerService = ImageManagerService_1 = class ImageManagerService {
                 return this.googleDriverService.trashMultipleFiles({
                     oid,
                     email: curEmail,
-                    fileIds: imageList.map((i) => i.hostId),
+                    fileIds: imageList.map((i) => i.externalId),
                 });
             }),
         ]);
@@ -21692,19 +21698,20 @@ let ImageManagerService = ImageManagerService_1 = class ImageManagerService {
                 name: i.name,
                 size: Number(i.size),
                 mimeType: i.mimeType,
-                hostType: image_entity_1.ImageHost.GoogleDriver,
+                hostType: image_entity_1.ImageHostType.GoogleDriver,
                 hostAccount: email,
-                hostId: i.id,
+                externalId: i.id,
+                externalUrl: '',
             };
             return draft;
         });
         const imageHostTrashSuccess = imageHostTrashResponse.map((i) => i.success).flat();
         const imageHostTrashFailed = imageHostTrashResponse.map((i) => i.failed).flat();
         const imageIdsRemoveSuccess = imageRemoveList
-            .filter((i) => imageHostTrashSuccess.includes(i.hostId))
+            .filter((i) => imageHostTrashSuccess.includes(i.externalId))
             .map((i) => i.id);
         const imageIdsRemoveFailed = imageRemoveList
-            .filter((i) => imageHostTrashFailed.includes(i.hostId))
+            .filter((i) => imageHostTrashFailed.includes(i.externalId))
             .map((i) => i.id);
         const [imageIdsNew] = await Promise.all([
             this.imageRepository.insertManyFullField(imageInsertList),
@@ -21721,6 +21728,76 @@ let ImageManagerService = ImageManagerService_1 = class ImageManagerService {
             imageIdsUpdate.splice(filesPosition[i], 0, imageIdsNew[i]);
         }
         return imageIdsUpdate;
+    }
+    async changeCloudinaryImageLink(options) {
+        const { oid, customerId, imageIdsWait, imageIdsOld, files, externalUrlList } = options;
+        const imageIdsRemove = imageIdsOld.filter((i) => !imageIdsWait.includes(i));
+        if (imageIdsRemove.length) {
+            await this.imageRepository.updateAndReturnEntity({ oid, id: { IN: imageIdsRemove } }, { waitDelete: 1 });
+        }
+        const imageInsertList = externalUrlList.map((i) => {
+            const insert = {
+                oid,
+                customerId,
+                name: '',
+                mimeType: '',
+                size: 0,
+                hostType: image_entity_1.ImageHostType.Cloudinary,
+                hostAccount: '',
+                externalId: '',
+                externalUrl: i,
+            };
+            return insert;
+        });
+        const imageCreatedList = await this.imageRepository.insertManyAndReturnEntity(imageInsertList);
+        const imageIdsNew = [];
+        for (let i = 0; i < imageIdsWait.length; i++) {
+            if (imageIdsWait[i] !== 0) {
+                imageIdsNew[i] = imageIdsWait[i];
+            }
+            if (imageIdsWait[i] === 0) {
+                const imageCreated = imageCreatedList.shift();
+                imageIdsNew[i] = imageCreated.id;
+            }
+        }
+        return imageIdsNew;
+    }
+    async removeImageGoogleDriver(oid, imageRemoveList) {
+        const imageMapAccount = helpers_1.ESArray.arrayToKeyArray(imageRemoveList, 'hostAccount');
+        const imageHostTrashResponse = await Promise.all(Object.entries(imageMapAccount).map(([curEmail, curImageList]) => {
+            return this.googleDriverService.trashMultipleFiles({
+                oid,
+                email: curEmail,
+                fileIds: curImageList.map((i) => i.externalId),
+            });
+        }));
+        const imageHostTrashSuccess = imageHostTrashResponse.map((i) => i.success).flat();
+        const imageHostTrashFailed = imageHostTrashResponse.map((i) => i.failed).flat();
+        const imageIdsRemoveSuccess = imageRemoveList
+            .filter((i) => imageHostTrashSuccess.includes(i.externalId))
+            .map((i) => i.id);
+        const imageIdsRemoveFailed = imageRemoveList
+            .filter((i) => imageHostTrashFailed.includes(i.externalId))
+            .map((i) => i.id);
+        if (imageIdsRemoveSuccess.length) {
+            await this.imageRepository.delete({ id: { IN: imageIdsRemoveSuccess } });
+        }
+    }
+    async removeImageCloudinary(oid, imageRemoveList) {
+    }
+    async removeImageList(options) {
+        const { oid, idRemoveList } = options;
+        const imageWaitDeleteList = await this.imageRepository.updateAndReturnEntity({ oid, id: { IN: idRemoveList } }, { waitDelete: 1 });
+        const imageCloudinaryWaitDelete = imageWaitDeleteList.filter((i) => {
+            return i.hostType === image_entity_1.ImageHostType.Cloudinary;
+        });
+        const imageGoogleWaitDelete = imageWaitDeleteList.filter((i) => {
+            return i.hostType === image_entity_1.ImageHostType.Cloudinary;
+        });
+        await Promise.all([
+            this.removeImageCloudinary(oid, imageCloudinaryWaitDelete),
+            this.removeImageGoogleDriver(oid, imageGoogleWaitDelete),
+        ]);
     }
 };
 exports.ImageManagerService = ImageManagerService;
@@ -22055,14 +22132,13 @@ __decorate([
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.IsNumber)({}, { each: true }),
     __metadata("design:type", Array)
-], ImagesChangeBody.prototype, "imageIdsKeep", void 0);
+], ImagesChangeBody.prototype, "imageIdsWait", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.IsNumber)({}, { each: true }),
     __metadata("design:type", Array)
-], ImagesChangeBody.prototype, "filesPosition", void 0);
+], ImagesChangeBody.prototype, "externalUrlList", void 0);
 class UserInfo {
 }
 __decorate([
@@ -22147,8 +22223,7 @@ __decorate([
         }
     }),
     (0, class_validator_1.IsObject)({
-        message: ({ value }) => `Validate imagesChange failed. Value = ${JSON.stringify(value)}. Example: `
-            + JSON.stringify({ imageIdsKeep: [102, 103, 104], filesPosition: [2, 3] }),
+        message: ({ value }) => `Validate imagesChange failed. Value = ${value}`,
     }),
     __metadata("design:type", ImagesChangeBody)
 ], UserUpdateInfoBody.prototype, "imagesChange", void 0);
@@ -28676,30 +28751,24 @@ __decorate([
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
 ], TicketRadiologyUpdateBody.prototype, "startedAt", void 0);
+class ImagesChangeBody {
+}
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsNumber)({}, { each: true }),
+    __metadata("design:type", Array)
+], ImagesChangeBody.prototype, "imageIdsWait", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], ImagesChangeBody.prototype, "externalUrlList", void 0);
 class TicketRadiologyUpdateResultBody extends file_1.MultipleFileUpload {
 }
 exports.TicketRadiologyUpdateResultBody = TicketRadiologyUpdateResultBody;
-__decorate([
-    (0, swagger_1.ApiProperty)({ type: String, example: JSON.stringify([3, 4]) }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => (value != null ? JSON.parse(value) : value)),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.IsNumber)({}, { each: true }),
-    __metadata("design:type", Array)
-], TicketRadiologyUpdateResultBody.prototype, "imageIdsKeep", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ type: String, example: JSON.stringify([3, 4]) }),
-    __metadata("design:type", Object)
-], TicketRadiologyUpdateResultBody.prototype, "G", void 0);
-__decorate([
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => (value != null ? JSON.parse(value) : value)),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.IsNumber)({}, { each: true }),
-    __metadata("design:type", Array)
-], TicketRadiologyUpdateResultBody.prototype, "filesPosition", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         type: 'string',
@@ -28718,8 +28787,13 @@ __decorate([
                     forbidNonWhitelisted: true,
                     skipMissingProperties: true,
                 });
-                if (validate.length)
-                    err.push(...validate);
+                if (validate.length) {
+                    const errValidate = validate.map((i) => {
+                        const { target } = i, other = __rest(i, ["target"]);
+                        return other;
+                    });
+                    err.push(...errValidate);
+                }
                 return instance;
             });
             if (err.length)
@@ -28732,8 +28806,7 @@ __decorate([
         }
     }),
     (0, class_validator_1.IsArray)({
-        message: ({ value }) => `Validate TicketUserBasicBody failed. Value = ${JSON.stringify(value)}. Example: `
-            + JSON.stringify([{ userId: 1, roleId: 2 }]),
+        message: ({ value }) => `Validate TicketUserBasicBody failed. Value = ${JSON.stringify(value)}.`,
     }),
     __metadata("design:type", Array)
 ], TicketRadiologyUpdateResultBody.prototype, "ticketUserList", void 0);
@@ -28770,6 +28843,37 @@ __decorate([
     }),
     __metadata("design:type", TicketRadiologyUpdateBody)
 ], TicketRadiologyUpdateResultBody.prototype, "ticketRadiology", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        if (value === undefined)
+            return undefined;
+        try {
+            const instance = Object.assign(new ImagesChangeBody(), JSON.parse(value));
+            const validate = (0, class_validator_1.validateSync)(instance, {
+                whitelist: true,
+                forbidNonWhitelisted: true,
+                skipMissingProperties: true,
+            });
+            if (validate.length) {
+                const errValidate = validate.map((i) => {
+                    const { target } = i, other = __rest(i, ["target"]);
+                    return other;
+                });
+                return JSON.stringify(errValidate);
+            }
+            return instance;
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsObject)({
+        message: ({ value }) => `Validate imagesChange failed. Value = ${value}`,
+    }),
+    __metadata("design:type", ImagesChangeBody)
+], TicketRadiologyUpdateResultBody.prototype, "imagesChange", void 0);
 
 
 /***/ }),
@@ -29007,13 +29111,15 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketReceptionUpdateTicketBody = exports.TicketReceptionCreateTicketBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
 const class_validator_1 = __webpack_require__(261);
+const helpers_1 = __webpack_require__(204);
 const class_validator_custom_1 = __webpack_require__(262);
+const variable_1 = __webpack_require__(21);
 const ticket_entity_1 = __webpack_require__(62);
 const request_1 = __webpack_require__(356);
 const ticket_clinic_update_user_list_body_1 = __webpack_require__(353);
@@ -29089,6 +29195,76 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], TicketReceptionCreate.prototype, "customType", void 0);
+class TicketProcedureBody {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 56 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketProcedureBody.prototype, "priority", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 12 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketProcedureBody.prototype, "procedureId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: variable_1.PaymentMoneyStatus.NoEffect }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsEnumValue)(variable_1.PaymentMoneyStatus),
+    (0, class_validator_1.IsIn)([variable_1.PaymentMoneyStatus.NoEffect, variable_1.PaymentMoneyStatus.Pending]),
+    __metadata("design:type", typeof (_c = typeof variable_1.PaymentMoneyStatus !== "undefined" && variable_1.PaymentMoneyStatus) === "function" ? _c : Object)
+], TicketProcedureBody.prototype, "paymentMoneyStatus", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 4 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsNumberGreaterThan)(0),
+    __metadata("design:type", Number)
+], TicketProcedureBody.prototype, "quantity", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 25000 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketProcedureBody.prototype, "expectedPrice", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 22500 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => Math.round(value || 0)),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketProcedureBody.prototype, "discountMoney", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 22500 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Max)(100),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], TicketProcedureBody.prototype, "discountPercent", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: (0, helpers_1.valuesEnum)(variable_1.DiscountType), example: variable_1.DiscountType.VND }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsEnumValue)(variable_1.DiscountType),
+    __metadata("design:type", typeof (_d = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _d : Object)
+], TicketProcedureBody.prototype, "discountType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 22500 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => Math.round(value || 0)),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketProcedureBody.prototype, "actualPrice", void 0);
 class TicketReceptionUpdate extends (0, swagger_1.PickType)(TicketReceptionCreate, [
     'roomId',
     'customerSourceId',
@@ -29118,11 +29294,19 @@ __decorate([
     __metadata("design:type", Array)
 ], TicketReceptionCreateTicketBody.prototype, "ticketUserList", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({ type: TicketProcedureBody, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => TicketProcedureBody),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], TicketReceptionCreateTicketBody.prototype, "ticketProcedureList", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({ type: request_1.CustomerCreateBody }),
     (0, class_transformer_1.Expose)(),
     (0, class_transformer_1.Type)(() => request_1.CustomerCreateBody),
     (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", typeof (_c = typeof request_1.CustomerCreateBody !== "undefined" && request_1.CustomerCreateBody) === "function" ? _c : Object)
+    __metadata("design:type", typeof (_e = typeof request_1.CustomerCreateBody !== "undefined" && request_1.CustomerCreateBody) === "function" ? _e : Object)
 ], TicketReceptionCreateTicketBody.prototype, "customer", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: TicketReceptionCreate }),
@@ -37543,13 +37727,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiOrganizationController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
 const fastify_1 = __webpack_require__(465);
-const file_1 = __webpack_require__(281);
 const user_guard_1 = __webpack_require__(182);
 const interceptor_1 = __webpack_require__(269);
 const external_request_1 = __webpack_require__(256);
@@ -37563,11 +37746,8 @@ let ApiOrganizationController = class ApiOrganizationController {
     async info({ oid }) {
         return await this.apiOrganizationService.getInfo(oid);
     }
-    async updateInfo({ oid }, body) {
-        return await this.apiOrganizationService.updateInfo(oid, body);
-    }
-    async updateInfoAndLogo({ oid }, file, body) {
-        return await this.apiOrganizationService.updateInfoAndLogo({ oid, body, file });
+    async updateInfoAndLogo({ oid }, files, body) {
+        return await this.apiOrganizationService.updateInfo({ oid, body, files });
     }
     async changeEmail({ oid }, body) {
         return await this.apiOrganizationService.changeEmail(oid, body.email);
@@ -37592,22 +37772,13 @@ __decorate([
 __decorate([
     (0, common_1.Patch)('update-info'),
     (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.ORGANIZATION_UPDATE_INFO),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_c = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _c : Object, typeof (_d = typeof request_1.OrganizationUpdateInfoBody !== "undefined" && request_1.OrganizationUpdateInfoBody) === "function" ? _d : Object]),
-    __metadata("design:returntype", Promise)
-], ApiOrganizationController.prototype, "updateInfo", null);
-__decorate([
-    (0, common_1.Patch)('update-info-and-logo'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.ORGANIZATION_UPDATE_INFO),
     (0, swagger_1.ApiConsumes)('multipart/form-data'),
-    (0, common_1.UseInterceptors)((0, interceptor_1.FastifyFileInterceptor)('file', {})),
+    (0, common_1.UseInterceptors)((0, interceptor_1.FastifyFilesInterceptor)('files', 10, {})),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.UploadedFile)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _e : Object, typeof (_f = typeof file_1.FileUploadDto !== "undefined" && file_1.FileUploadDto) === "function" ? _f : Object, typeof (_g = typeof request_1.OrganizationUpdateInfoAndLogoBody !== "undefined" && request_1.OrganizationUpdateInfoAndLogoBody) === "function" ? _g : Object]),
+    __metadata("design:paramtypes", [typeof (_c = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _c : Object, Array, typeof (_d = typeof request_1.OrganizationUpdateBody !== "undefined" && request_1.OrganizationUpdateBody) === "function" ? _d : Object]),
     __metadata("design:returntype", Promise)
 ], ApiOrganizationController.prototype, "updateInfoAndLogo", null);
 __decorate([
@@ -37616,7 +37787,7 @@ __decorate([
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_h = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _h : Object, typeof (_j = typeof request_1.OrganizationChangeEmailBody !== "undefined" && request_1.OrganizationChangeEmailBody) === "function" ? _j : Object]),
+    __metadata("design:paramtypes", [typeof (_e = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _e : Object, typeof (_f = typeof request_1.OrganizationChangeEmailBody !== "undefined" && request_1.OrganizationChangeEmailBody) === "function" ? _f : Object]),
     __metadata("design:returntype", Promise)
 ], ApiOrganizationController.prototype, "changeEmail", null);
 __decorate([
@@ -37624,7 +37795,7 @@ __decorate([
     (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.ORGANIZATION_VERIFY_EMAIL),
     __param(0, (0, external_request_1.External)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_k = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _k : Object]),
+    __metadata("design:paramtypes", [typeof (_g = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _g : Object]),
     __metadata("design:returntype", Promise)
 ], ApiOrganizationController.prototype, "sendEmailVerifyOrganizationEmail", null);
 __decorate([
@@ -37632,7 +37803,7 @@ __decorate([
     __param(0, (0, common_1.Res)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_l = typeof fastify_1.FastifyReply !== "undefined" && fastify_1.FastifyReply) === "function" ? _l : Object, typeof (_m = typeof request_1.VerifyOrganizationEmailQuery !== "undefined" && request_1.VerifyOrganizationEmailQuery) === "function" ? _m : Object]),
+    __metadata("design:paramtypes", [typeof (_h = typeof fastify_1.FastifyReply !== "undefined" && fastify_1.FastifyReply) === "function" ? _h : Object, typeof (_j = typeof request_1.VerifyOrganizationEmailQuery !== "undefined" && request_1.VerifyOrganizationEmailQuery) === "function" ? _j : Object]),
     __metadata("design:returntype", Promise)
 ], ApiOrganizationController.prototype, "verifyOrganizationEmail", null);
 exports.ApiOrganizationController = ApiOrganizationController = __decorate([
@@ -37698,34 +37869,28 @@ let ApiOrganizationService = class ApiOrganizationService {
         this.cacheDataService.updateOrganizationInfo(organization);
         return { data: { organization } };
     }
-    async updateInfo(oid, body) {
-        const [organization] = await this.organizationRepository.updateAndReturnEntity({ id: oid }, body);
-        if (!organization) {
-            throw new exception_filter_1.BusinessException('error.Database.UpdateFailed');
-        }
-        this.cacheDataService.updateOrganizationInfo(organization);
-        return { data: { organization } };
-    }
-    async updateInfoAndLogo(options) {
-        const { oid, body, file } = options;
+    async updateInfo(options) {
+        const { oid, body, files } = options;
+        const { organizationInfo } = body;
         const organizationOrigin = await this.organizationRepository.findOneById(oid);
         let image;
-        if (organizationOrigin.logoImageId) {
-            image = await this.imageRepository.findOneBy({ oid, id: organizationOrigin.logoImageId });
+        let logoImageId = organizationOrigin.logoImageId || 0;
+        if (body.imagesChange) {
+            const logoIdNewList = await this.imageManagerService.changeCloudinaryImageLink({
+                oid,
+                customerId: 0,
+                files,
+                imageIdsWait: [0],
+                externalUrlList: body.imagesChange.externalUrlList,
+                imageIdsOld: [organizationOrigin.logoImageId || 0],
+            });
+            logoImageId = logoIdNewList[0];
         }
-        const [logoImageId] = await this.imageManagerService.changeImageList({
-            oid,
-            customerId: 0,
-            files: [file],
-            filesPosition: [0],
-            imageIdsKeep: [],
-            imageIdsOld: image ? [image.id] : [],
-        });
-        const [organization] = await this.organizationRepository.updateAndReturnEntity({ id: oid }, {
-            name: body.name,
-            addressProvince: body.addressProvince,
-            addressWard: body.addressWard,
-            addressStreet: body.addressStreet,
+        const organization = await this.organizationRepository.updateOneAndReturnEntity({ id: oid }, {
+            name: organizationInfo.name,
+            addressProvince: organizationInfo.addressProvince,
+            addressWard: organizationInfo.addressWard,
+            addressStreet: organizationInfo.addressStreet,
             logoImageId,
         });
         if (!organization)
@@ -38026,46 +38191,134 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.OrganizationUpdateInfoBody = exports.OrganizationUpdateInfoAndLogoBody = void 0;
+exports.OrganizationUpdateBody = exports.OrganizationInfoBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
 const class_validator_1 = __webpack_require__(261);
 const file_1 = __webpack_require__(281);
-class OrganizationUpdateInfoAndLogoBody extends file_1.SingleFileUpload {
+class OrganizationInfoBody {
 }
-exports.OrganizationUpdateInfoAndLogoBody = OrganizationUpdateInfoAndLogoBody;
+exports.OrganizationInfoBody = OrganizationInfoBody;
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'Phòng khám đa khoa Medical' }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], OrganizationUpdateInfoAndLogoBody.prototype, "name", void 0);
+], OrganizationInfoBody.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'Tỉnh Lâm Đồng' }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], OrganizationUpdateInfoAndLogoBody.prototype, "addressProvince", void 0);
+], OrganizationInfoBody.prototype, "addressProvince", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'Xã Tiên Hoàng' }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], OrganizationUpdateInfoAndLogoBody.prototype, "addressWard", void 0);
+], OrganizationInfoBody.prototype, "addressWard", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ example: 'Thôn Trần Lệ Mai' }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], OrganizationUpdateInfoAndLogoBody.prototype, "addressStreet", void 0);
-class OrganizationUpdateInfoBody extends (0, swagger_1.OmitType)(OrganizationUpdateInfoAndLogoBody, ['file']) {
+], OrganizationInfoBody.prototype, "addressStreet", void 0);
+class ImagesChangeBody {
 }
-exports.OrganizationUpdateInfoBody = OrganizationUpdateInfoBody;
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsNumber)({}, { each: true }),
+    __metadata("design:type", Array)
+], ImagesChangeBody.prototype, "imageIdsWait", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsArray)(),
+    __metadata("design:type", Array)
+], ImagesChangeBody.prototype, "externalUrlList", void 0);
+class OrganizationUpdateBody extends file_1.MultipleFileUpload {
+}
+exports.OrganizationUpdateBody = OrganizationUpdateBody;
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        if (value === undefined)
+            return undefined;
+        try {
+            const instance = Object.assign(new OrganizationInfoBody(), JSON.parse(value));
+            const validate = (0, class_validator_1.validateSync)(instance, {
+                whitelist: true,
+                forbidNonWhitelisted: true,
+                skipMissingProperties: true,
+            });
+            if (validate.length) {
+                const errValidate = validate.map((i) => {
+                    const { target } = i, other = __rest(i, ["target"]);
+                    return other;
+                });
+                return JSON.stringify(errValidate);
+            }
+            return instance;
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsObject)({
+        message: ({ value }) => `Validate organizationInfoBody failed. Value = ${value} `,
+    }),
+    __metadata("design:type", OrganizationInfoBody)
+], OrganizationUpdateBody.prototype, "organizationInfo", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        if (value === undefined)
+            return undefined;
+        try {
+            const instance = Object.assign(new ImagesChangeBody(), JSON.parse(value));
+            const validate = (0, class_validator_1.validateSync)(instance, {
+                whitelist: true,
+                forbidNonWhitelisted: true,
+                skipMissingProperties: true,
+            });
+            if (validate.length) {
+                const errValidate = validate.map((i) => {
+                    const { target } = i, other = __rest(i, ["target"]);
+                    return other;
+                });
+                return JSON.stringify(errValidate);
+            }
+            return instance;
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsObject)({
+        message: ({ value }) => `Validate imagesChange failed. Value = ${value}`,
+    }),
+    __metadata("design:type", ImagesChangeBody)
+], OrganizationUpdateBody.prototype, "imagesChange", void 0);
 
 
 /***/ }),
@@ -57168,13 +57421,9 @@ let ApiTicketClinicRadiologyService = class ApiTicketClinicRadiologyService {
         if (ticketRadiologyOrigin.status === ticket_radiology_entity_1.TicketRadiologyStatus.Completed) {
             throw new error_1.BusinessError('Phiếu đã hoàn thành không thể xóa');
         }
-        const imageIdsUpdate = await this.imageManagerService.changeImageList({
+        const imageIdsUpdate = await this.imageManagerService.removeImageList({
             oid,
-            customerId: ticketRadiologyOrigin.customerId,
-            files: [],
-            filesPosition: [],
-            imageIdsKeep: [],
-            imageIdsOld: JSON.parse(ticketRadiologyOrigin.imageIds),
+            idRemoveList: JSON.parse(ticketRadiologyOrigin.imageIds),
         });
         const result = await this.ticketClinicDestroyTicketRadiologyOperation.destroyTicketRadiology({
             oid,
@@ -57731,12 +57980,12 @@ let ApiTicketClinicService = class ApiTicketClinicService {
         const { imagesChange, ticketAttributeChangeList, ticketAttributeKeyList } = body;
         let ticket = await this.ticketRepository.updateOneAndReturnEntity({ oid, id: ticketId }, { note: body.note });
         if (imagesChange) {
-            const imageIdsUpdate = await this.imageManagerService.changeImageList({
+            const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
                 oid,
                 customerId: ticket.customerId,
                 files,
-                filesPosition: imagesChange.filesPosition,
-                imageIdsKeep: imagesChange.imageIdsKeep,
+                imageIdsWait: imagesChange.imageIdsWait,
+                externalUrlList: imagesChange.externalUrlList,
                 imageIdsOld: JSON.parse(ticket.imageIds || '[]'),
             });
             if (ticket.imageIds !== JSON.stringify(imageIdsUpdate)) {
@@ -57797,6 +58046,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdateDiagnosisBody = void 0;
 const swagger_1 = __webpack_require__(6);
@@ -57825,14 +58085,13 @@ __decorate([
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.IsNumber)({}, { each: true }),
     __metadata("design:type", Array)
-], ImagesChangeBody.prototype, "imageIdsKeep", void 0);
+], ImagesChangeBody.prototype, "imageIdsWait", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.IsNumber)({}, { each: true }),
     __metadata("design:type", Array)
-], ImagesChangeBody.prototype, "filesPosition", void 0);
+], ImagesChangeBody.prototype, "externalUrlList", void 0);
 class TicketClinicUpdateDiagnosisBody extends file_1.MultipleFileUpload {
 }
 exports.TicketClinicUpdateDiagnosisBody = TicketClinicUpdateDiagnosisBody;
@@ -57861,8 +58120,13 @@ __decorate([
                     forbidNonWhitelisted: true,
                     skipMissingProperties: true,
                 });
-                if (validate.length)
-                    err.push(...validate);
+                if (validate.length) {
+                    const errValidate = validate.map((i) => {
+                        const { target } = i, other = __rest(i, ["target"]);
+                        return other;
+                    });
+                    err.push(...errValidate);
+                }
                 return instance;
             });
             if (err.length)
@@ -57917,18 +58181,20 @@ __decorate([
                 forbidNonWhitelisted: true,
                 skipMissingProperties: true,
             });
-            if (validate.length)
-                return JSON.stringify(validate);
+            if (validate.length) {
+                const errValidate = validate.map((i) => {
+                    const { target } = i, other = __rest(i, ["target"]);
+                    return other;
+                });
+                return JSON.stringify(errValidate);
+            }
             return instance;
         }
         catch (error) {
             return error.message;
         }
     }),
-    (0, class_validator_1.IsObject)({
-        message: ({ value }) => `Validate imagesChange failed. Value = ${JSON.stringify(value)}. Example: `
-            + JSON.stringify({ imageIdsKeep: [102, 103, 104], filesPosition: [2, 3] }),
-    }),
+    (0, class_validator_1.IsObject)({ message: ({ value }) => `Validate imagesChange failed. Value = ${value}` }),
     __metadata("design:type", ImagesChangeBody)
 ], TicketClinicUpdateDiagnosisBody.prototype, "imagesChange", void 0);
 
@@ -58786,13 +59052,9 @@ let TicketActionService = class TicketActionService {
         if (ticket.ticketRadiologyList.find((i) => i.status === ticket_radiology_entity_1.TicketRadiologyStatus.Completed)) {
             throw new error_1.BusinessError('Không thể hủy phiếu CĐHA đã có kết quả, cần hủy kết quả trước');
         }
-        await this.imageManagerService.changeImageList({
+        await this.imageManagerService.removeImageList({
             oid,
-            customerId: ticket.customerId,
-            files: [],
-            filesPosition: [],
-            imageIdsKeep: [],
-            imageIdsOld: JSON.parse(ticket.imageIds || '[]'),
+            idRemoveList: JSON.parse(ticket.imageIds || '[]'),
         });
         await this.ticketRepository.update({ oid, id: ticketId }, { status: ticket_entity_1.TicketStatus.Cancelled });
         await this.ticketRepository.destroy({ oid, ticketId });
@@ -60375,12 +60637,12 @@ let ApiTicketRadiologyAction = class ApiTicketRadiologyAction {
             id: ticketRadiologyId,
         });
         const { ticketId, customerId } = ticketRadiologyOrigin;
-        const imageIdsUpdate = await this.imageManagerService.changeImageList({
+        const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
             oid,
             customerId,
             files,
-            filesPosition: body.filesPosition,
-            imageIdsKeep: body.imageIdsKeep,
+            imageIdsWait: body.imagesChange.imageIdsWait,
+            externalUrlList: body.imagesChange.externalUrlList,
             imageIdsOld: JSON.parse(ticketRadiologyOrigin.imageIds),
         });
         const ticketRadiologyModified = await this.ticketRadiologyRepository.updateOneAndReturnEntity({
@@ -60429,13 +60691,9 @@ let ApiTicketRadiologyAction = class ApiTicketRadiologyAction {
             oid,
             id: ticketRadiologyId,
         });
-        const imageIdsUpdate = await this.imageManagerService.changeImageList({
+        const imageIdsUpdate = await this.imageManagerService.removeImageList({
             oid,
-            customerId: ticketRadiologyOrigin.customerId,
-            files: [],
-            filesPosition: [],
-            imageIdsKeep: [],
-            imageIdsOld: JSON.parse(ticketRadiologyOrigin.imageIds),
+            idRemoveList: JSON.parse(ticketRadiologyOrigin.imageIds),
         });
         const ticketRadiologyModified = await this.ticketRadiologyRepository.updateOneAndReturnEntity({
             oid,
@@ -63379,7 +63637,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g, _h;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketReceptionService = void 0;
 const common_1 = __webpack_require__(3);
@@ -63388,20 +63646,25 @@ const time_helper_1 = __webpack_require__(174);
 const variable_1 = __webpack_require__(21);
 const appointment_entity_1 = __webpack_require__(47);
 const position_entity_1 = __webpack_require__(77);
+const ticket_procedure_entity_1 = __webpack_require__(68);
 const ticket_entity_1 = __webpack_require__(62);
+const operations_1 = __webpack_require__(189);
 const repositories_1 = __webpack_require__(42);
 const socket_emit_service_1 = __webpack_require__(372);
 const ticket_user_service_1 = __webpack_require__(769);
 let TicketReceptionService = class TicketReceptionService {
-    constructor(socketEmitService, customerRepository, appointmentRepository, ticketRepository, ticketAttributeRepository, ticketUserService) {
+    constructor(socketEmitService, ticketRepository, ticketProcedureRepository, customerRepository, appointmentRepository, ticketAttributeRepository, ticketUserService, ticketChangeItemMoneyManager) {
         this.socketEmitService = socketEmitService;
+        this.ticketRepository = ticketRepository;
+        this.ticketProcedureRepository = ticketProcedureRepository;
         this.customerRepository = customerRepository;
         this.appointmentRepository = appointmentRepository;
-        this.ticketRepository = ticketRepository;
         this.ticketAttributeRepository = ticketAttributeRepository;
         this.ticketUserService = ticketUserService;
+        this.ticketChangeItemMoneyManager = ticketChangeItemMoneyManager;
     }
     async receptionCreate(options) {
+        var _a;
         const { oid, body } = options;
         const { ticketReception } = body;
         let customer;
@@ -63436,7 +63699,7 @@ let TicketReceptionService = class TicketReceptionService {
                 maxDailyIndex = i.dailyIndex;
             }
         });
-        const ticket = await this.ticketRepository.insertOneFullFieldAndReturnEntity({
+        let ticket = await this.ticketRepository.insertOneFullFieldAndReturnEntity({
             oid,
             customerId: customer.id,
             roomId: ticketReception.roomId,
@@ -63502,6 +63765,28 @@ let TicketReceptionService = class TicketReceptionService {
                 },
             });
         }
+        if ((_a = body.ticketProcedureList) === null || _a === void 0 ? void 0 : _a.length) {
+            const ticketProcedureInsertList = body.ticketProcedureList.map((i) => {
+                const insert = Object.assign(Object.assign({}, i), { customerId: ticket.customerId, status: ticket_procedure_entity_1.TicketProcedureStatus.Completed, oid, imageIds: JSON.stringify([]), startedAt: Date.now(), ticketId: ticket.id, result: '' });
+                return insert;
+            });
+            const ticketProcedureCreatedList = await this.ticketProcedureRepository.insertManyAndReturnEntity(ticketProcedureInsertList);
+            const procedureMoney = ticketProcedureCreatedList.reduce((acc, cur) => {
+                return acc + cur.quantity * cur.actualPrice;
+            }, 0);
+            const procedureDiscount = ticketProcedureCreatedList.reduce((acc, cur) => {
+                return acc + cur.quantity * cur.discountMoney;
+            }, 0);
+            ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
+                manager: this.ticketRepository.getManager(),
+                oid,
+                ticketOrigin: ticket,
+                itemMoney: {
+                    procedureMoneyAdd: procedureMoney,
+                    itemsDiscountAdd: procedureDiscount,
+                },
+            });
+        }
         this.socketEmitService.socketTicketChange(oid, { type: 'CREATE', ticket });
         return { ticket };
     }
@@ -63562,7 +63847,7 @@ let TicketReceptionService = class TicketReceptionService {
 exports.TicketReceptionService = TicketReceptionService;
 exports.TicketReceptionService = TicketReceptionService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof repositories_1.CustomerRepository !== "undefined" && repositories_1.CustomerRepository) === "function" ? _b : Object, typeof (_c = typeof repositories_1.AppointmentRepository !== "undefined" && repositories_1.AppointmentRepository) === "function" ? _c : Object, typeof (_d = typeof repositories_1.TicketRepository !== "undefined" && repositories_1.TicketRepository) === "function" ? _d : Object, typeof (_e = typeof repositories_1.TicketAttributeRepository !== "undefined" && repositories_1.TicketAttributeRepository) === "function" ? _e : Object, typeof (_f = typeof ticket_user_service_1.TicketUserService !== "undefined" && ticket_user_service_1.TicketUserService) === "function" ? _f : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof repositories_1.TicketRepository !== "undefined" && repositories_1.TicketRepository) === "function" ? _b : Object, typeof (_c = typeof repositories_1.TicketProcedureRepository !== "undefined" && repositories_1.TicketProcedureRepository) === "function" ? _c : Object, typeof (_d = typeof repositories_1.CustomerRepository !== "undefined" && repositories_1.CustomerRepository) === "function" ? _d : Object, typeof (_e = typeof repositories_1.AppointmentRepository !== "undefined" && repositories_1.AppointmentRepository) === "function" ? _e : Object, typeof (_f = typeof repositories_1.TicketAttributeRepository !== "undefined" && repositories_1.TicketAttributeRepository) === "function" ? _f : Object, typeof (_g = typeof ticket_user_service_1.TicketUserService !== "undefined" && ticket_user_service_1.TicketUserService) === "function" ? _g : Object, typeof (_h = typeof operations_1.TicketChangeItemMoneyManager !== "undefined" && operations_1.TicketChangeItemMoneyManager) === "function" ? _h : Object])
 ], TicketReceptionService);
 
 

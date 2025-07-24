@@ -80,12 +80,12 @@ export class ApiMeService {
 
     let imageIdsStringifyUpdate = userOrigin.imageIds
     if (imagesChange) {
-      const imageIdsUpdate = await this.imageManagerService.changeImageList({
+      const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
         oid,
         customerId: userId,
         files,
-        filesPosition: imagesChange.filesPosition,
-        imageIdsKeep: imagesChange.imageIdsKeep,
+        imageIdsWait: body.imagesChange.imageIdsWait,
+        externalUrlList: body.imagesChange.externalUrlList,
         imageIdsOld: JSON.parse(userOrigin.imageIds || '[]'),
       })
       imageIdsStringifyUpdate = JSON.stringify(imageIdsUpdate)

@@ -8,9 +8,7 @@ import {
   TicketClinicDestroyTicketRadiologyOperation,
   TicketClinicUpdateTicketRadiologyOperation,
 } from '../../../../../_libs/database/operations'
-import {
-  TicketRadiologyRepository,
-} from '../../../../../_libs/database/repositories'
+import { TicketRadiologyRepository } from '../../../../../_libs/database/repositories'
 import { ImageManagerService } from '../../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { ApiTicketClinicUserService } from '../api-ticket-clinic-user/api-ticket-clinic-user.service'
@@ -76,13 +74,9 @@ export class ApiTicketClinicRadiologyService {
       throw new BusinessError('Phiếu đã hoàn thành không thể xóa')
     }
 
-    const imageIdsUpdate = await this.imageManagerService.changeImageList({
+    const imageIdsUpdate = await this.imageManagerService.removeImageList({
       oid,
-      customerId: ticketRadiologyOrigin.customerId,
-      files: [],
-      filesPosition: [],
-      imageIdsKeep: [],
-      imageIdsOld: JSON.parse(ticketRadiologyOrigin.imageIds),
+      idRemoveList: JSON.parse(ticketRadiologyOrigin.imageIds),
     })
 
     const result = await this.ticketClinicDestroyTicketRadiologyOperation.destroyTicketRadiology({

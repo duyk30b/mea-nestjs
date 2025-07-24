@@ -327,13 +327,9 @@ export class TicketActionService {
       throw new BusinessError('Không thể hủy phiếu CĐHA đã có kết quả, cần hủy kết quả trước')
     }
 
-    await this.imageManagerService.changeImageList({
+    await this.imageManagerService.removeImageList({
       oid,
-      customerId: ticket.customerId,
-      files: [],
-      filesPosition: [],
-      imageIdsKeep: [],
-      imageIdsOld: JSON.parse(ticket.imageIds || '[]'),
+      idRemoveList: JSON.parse(ticket.imageIds || '[]'),
     })
     await this.ticketRepository.update({ oid, id: ticketId }, { status: TicketStatus.Cancelled })
     await this.ticketRepository.destroy({ oid, ticketId })

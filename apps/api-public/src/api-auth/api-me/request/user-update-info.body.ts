@@ -20,13 +20,12 @@ class ImagesChangeBody {
   @IsDefined()
   @IsArray()
   @IsNumber({}, { each: true })
-  imageIdsKeep: number[]
+  imageIdsWait: number[]
 
   @Expose()
   @IsDefined()
   @IsArray()
-  @IsNumber({}, { each: true })
-  filesPosition: number[]
+  externalUrlList: string[]
 }
 
 class UserInfo {
@@ -101,9 +100,7 @@ export class UserUpdateInfoBody extends MultipleFileUpload {
     }
   })
   @IsObject({
-    message: ({ value }) =>
-      `Validate imagesChange failed. Value = ${JSON.stringify(value)}. Example: `
-      + JSON.stringify(<ImagesChangeBody>{ imageIdsKeep: [102, 103, 104], filesPosition: [2, 3] }),
+    message: ({ value }) => `Validate imagesChange failed. Value = ${value}`,
   })
   imagesChange: ImagesChangeBody
 }
