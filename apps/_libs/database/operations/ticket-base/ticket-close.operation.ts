@@ -159,6 +159,11 @@ export class TicketCloseOperation {
           voucherItemId: 0,
           paymentInteractId: 0,
 
+          discountMoney: 0,
+          discountPercent: 0,
+          expectedPrice: 0,
+          actualPrice: 0,
+          quantity: 1,
           paidAmount: 0,
           debtAmount: paidByTopUp + ticketFix.debt,
           openDebt: customerOrigin.debt,

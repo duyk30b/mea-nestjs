@@ -25,7 +25,7 @@ class PaymentPayDebt {
   @Expose()
   @IsDefined()
   @IsNumberGreaterThan(0)
-  amount: number
+  paidAmount: number
 }
 
 class PaymentPrepaymentReceiptItem {
@@ -50,7 +50,27 @@ class PaymentPrepaymentReceiptItem {
   @Expose()
   @IsDefined()
   @IsNumberGreaterThan(0)
-  amount: number
+  paidAmount: number
+
+  @Expose()
+  @IsDefined()
+  expectedPrice: number
+
+  @Expose()
+  @IsDefined()
+  actualPrice: number
+
+  @Expose()
+  @IsDefined()
+  quantity: number
+
+  @Expose()
+  @IsDefined()
+  discountMoney: number
+
+  @Expose()
+  @IsDefined()
+  discountPercent: number
 }
 
 class PaymentPrepayment {

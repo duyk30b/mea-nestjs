@@ -103,6 +103,12 @@ export class CustomerRefundOperation {
         note: note || '',
         createdAt: time,
         cashierId,
+
+        expectedPrice: -money,
+        actualPrice: -money,
+        quantity: 1,
+        discountMoney: 0,
+        discountPercent: 0,
         paidAmount: -money,
         debtAmount: 0,
         openDebt: customerOpenDebt,

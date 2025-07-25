@@ -72,10 +72,15 @@ export class ApiReceiptAction {
             receiptId,
             itemList: [
               {
-                amount: body.money,
+                paidAmount: body.money,
                 receiptItemId: 0,
                 voucherItemType: PaymentVoucherItemType.Other,
                 paymentInteractId: 0,
+                discountMoney: 0,
+                discountPercent: 0,
+                expectedPrice: body.money,
+                actualPrice: body.money,
+                quantity: 1,
               },
             ],
           },

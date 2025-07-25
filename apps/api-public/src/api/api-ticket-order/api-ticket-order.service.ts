@@ -181,10 +181,15 @@ export class ApiTicketOrderService {
               ticketId,
               itemList: [
                 {
-                  amount: paid,
+                  paidAmount: paid,
                   ticketItemId: 0,
                   voucherItemType: PaymentVoucherItemType.Other,
                   paymentInteractId: 0,
+                  discountMoney: 0,
+                  discountPercent: 0,
+                  expectedPrice: paid,
+                  actualPrice: paid,
+                  quantity: 1,
                 },
               ],
             },
@@ -286,10 +291,15 @@ export class ApiTicketOrderService {
               ticketId,
               itemList: [
                 {
-                  amount: paidBody,
                   ticketItemId: 0,
                   voucherItemType: PaymentVoucherItemType.Other,
                   paymentInteractId: 0,
+                  discountMoney: 0,
+                  discountPercent: 0,
+                  paidAmount: paidBody,
+                  expectedPrice: paidBody,
+                  actualPrice: paidBody,
+                  quantity: 1,
                 },
               ],
             },
@@ -357,7 +367,12 @@ export class ApiTicketOrderService {
               ticketId,
               itemList: [
                 {
-                  amount: body.money,
+                  paidAmount: body.money,
+                  expectedPrice: body.money,
+                  actualPrice: body.money,
+                  quantity: 1,
+                  discountMoney: 0,
+                  discountPercent: 0,
                   ticketItemId: 0,
                   voucherItemType: PaymentVoucherItemType.Other,
                   paymentInteractId: 0,

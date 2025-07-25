@@ -205,6 +205,11 @@ export class ApiFileCustomerUploadExcel {
             voucherItemId: 0,
             paymentInteractId: 0,
 
+            discountMoney: 0,
+            discountPercent: 0,
+            expectedPrice: -(i.debtUpdate - i.debtOrigin),
+            actualPrice: -(i.debtUpdate - i.debtOrigin),
+            quantity: 1,
             paidAmount: -(i.debtUpdate - i.debtOrigin),
             debtAmount: i.debtUpdate - i.debtOrigin,
             openDebt: i.debtOrigin,

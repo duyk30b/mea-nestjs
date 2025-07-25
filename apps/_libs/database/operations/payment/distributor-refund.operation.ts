@@ -104,6 +104,12 @@ export class DistributorRefundOperation {
         note: note || 'Hoàn trả',
         createdAt: time,
         cashierId,
+
+        expectedPrice: -money,
+        actualPrice: -money,
+        quantity: 1,
+        discountMoney: 0,
+        discountPercent: 0,
         paidAmount: -money,
         debtAmount: 0,
         openDebt: distributorOpenDebt,

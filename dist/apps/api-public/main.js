@@ -6950,6 +6950,49 @@ __decorate([
     }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Number)
+], PaymentItem.prototype, "expectedPrice", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'bigint',
+        default: 0,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], PaymentItem.prototype, "discountMoney", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'decimal',
+        default: 0,
+        precision: 7,
+        scale: 3,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], PaymentItem.prototype, "discountPercent", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'bigint',
+        default: 0,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], PaymentItem.prototype, "actualPrice", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 1 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], PaymentItem.prototype, "quantity", void 0);
+__decorate([
+    (0, typeorm_1.Column)({
+        type: 'bigint',
+        default: 0,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
 ], PaymentItem.prototype, "paidAmount", void 0);
 __decorate([
     (0, typeorm_1.Column)({
@@ -14901,6 +14944,11 @@ let ReceiptCloseOperation = class ReceiptCloseOperation {
                     voucherItemType: payment_item_entity_1.PaymentVoucherItemType.Other,
                     voucherItemId: 0,
                     paymentInteractId: 0,
+                    discountMoney: 0,
+                    discountPercent: 0,
+                    expectedPrice: 0,
+                    actualPrice: 0,
+                    quantity: 1,
                     paidAmount: 0,
                     debtAmount: paidByTopUp + newDebtReceipt,
                     openDebt: distributorOrigin.debt,
@@ -15110,6 +15158,11 @@ let ReceiptReopenOperation = class ReceiptReopenOperation {
                     voucherItemType: payment_item_entity_1.PaymentVoucherItemType.Other,
                     voucherItemId: 0,
                     paymentInteractId: 0,
+                    discountMoney: 0,
+                    discountPercent: 0,
+                    expectedPrice: 0,
+                    actualPrice: 0,
+                    quantity: 1,
                     paidAmount: 0,
                     debtAmount: -receiptModified.debt,
                     openDebt: distributorOpenDebt,
@@ -15776,23 +15829,26 @@ let TicketChangeAllMoneyOperator = class TicketChangeAllMoneyOperator {
         const ticketId = options.ticketUpdate.id;
         const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
             const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(manager, { oid, id: ticketId, status: ticket_entity_1.TicketStatus.Executing }, { updatedAt: Date.now() });
-            let ticketProductModifiedList = await this.ticketProductManager.bulkUpdate({
+            const ticketProductModifiedList = await this.ticketProductManager.bulkUpdate({
                 manager,
-                condition: { oid, ticketId, deliveryStatus: variable_1.DeliveryStatus.Pending },
+                condition: {
+                    oid,
+                    ticketId,
+                    deliveryStatus: variable_1.DeliveryStatus.Pending,
+                    paymentMoneyStatus: { IN: [variable_1.PaymentMoneyStatus.NoEffect, variable_1.PaymentMoneyStatus.Pending] },
+                },
                 compare: ['id'],
                 tempList: options.ticketProductUpdate,
                 update: ['quantity', 'discountMoney', 'discountPercent', 'discountType', 'actualPrice'],
-                options: { requireEqualLength: false },
+                options: { requireEqualLength: true },
             });
-            if (ticketProductModifiedList.length !== options.ticketProductUpdate.length) {
-                ticketProductModifiedList = await this.ticketProductManager.findManyBy(manager, {
-                    oid,
-                    ticketId,
-                });
-            }
             const ticketProcedureModifiedList = await this.ticketProcedureManager.bulkUpdate({
                 manager,
-                condition: { oid, ticketId },
+                condition: {
+                    oid,
+                    ticketId,
+                    paymentMoneyStatus: { IN: [variable_1.PaymentMoneyStatus.NoEffect, variable_1.PaymentMoneyStatus.Pending] },
+                },
                 compare: ['id'],
                 tempList: options.ticketProcedureUpdate,
                 update: ['quantity', 'discountMoney', 'discountPercent', 'discountType', 'actualPrice'],
@@ -15800,7 +15856,11 @@ let TicketChangeAllMoneyOperator = class TicketChangeAllMoneyOperator {
             });
             const ticketLaboratoryModifiedList = await this.ticketLaboratoryManager.bulkUpdate({
                 manager,
-                condition: { oid, ticketId },
+                condition: {
+                    oid,
+                    ticketId,
+                    paymentMoneyStatus: { IN: [variable_1.PaymentMoneyStatus.NoEffect, variable_1.PaymentMoneyStatus.Pending] },
+                },
                 compare: ['id'],
                 tempList: options.ticketLaboratoryUpdate,
                 update: ['discountMoney', 'discountPercent', 'discountType', 'actualPrice'],
@@ -15808,29 +15868,49 @@ let TicketChangeAllMoneyOperator = class TicketChangeAllMoneyOperator {
             });
             const ticketRadiologyModifiedList = await this.ticketRadiologyManager.bulkUpdate({
                 manager,
-                condition: { oid, ticketId },
+                condition: {
+                    oid,
+                    ticketId,
+                    paymentMoneyStatus: { IN: [variable_1.PaymentMoneyStatus.NoEffect, variable_1.PaymentMoneyStatus.Pending] },
+                },
                 compare: ['id'],
                 tempList: options.ticketRadiologyUpdate,
                 update: ['discountMoney', 'discountPercent', 'discountType', 'actualPrice'],
                 options: { requireEqualLength: true },
+            });
+            const ticketProductList = await this.ticketProductManager.findManyBy(manager, {
+                oid,
+                ticketId,
+            });
+            const ticketProcedureList = await this.ticketProcedureManager.findManyBy(manager, {
+                oid,
+                ticketId,
+            });
+            const ticketLaboratoryList = await this.ticketLaboratoryManager.findManyBy(manager, {
+                oid,
+                ticketId,
+            });
+            const ticketRadiologyList = await this.ticketRadiologyManager.findManyBy(manager, {
+                oid,
+                ticketId,
             });
             const { ticketUserModifiedList } = await this.ticketUpdateCommissionTicketUserOperator.updateCommissionTicketUser({
                 manager,
                 oid,
                 ticketId,
                 ticketOrigin,
-                ticketLaboratoryList: ticketLaboratoryModifiedList,
-                ticketProcedureList: ticketProcedureModifiedList,
-                ticketRadiologyList: ticketRadiologyModifiedList,
-                ticketProductList: ticketProductModifiedList,
+                ticketLaboratoryList,
+                ticketProcedureList,
+                ticketRadiologyList,
+                ticketProductList,
             });
             const ticketMoneyBody = this.ticketCalculatorMoney.reCalculatorMoney({
                 oid,
                 ticketOrigin,
-                ticketProcedureList: ticketProcedureModifiedList,
-                ticketProductList: ticketProductModifiedList,
-                ticketLaboratoryList: ticketLaboratoryModifiedList,
-                ticketRadiologyList: ticketRadiologyModifiedList,
+                ticketProcedureList,
+                ticketProductList,
+                ticketLaboratoryList,
+                ticketRadiologyList,
                 ticketUserList: ticketUserModifiedList,
             });
             const ticket = await this.ticketManager.updateOneAndReturnEntity(manager, { oid, id: ticketOrigin.id }, ticketMoneyBody);
@@ -16790,6 +16870,11 @@ let TicketCloseOperation = class TicketCloseOperation {
                     voucherItemType: payment_item_entity_1.PaymentVoucherItemType.Other,
                     voucherItemId: 0,
                     paymentInteractId: 0,
+                    discountMoney: 0,
+                    discountPercent: 0,
+                    expectedPrice: 0,
+                    actualPrice: 0,
+                    quantity: 1,
                     paidAmount: 0,
                     debtAmount: paidByTopUp + ticketFix.debt,
                     openDebt: customerOrigin.debt,
@@ -16879,6 +16964,11 @@ let TicketReopenOperation = class TicketReopenOperation {
                     voucherItemType: payment_item_entity_1.PaymentVoucherItemType.Other,
                     voucherItemId: 0,
                     paymentInteractId: 0,
+                    discountMoney: 0,
+                    discountPercent: 0,
+                    expectedPrice: 0,
+                    actualPrice: 0,
+                    quantity: 1,
                     paidAmount: 0,
                     debtAmount: -ticketModified.debt,
                     openDebt: customerOpenDebt,
@@ -18999,8 +19089,8 @@ let CustomerPaymentOperation = class CustomerPaymentOperation {
     async startPayment(options) {
         var _a;
         const { oid, customerId, paymentMethodId, time, cashierId, totalMoney, reason, note, paymentItemData, } = options;
-        const moneyDebtReduce = paymentItemData.payDebt.reduce((acc, item) => acc + item.amount, 0);
-        const moneyPrepaymentReduce = ((_a = paymentItemData.prepayment) === null || _a === void 0 ? void 0 : _a.itemList.reduce((acc, item) => acc + item.amount, 0)) || 0;
+        const moneyDebtReduce = paymentItemData.payDebt.reduce((acc, item) => acc + item.paidAmount, 0);
+        const moneyPrepaymentReduce = ((_a = paymentItemData.prepayment) === null || _a === void 0 ? void 0 : _a.itemList.reduce((acc, item) => acc + item.paidAmount, 0)) || 0;
         if (totalMoney <= 0) {
             throw new error_1.BusinessError('Số tiền thanh toán không hợp lệ', { totalMoney });
         }
@@ -19040,7 +19130,7 @@ let CustomerPaymentOperation = class CustomerPaymentOperation {
                     manager,
                     tempList: paymentItemData.payDebt.map((i) => ({
                         id: i.ticketId,
-                        amount: i.amount,
+                        amount: i.paidAmount,
                     })),
                     condition: {
                         oid,
@@ -19072,10 +19162,15 @@ let CustomerPaymentOperation = class CustomerPaymentOperation {
                         voucherItemType: payment_item_entity_1.PaymentVoucherItemType.Other,
                         voucherItemId: 0,
                         paymentInteractId: 0,
-                        paidAmount: itemData.amount,
-                        debtAmount: -itemData.amount,
+                        expectedPrice: itemData.paidAmount,
+                        discountMoney: 0,
+                        discountPercent: 0,
+                        actualPrice: itemData.paidAmount,
+                        quantity: 1,
+                        paidAmount: itemData.paidAmount,
+                        debtAmount: -itemData.paidAmount,
                         openDebt: customerOpenDebt,
-                        closeDebt: customerOpenDebt - itemData.amount,
+                        closeDebt: customerOpenDebt - itemData.paidAmount,
                         cashierId,
                         note: reason || note || '',
                     };
@@ -19120,7 +19215,12 @@ let CustomerPaymentOperation = class CustomerPaymentOperation {
                         voucherItemType: itemData.voucherItemType,
                         voucherItemId: itemData.ticketItemId,
                         paymentInteractId: itemData.paymentInteractId,
-                        paidAmount: itemData.amount,
+                        expectedPrice: itemData.expectedPrice,
+                        actualPrice: itemData.actualPrice,
+                        quantity: itemData.quantity,
+                        discountMoney: itemData.discountMoney,
+                        discountPercent: itemData.discountPercent,
+                        paidAmount: itemData.paidAmount,
                         debtAmount: 0,
                         openDebt: customerOpenDebt,
                         closeDebt: customerOpenDebt,
@@ -19142,6 +19242,11 @@ let CustomerPaymentOperation = class CustomerPaymentOperation {
                     voucherItemType: payment_item_entity_1.PaymentVoucherItemType.Other,
                     voucherItemId: 0,
                     paymentInteractId: 0,
+                    expectedPrice: paymentItemData.moneyTopUpAdd,
+                    actualPrice: paymentItemData.moneyTopUpAdd,
+                    quantity: 1,
+                    discountMoney: 0,
+                    discountPercent: 0,
                     paidAmount: paymentItemData.moneyTopUpAdd,
                     debtAmount: -paymentItemData.moneyTopUpAdd,
                     openDebt: customerOpenDebt,
@@ -19366,6 +19471,11 @@ let CustomerRefundOperation = class CustomerRefundOperation {
                 note: note || '',
                 createdAt: time,
                 cashierId,
+                expectedPrice: -money,
+                actualPrice: -money,
+                quantity: 1,
+                discountMoney: 0,
+                discountPercent: 0,
                 paidAmount: -money,
                 debtAmount: 0,
                 openDebt: customerOpenDebt,
@@ -19420,8 +19530,8 @@ let DistributorPaymentOperation = class DistributorPaymentOperation {
     async startPayment(options) {
         var _a;
         const { oid, distributorId, paymentMethodId, time, cashierId, totalMoney, reason, note, paymentItemData, } = options;
-        const moneyDebtReduce = paymentItemData.payDebt.reduce((acc, item) => acc + item.amount, 0);
-        const moneyPrepaymentReduce = ((_a = paymentItemData.prepayment) === null || _a === void 0 ? void 0 : _a.itemList.reduce((acc, item) => acc + item.amount, 0)) || 0;
+        const moneyDebtReduce = paymentItemData.payDebt.reduce((acc, item) => acc + item.paidAmount, 0);
+        const moneyPrepaymentReduce = ((_a = paymentItemData.prepayment) === null || _a === void 0 ? void 0 : _a.itemList.reduce((acc, item) => acc + item.paidAmount, 0)) || 0;
         if (totalMoney <= 0) {
             throw new error_1.BusinessError('Số tiền thanh toán không hợp lệ', { totalMoney });
         }
@@ -19461,7 +19571,7 @@ let DistributorPaymentOperation = class DistributorPaymentOperation {
                     manager,
                     tempList: paymentItemData.payDebt.map((i) => ({
                         id: i.receiptId,
-                        amount: i.amount,
+                        amount: i.paidAmount,
                     })),
                     condition: {
                         oid,
@@ -19493,10 +19603,15 @@ let DistributorPaymentOperation = class DistributorPaymentOperation {
                         voucherItemType: payment_item_entity_1.PaymentVoucherItemType.Other,
                         voucherItemId: 0,
                         paymentInteractId: 0,
-                        paidAmount: itemData.amount,
-                        debtAmount: -itemData.amount,
+                        expectedPrice: itemData.paidAmount,
+                        actualPrice: itemData.paidAmount,
+                        quantity: 1,
+                        discountMoney: 0,
+                        discountPercent: 0,
+                        paidAmount: itemData.paidAmount,
+                        debtAmount: -itemData.paidAmount,
                         openDebt: distributorOpenDebt,
-                        closeDebt: distributorOpenDebt - itemData.amount,
+                        closeDebt: distributorOpenDebt - itemData.paidAmount,
                         cashierId,
                         note: reason || note || '',
                     };
@@ -19541,7 +19656,12 @@ let DistributorPaymentOperation = class DistributorPaymentOperation {
                         voucherItemType: itemData.voucherItemType,
                         voucherItemId: itemData.receiptItemId,
                         paymentInteractId: itemData.paymentInteractId,
-                        paidAmount: itemData.amount,
+                        expectedPrice: itemData.expectedPrice,
+                        actualPrice: itemData.actualPrice,
+                        quantity: itemData.quantity,
+                        discountMoney: itemData.discountMoney,
+                        discountPercent: itemData.discountPercent,
+                        paidAmount: itemData.paidAmount,
                         debtAmount: 0,
                         openDebt: distributorOpenDebt,
                         closeDebt: distributorOpenDebt,
@@ -19563,6 +19683,11 @@ let DistributorPaymentOperation = class DistributorPaymentOperation {
                     voucherItemType: payment_item_entity_1.PaymentVoucherItemType.Other,
                     voucherItemId: 0,
                     paymentInteractId: 0,
+                    expectedPrice: paymentItemData.moneyTopUpAdd,
+                    actualPrice: paymentItemData.moneyTopUpAdd,
+                    quantity: 1,
+                    discountMoney: 0,
+                    discountPercent: 0,
                     paidAmount: paymentItemData.moneyTopUpAdd,
                     debtAmount: -paymentItemData.moneyTopUpAdd,
                     openDebt: distributorOpenDebt,
@@ -19678,6 +19803,11 @@ let DistributorRefundOperation = class DistributorRefundOperation {
                 note: note || 'Hoàn trả',
                 createdAt: time,
                 cashierId,
+                expectedPrice: -money,
+                actualPrice: -money,
+                quantity: 1,
+                discountMoney: 0,
+                discountPercent: 0,
                 paidAmount: -money,
                 debtAmount: 0,
                 openDebt: distributorOpenDebt,
@@ -23008,6 +23138,11 @@ let ApiFileCustomerUploadExcel = class ApiFileCustomerUploadExcel {
                         voucherItemType: payment_item_entity_1.PaymentVoucherItemType.Other,
                         voucherItemId: 0,
                         paymentInteractId: 0,
+                        discountMoney: 0,
+                        discountPercent: 0,
+                        expectedPrice: -(i.debtUpdate - i.debtOrigin),
+                        actualPrice: -(i.debtUpdate - i.debtOrigin),
+                        quantity: 1,
                         paidAmount: -(i.debtUpdate - i.debtOrigin),
                         debtAmount: i.debtUpdate - i.debtOrigin,
                         openDebt: i.debtOrigin,
@@ -40094,7 +40229,7 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_custom_1.IsNumberGreaterThan)(0),
     __metadata("design:type", Number)
-], PaymentPayDebt.prototype, "amount", void 0);
+], PaymentPayDebt.prototype, "paidAmount", void 0);
 class PaymentPrepaymentTicketItem {
 }
 __decorate([
@@ -40123,7 +40258,32 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_custom_1.IsNumberGreaterThan)(0),
     __metadata("design:type", Number)
-], PaymentPrepaymentTicketItem.prototype, "amount", void 0);
+], PaymentPrepaymentTicketItem.prototype, "paidAmount", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    __metadata("design:type", Number)
+], PaymentPrepaymentTicketItem.prototype, "expectedPrice", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    __metadata("design:type", Number)
+], PaymentPrepaymentTicketItem.prototype, "actualPrice", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    __metadata("design:type", Number)
+], PaymentPrepaymentTicketItem.prototype, "quantity", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    __metadata("design:type", Number)
+], PaymentPrepaymentTicketItem.prototype, "discountMoney", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    __metadata("design:type", Number)
+], PaymentPrepaymentTicketItem.prototype, "discountPercent", void 0);
 class PaymentPrepayment {
 }
 __decorate([
@@ -40307,7 +40467,7 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_custom_1.IsNumberGreaterThan)(0),
     __metadata("design:type", Number)
-], PaymentPayDebt.prototype, "amount", void 0);
+], PaymentPayDebt.prototype, "paidAmount", void 0);
 class PaymentPrepaymentReceiptItem {
 }
 __decorate([
@@ -40336,7 +40496,32 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_custom_1.IsNumberGreaterThan)(0),
     __metadata("design:type", Number)
-], PaymentPrepaymentReceiptItem.prototype, "amount", void 0);
+], PaymentPrepaymentReceiptItem.prototype, "paidAmount", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    __metadata("design:type", Number)
+], PaymentPrepaymentReceiptItem.prototype, "expectedPrice", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    __metadata("design:type", Number)
+], PaymentPrepaymentReceiptItem.prototype, "actualPrice", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    __metadata("design:type", Number)
+], PaymentPrepaymentReceiptItem.prototype, "quantity", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    __metadata("design:type", Number)
+], PaymentPrepaymentReceiptItem.prototype, "discountMoney", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    __metadata("design:type", Number)
+], PaymentPrepaymentReceiptItem.prototype, "discountPercent", void 0);
 class PaymentPrepayment {
 }
 __decorate([
@@ -50098,10 +50283,15 @@ let ApiReceiptAction = class ApiReceiptAction {
                         receiptId,
                         itemList: [
                             {
-                                amount: body.money,
+                                paidAmount: body.money,
                                 receiptItemId: 0,
                                 voucherItemType: payment_item_entity_1.PaymentVoucherItemType.Other,
                                 paymentInteractId: 0,
+                                discountMoney: 0,
+                                discountPercent: 0,
+                                expectedPrice: body.money,
+                                actualPrice: body.money,
+                                quantity: 1,
                             },
                         ],
                     },
@@ -59754,10 +59944,15 @@ let ApiTicketOrderService = class ApiTicketOrderService {
                             ticketId,
                             itemList: [
                                 {
-                                    amount: paid,
+                                    paidAmount: paid,
                                     ticketItemId: 0,
                                     voucherItemType: payment_item_entity_1.PaymentVoucherItemType.Other,
                                     paymentInteractId: 0,
+                                    discountMoney: 0,
+                                    discountPercent: 0,
+                                    expectedPrice: paid,
+                                    actualPrice: paid,
+                                    quantity: 1,
                                 },
                             ],
                         },
@@ -59829,10 +60024,15 @@ let ApiTicketOrderService = class ApiTicketOrderService {
                             ticketId,
                             itemList: [
                                 {
-                                    amount: paidBody,
                                     ticketItemId: 0,
                                     voucherItemType: payment_item_entity_1.PaymentVoucherItemType.Other,
                                     paymentInteractId: 0,
+                                    discountMoney: 0,
+                                    discountPercent: 0,
+                                    paidAmount: paidBody,
+                                    expectedPrice: paidBody,
+                                    actualPrice: paidBody,
+                                    quantity: 1,
                                 },
                             ],
                         },
@@ -59886,7 +60086,12 @@ let ApiTicketOrderService = class ApiTicketOrderService {
                             ticketId,
                             itemList: [
                                 {
-                                    amount: body.money,
+                                    paidAmount: body.money,
+                                    expectedPrice: body.money,
+                                    actualPrice: body.money,
+                                    quantity: 1,
+                                    discountMoney: 0,
+                                    discountPercent: 0,
                                     ticketItemId: 0,
                                     voucherItemType: payment_item_entity_1.PaymentVoucherItemType.Other,
                                     paymentInteractId: 0,
@@ -61078,7 +61283,7 @@ let ApiTicketRadiologyAction = class ApiTicketRadiologyAction {
             oid,
             id: ticketRadiologyId,
         });
-        const imageIdsUpdate = await this.imageManagerService.removeImageList({
+        await this.imageManagerService.removeImageList({
             oid,
             idRemoveList: JSON.parse(ticketRadiologyOrigin.imageIds),
         });
@@ -61093,7 +61298,7 @@ let ApiTicketRadiologyAction = class ApiTicketRadiologyAction {
             customStyles: body.customStyles,
             customVariables: body.customVariables,
             startedAt: null,
-            imageIds: JSON.stringify(imageIdsUpdate),
+            imageIds: JSON.stringify([]),
             status: ticket_radiology_entity_1.TicketRadiologyStatus.Pending,
         });
         ticketRadiologyModified.imageList = [];
@@ -64055,6 +64260,8 @@ let TicketReceptionService = class TicketReceptionService {
         const { oid, body } = options;
         const { ticketReception } = body;
         let customer;
+        let ticketAttributeList = [];
+        let ticketProcedureList = [];
         if (!ticketReception.customerId) {
             let customerCode = body.customer.customerCode;
             if (!customerCode) {
@@ -64122,7 +64329,6 @@ let TicketReceptionService = class TicketReceptionService {
             imageIds: JSON.stringify([]),
             endedAt: null,
         });
-        ticket.customer = customer;
         if (ticketReception.fromAppointmentId) {
             await this.appointmentRepository.update({ oid, id: ticketReception.fromAppointmentId }, {
                 toTicketId: ticket.id,
@@ -64136,7 +64342,7 @@ let TicketReceptionService = class TicketReceptionService {
                 const dto = Object.assign(Object.assign({}, i), { oid, ticketId: ticket.id });
                 return dto;
             });
-            ticket.ticketAttributeList =
+            ticketAttributeList =
                 await this.ticketAttributeRepository.insertManyAndReturnEntity(ticketAttributeInsertList);
         }
         if (body.ticketUserList) {
@@ -64157,11 +64363,12 @@ let TicketReceptionService = class TicketReceptionService {
                 const insert = Object.assign(Object.assign({}, i), { customerId: ticket.customerId, status: ticket_procedure_entity_1.TicketProcedureStatus.Completed, oid, imageIds: JSON.stringify([]), startedAt: Date.now(), ticketId: ticket.id, result: '' });
                 return insert;
             });
-            const ticketProcedureCreatedList = await this.ticketProcedureRepository.insertManyAndReturnEntity(ticketProcedureInsertList);
-            const procedureMoney = ticketProcedureCreatedList.reduce((acc, cur) => {
+            ticketProcedureList =
+                await this.ticketProcedureRepository.insertManyAndReturnEntity(ticketProcedureInsertList);
+            const procedureMoney = ticketProcedureList.reduce((acc, cur) => {
                 return acc + cur.quantity * cur.actualPrice;
             }, 0);
-            const procedureDiscount = ticketProcedureCreatedList.reduce((acc, cur) => {
+            const procedureDiscount = ticketProcedureList.reduce((acc, cur) => {
                 return acc + cur.quantity * cur.discountMoney;
             }, 0);
             ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
@@ -64174,6 +64381,9 @@ let TicketReceptionService = class TicketReceptionService {
                 },
             });
         }
+        ticket.customer = customer;
+        ticket.ticketAttributeList = ticketAttributeList;
+        ticket.ticketProcedureList = ticketProcedureList;
         this.socketEmitService.socketTicketChange(oid, { type: 'CREATE', ticket });
         return { ticket };
     }

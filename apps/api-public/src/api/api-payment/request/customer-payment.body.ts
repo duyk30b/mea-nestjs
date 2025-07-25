@@ -1,6 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsInt, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator'
+import {
+  IsArray,
+  IsDefined,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator'
 import {
   IsEnumValue,
   IsNumberGreaterThan,
@@ -17,7 +25,7 @@ class PaymentPayDebt {
   @Expose()
   @IsDefined()
   @IsNumberGreaterThan(0)
-  amount: number
+  paidAmount: number
 }
 
 class PaymentPrepaymentTicketItem {
@@ -42,7 +50,27 @@ class PaymentPrepaymentTicketItem {
   @Expose()
   @IsDefined()
   @IsNumberGreaterThan(0)
-  amount: number
+  paidAmount: number
+
+  @Expose()
+  @IsDefined()
+  expectedPrice: number
+
+  @Expose()
+  @IsDefined()
+  actualPrice: number
+
+  @Expose()
+  @IsDefined()
+  quantity: number
+
+  @Expose()
+  @IsDefined()
+  discountMoney: number
+
+  @Expose()
+  @IsDefined()
+  discountPercent: number
 }
 
 class PaymentPrepayment {

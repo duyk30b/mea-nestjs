@@ -18,7 +18,6 @@ export class Version971753412963484 implements MigrationInterface {
                 CONSTRAINT "PK_0b97a4f4f19825ffb5f45c19cc0" PRIMARY KEY ("id")
             )
         `)
-        queryArray.push(queryArray.join(''))
         await queryRunner.query(queryArray.join(''))
     }
 

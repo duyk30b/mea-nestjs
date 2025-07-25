@@ -123,7 +123,7 @@ export class ApiTicketRadiologyAction {
       id: ticketRadiologyId,
     })
 
-    const imageIdsUpdate = await this.imageManagerService.removeImageList({
+    await this.imageManagerService.removeImageList({
       oid,
       idRemoveList: JSON.parse(ticketRadiologyOrigin.imageIds),
     })
@@ -141,7 +141,7 @@ export class ApiTicketRadiologyAction {
         customStyles: body.customStyles,
         customVariables: body.customVariables,
         startedAt: null,
-        imageIds: JSON.stringify(imageIdsUpdate),
+        imageIds: JSON.stringify([]),
         status: TicketRadiologyStatus.Pending,
       }
     )

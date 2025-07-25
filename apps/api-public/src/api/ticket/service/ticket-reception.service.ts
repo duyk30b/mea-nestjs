@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
 import { ESTimer } from '../../../../../_libs/common/helpers/time.helper'
-import {
-  DeliveryStatus,
-  DiscountType,
-} from '../../../../../_libs/database/common/variable'
+import { DeliveryStatus, DiscountType } from '../../../../../_libs/database/common/variable'
 import { Customer } from '../../../../../_libs/database/entities'
 import { AppointmentStatus } from '../../../../../_libs/database/entities/appointment.entity'
 import { PositionInteractType } from '../../../../../_libs/database/entities/position.entity'
-import { TicketAttributeInsertType } from '../../../../../_libs/database/entities/ticket-attribute.entity'
-import {
+import TicketAttribute, {
+  TicketAttributeInsertType,
+} from '../../../../../_libs/database/entities/ticket-attribute.entity'
+import TicketProcedure, {
   TicketProcedureInsertType,
   TicketProcedureStatus,
 } from '../../../../../_libs/database/entities/ticket-procedure.entity'
@@ -44,6 +43,9 @@ export class TicketReceptionService {
     const { ticketReception } = body
 
     let customer: Customer
+    let ticketAttributeList: TicketAttribute[] = []
+    let ticketProcedureList: TicketProcedure[] = []
+
     if (!ticketReception.customerId) {
       let customerCode = body.customer.customerCode
       if (!customerCode) {
@@ -119,7 +121,6 @@ export class TicketReceptionService {
       imageIds: JSON.stringify([]),
       endedAt: null,
     })
-    ticket.customer = customer
 
     if (ticketReception.fromAppointmentId) {
       await this.appointmentRepository.update(
@@ -142,7 +143,7 @@ export class TicketReceptionService {
           }
           return dto
         })
-      ticket.ticketAttributeList =
+      ticketAttributeList =
         await this.ticketAttributeRepository.insertManyAndReturnEntity(ticketAttributeInsertList)
     }
 
@@ -174,12 +175,12 @@ export class TicketReceptionService {
         }
         return insert
       })
-      const ticketProcedureCreatedList =
+      ticketProcedureList =
         await this.ticketProcedureRepository.insertManyAndReturnEntity(ticketProcedureInsertList)
-      const procedureMoney = ticketProcedureCreatedList.reduce((acc, cur) => {
+      const procedureMoney = ticketProcedureList.reduce((acc, cur) => {
         return acc + cur.quantity * cur.actualPrice
       }, 0)
-      const procedureDiscount = ticketProcedureCreatedList.reduce((acc, cur) => {
+      const procedureDiscount = ticketProcedureList.reduce((acc, cur) => {
         return acc + cur.quantity * cur.discountMoney
       }, 0)
       ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
@@ -193,6 +194,9 @@ export class TicketReceptionService {
       })
     }
 
+    ticket.customer = customer
+    ticket.ticketAttributeList = ticketAttributeList
+    ticket.ticketProcedureList = ticketProcedureList
     this.socketEmitService.socketTicketChange(oid, { type: 'CREATE', ticket })
     return { ticket }
   }

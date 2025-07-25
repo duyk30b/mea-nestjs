@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
-import { DeliveryStatus, DiscountType } from '../../common/variable'
+import { DeliveryStatus, DiscountType, PaymentMoneyStatus } from '../../common/variable'
 import { TicketStatus } from '../../entities/ticket.entity'
 import {
   TicketLaboratoryManager,
@@ -52,25 +52,27 @@ export class TicketChangeAllMoneyOperator {
         { oid, id: ticketId, status: TicketStatus.Executing },
         { updatedAt: Date.now() }
       )
-      let ticketProductModifiedList = await this.ticketProductManager.bulkUpdate({
+      const ticketProductModifiedList = await this.ticketProductManager.bulkUpdate({
         manager,
-        condition: { oid, ticketId, deliveryStatus: DeliveryStatus.Pending },
+        condition: {
+          oid,
+          ticketId,
+          deliveryStatus: DeliveryStatus.Pending,
+          paymentMoneyStatus: { IN: [PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending] },
+        },
         compare: ['id'],
         tempList: options.ticketProductUpdate,
         update: ['quantity', 'discountMoney', 'discountPercent', 'discountType', 'actualPrice'],
-        options: { requireEqualLength: false },
+        options: { requireEqualLength: true },
       })
-      if (ticketProductModifiedList.length !== options.ticketProductUpdate.length) {
-        // vì không được update thằng đã gửi hàng
-        ticketProductModifiedList = await this.ticketProductManager.findManyBy(manager, {
-          oid,
-          ticketId,
-        })
-      }
 
       const ticketProcedureModifiedList = await this.ticketProcedureManager.bulkUpdate({
         manager,
-        condition: { oid, ticketId },
+        condition: {
+          oid,
+          ticketId,
+          paymentMoneyStatus: { IN: [PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending] },
+        },
         compare: ['id'],
         tempList: options.ticketProcedureUpdate,
         update: ['quantity', 'discountMoney', 'discountPercent', 'discountType', 'actualPrice'],
@@ -79,7 +81,11 @@ export class TicketChangeAllMoneyOperator {
 
       const ticketLaboratoryModifiedList = await this.ticketLaboratoryManager.bulkUpdate({
         manager,
-        condition: { oid, ticketId },
+        condition: {
+          oid,
+          ticketId,
+          paymentMoneyStatus: { IN: [PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending] },
+        },
         compare: ['id'],
         tempList: options.ticketLaboratoryUpdate,
         update: ['discountMoney', 'discountPercent', 'discountType', 'actualPrice'],
@@ -88,11 +94,32 @@ export class TicketChangeAllMoneyOperator {
 
       const ticketRadiologyModifiedList = await this.ticketRadiologyManager.bulkUpdate({
         manager,
-        condition: { oid, ticketId },
+        condition: {
+          oid,
+          ticketId,
+          paymentMoneyStatus: { IN: [PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending] },
+        },
         compare: ['id'],
         tempList: options.ticketRadiologyUpdate,
         update: ['discountMoney', 'discountPercent', 'discountType', 'actualPrice'],
         options: { requireEqualLength: true },
+      })
+
+      const ticketProductList = await this.ticketProductManager.findManyBy(manager, {
+        oid,
+        ticketId,
+      })
+      const ticketProcedureList = await this.ticketProcedureManager.findManyBy(manager, {
+        oid,
+        ticketId,
+      })
+      const ticketLaboratoryList = await this.ticketLaboratoryManager.findManyBy(manager, {
+        oid,
+        ticketId,
+      })
+      const ticketRadiologyList = await this.ticketRadiologyManager.findManyBy(manager, {
+        oid,
+        ticketId,
       })
 
       const { ticketUserModifiedList } =
@@ -101,19 +128,19 @@ export class TicketChangeAllMoneyOperator {
           oid,
           ticketId,
           ticketOrigin,
-          ticketLaboratoryList: ticketLaboratoryModifiedList,
-          ticketProcedureList: ticketProcedureModifiedList,
-          ticketRadiologyList: ticketRadiologyModifiedList,
-          ticketProductList: ticketProductModifiedList,
+          ticketLaboratoryList,
+          ticketProcedureList,
+          ticketRadiologyList,
+          ticketProductList,
         })
 
       const ticketMoneyBody = this.ticketCalculatorMoney.reCalculatorMoney({
         oid,
         ticketOrigin,
-        ticketProcedureList: ticketProcedureModifiedList,
-        ticketProductList: ticketProductModifiedList,
-        ticketLaboratoryList: ticketLaboratoryModifiedList,
-        ticketRadiologyList: ticketRadiologyModifiedList,
+        ticketProcedureList,
+        ticketProductList,
+        ticketLaboratoryList,
+        ticketRadiologyList,
         ticketUserList: ticketUserModifiedList,
       })
 

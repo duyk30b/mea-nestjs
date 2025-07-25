@@ -82,6 +82,44 @@ export default class PaymentItem {
     default: 0,
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
+  @Expose()
+  expectedPrice: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  discountMoney: number
+
+  @Column({
+    type: 'decimal',
+    default: 0,
+    precision: 7,
+    scale: 3,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  discountPercent: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  actualPrice: number
+
+  @Column({ default: 1 })
+  @Expose()
+  quantity: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
   @Expose() // VD: Đơn 1tr, moneyIn = 300 ==> debit = 700
   paidAmount: number // Số tiền thu
 

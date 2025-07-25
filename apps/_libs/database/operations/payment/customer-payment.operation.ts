@@ -52,14 +52,19 @@ export class CustomerPaymentOperation {
     reason: string
     note: string
     paymentItemData: {
-      payDebt: { ticketId: number; amount: number }[]
+      payDebt: { ticketId: number; paidAmount: number }[]
       prepayment?: {
         ticketId: number
         itemList: {
           ticketItemId: number // nếu không chọn ticketItem thì là tạm ứng vào đơn
           voucherItemType: PaymentVoucherItemType
           paymentInteractId: number
-          amount: number
+          discountMoney: number
+          discountPercent: number
+          expectedPrice: number
+          actualPrice: number
+          quantity: number
+          paidAmount: number
         }[]
       }
       moneyTopUpAdd: number // phải validate, nếu trả hết nợ thì mới được ký quỹ
@@ -77,9 +82,9 @@ export class CustomerPaymentOperation {
       paymentItemData,
     } = options
 
-    const moneyDebtReduce = paymentItemData.payDebt.reduce((acc, item) => acc + item.amount, 0)
+    const moneyDebtReduce = paymentItemData.payDebt.reduce((acc, item) => acc + item.paidAmount, 0)
     const moneyPrepaymentReduce =
-      paymentItemData.prepayment?.itemList.reduce((acc, item) => acc + item.amount, 0) || 0
+      paymentItemData.prepayment?.itemList.reduce((acc, item) => acc + item.paidAmount, 0) || 0
 
     if (totalMoney <= 0) {
       throw new BusinessError('Số tiền thanh toán không hợp lệ', { totalMoney })
@@ -132,7 +137,7 @@ export class CustomerPaymentOperation {
           manager,
           tempList: paymentItemData.payDebt.map((i) => ({
             id: i.ticketId,
-            amount: i.amount,
+            amount: i.paidAmount,
           })),
           condition: {
             oid,
@@ -167,10 +172,15 @@ export class CustomerPaymentOperation {
             voucherItemId: 0,
             paymentInteractId: 0,
 
-            paidAmount: itemData.amount,
-            debtAmount: -itemData.amount,
+            expectedPrice: itemData.paidAmount,
+            discountMoney: 0,
+            discountPercent: 0,
+            actualPrice: itemData.paidAmount,
+            quantity: 1,
+            paidAmount: itemData.paidAmount,
+            debtAmount: -itemData.paidAmount,
             openDebt: customerOpenDebt,
-            closeDebt: customerOpenDebt - itemData.amount,
+            closeDebt: customerOpenDebt - itemData.paidAmount,
             cashierId,
             note: reason || note || '',
           }
@@ -224,7 +234,12 @@ export class CustomerPaymentOperation {
             voucherItemId: itemData.ticketItemId,
             paymentInteractId: itemData.paymentInteractId,
 
-            paidAmount: itemData.amount,
+            expectedPrice: itemData.expectedPrice,
+            actualPrice: itemData.actualPrice,
+            quantity: itemData.quantity,
+            discountMoney: itemData.discountMoney,
+            discountPercent: itemData.discountPercent,
+            paidAmount: itemData.paidAmount,
             debtAmount: 0,
             openDebt: customerOpenDebt,
             closeDebt: customerOpenDebt,
@@ -249,6 +264,11 @@ export class CustomerPaymentOperation {
           voucherItemId: 0,
           paymentInteractId: 0,
 
+          expectedPrice: paymentItemData.moneyTopUpAdd,
+          actualPrice: paymentItemData.moneyTopUpAdd,
+          quantity: 1,
+          discountMoney: 0,
+          discountPercent: 0,
           paidAmount: paymentItemData.moneyTopUpAdd,
           debtAmount: -paymentItemData.moneyTopUpAdd,
           openDebt: customerOpenDebt,
