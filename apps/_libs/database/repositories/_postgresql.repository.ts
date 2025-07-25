@@ -176,6 +176,7 @@ export abstract class _PostgreSqlRepository<
   async insertManyFullFieldAndReturnEntity<X extends _INSERT>(
     data: NoExtra<_INSERT, X>[]
   ): Promise<_ENTITY[]> {
+    if (!data.length) return []
     const raws = await this.insertManyAndReturnRaws(data)
     return this.entity.fromRaws(raws)
   }

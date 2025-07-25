@@ -13,11 +13,6 @@ export class PrintHtmlCreateBody {
   @IsNumber()
   printHtmlType: number
 
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  isDefault: 0 | 1
-
   @ApiProperty({ example: 'Đơn thuốc' })
   @Expose()
   @IsDefined()

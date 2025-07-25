@@ -2,7 +2,13 @@ import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import { IsArray, IsDefined, IsNotEmpty, ValidateNested } from 'class-validator'
 
-export class PrintHtmlSetDefault {
+export class PrintHtmlSettingReplace {
+  @ApiProperty({ example: 2 })
+  @Expose()
+  @IsDefined()
+  @IsNotEmpty()
+  id: number
+
   @ApiProperty({ example: 2 })
   @Expose()
   @IsDefined()
@@ -16,12 +22,12 @@ export class PrintHtmlSetDefault {
   printHtmlType: number
 }
 
-export class PrintHtmlSetDefaultBody {
-  @ApiProperty({ type: PrintHtmlSetDefault, isArray: true })
+export class PrintHtmlSettingReplaceAllBody {
+  @ApiProperty({ type: PrintHtmlSettingReplace, isArray: true })
   @Expose()
-  @Type(() => PrintHtmlSetDefault)
+  @Type(() => PrintHtmlSettingReplace)
   @IsDefined()
   @IsArray()
   @ValidateNested({ each: true })
-  listDefault: PrintHtmlSetDefault[]
+  replaceAll: PrintHtmlSettingReplace[]
 }

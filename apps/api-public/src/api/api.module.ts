@@ -17,6 +17,7 @@ import { ApiPaymentModule } from './api-payment/api-payment.module'
 import { ApiPermissionModule } from './api-permission/api-permission.module'
 import { ApiPositionModule } from './api-position/api-position.module'
 import { ApiPrescriptionSampleModule } from './api-prescription-sample/api-prescription-sample.module'
+import { ApiPrintHtmlSettingModule } from './api-print-html-setting/api-print-html-setting.module'
 import { ApiPrintHtmlModule } from './api-print-html/api-print-html.module'
 import { ApiProcedureGroupModule } from './api-procedure-group/api-procedure-group.module'
 import { ApiProcedureModule } from './api-procedure/api-procedure.module'
@@ -85,6 +86,7 @@ import { TicketModule } from './ticket/ticket.module'
     ApiProductGroupModule,
     ApiProcedureGroupModule,
     ApiPrintHtmlModule,
+    ApiPrintHtmlSettingModule,
 
     ApiTicketOrderModule,
     ApiTicketProcedureModule,

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
@@ -11,7 +11,6 @@ import {
   PrintHtmlGetManyQuery,
   PrintHtmlGetOneQuery,
   PrintHtmlPaginationQuery,
-  PrintHtmlSetDefaultBody,
   PrintHtmlUpdateBody,
 } from './request'
 
@@ -99,16 +98,6 @@ export class ApiPrintHtmlController {
   @UserPermission()
   async systemList() {
     const data = await this.apiPrintHtmlService.systemList()
-    return { data }
-  }
-
-  @Put('save-list-default')
-  @UserPermission(PermissionId.PRODUCT_UPDATE)
-  async saveListDefault(
-    @External() { oid }: TExternal,
-    @Body() body: PrintHtmlSetDefaultBody
-  ): Promise<BaseResponse> {
-    const data = await this.apiPrintHtmlService.saveListDefault(oid, body)
     return { data }
   }
 }

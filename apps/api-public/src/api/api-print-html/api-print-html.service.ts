@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import {
-  PrintHtmlManager,
   PrintHtmlRepository,
 } from '../../../../_libs/database/repositories/print-html.repository'
 import {
@@ -9,15 +8,13 @@ import {
   PrintHtmlGetManyQuery,
   PrintHtmlGetOneQuery,
   PrintHtmlPaginationQuery,
-  PrintHtmlSetDefaultBody,
   PrintHtmlUpdateBody,
 } from './request'
 
 @Injectable()
 export class ApiPrintHtmlService {
   constructor(
-    private readonly printHtmlRepository: PrintHtmlRepository,
-    private readonly printHtmlManager: PrintHtmlManager
+    private readonly printHtmlRepository: PrintHtmlRepository
   ) { }
 
   async pagination(oid: number, query: PrintHtmlPaginationQuery) {
@@ -85,12 +82,6 @@ export class ApiPrintHtmlService {
   }
 
   async updateOne(oid: number, id: number, body: PrintHtmlUpdateBody) {
-    if (body.isDefault) {
-      await this.printHtmlRepository.update(
-        { oid, printHtmlType: body.printHtmlType },
-        { isDefault: 0 }
-      )
-    }
     const printHtml = await this.printHtmlRepository.updateOneAndReturnEntity({ id, oid }, body)
     if (!printHtml) throw new BusinessException('error.Database.UpdateFailed')
     return { printHtml }
@@ -110,26 +101,5 @@ export class ApiPrintHtmlService {
       sort: { id: 'ASC' },
     })
     return { printHtmlSystem }
-  }
-
-  async saveListDefault(oid: number, body: PrintHtmlSetDefaultBody) {
-    await this.printHtmlRepository.update({ oid }, { isDefault: 0 })
-
-    const tempList = body.listDefault
-      .filter((i) => !!i.printHtmlId)
-      .map((i) => {
-        return { id: i.printHtmlId, printHtmlType: i.printHtmlType, isDefault: 1 }
-      })
-
-    await this.printHtmlManager.bulkUpdate({
-      manager: this.printHtmlRepository.getManager(),
-      condition: { oid },
-      compare: ['id'],
-      update: ['isDefault', 'printHtmlType'],
-      tempList,
-      options: { requireEqualLength: true },
-    })
-
-    return true
   }
 }

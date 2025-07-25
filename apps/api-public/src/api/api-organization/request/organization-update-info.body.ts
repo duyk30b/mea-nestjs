@@ -98,5 +98,5 @@ export class OrganizationUpdateBody extends MultipleFileUpload {
   @IsObject({
     message: ({ value }) => `Validate imagesChange failed. Value = ${value}`,
   })
-  imagesChange: ImagesChangeBody
+  imagesChange?: ImagesChangeBody
 }
