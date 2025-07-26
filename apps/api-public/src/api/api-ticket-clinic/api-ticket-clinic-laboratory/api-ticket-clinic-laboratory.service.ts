@@ -99,7 +99,12 @@ export class ApiTicketClinicLaboratoryService {
     this.socketEmitService.socketTicketLaboratoryListChange(oid, {
       ticketId,
       ticketLaboratoryDestroyList: [result.ticketLaboratoryDestroy],
-      ticketLaboratoryGroupDestroyList: [result.ticketLaboratoryGroupDestroy],
+      ticketLaboratoryGroupDestroyList: result.ticketLaboratoryGroupDestroy
+        ? [result.ticketLaboratoryGroupDestroy]
+        : undefined,
+      ticketLaboratoryGroupUpsertList: result.ticketLaboratoryGroupModified
+        ? [result.ticketLaboratoryGroupModified]
+        : undefined,
     })
 
     return { data: true }

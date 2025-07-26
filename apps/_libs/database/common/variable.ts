@@ -90,5 +90,6 @@ export enum TicketLaboratoryStatus {
 export enum PaymentMoneyStatus {
   NoEffect = 1,
   Pending = 2,
-  Paid = 3,
+  Partial = 3,
+  Paid = 4,
 }

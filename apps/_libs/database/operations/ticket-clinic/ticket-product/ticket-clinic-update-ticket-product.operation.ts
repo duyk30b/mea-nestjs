@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
-import { DeliveryStatus } from '../../../common/variable'
+import { DeliveryStatus, PaymentMoneyStatus } from '../../../common/variable'
 import { TicketProduct } from '../../../entities'
 import { TicketProductType } from '../../../entities/ticket-product.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
@@ -58,18 +58,18 @@ export class TicketClinicUpdateTicketProductOperation {
         { ticketId }
       )
 
-      if (!ticketProductOrigin) {
-        throw new Error(PREFIX + 'Database.NotFound ')
-      }
-
       let ticketProductModified: TicketProduct = ticketProductOrigin
       let productMoneyChange = 0
       let itemsDiscountChange = 0
       let itemsCostAmountChange = 0
       if (ticketProductUpdateDto) {
         if (
-          ticketProductOrigin.deliveryStatus === DeliveryStatus.Pending
-          || ticketProductOrigin.deliveryStatus === DeliveryStatus.NoStock
+          [DeliveryStatus.Pending, DeliveryStatus.NoStock].includes(
+            ticketProductOrigin.deliveryStatus
+          )
+          && [PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending].includes(
+            ticketProductOrigin.paymentMoneyStatus
+          )
         ) {
           ticketProductModified = await this.ticketProductManager.updateOneAndReturnEntity(
             manager,
@@ -115,16 +115,12 @@ export class TicketClinicUpdateTicketProductOperation {
       let deliveryStatus = ticketOrigin.deliveryStatus
       if (ticketProductModified.deliveryStatus !== DeliveryStatus.Delivered) {
         if (ticketProductModified.quantity === 0) {
-          const ticketProductList = await this.ticketProductManager.findMany(manager, {
-            condition: { ticketId },
+          const calc = await this.ticketProductManager.calculatorDeliveryStatus({
+            manager,
+            oid,
+            ticketId,
           })
-          deliveryStatus = DeliveryStatus.Delivered
-          if (ticketProductList.every((i) => i.deliveryStatus === DeliveryStatus.NoStock)) {
-            deliveryStatus = DeliveryStatus.NoStock
-          }
-          if (ticketProductList.some((i) => i.deliveryStatus === DeliveryStatus.Pending)) {
-            deliveryStatus = DeliveryStatus.Pending
-          }
+          deliveryStatus = calc.deliveryStatus
         } else {
           deliveryStatus = DeliveryStatus.Pending
         }

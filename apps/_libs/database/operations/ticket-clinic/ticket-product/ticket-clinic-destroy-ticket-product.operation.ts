@@ -57,16 +57,13 @@ export class TicketClinicDestroyTicketProductOperation {
       // === 4. ReCalculator DeliveryStatus
       let deliveryStatus = ticketOrigin.deliveryStatus
       if (ticketProductDestroy.deliveryStatus === DeliveryStatus.Pending) {
-        const ticketProductList = await this.ticketProductManager.findMany(manager, {
-          condition: { ticketId },
+        const calcDeliveryStatus = await this.ticketProductManager.calculatorDeliveryStatus({
+          manager,
+          oid,
+          ticketId,
         })
-        deliveryStatus = DeliveryStatus.Delivered
-        if (ticketProductList.every((i) => i.deliveryStatus === DeliveryStatus.NoStock)) {
-          deliveryStatus = DeliveryStatus.NoStock
-        }
-        if (ticketProductList.some((i) => i.deliveryStatus === DeliveryStatus.Pending)) {
-          deliveryStatus = DeliveryStatus.Pending
-        }
+
+        deliveryStatus = calcDeliveryStatus.deliveryStatus
       }
 
       // === 5. UPDATE TICKET: MONEY  ===

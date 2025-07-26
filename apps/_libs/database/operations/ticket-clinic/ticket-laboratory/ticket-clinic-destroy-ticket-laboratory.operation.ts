@@ -59,19 +59,35 @@ export class TicketClinicDestroyTicketLaboratoryOperation {
           laboratoryId: ticketLaboratoryDestroy.laboratoryId,
         })
 
-      const ticketLaboratoryRemain = await this.ticketLaboratoryManager.findOneBy(manager, {
+      const ticketLaboratoryRemainList = await this.ticketLaboratoryManager.findManyBy(manager, {
         oid,
         ticketId,
         ticketLaboratoryGroupId: ticketLaboratoryDestroy.ticketLaboratoryGroupId,
       })
       let ticketLaboratoryGroupDestroy: TicketLaboratoryGroup | null = null
-      if (!ticketLaboratoryRemain) {
+      let ticketLaboratoryGroupModified: TicketLaboratoryGroup | null = null
+      if (!ticketLaboratoryRemainList.length) {
         ticketLaboratoryGroupDestroy =
           await this.ticketLaboratoryGroupManager.deleteOneAndReturnEntity(manager, {
             oid,
             ticketId,
             id: ticketLaboratoryDestroy.ticketLaboratoryGroupId,
           })
+      } else {
+        const { paymentMoneyStatus } =
+          this.ticketLaboratoryGroupManager.calculatorPaymentMoneyStatus({
+            ticketLaboratoryList: ticketLaboratoryRemainList,
+          })
+        ticketLaboratoryGroupModified =
+          await this.ticketLaboratoryGroupManager.updateOneAndReturnEntity(
+            manager,
+            {
+              oid,
+              ticketId,
+              id: ticketLaboratoryDestroy.ticketLaboratoryGroupId,
+            },
+            { paymentMoneyStatus }
+          )
       }
 
       // === 4. UPDATE TICKET: MONEY  ===
@@ -96,7 +112,8 @@ export class TicketClinicDestroyTicketLaboratoryOperation {
       return {
         ticket,
         ticketLaboratoryDestroy,
-        ticketLaboratoryGroupDestroy,
+        ticketLaboratoryGroupDestroy: ticketLaboratoryGroupDestroy as TicketLaboratoryGroup | null,
+        ticketLaboratoryGroupModified: ticketLaboratoryGroupModified as TicketLaboratoryGroup | null,
         ticketLaboratoryResultDestroyList,
       }
     })

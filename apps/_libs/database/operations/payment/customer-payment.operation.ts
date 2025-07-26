@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
+import { ESArray } from '../../../common/helpers'
 import { BusinessError } from '../../common/error'
 import { PaymentMoneyStatus } from '../../common/variable'
 import {
@@ -381,23 +382,28 @@ export class CustomerPaymentOperation {
           oid,
           ticketLaboratoryGroupId: { IN: tlgIdList },
         })
-        const tlgIdListCompleted = tlgIdList.filter((tlgId) => {
-          const tlList = ticketLaboratoryList.filter((i) => i.ticketLaboratoryGroupId === tlgId)
-          return tlList.every((i) => i.paymentMoneyStatus === PaymentMoneyStatus.Paid)
+
+        const tlgUpdateList = ESArray.uniqueArray(tlgIdList)
+          .filter((i) => !!i)
+          .map((tlgId) => {
+            const tlList = ticketLaboratoryList.filter((i) => i.ticketLaboratoryGroupId === tlgId)
+            const { paymentMoneyStatus } =
+              this.ticketLaboratoryGroupManager.calculatorPaymentMoneyStatus({
+                ticketLaboratoryList: tlList,
+              })
+            return {
+              id: tlgId,
+              paymentMoneyStatus,
+            }
+          })
+        ticketLaboratoryGroupModifiedList = await this.ticketLaboratoryGroupManager.bulkUpdate({
+          manager,
+          compare: ['id'],
+          condition: { oid },
+          tempList: tlgUpdateList,
+          update: ['paymentMoneyStatus'],
+          options: { requireEqualLength: true },
         })
-        if (tlgIdListCompleted.length) {
-          ticketLaboratoryGroupModifiedList =
-            await this.ticketLaboratoryGroupManager.updateAndReturnEntity(
-              manager,
-              {
-                oid,
-                id: { IN: tlgIdListCompleted },
-              },
-              {
-                paymentMoneyStatus: PaymentMoneyStatus.Paid,
-              }
-            )
-        }
       }
 
       return {

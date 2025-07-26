@@ -18,7 +18,7 @@ export class Version9711753467436976 implements MigrationInterface {
                         "actualPrice"   = "paidAmount",
                         "quantity"      = 1;
         `)
-        queryArray.push(queryArray.join(''))
+        await queryRunner.query(queryArray.join(''))
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> { }

@@ -38,8 +38,8 @@ export class TicketClinicDestroyTicketLaboratoryGroupOperation {
       )
 
       // === 2. DELETE TICKET LABORATORY ===
-      const [ticketLaboratoryGroupDestroy] =
-        await this.ticketLaboratoryGroupManager.deleteAndReturnEntity(manager, {
+      const ticketLaboratoryGroupDestroy =
+        await this.ticketLaboratoryGroupManager.deleteOneAndReturnEntity(manager, {
           oid,
           ticketId,
           id: ticketLaboratoryGroupId,

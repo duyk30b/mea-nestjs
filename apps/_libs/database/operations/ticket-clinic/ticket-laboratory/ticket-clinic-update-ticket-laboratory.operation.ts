@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
+import { BusinessError } from '../../../common/error'
+import { PaymentMoneyStatus } from '../../../common/variable'
 import TicketLaboratory from '../../../entities/ticket-laboratory.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import { TicketLaboratoryManager, TicketManager } from '../../../managers'
@@ -44,6 +46,10 @@ export class TicketClinicUpdateTicketLaboratoryOperation {
         oid,
         id: ticketLaboratoryId,
       })
+
+      if (ticketLaboratoryOrigin.paymentMoneyStatus === PaymentMoneyStatus.Paid) {
+        throw new BusinessError('Xét nghiệm đã thanh toán không thể sửa')
+      }
 
       let ticketLaboratory: TicketLaboratory = ticketLaboratoryOrigin
       let laboratoryMoneyChange = 0

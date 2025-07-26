@@ -883,7 +883,8 @@ var PaymentMoneyStatus;
 (function (PaymentMoneyStatus) {
     PaymentMoneyStatus[PaymentMoneyStatus["NoEffect"] = 1] = "NoEffect";
     PaymentMoneyStatus[PaymentMoneyStatus["Pending"] = 2] = "Pending";
-    PaymentMoneyStatus[PaymentMoneyStatus["Paid"] = 3] = "Paid";
+    PaymentMoneyStatus[PaymentMoneyStatus["Partial"] = 3] = "Partial";
+    PaymentMoneyStatus[PaymentMoneyStatus["Paid"] = 4] = "Paid";
 })(PaymentMoneyStatus || (exports.PaymentMoneyStatus = PaymentMoneyStatus = {}));
 
 
@@ -10260,11 +10261,28 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketLaboratoryGroupManager = void 0;
 const common_1 = __webpack_require__(3);
+const variable_1 = __webpack_require__(21);
 const entities_1 = __webpack_require__(45);
 const _postgresql_manager_1 = __webpack_require__(92);
 let TicketLaboratoryGroupManager = class TicketLaboratoryGroupManager extends _postgresql_manager_1._PostgreSqlManager {
     constructor() {
         super(entities_1.TicketLaboratoryGroup);
+    }
+    calculatorPaymentMoneyStatus(options) {
+        const { ticketLaboratoryList } = options;
+        let paymentMoneyStatus = variable_1.PaymentMoneyStatus.NoEffect;
+        if (ticketLaboratoryList.every((i) => i.paymentMoneyStatus === variable_1.PaymentMoneyStatus.NoEffect)) {
+            paymentMoneyStatus = variable_1.PaymentMoneyStatus.NoEffect;
+        }
+        const hasPaid = ticketLaboratoryList.some((i) => i.paymentMoneyStatus === variable_1.PaymentMoneyStatus.Paid);
+        const hasPending = ticketLaboratoryList.some((i) => i.paymentMoneyStatus === variable_1.PaymentMoneyStatus.Pending);
+        if (hasPaid && !hasPending)
+            paymentMoneyStatus = variable_1.PaymentMoneyStatus.Paid;
+        if (!hasPaid && hasPending)
+            paymentMoneyStatus = variable_1.PaymentMoneyStatus.Pending;
+        if (hasPaid && hasPending)
+            paymentMoneyStatus = variable_1.PaymentMoneyStatus.Partial;
+        return { paymentMoneyStatus };
     }
 };
 exports.TicketLaboratoryGroupManager = TicketLaboratoryGroupManager;
@@ -17769,6 +17787,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdateTicketProcedureOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
+const error_1 = __webpack_require__(14);
+const variable_1 = __webpack_require__(21);
 const ticket_entity_1 = __webpack_require__(62);
 const managers_1 = __webpack_require__(98);
 const ticket_change_item_money_manager_1 = __webpack_require__(216);
@@ -17788,6 +17808,9 @@ let TicketClinicUpdateTicketProcedureOperation = class TicketClinicUpdateTicketP
                 oid,
                 id: ticketProcedureId,
             });
+            if (ticketProcedureOrigin.paymentMoneyStatus === variable_1.PaymentMoneyStatus.Paid) {
+                throw new error_1.BusinessError('Dịch vụ đã thanh toán không thể sửa');
+            }
             let ticketProcedure = ticketProcedureOrigin;
             let procedureMoneyChange = 0;
             let itemsDiscountChange = 0;
@@ -17968,16 +17991,12 @@ let TicketClinicDestroyTicketProductOperation = class TicketClinicDestroyTicketP
             });
             let deliveryStatus = ticketOrigin.deliveryStatus;
             if (ticketProductDestroy.deliveryStatus === variable_1.DeliveryStatus.Pending) {
-                const ticketProductList = await this.ticketProductManager.findMany(manager, {
-                    condition: { ticketId },
+                const calcDeliveryStatus = await this.ticketProductManager.calculatorDeliveryStatus({
+                    manager,
+                    oid,
+                    ticketId,
                 });
-                deliveryStatus = variable_1.DeliveryStatus.Delivered;
-                if (ticketProductList.every((i) => i.deliveryStatus === variable_1.DeliveryStatus.NoStock)) {
-                    deliveryStatus = variable_1.DeliveryStatus.NoStock;
-                }
-                if (ticketProductList.some((i) => i.deliveryStatus === variable_1.DeliveryStatus.Pending)) {
-                    deliveryStatus = variable_1.DeliveryStatus.Pending;
-                }
+                deliveryStatus = calcDeliveryStatus.deliveryStatus;
             }
             const productMoneyDelete = ticketProductDestroy.quantity * ticketProductDestroy.actualPrice;
             const itemsCostAmountDelete = ticketProductDestroy.costAmount;
@@ -18048,16 +18067,13 @@ let TicketClinicUpdateTicketProductOperation = class TicketClinicUpdateTicketPro
         const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
             const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(manager, { oid, id: ticketId, status: ticket_entity_1.TicketStatus.Executing }, { updatedAt: Date.now() });
             const ticketProductOrigin = await this.ticketProductManager.updateOneAndReturnEntity(manager, { oid, id: ticketProductId, type: ticketProductType }, { ticketId });
-            if (!ticketProductOrigin) {
-                throw new Error(PREFIX + 'Database.NotFound ');
-            }
             let ticketProductModified = ticketProductOrigin;
             let productMoneyChange = 0;
             let itemsDiscountChange = 0;
             let itemsCostAmountChange = 0;
             if (ticketProductUpdateDto) {
-                if (ticketProductOrigin.deliveryStatus === variable_1.DeliveryStatus.Pending
-                    || ticketProductOrigin.deliveryStatus === variable_1.DeliveryStatus.NoStock) {
+                if ([variable_1.DeliveryStatus.Pending, variable_1.DeliveryStatus.NoStock].includes(ticketProductOrigin.deliveryStatus)
+                    && [variable_1.PaymentMoneyStatus.NoEffect, variable_1.PaymentMoneyStatus.Pending].includes(ticketProductOrigin.paymentMoneyStatus)) {
                     ticketProductModified = await this.ticketProductManager.updateOneAndReturnEntity(manager, { oid, id: ticketProductId }, {
                         quantity: ticketProductUpdateDto.quantity,
                         quantityPrescription: ticketProductUpdateDto.quantityPrescription,
@@ -18092,16 +18108,12 @@ let TicketClinicUpdateTicketProductOperation = class TicketClinicUpdateTicketPro
             let deliveryStatus = ticketOrigin.deliveryStatus;
             if (ticketProductModified.deliveryStatus !== variable_1.DeliveryStatus.Delivered) {
                 if (ticketProductModified.quantity === 0) {
-                    const ticketProductList = await this.ticketProductManager.findMany(manager, {
-                        condition: { ticketId },
+                    const calc = await this.ticketProductManager.calculatorDeliveryStatus({
+                        manager,
+                        oid,
+                        ticketId,
                     });
-                    deliveryStatus = variable_1.DeliveryStatus.Delivered;
-                    if (ticketProductList.every((i) => i.deliveryStatus === variable_1.DeliveryStatus.NoStock)) {
-                        deliveryStatus = variable_1.DeliveryStatus.NoStock;
-                    }
-                    if (ticketProductList.some((i) => i.deliveryStatus === variable_1.DeliveryStatus.Pending)) {
-                        deliveryStatus = variable_1.DeliveryStatus.Pending;
-                    }
+                    deliveryStatus = calc.deliveryStatus;
                 }
                 else {
                     deliveryStatus = variable_1.DeliveryStatus.Pending;
@@ -18221,7 +18233,6 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicDestroyTicketRadiologyOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
-const error_1 = __webpack_require__(14);
 const variable_1 = __webpack_require__(21);
 const position_entity_1 = __webpack_require__(77);
 const ticket_entity_1 = __webpack_require__(62);
@@ -18246,9 +18257,6 @@ let TicketClinicDestroyTicketRadiologyOperation = class TicketClinicDestroyTicke
                 id: ticketRadiologyId,
                 paymentMoneyStatus: { IN: [variable_1.PaymentMoneyStatus.NoEffect, variable_1.PaymentMoneyStatus.Pending] },
             });
-            if (ticketRadiologyDestroy.paymentMoneyStatus === variable_1.PaymentMoneyStatus.Paid) {
-                throw new error_1.BusinessError('Phiếu đã thanh toán không thể xóa');
-            }
             const ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
                 oid,
                 positionType: position_entity_1.PositionInteractType.Radiology,
@@ -18523,7 +18531,7 @@ let TicketClinicChangeSelectLaboratoryOperation = class TicketClinicChangeSelect
                 .filter((tlDto) => !laboratoryIdKeepList.includes(tlDto.laboratoryId))
                 .map((tlDto) => {
                 const tlEntity = Object.assign(Object.assign({}, tlDto), { oid,
-                    ticketId, customerId: ticketOrigin.customerId, ticketLaboratoryGroupId: tlgDto.roomId, roomId: tlgDto.id, status: variable_1.TicketLaboratoryStatus.Pending, startedAt: null, paymentMoneyStatus: tlgUpdate.paymentMoneyStatus });
+                    ticketId, customerId: ticketOrigin.customerId, ticketLaboratoryGroupId: tlgDto.id, roomId: tlgDto.roomId, status: variable_1.TicketLaboratoryStatus.Pending, startedAt: null, paymentMoneyStatus: tlgUpdate.paymentMoneyStatus });
                 return tlEntity;
             });
             const tlInsertList = await this.ticketLaboratoryManager.insertManyAndReturnEntity(manager, tlEntityList);
@@ -18613,7 +18621,7 @@ let TicketClinicDestroyTicketLaboratoryGroupOperation = class TicketClinicDestro
         const PREFIX = `ticketId=${ticketLaboratoryGroupId} destroyTicketLaboratoryGroup failed`;
         const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
             const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(manager, { oid, id: ticketId, status: ticket_entity_1.TicketStatus.Executing }, { updatedAt: Date.now() });
-            const [ticketLaboratoryGroupDestroy] = await this.ticketLaboratoryGroupManager.deleteAndReturnEntity(manager, {
+            const ticketLaboratoryGroupDestroy = await this.ticketLaboratoryGroupManager.deleteOneAndReturnEntity(manager, {
                 oid,
                 ticketId,
                 id: ticketLaboratoryGroupId,
@@ -18714,19 +18722,31 @@ let TicketClinicDestroyTicketLaboratoryOperation = class TicketClinicDestroyTick
                 ticketLaboratoryId: ticketLaboratoryDestroy.id,
                 laboratoryId: ticketLaboratoryDestroy.laboratoryId,
             });
-            const ticketLaboratoryRemain = await this.ticketLaboratoryManager.findOneBy(manager, {
+            const ticketLaboratoryRemainList = await this.ticketLaboratoryManager.findManyBy(manager, {
                 oid,
                 ticketId,
                 ticketLaboratoryGroupId: ticketLaboratoryDestroy.ticketLaboratoryGroupId,
             });
             let ticketLaboratoryGroupDestroy = null;
-            if (!ticketLaboratoryRemain) {
+            let ticketLaboratoryGroupModified = null;
+            if (!ticketLaboratoryRemainList.length) {
                 ticketLaboratoryGroupDestroy =
                     await this.ticketLaboratoryGroupManager.deleteOneAndReturnEntity(manager, {
                         oid,
                         ticketId,
                         id: ticketLaboratoryDestroy.ticketLaboratoryGroupId,
                     });
+            }
+            else {
+                const { paymentMoneyStatus } = this.ticketLaboratoryGroupManager.calculatorPaymentMoneyStatus({
+                    ticketLaboratoryList: ticketLaboratoryRemainList,
+                });
+                ticketLaboratoryGroupModified =
+                    await this.ticketLaboratoryGroupManager.updateOneAndReturnEntity(manager, {
+                        oid,
+                        ticketId,
+                        id: ticketLaboratoryDestroy.ticketLaboratoryGroupId,
+                    }, { paymentMoneyStatus });
             }
             const laboratoryMoneyDelete = ticketLaboratoryDestroy.actualPrice;
             const itemsDiscountDelete = ticketLaboratoryDestroy.discountMoney;
@@ -18747,7 +18767,8 @@ let TicketClinicDestroyTicketLaboratoryOperation = class TicketClinicDestroyTick
             return {
                 ticket,
                 ticketLaboratoryDestroy,
-                ticketLaboratoryGroupDestroy,
+                ticketLaboratoryGroupDestroy: ticketLaboratoryGroupDestroy,
+                ticketLaboratoryGroupModified: ticketLaboratoryGroupModified,
                 ticketLaboratoryResultDestroyList,
             };
         });
@@ -18780,6 +18801,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketClinicUpdateTicketLaboratoryOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
+const error_1 = __webpack_require__(14);
+const variable_1 = __webpack_require__(21);
 const ticket_entity_1 = __webpack_require__(62);
 const managers_1 = __webpack_require__(98);
 const ticket_change_item_money_manager_1 = __webpack_require__(216);
@@ -18799,6 +18822,9 @@ let TicketClinicUpdateTicketLaboratoryOperation = class TicketClinicUpdateTicket
                 oid,
                 id: ticketLaboratoryId,
             });
+            if (ticketLaboratoryOrigin.paymentMoneyStatus === variable_1.PaymentMoneyStatus.Paid) {
+                throw new error_1.BusinessError('Xét nghiệm đã thanh toán không thể sửa');
+            }
             let ticketLaboratory = ticketLaboratoryOrigin;
             let laboratoryMoneyChange = 0;
             let itemsDiscountChange = 0;
@@ -19066,6 +19092,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CustomerPaymentOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
+const helpers_1 = __webpack_require__(206);
 const error_1 = __webpack_require__(14);
 const variable_1 = __webpack_require__(21);
 const payment_item_entity_1 = __webpack_require__(80);
@@ -19346,19 +19373,26 @@ let CustomerPaymentOperation = class CustomerPaymentOperation {
                     oid,
                     ticketLaboratoryGroupId: { IN: tlgIdList },
                 });
-                const tlgIdListCompleted = tlgIdList.filter((tlgId) => {
+                const tlgUpdateList = helpers_1.ESArray.uniqueArray(tlgIdList)
+                    .filter((i) => !!i)
+                    .map((tlgId) => {
                     const tlList = ticketLaboratoryList.filter((i) => i.ticketLaboratoryGroupId === tlgId);
-                    return tlList.every((i) => i.paymentMoneyStatus === variable_1.PaymentMoneyStatus.Paid);
+                    const { paymentMoneyStatus } = this.ticketLaboratoryGroupManager.calculatorPaymentMoneyStatus({
+                        ticketLaboratoryList: tlList,
+                    });
+                    return {
+                        id: tlgId,
+                        paymentMoneyStatus,
+                    };
                 });
-                if (tlgIdListCompleted.length) {
-                    ticketLaboratoryGroupModifiedList =
-                        await this.ticketLaboratoryGroupManager.updateAndReturnEntity(manager, {
-                            oid,
-                            id: { IN: tlgIdListCompleted },
-                        }, {
-                            paymentMoneyStatus: variable_1.PaymentMoneyStatus.Paid,
-                        });
-                }
+                ticketLaboratoryGroupModifiedList = await this.ticketLaboratoryGroupManager.bulkUpdate({
+                    manager,
+                    compare: ['id'],
+                    condition: { oid },
+                    tempList: tlgUpdateList,
+                    update: ['paymentMoneyStatus'],
+                    options: { requireEqualLength: true },
+                });
             }
             return {
                 customerModified,
@@ -55838,7 +55872,12 @@ let ApiTicketClinicLaboratoryService = class ApiTicketClinicLaboratoryService {
         this.socketEmitService.socketTicketLaboratoryListChange(oid, {
             ticketId,
             ticketLaboratoryDestroyList: [result.ticketLaboratoryDestroy],
-            ticketLaboratoryGroupDestroyList: [result.ticketLaboratoryGroupDestroy],
+            ticketLaboratoryGroupDestroyList: result.ticketLaboratoryGroupDestroy
+                ? [result.ticketLaboratoryGroupDestroy]
+                : undefined,
+            ticketLaboratoryGroupUpsertList: result.ticketLaboratoryGroupModified
+                ? [result.ticketLaboratoryGroupModified]
+                : undefined,
         });
         return { data: true };
     }

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { BusinessError } from '../../../common/error'
 import { PaymentMoneyStatus } from '../../../common/variable'
 import { PositionInteractType } from '../../../entities/position.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
@@ -43,9 +42,6 @@ export class TicketClinicDestroyTicketRadiologyOperation {
           paymentMoneyStatus: { IN: [PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending] },
         }
       )
-      if (ticketRadiologyDestroy.paymentMoneyStatus === PaymentMoneyStatus.Paid) {
-        throw new BusinessError('Phiếu đã thanh toán không thể xóa')
-      }
 
       // === 3. DELETE TICKET USER ===
       const ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
