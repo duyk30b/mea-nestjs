@@ -25,7 +25,7 @@ export class ApiTicketClinicService {
 
   async startCheckup(options: { oid: number; ticketId: number }) {
     const { oid, ticketId } = options
-    const [ticket] = await this.ticketRepository.updateAndReturnEntity(
+    const ticketModified = await this.ticketRepository.updateOneAndReturnEntity(
       {
         oid,
         id: ticketId,
@@ -36,9 +36,8 @@ export class ApiTicketClinicService {
         startedAt: Date.now(),
       }
     )
-    if (!ticket) throw new BusinessException('error.Database.UpdateFailed')
-    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
-    return { data: true }
+    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified })
+    return { data: { ticketModified } }
   }
 
   async updateDiagnosis(options: {

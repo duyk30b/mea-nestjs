@@ -19431,29 +19431,37 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d, _e;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CustomerRefundOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
+const helpers_1 = __webpack_require__(206);
 const error_1 = __webpack_require__(14);
+const variable_1 = __webpack_require__(21);
 const payment_item_entity_1 = __webpack_require__(80);
 const payment_entity_1 = __webpack_require__(51);
 const ticket_entity_1 = __webpack_require__(62);
 const managers_1 = __webpack_require__(98);
 const repositories_1 = __webpack_require__(42);
 let CustomerRefundOperation = class CustomerRefundOperation {
-    constructor(dataSource, customerManager, paymentManager, paymentItemManager, ticketManager) {
+    constructor(dataSource, customerManager, paymentManager, paymentItemManager, ticketManager, ticketProductManager, ticketProcedureManager, ticketLaboratoryManager, ticketLaboratoryGroupManager, ticketRadiologyManager) {
         this.dataSource = dataSource;
         this.customerManager = customerManager;
         this.paymentManager = paymentManager;
         this.paymentItemManager = paymentItemManager;
         this.ticketManager = ticketManager;
+        this.ticketProductManager = ticketProductManager;
+        this.ticketProcedureManager = ticketProcedureManager;
+        this.ticketLaboratoryManager = ticketLaboratoryManager;
+        this.ticketLaboratoryGroupManager = ticketLaboratoryGroupManager;
+        this.ticketRadiologyManager = ticketRadiologyManager;
     }
     async startRefund(options) {
-        const { oid, paymentMethodId, customerId, ticketId, time, cashierId, money, reason, note } = options;
-        if (money <= 0) {
-            throw new error_1.BusinessError('Số tiền hoàn trả không hợp lệ', { money });
+        const { oid, paymentMethodId, customerId, ticketId, time, cashierId, totalMoney, reason, note, refundItemList, } = options;
+        const moneyItemReduce = refundItemList.reduce((acc, item) => acc + item.paidAmount, 0) || 0;
+        if (totalMoney <= 0 || totalMoney !== moneyItemReduce) {
+            throw new error_1.BusinessError('Số tiền hoàn trả không hợp lệ', { totalMoney, moneyItemReduce });
         }
         const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
             const ticketModified = await this.ticketManager.updateOneAndReturnEntity(manager, {
@@ -19461,13 +19469,13 @@ let CustomerRefundOperation = class CustomerRefundOperation {
                 id: ticketId,
                 status: { IN: [ticket_entity_1.TicketStatus.Deposited, ticket_entity_1.TicketStatus.Executing] },
             }, {
-                paid: () => `paid - ${money}`,
-                debt: () => `debt + ${money}`,
+                paid: () => `paid - ${totalMoney}`,
+                debt: () => `debt + ${totalMoney}`,
             });
             if (ticketModified.paid < 0) {
                 throw new error_1.BusinessError(`Số tiền hoàn trả vượt quá số tiền cho phép`, {
-                    money,
-                    paidOrigin: ticketModified.paid + money,
+                    totalMoney,
+                    paidOrigin: ticketModified.paid + totalMoney,
                 });
             }
             const customer = await this.customerManager.findOneBy(manager, {
@@ -19486,37 +19494,161 @@ let CustomerRefundOperation = class CustomerRefundOperation {
                 personId: customerId,
                 createdAt: time,
                 moneyDirection: payment_entity_1.MoneyDirection.Out,
-                money,
+                money: totalMoney,
                 cashierId,
                 note: note || '',
                 reason: reason || '',
             };
             const paymentCreated = await this.paymentManager.insertOneAndReturnEntity(manager, paymentInsert);
-            const paymentItemInsert = {
-                oid,
-                paymentId: paymentCreated.id,
-                personId: customerId,
-                paymentPersonType: payment_entity_1.PaymentPersonType.Customer,
-                voucherType: payment_item_entity_1.PaymentVoucherType.Ticket,
-                voucherId: ticketId,
-                voucherItemType: payment_item_entity_1.PaymentVoucherItemType.Other,
-                voucherItemId: 0,
-                paymentInteractId: 0,
-                note: note || '',
-                createdAt: time,
-                cashierId,
-                expectedPrice: -money,
-                actualPrice: -money,
-                quantity: 1,
-                discountMoney: 0,
-                discountPercent: 0,
-                paidAmount: -money,
-                debtAmount: 0,
-                openDebt: customerOpenDebt,
-                closeDebt: customerCloseDebt,
+            const paymentItemInsertList = refundItemList.map((itemData, index) => {
+                const paymentItemInsert = {
+                    oid,
+                    paymentId: paymentCreated.id,
+                    paymentPersonType: payment_entity_1.PaymentPersonType.Customer,
+                    personId: customerId,
+                    createdAt: time,
+                    voucherType: payment_item_entity_1.PaymentVoucherType.Ticket,
+                    voucherId: ticketId,
+                    voucherItemType: itemData.voucherItemType,
+                    voucherItemId: itemData.ticketItemId,
+                    paymentInteractId: itemData.paymentInteractId,
+                    expectedPrice: itemData.expectedPrice,
+                    actualPrice: itemData.actualPrice,
+                    quantity: itemData.quantity,
+                    discountMoney: itemData.discountMoney,
+                    discountPercent: itemData.discountPercent,
+                    paidAmount: itemData.paidAmount,
+                    debtAmount: 0,
+                    openDebt: customerOpenDebt,
+                    closeDebt: customerOpenDebt,
+                    cashierId,
+                    note: reason || note || '',
+                };
+                return paymentItemInsert;
+            });
+            const paymentItemCreatedList = await this.paymentItemManager.insertManyAndReturnEntity(manager, paymentItemInsertList);
+            let ticketProcedureModifiedList;
+            let ticketProductConsumableModifiedList;
+            let ticketProductPrescriptionModifiedList;
+            let ticketLaboratoryModifiedList;
+            let ticketRadiologyModifiedList;
+            let ticketLaboratoryGroupModifiedList;
+            if (refundItemList.length) {
+                const itemProcedureList = refundItemList
+                    .filter((i) => i.voucherItemType === payment_item_entity_1.PaymentVoucherItemType.TicketProcedure)
+                    .map((i) => (Object.assign(Object.assign({}, i), { id: i.ticketItemId, paymentMoneyStatus: variable_1.PaymentMoneyStatus.Pending })));
+                ticketProcedureModifiedList = await this.ticketProcedureManager.bulkUpdate({
+                    manager,
+                    condition: {
+                        oid,
+                        ticketId,
+                        paymentMoneyStatus: variable_1.PaymentMoneyStatus.Paid,
+                    },
+                    compare: ['id'],
+                    tempList: itemProcedureList,
+                    update: ['paymentMoneyStatus'],
+                    options: { requireEqualLength: true },
+                });
+                const itemConsumable = refundItemList
+                    .filter((i) => i.voucherItemType === payment_item_entity_1.PaymentVoucherItemType.TicketProductConsumable)
+                    .map((i) => (Object.assign(Object.assign({}, i), { id: i.ticketItemId, paymentMoneyStatus: variable_1.PaymentMoneyStatus.Pending })));
+                ticketProductConsumableModifiedList = await this.ticketProductManager.bulkUpdate({
+                    manager,
+                    condition: {
+                        oid,
+                        ticketId,
+                        paymentMoneyStatus: variable_1.PaymentMoneyStatus.Paid,
+                    },
+                    compare: ['id'],
+                    tempList: itemConsumable,
+                    update: ['paymentMoneyStatus'],
+                    options: { requireEqualLength: true },
+                });
+                const itemPrescription = refundItemList
+                    .filter((i) => i.voucherItemType === payment_item_entity_1.PaymentVoucherItemType.TicketProductPrescription)
+                    .map((i) => (Object.assign(Object.assign({}, i), { id: i.ticketItemId, paymentMoneyStatus: variable_1.PaymentMoneyStatus.Pending })));
+                ticketProductPrescriptionModifiedList = await this.ticketProductManager.bulkUpdate({
+                    manager,
+                    condition: {
+                        oid,
+                        ticketId,
+                        paymentMoneyStatus: variable_1.PaymentMoneyStatus.Paid,
+                    },
+                    compare: ['id'],
+                    tempList: itemPrescription,
+                    update: ['paymentMoneyStatus'],
+                    options: { requireEqualLength: true },
+                });
+                const itemLaboratoryList = refundItemList
+                    .filter((i) => i.voucherItemType === payment_item_entity_1.PaymentVoucherItemType.TicketLaboratory)
+                    .map((i) => (Object.assign(Object.assign({}, i), { id: i.ticketItemId, paymentMoneyStatus: variable_1.PaymentMoneyStatus.Pending })));
+                ticketLaboratoryModifiedList = await this.ticketLaboratoryManager.bulkUpdate({
+                    manager,
+                    condition: {
+                        oid,
+                        ticketId,
+                        paymentMoneyStatus: variable_1.PaymentMoneyStatus.Paid,
+                    },
+                    compare: ['id'],
+                    tempList: itemLaboratoryList,
+                    update: ['paymentMoneyStatus'],
+                    options: { requireEqualLength: true },
+                });
+                const itemRadiologyList = refundItemList
+                    .filter((i) => i.voucherItemType === payment_item_entity_1.PaymentVoucherItemType.TicketRadiology)
+                    .map((i) => (Object.assign(Object.assign({}, i), { id: i.ticketItemId, paymentMoneyStatus: variable_1.PaymentMoneyStatus.Pending })));
+                ticketRadiologyModifiedList = await this.ticketRadiologyManager.bulkUpdate({
+                    manager,
+                    condition: {
+                        oid,
+                        ticketId,
+                        paymentMoneyStatus: variable_1.PaymentMoneyStatus.Paid,
+                    },
+                    compare: ['id'],
+                    tempList: itemRadiologyList,
+                    update: ['paymentMoneyStatus'],
+                    options: { requireEqualLength: true },
+                });
+            }
+            if (ticketLaboratoryModifiedList === null || ticketLaboratoryModifiedList === void 0 ? void 0 : ticketLaboratoryModifiedList.length) {
+                const tlgIdList = ticketLaboratoryModifiedList.map((i) => i.ticketLaboratoryGroupId);
+                const ticketLaboratoryList = await this.ticketLaboratoryManager.findManyBy(manager, {
+                    oid,
+                    ticketLaboratoryGroupId: { IN: tlgIdList },
+                });
+                const tlgUpdateList = helpers_1.ESArray.uniqueArray(tlgIdList)
+                    .filter((i) => !!i)
+                    .map((tlgId) => {
+                    const tlList = ticketLaboratoryList.filter((i) => i.ticketLaboratoryGroupId === tlgId);
+                    const { paymentMoneyStatus } = this.ticketLaboratoryGroupManager.calculatorPaymentMoneyStatus({
+                        ticketLaboratoryList: tlList,
+                    });
+                    return {
+                        id: tlgId,
+                        paymentMoneyStatus,
+                    };
+                });
+                ticketLaboratoryGroupModifiedList = await this.ticketLaboratoryGroupManager.bulkUpdate({
+                    manager,
+                    compare: ['id'],
+                    condition: { oid },
+                    tempList: tlgUpdateList,
+                    update: ['paymentMoneyStatus'],
+                    options: { requireEqualLength: true },
+                });
+            }
+            return {
+                ticketModified,
+                customer,
+                paymentCreated,
+                paymentItemCreatedList,
+                ticketProcedureModifiedList,
+                ticketProductConsumableModifiedList,
+                ticketProductPrescriptionModifiedList,
+                ticketLaboratoryModifiedList,
+                ticketRadiologyModifiedList,
+                ticketLaboratoryGroupModifiedList,
             };
-            const paymentItemCreated = await this.paymentItemManager.insertOneAndReturnEntity(manager, paymentItemInsert);
-            return { ticketModified, paymentCreated, paymentItemCreated, customer };
         });
         return transaction;
     }
@@ -19524,7 +19656,7 @@ let CustomerRefundOperation = class CustomerRefundOperation {
 exports.CustomerRefundOperation = CustomerRefundOperation;
 exports.CustomerRefundOperation = CustomerRefundOperation = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _a : Object, typeof (_b = typeof managers_1.CustomerManager !== "undefined" && managers_1.CustomerManager) === "function" ? _b : Object, typeof (_c = typeof repositories_1.PaymentManager !== "undefined" && repositories_1.PaymentManager) === "function" ? _c : Object, typeof (_d = typeof repositories_1.PaymentItemManager !== "undefined" && repositories_1.PaymentItemManager) === "function" ? _d : Object, typeof (_e = typeof managers_1.TicketManager !== "undefined" && managers_1.TicketManager) === "function" ? _e : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _a : Object, typeof (_b = typeof managers_1.CustomerManager !== "undefined" && managers_1.CustomerManager) === "function" ? _b : Object, typeof (_c = typeof repositories_1.PaymentManager !== "undefined" && repositories_1.PaymentManager) === "function" ? _c : Object, typeof (_d = typeof repositories_1.PaymentItemManager !== "undefined" && repositories_1.PaymentItemManager) === "function" ? _d : Object, typeof (_e = typeof managers_1.TicketManager !== "undefined" && managers_1.TicketManager) === "function" ? _e : Object, typeof (_f = typeof managers_1.TicketProductManager !== "undefined" && managers_1.TicketProductManager) === "function" ? _f : Object, typeof (_g = typeof managers_1.TicketProcedureManager !== "undefined" && managers_1.TicketProcedureManager) === "function" ? _g : Object, typeof (_h = typeof managers_1.TicketLaboratoryManager !== "undefined" && managers_1.TicketLaboratoryManager) === "function" ? _h : Object, typeof (_j = typeof managers_1.TicketLaboratoryGroupManager !== "undefined" && managers_1.TicketLaboratoryGroupManager) === "function" ? _j : Object, typeof (_k = typeof managers_1.TicketRadiologyManager !== "undefined" && managers_1.TicketRadiologyManager) === "function" ? _k : Object])
 ], CustomerRefundOperation);
 
 
@@ -19837,12 +19969,12 @@ let DistributorRefundOperation = class DistributorRefundOperation {
                 note: note || 'Hoàn trả',
                 createdAt: time,
                 cashierId,
-                expectedPrice: -money,
-                actualPrice: -money,
+                expectedPrice: money,
+                actualPrice: money,
                 quantity: 1,
                 discountMoney: 0,
                 discountPercent: 0,
-                paidAmount: -money,
+                paidAmount: money,
                 debtAmount: 0,
                 openDebt: distributorOpenDebt,
                 closeDebt: distributorCloseDebt,
@@ -40109,14 +40241,46 @@ let PaymentActionService = class PaymentActionService {
             customerId: body.customerId,
             ticketId: body.ticketId,
             time: Date.now(),
-            money: body.money,
+            totalMoney: body.totalMoney,
             paymentMethodId: body.paymentMethodId,
             reason: body.reason,
             note: 'Hoàn trả',
+            refundItemList: body.refundItemList,
         });
-        const { ticketModified, customer, paymentItemCreated } = refundResult;
+        const { ticketModified, customer, paymentCreated, paymentItemCreatedList } = refundResult;
         this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] });
-        return { ticketModified, customer, paymentItemCreated };
+        if (refundResult.ticketProcedureModifiedList) {
+            this.socketEmitService.socketTicketProcedureListChange(oid, {
+                ticketId: body.ticketId || 0,
+                ticketProcedureUpsertList: refundResult.ticketProcedureModifiedList,
+            });
+        }
+        if (refundResult.ticketProductConsumableModifiedList) {
+            this.socketEmitService.socketTicketConsumableChange(oid, {
+                ticketId: body.ticketId || 0,
+                ticketProductUpsertList: refundResult.ticketProductConsumableModifiedList,
+            });
+        }
+        if (refundResult.ticketProductPrescriptionModifiedList) {
+            this.socketEmitService.socketTicketPrescriptionChange(oid, {
+                ticketId: body.ticketId || 0,
+                ticketProductUpsertList: refundResult.ticketProductPrescriptionModifiedList,
+            });
+        }
+        if (refundResult.ticketLaboratoryModifiedList) {
+            this.socketEmitService.socketTicketLaboratoryListChange(oid, {
+                ticketId: body.ticketId || 0,
+                ticketLaboratoryUpsertList: refundResult.ticketLaboratoryModifiedList,
+                ticketLaboratoryGroupUpsertList: refundResult.ticketLaboratoryGroupModifiedList || [],
+            });
+        }
+        if (refundResult.ticketRadiologyModifiedList) {
+            this.socketEmitService.socketTicketRadiologyListChange(oid, {
+                ticketId: body.ticketId || 0,
+                ticketRadiologyUpsertList: refundResult.ticketRadiologyModifiedList,
+            });
+        }
+        return { ticketModified, customer, paymentCreated, paymentItemCreatedList };
     }
     async distributorPayment(options) {
         const { oid, body, userId } = options;
@@ -40420,11 +40584,68 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CustomerRefundBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
 const class_validator_1 = __webpack_require__(263);
+const class_validator_custom_1 = __webpack_require__(264);
+const payment_item_entity_1 = __webpack_require__(80);
+class PaymentPrepaymentTicketItem {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: payment_item_entity_1.PaymentVoucherItemType }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsEnumValue)(payment_item_entity_1.PaymentVoucherItemType),
+    __metadata("design:type", typeof (_a = typeof payment_item_entity_1.PaymentVoucherItemType !== "undefined" && payment_item_entity_1.PaymentVoucherItemType) === "function" ? _a : Object)
+], PaymentPrepaymentTicketItem.prototype, "voucherItemType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 12 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], PaymentPrepaymentTicketItem.prototype, "ticketItemId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 12 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], PaymentPrepaymentTicketItem.prototype, "paymentInteractId", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    __metadata("design:type", Number)
+], PaymentPrepaymentTicketItem.prototype, "expectedPrice", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    __metadata("design:type", Number)
+], PaymentPrepaymentTicketItem.prototype, "discountMoney", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    __metadata("design:type", Number)
+], PaymentPrepaymentTicketItem.prototype, "discountPercent", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    __metadata("design:type", Number)
+], PaymentPrepaymentTicketItem.prototype, "actualPrice", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    __metadata("design:type", Number)
+], PaymentPrepaymentTicketItem.prototype, "quantity", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsNumberGreaterThan)(0),
+    __metadata("design:type", Number)
+], PaymentPrepaymentTicketItem.prototype, "paidAmount", void 0);
 class CustomerRefundBody {
 }
 exports.CustomerRefundBody = CustomerRefundBody;
@@ -40448,7 +40669,7 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
-], CustomerRefundBody.prototype, "money", void 0);
+], CustomerRefundBody.prototype, "totalMoney", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 2 }),
     (0, class_transformer_1.Expose)(),
@@ -40457,12 +40678,28 @@ __decorate([
     __metadata("design:type", Number)
 ], CustomerRefundBody.prototype, "paymentMethodId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 1200000 }),
+    (0, swagger_1.ApiProperty)(),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CustomerRefundBody.prototype, "reason", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CustomerRefundBody.prototype, "note", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: PaymentPrepaymentTicketItem, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_transformer_1.Type)(() => PaymentPrepaymentTicketItem),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], CustomerRefundBody.prototype, "refundItemList", void 0);
 
 
 /***/ }),
@@ -58557,7 +58794,6 @@ var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketClinicService = void 0;
 const common_1 = __webpack_require__(3);
-const exception_filter_1 = __webpack_require__(9);
 const array_helper_1 = __webpack_require__(181);
 const ticket_entity_1 = __webpack_require__(62);
 const repositories_1 = __webpack_require__(42);
@@ -58574,7 +58810,7 @@ let ApiTicketClinicService = class ApiTicketClinicService {
     }
     async startCheckup(options) {
         const { oid, ticketId } = options;
-        const [ticket] = await this.ticketRepository.updateAndReturnEntity({
+        const ticketModified = await this.ticketRepository.updateOneAndReturnEntity({
             oid,
             id: ticketId,
             status: { IN: [ticket_entity_1.TicketStatus.Schedule, ticket_entity_1.TicketStatus.Draft, ticket_entity_1.TicketStatus.Deposited] },
@@ -58582,10 +58818,8 @@ let ApiTicketClinicService = class ApiTicketClinicService {
             status: ticket_entity_1.TicketStatus.Executing,
             startedAt: Date.now(),
         });
-        if (!ticket)
-            throw new exception_filter_1.BusinessException('error.Database.UpdateFailed');
-        this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket });
-        return { data: true };
+        this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified });
+        return { data: { ticketModified } };
     }
     async updateDiagnosis(options) {
         const { oid, ticketId, body, files } = options;
@@ -59410,6 +59644,7 @@ const cache_data_service_1 = __webpack_require__(40);
 const exception_filter_1 = __webpack_require__(9);
 const error_1 = __webpack_require__(14);
 const variable_1 = __webpack_require__(21);
+const payment_item_entity_1 = __webpack_require__(80);
 const ticket_product_entity_1 = __webpack_require__(71);
 const ticket_radiology_entity_1 = __webpack_require__(72);
 const ticket_entity_1 = __webpack_require__(62);
@@ -59609,14 +59844,27 @@ let TicketActionService = class TicketActionService {
                 customerId: ticketModified.customerId,
                 cashierId: userId,
                 ticketId,
-                money: ticketModified.paid,
+                totalMoney: ticketModified.paid,
                 time,
                 paymentMethodId: 0,
-                reason: '',
+                reason: 'Hủy phiếu',
                 note: 'Hủy phiếu',
+                refundItemList: [
+                    {
+                        ticketItemId: 0,
+                        voucherItemType: payment_item_entity_1.PaymentVoucherItemType.Other,
+                        paymentInteractId: 0,
+                        discountMoney: 0,
+                        discountPercent: 0,
+                        expectedPrice: ticketModified.paid,
+                        actualPrice: ticketModified.paid,
+                        quantity: 1,
+                        paidAmount: ticketModified.paid,
+                    },
+                ],
             });
             customerModified = refundOverpaidResult.customer;
-            paymentItemCreatedList.push(refundOverpaidResult.paymentItemCreated);
+            paymentItemCreatedList.push(...refundOverpaidResult.paymentItemCreatedList);
             ticketModified = refundOverpaidResult.ticketModified;
         }
         if (ticketModified.deliveryStatus === variable_1.DeliveryStatus.Delivered) {

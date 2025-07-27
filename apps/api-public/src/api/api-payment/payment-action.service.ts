@@ -65,8 +65,8 @@ export class PaymentActionService {
   async customerPayment(data: {
     oid: number
     userId: number
-    body: CustomerPaymentBody,
-    query?: PaymentPostQuery,
+    body: CustomerPaymentBody
+    query?: PaymentPostQuery
     options?: { noEmitTicket?: boolean; noEmitCustomer?: boolean }
   }) {
     const { oid, userId, body, options } = data
@@ -81,7 +81,8 @@ export class PaymentActionService {
       note: body.note,
       paymentItemData: body.paymentItemData,
     })
-    const { ticketModifiedList, customerModified, paymentCreated, paymentItemCreatedList } = paymentResult
+    const { ticketModifiedList, customerModified, paymentCreated, paymentItemCreatedList } =
+      paymentResult
     if (!options?.noEmitTicket) {
       this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: ticketModifiedList })
     }
@@ -130,14 +131,46 @@ export class PaymentActionService {
       customerId: body.customerId,
       ticketId: body.ticketId,
       time: Date.now(),
-      money: body.money,
+      totalMoney: body.totalMoney,
       paymentMethodId: body.paymentMethodId,
       reason: body.reason,
       note: 'Hoàn trả',
+      refundItemList: body.refundItemList,
     })
-    const { ticketModified, customer, paymentItemCreated } = refundResult
+    const { ticketModified, customer, paymentCreated, paymentItemCreatedList } = refundResult
     this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
-    return { ticketModified, customer, paymentItemCreated }
+    if (refundResult.ticketProcedureModifiedList) {
+      this.socketEmitService.socketTicketProcedureListChange(oid, {
+        ticketId: body.ticketId || 0,
+        ticketProcedureUpsertList: refundResult.ticketProcedureModifiedList,
+      })
+    }
+    if (refundResult.ticketProductConsumableModifiedList) {
+      this.socketEmitService.socketTicketConsumableChange(oid, {
+        ticketId: body.ticketId || 0,
+        ticketProductUpsertList: refundResult.ticketProductConsumableModifiedList,
+      })
+    }
+    if (refundResult.ticketProductPrescriptionModifiedList) {
+      this.socketEmitService.socketTicketPrescriptionChange(oid, {
+        ticketId: body.ticketId || 0,
+        ticketProductUpsertList: refundResult.ticketProductPrescriptionModifiedList,
+      })
+    }
+    if (refundResult.ticketLaboratoryModifiedList) {
+      this.socketEmitService.socketTicketLaboratoryListChange(oid, {
+        ticketId: body.ticketId || 0,
+        ticketLaboratoryUpsertList: refundResult.ticketLaboratoryModifiedList,
+        ticketLaboratoryGroupUpsertList: refundResult.ticketLaboratoryGroupModifiedList || [],
+      })
+    }
+    if (refundResult.ticketRadiologyModifiedList) {
+      this.socketEmitService.socketTicketRadiologyListChange(oid, {
+        ticketId: body.ticketId || 0,
+        ticketRadiologyUpsertList: refundResult.ticketRadiologyModifiedList,
+      })
+    }
+    return { ticketModified, customer, paymentCreated, paymentItemCreatedList }
   }
 
   async distributorPayment(options: { oid: number; userId: number; body: DistributorPaymentBody }) {

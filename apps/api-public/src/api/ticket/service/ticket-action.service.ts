@@ -4,6 +4,7 @@ import { BusinessException } from '../../../../../_libs/common/exception-filter/
 import { BusinessError } from '../../../../../_libs/database/common/error'
 import { DeliveryStatus } from '../../../../../_libs/database/common/variable'
 import { Customer, PaymentItem } from '../../../../../_libs/database/entities'
+import { PaymentVoucherItemType } from '../../../../../_libs/database/entities/payment-item.entity'
 import TicketProduct, {
   TicketProductType,
 } from '../../../../../_libs/database/entities/ticket-product.entity'
@@ -259,14 +260,27 @@ export class TicketActionService {
         customerId: ticketModified.customerId,
         cashierId: userId,
         ticketId,
-        money: ticketModified.paid,
+        totalMoney: ticketModified.paid,
         time,
         paymentMethodId: 0,
-        reason: '',
+        reason: 'Hủy phiếu',
         note: 'Hủy phiếu',
+        refundItemList: [
+          {
+            ticketItemId: 0,
+            voucherItemType: PaymentVoucherItemType.Other,
+            paymentInteractId: 0,
+            discountMoney: 0,
+            discountPercent: 0,
+            expectedPrice: ticketModified.paid,
+            actualPrice: ticketModified.paid,
+            quantity: 1,
+            paidAmount: ticketModified.paid,
+          },
+        ],
       })
       customerModified = refundOverpaidResult.customer
-      paymentItemCreatedList.push(refundOverpaidResult.paymentItemCreated)
+      paymentItemCreatedList.push(...refundOverpaidResult.paymentItemCreatedList)
       ticketModified = refundOverpaidResult.ticketModified
     }
 
