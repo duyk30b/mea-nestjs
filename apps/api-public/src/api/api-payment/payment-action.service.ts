@@ -1,36 +1,54 @@
 import { Injectable } from '@nestjs/common'
 import {
   MoneyDirection,
+  PaymentActionType,
   PaymentInsertType,
   PaymentPersonType,
+  PaymentVoucherType,
 } from '../../../../_libs/database/entities/payment.entity'
 import {
-  CustomerPaymentOperation,
-  CustomerRefundOperation,
-  DistributorPaymentOperation,
-  DistributorRefundOperation,
+  CustomerPayDebtOperation,
+  CustomerPrepaymentMoneyOperation,
+  CustomerPrepaymentTicketItemListOperation,
+  CustomerRefundMoneyOperation,
+  CustomerRefundTicketItemListOperation,
+  DistributorPayDebtOperation,
+  DistributorPrepaymentMoneyOperation,
+  DistributorRefundMoneyOperation,
 } from '../../../../_libs/database/operations'
 import { PaymentRepository } from '../../../../_libs/database/repositories/payment.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
-  CustomerPaymentBody,
-  DistributorPaymentBody,
+  CustomerPayDebtBody,
+  CustomerPrepaymentBody,
+  CustomerPrepaymentTicketItemListBody,
+  CustomerRefundMoneyBody,
+  CustomerRefundTicketItemListBody,
+  DistributorPayDebtBody,
+  DistributorPrepaymentBody,
+  DistributorRefundMoneyBody,
   OtherPaymentBody,
   PaymentGetManyQuery,
   PaymentPostQuery,
 } from './request'
-import { CustomerRefundBody } from './request/customer-refund.body'
-import { DistributorRefundBody } from './request/distributor-refund.body'
 
 @Injectable()
 export class PaymentActionService {
+  customerPaymentOperation: any
+  customerRefundOperation: any
+  distributorPaymentOperation: any
+  distributorRefundOperation: any
   constructor(
     private readonly socketEmitService: SocketEmitService,
     private readonly paymentRepository: PaymentRepository,
-    private readonly customerPaymentOperation: CustomerPaymentOperation,
-    private readonly distributorPaymentOperation: DistributorPaymentOperation,
-    private readonly customerRefundOperation: CustomerRefundOperation,
-    private readonly distributorRefundOperation: DistributorRefundOperation
+    private readonly customerPayDebtOperation: CustomerPayDebtOperation,
+    private readonly customerPrepaymentMoneyOperation: CustomerPrepaymentMoneyOperation,
+    private readonly customerPrepaymentTicketItemListOperation: CustomerPrepaymentTicketItemListOperation,
+    private readonly customerRefundMoneyOperation: CustomerRefundMoneyOperation,
+    private readonly customerRefundTicketItemListOperation: CustomerRefundTicketItemListOperation,
+    private readonly distributorPayDebtOperation: DistributorPayDebtOperation,
+    private readonly distributorPrepaymentMoneyOperation: DistributorPrepaymentMoneyOperation,
+    private readonly distributorRefundMoneyOperation: DistributorRefundMoneyOperation
   ) { }
 
   async sumMoney(oid: number, query: PaymentGetManyQuery) {
@@ -39,7 +57,7 @@ export class PaymentActionService {
       condition: {
         oid,
         paymentMethodId: filter?.paymentMethodId,
-        paymentPersonType: filter?.paymentPersonType,
+        personType: filter?.personType,
         personId: filter?.personId,
         moneyDirection: filter?.moneyDirection,
         cashierId: filter?.cashierId,
@@ -47,7 +65,7 @@ export class PaymentActionService {
       },
       select: ['moneyDirection'],
       aggregate: {
-        sumPaidAmount: { SUM: ['money'] },
+        sumPaidAmount: { SUM: ['paidAmount'] },
         count: { COUNT: '*' },
       },
       groupBy: ['moneyDirection'],
@@ -62,172 +80,312 @@ export class PaymentActionService {
     return { aggregate }
   }
 
-  async customerPayment(data: {
+  async customerPrepaymentMoney(data: {
     oid: number
     userId: number
-    body: CustomerPaymentBody
+    body: CustomerPrepaymentBody
+    query?: PaymentPostQuery
+    options?: { noEmitTicket?: boolean }
+  }) {
+    const { oid, userId, body, options } = data
+    const prepaymentResult = await this.customerPrepaymentMoneyOperation.startPrePaymentMoney({
+      oid,
+      ticketId: body.ticketId,
+      customerId: body.customerId,
+      cashierId: userId,
+      paymentMethodId: body.paymentMethodId,
+      time: Date.now(),
+      paidAmount: body.paidAmount,
+      note: body.note,
+    })
+    const { ticketModified, customer, paymentCreated } = prepaymentResult
+    if (!options?.noEmitTicket) {
+      this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+    }
+
+    return { ticketModified, customer, paymentCreated }
+  }
+
+  async customerPayDebt(data: {
+    oid: number
+    userId: number
+    body: CustomerPayDebtBody
     query?: PaymentPostQuery
     options?: { noEmitTicket?: boolean; noEmitCustomer?: boolean }
   }) {
     const { oid, userId, body, options } = data
-    const paymentResult = await this.customerPaymentOperation.startPayment({
+    const payDebtResult = await this.customerPayDebtOperation.startPayDebt({
       oid,
       customerId: body.customerId,
       cashierId: userId,
       paymentMethodId: body.paymentMethodId,
       time: Date.now(),
-      totalMoney: body.totalMoney,
-      reason: body.reason,
+      paidAmount: body.paidAmount,
       note: body.note,
-      paymentItemData: body.paymentItemData,
+      dataList: body.dataList,
     })
-    const { ticketModifiedList, customerModified, paymentCreated, paymentItemCreatedList } =
-      paymentResult
+    const { ticketModifiedList, customerModified, paymentCreatedList } = payDebtResult
     if (!options?.noEmitTicket) {
       this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: ticketModifiedList })
     }
     if (!options?.noEmitCustomer) {
       this.socketEmitService.customerUpsert(oid, { customer: customerModified })
     }
-    if (paymentResult.ticketProcedureModifiedList) {
-      this.socketEmitService.socketTicketProcedureListChange(oid, {
-        ticketId: body.paymentItemData.prepayment?.ticketId || 0,
-        ticketProcedureUpsertList: paymentResult.ticketProcedureModifiedList,
-      })
-    }
-    if (paymentResult.ticketProductConsumableModifiedList) {
-      this.socketEmitService.socketTicketConsumableChange(oid, {
-        ticketId: body.paymentItemData.prepayment?.ticketId || 0,
-        ticketProductUpsertList: paymentResult.ticketProductConsumableModifiedList,
-      })
-    }
-    if (paymentResult.ticketProductPrescriptionModifiedList) {
-      this.socketEmitService.socketTicketPrescriptionChange(oid, {
-        ticketId: body.paymentItemData.prepayment?.ticketId || 0,
-        ticketProductUpsertList: paymentResult.ticketProductPrescriptionModifiedList,
-      })
-    }
-    if (paymentResult.ticketLaboratoryModifiedList) {
-      this.socketEmitService.socketTicketLaboratoryListChange(oid, {
-        ticketId: body.paymentItemData.prepayment?.ticketId || 0,
-        ticketLaboratoryUpsertList: paymentResult.ticketLaboratoryModifiedList,
-        ticketLaboratoryGroupUpsertList: paymentResult.ticketLaboratoryGroupModifiedList || [],
-      })
-    }
-    if (paymentResult.ticketRadiologyModifiedList) {
-      this.socketEmitService.socketTicketRadiologyListChange(oid, {
-        ticketId: body.paymentItemData.prepayment?.ticketId || 0,
-        ticketRadiologyUpsertList: paymentResult.ticketRadiologyModifiedList,
-      })
-    }
-    return { ticketModifiedList, customerModified, paymentCreated, paymentItemCreatedList }
+
+    return { ticketModifiedList, customerModified, paymentCreatedList }
   }
 
-  async customerRefund(params: { oid: number; userId: number; body: CustomerRefundBody }) {
-    const { oid, userId, body } = params
-    const refundResult = await this.customerRefundOperation.startRefund({
+  async customerRefundMoney(data: {
+    oid: number
+    userId: number
+    body: CustomerRefundMoneyBody
+    query?: PaymentPostQuery
+    options?: { noEmitTicket?: boolean }
+  }) {
+    const { oid, userId, body, options } = data
+    const payDebtResult = await this.customerRefundMoneyOperation.startRefundMoney({
       oid,
-      cashierId: userId,
-      customerId: body.customerId,
       ticketId: body.ticketId,
-      time: Date.now(),
-      totalMoney: body.totalMoney,
+      customerId: body.customerId,
+      cashierId: userId,
       paymentMethodId: body.paymentMethodId,
-      reason: body.reason,
-      note: 'Hoàn trả',
-      refundItemList: body.refundItemList,
+      time: Date.now(),
+      refundAmount: body.refundAmount,
+      note: body.note,
     })
-    const { ticketModified, customer, paymentCreated, paymentItemCreatedList } = refundResult
-    this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
-    if (refundResult.ticketProcedureModifiedList) {
+    const { ticketModified, customer, paymentCreated } = payDebtResult
+    if (!options?.noEmitTicket) {
+      this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+    }
+
+    return { ticketModified, customer, paymentCreated }
+  }
+
+  async distributorPrepaymentMoney(data: {
+    oid: number
+    userId: number
+    body: DistributorPrepaymentBody
+    query?: PaymentPostQuery
+    options?: { noEmitReceipt?: boolean }
+  }) {
+    const { oid, userId, body, options } = data
+    const prepaymentResult = await this.distributorPrepaymentMoneyOperation.startPrePaymentMoney({
+      oid,
+      receiptId: body.receiptId,
+      distributorId: body.distributorId,
+      cashierId: userId,
+      paymentMethodId: body.paymentMethodId,
+      time: Date.now(),
+      paidAmount: body.paidAmount,
+      note: body.note,
+    })
+    const { receiptModified, distributor, paymentCreated } = prepaymentResult
+    if (!options?.noEmitReceipt) {
+      this.socketEmitService.socketReceiptListChange(oid, {
+        receiptUpsertedList: [receiptModified],
+      })
+    }
+
+    return { receiptModified, distributor, paymentCreated }
+  }
+
+  async distributorPayDebt(data: {
+    oid: number
+    userId: number
+    body: DistributorPayDebtBody
+    query?: PaymentPostQuery
+    options?: { noEmitTicket?: boolean; noEmitDistributor?: boolean }
+  }) {
+    const { oid, userId, body, options } = data
+    const payDebtResult = await this.distributorPayDebtOperation.startPayDebt({
+      oid,
+      distributorId: body.distributorId,
+      cashierId: userId,
+      paymentMethodId: body.paymentMethodId,
+      time: Date.now(),
+      paidAmount: body.paidAmount,
+      note: body.note,
+      dataList: body.dataList,
+    })
+    const { receiptModifiedList, distributorModified, paymentCreatedList } = payDebtResult
+    if (!options?.noEmitTicket) {
+      this.socketEmitService.socketReceiptListChange(oid, {
+        receiptUpsertedList: receiptModifiedList,
+      })
+    }
+    if (!options?.noEmitDistributor) {
+      this.socketEmitService.distributorUpsert(oid, { distributor: distributorModified })
+    }
+
+    return { receiptModifiedList, distributorModified, paymentCreatedList }
+  }
+
+  async distributorRefundMoney(data: {
+    oid: number
+    userId: number
+    body: DistributorRefundMoneyBody
+    query?: PaymentPostQuery
+    options?: { noEmitReceipt?: boolean }
+  }) {
+    const { oid, userId, body, options } = data
+    const payDebtResult = await this.distributorRefundMoneyOperation.startRefundMoney({
+      oid,
+      receiptId: body.receiptId,
+      distributorId: body.distributorId,
+      cashierId: userId,
+      paymentMethodId: body.paymentMethodId,
+      time: Date.now(),
+      refundAmount: body.refundAmount,
+      note: body.note,
+    })
+    const { receiptModified, distributor, paymentCreated } = payDebtResult
+    if (!options?.noEmitReceipt) {
+      this.socketEmitService.socketReceiptListChange(oid, {
+        receiptUpsertedList: [receiptModified],
+      })
+    }
+
+    return { receiptModified, distributor, paymentCreated }
+  }
+
+  async customerPrepaymentTicketItemList(data: {
+    oid: number
+    userId: number
+    body: CustomerPrepaymentTicketItemListBody
+    query?: PaymentPostQuery
+    options?: { noEmitTicket?: boolean }
+  }) {
+    const { oid, userId, body, options } = data
+    const prepaymentResult =
+      await this.customerPrepaymentTicketItemListOperation.startPrepaymentTicketItemList({
+        oid,
+        ticketId: body.ticketId,
+        customerId: body.customerId,
+        cashierId: userId,
+        paymentMethodId: body.paymentMethodId,
+        time: Date.now(),
+        note: body.note,
+        paidAmount: body.paidAmount,
+        ticketItemList: body.ticketItemList,
+      })
+    const { ticketModified, customer, paymentCreated } = prepaymentResult
+    if (!options?.noEmitTicket) {
+      this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+    }
+
+    if (prepaymentResult.ticketProcedureModifiedList?.length) {
+      this.socketEmitService.socketTicketProcedureListChange(oid, {
+        ticketId: body.ticketId,
+        ticketProcedureUpsertList: prepaymentResult.ticketProcedureModifiedList,
+      })
+    }
+    if (prepaymentResult.ticketProductConsumableModifiedList?.length) {
+      this.socketEmitService.socketTicketConsumableChange(oid, {
+        ticketId: body.ticketId,
+        ticketProductUpsertList: prepaymentResult.ticketProductConsumableModifiedList,
+      })
+    }
+    if (prepaymentResult.ticketProductPrescriptionModifiedList?.length) {
+      this.socketEmitService.socketTicketPrescriptionChange(oid, {
+        ticketId: body.ticketId,
+        ticketProductUpsertList: prepaymentResult.ticketProductPrescriptionModifiedList,
+      })
+    }
+    if (prepaymentResult.ticketLaboratoryModifiedList?.length) {
+      this.socketEmitService.socketTicketLaboratoryListChange(oid, {
+        ticketId: body.ticketId,
+        ticketLaboratoryUpsertList: prepaymentResult.ticketLaboratoryModifiedList,
+        ticketLaboratoryGroupUpsertList: prepaymentResult.ticketLaboratoryGroupModifiedList || [],
+      })
+    }
+    if (prepaymentResult.ticketRadiologyModifiedList?.length) {
+      this.socketEmitService.socketTicketRadiologyListChange(oid, {
+        ticketId: body.ticketId,
+        ticketRadiologyUpsertList: prepaymentResult.ticketRadiologyModifiedList,
+      })
+    }
+    return { ticketModified, customer, paymentCreated }
+  }
+
+  async customerRefundTicketItemList(params: {
+    oid: number
+    userId: number
+    body: CustomerRefundTicketItemListBody
+    options?: { noEmitTicket?: boolean }
+  }) {
+    const { oid, userId, body, options } = params
+    const refundResult = await this.customerRefundTicketItemListOperation.startRefundTicketItemList(
+      {
+        oid,
+        ticketId: body.ticketId,
+        customerId: body.customerId,
+        cashierId: userId,
+        paymentMethodId: body.paymentMethodId,
+        time: Date.now(),
+        refundAmount: body.refundAmount,
+        note: body.note,
+        ticketItemList: body.ticketItemList,
+      }
+    )
+    const { ticketModified, customer, paymentCreated } = refundResult
+    if (!options?.noEmitTicket) {
+      this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+    }
+
+    if (refundResult.ticketProcedureModifiedList?.length) {
       this.socketEmitService.socketTicketProcedureListChange(oid, {
         ticketId: body.ticketId || 0,
         ticketProcedureUpsertList: refundResult.ticketProcedureModifiedList,
       })
     }
-    if (refundResult.ticketProductConsumableModifiedList) {
+    if (refundResult.ticketProductConsumableModifiedList?.length) {
       this.socketEmitService.socketTicketConsumableChange(oid, {
         ticketId: body.ticketId || 0,
         ticketProductUpsertList: refundResult.ticketProductConsumableModifiedList,
       })
     }
-    if (refundResult.ticketProductPrescriptionModifiedList) {
+    if (refundResult.ticketProductPrescriptionModifiedList?.length) {
       this.socketEmitService.socketTicketPrescriptionChange(oid, {
         ticketId: body.ticketId || 0,
         ticketProductUpsertList: refundResult.ticketProductPrescriptionModifiedList,
       })
     }
-    if (refundResult.ticketLaboratoryModifiedList) {
+    if (refundResult.ticketLaboratoryModifiedList?.length) {
       this.socketEmitService.socketTicketLaboratoryListChange(oid, {
         ticketId: body.ticketId || 0,
         ticketLaboratoryUpsertList: refundResult.ticketLaboratoryModifiedList,
         ticketLaboratoryGroupUpsertList: refundResult.ticketLaboratoryGroupModifiedList || [],
       })
     }
-    if (refundResult.ticketRadiologyModifiedList) {
+    if (refundResult.ticketRadiologyModifiedList?.length) {
       this.socketEmitService.socketTicketRadiologyListChange(oid, {
         ticketId: body.ticketId || 0,
         ticketRadiologyUpsertList: refundResult.ticketRadiologyModifiedList,
       })
     }
-    return { ticketModified, customer, paymentCreated, paymentItemCreatedList }
-  }
-
-  async distributorPayment(options: { oid: number; userId: number; body: DistributorPaymentBody }) {
-    const { oid, body, userId } = options
-    const paymentResult = await this.distributorPaymentOperation.startPayment({
-      oid,
-      distributorId: body.distributorId,
-      cashierId: userId,
-      paymentMethodId: body.paymentMethodId,
-      time: Date.now(),
-      totalMoney: body.totalMoney,
-      reason: body.reason,
-      note: body.note,
-      paymentItemData: body.paymentItemData,
-    })
-    const { distributorModified, receiptModifiedList, paymentItemCreatedList } = paymentResult
-    this.socketEmitService.distributorUpsert(oid, { distributor: distributorModified })
-    this.socketEmitService.socketReceiptListChange(oid, {
-      receiptUpsertedList: receiptModifiedList,
-    })
-    return { distributorModified, receiptModifiedList, paymentItemCreatedList }
-  }
-
-  async distributorRefund(params: { oid: number; userId: number; body: DistributorRefundBody }) {
-    const { oid, userId, body } = params
-    const refundResult = await this.distributorRefundOperation.startRefund({
-      oid,
-      cashierId: userId,
-      distributorId: body.distributorId,
-      receiptId: body.receiptId,
-      time: Date.now(),
-      money: body.money,
-      paymentMethodId: body.paymentMethodId,
-      reason: body.reason,
-      note: 'Hoàn trả',
-    })
-    const { distributor, receiptModified, paymentItemCreated } = refundResult
-    this.socketEmitService.socketReceiptListChange(oid, {
-      receiptUpsertedList: [receiptModified],
-    })
-    return { receiptModified, distributor, paymentItemCreated }
+    return { ticketModified, customer, paymentCreated }
   }
 
   async otherPaymentMoneyIn(options: { oid: number; userId: number; body: OtherPaymentBody }) {
     const { oid, userId, body } = options
     const paymentInsert: PaymentInsertType = {
       oid,
-      paymentMethodId: body.paymentMethodId,
-      paymentPersonType: PaymentPersonType.Other,
+      voucherType: PaymentVoucherType.Other,
+      voucherId: 0,
+      personType: PaymentPersonType.Other,
       personId: 0,
+
+      cashierId: userId,
+      paymentMethodId: body.paymentMethodId,
       createdAt: Date.now(),
       moneyDirection: MoneyDirection.In,
-
-      money: body.money,
-      cashierId: userId,
+      paymentActionType: PaymentActionType.Other,
       note: body.note || '',
-      reason: body.reason,
+
+      paidAmount: body.paidAmount,
+      debtAmount: 0,
+      openDebt: 0,
+      closeDebt: 0,
     }
     const payment = await this.paymentRepository.insertOneAndReturnEntity(paymentInsert)
     return { payment }
@@ -237,16 +395,22 @@ export class PaymentActionService {
     const { oid, userId, body } = options
     const paymentInsert: PaymentInsertType = {
       oid,
-      paymentMethodId: body.paymentMethodId,
-      paymentPersonType: PaymentPersonType.Other,
+      voucherType: PaymentVoucherType.Other,
+      voucherId: 0,
+      personType: PaymentPersonType.Other,
       personId: 0,
+
+      cashierId: userId,
+      paymentMethodId: body.paymentMethodId,
       createdAt: Date.now(),
       moneyDirection: MoneyDirection.Out,
-
-      money: body.money,
-      cashierId: userId,
+      paymentActionType: PaymentActionType.Other,
       note: body.note || '',
-      reason: body.reason,
+
+      paidAmount: body.paidAmount,
+      debtAmount: 0,
+      openDebt: 0,
+      closeDebt: 0,
     }
     const payment = await this.paymentRepository.insertOneAndReturnEntity(paymentInsert)
     return { payment }

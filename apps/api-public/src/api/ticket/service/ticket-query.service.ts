@@ -18,9 +18,7 @@ import {
   TicketSurcharge,
   TicketUser,
 } from '../../../../../_libs/database/entities'
-import PaymentItem, {
-  PaymentVoucherType,
-} from '../../../../../_libs/database/entities/payment-item.entity'
+import Payment, { PaymentVoucherType } from '../../../../../_libs/database/entities/payment.entity'
 import TicketProduct, {
   TicketProductType,
 } from '../../../../../_libs/database/entities/ticket-product.entity'
@@ -28,7 +26,7 @@ import {
   AppointmentRepository,
   CustomerRepository,
   CustomerSourceRepository,
-  PaymentItemRepository,
+  PaymentRepository,
   TicketAttributeRepository,
   TicketBatchRepository,
   TicketExpenseRepository,
@@ -67,7 +65,7 @@ export class TicketQueryService {
     private readonly ticketLaboratoryGroupRepository: TicketLaboratoryGroupRepository,
     private readonly ticketLaboratoryResultRepository: TicketLaboratoryResultRepository,
     private readonly ticketUserRepository: TicketUserRepository,
-    private readonly paymentItemRepository: PaymentItemRepository,
+    private readonly paymentRepository: PaymentRepository,
     private readonly customerSourceRepository: CustomerSourceRepository,
     private readonly imageRepository: ImageRepository
   ) { }
@@ -162,8 +160,8 @@ export class TicketQueryService {
       relation?.customer
         ? this.customerRepository.findMany({ condition: { oid, id: { IN: customerIdList } } })
         : undefined,
-      relation?.paymentItemList
-        ? this.paymentItemRepository.findMany({
+      relation?.paymentList
+        ? this.paymentRepository.findMany({
           condition: {
             oid,
             voucherType: PaymentVoucherType.Ticket,
@@ -307,7 +305,7 @@ export class TicketQueryService {
     ])
 
     const customerList: Customer[] = dataPromise[0]
-    const paymentItemList: PaymentItem[] = dataPromise[1]
+    const paymentList: Payment[] = dataPromise[1]
     const ticketProductList: TicketProduct[] = dataPromise[2]
     const ticketProductPrescriptionList: TicketProduct[] = dataPromise[3]
     const ticketProductConsumableList: TicketProduct[] = dataPromise[4]
@@ -333,8 +331,8 @@ export class TicketQueryService {
           return i.id === ticket.customerId
         })
       }
-      if (relation?.paymentItemList) {
-        ticket.paymentItemList = paymentItemList.filter((i) => {
+      if (relation?.paymentList) {
+        ticket.paymentList = paymentList.filter((i) => {
           return i.voucherId === ticket.id
         })
       }

@@ -7,15 +7,19 @@ import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiPaymentService } from './api-payment.service'
 import { PaymentActionService } from './payment-action.service'
 import {
-  CustomerPaymentBody,
-  DistributorPaymentBody,
-  DistributorRefundBody,
+  CustomerPayDebtBody,
+  CustomerPrepaymentBody,
+  CustomerPrepaymentTicketItemListBody,
+  CustomerRefundMoneyBody,
+  CustomerRefundTicketItemListBody,
+  DistributorPayDebtBody,
+  DistributorPrepaymentBody,
+  DistributorRefundMoneyBody,
   OtherPaymentBody,
   PaymentGetManyQuery,
   PaymentPaginationQuery,
   PaymentPostQuery,
 } from './request'
-import { CustomerRefundBody } from './request/customer-refund.body'
 
 @ApiTags('Payment')
 @ApiBearerAuth('access-token')
@@ -56,44 +60,117 @@ export class ApiPaymentController {
     return { data }
   }
 
-  @Post('customer-payment')
+  @Post('customer-prepayment-money')
   @UserPermission(PermissionId.PAYMENT_CUSTOMER_PAYMENT)
-  async customerPayment(
+  async customerPrepaymentMoney(
     @External() { oid, uid }: TExternal,
-    @Body() body: CustomerPaymentBody,
+    @Body() body: CustomerPrepaymentBody,
     @Query() query: PaymentPostQuery
   ): Promise<BaseResponse> {
-    const data = await this.paymentActionService.customerPayment({ oid, userId: uid, body, query })
+    const data = await this.paymentActionService.customerPrepaymentMoney({
+      oid,
+      userId: uid,
+      body,
+      query,
+    })
     return { data }
   }
 
-  @Post('customer-refund')
+  @Post('customer-pay-debt')
+  @UserPermission(PermissionId.PAYMENT_CUSTOMER_PAYMENT)
+  async customerPayDebt(
+    @External() { oid, uid }: TExternal,
+    @Body() body: CustomerPayDebtBody,
+    @Query() query: PaymentPostQuery
+  ): Promise<BaseResponse> {
+    const data = await this.paymentActionService.customerPayDebt({
+      oid,
+      userId: uid,
+      body,
+      query,
+    })
+    return { data }
+  }
+
+  @Post('customer-refund-money')
   @UserPermission(PermissionId.PAYMENT_CUSTOMER_REFUND)
-  async customerRefund(
+  async customerRefundMoney(
     @External() { oid, uid }: TExternal,
-    @Body() body: CustomerRefundBody
+    @Body() body: CustomerRefundMoneyBody
   ): Promise<BaseResponse> {
-    const data = await this.paymentActionService.customerRefund({ oid, userId: uid, body })
+    const data = await this.paymentActionService.customerRefundMoney({ oid, userId: uid, body })
     return { data }
   }
 
-  @Post('distributor-payment')
+  @Post('distributor-prepayment-money')
   @UserPermission(PermissionId.PAYMENT_DISTRIBUTOR_PAYMENT)
-  async distributorPayment(
+  async distributorPrepaymentMoney(
     @External() { oid, uid }: TExternal,
-    @Body() body: DistributorPaymentBody
+    @Body() body: DistributorPrepaymentBody,
+    @Query() query: PaymentPostQuery
   ): Promise<BaseResponse> {
-    const data = await this.paymentActionService.distributorPayment({ oid, userId: uid, body })
+    const data = await this.paymentActionService.distributorPrepaymentMoney({
+      oid,
+      userId: uid,
+      body,
+      query,
+    })
     return { data }
   }
 
-  @Post('distributor-refund')
-  @UserPermission(PermissionId.PAYMENT_DISTRIBUTOR_REFUND)
-  async distributorRefund(
+  @Post('distributor-pay-debt')
+  @UserPermission(PermissionId.PAYMENT_DISTRIBUTOR_PAYMENT)
+  async distributorPayDebt(
     @External() { oid, uid }: TExternal,
-    @Body() body: DistributorRefundBody
+    @Body() body: DistributorPayDebtBody,
+    @Query() query: PaymentPostQuery
   ): Promise<BaseResponse> {
-    const data = await this.paymentActionService.distributorRefund({ oid, userId: uid, body })
+    const data = await this.paymentActionService.distributorPayDebt({
+      oid,
+      userId: uid,
+      body,
+      query,
+    })
+    return { data }
+  }
+
+  @Post('distributor-refund-money')
+  @UserPermission(PermissionId.PAYMENT_DISTRIBUTOR_REFUND)
+  async distributorRefundMoney(
+    @External() { oid, uid }: TExternal,
+    @Body() body: DistributorRefundMoneyBody
+  ): Promise<BaseResponse> {
+    const data = await this.paymentActionService.distributorRefundMoney({ oid, userId: uid, body })
+    return { data }
+  }
+
+  @Post('customer-prepayment-ticket-item-list')
+  @UserPermission(PermissionId.PAYMENT_CUSTOMER_PAYMENT)
+  async customerPrepaymentTicketItemList(
+    @External() { oid, uid }: TExternal,
+    @Body() body: CustomerPrepaymentTicketItemListBody,
+    @Query() query: PaymentPostQuery
+  ): Promise<BaseResponse> {
+    const data = await this.paymentActionService.customerPrepaymentTicketItemList({
+      oid,
+      userId: uid,
+      body,
+      query,
+    })
+    return { data }
+  }
+
+  @Post('customer-refund-ticket-item-list')
+  @UserPermission(PermissionId.PAYMENT_CUSTOMER_REFUND)
+  async customerRefundTicketItemList(
+    @External() { oid, uid }: TExternal,
+    @Body() body: CustomerRefundTicketItemListBody
+  ): Promise<BaseResponse> {
+    const data = await this.paymentActionService.customerRefundTicketItemList({
+      oid,
+      userId: uid,
+      body,
+    })
     return { data }
   }
 

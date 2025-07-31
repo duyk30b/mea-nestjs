@@ -2,12 +2,13 @@ import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { DeliveryStatus } from '../../common/variable'
 import { Customer, TicketUser } from '../../entities'
-import PaymentItem, {
-  PaymentItemInsertType,
-  PaymentVoucherItemType,
+import Payment, {
+  MoneyDirection,
+  PaymentActionType,
+  PaymentInsertType,
+  PaymentPersonType,
   PaymentVoucherType,
-} from '../../entities/payment-item.entity'
-import { PaymentPersonType } from '../../entities/payment.entity'
+} from '../../entities/payment.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
 import {
   CustomerManager,
@@ -17,7 +18,7 @@ import {
   TicketProductManager,
   TicketRadiologyManager,
 } from '../../managers'
-import { PaymentItemManager, TicketUserManager } from '../../repositories'
+import { PaymentManager, TicketUserManager } from '../../repositories'
 import { TicketCalculatorMoney } from './ticket-calculator-money.operator'
 import { TicketUpdateCommissionTicketUserOperator } from './ticket-update-commission-ticket-user.operator'
 
@@ -32,7 +33,7 @@ export class TicketCloseOperation {
     private ticketRadiologyManager: TicketRadiologyManager,
     private ticketUserManager: TicketUserManager,
     private customerManager: CustomerManager,
-    private paymentItemManager: PaymentItemManager,
+    private paymentManager: PaymentManager,
     private ticketUpdateCommissionTicketUserOperator: TicketUpdateCommissionTicketUserOperator,
     private ticketCalculatorMoney: TicketCalculatorMoney
   ) { }
@@ -122,7 +123,7 @@ export class TicketCloseOperation {
       })
 
       let customerModified: Customer
-      const paymentItemCreatedList: PaymentItem[] = []
+      const paymentCreatedList: Payment[] = []
       if (ticketUpdated.debt) {
         let paidByTopUp = 0
         const customerOrigin = await this.customerManager.updateOneAndReturnEntity(
@@ -146,36 +147,30 @@ export class TicketCloseOperation {
 
         ticketFix.debt = newDebtTicket
 
-        const paymentItemInsert: PaymentItemInsertType = {
+        const paymentInsert: PaymentInsertType = {
           oid,
-          paymentId: 0,
-          paymentPersonType: PaymentPersonType.Customer,
-          personId: ticketUpdated.customerId,
-          createdAt: time,
-
           voucherType: PaymentVoucherType.Ticket,
           voucherId: ticketId,
-          voucherItemType: PaymentVoucherItemType.Other,
-          voucherItemId: 0,
-          paymentInteractId: 0,
+          personType: PaymentPersonType.Customer,
+          personId: ticketUpdated.customerId,
 
-          discountMoney: 0,
-          discountPercent: 0,
-          expectedPrice: 0,
-          actualPrice: 0,
-          quantity: 1,
+          cashierId: userId,
+          paymentMethodId: 0,
+          createdAt: time,
+          paymentActionType: PaymentActionType.Close,
+          moneyDirection: MoneyDirection.Other,
+          note: note || '',
+
           paidAmount: 0,
-          debtAmount: paidByTopUp + ticketFix.debt,
+          debtAmount: paidByTopUp + ticketFix.debt, // thực ra thì vẫn = receiptUpdated.debt
           openDebt: customerOrigin.debt,
           closeDebt: customerModified.debt,
-          cashierId: userId,
-          note: note || 'Đóng phiếu',
         }
-        const paymentItemCreated = await this.paymentItemManager.insertOneAndReturnEntity(
+        const paymentCreated = await this.paymentManager.insertOneAndReturnEntity(
           manager,
-          paymentItemInsert
+          paymentInsert
         )
-        paymentItemCreatedList.push(paymentItemCreated)
+        paymentCreatedList.push(paymentCreated)
       }
 
       const ticketModified = await this.ticketManager.updateOneAndReturnEntity(
@@ -190,7 +185,7 @@ export class TicketCloseOperation {
         customerModified,
         ticketUserModifiedList,
         ticketUserDeletedList,
-        paymentItemCreatedList,
+        paymentCreatedList,
       }
     } catch (error) {
       console.error('error:', error)

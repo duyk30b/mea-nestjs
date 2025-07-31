@@ -44,9 +44,13 @@ export * from './ticket-clinic/ticket-laboratory/ticket-clinic-update-ticket-lab
 export * from './ticket-order/ticket-order-deposited.operation'
 export * from './ticket-order/ticket-order-draft.operation'
 
-export * from './payment/customer-payment.operation'
-export * from './payment/customer-refund.operation'
-export * from './payment/distributor-payment.operation'
-export * from './payment/distributor-refund.operation'
+export * from './payment/customer-pay-debt.operation'
+export * from './payment/customer-prepayment-money.operation'
+export * from './payment/customer-prepayment-ticket-item-list.operation'
+export * from './payment/customer-refund-money.operation'
+export * from './payment/customer-refund-ticket-item-list.operation'
+export * from './payment/distributor-pay-debt.operation'
+export * from './payment/distributor-prepayment-money.operation'
+export * from './payment/distributor-refund-money.operation'
 
 export * from './stock-check/stock-check-reconcile.operation'

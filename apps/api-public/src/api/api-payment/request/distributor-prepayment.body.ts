@@ -1,11 +1,27 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
-import { IsDefined, IsInt, IsString } from 'class-validator'
+import {
+  IsDefined,
+  IsInt,
+  IsString,
+} from 'class-validator'
 import {
   IsNumberGreaterThan,
 } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 
-export class OtherPaymentBody {
+export class DistributorPrepaymentBody {
+  @ApiProperty({ example: 12 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  receiptId: number
+
+  @ApiProperty({ example: 12 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  distributorId: number
+
   @ApiProperty({ example: 12 })
   @Expose()
   @IsDefined()

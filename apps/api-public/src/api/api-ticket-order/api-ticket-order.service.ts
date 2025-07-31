@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { PaymentMoneyStatus } from '../../../../_libs/database/common/variable'
-import { Customer } from '../../../../_libs/database/entities'
-import PaymentItem, {
-  PaymentVoucherItemType,
-} from '../../../../_libs/database/entities/payment-item.entity'
+import { Customer, Payment, TicketProduct } from '../../../../_libs/database/entities'
 import Ticket, { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import {
   TicketOrderDepositedOperation,
@@ -165,36 +162,10 @@ export class ApiTicketOrderService {
     }
 
     if (paid > 0) {
-      await this.paymentActionService.customerPayment({
+      await this.paymentActionService.customerPrepaymentMoney({
         oid,
         userId,
-        body: {
-          customerId,
-          note: 'Cập nhật phiếu',
-          reason: '',
-          totalMoney: paid,
-          paymentMethodId: 0,
-          paymentItemData: {
-            moneyTopUpAdd: 0,
-            payDebt: [],
-            prepayment: {
-              ticketId,
-              itemList: [
-                {
-                  paidAmount: paid,
-                  ticketItemId: 0,
-                  voucherItemType: PaymentVoucherItemType.Other,
-                  paymentInteractId: 0,
-                  discountMoney: 0,
-                  discountPercent: 0,
-                  expectedPrice: paid,
-                  actualPrice: paid,
-                  quantity: 1,
-                },
-              ],
-            },
-          },
-        },
+        body: { ticketId, customerId, paymentMethodId: 0, paidAmount: paid, note: '' },
       })
     }
 
@@ -211,8 +182,7 @@ export class ApiTicketOrderService {
   }) {
     const { oid, userId, ticketId, body } = params
     const time = Date.now()
-    const promiseData = await Promise.all([this.ticketRepository.findOneBy({ oid, id: ticketId })])
-    let ticket = promiseData[0]
+    let ticket = await this.ticketRepository.findOneBy({ oid, id: ticketId })
     const customerId = ticket.customerId
 
     if ([TicketStatus.Draft, TicketStatus.Schedule].includes(ticket.status)) {
@@ -225,6 +195,19 @@ export class ApiTicketOrderService {
         userId,
       })
       ticket = responseReopen.ticketModified
+    }
+    if (ticket.paid) {
+      await this.paymentActionService.customerRefundMoney({
+        oid,
+        userId,
+        body: {
+          customerId,
+          note: 'Sửa đơn',
+          paymentMethodId: 0,
+          refundAmount: ticket.paid,
+          ticketId,
+        },
+      })
     }
     await this.ticketActionService.returnProduct({
       oid,
@@ -275,36 +258,10 @@ export class ApiTicketOrderService {
     })
 
     if (paidBody > 0) {
-      await this.paymentActionService.customerPayment({
+      await this.paymentActionService.customerPrepaymentMoney({
         oid,
         userId,
-        body: {
-          customerId,
-          note: 'Sửa đơn',
-          reason: '',
-          totalMoney: paidBody,
-          paymentMethodId: 0,
-          paymentItemData: {
-            moneyTopUpAdd: 0,
-            payDebt: [],
-            prepayment: {
-              ticketId,
-              itemList: [
-                {
-                  ticketItemId: 0,
-                  voucherItemType: PaymentVoucherItemType.Other,
-                  paymentInteractId: 0,
-                  discountMoney: 0,
-                  discountPercent: 0,
-                  paidAmount: paidBody,
-                  expectedPrice: paidBody,
-                  actualPrice: paidBody,
-                  quantity: 1,
-                },
-              ],
-            },
-          },
-        },
+        body: { ticketId, customerId, paymentMethodId: 0, paidAmount: paidBody, note: 'Sửa đơn' },
       })
     }
 
@@ -333,60 +290,41 @@ export class ApiTicketOrderService {
   }) {
     const { oid, ticketId, body, userId } = params
     const time = Date.now()
-    const paymentItemCreatedList: PaymentItem[] = []
+    const paymentCreatedList: Payment[] = []
     let ticketModified: Ticket
     let customerModified: Customer
 
-    const sendProductResult = await this.ticketActionService.sendProduct({
-      oid,
-      sendAll: true,
-      ticketId,
-      ticketProductIdList: [],
-      options: { noEmitTicket: true },
-    })
-    if (sendProductResult.ticketModified) {
-      ticketModified = sendProductResult.ticketModified
+    let ticketProductModifiedAll: TicketProduct[]
+    if (body.ticketProductIdList.length) {
+      const sendProductResult = await this.ticketActionService.sendProduct({
+        oid,
+        sendAll: true,
+        ticketId,
+        ticketProductIdList: [],
+        options: { noEmitTicket: true },
+      })
+      if (sendProductResult.ticketModified) {
+        ticketModified = sendProductResult.ticketModified
+      }
+      ticketProductModifiedAll = sendProductResult.ticketProductModifiedAll
     }
 
-    const customerId = sendProductResult.ticketModified.customerId
+    const customerId = body.customerId
 
-    if (body.money > 0) {
-      const paymentResult = await this.paymentActionService.customerPayment({
+    if (body.paidAmount > 0) {
+      const prepaymentResult = await this.paymentActionService.customerPrepaymentMoney({
         oid,
         userId,
         body: {
           customerId,
-          note: 'Gửi hàng',
-          reason: '',
-          totalMoney: body.money,
-          paymentMethodId: 0,
-          paymentItemData: {
-            moneyTopUpAdd: 0,
-            payDebt: [],
-            prepayment: {
-              ticketId,
-              itemList: [
-                {
-                  paidAmount: body.money,
-                  expectedPrice: body.money,
-                  actualPrice: body.money,
-                  quantity: 1,
-                  discountMoney: 0,
-                  discountPercent: 0,
-                  ticketItemId: 0,
-                  voucherItemType: PaymentVoucherItemType.Other,
-                  paymentInteractId: 0,
-                },
-              ],
-            },
-          },
+          note: body.note,
+          paidAmount: body.paidAmount,
+          paymentMethodId: body.paymentMethodId,
+          ticketId,
         },
-        options: { noEmitTicket: true, noEmitCustomer: true },
       })
-      paymentItemCreatedList.push(...paymentResult.paymentItemCreatedList)
-      if (paymentResult.ticketModifiedList.length) {
-        ticketModified = paymentResult.ticketModifiedList[0]
-      }
+      paymentCreatedList.push(prepaymentResult.paymentCreated)
+      ticketModified = prepaymentResult.ticketModified
     }
 
     const closeResult = await this.ticketActionService.close({
@@ -395,7 +333,7 @@ export class ApiTicketOrderService {
       userId,
       options: { noEmitCustomer: true, noEmitTicket: true },
     })
-    paymentItemCreatedList.push(...closeResult.paymentItemCreatedList)
+    paymentCreatedList.push(...closeResult.paymentCreatedList)
     if (closeResult.ticketModified) {
       ticketModified = closeResult.ticketModified
     }
@@ -410,8 +348,8 @@ export class ApiTicketOrderService {
     }
     return {
       ticketModified: closeResult.ticketModified,
-      paymentItemCreatedList,
-      ticketProductModifiedAll: sendProductResult.ticketProductModifiedAll,
+      paymentCreatedList,
+      ticketProductModifiedAll: ticketProductModifiedAll || [],
     }
   }
 }

@@ -7,35 +7,53 @@ import { IsEnumValue } from '../../../../../_libs/common/transform-validate/clas
 import {
   MoneyDirection,
   PaymentPersonType,
+  PaymentVoucherType,
 } from '../../../../../_libs/database/entities/payment.entity'
 
 export class PaymentRelationQuery {
   @Expose()
   @IsBoolean()
-  customer: boolean
+  ticket: boolean
 
   @Expose()
   @IsBoolean()
-  distributor: boolean
+  receipt?: boolean
 
   @Expose()
   @IsBoolean()
-  employee: boolean
+  customer?: boolean
 
   @Expose()
   @IsBoolean()
-  cashier: boolean
+  distributor?: boolean
 
   @Expose()
   @IsBoolean()
-  paymentMethod: boolean
+  employee?: boolean
 
   @Expose()
   @IsBoolean()
-  paymentItemList: boolean
+  cashier?: boolean
+
+  @Expose()
+  @IsBoolean()
+  paymentMethod?: boolean
+
+  @Expose()
+  @IsBoolean()
+  paymentTicketItemList?: boolean
 }
 
 export class PaymentFilterQuery {
+  @Expose()
+  @IsEnumValue(PaymentVoucherType)
+  @IsIn(valuesEnum(PaymentVoucherType))
+  voucherType: PaymentVoucherType
+
+  @Expose()
+  @IsNumber()
+  voucherId: number
+
   @Expose()
   @IsNumber()
   paymentMethodId: number
@@ -43,7 +61,7 @@ export class PaymentFilterQuery {
   @Expose()
   @IsEnumValue(PaymentPersonType)
   @IsIn(valuesEnum(PaymentPersonType))
-  paymentPersonType: PaymentPersonType
+  personType: PaymentPersonType
 
   @Expose()
   @IsNumber()

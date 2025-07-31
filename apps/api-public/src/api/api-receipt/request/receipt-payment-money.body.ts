@@ -7,7 +7,7 @@ export class ReceiptPaymentMoneyBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  money: number
+  paidAmount: number
 
   @ApiProperty({ example: 2 })
   @Expose()
@@ -25,5 +25,5 @@ export class ReceiptPaymentMoneyBody {
   @Expose()
   @IsDefined()
   @IsString()
-  reason: string
+  note: string
 }

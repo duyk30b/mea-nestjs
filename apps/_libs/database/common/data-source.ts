@@ -2,9 +2,11 @@ import * as dotenv from 'dotenv'
 import * as path from 'path'
 import { DataSource, DataSourceOptions } from 'typeorm'
 
-dotenv.config({
-  path: path.resolve(__dirname, `../../../../.env.${process.env.NODE_ENV || 'local'}`),
-})
+if (process.env.NODE_ENV) {
+  dotenv.config({
+    path: path.resolve(__dirname, `../../../../.env.${process.env.NODE_ENV}`),
+  })
+}
 dotenv.config({ path: path.resolve(__dirname, '../../../../.env') })
 
 const options: DataSourceOptions = {

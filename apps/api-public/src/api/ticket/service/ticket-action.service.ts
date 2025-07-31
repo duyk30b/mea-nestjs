@@ -3,15 +3,14 @@ import { CacheDataService } from '../../../../../_libs/common/cache-data/cache-d
 import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
 import { BusinessError } from '../../../../../_libs/database/common/error'
 import { DeliveryStatus } from '../../../../../_libs/database/common/variable'
-import { Customer, PaymentItem } from '../../../../../_libs/database/entities'
-import { PaymentVoucherItemType } from '../../../../../_libs/database/entities/payment-item.entity'
+import { Customer, Payment } from '../../../../../_libs/database/entities'
 import TicketProduct, {
   TicketProductType,
 } from '../../../../../_libs/database/entities/ticket-product.entity'
 import { TicketRadiologyStatus } from '../../../../../_libs/database/entities/ticket-radiology.entity'
 import { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
 import {
-  CustomerRefundOperation,
+  CustomerRefundMoneyOperation,
   TicketChangeAllMoneyOperator,
   TicketChangeDiscountOperation,
   TicketCloseOperation,
@@ -37,8 +36,8 @@ export class TicketActionService {
     private readonly ticketReturnProductOperation: TicketReturnProductOperation,
     private readonly ticketChangeAllMoneyOperator: TicketChangeAllMoneyOperator,
     private readonly ticketCloseOperation: TicketCloseOperation,
-    private readonly customerRefundOperation: CustomerRefundOperation,
-    private readonly ticketChangeDiscountOperation: TicketChangeDiscountOperation
+    private readonly ticketChangeDiscountOperation: TicketChangeDiscountOperation,
+    private readonly customerRefundMoneyOperation: CustomerRefundMoneyOperation
   ) { }
 
   async changeDiscount(params: {
@@ -194,7 +193,7 @@ export class TicketActionService {
       userId,
       note: '',
     })
-    const { ticketModified, customerModified, paymentItemCreatedList } = closeResult
+    const { ticketModified, customerModified, paymentCreatedList } = closeResult
 
     if (!options?.noEmitTicket) {
       this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
@@ -209,7 +208,7 @@ export class TicketActionService {
         ticketUserUpsertList: [...closeResult.ticketUserModifiedList],
       })
     }
-    return { ticketModified, customerModified, paymentItemCreatedList }
+    return { ticketModified, customerModified, paymentCreatedList }
   }
 
   async reopen(params: { oid: number; userId: number; ticketId: number }) {
@@ -219,16 +218,16 @@ export class TicketActionService {
       userId,
       ticketId,
       time: Date.now(),
-      note: 'Mở lại phiếu',
+      note: '',
     })
-    const { ticketModified, customerModified, paymentItemCreatedList } = reopenResult
+    const { ticketModified, customerModified, paymentCreatedList } = reopenResult
 
     this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
 
     if (customerModified) {
       this.socketEmitService.customerUpsert(oid, { customer: customerModified })
     }
-    return { ticketModified, customerModified, paymentItemCreatedList }
+    return { ticketModified, customerModified, paymentCreatedList }
   }
 
   async terminate(options: { oid: number; userId: number; ticketId: number }) {
@@ -236,7 +235,7 @@ export class TicketActionService {
     const time = Date.now()
 
     let ticketModified = await this.ticketRepository.findOneBy({ oid, id: ticketId })
-    const paymentItemCreatedList: PaymentItem[] = []
+    const paymentCreatedList: Payment[] = []
     let ticketProductModifiedAll: TicketProduct[]
     let customerModified: Customer
     if ([TicketStatus.Debt, TicketStatus.Completed].includes(ticketModified.status)) {
@@ -250,37 +249,23 @@ export class TicketActionService {
       if (reopenResult.customerModified) {
         customerModified = reopenResult.customerModified
       }
-      paymentItemCreatedList.push(...reopenResult.paymentItemCreatedList)
+      paymentCreatedList.push(...reopenResult.paymentCreatedList)
       ticketModified = reopenResult.ticketModified
     }
 
     if (ticketModified.paid > 0) {
-      const refundOverpaidResult = await this.customerRefundOperation.startRefund({
+      const refundOverpaidResult = await this.customerRefundMoneyOperation.startRefundMoney({
         oid,
         customerId: ticketModified.customerId,
         cashierId: userId,
         ticketId,
-        totalMoney: ticketModified.paid,
+        refundAmount: ticketModified.paid,
         time,
         paymentMethodId: 0,
-        reason: 'Hủy phiếu',
         note: 'Hủy phiếu',
-        refundItemList: [
-          {
-            ticketItemId: 0,
-            voucherItemType: PaymentVoucherItemType.Other,
-            paymentInteractId: 0,
-            discountMoney: 0,
-            discountPercent: 0,
-            expectedPrice: ticketModified.paid,
-            actualPrice: ticketModified.paid,
-            quantity: 1,
-            paidAmount: ticketModified.paid,
-          },
-        ],
       })
       customerModified = refundOverpaidResult.customer
-      paymentItemCreatedList.push(...refundOverpaidResult.paymentItemCreatedList)
+      paymentCreatedList.push(refundOverpaidResult.paymentCreated)
       ticketModified = refundOverpaidResult.ticketModified
     }
 
@@ -310,7 +295,7 @@ export class TicketActionService {
     if (customerModified) {
       this.socketEmitService.customerUpsert(oid, { customer: customerModified })
     }
-    return { ticketModified, customerModified, paymentItemCreatedList, ticketProductModifiedAll }
+    return { ticketModified, customerModified, paymentCreatedList, ticketProductModifiedAll }
   }
 
   async destroy(params: { oid: number; ticketId: number }) {

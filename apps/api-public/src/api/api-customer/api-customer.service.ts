@@ -5,8 +5,8 @@ import { BaseResponse } from '../../../../_libs/common/interceptor/transform-res
 import { BusinessError } from '../../../../_libs/database/common/error'
 import { PaymentPersonType } from '../../../../_libs/database/entities/payment.entity'
 import {
-  PaymentItemRepository,
   PaymentRepository,
+  PaymentTicketItemRepository,
   TicketRepository,
 } from '../../../../_libs/database/repositories'
 import { CustomerRepository } from '../../../../_libs/database/repositories/customer.repository'
@@ -27,7 +27,7 @@ export class ApiCustomerService {
     private readonly cacheDataService: CacheDataService,
     private readonly customerRepository: CustomerRepository,
     private readonly paymentRepository: PaymentRepository,
-    private readonly paymentItemRepository: PaymentItemRepository,
+    private readonly paymentTicketItemRepository: PaymentTicketItemRepository,
     private readonly organizationRepository: OrganizationRepository,
     private readonly ticketRepository: TicketRepository
   ) { }
@@ -131,19 +131,21 @@ export class ApiCustomerService {
       }
     }
 
-    await Promise.allSettled([
-      this.customerRepository.delete({ oid, id: customerId }),
-      this.paymentRepository.delete({
+    const [customerDestroy, paymentDestroyedList] = await Promise.all([
+      this.customerRepository.deleteAndReturnEntity({ oid, id: customerId }),
+      this.paymentRepository.deleteAndReturnEntity({
         oid,
         personId: customerId,
-        paymentPersonType: PaymentPersonType.Customer,
-      }),
-      this.paymentItemRepository.delete({
-        oid,
-        personId: customerId,
-        paymentPersonType: PaymentPersonType.Customer,
+        personType: PaymentPersonType.Customer,
       }),
     ])
+
+    if (paymentDestroyedList.length) {
+      await this.paymentTicketItemRepository.delete({
+        oid,
+        paymentId: { IN: paymentDestroyedList.map((i) => i.id) },
+      })
+    }
 
     await this.organizationRepository.updateDataVersion(oid)
     this.cacheDataService.clearOrganization(oid)

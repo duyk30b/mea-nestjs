@@ -5,13 +5,14 @@ import { ESArray } from '../../../../_libs/common/helpers'
 import { BusinessError } from '../../../../_libs/database/common/error'
 import { CustomerInsertType } from '../../../../_libs/database/entities/customer.entity'
 import {
-  PaymentItemInsertType,
-  PaymentVoucherItemType,
+  MoneyDirection,
+  PaymentActionType,
+  PaymentInsertType,
+  PaymentPersonType,
   PaymentVoucherType,
-} from '../../../../_libs/database/entities/payment-item.entity'
-import { PaymentPersonType } from '../../../../_libs/database/entities/payment.entity'
+} from '../../../../_libs/database/entities/payment.entity'
 import { CustomerManager } from '../../../../_libs/database/managers'
-import { PaymentItemManager } from '../../../../_libs/database/repositories'
+import { PaymentManager } from '../../../../_libs/database/repositories'
 import { ExcelProcess } from '../common/excel-process'
 import { CustomerExcelRules } from './customer-excel.rule'
 
@@ -39,7 +40,7 @@ export class ApiFileCustomerUploadExcel {
   constructor(
     private dataSource: DataSource,
     private readonly customerManager: CustomerManager,
-    private paymentItemManager: PaymentItemManager
+    private paymentManager: PaymentManager
   ) { }
 
   async uploadExcel(options: { oid: number; userId: number; file: FileUploadDto }) {
@@ -190,36 +191,30 @@ export class ApiFileCustomerUploadExcel {
       }
 
       if (dataChangeDebt.length) {
-        const paymentItemInsertList = dataChangeDebt.map((i) => {
-          const paymentItemInsert: PaymentItemInsertType = {
+        const paymentInsertList = dataChangeDebt.map((i) => {
+          const paymentInsert: PaymentInsertType = {
             oid,
-            note: 'Update Excel',
-            paymentId: 0,
-            paymentPersonType: PaymentPersonType.Customer,
-            personId: i.customerId,
-            createdAt: time,
-
             voucherType: PaymentVoucherType.Other,
             voucherId: 0,
-            voucherItemType: PaymentVoucherItemType.Other,
-            voucherItemId: 0,
-            paymentInteractId: 0,
+            personType: PaymentPersonType.Customer,
+            personId: i.customerId,
 
-            discountMoney: 0,
-            discountPercent: 0,
-            expectedPrice: -(i.debtUpdate - i.debtOrigin),
-            actualPrice: -(i.debtUpdate - i.debtOrigin),
-            quantity: 1,
-            paidAmount: -(i.debtUpdate - i.debtOrigin),
+            createdAt: time,
+            paymentMethodId: 0,
+            paymentActionType: PaymentActionType.FixByExcel,
+            moneyDirection: MoneyDirection.Other,
+            note: 'Update Excel',
+
+            paidAmount: 0,
             debtAmount: i.debtUpdate - i.debtOrigin,
             openDebt: i.debtOrigin,
             closeDebt: i.debtUpdate,
             cashierId: userId,
           }
-          return paymentItemInsert
+          return paymentInsert
         })
 
-        await this.paymentItemManager.insertMany(manager, paymentItemInsertList)
+        await this.paymentManager.insertMany(manager, paymentInsertList)
       }
     })
   }

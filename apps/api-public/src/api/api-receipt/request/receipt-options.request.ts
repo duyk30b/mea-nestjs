@@ -15,7 +15,7 @@ export class ReceiptRelationQuery {
 
   @Expose()
   @IsBoolean()
-  paymentItemList: boolean
+  paymentList: boolean
 
   @Expose()
   @IsOptional()

@@ -6,7 +6,7 @@ import Appointment from './appointment.entity'
 import CustomerSource from './customer-source.entity'
 import Customer from './customer.entity'
 import Image from './image.entity'
-import PaymentItem from './payment-item.entity'
+import Payment from './payment.entity'
 import TicketAttribute from './ticket-attribute.entity'
 import TicketBatch from './ticket-batch.entity'
 import TicketExpense from './ticket-expense.entity'
@@ -303,7 +303,7 @@ export default class Ticket extends BaseEntity {
   customer: Customer
 
   @Expose()
-  paymentItemList: PaymentItem[]
+  paymentList: Payment[]
 
   // @OneToOne(() => Appointment, { createForeignKeyConstraints: false })
   // @JoinColumn({ name: 'id', referencedColumnName: 'fromTicketId' }) // không JoinColumn trên cùng cột id được, vkl
@@ -423,7 +423,7 @@ export type TicketRelationType = {
     | 'ticketAttributeList'
     | 'ticketExpenseList'
     | 'ticketSurchargeList'
-    | 'paymentItemList'
+    | 'paymentList'
     | 'customerSource'
     | 'imageList'
     | 'toAppointment'

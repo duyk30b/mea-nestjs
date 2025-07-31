@@ -2,8 +2,10 @@ import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import Customer from './customer.entity'
 import Distributor from './distributor.entity'
-import PaymentItem from './payment-item.entity'
 import PaymentMethod from './payment-method.entity'
+import PaymentTicketItem from './payment-ticket-item.entity'
+import Receipt from './receipt.entity'
+import Ticket from './ticket.entity'
 import User from './user.entity'
 
 export enum PaymentPersonType {
@@ -13,7 +15,26 @@ export enum PaymentPersonType {
   Employee = 3,
 }
 
+export enum PaymentVoucherType {
+  Other = 0, // Không xác định
+  Receipt = 1,
+  Ticket = 2,
+}
+
+export enum PaymentActionType {
+  Other = 0, // Tạm ứng
+  PrepaymentMoney = 1, // Tạm ứng
+  RefundMoney = 2, // Hoàn trả tiền
+  PayDebt = 3, // Trả nợ
+  Close = 4, // Đóng phiếu, thường chỉ có thể ghi nợ khi đóng phiếu
+  Reopen = 5, // Mở lại phiếu, thường thì chỉ có thể là hoàn trả nợ
+  PrepaymentForTicketItemList = 6,
+  RefundForTicketItemList = 7,
+  FixByExcel = 8,
+}
+
 export enum MoneyDirection {
+  Other = 0,
   In = 1,
   Out = 2,
 }
@@ -32,17 +53,25 @@ export default class Payment {
   @Expose()
   id: number
 
-  @Column({ default: 0 })
+  @Column({ type: 'smallint', default: PaymentVoucherType.Other })
   @Expose()
-  paymentMethodId: number
+  voucherType: PaymentVoucherType
+
+  @Column({ default: 0 }) // ticketId hoặc receiptId
+  @Expose()
+  voucherId: number
 
   @Column({ type: 'smallint', default: PaymentPersonType.Other })
   @Expose()
-  paymentPersonType: PaymentPersonType
+  personType: PaymentPersonType
 
   @Column({ default: 0 }) // distributorId hoặc customerId hoặc userId
   @Expose()
   personId: number
+
+  @Column({ default: 0 })
+  @Expose()
+  paymentMethodId: number
 
   @Column({
     type: 'bigint',
@@ -55,13 +84,9 @@ export default class Payment {
   @Expose()
   moneyDirection: MoneyDirection
 
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose() // VD: Đơn 1tr, moneyIn = 300 ==> debit = 700
-  money: number // Số tiền thu
+  @Column({ type: 'smallint' })
+  @Expose()
+  paymentActionType: PaymentActionType
 
   @Column({ default: 0 }) // distributorId hoặc customerId hoặc userId
   @Expose()
@@ -71,9 +96,43 @@ export default class Payment {
   @Expose()
   note: string // Ghi chú
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
   @Expose()
-  reason: string
+  paidAmount: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  debtAmount: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  openDebt: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  closeDebt: number
+
+  @Expose()
+  ticket: Ticket
+
+  @Expose()
+  receipt: Receipt
 
   @Expose()
   customer: Customer
@@ -88,7 +147,7 @@ export default class Payment {
   cashier: User
 
   @Expose()
-  paymentItemList: PaymentItem[]
+  paymentTicketItemList: PaymentTicketItem[]
 
   @Expose()
   @ManyToOne((type) => PaymentMethod, (paymentMethod) => paymentMethod.paymentList, {
@@ -103,7 +162,10 @@ export default class Payment {
     Object.assign(entity, raw)
 
     entity.createdAt = Number(raw.createdAt)
-    entity.money = Number(raw.money)
+    entity.paidAmount = Number(raw.paidAmount)
+    entity.debtAmount = Number(raw.debtAmount)
+    entity.openDebt = Number(raw.openDebt)
+    entity.closeDebt = Number(raw.closeDebt)
 
     return entity
   }
@@ -116,7 +178,14 @@ export default class Payment {
 export type PaymentRelationType = {
   [P in keyof Pick<
     Payment,
-    'customer' | 'distributor' | 'employee' | 'paymentMethod' | 'cashier' | 'paymentItemList'
+    | 'ticket'
+    | 'receipt'
+    | 'customer'
+    | 'distributor'
+    | 'employee'
+    | 'paymentMethod'
+    | 'cashier'
+    | 'paymentTicketItemList'
   >]?: boolean
 }
 

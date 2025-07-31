@@ -5,9 +5,7 @@ import { ESArray } from '../../../../_libs/common/helpers/array.helper'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { Distributor, Product, Receipt, ReceiptItem } from '../../../../_libs/database/entities'
 import Batch, { BatchInsertType } from '../../../../_libs/database/entities/batch.entity'
-import PaymentItem, {
-  PaymentVoucherType,
-} from '../../../../_libs/database/entities/payment-item.entity'
+import Payment, { PaymentVoucherType } from '../../../../_libs/database/entities/payment.entity'
 import {
   ProductType,
   SplitBatchByCostPrice,
@@ -21,7 +19,7 @@ import {
 } from '../../../../_libs/database/operations'
 import {
   DistributorRepository,
-  PaymentItemRepository,
+  PaymentRepository,
   ProductRepository,
   ReceiptItemRepository,
 } from '../../../../_libs/database/repositories'
@@ -47,7 +45,7 @@ export class ApiReceiptService {
     private readonly batchRepository: BatchRepository,
     private readonly receiptDraft: ReceiptDraftOperation,
     private readonly receiptDepositedOperation: ReceiptDepositedOperation,
-    private readonly paymentItemRepository: PaymentItemRepository
+    private readonly paymentRepository: PaymentRepository
   ) { }
 
   async pagination(oid: number, query: ReceiptPaginationQuery): Promise<BaseResponse> {
@@ -423,28 +421,28 @@ export class ApiReceiptService {
     const receiptIdList = ESArray.uniqueArray(receiptList.map((i) => i.id))
     const distributorIdList = ESArray.uniqueArray(receiptList.map((i) => i.distributorId))
 
-    const [receiptItemList, distributorList, paymentItemList] = await Promise.all([
+    const [receiptItemList, distributorList, paymentList] = await Promise.all([
       relation?.receiptItemList && receiptIdList.length
         ? this.receiptItemRepository.findManyBy({ receiptId: { IN: receiptIdList } })
         : <ReceiptItem[]>[],
       relation?.distributor && distributorIdList.length
         ? this.distributorRepository.findManyBy({ id: { IN: distributorIdList } })
         : <Distributor[]>[],
-      relation?.paymentItemList && receiptIdList.length
-        ? this.paymentItemRepository.findMany({
+      relation?.paymentList && receiptIdList.length
+        ? this.paymentRepository.findMany({
           condition: {
             voucherId: { IN: receiptIdList },
             voucherType: PaymentVoucherType.Receipt,
           },
           sort: { id: 'ASC' },
         })
-        : <PaymentItem[]>[],
+        : <Payment[]>[],
     ])
 
     receiptList.forEach((r: Receipt) => {
       r.receiptItemList = receiptItemList.filter((ri) => ri.receiptId === r.id)
       r.distributor = distributorList.find((d) => d.id === r.distributorId)
-      r.paymentItemList = paymentItemList.filter((p) => p.voucherId === r.id)
+      r.paymentList = paymentList.filter((p) => p.voucherId === r.id)
     })
 
     if (relation?.receiptItemList) {

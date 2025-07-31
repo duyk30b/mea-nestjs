@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { PaymentPersonType } from '../../../../_libs/database/entities/payment.entity'
-import { PaymentItemRepository, PaymentRepository } from '../../../../_libs/database/repositories'
+import { PaymentRepository } from '../../../../_libs/database/repositories'
 import { DistributorRepository } from '../../../../_libs/database/repositories/distributor.repository'
 import { ReceiptRepository } from '../../../../_libs/database/repositories/receipt.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
@@ -19,7 +19,6 @@ export class ApiDistributorService {
     private readonly socketEmitService: SocketEmitService,
     private readonly distributorRepository: DistributorRepository,
     private readonly paymentRepository: PaymentRepository,
-    private readonly paymentItemRepository: PaymentItemRepository,
     private readonly receiptRepository: ReceiptRepository
   ) { }
 
@@ -111,12 +110,7 @@ export class ApiDistributorService {
       this.paymentRepository.delete({
         oid,
         personId: distributorId,
-        paymentPersonType: PaymentPersonType.Distributor,
-      }),
-      this.paymentItemRepository.delete({
-        oid,
-        personId: distributorId,
-        paymentPersonType: PaymentPersonType.Distributor,
+        personType: PaymentPersonType.Distributor,
       }),
     ])
 

@@ -1,13 +1,12 @@
 import { ApiProperty, IntersectionType } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
-import { ArrayMinSize, IsArray, IsDefined, IsInt, IsString } from 'class-validator'
+import { IsArray, IsDefined, IsInt, IsString } from 'class-validator'
 
 export class TicketSendProductListBody {
   @ApiProperty({ example: [2, 3, 4], isArray: true })
   @Expose()
   @IsDefined()
   @IsArray()
-  @ArrayMinSize(1)
   ticketProductIdList: number[]
 }
 
@@ -16,7 +15,7 @@ export class TicketPaymentMoneyBody {
   @Expose()
   @IsDefined()
   @IsInt()
-  money: number
+  paidAmount: number
 
   @ApiProperty({ example: 2 })
   @Expose()
@@ -34,7 +33,7 @@ export class TicketPaymentMoneyBody {
   @Expose()
   @IsDefined()
   @IsString()
-  reason: string
+  note: string
 }
 
 export class TicketSendProductAndPaymentBody extends IntersectionType(

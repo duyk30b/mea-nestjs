@@ -1,23 +1,17 @@
 import { Injectable } from '@nestjs/common'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { DeliveryStatus } from '../../../../_libs/database/common/variable'
-import { Distributor } from '../../../../_libs/database/entities'
-import PaymentItem, {
-  PaymentVoucherItemType,
-} from '../../../../_libs/database/entities/payment-item.entity'
+import { Distributor, Payment } from '../../../../_libs/database/entities'
 import { ReceiptStatus } from '../../../../_libs/database/entities/receipt.entity'
 import {
-  DistributorPaymentOperation,
-  DistributorRefundOperation,
+  DistributorPrepaymentMoneyOperation,
+  DistributorRefundMoneyOperation,
   ReceiptCloseOperation,
   ReceiptReopenOperation,
   ReceiptReturnProductOperation,
   ReceiptSendProductOperation,
 } from '../../../../_libs/database/operations'
-import {
-  PaymentItemRepository,
-  ReceiptItemRepository,
-} from '../../../../_libs/database/repositories'
+import { ReceiptItemRepository } from '../../../../_libs/database/repositories'
 import { ReceiptRepository } from '../../../../_libs/database/repositories/receipt.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import { ReceiptPaymentMoneyBody } from './request'
@@ -28,13 +22,12 @@ export class ApiReceiptAction {
     private readonly socketEmitService: SocketEmitService,
     private readonly receiptRepository: ReceiptRepository,
     private readonly receiptItemRepository: ReceiptItemRepository,
-    private readonly paymentItemRepository: PaymentItemRepository,
     private readonly receiptSendProductOperation: ReceiptSendProductOperation,
     private readonly receiptCloseOperation: ReceiptCloseOperation,
     private readonly receiptReturnProductOperation: ReceiptReturnProductOperation,
     private readonly receiptReopenOperation: ReceiptReopenOperation,
-    private readonly distributorPaymentOperation: DistributorPaymentOperation,
-    private readonly distributorRefundOperation: DistributorRefundOperation
+    private readonly distributorPrepaymentMoneyOperation: DistributorPrepaymentMoneyOperation,
+    private readonly distributorRefundMoneyOperation: DistributorRefundMoneyOperation
   ) { }
 
   async destroy(params: { oid: number; receiptId: number }): Promise<BaseResponse> {
@@ -58,39 +51,19 @@ export class ApiReceiptAction {
       time: Date.now(),
     })
 
-    const paymentItemCreatedList: PaymentItem[] = []
-    if (body.money > 0) {
-      const prepaymentResult = await this.distributorPaymentOperation.startPayment({
+    const paymentCreatedList: Payment[] = []
+    if (body.paidAmount > 0) {
+      const prepaymentResult = await this.distributorPrepaymentMoneyOperation.startPrePaymentMoney({
         cashierId: userId,
         distributorId: body.distributorId,
-        note: 'Đóng phiếu',
         oid,
-        paymentItemData: {
-          moneyTopUpAdd: 0,
-          payDebt: [],
-          prepayment: {
-            receiptId,
-            itemList: [
-              {
-                paidAmount: body.money,
-                receiptItemId: 0,
-                voucherItemType: PaymentVoucherItemType.Other,
-                paymentInteractId: 0,
-                discountMoney: 0,
-                discountPercent: 0,
-                expectedPrice: body.money,
-                actualPrice: body.money,
-                quantity: 1,
-              },
-            ],
-          },
-        },
+        receiptId,
         paymentMethodId: body.paymentMethodId,
-        reason: body.reason,
-        totalMoney: body.money,
+        note: body.note,
+        paidAmount: body.paidAmount,
         time: Date.now(),
       })
-      paymentItemCreatedList.push(...prepaymentResult.paymentItemCreatedList)
+      paymentCreatedList.push(prepaymentResult.paymentCreated)
     }
 
     const closeResult = await this.receiptCloseOperation.startClose({
@@ -98,9 +71,9 @@ export class ApiReceiptAction {
       userId,
       receiptId,
       time: Date.now(),
-      note: 'Đóng phiếu',
+      note: '',
     })
-    paymentItemCreatedList.push(...closeResult.paymentItemCreatedList)
+    paymentCreatedList.push(...closeResult.paymentCreatedList)
 
     if (closeResult.distributorModified) {
       this.socketEmitService.distributorUpsert(oid, {
@@ -118,7 +91,7 @@ export class ApiReceiptAction {
       data: {
         receiptModified: closeResult.receiptModified,
         distributorModified: closeResult.distributorModified,
-        paymentItemCreatedList,
+        paymentCreatedList,
       },
     }
   }
@@ -164,7 +137,7 @@ export class ApiReceiptAction {
     return {
       data: {
         receiptModified: closeResult.receiptModified,
-        paymentItemCreatedList: closeResult.paymentItemCreatedList,
+        paymentCreatedList: closeResult.paymentCreatedList,
         distributorModified: closeResult.distributorModified,
       },
     }
@@ -180,7 +153,7 @@ export class ApiReceiptAction {
     let distributorModified: Distributor
 
     const receiptOrigin = await this.receiptRepository.findOneBy({ oid, id: receiptId })
-    const paymentItemCreatedList: PaymentItem[] = []
+    const paymentCreatedList: Payment[] = []
 
     if ([ReceiptStatus.Completed, ReceiptStatus.Debt].includes(receiptOrigin.status)) {
       const reopenResult = await this.receiptReopenOperation.reopen({
@@ -188,25 +161,24 @@ export class ApiReceiptAction {
         userId,
         time,
         receiptId,
-        note: 'Hủy phiếu',
+        note: '',
       })
       distributorModified = reopenResult.distributorModified
-      paymentItemCreatedList.push(...reopenResult.paymentItemCreatedList)
+      paymentCreatedList.push(...reopenResult.paymentCreatedList)
     }
     if (receiptOrigin.paid > 0) {
-      const refundResult = await this.distributorRefundOperation.startRefund({
+      const refundResult = await this.distributorRefundMoneyOperation.startRefundMoney({
         oid,
         cashierId: userId,
         time,
         receiptId,
         paymentMethodId: 0,
-        money: receiptOrigin.paid,
+        refundAmount: receiptOrigin.paid,
         note: 'Hủy phiếu',
         distributorId: receiptOrigin.distributorId,
-        reason: '',
       })
       distributorModified = refundResult.distributor
-      paymentItemCreatedList.push(refundResult.paymentItemCreated)
+      paymentCreatedList.push(refundResult.paymentCreated)
     }
 
     if (receiptOrigin.deliveryStatus === DeliveryStatus.Delivered) {
@@ -232,6 +204,6 @@ export class ApiReceiptAction {
       { status: ReceiptStatus.Cancelled }
     )
 
-    return { data: { receiptModified, paymentItemCreatedList, distributorModified } }
+    return { data: { receiptModified, paymentCreatedList, distributorModified } }
   }
 }

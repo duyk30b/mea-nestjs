@@ -2,15 +2,16 @@ import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { DeliveryStatus } from '../../common/variable'
 import { Distributor } from '../../entities'
-import PaymentItem, {
-  PaymentItemInsertType,
-  PaymentVoucherItemType,
+import Payment, {
+  MoneyDirection,
+  PaymentActionType,
+  PaymentInsertType,
+  PaymentPersonType,
   PaymentVoucherType,
-} from '../../entities/payment-item.entity'
-import { PaymentPersonType } from '../../entities/payment.entity'
+} from '../../entities/payment.entity'
 import { ReceiptStatus } from '../../entities/receipt.entity'
 import { DistributorManager, ReceiptManager } from '../../managers'
-import { PaymentItemManager } from '../../repositories'
+import { PaymentManager } from '../../repositories'
 
 @Injectable()
 export class ReceiptCloseOperation {
@@ -18,7 +19,7 @@ export class ReceiptCloseOperation {
     private dataSource: DataSource,
     private receiptManager: ReceiptManager,
     private distributorManager: DistributorManager,
-    private paymentItemManager: PaymentItemManager
+    private paymentManager: PaymentManager
   ) { }
 
   async startClose(params: {
@@ -53,7 +54,7 @@ export class ReceiptCloseOperation {
 
       let newDebtReceipt = receiptUpdated.debt
       let distributorModified: Distributor
-      const paymentItemCreatedList: PaymentItem[] = []
+      const paymentCreatedList: Payment[] = []
 
       if (receiptUpdated.debt > 0) {
         let paidByTopUp = 0
@@ -76,36 +77,30 @@ export class ReceiptCloseOperation {
           { debt: newDebtCustomer }
         )
 
-        const paymentItemInsert: PaymentItemInsertType = {
+        const paymentInsert: PaymentInsertType = {
           oid,
-          paymentId: 0,
-          paymentPersonType: PaymentPersonType.Distributor,
-          personId: receiptUpdated.distributorId,
-          createdAt: time,
-
           voucherType: PaymentVoucherType.Receipt,
           voucherId: receiptId,
-          voucherItemType: PaymentVoucherItemType.Other,
-          voucherItemId: 0,
-          paymentInteractId: 0,
+          personType: PaymentPersonType.Distributor,
+          personId: receiptUpdated.distributorId,
 
-          discountMoney: 0,
-          discountPercent: 0,
-          expectedPrice: 0,
-          actualPrice: 0,
-          quantity: 1,
+          cashierId: userId,
+          paymentMethodId: 0,
+          createdAt: time,
+          paymentActionType: PaymentActionType.Close,
+          moneyDirection: MoneyDirection.Other,
+          note: note || '',
+
           paidAmount: 0,
-          debtAmount: paidByTopUp + newDebtReceipt,
+          debtAmount: paidByTopUp + newDebtReceipt, // thực ra thì vẫn = receiptUpdated.debt
           openDebt: distributorOrigin.debt,
           closeDebt: distributorModified.debt,
-          cashierId: userId,
-          note: note || 'Đóng phiếu',
         }
-        const paymentItemCreated = await this.paymentItemManager.insertOneAndReturnEntity(
+        const paymentCreated = await this.paymentManager.insertOneAndReturnEntity(
           manager,
-          paymentItemInsert
+          paymentInsert
         )
-        paymentItemCreatedList.push(paymentItemCreated)
+        paymentCreatedList.push(paymentCreated)
       }
 
       let receiptModified = receiptUpdated
@@ -117,7 +112,7 @@ export class ReceiptCloseOperation {
         )
       }
 
-      return { receiptModified, paymentItemCreatedList, distributorModified }
+      return { receiptModified, paymentCreatedList, distributorModified }
     })
 
     return transaction

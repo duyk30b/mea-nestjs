@@ -23,7 +23,7 @@ export class TicketRelationQuery {
 
   @Expose()
   @IsBoolean()
-  paymentItemList: boolean
+  paymentList: boolean
 
   @Expose()
   @IsBoolean()

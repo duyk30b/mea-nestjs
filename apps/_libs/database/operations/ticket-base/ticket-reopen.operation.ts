@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { Customer } from '../../entities'
-import PaymentItem, {
-  PaymentItemInsertType,
-  PaymentVoucherItemType,
+import Payment, {
+  MoneyDirection,
+  PaymentActionType,
+  PaymentInsertType,
+  PaymentPersonType,
   PaymentVoucherType,
-} from '../../entities/payment-item.entity'
-import { PaymentPersonType } from '../../entities/payment.entity'
+} from '../../entities/payment.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
 import { CustomerManager, TicketManager } from '../../managers'
-import { PaymentItemManager } from '../../repositories'
+import { PaymentManager } from '../../repositories'
 
 @Injectable()
 export class TicketReopenOperation {
@@ -17,7 +18,7 @@ export class TicketReopenOperation {
     private dataSource: DataSource,
     private ticketManager: TicketManager,
     private customerManager: CustomerManager,
-    private paymentItemManager: PaymentItemManager
+    private paymentManager: PaymentManager
   ) { }
 
   async reopen(params: {
@@ -37,7 +38,7 @@ export class TicketReopenOperation {
       )
 
       let customerModified: Customer
-      const paymentItemCreatedList: PaymentItem[] = []
+      const paymentCreatedList: Payment[] = []
       if (ticketModified.debt > 0) {
         customerModified = await this.customerManager.updateOneAndReturnEntity(
           manager,
@@ -50,42 +51,36 @@ export class TicketReopenOperation {
         const customerOpenDebt = customerCloseDebt + ticketModified.debt
 
         // === 3. INSERT CUSTOMER_PAYMENT ===
-        const paymentItemInsert: PaymentItemInsertType = {
+        const paymentInsert: PaymentInsertType = {
           oid,
-          paymentId: 0,
-          paymentPersonType: PaymentPersonType.Customer,
-          personId: ticketModified.customerId,
-          createdAt: time,
-
           voucherType: PaymentVoucherType.Ticket,
           voucherId: ticketId,
-          voucherItemType: PaymentVoucherItemType.Other,
-          voucherItemId: 0,
-          paymentInteractId: 0,
+          personType: PaymentPersonType.Customer,
+          personId: ticketModified.customerId,
 
-          discountMoney: 0,
-          discountPercent: 0,
-          expectedPrice: 0,
-          actualPrice: 0,
-          quantity: 1,
+          cashierId: userId,
+          paymentMethodId: 0,
+          createdAt: time,
+          paymentActionType: PaymentActionType.Reopen,
+          moneyDirection: MoneyDirection.Other,
+
           paidAmount: 0,
           debtAmount: -ticketModified.debt,
           openDebt: customerOpenDebt,
           closeDebt: customerCloseDebt,
-          cashierId: userId,
           note: note || '',
         }
-        const paymentItemCreated = await this.paymentItemManager.insertOneAndReturnEntity(
+        const paymentCreated = await this.paymentManager.insertOneAndReturnEntity(
           manager,
-          paymentItemInsert
+          paymentInsert
         )
-        paymentItemCreatedList.push(paymentItemCreated)
+        paymentCreatedList.push(paymentCreated)
       }
 
       return {
         ticketModified,
         customerModified: customerModified as Customer | undefined,
-        paymentItemCreatedList,
+        paymentCreatedList,
       }
     })
 
