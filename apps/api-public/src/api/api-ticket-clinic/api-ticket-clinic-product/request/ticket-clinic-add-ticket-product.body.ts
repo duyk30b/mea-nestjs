@@ -16,7 +16,11 @@ import {
   IsEnumValue,
   IsNumberGreaterThan,
 } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType, PaymentMoneyStatus, PickupStrategy } from '../../../../../../_libs/database/common/variable'
+import {
+  DiscountType,
+  PaymentMoneyStatus,
+  PickupStrategy,
+} from '../../../../../../_libs/database/common/variable'
 
 export class TicketProductAddBody {
   @ApiProperty({ example: 1 })
@@ -133,10 +137,16 @@ export class TicketProductAddBody {
   @IsNumber()
   actualPrice: number
 
-  @ApiPropertyOptional({ example: 'Uống 2 lần/ngày sáng 1 viên, chiều 1 viên' })
+  @ApiProperty({ example: 'Uống 2 lần/ngày sáng 1 viên, chiều 1 viên' })
   @Expose()
   @IsString()
   hintUsage: string
+
+  @ApiProperty()
+  @Expose()
+  @Type(() => Number)
+  @IsNumber()
+  createdAt: number
 }
 
 export class TicketClinicAddTicketProductListBody {

@@ -128,6 +128,14 @@ export default class TicketProduct extends BaseEntity {
   @Expose()
   actualPrice: number
 
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  createdAt: number
+
   @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   hintUsage: string

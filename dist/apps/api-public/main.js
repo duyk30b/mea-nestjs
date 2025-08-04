@@ -6128,6 +6128,15 @@ __decorate([
     __metadata("design:type", Number)
 ], TicketProduct.prototype, "actualPrice", void 0);
 __decorate([
+    (0, typeorm_1.Column)({
+        type: 'bigint',
+        nullable: true,
+        transformer: { to: (value) => value, from: (value) => Number(value) },
+    }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], TicketProduct.prototype, "createdAt", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 255, nullable: true }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", String)
@@ -9292,8 +9301,26 @@ class _PostgreSqlRepository extends postgresql_raw_1.PostgreSqlRaw {
         }
         return this.entity.fromRaw(raws[0]);
     }
+    async countGroup(options) {
+        const { condition, groupBy } = options;
+        const where = this.getWhereOptions(condition);
+        const groupString = groupBy.map((field) => `"${field}"`).join(', ');
+        const query = this.getManager()
+            .createQueryBuilder()
+            .select('COUNT(*)', 'total')
+            .from((qb) => {
+            return qb
+                .subQuery()
+                .select(groupString)
+                .from(this.entity, 'h')
+                .where(where)
+                .groupBy(groupString);
+        }, 'temp');
+        const totalResponse = await query.getRawOne();
+        return Number(totalResponse.total);
+    }
     async findAndSelect(options) {
-        const { condition, select, aggregate, groupBy, orderBy, limit } = options;
+        const { condition, select, aggregate, groupBy, orderBy, page, limit } = options;
         const where = this.getWhereOptions(condition);
         const selectList = [];
         if (select) {
@@ -9354,9 +9381,14 @@ class _PostgreSqlRepository extends postgresql_raw_1.PostgreSqlRaw {
                 }
             });
         }
-        if (limit)
+        if (limit) {
             query = query.take(limit);
-        return await query.getRawMany();
+            if (page) {
+                query = query.skip((page - 1) * limit);
+            }
+        }
+        const dataRaws = await query.getRawMany();
+        return { dataRaws };
     }
 }
 exports._PostgreSqlRepository = _PostgreSqlRepository;
@@ -28689,9 +28721,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c;
+var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketProductGetOneQuery = exports.TicketProductGetManyQuery = exports.TicketProductPaginationQuery = exports.TicketProductGetQuery = void 0;
+exports.TicketProductStatisticQuery = exports.TicketProductGetOneQuery = exports.TicketProductGetManyQuery = exports.TicketProductPaginationQuery = exports.TicketProductGetQuery = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
 const class_validator_1 = __webpack_require__(267);
@@ -28782,6 +28814,30 @@ exports.TicketProductGetManyQuery = TicketProductGetManyQuery;
 class TicketProductGetOneQuery extends (0, swagger_1.PickType)(TicketProductGetQuery, ['relation']) {
 }
 exports.TicketProductGetOneQuery = TicketProductGetOneQuery;
+class TicketProductStatisticQuery extends (0, swagger_1.IntersectionType)((0, swagger_1.PickType)(TicketProductGetQuery, ['filter', 'relation']), query_1.PaginationQuery) {
+}
+exports.TicketProductStatisticQuery = TicketProductStatisticQuery;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: String }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        try {
+            if (!value)
+                return undefined;
+            const plain = JSON.parse(value);
+            return (0, class_transformer_1.plainToInstance)(ticket_product_options_request_1.TicketProductStatisticSortQuery, plain, {
+                exposeUnsetFields: false,
+                excludeExtraneousValues: false,
+            });
+        }
+        catch (error) {
+            return error.message;
+        }
+    }),
+    (0, class_validator_1.IsObject)({ message: ({ value }) => value }),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_d = typeof ticket_product_options_request_1.TicketProductStatisticSortQuery !== "undefined" && ticket_product_options_request_1.TicketProductStatisticSortQuery) === "function" ? _d : Object)
+], TicketProductStatisticQuery.prototype, "sortStatistic", void 0);
 
 
 /***/ }),
@@ -28798,9 +28854,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b, _c, _d;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketProductSortQuery = exports.TicketProductFilterQuery = exports.TicketProductRelationQuery = void 0;
+exports.TicketProductStatisticSortQuery = exports.TicketProductSortQuery = exports.TicketProductFilterQuery = exports.TicketProductRelationQuery = void 0;
 const class_transformer_1 = __webpack_require__(17);
 const class_validator_1 = __webpack_require__(267);
 const dto_1 = __webpack_require__(332);
@@ -28856,9 +28912,48 @@ __decorate([
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", Object)
 ], TicketProductFilterQuery.prototype, "deliveryStatus", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => dto_1.ConditionTimestamp),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", typeof (_e = typeof dto_1.ConditionTimestamp !== "undefined" && dto_1.ConditionTimestamp) === "function" ? _e : Object)
+], TicketProductFilterQuery.prototype, "createdAt", void 0);
 class TicketProductSortQuery extends query_1.SortQuery {
 }
 exports.TicketProductSortQuery = TicketProductSortQuery;
+class TicketProductStatisticSortQuery {
+}
+exports.TicketProductStatisticSortQuery = TicketProductStatisticSortQuery;
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsIn)(['ASC', 'DESC']),
+    __metadata("design:type", String)
+], TicketProductStatisticSortQuery.prototype, "productId", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsIn)(['ASC', 'DESC']),
+    __metadata("design:type", String)
+], TicketProductStatisticSortQuery.prototype, "count", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsIn)(['ASC', 'DESC']),
+    __metadata("design:type", String)
+], TicketProductStatisticSortQuery.prototype, "sumQuantity", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsIn)(['ASC', 'DESC']),
+    __metadata("design:type", String)
+], TicketProductStatisticSortQuery.prototype, "sumCostAmount", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsIn)(['ASC', 'DESC']),
+    __metadata("design:type", String)
+], TicketProductStatisticSortQuery.prototype, "sumActualAmount", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsIn)(['ASC', 'DESC']),
+    __metadata("design:type", String)
+], TicketProductStatisticSortQuery.prototype, "sumProfitAmount", void 0);
 
 
 /***/ }),
@@ -39703,7 +39798,7 @@ let PaymentActionService = class PaymentActionService {
     }
     async sumMoney(oid, query) {
         const { filter } = query;
-        const aggregateRaw = await this.paymentRepository.findAndSelect({
+        const { dataRaws } = await this.paymentRepository.findAndSelect({
             condition: {
                 oid,
                 paymentMethodId: filter === null || filter === void 0 ? void 0 : filter.paymentMethodId,
@@ -39720,7 +39815,7 @@ let PaymentActionService = class PaymentActionService {
             },
             groupBy: ['moneyDirection'],
         });
-        const aggregate = aggregateRaw.map((i) => {
+        const aggregate = dataRaws.map((i) => {
             return {
                 moneyDirection: i.moneyDirection,
                 sumPaidAmount: Number(i.sumPaidAmount),
@@ -53347,7 +53442,7 @@ let ApiStatisticService = class ApiStatisticService {
     }
     async topProductBestSelling(oid, query) {
         const { fromTime, toTime, orderBy, limit } = query;
-        const dataStatistic = await this.productMovementRepository.findAndSelect({
+        const { dataRaws } = await this.productMovementRepository.findAndSelect({
             condition: {
                 oid,
                 movementType: variable_1.MovementType.Ticket,
@@ -53370,14 +53465,14 @@ let ApiStatisticService = class ApiStatisticService {
             orderBy: { [orderBy]: 'DESC' },
             limit,
         });
-        const productIds = dataStatistic.map((i) => i.productId);
+        const productIds = dataRaws.map((i) => i.productId);
         const productList = await this.productRepository.findManyBy({
             oid,
             id: { IN: productIds },
         });
         const productMap = {};
         productList.forEach((i) => (productMap[i.id] = i));
-        const topData = dataStatistic.map((i) => ({
+        const topData = dataRaws.map((i) => ({
             productId: i.productId,
             sumQuantity: Number(i.sumQuantity),
             sumCostAmount: Number(i.sumCostAmount),
@@ -57406,11 +57501,18 @@ __decorate([
     __metadata("design:type", Number)
 ], TicketProductAddBody.prototype, "actualPrice", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ example: 'Uống 2 lần/ngày sáng 1 viên, chiều 1 viên' }),
+    (0, swagger_1.ApiProperty)({ example: 'Uống 2 lần/ngày sáng 1 viên, chiều 1 viên' }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], TicketProductAddBody.prototype, "hintUsage", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketProductAddBody.prototype, "createdAt", void 0);
 class TicketClinicAddTicketProductListBody {
 }
 exports.TicketClinicAddTicketProductListBody = TicketClinicAddTicketProductListBody;
@@ -59778,7 +59880,7 @@ let ApiTicketOrderService = class ApiTicketOrderService {
             ticketId: body.ticketId,
             ticketOrderDraftUpsertDto: Object.assign(Object.assign({}, body.ticketOrderDraftUpsert), { customType: 0, roomId: 0, customerSourceId: 0, laboratoryMoney: 0, radiologyMoney: 0, dailyIndex: 0, commissionMoney: 0, imageIds: JSON.stringify([]) }),
             ticketOrderProductDraftListDto: body.ticketOrderProductDraftList.map((i) => {
-                return Object.assign(Object.assign({}, i), { printPrescription: 1, paymentMoneyStatus: variable_1.PaymentMoneyStatus.NoEffect });
+                return Object.assign(Object.assign({}, i), { printPrescription: 1, paymentMoneyStatus: variable_1.PaymentMoneyStatus.NoEffect, createdAt: body.ticketOrderDraftUpsert.registeredAt });
             }),
             ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
                 return Object.assign(Object.assign({}, i), { paymentMoneyStatus: variable_1.PaymentMoneyStatus.NoEffect });
@@ -59795,7 +59897,7 @@ let ApiTicketOrderService = class ApiTicketOrderService {
             ticketId,
             ticketOrderDepositedUpdateDto: Object.assign(Object.assign({}, body.ticketOrderDepositedUpdate), { customType: 0, roomId: 0, customerSourceId: 0, laboratoryMoney: 0, radiologyMoney: 0, dailyIndex: 0, commissionMoney: 0, imageIds: JSON.stringify([]) }),
             ticketOrderProductDraftListDto: body.ticketOrderProductDraftList.map((i) => {
-                return Object.assign(Object.assign({}, i), { printPrescription: 1, paymentMoneyStatus: variable_1.PaymentMoneyStatus.NoEffect });
+                return Object.assign(Object.assign({}, i), { printPrescription: 1, paymentMoneyStatus: variable_1.PaymentMoneyStatus.NoEffect, createdAt: body.ticketOrderDepositedUpdate.registeredAt });
             }),
             ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
                 return Object.assign(Object.assign({}, i), { paymentMoneyStatus: variable_1.PaymentMoneyStatus.NoEffect });
@@ -59814,7 +59916,7 @@ let ApiTicketOrderService = class ApiTicketOrderService {
             ticketId: 0,
             ticketOrderDraftUpsertDto: Object.assign(Object.assign({}, ticketOrderDraftInsertBody), { customType: 0, roomId: 0, customerSourceId: 0, laboratoryMoney: 0, radiologyMoney: 0, dailyIndex: 0, commissionMoney: 0, imageIds: JSON.stringify([]) }),
             ticketOrderProductDraftListDto: body.ticketOrderProductDraftList.map((i) => {
-                return Object.assign(Object.assign({}, i), { printPrescription: 1, paymentMoneyStatus: variable_1.PaymentMoneyStatus.NoEffect });
+                return Object.assign(Object.assign({}, i), { printPrescription: 1, paymentMoneyStatus: variable_1.PaymentMoneyStatus.NoEffect, createdAt: body.ticketOrderDebtSuccessInsert.registeredAt });
             }),
             ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
                 return Object.assign(Object.assign({}, i), { paymentMoneyStatus: variable_1.PaymentMoneyStatus.NoEffect });
@@ -59883,7 +59985,7 @@ let ApiTicketOrderService = class ApiTicketOrderService {
             ticketId,
             ticketOrderDepositedUpdateDto: Object.assign(Object.assign({}, ticketBodyUpdate), { customType: 0, roomId: 0, customerSourceId: 0, laboratoryMoney: 0, radiologyMoney: 0, dailyIndex: 0, commissionMoney: 0, imageIds: JSON.stringify([]) }),
             ticketOrderProductDraftListDto: body.ticketOrderProductDraftList.map((i) => {
-                return Object.assign(Object.assign({}, i), { printPrescription: 1, paymentMoneyStatus: variable_1.PaymentMoneyStatus.NoEffect });
+                return Object.assign(Object.assign({}, i), { printPrescription: 1, paymentMoneyStatus: variable_1.PaymentMoneyStatus.NoEffect, createdAt: body.ticketOrderDebtSuccessUpdate.registeredAt });
             }),
             ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
                 return Object.assign(Object.assign({}, i), { paymentMoneyStatus: variable_1.PaymentMoneyStatus.NoEffect });
@@ -60859,7 +60961,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketProductController = void 0;
 const common_1 = __webpack_require__(3);
@@ -60874,13 +60976,20 @@ let ApiTicketProductController = class ApiTicketProductController {
         this.apiTicketProductService = apiTicketProductService;
     }
     async pagination({ oid }, query) {
-        return await this.apiTicketProductService.pagination(oid, query);
+        const data = await this.apiTicketProductService.pagination(oid, query);
+        return { data };
     }
     async list({ oid }, query) {
-        return await this.apiTicketProductService.getList(oid, query);
+        const data = await this.apiTicketProductService.getList(oid, query);
+        return { data };
     }
     async destroyZero({ oid }, { id }) {
-        return await this.apiTicketProductService.destroyZero(oid, id);
+        const data = await this.apiTicketProductService.destroyZero(oid, id);
+        return { data };
+    }
+    async statisticProduct({ oid }, query) {
+        const data = await this.apiTicketProductService.statisticProduct(oid, query);
+        return { data };
     }
 };
 exports.ApiTicketProductController = ApiTicketProductController;
@@ -60891,7 +61000,7 @@ __decorate([
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [typeof (_b = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _b : Object, typeof (_c = typeof request_1.TicketProductPaginationQuery !== "undefined" && request_1.TicketProductPaginationQuery) === "function" ? _c : Object]),
-    __metadata("design:returntype", Promise)
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
 ], ApiTicketProductController.prototype, "pagination", null);
 __decorate([
     (0, common_1.Get)('list'),
@@ -60899,8 +61008,8 @@ __decorate([
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_d = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _d : Object, typeof (_e = typeof request_1.TicketProductGetManyQuery !== "undefined" && request_1.TicketProductGetManyQuery) === "function" ? _e : Object]),
-    __metadata("design:returntype", Promise)
+    __metadata("design:paramtypes", [typeof (_e = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _e : Object, typeof (_f = typeof request_1.TicketProductGetManyQuery !== "undefined" && request_1.TicketProductGetManyQuery) === "function" ? _f : Object]),
+    __metadata("design:returntype", typeof (_g = typeof Promise !== "undefined" && Promise) === "function" ? _g : Object)
 ], ApiTicketProductController.prototype, "list", null);
 __decorate([
     (0, common_1.Delete)('destroy-zero/:id'),
@@ -60908,9 +61017,18 @@ __decorate([
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _f : Object, typeof (_g = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _g : Object]),
-    __metadata("design:returntype", Promise)
+    __metadata("design:paramtypes", [typeof (_h = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _h : Object, typeof (_j = typeof dto_1.IdParam !== "undefined" && dto_1.IdParam) === "function" ? _j : Object]),
+    __metadata("design:returntype", typeof (_k = typeof Promise !== "undefined" && Promise) === "function" ? _k : Object)
 ], ApiTicketProductController.prototype, "destroyZero", null);
+__decorate([
+    (0, common_1.Get)('statistic-product'),
+    (0, user_guard_1.UserPermission)(),
+    __param(0, (0, external_request_1.External)()),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_l = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _l : Object, typeof (_m = typeof request_1.TicketProductStatisticQuery !== "undefined" && request_1.TicketProductStatisticQuery) === "function" ? _m : Object]),
+    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
+], ApiTicketProductController.prototype, "statisticProduct", null);
 exports.ApiTicketProductController = ApiTicketProductController = __decorate([
     (0, swagger_1.ApiTags)('TicketProduct'),
     (0, swagger_1.ApiBearerAuth)('access-token'),
@@ -60933,14 +61051,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiTicketProductService = void 0;
 const common_1 = __webpack_require__(3);
+const helpers_1 = __webpack_require__(206);
+const variable_1 = __webpack_require__(21);
+const repositories_1 = __webpack_require__(42);
 const ticket_product_repository_1 = __webpack_require__(171);
 let ApiTicketProductService = class ApiTicketProductService {
-    constructor(ticketProductRepository) {
+    constructor(ticketProductRepository, productRepository) {
         this.ticketProductRepository = ticketProductRepository;
+        this.productRepository = productRepository;
     }
     async pagination(oid, query) {
         const { page, limit, filter, relation, sort } = query;
@@ -60954,13 +61076,11 @@ let ApiTicketProductService = class ApiTicketProductService {
                 productId: filter === null || filter === void 0 ? void 0 : filter.productId,
                 ticketId: filter === null || filter === void 0 ? void 0 : filter.ticketId,
                 deliveryStatus: filter === null || filter === void 0 ? void 0 : filter.deliveryStatus,
+                createdAt: filter === null || filter === void 0 ? void 0 : filter.createdAt,
             },
             sort,
         });
-        return {
-            data,
-            meta: { page, limit, total },
-        };
+        return { page, limit, total, ticketProductList: data };
     }
     async getList(oid, query) {
         const { filter, limit, relation, sort } = query;
@@ -60971,11 +61091,12 @@ let ApiTicketProductService = class ApiTicketProductService {
                 productId: filter === null || filter === void 0 ? void 0 : filter.productId,
                 ticketId: filter === null || filter === void 0 ? void 0 : filter.ticketId,
                 deliveryStatus: filter === null || filter === void 0 ? void 0 : filter.deliveryStatus,
+                createdAt: filter === null || filter === void 0 ? void 0 : filter.createdAt,
             },
             limit,
             sort,
         });
-        return { data: { ticketProductList } };
+        return { ticketProductList };
     }
     async destroyZero(oid, ticketProductId) {
         await this.ticketProductRepository.delete({
@@ -60983,13 +61104,70 @@ let ApiTicketProductService = class ApiTicketProductService {
             id: ticketProductId,
             quantity: 0,
         });
-        return { data: { ticketProductId } };
+        return { ticketProductId };
+    }
+    async statisticProduct(oid, query) {
+        const { filter, sortStatistic, page, limit } = query;
+        const promiseData = await Promise.all([
+            this.ticketProductRepository.findAndSelect({
+                condition: {
+                    oid,
+                    deliveryStatus: { IN: [variable_1.DeliveryStatus.Delivered] },
+                    quantity: { GT: 0 },
+                    createdAt: filter === null || filter === void 0 ? void 0 : filter.createdAt,
+                },
+                groupBy: ['productId'],
+                select: ['productId'],
+                aggregate: {
+                    count: { COUNT: '*' },
+                    sumQuantity: { SUM: ['quantity'] },
+                    sumCostAmount: { SUM: ['costAmount'] },
+                    sumActualAmount: { SUM: [{ MUL: ['quantity', 'actualPrice'] }] },
+                    sumProfitAmount: { SUM: [{ SUB: [{ MUL: ['quantity', 'actualPrice'] }, 'costAmount'] }] },
+                },
+                orderBy: sortStatistic || { productId: 'DESC' },
+                limit: limit || 20,
+                page: page || 1,
+            }),
+            this.ticketProductRepository.countGroup({
+                condition: {
+                    oid,
+                    deliveryStatus: { IN: [variable_1.DeliveryStatus.Delivered] },
+                    quantity: { GT: 0 },
+                    createdAt: filter === null || filter === void 0 ? void 0 : filter.createdAt,
+                },
+                groupBy: ['productId'],
+            }),
+        ]);
+        const dataRaws = promiseData[0].dataRaws;
+        const total = promiseData[1];
+        let productMap = {};
+        const productIds = dataRaws.map((i) => i.productId);
+        if (productIds.length) {
+            const productList = await this.productRepository.findManyBy({
+                oid,
+                id: { IN: productIds },
+            });
+            productMap = helpers_1.ESArray.arrayToKeyValue(productList, 'id');
+        }
+        const dataStatistic = dataRaws.map((i) => {
+            return {
+                count: Number(i.count),
+                productId: i.productId,
+                product: productMap[i.productId],
+                sumQuantity: Number(i.sumQuantity),
+                sumCostAmount: Number(i.sumCostAmount),
+                sumActualAmount: Number(i.sumActualAmount),
+                sumProfitAmount: Number(i.sumProfitAmount),
+            };
+        });
+        return { dataStatistic, total };
     }
 };
 exports.ApiTicketProductService = ApiTicketProductService;
 exports.ApiTicketProductService = ApiTicketProductService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof ticket_product_repository_1.TicketProductRepository !== "undefined" && ticket_product_repository_1.TicketProductRepository) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof ticket_product_repository_1.TicketProductRepository !== "undefined" && ticket_product_repository_1.TicketProductRepository) === "function" ? _a : Object, typeof (_b = typeof repositories_1.ProductRepository !== "undefined" && repositories_1.ProductRepository) === "function" ? _b : Object])
 ], ApiTicketProductService);
 
 

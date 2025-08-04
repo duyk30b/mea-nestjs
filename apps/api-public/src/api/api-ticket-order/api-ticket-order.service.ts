@@ -51,6 +51,7 @@ export class ApiTicketOrderService {
           ...i,
           printPrescription: 1,
           paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
+          createdAt: body.ticketOrderDraftUpsert.registeredAt,
         }
       }),
       ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
@@ -93,6 +94,7 @@ export class ApiTicketOrderService {
           ...i,
           printPrescription: 1,
           paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
+          createdAt: body.ticketOrderDepositedUpdate.registeredAt,
         }
       }),
       ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
@@ -136,6 +138,7 @@ export class ApiTicketOrderService {
           ...i,
           printPrescription: 1,
           paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
+          createdAt: body.ticketOrderDebtSuccessInsert.registeredAt,
         }
       }),
       ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
@@ -237,6 +240,7 @@ export class ApiTicketOrderService {
           ...i,
           printPrescription: 1,
           paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
+          createdAt: body.ticketOrderDebtSuccessUpdate.registeredAt,
         }
       }),
       ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {

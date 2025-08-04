@@ -35,7 +35,7 @@ export class ApiStatisticService {
   ): Promise<BaseResponse> {
     const { fromTime, toTime, orderBy, limit } = query
 
-    const dataStatistic = await this.productMovementRepository.findAndSelect({
+    const { dataRaws } = await this.productMovementRepository.findAndSelect({
       condition: {
         oid,
         movementType: MovementType.Ticket,
@@ -59,7 +59,7 @@ export class ApiStatisticService {
       limit,
     })
 
-    const productIds = dataStatistic.map((i) => i.productId)
+    const productIds = dataRaws.map((i) => i.productId)
     const productList = await this.productRepository.findManyBy({
       oid,
       id: { IN: productIds },
@@ -67,7 +67,7 @@ export class ApiStatisticService {
     const productMap: Record<string, Product> = {}
     productList.forEach((i) => (productMap[i.id] = i))
 
-    const topData = dataStatistic.map((i) => ({
+    const topData = dataRaws.map((i) => ({
       productId: i.productId,
       sumQuantity: Number(i.sumQuantity),
       sumCostAmount: Number(i.sumCostAmount),

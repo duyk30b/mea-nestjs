@@ -1,6 +1,10 @@
-import { Expose, Transform, TransformFnParams } from 'class-transformer'
-import { IsBoolean, IsInt, IsOptional } from 'class-validator'
-import { createConditionEnum, transformConditionEnum } from '../../../../../_libs/common/dto'
+import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
+import { IsBoolean, IsIn, IsInt, IsOptional, ValidateNested } from 'class-validator'
+import {
+  ConditionTimestamp,
+  createConditionEnum,
+  transformConditionEnum,
+} from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 import { DeliveryStatus, PaymentMoneyStatus } from '../../../../../_libs/database/common/variable'
 
@@ -43,6 +47,37 @@ export class TicketProductFilterQuery {
   @Transform((params: TransformFnParams) => transformConditionEnum(params, DeliveryStatus))
   @IsOptional()
   deliveryStatus: DeliveryStatus | InstanceType<typeof ConditionEnumDeliveryStatus>
+
+  @Expose()
+  @Type(() => ConditionTimestamp)
+  @ValidateNested({ each: true })
+  createdAt: ConditionTimestamp
 }
 
 export class TicketProductSortQuery extends SortQuery { }
+
+export class TicketProductStatisticSortQuery {
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  productId: 'ASC' | 'DESC'
+
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  count: 'ASC' | 'DESC'
+
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  sumQuantity: 'ASC' | 'DESC'
+
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  sumCostAmount: 'ASC' | 'DESC'
+
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  sumActualAmount: 'ASC' | 'DESC'
+
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  sumProfitAmount: 'ASC' | 'DESC'
+}

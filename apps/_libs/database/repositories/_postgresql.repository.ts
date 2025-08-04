@@ -344,6 +344,31 @@ export abstract class _PostgreSqlRepository<
     return this.entity.fromRaw(raws[0])
   }
 
+  async countGroup(options: {
+    condition: BaseCondition<_ENTITY>
+    groupBy?: (keyof _ENTITY)[]
+  }): Promise<number> {
+    const { condition, groupBy } = options
+    const where = this.getWhereOptions(condition)
+
+    const groupString = groupBy.map((field) => `"${field as string}"`).join(', ')
+    const query = this.getManager()
+      .createQueryBuilder()
+      .select('COUNT(*)', 'total')
+      .from((qb) => {
+        return qb
+          .subQuery()
+          .select(groupString)
+          .from(this.entity, 'h')
+          .where(where)
+          .groupBy(groupString)
+      }, 'temp')
+
+    const totalResponse = await query.getRawOne()
+
+    return Number(totalResponse.total)
+  }
+
   async findAndSelect<
     Aggregate extends Record<
       string,
@@ -359,15 +384,16 @@ export abstract class _PostgreSqlRepository<
     aggregate?: Aggregate
     groupBy?: (keyof _ENTITY)[]
     orderBy?: { [P in keyof _ENTITY]?: 'ASC' | 'DESC' } | { [P in keyof Aggregate]: 'ASC' | 'DESC' }
+    page?: number
     limit?: number
-  }): Promise<
-    ((SELECT extends (keyof _ENTITY)[]
+  }): Promise<{
+    dataRaws: ((SELECT extends (keyof _ENTITY)[]
       ? { [P in SELECT[number]]: _ENTITY[P] }
       : SELECT extends { [P in keyof _ENTITY]?: boolean }
       ? { [P in keyof SELECT as SELECT[P] extends true ? P : never]: _ENTITY }
       : never) & { [P in keyof Aggregate]: string })[]
-  > {
-    const { condition, select, aggregate, groupBy, orderBy, limit } = options
+  }> {
+    const { condition, select, aggregate, groupBy, orderBy, page, limit } = options
     const where = this.getWhereOptions(condition)
     const selectList: string[] = []
     if (select) {
@@ -425,8 +451,16 @@ export abstract class _PostgreSqlRepository<
         }
       })
     }
-    if (limit) query = query.take(limit)
 
-    return await query.getRawMany()
+    if (limit) {
+      query = query.take(limit)
+      if (page) {
+        query = query.skip((page - 1) * limit)
+      }
+    }
+
+    const dataRaws = await query.getRawMany()
+
+    return { dataRaws }
   }
 }

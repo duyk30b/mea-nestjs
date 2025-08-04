@@ -53,7 +53,7 @@ export class PaymentActionService {
 
   async sumMoney(oid: number, query: PaymentGetManyQuery) {
     const { filter } = query
-    const aggregateRaw = await this.paymentRepository.findAndSelect({
+    const { dataRaws } = await this.paymentRepository.findAndSelect({
       condition: {
         oid,
         paymentMethodId: filter?.paymentMethodId,
@@ -70,7 +70,7 @@ export class PaymentActionService {
       },
       groupBy: ['moneyDirection'],
     })
-    const aggregate = aggregateRaw.map((i) => {
+    const aggregate = dataRaws.map((i) => {
       return {
         moneyDirection: i.moneyDirection,
         sumPaidAmount: Number(i.sumPaidAmount),
