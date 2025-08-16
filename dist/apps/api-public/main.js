@@ -19128,26 +19128,26 @@ let CustomerPayDebtOperation = class CustomerPayDebtOperation {
                 options: { requireEqualLength: true },
             });
             const customerModified = await this.customerManager.updateOneAndReturnEntity(manager, { oid, id: customerId }, { debt: () => `debt - ${paidAmount}` });
-            const customerCloseDebt = customerModified.debt;
-            const customerOpenDebt = customerModified.debt + paidAmount;
-            const paymentInsertList = ticketModifiedList.map((ticketModified) => {
+            let customerOpenDebt = customerModified.debt + paidAmount;
+            const paymentInsertList = dataList.map((item) => {
                 const paymentInsert = {
                     oid,
                     voucherType: payment_entity_1.PaymentVoucherType.Ticket,
-                    voucherId: ticketModified.id,
+                    voucherId: item.ticketId,
                     personType: payment_entity_1.PaymentPersonType.Customer,
-                    personId: ticketModified.customerId,
+                    personId: customerId,
                     createdAt: time,
                     paymentMethodId,
                     cashierId,
                     moneyDirection: payment_entity_1.MoneyDirection.In,
                     note: note || '',
-                    paidAmount,
+                    paidAmount: item.paidAmount,
                     paymentActionType: payment_entity_1.PaymentActionType.PayDebt,
-                    debtAmount: -paidAmount,
+                    debtAmount: -item.paidAmount,
                     openDebt: customerOpenDebt,
-                    closeDebt: customerCloseDebt,
+                    closeDebt: customerOpenDebt - item.paidAmount,
                 };
+                customerOpenDebt = paymentInsert.closeDebt;
                 return paymentInsert;
             });
             const paymentCreatedList = await this.paymentManager.insertManyAndReturnEntity(manager, paymentInsertList);
