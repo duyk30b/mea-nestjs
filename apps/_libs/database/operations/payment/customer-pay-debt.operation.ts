@@ -31,8 +31,8 @@ export class CustomerPayDebtOperation {
     note: string
     dataList: { ticketId: number; paidAmount: number }[]
   }) {
-    const { oid, customerId, cashierId, paymentMethodId, time, paidAmount, note, dataList } =
-      options
+    const { oid, customerId, cashierId, paymentMethodId, time, paidAmount, dataList } = options
+    let note = options.note
 
     const paidAmountReduce = dataList.reduce((acc, item) => acc + item.paidAmount, 0)
     if (paidAmount !== paidAmountReduce) {
@@ -72,6 +72,9 @@ export class CustomerPayDebtOperation {
       )
 
       let customerOpenDebt = customerModified.debt + paidAmount
+      if (!note && dataList.length > 0) {
+        note = `Trả nợ ${paidAmount} vào ${dataList.length} đơn: ${dataList.map((i) => i.ticketId)}`
+      }
 
       const paymentInsertList = dataList.map((item) => {
         const paymentInsert: PaymentInsertType = {
