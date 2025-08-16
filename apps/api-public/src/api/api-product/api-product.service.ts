@@ -231,13 +231,15 @@ export class ApiProductService {
       }
     }
 
-    const existProduct = await this.productRepository.findOneBy({
-      oid,
-      productCode: productBody.productCode,
-      id: { NOT: productId },
-    })
-    if (existProduct) {
-      throw new BusinessException(`Trùng mã sản phẩm với ${existProduct.brandName}` as any)
+    if (productBody.productCode != null) {
+      const existProduct = await this.productRepository.findOneBy({
+        oid,
+        productCode: productBody.productCode,
+        id: { NOT: productId },
+      })
+      if (existProduct) {
+        throw new BusinessException(`Trùng mã sản phẩm với ${existProduct.brandName}` as any)
+      }
     }
 
     const productModified = await this.productRepository.updateOneAndReturnEntity(

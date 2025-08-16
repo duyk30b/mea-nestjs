@@ -18,15 +18,12 @@ import Ticket, {
   TicketType,
 } from '../../entities/ticket.entity'
 import {
-  TicketExpenseManager,
-  TicketLaboratoryManager,
   TicketManager,
   TicketProcedureManager,
   TicketProductManager,
-  TicketRadiologyManager,
-  TicketSurchargeManager,
 } from '../../managers'
 import { TicketAttributeManager } from '../../managers/ticket-attribute.manager'
+import { TicketExpenseManager, TicketSurchargeManager } from '../../repositories'
 import {
   TicketOrderExpenseDraftType,
   TicketOrderProcedureDraftType,
@@ -63,8 +60,6 @@ export class TicketOrderDraftOperation {
     private ticketAttributeManager: TicketAttributeManager,
     private ticketProductManager: TicketProductManager,
     private ticketProcedureManager: TicketProcedureManager,
-    private ticketLaboratoryManager: TicketLaboratoryManager,
-    private ticketRadiologyManager: TicketRadiologyManager,
     private ticketSurchargeManager: TicketSurchargeManager,
     private ticketExpenseManager: TicketExpenseManager
   ) { }

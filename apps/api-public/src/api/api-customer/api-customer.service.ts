@@ -86,6 +86,14 @@ export class ApiCustomerService {
       customerCode = (count + 1).toString()
     }
 
+    const existCustomer = await this.customerRepository.findOneBy({
+      oid,
+      customerCode,
+    })
+    if (existCustomer) {
+      throw new BusinessError(`Trùng mã khách hàng với ${existCustomer.fullName}`)
+    }
+
     const customer = await this.customerRepository.insertOneFullFieldAndReturnEntity({
       ...body,
       oid,
@@ -101,13 +109,15 @@ export class ApiCustomerService {
     customerId: number,
     customerBody: CustomerUpdateBody
   ): Promise<BaseResponse> {
-    const existCustomer = await this.customerRepository.findOneBy({
-      oid,
-      customerCode: customerBody.customerCode,
-      id: { NOT: customerId },
-    })
-    if (existCustomer) {
-      throw new BusinessError(`Trùng mã dịch vụ với ${existCustomer.fullName}`)
+    if (customerBody.customerCode != null) {
+      const existCustomer = await this.customerRepository.findOneBy({
+        oid,
+        customerCode: customerBody.customerCode,
+        id: { NOT: customerId },
+      })
+      if (existCustomer) {
+        throw new BusinessError(`Trùng mã khách hàng với ${existCustomer.fullName}`)
+      }
     }
 
     const customer = await this.customerRepository.updateOneAndReturnEntity(

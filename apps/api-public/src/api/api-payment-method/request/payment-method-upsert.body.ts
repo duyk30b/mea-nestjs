@@ -1,13 +1,13 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
-import { IsDefined, IsIn, IsInt, IsNotEmpty } from 'class-validator'
+import { IsDefined, IsIn, IsNotEmpty, IsString } from 'class-validator'
 
 export class PaymentMethodCreateBody {
   @ApiProperty({ example: 105000 })
   @Expose()
   @IsDefined()
-  @IsInt()
-  priority: number
+  @IsString()
+  code: string
 
   @ApiProperty({ example: 'Tiền mặt' })
   @Expose()

@@ -354,11 +354,9 @@ export default class Ticket extends BaseEntity {
   ticketRadiologyList: TicketRadiology[]
 
   @Expose()
-  @OneToMany(() => TicketExpense, (ticketExpense) => ticketExpense.ticket)
   ticketExpenseList: TicketExpense[]
 
   @Expose()
-  @OneToMany(() => TicketSurcharge, (ticketSurcharge) => ticketSurcharge.ticket)
   ticketSurchargeList: TicketSurcharge[]
 
   @Expose()

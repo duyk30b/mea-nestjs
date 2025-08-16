@@ -12,9 +12,10 @@ export enum PositionInteractType {
   Procedure = 3, // chỉ tương tác với thủ thuật
   Radiology = 4, // chỉ tương tác với phiếu CĐHA (1 phiếu 1 CHA)
   Laboratory = 5, // chỉ tương tác với 1 xét nghiệm
-  ConsumableList = 6, // tương tác với tất cả sản phẩm trong cả tiêu hao
-  PrescriptionList = 7, // tương tác với tất cả sản phẩm trong cả toa thuốc
-  LaboratoryGroup = 8, // chỉ tương tác với phiếu xét nghiệm (1 phiếu nhiều xét nghiệm)
+  Regimen = 6, // chỉ tương tác với 1 xét nghiệm
+  ConsumableList = 7, // tương tác với tất cả sản phẩm trong cả tiêu hao
+  PrescriptionList = 8, // tương tác với tất cả sản phẩm trong cả toa thuốc
+  LaboratoryGroup = 9, // chỉ tương tác với phiếu xét nghiệm (1 phiếu nhiều xét nghiệm)
 }
 
 export enum CommissionCalculatorType {
@@ -109,8 +110,8 @@ export type PositionInsertType = Omit<
 
 export type PositionUpdateType = {
   [K in Exclude<keyof Position, keyof PositionRelationType | keyof Pick<Position, 'oid' | 'id'>>]:
-    | Position[K]
-    | (() => string)
+  | Position[K]
+  | (() => string)
 }
 
 export type PositionSortType = {

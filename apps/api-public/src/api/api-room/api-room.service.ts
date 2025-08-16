@@ -3,6 +3,7 @@ import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { ESArray } from '../../../../_libs/common/helpers'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
+import { BusinessError } from '../../../../_libs/database/common/error'
 import { Room, UserRoom } from '../../../../_libs/database/entities'
 import { UserRoomInsertType } from '../../../../_libs/database/entities/user-room.entity'
 import {
@@ -91,10 +92,18 @@ export class ApiRoomService {
 
   async createOne(oid: number, body: RoomCreateBody): Promise<BaseResponse> {
     const { room: roomBody, userIdList } = body
+
+    let code = roomBody.code
+    if (!code) {
+      const count = await this.roomRepository.getMaxId()
+      code = (count + 1).toString()
+    }
     const room = await this.roomRepository.insertOneFullFieldAndReturnEntity({
       ...roomBody,
       oid,
+      code,
     })
+
     if (userIdList?.length) {
       const userList = await this.userRepository.findManyBy({
         oid,
@@ -123,6 +132,16 @@ export class ApiRoomService {
   async updateOne(oid: number, roomId: number, body: RoomUpdateBody): Promise<BaseResponse> {
     const { room: roomBody, userIdList } = body
 
+    if (roomBody.code != null) {
+      const existProcedure = await this.roomRepository.findOneBy({
+        oid,
+        code: roomBody.code,
+        id: { NOT: roomId },
+      })
+      if (existProcedure) {
+        throw new BusinessError(`Trùng mã phòng với ${existProcedure.name}`)
+      }
+    }
     const room = await this.roomRepository.updateOneAndReturnEntity({ id: roomId, oid }, roomBody)
 
     if (userIdList) {

@@ -13,5 +13,5 @@ export class RoomFilterQuery { }
 export class RoomSortQuery extends SortQuery {
   @Expose()
   @IsIn(['ASC', 'DESC'])
-  roomCode: 'ASC' | 'DESC'
+  code: 'ASC' | 'DESC'
 }

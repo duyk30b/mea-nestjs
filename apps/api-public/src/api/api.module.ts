@@ -6,6 +6,7 @@ import { ApiCustomerSourceModule } from './api-customer-source/api-customer-sour
 import { ApiCustomerModule } from './api-customer/api-customer.module'
 import { ApiDiscountModule } from './api-discount/api-discount.module'
 import { ApiDistributorModule } from './api-distributor/api-distributor.module'
+import { ApiExpenseModule } from './api-expense/api-expense.module'
 import { ApiICDModule } from './api-icd/api-icd.module'
 import { ApiLaboratoryGroupModule } from './api-laboratory-group/api-laboratory-group.module'
 import { ApiLaboratorySampleModule } from './api-laboratory-sample/api-laboratory-sample.module'
@@ -28,11 +29,13 @@ import { ApiRadiologySampleModule } from './api-radiology-sample/api-radiology-s
 import { ApiRadiologyModule } from './api-radiology/api-radiology.module'
 import { ApiReceiptItemModule } from './api-receipt-item/api-receipt-item.module'
 import { ApiReceiptModule } from './api-receipt/api-receipt.module'
+import { ApiRegimenModule } from './api-regimen/api-regimen.module'
 import { ApiRoleModule } from './api-role/api-role.module'
 import { ApiRoomModule } from './api-room/api-room.module'
 import { ApiSettingModule } from './api-setting/api-setting.module'
 import { ApiStatisticModule } from './api-statistics/api-statistic.module'
 import { ApiStockCheckModule } from './api-stock-check/api-stock-check.module'
+import { ApiSurchargeModule } from './api-surcharge/api-surcharge.module'
 import { ApiTicketBatchModule } from './api-ticket-batch/api-ticket-batch.module'
 import { ApiTicketClinicModule } from './api-ticket-clinic/api-ticket-clinic.module'
 import { ApiTicketLaboratoryGroupModule } from './api-ticket-laboratory-group/api-ticket-laboratory-group.module'
@@ -100,8 +103,11 @@ import { TicketModule } from './ticket/ticket.module'
     ApiPaymentModule,
     ApiPaymentMethodModule,
     ApiDiscountModule,
+    ApiRegimenModule,
 
     ApiRoomModule,
+    ApiExpenseModule,
+    ApiSurchargeModule,
     ApiRadiologySampleModule,
     TicketModule,
   ],

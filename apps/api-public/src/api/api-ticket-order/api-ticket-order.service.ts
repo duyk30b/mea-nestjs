@@ -8,7 +8,7 @@ import {
 } from '../../../../_libs/database/operations'
 import { TicketRepository } from '../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../socket/socket-emit.service'
-import { PaymentActionService } from '../api-payment/payment-action.service'
+import { PaymentCustomerService } from '../api-payment/payment-customer.service'
 import { TicketSendProductAndPaymentBody } from '../ticket/request'
 import { TicketActionService } from '../ticket/service/ticket-action.service'
 import {
@@ -26,7 +26,7 @@ export class ApiTicketOrderService {
     private readonly ticketOrderDepositedOperation: TicketOrderDepositedOperation,
     private readonly ticketRepository: TicketRepository,
     private readonly ticketActionService: TicketActionService,
-    private readonly paymentActionService: PaymentActionService
+    private readonly paymentCustomerService: PaymentCustomerService
   ) { }
 
   async draftUpsert(params: { oid: number; userId: number; body: TicketOrderDraftUpsertBody }) {
@@ -165,7 +165,7 @@ export class ApiTicketOrderService {
     }
 
     if (paid > 0) {
-      await this.paymentActionService.customerPrepaymentMoney({
+      await this.paymentCustomerService.customerPrepaymentMoney({
         oid,
         userId,
         body: { ticketId, customerId, paymentMethodId: 0, paidAmount: paid, note: '' },
@@ -200,7 +200,7 @@ export class ApiTicketOrderService {
       ticket = responseReopen.ticketModified
     }
     if (ticket.paid) {
-      await this.paymentActionService.customerRefundMoney({
+      await this.paymentCustomerService.customerRefundMoney({
         oid,
         userId,
         body: {
@@ -262,7 +262,7 @@ export class ApiTicketOrderService {
     })
 
     if (paidBody > 0) {
-      await this.paymentActionService.customerPrepaymentMoney({
+      await this.paymentCustomerService.customerPrepaymentMoney({
         oid,
         userId,
         body: { ticketId, customerId, paymentMethodId: 0, paidAmount: paidBody, note: 'Sửa đơn' },
@@ -316,7 +316,7 @@ export class ApiTicketOrderService {
     const customerId = body.customerId
 
     if (body.paidAmount > 0) {
-      const prepaymentResult = await this.paymentActionService.customerPrepaymentMoney({
+      const prepaymentResult = await this.paymentCustomerService.customerPrepaymentMoney({
         oid,
         userId,
         body: {

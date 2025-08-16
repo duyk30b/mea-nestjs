@@ -135,7 +135,7 @@ export class ApiLaboratoryService {
       laboratoryCode,
     })
     if (existLaboratory) {
-      throw new BusinessError(`Trùng mã dịch vụ với ${existLaboratory.name}`)
+      throw new BusinessError(`Trùng mã xét nghiệm với ${existLaboratory.name}`)
     }
 
     const laboratoryParentId = await this.laboratoryRepository.insertOneFullField({
@@ -229,13 +229,15 @@ export class ApiLaboratoryService {
       }
     }
 
-    const existLaboratory = await this.laboratoryRepository.findOneBy({
-      oid,
-      laboratoryCode: laboratoryBody.laboratoryCode,
-      id: { NOT: laboratoryId },
-    })
-    if (existLaboratory) {
-      throw new BusinessError(`Trùng mã xét nghiệm với ${existLaboratory.name}`)
+    if (laboratoryBody.laboratoryCode != null) {
+      const existLaboratory = await this.laboratoryRepository.findOneBy({
+        oid,
+        laboratoryCode: laboratoryBody.laboratoryCode,
+        id: { NOT: laboratoryId },
+      })
+      if (existLaboratory) {
+        throw new BusinessError(`Trùng mã xét nghiệm với ${existLaboratory.name}`)
+      }
     }
 
     const laboratoryParent = await this.laboratoryRepository.updateOneAndReturnEntity(

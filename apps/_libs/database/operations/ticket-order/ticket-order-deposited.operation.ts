@@ -15,15 +15,14 @@ import { TicketProductInsertType, TicketProductType } from '../../entities/ticke
 import { TicketSurchargeInsertType } from '../../entities/ticket-surcharge.entity'
 import { TicketRelationType } from '../../entities/ticket.entity'
 import {
-  TicketExpenseManager,
   TicketLaboratoryManager,
   TicketManager,
   TicketProcedureManager,
   TicketProductManager,
   TicketRadiologyManager,
-  TicketSurchargeManager,
 } from '../../managers'
 import { TicketAttributeManager } from '../../managers/ticket-attribute.manager'
+import { TicketExpenseManager, TicketSurchargeManager } from '../../repositories'
 import {
   TicketOrderExpenseDraftType,
   TicketOrderProcedureDraftType,

@@ -9,7 +9,6 @@ import {
   DiscountInteractType,
 } from '../../../../_libs/database/entities/discount.entity'
 import Position, {
-  CommissionCalculatorType,
   PositionInsertType,
   PositionInteractType,
 } from '../../../../_libs/database/entities/position.entity'
@@ -103,35 +102,21 @@ export class ApiProcedureService {
 
   async createOne(oid: number, body: ProcedureUpsertBody): Promise<BaseResponse> {
     const { positionList, discountList, procedure: procedureBody } = body
-    positionList?.forEach((i) => {
-      if (
-        i.commissionCalculatorType === CommissionCalculatorType.PercentExpected
-        || i.commissionCalculatorType === CommissionCalculatorType.PercentActual
-      ) {
-        if (i.commissionValue >= 1000) {
-          throw new BusinessException('error.ValidateFailed')
-        }
-      }
-    })
-
-    let procedureCode = procedureBody.procedureCode
-    if (!procedureCode) {
+    let code = procedureBody.code
+    if (!code) {
       const count = await this.procedureRepository.getMaxId()
-      procedureCode = (count + 1).toString()
+      code = (count + 1).toString()
     }
 
-    const existProcedure = await this.procedureRepository.findOneBy({
-      oid,
-      procedureCode,
-    })
+    const existProcedure = await this.procedureRepository.findOneBy({ oid, code })
     if (existProcedure) {
       throw new BusinessError(`Trùng mã dịch vụ với ${existProcedure.name}`)
     }
 
     const procedure = await this.procedureRepository.insertOneFullFieldAndReturnEntity({
-      oid,
       ...procedureBody,
-      procedureCode,
+      oid,
+      code,
     })
 
     this.socketEmitService.procedureListChange(oid, { procedureUpsertedList: [procedure] })
@@ -179,25 +164,18 @@ export class ApiProcedureService {
     body: ProcedureUpsertBody
   ): Promise<BaseResponse> {
     const { positionList, discountList, procedure: procedureBody } = body
-    positionList?.forEach((i) => {
-      if (
-        i.commissionCalculatorType === CommissionCalculatorType.PercentExpected
-        || i.commissionCalculatorType === CommissionCalculatorType.PercentActual
-      ) {
-        if (i.commissionValue >= 1000) {
-          throw new BusinessException('error.ValidateFailed')
-        }
-      }
-    })
 
-    const existProcedure = await this.procedureRepository.findOneBy({
-      oid,
-      procedureCode: procedureBody.procedureCode,
-      id: { NOT: procedureId },
-    })
-    if (existProcedure) {
-      throw new BusinessError(`Trùng mã dịch vụ với ${existProcedure.name}`)
+    if (procedureBody.code != null) {
+      const existProcedure = await this.procedureRepository.findOneBy({
+        oid,
+        code: procedureBody.code,
+        id: { NOT: procedureId },
+      })
+      if (existProcedure) {
+        throw new BusinessError(`Trùng mã dịch vụ với ${existProcedure.name}`)
+      }
     }
+
     const procedure = await this.procedureRepository.updateOneAndReturnEntity(
       { oid, id: procedureId },
       procedureBody

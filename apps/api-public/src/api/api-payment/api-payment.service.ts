@@ -24,7 +24,7 @@ import {
   UserRepository,
 } from '../../../../_libs/database/repositories'
 import { PaymentRepository } from '../../../../_libs/database/repositories/payment.repository'
-import { PaymentGetManyQuery, PaymentPaginationQuery } from './request'
+import { PaymentGetManyQuery, PaymentPaginationQuery, PaymentUpdateInfoBody } from './request'
 import { PaymentRelationQuery } from './request/payment.options'
 
 @Injectable()
@@ -202,5 +202,51 @@ export class ApiPaymentService {
     })
 
     return paymentList
+  }
+
+  async updateInfo(options: {
+    oid: number
+    userId: number
+    paymentId: number
+    body: PaymentUpdateInfoBody
+  }) {
+    const { oid, userId, paymentId, body } = options
+    const payment = await this.paymentRepository.updateOneAndReturnEntity(
+      { oid, id: paymentId, cashierId: userId }, // chỉ sửa phiếu do chính mình tạo ra
+      {
+        paymentMethodId: body.paymentMethodId,
+        note: body.note,
+      }
+    )
+    return { payment }
+  }
+
+  async sumMoney(oid: number, query: PaymentGetManyQuery) {
+    const { filter } = query
+    const { dataRaws } = await this.paymentRepository.findAndSelect({
+      condition: {
+        oid,
+        paymentMethodId: filter?.paymentMethodId,
+        personType: filter?.personType,
+        personId: filter?.personId,
+        moneyDirection: filter?.moneyDirection,
+        cashierId: filter?.cashierId,
+        createdAt: filter?.createdAt,
+      },
+      select: ['moneyDirection'],
+      aggregate: {
+        sumPaidAmount: { SUM: ['paidAmount'] },
+        count: { COUNT: '*' },
+      },
+      groupBy: ['moneyDirection'],
+    })
+    const aggregate = dataRaws.map((i) => {
+      return {
+        moneyDirection: i.moneyDirection,
+        sumPaidAmount: Number(i.sumPaidAmount),
+        count: Number(i.count),
+      }
+    })
+    return { aggregate }
   }
 }

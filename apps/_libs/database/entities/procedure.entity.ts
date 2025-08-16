@@ -4,14 +4,8 @@ import Discount from './discount.entity'
 import Position from './position.entity'
 import ProcedureGroup from './procedure-group.entity'
 
-export enum ProcedureType {
-  Basic = 1,
-  Regimen = 2, // Liệu trình
-  Remedy = 3, // Bài thuốc
-}
-
 @Entity('Procedure')
-@Unique('UNIQUE_Procedure__oid_procedureCode', ['oid', 'procedureCode'])
+@Unique('UNIQUE_Procedure__oid_code', ['oid', 'code'])
 export default class Procedure {
   @Column({ name: 'oid' })
   @Exclude()
@@ -23,23 +17,11 @@ export default class Procedure {
 
   @Column({ type: 'varchar', length: 50 })
   @Expose()
-  procedureCode: string // Mã dịch vụ
+  code: string // Mã dịch vụ
 
   @Column({ type: 'varchar', length: 255 })
   @Expose()
   name: string
-
-  @Column({ type: 'smallint', default: ProcedureType.Basic })
-  @Expose()
-  procedureType: ProcedureType
-
-  @Column({ type: 'smallint', default: 1 })
-  @Expose()
-  quantityDefault: number
-
-  @Column({ type: 'smallint', default: 0 })
-  @Expose()
-  gapHours: number
 
   @Expose()
   @Column({ default: 0 })
@@ -48,10 +30,6 @@ export default class Procedure {
   @Column({ nullable: true })
   @Expose()
   price: number // Giá mặc định
-
-  @Column({ type: 'text', default: JSON.stringify([]) })
-  @Expose()
-  consumablesHint: string
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()
@@ -119,5 +97,5 @@ export type ProcedureUpdateType = {
 }
 
 export type ProcedureSortType = {
-  [P in keyof Pick<Procedure, 'oid' | 'id' | 'procedureCode' | 'name' | 'price'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<Procedure, 'oid' | 'id' | 'code' | 'name' | 'price'>]?: 'ASC' | 'DESC'
 }

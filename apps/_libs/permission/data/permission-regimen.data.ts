@@ -1,0 +1,55 @@
+import { Permission } from '../../database/entities'
+import { PermissionId } from '../permission.enum'
+
+export const permissionRegimen: Permission[] = [
+  {
+    id: PermissionId.REGIMEN,
+    level: 1,
+    code: PermissionId[PermissionId.REGIMEN],
+    isActive: 1,
+    pathId: `${PermissionId.REGIMEN}`,
+    name: 'Quản lý liệu trình',
+    parentId: 0,
+    rootId: PermissionId.REGIMEN,
+  },
+  {
+    id: PermissionId.REGIMEN_MENU,
+    level: 2,
+    code: PermissionId[PermissionId.REGIMEN_MENU],
+    isActive: 1,
+    pathId: `${PermissionId.REGIMEN}.${PermissionId.REGIMEN_MENU}`,
+    name: 'Xem menu danh sách liệu trình',
+    parentId: PermissionId.REGIMEN,
+    rootId: PermissionId.REGIMEN,
+  },
+  {
+    id: PermissionId.REGIMEN_CREATE,
+    level: 2,
+    code: PermissionId[PermissionId.REGIMEN_CREATE],
+    isActive: 1,
+    pathId: `${PermissionId.REGIMEN}.${PermissionId.REGIMEN_CREATE}`,
+    name: 'Thêm liệu trình mới',
+    parentId: PermissionId.REGIMEN,
+    rootId: PermissionId.REGIMEN,
+  },
+  {
+    id: PermissionId.REGIMEN_UPDATE,
+    level: 2,
+    code: PermissionId[PermissionId.REGIMEN_UPDATE],
+    isActive: 1,
+    pathId: `${PermissionId.REGIMEN}.${PermissionId.REGIMEN_UPDATE}`,
+    name: 'Sửa liệu trình',
+    parentId: PermissionId.REGIMEN,
+    rootId: PermissionId.REGIMEN,
+  },
+  {
+    id: PermissionId.REGIMEN_DELETE,
+    level: 2,
+    code: PermissionId[PermissionId.REGIMEN_DELETE],
+    isActive: 1,
+    pathId: `${PermissionId.REGIMEN}.${PermissionId.REGIMEN_DELETE}`,
+    name: 'Xóa liệu trình',
+    parentId: PermissionId.REGIMEN,
+    rootId: PermissionId.REGIMEN,
+  },
+]

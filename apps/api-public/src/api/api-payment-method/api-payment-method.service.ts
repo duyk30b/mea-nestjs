@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { PaymentRepository } from '../../../../_libs/database/repositories'
+import { BusinessError } from '../../../../_libs/database/common/error'
 import { PaymentMethodRepository } from '../../../../_libs/database/repositories/payment-method.repository'
 import {
   PaymentMethodCreateBody,
@@ -12,12 +11,9 @@ import {
 
 @Injectable()
 export class ApiPaymentMethodService {
-  constructor(
-    private readonly paymentMethodRepository: PaymentMethodRepository,
-    private readonly paymentRepository: PaymentRepository
-  ) { }
+  constructor(private readonly paymentMethodRepository: PaymentMethodRepository) { }
 
-  async pagination(oid: number, query: PaymentMethodPaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: PaymentMethodPaginationQuery) {
     const { page, limit, filter, sort, relation } = query
 
     const { data, total } = await this.paymentMethodRepository.pagination({
@@ -29,13 +25,10 @@ export class ApiPaymentMethodService {
       },
       sort,
     })
-    return {
-      data,
-      meta: { total, page, limit },
-    }
+    return { paymentMethodList: data, total, page, limit }
   }
 
-  async getMany(oid: number, query: PaymentMethodGetManyQuery): Promise<BaseResponse> {
+  async getMany(oid: number, query: PaymentMethodGetManyQuery) {
     const { limit, filter, relation } = query
 
     const data = await this.paymentMethodRepository.findMany({
@@ -45,44 +38,63 @@ export class ApiPaymentMethodService {
       },
       limit,
     })
-    return { data }
+    return { paymentMethodList: data }
   }
 
-  async getOne(oid: number, id: number): Promise<BaseResponse> {
+  async getOne(oid: number, id: number) {
     const paymentMethod = await this.paymentMethodRepository.findOneBy({ oid, id })
     if (!paymentMethod) throw new BusinessException('error.Database.NotFound')
-    return { data: { paymentMethod } }
+    return { paymentMethod }
   }
 
-  async createOne(oid: number, body: PaymentMethodCreateBody): Promise<BaseResponse> {
+  async createOne(oid: number, body: PaymentMethodCreateBody) {
+    let code = body.code
+    if (!code) {
+      const count = await this.paymentMethodRepository.getMaxId()
+      code = (count + 1).toString()
+    }
+    const existPaymentMethod = await this.paymentMethodRepository.findOneBy({ oid, code })
+    if (existPaymentMethod) {
+      throw new BusinessError(`Trùng mã thanh toán với ${existPaymentMethod.name}`)
+    }
+
     const paymentMethod = await this.paymentMethodRepository.insertOneFullFieldAndReturnEntity({
       oid,
       ...body,
+      code,
     })
-    return { data: { paymentMethod } }
+    return { paymentMethod }
   }
 
-  async updateOne(oid: number, id: number, body: PaymentMethodUpdateBody): Promise<BaseResponse> {
-    const [paymentMethod] = await this.paymentMethodRepository.updateAndReturnEntity(
-      { id, oid },
+  async updateOne(options: {
+    oid: number
+    paymentMethodId: number
+    body: PaymentMethodUpdateBody
+  }) {
+    const { body, paymentMethodId, oid } = options
+
+    if (body.code != null) {
+      const existPaymentMethod = await this.paymentMethodRepository.findOneBy({
+        oid,
+        code: body.code,
+        id: { NOT: paymentMethodId },
+      })
+      if (existPaymentMethod) {
+        throw new BusinessError(`Trùng mã thanh toán với ${existPaymentMethod.name}`)
+      }
+    }
+
+    const paymentMethod = await this.paymentMethodRepository.updateOneAndReturnEntity(
+      { id: paymentMethodId, oid },
       body
     )
-    if (!paymentMethod) {
-      throw BusinessException.create({
-        message: 'error.Database.UpdateFailed',
-        details: 'PaymentMethod',
-      })
-    }
-    return { data: { paymentMethod } }
+    return { paymentMethod }
   }
 
-  async destroyOne(options: { oid: number; paymentMethodId: number }): Promise<BaseResponse> {
+  async destroyOne(options: { oid: number; paymentMethodId: number }) {
     const { oid, paymentMethodId } = options
-    await Promise.all([
-      this.paymentMethodRepository.delete({ oid, id: paymentMethodId }),
-      this.paymentRepository.update({ oid, paymentMethodId }, { paymentMethodId: 0 }),
-    ])
+    await this.paymentMethodRepository.delete({ oid, id: paymentMethodId })
 
-    return { data: { paymentMethodId } }
+    return { paymentMethodId }
   }
 }

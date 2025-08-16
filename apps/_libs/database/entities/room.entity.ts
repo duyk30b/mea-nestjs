@@ -22,7 +22,7 @@ export default class Room {
 
   @Column({ type: 'varchar', length: 50, default: '' })
   @Expose()
-  roomCode: string
+  code: string
 
   @Expose()
   @Column({ type: 'varchar', length: 255 })
@@ -31,6 +31,10 @@ export default class Room {
   @Column({ type: 'smallint', default: RoomInteractType.Product })
   @Expose()
   roomInteractType: RoomInteractType
+
+  @Column({ type: 'smallint', default: 0 })
+  @Expose()
+  roomStyle: number
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()
@@ -68,5 +72,5 @@ export type RoomUpdateType = {
 }
 
 export type RoomSortType = {
-  [P in keyof Pick<Room, 'oid' | 'id' | 'roomCode' | 'name'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<Room, 'oid' | 'id' | 'code' | 'name'>]?: 'ASC' | 'DESC'
 }
