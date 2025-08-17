@@ -54,6 +54,38 @@ export class Version991755225366463 implements MigrationInterface {
             );
             CREATE INDEX "IDX_RegimenItem__oid_regimenId" ON "RegimenItem" ("oid", "regimenId");
         `)
+        queryArray.push(`
+            CREATE TABLE "TicketRegimen" (
+                "oid" integer NOT NULL,
+                "id" SERIAL NOT NULL,
+                "ticketId" integer NOT NULL,
+                "customerId" integer NOT NULL,
+                "regimenId" integer NOT NULL,
+                "status" smallint NOT NULL DEFAULT '2',
+                "paymentMoneyStatus" smallint NOT NULL DEFAULT '1',
+                "registeredAt" bigint,
+                "completedAt" bigint,
+                CONSTRAINT "PK_d90ee5d9c6ca4aab6c4e57d9b70" PRIMARY KEY ("id")
+            );
+            CREATE INDEX "IDX_TicketRegimen__oid_ticketId" ON "TicketRegimen" ("oid", "ticketId");
+            CREATE INDEX "IDX_TicketRegimen__oid_registeredAt" ON "TicketRegimen" ("oid", "registeredAt");
+        `)
+        queryArray.push(`
+            CREATE TABLE "TicketRegimenItem" (
+                "oid" integer NOT NULL,
+                "id" SERIAL NOT NULL,
+                "ticketId" integer NOT NULL,
+                "customerId" integer NOT NULL,
+                "ticketRegimenId" integer NOT NULL,
+                "regimenItemId" integer NOT NULL,
+                "regimenId" integer NOT NULL,
+                "procedureId" integer NOT NULL,
+                "status" smallint NOT NULL DEFAULT '2',
+                "completedAt" bigint,
+                CONSTRAINT "PK_c65db5965d4c1fe9631323410a1" PRIMARY KEY ("id")
+            );
+            CREATE INDEX "IDX_TicketRegimenItem__oid_ticketId" ON "TicketRegimenItem" ("oid", "ticketId");
+        `)
 
         queryArray.push(`
             ALTER TABLE "Procedure" 
@@ -92,7 +124,7 @@ export class Version991755225366463 implements MigrationInterface {
             ALTER TABLE "PaymentMethod"
                 ADD CONSTRAINT "UNIQUE_PaymentMethod__oid_code" UNIQUE ("oid", "code");
         `)
-        
+
         queryArray.push(`
             ALTER TABLE "Room" ADD "roomStyle" smallint NOT NULL DEFAULT '0';
             ALTER TABLE "Room" RENAME COLUMN "roomCode" TO "code";
