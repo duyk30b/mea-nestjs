@@ -15,79 +15,84 @@ import { TicketLaboratoryGetManyQuery } from '../../api-ticket-laboratory/reques
 import { TicketProcedureGetManyQuery } from '../../api-ticket-procedure/request'
 import { TicketProductGetManyQuery } from '../../api-ticket-product/request'
 import { TicketRadiologyGetManyQuery } from '../../api-ticket-radiology/request'
+import { TicketRegimenGetManyQuery } from '../../api-ticket-regimen/request'
 
 export class TicketRelationQuery {
   @Expose()
   @IsBoolean()
-  customer: boolean
+  customer?: boolean
 
   @Expose()
   @IsBoolean()
-  paymentList: boolean
+  paymentList?: boolean
 
   @Expose()
   @IsBoolean()
-  ticketSurchargeList: boolean
+  ticketSurchargeList?: boolean
 
   @Expose()
   @IsBoolean()
-  ticketExpenseList: boolean
+  ticketExpenseList?: boolean
 
   @Expose()
   @IsBoolean()
-  ticketAttributeList: boolean
+  ticketAttributeList?: boolean
 
   @Expose()
   @IsOptional()
-  ticketProductList: TicketProductGetManyQuery
+  ticketProductList?: TicketProductGetManyQuery
 
   @Expose()
   @IsOptional()
-  ticketProductConsumableList: TicketProductGetManyQuery
+  ticketProductConsumableList?: TicketProductGetManyQuery
 
   @Expose()
   @IsOptional()
-  ticketProductPrescriptionList: TicketProductGetManyQuery
+  ticketProductPrescriptionList?: TicketProductGetManyQuery
 
   @Expose()
   @IsOptional()
-  ticketBatchList: false | { batch?: boolean }
+  ticketBatchList?: false | { batch?: boolean }
 
   @Expose()
   @IsOptional()
-  ticketProcedureList: TicketProcedureGetManyQuery
+  ticketProcedureList?: TicketProcedureGetManyQuery
 
   @Expose()
   @IsOptional()
-  ticketLaboratoryGroupList: TicketLaboratoryGroupGetManyQuery
+  ticketLaboratoryGroupList?: TicketLaboratoryGroupGetManyQuery
 
   @Expose()
   @IsOptional()
-  ticketLaboratoryResultList: boolean
+  ticketLaboratoryResultList?: boolean
 
   @Expose()
   @IsOptional()
-  ticketLaboratoryList: TicketLaboratoryGetManyQuery
+  ticketLaboratoryList?: TicketLaboratoryGetManyQuery
 
   @Expose()
   @IsOptional()
-  ticketRadiologyList: TicketRadiologyGetManyQuery
+  ticketRadiologyList?: TicketRadiologyGetManyQuery
 
   @Expose()
   @IsOptional()
-  ticketUserList: false | { user?: boolean }
+  ticketRegimenList?: TicketRegimenGetManyQuery
+
+  @Expose()
+  @IsOptional()
+  ticketUserList?: false | { user?: boolean }
 
   @Expose()
   @IsBoolean()
-  toAppointment: boolean
+  toAppointment?: boolean
 
   @Expose()
   @IsBoolean()
-  customerSource: boolean
+  customerSource?: boolean
 
   @Expose()
   @IsBoolean()
-  imageList: boolean
+  imageList?: boolean
 }
 
 const ConditionEnumTicketType = createConditionEnum(TicketType)

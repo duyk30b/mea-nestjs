@@ -81,6 +81,13 @@ export enum AttributeLayoutType {
   InputAndLabelLeft = 'Input và Nhãn bên trái',
 }
 
+export enum TicketRegimenStatus {
+  Empty = 1,
+  Pending = 2,
+  Executing = 3,
+  Completed = 4,
+}
+
 export enum TicketLaboratoryStatus {
   Empty = 1,
   Pending = 2,

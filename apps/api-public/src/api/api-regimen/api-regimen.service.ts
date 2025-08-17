@@ -18,6 +18,8 @@ import {
   PositionRepository,
   RegimenItemRepository,
   RegimenRepository,
+  TicketRegimenItemRepository,
+  TicketRegimenRepository,
 } from '../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
@@ -35,6 +37,8 @@ export class ApiRegimenService {
     private readonly socketEmitService: SocketEmitService,
     private readonly regimenRepository: RegimenRepository,
     private readonly regimenItemRepository: RegimenItemRepository,
+    private readonly ticketRegimenRepository: TicketRegimenRepository,
+    private readonly ticketRegimenItemRepository: TicketRegimenItemRepository,
     private readonly positionRepository: PositionRepository,
     private readonly discountRepository: DiscountRepository
   ) { }
@@ -272,12 +276,8 @@ export class ApiRegimenService {
       }
     }
 
-    const [regimenItemDestroyedList, positionDestroyedList, discountDestroyedList] =
+    const [positionDestroyedList, discountDestroyedList, regimenItemDestroyedList] =
       await Promise.all([
-        this.regimenItemRepository.deleteAndReturnEntity({
-          oid,
-          regimenId,
-        }),
         this.positionRepository.deleteAndReturnEntity({
           oid,
           positionInteractId: regimenId,
@@ -287,6 +287,10 @@ export class ApiRegimenService {
           oid,
           discountInteractId: regimenId,
           discountInteractType: DiscountInteractType.Regimen,
+        }),
+        this.regimenItemRepository.deleteAndReturnEntity({
+          oid,
+          regimenId,
         }),
       ])
 

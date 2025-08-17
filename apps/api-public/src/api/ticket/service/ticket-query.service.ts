@@ -15,6 +15,7 @@ import {
   TicketLaboratoryResult,
   TicketProcedure,
   TicketRadiology,
+  TicketRegimen,
   TicketSurcharge,
   TicketUser,
 } from '../../../../../_libs/database/entities'
@@ -36,6 +37,7 @@ import {
   TicketProcedureRepository,
   TicketProductRepository,
   TicketRadiologyRepository,
+  TicketRegimenRepository,
   TicketSurchargeRepository,
   TicketUserRepository,
 } from '../../../../../_libs/database/repositories'
@@ -61,6 +63,7 @@ export class TicketQueryService {
     private readonly ticketBatchRepository: TicketBatchRepository,
     private readonly ticketProcedureRepository: TicketProcedureRepository,
     private readonly ticketRadiologyRepository: TicketRadiologyRepository,
+    private readonly ticketRegimenRepository: TicketRegimenRepository,
     private readonly ticketLaboratoryRepository: TicketLaboratoryRepository,
     private readonly ticketLaboratoryGroupRepository: TicketLaboratoryGroupRepository,
     private readonly ticketLaboratoryResultRepository: TicketLaboratoryResultRepository,
@@ -263,6 +266,16 @@ export class TicketQueryService {
           sort: { priority: 'ASC' },
         })
         : undefined,
+      relation?.ticketRegimenList
+        ? this.ticketRegimenRepository.findMany({
+          relation: relation?.ticketRegimenList?.relation || {},
+          condition: {
+            ...(relation?.ticketRegimenList.filter || {}),
+            oid,
+            ticketId: { IN: ticketIdList },
+          },
+        })
+        : undefined,
       relation?.ticketUserList
         ? this.ticketUserRepository.findMany({
           condition: { oid, ticketId: { IN: ticketIdList } },
@@ -315,13 +328,14 @@ export class TicketQueryService {
     const ticketLaboratoryGroupList: TicketLaboratoryGroup[] = dataPromise[8]
     const ticketLaboratoryResultList: TicketLaboratoryResult[] = dataPromise[9]
     const ticketRadiologyList: TicketRadiology[] = dataPromise[10]
-    const ticketUserList: TicketUser[] = dataPromise[11]
-    const ticketAttributeList: TicketAttribute[] = dataPromise[12]
-    const ticketSurchargeList: TicketSurcharge[] = dataPromise[13]
-    const ticketExpenseList: TicketExpense[] = dataPromise[14]
-    const imageList: Image[] = dataPromise[15]
-    const customerSourceList: CustomerSource[] = dataPromise[16]
-    const toAppointmentList: Appointment[] = dataPromise[17]
+    const ticketRegimenList: TicketRegimen[] = dataPromise[11]
+    const ticketUserList: TicketUser[] = dataPromise[12]
+    const ticketAttributeList: TicketAttribute[] = dataPromise[13]
+    const ticketSurchargeList: TicketSurcharge[] = dataPromise[14]
+    const ticketExpenseList: TicketExpense[] = dataPromise[15]
+    const imageList: Image[] = dataPromise[16]
+    const customerSourceList: CustomerSource[] = dataPromise[17]
+    const toAppointmentList: Appointment[] = dataPromise[18]
 
     const imageMap = ESArray.arrayToKeyValue(imageList || [], 'id')
 
