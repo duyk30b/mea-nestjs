@@ -11,6 +11,8 @@ export class Version9811754257975055 implements MigrationInterface {
             SET     "createdAt" = "Ticket"."registeredAt"
             FROM    "Ticket"
             WHERE   "TicketProduct"."ticketId" = "Ticket"."id";
+
+            ALTER TABLE "Room" ADD "roomStyle" smallint NOT NULL DEFAULT '0';
         `)
     }
 

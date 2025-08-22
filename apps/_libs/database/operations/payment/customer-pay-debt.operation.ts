@@ -9,8 +9,7 @@ import {
   PaymentVoucherType,
 } from '../../entities/payment.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
-import { CustomerManager, TicketManager } from '../../managers'
-import { PaymentManager } from '../../repositories'
+import { CustomerManager, PaymentManager, TicketManager } from '../../repositories'
 
 @Injectable()
 export class CustomerPayDebtOperation {
@@ -31,8 +30,8 @@ export class CustomerPayDebtOperation {
     note: string
     dataList: { ticketId: number; paidAmount: number }[]
   }) {
-    const { oid, customerId, cashierId, paymentMethodId, time, paidAmount, note, dataList } =
-      options
+    const { oid, customerId, cashierId, paymentMethodId, time, paidAmount, dataList } = options
+    let note = options.note
 
     const paidAmountReduce = dataList.reduce((acc, item) => acc + item.paidAmount, 0)
     if (paidAmount !== paidAmountReduce) {
@@ -70,16 +69,19 @@ export class CustomerPayDebtOperation {
         { oid, id: customerId },
         { debt: () => `debt - ${paidAmount}` }
       )
-      const customerCloseDebt = customerModified.debt
-      const customerOpenDebt = customerModified.debt + paidAmount
 
-      const paymentInsertList = ticketModifiedList.map((ticketModified) => {
+      let customerOpenDebt = customerModified.debt + paidAmount
+      if (!note && dataList.length > 0) {
+        note = `Trả nợ ${paidAmount} vào ${dataList.length} đơn: ${dataList.map((i) => i.ticketId)}`
+      }
+
+      const paymentInsertList = dataList.map((item) => {
         const paymentInsert: PaymentInsertType = {
           oid,
           voucherType: PaymentVoucherType.Ticket,
-          voucherId: ticketModified.id,
+          voucherId: item.ticketId,
           personType: PaymentPersonType.Customer,
-          personId: ticketModified.customerId,
+          personId: customerId,
 
           createdAt: time,
           paymentMethodId,
@@ -87,12 +89,13 @@ export class CustomerPayDebtOperation {
           moneyDirection: MoneyDirection.In,
           note: note || '',
 
-          paidAmount,
+          paidAmount: item.paidAmount,
           paymentActionType: PaymentActionType.PayDebt,
-          debtAmount: -paidAmount,
+          debtAmount: -item.paidAmount,
           openDebt: customerOpenDebt,
-          closeDebt: customerCloseDebt,
+          closeDebt: customerOpenDebt - item.paidAmount,
         }
+        customerOpenDebt = paymentInsert.closeDebt
         return paymentInsert
       })
       const paymentCreatedList = await this.paymentManager.insertManyAndReturnEntity(

@@ -3,18 +3,15 @@ import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
 import { ESTimer } from '../../../common/helpers/time.helper'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
-import { DeliveryStatus } from '../../common/variable'
+import { DeliveryStatus, TicketProcedureStatus } from '../../common/variable'
 import { Ticket } from '../../entities'
 import { TicketAttributeInsertType } from '../../entities/ticket-attribute.entity'
 import { TicketExpenseInsertType } from '../../entities/ticket-expense.entity'
-import {
-  TicketProcedureInsertType,
-  TicketProcedureStatus,
-} from '../../entities/ticket-procedure.entity'
+import { TicketProcedureInsertType } from '../../entities/ticket-procedure.entity'
 import { TicketProductInsertType, TicketProductType } from '../../entities/ticket-product.entity'
 import { TicketSurchargeInsertType } from '../../entities/ticket-surcharge.entity'
-import { TicketRelationType } from '../../entities/ticket.entity'
 import {
+  TicketAttributeManager,
   TicketExpenseManager,
   TicketLaboratoryManager,
   TicketManager,
@@ -22,8 +19,7 @@ import {
   TicketProductManager,
   TicketRadiologyManager,
   TicketSurchargeManager,
-} from '../../managers'
-import { TicketAttributeManager } from '../../managers/ticket-attribute.manager'
+} from '../../repositories'
 import {
   TicketOrderExpenseDraftType,
   TicketOrderProcedureDraftType,
@@ -31,26 +27,28 @@ import {
   TicketOrderSurchargeDraftType,
 } from './ticket-order.dto'
 
-export type TicketOrderDepositedUpdateType = Omit<
+export type TicketOrderDepositedUpdateType = Pick<
   Ticket,
-  | keyof TicketRelationType
-  | keyof Pick<
-    Ticket,
-    | 'oid'
-    | 'id'
-    | 'customerId' // không được update customerId
-    | 'ticketType'
-    | 'status'
-    | 'deliveryStatus'
-    | 'paid'
-    | 'debt'
-    | 'year'
-    | 'month'
-    | 'date'
-    | 'startedAt'
-    | 'updatedAt'
-    | 'endedAt'
-  >
+  // | 'customerId' // không được update customerId
+  | 'customerSourceId'
+  | 'roomId'
+  | 'productMoney'
+  | 'procedureMoney'
+  | 'radiologyMoney'
+  | 'laboratoryMoney'
+  | 'itemsCostAmount'
+  | 'itemsDiscount'
+  | 'itemsActualMoney'
+  | 'discountMoney'
+  | 'discountPercent'
+  | 'discountType'
+  | 'surcharge'
+  | 'totalMoney'
+  | 'expense'
+  | 'commissionMoney'
+  | 'profit'
+  | 'registeredAt'
+  | 'note'
 >
 
 @Injectable()
@@ -142,8 +140,8 @@ export class TicketOrderDepositedOperation {
             customerId: ticket.customerId,
             startedAt: ticket.registeredAt,
             status: TicketProcedureStatus.Completed,
-            imageIds: JSON.stringify([]),
-            result: '',
+            totalSessions: 0,
+            completedSessions: 0,
           }
           return ticketProcedure
         })

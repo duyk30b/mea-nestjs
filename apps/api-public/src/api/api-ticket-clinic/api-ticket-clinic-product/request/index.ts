@@ -1,5 +1,0 @@
-export * from './ticket-clinic-add-ticket-product.body'
-export * from './ticket-clinic-product.params'
-export * from './ticket-clinic-update-priority-ticket-product.body'
-export * from './ticket-clinic-update-ticket-product-list.body'
-export * from './ticket-clinic-update-ticket-product.body'

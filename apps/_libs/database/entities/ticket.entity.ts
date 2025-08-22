@@ -1,6 +1,13 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
+import { Exclude, Expose } from 'class-transformer'
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm'
 import { DeliveryStatus, DiscountType } from '../common/variable'
 import Appointment from './appointment.entity'
 import CustomerSource from './customer-source.entity'
@@ -19,14 +26,6 @@ import TicketRadiology from './ticket-radiology.entity'
 import TicketSurcharge from './ticket-surcharge.entity'
 import TicketUser from './ticket-user.entity'
 
-export enum TicketType {
-  Order = 2,
-  Clinic = 3,
-  Spa = 4,
-  Eye = 5,
-  Obstetric = 6,
-}
-
 export enum TicketStatus {
   Schedule = 1,
   Draft = 2,
@@ -37,21 +36,11 @@ export enum TicketStatus {
   Cancelled = 7,
 }
 
-export const TicketOrderStatusText = {
-  [TicketStatus.Schedule]: 'Xem trước',
+export const TicketStatusText = {
+  [TicketStatus.Schedule]: 'Hẹn trước',
   [TicketStatus.Draft]: 'Nháp',
-  [TicketStatus.Deposited]: 'Đặt hàng',
+  [TicketStatus.Deposited]: 'Đặt chỗ',
   [TicketStatus.Executing]: 'Đang xử lý',
-  [TicketStatus.Debt]: 'Đang nợ',
-  [TicketStatus.Completed]: 'Hoàn thành',
-  [TicketStatus.Cancelled]: 'Đã hủy',
-}
-
-export const TicketClinicStatusText = {
-  [TicketStatus.Schedule]: 'Hẹn khám',
-  [TicketStatus.Draft]: 'Chờ khám',
-  [TicketStatus.Deposited]: 'Đặt khám',
-  [TicketStatus.Executing]: 'Đang khám',
   [TicketStatus.Debt]: 'Đang nợ',
   [TicketStatus.Completed]: 'Hoàn thành',
   [TicketStatus.Cancelled]: 'Đã hủy',
@@ -59,9 +48,18 @@ export const TicketClinicStatusText = {
 
 @Entity('Ticket')
 @Index('IDX_Ticket__oid_registeredAt', ['oid', 'registeredAt'])
+@Index('IDX_Ticket__oid_roomId', ['oid', 'roomId'])
 @Index('IDX_Ticket__oid_customerId', ['oid', 'customerId'])
 @Index('IDX_Ticket__oid_status', ['oid', 'status'])
-export default class Ticket extends BaseEntity {
+export default class Ticket {
+  @Column({ name: 'oid' })
+  @Exclude()
+  oid: number
+
+  @PrimaryGeneratedColumn({ name: 'id' })
+  @Expose({ name: 'id' })
+  id: number
+
   @Column()
   @Expose()
   customerId: number
@@ -73,14 +71,6 @@ export default class Ticket extends BaseEntity {
   @Column({ default: 0 })
   @Expose()
   roomId: number
-
-  @Column({ type: 'smallint', default: TicketType.Order })
-  @Expose()
-  ticketType: TicketType
-
-  @Column({ type: 'smallint', default: 0 })
-  @Expose()
-  customType: number
 
   @Column({ type: 'smallint', default: TicketStatus.Draft })
   @Expose()
@@ -354,11 +344,9 @@ export default class Ticket extends BaseEntity {
   ticketRadiologyList: TicketRadiology[]
 
   @Expose()
-  @OneToMany(() => TicketExpense, (ticketExpense) => ticketExpense.ticket)
   ticketExpenseList: TicketExpense[]
 
   @Expose()
-  @OneToMany(() => TicketSurcharge, (ticketSurcharge) => ticketSurcharge.ticket)
   ticketSurchargeList: TicketSurcharge[]
 
   @Expose()
@@ -404,15 +392,6 @@ export default class Ticket extends BaseEntity {
 
   static fromRaws(raws: { [P in keyof Ticket]: any }[]) {
     return raws.map((i) => Ticket.fromRaw(i))
-  }
-
-  static getStatusText(ticket: Ticket) {
-    if (ticket.ticketType === TicketType.Order) {
-      return TicketOrderStatusText[ticket.status]
-    } else {
-      return TicketClinicStatusText[ticket.status]
-    }
-    return ''
   }
 }
 

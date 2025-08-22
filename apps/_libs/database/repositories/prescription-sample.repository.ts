@@ -8,7 +8,21 @@ import {
   PrescriptionSampleSortType,
   PrescriptionSampleUpdateType,
 } from '../entities/prescription-sample.entity'
+import { _PostgreSqlManager } from './_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
+
+@Injectable()
+export class PrescriptionSampleManager extends _PostgreSqlManager<
+  PrescriptionSample,
+  PrescriptionSampleRelationType,
+  PrescriptionSampleInsertType,
+  PrescriptionSampleUpdateType,
+  PrescriptionSampleSortType
+> {
+  constructor() {
+    super(PrescriptionSample)
+  }
+}
 
 @Injectable()
 export class PrescriptionSampleRepository extends _PostgreSqlRepository<

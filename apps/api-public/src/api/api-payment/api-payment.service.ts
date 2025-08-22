@@ -5,7 +5,7 @@ import {
   Distributor,
   PaymentMethod,
   PaymentTicketItem,
-  Receipt,
+  PurchaseOrder,
   Ticket,
   User,
 } from '../../../../_libs/database/entities'
@@ -19,12 +19,12 @@ import {
   DistributorRepository,
   PaymentMethodRepository,
   PaymentTicketItemRepository,
-  ReceiptRepository,
+  PurchaseOrderRepository,
   TicketRepository,
   UserRepository,
 } from '../../../../_libs/database/repositories'
 import { PaymentRepository } from '../../../../_libs/database/repositories/payment.repository'
-import { PaymentGetManyQuery, PaymentPaginationQuery } from './request'
+import { PaymentGetManyQuery, PaymentPaginationQuery, PaymentUpdateInfoBody } from './request'
 import { PaymentRelationQuery } from './request/payment.options'
 
 @Injectable()
@@ -35,7 +35,7 @@ export class ApiPaymentService {
     private readonly paymentMethodRepository: PaymentMethodRepository,
     private readonly customerRepository: CustomerRepository,
     private readonly ticketRepository: TicketRepository,
-    private readonly receiptRepository: ReceiptRepository,
+    private readonly purchaseOrderRepository: PurchaseOrderRepository,
     private readonly distributorRepository: DistributorRepository,
     private readonly userRepository: UserRepository
   ) { }
@@ -106,8 +106,8 @@ export class ApiPaymentService {
     const ticketIdList = paymentList
       .filter((i) => i.voucherType === PaymentVoucherType.Ticket)
       .map((i) => i.voucherId)
-    const receiptIdList = paymentList
-      .filter((i) => i.voucherType === PaymentVoucherType.Receipt)
+    const purchaseOrderIdList = paymentList
+      .filter((i) => i.voucherType === PaymentVoucherType.PurchaseOrder)
       .map((i) => i.voucherId)
 
     const customerIdList = paymentList
@@ -125,7 +125,7 @@ export class ApiPaymentService {
 
     const [
       ticketList,
-      receiptList,
+      purchaseOrderList,
       customerList,
       distributorList,
       userList,
@@ -137,11 +137,11 @@ export class ApiPaymentService {
           id: { IN: ESArray.uniqueArray(ticketIdList) },
         })
         : <Ticket[]>[],
-      relation?.receipt && receiptIdList.length
-        ? this.receiptRepository.findManyBy({
-          id: { IN: ESArray.uniqueArray(receiptIdList) },
+      relation?.purchaseOrder && purchaseOrderIdList.length
+        ? this.purchaseOrderRepository.findManyBy({
+          id: { IN: ESArray.uniqueArray(purchaseOrderIdList) },
         })
-        : <Receipt[]>[],
+        : <PurchaseOrder[]>[],
       relation?.customer && customerIdList.length
         ? this.customerRepository.findManyBy({ id: { IN: ESArray.uniqueArray(customerIdList) } })
         : <Customer[]>[],
@@ -166,7 +166,7 @@ export class ApiPaymentService {
     ])
 
     const ticketMap = ESArray.arrayToKeyValue(ticketList, 'id')
-    const receiptMap = ESArray.arrayToKeyValue(receiptList, 'id')
+    const purchaseOrderMap = ESArray.arrayToKeyValue(purchaseOrderList, 'id')
     const customerMap = ESArray.arrayToKeyValue(customerList, 'id')
     const distributorMap = ESArray.arrayToKeyValue(distributorList, 'id')
     const userMap = ESArray.arrayToKeyValue(userList, 'id')
@@ -176,8 +176,8 @@ export class ApiPaymentService {
       if (relation?.ticket) {
         payment.ticket = ticketMap[payment.voucherId]
       }
-      if (relation?.receipt) {
-        payment.receipt = receiptMap[payment.voucherId]
+      if (relation?.purchaseOrder) {
+        payment.purchaseOrder = purchaseOrderMap[payment.voucherId]
       }
       if (relation?.customer && payment.personType === PaymentPersonType.Customer) {
         payment.customer = customerMap[payment.personId]
@@ -202,5 +202,51 @@ export class ApiPaymentService {
     })
 
     return paymentList
+  }
+
+  async updateInfo(options: {
+    oid: number
+    userId: number
+    paymentId: number
+    body: PaymentUpdateInfoBody
+  }) {
+    const { oid, userId, paymentId, body } = options
+    const payment = await this.paymentRepository.updateOneAndReturnEntity(
+      { oid, id: paymentId, cashierId: userId }, // chỉ sửa phiếu do chính mình tạo ra
+      {
+        paymentMethodId: body.paymentMethodId,
+        note: body.note,
+      }
+    )
+    return { payment }
+  }
+
+  async sumMoney(oid: number, query: PaymentGetManyQuery) {
+    const { filter } = query
+    const { dataRaws } = await this.paymentRepository.findAndSelect({
+      condition: {
+        oid,
+        paymentMethodId: filter?.paymentMethodId,
+        personType: filter?.personType,
+        personId: filter?.personId,
+        moneyDirection: filter?.moneyDirection,
+        cashierId: filter?.cashierId,
+        createdAt: filter?.createdAt,
+      },
+      select: ['moneyDirection'],
+      aggregate: {
+        sumPaidAmount: { SUM: ['paidAmount'] },
+        count: { COUNT: '*' },
+      },
+      groupBy: ['moneyDirection'],
+    })
+    const aggregate = dataRaws.map((i) => {
+      return {
+        moneyDirection: i.moneyDirection,
+        sumPaidAmount: Number(i.sumPaidAmount),
+        count: Number(i.count),
+      }
+    })
+    return { aggregate }
   }
 }

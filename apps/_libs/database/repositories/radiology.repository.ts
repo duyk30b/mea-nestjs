@@ -8,7 +8,21 @@ import {
   RadiologySortType,
   RadiologyUpdateType,
 } from '../entities/radiology.entity'
+import { _PostgreSqlManager } from './_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
+
+@Injectable()
+export class RadiologyManager extends _PostgreSqlManager<
+  Radiology,
+  RadiologyRelationType,
+  RadiologyInsertType,
+  RadiologyUpdateType,
+  RadiologySortType
+> {
+  constructor() {
+    super(Radiology)
+  }
+}
 
 @Injectable()
 export class RadiologyRepository extends _PostgreSqlRepository<

@@ -11,6 +11,7 @@ export enum DiscountInteractType {
   Procedure = 2,
   Laboratory = 3,
   Radiology = 4,
+  Regimen = 5,
 }
 
 export enum DiscountRepeatType {

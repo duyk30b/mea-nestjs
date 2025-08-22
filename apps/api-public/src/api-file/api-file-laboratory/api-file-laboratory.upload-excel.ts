@@ -7,8 +7,7 @@ import {
   LaboratoryInsertType,
   LaboratoryValueType,
 } from '../../../../_libs/database/entities/laboratory.entity'
-import { LaboratoryManager } from '../../../../_libs/database/managers'
-import { LaboratoryGroupRepository } from '../../../../_libs/database/repositories'
+import { LaboratoryGroupRepository, LaboratoryManager } from '../../../../_libs/database/repositories'
 import { ApiLaboratoryGroupService } from '../../api/api-laboratory-group/api-laboratory-group.service'
 import { ExcelProcess } from '../common/excel-process'
 import { LaboratoryExcelRules } from './laboratory-excel.rule'

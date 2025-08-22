@@ -12,7 +12,7 @@ import {
   TicketBatchManager,
   TicketManager,
   TicketProductManager,
-} from '../../managers'
+} from '../../repositories'
 import { ProductPickingOperation } from '../product/product-picking.operation'
 import { TicketChangeItemMoneyManager } from './ticket-change-item-money.manager'
 

@@ -13,8 +13,8 @@ import {
   TicketBatchManager,
   TicketManager,
   TicketProductManager,
-} from '../../managers'
-import { TicketUserManager } from '../../repositories'
+  TicketUserManager,
+} from '../../repositories'
 import { ProductPutawayOperation } from '../product/product-putaway.operation'
 import { TicketChangeItemMoneyManager } from './ticket-change-item-money.manager'
 

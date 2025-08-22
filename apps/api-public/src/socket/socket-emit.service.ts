@@ -10,8 +10,8 @@ import {
   Position,
   Procedure,
   Product,
+  PurchaseOrder,
   Radiology,
-  Receipt,
   Ticket,
   TicketAttribute,
   TicketBatch,
@@ -113,12 +113,12 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_DISCOUNT_LIST_CHANGE, data)
   }
 
-  socketReceiptListChange(
+  socketPurchaseOrderListChange(
     oid: number,
-    data: { receiptDestroyedList?: Receipt[]; receiptUpsertedList?: Receipt[] }
+    data: { purchaseOrderDestroyedList?: PurchaseOrder[]; purchaseOrderUpsertedList?: PurchaseOrder[] }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_RECEIPT_LIST_CHANGE, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_PURCHASE_ORDER_LIST_CHANGE, data)
   }
 
   socketTicketChange(oid: number, data: { type: 'CREATE' | 'UPDATE' | 'DESTROY'; ticket: Ticket }) {
@@ -139,7 +139,7 @@ export class SocketEmitService {
     data: { ticketId: number; ticketAttributeList: TicketAttribute[] }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_ATTRIBUTE_LIST_CHANGE, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_ATTRIBUTE, data)
   }
 
   socketTicketUserListChange(
@@ -159,7 +159,7 @@ export class SocketEmitService {
     }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_USER_LIST_CHANGE, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_USER, data)
   }
 
   socketTicketProcedureListChange(
@@ -171,7 +171,7 @@ export class SocketEmitService {
     }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_PROCEDURE_LIST_CHANGE, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_PROCEDURE, data)
   }
 
   socketTicketRadiologyListChange(
@@ -183,7 +183,7 @@ export class SocketEmitService {
     }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_RADIOLOGY_LIST_CHANGE, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_RADIOLOGY, data)
   }
 
   socketTicketLaboratoryListChange(
@@ -199,7 +199,20 @@ export class SocketEmitService {
     }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_LABORATORY_LIST_CHANGE, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_LABORATORY, data)
+  }
+
+  socketTicketProductChange(
+    oid: number,
+    data: {
+      ticketId: number
+      ticketProductUpsertList?: TicketProduct[]
+      ticketProductDestroyList?: TicketProduct[]
+      ticketProductReplaceList?: TicketProduct[]
+    }
+  ) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_PRODUCT, data)
   }
 
   socketTicketConsumableChange(
@@ -212,7 +225,7 @@ export class SocketEmitService {
     }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CONSUMABLE_CHANGE, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_CONSUMABLE, data)
   }
 
   socketTicketPrescriptionChange(
@@ -225,7 +238,7 @@ export class SocketEmitService {
     }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_PRESCRIPTION_CHANGE, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_PRESCRIPTION, data)
   }
 
   socketTicketBatchListChange(
@@ -238,6 +251,6 @@ export class SocketEmitService {
     }
   ) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_BATCH_LIST_CHANGE, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_BATCH, data)
   }
 }

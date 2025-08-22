@@ -1,29 +1,29 @@
 import { Expose, Transform, TransformFnParams } from 'class-transformer'
-import { IsBoolean, IsInt, IsOptional } from 'class-validator'
-import { createConditionEnum, transformConditionEnum } from '../../../../../_libs/common/dto'
+import { IsBoolean, IsIn, IsInt, IsOptional } from 'class-validator'
+import { ConditionNumber, createConditionEnum, transformConditionEnum, transformConditionNumber } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 import { PaymentMoneyStatus } from '../../../../../_libs/database/common/variable'
 
 export class TicketProcedureRelationQuery {
   @Expose()
   @IsBoolean()
-  procedure: boolean
+  procedure?: boolean
 
   @Expose()
   @IsBoolean()
-  customer: boolean
+  customer?: boolean
 
   @Expose()
   @IsBoolean()
-  ticket: boolean
+  ticket?: boolean
 
   @Expose()
   @IsBoolean()
-  imageList: boolean
+  ticketProcedureItemList?: { imageList?: boolean }
 
   @Expose()
   @IsBoolean()
-  ticketUser: boolean
+  ticketUserList?: boolean
 }
 
 const ConditionEnumPaymentMoneyStatus = createConditionEnum(PaymentMoneyStatus)
@@ -32,19 +32,28 @@ export class TicketProcedureFilterQuery {
   @Expose()
   @Transform((params: TransformFnParams) => transformConditionEnum(params, PaymentMoneyStatus))
   @IsOptional()
-  paymentMoneyStatus: PaymentMoneyStatus | InstanceType<typeof ConditionEnumPaymentMoneyStatus>
+  paymentMoneyStatus?: PaymentMoneyStatus | InstanceType<typeof ConditionEnumPaymentMoneyStatus>
 
   @Expose()
   @IsInt()
-  procedureId: number
+  procedureId?: number
 
   @Expose()
   @IsInt()
-  customerId: number
+  oid?: number
 
   @Expose()
   @IsInt()
-  ticketId: number
+  customerId?: number
+
+  @Expose()
+  @Transform(transformConditionNumber)
+  @IsOptional()
+  ticketId?: number | ConditionNumber
 }
 
-export class TicketProcedureSortQuery extends SortQuery { }
+export class TicketProcedureSortQuery extends SortQuery {
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  priority?: 'ASC' | 'DESC'
+}

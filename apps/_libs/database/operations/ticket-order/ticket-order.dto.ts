@@ -5,40 +5,13 @@ import { TicketProductRelationType } from '../../entities/ticket-product.entity'
 import TicketSurcharge, {
   TicketSurchargeRelationType,
 } from '../../entities/ticket-surcharge.entity'
-import Ticket, { TicketRelationType } from '../../entities/ticket.entity'
-
-export type TicketOrderDebtSuccessUpdateType = Omit<
-  Ticket,
-  | keyof TicketRelationType
-  | keyof Pick<
-    Ticket,
-    | 'oid'
-    | 'id'
-    | 'customerId' // không được update customerId
-    | 'ticketType'
-    | 'status'
-    | 'debt'
-    | 'year'
-    | 'month'
-    | 'date'
-    | 'startedAt'
-    | 'updatedAt'
-    | 'endedAt'
-  >
->
 
 export type TicketOrderProductDraftType = Omit<
   TicketProduct,
   | keyof TicketProductRelationType
   | keyof Pick<
     TicketProduct,
-    | 'oid'
-    | 'id'
-    | 'ticketId'
-    | 'deliveryStatus'
-    | 'customerId'
-    | 'quantityPrescription'
-    | 'type'
+    'oid' | 'id' | 'ticketId' | 'deliveryStatus' | 'customerId' | 'quantityPrescription' | 'type'
   >
 >
 
@@ -47,14 +20,7 @@ export type TicketOrderProcedureDraftType = Omit<
   | keyof TicketProcedureRelationType
   | keyof Pick<
     TicketProcedure,
-    | 'oid'
-    | 'id'
-    | 'ticketId'
-    | 'customerId'
-    | 'status'
-    | 'startedAt'
-    | 'imageIds'
-    | 'result'
+    'oid' | 'id' | 'ticketId' | 'customerId' | 'status' | 'startedAt' | 'completedSessions'
   >
 >
 

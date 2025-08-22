@@ -1,34 +1,24 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { DiscountType, PaymentMoneyStatus } from '../common/variable'
+import { DiscountType, PaymentMoneyStatus, TicketProcedureStatus } from '../common/variable'
 import Customer from './customer.entity'
-import Image from './image.entity'
 import Procedure from './procedure.entity'
+import TicketProcedureItem from './ticket-procedure-item.entity'
 import TicketUser from './ticket-user.entity'
 import Ticket from './ticket.entity'
-
-export enum TicketProcedureStatus {
-  Empty = 1,
-  Pending = 2,
-  Completed = 3,
-}
 
 @Entity('TicketProcedure')
 @Index('IDX_TicketProcedure__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketProcedure__oid_procedureId', ['oid', 'procedureId'])
 export default class TicketProcedure extends BaseEntity {
-  @Column()
-  @Expose()
-  ticketId: number
-
   @Column({ default: 1 })
   @Expose()
   priority: number
 
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.NoEffect })
+  @Column()
   @Expose()
-  paymentMoneyStatus: PaymentMoneyStatus
+  ticketId: number
 
   @Column()
   @Expose()
@@ -38,13 +28,17 @@ export default class TicketProcedure extends BaseEntity {
   @Expose()
   procedureId: number
 
-  @Column({ type: 'smallint', default: TicketProcedureStatus.Pending })
+  @Column({ default: 1 })
   @Expose()
-  status: TicketProcedureStatus
+  quantity: number
 
   @Column({ default: 0 })
   @Expose()
-  quantity: number
+  totalSessions: number
+
+  @Column({ default: 0 })
+  @Expose()
+  completedSessions: number
 
   @Column({
     type: 'bigint',
@@ -83,6 +77,14 @@ export default class TicketProcedure extends BaseEntity {
   @Expose()
   actualPrice: number // Giá thực tế
 
+  @Column({ type: 'smallint', default: PaymentMoneyStatus.NoEffect })
+  @Expose()
+  paymentMoneyStatus: PaymentMoneyStatus
+
+  @Column({ type: 'smallint', default: TicketProcedureStatus.Pending })
+  @Expose()
+  status: TicketProcedureStatus
+
   @Column({
     type: 'bigint',
     nullable: true,
@@ -93,14 +95,6 @@ export default class TicketProcedure extends BaseEntity {
   })
   @Expose()
   startedAt: number
-
-  @Column({ type: 'text', default: '' })
-  @Expose({})
-  result: string // Kết luận
-
-  @Column({ type: 'varchar', length: 100, default: JSON.stringify([]) })
-  @Expose()
-  imageIds: string
 
   @Expose()
   @ManyToOne((type) => Ticket, (ticket) => ticket.ticketProcedureList, {
@@ -120,7 +114,7 @@ export default class TicketProcedure extends BaseEntity {
   procedure: Procedure
 
   @Expose()
-  imageList: Image[]
+  ticketProcedureItemList: TicketProcedureItem[]
 
   @Expose()
   ticketUserList: TicketUser[]
@@ -147,7 +141,7 @@ export default class TicketProcedure extends BaseEntity {
 export type TicketProcedureRelationType = {
   [P in keyof Pick<
     TicketProcedure,
-    'ticket' | 'procedure' | 'customer' | 'imageList' | 'ticketUserList'
+    'ticket' | 'procedure' | 'customer' | 'ticketProcedureItemList' | 'ticketUserList'
   >]?: boolean
 }
 

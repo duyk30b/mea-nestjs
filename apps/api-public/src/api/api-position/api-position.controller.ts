@@ -1,7 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
-import { OrganizationPermission } from '../../../../_libs/common/guards/organization.guard'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/permission/permission.enum'
@@ -22,22 +21,19 @@ export class ApiPositionController {
   constructor(private readonly apiPositionService: ApiPositionService) { }
 
   @Get('pagination')
-  @OrganizationPermission()
-  pagination(
-    @External(PermissionId.POSITION) { oid }: TExternal,
-    @Query() query: PositionPaginationQuery
-  ) {
+  @UserPermission()
+  pagination(@External() { oid }: TExternal, @Query() query: PositionPaginationQuery) {
     return this.apiPositionService.pagination(oid, query)
   }
 
   @Get('list')
-  @OrganizationPermission(PermissionId.POSITION)
+  @UserPermission()
   list(@External() { oid }: TExternal, @Query() query: PositionGetManyQuery) {
     return this.apiPositionService.getMany(oid, query)
   }
 
   @Get('detail/:id')
-  @OrganizationPermission(PermissionId.POSITION)
+  @UserPermission()
   findOne(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -47,13 +43,13 @@ export class ApiPositionController {
   }
 
   @Post('create')
-  @UserPermission(PermissionId.POSITION_CREATE)
+  @UserPermission(PermissionId.MASTER_DATA_POSITION)
   async createOne(@External() { oid }: TExternal, @Body() body: PositionCreateBody) {
     return await this.apiPositionService.createOne(oid, body)
   }
 
   @Patch('update/:id')
-  @UserPermission(PermissionId.POSITION_UPDATE)
+  @UserPermission(PermissionId.MASTER_DATA_POSITION)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
     @External() { oid }: TExternal,
@@ -64,14 +60,14 @@ export class ApiPositionController {
   }
 
   @Delete('destroy/:id')
-  @UserPermission(PermissionId.POSITION_DELETE)
+  @UserPermission(PermissionId.MASTER_DATA_POSITION)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiPositionService.destroyOne(oid, id)
   }
 
   @Put('replace-list')
-  @UserPermission(PermissionId.POSITION_UPDATE)
+  @UserPermission(PermissionId.MASTER_DATA_POSITION)
   async replaceAll(@External() { oid }: TExternal, @Body() body: PositionReplaceListBody) {
     return await this.apiPositionService.replaceList(oid, body)
   }

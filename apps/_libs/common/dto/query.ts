@@ -26,13 +26,13 @@ export class LimitQuery {
   @IsInt()
   @Min(3)
   @Max(100)
-  limit: number
+  limit?: number
 }
 
 export class SortQuery {
   @Expose()
   @IsIn(['ASC', 'DESC'])
-  id: 'ASC' | 'DESC'
+  id?: 'ASC' | 'DESC'
 }
 
 export class MultiMongoIdQuery {

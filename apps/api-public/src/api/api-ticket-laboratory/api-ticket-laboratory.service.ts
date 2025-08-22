@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { TicketRepository } from '../../../../_libs/database/repositories'
 import { LaboratoryRepository } from '../../../../_libs/database/repositories/laboratory.repository'
 import { TicketLaboratoryRepository } from '../../../../_libs/database/repositories/ticket-laboratory.repository'
@@ -18,10 +17,10 @@ export class ApiTicketLaboratoryService {
     private readonly ticketRepository: TicketRepository
   ) { }
 
-  async pagination(oid: number, query: TicketLaboratoryPaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: TicketLaboratoryPaginationQuery) {
     const { page, limit, filter, relation, sort } = query
 
-    const { total, data } = await this.ticketLaboratoryRepository.pagination({
+    const { total, data: ticketLaboratoryList } = await this.ticketLaboratoryRepository.pagination({
       relation: {
         customer: relation?.customer,
         ticket: relation?.ticket,
@@ -39,13 +38,10 @@ export class ApiTicketLaboratoryService {
       sort,
     })
 
-    return {
-      data,
-      meta: { page, limit, total },
-    }
+    return { ticketLaboratoryList, page, limit, total }
   }
 
-  async getOne(oid: number, id: number, query: TicketLaboratoryGetOneQuery): Promise<BaseResponse> {
+  async getOne(oid: number, id: number, query: TicketLaboratoryGetOneQuery) {
     const { relation } = query
     const ticketLaboratory = await this.ticketLaboratoryRepository.findOne({
       relation: {
@@ -59,6 +55,6 @@ export class ApiTicketLaboratoryService {
       throw new BusinessException('error.Database.NotFound')
     }
 
-    return { data: { ticketLaboratory } }
+    return { ticketLaboratory }
   }
 }

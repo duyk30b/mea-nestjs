@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { ESArray } from '../../../../_libs/common/helpers'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { Batch, Organization, Product, ProductGroup } from '../../../../_libs/database/entities'
 import Discount, {
   DiscountInsertType,
@@ -12,6 +11,7 @@ import Position, {
   PositionInsertType,
   PositionInteractType,
 } from '../../../../_libs/database/entities/position.entity'
+import { ProductOperation } from '../../../../_libs/database/operations'
 import {
   BatchRepository,
   DiscountRepository,
@@ -21,7 +21,7 @@ import {
 } from '../../../../_libs/database/repositories'
 import { OrganizationRepository } from '../../../../_libs/database/repositories/organization.repository'
 import { ProductMovementRepository } from '../../../../_libs/database/repositories/product-movement.repository'
-import { ReceiptItemRepository } from '../../../../_libs/database/repositories/receipt-item.repository'
+import { PurchaseOrderItemRepository } from '../../../../_libs/database/repositories/purchase-order-item.repository'
 import { TicketProductRepository } from '../../../../_libs/database/repositories/ticket-product.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
@@ -41,8 +41,9 @@ export class ApiProductService {
     private readonly cacheDataService: CacheDataService,
     private readonly organizationRepository: OrganizationRepository,
     private readonly ticketProductRepository: TicketProductRepository,
-    private readonly receiptItemRepository: ReceiptItemRepository,
+    private readonly purchaseOrderItemRepository: PurchaseOrderItemRepository,
     private readonly productRepository: ProductRepository,
+    private readonly productOperation: ProductOperation,
     private readonly productGroupRepository: ProductGroupRepository,
     private readonly batchRepository: BatchRepository,
     private readonly productMovementRepository: ProductMovementRepository,
@@ -50,7 +51,7 @@ export class ApiProductService {
     private readonly discountRepository: DiscountRepository
   ) { }
 
-  async pagination(oid: number, query: ProductPaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: ProductPaginationQuery) {
     const { page, limit, filter, sort, relation } = query
 
     const { total, data } = await this.productRepository.pagination({
@@ -72,16 +73,13 @@ export class ApiProductService {
       await this.generateRelation({ oid, productList: data, relation: query.relation })
     }
 
-    return {
-      data,
-      meta: { total, page, limit },
-    }
+    return { productList: data, total, page, limit }
   }
 
-  async getList(oid: number, query: ProductGetManyQuery): Promise<BaseResponse> {
+  async getList(oid: number, query: ProductGetManyQuery) {
     const { filter, limit, relation } = query
 
-    const data = await this.productRepository.findMany({
+    const productList = await this.productRepository.findMany({
       // relation,
       condition: {
         oid,
@@ -95,12 +93,12 @@ export class ApiProductService {
     })
 
     if (query.relation) {
-      await this.generateRelation({ oid, productList: data, relation: query.relation })
+      await this.generateRelation({ oid, productList, relation: query.relation })
     }
-    return { data }
+    return { productList }
   }
 
-  async getOne(oid: number, id: number, query: ProductGetOneQuery): Promise<BaseResponse> {
+  async getOne(oid: number, id: number, query: ProductGetOneQuery) {
     const { relation, filter } = query
     const product = await this.productRepository.findOne({
       relation: { productGroup: relation?.productGroup },
@@ -111,10 +109,10 @@ export class ApiProductService {
     if (query.relation) {
       await this.generateRelation({ oid, productList: [product], relation: query.relation })
     }
-    return { data: { product } }
+    return { product }
   }
 
-  async createOne(oid: number, body: ProductCreateBody): Promise<BaseResponse> {
+  async createOne(oid: number, body: ProductCreateBody) {
     const { positionList, discountList, product: productBody } = body
 
     let productCode = productBody.productCode
@@ -191,10 +189,10 @@ export class ApiProductService {
       this.socketEmitService.discountListChange(oid, { discountUpsertedList })
     }
 
-    return { data: { product: productInserted } }
+    return { product: productInserted }
   }
 
-  async updateOne(oid: number, productId: number, body: ProductUpdateBody): Promise<BaseResponse> {
+  async updateOne(oid: number, productId: number, body: ProductUpdateBody) {
     const { positionList, discountList, product: productBody } = body
 
     const productOrigin = await this.productRepository.findOneBy({ oid, id: productId })
@@ -222,22 +220,20 @@ export class ApiProductService {
           }
         })
         if (batchError.length) {
-          return {
-            success: false,
-            data: { batchError },
-            message: 'error.Conflict',
-          }
+          throw new BusinessException('error.Conflict')
         }
       }
     }
 
-    const existProduct = await this.productRepository.findOneBy({
-      oid,
-      productCode: productBody.productCode,
-      id: { NOT: productId },
-    })
-    if (existProduct) {
-      throw new BusinessException(`Trùng mã sản phẩm với ${existProduct.brandName}` as any)
+    if (productBody.productCode != null) {
+      const existProduct = await this.productRepository.findOneBy({
+        oid,
+        productCode: productBody.productCode,
+        id: { NOT: productId },
+      })
+      if (existProduct) {
+        throw new BusinessException(`Trùng mã sản phẩm với ${existProduct.brandName}` as any)
+      }
     }
 
     const productModified = await this.productRepository.updateOneAndReturnEntity(
@@ -296,17 +292,13 @@ export class ApiProductService {
       })
     }
 
-    return { data: { product: productModified } }
+    return { product: productModified }
   }
 
-  async destroyOne(options: {
-    oid: number
-    productId: number
-    organization: Organization
-  }): Promise<BaseResponse> {
+  async destroyOne(options: { oid: number; productId: number; organization: Organization }) {
     const { oid, productId, organization } = options
-    const [receiptItemList, ticketProductList] = await Promise.all([
-      this.receiptItemRepository.findMany({
+    const [purchaseOrderItemList, ticketProductList] = await Promise.all([
+      this.purchaseOrderItemRepository.findMany({
         condition: { oid, productId },
         limit: 10,
       }),
@@ -315,18 +307,17 @@ export class ApiProductService {
         limit: 10,
       }),
     ])
-    if (receiptItemList.length > 0 || ticketProductList.length > 0) {
-      return {
-        data: { receiptItemList, ticketProductList },
-        success: false,
-      }
-    }
-
-    const [productDestroyed, batchDestroyedList, m, positionDestroyedList, discountDestroyedList] =
-      await Promise.all([
+    if (!(purchaseOrderItemList.length > 0 || ticketProductList.length > 0)) {
+      const [
+        productDestroyed,
+        batchDestroyedList,
+        productMovementDestroyedList,
+        positionDestroyedList,
+        discountDestroyedList,
+      ] = await Promise.all([
         this.productRepository.deleteOneAndReturnEntity({ oid, id: productId }),
         this.batchRepository.deleteAndReturnEntity({ oid, id: productId }),
-        this.productMovementRepository.delete({ oid, productId }),
+        this.productMovementRepository.deleteAndReturnEntity({ oid, productId }),
         this.positionRepository.deleteAndReturnEntity({
           oid,
           positionInteractId: productId,
@@ -339,21 +330,27 @@ export class ApiProductService {
         }),
       ])
 
-    if (positionDestroyedList.length) {
-      this.socketEmitService.positionListChange(oid, { positionDestroyedList })
+      if (positionDestroyedList.length) {
+        this.socketEmitService.positionListChange(oid, { positionDestroyedList })
+      }
+
+      if (discountDestroyedList.length) {
+        this.socketEmitService.discountListChange(oid, { discountDestroyedList })
+      }
+
+      await this.organizationRepository.updateDataVersion(oid)
+      this.cacheDataService.clearOrganization(oid)
+
+      this.socketEmitService.productListChange(oid, { productDestroyedList: [productDestroyed] })
+      this.socketEmitService.batchListChange(oid, { batchDestroyedList })
     }
 
-    if (discountDestroyedList.length) {
-      this.socketEmitService.discountListChange(oid, { discountDestroyedList })
+    return {
+      success: !(purchaseOrderItemList.length > 0 || ticketProductList.length > 0),
+      productId,
+      ticketProductList,
+      purchaseOrderItemList,
     }
-
-    await this.organizationRepository.updateDataVersion(oid)
-    this.cacheDataService.clearOrganization(oid)
-
-    this.socketEmitService.productListChange(oid, { productDestroyedList: [productDestroyed] })
-    this.socketEmitService.batchListChange(oid, { batchDestroyedList })
-
-    return { data: { receiptItemList: [], ticketProductList: [], productId } }
   }
 
   async mergeProduct(options: { oid: number; userId: number; body: ProductMergeBody }) {
@@ -366,7 +363,7 @@ export class ApiProductService {
     })
 
     const { productModified, productDestroyedList, batchModifiedList } =
-      await this.productRepository.mergeProduct({
+      await this.productOperation.mergeProduct({
         oid,
         userId,
         productIdTarget,
@@ -382,7 +379,7 @@ export class ApiProductService {
     })
     this.socketEmitService.batchListChange(oid, { batchUpsertedList: batchModifiedList })
 
-    return { data: true }
+    return true
   }
 
   async generateRelation(options: {

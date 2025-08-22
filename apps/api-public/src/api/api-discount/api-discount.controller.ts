@@ -30,13 +30,13 @@ export class ApiDiscountController {
   }
 
   @Post('create')
-  @UserPermission(PermissionId.POSITION_CREATE)
+  @UserPermission(PermissionId.MASTER_DATA_DISCOUNT)
   async createOne(@External() { oid }: TExternal, @Body() body: DiscountCreateBody) {
     return await this.apiDiscountService.createOne(oid, body)
   }
 
   @Patch('update/:id')
-  @UserPermission(PermissionId.POSITION_UPDATE)
+  @UserPermission(PermissionId.MASTER_DATA_DISCOUNT)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
     @External() { oid }: TExternal,

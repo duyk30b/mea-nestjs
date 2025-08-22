@@ -1,15 +1,19 @@
 import { Injectable } from '@nestjs/common'
 import { Cell, Workbook, Worksheet } from 'exceljs'
+import { ESArray } from '../../../../_libs/common/helpers'
 import { ESTimer } from '../../../../_libs/common/helpers/time.helper'
-import { Organization, Ticket, User } from '../../../../_libs/database/entities'
-import { TicketType } from '../../../../_libs/database/entities/ticket.entity'
-import { TicketRepository } from '../../../../_libs/database/repositories'
+import { Organization, Room, Ticket, User } from '../../../../_libs/database/entities'
+import { TicketStatusText } from '../../../../_libs/database/entities/ticket.entity'
+import { RoomRepository, TicketRepository } from '../../../../_libs/database/repositories'
 import { excelOneSheetWorkbook } from '../../../../_libs/file/excel-one-sheet.util'
-import { TicketGetManyQuery } from '../../api/ticket/request'
+import { TicketGetManyQuery } from '../../api/ticket/ticket-query/request'
 
 @Injectable()
 export class ApiFileTicketDownloadExcel {
-  constructor(private readonly ticketRepository: TicketRepository) { }
+  constructor(
+    private readonly ticketRepository: TicketRepository,
+    private readonly roomRepository: RoomRepository
+  ) { }
 
   async downloadExcel(options: {
     user: User
@@ -18,12 +22,6 @@ export class ApiFileTicketDownloadExcel {
   }) {
     const { user, organization, query } = options
 
-    let typeText: 'LƯỢT BÁN HÀNG' | 'LƯỢT KHÁM' = 'LƯỢT KHÁM'
-
-    if (query.filter?.ticketType === TicketType.Order) {
-      typeText = 'LƯỢT BÁN HÀNG'
-    }
-
     const ticketList = await this.ticketRepository.findMany({
       relation: {
         customer: true,
@@ -31,8 +29,7 @@ export class ApiFileTicketDownloadExcel {
       condition: {
         oid: organization.id,
         status: query.filter?.status,
-        ticketType: query.filter?.ticketType,
-        customType: query.filter?.customType,
+        roomId: query.filter?.roomId,
         customerId: query.filter?.customerId,
         registeredAt: query.filter?.registeredAt,
         startedAt: query.filter?.startedAt,
@@ -41,21 +38,24 @@ export class ApiFileTicketDownloadExcel {
       sort: { id: 'ASC' },
     })
 
-    const workbook: Workbook = this.getWorkbookProduct(ticketList, {
-      orgName: organization.name,
-      orgPhone: organization.phone,
-      orgAddress: [
-        organization.addressWard,
-        organization.addressProvince,
-      ]
-        .filter((i) => !!i)
-        .join(' - ')
-        .replace('Tỉnh', '')
-        .replace('Thành phố', '')
-        .replace('Phường ', '')
-        .replace('Xã ', ''),
-      userFullName: user.fullName,
-      typeText,
+    const roomList = await this.roomRepository.findManyBy({ oid: organization.id })
+    const roomMap = ESArray.arrayToKeyValue(roomList, 'id')
+
+    const workbook: Workbook = this.getWorkbookProduct({
+      ticketList,
+      roomMap,
+      meta: {
+        orgName: organization.name,
+        orgPhone: organization.phone,
+        orgAddress: [organization.addressWard, organization.addressProvince]
+          .filter((i) => !!i)
+          .join(' - ')
+          .replace('Tỉnh', '')
+          .replace('Thành phố', '')
+          .replace('Phường ', '')
+          .replace('Xã ', ''),
+        userFullName: user.fullName,
+      },
     })
     const buffer = await workbook.xlsx.writeBuffer()
 
@@ -63,21 +63,23 @@ export class ApiFileTicketDownloadExcel {
       data: {
         buffer,
         mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        filename: `MEA_${typeText}.xlsx`,
+        filename: `MEA_DOANH_THU.xlsx`,
       },
     }
   }
 
-  public getWorkbookProduct(
-    ticketList: Ticket[],
+  public getWorkbookProduct(options: {
+    ticketList: Ticket[]
+    roomMap: Record<string, Room>
     meta: {
       orgName: string
       orgPhone: string
       orgAddress: string
       userFullName: string
-      typeText: 'LƯỢT BÁN HÀNG' | 'LƯỢT KHÁM'
     }
-  ): Workbook {
+  }): Workbook {
+    const { ticketList, roomMap, meta } = options
+
     const dataRows = []
 
     ticketList.forEach((ticket, ticketIndex) => {
@@ -85,6 +87,7 @@ export class ApiFileTicketDownloadExcel {
         style: {
           num: { alignment: { horizontal: 'center' } },
           id: { alignment: { horizontal: 'center' } },
+          roomId: { alignment: { wrapText: true } },
           ticketCode: { alignment: { horizontal: 'center' } },
           customerName: { alignment: { wrapText: true } },
           status: { alignment: { wrapText: true } },
@@ -110,6 +113,7 @@ export class ApiFileTicketDownloadExcel {
           {
             num: ticketIndex + 1,
             id: ticket.id,
+            roomId: roomMap[ticket.roomId]?.name || '',
             ticketCode:
               ticket.date?.toString().padStart(2, '0')
               + ticket.month?.toString().padStart(2, '0')
@@ -117,7 +121,7 @@ export class ApiFileTicketDownloadExcel {
               + '_'
               + ticket.dailyIndex?.toString().padStart(2, '0'),
             customerName: ticket.customer?.fullName || '',
-            status: Ticket.getStatusText(ticket),
+            status: TicketStatusText[ticket.status],
             registeredAt: ticket.registeredAt
               ? new Date(ticket.registeredAt + 7 * 60 * 60 * 1000)
               : '', // fix giờ do hệ thống lệch giờ
@@ -143,7 +147,7 @@ export class ApiFileTicketDownloadExcel {
     })
 
     const workbook = excelOneSheetWorkbook({
-      layout: { sheetName: meta.typeText },
+      layout: { sheetName: 'DOANH THU' },
       headerSheet: (worksheet: Worksheet) => {
         worksheet.addRow([meta.orgName]).eachCell((cell) => {
           cell.font = {
@@ -167,7 +171,7 @@ export class ApiFileTicketDownloadExcel {
           }
         })
 
-        worksheet.addRow(['BÁO CÁO ' + meta.typeText.toUpperCase()]).eachCell((cell) => {
+        worksheet.addRow(['BÁO CÁO DOANH THU']).eachCell((cell) => {
           cell.font = {
             size: 16,
             bold: true,
@@ -193,7 +197,8 @@ export class ApiFileTicketDownloadExcel {
         const rowTitle = worksheet.addRow([
           'STT',
           'ID',
-          'Mã lượt',
+          'Phòng',
+          'Mã phiếu',
           'Tên khách hàng',
           'Trạng thái',
           'Thời gian đăng ký',
@@ -239,6 +244,7 @@ export class ApiFileTicketDownloadExcel {
       columns: [
         { key: 'num', width: 5 },
         { key: 'id', width: 10 },
+        { key: 'roomId', width: 15 },
         { key: 'ticketCode', width: 15 },
         { key: 'customerName', width: 30 },
         { key: 'status', width: 15 },

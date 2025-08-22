@@ -2,31 +2,25 @@ import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { ESTimer } from '../../../common/helpers/time.helper'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
-import { DeliveryStatus } from '../../common/variable'
+import { DeliveryStatus, TicketProcedureStatus } from '../../common/variable'
 import { TicketAttributeInsertType } from '../../entities/ticket-attribute.entity'
 import { TicketExpenseInsertType } from '../../entities/ticket-expense.entity'
-import {
-  TicketProcedureInsertType,
-  TicketProcedureStatus,
-} from '../../entities/ticket-procedure.entity'
+import { TicketProcedureInsertType } from '../../entities/ticket-procedure.entity'
 import { TicketProductInsertType, TicketProductType } from '../../entities/ticket-product.entity'
 import { TicketSurchargeInsertType } from '../../entities/ticket-surcharge.entity'
 import Ticket, {
   TicketInsertType,
   TicketRelationType,
   TicketStatus,
-  TicketType,
 } from '../../entities/ticket.entity'
 import {
+  TicketAttributeManager,
   TicketExpenseManager,
-  TicketLaboratoryManager,
   TicketManager,
   TicketProcedureManager,
   TicketProductManager,
-  TicketRadiologyManager,
   TicketSurchargeManager,
-} from '../../managers'
-import { TicketAttributeManager } from '../../managers/ticket-attribute.manager'
+} from '../../repositories'
 import {
   TicketOrderExpenseDraftType,
   TicketOrderProcedureDraftType,
@@ -34,25 +28,28 @@ import {
   TicketOrderSurchargeDraftType,
 } from './ticket-order.dto'
 
-export type TicketOrderDraftUpsertType = Omit<
+export type TicketOrderDraftUpsertType = Pick<
   Ticket,
-  | keyof TicketRelationType
-  | keyof Pick<
-    Ticket,
-    | 'oid'
-    | 'id'
-    | 'ticketType'
-    | 'status'
-    | 'deliveryStatus'
-    | 'paid'
-    | 'debt'
-    | 'year'
-    | 'month'
-    | 'date'
-    | 'startedAt'
-    | 'updatedAt'
-    | 'endedAt'
-  >
+  | 'customerId'
+  | 'customerSourceId'
+  | 'roomId'
+  | 'productMoney'
+  | 'procedureMoney'
+  | 'radiologyMoney'
+  | 'laboratoryMoney'
+  | 'itemsCostAmount'
+  | 'itemsDiscount'
+  | 'itemsActualMoney'
+  | 'discountMoney'
+  | 'discountPercent'
+  | 'discountType'
+  | 'surcharge'
+  | 'totalMoney'
+  | 'expense'
+  | 'commissionMoney'
+  | 'profit'
+  | 'registeredAt'
+  | 'note'
 >
 
 @Injectable()
@@ -63,8 +60,6 @@ export class TicketOrderDraftOperation {
     private ticketAttributeManager: TicketAttributeManager,
     private ticketProductManager: TicketProductManager,
     private ticketProcedureManager: TicketProcedureManager,
-    private ticketLaboratoryManager: TicketLaboratoryManager,
-    private ticketRadiologyManager: TicketRadiologyManager,
     private ticketSurchargeManager: TicketSurchargeManager,
     private ticketExpenseManager: TicketExpenseManager
   ) { }
@@ -103,15 +98,15 @@ export class TicketOrderDraftOperation {
         deliveryStatus: ticketOrderProductDraftListDto.length
           ? DeliveryStatus.Pending
           : DeliveryStatus.NoStock,
-        ticketType: TicketType.Order,
         paid: 0,
         debt: ticketOrderDraftUpsertDto.totalMoney,
-        registeredAt,
         startedAt: registeredAt,
         year: ESTimer.info(registeredAt, 7).year,
         month: ESTimer.info(registeredAt, 7).month + 1,
         date: ESTimer.info(registeredAt, 7).date,
+        dailyIndex: 0,
         endedAt: null,
+        imageIds: '[]',
       }
       if (!ticketId) {
         ticket = await this.ticketManager.insertOneAndReturnEntity(manager, {
@@ -163,6 +158,8 @@ export class TicketOrderDraftOperation {
             status: TicketProcedureStatus.Completed,
             imageIds: JSON.stringify([]),
             result: '',
+            totalSessions: 0,
+            completedSessions: 0,
           }
           return ticketProcedure
         })

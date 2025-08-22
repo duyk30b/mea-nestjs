@@ -1,0 +1,6 @@
+export * from './ticket-change-laboratory.params'
+export * from './ticket-update-laboratory-group-result.body'
+export * from './ticket-update-laboratory-list.body'
+export * from './ticket-update-priority-ticket-laboratory.body'
+export * from './ticket-update-ticket-laboratory.body'
+export * from './ticket-upsert-ticket-laboratory.body'

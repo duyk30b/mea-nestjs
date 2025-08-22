@@ -8,7 +8,21 @@ import {
   StockCheckItemSortType,
   StockCheckItemUpdateType,
 } from '../entities/stock-check-item.entity'
+import { _PostgreSqlManager } from './_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
+
+@Injectable()
+export class StockCheckItemManager extends _PostgreSqlManager<
+  StockCheckItem,
+  StockCheckItemRelationType,
+  StockCheckItemInsertType,
+  StockCheckItemUpdateType,
+  StockCheckItemSortType
+> {
+  constructor() {
+    super(StockCheckItem)
+  }
+}
 
 @Injectable()
 export class StockCheckItemRepository extends _PostgreSqlRepository<

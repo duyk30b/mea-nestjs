@@ -8,7 +8,7 @@ import {
   PaymentTicketItemSortType,
   PaymentTicketItemUpdateType,
 } from '../entities/payment-ticket-item.entity'
-import { _PostgreSqlManager } from '../managers/_postgresql.manager'
+import { _PostgreSqlManager } from './_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
 
 @Injectable()

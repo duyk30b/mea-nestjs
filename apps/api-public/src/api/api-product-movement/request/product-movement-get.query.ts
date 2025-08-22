@@ -38,7 +38,7 @@ export class ProductMovementGetQuery {
     type: String,
     example: JSON.stringify(<ProductMovementFilterQuery>{
       voucherId: 3,
-      movementType: MovementType.Receipt,
+      movementType: MovementType.PurchaseOrder,
     }),
   })
   @Expose()

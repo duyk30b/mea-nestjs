@@ -9,7 +9,21 @@ import {
   LaboratorySortType,
   LaboratoryUpdateType,
 } from '../entities/laboratory.entity'
+import { _PostgreSqlManager } from './_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
+
+@Injectable()
+export class LaboratoryManager extends _PostgreSqlManager<
+  Laboratory,
+  LaboratoryRelationType,
+  LaboratoryInsertType,
+  LaboratoryUpdateType,
+  LaboratorySortType
+> {
+  constructor() {
+    super(Laboratory)
+  }
+}
 
 @Injectable()
 export class LaboratoryRepository extends _PostgreSqlRepository<

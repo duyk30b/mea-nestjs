@@ -44,9 +44,5 @@ export class ProcedureSortQuery extends SortQuery {
 
   @Expose()
   @IsIn(['ASC', 'DESC'])
-  procedureCode: 'ASC' | 'DESC'
-
-  @Expose()
-  @IsIn(['ASC', 'DESC'])
-  price: 'ASC' | 'DESC'
+  code: 'ASC' | 'DESC'
 }

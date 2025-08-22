@@ -9,7 +9,7 @@ import {
   TicketProcedureManager,
   TicketProductManager,
   TicketRadiologyManager,
-} from '../../managers'
+} from '../../repositories'
 import { TicketCalculatorMoney } from './ticket-calculator-money.operator'
 import { TicketUpdateCommissionTicketUserOperator } from './ticket-update-commission-ticket-user.operator'
 
@@ -19,6 +19,7 @@ export type TicketItemChangeMoney = {
   discountMoney: number
   discountPercent: number
   discountType: DiscountType
+  actualPrice: number
 }
 
 @Injectable()

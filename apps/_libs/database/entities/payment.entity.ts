@@ -4,7 +4,7 @@ import Customer from './customer.entity'
 import Distributor from './distributor.entity'
 import PaymentMethod from './payment-method.entity'
 import PaymentTicketItem from './payment-ticket-item.entity'
-import Receipt from './receipt.entity'
+import PurchaseOrder from './purchase-order.entity'
 import Ticket from './ticket.entity'
 import User from './user.entity'
 
@@ -17,7 +17,7 @@ export enum PaymentPersonType {
 
 export enum PaymentVoucherType {
   Other = 0, // Không xác định
-  Receipt = 1,
+  PurchaseOrder = 1,
   Ticket = 2,
 }
 
@@ -57,7 +57,7 @@ export default class Payment {
   @Expose()
   voucherType: PaymentVoucherType
 
-  @Column({ default: 0 }) // ticketId hoặc receiptId
+  @Column({ default: 0 }) // ticketId hoặc purchaseOrderId
   @Expose()
   voucherId: number
 
@@ -132,7 +132,7 @@ export default class Payment {
   ticket: Ticket
 
   @Expose()
-  receipt: Receipt
+  purchaseOrder: PurchaseOrder
 
   @Expose()
   customer: Customer
@@ -179,7 +179,7 @@ export type PaymentRelationType = {
   [P in keyof Pick<
     Payment,
     | 'ticket'
-    | 'receipt'
+    | 'purchaseOrder'
     | 'customer'
     | 'distributor'
     | 'employee'

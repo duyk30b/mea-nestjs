@@ -15,7 +15,21 @@ import {
   TicketLaboratorySortType,
   TicketLaboratoryUpdateType,
 } from '../entities/ticket-laboratory.entity'
+import { _PostgreSqlManager } from './_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
+
+@Injectable()
+export class TicketLaboratoryManager extends _PostgreSqlManager<
+  TicketLaboratory,
+  TicketLaboratoryRelationType,
+  TicketLaboratoryInsertType,
+  TicketLaboratoryUpdateType,
+  TicketLaboratorySortType
+> {
+  constructor() {
+    super(TicketLaboratory)
+  }
+}
 
 @Injectable()
 export class TicketLaboratoryRepository extends _PostgreSqlRepository<

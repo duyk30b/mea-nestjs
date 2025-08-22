@@ -6,12 +6,12 @@ import ProcedureGroup from './procedure-group.entity'
 
 export enum ProcedureType {
   Basic = 1,
-  Regimen = 2, // Liệu trình
-  Remedy = 3, // Bài thuốc
+  SingleProcess = 2,
+  Regimen = 3, // Liệu trình
 }
 
 @Entity('Procedure')
-@Unique('UNIQUE_Procedure__oid_procedureCode', ['oid', 'procedureCode'])
+@Unique('UNIQUE_Procedure__oid_code', ['oid', 'code'])
 export default class Procedure {
   @Column({ name: 'oid' })
   @Exclude()
@@ -23,11 +23,15 @@ export default class Procedure {
 
   @Column({ type: 'varchar', length: 50 })
   @Expose()
-  procedureCode: string // Mã dịch vụ
+  code: string // Mã dịch vụ
 
   @Column({ type: 'varchar', length: 255 })
   @Expose()
   name: string
+
+  @Expose()
+  @Column({ default: 0 })
+  procedureGroupId: number
 
   @Column({ type: 'smallint', default: ProcedureType.Basic })
   @Expose()
@@ -35,38 +39,23 @@ export default class Procedure {
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()
-  quantityDefault: number
+  totalSessions: number
 
   @Column({ type: 'smallint', default: 0 })
   @Expose()
   gapHours: number
 
+  @Column({ type: 'smallint', default: 24 })
   @Expose()
+  gapHoursType: number
+
   @Column({ default: 0 })
-  procedureGroupId: number
-
-  @Column({ nullable: true })
   @Expose()
-  price: number // Giá mặc định
-
-  @Column({ type: 'text', default: JSON.stringify([]) })
-  @Expose()
-  consumablesHint: string
+  price: number
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()
   isActive: 0 | 1
-
-  @Column({
-    type: 'bigint',
-    default: () => '(EXTRACT(epoch FROM now()) * (1000))',
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
-  @Expose()
-  updatedAt: number
 
   @ManyToOne((type) => ProcedureGroup, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'procedureGroupId', referencedColumnName: 'id' })
@@ -89,8 +78,6 @@ export default class Procedure {
 
     entity.price = Number(raw.price)
 
-    entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)
-
     return entity
   }
 
@@ -108,16 +95,16 @@ export type ProcedureRelationType = {
 
 export type ProcedureInsertType = Omit<
   Procedure,
-  keyof ProcedureRelationType | keyof Pick<Procedure, 'id' | 'updatedAt'>
+  keyof ProcedureRelationType | keyof Pick<Procedure, 'id'>
 >
 
 export type ProcedureUpdateType = {
   [K in Exclude<
     keyof Procedure,
-    keyof ProcedureRelationType | keyof Pick<Procedure, 'oid' | 'id' | 'updatedAt'>
+    keyof ProcedureRelationType | keyof Pick<Procedure, 'oid' | 'id'>
   >]: Procedure[K] | (() => string)
 }
 
 export type ProcedureSortType = {
-  [P in keyof Pick<Procedure, 'oid' | 'id' | 'procedureCode' | 'name' | 'price'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<Procedure, 'oid' | 'id' | 'code' | 'name'>]?: 'ASC' | 'DESC'
 }

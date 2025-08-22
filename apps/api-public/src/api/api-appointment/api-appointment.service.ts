@@ -6,19 +6,19 @@ import { DeliveryStatus, DiscountType } from '../../../../_libs/database/common/
 import { AppointmentStatus } from '../../../../_libs/database/entities/appointment.entity'
 import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import {
-    AppointmentRepository,
-    CustomerRepository,
-    TicketAttributeRepository,
-    TicketRepository,
+  AppointmentRepository,
+  CustomerRepository,
+  TicketAttributeRepository,
+  TicketRepository,
 } from '../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
-    AppointmentCreateBody,
-    AppointmentGetManyQuery,
-    AppointmentGetOneQuery,
-    AppointmentPaginationQuery,
-    AppointmentRegisterTicketClinicBody,
-    AppointmentUpdateBody,
+  AppointmentCreateBody,
+  AppointmentGetManyQuery,
+  AppointmentGetOneQuery,
+  AppointmentPaginationQuery,
+  AppointmentRegisterTicketClinicBody,
+  AppointmentUpdateBody,
 } from './request'
 
 @Injectable()
@@ -145,7 +145,6 @@ export class ApiAppointmentService {
       roomId: body.roomId,
       customerId: customer.id,
       status: TicketStatus.Schedule,
-      ticketType: body.ticketType,
       registeredAt,
       dailyIndex: countToday + 1,
       year: ESTimer.info(registeredAt, 7).year,
@@ -155,7 +154,6 @@ export class ApiAppointmentService {
       customerSourceId: 0,
       debt: 0,
       note: '',
-      customType: 0,
       deliveryStatus: DeliveryStatus.NoStock,
       procedureMoney: 0,
       productMoney: 0,

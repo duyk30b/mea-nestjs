@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { PaymentPersonType } from '../../../../_libs/database/entities/payment.entity'
 import { PaymentRepository } from '../../../../_libs/database/repositories'
 import { DistributorRepository } from '../../../../_libs/database/repositories/distributor.repository'
-import { ReceiptRepository } from '../../../../_libs/database/repositories/receipt.repository'
+import { PurchaseOrderRepository } from '../../../../_libs/database/repositories/purchase-order.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   DistributorCreateBody,
@@ -19,10 +18,10 @@ export class ApiDistributorService {
     private readonly socketEmitService: SocketEmitService,
     private readonly distributorRepository: DistributorRepository,
     private readonly paymentRepository: PaymentRepository,
-    private readonly receiptRepository: ReceiptRepository
+    private readonly purchaseOrderRepository: PurchaseOrderRepository
   ) { }
 
-  async pagination(oid: number, query: DistributorPaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: DistributorPaginationQuery) {
     const { page, limit, filter, sort, relation } = query
 
     const { data, total } = await this.distributorRepository.pagination({
@@ -40,16 +39,13 @@ export class ApiDistributorService {
       },
       sort,
     })
-    return {
-      data,
-      meta: { total, page, limit },
-    }
+    return { distributorList: data, total, page, limit }
   }
 
-  async getMany(oid: number, query: DistributorGetManyQuery): Promise<BaseResponse> {
+  async getMany(oid: number, query: DistributorGetManyQuery) {
     const { limit, filter, relation } = query
 
-    const data = await this.distributorRepository.findMany({
+    const distributorList = await this.distributorRepository.findMany({
       relation,
       condition: {
         oid,
@@ -62,58 +58,49 @@ export class ApiDistributorService {
       },
       limit,
     })
-    return { data }
+    return { distributorList }
   }
 
-  async getOne(oid: number, id: number): Promise<BaseResponse> {
+  async getOne(oid: number, id: number) {
     const distributor = await this.distributorRepository.findOneBy({ oid, id })
     if (!distributor) throw new BusinessException('error.Database.NotFound')
-    return { data: { distributor } }
+    return { distributor }
   }
 
-  async createOne(oid: number, body: DistributorCreateBody): Promise<BaseResponse> {
+  async createOne(oid: number, body: DistributorCreateBody) {
     const distributor = await this.distributorRepository.insertOneFullFieldAndReturnEntity({
       ...body,
       oid,
       debt: 0,
     })
     this.socketEmitService.distributorUpsert(oid, { distributor })
-    return { data: { distributor } }
+    return { distributor }
   }
 
-  async updateOne(oid: number, id: number, body: DistributorUpdateBody): Promise<BaseResponse> {
-    const [distributor] = await this.distributorRepository.updateAndReturnEntity({ oid, id }, body)
-    if (!distributor) {
-      throw BusinessException.create({
-        message: 'error.Database.UpdateFailed',
-        details: 'Distributor',
-      })
-    }
+  async updateOne(oid: number, id: number, body: DistributorUpdateBody) {
+    const distributor = await this.distributorRepository.updateOneAndReturnEntity({ oid, id }, body)
+
     this.socketEmitService.distributorUpsert(oid, { distributor })
-    return { data: { distributor } }
+    return { distributor }
   }
 
-  async destroyOne(oid: number, distributorId: number): Promise<BaseResponse> {
-    const receiptList = await this.receiptRepository.findMany({
+  async destroyOne(oid: number, distributorId: number) {
+    const purchaseOrderList = await this.purchaseOrderRepository.findMany({
       condition: { oid, distributorId },
       limit: 10,
     })
-    if (receiptList.length > 0) {
-      return {
-        data: { receiptList },
-        success: false,
-      }
+
+    if (!purchaseOrderList.length) {
+      await Promise.allSettled([
+        this.distributorRepository.delete({ oid, id: distributorId }),
+        this.paymentRepository.delete({
+          oid,
+          personId: distributorId,
+          personType: PaymentPersonType.Distributor,
+        }),
+      ])
     }
 
-    await Promise.allSettled([
-      this.distributorRepository.delete({ oid, id: distributorId }),
-      this.paymentRepository.delete({
-        oid,
-        personId: distributorId,
-        personType: PaymentPersonType.Distributor,
-      }),
-    ])
-
-    return { data: { receiptList: [], distributorId } }
+    return { purchaseOrderList, distributorId, success: purchaseOrderList.length === 0 }
   }
 }

@@ -8,7 +8,21 @@ import {
   UserSortType,
   UserUpdateType,
 } from '../entities/user.entity'
+import { _PostgreSqlManager } from './_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
+
+@Injectable()
+export class UserManager extends _PostgreSqlManager<
+  User,
+  UserRelationType,
+  UserInsertType,
+  UserUpdateType,
+  UserSortType
+> {
+  constructor() {
+    super(User)
+  }
+}
 
 @Injectable()
 export class UserRepository extends _PostgreSqlRepository<

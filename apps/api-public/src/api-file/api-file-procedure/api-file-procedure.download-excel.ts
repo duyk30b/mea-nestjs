@@ -18,7 +18,7 @@ export class ApiFileProcedureDownloadExcel {
     const procedureList = await this.procedureRepository.findMany({
       relation: { procedureGroup: true },
       condition: { oid },
-      sort: { procedureCode: 'ASC' },
+      sort: { code: 'ASC' },
     })
 
     const workbook: Workbook = this.getWorkbookProcedure(procedureList)
@@ -40,7 +40,7 @@ export class ApiFileProcedureDownloadExcel {
     } = {
       style: {
         _num: { alignment: { horizontal: 'center' } },
-        procedureCode: { alignment: { wrapText: true } },
+        code: { alignment: { wrapText: true } },
         name: { alignment: { wrapText: true } },
         procedureGroupName: { alignment: { wrapText: true } },
         price: { alignment: { horizontal: 'right' } },
@@ -53,7 +53,7 @@ export class ApiFileProcedureDownloadExcel {
       indexNumber++
       const data: { [P in keyof typeof ProcedureExcelRules]: any } = {
         _num: indexNumber,
-        procedureCode: procedure.procedureCode || '',
+        code: procedure.code || '',
         name: procedure.name || '',
         procedureGroupName: procedure.procedureGroup?.name || '',
         price: procedure.price || 0,

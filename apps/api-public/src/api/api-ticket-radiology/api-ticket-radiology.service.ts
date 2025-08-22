@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { ESArray } from '../../../../_libs/common/helpers/array.helper'
-import { BaseResponse } from '../../../../_libs/common/interceptor'
 import {
   Customer,
   Image,
@@ -33,10 +32,10 @@ export class ApiTicketRadiologyService {
     private readonly imageRepository: ImageRepository
   ) { }
 
-  async pagination(oid: number, query: TicketRadiologyPaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: TicketRadiologyPaginationQuery) {
     const { page, limit, filter, relation, sort } = query
 
-    const { total, data } = await this.ticketRadiologyRepository.pagination({
+    const { data: ticketRadiologyList, total } = await this.ticketRadiologyRepository.pagination({
       page,
       limit,
       condition: {
@@ -54,16 +53,13 @@ export class ApiTicketRadiologyService {
     })
 
     if (query.relation) {
-      await this.generateRelation(data, query.relation)
+      await this.generateRelation(ticketRadiologyList, query.relation)
     }
 
-    return {
-      data,
-      meta: { page, limit, total },
-    }
+    return { ticketRadiologyList, page, limit, total }
   }
 
-  async getOne(oid: number, id: number, query: TicketRadiologyGetOneQuery): Promise<BaseResponse> {
+  async getOne(oid: number, id: number, query: TicketRadiologyGetOneQuery) {
     const ticketRadiology = await this.ticketRadiologyRepository.findOne({
       // relation: relationEntity,
       condition: { oid, id },
@@ -76,7 +72,7 @@ export class ApiTicketRadiologyService {
       await this.generateRelation([ticketRadiology], query.relation)
     }
 
-    return { data: { ticketRadiology } }
+    return { ticketRadiology }
   }
 
   async generateRelation(

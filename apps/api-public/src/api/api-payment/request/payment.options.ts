@@ -17,7 +17,7 @@ export class PaymentRelationQuery {
 
   @Expose()
   @IsBoolean()
-  receipt?: boolean
+  purchaseOrder?: boolean
 
   @Expose()
   @IsBoolean()

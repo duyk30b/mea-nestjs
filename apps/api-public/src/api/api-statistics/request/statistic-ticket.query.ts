@@ -1,7 +1,7 @@
 import { ApiProperty, PickType } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import { IsDate, IsDefined, IsIn } from 'class-validator'
-import { TicketGetQuery } from '../../ticket/request'
+import { TicketGetQuery } from '../../ticket/ticket-query/request'
 
 export class StatisticTicketQuery extends PickType(TicketGetQuery, ['filter']) {
   @ApiProperty()

@@ -6,6 +6,7 @@ import { ApiCustomerSourceModule } from './api-customer-source/api-customer-sour
 import { ApiCustomerModule } from './api-customer/api-customer.module'
 import { ApiDiscountModule } from './api-discount/api-discount.module'
 import { ApiDistributorModule } from './api-distributor/api-distributor.module'
+import { ApiExpenseModule } from './api-expense/api-expense.module'
 import { ApiICDModule } from './api-icd/api-icd.module'
 import { ApiLaboratoryGroupModule } from './api-laboratory-group/api-laboratory-group.module'
 import { ApiLaboratorySampleModule } from './api-laboratory-sample/api-laboratory-sample.module'
@@ -23,21 +24,19 @@ import { ApiProcedureModule } from './api-procedure/api-procedure.module'
 import { ApiProductGroupModule } from './api-product-group/api-product-group.module'
 import { ApiProductMovementModule } from './api-product-movement/api-product-movement.module'
 import { ApiProductModule } from './api-product/api-product.module'
+import { ApiPurchaseOrderItemModule } from './api-purchase-order-item/api-purchase-order-item.module'
 import { ApiRadiologyGroupModule } from './api-radiology-group/api-radiology-group.module'
 import { ApiRadiologySampleModule } from './api-radiology-sample/api-radiology-sample.module'
 import { ApiRadiologyModule } from './api-radiology/api-radiology.module'
-import { ApiReceiptItemModule } from './api-receipt-item/api-receipt-item.module'
-import { ApiReceiptModule } from './api-receipt/api-receipt.module'
 import { ApiRoleModule } from './api-role/api-role.module'
 import { ApiRoomModule } from './api-room/api-room.module'
 import { ApiSettingModule } from './api-setting/api-setting.module'
 import { ApiStatisticModule } from './api-statistics/api-statistic.module'
 import { ApiStockCheckModule } from './api-stock-check/api-stock-check.module'
+import { ApiSurchargeModule } from './api-surcharge/api-surcharge.module'
 import { ApiTicketBatchModule } from './api-ticket-batch/api-ticket-batch.module'
-import { ApiTicketClinicModule } from './api-ticket-clinic/api-ticket-clinic.module'
 import { ApiTicketLaboratoryGroupModule } from './api-ticket-laboratory-group/api-ticket-laboratory-group.module'
 import { ApiTicketLaboratoryModule } from './api-ticket-laboratory/api-ticket-laboratory.module'
-import { ApiTicketOrderModule } from './api-ticket-order/api-ticket-order.module'
 import { ApiTicketProcedureModule } from './api-ticket-procedure/api-ticket-procedure.module'
 import { ApiTicketProductModule } from './api-ticket-product/api-ticket-product.module'
 import { ApiTicketRadiologyModule } from './api-ticket-radiology/api-ticket-radiology.module'
@@ -45,6 +44,7 @@ import { ApiUserRoleModule } from './api-user-role/api-user-role.module'
 import { ApiUserRoomModule } from './api-user-room/api-user-room.module'
 import { ApiUserModule } from './api-user/api-user.module'
 import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
+import { ApiPurchaseOrderModule } from './purchase-order/api-purchase-order.module'
 import { TicketModule } from './ticket/ticket.module'
 
 @Module({
@@ -61,8 +61,8 @@ import { TicketModule } from './ticket/ticket.module'
     ApiProcedureModule,
     ApiProductModule,
     ApiProductMovementModule,
-    ApiReceiptModule,
-    ApiReceiptItemModule,
+    ApiPurchaseOrderModule,
+    ApiPurchaseOrderItemModule,
 
     ApiStatisticModule,
     ApiSettingModule,
@@ -87,11 +87,9 @@ import { TicketModule } from './ticket/ticket.module'
     ApiPrintHtmlModule,
     ApiPrintHtmlSettingModule,
 
-    ApiTicketOrderModule,
     ApiTicketProcedureModule,
     ApiTicketProductModule,
     ApiTicketBatchModule,
-    ApiTicketClinicModule,
     ApiTicketLaboratoryModule,
     ApiTicketLaboratoryGroupModule,
     ApiTicketRadiologyModule,
@@ -102,6 +100,8 @@ import { TicketModule } from './ticket/ticket.module'
     ApiDiscountModule,
 
     ApiRoomModule,
+    ApiExpenseModule,
+    ApiSurchargeModule,
     ApiRadiologySampleModule,
     TicketModule,
   ],

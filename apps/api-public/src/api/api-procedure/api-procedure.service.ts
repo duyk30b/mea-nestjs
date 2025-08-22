@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { ESArray } from '../../../../_libs/common/helpers'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { BusinessError } from '../../../../_libs/database/common/error'
 import { Discount, Procedure, ProcedureGroup } from '../../../../_libs/database/entities'
 import {
@@ -9,7 +8,6 @@ import {
   DiscountInteractType,
 } from '../../../../_libs/database/entities/discount.entity'
 import Position, {
-  CommissionCalculatorType,
   PositionInsertType,
   PositionInteractType,
 } from '../../../../_libs/database/entities/position.entity'
@@ -40,7 +38,7 @@ export class ApiProcedureService {
     private readonly ticketProcedureRepository: TicketProcedureRepository
   ) { }
 
-  async pagination(oid: number, query: ProcedurePaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: ProcedurePaginationQuery) {
     const { page, limit, filter, relation, sort } = query
     const { data, total } = await this.procedureRepository.pagination({
       // relation,
@@ -51,7 +49,6 @@ export class ApiProcedureService {
         name: filter?.searchText ? { LIKE: filter.searchText } : undefined,
         procedureGroupId: filter?.procedureGroupId,
         isActive: filter?.isActive,
-        updatedAt: filter?.updatedAt,
       },
       sort,
     })
@@ -60,34 +57,30 @@ export class ApiProcedureService {
       await this.generateRelation({ oid, procedureList: data, relation: query.relation })
     }
 
-    return {
-      data,
-      meta: { page, limit, total },
-    }
+    return { procedureList: data, page, limit, total }
   }
 
-  async getMany(oid: number, query: ProcedureGetManyQuery): Promise<BaseResponse> {
+  async getMany(oid: number, query: ProcedureGetManyQuery) {
     const { limit, filter, relation } = query
-    const data = await this.procedureRepository.findMany({
+    const procedureList = await this.procedureRepository.findMany({
       // relation,
       condition: {
         oid,
         name: filter?.searchText ? { LIKE: filter.searchText } : undefined,
         procedureGroupId: filter?.procedureGroupId,
         isActive: filter?.isActive,
-        updatedAt: filter?.updatedAt,
       },
       sort: { id: 'ASC' },
       limit,
     })
 
     if (query.relation) {
-      await this.generateRelation({ oid, procedureList: data, relation: query.relation })
+      await this.generateRelation({ oid, procedureList, relation: query.relation })
     }
-    return { data }
+    return { procedureList }
   }
 
-  async getOne(oid: number, id: number, query: ProcedureGetOneQuery): Promise<BaseResponse> {
+  async getOne(oid: number, id: number, query: ProcedureGetOneQuery) {
     const procedure = await this.procedureRepository.findOne({
       relation: { procedureGroup: query?.relation?.procedureGroup },
       condition: { oid, id },
@@ -98,40 +91,26 @@ export class ApiProcedureService {
       await this.generateRelation({ oid, procedureList: [procedure], relation: query.relation })
     }
 
-    return { data: { procedure } }
+    return { procedure }
   }
 
-  async createOne(oid: number, body: ProcedureUpsertBody): Promise<BaseResponse> {
+  async createOne(oid: number, body: ProcedureUpsertBody) {
     const { positionList, discountList, procedure: procedureBody } = body
-    positionList?.forEach((i) => {
-      if (
-        i.commissionCalculatorType === CommissionCalculatorType.PercentExpected
-        || i.commissionCalculatorType === CommissionCalculatorType.PercentActual
-      ) {
-        if (i.commissionValue >= 1000) {
-          throw new BusinessException('error.ValidateFailed')
-        }
-      }
-    })
-
-    let procedureCode = procedureBody.procedureCode
-    if (!procedureCode) {
+    let code = procedureBody.code
+    if (!code) {
       const count = await this.procedureRepository.getMaxId()
-      procedureCode = (count + 1).toString()
+      code = (count + 1).toString()
     }
 
-    const existProcedure = await this.procedureRepository.findOneBy({
-      oid,
-      procedureCode,
-    })
+    const existProcedure = await this.procedureRepository.findOneBy({ oid, code })
     if (existProcedure) {
       throw new BusinessError(`Trùng mã dịch vụ với ${existProcedure.name}`)
     }
 
     const procedure = await this.procedureRepository.insertOneFullFieldAndReturnEntity({
-      oid,
       ...procedureBody,
-      procedureCode,
+      oid,
+      code,
     })
 
     this.socketEmitService.procedureListChange(oid, { procedureUpsertedList: [procedure] })
@@ -170,34 +149,23 @@ export class ApiProcedureService {
       this.socketEmitService.discountListChange(oid, { discountUpsertedList })
     }
 
-    return { data: { procedure } }
+    return { procedure }
   }
 
-  async updateOne(
-    oid: number,
-    procedureId: number,
-    body: ProcedureUpsertBody
-  ): Promise<BaseResponse> {
+  async updateOne(oid: number, procedureId: number, body: ProcedureUpsertBody) {
     const { positionList, discountList, procedure: procedureBody } = body
-    positionList?.forEach((i) => {
-      if (
-        i.commissionCalculatorType === CommissionCalculatorType.PercentExpected
-        || i.commissionCalculatorType === CommissionCalculatorType.PercentActual
-      ) {
-        if (i.commissionValue >= 1000) {
-          throw new BusinessException('error.ValidateFailed')
-        }
-      }
-    })
 
-    const existProcedure = await this.procedureRepository.findOneBy({
-      oid,
-      procedureCode: procedureBody.procedureCode,
-      id: { NOT: procedureId },
-    })
-    if (existProcedure) {
-      throw new BusinessError(`Trùng mã dịch vụ với ${existProcedure.name}`)
+    if (procedureBody.code != null) {
+      const existProcedure = await this.procedureRepository.findOneBy({
+        oid,
+        code: procedureBody.code,
+        id: { NOT: procedureId },
+      })
+      if (existProcedure) {
+        throw new BusinessError(`Trùng mã dịch vụ với ${existProcedure.name}`)
+      }
     }
+
     const procedure = await this.procedureRepository.updateOneAndReturnEntity(
       { oid, id: procedureId },
       procedureBody
@@ -255,10 +223,10 @@ export class ApiProcedureService {
       })
     }
 
-    return { data: { procedure } }
+    return { procedure }
   }
 
-  async destroyOne(oid: number, procedureId: number): Promise<BaseResponse> {
+  async destroyOne(oid: number, procedureId: number) {
     const ticketProcedureList = await this.ticketProcedureRepository.findMany({
       condition: { oid, procedureId },
       limit: 10,

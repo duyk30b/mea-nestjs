@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { BusinessError } from '../../../../_libs/database/common/error'
 import { PaymentPersonType } from '../../../../_libs/database/entities/payment.entity'
 import {
@@ -32,10 +31,10 @@ export class ApiCustomerService {
     private readonly ticketRepository: TicketRepository
   ) { }
 
-  async pagination(oid: number, query: CustomerPaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: CustomerPaginationQuery) {
     const { page, limit, filter, sort, relation } = query
 
-    const { data, total } = await this.customerRepository.pagination({
+    const { data: customerList, total } = await this.customerRepository.pagination({
       page,
       limit,
       relation,
@@ -50,16 +49,13 @@ export class ApiCustomerService {
       },
       sort,
     })
-    return {
-      data,
-      meta: { total, page, limit },
-    }
+    return { customerList, total, page, limit }
   }
 
-  async getMany(oid: number, query: CustomerGetManyQuery): Promise<BaseResponse> {
+  async getMany(oid: number, query: CustomerGetManyQuery) {
     const { limit, filter } = query
 
-    const data = await this.customerRepository.findMany({
+    const customerList = await this.customerRepository.findMany({
       condition: {
         oid,
         isActive: filter?.isActive,
@@ -70,20 +66,28 @@ export class ApiCustomerService {
       },
       limit,
     })
-    return { data }
+    return { customerList }
   }
 
-  async getOne(oid: number, id: number, query?: CustomerGetOneQuery): Promise<BaseResponse> {
+  async getOne(oid: number, id: number, query?: CustomerGetOneQuery) {
     const customer = await this.customerRepository.findOneBy({ oid, id })
     if (!customer) throw new BusinessException('error.Database.NotFound')
-    return { data: { customer } }
+    return { customer }
   }
 
-  async createOne(oid: number, body: CustomerCreateBody): Promise<BaseResponse> {
+  async createOne(oid: number, body: CustomerCreateBody) {
     let customerCode = body.customerCode
     if (!customerCode) {
       const count = await this.customerRepository.getMaxId()
       customerCode = (count + 1).toString()
+    }
+
+    const existCustomer = await this.customerRepository.findOneBy({
+      oid,
+      customerCode,
+    })
+    if (existCustomer) {
+      throw new BusinessError(`Trùng mã khách hàng với ${existCustomer.fullName}`)
     }
 
     const customer = await this.customerRepository.insertOneFullFieldAndReturnEntity({
@@ -93,21 +97,19 @@ export class ApiCustomerService {
       customerCode,
     })
     this.socketEmitService.customerUpsert(oid, { customer })
-    return { data: { customer } }
+    return { customer }
   }
 
-  async updateOne(
-    oid: number,
-    customerId: number,
-    customerBody: CustomerUpdateBody
-  ): Promise<BaseResponse> {
-    const existCustomer = await this.customerRepository.findOneBy({
-      oid,
-      customerCode: customerBody.customerCode,
-      id: { NOT: customerId },
-    })
-    if (existCustomer) {
-      throw new BusinessError(`Trùng mã dịch vụ với ${existCustomer.fullName}`)
+  async updateOne(oid: number, customerId: number, customerBody: CustomerUpdateBody) {
+    if (customerBody.customerCode != null) {
+      const existCustomer = await this.customerRepository.findOneBy({
+        oid,
+        customerCode: customerBody.customerCode,
+        id: { NOT: customerId },
+      })
+      if (existCustomer) {
+        throw new BusinessError(`Trùng mã khách hàng với ${existCustomer.fullName}`)
+      }
     }
 
     const customer = await this.customerRepository.updateOneAndReturnEntity(
@@ -115,41 +117,37 @@ export class ApiCustomerService {
       customerBody
     )
     this.socketEmitService.customerUpsert(oid, { customer })
-    return { data: { customer } }
+    return { customer }
   }
 
-  async destroyOne(options: { oid: number; customerId: number }): Promise<BaseResponse> {
+  async destroyOne(options: { oid: number; customerId: number }) {
     const { oid, customerId } = options
     const ticketList = await this.ticketRepository.findMany({
       condition: { oid, customerId },
       limit: 10,
     })
-    if (ticketList.length > 0) {
-      return {
-        data: { ticketList },
-        success: false,
+
+    if (ticketList.length === 0) {
+      const [customerDestroy, paymentDestroyedList] = await Promise.all([
+        this.customerRepository.deleteAndReturnEntity({ oid, id: customerId }),
+        this.paymentRepository.deleteAndReturnEntity({
+          oid,
+          personId: customerId,
+          personType: PaymentPersonType.Customer,
+        }),
+      ])
+
+      if (paymentDestroyedList.length) {
+        await this.paymentTicketItemRepository.delete({
+          oid,
+          paymentId: { IN: paymentDestroyedList.map((i) => i.id) },
+        })
       }
+
+      await this.organizationRepository.updateDataVersion(oid)
+      this.cacheDataService.clearOrganization(oid)
     }
 
-    const [customerDestroy, paymentDestroyedList] = await Promise.all([
-      this.customerRepository.deleteAndReturnEntity({ oid, id: customerId }),
-      this.paymentRepository.deleteAndReturnEntity({
-        oid,
-        personId: customerId,
-        personType: PaymentPersonType.Customer,
-      }),
-    ])
-
-    if (paymentDestroyedList.length) {
-      await this.paymentTicketItemRepository.delete({
-        oid,
-        paymentId: { IN: paymentDestroyedList.map((i) => i.id) },
-      })
-    }
-
-    await this.organizationRepository.updateDataVersion(oid)
-    this.cacheDataService.clearOrganization(oid)
-
-    return { data: { ticketList: [], customerId } }
+    return { ticketList, customerId, success: ticketList.length === 0 }
   }
 }

@@ -16,10 +16,10 @@ import {
 } from '../../../../_libs/database/entities/product.entity'
 import {
   BatchManager,
+  ProductGroupRepository,
   ProductManager,
   ProductMovementManager,
-} from '../../../../_libs/database/managers'
-import { ProductGroupRepository } from '../../../../_libs/database/repositories'
+} from '../../../../_libs/database/repositories'
 import { ApiProductGroupService } from '../../api/api-product-group/api-product-group.service'
 import { ExcelProcess } from '../common/excel-process'
 import { ProductExcelRules } from './product-excel.rule'

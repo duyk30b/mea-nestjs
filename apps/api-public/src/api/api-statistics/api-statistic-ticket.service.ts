@@ -18,7 +18,7 @@ export class ApiStatisticTicketService {
           GTE: fromTime.getTime(),
           LTE: toTime.getTime(),
         },
-        ticketType: filter.ticketType,
+        roomId: filter.roomId,
         status: filter.status,
       },
       groupTimeType,

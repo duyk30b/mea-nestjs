@@ -4,7 +4,7 @@ import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
 import { sleep } from '../../_libs/common/helpers/function.helper'
 import { randomFullName } from '../../_libs/common/helpers/random.helper'
-import { Customer, Distributor, Receipt } from '../../_libs/database/entities'
+import { Customer } from '../../_libs/database/entities'
 
 @ApiTags('Test')
 @ApiBearerAuth('access-token')

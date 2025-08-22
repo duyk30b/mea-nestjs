@@ -15,7 +15,21 @@ import {
   TicketRadiologySortType,
   TicketRadiologyUpdateType,
 } from '../entities/ticket-radiology.entity'
+import { _PostgreSqlManager } from './_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
+
+@Injectable()
+export class TicketRadiologyManager extends _PostgreSqlManager<
+  TicketRadiology,
+  TicketRadiologyRelationType,
+  TicketRadiologyInsertType,
+  TicketRadiologyUpdateType,
+  TicketRadiologySortType
+> {
+  constructor() {
+    super(TicketRadiology)
+  }
+}
 
 @Injectable()
 export class TicketRadiologyRepository extends _PostgreSqlRepository<
@@ -54,33 +68,5 @@ export class TicketRadiologyRepository extends _PostgreSqlRepository<
       sumCostMoney: Number(result.sumCostMoney),
       sumActualMoney: Number(result.sumActualMoney),
     }
-  }
-
-  async updatePriorityList(params: {
-    oid: number
-    ticketId: number
-    updateData: { id: number; priority: number }[]
-  }): Promise<TicketRadiology[]> {
-    if (!params.updateData.length) return []
-    const queryUpdateResult: [any[], number] = await this.manager.query(
-      `
-      UPDATE "TicketRadiology"
-      SET "priority" = temp.priority
-      FROM (VALUES `
-      + params.updateData
-        .map(({ id, priority }) => {
-          return `(${id}, ${priority})`
-        })
-        .join(', ')
-      + `   ) AS temp("id", "priority")
-      WHERE   "TicketRadiology"."id"  = temp."id" 
-          AND "TicketRadiology"."ticketId" = ${params.ticketId} 
-          AND "TicketRadiology"."oid" = ${params.oid} 
-      RETURNING "TicketRadiology".*; 
-      `
-    )
-
-    const ticketRadiologyList = TicketRadiology.fromRaws(queryUpdateResult[0])
-    return ticketRadiologyList
   }
 }

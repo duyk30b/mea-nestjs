@@ -9,7 +9,21 @@ import {
   TicketBatchSortType,
   TicketBatchUpdateType,
 } from '../entities/ticket-batch.entity'
+import { _PostgreSqlManager } from './_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
+
+@Injectable()
+export class TicketBatchManager extends _PostgreSqlManager<
+  TicketBatch,
+  TicketBatchRelationType,
+  TicketBatchInsertType,
+  TicketBatchUpdateType,
+  TicketBatchSortType
+> {
+  constructor() {
+    super(TicketBatch)
+  }
+}
 
 export type TicketBatchUpdateMoneyType = {
   id: number

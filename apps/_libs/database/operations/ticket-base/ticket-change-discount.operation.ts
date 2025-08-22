@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { DiscountType } from '../../common/variable'
 import { TicketStatus } from '../../entities/ticket.entity'
-import { TicketManager } from '../../managers'
+import { TicketManager } from '../../repositories'
 
 @Injectable()
 export class TicketChangeDiscountOperation {

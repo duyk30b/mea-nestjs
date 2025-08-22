@@ -8,7 +8,6 @@ import {
   DiscountInteractType,
 } from '../../../../_libs/database/entities/discount.entity'
 import Position, {
-  CommissionCalculatorType,
   PositionInsertType,
   PositionInteractType,
 } from '../../../../_libs/database/entities/position.entity'
@@ -114,17 +113,6 @@ export class ApiRadiologyService {
 
   async createOne(oid: number, body: RadiologyUpsertBody): Promise<BaseResponse> {
     const { positionList, radiology: radiologyBody, discountList } = body
-    positionList?.forEach((i) => {
-      if (
-        i.commissionCalculatorType === CommissionCalculatorType.PercentExpected
-        || i.commissionCalculatorType === CommissionCalculatorType.PercentActual
-      ) {
-        if (i.commissionValue >= 1000) {
-          throw new BusinessException('error.ValidateFailed')
-        }
-      }
-    })
-
     let radiologyCode = radiologyBody.radiologyCode
     if (!radiologyCode) {
       const maxId = await this.radiologyRepository.getMaxId()
@@ -190,24 +178,16 @@ export class ApiRadiologyService {
     body: RadiologyUpsertBody
   ): Promise<BaseResponse> {
     const { positionList, radiology: radiologyBody, discountList } = body
-    positionList?.forEach((i) => {
-      if (
-        i.commissionCalculatorType === CommissionCalculatorType.PercentExpected
-        || i.commissionCalculatorType === CommissionCalculatorType.PercentActual
-      ) {
-        if (i.commissionValue >= 1000) {
-          throw new BusinessException('error.ValidateFailed')
-        }
-      }
-    })
 
-    const existRadiology = await this.radiologyRepository.findOneBy({
-      oid,
-      radiologyCode: radiologyBody.radiologyCode,
-      id: { NOT: radiologyId },
-    })
-    if (existRadiology) {
-      throw new BusinessException(`Trùng mã sản phẩm với ${existRadiology.name}` as any)
+    if (radiologyBody.radiologyCode != null) {
+      const existRadiology = await this.radiologyRepository.findOneBy({
+        oid,
+        radiologyCode: radiologyBody.radiologyCode,
+        id: { NOT: radiologyId },
+      })
+      if (existRadiology) {
+        throw new BusinessException(`Trùng mã sản phẩm với ${existRadiology.name}` as any)
+      }
     }
 
     const radiology = await this.radiologyRepository.updateOneAndReturnEntity(

@@ -13,6 +13,7 @@ import Product from './product.entity'
 import Ticket from './ticket.entity'
 
 export enum TicketProductType {
+  Product = 0,
   Prescription = 1,
   Consumable = 2,
 }

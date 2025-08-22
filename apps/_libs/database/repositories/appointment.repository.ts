@@ -8,7 +8,21 @@ import {
   AppointmentSortType,
   AppointmentUpdateType,
 } from '../entities/appointment.entity'
+import { _PostgreSqlManager } from './_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
+
+@Injectable()
+export class AppointmentManager extends _PostgreSqlManager<
+  Appointment,
+  AppointmentRelationType,
+  AppointmentInsertType,
+  AppointmentUpdateType,
+  AppointmentSortType
+> {
+  constructor() {
+    super(Appointment)
+  }
+}
 
 @Injectable()
 export class AppointmentRepository extends _PostgreSqlRepository<

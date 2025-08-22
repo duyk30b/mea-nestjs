@@ -9,8 +9,7 @@ import Payment, {
   PaymentVoucherType,
 } from '../../entities/payment.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
-import { CustomerManager, TicketManager } from '../../managers'
-import { PaymentManager } from '../../repositories'
+import { CustomerManager, PaymentManager, TicketManager } from '../../repositories'
 
 @Injectable()
 export class TicketReopenOperation {

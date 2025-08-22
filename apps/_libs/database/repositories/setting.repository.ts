@@ -3,7 +3,21 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Setting } from '../entities'
 import { SettingInsertType, SettingKey, SettingRelationType, SettingSortType, SettingUpdateType } from '../entities/setting.entity'
+import { _PostgreSqlManager } from './_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
+
+@Injectable()
+export class SettingManager extends _PostgreSqlManager<
+  Setting,
+  SettingRelationType,
+  SettingInsertType,
+  SettingUpdateType,
+  SettingSortType
+> {
+  constructor() {
+    super(Setting)
+  }
+}
 
 @Injectable()
 export class SettingRepository extends _PostgreSqlRepository<

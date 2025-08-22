@@ -1,8 +1,9 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn, Unique } from 'typeorm'
 import Payment from './payment.entity'
 
 @Entity('PaymentMethod')
+@Unique('UNIQUE_PaymentMethod__oid_code', ['oid', 'code'])
 export default class PaymentMethod {
   @Column({ name: 'oid' })
   @Exclude()
@@ -12,9 +13,9 @@ export default class PaymentMethod {
   @Expose({ name: 'id' })
   id: number
 
-  @Column({ default: 1 })
+  @Column({ type: 'varchar', length: 50 })
   @Expose()
-  priority: number
+  code: string
 
   @Column()
   @Expose()

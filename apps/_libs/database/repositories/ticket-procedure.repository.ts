@@ -10,6 +10,7 @@ import {
   TicketProcedureSortType,
   TicketProcedureUpdateType,
 } from '../entities/ticket-procedure.entity'
+import { _PostgreSqlManager } from './_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
 
 export type TicketProcedureUpdateMoneyType = {
@@ -19,6 +20,19 @@ export type TicketProcedureUpdateMoneyType = {
   discountPercent: number
   discountType: DiscountType
   actualPrice: number
+}
+
+@Injectable()
+export class TicketProcedureManager extends _PostgreSqlManager<
+  TicketProcedure,
+  TicketProcedureRelationType,
+  TicketProcedureInsertType,
+  TicketProcedureUpdateType,
+  TicketProcedureSortType
+> {
+  constructor() {
+    super(TicketProcedure)
+  }
 }
 
 @Injectable()

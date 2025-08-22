@@ -12,13 +12,14 @@ import Payment, {
 import { TicketStatus } from '../../entities/ticket.entity'
 import {
   CustomerManager,
+  PaymentManager,
   TicketLaboratoryManager,
   TicketManager,
   TicketProcedureManager,
   TicketProductManager,
   TicketRadiologyManager,
-} from '../../managers'
-import { PaymentManager, TicketUserManager } from '../../repositories'
+  TicketUserManager,
+} from '../../repositories'
 import { TicketCalculatorMoney } from './ticket-calculator-money.operator'
 import { TicketUpdateCommissionTicketUserOperator } from './ticket-update-commission-ticket-user.operator'
 
@@ -162,7 +163,7 @@ export class TicketCloseOperation {
           note: note || '',
 
           paidAmount: 0,
-          debtAmount: paidByTopUp + ticketFix.debt, // thực ra thì vẫn = receiptUpdated.debt
+          debtAmount: paidByTopUp + ticketFix.debt, // thực ra thì vẫn = purchaseOrderUpdated.debt
           openDebt: customerOrigin.debt,
           closeDebt: customerModified.debt,
         }

@@ -11,7 +11,7 @@ import {
   ProductMovementManager,
   StockCheckItemManager,
   StockCheckManager,
-} from '../../managers'
+} from '../../repositories'
 
 @Injectable()
 export class StockCheckReconcileOperation {

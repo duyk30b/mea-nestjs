@@ -7,15 +7,14 @@ import {
   ProcedureInsertType,
   ProcedureType,
 } from '../../../../_libs/database/entities/procedure.entity'
-import { ProcedureManager } from '../../../../_libs/database/managers'
-import { ProcedureGroupRepository } from '../../../../_libs/database/repositories'
+import { ProcedureGroupRepository, ProcedureManager } from '../../../../_libs/database/repositories'
 import { ApiProcedureGroupService } from '../../api/api-procedure-group/api-procedure-group.service'
 import { ExcelProcess } from '../common/excel-process'
 import { ProcedureExcelRules } from './procedure-excel.rule'
 
 const dataPlainExample = {
   _num: 0,
-  procedureCode: '',
+  code: '',
   name: '',
   price: 0,
   procedureGroupName: '',
@@ -60,7 +59,7 @@ export class ApiFileProcedureUploadExcel {
     const procedureGroupMapName = ESArray.arrayToKeyValue(procedureGroupList, 'name')
 
     const dataPlainList: DataPlain[] = dataConvertList.map((item, index) => {
-      if (!item.procedureCode) {
+      if (!item.code) {
         throw new BusinessError(`Lỗi: Dòng ${index + 2}: Mã dịch vụ không được để trống`)
       }
       let procedureGroupId = 0
@@ -70,7 +69,7 @@ export class ApiFileProcedureUploadExcel {
       }
       const dataPlain: DataPlain = {
         _num: item._num || 0,
-        procedureCode: item.procedureCode,
+        code: item.code,
         name: item.name || '',
         price: item.price || 0,
         procedureGroupName: item.procedureGroupName || '',
@@ -91,8 +90,8 @@ export class ApiFileProcedureUploadExcel {
     const { oid, userId, dataPlainList, time } = data
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-      // Không cho cập nhật trùng procedureCode
-      const duplicatesBatchId = ESArray.checkDuplicate(dataPlainList, 'procedureCode')
+      // Không cho cập nhật trùng code
+      const duplicatesBatchId = ESArray.checkDuplicate(dataPlainList, 'code')
       duplicatesBatchId.forEach(({ value, indices }) => {
         const indicesString = indices.map((i) => i + 2) // +1 do bắt đầu từ 0
         throw new BusinessError(
@@ -100,34 +99,30 @@ export class ApiFileProcedureUploadExcel {
         )
       })
 
-      const procedureCodeList = dataPlainList.map((i) => i.procedureCode)
+      const codeList = dataPlainList.map((i) => i.code)
       const procedureOriginList = await this.procedureManager.findManyBy(manager, {
         oid,
-        procedureCode: { IN: procedureCodeList },
+        code: { IN: codeList },
       })
-      const procedureOriginMapCode = ESArray.arrayToKeyValue(procedureOriginList, 'procedureCode')
+      const procedureOriginMapCode = ESArray.arrayToKeyValue(procedureOriginList, 'code')
 
-      // Phân biệt tạo mới hay cập nhật theo procedureCode vì đã được gắn ở trên
-      const dataPlainInsertList = dataPlainList.filter(
-        (i) => !procedureOriginMapCode[i.procedureCode]
-      )
-      const dataPlainUpdateList = dataPlainList.filter(
-        (i) => !!procedureOriginMapCode[i.procedureCode]
-      )
+      // Phân biệt tạo mới hay cập nhật theo code vì đã được gắn ở trên
+      const dataPlainInsertList = dataPlainList.filter((i) => !procedureOriginMapCode[i.code])
+      const dataPlainUpdateList = dataPlainList.filter((i) => !!procedureOriginMapCode[i.code])
 
       // === 1. Trường hợp 1: Tạo mới Procedure
       if (dataPlainInsertList.length) {
         const procedureInsertList = dataPlainInsertList.map((plain) => {
           const procedureInsert: ProcedureInsertType = {
             oid,
-            procedureCode: plain.procedureCode,
+            code: plain.code,
             name: plain.name,
             price: plain.price,
             procedureGroupId: plain.procedureGroupId,
             procedureType: ProcedureType.Basic,
-            quantityDefault: 0,
+            totalSessions: 1,
             gapHours: 0,
-            consumablesHint: '',
+            gapHoursType: 0,
             isActive: 1,
           }
           return procedureInsert
@@ -141,7 +136,7 @@ export class ApiFileProcedureUploadExcel {
         await this.procedureManager.bulkUpdate({
           manager,
           condition: { oid, id: { NOT: 0 } },
-          compare: ['procedureCode'],
+          compare: ['code'],
           tempList: dataPlainUpdateList,
           update: ['name', 'price', 'procedureGroupId'],
           options: { requireEqualLength: true },

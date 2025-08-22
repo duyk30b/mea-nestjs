@@ -1,0 +1,6 @@
+export * from './ticket-add-ticket-radiology.body'
+export * from './ticket-change-radiology.params'
+export * from './ticket-clinic-update-priority-ticket-radiology.body'
+export * from './ticket-radiology-cancel-result.request'
+export * from './ticket-radiology-update-result.request'
+export * from './ticket-update-money-ticket-radiology.body'

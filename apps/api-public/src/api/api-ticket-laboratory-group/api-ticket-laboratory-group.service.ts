@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { ESArray } from '../../../../_libs/common/helpers'
-import { BaseResponse } from '../../../../_libs/common/interceptor'
 import {
   Customer,
   Ticket,
@@ -19,9 +18,6 @@ import {
   TicketRepository,
   TicketUserRepository,
 } from '../../../../_libs/database/repositories'
-import { LaboratoryRepository } from '../../../../_libs/database/repositories/laboratory.repository'
-import { UserRepository } from '../../../../_libs/database/repositories/user.repository'
-import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   TicketLaboratoryGroupGetOneQuery,
   TicketLaboratoryGroupPaginationQuery,
@@ -31,58 +27,50 @@ import {
 @Injectable()
 export class ApiTicketLaboratoryGroupService {
   constructor(
-    private readonly socketEmitService: SocketEmitService,
     private readonly ticketLaboratoryGroupRepository: TicketLaboratoryGroupRepository,
     private readonly ticketLaboratoryRepository: TicketLaboratoryRepository,
     private readonly ticketLaboratoryResultRepository: TicketLaboratoryResultRepository,
-    private readonly laboratoryRepository: LaboratoryRepository,
-    private readonly userRepository: UserRepository,
     private readonly customerRepository: CustomerRepository,
     private readonly ticketUserRepository: TicketUserRepository,
     private readonly ticketRepository: TicketRepository
   ) { }
 
-  async pagination(
-    oid: number,
-    query: TicketLaboratoryGroupPaginationQuery
-  ): Promise<BaseResponse> {
+  async pagination(oid: number, query: TicketLaboratoryGroupPaginationQuery) {
     const { page, limit, filter, relation, sort } = query
 
-    const { total, data } = await this.ticketLaboratoryGroupRepository.pagination({
-      // relation: {
-      //   customer: relation?.customer,
-      //   ticket: relation?.ticket,
-      // },
-      page,
-      limit,
-      condition: {
-        oid,
-        status: filter?.status,
-        paymentMoneyStatus: filter?.paymentMoneyStatus,
-        customerId: filter?.customerId,
-        roomId: filter?.roomId,
-        ticketId: filter?.ticketId,
-        registeredAt: filter?.registeredAt,
-        startedAt: filter?.startedAt,
-      },
-      sort,
-    })
+    const { total, data: ticketLaboratoryGroupList } =
+      await this.ticketLaboratoryGroupRepository.pagination({
+        // relation: {
+        //   customer: relation?.customer,
+        //   ticket: relation?.ticket,
+        // },
+        page,
+        limit,
+        condition: {
+          oid,
+          status: filter?.status,
+          paymentMoneyStatus: filter?.paymentMoneyStatus,
+          customerId: filter?.customerId,
+          roomId: filter?.roomId,
+          ticketId: filter?.ticketId,
+          registeredAt: filter?.registeredAt,
+          startedAt: filter?.startedAt,
+        },
+        sort,
+      })
 
     if (query.relation) {
-      await this.generateRelation(data, query.relation)
+      await this.generateRelation(ticketLaboratoryGroupList, query.relation)
     }
 
-    return {
-      data,
-      meta: { page, limit, total },
-    }
+    return { ticketLaboratoryGroupList, page, limit, total }
   }
 
   async getOne(
     oid: number,
     id: number,
     query: TicketLaboratoryGroupGetOneQuery
-  ): Promise<BaseResponse> {
+  ) {
     const { relation } = query
     const ticketLaboratoryGroup = await this.ticketLaboratoryGroupRepository.findOne({
       // relation: {
@@ -98,7 +86,7 @@ export class ApiTicketLaboratoryGroupService {
       await this.generateRelation([ticketLaboratoryGroup], query.relation)
     }
 
-    return { data: { ticketLaboratoryGroup } }
+    return { ticketLaboratoryGroup }
   }
 
   async generateRelation(

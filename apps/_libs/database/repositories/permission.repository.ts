@@ -8,7 +8,21 @@ import Permission, {
   PermissionSortType,
   PermissionUpdateType,
 } from '../entities/permission.entity'
+import { _PostgreSqlManager } from './_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
+
+@Injectable()
+export class PermissionManager extends _PostgreSqlManager<
+  Permission,
+  PermissionRelationType,
+  PermissionInsertType,
+  PermissionUpdateType,
+  PermissionSortType
+> {
+  constructor() {
+    super(Permission)
+  }
+}
 
 @Injectable()
 export class PermissionRepository extends _PostgreSqlRepository<

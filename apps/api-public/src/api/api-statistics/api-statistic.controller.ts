@@ -1,9 +1,8 @@
 import { Controller, Get, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
+import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/permission/permission.enum'
-// import { ApiStatisticReceiptService } from './api-statistic-receipt.service'
-import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { ApiStatisticLaboratoryService } from './api-statistic-laboratory.service'
 import { ApiStatisticRadiologyService } from './api-statistic-radiology.service'
 import { ApiStatisticTicketService } from './api-statistic-ticket.service'
@@ -22,7 +21,6 @@ import {
 export class ApiStatisticController {
   constructor(
     private readonly apiStatisticService: ApiStatisticService,
-    // private readonly apiStatisticReceiptService: ApiStatisticReceiptService,
     private readonly apiStatisticTicketService: ApiStatisticTicketService,
     private readonly apiStatisticLaboratoryService: ApiStatisticLaboratoryService,
     private readonly apiStatisticRadiologyService: ApiStatisticRadiologyService
@@ -75,12 +73,6 @@ export class ApiStatisticController {
   sumCustomerDebt(@External() { oid }: TExternal) {
     return this.apiStatisticService.sumCustomerDebt(oid)
   }
-
-  // @Get('statistic-receipt')
-  // @UserPermission(PermissionId.STATISTIC_VISIT)
-  // async statisticReceipt(@External() { oid }: TExternal, @Query() query: StatisticTimeQuery) {
-  //   return await this.apiStatisticReceiptService.statisticReceipt(oid, query)
-  // }
 
   @Get('statistic-ticket')
   @UserPermission(PermissionId.STATISTIC_TICKET)

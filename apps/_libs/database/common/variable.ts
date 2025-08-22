@@ -52,7 +52,7 @@ export enum PickupStrategy {
 }
 
 export enum MovementType {
-  Receipt = 1,
+  PurchaseOrder = 1,
   Ticket = 2,
   UserChange = 3,
   StockCheck = 4,
@@ -79,6 +79,13 @@ export enum AttributeLayoutType {
   Table = 'Bảng',
   InputAndLabelTop = 'Input và Nhãn bên trên',
   InputAndLabelLeft = 'Input và Nhãn bên trái',
+}
+
+export enum TicketProcedureStatus {
+  Empty = 1,
+  Pending = 2,
+  Executing = 3,
+  Completed = 4,
 }
 
 export enum TicketLaboratoryStatus {

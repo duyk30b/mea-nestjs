@@ -18,14 +18,15 @@ import {
 import { TicketStatus } from '../../entities/ticket.entity'
 import {
   CustomerManager,
+  PaymentManager,
+  PaymentTicketItemManager,
   TicketLaboratoryGroupManager,
   TicketLaboratoryManager,
   TicketManager,
   TicketProcedureManager,
   TicketProductManager,
   TicketRadiologyManager,
-} from '../../managers'
-import { PaymentManager, PaymentTicketItemManager } from '../../repositories'
+} from '../../repositories'
 
 @Injectable()
 export class CustomerPrepaymentTicketItemListOperation {

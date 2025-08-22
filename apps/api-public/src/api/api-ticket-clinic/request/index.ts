@@ -1,6 +1,0 @@
-export * from './ticket-clinic-update-consumable.body'
-export * from './ticket-clinic-update-diagnosis.body'
-export * from './ticket-clinic-update-laboratory-list.body'
-export * from './ticket-clinic-update-prescription.body'
-export * from './ticket-clinic-update-procedure-list.body'
-export * from './ticket-clinic-upsert.body'

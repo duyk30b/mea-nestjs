@@ -8,9 +8,8 @@ import {
   PaymentPersonType,
   PaymentVoucherType,
 } from '../../entities/payment.entity'
-import { ReceiptStatus } from '../../entities/receipt.entity'
-import { DistributorManager, ReceiptManager } from '../../managers'
-import { PaymentManager } from '../../repositories'
+import { PurchaseOrderStatus } from '../../entities/purchase-order.entity'
+import { DistributorManager, PaymentManager, PurchaseOrderManager } from '../../repositories'
 
 @Injectable()
 export class DistributorPayDebtOperation {
@@ -18,7 +17,7 @@ export class DistributorPayDebtOperation {
     private dataSource: DataSource,
     private distributorManager: DistributorManager,
     private paymentManager: PaymentManager,
-    private receiptManager: ReceiptManager
+    private purchaseOrderManager: PurchaseOrderManager
   ) { }
 
   async startPayDebt(options: {
@@ -29,7 +28,7 @@ export class DistributorPayDebtOperation {
     time: number
     paidAmount: number
     note: string
-    dataList: { receiptId: number; paidAmount: number }[]
+    dataList: { purchaseOrderId: number; paidAmount: number }[]
   }) {
     const { oid, distributorId, cashierId, paymentMethodId, time, paidAmount, note, dataList } =
       options
@@ -41,15 +40,15 @@ export class DistributorPayDebtOperation {
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. UPDATE CUSTOMER ===
-      const receiptModifiedList = await this.receiptManager.bulkUpdate({
+      const purchaseOrderModifiedList = await this.purchaseOrderManager.bulkUpdate({
         manager,
         tempList: dataList.map((i) => ({
-          id: i.receiptId,
+          id: i.purchaseOrderId,
           paidAmount: i.paidAmount,
         })),
         condition: {
           oid,
-          status: ReceiptStatus.Debt,
+          status: PurchaseOrderStatus.Debt,
           distributorId,
           debt: { RAW_QUERY: '"debt" >= temp."paidAmount"' },
         },
@@ -58,8 +57,8 @@ export class DistributorPayDebtOperation {
           paid: (t) => `paid + "${t}"."paidAmount"`,
           debt: (t) => `debt - "${t}"."paidAmount"`,
           status: (t: string, u: string) => ` CASE
-                                    WHEN("${u}"."debt" = "${t}"."paidAmount") THEN ${ReceiptStatus.Completed} 
-                                    ELSE ${ReceiptStatus.Debt}
+                                    WHEN("${u}"."debt" = "${t}"."paidAmount") THEN ${PurchaseOrderStatus.Completed} 
+                                    ELSE ${PurchaseOrderStatus.Debt}
                                   END`,
         },
         options: { requireEqualLength: true },
@@ -73,13 +72,13 @@ export class DistributorPayDebtOperation {
       const distributorCloseDebt = distributorModified.debt
       const distributorOpenDebt = distributorModified.debt + paidAmount
 
-      const paymentInsertList = receiptModifiedList.map((receiptModified) => {
+      const paymentInsertList = purchaseOrderModifiedList.map((purchaseOrderModified) => {
         const paymentInsert: PaymentInsertType = {
           oid,
-          voucherType: PaymentVoucherType.Receipt,
-          voucherId: receiptModified.id,
+          voucherType: PaymentVoucherType.PurchaseOrder,
+          voucherId: purchaseOrderModified.id,
           personType: PaymentPersonType.Distributor,
-          personId: receiptModified.distributorId,
+          personId: purchaseOrderModified.distributorId,
 
           createdAt: time,
           paymentMethodId,
@@ -100,7 +99,7 @@ export class DistributorPayDebtOperation {
         paymentInsertList
       )
 
-      return { receiptModifiedList, distributorModified, paymentCreatedList }
+      return { purchaseOrderModifiedList, distributorModified, paymentCreatedList }
     })
 
     return transaction

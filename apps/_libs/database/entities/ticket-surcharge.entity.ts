@@ -1,7 +1,7 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
+import { Column, Entity, Index } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import Ticket from './ticket.entity'
+import Surcharge from './surcharge.entity'
 
 @Entity('TicketSurcharge')
 @Index('IDX_TicketSurcharge__ticketId', ['oid', 'ticketId'])
@@ -10,13 +10,9 @@ export default class TicketSurcharge extends BaseEntity {
   @Expose()
   ticketId: number
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ default: 0 })
   @Expose()
-  key: string
-
-  @Column({ type: 'varchar', length: 255 })
-  @Expose()
-  name: string
+  surchargeId: number
 
   @Column({
     type: 'bigint',
@@ -27,11 +23,7 @@ export default class TicketSurcharge extends BaseEntity {
   money: number
 
   @Expose()
-  @ManyToOne((type) => Ticket, (ticket) => ticket.ticketSurchargeList, {
-    createForeignKeyConstraints: false,
-  })
-  @JoinColumn({ name: 'ticketId', referencedColumnName: 'id' })
-  ticket: Ticket
+  surcharge: Surcharge
 
   static fromRaw(raw: { [P in keyof TicketSurcharge]: any }) {
     if (!raw) return null
@@ -48,7 +40,7 @@ export default class TicketSurcharge extends BaseEntity {
 }
 
 export type TicketSurchargeRelationType = {
-  [P in keyof Pick<TicketSurcharge, 'ticket'>]?: boolean
+  [P in keyof Pick<TicketSurcharge, 'surcharge'>]?: boolean
 }
 
 export type TicketSurchargeInsertType = Omit<

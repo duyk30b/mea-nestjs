@@ -7,12 +7,8 @@ import {
   PaymentPersonType,
   PaymentVoucherType,
 } from '../../entities/payment.entity'
-import { ReceiptStatus } from '../../entities/receipt.entity'
-import {
-  DistributorManager,
-  ReceiptManager,
-} from '../../managers'
-import { PaymentManager } from '../../repositories'
+import { PurchaseOrderStatus } from '../../entities/purchase-order.entity'
+import { DistributorManager, PaymentManager, PurchaseOrderManager } from '../../repositories'
 
 @Injectable()
 export class DistributorRefundMoneyOperation {
@@ -20,13 +16,12 @@ export class DistributorRefundMoneyOperation {
     private dataSource: DataSource,
     private distributorManager: DistributorManager,
     private paymentManager: PaymentManager,
-    private receiptManager: ReceiptManager
-
+    private purchaseOrderManager: PurchaseOrderManager
   ) { }
 
   async startRefundMoney(options: {
     oid: number
-    receiptId: number
+    purchaseOrderId: number
     distributorId: number
     cashierId: number
     paymentMethodId: number
@@ -34,17 +29,17 @@ export class DistributorRefundMoneyOperation {
     refundAmount: number
     note: string
   }) {
-    const { oid, receiptId, distributorId, cashierId, paymentMethodId, time, refundAmount, note } =
+    const { oid, purchaseOrderId, distributorId, cashierId, paymentMethodId, time, refundAmount, note } =
       options
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. TICKET: update ===
-      const receiptModified = await this.receiptManager.updateOneAndReturnEntity(
+      const purchaseOrderModified = await this.purchaseOrderManager.updateOneAndReturnEntity(
         manager,
         {
           oid,
-          id: receiptId,
-          status: { IN: [ReceiptStatus.Deposited, ReceiptStatus.Executing] },
+          id: purchaseOrderId,
+          status: { IN: [PurchaseOrderStatus.Deposited, PurchaseOrderStatus.Executing] },
           paid: { GTE: refundAmount },
         },
         {
@@ -56,7 +51,7 @@ export class DistributorRefundMoneyOperation {
       // === 2. CUSTOMER: query ===
       const distributor = await this.distributorManager.findOneBy(manager, {
         oid,
-        id: receiptModified.distributorId,
+        id: purchaseOrderModified.distributorId,
       })
       if (!distributor) {
         throw new Error(`Nhà cung cấp không tồn tại trên hệ thống`)
@@ -67,8 +62,8 @@ export class DistributorRefundMoneyOperation {
       // === 3. INSERT CUSTOMER_PAYMENT ===
       const paymentInsert: PaymentInsertType = {
         oid,
-        voucherType: PaymentVoucherType.Receipt,
-        voucherId: receiptModified.id,
+        voucherType: PaymentVoucherType.PurchaseOrder,
+        voucherId: purchaseOrderModified.id,
         personType: PaymentPersonType.Distributor,
         personId: distributorId,
 
@@ -89,7 +84,7 @@ export class DistributorRefundMoneyOperation {
         paymentInsert
       )
 
-      return { receiptModified, distributor, paymentCreated }
+      return { purchaseOrderModified, distributor, paymentCreated }
     })
     return transaction
   }

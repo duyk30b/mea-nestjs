@@ -40,7 +40,7 @@ export default class PaymentTicketItem {
   @Expose()
   ticketItemType: TicketItemType
 
-  @Column({ default: 0 }) // ticketId hoặc receiptId
+  @Column({ default: 0 }) // ticketId hoặc purchaseOrderId
   @Expose()
   ticketItemId: number
 

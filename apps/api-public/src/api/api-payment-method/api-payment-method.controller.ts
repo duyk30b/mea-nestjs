@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestj
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
+import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiPaymentMethodService } from './api-payment-method.service'
@@ -20,26 +21,39 @@ export class ApiPaymentMethodController {
 
   @Get('pagination')
   @UserPermission()
-  pagination(@External() { oid }: TExternal, @Query() query: PaymentMethodPaginationQuery) {
-    return this.apiPaymentMethodService.pagination(oid, query)
+  async pagination(
+    @External() { oid }: TExternal,
+    @Query() query: PaymentMethodPaginationQuery
+  ): Promise<BaseResponse> {
+    const data = await this.apiPaymentMethodService.pagination(oid, query)
+    return { data }
   }
 
   @Get('list')
   @UserPermission()
-  list(@External() { oid }: TExternal, @Query() query: PaymentMethodGetManyQuery) {
-    return this.apiPaymentMethodService.getMany(oid, query)
+  async list(
+    @External() { oid }: TExternal,
+    @Query() query: PaymentMethodGetManyQuery
+  ): Promise<BaseResponse> {
+    const data = await this.apiPaymentMethodService.getMany(oid, query)
+    return { data }
   }
 
   @Get('detail/:id')
   @UserPermission()
-  findOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return this.apiPaymentMethodService.getOne(oid, id)
+  async findOne(@External() { oid }: TExternal, @Param() { id }: IdParam): Promise<BaseResponse> {
+    const data = await this.apiPaymentMethodService.getOne(oid, id)
+    return { data }
   }
 
   @Post('create')
   @UserPermission(PermissionId.MASTER_DATA_PAYMENT_METHOD)
-  async createOne(@External() { oid }: TExternal, @Body() body: PaymentMethodCreateBody) {
-    return await this.apiPaymentMethodService.createOne(oid, body)
+  async createOne(
+    @External() { oid }: TExternal,
+    @Body() body: PaymentMethodCreateBody
+  ): Promise<BaseResponse> {
+    const data = await this.apiPaymentMethodService.createOne(oid, body)
+    return { data }
   }
 
   @Patch('update/:id')
@@ -49,14 +63,19 @@ export class ApiPaymentMethodController {
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
     @Body() body: PaymentMethodUpdateBody
-  ) {
-    return await this.apiPaymentMethodService.updateOne(oid, id, body)
+  ): Promise<BaseResponse> {
+    const data = await this.apiPaymentMethodService.updateOne({ oid, paymentMethodId: id, body })
+    return { data }
   }
 
   @Delete('destroy/:id')
   @UserPermission(PermissionId.MASTER_DATA_PAYMENT_METHOD)
   @ApiParam({ name: 'id', example: 1 })
-  async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiPaymentMethodService.destroyOne({ oid, paymentMethodId: id })
+  async destroyOne(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam
+  ): Promise<BaseResponse> {
+    const data = await this.apiPaymentMethodService.destroyOne({ oid, paymentMethodId: id })
+    return { data }
   }
 }

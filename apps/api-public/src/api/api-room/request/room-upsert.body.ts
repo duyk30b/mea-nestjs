@@ -17,7 +17,7 @@ export class RoomBody {
   @Expose()
   @IsDefined()
   @IsString()
-  roomCode: string
+  code: string
 
   @ApiProperty({ example: '' })
   @Expose()
@@ -36,6 +36,12 @@ export class RoomBody {
   @IsDefined()
   @IsEnumValue(RoomInteractType)
   roomInteractType: RoomInteractType
+
+  @ApiProperty({})
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  roomStyle: number
 }
 
 export class RoomCreateBody {

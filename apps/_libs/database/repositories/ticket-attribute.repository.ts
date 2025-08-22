@@ -8,7 +8,21 @@ import {
   TicketAttributeSortType,
   TicketAttributeUpdateType,
 } from '../entities/ticket-attribute.entity'
+import { _PostgreSqlManager } from './_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
+
+@Injectable()
+export class TicketAttributeManager extends _PostgreSqlManager<
+  TicketAttribute,
+  TicketAttributeRelationType,
+  TicketAttributeInsertType,
+  TicketAttributeUpdateType,
+  TicketAttributeSortType
+> {
+  constructor() {
+    super(TicketAttribute)
+  }
+}
 
 @Injectable()
 export class TicketAttributeRepository extends _PostgreSqlRepository<

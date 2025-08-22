@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { uniqueArray } from '../../../../_libs/common/helpers/array.helper'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { MovementType } from '../../../../_libs/database/common/variable'
 import {
   Customer,
   Distributor,
   ProductMovement,
-  Receipt,
+  PurchaseOrder,
   StockCheck,
   Ticket,
   User,
@@ -15,7 +14,7 @@ import {
   CustomerRepository,
   DistributorRepository,
   ProductMovementRepository,
-  ReceiptRepository,
+  PurchaseOrderRepository,
   StockCheckRepository,
   TicketRepository,
   UserRepository,
@@ -26,7 +25,7 @@ import { ProductMovementPaginationQuery } from './request'
 export class ApiProductMovementService {
   constructor(
     private readonly productMovementRepository: ProductMovementRepository,
-    private readonly receiptRepository: ReceiptRepository,
+    private readonly purchaseOrderRepository: PurchaseOrderRepository,
     private readonly stockCheckRepository: StockCheckRepository,
     private readonly ticketRepository: TicketRepository,
     private readonly customerRepository: CustomerRepository,
@@ -34,9 +33,9 @@ export class ApiProductMovementService {
     private readonly userRepository: UserRepository
   ) { }
 
-  async pagination(oid: number, query: ProductMovementPaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: ProductMovementPaginationQuery) {
     const { page, limit, filter, sort, relation } = query
-    const { total, data } = await this.productMovementRepository.pagination({
+    const { total, data: productMovementList } = await this.productMovementRepository.pagination({
       relation: { product: relation?.product },
       page,
       limit,
@@ -50,34 +49,34 @@ export class ApiProductMovementService {
       sort,
     })
 
-    const receiptIds = data
-      .filter((i) => i.movementType === MovementType.Receipt)
+    const purchaseOrderIds = productMovementList
+      .filter((i) => i.movementType === MovementType.PurchaseOrder)
       .map((i) => i.voucherId)
-    const ticketIds = data
+    const ticketIds = productMovementList
       .filter((i) => i.movementType === MovementType.Ticket)
       .map((i) => i.voucherId)
-    const stockCheckIds = data
+    const stockCheckIds = productMovementList
       .filter((i) => i.movementType === MovementType.StockCheck)
       .map((i) => i.voucherId)
 
-    const distributorIds = data
-      .filter((i) => i.movementType === MovementType.Receipt)
+    const distributorIds = productMovementList
+      .filter((i) => i.movementType === MovementType.PurchaseOrder)
       .map((i) => i.contactId)
-    const customerIds = data
+    const customerIds = productMovementList
       .filter((i) => i.movementType === MovementType.Ticket)
       .map((i) => i.contactId)
-    const userIds = data
+    const userIds = productMovementList
       .filter((i) =>
         [MovementType.UserChange, MovementType.StockCheck, MovementType.Excel].includes(
           i.movementType
         ))
       .map((i) => i.contactId)
 
-    const [receiptList, ticketList, stockCheckList, distributorList, customerList, userList] =
+    const [purchaseOrderList, ticketList, stockCheckList, distributorList, customerList, userList] =
       await Promise.all([
-        relation?.receipt && receiptIds.length
-          ? this.receiptRepository.findMany({ condition: { id: { IN: uniqueArray(receiptIds) } } })
-          : <Receipt[]>[],
+        relation?.purchaseOrder && purchaseOrderIds.length
+          ? this.purchaseOrderRepository.findMany({ condition: { id: { IN: uniqueArray(purchaseOrderIds) } } })
+          : <PurchaseOrder[]>[],
         relation?.ticket && ticketIds.length
           ? this.ticketRepository.findMany({ condition: { id: { IN: uniqueArray(ticketIds) } } })
           : <Ticket[]>[],
@@ -99,9 +98,9 @@ export class ApiProductMovementService {
           : <User[]>[],
       ])
 
-    data.forEach((mov: ProductMovement) => {
-      if (mov.movementType === MovementType.Receipt) {
-        mov.receipt = receiptList.find((v) => v.id === mov.voucherId)
+    productMovementList.forEach((mov: ProductMovement) => {
+      if (mov.movementType === MovementType.PurchaseOrder) {
+        mov.purchaseOrder = purchaseOrderList.find((v) => v.id === mov.voucherId)
         mov.distributor = distributorList.find((c) => c.id === mov.contactId)
       }
       if (mov.movementType === MovementType.Ticket) {
@@ -120,9 +119,6 @@ export class ApiProductMovementService {
       }
     })
 
-    return {
-      data,
-      meta: { total, page, limit },
-    }
+    return { productMovementList, total, page, limit }
   }
 }

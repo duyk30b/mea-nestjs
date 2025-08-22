@@ -7,7 +7,7 @@ export const ProcedureExcelRules = {
     type: 'number',
     required: false,
   },
-  procedureCode: {
+  code: {
     title: 'Mã dịch vụ',
     width: 20,
     type: 'string_number',

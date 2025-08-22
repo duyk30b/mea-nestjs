@@ -8,7 +8,21 @@ import {
   ImageSortType,
   ImageUpdateType,
 } from '../entities/image.entity'
+import { _PostgreSqlManager } from './_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
+
+@Injectable()
+export class ImageManager extends _PostgreSqlManager<
+  Image,
+  ImageRelationType,
+  ImageInsertType,
+  ImageUpdateType,
+  ImageSortType
+> {
+  constructor() {
+    super(Image)
+  }
+}
 
 @Injectable()
 export class ImageRepository extends _PostgreSqlRepository<

@@ -1,6 +1,16 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsNumber, IsPositive, ValidateNested } from 'class-validator'
+import {
+  IsArray,
+  IsDefined,
+  IsNumber,
+  IsPositive,
+  Validate,
+  ValidateNested,
+  ValidationArguments,
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+} from 'class-validator'
 import { valuesEnum } from '../../../../../_libs/common/helpers/typescript.helper'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 import {
@@ -63,6 +73,24 @@ export class PositionReplaceListBody {
   filter: PositionFilterQuery
 }
 
+@ValidatorConstraint({ name: 'validateCommissionValue', async: false })
+class ValidateCommissionValue implements ValidatorConstraintInterface {
+  validate(val: number, args: ValidationArguments) {
+    const object = args.object as PositionBasicBody
+    if (
+      object.commissionCalculatorType === CommissionCalculatorType.PercentActual
+      || object.commissionCalculatorType === CommissionCalculatorType.PercentExpected
+    ) {
+      if (val < 0 || val > 100) return false
+    }
+    return true
+  }
+
+  defaultMessage(args: ValidationArguments) {
+    return 'Giá trị tiền hoa hồng = $value là không hợp lệ'
+  }
+}
+
 export class PositionBasicBody {
   @Expose()
   @IsDefined()
@@ -73,6 +101,7 @@ export class PositionBasicBody {
   @Expose()
   @IsDefined()
   @IsNumber()
+  @Validate(ValidateCommissionValue)
   commissionValue: number
 
   @ApiProperty({ example: CommissionCalculatorType.VND })

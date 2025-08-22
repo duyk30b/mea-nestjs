@@ -3,7 +3,7 @@ import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
 import { DeliveryStatus, DiscountType } from '../../common/variable'
 import { Ticket } from '../../entities'
-import { TicketManager } from '../../managers'
+import { TicketManager } from '../../repositories'
 
 @Injectable()
 export class TicketChangeItemMoneyManager {

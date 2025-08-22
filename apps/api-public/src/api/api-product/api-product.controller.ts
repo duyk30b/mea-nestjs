@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
 import { OrganizationPermission } from '../../../../_libs/common/guards/organization.guard'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
+import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiProductService } from './api-product.service'
@@ -23,14 +24,22 @@ export class ApiProductController {
 
   @Get('pagination')
   @OrganizationPermission(PermissionId.PRODUCT)
-  pagination(@External() { oid }: TExternal, @Query() query: ProductPaginationQuery) {
-    return this.apiProductService.pagination(oid, query)
+  async pagination(
+    @External() { oid }: TExternal,
+    @Query() query: ProductPaginationQuery
+  ): Promise<BaseResponse> {
+    const data = await this.apiProductService.pagination(oid, query)
+    return { data }
   }
 
   @Get('list')
   @OrganizationPermission(PermissionId.PRODUCT)
-  async list(@External() { oid }: TExternal, @Query() query: ProductGetManyQuery) {
-    return await this.apiProductService.getList(oid, query)
+  async list(
+    @External() { oid }: TExternal,
+    @Query() query: ProductGetManyQuery
+  ): Promise<BaseResponse> {
+    const data = await this.apiProductService.getList(oid, query)
+    return { data }
   }
 
   @Get('detail/:id')
@@ -39,14 +48,19 @@ export class ApiProductController {
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
     @Query() query: ProductGetOneQuery
-  ) {
-    return await this.apiProductService.getOne(oid, id, query)
+  ): Promise<BaseResponse> {
+    const data = await this.apiProductService.getOne(oid, id, query)
+    return { data }
   }
 
   @Post('create')
   @UserPermission(PermissionId.PRODUCT_CREATE)
-  async create(@External() { oid }: TExternal, @Body() body: ProductCreateBody) {
-    return await this.apiProductService.createOne(oid, body)
+  async create(
+    @External() { oid }: TExternal,
+    @Body() body: ProductCreateBody
+  ): Promise<BaseResponse> {
+    const data = await this.apiProductService.createOne(oid, body)
+    return { data }
   }
 
   @Patch('update/:id')
@@ -55,15 +69,20 @@ export class ApiProductController {
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
     @Body() body: ProductUpdateBody
-  ) {
-    return await this.apiProductService.updateOne(oid, id, body)
+  ): Promise<BaseResponse> {
+    const data = await this.apiProductService.updateOne(oid, id, body)
+    return { data }
   }
 
   @Delete('destroy/:id')
   @UserPermission(PermissionId.PRODUCT_DELETE)
   @ApiParam({ name: 'id', example: 1 })
-  async deleteOne(@External() { oid, organization }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiProductService.destroyOne({ organization, oid, productId: id })
+  async deleteOne(
+    @External() { oid, organization }: TExternal,
+    @Param() { id }: IdParam
+  ): Promise<BaseResponse> {
+    const data = await this.apiProductService.destroyOne({ organization, oid, productId: id })
+    return { data }
   }
 
   @Patch('merge-product')
@@ -71,7 +90,8 @@ export class ApiProductController {
   async mergeProduct(
     @External() { oid, uid, organization }: TExternal,
     @Body() body: ProductMergeBody
-  ) {
-    return await this.apiProductService.mergeProduct({ oid, body, userId: uid })
+  ): Promise<BaseResponse> {
+    const data = await this.apiProductService.mergeProduct({ oid, body, userId: uid })
+    return { data }
   }
 }

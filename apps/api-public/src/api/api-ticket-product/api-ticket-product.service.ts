@@ -20,7 +20,7 @@ export class ApiTicketProductService {
   async pagination(oid: number, query: TicketProductPaginationQuery) {
     const { page, limit, filter, relation, sort } = query
 
-    const { total, data } = await this.ticketProductRepository.pagination({
+    const { total, data: ticketProductList } = await this.ticketProductRepository.pagination({
       relation,
       page,
       limit,
@@ -35,7 +35,7 @@ export class ApiTicketProductService {
       sort,
     })
 
-    return { page, limit, total, ticketProductList: data }
+    return { page, limit, total, ticketProductList }
   }
 
   async getList(oid: number, query: TicketProductGetManyQuery) {

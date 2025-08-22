@@ -7,6 +7,7 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
+import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { ApiTicketLaboratoryService } from './api-ticket-laboratory.service'
 import {
@@ -25,8 +26,9 @@ export class ApiTicketLaboratoryController {
   async pagination(
     @External() { oid }: TExternal,
     @Query() query: TicketLaboratoryPaginationQuery
-  ) {
-    return await this.apiTicketLaboratoryService.pagination(oid, query)
+  ): Promise<BaseResponse> {
+    const data = await this.apiTicketLaboratoryService.pagination(oid, query)
+    return { data }
   }
 
   @Get('detail/:id')
@@ -35,7 +37,8 @@ export class ApiTicketLaboratoryController {
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
     @Query() query: TicketLaboratoryGetOneQuery
-  ) {
-    return await this.apiTicketLaboratoryService.getOne(oid, id, query)
+  ): Promise<BaseResponse> {
+    const data = await this.apiTicketLaboratoryService.getOne(oid, id, query)
+    return { data }
   }
 }

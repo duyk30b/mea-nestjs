@@ -5,7 +5,7 @@ import { MovementType } from '../common/variable'
 import Customer from './customer.entity'
 import Distributor from './distributor.entity'
 import Product from './product.entity'
-import Receipt from './receipt.entity'
+import PurchaseOrder from './purchase-order.entity'
 import StockCheck from './stock-check.entity'
 import Ticket from './ticket.entity'
 import User from './user.entity'
@@ -27,11 +27,11 @@ export default class ProductMovement extends BaseEntity {
   @Expose()
   contactId: number
 
-  @Column() // ticketId hoặc receiptId hoặc stockCheckId
+  @Column() // ticketId hoặc purchaseOrder hoặc stockCheckId
   @Expose()
   voucherId: number
 
-  @Column({ default: 0 }) // ticketProductId hoặc receiptItemId hoặc stockCheckItemId
+  @Column({ default: 0 }) // ticketProductId hoặc purchaseOrderItemId hoặc stockCheckItemId
   @Expose()
   voucherProductId: number
 
@@ -159,9 +159,9 @@ export default class ProductMovement extends BaseEntity {
   distributor: Distributor
 
   @Expose()
-  @ManyToOne((type) => Receipt, { createForeignKeyConstraints: false })
+  @ManyToOne((type) => PurchaseOrder, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
-  receipt: Receipt
+  purchaseOrder: PurchaseOrder
 
   @Expose()
   @ManyToOne((type) => Ticket, { createForeignKeyConstraints: false })
@@ -211,7 +211,7 @@ export default class ProductMovement extends BaseEntity {
 export type ProductMovementRelationType = {
   [P in keyof Pick<
     ProductMovement,
-    'product' | 'receipt' | 'ticket' | 'stockCheck' | 'distributor' | 'customer' | 'user'
+    'product' | 'purchaseOrder' | 'ticket' | 'stockCheck' | 'distributor' | 'customer' | 'user'
   >]?: boolean
 }
 

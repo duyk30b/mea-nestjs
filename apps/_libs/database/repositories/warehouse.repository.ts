@@ -8,7 +8,21 @@ import {
   WarehouseSortType,
   WarehouseUpdateType,
 } from '../entities/warehouse.entity'
+import { _PostgreSqlManager } from './_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
+
+@Injectable()
+export class WarehouseManager extends _PostgreSqlManager<
+  Warehouse,
+  WarehouseRelationType,
+  WarehouseInsertType,
+  WarehouseUpdateType,
+  WarehouseSortType
+> {
+  constructor() {
+    super(Warehouse)
+  }
+}
 
 @Injectable()
 export class WarehouseRepository extends _PostgreSqlRepository<

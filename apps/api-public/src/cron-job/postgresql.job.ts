@@ -15,12 +15,12 @@ export class PostgresqlJob {
     private readonly googleDriverService: GoogleDriverService
   ) { }
 
-  @Cron('0 0 20 * * *') // chạy vào 3h00 sáng hàng ngày (thằng cron chạy lúc 2h)
+  @Cron('0 0 19 * * *') // chạy vào 2h00 sáng hàng ngày (thằng cron chạy lúc 2h)
   async startBackupPostgres() {
     this.logger.debug('===== Start Backup Database Postgres =====')
   }
 
-  @Cron('0 30 20 * * *') // chạy vào 3h30 sáng hàng ngày (thằng cron chạy lúc 2h)
+  @Cron('0 30 19 * * *') // chạy vào 2h30 sáng hàng ngày (thằng cron chạy lúc 2h)
   async startJobUploadPostgres() {
     this.logger.debug('===== Start Upload Database to GoogleDriver =====')
     const oid = 1

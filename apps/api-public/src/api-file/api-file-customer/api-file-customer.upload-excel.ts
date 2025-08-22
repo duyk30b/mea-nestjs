@@ -11,8 +11,7 @@ import {
   PaymentPersonType,
   PaymentVoucherType,
 } from '../../../../_libs/database/entities/payment.entity'
-import { CustomerManager } from '../../../../_libs/database/managers'
-import { PaymentManager } from '../../../../_libs/database/repositories'
+import { CustomerManager, PaymentManager } from '../../../../_libs/database/repositories'
 import { ExcelProcess } from '../common/excel-process'
 import { CustomerExcelRules } from './customer-excel.rule'
 
