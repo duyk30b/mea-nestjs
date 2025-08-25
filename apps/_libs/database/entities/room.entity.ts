@@ -2,7 +2,7 @@ import { Expose } from 'class-transformer'
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import UserRoom from './user-room.entity'
 
-export enum RoomInteractType {
+export enum RoomType {
   Ticket = 1,
   Product = 2,
   Procedure = 3,
@@ -37,9 +37,9 @@ export default class Room {
   @Column({ type: 'varchar', length: 255 })
   name: string
 
-  @Column({ type: 'smallint', default: RoomInteractType.Product })
+  @Column({ type: 'smallint', default: RoomType.Product })
   @Expose()
-  roomInteractType: RoomInteractType
+  roomType: RoomType
 
   @Column({ type: 'smallint', default: 0 })
   @Expose()

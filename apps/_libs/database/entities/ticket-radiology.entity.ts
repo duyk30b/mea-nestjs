@@ -16,7 +16,7 @@ export enum TicketRadiologyStatus {
 @Entity('TicketRadiology')
 @Index('IDX_TicketRadiology__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketRadiology__oid_radiologyId', ['oid', 'radiologyId'])
-@Index('IDX_TicketRadiology__oid_registeredAt', ['oid', 'registeredAt'])
+@Index('IDX_TicketRadiology__oid_createdAt', ['oid', 'createdAt'])
 export default class TicketRadiology extends BaseEntity {
   @Column()
   @Expose()
@@ -106,15 +106,13 @@ export default class TicketRadiology extends BaseEntity {
 
   @Column({
     type: 'bigint',
-    nullable: true,
-    default: 0,
     transformer: {
       to: (value) => value,
       from: (value) => (value == null ? value : Number(value)),
     },
   })
   @Expose()
-  registeredAt: number
+  createdAt: number
 
   @Column({
     type: 'bigint',
@@ -125,7 +123,7 @@ export default class TicketRadiology extends BaseEntity {
     },
   })
   @Expose()
-  startedAt: number
+  completedAt: number
 
   @Column({ type: 'text', default: '' })
   @Expose({})
@@ -173,7 +171,8 @@ export default class TicketRadiology extends BaseEntity {
     entity.discountPercent = Number(raw.discountPercent)
     entity.actualPrice = Number(raw.actualPrice)
 
-    entity.startedAt = raw.startedAt == null ? raw.startedAt : Number(raw.startedAt)
+    entity.createdAt = Number(raw.createdAt)
+    entity.completedAt = raw.completedAt == null ? raw.completedAt : Number(raw.completedAt)
     return entity
   }
 
@@ -210,6 +209,6 @@ export type TicketRadiologyUpdateType = {
 export type TicketRadiologySortType = {
   [P in keyof Pick<
     TicketRadiology,
-    'id' | 'ticketId' | 'radiologyId' | 'startedAt' | 'registeredAt' | 'priority'
+    'id' | 'ticketId' | 'radiologyId' | 'completedAt' | 'createdAt' | 'priority'
   >]?: 'ASC' | 'DESC'
 }

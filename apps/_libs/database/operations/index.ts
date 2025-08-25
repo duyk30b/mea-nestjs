@@ -4,6 +4,8 @@ export * from './product/product-picking.operation'
 export * from './product/product-putaway.operation'
 export * from './product/product.operation'
 
+export * from './room/room.operation'
+
 export * from './purchase-order/purchase-order-close.operation'
 export * from './purchase-order/purchase-order-deposited.operation'
 export * from './purchase-order/purchase-order-draft.operation'
@@ -11,8 +13,9 @@ export * from './purchase-order/purchase-order-reopen.operation'
 export * from './purchase-order/purchase-order-return-product.operation'
 export * from './purchase-order/purchase-order-send-product.operation'
 
+export * from './statistic/statistic-product.operation'
 export * from './statistic/statistic-purchase-order.operation'
-export * from './statistic/statistic.operation'
+export * from './statistic/statistic-ticket.operation'
 
 export * from './ticket-base/ticket-calculator-money.operator'
 export * from './ticket-base/ticket-change-all-money.operator'
@@ -22,7 +25,6 @@ export * from './ticket-base/ticket-close.operation'
 export * from './ticket-base/ticket-reopen.operation'
 export * from './ticket-base/ticket-return-product.operation'
 export * from './ticket-base/ticket-send-product.operation'
-export * from './ticket-base/ticket-statistic.operation'
 export * from './ticket-base/ticket-update-commission-ticket-user.operator'
 
 export * from './ticket-item/ticket-change-procedure/ticket-add-ticket-procedure-list.operation'

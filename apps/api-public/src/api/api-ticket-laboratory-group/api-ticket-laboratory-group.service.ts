@@ -53,8 +53,8 @@ export class ApiTicketLaboratoryGroupService {
           customerId: filter?.customerId,
           roomId: filter?.roomId,
           ticketId: filter?.ticketId,
-          registeredAt: filter?.registeredAt,
-          startedAt: filter?.startedAt,
+          createdAt: filter?.createdAt,
+          completedAt: filter?.completedAt,
         },
         sort,
       })
@@ -66,11 +66,7 @@ export class ApiTicketLaboratoryGroupService {
     return { ticketLaboratoryGroupList, page, limit, total }
   }
 
-  async getOne(
-    oid: number,
-    id: number,
-    query: TicketLaboratoryGroupGetOneQuery
-  ) {
+  async getOne(oid: number, id: number, query: TicketLaboratoryGroupGetOneQuery) {
     const { relation } = query
     const ticketLaboratoryGroup = await this.ticketLaboratoryGroupRepository.findOne({
       // relation: {

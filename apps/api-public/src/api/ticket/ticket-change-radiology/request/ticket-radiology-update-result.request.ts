@@ -51,7 +51,7 @@ export class TicketRadiologyUpdateBody extends MultipleFileUpload {
   @Transform(({ value }) => (value != null ? Number(value) : value))
   @IsDefined()
   @IsInt()
-  startedAt: number
+  completedAt: number
 }
 
 class ImagesChangeBody {

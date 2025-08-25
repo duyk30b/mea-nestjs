@@ -32,7 +32,7 @@ export type TIcketProcedureAddType = Pick<
   | 'discountPercent'
   | 'discountType'
   | 'actualPrice'
-  | 'startedAt'
+  | 'createdAt'
 > & { ticketProcedureItemAddList: TIcketProcedureItemAddType[] }
 
 @Injectable()

@@ -33,7 +33,7 @@ export class ApiTicketLaboratoryService {
         customerId: filter?.customerId,
         laboratoryId: filter?.laboratoryId,
         ticketId: filter?.ticketId,
-        startedAt: filter?.startedAt,
+        createdAt: filter?.createdAt,
       },
       sort,
     })

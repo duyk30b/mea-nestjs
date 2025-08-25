@@ -2,12 +2,13 @@ import { Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { ESArray } from '../../../../_libs/common/helpers'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { BusinessError } from '../../../../_libs/database/common/error'
 import { Room, UserRoom } from '../../../../_libs/database/entities'
 import { UserRoomInsertType } from '../../../../_libs/database/entities/user-room.entity'
+import { RoomOperation } from '../../../../_libs/database/operations'
 import {
   RoomRepository,
+  TicketRepository,
   UserRepository,
   UserRoomRepository,
 } from '../../../../_libs/database/repositories'
@@ -15,6 +16,7 @@ import {
   RoomCreateBody,
   RoomGetManyQuery,
   RoomGetOneQuery,
+  RoomMergeBody,
   RoomPaginationQuery,
   RoomRelationQuery,
   RoomUpdateBody,
@@ -26,10 +28,12 @@ export class ApiRoomService {
     private readonly cacheDataService: CacheDataService,
     private readonly roomRepository: RoomRepository,
     private readonly userRepository: UserRepository,
-    private readonly userRoomRepository: UserRoomRepository
+    private readonly userRoomRepository: UserRoomRepository,
+    private readonly ticketRepository: TicketRepository,
+    private readonly roomOperation: RoomOperation
   ) { }
 
-  async pagination(oid: number, query: RoomPaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: RoomPaginationQuery) {
     const { page, limit, filter, sort, relation } = query
 
     const { data, total } = await this.roomRepository.pagination({
@@ -46,24 +50,15 @@ export class ApiRoomService {
       await this.generateRelation(data, relation)
     }
 
-    return {
-      data: {
-        roomList: data,
-        total,
-        page,
-        limit,
-      },
-    }
+    return { roomList: data, total, page, limit }
   }
 
-  async getMany(oid: number, query: RoomGetManyQuery): Promise<BaseResponse> {
+  async getMany(oid: number, query: RoomGetManyQuery) {
     const { limit, filter, relation, sort } = query
 
     const roomList = await this.roomRepository.findMany({
       relation,
-      condition: {
-        oid,
-      },
+      condition: { oid },
       limit,
       sort,
     })
@@ -71,14 +66,10 @@ export class ApiRoomService {
     if (relation) {
       await this.generateRelation(roomList, relation)
     }
-    return { data: { roomList } }
+    return { roomList }
   }
 
-  async getOne(options: {
-    oid: number
-    roomId: number
-    query: RoomGetOneQuery
-  }): Promise<BaseResponse> {
+  async getOne(options: { oid: number; roomId: number; query: RoomGetOneQuery }) {
     const { oid, roomId, query } = options
     const room = await this.roomRepository.findOneBy({ oid, id: roomId })
     if (!room) throw new BusinessException('error.Database.NotFound')
@@ -87,10 +78,10 @@ export class ApiRoomService {
       const dataRelation = await this.generateRelation([room], query.relation)
     }
 
-    return { data: { room } }
+    return { room }
   }
 
-  async createOne(oid: number, body: RoomCreateBody): Promise<BaseResponse> {
+  async createOne(oid: number, body: RoomCreateBody) {
     const { room: roomBody, userIdList } = body
 
     let code = roomBody.code
@@ -126,10 +117,10 @@ export class ApiRoomService {
         await this.userRoomRepository.insertManyAndReturnEntity(userRoomInsertList)
     }
     this.cacheDataService.clearUserAndRoleAndRoom(oid)
-    return { data: { room } }
+    return { room }
   }
 
-  async updateOne(oid: number, roomId: number, body: RoomUpdateBody): Promise<BaseResponse> {
+  async updateOne(oid: number, roomId: number, body: RoomUpdateBody) {
     const { room: roomBody, userIdList } = body
 
     if (roomBody.code != null) {
@@ -168,15 +159,36 @@ export class ApiRoomService {
         await this.userRoomRepository.insertManyAndReturnEntity(userRoomInsertList)
     }
     this.cacheDataService.clearUserAndRoleAndRoom(oid)
-    return { data: { room } }
+    return { room }
   }
 
-  async destroyOne(oid: number, roomId: number): Promise<BaseResponse> {
-    const roomDestroyed = await this.roomRepository.deleteOneAndReturnEntity({ oid, id: roomId })
+  async destroyOne(oid: number, roomId: number) {
+    const ticketList = await this.ticketRepository.findMany({
+      condition: { oid, roomId },
+      limit: 10,
+    })
 
-    await this.userRoomRepository.delete({ oid, roomId })
+    if (!ticketList.length) {
+      await this.roomRepository.delete({ oid, id: roomId })
+      await this.userRoomRepository.delete({ oid, roomId })
+      this.cacheDataService.clearUserAndRoleAndRoom(oid)
+    }
+
+    return { ticketList, roomId, success: ticketList.length === 0 }
+  }
+
+  async mergeRoom(options: { oid: number; userId: number; body: RoomMergeBody }) {
+    const { oid, userId, body } = options
+    const { roomIdSourceList, roomIdTarget } = body
+    roomIdSourceList.forEach((i) => {
+      if (isNaN(i) || i <= 0) {
+        throw new BusinessException('error.ValidateFailed')
+      }
+    })
+
+    await this.roomOperation.mergeRoom({ oid, userId, roomIdSourceList, roomIdTarget })
     this.cacheDataService.clearUserAndRoleAndRoom(oid)
-    return { data: { roomId } }
+    return true
   }
 
   async generateRelation(roomList: Room[], relation: RoomRelationQuery) {

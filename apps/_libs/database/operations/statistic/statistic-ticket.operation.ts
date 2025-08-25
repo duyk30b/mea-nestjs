@@ -6,7 +6,7 @@ import { Ticket } from '../../entities'
 import { TicketRepository } from '../../repositories'
 
 @Injectable()
-export class TicketStatisticOperation {
+export class StatisticTicketOperation {
   constructor(
     private dataSource: DataSource,
     @InjectEntityManager() private manager: EntityManager,

@@ -39,13 +39,4 @@ export class CustomerRepository extends _PostgreSqlRepository<
   ) {
     super(Customer, customerRepository)
   }
-
-  async sumDebt(oid: number): Promise<number> {
-    const { sum } = await this.manager
-      .createQueryBuilder(Customer, 'customer')
-      .select('SUM(debt)', 'sum')
-      .where({ oid })
-      .getRawOne()
-    return Number(sum)
-  }
 }

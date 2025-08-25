@@ -31,7 +31,6 @@ import { ApiRadiologyModule } from './api-radiology/api-radiology.module'
 import { ApiRoleModule } from './api-role/api-role.module'
 import { ApiRoomModule } from './api-room/api-room.module'
 import { ApiSettingModule } from './api-setting/api-setting.module'
-import { ApiStatisticModule } from './api-statistics/api-statistic.module'
 import { ApiStockCheckModule } from './api-stock-check/api-stock-check.module'
 import { ApiSurchargeModule } from './api-surcharge/api-surcharge.module'
 import { ApiTicketBatchModule } from './api-ticket-batch/api-ticket-batch.module'
@@ -45,6 +44,7 @@ import { ApiUserRoomModule } from './api-user-room/api-user-room.module'
 import { ApiUserModule } from './api-user/api-user.module'
 import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
 import { ApiPurchaseOrderModule } from './purchase-order/api-purchase-order.module'
+import { StatisticModule } from './statistics/statistic.module'
 import { TicketModule } from './ticket/ticket.module'
 
 @Module({
@@ -64,7 +64,7 @@ import { TicketModule } from './ticket/ticket.module'
     ApiPurchaseOrderModule,
     ApiPurchaseOrderItemModule,
 
-    ApiStatisticModule,
+    StatisticModule,
     ApiSettingModule,
 
     ApiOrganizationModule,

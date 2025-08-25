@@ -1,7 +1,8 @@
-import { Expose, Type } from 'class-transformer'
+import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
 import { IsBoolean, IsIn, IsInt, IsOptional, ValidateNested } from 'class-validator'
-import { ConditionTimestamp } from '../../../../../_libs/common/dto'
+import { ConditionTimestamp, createConditionEnum, transformConditionEnum } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
+import { TicketLaboratoryStatus } from '../../../../../_libs/database/common/variable'
 
 export class TicketLaboratoryRelationQuery {
   @Expose()
@@ -21,7 +22,14 @@ export class TicketLaboratoryRelationQuery {
   ticket: boolean
 }
 
+const ConditionEnumTicketLaboratoryStatus = createConditionEnum(TicketLaboratoryStatus)
+
 export class TicketLaboratoryFilterQuery {
+  @Expose()
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketLaboratoryStatus))
+  @IsOptional()
+  status?: TicketLaboratoryStatus | InstanceType<typeof ConditionEnumTicketLaboratoryStatus>
+
   @Expose()
   @IsInt()
   laboratoryId: number
@@ -37,11 +45,11 @@ export class TicketLaboratoryFilterQuery {
   @Expose()
   @Type(() => ConditionTimestamp)
   @ValidateNested({ each: true })
-  startedAt: ConditionTimestamp
+  createdAt: ConditionTimestamp
 }
 
 export class TicketLaboratorySortQuery extends SortQuery {
   @Expose()
   @IsIn(['ASC', 'DESC'])
-  startedAt: 'ASC' | 'DESC'
+  createdAt: 'ASC' | 'DESC'
 }

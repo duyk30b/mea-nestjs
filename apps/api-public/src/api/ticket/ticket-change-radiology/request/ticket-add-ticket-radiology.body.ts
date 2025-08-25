@@ -23,7 +23,7 @@ export class TicketAddTicketRadiologyBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  registeredAt: number
+  createdAt: number
 
   @ApiProperty({ example: 56 })
   @Expose()

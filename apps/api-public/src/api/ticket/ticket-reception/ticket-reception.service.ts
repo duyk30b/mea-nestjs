@@ -173,7 +173,7 @@ export class TicketReceptionService {
           customerId: ticket.customerId,
           status: TicketProcedureStatus.Completed,
           oid,
-          startedAt: Date.now(),
+          createdAt: Date.now(),
           ticketId: ticket.id,
           completedSessions: 0,
         }

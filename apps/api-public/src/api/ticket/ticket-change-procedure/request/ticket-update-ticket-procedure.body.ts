@@ -43,7 +43,7 @@ class TicketProcedureBody {
   @ApiProperty({ example: 4 })
   @Expose()
   @IsDefined()
-  @IsNumberGreaterThan(0)
+  @IsNumber()
   totalSessions: number
 
   @ApiProperty({ example: 25_000 })

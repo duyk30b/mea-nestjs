@@ -64,22 +64,22 @@ export class TicketRadiologyFilterQuery {
   @Expose()
   @Type(() => ConditionTimestamp)
   @ValidateNested({ each: true })
-  startedAt: ConditionTimestamp
+  completedAt: ConditionTimestamp
 
   @Expose()
   @Type(() => ConditionTimestamp)
   @ValidateNested({ each: true })
-  registeredAt: ConditionTimestamp
+  createdAt: ConditionTimestamp
 }
 
 export class TicketRadiologySortQuery extends SortQuery {
   @Expose()
   @IsIn(['ASC', 'DESC'])
-  startedAt: 'ASC' | 'DESC'
+  completedAt: 'ASC' | 'DESC'
 
   @Expose()
   @IsIn(['ASC', 'DESC'])
-  registeredAt: 'ASC' | 'DESC'
+  createdAt: 'ASC' | 'DESC'
 }
 
 export class TicketRadiologyResponseQuery {

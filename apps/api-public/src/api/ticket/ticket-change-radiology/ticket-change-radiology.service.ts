@@ -54,7 +54,7 @@ export class TicketChangeRadiologyService {
         oid,
         ticketId,
         imageIds: JSON.stringify([]),
-        startedAt: null,
+        completedAt: null,
         status: TicketRadiologyStatus.Pending,
       },
     })
@@ -214,7 +214,7 @@ export class TicketChangeRadiologyService {
         customStyles: body.ticketRadiology.customStyles,
         customVariables: body.ticketRadiology.customVariables,
         result: body.ticketRadiology.result,
-        startedAt: body.ticketRadiology.startedAt,
+        completedAt: body.ticketRadiology.completedAt,
         imageIds: imageIdsUpdateString,
         status: TicketRadiologyStatus.Completed,
       }
@@ -280,7 +280,7 @@ export class TicketChangeRadiologyService {
         result: body.result,
         customStyles: body.customStyles,
         customVariables: body.customVariables,
-        startedAt: null,
+        completedAt: null,
         imageIds: JSON.stringify([]),
         status: TicketRadiologyStatus.Pending,
       }

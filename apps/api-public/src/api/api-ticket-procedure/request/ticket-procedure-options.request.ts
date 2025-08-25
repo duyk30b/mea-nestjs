@@ -1,8 +1,14 @@
-import { Expose, Transform, TransformFnParams } from 'class-transformer'
-import { IsBoolean, IsIn, IsInt, IsOptional } from 'class-validator'
-import { ConditionNumber, createConditionEnum, transformConditionEnum, transformConditionNumber } from '../../../../../_libs/common/dto'
+import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
+import { IsBoolean, IsIn, IsInt, IsOptional, ValidateNested } from 'class-validator'
+import {
+  ConditionNumber,
+  ConditionTimestamp,
+  createConditionEnum,
+  transformConditionEnum,
+  transformConditionNumber,
+} from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
-import { PaymentMoneyStatus } from '../../../../../_libs/database/common/variable'
+import { PaymentMoneyStatus, TicketProcedureStatus } from '../../../../../_libs/database/common/variable'
 
 export class TicketProcedureRelationQuery {
   @Expose()
@@ -27,12 +33,18 @@ export class TicketProcedureRelationQuery {
 }
 
 const ConditionEnumPaymentMoneyStatus = createConditionEnum(PaymentMoneyStatus)
+const ConditionEnumTicketProcedureStatus = createConditionEnum(TicketProcedureStatus)
 
 export class TicketProcedureFilterQuery {
   @Expose()
   @Transform((params: TransformFnParams) => transformConditionEnum(params, PaymentMoneyStatus))
   @IsOptional()
   paymentMoneyStatus?: PaymentMoneyStatus | InstanceType<typeof ConditionEnumPaymentMoneyStatus>
+
+  @Expose()
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketProcedureStatus))
+  @IsOptional()
+  status?: TicketProcedureStatus | InstanceType<typeof ConditionEnumTicketProcedureStatus>
 
   @Expose()
   @IsInt()
@@ -50,6 +62,11 @@ export class TicketProcedureFilterQuery {
   @Transform(transformConditionNumber)
   @IsOptional()
   ticketId?: number | ConditionNumber
+
+  @Expose()
+  @Type(() => ConditionTimestamp)
+  @ValidateNested({ each: true })
+  createdAt?: ConditionTimestamp
 }
 
 export class TicketProcedureSortQuery extends SortQuery {

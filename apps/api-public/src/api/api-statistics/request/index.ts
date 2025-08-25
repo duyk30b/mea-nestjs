@@ -1,6 +1,0 @@
-export * from './statistic-month.query'
-export * from './statistic-ticket.query'
-export * from './statistic-time.query'
-export * from './statistic-top-best-selling.query'
-export * from './statistic-top-customer-best-ticket.query'
-export * from './statistic-top-product-high-money.query'

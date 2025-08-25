@@ -6,7 +6,6 @@ import {
   TicketProductFilterQuery,
   TicketProductRelationQuery,
   TicketProductSortQuery,
-  TicketProductStatisticSortQuery,
 } from './ticket-product-options.request'
 
 export class TicketProductGetQuery {
@@ -86,26 +85,3 @@ export class TicketProductGetManyQuery extends IntersectionType(
 ) { }
 
 export class TicketProductGetOneQuery extends PickType(TicketProductGetQuery, ['relation']) { }
-
-export class TicketProductStatisticQuery extends IntersectionType(
-  PickType(TicketProductGetQuery, ['filter', 'relation']),
-  PaginationQuery
-) {
-  @ApiPropertyOptional({ type: String })
-  @Expose()
-  @Transform(({ value }) => {
-    try {
-      if (!value) return undefined // return undefined để không validate nữa
-      const plain = JSON.parse(value)
-      return plainToInstance(TicketProductStatisticSortQuery, plain, {
-        exposeUnsetFields: false,
-        excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
-      })
-    } catch (error) {
-      return error.message
-    }
-  })
-  @IsObject({ message: ({ value }) => value })
-  @ValidateNested({ each: true })
-  sortStatistic?: TicketProductStatisticSortQuery
-}

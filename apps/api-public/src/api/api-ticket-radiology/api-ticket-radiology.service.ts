@@ -46,8 +46,8 @@ export class ApiTicketRadiologyService {
         paymentMoneyStatus: filter?.paymentMoneyStatus,
         radiologyId: filter?.radiologyId,
         ticketId: filter?.ticketId,
-        startedAt: filter?.startedAt,
-        registeredAt: filter?.registeredAt,
+        createdAt: filter?.createdAt,
+        completedAt: filter?.completedAt,
       },
       sort,
     })

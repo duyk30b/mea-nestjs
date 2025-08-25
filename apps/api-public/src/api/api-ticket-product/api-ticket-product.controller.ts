@@ -5,7 +5,7 @@ import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { ApiTicketProductService } from './api-ticket-product.service'
-import { TicketProductGetManyQuery, TicketProductPaginationQuery, TicketProductStatisticQuery } from './request'
+import { TicketProductGetManyQuery, TicketProductPaginationQuery } from './request'
 
 @ApiTags('TicketProduct')
 @ApiBearerAuth('access-token')
@@ -40,16 +40,6 @@ export class ApiTicketProductController {
     @Param() { id }: IdParam
   ): Promise<BaseResponse> {
     const data = await this.apiTicketProductService.destroyZero(oid, id)
-    return { data }
-  }
-
-  @Get('statistic-product')
-  @UserPermission() // tạm thời để thế này trước
-  async statisticProduct(
-    @External() { oid }: TExternal,
-    @Query() query: TicketProductStatisticQuery
-  ): Promise<BaseResponse> {
-    const data = await this.apiTicketProductService.statisticProduct(oid, query)
     return { data }
   }
 }

@@ -4,13 +4,12 @@ import { ESTimer } from '../../../common/helpers/time.helper'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { DeliveryStatus, TicketProcedureStatus } from '../../common/variable'
 import { TicketAttributeInsertType } from '../../entities/ticket-attribute.entity'
-import { TicketExpenseInsertType } from '../../entities/ticket-expense.entity'
-import { TicketProcedureInsertType } from '../../entities/ticket-procedure.entity'
-import { TicketProductInsertType, TicketProductType } from '../../entities/ticket-product.entity'
-import { TicketSurchargeInsertType } from '../../entities/ticket-surcharge.entity'
+import TicketExpense, { TicketExpenseInsertType, TicketExpenseRelationType } from '../../entities/ticket-expense.entity'
+import TicketProcedure, { TicketProcedureInsertType, TicketProcedureRelationType } from '../../entities/ticket-procedure.entity'
+import TicketProduct, { TicketProductInsertType, TicketProductRelationType, TicketProductType } from '../../entities/ticket-product.entity'
+import TicketSurcharge, { TicketSurchargeInsertType, TicketSurchargeRelationType } from '../../entities/ticket-surcharge.entity'
 import Ticket, {
   TicketInsertType,
-  TicketRelationType,
   TicketStatus,
 } from '../../entities/ticket.entity'
 import {
@@ -21,12 +20,6 @@ import {
   TicketProductManager,
   TicketSurchargeManager,
 } from '../../repositories'
-import {
-  TicketOrderExpenseDraftType,
-  TicketOrderProcedureDraftType,
-  TicketOrderProductDraftType,
-  TicketOrderSurchargeDraftType,
-} from './ticket-order.dto'
 
 export type TicketOrderDraftUpsertType = Pick<
   Ticket,
@@ -50,6 +43,34 @@ export type TicketOrderDraftUpsertType = Pick<
   | 'profit'
   | 'registeredAt'
   | 'note'
+>
+
+export type TicketOrderProductDraftType = Omit<
+  TicketProduct,
+  | keyof TicketProductRelationType
+  | keyof Pick<
+    TicketProduct,
+    'oid' | 'id' | 'ticketId' | 'deliveryStatus' | 'customerId' | 'quantityPrescription' | 'type'
+  >
+>
+
+export type TicketOrderProcedureDraftType = Omit<
+  TicketProcedure,
+  | keyof TicketProcedureRelationType
+  | keyof Pick<
+    TicketProcedure,
+    'oid' | 'id' | 'ticketId' | 'customerId' | 'status' | 'createdAt' | 'completedSessions'
+  >
+>
+
+export type TicketOrderSurchargeDraftType = Omit<
+  TicketSurcharge,
+  keyof TicketSurchargeRelationType | keyof Pick<TicketSurcharge, 'oid' | 'id' | 'ticketId'>
+>
+
+export type TicketOrderExpenseDraftType = Omit<
+  TicketExpense,
+  keyof TicketExpenseRelationType | keyof Pick<TicketExpense, 'oid' | 'id' | 'ticketId'>
 >
 
 @Injectable()
@@ -154,11 +175,10 @@ export class TicketOrderDraftOperation {
             oid,
             ticketId: ticket.id,
             customerId: ticketOrderDraftUpsertDto.customerId,
-            startedAt: ticketOrderDraftUpsertDto.registeredAt,
+            createdAt: ticketOrderDraftUpsertDto.registeredAt,
             status: TicketProcedureStatus.Completed,
             imageIds: JSON.stringify([]),
             result: '',
-            totalSessions: 0,
             completedSessions: 0,
           }
           return ticketProcedure

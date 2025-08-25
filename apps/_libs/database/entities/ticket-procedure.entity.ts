@@ -11,6 +11,7 @@ import Ticket from './ticket.entity'
 @Entity('TicketProcedure')
 @Index('IDX_TicketProcedure__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketProcedure__oid_procedureId', ['oid', 'procedureId'])
+@Index('IDX_TicketProcedure__oid_createdAt', ['oid', 'createdAt'])
 export default class TicketProcedure extends BaseEntity {
   @Column({ default: 1 })
   @Expose()
@@ -87,14 +88,13 @@ export default class TicketProcedure extends BaseEntity {
 
   @Column({
     type: 'bigint',
-    nullable: true,
     transformer: {
       to: (value) => value,
       from: (value) => (value == null ? value : Number(value)),
     },
   })
   @Expose()
-  startedAt: number
+  createdAt: number
 
   @Expose()
   @ManyToOne((type) => Ticket, (ticket) => ticket.ticketProcedureList, {
@@ -129,7 +129,7 @@ export default class TicketProcedure extends BaseEntity {
     entity.discountPercent = Number(raw.discountPercent)
     entity.actualPrice = Number(raw.actualPrice)
 
-    entity.startedAt = raw.startedAt == null ? raw.startedAt : Number(raw.startedAt)
+    entity.createdAt = Number(raw.createdAt)
     return entity
   }
 

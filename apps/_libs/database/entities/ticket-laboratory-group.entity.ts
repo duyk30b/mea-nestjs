@@ -10,7 +10,7 @@ import Ticket from './ticket.entity'
 
 @Entity('TicketLaboratoryGroup')
 @Index('IDX_TicketLaboratoryGroup__oid_ticketId', ['oid', 'ticketId'])
-@Index('IDX_TicketLaboratoryGroup__oid_registeredAt', ['oid', 'registeredAt'])
+@Index('IDX_TicketLaboratoryGroup__oid_createdAt', ['oid', 'createdAt'])
 export default class TicketLaboratoryGroup {
   @Column({ name: 'oid' })
   @Exclude()
@@ -46,14 +46,13 @@ export default class TicketLaboratoryGroup {
 
   @Column({
     type: 'bigint',
-    nullable: true,
     transformer: {
       to: (value) => value,
       from: (value) => (value == null ? value : Number(value)),
     },
   })
   @Expose()
-  registeredAt: number
+  createdAt: number
 
   @Column({
     type: 'bigint',
@@ -64,7 +63,7 @@ export default class TicketLaboratoryGroup {
     },
   })
   @Expose()
-  startedAt: number
+  completedAt: number
 
   @Column({ type: 'text', default: '' })
   @Expose({})
@@ -101,8 +100,8 @@ export default class TicketLaboratoryGroup {
     const entity = new TicketLaboratoryGroup()
     Object.assign(entity, raw)
 
-    entity.startedAt = raw.startedAt == null ? raw.startedAt : Number(raw.startedAt)
-    entity.registeredAt = raw.registeredAt == null ? raw.registeredAt : Number(raw.registeredAt)
+    entity.createdAt = Number(raw.createdAt)
+    entity.completedAt = raw.completedAt == null ? raw.completedAt : Number(raw.completedAt)
     return entity
   }
 
@@ -138,6 +137,6 @@ export type TicketLaboratoryGroupUpdateType = {
 export type TicketLaboratoryGroupSortType = {
   [P in keyof Pick<
     TicketLaboratoryGroup,
-    'id' | 'ticketId' | 'laboratoryGroupId' | 'registeredAt' | 'startedAt'
+    'id' | 'ticketId' | 'laboratoryGroupId' | 'createdAt' | 'completedAt'
   >]?: 'ASC' | 'DESC'
 }

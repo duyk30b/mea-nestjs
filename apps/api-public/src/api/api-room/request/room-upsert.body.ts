@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, OmitType } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import {
   IsArray,
@@ -10,9 +10,9 @@ import {
   ValidateNested,
 } from 'class-validator'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { RoomInteractType } from '../../../../../_libs/database/entities/room.entity'
+import { RoomType } from '../../../../../_libs/database/entities/room.entity'
 
-export class RoomBody {
+export class RoomCreate {
   @ApiProperty({ example: 'ABC12345' })
   @Expose()
   @IsDefined()
@@ -31,11 +31,11 @@ export class RoomBody {
   @IsNumber()
   isCommon: 0 | 1
 
-  @ApiProperty({ example: RoomInteractType.Product })
+  @ApiProperty({ example: RoomType.Product })
   @Expose()
   @IsDefined()
-  @IsEnumValue(RoomInteractType)
-  roomInteractType: RoomInteractType
+  @IsEnumValue(RoomType)
+  roomType: RoomType
 
   @ApiProperty({})
   @Expose()
@@ -44,13 +44,15 @@ export class RoomBody {
   roomStyle: number
 }
 
+export class RoomUpdate extends OmitType(RoomCreate, ['roomType']) { }
+
 export class RoomCreateBody {
-  @ApiProperty({ type: RoomBody })
+  @ApiProperty({ type: RoomCreate })
   @Expose()
-  @Type(() => RoomBody)
+  @Type(() => RoomCreate)
   @IsDefined()
   @ValidateNested({ each: true })
-  room: RoomBody
+  room: RoomCreate
 
   @ApiProperty({ example: [2, 3, 4] })
   @Expose()
@@ -59,4 +61,17 @@ export class RoomCreateBody {
   userIdList?: number[] // nếu không cập nhật thì không push field này
 }
 
-export class RoomUpdateBody extends RoomCreateBody { }
+export class RoomUpdateBody {
+  @ApiProperty({ type: RoomUpdate })
+  @Expose()
+  @Type(() => RoomUpdate)
+  @IsDefined()
+  @ValidateNested({ each: true })
+  room: RoomUpdate
+
+  @ApiProperty({ example: [2, 3, 4] })
+  @Expose()
+  @IsOptional()
+  @IsArray()
+  userIdList?: number[] // nếu không cập nhật thì không push field này
+}

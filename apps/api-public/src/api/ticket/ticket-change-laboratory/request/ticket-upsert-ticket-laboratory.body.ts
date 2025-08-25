@@ -73,6 +73,12 @@ export class TicketLaboratoryAddBody {
   @IsNumber()
   actualPrice: number
 
+  @ApiProperty({ example: Date.now() })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  createdAt: number
+
   @ApiProperty({ example: PaymentMoneyStatus.NoEffect })
   @Expose()
   @IsDefined()
@@ -102,7 +108,7 @@ export class TicketLaboratoryGroupAddBody {
   @Expose()
   @IsDefined()
   @IsInt()
-  registeredAt: number
+  createdAt: number
 
   @ApiProperty({ example: PaymentMoneyStatus.NoEffect })
   @Expose()
@@ -142,7 +148,7 @@ export class TicketLaboratoryGroupUpdateBody {
   @Expose()
   @IsDefined()
   @IsInt()
-  registeredAt: number
+  createdAt: number
 
   @ApiProperty({ type: TicketLaboratoryUpdateBody, isArray: true })
   @Expose()

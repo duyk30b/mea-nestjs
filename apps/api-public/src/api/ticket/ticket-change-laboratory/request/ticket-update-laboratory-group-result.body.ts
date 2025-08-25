@@ -47,5 +47,5 @@ export class TicketUpdateLaboratoryGroupResultBody {
   @Expose()
   @IsDefined()
   @IsInt()
-  startedAt: number
+  completedAt: number
 }

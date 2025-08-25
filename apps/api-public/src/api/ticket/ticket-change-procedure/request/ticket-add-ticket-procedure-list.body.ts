@@ -106,7 +106,7 @@ class TicketProcedureBasicBody {
   @Transform(({ value }) => (value != null ? Number(value) : value))
   @IsOptional()
   @IsInt()
-  startedAt: number
+  createdAt: number
 }
 
 export class TicketProcedureBody {

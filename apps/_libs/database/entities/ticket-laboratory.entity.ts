@@ -10,7 +10,7 @@ import Ticket from './ticket.entity'
 @Entity('TicketLaboratory')
 @Index('IDX_TicketLaboratory__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketLaboratory__oid_laboratoryId', ['oid', 'laboratoryId'])
-@Index('IDX_TicketLaboratory__oid_startedAt', ['oid', 'startedAt'])
+@Index('IDX_TicketLaboratory__oid_createdAt', ['oid', 'createdAt'])
 export default class TicketLaboratory extends BaseEntity {
   @Column()
   @Expose()
@@ -96,6 +96,16 @@ export default class TicketLaboratory extends BaseEntity {
 
   @Column({
     type: 'bigint',
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  createdAt: number
+
+  @Column({
+    type: 'bigint',
     nullable: true,
     transformer: {
       to: (value) => value,
@@ -103,7 +113,7 @@ export default class TicketLaboratory extends BaseEntity {
     },
   })
   @Expose()
-  startedAt: number
+  completedAt: number
 
   @Expose()
   @ManyToOne((type) => Ticket, (ticket) => ticket.ticketLaboratoryList, {
@@ -140,7 +150,8 @@ export default class TicketLaboratory extends BaseEntity {
     entity.discountPercent = Number(raw.discountPercent)
     entity.actualPrice = Number(raw.actualPrice)
 
-    entity.startedAt = raw.startedAt == null ? raw.startedAt : Number(raw.startedAt)
+    entity.createdAt = Number(raw.createdAt)
+    entity.completedAt = raw.completedAt == null ? raw.completedAt : Number(raw.completedAt)
     return entity
   }
 
@@ -171,6 +182,6 @@ export type TicketLaboratoryUpdateType = {
 export type TicketLaboratorySortType = {
   [P in keyof Pick<
     TicketLaboratory,
-    'id' | 'ticketId' | 'laboratoryId' | 'startedAt' | 'priority'
+    'id' | 'ticketId' | 'laboratoryId' | 'createdAt' | 'priority'
   >]?: 'ASC' | 'DESC'
 }

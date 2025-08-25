@@ -25,7 +25,7 @@ import {
   TicketOrderProcedureDraftType,
   TicketOrderProductDraftType,
   TicketOrderSurchargeDraftType,
-} from './ticket-order.dto'
+} from './ticket-order-draft.operation'
 
 export type TicketOrderDepositedUpdateType = Pick<
   Ticket,
@@ -138,9 +138,8 @@ export class TicketOrderDepositedOperation {
             oid,
             ticketId,
             customerId: ticket.customerId,
-            startedAt: ticket.registeredAt,
+            createdAt: ticket.registeredAt,
             status: TicketProcedureStatus.Completed,
-            totalSessions: 0,
             completedSessions: 0,
           }
           return ticketProcedure

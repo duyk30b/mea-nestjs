@@ -28,11 +28,12 @@ export type TicketLaboratoryInsertBasicType = Pick<
   | 'discountType'
   | 'actualPrice'
   | 'paymentMoneyStatus'
+  | 'createdAt'
 >
 
 export type TicketLaboratoryGroupInsertBasicType = Pick<
   TicketLaboratoryGroup,
-  'laboratoryGroupId' | 'registeredAt' | 'roomId' | 'paymentMoneyStatus'
+  'laboratoryGroupId' | 'createdAt' | 'roomId' | 'paymentMoneyStatus'
 > & { ticketLaboratoryList: TicketLaboratoryInsertBasicType[] }
 
 @Injectable()
@@ -71,7 +72,7 @@ export class TicketAddSelectLaboratoryOperation {
           roomId: i.roomId,
           customerId: ticketOrigin.customerId,
           status: TicketLaboratoryStatus.Pending,
-          startedAt: null,
+          completedAt: null,
           result: '',
         }
         return tlgEntity
@@ -92,7 +93,7 @@ export class TicketAddSelectLaboratoryOperation {
               ticketLaboratoryGroupId: tlgInsertList[tlgDtoIndex].id,
               roomId: tlgInsertList[tlgDtoIndex].roomId,
               status: TicketLaboratoryStatus.Pending,
-              startedAt: null,
+              completedAt: null,
             }
             return tlEntity
           })

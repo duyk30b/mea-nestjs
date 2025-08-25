@@ -120,7 +120,7 @@ export class ApiFileProcedureUploadExcel {
             price: plain.price,
             procedureGroupId: plain.procedureGroupId,
             procedureType: ProcedureType.Basic,
-            totalSessions: 1,
+            totalSessions: 0,
             gapHours: 0,
             gapHoursType: 0,
             isActive: 1,

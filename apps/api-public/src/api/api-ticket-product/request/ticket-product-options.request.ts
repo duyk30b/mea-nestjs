@@ -1,5 +1,5 @@
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsInt, IsOptional, ValidateNested } from 'class-validator'
+import { IsBoolean, IsInt, IsOptional, ValidateNested } from 'class-validator'
 import {
   ConditionTimestamp,
   createConditionEnum,
@@ -55,29 +55,3 @@ export class TicketProductFilterQuery {
 }
 
 export class TicketProductSortQuery extends SortQuery { }
-
-export class TicketProductStatisticSortQuery {
-  @Expose()
-  @IsIn(['ASC', 'DESC'])
-  productId: 'ASC' | 'DESC'
-
-  @Expose()
-  @IsIn(['ASC', 'DESC'])
-  count: 'ASC' | 'DESC'
-
-  @Expose()
-  @IsIn(['ASC', 'DESC'])
-  sumQuantity: 'ASC' | 'DESC'
-
-  @Expose()
-  @IsIn(['ASC', 'DESC'])
-  sumCostAmount: 'ASC' | 'DESC'
-
-  @Expose()
-  @IsIn(['ASC', 'DESC'])
-  sumActualAmount: 'ASC' | 'DESC'
-
-  @Expose()
-  @IsIn(['ASC', 'DESC'])
-  sumProfitAmount: 'ASC' | 'DESC'
-}

@@ -4,7 +4,7 @@ import { DataSource, EntityManager } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { TicketLaboratoryStatus } from '../../../common/variable'
 import { TicketLaboratoryGroup } from '../../../entities'
-import {
+import TicketLaboratory, {
   TicketLaboratoryInsertType,
 } from '../../../entities/ticket-laboratory.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
@@ -14,17 +14,25 @@ import {
   TicketManager,
 } from '../../../repositories'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
-import { TicketLaboratoryInsertBasicType } from './ticket-add-select-laboratory.operation'
 
-export type TicketLaboratoryUpdateBasicType = Omit<
-  TicketLaboratoryInsertBasicType,
-  keyof Pick<TicketLaboratoryInsertBasicType, 'paymentMoneyStatus'>
+export type TicketLaboratoryUpdateBasicType = Pick<
+  TicketLaboratory,
+  | 'priority'
+  | 'laboratoryId'
+  | 'laboratoryGroupId'
+  | 'costPrice'
+  | 'expectedPrice'
+  | 'discountMoney'
+  | 'discountPercent'
+  | 'discountType'
+  | 'actualPrice'
+  | 'createdAt'
 >
 
 export type TicketLaboratoryGroupUpdateBasicType = Pick<
   TicketLaboratoryGroup,
-  'id' | 'laboratoryGroupId' | 'registeredAt' | 'roomId'
-> & { ticketLaboratoryList: TicketLaboratoryUpdateBasicType[] }
+  'id' | 'laboratoryGroupId' | 'createdAt' | 'roomId'
+>
 
 @Injectable()
 export class TicketChangeSelectLaboratoryOperation {
@@ -40,9 +48,10 @@ export class TicketChangeSelectLaboratoryOperation {
   async changeSelectLaboratoryList<U extends TicketLaboratoryGroupUpdateBasicType>(params: {
     oid: number
     ticketId: number
-    tlgDto: NoExtra<TicketLaboratoryGroupUpdateBasicType, U>
+    ticketLaboratoryGroupDto: NoExtra<TicketLaboratoryGroupUpdateBasicType, U>
+    ticketLaboratoryListDto: TicketLaboratoryUpdateBasicType[]
   }) {
-    const { oid, ticketId, tlgDto } = params
+    const { oid, ticketId, ticketLaboratoryGroupDto, ticketLaboratoryListDto } = params
     const PREFIX = `ticketId=${ticketId} changeSelectLaboratoryList failed`
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
@@ -55,30 +64,35 @@ export class TicketChangeSelectLaboratoryOperation {
 
       // === 2. UPDATE ===
       let tlgUpdate: TicketLaboratoryGroup
-      if (tlgDto.id !== 0) {
+      if (ticketLaboratoryGroupDto.id !== 0) {
         tlgUpdate = await this.ticketLaboratoryGroupManager.updateOneAndReturnEntity(
           manager,
-          { oid, ticketId, id: tlgDto.id },
-          { registeredAt: tlgDto.registeredAt, roomId: tlgDto.roomId }
+          { oid, ticketId, id: ticketLaboratoryGroupDto.id },
+          {
+            createdAt: ticketLaboratoryGroupDto.createdAt,
+            roomId: ticketLaboratoryGroupDto.roomId,
+          }
         )
       }
 
       const tlDestroyList = await this.ticketLaboratoryManager.deleteAndReturnEntity(manager, {
         oid,
         ticketId,
-        ticketLaboratoryGroupId: tlgDto.id,
-        laboratoryId: { NOT_IN: tlgDto.ticketLaboratoryList.map((i) => i.laboratoryId) },
+        ticketLaboratoryGroupId: ticketLaboratoryGroupDto.id,
+        laboratoryId: {
+          NOT_IN: [0, ...ticketLaboratoryListDto.map((i) => i.laboratoryId)],
+        },
       })
 
       const tlKeepList = await this.ticketLaboratoryManager.findManyBy(manager, {
         oid,
         ticketId,
-        ticketLaboratoryGroupId: tlgDto.id,
+        ticketLaboratoryGroupId: ticketLaboratoryGroupDto.id,
       })
 
       const laboratoryIdKeepList = tlKeepList.map((i) => i.laboratoryId)
 
-      const tlEntityList = tlgDto.ticketLaboratoryList
+      const tlEntityList = ticketLaboratoryListDto
         .filter((tlDto) => !laboratoryIdKeepList.includes(tlDto.laboratoryId))
         .map((tlDto) => {
           const tlEntity: NoExtra<TicketLaboratoryInsertType> = {
@@ -86,11 +100,11 @@ export class TicketChangeSelectLaboratoryOperation {
             oid,
             ticketId,
             customerId: ticketOrigin.customerId,
-            ticketLaboratoryGroupId: tlgDto.id,
-            roomId: tlgDto.roomId,
+            ticketLaboratoryGroupId: ticketLaboratoryGroupDto.id,
+            roomId: ticketLaboratoryGroupDto.roomId,
             status: TicketLaboratoryStatus.Pending,
-            startedAt: null,
             paymentMoneyStatus: tlgUpdate.paymentMoneyStatus,
+            completedAt: null,
           }
           return tlEntity
         })

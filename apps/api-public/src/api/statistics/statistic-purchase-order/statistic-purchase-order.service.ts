@@ -1,14 +1,13 @@
 import { Injectable } from '@nestjs/common'
-import { ESTimer } from '../../../../_libs/common/helpers/time.helper'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { StatisticPurchaseOrderOperation } from '../../../../_libs/database/operations/statistic/statistic-purchase-order.operation'
-import { StatisticTimeQuery } from './request'
+import { ESTimer } from '../../../../../_libs/common/helpers/time.helper'
+import { StatisticPurchaseOrderOperation } from '../../../../../_libs/database/operations/statistic/statistic-purchase-order.operation'
+import { StatisticTimeQuery } from '../request'
 
 @Injectable()
-export class ApiStatisticPurchaseOrderService {
+export class StatisticPurchaseOrderService {
   constructor(private readonly statisticPurchaseOrderOperation: StatisticPurchaseOrderOperation) { }
 
-  async statisticPurchaseOrder(oid: number, query: StatisticTimeQuery): Promise<BaseResponse> {
+  async statisticPurchaseOrder(oid: number, query: StatisticTimeQuery) {
     const { fromTime, toTime, timeType } = query
 
     const data = await this.statisticPurchaseOrderOperation.statisticPurchaseOrder({
@@ -53,6 +52,6 @@ export class ApiStatisticPurchaseOrderService {
       dataMap[time] = i
     })
 
-    return { data: dataMap }
+    return dataMap
   }
 }

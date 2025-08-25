@@ -69,10 +69,13 @@ export class TicketChangeLaboratoryService {
     }
 
     if (body.ticketLaboratoryGroupUpdate) {
+      const { ticketLaboratoryList: ticketLaboratoryListDto, ...ticketLaboratoryGroupDto } =
+        body.ticketLaboratoryGroupUpdate
       const result = await this.ticketChangeSelectLaboratoryOperation.changeSelectLaboratoryList({
         oid,
         ticketId,
-        tlgDto: body.ticketLaboratoryGroupUpdate,
+        ticketLaboratoryGroupDto,
+        ticketLaboratoryListDto,
       })
 
       this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: result.ticket })
@@ -212,12 +215,12 @@ export class TicketChangeLaboratoryService {
     const ticketLaboratoryGroupUpdate =
       await this.ticketLaboratoryGroupRepository.updateOneAndReturnEntity(
         { oid, id: ticketLaboratoryGroupId },
-        { startedAt: body.startedAt, status: TicketLaboratoryStatus.Completed }
+        { completedAt: body.completedAt, status: TicketLaboratoryStatus.Completed }
       )
 
     const ticketLaboratoryUpdateList = await this.ticketLaboratoryRepository.updateAndReturnEntity(
       { oid, ticketId, ticketLaboratoryGroupId },
-      { startedAt: body.startedAt, status: TicketLaboratoryStatus.Completed }
+      { completedAt: body.completedAt, status: TicketLaboratoryStatus.Completed }
     )
 
     const tlrBodyInsertList = body.ticketLaboratoryResultUpdateList.filter((i) => {
