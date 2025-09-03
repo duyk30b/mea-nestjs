@@ -1,14 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import { ESArray, ESTimer } from '../../../../../_libs/common/helpers'
-import { StatisticTicketOperation } from '../../../../../_libs/database/operations'
 import { CustomerRepository, TicketRepository } from '../../../../../_libs/database/repositories'
 import { StatisticTicketQuery } from './request'
-import { StatisticTicketQueryTime } from './request/statistic-ticket-query'
+import { StatisticTicketQueryTime } from './request/statistic-ticket-query-time'
 
 @Injectable()
 export class StatisticTicketService {
   constructor(
-    private readonly statisticTicketOperation: StatisticTicketOperation,
     private readonly ticketRepository: TicketRepository,
     private readonly customerRepository: CustomerRepository
   ) { }
@@ -43,7 +41,7 @@ export class StatisticTicketService {
     })
     const customerMap = ESArray.arrayToKeyValue(customerList, 'id')
 
-    const dataStatistic = dataRaws.map((i) => ({
+    const statisticData = dataRaws.map((i) => ({
       customerId: i.customerId,
       sumItemsCostAmount: i.sumItemsCostAmount,
       sumExpense: i.sumExpense,
@@ -55,27 +53,54 @@ export class StatisticTicketService {
       customer: customerMap[i.customerId],
     }))
 
-    return { dataStatistic }
+    return { statisticData }
   }
 
-  async statistic(oid: number, query: StatisticTicketQueryTime) {
-    const { filter, groupTimeType, fromTime, toTime } = query
+  async groupByTime(oid: number, query: StatisticTicketQueryTime) {
+    const { filter, fromTime, toTime, groupTimeType } = query
 
-    const data = await this.statisticTicketOperation.statistic({
+    const { dataRaws } = await this.ticketRepository.findAndSelect({
       condition: {
         oid,
-        registeredAt: {
+        roomId: filter.roomId,
+        status: filter?.status,
+        startedAt: {
           GTE: fromTime.getTime(),
           LTE: toTime.getTime(),
         },
-        roomId: filter.roomId,
-        status: filter.status,
       },
-      groupTimeType,
+      groupBy:
+        groupTimeType === 'month'
+          ? ['year', 'month']
+          : groupTimeType === 'date'
+            ? ['year', 'month', 'date']
+            : undefined,
+      select:
+        groupTimeType === 'month'
+          ? ['year', 'month']
+          : groupTimeType === 'date'
+            ? ['year', 'month', 'date']
+            : [],
+      aggregate: {
+        countTicket: { COUNT: '*' },
+        sumTotalMoney: { SUM: ['totalMoney'] },
+        sumItemsCostAmount: { SUM: ['itemsCostAmount'] },
+        sumProcedureMoney: { SUM: ['procedureMoney'] },
+        sumProductMoney: { SUM: ['productMoney'] },
+        sumRadiologyMoney: { SUM: ['radiologyMoney'] },
+        sumLaboratoryMoney: { SUM: ['laboratoryMoney'] },
+        sumDiscountMoney: { SUM: ['discountMoney'] },
+        sumItemsDiscount: { SUM: ['itemsDiscount'] },
+        sumExpense: { SUM: ['expense'] },
+        sumSurcharge: { SUM: ['surcharge'] },
+        sumDebt: { SUM: ['debt'] },
+        sumProfit: { SUM: ['profit'] },
+      },
     })
-    // tạo ra 1 dataMap có đầy đủ các giá trị = 0
-    const dataMap: Record<string, (typeof data)[number] & { oid: number }> = {}
+
+    const statisticData: Record<string, { [K in keyof (typeof dataRaws)[number]]: number }> = {}
     const date = new Date(fromTime.getTime())
+
     do {
       const currentTime = ESTimer.info(date, 7)
       let time = ''
@@ -87,36 +112,53 @@ export class StatisticTicketService {
         time = ESTimer.timeToText(date, 'MM/YYYY', 7)
         date.setMonth(date.getMonth() + 1)
       }
-      dataMap[time] = {
-        oid,
+      statisticData[time] = {
         year: currentTime.year,
         month: currentTime.month + 1,
         date: currentTime.date,
+        countTicket: 0,
+        sumTotalMoney: 0,
         sumItemsCostAmount: 0,
         sumProcedureMoney: 0,
         sumProductMoney: 0,
         sumRadiologyMoney: 0,
         sumLaboratoryMoney: 0,
-        sumSurcharge: 0,
-        sumExpense: 0,
         sumDiscountMoney: 0,
-        sumTotalMoney: 0,
-        sumProfit: 0,
+        sumItemsDiscount: 0,
+        sumExpense: 0,
+        sumSurcharge: 0,
         sumDebt: 0,
-        countTicket: 0,
+        sumProfit: 0,
       }
     } while (date.getTime() <= toTime.getTime())
 
-    data.forEach((i) => {
+    dataRaws.forEach((i) => {
       const year = i.year
       const month = `0${i.month}`.slice(-2)
       const date = `0${i.date}`.slice(-2)
       let time = ''
       if (groupTimeType === 'date') time = `${date}/${month}/${year}`
       if (groupTimeType === 'month') time = `${month}/${year}`
-      dataMap[time] = { ...i, oid }
+      statisticData[time] = {
+        year: i.year,
+        month: i.month,
+        date: i.date,
+        countTicket: Number(i.countTicket),
+        sumTotalMoney: Number(i.sumTotalMoney),
+        sumItemsCostAmount: Number(i.sumItemsCostAmount),
+        sumProcedureMoney: Number(i.sumProcedureMoney),
+        sumProductMoney: Number(i.sumProductMoney),
+        sumRadiologyMoney: Number(i.sumRadiologyMoney),
+        sumLaboratoryMoney: Number(i.sumLaboratoryMoney),
+        sumDiscountMoney: Number(i.sumDiscountMoney),
+        sumItemsDiscount: Number(i.sumItemsDiscount),
+        sumExpense: Number(i.sumExpense),
+        sumSurcharge: Number(i.sumSurcharge),
+        sumDebt: Number(i.sumDebt),
+        sumProfit: Number(i.sumProfit),
+      }
     })
 
-    return dataMap
+    return { statisticData }
   }
 }

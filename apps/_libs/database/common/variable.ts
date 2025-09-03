@@ -86,6 +86,7 @@ export enum TicketProcedureStatus {
   Pending = 2,
   Executing = 3,
   Completed = 4,
+  Cancelled = 5,
 }
 
 export enum TicketLaboratoryStatus {

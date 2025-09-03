@@ -1,7 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
-import { OrganizationPermission } from '../../../../_libs/common/guards/organization.guard'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/permission/permission.enum'
@@ -20,19 +19,19 @@ export class ApiRadiologyGroupController {
   constructor(private readonly apiRadiologyGroupService: ApiRadiologyGroupService) { }
 
   @Get('pagination')
-  @OrganizationPermission(PermissionId.RADIOLOGY)
+  @UserPermission()
   pagination(@External() { oid }: TExternal, @Query() query: RadiologyGroupPaginationQuery) {
     return this.apiRadiologyGroupService.pagination(oid, query)
   }
 
   @Get('list')
-  @OrganizationPermission(PermissionId.RADIOLOGY)
+  @UserPermission()
   list(@External() { oid }: TExternal, @Query() query: RadiologyGroupGetManyQuery) {
     return this.apiRadiologyGroupService.getMany(oid, query)
   }
 
   @Get('detail/:id')
-  @OrganizationPermission(PermissionId.RADIOLOGY)
+  @UserPermission()
   findOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return this.apiRadiologyGroupService.getOne(oid, id)
   }

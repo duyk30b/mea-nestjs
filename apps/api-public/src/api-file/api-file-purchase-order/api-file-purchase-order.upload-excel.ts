@@ -7,7 +7,6 @@ import { BatchInsertType } from '../../../../_libs/database/entities/batch.entit
 import Product, {
   ProductInsertType,
   ProductType,
-  ProductUpdateType,
   SplitBatchByCostPrice,
   SplitBatchByDistributor,
   SplitBatchByExpiryDate,
@@ -274,15 +273,14 @@ export class ApiFilePurchaseOrderUploadExcel {
 
     if (dataPlainUpdateList.length) {
       // Có thể có trường hợp 2 dòng chung mã sản phẩm, nhưng tạo 2 lô
-      const productIdMap = new Map<string, ProductUpdateType>()
-      const productUpdateList: ProductUpdateType[] = []
+      const productIdMap = new Map<string, ProductInsertType & { id: number }>()
+      const productUpdateList: (ProductInsertType & { id: number })[] = []
       dataPlainInsertList.forEach((plain) => {
         if (productIdMap.has(plain.productCode)) {
           productIdMap.get(plain.productCode).productType = ProductType.SplitBatch
         } else {
-          const { id, ...productUpdateBody } = plain.productUpsert
-          productUpdateList.push(productUpdateBody)
-          productIdMap.set(plain.productCode, productUpdateBody)
+          productUpdateList.push(plain.productUpsert)
+          productIdMap.set(plain.productCode, plain.productUpsert)
         }
       })
 

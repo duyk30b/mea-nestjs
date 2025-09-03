@@ -30,11 +30,7 @@ export class AppointmentGetQuery {
 
   @ApiPropertyOptional({
     type: String,
-    example: JSON.stringify(<AppointmentFilterQuery>{
-      customerId: 3,
-      registeredAt: { GT: Date.now() },
-      appointmentStatus: { IN: [AppointmentStatus.Confirm, AppointmentStatus.Waiting] },
-    }),
+    example: JSON.stringify(<AppointmentFilterQuery>{}),
   })
   @Expose()
   @Transform(({ value }) => {

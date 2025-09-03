@@ -1,8 +1,10 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
+import { Exclude, Expose } from 'class-transformer'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import CustomerSource from './customer-source.entity'
 import Customer from './customer.entity'
+import TicketProcedureItem from './ticket-procedure-item.entity'
+import TicketProcedure from './ticket-procedure.entity'
+import Ticket from './ticket.entity'
 
 export enum AppointmentStatus {
   Waiting = 1, // Đợi - Nhắc khám
@@ -11,9 +13,30 @@ export enum AppointmentStatus {
   Cancelled = 4, // Hủy
 }
 
+export enum AppointmentType {
+  Ticket = 1, // Phiếu khám
+  TicketProcedure = 2, // Dịch vụ
+}
+
 @Entity('Appointment')
 @Index('IDX_Appointment__fromTicketId', ['fromTicketId'])
-export default class Appointment extends BaseEntity {
+export default class Appointment {
+  @Column({})
+  @Exclude()
+  oid: number
+
+  @PrimaryGeneratedColumn({})
+  @Expose({})
+  id: number
+
+  @Column({ type: 'smallint', default: AppointmentType.Ticket })
+  @Expose()
+  type: AppointmentType
+
+  @Column({ type: 'smallint', default: AppointmentStatus.Waiting })
+  @Expose()
+  status: AppointmentStatus
+
   @Column()
   @Expose()
   customerId: number
@@ -44,13 +67,17 @@ export default class Appointment extends BaseEntity {
   @Expose()
   toTicketId: number
 
+  @Column({ default: 0 })
+  @Expose()
+  ticketProcedureId: number
+
+  @Column({ default: 0 })
+  @Expose()
+  ticketProcedureItemId: number
+
   @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   cancelReason: string // Lý do hẹn
-
-  @Column({ type: 'smallint', default: AppointmentStatus.Waiting })
-  @Expose()
-  appointmentStatus: AppointmentStatus
 
   @ManyToOne((type) => Customer, { createForeignKeyConstraints: false })
   @JoinColumn({ name: 'customerId', referencedColumnName: 'id' })
@@ -61,6 +88,15 @@ export default class Appointment extends BaseEntity {
   @JoinColumn({ name: 'customerSourceId', referencedColumnName: 'id' })
   @Expose()
   customerSource: CustomerSource
+
+  @Expose()
+  toTicket: Ticket
+
+  @Expose()
+  ticketProcedure: TicketProcedure
+
+  @Expose()
+  ticketProcedureItem: TicketProcedureItem
 
   static fromRaw(raw: { [P in keyof Appointment]: any }) {
     if (!raw) return null
@@ -78,7 +114,10 @@ export default class Appointment extends BaseEntity {
 }
 
 export type AppointmentRelationType = {
-  [P in keyof Pick<Appointment, 'customer' | 'customerSource'>]?: boolean
+  [P in keyof Pick<
+    Appointment,
+    'customer' | 'customerSource' | 'ticketProcedure' | 'ticketProcedureItem' | 'toTicket'
+  >]?: boolean
 }
 
 export type AppointmentInsertType = Omit<

@@ -128,6 +128,16 @@ export class ConditionTimestamp {
     if (!value) return undefined
     return value.map((v: string | number) => new Date(v).getTime())
   })
+  @IsNumber({}, { each: true })
+  @IsArray()
+  @ArrayMinSize(1)
+  'NOT_IN'?: number[]
+
+  @Expose()
+  @Transform(({ value }) => {
+    if (!value) return undefined
+    return value.map((v: string | number) => new Date(v).getTime())
+  })
   @IsArray()
   @ArrayMinSize(2)
   @ArrayMaxSize(2)
@@ -137,7 +147,7 @@ export class ConditionTimestamp {
 
 export const transformConditionTimestamp = ({ value, key }: TransformFnParams) => {
   if (value == null) return
-  
+
   if (typeof value === 'number') {
     return value
   } else if (typeof value === 'object') {

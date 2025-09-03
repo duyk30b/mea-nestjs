@@ -228,7 +228,7 @@ export class ProductCreateBody {
   @Type(() => PositionBasicBody)
   @IsArray()
   @ValidateNested({ each: true })
-  positionList: PositionBasicBody[]
+  positionRequestList: PositionBasicBody[]
 
   @ApiProperty({ type: DiscountUpdateBody, isArray: true })
   @Expose()
@@ -251,7 +251,7 @@ export class ProductUpdateBody {
   @Type(() => PositionBasicBody)
   @IsArray()
   @ValidateNested({ each: true })
-  positionList: PositionBasicBody[]
+  positionRequestList: PositionBasicBody[]
 
   @ApiProperty({ type: DiscountUpdateBody, isArray: true })
   @Expose()

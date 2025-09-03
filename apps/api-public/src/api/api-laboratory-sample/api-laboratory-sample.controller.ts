@@ -1,7 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
-import { OrganizationPermission } from '../../../../_libs/common/guards/organization.guard'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/permission/permission.enum'
@@ -20,19 +19,19 @@ export class ApiLaboratorySampleController {
   constructor(private readonly apiLaboratorySampleService: ApiLaboratorySampleService) { }
 
   @Get('pagination')
-  @OrganizationPermission(PermissionId.LABORATORY)
+  @UserPermission()
   pagination(@External() { oid }: TExternal, @Query() query: LaboratorySamplePaginationQuery) {
     return this.apiLaboratorySampleService.pagination(oid, query)
   }
 
   @Get('list')
-  @OrganizationPermission(PermissionId.LABORATORY)
+  @UserPermission()
   list(@External() { oid }: TExternal, @Query() query: LaboratorySampleGetManyQuery) {
     return this.apiLaboratorySampleService.getMany(oid, query)
   }
 
   @Get('detail/:id')
-  @OrganizationPermission(PermissionId.LABORATORY)
+  @UserPermission()
   findOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return this.apiLaboratorySampleService.getOne(oid, id)
   }

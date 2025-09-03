@@ -1,5 +1,5 @@
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsNumber, IsOptional, ValidateNested } from 'class-validator'
+import { IsBoolean, IsIn, IsNumber, IsObject, IsOptional, ValidateNested } from 'class-validator'
 import {
   ConditionNumber,
   ConditionTimestamp,
@@ -38,44 +38,44 @@ export class TicketRelationQuery {
   ticketAttributeList?: boolean
 
   @Expose()
-  @IsOptional()
+  @IsObject()
   ticketProductList?: TicketProductGetManyQuery
 
   @Expose()
-  @IsOptional()
+  @IsObject()
   ticketProductConsumableList?: TicketProductGetManyQuery
 
   @Expose()
-  @IsOptional()
+  @IsObject()
   ticketProductPrescriptionList?: TicketProductGetManyQuery
 
   @Expose()
-  @IsOptional()
-  ticketBatchList?: false | { batch?: boolean }
+  @IsObject()
+  ticketBatchList?: { batch?: boolean }
 
   @Expose()
-  @IsOptional()
+  @IsObject()
   ticketProcedureList?: TicketProcedureGetManyQuery
 
   @Expose()
-  @IsOptional()
+  @IsObject()
   ticketLaboratoryGroupList?: TicketLaboratoryGroupGetManyQuery
 
   @Expose()
-  @IsOptional()
+  @IsBoolean()
   ticketLaboratoryResultList?: boolean
 
   @Expose()
-  @IsOptional()
+  @IsObject()
   ticketLaboratoryList?: TicketLaboratoryGetManyQuery
 
   @Expose()
-  @IsOptional()
+  @IsObject()
   ticketRadiologyList?: TicketRadiologyGetManyQuery
 
   @Expose()
-  @IsOptional()
-  ticketUserList?: false | { user?: boolean }
+  @IsObject()
+  ticketUserList?: { user?: boolean }
 
   @Expose()
   @IsBoolean()
@@ -94,9 +94,23 @@ const ConditionEnumTicketStatus = createConditionEnum(TicketStatus)
 const ConditionEnumDeliveryStatus = createConditionEnum(DeliveryStatus)
 
 export class TicketFilterQuery {
+  @Expose()
+  @Type(() => TicketFilterQuery)
+  @ValidateNested({ each: true })
+  $OR: TicketFilterQuery[]
+
   // @Expose()
   // @IsEnumValue(TicketStatus)
   // status: TicketStatus
+
+  @Expose()
+  @Transform(transformConditionNumber)
+  @IsOptional()
+  roomId: number | ConditionNumber
+
+  @Expose()
+  @IsNumber()
+  customerId: number
 
   @Expose()
   @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketStatus))
@@ -107,15 +121,6 @@ export class TicketFilterQuery {
   @Transform((params: TransformFnParams) => transformConditionEnum(params, DeliveryStatus))
   @IsOptional()
   deliveryStatus: DeliveryStatus | InstanceType<typeof ConditionEnumDeliveryStatus>
-
-  @Expose()
-  @IsNumber()
-  customerId: number
-
-  @Expose()
-  @Transform(transformConditionNumber)
-  @IsOptional()
-  roomId: number | ConditionNumber
 
   @Expose()
   @Type(() => ConditionTimestamp)

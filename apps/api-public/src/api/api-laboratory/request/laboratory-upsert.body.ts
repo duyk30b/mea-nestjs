@@ -111,7 +111,7 @@ export class LaboratoryCreateBody {
   @Type(() => PositionBasicBody)
   @IsArray()
   @ValidateNested({ each: true })
-  positionList: PositionBasicBody[]
+  positionRequestList: PositionBasicBody[]
 }
 
 export class LaboratoryUpdateBody {
@@ -142,5 +142,5 @@ export class LaboratoryUpdateBody {
   @Type(() => PositionBasicBody)
   @IsArray()
   @ValidateNested({ each: true })
-  positionList: PositionBasicBody[]
+  positionRequestList: PositionBasicBody[]
 }

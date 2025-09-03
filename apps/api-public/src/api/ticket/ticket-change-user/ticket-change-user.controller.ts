@@ -51,11 +51,12 @@ export class TicketChangeUserController {
     @Param() { ticketId }: TicketParams,
     @Body() body: TicketUpdateTicketUserPositionListBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeUserService.updateTicketUserPositionList({
-      oid,
-      ticketId,
-      body,
-    })
+    // const data = await this.ticketChangeUserService.updateTicketUserPositionList({
+    //   oid,
+    //   ticketId,
+    //   body,
+    // })
+    const data = true
     return { data }
   }
 }

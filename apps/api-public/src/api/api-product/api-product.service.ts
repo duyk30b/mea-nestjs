@@ -9,7 +9,7 @@ import Discount, {
 } from '../../../../_libs/database/entities/discount.entity'
 import Position, {
   PositionInsertType,
-  PositionInteractType,
+  PositionType,
 } from '../../../../_libs/database/entities/position.entity'
 import { ProductOperation } from '../../../../_libs/database/operations'
 import {
@@ -54,7 +54,7 @@ export class ApiProductService {
   async pagination(oid: number, query: ProductPaginationQuery) {
     const { page, limit, filter, sort, relation } = query
 
-    const { total, data } = await this.productRepository.pagination({
+    const { total, data: productList } = await this.productRepository.pagination({
       // relation,
       page,
       limit,
@@ -70,10 +70,10 @@ export class ApiProductService {
     })
 
     if (query.relation) {
-      await this.generateRelation({ oid, productList: data, relation: query.relation })
+      await this.generateRelation({ oid, productList, relation: query.relation })
     }
 
-    return { productList: data, total, page, limit }
+    return { productList, total, page, limit }
   }
 
   async getList(oid: number, query: ProductGetManyQuery) {
@@ -113,7 +113,7 @@ export class ApiProductService {
   }
 
   async createOne(oid: number, body: ProductCreateBody) {
-    const { positionList, discountList, product: productBody } = body
+    const { positionRequestList, discountList, product: productBody } = body
 
     let productCode = productBody.productCode
     if (!productCode) {
@@ -155,21 +155,19 @@ export class ApiProductService {
       this.socketEmitService.batchListChange(oid, { batchUpsertedList: [batchCreated] })
     }
 
-    if (positionList?.length) {
-      const positionDtoList: PositionInsertType[] = positionList.map((i) => {
+    if (positionRequestList?.length) {
+      const positionDtoList: PositionInsertType[] = positionRequestList.map((i) => {
         const dto: PositionInsertType = {
+          ...i,
           oid,
-          roleId: i.roleId,
-          commissionCalculatorType: i.commissionCalculatorType,
-          commissionValue: i.commissionValue,
           positionInteractId: productInserted.id,
-          positionType: PositionInteractType.Product,
+          positionType: PositionType.ProductRequest,
         }
         return dto
       })
       const positionUpsertedList =
         await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
-      productInserted.positionList = positionUpsertedList
+      productInserted.positionRequestList = positionUpsertedList
       this.socketEmitService.positionListChange(oid, { positionUpsertedList })
     }
 
@@ -193,7 +191,7 @@ export class ApiProductService {
   }
 
   async updateOne(oid: number, productId: number, body: ProductUpdateBody) {
-    const { positionList, discountList, product: productBody } = body
+    const { positionRequestList, discountList, product: productBody } = body
 
     const productOrigin = await this.productRepository.findOneBy({ oid, id: productId })
 
@@ -242,26 +240,24 @@ export class ApiProductService {
     )
     this.socketEmitService.productListChange(oid, { productUpsertedList: [productModified] })
 
-    if (positionList) {
+    if (positionRequestList) {
       const positionDestroyedList = await this.positionRepository.deleteAndReturnEntity({
         oid,
         positionInteractId: productModified.id,
-        positionType: PositionInteractType.Product,
+        positionType: PositionType.ProductRequest,
       })
-      const positionDtoList: PositionInsertType[] = positionList.map((i) => {
+      const positionDtoList: PositionInsertType[] = positionRequestList.map((i) => {
         const dto: PositionInsertType = {
+          ...i,
           oid,
-          roleId: i.roleId,
-          commissionCalculatorType: i.commissionCalculatorType,
-          commissionValue: i.commissionValue,
           positionInteractId: productModified.id,
-          positionType: PositionInteractType.Product,
+          positionType: PositionType.ProductRequest,
         }
         return dto
       })
       const positionUpsertedList =
         await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
-      productModified.positionList = positionUpsertedList
+      productModified.positionRequestList = positionUpsertedList
       this.socketEmitService.positionListChange(oid, {
         positionUpsertedList,
         positionDestroyedList,
@@ -321,7 +317,7 @@ export class ApiProductService {
         this.positionRepository.deleteAndReturnEntity({
           oid,
           positionInteractId: productId,
-          positionType: PositionInteractType.Product,
+          positionType: PositionType.ProductRequest,
         }),
         this.discountRepository.deleteAndReturnEntity({
           oid,
@@ -395,8 +391,8 @@ export class ApiProductService {
       relation?.positionList && productIdList.length
         ? this.positionRepository.findManyBy({
           oid,
-          positionType: PositionInteractType.Product,
-          positionInteractId: { IN: productIdList },
+          positionType: PositionType.ProductRequest,
+          positionInteractId: { IN: [...productIdList, 0] },
         })
         : <Position[]>[],
       relation?.discountList && productIdList.length
@@ -426,18 +422,26 @@ export class ApiProductService {
     const productGroupMap = ESArray.arrayToKeyValue(productGroupList, 'id')
 
     productList.forEach((product: Product) => {
-      if (relation?.positionList) {
-        product.positionList = positionList.filter((i) => i.positionInteractId === product.id)
-      }
-      if (relation?.discountList) {
-        product.discountList = discountList.filter((i) => i.discountInteractId === product.id)
-        product.discountListExtra = discountList.filter((i) => i.discountInteractId === 0)
-      }
       if (relation?.productGroup) {
         product.productGroup = productGroupMap[product.productGroupId]
       }
       if (relation?.batchList) {
         product.batchList = batchList.filter((i) => i.productId === product.id)
+      }
+      if (relation?.discountList) {
+        product.discountList = discountList.filter((i) => i.discountInteractId === product.id)
+        product.discountListExtra = discountList.filter((i) => i.discountInteractId === 0)
+      }
+      if (relation?.positionList) {
+        product.positionRequestListCommon = positionList.filter((i) => {
+          return i.positionType === PositionType.ProductRequest && i.positionInteractId === 0
+        })
+        product.positionRequestList = positionList.filter((i) => {
+          return (
+            i.positionType === PositionType.ProductRequest
+            && i.positionInteractId === product.id
+          )
+        })
       }
     })
 

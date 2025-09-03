@@ -1,27 +1,33 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { ESArray } from '../../../../_libs/common/helpers/array.helper'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { Laboratory, Procedure, Product, Radiology } from '../../../../_libs/database/entities'
+import {
+  Laboratory,
+  LaboratoryGroup,
+  Procedure,
+  Product,
+  Radiology,
+} from '../../../../_libs/database/entities'
 import Position, {
-    PositionInsertType,
-    PositionInteractType,
+  PositionInsertType,
+  PositionType,
 } from '../../../../_libs/database/entities/position.entity'
 import {
-    LaboratoryRepository,
-    ProcedureRepository,
-    ProductRepository,
-    RadiologyRepository,
+  LaboratoryGroupRepository,
+  LaboratoryRepository,
+  ProcedureRepository,
+  ProductRepository,
+  RadiologyRepository,
 } from '../../../../_libs/database/repositories'
 import { PositionRepository } from '../../../../_libs/database/repositories/position.repository'
 import {
-    PositionCreateBody,
-    PositionGetManyQuery,
-    PositionGetOneQuery,
-    PositionPaginationQuery,
-    PositionRelationQuery,
-    PositionReplaceListBody,
-    PositionUpdateBody,
+  PositionCreateBody,
+  PositionGetManyQuery,
+  PositionGetOneQuery,
+  PositionPaginationQuery,
+  PositionRelationQuery,
+  PositionReplaceListBody,
+  PositionUpdateBody,
 } from './request'
 
 @Injectable()
@@ -31,13 +37,14 @@ export class ApiPositionService {
     private readonly productRepository: ProductRepository,
     private readonly procedureRepository: ProcedureRepository,
     private readonly radiologyRepository: RadiologyRepository,
-    private readonly laboratoryRepository: LaboratoryRepository
+    private readonly laboratoryRepository: LaboratoryRepository,
+    private readonly laboratoryGroupRepository: LaboratoryGroupRepository
   ) { }
 
-  async pagination(oid: number, query: PositionPaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: PositionPaginationQuery) {
     const { page, limit, filter, sort, relation } = query
 
-    const { data, total } = await this.positionRepository.pagination({
+    const { data: positionList, total } = await this.positionRepository.pagination({
       relation: {
         role: relation?.role,
       },
@@ -53,15 +60,12 @@ export class ApiPositionService {
     })
 
     if (query.relation) {
-      await this.generateRelation(data, query.relation)
+      await this.generateRelation(positionList, query.relation)
     }
-    return {
-      data,
-      meta: { total, page, limit },
-    }
+    return { positionList, total, page, limit }
   }
 
-  async getMany(oid: number, query: PositionGetManyQuery): Promise<BaseResponse> {
+  async getMany(oid: number, query: PositionGetManyQuery) {
     const { limit, filter, relation, sort } = query
 
     const positionList = await this.positionRepository.findMany({
@@ -81,10 +85,10 @@ export class ApiPositionService {
     if (query.relation) {
       await this.generateRelation(positionList, query.relation)
     }
-    return { data: { positionList } }
+    return { positionList }
   }
 
-  async getOne(oid: number, id: number, query: PositionGetOneQuery): Promise<BaseResponse> {
+  async getOne(oid: number, id: number, query: PositionGetOneQuery) {
     const position = await this.positionRepository.findOne({
       relation: { role: query?.relation?.role },
       condition: { oid, id },
@@ -93,58 +97,30 @@ export class ApiPositionService {
     if (query.relation) {
       await this.generateRelation([position], query.relation)
     }
-    return { data: { position } }
+    return { position }
   }
 
-  async createOne(oid: number, body: PositionCreateBody): Promise<BaseResponse> {
-    const existPosition = await this.positionRepository.findOneBy({
-      oid,
-      roleId: body.roleId,
-      positionType: body.positionType,
-      positionInteractId: body.positionInteractId,
-    })
-    if (existPosition) {
-      throw new BusinessException('error.Conflict', {
-        obj:
-          `Không thể tạo bản ghi trùng lặp. `
-          + `Đã tồn tại bản ghi nội dung tương tự với id = ${existPosition.id}`,
-      })
-    }
-
+  async createOne(oid: number, body: PositionCreateBody) {
     const position = await this.positionRepository.insertOneFullFieldAndReturnEntity({
       ...body,
       oid,
     })
-    return { data: { position } }
+    return { position }
   }
 
-  async updateOne(oid: number, id: number, body: PositionUpdateBody): Promise<BaseResponse> {
-    const existPosition = await this.positionRepository.findOneBy({
-      id: { NOT: id },
-      oid,
-      roleId: body.roleId,
-      positionType: body.positionType,
-      positionInteractId: body.positionInteractId,
-    })
-    if (existPosition) {
-      throw new BusinessException('error.Conflict', {
-        obj:
-          `Không thể tạo bản ghi trùng lặp. `
-          + `Đã tồn tại bản ghi nội dung tương tự với id = ${existPosition.id}`,
-      })
-    }
-    const positionList = await this.positionRepository.updateAndReturnEntity({ id, oid }, body)
-    return { data: { position: positionList[0] } }
+  async updateOne(oid: number, id: number, body: PositionUpdateBody) {
+    const position = await this.positionRepository.updateOneAndReturnEntity({ id, oid }, body)
+    return { position }
   }
 
-  async destroyOne(oid: number, id: number): Promise<BaseResponse> {
+  async destroyOne(oid: number, id: number) {
     const affected = await this.positionRepository.delete({ oid, id })
     if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
 
     return { data: true }
   }
 
-  async replaceList(oid: number, body: PositionReplaceListBody): Promise<BaseResponse> {
+  async replaceList(oid: number, body: PositionReplaceListBody) {
     await this.positionRepository.delete({
       oid,
       positionType: body.filter?.positionType,
@@ -161,54 +137,90 @@ export class ApiPositionService {
     const positionList =
       await this.positionRepository.insertManyAndReturnEntity(positionInsertListDto)
 
-    return { data: { positionList } }
+    return { positionList }
   }
 
   async generateRelation(positionList: Position[], relation: PositionRelationQuery) {
     const productIdList = positionList
-      .filter((i) => i.positionType === PositionInteractType.Product)
+      .filter((i) => [PositionType.ProductRequest].includes(i.positionType))
       .map((i) => i.positionInteractId)
     const procedureIdList = positionList
-      .filter((i) => i.positionType === PositionInteractType.Procedure)
+      .filter((i) =>
+        [PositionType.ProcedureRequest, PositionType.ProcedureResult].includes(
+          i.positionType
+        ))
       .map((i) => i.positionInteractId)
     const radiologyIdList = positionList
-      .filter((i) => i.positionType === PositionInteractType.Radiology)
+      .filter((i) =>
+        [PositionType.RadiologyRequest, PositionType.RadiologyResult].includes(
+          i.positionType
+        ))
       .map((i) => i.positionInteractId)
     const laboratoryIdList = positionList
-      .filter((i) => i.positionType === PositionInteractType.Laboratory)
+      .filter((i) => [PositionType.LaboratoryRequest].includes(i.positionType))
+      .map((i) => i.positionInteractId)
+    const laboratoryGroupIdList = positionList
+      .filter((i) => [PositionType.LaboratoryRequest].includes(i.positionType))
       .map((i) => i.positionInteractId)
 
-    const [productList, procedureList, radiologyList, laboratoryList] = await Promise.all([
-      relation?.product && productIdList.length
-        ? this.productRepository.findManyBy({ id: { IN: ESArray.uniqueArray(productIdList) } })
-        : <Product[]>[],
-      relation?.procedure && procedureIdList.length
-        ? this.procedureRepository.findMany({
-          condition: { id: { IN: ESArray.uniqueArray(procedureIdList) } },
-        })
-        : <Procedure[]>[],
-      relation?.radiology && radiologyIdList.length
-        ? this.radiologyRepository.findManyBy({ id: { IN: ESArray.uniqueArray(radiologyIdList) } })
-        : <Radiology[]>[],
-      relation?.laboratory && laboratoryIdList.length
-        ? this.laboratoryRepository.findMany({
-          condition: { id: { IN: ESArray.uniqueArray(laboratoryIdList) } },
-        })
-        : <Laboratory[]>[],
-    ])
+    const [productList, procedureList, radiologyList, laboratoryList, laboratoryGroupList] =
+      await Promise.all([
+        relation?.productRequest && productIdList.length
+          ? this.productRepository.findManyBy({ id: { IN: ESArray.uniqueArray(productIdList) } })
+          : <Product[]>[],
+        (relation?.procedureRequest || relation?.procedureResult) && procedureIdList.length
+          ? this.procedureRepository.findMany({
+            condition: { id: { IN: ESArray.uniqueArray(procedureIdList) } },
+          })
+          : <Procedure[]>[],
+        (relation?.radiologyRequest || relation?.radiologyResult) && radiologyIdList.length
+          ? this.radiologyRepository.findManyBy({
+            id: { IN: ESArray.uniqueArray(radiologyIdList) },
+          })
+          : <Radiology[]>[],
+        relation?.laboratoryRequest && laboratoryIdList.length
+          ? this.laboratoryRepository.findMany({
+            condition: { id: { IN: ESArray.uniqueArray(laboratoryIdList) } },
+          })
+          : <Laboratory[]>[],
+        (relation?.laboratoryGroupRequest || relation?.laboratoryGroupResult)
+          && laboratoryGroupIdList.length
+          ? this.laboratoryGroupRepository.findMany({
+            condition: { id: { IN: ESArray.uniqueArray(laboratoryIdList) } },
+          })
+          : <LaboratoryGroup[]>[],
+      ])
+
+    const productMap = ESArray.arrayToKeyValue(productList, 'id')
+    const procedureMap = ESArray.arrayToKeyValue(procedureList, 'id')
+    const radiologyMap = ESArray.arrayToKeyValue(radiologyList, 'id')
+    const laboratoryMap = ESArray.arrayToKeyValue(laboratoryList, 'id')
+    const laboratoryGroupMap = ESArray.arrayToKeyValue(laboratoryGroupList, 'id')
 
     positionList.forEach((position: Position) => {
-      if (position.positionType === PositionInteractType.Product) {
-        position.product = productList.find((i) => i.id === position.positionInteractId)
+      if (position.positionType === PositionType.ProductRequest) {
+        position.productRequest = productMap[position.positionInteractId]
       }
-      if (position.positionType === PositionInteractType.Procedure) {
-        position.procedure = procedureList.find((i) => i.id === position.positionInteractId)
+      if (position.positionType === PositionType.ProcedureRequest) {
+        position.procedureRequest = procedureMap[position.positionInteractId]
       }
-      if (position.positionType === PositionInteractType.Radiology) {
-        position.radiology = radiologyList.find((i) => i.id === position.positionInteractId)
+      if (position.positionType === PositionType.ProcedureResult) {
+        position.procedureResult = procedureMap[position.positionInteractId]
       }
-      if (position.positionType === PositionInteractType.Laboratory) {
-        position.laboratory = laboratoryList.find((i) => i.id === position.positionInteractId)
+      if (position.positionType === PositionType.RadiologyRequest) {
+        position.radiologyRequest = radiologyMap[position.positionInteractId]
+      }
+      if (position.positionType === PositionType.RadiologyResult) {
+        position.radiologyResult = radiologyMap[position.positionInteractId]
+      }
+      if (position.positionType === PositionType.LaboratoryRequest) {
+        position.laboratoryRequest = laboratoryMap[position.positionInteractId]
+      }
+      if (position.positionType === PositionType.LaboratoryGroupRequest) {
+        position.laboratoryGroupRequest = laboratoryGroupMap[position.positionInteractId]
+      }
+      if (position.positionType === PositionType.LaboratoryGroupResult) {
+        position.laboratoryGroupResult = laboratoryGroupMap[position.positionInteractId]
       }
     })
 

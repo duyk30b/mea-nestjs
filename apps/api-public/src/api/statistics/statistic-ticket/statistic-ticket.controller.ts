@@ -5,7 +5,7 @@ import { BaseResponse } from '../../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { StatisticTicketQuery } from './request'
-import { StatisticTicketQueryTime } from './request/statistic-ticket-query'
+import { StatisticTicketQueryTime } from './request/statistic-ticket-query-time'
 import { StatisticTicketService } from './statistic-ticket.service'
 
 @ApiTags('Statistic')
@@ -24,13 +24,13 @@ export class StatisticTicketController {
     return { data }
   }
 
-  @Get('statistic')
-  @UserPermission(PermissionId.STATISTIC_TICKET)
-  async statistic(
+  @Get('group-by-time')
+  @UserPermission(PermissionId.STATISTIC_CUSTOMER)
+  async groupByTime(
     @External() { oid }: TExternal,
     @Query() query: StatisticTicketQueryTime
   ): Promise<BaseResponse> {
-    const data = await this.statisticTicketService.statistic(oid, query)
+    const data = await this.statisticTicketService.groupByTime(oid, query)
     return { data }
   }
 }

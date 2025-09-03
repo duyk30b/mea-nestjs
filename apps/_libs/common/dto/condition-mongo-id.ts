@@ -35,6 +35,12 @@ export class ConditionMongoId {
   @IsMongoId({ each: true })
   @ArrayMinSize(1)
   'IN'?: string[]
+
+  @Expose()
+  @IsArray()
+  @IsMongoId({ each: true })
+  @ArrayMinSize(1)
+  'NOT_IN'?: string[]
 }
 
 export const transformConditionMongoId = ({ value, key }: TransformFnParams) => {

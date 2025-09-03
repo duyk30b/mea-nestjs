@@ -101,6 +101,19 @@ export class ConditionDate {
   })
   @IsArray()
   @IsDate({ each: true })
+  @ArrayMinSize(1)
+  'NOT_IN'?: Date[]
+
+  @Expose()
+  @Transform(({ value }) => {
+    if (!value) return undefined
+    return value.map((v: any) => {
+      if (v == null) return null
+      return new Date(v)
+    })
+  })
+  @IsArray()
+  @IsDate({ each: true })
   @ArrayMinSize(2)
   @ArrayMaxSize(2)
   'BETWEEN'?: [Date, Date]

@@ -1,16 +1,44 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { Expose, Transform } from 'class-transformer'
-import { IsDefined, IsIn, IsNumber, IsString, Max, Min } from 'class-validator'
+import { Expose, Transform, Type } from 'class-transformer'
+import {
+  IsArray,
+  IsDefined,
+  IsIn,
+  IsNumber,
+  IsString,
+  Max,
+  Min,
+  ValidateNested,
+} from 'class-validator'
 import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
 import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
 import { DiscountType, PaymentMoneyStatus } from '../../../../../../_libs/database/common/variable'
+import { TicketUserBasicBody } from '../../ticket-change-user/request'
 
-export class TicketAddTicketRadiologyBody {
+export class TicketRadiologyAddBody {
   @ApiProperty({ example: 1 })
   @Expose()
   @IsDefined()
   @IsNumber()
   priority: number
+
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  radiologyId: number
+
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  customerId: number
+
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  roomId: number
 
   @ApiProperty({ example: PaymentMoneyStatus.NoEffect })
   @Expose()
@@ -24,24 +52,6 @@ export class TicketAddTicketRadiologyBody {
   @IsDefined()
   @IsNumber()
   createdAt: number
-
-  @ApiProperty({ example: 56 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  customerId: number
-
-  @ApiProperty({ example: 56 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  radiologyId: number
-
-  @ApiProperty({ example: 56 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  roomId: number
 
   @ApiProperty({ example: 4 })
   @Expose()
@@ -112,4 +122,30 @@ export class TicketAddTicketRadiologyBody {
   @IsDefined()
   @IsString()
   customVariables: string
+}
+
+export class TicketRadiologyWrapBody {
+  @ApiProperty({ type: TicketUserBasicBody, isArray: true })
+  @Expose()
+  @Type(() => TicketUserBasicBody)
+  @IsDefined()
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketUserRequestList: TicketUserBasicBody[]
+
+  @ApiProperty({ type: TicketRadiologyAddBody })
+  @Expose()
+  @Type(() => TicketRadiologyAddBody)
+  @IsDefined()
+  @ValidateNested({ each: true })
+  ticketRadiology: TicketRadiologyAddBody
+}
+
+export class TicketAddTicketRadiologyListBody {
+  @ApiProperty({ type: TicketRadiologyWrapBody })
+  @Expose()
+  @Type(() => TicketRadiologyWrapBody)
+  @IsDefined()
+  @ValidateNested({ each: true })
+  ticketRadiologyWrapList: TicketRadiologyWrapBody[]
 }

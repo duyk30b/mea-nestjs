@@ -8,5 +8,6 @@ import { TicketChangeProcedureService } from './ticket-change-procedure.service'
   imports: [TicketChangeUserModule],
   controllers: [TicketChangeProcedureController],
   providers: [TicketChangeProcedureService, ApiTicketProcedureService],
+  exports: [TicketChangeProcedureService],
 })
 export class TicketChangeProcedureModule { }

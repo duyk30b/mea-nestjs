@@ -31,7 +31,7 @@ export class ApiTicketProcedureController {
     @Param() { id }: IdParam,
     @Query() query: TicketProcedureGetOneQuery
   ): Promise<BaseResponse> {
-    const data = await this.apiTicketProcedureService.getOne(oid, id, query)
+    const data = await this.apiTicketProcedureService.detail({ oid, id, query })
     return { data }
   }
 }

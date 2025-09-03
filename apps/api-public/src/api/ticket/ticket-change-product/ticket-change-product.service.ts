@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import { PositionInteractType } from '../../../../../_libs/database/entities/position.entity'
 import { TicketProductType } from '../../../../../_libs/database/entities/ticket-product.entity'
 import {
   TicketAddTicketProductOperation,
@@ -169,41 +168,34 @@ export class TicketChangeProductService {
       ticketProductId,
       ticketProductType,
       ticketProductUpdateDto: body.ticketProduct,
+      ticketUserRequestList: body.ticketUserRequestList,
     })
-    const { ticket, ticketProduct } = result
+    const { ticketModified, ticketProductModified } = result
 
-    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
-    if (ticketProduct.type === TicketProductType.Product) {
+    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified })
+    if (ticketProductModified.type === TicketProductType.Product) {
       this.socketEmitService.socketTicketProductChange(oid, {
         ticketId,
-        ticketProductUpsertList: [ticketProduct],
+        ticketProductUpsertList: [ticketProductModified],
       })
     }
-    if (ticketProduct.type === TicketProductType.Consumable) {
+    if (ticketProductModified.type === TicketProductType.Consumable) {
       this.socketEmitService.socketTicketConsumableChange(oid, {
         ticketId,
-        ticketProductUpsertList: [ticketProduct],
+        ticketProductUpsertList: [ticketProductModified],
       })
     }
-    if (ticketProduct.type === TicketProductType.Prescription) {
+    if (ticketProductModified.type === TicketProductType.Prescription) {
       this.socketEmitService.socketTicketPrescriptionChange(oid, {
         ticketId,
-        ticketProductUpsertList: [ticketProduct],
+        ticketProductUpsertList: [ticketProductModified],
       })
     }
-    if (body.ticketUserList) {
-      this.ticketChangeUserService.updateTicketUserPositionList({
-        oid,
-        ticketId,
-        body: {
-          positionType: PositionInteractType.Product,
-          positionInteractId: ticketProduct.productId,
-          ticketItemId: ticketProduct.id,
-          quantity: ticketProduct.quantity,
-          ticketUserList: body.ticketUserList,
-        },
-      })
-    }
+    this.socketEmitService.socketTicketUserListChange(oid, {
+      ticketId,
+      ticketUserUpsertList: result.ticketUserCreatedList,
+      ticketUserDestroyList: result.ticketUserDestroyList,
+    })
     return true
   }
 }

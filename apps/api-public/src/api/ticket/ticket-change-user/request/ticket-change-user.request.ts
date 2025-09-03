@@ -19,13 +19,7 @@ export class TicketUserBasicBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  id: number
-
-  @ApiProperty({ example: 56 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  roleId: number
+  positionId: number
 
   @ApiProperty({ example: 56 })
   @Expose()

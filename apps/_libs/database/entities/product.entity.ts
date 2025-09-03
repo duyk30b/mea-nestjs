@@ -188,7 +188,10 @@ export default class Product {
   batchList: Batch[]
 
   @Expose()
-  positionList: Position[]
+  positionRequestListCommon: Position[]
+
+  @Expose()
+  positionRequestList: Position[]
 
   @Expose()
   discountList: Discount[]
@@ -282,7 +285,7 @@ export default class Product {
 export type ProductRelationType = {
   [P in keyof Pick<
     Product,
-    'batchList' | 'productGroup' | 'positionList' | 'discountList' | 'discountListExtra'
+    'batchList' | 'productGroup' | 'positionRequestList' | 'positionRequestListCommon' | 'discountList' | 'discountListExtra'
   >]?: boolean
 }
 

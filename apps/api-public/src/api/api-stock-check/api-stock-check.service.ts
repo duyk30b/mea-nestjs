@@ -10,6 +10,7 @@ import {
   StockCheckItemRepository,
   StockCheckRepository,
 } from '../../../../_libs/database/repositories'
+import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
   StockCheckGetManyQuery,
   StockCheckGetOneQuery,
@@ -20,6 +21,7 @@ import {
 @Injectable()
 export class ApiStockCheckService {
   constructor(
+    private readonly socketEmitService: SocketEmitService,
     private readonly stockCheckRepository: StockCheckRepository,
     private readonly stockCheckItemRepository: StockCheckItemRepository,
     private readonly stockCheckReconcileOperation: StockCheckReconcileOperation
@@ -204,11 +206,19 @@ export class ApiStockCheckService {
     userId: number
   }): Promise<BaseResponse> {
     const { oid, stockCheckId, userId } = params
-    const { stockCheck } = await this.stockCheckReconcileOperation.startReconcile({
-      oid,
-      stockCheckId,
-      userId,
-      time: Date.now(),
+    const { stockCheck, productModifiedList, batchModifiedList } =
+      await this.stockCheckReconcileOperation.startReconcile({
+        oid,
+        stockCheckId,
+        userId,
+        time: Date.now(),
+      })
+
+    this.socketEmitService.productListChange(oid, {
+      productUpsertedList: productModifiedList || [],
+    })
+    this.socketEmitService.batchListChange(oid, {
+      batchUpsertedList: batchModifiedList || [],
     })
     return { data: { stockCheck } }
   }

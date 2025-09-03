@@ -3,10 +3,13 @@ import { DataSource } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { BusinessError } from '../../../common/error'
 import { PaymentMoneyStatus } from '../../../common/variable'
+import { TicketUser } from '../../../entities'
+import { PositionType } from '../../../entities/position.entity'
 import TicketLaboratory from '../../../entities/ticket-laboratory.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
-import { TicketLaboratoryManager, TicketManager } from '../../../repositories'
+import { TicketLaboratoryManager, TicketManager, TicketUserManager } from '../../../repositories'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
+import { TicketUserCommon } from '../ticket-change-user/ticket-user.common'
 
 export type TicketLaboratoryUpdateDtoType = {
   [K in keyof Pick<
@@ -21,7 +24,9 @@ export class TicketUpdateTicketLaboratoryOperation {
     private dataSource: DataSource,
     private ticketManager: TicketManager,
     private ticketLaboratoryManager: TicketLaboratoryManager,
-    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
+    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager,
+    private ticketUserManager: TicketUserManager,
+    private ticketUserCommon: TicketUserCommon
   ) { }
 
   async updateTicketLaboratory<T extends TicketLaboratoryUpdateDtoType>(params: {
@@ -29,8 +34,10 @@ export class TicketUpdateTicketLaboratoryOperation {
     ticketId: number
     ticketLaboratoryId: number
     ticketLaboratoryUpdateDto?: NoExtra<TicketLaboratoryUpdateDtoType, T>
+    ticketUserRequestList?: Pick<TicketUser, 'positionId' | 'userId'>[]
   }) {
-    const { oid, ticketId, ticketLaboratoryId, ticketLaboratoryUpdateDto } = params
+    const { oid, ticketId, ticketLaboratoryId, ticketLaboratoryUpdateDto, ticketUserRequestList } =
+      params
     const PREFIX = `ticketId=${ticketId} updateTicketLaboratory failed`
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
@@ -51,12 +58,12 @@ export class TicketUpdateTicketLaboratoryOperation {
         throw new BusinessError('Xét nghiệm đã thanh toán không thể sửa')
       }
 
-      let ticketLaboratory: TicketLaboratory = ticketLaboratoryOrigin
-      let laboratoryMoneyChange = 0
-      let itemsDiscountChange = 0
-      let itemsCostAmountChange = 0
+      let ticketLaboratoryModified: TicketLaboratory = ticketLaboratoryOrigin
+      let laboratoryMoneyAdd = 0
+      let itemsDiscountAdd = 0
+      let itemsCostAmountAdd = 0
       if (ticketLaboratoryUpdateDto) {
-        ticketLaboratory = await this.ticketLaboratoryManager.updateOneAndReturnEntity(
+        ticketLaboratoryModified = await this.ticketLaboratoryManager.updateOneAndReturnEntity(
           manager,
           { oid, id: ticketLaboratoryId },
           {
@@ -67,26 +74,73 @@ export class TicketUpdateTicketLaboratoryOperation {
             actualPrice: ticketLaboratoryUpdateDto.actualPrice,
           }
         )
-        laboratoryMoneyChange = ticketLaboratory.actualPrice - ticketLaboratoryOrigin.actualPrice
-        itemsDiscountChange = ticketLaboratory.discountMoney - ticketLaboratoryOrigin.discountMoney
-        itemsCostAmountChange = ticketLaboratory.costPrice - ticketLaboratoryOrigin.costPrice
+        laboratoryMoneyAdd =
+          ticketLaboratoryModified.actualPrice - ticketLaboratoryOrigin.actualPrice
+        itemsDiscountAdd =
+          ticketLaboratoryModified.discountMoney - ticketLaboratoryOrigin.discountMoney
+        itemsCostAmountAdd =
+          ticketLaboratoryModified.costPrice - ticketLaboratoryOrigin.costPrice
+      }
+
+      let ticketUserDestroyList: TicketUser[] = []
+      let ticketUserCreatedList: TicketUser[] = []
+      let commissionMoneyAdd = 0
+      if (ticketUserRequestList) {
+        ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+          oid,
+          ticketId,
+          positionType: PositionType.LaboratoryRequest,
+          ticketItemId: ticketLaboratoryModified.id,
+        })
+        ticketUserCreatedList = await this.ticketUserCommon.addTicketUserList({
+          manager,
+          createdAt: ticketLaboratoryModified.createdAt,
+          oid,
+          ticketId,
+          ticketUserDtoList: ticketUserRequestList.map((i) => {
+            return {
+              positionId: i.positionId,
+              userId: i.userId,
+              quantity: 1,
+              ticketItemId: ticketLaboratoryModified.id,
+              ticketItemChildId: 0,
+              positionInteractId: ticketLaboratoryModified.laboratoryId,
+              ticketItemExpectedPrice: ticketLaboratoryModified.expectedPrice,
+              ticketItemActualPrice: ticketLaboratoryModified.actualPrice,
+            }
+          }),
+        })
+
+        commissionMoneyAdd =
+          ticketUserCreatedList.reduce((acc, item) => {
+            return acc + item.quantity * item.commissionMoney
+          }, 0)
+          - ticketUserDestroyList.reduce((acc, item) => {
+            return acc + item.quantity * item.commissionMoney
+          }, 0)
       }
 
       // === 5. UPDATE TICKET: MONEY  ===
-      let ticket: Ticket = ticketOrigin
-      if (laboratoryMoneyChange != 0 || itemsDiscountChange != 0) {
-        ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
+      let ticketModified: Ticket = ticketOrigin
+      if (
+        laboratoryMoneyAdd != 0
+        || itemsDiscountAdd != 0
+        || itemsCostAmountAdd != 0
+        || commissionMoneyAdd != 0
+      ) {
+        ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
           manager,
           oid,
           ticketOrigin,
           itemMoney: {
-            laboratoryMoneyAdd: laboratoryMoneyChange,
-            itemsDiscountAdd: itemsDiscountChange,
-            itemsCostAmountAdd: itemsCostAmountChange,
+            laboratoryMoneyAdd,
+            itemsDiscountAdd,
+            itemsCostAmountAdd,
+            commissionMoneyAdd,
           },
         })
       }
-      return { ticket, ticketLaboratory }
+      return { ticketModified, ticketLaboratoryModified, ticketUserDestroyList, ticketUserCreatedList }
     })
 
     return transaction

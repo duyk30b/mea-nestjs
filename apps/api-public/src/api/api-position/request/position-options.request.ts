@@ -1,15 +1,15 @@
 import { Expose, Transform, TransformFnParams } from 'class-transformer'
 import { IsBoolean, IsIn, IsNumber, IsOptional } from 'class-validator'
 import {
-    ConditionNumber,
-    createConditionEnum,
-    transformConditionEnum,
-    transformConditionNumber,
+  ConditionNumber,
+  createConditionEnum,
+  transformConditionEnum,
+  transformConditionNumber,
 } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
-import { PositionInteractType } from '../../../../../_libs/database/entities/position.entity'
+import { PositionType } from '../../../../../_libs/database/entities/position.entity'
 
-const ConditionEnumPositionInteractType = createConditionEnum(PositionInteractType)
+const ConditionEnumPositionType = createConditionEnum(PositionType)
 
 export class PositionRelationQuery {
   @Expose()
@@ -18,26 +18,42 @@ export class PositionRelationQuery {
 
   @Expose()
   @IsBoolean()
-  product?: boolean
+  productRequest?: boolean
 
   @Expose()
   @IsBoolean()
-  procedure?: boolean
+  procedureRequest?: boolean
 
   @Expose()
   @IsBoolean()
-  laboratory?: boolean
+  procedureResult?: boolean
 
   @Expose()
   @IsBoolean()
-  radiology?: boolean
+  laboratoryRequest?: boolean
+
+  @Expose()
+  @IsBoolean()
+  laboratoryGroupRequest?: boolean
+
+  @Expose()
+  @IsBoolean()
+  laboratoryGroupResult?: boolean
+
+  @Expose()
+  @IsBoolean()
+  radiologyRequest?: boolean
+
+  @Expose()
+  @IsBoolean()
+  radiologyResult?: boolean
 }
 
 export class PositionFilterQuery {
   @Expose()
-  @Transform((params: TransformFnParams) => transformConditionEnum(params, PositionInteractType))
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, PositionType))
   @IsOptional()
-  positionType: PositionInteractType | InstanceType<typeof ConditionEnumPositionInteractType>
+  positionType: PositionType | InstanceType<typeof ConditionEnumPositionType>
 
   @Expose()
   @IsNumber()

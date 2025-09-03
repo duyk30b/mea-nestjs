@@ -51,6 +51,7 @@ export class ApiOrganizationService {
     if (body.imagesChange) {
       const logoIdNewList = await this.imageManagerService.changeCloudinaryImageLink({
         oid,
+        ticketId: 0,
         customerId: 0,
         files,
         imageIdsWait: [0],

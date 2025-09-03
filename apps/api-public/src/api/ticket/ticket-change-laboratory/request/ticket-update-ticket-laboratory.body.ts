@@ -48,7 +48,7 @@ export class TicketUpdateTicketLaboratoryBody {
   @Type(() => TicketUserBasicBody)
   @IsArray()
   @ValidateNested({ each: true })
-  ticketUserList: TicketUserBasicBody[]
+  ticketUserRequestList: TicketUserBasicBody[]
 
   @ApiProperty({ type: TicketLaboratoryBody })
   @Expose()

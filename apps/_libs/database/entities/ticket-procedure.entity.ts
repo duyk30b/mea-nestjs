@@ -3,7 +3,7 @@ import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import { DiscountType, PaymentMoneyStatus, TicketProcedureStatus } from '../common/variable'
 import Customer from './customer.entity'
-import Procedure from './procedure.entity'
+import Procedure, { ProcedureType } from './procedure.entity'
 import TicketProcedureItem from './ticket-procedure-item.entity'
 import TicketUser from './ticket-user.entity'
 import Ticket from './ticket.entity'
@@ -29,6 +29,10 @@ export default class TicketProcedure extends BaseEntity {
   @Expose()
   procedureId: number
 
+  @Column({ type: 'smallint', default: ProcedureType.Basic })
+  @Expose()
+  type: ProcedureType
+
   @Column({ default: 1 })
   @Expose()
   quantity: number
@@ -39,7 +43,7 @@ export default class TicketProcedure extends BaseEntity {
 
   @Column({ default: 0 })
   @Expose()
-  completedSessions: number
+  finishedSessions: number
 
   @Column({
     type: 'bigint',
@@ -117,7 +121,7 @@ export default class TicketProcedure extends BaseEntity {
   ticketProcedureItemList: TicketProcedureItem[]
 
   @Expose()
-  ticketUserList: TicketUser[]
+  ticketUserRequestList: TicketUser[]
 
   static fromRaw(raw: { [P in keyof TicketProcedure]: any }) {
     if (!raw) return null
@@ -141,7 +145,11 @@ export default class TicketProcedure extends BaseEntity {
 export type TicketProcedureRelationType = {
   [P in keyof Pick<
     TicketProcedure,
-    'ticket' | 'procedure' | 'customer' | 'ticketProcedureItemList' | 'ticketUserList'
+    | 'ticket'
+    | 'procedure'
+    | 'customer'
+    | 'ticketProcedureItemList'
+    | 'ticketUserRequestList'
   >]?: boolean
 }
 

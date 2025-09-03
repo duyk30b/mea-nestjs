@@ -15,12 +15,13 @@ import { External, TExternal } from '../../../../../_libs/common/request/externa
 import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { TicketParams } from '../ticket-query/request'
 import {
+  TicketCancelProcedureItemBody,
   TicketChangeProcedureParams,
   TicketUpdatePriorityTicketProcedureBody,
   TicketUpdateTicketProcedureBody,
 } from './request'
 import { TicketAddTicketProcedureListBody } from './request/ticket-add-ticket-procedure-list.body'
-import { TicketProcedureUpdateResultBody } from './request/ticket-procedure-update-result.request'
+import { TicketProcedureUpdateResultBody } from './request/ticket-update-result-procedure.request'
 import { TicketChangeProcedureService } from './ticket-change-procedure.service'
 
 @ApiTags('Ticket')
@@ -104,6 +105,21 @@ export class TicketChangeProcedureController {
       ticketId,
       body,
       files,
+    })
+    return { data }
+  }
+
+  @Post(':ticketId/procedure/cancel-ticket-procedure-item')
+  @UserPermission(PermissionId.TICKET_CHANGE_PROCEDURE_RESULT)
+  async cancelTicketProcedureItem(
+    @External() { oid }: TExternal,
+    @Param() { ticketId }: TicketParams,
+    @Body() body: TicketCancelProcedureItemBody
+  ): Promise<BaseResponse> {
+    const data = await this.ticketChangeProcedureService.cancelTicketProcedureItem({
+      oid,
+      ticketId,
+      body,
     })
     return { data }
   }

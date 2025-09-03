@@ -6,7 +6,8 @@ import {
   IsEnumValue,
   IsNumberGreaterThan,
 } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType } from '../../../../../../_libs/database/common/variable'
+import { DiscountType, PaymentMoneyStatus } from '../../../../../../_libs/database/common/variable'
+import { ProcedureType } from '../../../../../../_libs/database/entities/procedure.entity'
 
 export class TicketOrderProcedureDraft {
   @ApiProperty({ example: 56 })
@@ -20,6 +21,18 @@ export class TicketOrderProcedureDraft {
   @IsDefined()
   @IsNumber()
   procedureId: number
+
+  @ApiProperty({ enum: valuesEnum(ProcedureType), example: ProcedureType.Basic })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(ProcedureType)
+  type: ProcedureType
+
+  @ApiProperty({ enum: valuesEnum(PaymentMoneyStatus), example: PaymentMoneyStatus.NoEffect })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(PaymentMoneyStatus)
+  paymentMoneyStatus: PaymentMoneyStatus
 
   @ApiProperty({ example: 4 })
   @Expose()

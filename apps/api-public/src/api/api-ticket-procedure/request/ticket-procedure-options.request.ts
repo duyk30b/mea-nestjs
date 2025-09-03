@@ -1,5 +1,5 @@
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsInt, IsOptional, ValidateNested } from 'class-validator'
+import { IsBoolean, IsIn, IsInt, IsObject, IsOptional, ValidateNested } from 'class-validator'
 import {
   ConditionNumber,
   ConditionTimestamp,
@@ -8,7 +8,10 @@ import {
   transformConditionNumber,
 } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
-import { PaymentMoneyStatus, TicketProcedureStatus } from '../../../../../_libs/database/common/variable'
+import {
+  PaymentMoneyStatus,
+  TicketProcedureStatus,
+} from '../../../../../_libs/database/common/variable'
 
 export class TicketProcedureRelationQuery {
   @Expose()
@@ -24,18 +27,40 @@ export class TicketProcedureRelationQuery {
   ticket?: boolean
 
   @Expose()
-  @IsBoolean()
-  ticketProcedureItemList?: { imageList?: boolean }
+  @IsObject()
+  ticketProcedureItemList?: { imageList?: boolean; ticketUserResultList?: true }
 
   @Expose()
   @IsBoolean()
-  ticketUserList?: boolean
+  ticketUserRequestList?: boolean
 }
 
 const ConditionEnumPaymentMoneyStatus = createConditionEnum(PaymentMoneyStatus)
 const ConditionEnumTicketProcedureStatus = createConditionEnum(TicketProcedureStatus)
 
 export class TicketProcedureFilterQuery {
+  @Expose()
+  @IsInt()
+  oid?: number
+
+  @Expose()
+  @Transform(transformConditionNumber)
+  @IsOptional()
+  id?: number | ConditionNumber
+
+  @Expose()
+  @Transform(transformConditionNumber)
+  @IsOptional()
+  ticketId?: number | ConditionNumber
+
+  @Expose()
+  @IsInt()
+  customerId?: number
+
+  @Expose()
+  @IsInt()
+  procedureId?: number
+
   @Expose()
   @Transform((params: TransformFnParams) => transformConditionEnum(params, PaymentMoneyStatus))
   @IsOptional()
@@ -45,23 +70,6 @@ export class TicketProcedureFilterQuery {
   @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketProcedureStatus))
   @IsOptional()
   status?: TicketProcedureStatus | InstanceType<typeof ConditionEnumTicketProcedureStatus>
-
-  @Expose()
-  @IsInt()
-  procedureId?: number
-
-  @Expose()
-  @IsInt()
-  oid?: number
-
-  @Expose()
-  @IsInt()
-  customerId?: number
-
-  @Expose()
-  @Transform(transformConditionNumber)
-  @IsOptional()
-  ticketId?: number | ConditionNumber
 
   @Expose()
   @Type(() => ConditionTimestamp)

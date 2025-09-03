@@ -2,6 +2,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
+import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiPositionService } from './api-position.service'
@@ -22,30 +23,43 @@ export class ApiPositionController {
 
   @Get('pagination')
   @UserPermission()
-  pagination(@External() { oid }: TExternal, @Query() query: PositionPaginationQuery) {
-    return this.apiPositionService.pagination(oid, query)
+  async pagination(
+    @External() { oid }: TExternal,
+    @Query() query: PositionPaginationQuery
+  ): Promise<BaseResponse> {
+    const data = await this.apiPositionService.pagination(oid, query)
+    return { data }
   }
 
   @Get('list')
   @UserPermission()
-  list(@External() { oid }: TExternal, @Query() query: PositionGetManyQuery) {
-    return this.apiPositionService.getMany(oid, query)
+  async list(
+    @External() { oid }: TExternal,
+    @Query() query: PositionGetManyQuery
+  ): Promise<BaseResponse> {
+    const data = await this.apiPositionService.getMany(oid, query)
+    return { data }
   }
 
   @Get('detail/:id')
   @UserPermission()
-  findOne(
+  async findOne(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
     @Query() query: PositionGetOneQuery
-  ) {
-    return this.apiPositionService.getOne(oid, id, query)
+  ): Promise<BaseResponse> {
+    const data = await this.apiPositionService.getOne(oid, id, query)
+    return { data }
   }
 
   @Post('create')
   @UserPermission(PermissionId.MASTER_DATA_POSITION)
-  async createOne(@External() { oid }: TExternal, @Body() body: PositionCreateBody) {
-    return await this.apiPositionService.createOne(oid, body)
+  async createOne(
+    @External() { oid }: TExternal,
+    @Body() body: PositionCreateBody
+  ): Promise<BaseResponse> {
+    const data = await this.apiPositionService.createOne(oid, body)
+    return { data }
   }
 
   @Patch('update/:id')
@@ -55,20 +69,29 @@ export class ApiPositionController {
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
     @Body() body: PositionUpdateBody
-  ) {
-    return await this.apiPositionService.updateOne(oid, id, body)
+  ): Promise<BaseResponse> {
+    const data = await this.apiPositionService.updateOne(oid, id, body)
+    return { data }
   }
 
   @Delete('destroy/:id')
   @UserPermission(PermissionId.MASTER_DATA_POSITION)
   @ApiParam({ name: 'id', example: 1 })
-  async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiPositionService.destroyOne(oid, id)
+  async destroyOne(
+    @External() { oid }: TExternal,
+    @Param() { id }: IdParam
+  ): Promise<BaseResponse> {
+    const data = await this.apiPositionService.destroyOne(oid, id)
+    return { data }
   }
 
   @Put('replace-list')
   @UserPermission(PermissionId.MASTER_DATA_POSITION)
-  async replaceAll(@External() { oid }: TExternal, @Body() body: PositionReplaceListBody) {
-    return await this.apiPositionService.replaceList(oid, body)
+  async replaceAll(
+    @External() { oid }: TExternal,
+    @Body() body: PositionReplaceListBody
+  ): Promise<BaseResponse> {
+    const data = await this.apiPositionService.replaceList(oid, body)
+    return { data }
   }
 }

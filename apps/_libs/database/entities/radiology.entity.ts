@@ -93,7 +93,16 @@ export default class Radiology {
   printHtml: PrintHtml
 
   @Expose()
-  positionList: Position[]
+  positionRequestListCommon: Position[]
+
+  @Expose()
+  positionRequestList: Position[]
+
+  @Expose()
+  positionResultListCommon: Position[]
+
+  @Expose()
+  positionResultList: Position[]
 
   @Expose()
   discountList: Discount[]
@@ -123,7 +132,14 @@ export default class Radiology {
 export type RadiologyRelationType = {
   [P in keyof Pick<
     Radiology,
-    'radiologyGroup' | 'printHtml' | 'positionList' | 'discountList' | 'discountListExtra'
+    | 'radiologyGroup'
+    | 'printHtml'
+    | 'positionRequestListCommon'
+    | 'positionRequestList'
+    | 'positionResultListCommon'
+    | 'positionResultList'
+    | 'discountList'
+    | 'discountListExtra'
   >]?: boolean
 }
 

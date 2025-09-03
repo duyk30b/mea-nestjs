@@ -35,6 +35,7 @@ export class TicketChangeAttributeService {
     if (imagesChange) {
       const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
         oid,
+        ticketId,
         customerId: ticket.customerId,
         files,
         imageIdsWait: imagesChange.imageIdsWait,

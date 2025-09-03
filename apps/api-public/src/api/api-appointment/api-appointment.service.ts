@@ -1,23 +1,36 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
+import { ESArray } from '../../../../_libs/common/helpers'
 import { ESTimer } from '../../../../_libs/common/helpers/time.helper'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { DeliveryStatus, DiscountType } from '../../../../_libs/database/common/variable'
-import { AppointmentStatus } from '../../../../_libs/database/entities/appointment.entity'
-import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
+import {
+  Customer,
+  CustomerSource,
+  TicketProcedure,
+  TicketProcedureItem,
+} from '../../../../_libs/database/entities'
+import Appointment, {
+  AppointmentStatus,
+} from '../../../../_libs/database/entities/appointment.entity'
+import Ticket, { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import {
   AppointmentRepository,
   CustomerRepository,
+  CustomerSourceRepository,
   TicketAttributeRepository,
+  TicketProcedureItemRepository,
+  TicketProcedureRepository,
   TicketRepository,
 } from '../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../socket/socket-emit.service'
+import { ApiTicketProcedureService } from '../api-ticket-procedure/api-ticket-procedure.service'
 import {
   AppointmentCreateBody,
   AppointmentGetManyQuery,
   AppointmentGetOneQuery,
   AppointmentPaginationQuery,
   AppointmentRegisterTicketClinicBody,
+  AppointmentRelationQuery,
   AppointmentUpdateBody,
 } from './request'
 
@@ -27,55 +40,150 @@ export class ApiAppointmentService {
     private readonly socketEmitService: SocketEmitService,
     private readonly appointmentRepository: AppointmentRepository,
     private readonly customerRepository: CustomerRepository,
+    private readonly customerSourceRepository: CustomerSourceRepository,
+    private readonly ticketProcedureRepository: TicketProcedureRepository,
+    private readonly ticketProcedureItemRepository: TicketProcedureItemRepository,
     private readonly ticketRepository: TicketRepository,
-    private readonly ticketAttributeRepository: TicketAttributeRepository
+    private readonly ticketAttributeRepository: TicketAttributeRepository,
+    private readonly apiTicketProcedureService: ApiTicketProcedureService
   ) { }
 
-  async pagination(oid: number, query: AppointmentPaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: AppointmentPaginationQuery) {
     const { page, limit, filter, sort, relation } = query
 
-    const { data, total } = await this.appointmentRepository.pagination({
+    const { data: appointmentList, total } = await this.appointmentRepository.pagination({
       page,
       limit,
-      relation,
+      // relation,
       condition: {
         oid,
         customerId: filter?.customerId,
-        appointmentStatus: filter?.appointmentStatus,
+        status: filter?.status,
+        type: filter?.type,
         registeredAt: filter?.registeredAt,
       },
       sort,
     })
-    return {
-      data,
-      meta: { total, page, limit },
+    if (relation) {
+      await this.generateRelation({ oid, appointmentList, relation })
     }
+
+    return { appointmentList, total, page, limit }
   }
 
-  async getMany(oid: number, query: AppointmentGetManyQuery): Promise<BaseResponse> {
-    const { limit, filter } = query
+  async getMany(oid: number, query: AppointmentGetManyQuery) {
+    const { limit, filter, relation } = query
 
-    const data = await this.appointmentRepository.findMany({
+    const appointmentList = await this.appointmentRepository.findMany({
       condition: {
         oid,
         customerId: filter?.customerId,
-        appointmentStatus: filter?.appointmentStatus,
+        status: filter?.status,
+        type: filter?.type,
         registeredAt: filter?.registeredAt,
       },
       limit,
     })
-    return { data }
+    if (relation) {
+      await this.generateRelation({ oid, appointmentList, relation })
+    }
+
+    return { appointmentList }
   }
 
-  async getOne(oid: number, id: number, query?: AppointmentGetOneQuery): Promise<BaseResponse> {
+  async getOne(oid: number, id: number, query?: AppointmentGetOneQuery) {
     const appointment = await this.appointmentRepository.findOneBy({ oid, id })
     if (!appointment) {
       throw BusinessException.create({ message: 'error.Database.NotFound', details: 'Appointment' })
     }
-    return { data: { appointment } }
+    if (query?.relation) {
+      await this.generateRelation({ oid, appointmentList: [appointment], relation: query.relation })
+    }
+
+    return { appointment }
   }
 
-  async createOne(oid: number, body: AppointmentCreateBody): Promise<BaseResponse> {
+  async generateRelation(options: {
+    oid: number
+    appointmentList: Appointment[]
+    relation: AppointmentRelationQuery
+  }) {
+    const { oid, appointmentList, relation } = options
+    const appointmentIdList = appointmentList.map((i) => i.id)
+    const customerIdList = appointmentList.map((i) => i.customerId)
+    const customerSourceIdList = appointmentList.map((i) => i.customerSourceId).filter((i) => !!i)
+    const ticketProcedureIdList = appointmentList.map((i) => i.ticketProcedureId).filter((i) => !!i)
+
+    const toTicketIdList = appointmentList.map((i) => i.toTicketId).filter((i) => !!i)
+
+    const promiseData = await Promise.all([
+      relation?.customer
+        ? this.customerRepository.findManyBy({
+          oid,
+          id: { IN: ESArray.uniqueArray(customerIdList) },
+        })
+        : undefined,
+
+      relation?.customerSource && customerSourceIdList.length
+        ? this.customerSourceRepository.findManyBy({
+          oid,
+          id: { IN: ESArray.uniqueArray(customerSourceIdList) },
+        })
+        : undefined,
+      relation?.ticketProcedure && ticketProcedureIdList.length
+        ? this.apiTicketProcedureService.getList(oid, {
+          filter: {
+            ...(relation?.ticketProcedure.filter || {}),
+            oid,
+            id: { IN: ESArray.uniqueArray(ticketProcedureIdList) },
+          },
+          relation: relation?.ticketProcedure.relation,
+        })
+        : undefined,
+      relation?.toTicket && toTicketIdList.length
+        ? this.ticketRepository.findManyBy({
+          oid,
+          id: { IN: ESArray.uniqueArray(toTicketIdList) },
+        })
+        : undefined,
+    ])
+
+    const customerList: Customer[] = promiseData[0]
+    const customerSourceList: CustomerSource[] = promiseData[1]
+    const ticketProcedureList: TicketProcedure[] = promiseData[2]?.ticketProcedureList || []
+    const toTicketList: Ticket[] = promiseData[3]
+
+    const customerMap = ESArray.arrayToKeyValue(customerList || [], 'id')
+    const customerSourceMap = ESArray.arrayToKeyValue(customerSourceList || [], 'id')
+    const ticketProcedureMap = ESArray.arrayToKeyValue(ticketProcedureList || [], 'id')
+    const toTicketMap = ESArray.arrayToKeyValue(toTicketList || [], 'id')
+
+    appointmentList.forEach((appointment: Appointment) => {
+      if (relation?.customer) {
+        appointment.customer = customerMap[appointment.customerId]
+      }
+      if (relation?.customerSource) {
+        appointment.customerSource = customerSourceMap[appointment.customerSourceId]
+      }
+      if (relation?.toTicket) {
+        appointment.toTicket = toTicketMap[appointment.toTicketId]
+      }
+      if (relation?.ticketProcedure) {
+        appointment.ticketProcedure = ticketProcedureMap[appointment.ticketProcedureId]
+      }
+      if (relation?.ticketProcedureItem) {
+        if (appointment.ticketProcedure?.ticketProcedureItemList) {
+          appointment.ticketProcedureItem =
+            appointment.ticketProcedure.ticketProcedureItemList.find((i) => {
+              return i.id === appointment.ticketProcedureItemId
+            })
+        }
+      }
+    })
+    return appointmentList
+  }
+
+  async createOne(oid: number, body: AppointmentCreateBody) {
     const { customerId: cid, customer, ...ticketBody } = body
     let customerId = cid
     if (!customerId) {
@@ -99,11 +207,13 @@ export class ApiAppointmentService {
       toTicketId: 0,
       cancelReason: '',
       oid,
+      ticketProcedureId: 0,
+      ticketProcedureItemId: 0,
     })
-    return { data: { appointment } }
+    return { appointment }
   }
 
-  async updateOne(oid: number, id: number, body: AppointmentUpdateBody): Promise<BaseResponse> {
+  async updateOne(oid: number, id: number, body: AppointmentUpdateBody) {
     const [appointment] = await this.appointmentRepository.updateAndReturnEntity({ oid, id }, body)
     if (!appointment) {
       throw BusinessException.create({
@@ -111,28 +221,28 @@ export class ApiAppointmentService {
         details: 'Appointment',
       })
     }
-    return { data: { appointment } }
+    return { appointment }
   }
 
-  async deleteOne(oid: number, id: number): Promise<BaseResponse> {
+  async deleteOne(oid: number, id: number) {
     const affected = await this.appointmentRepository.delete({
       oid,
       id,
-      appointmentStatus: {
+      status: {
         IN: [AppointmentStatus.Waiting, AppointmentStatus.Confirm, AppointmentStatus.Cancelled],
       },
     })
     if (affected === 0) {
       throw new BusinessException('error.Database.DeleteFailed')
     }
-    return { data: { appointmentId: id } }
+    return { appointmentId: id }
   }
 
   async registerTicketClinic(options: {
     oid: number
     appointmentId: number
     body: AppointmentRegisterTicketClinicBody
-  }): Promise<BaseResponse> {
+  }) {
     const { oid, appointmentId, body } = options
 
     const appointment = await this.appointmentRepository.findOneBy({ oid, id: appointmentId })
@@ -195,10 +305,10 @@ export class ApiAppointmentService {
     await this.appointmentRepository.updateAndReturnEntity(
       { oid, id: appointmentId },
       {
-        appointmentStatus: AppointmentStatus.Completed,
+        status: AppointmentStatus.Completed,
         toTicketId: ticket.id,
       }
     )
-    return { data: { appointmentId } }
+    return { appointmentId }
   }
 }

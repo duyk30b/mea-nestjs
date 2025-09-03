@@ -23,7 +23,6 @@ import {
   TicketRadiology,
   TicketUser,
 } from '../../../_libs/database/entities'
-import { PositionInteractType } from '../../../_libs/database/entities/position.entity'
 import { SOCKET_EVENT } from './socket.variable'
 
 @Injectable()
@@ -62,6 +61,9 @@ export class SocketEmitService {
     data: { batchDestroyedList?: Batch[]; batchUpsertedList?: Batch[] }
   ) {
     if (!this.io) return
+    if (!data.batchUpsertedList?.length && !data.batchDestroyedList?.length) {
+      return
+    }
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_BATCH_LIST_CHANGE, data)
   }
 
@@ -70,6 +72,9 @@ export class SocketEmitService {
     data: { productDestroyedList?: Product[]; productUpsertedList?: Product[] }
   ) {
     if (!this.io) return
+    if (!data.productUpsertedList?.length && !data.productDestroyedList?.length) {
+      return
+    }
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_PRODUCT_LIST_CHANGE, data)
   }
 
@@ -115,7 +120,10 @@ export class SocketEmitService {
 
   socketPurchaseOrderListChange(
     oid: number,
-    data: { purchaseOrderDestroyedList?: PurchaseOrder[]; purchaseOrderUpsertedList?: PurchaseOrder[] }
+    data: {
+      purchaseOrderDestroyedList?: PurchaseOrder[]
+      purchaseOrderUpsertedList?: PurchaseOrder[]
+    }
   ) {
     if (!this.io) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_PURCHASE_ORDER_LIST_CHANGE, data)
@@ -148,17 +156,12 @@ export class SocketEmitService {
       ticketId: number
       ticketUserDestroyList?: TicketUser[]
       ticketUserUpsertList?: TicketUser[]
-      replace?: {
-        positionType: PositionInteractType
-        ticketItemId: number // ticketItemId = 0 là thay thế toàn bộ positionType đó
-        ticketUserList: TicketUser[]
-      }
-      replaceAll?: {
-        ticketUserList: TicketUser[]
-      }
     }
   ) {
     if (!this.io) return
+    if (!data.ticketUserDestroyList?.length && !data.ticketUserUpsertList?.length) {
+      return
+    }
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_USER, data)
   }
 
@@ -171,6 +174,9 @@ export class SocketEmitService {
     }
   ) {
     if (!this.io) return
+    if (!data.ticketProcedureUpsertList?.length && !data.ticketProcedureDestroyList?.length) {
+      return
+    }
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_PROCEDURE, data)
   }
 
@@ -180,9 +186,14 @@ export class SocketEmitService {
       ticketId: number
       ticketRadiologyUpsertList?: TicketRadiology[]
       ticketRadiologyDestroyList?: TicketRadiology[]
+      ticketUserDestroyList?: TicketUser[]
+      ticketUserUpsertList?: TicketUser[]
     }
   ) {
     if (!this.io) return
+    if (!data.ticketRadiologyUpsertList?.length && !data.ticketRadiologyDestroyList?.length) {
+      return
+    }
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_RADIOLOGY, data)
   }
 

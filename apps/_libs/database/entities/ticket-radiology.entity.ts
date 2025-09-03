@@ -158,7 +158,10 @@ export default class TicketRadiology extends BaseEntity {
   imageList: Image[]
 
   @Expose()
-  ticketUserList: TicketUser[]
+  ticketUserRequestList: TicketUser[]
+
+  @Expose()
+  ticketUserResultList: TicketUser[]
 
   static fromRaw(raw: { [P in keyof TicketRadiology]: any }) {
     if (!raw) return null
@@ -184,7 +187,7 @@ export default class TicketRadiology extends BaseEntity {
 export type TicketRadiologyRelationType = {
   [P in keyof Pick<
     TicketRadiology,
-    'ticket' | 'customer' | 'imageList' | 'ticketUserList'
+    'ticket' | 'customer' | 'imageList' | 'ticketUserRequestList' | 'ticketUserResultList'
   >]?: boolean
 } & {
   [P in keyof Pick<TicketRadiology, 'radiology'>]?:

@@ -37,6 +37,12 @@ export function createConditionEnum(enumObject: object) {
     @ArrayMinSize(1)
     @IsEnumValue(enumObject, { each: true })
     'IN'?: T[]
+
+    @Expose()
+    @IsArray()
+    @ArrayMinSize(1)
+    @IsEnumValue(enumObject, { each: true })
+    'NOT_IN'?: T[]
   }
   return ConditionEnum
 }

@@ -3,7 +3,7 @@ import { DataSource } from 'typeorm'
 import { ESArray } from '../../../common/helpers/array.helper'
 import { DeliveryStatus, MovementType } from '../../common/variable'
 import { TicketUser } from '../../entities'
-import { PositionInteractType } from '../../entities/position.entity'
+import { PositionType } from '../../entities/position.entity'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
 import {
@@ -270,7 +270,7 @@ export class TicketReturnProductOperation {
       const ticketUserOriginList = await this.ticketUserManager.findManyBy(manager, {
         oid,
         ticketId,
-        positionType: PositionInteractType.Product,
+        positionType: PositionType.ProductRequest,
         ticketItemId: { IN: ticketProductModifiedList.map((i) => i.id) },
       })
       let ticketUserModifiedList: TicketUser[] = []
@@ -278,7 +278,7 @@ export class TicketReturnProductOperation {
       if (ticketUserOriginList.length) {
         ticketUserModifiedList = await this.ticketUserManager.bulkUpdate({
           manager,
-          condition: { oid, ticketId, positionType: PositionInteractType.Product },
+          condition: { oid, ticketId, positionType: PositionType.ProductRequest },
           compare: ['ticketItemId'],
           update: ['quantity'],
           tempList: ticketProductModifiedList.map((i) => {

@@ -2,11 +2,13 @@ import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { DeliveryStatus, PaymentMoneyStatus } from '../../../common/variable'
-import { TicketProduct } from '../../../entities'
+import { TicketProduct, TicketUser } from '../../../entities'
+import { PositionType } from '../../../entities/position.entity'
 import { TicketProductType } from '../../../entities/ticket-product.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
-import { TicketManager, TicketProductManager } from '../../../repositories'
+import { TicketManager, TicketProductManager, TicketUserManager } from '../../../repositories'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
+import { TicketUserCommon } from '../ticket-change-user/ticket-user.common'
 
 export type TicketProductUpdateDtoType = {
   [K in keyof Pick<
@@ -30,7 +32,9 @@ export class TicketUpdateTicketProductOperation {
     private dataSource: DataSource,
     private ticketManager: TicketManager,
     private ticketProductManager: TicketProductManager,
-    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
+    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager,
+    private ticketUserManager: TicketUserManager,
+    private ticketUserCommon: TicketUserCommon
   ) { }
 
   async updateTicketProduct<T extends TicketProductUpdateDtoType>(params: {
@@ -39,8 +43,16 @@ export class TicketUpdateTicketProductOperation {
     ticketProductId: number
     ticketProductType: TicketProductType
     ticketProductUpdateDto?: NoExtra<TicketProductUpdateDtoType, T>
+    ticketUserRequestList?: Pick<TicketUser, 'positionId' | 'userId'>[]
   }) {
-    const { oid, ticketId, ticketProductId, ticketProductType, ticketProductUpdateDto } = params
+    const {
+      oid,
+      ticketId,
+      ticketProductId,
+      ticketProductType,
+      ticketProductUpdateDto,
+      ticketUserRequestList,
+    } = params
     const PREFIX = `ticketId=${ticketId} updateTicketProduct failed: `
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
@@ -50,6 +62,7 @@ export class TicketUpdateTicketProductOperation {
         { oid, id: ticketId, status: TicketStatus.Executing },
         { updatedAt: Date.now() }
       )
+      let ticketModified: Ticket = ticketOrigin
 
       // === 2. UPDATE TICKET PRODUCT ===
       const ticketProductOrigin = await this.ticketProductManager.updateOneAndReturnEntity(
@@ -59,9 +72,9 @@ export class TicketUpdateTicketProductOperation {
       )
 
       let ticketProductModified: TicketProduct = ticketProductOrigin
-      let productMoneyChange = 0
-      let itemsDiscountChange = 0
-      let itemsCostAmountChange = 0
+      let productMoneyAdd = 0
+      let itemsDiscountAdd = 0
+      let itemsCostAmountAdd = 0
       if (ticketProductUpdateDto) {
         if (
           [DeliveryStatus.Pending, DeliveryStatus.NoStock].includes(
@@ -91,13 +104,13 @@ export class TicketUpdateTicketProductOperation {
                   : DeliveryStatus.Pending,
             }
           )
-          productMoneyChange =
+          productMoneyAdd =
             ticketProductModified.quantity * ticketProductModified.actualPrice
             - ticketProductOrigin.quantity * ticketProductOrigin.actualPrice
-          itemsDiscountChange =
+          itemsDiscountAdd =
             ticketProductModified.quantity * ticketProductModified.discountMoney
             - ticketProductOrigin.quantity * ticketProductOrigin.discountMoney
-          itemsCostAmountChange = ticketProductModified.costAmount - ticketProductOrigin.costAmount
+          itemsCostAmountAdd = ticketProductModified.costAmount - ticketProductOrigin.costAmount
         } else {
           ticketProductModified = await this.ticketProductManager.updateOneAndReturnEntity(
             manager,
@@ -109,6 +122,44 @@ export class TicketUpdateTicketProductOperation {
             }
           )
         }
+      }
+
+      let ticketUserDestroyList: TicketUser[] = []
+      let ticketUserCreatedList: TicketUser[] = []
+      let commissionMoneyAdd = 0
+      if (ticketUserRequestList) {
+        ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+          oid,
+          ticketId,
+          positionType: PositionType.ProductRequest,
+          ticketItemId: ticketProductModified.id,
+        })
+        ticketUserCreatedList = await this.ticketUserCommon.addTicketUserList({
+          manager,
+          createdAt: ticketProductModified.createdAt,
+          oid,
+          ticketId,
+          ticketUserDtoList: ticketUserRequestList.map((i) => {
+            return {
+              positionId: i.positionId,
+              userId: i.userId,
+              quantity: 1,
+              ticketItemId: ticketProductModified.id,
+              ticketItemChildId: 0,
+              positionInteractId: ticketProductModified.productId,
+              ticketItemExpectedPrice: ticketProductModified.expectedPrice,
+              ticketItemActualPrice: ticketProductModified.actualPrice,
+            }
+          }),
+        })
+
+        commissionMoneyAdd =
+          ticketUserCreatedList.reduce((acc, item) => {
+            return acc + item.quantity * item.commissionMoney
+          }, 0)
+          - ticketUserDestroyList.reduce((acc, item) => {
+            return acc + item.quantity * item.commissionMoney
+          }, 0)
       }
 
       // === 4. ReCalculator DeliveryStatus
@@ -127,21 +178,32 @@ export class TicketUpdateTicketProductOperation {
       }
 
       // === 5. UPDATE TICKET: MONEY  ===
-      let ticket: Ticket = ticketOrigin
-      if (productMoneyChange != 0 || itemsDiscountChange != 0) {
-        ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
+
+      if (
+        productMoneyAdd != 0
+        || itemsDiscountAdd != 0
+        || itemsCostAmountAdd != 0
+        || commissionMoneyAdd != 0
+      ) {
+        ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
           manager,
           oid,
           ticketOrigin,
           itemMoney: {
-            productMoneyAdd: productMoneyChange,
-            itemsCostAmountAdd: itemsCostAmountChange,
-            itemsDiscountAdd: itemsDiscountChange,
+            productMoneyAdd,
+            itemsCostAmountAdd,
+            itemsDiscountAdd,
+            commissionMoneyAdd,
           },
           other: { deliveryStatus },
         })
       }
-      return { ticket, ticketProduct: ticketProductModified }
+      return {
+        ticketModified,
+        ticketProductModified,
+        ticketUserCreatedList,
+        ticketUserDestroyList,
+      }
     })
 
     return transaction

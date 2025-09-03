@@ -5,7 +5,6 @@ import {
   TicketLaboratoryStatus,
 } from '../../../../../_libs/database/common/variable'
 import { TicketLaboratoryResult } from '../../../../../_libs/database/entities'
-import { PositionInteractType } from '../../../../../_libs/database/entities/position.entity'
 import { TicketLaboratoryResultInsertType } from '../../../../../_libs/database/entities/ticket-laboratory-result.entity'
 import {
   TicketAddSelectLaboratoryOperation,
@@ -168,27 +167,20 @@ export class TicketChangeLaboratoryService {
       ticketId,
       ticketLaboratoryId,
       ticketLaboratoryUpdateDto: body.ticketLaboratory,
+      ticketUserRequestList: body.ticketUserRequestList,
     })
-    const { ticket, ticketLaboratory } = result
+    const { ticketModified, ticketLaboratoryModified } = result
 
-    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
+    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified })
     this.socketEmitService.socketTicketLaboratoryListChange(oid, {
       ticketId,
-      ticketLaboratoryUpsertList: [ticketLaboratory],
+      ticketLaboratoryUpsertList: [ticketLaboratoryModified],
     })
-    if (body.ticketUserList) {
-      this.ticketChangeUserService.updateTicketUserPositionList({
-        oid,
-        ticketId,
-        body: {
-          positionType: PositionInteractType.Laboratory,
-          positionInteractId: ticketLaboratory.laboratoryId,
-          ticketItemId: ticketLaboratory.id,
-          quantity: 1,
-          ticketUserList: body.ticketUserList,
-        },
-      })
-    }
+    this.socketEmitService.socketTicketUserListChange(oid, {
+      ticketId,
+      ticketUserUpsertList: result.ticketUserCreatedList,
+      ticketUserDestroyList: result.ticketUserDestroyList,
+    })
     return true
   }
 

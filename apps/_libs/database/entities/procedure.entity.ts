@@ -63,7 +63,16 @@ export default class Procedure {
   procedureGroup: ProcedureGroup
 
   @Expose()
-  positionList: Position[]
+  positionRequestListCommon: Position[]
+
+  @Expose()
+  positionRequestList: Position[]
+
+  @Expose()
+  positionResultListCommon: Position[]
+
+  @Expose()
+  positionResultList: Position[]
 
   @Expose()
   discountList: Discount[]
@@ -89,7 +98,13 @@ export default class Procedure {
 export type ProcedureRelationType = {
   [P in keyof Pick<
     Procedure,
-    'procedureGroup' | 'positionList' | 'discountList' | 'discountListExtra'
+    | 'procedureGroup'
+    | 'positionRequestListCommon'
+    | 'positionRequestList'
+    | 'positionResultListCommon'
+    | 'positionResultList'
+    | 'discountList'
+    | 'discountListExtra'
   >]?: boolean
 }
 

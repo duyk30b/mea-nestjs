@@ -18,15 +18,21 @@ import {
   PaymentMoneyStatus,
   TicketProcedureStatus,
 } from '../../../../../../_libs/database/common/variable'
+import { ProcedureType } from '../../../../../../_libs/database/entities/procedure.entity'
 import { TicketUserBasicBody } from '../../ticket-change-user/request'
 
 class TicketProcedureItemBody {
   @ApiProperty({ example: Date.now() })
   @Expose()
-  @Transform(({ value }) => (value != null ? Number(value) : value))
   @IsOptional()
-  @IsInt()
-  completedAt: number
+  @IsNumber()
+  registeredAt: number
+
+  @ApiProperty()
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  indexSession: number
 }
 
 class TicketProcedureBasicBody {
@@ -41,6 +47,11 @@ class TicketProcedureBasicBody {
   @IsDefined()
   @IsNumber()
   procedureId: number
+
+  @ApiProperty({ example: ProcedureType.Basic })
+  @Expose()
+  @IsEnumValue(ProcedureType)
+  type: ProcedureType
 
   @ApiProperty({ example: 4 })
   @Expose()
@@ -109,7 +120,7 @@ class TicketProcedureBasicBody {
   createdAt: number
 }
 
-export class TicketProcedureBody {
+export class TicketProcedureWrapBody {
   @ApiProperty({ type: TicketProcedureItemBody })
   @Expose()
   @Type(() => TicketProcedureItemBody)
@@ -124,7 +135,7 @@ export class TicketProcedureBody {
   @IsDefined()
   @IsArray()
   @ValidateNested({ each: true })
-  ticketUserList: TicketUserBasicBody[]
+  ticketUserRequestList: TicketUserBasicBody[]
 
   @ApiProperty({ type: TicketProcedureBasicBody })
   @Expose()
@@ -135,10 +146,10 @@ export class TicketProcedureBody {
 }
 
 export class TicketAddTicketProcedureListBody {
-  @ApiProperty({ type: TicketProcedureBody })
+  @ApiProperty({ type: TicketProcedureWrapBody })
   @Expose()
-  @Type(() => TicketProcedureBody)
+  @Type(() => TicketProcedureWrapBody)
   @IsDefined()
   @ValidateNested({ each: true })
-  ticketProcedureList: TicketProcedureBody[]
+  ticketProcedureWrapList: TicketProcedureWrapBody[]
 }

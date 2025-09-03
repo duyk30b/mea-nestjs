@@ -9,7 +9,7 @@ import {
 } from '../../../../_libs/database/entities/discount.entity'
 import Position, {
   PositionInsertType,
-  PositionInteractType,
+  PositionType,
 } from '../../../../_libs/database/entities/position.entity'
 import {
   DiscountRepository,
@@ -95,7 +95,7 @@ export class ApiProcedureService {
   }
 
   async createOne(oid: number, body: ProcedureUpsertBody) {
-    const { positionList, discountList, procedure: procedureBody } = body
+    const { positionRequestList, positionResultList, discountList, procedure: procedureBody } = body
     let code = procedureBody.code
     if (!code) {
       const count = await this.procedureRepository.getMaxId()
@@ -115,21 +115,35 @@ export class ApiProcedureService {
 
     this.socketEmitService.procedureListChange(oid, { procedureUpsertedList: [procedure] })
 
-    if (positionList?.length) {
-      const positionDtoList: PositionInsertType[] = positionList.map((i) => {
+    if (positionRequestList?.length) {
+      const positionDtoList: PositionInsertType[] = positionRequestList.map((i) => {
         const dto: PositionInsertType = {
+          ...i,
           oid,
-          roleId: i.roleId,
-          commissionCalculatorType: i.commissionCalculatorType,
-          commissionValue: i.commissionValue,
           positionInteractId: procedure.id,
-          positionType: PositionInteractType.Procedure,
+          positionType: PositionType.ProcedureRequest,
         }
         return dto
       })
       const positionUpsertedList =
         await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
-      procedure.positionList = positionUpsertedList
+      procedure.positionRequestList = positionUpsertedList
+      this.socketEmitService.positionListChange(oid, { positionUpsertedList })
+    }
+
+    if (positionResultList?.length) {
+      const positionDtoList: PositionInsertType[] = positionResultList.map((i) => {
+        const dto: PositionInsertType = {
+          ...i,
+          oid,
+          positionInteractId: procedure.id,
+          positionType: PositionType.ProcedureResult,
+        }
+        return dto
+      })
+      const positionUpsertedList =
+        await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
+      procedure.positionResultList = positionUpsertedList
       this.socketEmitService.positionListChange(oid, { positionUpsertedList })
     }
 
@@ -153,7 +167,7 @@ export class ApiProcedureService {
   }
 
   async updateOne(oid: number, procedureId: number, body: ProcedureUpsertBody) {
-    const { positionList, discountList, procedure: procedureBody } = body
+    const { positionRequestList, positionResultList, discountList, procedure: procedureBody } = body
 
     if (procedureBody.code != null) {
       const existProcedure = await this.procedureRepository.findOneBy({
@@ -173,26 +187,48 @@ export class ApiProcedureService {
 
     this.socketEmitService.procedureListChange(oid, { procedureUpsertedList: [procedure] })
 
-    if (positionList) {
+    if (positionRequestList) {
       const positionDestroyedList = await this.positionRepository.deleteAndReturnEntity({
         oid,
         positionInteractId: procedure.id,
-        positionType: PositionInteractType.Procedure,
+        positionType: PositionType.ProcedureRequest,
       })
-      const positionDtoList: PositionInsertType[] = positionList.map((i) => {
+      const positionDtoList: PositionInsertType[] = positionRequestList.map((i) => {
         const dto: PositionInsertType = {
+          ...i,
           oid,
-          roleId: i.roleId,
-          commissionCalculatorType: i.commissionCalculatorType,
-          commissionValue: i.commissionValue,
           positionInteractId: procedure.id,
-          positionType: PositionInteractType.Procedure,
+          positionType: PositionType.ProcedureRequest,
         }
         return dto
       })
       const positionUpsertedList =
         await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
-      procedure.positionList = positionUpsertedList
+      procedure.positionRequestList = positionUpsertedList
+      this.socketEmitService.positionListChange(oid, {
+        positionUpsertedList,
+        positionDestroyedList,
+      })
+    }
+
+    if (positionResultList) {
+      const positionDestroyedList = await this.positionRepository.deleteAndReturnEntity({
+        oid,
+        positionInteractId: procedure.id,
+        positionType: PositionType.ProcedureResult,
+      })
+      const positionDtoList: PositionInsertType[] = positionResultList.map((i) => {
+        const dto: PositionInsertType = {
+          ...i,
+          oid,
+          positionInteractId: procedure.id,
+          positionType: PositionType.ProcedureResult,
+        }
+        return dto
+      })
+      const positionUpsertedList =
+        await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
+      procedure.positionRequestList = positionUpsertedList
       this.socketEmitService.positionListChange(oid, {
         positionUpsertedList,
         positionDestroyedList,
@@ -231,42 +267,38 @@ export class ApiProcedureService {
       condition: { oid, procedureId },
       limit: 10,
     })
-    if (ticketProcedureList.length > 0) {
-      return {
-        data: { ticketProcedureList },
-        success: false,
+
+    if (!ticketProcedureList.length) {
+      const [positionDestroyedList, discountDestroyedList] = await Promise.all([
+        this.positionRepository.deleteAndReturnEntity({
+          oid,
+          positionInteractId: procedureId,
+          positionType: { IN: [PositionType.ProcedureRequest, PositionType.ProcedureResult] },
+        }),
+        this.discountRepository.deleteAndReturnEntity({
+          oid,
+          discountInteractId: procedureId,
+          discountInteractType: DiscountInteractType.Procedure,
+        }),
+      ])
+
+      if (positionDestroyedList.length) {
+        this.socketEmitService.positionListChange(oid, { positionDestroyedList })
       }
-    }
 
-    const [positionDestroyedList, discountDestroyedList] = await Promise.all([
-      this.positionRepository.deleteAndReturnEntity({
+      if (discountDestroyedList.length) {
+        this.socketEmitService.discountListChange(oid, { discountDestroyedList })
+      }
+
+      const procedure = await this.procedureRepository.deleteOneAndReturnEntity({
         oid,
-        positionInteractId: procedureId,
-        positionType: PositionInteractType.Procedure,
-      }),
-      this.discountRepository.deleteAndReturnEntity({
-        oid,
-        discountInteractId: procedureId,
-        discountInteractType: DiscountInteractType.Procedure,
-      }),
-    ])
+        id: procedureId,
+      })
 
-    if (positionDestroyedList.length) {
-      this.socketEmitService.positionListChange(oid, { positionDestroyedList })
+      this.socketEmitService.procedureListChange(oid, { procedureDestroyedList: [procedure] })
     }
 
-    if (discountDestroyedList.length) {
-      this.socketEmitService.discountListChange(oid, { discountDestroyedList })
-    }
-
-    const procedure = await this.procedureRepository.deleteOneAndReturnEntity({
-      oid,
-      id: procedureId,
-    })
-
-    this.socketEmitService.procedureListChange(oid, { procedureDestroyedList: [procedure] })
-
-    return { data: { ticketProcedureList: [], procedureId } }
+    return { ticketProcedureList: [], procedureId, success: !ticketProcedureList.length }
   }
 
   async generateRelation(options: {
@@ -282,8 +314,8 @@ export class ApiProcedureService {
       relation?.positionList && procedureIdList.length
         ? this.positionRepository.findManyBy({
           oid,
-          positionType: PositionInteractType.Procedure,
-          positionInteractId: { IN: procedureIdList },
+          positionType: { IN: [PositionType.ProcedureRequest, PositionType.ProcedureResult] },
+          positionInteractId: { IN: [...procedureIdList, 0] },
         })
         : <Position[]>[],
       relation?.discountList && procedureIdList.length
@@ -304,15 +336,31 @@ export class ApiProcedureService {
     const procedureGroupMap = ESArray.arrayToKeyValue(procedureGroupList, 'id')
 
     procedureList.forEach((procedure: Procedure) => {
-      if (relation?.positionList) {
-        procedure.positionList = positionList.filter((i) => i.positionInteractId === procedure.id)
+      if (relation?.procedureGroup) {
+        procedure.procedureGroup = procedureGroupMap[procedure.procedureGroupId]
       }
       if (relation?.discountList) {
         procedure.discountList = discountList.filter((i) => i.discountInteractId === procedure.id)
         procedure.discountListExtra = discountList.filter((i) => i.discountInteractId === 0)
       }
-      if (relation?.procedureGroup) {
-        procedure.procedureGroup = procedureGroupMap[procedure.procedureGroupId]
+      if (relation?.positionList) {
+        procedure.positionRequestListCommon = positionList.filter((i) => {
+          return i.positionType === PositionType.ProcedureRequest && i.positionInteractId === 0
+        })
+        procedure.positionRequestList = positionList.filter((i) => {
+          return (
+            i.positionType === PositionType.ProcedureRequest
+            && i.positionInteractId === procedure.id
+          )
+        })
+        procedure.positionResultListCommon = positionList.filter((i) => {
+          return i.positionType === PositionType.ProcedureResult && i.positionInteractId === 0
+        })
+        procedure.positionResultList = positionList.filter((i) => {
+          return (
+            i.positionType === PositionType.ProcedureResult && i.positionInteractId === procedure.id
+          )
+        })
       }
     })
 

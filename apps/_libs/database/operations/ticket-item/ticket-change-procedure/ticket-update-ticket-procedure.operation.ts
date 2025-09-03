@@ -2,24 +2,35 @@ import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
 import { PaymentMoneyStatus, TicketProcedureStatus } from '../../../common/variable'
-import { TicketProcedureItem } from '../../../entities'
+import { TicketProcedureItem, TicketUser } from '../../../entities'
+import {
+  AppointmentInsertType,
+  AppointmentStatus,
+  AppointmentType,
+  AppointmentUpdateType,
+} from '../../../entities/appointment.entity'
+import { PositionType } from '../../../entities/position.entity'
+import { ProcedureType } from '../../../entities/procedure.entity'
 import { TicketProcedureItemInsertType } from '../../../entities/ticket-procedure-item.entity'
 import TicketProcedure from '../../../entities/ticket-procedure.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import {
+  AppointmentManager,
   TicketManager,
   TicketProcedureItemManager,
   TicketProcedureManager,
+  TicketUserManager,
 } from '../../../repositories'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
-
-export type TIcketProcedureItemUpdateType = Pick<TicketProcedureItem, 'id' | 'completedAt'>
+import { TicketUserCommon } from '../ticket-change-user/ticket-user.common'
 
 export type TicketProcedureUpdateDtoType = {
   [K in keyof Pick<
     TicketProcedure,
-    | 'quantity'
+    | 'status'
     | 'totalSessions'
+    | 'finishedSessions'
+    | 'quantity'
     | 'expectedPrice'
     | 'discountType'
     | 'discountMoney'
@@ -35,7 +46,10 @@ export class TicketUpdateTicketProcedureOperation {
     private ticketManager: TicketManager,
     private ticketProcedureManager: TicketProcedureManager,
     private ticketProcedureItemManager: TicketProcedureItemManager,
-    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
+    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager,
+    private appointmentManager: AppointmentManager,
+    private ticketUserManager: TicketUserManager,
+    private ticketUserCommon: TicketUserCommon
   ) { }
 
   async updateTicketProcedure<T extends TicketProcedureUpdateDtoType>(params: {
@@ -43,7 +57,11 @@ export class TicketUpdateTicketProcedureOperation {
     ticketId: number
     ticketProcedureId: number
     ticketProcedureUpdateDto?: NoExtra<TicketProcedureUpdateDtoType, T>
-    ticketProcedureItemUpdateList?: TIcketProcedureItemUpdateType[]
+    ticketProcedureItemUpdateList?: Pick<
+      TicketProcedureItem,
+      'id' | 'registeredAt' | 'indexSession'
+    >[]
+    ticketUserRequestList?: Pick<TicketUser, 'positionId' | 'userId'>[]
   }) {
     const {
       oid,
@@ -51,6 +69,7 @@ export class TicketUpdateTicketProcedureOperation {
       ticketProcedureId,
       ticketProcedureUpdateDto,
       ticketProcedureItemUpdateList,
+      ticketUserRequestList,
     } = params
     const PREFIX = `ticketId=${ticketId} updateTicketProcedure failed`
 
@@ -69,17 +88,19 @@ export class TicketUpdateTicketProcedureOperation {
         id: ticketProcedureId,
       })
 
-      let ticketProcedure: TicketProcedure = ticketProcedureOrigin
+      let ticketProcedureModified: TicketProcedure = ticketProcedureOrigin
       let procedureMoneyChange = 0
       let itemsDiscountChange = 0
       if (ticketProcedureUpdateDto) {
         if (ticketProcedureOrigin.paymentMoneyStatus !== PaymentMoneyStatus.Paid) {
-          ticketProcedure = await this.ticketProcedureManager.updateOneAndReturnEntity(
+          ticketProcedureModified = await this.ticketProcedureManager.updateOneAndReturnEntity(
             manager,
             { oid, id: ticketProcedureId },
             {
               quantity: ticketProcedureUpdateDto.quantity,
+              status: ticketProcedureUpdateDto.status,
               totalSessions: ticketProcedureUpdateDto.totalSessions,
+              finishedSessions: ticketProcedureUpdateDto.finishedSessions,
               expectedPrice: ticketProcedureUpdateDto.expectedPrice,
               discountType: ticketProcedureUpdateDto.discountType,
               discountMoney: ticketProcedureUpdateDto.discountMoney,
@@ -88,22 +109,27 @@ export class TicketUpdateTicketProcedureOperation {
             }
           )
         } else {
-          ticketProcedure = await this.ticketProcedureManager.updateOneAndReturnEntity(
+          ticketProcedureModified = await this.ticketProcedureManager.updateOneAndReturnEntity(
             manager,
             { oid, id: ticketProcedureId },
-            { totalSessions: ticketProcedureUpdateDto.totalSessions }
+            {
+              status: ticketProcedureUpdateDto.status,
+              totalSessions: ticketProcedureUpdateDto.totalSessions,
+              finishedSessions: ticketProcedureUpdateDto.finishedSessions,
+            }
           )
         }
 
         procedureMoneyChange =
-          ticketProcedure.quantity * ticketProcedure.actualPrice
+          ticketProcedureModified.quantity * ticketProcedureModified.actualPrice
           - ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice
         itemsDiscountChange =
-          ticketProcedure.quantity * ticketProcedure.discountMoney
+          ticketProcedureModified.quantity * ticketProcedureModified.discountMoney
           - ticketProcedureOrigin.quantity * ticketProcedureOrigin.discountMoney
       }
 
-      if (ticketProcedureUpdateDto.totalSessions && ticketProcedureItemUpdateList) {
+      if (ticketProcedureItemUpdateList && ticketProcedureOrigin.type === ProcedureType.Regimen) {
+        // DELETE OLD
         await this.ticketProcedureItemManager.delete(manager, {
           oid,
           ticketId,
@@ -111,25 +137,62 @@ export class TicketUpdateTicketProcedureOperation {
           status: { NOT: TicketProcedureStatus.Completed },
           id: { NOT_IN: [0, ...ticketProcedureItemUpdateList.map((i) => i.id)] },
         })
+        await this.appointmentManager.delete(manager, {
+          oid,
+          fromTicketId: ticketId,
+          toTicketId: ticketId,
+          customerId: ticketOrigin.customerId,
+          ticketProcedureId,
+          ticketProcedureItemId: {
+            NOT_IN: [
+              0,
+              ...ticketProcedureItemUpdateList.filter((i) => !!i.registeredAt).map((i) => i.id),
+            ],
+          },
+        })
 
+        // INSERT NEW
         const tpiInsertList = ticketProcedureItemUpdateList
           .filter((i) => !i.id)
           .map((i) => {
             const insert: TicketProcedureItemInsertType = {
               ...i,
-              status: TicketProcedureStatus.Pending,
-              imageIds: '[]',
               oid,
               ticketId,
               ticketProcedureId,
+              status: TicketProcedureStatus.Pending,
+              imageIds: '[]',
               result: '',
+              completedAt: null,
             }
             return insert
           })
-        if (tpiInsertList.length) {
-          await this.ticketProcedureItemManager.insertMany(manager, tpiInsertList)
-        }
+        const tpiCreatedList = await this.ticketProcedureItemManager.insertManyAndReturnEntity(
+          manager,
+          tpiInsertList
+        )
+        const appointmentInsertListDto = tpiCreatedList
+          .filter((i) => !!i.registeredAt)
+          .map((i) => {
+            const appointmentInsert: AppointmentInsertType = {
+              oid,
+              customerId: ticketOrigin.customerId,
+              customerSourceId: 0,
+              status: AppointmentStatus.Waiting,
+              type: AppointmentType.TicketProcedure,
+              registeredAt: i.registeredAt,
+              reason: '',
+              fromTicketId: ticketOrigin.id,
+              toTicketId: ticketOrigin.id,
+              ticketProcedureId: i.ticketProcedureId,
+              ticketProcedureItemId: i.id,
+              cancelReason: '',
+            }
+            return appointmentInsert
+          })
+        await this.appointmentManager.insertManyAndReturnEntity(manager, appointmentInsertListDto)
 
+        // UPDATE
         const tpiUpdateList = ticketProcedureItemUpdateList.filter((i) => i.id)
         if (tpiUpdateList.length) {
           await this.ticketProcedureItemManager.bulkUpdate({
@@ -137,34 +200,90 @@ export class TicketUpdateTicketProcedureOperation {
             condition: { oid, ticketId, ticketProcedureId },
             compare: ['id'],
             tempList: tpiUpdateList,
-            update: ['completedAt'],
+            update: { indexSession: true, registeredAt: { cast: 'bigint' } },
             options: { requireEqualLength: true },
           })
         }
 
-        ticketProcedure.ticketProcedureItemList = await this.ticketProcedureItemManager.findMany(
+        const appointmentUpdateListDto = ticketProcedureItemUpdateList
+          .filter((i) => !!i.id && !!i.registeredAt)
+          .map((i) => {
+            const updateDto: Partial<AppointmentUpdateType> = {
+              registeredAt: i.registeredAt,
+              ticketProcedureItemId: i.id,
+            }
+            return updateDto
+          })
+        if (appointmentUpdateListDto.length) {
+          await this.appointmentManager.bulkUpdate({
+            manager,
+            condition: { oid, fromTicketId: ticketId, toTicketId: ticketId, ticketProcedureId },
+            compare: ['ticketProcedureItemId'],
+            tempList: appointmentUpdateListDto,
+            update: ['registeredAt'],
+            options: { requireEqualLength: true },
+          })
+        }
+      }
+
+      let ticketUserDestroyList: TicketUser[] = []
+      let ticketUserCreatedList: TicketUser[] = []
+      let commissionMoneyAdd = 0
+      if (ticketUserRequestList) {
+        ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+          oid,
+          ticketId,
+          positionType: PositionType.ProcedureRequest,
+          ticketItemId: ticketProcedureModified.id,
+        })
+        ticketUserCreatedList = await this.ticketUserCommon.addTicketUserList({
           manager,
-          {
-            condition: { oid, ticketId, ticketProcedureId },
-            sort: { id: 'ASC' },
-          }
-        )
+          createdAt: ticketProcedureModified.createdAt,
+          oid,
+          ticketId,
+          ticketUserDtoList: ticketUserRequestList.map((i) => {
+            return {
+              positionId: i.positionId,
+              userId: i.userId,
+              quantity: ticketProcedureModified.quantity,
+              ticketItemId: ticketProcedureModified.id,
+              ticketItemChildId: 0,
+              positionInteractId: ticketProcedureModified.procedureId,
+              ticketItemExpectedPrice: ticketProcedureModified.expectedPrice,
+              ticketItemActualPrice: ticketProcedureModified.actualPrice,
+            }
+          }),
+        })
+
+        commissionMoneyAdd =
+          ticketUserCreatedList.reduce((acc, item) => {
+            return acc + item.quantity * item.commissionMoney
+          }, 0)
+          - ticketUserDestroyList.reduce((acc, item) => {
+            return acc + item.quantity * item.commissionMoney
+          }, 0)
       }
 
       // === 5. UPDATE TICKET: MONEY  ===
-      let ticket: Ticket = ticketOrigin
-      if (procedureMoneyChange != 0 || itemsDiscountChange != 0) {
-        ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
+      let ticketModified: Ticket = ticketOrigin
+      if (procedureMoneyChange != 0 || itemsDiscountChange != 0 || commissionMoneyAdd != 0) {
+        ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
           manager,
           oid,
           ticketOrigin,
           itemMoney: {
             procedureMoneyAdd: procedureMoneyChange,
             itemsDiscountAdd: itemsDiscountChange,
+            commissionMoneyAdd,
           },
         })
       }
-      return { ticket, ticketProcedure }
+      return {
+        ticketModified,
+        ticketProcedureModified,
+        ticketUserCreatedList,
+        ticketUserDestroyList,
+      }
     })
 
     return transaction

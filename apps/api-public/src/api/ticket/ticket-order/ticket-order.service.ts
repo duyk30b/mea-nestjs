@@ -50,12 +50,7 @@ export class TicketOrderService {
           createdAt: body.ticketOrderDraftUpsert.registeredAt,
         }
       }),
-      ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
-        return {
-          ...i,
-          paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
-        }
-      }),
+      ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList,
       ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
       ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
       // ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
@@ -89,12 +84,7 @@ export class TicketOrderService {
           createdAt: body.ticketOrderDepositedUpdate.registeredAt,
         }
       }),
-      ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
-        return {
-          ...i,
-          paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
-        }
-      }),
+      ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList,
       ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
       ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
       // ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
@@ -129,12 +119,7 @@ export class TicketOrderService {
           createdAt: body.ticketOrderDebtSuccessInsert.registeredAt,
         }
       }),
-      ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
-        return {
-          ...i,
-          paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
-        }
-      }),
+      ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList,
       ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
       ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
       // ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
@@ -228,12 +213,7 @@ export class TicketOrderService {
           createdAt: body.ticketOrderDebtSuccessUpdate.registeredAt,
         }
       }),
-      ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
-        return {
-          ...i,
-          paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
-        }
-      }),
+      ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList,
       ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
       ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
     })

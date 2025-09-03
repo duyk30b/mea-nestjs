@@ -35,11 +35,17 @@ export class ConditionString {
   @IsString({ each: true })
   @ArrayMinSize(1)
   'IN'?: string[]
+
+  @Expose()
+  @IsArray()
+  @IsString({ each: true })
+  @ArrayMinSize(1)
+  'NOT_IN'?: string[]
 }
 
 export const transformConditionString = ({ value, key }: TransformFnParams) => {
   if (value == null) return
-  
+
   if (typeof value === 'string') {
     return value
   } else if (typeof value === 'object') {

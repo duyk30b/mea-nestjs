@@ -111,7 +111,10 @@ export default class Laboratory {
   children: Laboratory[]
 
   @Expose()
-  positionList: Position[]
+  positionRequestListCommon: Position[]
+
+  @Expose()
+  positionRequestList: Position[]
 
   @Expose()
   discountList: Discount[]
@@ -144,7 +147,8 @@ export type LaboratoryRelationType = {
     | 'laboratoryGroup'
     | 'children'
     | 'ticketLaboratory'
-    | 'positionList'
+    | 'positionRequestList'
+    | 'positionRequestListCommon'
     | 'discountList'
     | 'discountListExtra'
   >]?: boolean

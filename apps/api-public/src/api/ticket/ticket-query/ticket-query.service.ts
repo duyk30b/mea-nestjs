@@ -33,15 +33,14 @@ import {
   TicketLaboratoryGroupRepository,
   TicketLaboratoryRepository,
   TicketLaboratoryResultRepository,
-  TicketProcedureRepository,
   TicketProductRepository,
-  TicketRadiologyRepository,
   TicketSurchargeRepository,
   TicketUserRepository,
 } from '../../../../../_libs/database/repositories'
 import { ImageRepository } from '../../../../../_libs/database/repositories/image.repository'
 import { TicketRepository } from '../../../../../_libs/database/repositories/ticket.repository'
 import { ApiTicketProcedureService } from '../../api-ticket-procedure/api-ticket-procedure.service'
+import { ApiTicketRadiologyService } from '../../api-ticket-radiology/api-ticket-radiology.service'
 import {
   TicketGetManyQuery,
   TicketGetOneQuery,
@@ -60,8 +59,6 @@ export class TicketQueryService {
     private readonly ticketExpenseRepository: TicketExpenseRepository,
     private readonly ticketProductRepository: TicketProductRepository,
     private readonly ticketBatchRepository: TicketBatchRepository,
-    private readonly ticketProcedureRepository: TicketProcedureRepository,
-    private readonly ticketRadiologyRepository: TicketRadiologyRepository,
     private readonly ticketLaboratoryRepository: TicketLaboratoryRepository,
     private readonly ticketLaboratoryGroupRepository: TicketLaboratoryGroupRepository,
     private readonly ticketLaboratoryResultRepository: TicketLaboratoryResultRepository,
@@ -69,7 +66,8 @@ export class TicketQueryService {
     private readonly paymentRepository: PaymentRepository,
     private readonly customerSourceRepository: CustomerSourceRepository,
     private readonly imageRepository: ImageRepository,
-    private readonly apiTicketProcedureService: ApiTicketProcedureService
+    private readonly apiTicketProcedureService: ApiTicketProcedureService,
+    private readonly apiTicketRadiologyService: ApiTicketRadiologyService
   ) { }
 
   async pagination(oid: number, query: TicketPaginationQuery) {
@@ -87,6 +85,7 @@ export class TicketQueryService {
         registeredAt: filter?.registeredAt,
         startedAt: filter?.startedAt,
         updatedAt: filter?.updatedAt,
+        $OR: filter?.$OR,
       },
       sort,
     })
@@ -252,13 +251,13 @@ export class TicketQueryService {
         })
         : undefined,
       relation?.ticketRadiologyList
-        ? this.ticketRadiologyRepository.findMany({
-          relation: relation?.ticketRadiologyList?.relation || {},
-          condition: {
-            ...(relation?.ticketRadiologyList.filter || {}),
+        ? this.apiTicketRadiologyService.getList(oid, {
+          filter: {
             oid,
             ticketId: { IN: ticketIdList },
+            ...(relation?.ticketRadiologyList.filter || {}),
           },
+          relation: relation?.ticketRadiologyList.relation,
           sort: { priority: 'ASC' },
         })
         : undefined,
@@ -268,7 +267,7 @@ export class TicketQueryService {
           relation: {
             user: relation?.ticketUserList?.user,
           },
-          sort: { positionType: 'ASC', roleId: 'ASC' },
+          sort: { positionType: 'ASC', ticketItemId: 'ASC' },
         })
         : undefined,
       relation?.ticketAttributeList
@@ -296,7 +295,7 @@ export class TicketQueryService {
           condition: { oid, id: { IN: customerSourceIdList } },
         })
         : undefined,
-      relation?.toAppointment && relation?.toAppointment
+      relation?.toAppointment && ticketIdList.length
         ? this.appointmentRepository.findMany({
           condition: { oid, fromTicketId: { IN: ticketIdList } },
         })
@@ -313,7 +312,7 @@ export class TicketQueryService {
     const ticketLaboratoryList: TicketLaboratory[] = dataPromise[7]
     const ticketLaboratoryGroupList: TicketLaboratoryGroup[] = dataPromise[8]
     const ticketLaboratoryResultList: TicketLaboratoryResult[] = dataPromise[9]
-    const ticketRadiologyList: TicketRadiology[] = dataPromise[10]
+    const ticketRadiologyList: TicketRadiology[] = dataPromise[10]?.ticketRadiologyList || []
     const ticketUserList: TicketUser[] = dataPromise[11]
     const ticketAttributeList: TicketAttribute[] = dataPromise[12]
     const ticketSurchargeList: TicketSurcharge[] = dataPromise[13]
@@ -379,6 +378,16 @@ export class TicketQueryService {
         ticket.ticketRadiologyList = ticketRadiologyList.filter((i) => {
           return i.ticketId === ticket.id
         })
+        // if (relation?.imageList) {
+        //   ticket.ticketRadiologyList.forEach((tr) => {
+        //     try {
+        //       const imageIdList: number[] = JSON.parse(tr.imageIds)
+        //       tr.imageList = imageIdList.map((imageId) => imageMap[imageId]).filter((i) => !!i)
+        //     } catch (error) {
+        //       tr.imageList = []
+        //     }
+        //   })
+        // }
       }
       if (relation?.ticketUserList) {
         ticket.ticketUserList = ticketUserList.filter((i) => {

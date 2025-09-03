@@ -119,7 +119,7 @@ export class StockCheckReconcileOperation {
       })
       await this.productMovementManager.insertMany(manager, productMovementInsertList)
 
-      return { stockCheck }
+      return { stockCheck, batchModifiedList, productModifiedList }
     })
 
     return transaction

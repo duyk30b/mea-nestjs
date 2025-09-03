@@ -81,6 +81,6 @@ export class ApiProcedureController {
     @Param() { id }: IdParam
   ): Promise<BaseResponse> {
     const data = await this.apiProcedureService.destroyOne(oid, id)
-    return data
+    return { data }
   }
 }

@@ -70,7 +70,7 @@ class ImagesChangeBody {
 export class TicketRadiologyUpdateResultBody extends MultipleFileUpload {
   @ApiProperty({
     type: 'string',
-    example: JSON.stringify(<TicketUserBasicBody[]>[{ userId: 1, roleId: 2 }]),
+    example: JSON.stringify(<TicketUserBasicBody[]>[{ userId: 1, positionId: 2 }]),
   })
   @Expose()
   @Transform(({ value }) => {
@@ -103,7 +103,7 @@ export class TicketRadiologyUpdateResultBody extends MultipleFileUpload {
     message: ({ value }) =>
       `Validate TicketUserBasicBody failed. Value = ${JSON.stringify(value)}.`,
   })
-  ticketUserList: TicketUserBasicBody[]
+  ticketUserResultList: TicketUserBasicBody[]
 
   @ApiProperty()
   @Expose()

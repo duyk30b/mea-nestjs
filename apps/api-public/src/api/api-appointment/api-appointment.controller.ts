@@ -1,10 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
-import {
-  OrganizationPermission,
-} from '../../../../_libs/common/guards/organization.guard'
+import { OrganizationPermission } from '../../../../_libs/common/guards/organization.guard'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
+import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiAppointmentService } from './api-appointment.service'
@@ -25,14 +24,22 @@ export class ApiAppointmentController {
 
   @Get('pagination')
   @OrganizationPermission(PermissionId.APPOINTMENT)
-  pagination(@External() { oid }: TExternal, @Query() query: AppointmentPaginationQuery) {
-    return this.apiAppointmentService.pagination(oid, query)
+  async pagination(
+    @External() { oid }: TExternal,
+    @Query() query: AppointmentPaginationQuery
+  ): Promise<BaseResponse> {
+    const data = await this.apiAppointmentService.pagination(oid, query)
+    return { data }
   }
 
   @Get('list')
   @OrganizationPermission(PermissionId.APPOINTMENT)
-  list(@External() { oid }: TExternal, @Query() query: AppointmentGetManyQuery) {
-    return this.apiAppointmentService.getMany(oid, query)
+  async list(
+    @External() { oid }: TExternal,
+    @Query() query: AppointmentGetManyQuery
+  ): Promise<BaseResponse> {
+    const data = await this.apiAppointmentService.getMany(oid, query)
+    return { data }
   }
 
   @Get('detail/:id')
@@ -41,14 +48,19 @@ export class ApiAppointmentController {
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
     @Query() query: AppointmentGetOneQuery
-  ) {
-    return await this.apiAppointmentService.getOne(oid, id, query)
+  ): Promise<BaseResponse> {
+    const data = await this.apiAppointmentService.getOne(oid, id, query)
+    return { data }
   }
 
   @Post('create')
   @UserPermission(PermissionId.APPOINTMENT_CREATE)
-  async create(@External() { oid }: TExternal, @Body() body: AppointmentCreateBody) {
-    return await this.apiAppointmentService.createOne(oid, body)
+  async create(
+    @External() { oid }: TExternal,
+    @Body() body: AppointmentCreateBody
+  ): Promise<BaseResponse> {
+    const data = await this.apiAppointmentService.createOne(oid, body)
+    return { data }
   }
 
   @Patch('update/:id')
@@ -57,15 +69,17 @@ export class ApiAppointmentController {
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
     @Body() body: AppointmentUpdateBody
-  ) {
-    return await this.apiAppointmentService.updateOne(oid, +id, body)
+  ): Promise<BaseResponse> {
+    const data = await this.apiAppointmentService.updateOne(oid, +id, body)
+    return { data }
   }
 
   @Delete('delete/:id')
   @UserPermission(PermissionId.APPOINTMENT_DELETE)
   @ApiParam({ name: 'id', example: 1 })
-  async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    return await this.apiAppointmentService.deleteOne(oid, id)
+  async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam): Promise<BaseResponse> {
+    const data = await this.apiAppointmentService.deleteOne(oid, id)
+    return { data }
   }
 
   @Post(':id/register-ticket-clinic')
@@ -74,11 +88,12 @@ export class ApiAppointmentController {
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
     @Body() body: AppointmentRegisterTicketClinicBody
-  ) {
-    return await this.apiAppointmentService.registerTicketClinic({
+  ): Promise<BaseResponse> {
+    const data = await this.apiAppointmentService.registerTicketClinic({
       oid,
       appointmentId: id,
       body,
     })
+    return { data }
   }
 }

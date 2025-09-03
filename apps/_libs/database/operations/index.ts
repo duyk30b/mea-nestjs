@@ -15,7 +15,6 @@ export * from './purchase-order/purchase-order-send-product.operation'
 
 export * from './statistic/statistic-product.operation'
 export * from './statistic/statistic-purchase-order.operation'
-export * from './statistic/statistic-ticket.operation'
 
 export * from './ticket-base/ticket-calculator-money.operator'
 export * from './ticket-base/ticket-change-all-money.operator'
@@ -35,7 +34,7 @@ export * from './ticket-item/ticket-change-product/ticket-add-ticket-product.ope
 export * from './ticket-item/ticket-change-product/ticket-destroy-ticket-product.operation'
 export * from './ticket-item/ticket-change-product/ticket-update-ticket-product.operation'
 
-export * from './ticket-item/ticket-change-radiology/ticket-add-ticket-radiology.operation'
+export * from './ticket-item/ticket-change-radiology/ticket-add-ticket-radiology-list.operation'
 export * from './ticket-item/ticket-change-radiology/ticket-destroy-ticket-radiology.operation'
 export * from './ticket-item/ticket-change-radiology/ticket-update-ticket-radiology.operation'
 
@@ -44,6 +43,9 @@ export * from './ticket-item/ticket-change-laboratory/ticket-change-select-labor
 export * from './ticket-item/ticket-change-laboratory/ticket-destroy-ticket-laboratory-group.operation'
 export * from './ticket-item/ticket-change-laboratory/ticket-destroy-ticket-laboratory.operation'
 export * from './ticket-item/ticket-change-laboratory/ticket-update-ticket-laboratory.operation'
+
+export * from './ticket-item/ticket-change-user/ticket-change-ticket-user.operation'
+export * from './ticket-item/ticket-change-user/ticket-user.common'
 
 export * from './ticket-order/ticket-order-deposited.operation'
 export * from './ticket-order/ticket-order-draft.operation'

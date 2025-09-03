@@ -373,7 +373,10 @@ export class ApiFileProductUploadExcel {
 
       // === 2. Trường hợp 2: Cập nhật Product, tạo mới hoặc cập nhật Batch
       if (dataPlainUpdateList.length) {
-        const productUpdateMap: Record<string, ProductInsertType & { openQuantity: number }> = {}
+        const productUpdateMap: Record<
+          string,
+          ProductInsertType & { id: number; openQuantity: number }
+        > = {}
 
         dataPlainUpdateList.forEach((plain) => {
           const productId = plain.productId

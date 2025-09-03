@@ -82,7 +82,8 @@ export class ApiMeService {
     if (imagesChange) {
       const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
         oid,
-        customerId: userId,
+        ticketId: 0,
+        customerId: 0,
         files,
         imageIdsWait: body.imagesChange.imageIdsWait,
         externalUrlList: body.imagesChange.externalUrlList,

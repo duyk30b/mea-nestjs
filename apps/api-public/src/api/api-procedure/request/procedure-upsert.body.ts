@@ -74,7 +74,14 @@ export class ProcedureUpsertBody {
   @Type(() => PositionBasicBody)
   @IsArray()
   @ValidateNested({ each: true })
-  positionList: PositionBasicBody[]
+  positionRequestList: PositionBasicBody[]
+
+  @ApiProperty({ type: PositionBasicBody, isArray: true })
+  @Expose()
+  @Type(() => PositionBasicBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  positionResultList: PositionBasicBody[]
 
   @ApiProperty({ type: DiscountUpdateBody, isArray: true })
   @Expose()

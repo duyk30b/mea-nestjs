@@ -42,13 +42,14 @@ export class ImageManagerService implements OnModuleInit {
 
   async changeGoogleDriverImageList(options: {
     oid: number
+    ticketId: number
     customerId: number
     imageIdsOld: number[]
     imageIdsKeep: number[]
     files: FileUploadDto[]
     filesPosition: number[]
   }) {
-    const { oid, customerId, imageIdsKeep, imageIdsOld, files, filesPosition } = options
+    const { oid, ticketId, customerId, imageIdsKeep, imageIdsOld, files, filesPosition } = options
 
     const imageOldList = imageIdsOld.length
       ? await this.imageRepository.findManyByIds(imageIdsOld)
@@ -78,6 +79,7 @@ export class ImageManagerService implements OnModuleInit {
     const imageInsertList: ImageInsertType[] = imageHostInsertList.map((i, index) => {
       const draft: ImageInsertType = {
         oid,
+        ticketId,
         customerId,
         name: i.name,
         size: Number(i.size),
@@ -120,13 +122,14 @@ export class ImageManagerService implements OnModuleInit {
 
   async changeCloudinaryImageLink(options: {
     oid: number
+    ticketId: number
     customerId: number
     files: FileUploadDto[]
     externalUrlList: string[]
     imageIdsOld: number[] // ví dụ [1,4,3,20,21,12,7,3]
     imageIdsWait: number[] // ví dụ [1,4,3,0,0,0,12,7,3] // số 0 tương ứng với mỗi image mới chưa có ID
   }) {
-    const { oid, customerId, imageIdsWait, imageIdsOld, files, externalUrlList } = options
+    const { oid, ticketId, customerId, imageIdsWait, imageIdsOld, files, externalUrlList } = options
     const imageIdsRemove = imageIdsOld.filter((i) => !imageIdsWait.includes(i))
 
     // chưa xử lý việc xóa ảnh thực sự trên host
@@ -140,6 +143,7 @@ export class ImageManagerService implements OnModuleInit {
     const imageInsertList = externalUrlList.map((i) => {
       const insert: ImageInsertType = {
         oid,
+        ticketId,
         customerId,
         name: '',
         mimeType: '',

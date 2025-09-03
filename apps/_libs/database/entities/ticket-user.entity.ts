@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
-import { CommissionCalculatorType, PositionInteractType } from './position.entity'
+import Position, { CommissionCalculatorType, PositionType } from './position.entity'
 import Role from './role.entity'
 import Ticket from './ticket.entity'
 import User from './user.entity'
@@ -23,6 +23,10 @@ export default class TicketUser {
 
   @Column({ default: 0 })
   @Expose()
+  positionId: number
+
+  @Column({ default: 0 })
+  @Expose()
   roleId: number
 
   @Column()
@@ -31,7 +35,7 @@ export default class TicketUser {
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()
-  positionType: PositionInteractType
+  positionType: PositionType
 
   @Column({ type: 'integer', default: 0 })
   @Expose()
@@ -40,6 +44,10 @@ export default class TicketUser {
   @Column({ type: 'integer', default: 0 })
   @Expose()
   ticketItemId: number // ticketProcedureId hoặc ticketProductId hoặc ticketRadiologyId
+
+  @Column({ type: 'integer', default: 0 })
+  @Expose()
+  ticketItemChildId: number // ticketProcedureItemId ...
 
   @Column({
     type: 'bigint',
@@ -76,7 +84,7 @@ export default class TicketUser {
   @Column({
     type: 'decimal',
     default: 0,
-    precision: 5,
+    precision: 7,
     scale: 3,
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
@@ -86,7 +94,7 @@ export default class TicketUser {
   @Column({
     type: 'decimal',
     default: 0,
-    precision: 5,
+    precision: 7,
     scale: 3,
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
@@ -117,6 +125,9 @@ export default class TicketUser {
   @JoinColumn({ name: 'roleId', referencedColumnName: 'id' })
   role: Role
 
+  @Expose()
+  position: Position
+
   static fromRaw(raw: { [P in keyof TicketUser]: any }) {
     if (!raw) return null
     const entity = new TicketUser()
@@ -134,10 +145,44 @@ export default class TicketUser {
   static fromRaws(raws: { [P in keyof TicketUser]: any }[]) {
     return raws.map((i) => TicketUser.fromRaw(i))
   }
+
+  static reCalculatorCommission(ticketUser: TicketUser) {
+    if (ticketUser.commissionCalculatorType === CommissionCalculatorType.VND) {
+      ticketUser.commissionMoney = ticketUser.commissionMoney || 0
+      ticketUser.commissionPercentExpected =
+        ticketUser.ticketItemExpectedPrice == 0
+          ? 0
+          : Math.floor((ticketUser.commissionMoney * 100) / ticketUser.ticketItemExpectedPrice)
+      ticketUser.commissionPercentActual =
+        ticketUser.ticketItemActualPrice === 0
+          ? 0
+          : Math.floor((ticketUser.commissionMoney * 100) / ticketUser.ticketItemActualPrice)
+    }
+    if (ticketUser.commissionCalculatorType === CommissionCalculatorType.PercentExpected) {
+      ticketUser.commissionPercentExpected = ticketUser.commissionPercentExpected || 0
+      ticketUser.commissionMoney = Math.floor(
+        (ticketUser.ticketItemExpectedPrice * ticketUser.commissionPercentExpected) / 100
+      )
+      ticketUser.commissionPercentActual =
+        ticketUser.ticketItemActualPrice === 0
+          ? 0
+          : Math.floor((ticketUser.commissionMoney * 100) / ticketUser.ticketItemActualPrice)
+    }
+    if (ticketUser.commissionCalculatorType === CommissionCalculatorType.PercentActual) {
+      ticketUser.commissionPercentActual = ticketUser.commissionPercentActual || 0
+      ticketUser.commissionMoney = Math.floor(
+        (ticketUser.ticketItemActualPrice * ticketUser.commissionPercentActual) / 100
+      )
+      ticketUser.commissionPercentExpected =
+        ticketUser.ticketItemExpectedPrice === 0
+          ? 0
+          : Math.floor((ticketUser.commissionMoney * 100) / ticketUser.ticketItemExpectedPrice)
+    }
+  }
 }
 
 export type TicketUserRelationType = {
-  [P in keyof Pick<TicketUser, 'ticket' | 'user' | 'role'>]?: boolean
+  [P in keyof Pick<TicketUser, 'ticket' | 'user' | 'role' | 'position'>]?: boolean
 }
 
 export type TicketUserInsertType = Omit<
@@ -155,7 +200,8 @@ export type TicketUserUpdateType = {
 export type TicketUserUpsertType = Omit<TicketUser, keyof TicketUserRelationType>
 
 export type TicketUserSortType = {
-  [P in keyof Pick<TicketUser, 'oid' | 'id' | 'createdAt' | 'positionType' | 'roleId'>]?:
-  | 'ASC'
-  | 'DESC'
+  [P in keyof Pick<
+    TicketUser,
+    'oid' | 'id' | 'createdAt' | 'positionType' | 'ticketItemId' | 'roleId'
+  >]?: 'ASC' | 'DESC'
 }

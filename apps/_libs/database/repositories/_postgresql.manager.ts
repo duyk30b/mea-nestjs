@@ -123,7 +123,7 @@ export abstract class _PostgreSqlManager<
   async insertManyAndReturnEntity<X extends Partial<_INSERT>>(
     manager: EntityManager,
     data: NoExtra<Partial<_INSERT>, X>[]
-  ): Promise<{ [P in keyof _ENTITY]: any }[]> {
+  ): Promise<_ENTITY[]> {
     const raws = await this.insertManyAndReturnRaws(manager, data)
     return this.entity.fromRaws(raws)
   }
@@ -330,15 +330,15 @@ export abstract class _PostgreSqlManager<
     return this.entity.fromRaw(raws[0])
   }
 
-  async bulkUpdate(options: {
+  async bulkUpdate<T extends Partial<_ENTITY> | Record<string, any>>(options: {
     manager: EntityManager
-    tempList: (Partial<_ENTITY> | Record<string, any>)[]
+    tempList: T[]
     condition?: BaseCondition<_ENTITY>
     compare:
-    | (keyof _ENTITY)[]
-    | { [P in keyof _ENTITY]?: boolean | ((t?: string, u?: string) => string) }
+    | Extract<keyof T, keyof _ENTITY>[]
+    | { [P in Extract<keyof T, keyof _ENTITY>]?: boolean | ((t?: string, u?: string) => string) }
     update:
-    | (keyof _ENTITY)[]
+    | Extract<keyof T, keyof _ENTITY>[]
     | {
       [P in keyof _ENTITY]?:
       | ((t?: string, u?: string) => string)
@@ -354,8 +354,9 @@ export abstract class _PostgreSqlManager<
     if (!tempList.length) return []
 
     let compareName: string[] = []
-    let compareObject: { [P in keyof _ENTITY]?: boolean | ((t?: string, u?: string) => string) } =
-      {}
+    let compareObject: {
+      [P in Extract<keyof T, keyof _ENTITY>]?: boolean | ((t?: string, u?: string) => string)
+    } = {}
     let conditionRaw = ''
     if (options.condition) {
       conditionRaw = this.getRawConditions(tableName, options.condition)
@@ -373,7 +374,7 @@ export abstract class _PostgreSqlManager<
 
     let updateName: string[] = []
     let updateObject: {
-      [P in keyof _ENTITY]?:
+      [P in Extract<keyof T, keyof _ENTITY>]?:
       | ((t?: string, u?: string) => string)
       | boolean
       | { cast: 'int' | 'bigint' | 'numeric' | 'text' }

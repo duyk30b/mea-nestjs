@@ -1,21 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
-import {
-  IsArray,
-  IsDefined,
-  IsInt,
-  IsNumber,
-  IsOptional,
-  Max,
-  Min,
-  ValidateNested,
-} from 'class-validator'
+import { IsArray, IsDefined, IsNumber, IsOptional, Max, Min, ValidateNested } from 'class-validator'
 import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
 import {
   IsEnumValue,
   IsNumberGreaterThan,
 } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType } from '../../../../../../_libs/database/common/variable'
+import { DiscountType, TicketProcedureStatus } from '../../../../../../_libs/database/common/variable'
 import { TicketUserBasicBody } from '../../ticket-change-user/request'
 
 class TicketProcedureItemBody {
@@ -27,13 +18,24 @@ class TicketProcedureItemBody {
 
   @ApiProperty({ example: Date.now() })
   @Expose()
-  @Transform(({ value }) => (value != null ? Number(value) : value))
   @IsOptional()
-  @IsInt()
-  completedAt: number
+  @IsNumber()
+  registeredAt: number
+
+  @ApiProperty()
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  indexSession: number
 }
 
 class TicketProcedureBody {
+  @ApiProperty({ example: TicketProcedureStatus.Pending })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(TicketProcedureStatus)
+  status: TicketProcedureStatus
+
   @ApiProperty({ example: 4 })
   @Expose()
   @IsDefined()
@@ -45,6 +47,12 @@ class TicketProcedureBody {
   @IsDefined()
   @IsNumber()
   totalSessions: number
+
+  @ApiProperty({ example: 4 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  finishedSessions: number
 
   @ApiProperty({ example: 25_000 })
   @Expose()
@@ -87,7 +95,7 @@ export class TicketUpdateTicketProcedureBody {
   @Type(() => TicketUserBasicBody)
   @IsArray()
   @ValidateNested({ each: true })
-  ticketUserList: TicketUserBasicBody[]
+  ticketUserRequestList: TicketUserBasicBody[]
 
   @ApiProperty({ type: TicketProcedureItemBody })
   @Expose()

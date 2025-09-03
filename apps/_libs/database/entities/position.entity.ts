@@ -1,21 +1,23 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import LaboratoryGroup from './laboratory-group.entity'
 import Laboratory from './laboratory.entity'
 import Procedure from './procedure.entity'
 import Product from './product.entity'
 import Radiology from './radiology.entity'
 import Role from './role.entity'
 
-export enum PositionInteractType {
+export enum PositionType {
   Ticket = 1,
-  Product = 2, // chỉ tương tác với sản phẩm
-  Procedure = 3, // chỉ tương tác với thủ thuật
-  Radiology = 4, // chỉ tương tác với phiếu CĐHA (1 phiếu 1 CHA)
-  Laboratory = 5, // chỉ tương tác với 1 xét nghiệm
-  Regimen = 6, // chỉ tương tác với 1 xét nghiệm
-  ConsumableList = 7, // tương tác với tất cả sản phẩm trong cả tiêu hao
-  PrescriptionList = 8, // tương tác với tất cả sản phẩm trong cả toa thuốc
-  LaboratoryGroup = 9, // chỉ tương tác với phiếu xét nghiệm (1 phiếu nhiều xét nghiệm)
+  ProductRequest = 2,
+  TicketPrescriptionRequest = 3,
+  ProcedureRequest = 4,
+  ProcedureResult = 5,
+  LaboratoryRequest = 6,
+  LaboratoryGroupRequest = 7,
+  LaboratoryGroupResult = 8,
+  RadiologyRequest = 9,
+  RadiologyResult = 10,
 }
 
 export enum CommissionCalculatorType {
@@ -25,11 +27,6 @@ export enum CommissionCalculatorType {
 }
 
 @Entity('Position')
-@Index(
-  'IDX_Position__oid_roleId_positionType_positionInteractId',
-  ['oid', 'roleId', 'positionType', 'positionInteractId'],
-  { unique: true }
-)
 export default class Position {
   @Column()
   @Exclude()
@@ -39,6 +36,10 @@ export default class Position {
   @Expose()
   id: number
 
+  @Column({ type: 'integer', default: 0 })
+  @Expose()
+  priority: number
+
   @Column()
   @Expose()
   roleId: number
@@ -47,9 +48,9 @@ export default class Position {
   @Expose()
   positionInteractId: number
 
-  @Column({ type: 'smallint', default: PositionInteractType.Ticket })
+  @Column({ type: 'smallint', default: PositionType.Ticket })
   @Expose()
-  positionType: PositionInteractType
+  positionType: PositionType
 
   @Column({
     type: 'decimal',
@@ -71,16 +72,28 @@ export default class Position {
   role: Role
 
   @Expose()
-  product: Product
+  productRequest: Product
 
   @Expose()
-  procedure: Procedure
+  procedureRequest: Procedure
 
   @Expose()
-  radiology: Radiology
+  procedureResult: Procedure
 
   @Expose()
-  laboratory: Laboratory
+  laboratoryRequest: Laboratory
+
+  @Expose()
+  laboratoryGroupRequest: LaboratoryGroup
+
+  @Expose()
+  laboratoryGroupResult: LaboratoryGroup
+
+  @Expose()
+  radiologyRequest: Radiology
+
+  @Expose()
+  radiologyResult: Radiology
 
   static fromRaw(raw: { [P in keyof Position]: any }) {
     if (!raw) return null
@@ -99,7 +112,15 @@ export default class Position {
 export type PositionRelationType = {
   [P in keyof Pick<
     Position,
-    'role' | 'product' | 'procedure' | 'radiology' | 'laboratory'
+    | 'role'
+    | 'productRequest'
+    | 'procedureRequest'
+    | 'procedureResult'
+    | 'laboratoryRequest'
+    | 'laboratoryGroupRequest'
+    | 'laboratoryGroupResult'
+    | 'radiologyRequest'
+    | 'radiologyResult'
   >]?: boolean
 }
 

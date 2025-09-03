@@ -42,13 +42,13 @@ class TicketRadiologyBody {
   actualPrice: number
 }
 
-export class TicketUpdateMoneyTicketRadiologyBody {
+export class TicketUpdateTicketRadiologyBody {
   @ApiPropertyOptional({ type: TicketUserBasicBody, isArray: true })
   @Expose()
   @Type(() => TicketUserBasicBody)
   @IsArray()
   @ValidateNested({ each: true })
-  ticketUserList: TicketUserBasicBody[]
+  ticketUserRequestList: TicketUserBasicBody[]
 
   @ApiProperty({ type: TicketRadiologyBody })
   @Expose()

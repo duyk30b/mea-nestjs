@@ -18,6 +18,10 @@ export default class Image {
 
   @Column({ default: 0 })
   @Expose()
+  ticketId: number
+
+  @Column({ default: 0 })
+  @Expose()
   customerId: number
 
   @Column({ type: 'varchar', length: 50 })

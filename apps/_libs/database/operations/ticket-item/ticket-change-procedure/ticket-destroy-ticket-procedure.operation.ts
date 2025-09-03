@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { PaymentMoneyStatus } from '../../../common/variable'
-import { PositionInteractType } from '../../../entities/position.entity'
+import { PositionType } from '../../../entities/position.entity'
+import { ProcedureType } from '../../../entities/procedure.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import {
+  AppointmentManager,
   TicketManager,
   TicketProcedureItemManager,
   TicketProcedureManager,
@@ -19,7 +21,8 @@ export class TicketDestroyTicketProcedureOperation {
     private ticketProcedureManager: TicketProcedureManager,
     private ticketProcedureItemManager: TicketProcedureItemManager,
     private ticketUserManager: TicketUserManager,
-    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
+    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager,
+    private appointmentManager: AppointmentManager
   ) { }
 
   async destroyTicketProcedure(params: {
@@ -49,10 +52,16 @@ export class TicketDestroyTicketProcedureOperation {
         }
       )
 
-      if (ticketProcedureDestroy.totalSessions) {
+      if (ticketProcedureDestroy.type === ProcedureType.Regimen) {
         await this.ticketProcedureItemManager.deleteAndReturnEntity(manager, {
           oid,
           ticketId,
+          ticketProcedureId,
+        })
+        await this.appointmentManager.deleteAndReturnEntity(manager, {
+          oid,
+          fromTicketId: ticketId,
+          toTicketId: ticketId,
           ticketProcedureId,
         })
       }
@@ -60,7 +69,10 @@ export class TicketDestroyTicketProcedureOperation {
       // === 3. DELETE TICKET USER ===
       const ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
         oid,
-        positionType: PositionInteractType.Procedure,
+        positionType: {
+          IN: [PositionType.ProcedureRequest, PositionType.ProcedureResult],
+        },
+        ticketId,
         ticketItemId: ticketProcedureDestroy.id,
       })
 
@@ -81,8 +93,8 @@ export class TicketDestroyTicketProcedureOperation {
           ticketOrigin,
           itemMoney: {
             procedureMoneyAdd: -procedureMoneyDelete,
-            commissionMoneyAdd: -commissionMoneyDelete,
             itemsDiscountAdd: -itemsDiscountDelete,
+            commissionMoneyAdd: -commissionMoneyDelete,
           },
         })
       }

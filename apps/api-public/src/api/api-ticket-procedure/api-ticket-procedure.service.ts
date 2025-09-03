@@ -10,7 +10,7 @@ import {
   TicketProcedureItem,
   TicketUser,
 } from '../../../../_libs/database/entities'
-import { PositionInteractType } from '../../../../_libs/database/entities/position.entity'
+import { PositionType } from '../../../../_libs/database/entities/position.entity'
 import {
   CustomerRepository,
   ProcedureRepository,
@@ -67,6 +67,7 @@ export class ApiTicketProcedureService {
     const ticketProcedureList = await this.ticketProcedureRepository.findMany({
       condition: {
         oid,
+        id: filter.id,
         customerId: filter?.customerId,
         paymentMoneyStatus: filter?.paymentMoneyStatus,
         procedureId: filter?.procedureId,
@@ -82,7 +83,9 @@ export class ApiTicketProcedureService {
     return { ticketProcedureList }
   }
 
-  async getOne(oid: number, id: number, query: TicketProcedureGetOneQuery) {
+  async detail(options: { oid: number; id: number; query: TicketProcedureGetOneQuery }) {
+    const { oid, id, query } = options
+    const relation = query.relation
     const ticketProcedure = await this.ticketProcedureRepository.findOne({
       condition: { oid, id },
     })
@@ -90,11 +93,11 @@ export class ApiTicketProcedureService {
       throw new BusinessException('error.Database.NotFound')
     }
 
-    if (query.relation) {
+    if (relation) {
       await this.generateRelation({
         oid,
         ticketProcedureList: [ticketProcedure],
-        relation: query.relation,
+        relation,
       })
     }
 
@@ -135,17 +138,20 @@ export class ApiTicketProcedureService {
           ? this.ticketProcedureItemRepository.findMany({
             condition: {
               oid,
+              ticketId: { IN: ESArray.uniqueArray(ticketIdList) },
               ticketProcedureId: { IN: ESArray.uniqueArray(ticketProcedureIdList) },
             },
             sort: { id: 'ASC' },
           })
           : <TicketProcedureItem[]>[],
 
-        relation?.ticketUserList && ticketProcedureIdList.length
+        (relation?.ticketUserRequestList
+          || relation?.ticketProcedureItemList?.ticketUserResultList)
+          && ticketProcedureIdList.length
           ? this.ticketUserRepository.findManyBy({
             oid,
             ticketId: { IN: ESArray.uniqueArray(ticketIdList) },
-            positionType: PositionInteractType.Procedure,
+            positionType: { IN: [PositionType.ProcedureRequest, PositionType.ProcedureResult] },
             ticketItemId: { IN: ESArray.uniqueArray(ticketProcedureIdList) },
           })
           : <TicketUser[]>[],
@@ -184,24 +190,41 @@ export class ApiTicketProcedureService {
       if (relation.procedure) {
         tp.procedure = procedureMap[tp.procedureId]
       }
+
+      if (relation.ticketUserRequestList) {
+        tp.ticketUserRequestList = ticketUserList.filter((ticketUser) => {
+          return (
+            ticketUser.ticketId === tp.ticketId
+            && ticketUser.positionType === PositionType.ProcedureRequest
+            && ticketUser.ticketItemId === tp.id
+            && ticketUser.ticketItemChildId === 0
+          )
+        })
+      }
+
       if (relation.ticketProcedureItemList) {
         tp.ticketProcedureItemList = ticketProcedureItemList.filter((i) => {
           return i.ticketProcedureId === tp.id
         })
-        if (relation.ticketProcedureItemList.imageList) {
-          tp.ticketProcedureItemList.forEach((tpi) => {
+        tp.ticketProcedureItemList.forEach((tpi) => {
+          if (relation.ticketProcedureItemList.imageList) {
             try {
               const imageIdList: number[] = JSON.parse(tpi.imageIds)
               tpi.imageList = imageIdList.map((i) => imageMap[i])
             } catch (error) {
               tpi.imageList = []
             }
-          })
-        }
-      }
-      if (relation.ticketUserList) {
-        tp.ticketUserList = ticketUserList.filter((ticketUser) => {
-          return tp.ticketId === ticketUser.ticketId && tp.id === ticketUser.ticketItemId
+          }
+          if (relation.ticketProcedureItemList.ticketUserResultList) {
+            tpi.ticketUserResultList = ticketUserList.filter((ticketUser) => {
+              return (
+                ticketUser.ticketId === tpi.ticketId
+                && ticketUser.positionType === PositionType.ProcedureResult
+                && ticketUser.ticketItemId === tp.id 
+                && ticketUser.ticketItemChildId === tpi.id 
+              )
+            })
+          }
         })
       }
     })

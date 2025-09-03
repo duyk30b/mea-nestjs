@@ -140,7 +140,7 @@ export class TicketOrderDepositedOperation {
             customerId: ticket.customerId,
             createdAt: ticket.registeredAt,
             status: TicketProcedureStatus.Completed,
-            completedSessions: 0,
+            finishedSessions: 0,
           }
           return ticketProcedure
         })

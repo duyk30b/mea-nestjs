@@ -1,21 +1,19 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
-import { BusinessError } from '../../../common/error'
 import { PaymentMoneyStatus } from '../../../common/variable'
+import { TicketUser } from '../../../entities'
+import { PositionType } from '../../../entities/position.entity'
 import TicketRadiology from '../../../entities/ticket-radiology.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
-import { TicketManager, TicketRadiologyManager } from '../../../repositories'
+import { TicketManager, TicketRadiologyManager, TicketUserManager } from '../../../repositories'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
+import { TicketUserCommon } from '../ticket-change-user/ticket-user.common'
 
 export type TicketRadiologyUpdateDtoType = {
   [K in keyof Pick<
     TicketRadiology,
-    | 'expectedPrice'
-    | 'discountType'
-    | 'discountMoney'
-    | 'discountPercent'
-    | 'actualPrice'
+    'expectedPrice' | 'discountType' | 'discountMoney' | 'discountPercent' | 'actualPrice'
   >]?: TicketRadiology[K] | (() => string)
 }
 
@@ -25,16 +23,20 @@ export class TicketUpdateTicketRadiologyOperation {
     private dataSource: DataSource,
     private ticketManager: TicketManager,
     private ticketRadiologyManager: TicketRadiologyManager,
-    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
+    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager,
+    private ticketUserManager: TicketUserManager,
+    private ticketUserCommon: TicketUserCommon
   ) { }
 
-  async updateMoneyTicketRadiology<T extends TicketRadiologyUpdateDtoType>(params: {
+  async updateTicketRadiology<T extends TicketRadiologyUpdateDtoType>(params: {
     oid: number
     ticketId: number
     ticketRadiologyId: number
     ticketRadiologyUpdateDto: NoExtra<TicketRadiologyUpdateDtoType, T>
+    ticketUserRequestList?: Pick<TicketUser, 'positionId' | 'userId'>[]
   }) {
-    const { oid, ticketId, ticketRadiologyId, ticketRadiologyUpdateDto } = params
+    const { oid, ticketId, ticketRadiologyId, ticketRadiologyUpdateDto, ticketUserRequestList } =
+      params
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. UPDATE TICKET FOR TRANSACTION ===
@@ -50,45 +52,93 @@ export class TicketUpdateTicketRadiologyOperation {
         id: ticketRadiologyId,
       })
 
-      if (ticketRadiologyOrigin.paymentMoneyStatus === PaymentMoneyStatus.Paid) {
-        throw new BusinessError('Phiếu đã thanh toán không thể sửa')
-      }
-
-      let ticketRadiology: TicketRadiology = ticketRadiologyOrigin
+      let ticketRadiologyModified: TicketRadiology = ticketRadiologyOrigin
       if (ticketRadiologyUpdateDto) {
-        ticketRadiology = await this.ticketRadiologyManager.updateOneAndReturnEntity(
-          manager,
-          { oid, id: ticketRadiologyId },
-          {
-            expectedPrice: ticketRadiologyUpdateDto.expectedPrice,
-            discountType: ticketRadiologyUpdateDto.discountType,
-            discountMoney: ticketRadiologyUpdateDto.discountMoney,
-            discountPercent: ticketRadiologyUpdateDto.discountPercent,
-            actualPrice: ticketRadiologyUpdateDto.actualPrice,
-          }
-        )
+        if (ticketRadiologyOrigin.paymentMoneyStatus !== PaymentMoneyStatus.Paid) {
+          ticketRadiologyModified = await this.ticketRadiologyManager.updateOneAndReturnEntity(
+            manager,
+            { oid, id: ticketRadiologyId },
+            {
+              expectedPrice: ticketRadiologyUpdateDto.expectedPrice,
+              discountType: ticketRadiologyUpdateDto.discountType,
+              discountMoney: ticketRadiologyUpdateDto.discountMoney,
+              discountPercent: ticketRadiologyUpdateDto.discountPercent,
+              actualPrice: ticketRadiologyUpdateDto.actualPrice,
+            }
+          )
+        }
       }
 
-      const radiologyMoneyChange = ticketRadiology.actualPrice - ticketRadiologyOrigin.actualPrice
-      const itemsDiscountChange =
-        ticketRadiology.discountMoney - ticketRadiologyOrigin.discountMoney
-      const itemsCostAmountChange = ticketRadiology.costPrice - ticketRadiologyOrigin.costPrice
+      let ticketUserDestroyList: TicketUser[] = []
+      let ticketUserCreatedList: TicketUser[] = []
+      let commissionMoneyAdd = 0
+      if (ticketUserRequestList) {
+        ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+          oid,
+          ticketId,
+          positionType: PositionType.RadiologyRequest,
+          ticketItemId: ticketRadiologyModified.id,
+        })
+        ticketUserCreatedList = await this.ticketUserCommon.addTicketUserList({
+          manager,
+          createdAt: ticketRadiologyModified.createdAt,
+          oid,
+          ticketId,
+          ticketUserDtoList: ticketUserRequestList.map((i) => {
+            return {
+              positionId: i.positionId,
+              userId: i.userId,
+              quantity: 1,
+              ticketItemId: ticketRadiologyModified.id,
+              ticketItemChildId: 0,
+              positionInteractId: ticketRadiologyModified.radiologyId,
+              ticketItemExpectedPrice: ticketRadiologyModified.expectedPrice,
+              ticketItemActualPrice: ticketRadiologyModified.actualPrice,
+            }
+          }),
+        })
+
+        commissionMoneyAdd =
+          ticketUserCreatedList.reduce((acc, item) => {
+            return acc + item.quantity * item.commissionMoney
+          }, 0)
+          - ticketUserDestroyList.reduce((acc, item) => {
+            return acc + item.quantity * item.commissionMoney
+          }, 0)
+      }
+
+      const radiologyMoneyAdd =
+        ticketRadiologyModified.actualPrice - ticketRadiologyOrigin.actualPrice
+      const itemsDiscountAdd =
+        ticketRadiologyModified.discountMoney - ticketRadiologyOrigin.discountMoney
+      const itemsCostAmountAdd = ticketRadiologyModified.costPrice - ticketRadiologyOrigin.costPrice
 
       // === 5. UPDATE TICKET: MONEY  ===
-      let ticket: Ticket = ticketOrigin
-      if (radiologyMoneyChange != 0 || itemsDiscountChange != 0) {
-        ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
+      let ticketModified: Ticket = ticketOrigin
+      if (
+        radiologyMoneyAdd != 0
+        || itemsDiscountAdd != 0
+        || itemsCostAmountAdd != 0
+        || commissionMoneyAdd != 0
+      ) {
+        ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
           manager,
           oid,
           ticketOrigin,
           itemMoney: {
-            radiologyMoneyAdd: radiologyMoneyChange,
-            itemsDiscountAdd: itemsDiscountChange,
-            itemsCostAmountAdd: itemsCostAmountChange,
+            radiologyMoneyAdd,
+            itemsDiscountAdd,
+            itemsCostAmountAdd,
+            commissionMoneyAdd,
           },
         })
       }
-      return { ticket, ticketRadiology }
+      return {
+        ticketModified,
+        ticketRadiologyModified,
+        ticketUserCreatedList,
+        ticketUserDestroyList,
+      }
     })
 
     return transaction

@@ -2,7 +2,7 @@ import { ApiPropertyOptional, IntersectionType, PickType } from '@nestjs/swagger
 import { Expose, Transform, plainToInstance } from 'class-transformer'
 import { IsObject, ValidateNested } from 'class-validator'
 import { LimitQuery, PaginationQuery } from '../../../../../_libs/common/dto/query'
-import { PositionInteractType } from '../../../../../_libs/database/entities/position.entity'
+import { PositionType } from '../../../../../_libs/database/entities/position.entity'
 import {
   PositionFilterQuery,
   PositionRelationQuery,
@@ -31,7 +31,7 @@ export class PositionGetQuery {
   @ApiPropertyOptional({
     type: String,
     example: JSON.stringify(<PositionFilterQuery>{
-      positionType: PositionInteractType.Ticket,
+      positionType: PositionType.Ticket,
     }),
   })
   @Expose()

@@ -9,7 +9,7 @@ import {
   TicketLaboratoryResult,
   TicketUser,
 } from '../../../../_libs/database/entities'
-import { PositionInteractType } from '../../../../_libs/database/entities/position.entity'
+import { PositionType } from '../../../../_libs/database/entities/position.entity'
 import {
   CustomerRepository,
   TicketLaboratoryGroupRepository,
@@ -111,7 +111,7 @@ export class ApiTicketLaboratoryGroupService {
         ? this.ticketUserRepository.findMany({
           condition: {
             ticketId: { IN: ticketIdList },
-            positionType: PositionInteractType.LaboratoryGroup,
+            positionType: PositionType.LaboratoryGroupRequest,
             ticketItemId: { IN: tlgIdList },
           },
           sort: { id: 'ASC' },

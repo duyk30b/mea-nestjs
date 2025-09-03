@@ -2,6 +2,7 @@ import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
 import { TicketProcedureStatus } from '../common/variable'
 import Image from './image.entity'
+import TicketUser from './ticket-user.entity'
 
 @Entity('TicketProcedureItem')
 @Index('IDX_TicketProcedureItem__oid_ticketId', ['oid', 'ticketId'])
@@ -22,6 +23,10 @@ export default class TicketProcedureItem {
   @Expose()
   ticketProcedureId: number
 
+  @Column({ type: 'smallint', default: 0 })
+  @Expose()
+  indexSession: number
+
   @Column({ type: 'smallint', default: TicketProcedureStatus.Pending })
   @Expose()
   status: TicketProcedureStatus
@@ -34,8 +39,16 @@ export default class TicketProcedureItem {
   @Expose()
   imageIds: string
 
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
   @Expose()
-  imageList: Image[]
+  registeredAt: number
 
   @Column({
     type: 'bigint',
@@ -48,12 +61,19 @@ export default class TicketProcedureItem {
   @Expose()
   completedAt: number
 
+  @Expose()
+  imageList: Image[]
+
+  @Expose()
+  ticketUserResultList: TicketUser[]
+
   static fromRaw(raw: { [P in keyof TicketProcedureItem]: any }) {
     if (!raw) return null
     const entity = new TicketProcedureItem()
     Object.assign(entity, raw)
 
     entity.completedAt = raw.completedAt == null ? raw.completedAt : Number(raw.completedAt)
+    entity.registeredAt = raw.registeredAt == null ? raw.registeredAt : Number(raw.registeredAt)
     return entity
   }
 
@@ -63,7 +83,7 @@ export default class TicketProcedureItem {
 }
 
 export type TicketProcedureItemRelationType = {
-  [P in keyof Pick<TicketProcedureItem, 'imageList'>]?: boolean
+  [P in keyof Pick<TicketProcedureItem, 'imageList' | 'ticketUserResultList'>]?: boolean
 }
 
 export type TicketProcedureItemInsertType = Omit<

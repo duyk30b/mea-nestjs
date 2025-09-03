@@ -3,6 +3,7 @@ import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import { DataSource, EntityManager, FindOptionsWhere, In, Repository } from 'typeorm'
 import { ESTimer } from '../../common/helpers/time.helper'
 import {
+  Appointment,
   Ticket,
   TicketAttribute,
   TicketBatch,
@@ -80,6 +81,7 @@ export class TicketRepository extends _PostgreSqlRepository<
       if (ticketDeleteResult.affected !== 1) {
         throw new Error(`Destroy Ticket ${ticketId} failed: Status invalid`)
       }
+      await manager.delete(Appointment, { oid, fromTicketId: ticketId })
       await manager.delete(TicketAttribute, { oid, ticketId })
       await manager.delete(TicketBatch, { oid, ticketId })
       await manager.delete(TicketExpense, { oid, ticketId })

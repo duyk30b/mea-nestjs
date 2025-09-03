@@ -59,7 +59,7 @@ export type TicketOrderProcedureDraftType = Omit<
   | keyof TicketProcedureRelationType
   | keyof Pick<
     TicketProcedure,
-    'oid' | 'id' | 'ticketId' | 'customerId' | 'status' | 'createdAt' | 'completedSessions'
+    'oid' | 'id' | 'ticketId' | 'customerId' | 'status' | 'createdAt' | 'finishedSessions'
   >
 >
 
@@ -179,7 +179,7 @@ export class TicketOrderDraftOperation {
             status: TicketProcedureStatus.Completed,
             imageIds: JSON.stringify([]),
             result: '',
-            completedSessions: 0,
+            finishedSessions: 0,
           }
           return ticketProcedure
         })

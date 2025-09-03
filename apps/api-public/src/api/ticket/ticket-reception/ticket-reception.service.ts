@@ -1,34 +1,23 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
-import { NoExtra } from '../../../../../_libs/common/helpers'
 import { ESTimer } from '../../../../../_libs/common/helpers/time.helper'
-import {
-  DeliveryStatus,
-  DiscountType,
-  TicketProcedureStatus,
-} from '../../../../../_libs/database/common/variable'
+import { DeliveryStatus, DiscountType } from '../../../../../_libs/database/common/variable'
 import { Customer } from '../../../../../_libs/database/entities'
 import { AppointmentStatus } from '../../../../../_libs/database/entities/appointment.entity'
-import { PositionInteractType } from '../../../../../_libs/database/entities/position.entity'
-import TicketAttribute, {
-  TicketAttributeInsertType,
-} from '../../../../../_libs/database/entities/ticket-attribute.entity'
-import { TicketProcedureItemInsertType } from '../../../../../_libs/database/entities/ticket-procedure-item.entity'
-import TicketProcedure, {
-  TicketProcedureInsertType,
-} from '../../../../../_libs/database/entities/ticket-procedure.entity'
+import { PositionType } from '../../../../../_libs/database/entities/position.entity'
+import { TicketAttributeInsertType } from '../../../../../_libs/database/entities/ticket-attribute.entity'
 import { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
-import { TicketChangeItemMoneyManager } from '../../../../../_libs/database/operations'
+import {
+  TicketAddTicketProcedureListOperation,
+  TicketChangeTicketUserOperation,
+} from '../../../../../_libs/database/operations'
 import {
   AppointmentRepository,
   CustomerRepository,
   TicketAttributeRepository,
-  TicketProcedureItemRepository,
-  TicketProcedureRepository,
   TicketRepository,
 } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
-import { TicketChangeUserService } from '../ticket-change-user/ticket-change-user.service'
 import { TicketReceptionCreateTicketBody, TicketReceptionUpdateTicketBody } from './request'
 
 @Injectable()
@@ -36,13 +25,11 @@ export class TicketReceptionService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
     private readonly ticketRepository: TicketRepository,
-    private readonly ticketProcedureRepository: TicketProcedureRepository,
-    private readonly ticketProcedureItemRepository: TicketProcedureItemRepository,
     private readonly customerRepository: CustomerRepository,
     private readonly appointmentRepository: AppointmentRepository,
     private readonly ticketAttributeRepository: TicketAttributeRepository,
-    private readonly ticketChangeUserService: TicketChangeUserService,
-    private readonly ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
+    private readonly ticketChangeTicketUserOperation: TicketChangeTicketUserOperation,
+    private readonly ticketAddTicketProcedureListOperation: TicketAddTicketProcedureListOperation
   ) { }
 
   async receptionCreate(options: { oid: number; body: TicketReceptionCreateTicketBody }) {
@@ -50,8 +37,6 @@ export class TicketReceptionService {
     const { ticketReception } = body
 
     let customer: Customer
-    let ticketAttributeList: TicketAttribute[] = []
-    let ticketProcedureList: TicketProcedure[] = []
 
     if (!ticketReception.customerId) {
       let customerCode = body.customer.customerCode
@@ -89,7 +74,7 @@ export class TicketReceptionService {
       }
     })
 
-    let ticket = await this.ticketRepository.insertOneFullFieldAndReturnEntity({
+    const ticket = await this.ticketRepository.insertOneFullFieldAndReturnEntity({
       oid,
       customerId: customer.id,
       roomId: ticketReception.roomId,
@@ -132,7 +117,7 @@ export class TicketReceptionService {
         { oid, id: ticketReception.fromAppointmentId },
         {
           toTicketId: ticket.id,
-          appointmentStatus: AppointmentStatus.Completed,
+          status: AppointmentStatus.Completed,
         }
       )
     }
@@ -148,79 +133,50 @@ export class TicketReceptionService {
           }
           return dto
         })
-      ticketAttributeList =
+      ticket.ticketAttributeList =
         await this.ticketAttributeRepository.insertManyAndReturnEntity(ticketAttributeInsertList)
     }
 
-    if (body.ticketUserList) {
-      this.ticketChangeUserService.updateTicketUserPositionList({
+    if (body.ticketUserReceptionList) {
+      const responseChangeUser = await this.ticketChangeTicketUserOperation.changeTicketUserList({
         oid,
         ticketId: ticket.id,
-        body: {
-          positionType: PositionInteractType.Ticket,
-          positionInteractId: 0,
-          ticketItemId: 0,
-          quantity: 1,
-          ticketUserList: body.ticketUserList,
-        },
+        createdAt: ticket.registeredAt,
+        ticketUserDtoList: body.ticketUserReceptionList
+          .filter((i) => !!i.userId)
+          .map((i) => {
+            return {
+              ...i,
+              ticketItemId: 0,
+              ticketItemChildId: 0,
+              ticketItemExpectedPrice: ticket.totalMoney + ticket.discountMoney,
+              ticketItemActualPrice: ticket.totalMoney,
+              positionInteractId: 0,
+              quantity: 1,
+            }
+          }),
       })
+      ticket.ticketUserList = responseChangeUser.ticketUserCreatedList
     }
 
-    if (body.ticketProcedureList?.length) {
-      const ticketProcedureInsertList = body.ticketProcedureList!.map((i) => {
-        const insert: TicketProcedureInsertType = {
-          ...i.ticketProcedure,
-          customerId: ticket.customerId,
-          status: TicketProcedureStatus.Completed,
-          oid,
-          createdAt: Date.now(),
-          ticketId: ticket.id,
-          completedSessions: 0,
-        }
-        return insert
-      })
-      ticketProcedureList =
-        await this.ticketProcedureRepository.insertManyAndReturnEntity(ticketProcedureInsertList)
-
-      const ticketProcedureItemInsertList = body
-        .ticketProcedureList!.map((i, index) => {
-          return (i.ticketProcedureItemList || []).map((j) => {
-            const insert: NoExtra<TicketProcedureItemInsertType> = {
-              oid,
-              completedAt: j.completedAt,
-              ticketId: ticket.id,
-              ticketProcedureId: ticketProcedureList[index].id,
-              status: TicketProcedureStatus.Pending,
-              imageIds: '[]',
-              result: '',
-            }
-            return insert
-          })
-        })
-        .flat()
-      await this.ticketProcedureItemRepository.insertManyFullField(ticketProcedureItemInsertList)
-
-      const procedureMoney = ticketProcedureList.reduce((acc, cur) => {
-        return acc + cur.quantity * cur.actualPrice
-      }, 0)
-      const procedureDiscount = ticketProcedureList.reduce((acc, cur) => {
-        return acc + cur.quantity * cur.discountMoney
-      }, 0)
-
-      ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
-        manager: this.ticketRepository.getManager(),
+    if (body.ticketProcedureWrapList?.length) {
+      const result = await this.ticketAddTicketProcedureListOperation.addTicketProcedureList({
         oid,
-        ticketOrigin: ticket,
-        itemMoney: {
-          procedureMoneyAdd: procedureMoney,
-          itemsDiscountAdd: procedureDiscount,
-        },
+        ticketId: ticket.id,
+        ticketProcedureDtoList: body.ticketProcedureWrapList.map((i) => {
+          return {
+            ticketProcedureAdd: i.ticketProcedure,
+            ticketProcedureItemAddList: i.ticketProcedureItemList,
+            ticketUserRequestAddList: i.ticketUserRequestList,
+          }
+        }),
       })
+
+      Object.assign(ticket, result.ticketModified)
+      ticket.ticketProcedureList = result.ticketProcedureCreatedList
     }
 
     ticket.customer = customer
-    ticket.ticketAttributeList = ticketAttributeList
-    ticket.ticketProcedureList = ticketProcedureList
     this.socketEmitService.socketTicketChange(oid, { type: 'CREATE', ticket })
     return { ticket }
   }
@@ -275,17 +231,34 @@ export class TicketReceptionService {
       })
     }
 
-    if (body.ticketUserList) {
-      this.ticketChangeUserService.updateTicketUserPositionList({
+    if (body.ticketUserReceptionList) {
+      const responseChangeUser = await this.ticketChangeTicketUserOperation.changeTicketUserList({
         oid,
         ticketId,
-        body: {
-          positionType: PositionInteractType.Ticket,
-          positionInteractId: 0,
+        createdAt: ticketModified.registeredAt,
+        ticketUserDtoList: body.ticketUserReceptionList
+          .filter((i) => !!i.userId)
+          .map((i) => {
+            return {
+              ...i,
+              ticketItemId: 0,
+              ticketItemChildId: 0,
+              ticketItemExpectedPrice: ticketModified.totalMoney + ticketModified.discountMoney,
+              ticketItemActualPrice: ticketModified.totalMoney,
+              positionInteractId: 0,
+              quantity: 1,
+            }
+          }),
+        destroy: {
+          positionType: PositionType.Ticket,
           ticketItemId: 0,
-          quantity: 1,
-          ticketUserList: body.ticketUserList,
+          ticketItemChildId: 0,
         },
+      })
+      this.socketEmitService.socketTicketUserListChange(oid, {
+        ticketId,
+        ticketUserDestroyList: responseChangeUser.ticketUserDestroyList,
+        ticketUserUpsertList: responseChangeUser.ticketUserCreatedList,
       })
     }
 

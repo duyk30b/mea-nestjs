@@ -8,7 +8,7 @@ import {
   TicketRadiology,
   TicketUser,
 } from '../../../../_libs/database/entities'
-import { PositionInteractType } from '../../../../_libs/database/entities/position.entity'
+import { PositionType } from '../../../../_libs/database/entities/position.entity'
 import {
   CustomerRepository,
   TicketRepository,
@@ -17,6 +17,7 @@ import {
 import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
 import { TicketRadiologyRepository } from '../../../../_libs/database/repositories/ticket-radiology.repository'
 import {
+  TicketRadiologyGetManyQuery,
   TicketRadiologyGetOneQuery,
   TicketRadiologyPaginationQuery,
   TicketRadiologyRelationQuery,
@@ -53,7 +54,7 @@ export class ApiTicketRadiologyService {
     })
 
     if (query.relation) {
-      await this.generateRelation(ticketRadiologyList, query.relation)
+      await this.generateRelation({ oid, ticketRadiologyList, relation: query.relation })
     }
 
     return { ticketRadiologyList, page, limit, total }
@@ -69,16 +70,49 @@ export class ApiTicketRadiologyService {
     }
 
     if (query.relation) {
-      await this.generateRelation([ticketRadiology], query.relation)
+      await this.generateRelation({
+        oid,
+        ticketRadiologyList: [ticketRadiology],
+        relation: query.relation,
+      })
     }
 
     return { ticketRadiology }
   }
 
-  async generateRelation(
-    ticketRadiologyList: TicketRadiology[],
+  async getList(oid: number, query: TicketRadiologyGetManyQuery) {
+    const { limit, filter, relation, sort } = query
+    const ticketRadiologyList = await this.ticketRadiologyRepository.findMany({
+      condition: {
+        oid,
+        id: filter.id,
+        ticketId: filter?.ticketId,
+        customerId: filter?.customerId,
+        radiologyId: filter?.radiologyId,
+        roomId: filter?.roomId,
+        status: filter?.status,
+        paymentMoneyStatus: filter?.paymentMoneyStatus,
+
+        createdAt: filter?.createdAt,
+        completedAt: filter?.completedAt,
+      },
+      limit,
+      sort,
+    })
+    if (query.relation) {
+      await this.generateRelation({ oid, ticketRadiologyList, relation })
+    }
+
+    return { ticketRadiologyList }
+  }
+
+  async generateRelation(object: {
+    oid: number
+    ticketRadiologyList: TicketRadiology[]
     relation: TicketRadiologyRelationQuery
-  ) {
+  }) {
+    const { oid, ticketRadiologyList, relation } = object
+
     const ticketRadiologyIdList = ESArray.uniqueArray(ticketRadiologyList.map((i) => i.id))
     const customerIdList = ESArray.uniqueArray(ticketRadiologyList.map((i) => i.customerId))
     const ticketIdList = ESArray.uniqueArray(ticketRadiologyList.map((i) => i.ticketId))
@@ -94,11 +128,14 @@ export class ApiTicketRadiologyService {
         ? this.customerRepository.findManyBy({ id: { IN: customerIdList } })
         : <Customer[]>[],
 
-      relation?.ticketUserList && ticketIdList.length && ticketRadiologyIdList.length
+      (relation?.ticketUserRequestList || relation?.ticketUserResultList)
+        && ticketIdList.length
+        && ticketRadiologyIdList.length
         ? this.ticketUserRepository.findMany({
           condition: {
+            oid,
             ticketId: { IN: ticketIdList },
-            positionType: PositionInteractType.Radiology,
+            positionType: PositionType.RadiologyRequest,
             ticketItemId: { IN: ticketRadiologyIdList },
           },
           sort: { id: 'ASC' },
@@ -114,8 +151,15 @@ export class ApiTicketRadiologyService {
       tr.ticket = ticketList.find((t) => t.id === tr.ticketId)
       tr.customer = customerList.find((c) => c.id === tr.customerId)
 
-      if (relation.ticketUserList) {
-        tr.ticketUserList = ticketUserList.filter((tu) => tu.ticketItemId === tr.id)
+      if (relation.ticketUserRequestList) {
+        tr.ticketUserRequestList = ticketUserList.filter((tu) => {
+          return tu.ticketItemId === tr.id && tu.positionType === PositionType.RadiologyRequest
+        })
+      }
+      if (relation.ticketUserResultList) {
+        tr.ticketUserResultList = ticketUserList.filter((tu) => {
+          return tu.ticketItemId === tr.id && tu.positionType === PositionType.RadiologyResult
+        })
       }
 
       if (relation.imageList) {
