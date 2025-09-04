@@ -81,7 +81,7 @@ export class ApiMeService {
 
     let imageIdsStringifyUpdate = userOrigin.imageIds
     if (imagesChange) {
-      const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
+      const { imageIdsNew } = await this.imageManagerService.changeCloudinaryImageLink({
         oid,
         files,
         imageIdsWait: body.imagesChange.imageIdsWait,
@@ -95,7 +95,7 @@ export class ApiMeService {
           ticketItemChildId: 0,
         },
       })
-      imageIdsStringifyUpdate = JSON.stringify(imageIdsUpdate)
+      imageIdsStringifyUpdate = JSON.stringify(imageIdsNew)
     }
 
     if (userOrigin.imageIds !== imageIdsStringifyUpdate) {

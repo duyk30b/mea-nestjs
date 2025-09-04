@@ -134,32 +134,32 @@ export class TicketMoneyService {
     if (prepaymentResult.ticketProcedureModifiedList?.length) {
       this.socketEmitService.socketTicketProcedureListChange(oid, {
         ticketId,
-        ticketProcedureUpsertList: prepaymentResult.ticketProcedureModifiedList,
+        ticketProcedureUpsertedList: prepaymentResult.ticketProcedureModifiedList,
       })
     }
     if (prepaymentResult.ticketProductConsumableModifiedList?.length) {
       this.socketEmitService.socketTicketConsumableChange(oid, {
         ticketId,
-        ticketProductUpsertList: prepaymentResult.ticketProductConsumableModifiedList,
+        ticketProductUpsertedList: prepaymentResult.ticketProductConsumableModifiedList,
       })
     }
     if (prepaymentResult.ticketProductPrescriptionModifiedList?.length) {
       this.socketEmitService.socketTicketPrescriptionChange(oid, {
         ticketId,
-        ticketProductUpsertList: prepaymentResult.ticketProductPrescriptionModifiedList,
+        ticketProductUpsertedList: prepaymentResult.ticketProductPrescriptionModifiedList,
       })
     }
     if (prepaymentResult.ticketLaboratoryModifiedList?.length) {
       this.socketEmitService.socketTicketLaboratoryListChange(oid, {
         ticketId,
-        ticketLaboratoryUpsertList: prepaymentResult.ticketLaboratoryModifiedList,
-        ticketLaboratoryGroupUpsertList: prepaymentResult.ticketLaboratoryGroupModifiedList || [],
+        ticketLaboratoryUpsertedList: prepaymentResult.ticketLaboratoryModifiedList,
+        ticketLaboratoryGroupUpsertedList: prepaymentResult.ticketLaboratoryGroupModifiedList || [],
       })
     }
     if (prepaymentResult.ticketRadiologyModifiedList?.length) {
       this.socketEmitService.socketTicketRadiologyListChange(oid, {
         ticketId,
-        ticketRadiologyUpsertList: prepaymentResult.ticketRadiologyModifiedList,
+        ticketRadiologyUpsertedList: prepaymentResult.ticketRadiologyModifiedList,
       })
     }
     return { ticketModified, customer, paymentCreated }
@@ -194,32 +194,32 @@ export class TicketMoneyService {
     if (refundResult.ticketProcedureModifiedList?.length) {
       this.socketEmitService.socketTicketProcedureListChange(oid, {
         ticketId,
-        ticketProcedureUpsertList: refundResult.ticketProcedureModifiedList,
+        ticketProcedureUpsertedList: refundResult.ticketProcedureModifiedList,
       })
     }
     if (refundResult.ticketProductConsumableModifiedList?.length) {
       this.socketEmitService.socketTicketConsumableChange(oid, {
         ticketId,
-        ticketProductUpsertList: refundResult.ticketProductConsumableModifiedList,
+        ticketProductUpsertedList: refundResult.ticketProductConsumableModifiedList,
       })
     }
     if (refundResult.ticketProductPrescriptionModifiedList?.length) {
       this.socketEmitService.socketTicketPrescriptionChange(oid, {
         ticketId,
-        ticketProductUpsertList: refundResult.ticketProductPrescriptionModifiedList,
+        ticketProductUpsertedList: refundResult.ticketProductPrescriptionModifiedList,
       })
     }
     if (refundResult.ticketLaboratoryModifiedList?.length) {
       this.socketEmitService.socketTicketLaboratoryListChange(oid, {
         ticketId,
-        ticketLaboratoryUpsertList: refundResult.ticketLaboratoryModifiedList,
-        ticketLaboratoryGroupUpsertList: refundResult.ticketLaboratoryGroupModifiedList || [],
+        ticketLaboratoryUpsertedList: refundResult.ticketLaboratoryModifiedList,
+        ticketLaboratoryGroupUpsertedList: refundResult.ticketLaboratoryGroupModifiedList || [],
       })
     }
     if (refundResult.ticketRadiologyModifiedList?.length) {
       this.socketEmitService.socketTicketRadiologyListChange(oid, {
         ticketId,
-        ticketRadiologyUpsertList: refundResult.ticketRadiologyModifiedList,
+        ticketRadiologyUpsertedList: refundResult.ticketRadiologyModifiedList,
       })
     }
     return { ticketModified, customer, paymentCreated }

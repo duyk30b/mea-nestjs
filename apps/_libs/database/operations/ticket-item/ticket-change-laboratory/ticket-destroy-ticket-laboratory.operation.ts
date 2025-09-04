@@ -39,7 +39,7 @@ export class TicketDestroyTicketLaboratoryOperation {
       )
 
       // === 2. DELETE TICKET LABORATORY ===
-      const ticketLaboratoryDestroy = await this.ticketLaboratoryManager.deleteOneAndReturnEntity(
+      const ticketLaboratoryDestroyed = await this.ticketLaboratoryManager.deleteOneAndReturnEntity(
         manager,
         {
           oid,
@@ -50,28 +50,28 @@ export class TicketDestroyTicketLaboratoryOperation {
         }
       )
 
-      const ticketLaboratoryResultDestroyList =
+      const ticketLaboratoryResultDestroyedList =
         await this.ticketLaboratoryResultManager.deleteAndReturnEntity(manager, {
           oid,
           ticketId,
-          ticketLaboratoryGroupId: ticketLaboratoryDestroy.ticketLaboratoryGroupId,
-          ticketLaboratoryId: ticketLaboratoryDestroy.id,
-          laboratoryId: ticketLaboratoryDestroy.laboratoryId,
+          ticketLaboratoryGroupId: ticketLaboratoryDestroyed.ticketLaboratoryGroupId,
+          ticketLaboratoryId: ticketLaboratoryDestroyed.id,
+          laboratoryId: ticketLaboratoryDestroyed.laboratoryId,
         })
 
       const ticketLaboratoryRemainList = await this.ticketLaboratoryManager.findManyBy(manager, {
         oid,
         ticketId,
-        ticketLaboratoryGroupId: ticketLaboratoryDestroy.ticketLaboratoryGroupId,
+        ticketLaboratoryGroupId: ticketLaboratoryDestroyed.ticketLaboratoryGroupId,
       })
-      let ticketLaboratoryGroupDestroy: TicketLaboratoryGroup | null = null
+      let ticketLaboratoryGroupDestroyed: TicketLaboratoryGroup | null = null
       let ticketLaboratoryGroupModified: TicketLaboratoryGroup | null = null
       if (!ticketLaboratoryRemainList.length) {
-        ticketLaboratoryGroupDestroy =
+        ticketLaboratoryGroupDestroyed =
           await this.ticketLaboratoryGroupManager.deleteOneAndReturnEntity(manager, {
             oid,
             ticketId,
-            id: ticketLaboratoryDestroy.ticketLaboratoryGroupId,
+            id: ticketLaboratoryDestroyed.ticketLaboratoryGroupId,
           })
       } else {
         const { paymentMoneyStatus } =
@@ -84,16 +84,16 @@ export class TicketDestroyTicketLaboratoryOperation {
             {
               oid,
               ticketId,
-              id: ticketLaboratoryDestroy.ticketLaboratoryGroupId,
+              id: ticketLaboratoryDestroyed.ticketLaboratoryGroupId,
             },
             { paymentMoneyStatus }
           )
       }
 
       // === 4. UPDATE TICKET: MONEY  ===
-      const laboratoryMoneyDelete = ticketLaboratoryDestroy.actualPrice
-      const itemsDiscountDelete = ticketLaboratoryDestroy.discountMoney
-      const itemsCostAmountDelete = ticketLaboratoryDestroy.costPrice
+      const laboratoryMoneyDelete = ticketLaboratoryDestroyed.actualPrice
+      const itemsDiscountDelete = ticketLaboratoryDestroyed.discountMoney
+      const itemsCostAmountDelete = ticketLaboratoryDestroyed.costPrice
 
       let ticket: Ticket = ticketOrigin
       if (laboratoryMoneyDelete != 0 || itemsDiscountDelete != 0) {
@@ -111,10 +111,10 @@ export class TicketDestroyTicketLaboratoryOperation {
 
       return {
         ticket,
-        ticketLaboratoryDestroy,
-        ticketLaboratoryGroupDestroy: ticketLaboratoryGroupDestroy as TicketLaboratoryGroup | null,
+        ticketLaboratoryDestroyed,
+        ticketLaboratoryGroupDestroyed: ticketLaboratoryGroupDestroyed as TicketLaboratoryGroup | null,
         ticketLaboratoryGroupModified: ticketLaboratoryGroupModified as TicketLaboratoryGroup | null,
-        ticketLaboratoryResultDestroyList,
+        ticketLaboratoryResultDestroyedList,
       }
     })
 

@@ -5,8 +5,9 @@ import { BusinessError } from '../../../../../_libs/database/common/error'
 import { TicketProcedureStatus } from '../../../../../_libs/database/common/variable'
 import { TicketUser } from '../../../../../_libs/database/entities'
 import { AppointmentStatus } from '../../../../../_libs/database/entities/appointment.entity'
-import { ImageInteractType } from '../../../../../_libs/database/entities/image.entity'
+import Image, { ImageInteractType } from '../../../../../_libs/database/entities/image.entity'
 import { PositionType } from '../../../../../_libs/database/entities/position.entity'
+import { ProcedureType } from '../../../../../_libs/database/entities/procedure.entity'
 import {
   TicketAddTicketProcedureListOperation,
   TicketChangeTicketUserOperation,
@@ -22,13 +23,12 @@ import {
 import { ImageManagerService } from '../../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { ApiTicketProcedureService } from '../../api-ticket-procedure/api-ticket-procedure.service'
-import { TicketChangeUserService } from '../ticket-change-user/ticket-change-user.service'
 import {
   TicketAddTicketProcedureListBody,
-  TicketCancelProcedureItemBody,
+  TicketCancelResultProcedureItemBody,
   TicketProcedureUpdateResultBody,
   TicketUpdatePriorityTicketProcedureBody,
-  TicketUpdateTicketProcedureBody,
+  TicketUpdateRequestTicketProcedureBody,
 } from './request'
 
 @Injectable()
@@ -44,7 +44,6 @@ export class TicketChangeProcedureService {
     private readonly ticketDestroyTicketProcedureOperation: TicketDestroyTicketProcedureOperation,
     private readonly ticketUpdateTicketProcedureOperation: TicketUpdateTicketProcedureOperation,
     private readonly ticketChangeTicketUserOperation: TicketChangeTicketUserOperation,
-    private readonly ticketChangeUserService: TicketChangeUserService,
     private readonly apiTicketProcedureService: ApiTicketProcedureService
   ) { }
 
@@ -71,11 +70,14 @@ export class TicketChangeProcedureService {
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified })
     this.socketEmitService.socketTicketProcedureListChange(oid, {
       ticketId,
-      ticketProcedureUpsertList: ticketProcedureCreatedList,
+      ticketProcedureUpsertedList: ticketProcedureCreatedList,
+      ticketUserUpsertedList: ticketUserCreatedList,
     })
-    this.socketEmitService.socketTicketUserListChange(oid, {
-      ticketId,
-      ticketUserUpsertList: ticketUserCreatedList,
+
+    ticketProcedureCreatedList.forEach((tr) => {
+      tr.ticketUserRequestList = ticketUserCreatedList.filter((tu) => {
+        return tr.id === tu.ticketItemId
+      })
     })
 
     return { ticketModified, ticketProcedureCreatedList }
@@ -98,26 +100,21 @@ export class TicketChangeProcedureService {
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
     this.socketEmitService.socketTicketProcedureListChange(oid, {
       ticketId,
-      ticketProcedureDestroyList: [result.ticketProcedureDestroy],
+      ticketProcedureDestroyedList: [result.ticketProcedureDestroyed],
+      ticketUserDestroyedList: result.ticketUserDestroyedList || [],
     })
-    if (result.ticketUserDestroyList) {
-      this.socketEmitService.socketTicketUserListChange(oid, {
-        ticketId,
-        ticketUserDestroyList: result.ticketUserDestroyList,
-      })
-    }
 
-    return true
+    return { ticketId, ticketProcedureId }
   }
 
-  async updateTicketProcedure(options: {
+  async updateRequestTicketProcedure(options: {
     oid: number
     ticketId: number
     ticketProcedureId: number
-    body: TicketUpdateTicketProcedureBody
+    body: TicketUpdateRequestTicketProcedureBody
   }) {
     const { oid, ticketId, ticketProcedureId, body } = options
-    const result = await this.ticketUpdateTicketProcedureOperation.updateTicketProcedure({
+    const updateResult = await this.ticketUpdateTicketProcedureOperation.updateTicketProcedure({
       oid,
       ticketId,
       ticketProcedureId,
@@ -125,7 +122,7 @@ export class TicketChangeProcedureService {
       ticketProcedureItemUpdateList: body.ticketProcedureItemList,
       ticketUserRequestList: body.ticketUserRequestList,
     })
-    const { ticketModified, ticketProcedureModified } = result
+    const { ticketModified, ticketProcedureModified } = updateResult
 
     await this.apiTicketProcedureService.generateRelation({
       oid,
@@ -136,14 +133,12 @@ export class TicketChangeProcedureService {
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified })
     this.socketEmitService.socketTicketProcedureListChange(oid, {
       ticketId,
-      ticketProcedureUpsertList: [ticketProcedureModified],
-    })
-    this.socketEmitService.socketTicketUserListChange(oid, {
-      ticketId,
-      ticketUserUpsertList: result.ticketUserCreatedList,
-      ticketUserDestroyList: result.ticketUserDestroyList,
+      ticketProcedureUpsertedList: [ticketProcedureModified],
+      ticketUserUpsertedList: updateResult.ticketUserCreatedList,
+      ticketUserDestroyedList: updateResult.ticketUserDestroyedList,
     })
 
+    ticketProcedureModified.ticketUserRequestList = updateResult.ticketUserCreatedList || []
     return { ticketProcedureModified }
   }
 
@@ -161,7 +156,7 @@ export class TicketChangeProcedureService {
 
     this.socketEmitService.socketTicketProcedureListChange(oid, {
       ticketId,
-      ticketProcedureUpsertList: ticketProcedureList,
+      ticketProcedureUpsertedList: ticketProcedureList,
     })
 
     return { ticketProcedureList }
@@ -195,8 +190,10 @@ export class TicketChangeProcedureService {
     }
 
     let imageIdsUpdateString = ticketProcedureItemOrigin.imageIds
+    let imageDestroyedList: Image[] = []
+    let imageCreatedList: Image[] = []
     if (body.imagesChange) {
-      const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
+      const imageChangeResponse = await this.imageManagerService.changeCloudinaryImageLink({
         oid,
         files,
         imageIdsWait: body.imagesChange.imageIdsWait,
@@ -210,7 +207,10 @@ export class TicketChangeProcedureService {
           ticketItemChildId: ticketProcedureItemId,
         },
       })
-      imageIdsUpdateString = JSON.stringify(imageIdsUpdate)
+      imageIdsUpdateString = JSON.stringify(imageChangeResponse.imageIdsNew)
+
+      imageDestroyedList = imageChangeResponse.imageDestroyedList
+      imageCreatedList = imageChangeResponse.imageCreatedList
     }
 
     const ticketProcedureItemModified =
@@ -244,23 +244,26 @@ export class TicketChangeProcedureService {
               : TicketProcedureStatus.Completed,
         }
       )
-      await this.appointmentRepository.updateOneAndReturnEntity(
-        {
-          oid,
-          customerId: ticketProcedureOrigin.customerId,
-          fromTicketId: ticketId,
-          toTicketId: ticketId,
-          ticketProcedureId,
-          ticketProcedureItemId,
-        },
-        {
-          status: AppointmentStatus.Completed,
-          cancelReason: '',
-        }
-      )
+      if (ticketProcedureModified.procedureType === ProcedureType.Regimen) {
+        await this.appointmentRepository.updateOneAndReturnEntity(
+          {
+            oid,
+            customerId: ticketProcedureOrigin.customerId,
+            fromTicketId: ticketId,
+            toTicketId: ticketId,
+            ticketProcedureId,
+            ticketProcedureItemId,
+          },
+          {
+            status: AppointmentStatus.Completed,
+            cancelReason: '',
+          }
+        )
+      }
     }
 
-    let ticketUserList: TicketUser[] = []
+    let ticketUserCreatedList: TicketUser[] = []
+    let ticketUserDestroyedList: TicketUser[] = []
     if (body.ticketUserResultList) {
       const changeUserResult = await this.ticketChangeTicketUserOperation.changeTicketUserList({
         oid,
@@ -283,15 +286,11 @@ export class TicketChangeProcedureService {
           ticketItemChildId: ticketProcedureItemId,
         },
       })
-      ticketUserList = changeUserResult.ticketUserCreatedList
+      ticketUserCreatedList = changeUserResult.ticketUserCreatedList
+      ticketUserDestroyedList = changeUserResult.ticketUserDestroyedList
       this.socketEmitService.socketTicketChange(oid, {
         type: 'UPDATE',
         ticket: changeUserResult.ticketModified,
-      })
-      this.socketEmitService.socketTicketUserListChange(oid, {
-        ticketId,
-        ticketUserUpsertList: changeUserResult.ticketUserCreatedList,
-        ticketUserDestroyList: changeUserResult.ticketUserDestroyList,
       })
     }
 
@@ -302,19 +301,24 @@ export class TicketChangeProcedureService {
         ticketProcedureItemList: { imageList: true, ticketUserResultList: true },
         ticketUserRequestList: true,
       },
-    }),
-      this.socketEmitService.socketTicketProcedureListChange(oid, {
-        ticketId,
-        ticketProcedureUpsertList: [ticketProcedureModified],
-      })
+    })
+
+    this.socketEmitService.socketTicketProcedureListChange(oid, {
+      ticketId,
+      ticketProcedureUpsertedList: [ticketProcedureModified],
+      ticketUserUpsertedList: ticketUserCreatedList,
+      ticketUserDestroyedList,
+      imageDestroyedList,
+      imageUpsertedList: imageCreatedList,
+    })
 
     return { ticketProcedureModified }
   }
 
-  async cancelTicketProcedureItem(options: {
+  async cancelResultTicketProcedureItem(options: {
     oid: number
     ticketId: number
-    body: TicketCancelProcedureItemBody
+    body: TicketCancelResultProcedureItemBody
   }) {
     const { oid, ticketId, body } = options
     const { ticketProcedureId, ticketProcedureItemId } = body
@@ -367,23 +371,26 @@ export class TicketChangeProcedureService {
       )
     }
 
-    await this.appointmentRepository.updateOneAndReturnEntity(
-      {
-        oid,
-        customerId: ticketProcedureOrigin.customerId,
-        fromTicketId: ticketId,
-        toTicketId: ticketId,
-        ticketProcedureId,
-        ticketProcedureItemId,
-      },
-      {
-        status: AppointmentStatus.Cancelled,
-        cancelReason: body.cancelReason,
-      }
-    )
+    if (ticketProcedureModified.procedureType === ProcedureType.Regimen) {
+      await this.appointmentRepository.updateOneAndReturnEntity(
+        {
+          oid,
+          customerId: ticketProcedureOrigin.customerId,
+          fromTicketId: ticketId,
+          toTicketId: ticketId,
+          ticketProcedureId,
+          ticketProcedureItemId,
+        },
+        {
+          status: AppointmentStatus.Cancelled,
+          cancelReason: body.cancelReason,
+        }
+      )
+    }
 
+    let ticketUserDestroyedList: TicketUser[] = []
     if (ticketProcedureItemOrigin.status === TicketProcedureStatus.Completed) {
-      await this.ticketUserRepository.deleteAndReturnEntity({
+      ticketUserDestroyedList = await this.ticketUserRepository.deleteAndReturnEntity({
         oid,
         positionType: PositionType.ProcedureResult,
         ticketId,
@@ -403,7 +410,8 @@ export class TicketChangeProcedureService {
 
     this.socketEmitService.socketTicketProcedureListChange(oid, {
       ticketId,
-      ticketProcedureUpsertList: [ticketProcedureModified],
+      ticketProcedureUpsertedList: [ticketProcedureModified],
+      ticketUserDestroyedList,
     })
 
     return { ticketProcedureModified }

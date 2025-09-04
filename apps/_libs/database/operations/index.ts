@@ -38,8 +38,8 @@ export * from './ticket-item/ticket-change-radiology/ticket-add-ticket-radiology
 export * from './ticket-item/ticket-change-radiology/ticket-destroy-ticket-radiology.operation'
 export * from './ticket-item/ticket-change-radiology/ticket-update-ticket-radiology.operation'
 
-export * from './ticket-item/ticket-change-laboratory/ticket-add-select-laboratory.operation'
-export * from './ticket-item/ticket-change-laboratory/ticket-change-select-laboratory.operation'
+export * from './ticket-item/ticket-change-laboratory/ticket-add-ticket-laboratory-group.operation'
+export * from './ticket-item/ticket-change-laboratory/ticket-change-ticket-laboratory-group.operation'
 export * from './ticket-item/ticket-change-laboratory/ticket-destroy-ticket-laboratory-group.operation'
 export * from './ticket-item/ticket-change-laboratory/ticket-destroy-ticket-laboratory.operation'
 export * from './ticket-item/ticket-change-laboratory/ticket-update-ticket-laboratory.operation'

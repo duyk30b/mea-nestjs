@@ -1,4 +1,4 @@
-import { ApiProperty, PartialType } from '@nestjs/swagger'
+import { ApiProperty, PickType } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import {
   IsArray,
@@ -20,19 +20,7 @@ import {
 import { PositionFilterQuery } from './position-options.request'
 
 export class PositionCreateBody {
-  @ApiProperty({ example: 25 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  priority: number
-
-  @ApiProperty({ example: 25 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  roleId: number
-
-  @ApiProperty({ enum: PositionType, example: PositionType.Ticket })
+  @ApiProperty({ enum: PositionType, example: PositionType.TicketReception })
   @Expose()
   @IsDefined()
   @IsEnumValue(PositionType)
@@ -44,11 +32,17 @@ export class PositionCreateBody {
   @IsNumber()
   positionInteractId: number
 
-  @ApiProperty({ example: 22_500 })
+  @ApiProperty({ example: 25 })
   @Expose()
   @IsDefined()
   @IsNumber()
-  commissionValue: number
+  roleId: number
+
+  @ApiProperty({ example: 25 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  priority: number
 
   @ApiProperty({
     enum: valuesEnum(CommissionCalculatorType),
@@ -58,9 +52,19 @@ export class PositionCreateBody {
   @IsDefined()
   @IsEnumValue(CommissionCalculatorType)
   commissionCalculatorType: CommissionCalculatorType
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  commissionValue: number
 }
 
-export class PositionUpdateBody extends PartialType(PositionCreateBody) { }
+export class PositionUpdateBody extends PickType(PositionCreateBody, [
+  'priority',
+  'commissionCalculatorType',
+  'commissionValue',
+]) { }
 
 export class PositionReplaceListBody {
   @ApiProperty({ type: PositionCreateBody, isArray: true })

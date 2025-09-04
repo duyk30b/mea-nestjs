@@ -17,7 +17,7 @@ export class TicketUserAddBody {
   @IsNumber()
   userId: number
 
-  @ApiProperty({ example: PositionType.Ticket })
+  @ApiProperty({ example: PositionType.TicketReception })
   @Expose()
   @IsDefined()
   @IsEnumValue(PositionType)

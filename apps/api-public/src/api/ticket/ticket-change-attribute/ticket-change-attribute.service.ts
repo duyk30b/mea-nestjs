@@ -32,38 +32,41 @@ export class TicketChangeAttributeService {
     const { oid, ticketId, body, files } = options
     const { imagesChange, ticketAttributeChangeList, ticketAttributeKeyList } = body
 
-    let ticket = await this.ticketRepository.updateOneAndReturnEntity(
+    let ticketModified = await this.ticketRepository.updateOneAndReturnEntity(
       { oid, id: ticketId },
       { note: body.note }
     )
     // 1. Update Ticket Image
     if (imagesChange) {
-      const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
-        oid,
-        files,
-        imageIdsWait: imagesChange.imageIdsWait,
-        externalUrlList: imagesChange.externalUrlList,
-        imageIdsOld: JSON.parse(ticket.imageIds || '[]'),
-        imageInteract: {
-          imageInteractType: ImageInteractType.Customer,
-          imageInteractId: ticket.customerId,
-          ticketId,
-          ticketItemId: 0,
-          ticketItemChildId: 0,
-        },
-      })
-      if (ticket.imageIds !== JSON.stringify(imageIdsUpdate)) {
-        const ticketUpdateList = await this.ticketRepository.updateAndReturnEntity(
+      const { imageIdsNew, imageCreatedList, imageDestroyedList } =
+        await this.imageManagerService.changeCloudinaryImageLink({
+          oid,
+          files,
+          imageIdsWait: imagesChange.imageIdsWait,
+          externalUrlList: imagesChange.externalUrlList,
+          imageIdsOld: JSON.parse(ticketModified.imageDiagnosisIds || '[]'),
+          imageInteract: {
+            imageInteractType: ImageInteractType.Customer,
+            imageInteractId: ticketModified.customerId,
+            ticketId,
+            ticketItemId: 0,
+            ticketItemChildId: 0,
+          },
+        })
+      if (ticketModified.imageDiagnosisIds !== JSON.stringify(imageIdsNew)) {
+        ticketModified = await this.ticketRepository.updateOneAndReturnEntity(
           { oid, id: ticketId },
-          { imageIds: JSON.stringify(imageIdsUpdate) }
+          { imageDiagnosisIds: JSON.stringify(imageIdsNew) }
         )
-        ticket = ticketUpdateList[0]
-        ticket.imageList = []
-        const imageIds: number[] = JSON.parse(ticket.imageIds)
-        const imageList = await this.imageRepository.findManyByIds(imageIds)
-        const imageMap = ESArray.arrayToKeyValue(imageList, 'id')
-        imageIds.forEach((i) => {
-          ticket.imageList.push(imageMap[i])
+        const imageDiagnosisIds: number[] = JSON.parse(ticketModified.imageDiagnosisIds)
+        const imageDiagnosisList = await this.imageRepository.findManyByIds(imageDiagnosisIds)
+        const imageDiagnosisMap = ESArray.arrayToKeyValue(imageDiagnosisList, 'id')
+        ticketModified.imageDiagnosisList = imageDiagnosisIds.map((i) => imageDiagnosisMap[i])
+
+        this.socketEmitService.socketImageListChange(oid, {
+          ticketId,
+          imageUpsertedList: imageCreatedList,
+          imageDestroyedList,
         })
       }
     }
@@ -96,7 +99,7 @@ export class TicketChangeAttributeService {
         ticketAttributeList,
       })
     }
-    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
+    this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
     return true
   }
 

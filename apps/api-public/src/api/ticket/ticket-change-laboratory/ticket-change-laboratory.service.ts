@@ -21,12 +21,11 @@ import {
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { ApiTicketLaboratoryGroupService } from '../../api-ticket-laboratory-group/api-ticket-laboratory-group.service'
 import { TicketLaboratoryGroupPostQuery } from '../../api-ticket-laboratory-group/request'
-import { TicketChangeUserService } from '../ticket-change-user/ticket-change-user.service'
 import {
-  TicketUpdateLaboratoryGroupResultBody,
   TicketUpdatePriorityTicketLaboratoryBody,
-  TicketUpdateTicketLaboratoryBody,
-  TicketUpsertLaboratoryBody,
+  TicketUpdateRequestTicketLaboratoryBody,
+  TicketUpdateResultLaboratoryGroupBody,
+  TicketUpsertRequestLaboratoryGroupBody,
 } from './request'
 
 @Injectable()
@@ -41,19 +40,18 @@ export class TicketChangeLaboratoryService {
     private readonly ticketUpdateTicketLaboratoryOperation: TicketUpdateTicketLaboratoryOperation,
     private readonly ticketDestroyTicketLaboratoryOperation: TicketDestroyTicketLaboratoryOperation,
     private readonly ticketDestroyTlgOperation: TicketDestroyTicketLaboratoryGroupOperation,
-    private readonly ticketChangeUserService: TicketChangeUserService,
     private readonly apiTicketLaboratoryGroupService: ApiTicketLaboratoryGroupService
   ) { }
 
-  async upsertLaboratory(options: {
+  async upsertRequestLaboratoryGroup(options: {
     oid: number
     ticketId: number
-    body: TicketUpsertLaboratoryBody
+    body: TicketUpsertRequestLaboratoryGroupBody
   }) {
     const { oid, ticketId, body } = options
 
     if (body.ticketLaboratoryGroupAddList.length) {
-      const result = await this.ticketAddSelectLaboratoryOperation.addSelectLaboratoryList({
+      const result = await this.ticketAddSelectLaboratoryOperation.addTicketLaboratoryGroupList({
         oid,
         ticketId,
         tlgDtoList: body.ticketLaboratoryGroupAddList,
@@ -62,8 +60,8 @@ export class TicketChangeLaboratoryService {
       this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: result.ticket })
       this.socketEmitService.socketTicketLaboratoryListChange(oid, {
         ticketId,
-        ticketLaboratoryUpsertList: result.ticketLaboratoryInsertList,
-        ticketLaboratoryGroupUpsertList: result.ticketLaboratoryGroupInsertList,
+        ticketLaboratoryUpsertedList: result.ticketLaboratoryCreatedList,
+        ticketLaboratoryGroupUpsertedList: result.ticketLaboratoryGroupCreatedList,
       })
     }
 
@@ -80,9 +78,9 @@ export class TicketChangeLaboratoryService {
       this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: result.ticket })
       this.socketEmitService.socketTicketLaboratoryListChange(oid, {
         ticketId,
-        ticketLaboratoryUpsertList: result.ticketLaboratoryInsertList,
-        ticketLaboratoryDestroyList: result.ticketLaboratoryDestroyList,
-        ticketLaboratoryGroupUpsertList: [result.ticketLaboratoryGroupUpdate],
+        ticketLaboratoryUpsertedList: result.ticketLaboratoryCreatedList,
+        ticketLaboratoryDestroyedList: result.ticketLaboratoryDestroyedList,
+        ticketLaboratoryGroupUpsertedList: [result.ticketLaboratoryGroupModified],
       })
     }
     return true
@@ -105,11 +103,11 @@ export class TicketChangeLaboratoryService {
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
     this.socketEmitService.socketTicketLaboratoryListChange(oid, {
       ticketId,
-      ticketLaboratoryDestroyList: [result.ticketLaboratoryDestroy],
-      ticketLaboratoryGroupDestroyList: result.ticketLaboratoryGroupDestroy
-        ? [result.ticketLaboratoryGroupDestroy]
+      ticketLaboratoryDestroyedList: [result.ticketLaboratoryDestroyed],
+      ticketLaboratoryGroupDestroyedList: result.ticketLaboratoryGroupDestroyed
+        ? [result.ticketLaboratoryGroupDestroyed]
         : undefined,
-      ticketLaboratoryGroupUpsertList: result.ticketLaboratoryGroupModified
+      ticketLaboratoryGroupUpsertedList: result.ticketLaboratoryGroupModified
         ? [result.ticketLaboratoryGroupModified]
         : undefined,
     })
@@ -147,19 +145,19 @@ export class TicketChangeLaboratoryService {
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
     this.socketEmitService.socketTicketLaboratoryListChange(oid, {
       ticketId,
-      ticketLaboratoryGroupDestroyList: [result.ticketLaboratoryGroupDestroy],
-      ticketLaboratoryDestroyList: result.ticketLaboratoryDestroyList,
-      ticketLaboratoryResultDestroyList: result.ticketLaboratoryResultDestroyList,
+      ticketLaboratoryGroupDestroyedList: [result.ticketLaboratoryGroupDestroyed],
+      ticketLaboratoryDestroyedList: result.ticketLaboratoryDestroyedList,
+      ticketLaboratoryResultDestroyedList: result.ticketLaboratoryResultDestroyedList,
     })
 
     return true
   }
 
-  async updateTicketLaboratory(options: {
+  async updateRequestTicketLaboratory(options: {
     oid: number
     ticketId: number
     ticketLaboratoryId: number
-    body: TicketUpdateTicketLaboratoryBody
+    body: TicketUpdateRequestTicketLaboratoryBody
   }) {
     const { oid, ticketId, ticketLaboratoryId, body } = options
     const result = await this.ticketUpdateTicketLaboratoryOperation.updateTicketLaboratory({
@@ -174,12 +172,12 @@ export class TicketChangeLaboratoryService {
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified })
     this.socketEmitService.socketTicketLaboratoryListChange(oid, {
       ticketId,
-      ticketLaboratoryUpsertList: [ticketLaboratoryModified],
+      ticketLaboratoryUpsertedList: [ticketLaboratoryModified],
     })
     this.socketEmitService.socketTicketUserListChange(oid, {
       ticketId,
-      ticketUserUpsertList: result.ticketUserCreatedList,
-      ticketUserDestroyList: result.ticketUserDestroyList,
+      ticketUserUpsertedList: result.ticketUserCreatedList,
+      ticketUserDestroyedList: result.ticketUserDestroyedList,
     })
     return true
   }
@@ -198,7 +196,7 @@ export class TicketChangeLaboratoryService {
     oid: number
     ticketId: number
     ticketLaboratoryGroupId: number
-    body: TicketUpdateLaboratoryGroupResultBody
+    body: TicketUpdateResultLaboratoryGroupBody
     query: TicketLaboratoryGroupPostQuery
   }) {
     const { oid, ticketId, ticketLaboratoryGroupId, body } = options
@@ -210,7 +208,7 @@ export class TicketChangeLaboratoryService {
         { completedAt: body.completedAt, status: TicketLaboratoryStatus.Completed }
       )
 
-    const ticketLaboratoryUpdateList = await this.ticketLaboratoryRepository.updateAndReturnEntity(
+    const ticketLaboratoryModifiedList = await this.ticketLaboratoryRepository.updateAndReturnEntity(
       { oid, ticketId, ticketLaboratoryGroupId },
       { completedAt: body.completedAt, status: TicketLaboratoryStatus.Completed }
     )
@@ -221,8 +219,8 @@ export class TicketChangeLaboratoryService {
     const tlrBodyUpdateList = body.ticketLaboratoryResultUpdateList.filter((i) => {
       return !!i.id
     })
-    let tlrInsertList: TicketLaboratoryResult[] = []
-    let tlrUpdateList: TicketLaboratoryResult[] = []
+    let tlrCreatedList: TicketLaboratoryResult[] = []
+    let tlrModifiedList: TicketLaboratoryResult[] = []
     if (tlrBodyInsertList.length) {
       const tlrDtoInsertList = tlrBodyInsertList.map((i) => {
         const dtoInsert: TicketLaboratoryResultInsertType = {
@@ -235,11 +233,11 @@ export class TicketChangeLaboratoryService {
         }
         return dtoInsert
       })
-      tlrInsertList =
+      tlrCreatedList =
         await this.ticketLaboratoryResultRepository.insertManyAndReturnEntity(tlrDtoInsertList)
     }
     if (tlrBodyUpdateList.length) {
-      tlrUpdateList = await this.ticketLaboratoryResultRepository.updateResultList({
+      tlrModifiedList = await this.ticketLaboratoryResultRepository.updateResultList({
         oid,
         ticketId,
         ticketLaboratoryResultDtoList: body.ticketLaboratoryResultUpdateList,
@@ -248,12 +246,12 @@ export class TicketChangeLaboratoryService {
 
     this.socketEmitService.socketTicketLaboratoryListChange(oid, {
       ticketId,
-      ticketLaboratoryGroupUpsertList: [ticketLaboratoryGroupUpdate],
-      ticketLaboratoryUpsertList: ticketLaboratoryUpdateList,
-      ticketLaboratoryResultUpsertList: [...tlrInsertList, ...tlrUpdateList],
+      ticketLaboratoryGroupUpsertedList: [ticketLaboratoryGroupUpdate],
+      ticketLaboratoryUpsertedList: ticketLaboratoryModifiedList,
+      ticketLaboratoryResultUpsertedList: [...tlrCreatedList, ...tlrModifiedList],
     })
 
-    ticketLaboratoryGroupUpdate.ticketLaboratoryList = ticketLaboratoryUpdateList
+    ticketLaboratoryGroupUpdate.ticketLaboratoryList = ticketLaboratoryModifiedList
 
     await this.apiTicketLaboratoryGroupService.generateRelation([ticketLaboratoryGroupUpdate], {
       ticket: response?.ticketLaboratoryGroup?.ticket,
@@ -276,12 +274,12 @@ export class TicketChangeLaboratoryService {
         { status: TicketLaboratoryStatus.Pending }
       )
 
-    const ticketLaboratoryUpdateList = await this.ticketLaboratoryRepository.updateAndReturnEntity(
+    const ticketLaboratoryModifiedList = await this.ticketLaboratoryRepository.updateAndReturnEntity(
       { oid, ticketId, ticketLaboratoryGroupId },
       { status: TicketLaboratoryStatus.Pending }
     )
 
-    const ticketLaboratoryResultDestroyList =
+    const ticketLaboratoryResultDestroyedList =
       await this.ticketLaboratoryResultRepository.deleteAndReturnEntity({
         oid,
         ticketId,
@@ -290,9 +288,9 @@ export class TicketChangeLaboratoryService {
 
     this.socketEmitService.socketTicketLaboratoryListChange(oid, {
       ticketId,
-      ticketLaboratoryGroupUpsertList: [ticketLaboratoryGroupUpdate],
-      ticketLaboratoryUpsertList: ticketLaboratoryUpdateList,
-      ticketLaboratoryResultDestroyList,
+      ticketLaboratoryGroupUpsertedList: [ticketLaboratoryGroupUpdate],
+      ticketLaboratoryUpsertedList: ticketLaboratoryModifiedList,
+      ticketLaboratoryResultDestroyedList,
     })
     return true
   }

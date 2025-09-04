@@ -232,7 +232,7 @@ export default class Ticket {
 
   @Column({ type: 'varchar', length: 100, default: JSON.stringify([]) })
   @Expose()
-  imageIds: string
+  imageDiagnosisIds: string
 
   @Column({
     type: 'bigint',
@@ -354,6 +354,9 @@ export default class Ticket {
   ticketUserList: TicketUser[]
 
   @Expose()
+  imageDiagnosisList: Image[]
+
+  @Expose()
   imageList: Image[]
 
   static fromRaw(raw: { [P in keyof Ticket]: any }) {
@@ -405,6 +408,7 @@ export type TicketRelationType = {
     | 'paymentList'
     | 'customerSource'
     | 'imageList'
+    | 'imageDiagnosisList'
     | 'toAppointment'
   >]?: boolean
 } & {

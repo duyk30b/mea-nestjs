@@ -127,7 +127,7 @@ export class TicketOrderDraftOperation {
         date: ESTimer.info(registeredAt, 7).date,
         dailyIndex: 0,
         endedAt: null,
-        imageIds: '[]',
+        imageDiagnosisIds: '[]',
       }
       if (!ticketId) {
         ticket = await this.ticketManager.insertOneAndReturnEntity(manager, {

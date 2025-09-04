@@ -26,7 +26,7 @@ export class TicketOrderProcedureDraft {
   @Expose()
   @IsDefined()
   @IsEnumValue(ProcedureType)
-  type: ProcedureType
+  procedureType: ProcedureType
 
   @ApiProperty({ enum: valuesEnum(PaymentMoneyStatus), example: PaymentMoneyStatus.NoEffect })
   @Expose()

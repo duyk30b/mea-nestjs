@@ -6,7 +6,10 @@ import {
   IsEnumValue,
   IsNumberGreaterThan,
 } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType, TicketProcedureStatus } from '../../../../../../_libs/database/common/variable'
+import {
+  DiscountType,
+  TicketProcedureStatus,
+} from '../../../../../../_libs/database/common/variable'
 import { TicketUserBasicBody } from '../../ticket-change-user/request'
 
 class TicketProcedureItemBody {
@@ -89,7 +92,7 @@ class TicketProcedureBody {
   actualPrice: number
 }
 
-export class TicketUpdateTicketProcedureBody {
+export class TicketUpdateRequestTicketProcedureBody {
   @ApiProperty({ type: TicketUserBasicBody, isArray: true })
   @Expose()
   @Type(() => TicketUserBasicBody)

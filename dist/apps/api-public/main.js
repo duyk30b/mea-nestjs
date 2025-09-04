@@ -1508,14 +1508,14 @@ const auth_module_1 = __webpack_require__(232);
 const api_file_module_1 = __webpack_require__(264);
 const api_root_module_1 = __webpack_require__(333);
 const api_module_1 = __webpack_require__(356);
-const app_controller_1 = __webpack_require__(813);
-const app_service_1 = __webpack_require__(814);
+const app_controller_1 = __webpack_require__(811);
+const app_service_1 = __webpack_require__(812);
 const email_module_1 = __webpack_require__(234);
-const health_module_1 = __webpack_require__(815);
-const image_manager_module_1 = __webpack_require__(820);
-const cron_job_module_1 = __webpack_require__(821);
-const event_listener_module_1 = __webpack_require__(826);
-const socket_module_1 = __webpack_require__(831);
+const health_module_1 = __webpack_require__(813);
+const image_manager_module_1 = __webpack_require__(818);
+const cron_job_module_1 = __webpack_require__(819);
+const event_listener_module_1 = __webpack_require__(824);
+const socket_module_1 = __webpack_require__(829);
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(nestjs_i18n_1.I18nMiddleware).forRoutes('*');
@@ -4435,7 +4435,7 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 100, default: JSON.stringify([]) }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", String)
-], Ticket.prototype, "imageIds", void 0);
+], Ticket.prototype, "imageDiagnosisIds", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         type: 'bigint',
@@ -4572,6 +4572,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => ticket_user_entity_1.default, (ticketUser) => ticketUser.ticket),
     __metadata("design:type", Array)
 ], Ticket.prototype, "ticketUserList", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Array)
+], Ticket.prototype, "imageDiagnosisList", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Array)
@@ -5671,7 +5675,7 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'smallint', default: procedure_entity_1.ProcedureType.Basic }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", typeof (_a = typeof procedure_entity_1.ProcedureType !== "undefined" && procedure_entity_1.ProcedureType) === "function" ? _a : Object)
-], TicketProcedure.prototype, "type", void 0);
+], TicketProcedure.prototype, "procedureType", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 1 }),
     (0, class_transformer_1.Expose)(),
@@ -5998,7 +6002,6 @@ const product_entity_1 = __webpack_require__(57);
 const ticket_entity_1 = __webpack_require__(59);
 var TicketProductType;
 (function (TicketProductType) {
-    TicketProductType[TicketProductType["Product"] = 0] = "Product";
     TicketProductType[TicketProductType["Prescription"] = 1] = "Prescription";
     TicketProductType[TicketProductType["Consumable"] = 2] = "Consumable";
 })(TicketProductType || (exports.TicketProductType = TicketProductType = {}));
@@ -6898,7 +6901,7 @@ const radiology_entity_1 = __webpack_require__(73);
 const role_entity_1 = __webpack_require__(23);
 var PositionType;
 (function (PositionType) {
-    PositionType[PositionType["Ticket"] = 1] = "Ticket";
+    PositionType[PositionType["TicketReception"] = 1] = "TicketReception";
     PositionType[PositionType["ProductRequest"] = 2] = "ProductRequest";
     PositionType[PositionType["TicketPrescriptionRequest"] = 3] = "TicketPrescriptionRequest";
     PositionType[PositionType["ProcedureRequest"] = 4] = "ProcedureRequest";
@@ -6954,7 +6957,7 @@ __decorate([
     __metadata("design:type", Number)
 ], Position.prototype, "positionInteractId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'smallint', default: PositionType.Ticket }),
+    (0, typeorm_1.Column)({ type: 'smallint', default: PositionType.TicketReception }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Number)
 ], Position.prototype, "positionType", void 0);
@@ -7845,16 +7848,16 @@ var PermissionId;
     PermissionId[PermissionId["TICKET_CHANGE_ATTRIBUTE"] = 5011] = "TICKET_CHANGE_ATTRIBUTE";
     PermissionId[PermissionId["TICKET_CHANGE_USER_POSITION"] = 5021] = "TICKET_CHANGE_USER_POSITION";
     PermissionId[PermissionId["TICKET_CHANGE_USER_COMMISSION"] = 5022] = "TICKET_CHANGE_USER_COMMISSION";
-    PermissionId[PermissionId["TICKET_CHANGE_PROCEDURE"] = 5031] = "TICKET_CHANGE_PROCEDURE";
+    PermissionId[PermissionId["TICKET_CHANGE_PROCEDURE_REQUEST"] = 5031] = "TICKET_CHANGE_PROCEDURE_REQUEST";
     PermissionId[PermissionId["TICKET_CHANGE_PROCEDURE_RESULT"] = 5032] = "TICKET_CHANGE_PROCEDURE_RESULT";
     PermissionId[PermissionId["TICKET_CHANGE_PRODUCT"] = 5041] = "TICKET_CHANGE_PRODUCT";
     PermissionId[PermissionId["TICKET_CHANGE_PRODUCT_CONSUMABLE"] = 5042] = "TICKET_CHANGE_PRODUCT_CONSUMABLE";
     PermissionId[PermissionId["TICKET_CHANGE_PRODUCT_PRESCRIPTION"] = 5043] = "TICKET_CHANGE_PRODUCT_PRESCRIPTION";
     PermissionId[PermissionId["TICKET_CHANGE_PRODUCT_SEND_PRODUCT"] = 5044] = "TICKET_CHANGE_PRODUCT_SEND_PRODUCT";
     PermissionId[PermissionId["TICKET_CHANGE_PRODUCT_RETURN_PRODUCT"] = 5045] = "TICKET_CHANGE_PRODUCT_RETURN_PRODUCT";
-    PermissionId[PermissionId["TICKET_CHANGE_LABORATORY"] = 5051] = "TICKET_CHANGE_LABORATORY";
+    PermissionId[PermissionId["TICKET_CHANGE_LABORATORY_REQUEST"] = 5051] = "TICKET_CHANGE_LABORATORY_REQUEST";
     PermissionId[PermissionId["TICKET_CHANGE_LABORATORY_RESULT"] = 5052] = "TICKET_CHANGE_LABORATORY_RESULT";
-    PermissionId[PermissionId["TICKET_CHANGE_RADIOLOGY"] = 5061] = "TICKET_CHANGE_RADIOLOGY";
+    PermissionId[PermissionId["TICKET_CHANGE_RADIOLOGY_REQUEST"] = 5061] = "TICKET_CHANGE_RADIOLOGY_REQUEST";
     PermissionId[PermissionId["TICKET_CHANGE_RADIOLOGY_RESULT"] = 5062] = "TICKET_CHANGE_RADIOLOGY_RESULT";
     PermissionId[PermissionId["TICKET_PAYMENT_MONEY"] = 5083] = "TICKET_PAYMENT_MONEY";
     PermissionId[PermissionId["TICKET_REFUND_MONEY"] = 5084] = "TICKET_REFUND_MONEY";
@@ -15633,7 +15636,7 @@ let TicketUpdateCommissionTicketUserOperator = class TicketUpdateCommissionTicke
             let actualPrice = 0;
             let expectedPrice = 0;
             let quantity = 0;
-            if (tu.positionType === position_entity_1.PositionType.Ticket) {
+            if (tu.positionType === position_entity_1.PositionType.TicketReception) {
                 expectedPrice = ticketOrigin.totalMoney + ticketOrigin.discountMoney;
                 actualPrice = ticketOrigin.totalMoney;
             }
@@ -17320,13 +17323,20 @@ let TicketDestroyTicketProcedureOperation = class TicketDestroyTicketProcedureOp
         const PREFIX = `ticketId=${ticketId} addTicketProcedure failed`;
         const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
             const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(manager, { oid, id: ticketId, status: ticket_entity_1.TicketStatus.Executing }, { updatedAt: Date.now() });
-            const ticketProcedureDestroy = await this.ticketProcedureManager.deleteOneAndReturnEntity(manager, {
+            const ticketProcedureDestroyed = await this.ticketProcedureManager.deleteOneAndReturnEntity(manager, {
                 oid,
                 ticketId,
                 id: ticketProcedureId,
                 paymentMoneyStatus: { IN: [variable_1.PaymentMoneyStatus.NoEffect, variable_1.PaymentMoneyStatus.Pending] },
             });
-            if (ticketProcedureDestroy.type === procedure_entity_1.ProcedureType.Regimen) {
+            if (ticketProcedureDestroyed.procedureType === procedure_entity_1.ProcedureType.SingleProcess) {
+                await this.ticketProcedureItemManager.deleteAndReturnEntity(manager, {
+                    oid,
+                    ticketId,
+                    ticketProcedureId,
+                });
+            }
+            if (ticketProcedureDestroyed.procedureType === procedure_entity_1.ProcedureType.Regimen) {
                 await this.ticketProcedureItemManager.deleteAndReturnEntity(manager, {
                     oid,
                     ticketId,
@@ -17339,17 +17349,17 @@ let TicketDestroyTicketProcedureOperation = class TicketDestroyTicketProcedureOp
                     ticketProcedureId,
                 });
             }
-            const ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+            const ticketUserDestroyedList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
                 oid,
                 positionType: {
                     IN: [position_entity_1.PositionType.ProcedureRequest, position_entity_1.PositionType.ProcedureResult],
                 },
                 ticketId,
-                ticketItemId: ticketProcedureDestroy.id,
+                ticketItemId: ticketProcedureDestroyed.id,
             });
-            const procedureMoneyDelete = ticketProcedureDestroy.quantity * ticketProcedureDestroy.actualPrice;
-            const itemsDiscountDelete = ticketProcedureDestroy.quantity * ticketProcedureDestroy.discountMoney;
-            const commissionMoneyDelete = ticketUserDestroyList.reduce((acc, item) => {
+            const procedureMoneyDelete = ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.actualPrice;
+            const itemsDiscountDelete = ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.discountMoney;
+            const commissionMoneyDelete = ticketUserDestroyedList.reduce((acc, item) => {
                 return acc + item.commissionMoney * item.quantity;
             }, 0);
             let ticket = ticketOrigin;
@@ -17365,7 +17375,7 @@ let TicketDestroyTicketProcedureOperation = class TicketDestroyTicketProcedureOp
                     },
                 });
             }
-            return { ticket, ticketProcedureDestroy, ticketUserDestroyList };
+            return { ticket, ticketProcedureDestroyed, ticketUserDestroyedList };
         });
         return transaction;
     }
@@ -17456,7 +17466,7 @@ let TicketUpdateTicketProcedureOperation = class TicketUpdateTicketProcedureOper
                     ticketProcedureModified.quantity * ticketProcedureModified.discountMoney
                         - ticketProcedureOrigin.quantity * ticketProcedureOrigin.discountMoney;
             }
-            if (ticketProcedureItemUpdateList && ticketProcedureOrigin.type === procedure_entity_1.ProcedureType.Regimen) {
+            if ([procedure_entity_1.ProcedureType.Basic, procedure_entity_1.ProcedureType.Regimen].includes(ticketProcedureOrigin.procedureType)) {
                 await this.ticketProcedureItemManager.delete(manager, {
                     oid,
                     ticketId,
@@ -17464,6 +17474,8 @@ let TicketUpdateTicketProcedureOperation = class TicketUpdateTicketProcedureOper
                     status: { NOT: variable_1.TicketProcedureStatus.Completed },
                     id: { NOT_IN: [0, ...ticketProcedureItemUpdateList.map((i) => i.id)] },
                 });
+            }
+            if ([procedure_entity_1.ProcedureType.Regimen].includes(ticketProcedureOrigin.procedureType)) {
                 await this.appointmentManager.delete(manager, {
                     oid,
                     fromTicketId: ticketId,
@@ -17477,6 +17489,18 @@ let TicketUpdateTicketProcedureOperation = class TicketUpdateTicketProcedureOper
                         ],
                     },
                 });
+            }
+            if ([procedure_entity_1.ProcedureType.Basic, procedure_entity_1.ProcedureType.Regimen].includes(ticketProcedureOrigin.procedureType)) {
+                await this.ticketProcedureItemManager.delete(manager, {
+                    oid,
+                    ticketId,
+                    ticketProcedureId,
+                    status: { NOT: variable_1.TicketProcedureStatus.Completed },
+                    id: { NOT_IN: [0, ...ticketProcedureItemUpdateList.map((i) => i.id)] },
+                });
+            }
+            if (ticketProcedureItemUpdateList
+                && [procedure_entity_1.ProcedureType.Basic, procedure_entity_1.ProcedureType.Regimen].includes(ticketProcedureOrigin.procedureType)) {
                 const tpiInsertList = ticketProcedureItemUpdateList
                     .filter((i) => !i.id)
                     .map((i) => {
@@ -17537,11 +17561,11 @@ let TicketUpdateTicketProcedureOperation = class TicketUpdateTicketProcedureOper
                     });
                 }
             }
-            let ticketUserDestroyList = [];
+            let ticketUserDestroyedList = [];
             let ticketUserCreatedList = [];
             let commissionMoneyAdd = 0;
             if (ticketUserRequestList) {
-                ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+                ticketUserDestroyedList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
                     oid,
                     ticketId,
                     positionType: position_entity_1.PositionType.ProcedureRequest,
@@ -17569,7 +17593,7 @@ let TicketUpdateTicketProcedureOperation = class TicketUpdateTicketProcedureOper
                     ticketUserCreatedList.reduce((acc, item) => {
                         return acc + item.quantity * item.commissionMoney;
                     }, 0)
-                        - ticketUserDestroyList.reduce((acc, item) => {
+                        - ticketUserDestroyedList.reduce((acc, item) => {
                             return acc + item.quantity * item.commissionMoney;
                         }, 0);
             }
@@ -17590,7 +17614,7 @@ let TicketUpdateTicketProcedureOperation = class TicketUpdateTicketProcedureOper
                 ticketModified,
                 ticketProcedureModified,
                 ticketUserCreatedList,
-                ticketUserDestroyList,
+                ticketUserDestroyedList,
             };
         });
         return transaction;
@@ -18083,20 +18107,20 @@ let TicketDestroyTicketRadiologyOperation = class TicketDestroyTicketRadiologyOp
         const PREFIX = `ticketId=${ticketId} destroyTicketRadiology failed`;
         const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
             const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(manager, { oid, id: ticketId, status: ticket_entity_1.TicketStatus.Executing }, { updatedAt: Date.now() });
-            const ticketRadiologyDestroy = await this.ticketRadiologyManager.deleteOneAndReturnEntity(manager, {
+            const ticketRadiologyDestroyed = await this.ticketRadiologyManager.deleteOneAndReturnEntity(manager, {
                 oid,
                 id: ticketRadiologyId,
                 paymentMoneyStatus: { IN: [variable_1.PaymentMoneyStatus.NoEffect, variable_1.PaymentMoneyStatus.Pending] },
             });
-            const ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+            const ticketUserDestroyedList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
                 oid,
                 positionType: { IN: [position_entity_1.PositionType.RadiologyRequest, position_entity_1.PositionType.RadiologyResult] },
-                ticketItemId: ticketRadiologyDestroy.id,
+                ticketItemId: ticketRadiologyDestroyed.id,
             });
-            const radiologyMoneyDelete = ticketRadiologyDestroy.actualPrice;
-            const itemsDiscountDelete = ticketRadiologyDestroy.discountMoney;
-            const itemsCostAmountDelete = ticketRadiologyDestroy.costPrice;
-            const commissionMoneyDelete = ticketUserDestroyList.reduce((acc, item) => {
+            const radiologyMoneyDelete = ticketRadiologyDestroyed.actualPrice;
+            const itemsDiscountDelete = ticketRadiologyDestroyed.discountMoney;
+            const itemsCostAmountDelete = ticketRadiologyDestroyed.costPrice;
+            const commissionMoneyDelete = ticketUserDestroyedList.reduce((acc, item) => {
                 return acc + item.commissionMoney * item.quantity;
             }, 0);
             let ticket = ticketOrigin;
@@ -18113,7 +18137,7 @@ let TicketDestroyTicketRadiologyOperation = class TicketDestroyTicketRadiologyOp
                     },
                 });
             }
-            return { ticket, ticketRadiologyDestroy, ticketUserDestroyList };
+            return { ticket, ticketRadiologyDestroyed, ticketUserDestroyedList };
         });
         return transaction;
     }
@@ -18179,11 +18203,11 @@ let TicketUpdateTicketRadiologyOperation = class TicketUpdateTicketRadiologyOper
                     });
                 }
             }
-            let ticketUserDestroyList = [];
+            let ticketUserDestroyedList = [];
             let ticketUserCreatedList = [];
             let commissionMoneyAdd = 0;
             if (ticketUserRequestList) {
-                ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+                ticketUserDestroyedList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
                     oid,
                     ticketId,
                     positionType: position_entity_1.PositionType.RadiologyRequest,
@@ -18211,7 +18235,7 @@ let TicketUpdateTicketRadiologyOperation = class TicketUpdateTicketRadiologyOper
                     ticketUserCreatedList.reduce((acc, item) => {
                         return acc + item.quantity * item.commissionMoney;
                     }, 0)
-                        - ticketUserDestroyList.reduce((acc, item) => {
+                        - ticketUserDestroyedList.reduce((acc, item) => {
                             return acc + item.quantity * item.commissionMoney;
                         }, 0);
             }
@@ -18239,7 +18263,7 @@ let TicketUpdateTicketRadiologyOperation = class TicketUpdateTicketRadiologyOper
                 ticketModified,
                 ticketRadiologyModified,
                 ticketUserCreatedList,
-                ticketUserDestroyList,
+                ticketUserDestroyedList,
             };
         });
         return transaction;
@@ -18288,7 +18312,7 @@ let TicketAddSelectLaboratoryOperation = class TicketAddSelectLaboratoryOperatio
         this.ticketLaboratoryGroupManager = ticketLaboratoryGroupManager;
         this.ticketChangeItemMoneyManager = ticketChangeItemMoneyManager;
     }
-    async addSelectLaboratoryList(params) {
+    async addTicketLaboratoryGroupList(params) {
         const { oid, ticketId, tlgDtoList } = params;
         const PREFIX = `ticketId=${ticketId} addSelectLaboratoryList failed`;
         const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
@@ -18298,24 +18322,24 @@ let TicketAddSelectLaboratoryOperation = class TicketAddSelectLaboratoryOperatio
                     ticketId, roomId: i.roomId, customerId: ticketOrigin.customerId, status: variable_1.TicketLaboratoryStatus.Pending, completedAt: null, result: '' });
                 return tlgEntity;
             });
-            const tlgInsertList = await this.ticketLaboratoryGroupManager.insertManyAndReturnEntity(manager, tlgEntityList);
+            const tlgCreatedList = await this.ticketLaboratoryGroupManager.insertManyAndReturnEntity(manager, tlgEntityList);
             const tlEntityList = tlgDtoList
                 .map((tlgDto, tlgDtoIndex) => {
                 return tlgDto.ticketLaboratoryList.map((tlDto) => {
                     const tlEntity = Object.assign(Object.assign({}, tlDto), { oid,
-                        ticketId, customerId: ticketOrigin.customerId, ticketLaboratoryGroupId: tlgInsertList[tlgDtoIndex].id, roomId: tlgInsertList[tlgDtoIndex].roomId, status: variable_1.TicketLaboratoryStatus.Pending, completedAt: null });
+                        ticketId, customerId: ticketOrigin.customerId, ticketLaboratoryGroupId: tlgCreatedList[tlgDtoIndex].id, roomId: tlgCreatedList[tlgDtoIndex].roomId, status: variable_1.TicketLaboratoryStatus.Pending, completedAt: null });
                     return tlEntity;
                 });
             })
                 .flat();
-            const tlInsertList = await this.ticketLaboratoryManager.insertManyAndReturnEntity(manager, tlEntityList);
-            const laboratoryMoneyAdd = tlInsertList.reduce((acc, cur) => {
+            const tlCreatedList = await this.ticketLaboratoryManager.insertManyAndReturnEntity(manager, tlEntityList);
+            const laboratoryMoneyAdd = tlCreatedList.reduce((acc, cur) => {
                 return acc + cur.actualPrice;
             }, 0);
-            const itemsDiscountAdd = tlInsertList.reduce((acc, cur) => {
+            const itemsDiscountAdd = tlCreatedList.reduce((acc, cur) => {
                 return acc + cur.discountMoney;
             }, 0);
-            const itemsCostAmountAdd = tlInsertList.reduce((acc, cur) => {
+            const itemsCostAmountAdd = tlCreatedList.reduce((acc, cur) => {
                 return acc + cur.costPrice;
             }, 0);
             let ticket = ticketOrigin;
@@ -18333,8 +18357,8 @@ let TicketAddSelectLaboratoryOperation = class TicketAddSelectLaboratoryOperatio
             }
             return {
                 ticket,
-                ticketLaboratoryInsertList: tlInsertList,
-                ticketLaboratoryGroupInsertList: tlgInsertList,
+                ticketLaboratoryCreatedList: tlCreatedList,
+                ticketLaboratoryGroupCreatedList: tlgCreatedList,
             };
         });
         return transaction;
@@ -18389,14 +18413,14 @@ let TicketChangeSelectLaboratoryOperation = class TicketChangeSelectLaboratoryOp
         const PREFIX = `ticketId=${ticketId} changeSelectLaboratoryList failed`;
         const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
             const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(manager, { oid, id: ticketId, status: ticket_entity_1.TicketStatus.Executing }, { updatedAt: Date.now() });
-            let tlgUpdate;
+            let tlgModified;
             if (ticketLaboratoryGroupDto.id !== 0) {
-                tlgUpdate = await this.ticketLaboratoryGroupManager.updateOneAndReturnEntity(manager, { oid, ticketId, id: ticketLaboratoryGroupDto.id }, {
+                tlgModified = await this.ticketLaboratoryGroupManager.updateOneAndReturnEntity(manager, { oid, ticketId, id: ticketLaboratoryGroupDto.id }, {
                     createdAt: ticketLaboratoryGroupDto.createdAt,
                     roomId: ticketLaboratoryGroupDto.roomId,
                 });
             }
-            const tlDestroyList = await this.ticketLaboratoryManager.deleteAndReturnEntity(manager, {
+            const tlDestroyedList = await this.ticketLaboratoryManager.deleteAndReturnEntity(manager, {
                 oid,
                 ticketId,
                 ticketLaboratoryGroupId: ticketLaboratoryGroupDto.id,
@@ -18414,26 +18438,26 @@ let TicketChangeSelectLaboratoryOperation = class TicketChangeSelectLaboratoryOp
                 .filter((tlDto) => !laboratoryIdKeepList.includes(tlDto.laboratoryId))
                 .map((tlDto) => {
                 const tlEntity = Object.assign(Object.assign({}, tlDto), { oid,
-                    ticketId, customerId: ticketOrigin.customerId, ticketLaboratoryGroupId: ticketLaboratoryGroupDto.id, roomId: ticketLaboratoryGroupDto.roomId, status: variable_1.TicketLaboratoryStatus.Pending, paymentMoneyStatus: tlgUpdate.paymentMoneyStatus, completedAt: null });
+                    ticketId, customerId: ticketOrigin.customerId, ticketLaboratoryGroupId: ticketLaboratoryGroupDto.id, roomId: ticketLaboratoryGroupDto.roomId, status: variable_1.TicketLaboratoryStatus.Pending, paymentMoneyStatus: tlgModified.paymentMoneyStatus, completedAt: null });
                 return tlEntity;
             });
-            const tlInsertList = await this.ticketLaboratoryManager.insertManyAndReturnEntity(manager, tlEntityList);
-            const laboratoryMoneyAdd = tlInsertList.reduce((acc, cur) => {
+            const tlCreatedList = await this.ticketLaboratoryManager.insertManyAndReturnEntity(manager, tlEntityList);
+            const laboratoryMoneyAdd = tlCreatedList.reduce((acc, cur) => {
                 return acc + cur.actualPrice;
             }, 0)
-                - tlDestroyList.reduce((acc, cur) => {
+                - tlDestroyedList.reduce((acc, cur) => {
                     return acc + cur.actualPrice;
                 }, 0);
-            const itemsDiscountAdd = tlInsertList.reduce((acc, cur) => {
+            const itemsDiscountAdd = tlCreatedList.reduce((acc, cur) => {
                 return acc + cur.discountMoney;
             }, 0)
-                - tlDestroyList.reduce((acc, cur) => {
+                - tlDestroyedList.reduce((acc, cur) => {
                     return acc + cur.discountMoney;
                 }, 0);
-            const itemsCostAmountAdd = tlInsertList.reduce((acc, cur) => {
+            const itemsCostAmountAdd = tlCreatedList.reduce((acc, cur) => {
                 return acc + cur.costPrice;
             }, 0)
-                - tlDestroyList.reduce((acc, cur) => {
+                - tlDestroyedList.reduce((acc, cur) => {
                     return acc + cur.costPrice;
                 }, 0);
             let ticket = ticketOrigin;
@@ -18451,9 +18475,9 @@ let TicketChangeSelectLaboratoryOperation = class TicketChangeSelectLaboratoryOp
             }
             return {
                 ticket,
-                ticketLaboratoryInsertList: tlInsertList,
-                ticketLaboratoryDestroyList: tlDestroyList,
-                ticketLaboratoryGroupUpdate: tlgUpdate,
+                ticketLaboratoryCreatedList: tlCreatedList,
+                ticketLaboratoryDestroyedList: tlDestroyedList,
+                ticketLaboratoryGroupModified: tlgModified,
             };
         });
         return transaction;
@@ -18504,26 +18528,26 @@ let TicketDestroyTicketLaboratoryGroupOperation = class TicketDestroyTicketLabor
         const PREFIX = `ticketId=${ticketLaboratoryGroupId} destroyTicketLaboratoryGroup failed`;
         const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
             const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(manager, { oid, id: ticketId, status: ticket_entity_1.TicketStatus.Executing }, { updatedAt: Date.now() });
-            const ticketLaboratoryGroupDestroy = await this.ticketLaboratoryGroupManager.deleteOneAndReturnEntity(manager, {
+            const ticketLaboratoryGroupDestroyed = await this.ticketLaboratoryGroupManager.deleteOneAndReturnEntity(manager, {
                 oid,
                 ticketId,
                 id: ticketLaboratoryGroupId,
                 paymentMoneyStatus: { IN: [variable_1.PaymentMoneyStatus.NoEffect, variable_1.PaymentMoneyStatus.Pending] },
             });
-            const ticketLaboratoryDestroyList = await this.ticketLaboratoryManager.deleteAndReturnEntity(manager, {
+            const ticketLaboratoryDestroyedList = await this.ticketLaboratoryManager.deleteAndReturnEntity(manager, {
                 oid,
                 ticketId,
                 ticketLaboratoryGroupId,
                 paymentMoneyStatus: { IN: [variable_1.PaymentMoneyStatus.NoEffect, variable_1.PaymentMoneyStatus.Pending] },
             });
-            const ticketLaboratoryResultDestroyList = await this.ticketLaboratoryResultManager.deleteAndReturnEntity(manager, {
+            const ticketLaboratoryResultDestroyedList = await this.ticketLaboratoryResultManager.deleteAndReturnEntity(manager, {
                 oid,
                 ticketId,
                 ticketLaboratoryGroupId,
             });
-            const laboratoryMoneyDelete = ticketLaboratoryDestroyList.reduce((acc, item) => acc + item.actualPrice, 0);
-            const itemsDiscountDelete = ticketLaboratoryDestroyList.reduce((acc, item) => acc + item.discountMoney, 0);
-            const itemsCostAmountDelete = ticketLaboratoryDestroyList.reduce((acc, item) => acc + item.costPrice, 0);
+            const laboratoryMoneyDelete = ticketLaboratoryDestroyedList.reduce((acc, item) => acc + item.actualPrice, 0);
+            const itemsDiscountDelete = ticketLaboratoryDestroyedList.reduce((acc, item) => acc + item.discountMoney, 0);
+            const itemsCostAmountDelete = ticketLaboratoryDestroyedList.reduce((acc, item) => acc + item.costPrice, 0);
             let ticket = ticketOrigin;
             if (laboratoryMoneyDelete != 0 || itemsDiscountDelete != 0) {
                 ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
@@ -18539,9 +18563,9 @@ let TicketDestroyTicketLaboratoryGroupOperation = class TicketDestroyTicketLabor
             }
             return {
                 ticket,
-                ticketLaboratoryDestroyList,
-                ticketLaboratoryGroupDestroy,
-                ticketLaboratoryResultDestroyList,
+                ticketLaboratoryDestroyedList,
+                ticketLaboratoryGroupDestroyed,
+                ticketLaboratoryResultDestroyedList,
             };
         });
         return transaction;
@@ -18591,33 +18615,33 @@ let TicketDestroyTicketLaboratoryOperation = class TicketDestroyTicketLaboratory
         const PREFIX = `ticketId=${ticketId} destroyTicketLaboratory failed`;
         const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
             const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(manager, { oid, id: ticketId, status: ticket_entity_1.TicketStatus.Executing }, { updatedAt: Date.now() });
-            const ticketLaboratoryDestroy = await this.ticketLaboratoryManager.deleteOneAndReturnEntity(manager, {
+            const ticketLaboratoryDestroyed = await this.ticketLaboratoryManager.deleteOneAndReturnEntity(manager, {
                 oid,
                 ticketId,
                 id: ticketLaboratoryId,
                 status: variable_1.TicketLaboratoryStatus.Pending,
                 paymentMoneyStatus: { IN: [variable_1.PaymentMoneyStatus.NoEffect, variable_1.PaymentMoneyStatus.Pending] },
             });
-            const ticketLaboratoryResultDestroyList = await this.ticketLaboratoryResultManager.deleteAndReturnEntity(manager, {
+            const ticketLaboratoryResultDestroyedList = await this.ticketLaboratoryResultManager.deleteAndReturnEntity(manager, {
                 oid,
                 ticketId,
-                ticketLaboratoryGroupId: ticketLaboratoryDestroy.ticketLaboratoryGroupId,
-                ticketLaboratoryId: ticketLaboratoryDestroy.id,
-                laboratoryId: ticketLaboratoryDestroy.laboratoryId,
+                ticketLaboratoryGroupId: ticketLaboratoryDestroyed.ticketLaboratoryGroupId,
+                ticketLaboratoryId: ticketLaboratoryDestroyed.id,
+                laboratoryId: ticketLaboratoryDestroyed.laboratoryId,
             });
             const ticketLaboratoryRemainList = await this.ticketLaboratoryManager.findManyBy(manager, {
                 oid,
                 ticketId,
-                ticketLaboratoryGroupId: ticketLaboratoryDestroy.ticketLaboratoryGroupId,
+                ticketLaboratoryGroupId: ticketLaboratoryDestroyed.ticketLaboratoryGroupId,
             });
-            let ticketLaboratoryGroupDestroy = null;
+            let ticketLaboratoryGroupDestroyed = null;
             let ticketLaboratoryGroupModified = null;
             if (!ticketLaboratoryRemainList.length) {
-                ticketLaboratoryGroupDestroy =
+                ticketLaboratoryGroupDestroyed =
                     await this.ticketLaboratoryGroupManager.deleteOneAndReturnEntity(manager, {
                         oid,
                         ticketId,
-                        id: ticketLaboratoryDestroy.ticketLaboratoryGroupId,
+                        id: ticketLaboratoryDestroyed.ticketLaboratoryGroupId,
                     });
             }
             else {
@@ -18628,12 +18652,12 @@ let TicketDestroyTicketLaboratoryOperation = class TicketDestroyTicketLaboratory
                     await this.ticketLaboratoryGroupManager.updateOneAndReturnEntity(manager, {
                         oid,
                         ticketId,
-                        id: ticketLaboratoryDestroy.ticketLaboratoryGroupId,
+                        id: ticketLaboratoryDestroyed.ticketLaboratoryGroupId,
                     }, { paymentMoneyStatus });
             }
-            const laboratoryMoneyDelete = ticketLaboratoryDestroy.actualPrice;
-            const itemsDiscountDelete = ticketLaboratoryDestroy.discountMoney;
-            const itemsCostAmountDelete = ticketLaboratoryDestroy.costPrice;
+            const laboratoryMoneyDelete = ticketLaboratoryDestroyed.actualPrice;
+            const itemsDiscountDelete = ticketLaboratoryDestroyed.discountMoney;
+            const itemsCostAmountDelete = ticketLaboratoryDestroyed.costPrice;
             let ticket = ticketOrigin;
             if (laboratoryMoneyDelete != 0 || itemsDiscountDelete != 0) {
                 ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
@@ -18649,10 +18673,10 @@ let TicketDestroyTicketLaboratoryOperation = class TicketDestroyTicketLaboratory
             }
             return {
                 ticket,
-                ticketLaboratoryDestroy,
-                ticketLaboratoryGroupDestroy: ticketLaboratoryGroupDestroy,
+                ticketLaboratoryDestroyed,
+                ticketLaboratoryGroupDestroyed: ticketLaboratoryGroupDestroyed,
                 ticketLaboratoryGroupModified: ticketLaboratoryGroupModified,
-                ticketLaboratoryResultDestroyList,
+                ticketLaboratoryResultDestroyedList,
             };
         });
         return transaction;
@@ -18731,11 +18755,11 @@ let TicketUpdateTicketLaboratoryOperation = class TicketUpdateTicketLaboratoryOp
                 itemsCostAmountAdd =
                     ticketLaboratoryModified.costPrice - ticketLaboratoryOrigin.costPrice;
             }
-            let ticketUserDestroyList = [];
+            let ticketUserDestroyedList = [];
             let ticketUserCreatedList = [];
             let commissionMoneyAdd = 0;
             if (ticketUserRequestList) {
-                ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+                ticketUserDestroyedList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
                     oid,
                     ticketId,
                     positionType: position_entity_1.PositionType.LaboratoryRequest,
@@ -18763,7 +18787,7 @@ let TicketUpdateTicketLaboratoryOperation = class TicketUpdateTicketLaboratoryOp
                     ticketUserCreatedList.reduce((acc, item) => {
                         return acc + item.quantity * item.commissionMoney;
                     }, 0)
-                        - ticketUserDestroyList.reduce((acc, item) => {
+                        - ticketUserDestroyedList.reduce((acc, item) => {
                             return acc + item.quantity * item.commissionMoney;
                         }, 0);
             }
@@ -18784,7 +18808,7 @@ let TicketUpdateTicketLaboratoryOperation = class TicketUpdateTicketLaboratoryOp
                     },
                 });
             }
-            return { ticketModified, ticketLaboratoryModified, ticketUserDestroyList, ticketUserCreatedList };
+            return { ticketModified, ticketLaboratoryModified, ticketUserDestroyedList, ticketUserCreatedList };
         });
         return transaction;
     }
@@ -18835,9 +18859,9 @@ let TicketChangeTicketUserOperation = class TicketChangeTicketUserOperation {
         const { oid, ticketId, createdAt, ticketUserDtoList } = data;
         const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
             let ticketModified = await this.ticketManager.updateOneAndReturnEntity(manager, { oid, id: ticketId }, { updatedAt: Date.now() });
-            let ticketUserDestroyList = [];
+            let ticketUserDestroyedList = [];
             if (data.destroy) {
-                ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+                ticketUserDestroyedList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
                     oid,
                     ticketId,
                     positionType: data.destroy.positionType,
@@ -18855,7 +18879,7 @@ let TicketChangeTicketUserOperation = class TicketChangeTicketUserOperation {
             const commissionMoneyAdd = ticketUserCreatedList.reduce((acc, item) => {
                 return acc + item.quantity * item.commissionMoney;
             }, 0);
-            const commissionMoneyDestroy = ticketUserDestroyList.reduce((acc, item) => {
+            const commissionMoneyDestroy = ticketUserDestroyedList.reduce((acc, item) => {
                 return acc + item.quantity * item.commissionMoney;
             }, 0);
             if (commissionMoneyAdd - commissionMoneyDestroy != 0) {
@@ -18868,7 +18892,7 @@ let TicketChangeTicketUserOperation = class TicketChangeTicketUserOperation {
                     },
                 });
             }
-            return { ticketModified, ticketUserDestroyList, ticketUserCreatedList };
+            return { ticketModified, ticketUserDestroyedList, ticketUserCreatedList };
         });
         return transaction;
     }
@@ -18876,9 +18900,9 @@ let TicketChangeTicketUserOperation = class TicketChangeTicketUserOperation {
         const { oid, ticketId, condition } = data;
         const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
             let ticketModified = await this.ticketManager.updateOneAndReturnEntity(manager, { oid, id: ticketId }, { updatedAt: Date.now() });
-            const ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, Object.assign(Object.assign({}, condition), { oid,
+            const ticketUserDestroyedList = await this.ticketUserManager.deleteAndReturnEntity(manager, Object.assign(Object.assign({}, condition), { oid,
                 ticketId }));
-            const commissionMoneyDestroy = ticketUserDestroyList.reduce((acc, item) => {
+            const commissionMoneyDestroy = ticketUserDestroyedList.reduce((acc, item) => {
                 return acc + item.quantity * item.commissionMoney;
             }, 0);
             if (commissionMoneyDestroy != 0) {
@@ -18891,7 +18915,7 @@ let TicketChangeTicketUserOperation = class TicketChangeTicketUserOperation {
                     },
                 });
             }
-            return { ticketModified, ticketUserDestroyList };
+            return { ticketModified, ticketUserDestroyedList };
         });
         return transaction;
     }
@@ -19069,7 +19093,7 @@ let TicketOrderDraftOperation = class TicketOrderDraftOperation {
             let ticket;
             const ticketUpsert = Object.assign(Object.assign({}, ticketOrderDraftUpsertDto), { status: ticket_entity_1.TicketStatus.Draft, deliveryStatus: ticketOrderProductDraftListDto.length
                     ? variable_1.DeliveryStatus.Pending
-                    : variable_1.DeliveryStatus.NoStock, paid: 0, debt: ticketOrderDraftUpsertDto.totalMoney, startedAt: registeredAt, year: time_helper_1.ESTimer.info(registeredAt, 7).year, month: time_helper_1.ESTimer.info(registeredAt, 7).month + 1, date: time_helper_1.ESTimer.info(registeredAt, 7).date, dailyIndex: 0, endedAt: null, imageIds: '[]' });
+                    : variable_1.DeliveryStatus.NoStock, paid: 0, debt: ticketOrderDraftUpsertDto.totalMoney, startedAt: registeredAt, year: time_helper_1.ESTimer.info(registeredAt, 7).year, month: time_helper_1.ESTimer.info(registeredAt, 7).month + 1, date: time_helper_1.ESTimer.info(registeredAt, 7).date, dailyIndex: 0, endedAt: null, imageDiagnosisIds: '[]' });
             if (!ticketId) {
                 ticket = await this.ticketManager.insertOneAndReturnEntity(manager, Object.assign(Object.assign({}, ticketUpsert), { oid }));
             }
@@ -22082,7 +22106,7 @@ let ApiMeService = class ApiMeService {
         let userModified;
         let imageIdsStringifyUpdate = userOrigin.imageIds;
         if (imagesChange) {
-            const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
+            const { imageIdsNew } = await this.imageManagerService.changeCloudinaryImageLink({
                 oid,
                 files,
                 imageIdsWait: body.imagesChange.imageIdsWait,
@@ -22096,7 +22120,7 @@ let ApiMeService = class ApiMeService {
                     ticketItemChildId: 0,
                 },
             });
-            imageIdsStringifyUpdate = JSON.stringify(imageIdsUpdate);
+            imageIdsStringifyUpdate = JSON.stringify(imageIdsNew);
         }
         if (userOrigin.imageIds !== imageIdsStringifyUpdate) {
             userModified = await this.userRepository.updateOneAndReturnEntity({ oid, id: userId }, Object.assign(Object.assign({}, userInfo), { imageIds: imageIdsStringifyUpdate }));
@@ -22240,8 +22264,9 @@ let ImageManagerService = ImageManagerService_1 = class ImageManagerService {
     async changeCloudinaryImageLink(options) {
         const { oid, imageInteract, imageIdsWait, imageIdsOld, files, externalUrlList } = options;
         const imageIdsRemove = imageIdsOld.filter((i) => !imageIdsWait.includes(i));
+        let imageDestroyedList = [];
         if (imageIdsRemove.length) {
-            await this.imageRepository.updateAndReturnEntity({ oid, id: { IN: imageIdsRemove } }, { waitDelete: 1 });
+            imageDestroyedList = await this.imageRepository.updateAndReturnEntity({ oid, id: { IN: imageIdsRemove } }, { waitDelete: 1 });
         }
         const imageInsertList = externalUrlList.map((i) => {
             const insert = {
@@ -22263,16 +22288,17 @@ let ImageManagerService = ImageManagerService_1 = class ImageManagerService {
         });
         const imageCreatedList = await this.imageRepository.insertManyAndReturnEntity(imageInsertList);
         const imageIdsNew = [];
+        const imageCreatedListAction = [...imageCreatedList];
         for (let i = 0; i < imageIdsWait.length; i++) {
             if (imageIdsWait[i] !== 0) {
                 imageIdsNew[i] = imageIdsWait[i];
             }
             if (imageIdsWait[i] === 0) {
-                const imageCreated = imageCreatedList.shift();
+                const imageCreated = imageCreatedListAction.shift();
                 imageIdsNew[i] = imageCreated.id;
             }
         }
-        return imageIdsNew;
+        return { imageIdsNew, imageCreatedList, imageDestroyedList };
     }
     async removeImageGoogleDriver(oid, imageRemoveList) {
         const imageMapAccount = helpers_1.ESArray.arrayToKeyArray(imageRemoveList, 'hostAccount');
@@ -22304,12 +22330,13 @@ let ImageManagerService = ImageManagerService_1 = class ImageManagerService {
             return i.hostType === image_entity_1.ImageHostType.Cloudinary;
         });
         const imageGoogleWaitDelete = imageWaitDeleteList.filter((i) => {
-            return i.hostType === image_entity_1.ImageHostType.Cloudinary;
+            return i.hostType === image_entity_1.ImageHostType.GoogleDriver;
         });
         await Promise.all([
             this.removeImageCloudinary(oid, imageCloudinaryWaitDelete),
             this.removeImageGoogleDriver(oid, imageGoogleWaitDelete),
         ]);
+        return { imageDestroyedList: imageWaitDeleteList };
     }
 };
 exports.ImageManagerService = ImageManagerService;
@@ -27863,11 +27890,6 @@ __decorate([
 ], TicketRelationQuery.prototype, "ticketRadiologyList", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsObject)(),
-    __metadata("design:type", Object)
-], TicketRelationQuery.prototype, "ticketUserList", void 0);
-__decorate([
-    (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], TicketRelationQuery.prototype, "toAppointment", void 0);
@@ -27876,6 +27898,11 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], TicketRelationQuery.prototype, "customerSource", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsObject)(),
+    __metadata("design:type", Object)
+], TicketRelationQuery.prototype, "ticketUserList", void 0);
 __decorate([
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsBoolean)(),
@@ -29663,21 +29690,21 @@ let ApiRootDataService = ApiRootDataService_1 = class ApiRootDataService {
     async startMigrationData(body) {
         if (body.key !== '8aobvoyupp8')
             return;
-        await this.migrationTicketImage();
+        await this.migrationTicketDiagnosisImage();
         await this.migrationTicketRadiologyImage();
         await this.migrationOrganizationImage();
         await this.migrationUserImage();
         return { data: true };
     }
-    async migrationTicketImage() {
+    async migrationTicketDiagnosisImage() {
         const ticketList = await this.ticketRepository.findMany({
-            condition: { imageIds: { NOT: '[]' } },
+            condition: { imageDiagnosisIds: { NOT: '[]' } },
         });
         console.log('🚀 ~ ticketList:', ticketList.length);
         const imageTempList = ticketList
             .map((ticket) => {
             try {
-                const imageIdList = JSON.parse(ticket.imageIds);
+                const imageIdList = JSON.parse(ticket.imageDiagnosisIds);
                 return imageIdList.map((imageId) => {
                     const temp = {
                         id: imageId,
@@ -30157,29 +30184,30 @@ let SocketEmitService = class SocketEmitService {
             return;
         this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.SOCKET_TICKET_CHANGE_ATTRIBUTE, data);
     }
-    socketTicketUserListChange(oid, data) {
-        var _a, _b;
-        if (!this.io)
-            return;
-        if (!((_a = data.ticketUserDestroyList) === null || _a === void 0 ? void 0 : _a.length) && !((_b = data.ticketUserUpsertList) === null || _b === void 0 ? void 0 : _b.length)) {
-            return;
-        }
-        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.SOCKET_TICKET_CHANGE_USER, data);
-    }
     socketTicketProcedureListChange(oid, data) {
-        var _a, _b;
+        var _a, _b, _c, _d, _e, _f;
         if (!this.io)
             return;
-        if (!((_a = data.ticketProcedureUpsertList) === null || _a === void 0 ? void 0 : _a.length) && !((_b = data.ticketProcedureDestroyList) === null || _b === void 0 ? void 0 : _b.length)) {
+        if (!((_a = data.ticketProcedureUpsertedList) === null || _a === void 0 ? void 0 : _a.length)
+            && !((_b = data.ticketProcedureDestroyedList) === null || _b === void 0 ? void 0 : _b.length)
+            && !((_c = data.ticketUserDestroyedList) === null || _c === void 0 ? void 0 : _c.length)
+            && !((_d = data.ticketUserUpsertedList) === null || _d === void 0 ? void 0 : _d.length)
+            && !((_e = data.imageDestroyedList) === null || _e === void 0 ? void 0 : _e.length)
+            && !((_f = data.imageUpsertedList) === null || _f === void 0 ? void 0 : _f.length)) {
             return;
         }
         this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.SOCKET_TICKET_CHANGE_PROCEDURE, data);
     }
     socketTicketRadiologyListChange(oid, data) {
-        var _a, _b;
+        var _a, _b, _c, _d, _e, _f;
         if (!this.io)
             return;
-        if (!((_a = data.ticketRadiologyUpsertList) === null || _a === void 0 ? void 0 : _a.length) && !((_b = data.ticketRadiologyDestroyList) === null || _b === void 0 ? void 0 : _b.length)) {
+        if (!((_a = data.ticketRadiologyUpsertedList) === null || _a === void 0 ? void 0 : _a.length)
+            && !((_b = data.ticketRadiologyDestroyedList) === null || _b === void 0 ? void 0 : _b.length)
+            && !((_c = data.ticketUserDestroyedList) === null || _c === void 0 ? void 0 : _c.length)
+            && !((_d = data.ticketUserUpsertedList) === null || _d === void 0 ? void 0 : _d.length)
+            && !((_e = data.imageDestroyedList) === null || _e === void 0 ? void 0 : _e.length)
+            && !((_f = data.imageUpsertedList) === null || _f === void 0 ? void 0 : _f.length)) {
             return;
         }
         this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.SOCKET_TICKET_CHANGE_RADIOLOGY, data);
@@ -30188,11 +30216,6 @@ let SocketEmitService = class SocketEmitService {
         if (!this.io)
             return;
         this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.SOCKET_TICKET_CHANGE_LABORATORY, data);
-    }
-    socketTicketProductChange(oid, data) {
-        if (!this.io)
-            return;
-        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.SOCKET_TICKET_CHANGE_PRODUCT, data);
     }
     socketTicketConsumableChange(oid, data) {
         if (!this.io)
@@ -30208,6 +30231,24 @@ let SocketEmitService = class SocketEmitService {
         if (!this.io)
             return;
         this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.SOCKET_TICKET_CHANGE_BATCH, data);
+    }
+    socketTicketUserListChange(oid, data) {
+        var _a, _b;
+        if (!this.io)
+            return;
+        if (!((_a = data.ticketUserDestroyedList) === null || _a === void 0 ? void 0 : _a.length) && !((_b = data.ticketUserUpsertedList) === null || _b === void 0 ? void 0 : _b.length)) {
+            return;
+        }
+        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.SOCKET_TICKET_CHANGE_USER, data);
+    }
+    socketImageListChange(oid, data) {
+        var _a, _b;
+        if (!this.io)
+            return;
+        if (!((_a = data.imageDestroyedList) === null || _a === void 0 ? void 0 : _a.length) && !((_b = data.imageUpsertedList) === null || _b === void 0 ? void 0 : _b.length)) {
+            return;
+        }
+        this.io.in(oid.toString()).emit(socket_variable_1.SOCKET_EVENT.SOCKET_TICKET_CHANGE_IMAGE, data);
     }
 };
 exports.SocketEmitService = SocketEmitService;
@@ -30243,14 +30284,14 @@ var SOCKET_EVENT;
     SOCKET_EVENT["SOCKET_TICKET_CHANGE"] = "SOCKET_TICKET_CHANGE";
     SOCKET_EVENT["SOCKET_TICKET_LIST_CHANGE"] = "SOCKET_TICKET_LIST_CHANGE";
     SOCKET_EVENT["SOCKET_TICKET_CHANGE_ATTRIBUTE"] = "SOCKET_TICKET_CHANGE_ATTRIBUTE";
-    SOCKET_EVENT["SOCKET_TICKET_CHANGE_USER"] = "SOCKET_TICKET_CHANGE_USER";
     SOCKET_EVENT["SOCKET_TICKET_CHANGE_PROCEDURE"] = "SOCKET_TICKET_CHANGE_PROCEDURE";
-    SOCKET_EVENT["SOCKET_TICKET_CHANGE_PRODUCT"] = "SOCKET_TICKET_CHANGE_PRODUCT";
     SOCKET_EVENT["SOCKET_TICKET_CHANGE_CONSUMABLE"] = "SOCKET_TICKET_CHANGE_CONSUMABLE";
     SOCKET_EVENT["SOCKET_TICKET_CHANGE_PRESCRIPTION"] = "SOCKET_TICKET_CHANGE_PRESCRIPTION";
     SOCKET_EVENT["SOCKET_TICKET_CHANGE_BATCH"] = "SOCKET_TICKET_CHANGE_BATCH";
     SOCKET_EVENT["SOCKET_TICKET_CHANGE_LABORATORY"] = "SOCKET_TICKET_CHANGE_LABORATORY";
     SOCKET_EVENT["SOCKET_TICKET_CHANGE_RADIOLOGY"] = "SOCKET_TICKET_CHANGE_RADIOLOGY";
+    SOCKET_EVENT["SOCKET_TICKET_CHANGE_USER"] = "SOCKET_TICKET_CHANGE_USER";
+    SOCKET_EVENT["SOCKET_TICKET_CHANGE_IMAGE"] = "SOCKET_TICKET_CHANGE_IMAGE";
 })(SOCKET_EVENT || (exports.SOCKET_EVENT = SOCKET_EVENT = {}));
 
 
@@ -32216,7 +32257,7 @@ let ApiAppointmentService = class ApiAppointmentService {
             commissionMoney: 0,
             profit: 0,
             paid: 0,
-            imageIds: JSON.stringify([]),
+            imageDiagnosisIds: JSON.stringify([]),
             startedAt: null,
             endedAt: null,
         });
@@ -38073,7 +38114,7 @@ __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         type: String,
         example: JSON.stringify({
-            positionType: position_entity_1.PositionType.Ticket,
+            positionType: position_entity_1.PositionType.TicketReception,
         }),
     }),
     (0, class_transformer_1.Expose)(),
@@ -38264,21 +38305,7 @@ class PositionCreateBody {
 }
 exports.PositionCreateBody = PositionCreateBody;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 25 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], PositionCreateBody.prototype, "priority", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 25 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], PositionCreateBody.prototype, "roleId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ enum: position_entity_1.PositionType, example: position_entity_1.PositionType.Ticket }),
+    (0, swagger_1.ApiProperty)({ enum: position_entity_1.PositionType, example: position_entity_1.PositionType.TicketReception }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_custom_1.IsEnumValue)(position_entity_1.PositionType),
@@ -38292,12 +38319,19 @@ __decorate([
     __metadata("design:type", Number)
 ], PositionCreateBody.prototype, "positionInteractId", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 22500 }),
+    (0, swagger_1.ApiProperty)({ example: 25 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], PositionCreateBody.prototype, "commissionValue", void 0);
+], PositionCreateBody.prototype, "roleId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 25 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], PositionCreateBody.prototype, "priority", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         enum: (0, typescript_helper_1.valuesEnum)(position_entity_1.CommissionCalculatorType),
@@ -38308,7 +38342,18 @@ __decorate([
     (0, class_validator_custom_1.IsEnumValue)(position_entity_1.CommissionCalculatorType),
     __metadata("design:type", typeof (_b = typeof position_entity_1.CommissionCalculatorType !== "undefined" && position_entity_1.CommissionCalculatorType) === "function" ? _b : Object)
 ], PositionCreateBody.prototype, "commissionCalculatorType", void 0);
-class PositionUpdateBody extends (0, swagger_1.PartialType)(PositionCreateBody) {
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 22500 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], PositionCreateBody.prototype, "commissionValue", void 0);
+class PositionUpdateBody extends (0, swagger_1.PickType)(PositionCreateBody, [
+    'priority',
+    'commissionCalculatorType',
+    'commissionValue',
+]) {
 }
 exports.PositionUpdateBody = PositionUpdateBody;
 class PositionReplaceListBody {
@@ -38582,7 +38627,7 @@ let ApiOrganizationService = class ApiOrganizationService {
         let image;
         let logoImageId = organizationOrigin.logoImageId || 0;
         if (body.imagesChange) {
-            const logoIdNewList = await this.imageManagerService.changeCloudinaryImageLink({
+            const { imageIdsNew } = await this.imageManagerService.changeCloudinaryImageLink({
                 oid,
                 files,
                 imageIdsWait: [0],
@@ -38596,7 +38641,7 @@ let ApiOrganizationService = class ApiOrganizationService {
                     ticketItemChildId: 0,
                 },
             });
-            logoImageId = logoIdNewList[0];
+            logoImageId = imageIdsNew[0];
         }
         const organization = await this.organizationRepository.updateOneAndReturnEntity({ id: oid }, {
             name: organizationInfo.name,
@@ -42012,11 +42057,11 @@ exports.permissionTicket = [
         rootId: permission_enum_1.PermissionId.TICKET,
     },
     {
-        id: permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE,
+        id: permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST,
         level: 2,
-        code: permission_enum_1.PermissionId[permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE],
+        code: permission_enum_1.PermissionId[permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST],
         isActive: 1,
-        pathId: `${permission_enum_1.PermissionId.TICKET}.${permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE}`,
+        pathId: `${permission_enum_1.PermissionId.TICKET}.${permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST}`,
         name: 'Chỉ định dịch vụ',
         parentId: permission_enum_1.PermissionId.TICKET,
         rootId: permission_enum_1.PermissionId.TICKET,
@@ -42062,11 +42107,11 @@ exports.permissionTicket = [
         rootId: permission_enum_1.PermissionId.TICKET,
     },
     {
-        id: permission_enum_1.PermissionId.TICKET_CHANGE_LABORATORY,
+        id: permission_enum_1.PermissionId.TICKET_CHANGE_LABORATORY_REQUEST,
         level: 2,
-        code: permission_enum_1.PermissionId[permission_enum_1.PermissionId.TICKET_CHANGE_LABORATORY],
+        code: permission_enum_1.PermissionId[permission_enum_1.PermissionId.TICKET_CHANGE_LABORATORY_REQUEST],
         isActive: 1,
-        pathId: `${permission_enum_1.PermissionId.TICKET}.${permission_enum_1.PermissionId.TICKET_CHANGE_LABORATORY}`,
+        pathId: `${permission_enum_1.PermissionId.TICKET}.${permission_enum_1.PermissionId.TICKET_CHANGE_LABORATORY_REQUEST}`,
         name: 'Chỉ định Xét nghiệm',
         parentId: permission_enum_1.PermissionId.TICKET,
         rootId: permission_enum_1.PermissionId.TICKET,
@@ -42082,11 +42127,11 @@ exports.permissionTicket = [
         rootId: permission_enum_1.PermissionId.TICKET,
     },
     {
-        id: permission_enum_1.PermissionId.TICKET_CHANGE_RADIOLOGY,
+        id: permission_enum_1.PermissionId.TICKET_CHANGE_RADIOLOGY_REQUEST,
         level: 2,
-        code: permission_enum_1.PermissionId[permission_enum_1.PermissionId.TICKET_CHANGE_RADIOLOGY],
+        code: permission_enum_1.PermissionId[permission_enum_1.PermissionId.TICKET_CHANGE_RADIOLOGY_REQUEST],
         isActive: 1,
-        pathId: `${permission_enum_1.PermissionId.TICKET}.${permission_enum_1.PermissionId.TICKET_CHANGE_RADIOLOGY}`,
+        pathId: `${permission_enum_1.PermissionId.TICKET}.${permission_enum_1.PermissionId.TICKET_CHANGE_RADIOLOGY_REQUEST}`,
         name: 'Chỉ định CĐHA',
         parentId: permission_enum_1.PermissionId.TICKET,
         rootId: permission_enum_1.PermissionId.TICKET,
@@ -49678,7 +49723,13 @@ let ApiRoleService = class ApiRoleService {
     }
     async createOne(oid, body) {
         const { userIdList } = body, other = __rest(body, ["userIdList"]);
-        const role = await this.roleRepository.insertOneFullFieldAndReturnEntity(Object.assign(Object.assign({}, other), { oid }));
+        let roleCode = body.roleCode;
+        if (!roleCode) {
+            const count = await this.roleRepository.getMaxId();
+            roleCode = (count + 1).toString();
+        }
+        const role = await this.roleRepository.insertOneFullFieldAndReturnEntity(Object.assign(Object.assign({}, other), { oid,
+            roleCode }));
         if (userIdList.length) {
             const userList = await this.userRepository.findManyBy({
                 oid,
@@ -59428,14 +59479,14 @@ const common_1 = __webpack_require__(3);
 const ticket_action_module_1 = __webpack_require__(724);
 const ticket_change_attribute_module_1 = __webpack_require__(732);
 const ticket_change_laboratory_module_1 = __webpack_require__(738);
-const ticket_change_procedure_module_1 = __webpack_require__(756);
-const ticket_change_product_module_1 = __webpack_require__(767);
-const ticket_change_radiology_module_1 = __webpack_require__(778);
-const ticket_change_user_module_1 = __webpack_require__(739);
-const ticket_money_module_1 = __webpack_require__(788);
-const ticket_order_module_1 = __webpack_require__(796);
-const ticket_query_module_1 = __webpack_require__(805);
-const ticket_reception_module_1 = __webpack_require__(808);
+const ticket_change_procedure_module_1 = __webpack_require__(752);
+const ticket_change_product_module_1 = __webpack_require__(762);
+const ticket_change_radiology_module_1 = __webpack_require__(776);
+const ticket_change_user_module_1 = __webpack_require__(763);
+const ticket_money_module_1 = __webpack_require__(786);
+const ticket_order_module_1 = __webpack_require__(794);
+const ticket_query_module_1 = __webpack_require__(803);
+const ticket_reception_module_1 = __webpack_require__(806);
 let TicketModule = class TicketModule {
 };
 exports.TicketModule = TicketModule;
@@ -60080,21 +60131,15 @@ let TicketActionService = class TicketActionService {
             });
         }
         if (ticketProductModifiedAll) {
-            this.socketEmitService.socketTicketProductChange(oid, {
-                ticketId,
-                ticketProductUpsertList: ticketProductModifiedAll.filter((i) => {
-                    return i.type === ticket_product_entity_1.TicketProductType.Product;
-                }),
-            });
             this.socketEmitService.socketTicketConsumableChange(oid, {
                 ticketId,
-                ticketProductUpsertList: ticketProductModifiedAll.filter((i) => {
+                ticketProductUpsertedList: ticketProductModifiedAll.filter((i) => {
                     return i.type === ticket_product_entity_1.TicketProductType.Consumable;
                 }),
             });
             this.socketEmitService.socketTicketPrescriptionChange(oid, {
                 ticketId,
-                ticketProductUpsertList: ticketProductModifiedAll.filter((i) => {
+                ticketProductUpsertedList: ticketProductModifiedAll.filter((i) => {
                     return i.type === ticket_product_entity_1.TicketProductType.Prescription;
                 }),
             });
@@ -60126,23 +60171,17 @@ let TicketActionService = class TicketActionService {
         });
         this.socketEmitService.socketTicketUserListChange(oid, {
             ticketId,
-            ticketUserUpsertList: returnProductResult.ticketUserModifiedList || [],
-        });
-        this.socketEmitService.socketTicketProductChange(oid, {
-            ticketId,
-            ticketProductReplaceList: ticketProductModifiedAll.filter((i) => {
-                return i.type === ticket_product_entity_1.TicketProductType.Product;
-            }),
+            ticketUserUpsertedList: returnProductResult.ticketUserModifiedList || [],
         });
         this.socketEmitService.socketTicketConsumableChange(oid, {
             ticketId,
-            ticketProductReplaceList: ticketProductModifiedAll.filter((i) => {
+            ticketProductUpsertedList: ticketProductModifiedAll.filter((i) => {
                 return i.type === ticket_product_entity_1.TicketProductType.Consumable;
             }),
         });
         this.socketEmitService.socketTicketPrescriptionChange(oid, {
             ticketId,
-            ticketProductReplaceList: ticketProductModifiedAll.filter((i) => {
+            ticketProductUpsertedList: ticketProductModifiedAll.filter((i) => {
                 return i.type === ticket_product_entity_1.TicketProductType.Prescription;
             }),
         });
@@ -60168,8 +60207,8 @@ let TicketActionService = class TicketActionService {
         if (((_a = closeResult.ticketUserDeletedList) === null || _a === void 0 ? void 0 : _a.length) || ((_b = closeResult.ticketUserModifiedList) === null || _b === void 0 ? void 0 : _b.length)) {
             this.socketEmitService.socketTicketUserListChange(oid, {
                 ticketId,
-                ticketUserDestroyList: closeResult.ticketUserDeletedList,
-                ticketUserUpsertList: [...closeResult.ticketUserModifiedList],
+                ticketUserDestroyedList: closeResult.ticketUserDeletedList,
+                ticketUserUpsertedList: [...closeResult.ticketUserModifiedList],
             });
         }
         return { ticketModified, customerModified, paymentCreatedList };
@@ -60273,7 +60312,7 @@ let TicketActionService = class TicketActionService {
         }
         await this.imageManagerService.removeImageList({
             oid,
-            idRemoveList: JSON.parse(ticket.imageIds || '[]'),
+            idRemoveList: JSON.parse(ticket.imageDiagnosisIds || '[]'),
         });
         await this.ticketRepository.update({ oid, id: ticketId }, { status: ticket_entity_1.TicketStatus.Cancelled });
         await this.ticketRepository.destroy({ oid, ticketId });
@@ -60670,31 +60709,32 @@ let TicketChangeAttributeService = class TicketChangeAttributeService {
     async updateDiagnosis(options) {
         const { oid, ticketId, body, files } = options;
         const { imagesChange, ticketAttributeChangeList, ticketAttributeKeyList } = body;
-        let ticket = await this.ticketRepository.updateOneAndReturnEntity({ oid, id: ticketId }, { note: body.note });
+        let ticketModified = await this.ticketRepository.updateOneAndReturnEntity({ oid, id: ticketId }, { note: body.note });
         if (imagesChange) {
-            const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
+            const { imageIdsNew, imageCreatedList, imageDestroyedList } = await this.imageManagerService.changeCloudinaryImageLink({
                 oid,
                 files,
                 imageIdsWait: imagesChange.imageIdsWait,
                 externalUrlList: imagesChange.externalUrlList,
-                imageIdsOld: JSON.parse(ticket.imageIds || '[]'),
+                imageIdsOld: JSON.parse(ticketModified.imageDiagnosisIds || '[]'),
                 imageInteract: {
                     imageInteractType: image_entity_1.ImageInteractType.Customer,
-                    imageInteractId: ticket.customerId,
+                    imageInteractId: ticketModified.customerId,
                     ticketId,
                     ticketItemId: 0,
                     ticketItemChildId: 0,
                 },
             });
-            if (ticket.imageIds !== JSON.stringify(imageIdsUpdate)) {
-                const ticketUpdateList = await this.ticketRepository.updateAndReturnEntity({ oid, id: ticketId }, { imageIds: JSON.stringify(imageIdsUpdate) });
-                ticket = ticketUpdateList[0];
-                ticket.imageList = [];
-                const imageIds = JSON.parse(ticket.imageIds);
-                const imageList = await this.imageRepository.findManyByIds(imageIds);
-                const imageMap = helpers_1.ESArray.arrayToKeyValue(imageList, 'id');
-                imageIds.forEach((i) => {
-                    ticket.imageList.push(imageMap[i]);
+            if (ticketModified.imageDiagnosisIds !== JSON.stringify(imageIdsNew)) {
+                ticketModified = await this.ticketRepository.updateOneAndReturnEntity({ oid, id: ticketId }, { imageDiagnosisIds: JSON.stringify(imageIdsNew) });
+                const imageDiagnosisIds = JSON.parse(ticketModified.imageDiagnosisIds);
+                const imageDiagnosisList = await this.imageRepository.findManyByIds(imageDiagnosisIds);
+                const imageDiagnosisMap = helpers_1.ESArray.arrayToKeyValue(imageDiagnosisList, 'id');
+                ticketModified.imageDiagnosisList = imageDiagnosisIds.map((i) => imageDiagnosisMap[i]);
+                this.socketEmitService.socketImageListChange(oid, {
+                    ticketId,
+                    imageUpsertedList: imageCreatedList,
+                    imageDestroyedList,
                 });
             }
         }
@@ -60719,7 +60759,7 @@ let TicketChangeAttributeService = class TicketChangeAttributeService {
                 ticketAttributeList,
             });
         }
-        this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket });
+        this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] });
         return true;
     }
     async updateTicketAttributeList(options) {
@@ -60771,15 +60811,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketChangeLaboratoryModule = void 0;
 const common_1 = __webpack_require__(3);
 const api_ticket_laboratory_group_module_1 = __webpack_require__(619);
-const ticket_change_user_module_1 = __webpack_require__(739);
-const ticket_change_laboratory_controller_1 = __webpack_require__(747);
-const ticket_change_laboratory_service_1 = __webpack_require__(755);
+const ticket_change_laboratory_controller_1 = __webpack_require__(739);
+const ticket_change_laboratory_service_1 = __webpack_require__(751);
 let TicketChangeLaboratoryModule = class TicketChangeLaboratoryModule {
 };
 exports.TicketChangeLaboratoryModule = TicketChangeLaboratoryModule;
 exports.TicketChangeLaboratoryModule = TicketChangeLaboratoryModule = __decorate([
     (0, common_1.Module)({
-        imports: [ticket_change_user_module_1.TicketChangeUserModule, api_ticket_laboratory_group_module_1.ApiTicketLaboratoryGroupModule],
+        imports: [api_ticket_laboratory_group_module_1.ApiTicketLaboratoryGroupModule],
         controllers: [ticket_change_laboratory_controller_1.TicketChangeLaboratoryController],
         providers: [ticket_change_laboratory_service_1.TicketChangeLaboratoryService],
     })
@@ -60788,476 +60827,6 @@ exports.TicketChangeLaboratoryModule = TicketChangeLaboratoryModule = __decorate
 
 /***/ }),
 /* 739 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketChangeUserModule = void 0;
-const common_1 = __webpack_require__(3);
-const ticket_change_user_controller_1 = __webpack_require__(740);
-const ticket_change_user_service_1 = __webpack_require__(746);
-let TicketChangeUserModule = class TicketChangeUserModule {
-};
-exports.TicketChangeUserModule = TicketChangeUserModule;
-exports.TicketChangeUserModule = TicketChangeUserModule = __decorate([
-    (0, common_1.Module)({
-        imports: [],
-        controllers: [ticket_change_user_controller_1.TicketChangeUserController],
-        providers: [ticket_change_user_service_1.TicketChangeUserService],
-        exports: [ticket_change_user_service_1.TicketChangeUserService],
-    })
-], TicketChangeUserModule);
-
-
-/***/ }),
-/* 740 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketChangeUserController = void 0;
-const common_1 = __webpack_require__(3);
-const swagger_1 = __webpack_require__(6);
-const user_guard_1 = __webpack_require__(157);
-const external_request_1 = __webpack_require__(238);
-const permission_enum_1 = __webpack_require__(84);
-const ticket_params_1 = __webpack_require__(331);
-const request_1 = __webpack_require__(741);
-const ticket_change_user_service_1 = __webpack_require__(746);
-let TicketChangeUserController = class TicketChangeUserController {
-    constructor(ticketChangeUserService) {
-        this.ticketChangeUserService = ticketChangeUserService;
-    }
-    async destroyTicketUser({ oid }, { ticketId, ticketUserId }) {
-        const data = await this.ticketChangeUserService.destroyTicketUser({
-            oid,
-            ticketId,
-            ticketUserId,
-        });
-        return { data };
-    }
-    async updateTicketUserCommission({ oid }, { ticketId, ticketUserId }, body) {
-        const data = await this.ticketChangeUserService.updateTicketUserCommission({
-            oid,
-            ticketId,
-            ticketUserId,
-            body,
-        });
-        return { data };
-    }
-    async updateTicketUserPositionList({ oid }, { ticketId }, body) {
-        const data = true;
-        return { data };
-    }
-};
-exports.TicketChangeUserController = TicketChangeUserController;
-__decorate([
-    (0, common_1.Delete)(':ticketId/user/destroy-ticket-user/:ticketUserId'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_USER_POSITION),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _b : Object, typeof (_c = typeof request_1.TicketChangeUserParams !== "undefined" && request_1.TicketChangeUserParams) === "function" ? _c : Object]),
-    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
-], TicketChangeUserController.prototype, "destroyTicketUser", null);
-__decorate([
-    (0, common_1.Post)(':ticketId/user/update-ticket-user-commission/:ticketUserId'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_USER_COMMISSION),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_e = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _e : Object, typeof (_f = typeof request_1.TicketChangeUserParams !== "undefined" && request_1.TicketChangeUserParams) === "function" ? _f : Object, typeof (_g = typeof request_1.TicketUpdateTicketUserCommissionBody !== "undefined" && request_1.TicketUpdateTicketUserCommissionBody) === "function" ? _g : Object]),
-    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
-], TicketChangeUserController.prototype, "updateTicketUserCommission", null);
-__decorate([
-    (0, common_1.Post)(':ticketId/user/update-ticket-user-position'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_USER_POSITION),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_j = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _j : Object, typeof (_k = typeof ticket_params_1.TicketParams !== "undefined" && ticket_params_1.TicketParams) === "function" ? _k : Object, typeof (_l = typeof request_1.TicketUpdateTicketUserPositionListBody !== "undefined" && request_1.TicketUpdateTicketUserPositionListBody) === "function" ? _l : Object]),
-    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
-], TicketChangeUserController.prototype, "updateTicketUserPositionList", null);
-exports.TicketChangeUserController = TicketChangeUserController = __decorate([
-    (0, swagger_1.ApiTags)('Ticket'),
-    (0, swagger_1.ApiBearerAuth)('access-token'),
-    (0, common_1.Controller)('ticket'),
-    __metadata("design:paramtypes", [typeof (_a = typeof ticket_change_user_service_1.TicketChangeUserService !== "undefined" && ticket_change_user_service_1.TicketChangeUserService) === "function" ? _a : Object])
-], TicketChangeUserController);
-
-
-/***/ }),
-/* 741 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __exportStar = (this && this.__exportStar) || function(m, exports) {
-    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(742), exports);
-__exportStar(__webpack_require__(743), exports);
-__exportStar(__webpack_require__(744), exports);
-__exportStar(__webpack_require__(745), exports);
-
-
-/***/ }),
-/* 742 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketAddTicketUserPositionListBody = exports.TicketUserAddBody = void 0;
-const swagger_1 = __webpack_require__(6);
-const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(243);
-const class_validator_custom_1 = __webpack_require__(244);
-const position_entity_1 = __webpack_require__(76);
-class TicketUserAddBody {
-}
-exports.TicketUserAddBody = TicketUserAddBody;
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 56 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketUserAddBody.prototype, "roleId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 56 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketUserAddBody.prototype, "userId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: position_entity_1.PositionType.Ticket }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_custom_1.IsEnumValue)(position_entity_1.PositionType),
-    __metadata("design:type", typeof (_a = typeof position_entity_1.PositionType !== "undefined" && position_entity_1.PositionType) === "function" ? _a : Object)
-], TicketUserAddBody.prototype, "positionType", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 45 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketUserAddBody.prototype, "positionInteractId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 45 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketUserAddBody.prototype, "ticketItemId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 45 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketUserAddBody.prototype, "quantity", void 0);
-class TicketAddTicketUserPositionListBody {
-}
-exports.TicketAddTicketUserPositionListBody = TicketAddTicketUserPositionListBody;
-__decorate([
-    (0, swagger_1.ApiProperty)({ type: TicketUserAddBody, isArray: true }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => TicketUserAddBody),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", Array)
-], TicketAddTicketUserPositionListBody.prototype, "ticketUserList", void 0);
-
-
-/***/ }),
-/* 743 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketUserBasicBody = exports.TicketChangeUserParams = void 0;
-const swagger_1 = __webpack_require__(6);
-const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(243);
-const class_validator_custom_1 = __webpack_require__(244);
-const ticket_params_1 = __webpack_require__(331);
-class TicketChangeUserParams extends ticket_params_1.TicketParams {
-}
-exports.TicketChangeUserParams = TicketChangeUserParams;
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 45 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => Number),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsInt)(),
-    (0, class_validator_custom_1.IsNumberGreaterThan)(0),
-    __metadata("design:type", Number)
-], TicketChangeUserParams.prototype, "ticketUserId", void 0);
-class TicketUserBasicBody {
-}
-exports.TicketUserBasicBody = TicketUserBasicBody;
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 56 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketUserBasicBody.prototype, "positionId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 56 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketUserBasicBody.prototype, "userId", void 0);
-
-
-/***/ }),
-/* 744 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketUpdateTicketUserCommissionBody = void 0;
-const swagger_1 = __webpack_require__(6);
-const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(243);
-const typescript_helper_1 = __webpack_require__(189);
-const class_validator_custom_1 = __webpack_require__(244);
-const position_entity_1 = __webpack_require__(76);
-class TicketUpdateTicketUserCommissionBody {
-}
-exports.TicketUpdateTicketUserCommissionBody = TicketUpdateTicketUserCommissionBody;
-__decorate([
-    (0, swagger_1.ApiProperty)({ enum: (0, typescript_helper_1.valuesEnum)(position_entity_1.CommissionCalculatorType), example: position_entity_1.CommissionCalculatorType.VND }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_custom_1.IsEnumValue)(position_entity_1.CommissionCalculatorType),
-    __metadata("design:type", typeof (_a = typeof position_entity_1.CommissionCalculatorType !== "undefined" && position_entity_1.CommissionCalculatorType) === "function" ? _a : Object)
-], TicketUpdateTicketUserCommissionBody.prototype, "commissionCalculatorType", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 25000 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketUpdateTicketUserCommissionBody.prototype, "commissionMoney", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 25000 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketUpdateTicketUserCommissionBody.prototype, "commissionPercentActual", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 25000 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketUpdateTicketUserCommissionBody.prototype, "commissionPercentExpected", void 0);
-
-
-/***/ }),
-/* 745 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketUpdateTicketUserPositionListBody = void 0;
-const swagger_1 = __webpack_require__(6);
-const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(243);
-const class_validator_custom_1 = __webpack_require__(244);
-const position_entity_1 = __webpack_require__(76);
-const ticket_change_user_request_1 = __webpack_require__(743);
-class TicketUpdateTicketUserPositionListBody {
-}
-exports.TicketUpdateTicketUserPositionListBody = TicketUpdateTicketUserPositionListBody;
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: position_entity_1.PositionType.Ticket }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_custom_1.IsEnumValue)(position_entity_1.PositionType),
-    __metadata("design:type", typeof (_a = typeof position_entity_1.PositionType !== "undefined" && position_entity_1.PositionType) === "function" ? _a : Object)
-], TicketUpdateTicketUserPositionListBody.prototype, "positionType", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 45 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketUpdateTicketUserPositionListBody.prototype, "positionInteractId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 45 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketUpdateTicketUserPositionListBody.prototype, "ticketItemId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 45 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketUpdateTicketUserPositionListBody.prototype, "quantity", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ type: ticket_change_user_request_1.TicketUserBasicBody, isArray: true }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => ticket_change_user_request_1.TicketUserBasicBody),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", Array)
-], TicketUpdateTicketUserPositionListBody.prototype, "ticketUserList", void 0);
-
-
-/***/ }),
-/* 746 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a, _b, _c;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketChangeUserService = void 0;
-const common_1 = __webpack_require__(3);
-const operations_1 = __webpack_require__(164);
-const repositories_1 = __webpack_require__(42);
-const socket_emit_service_1 = __webpack_require__(341);
-let TicketChangeUserService = class TicketChangeUserService {
-    constructor(socketEmitService, ticketUserRepository, ticketChangeTicketUserOperation) {
-        this.socketEmitService = socketEmitService;
-        this.ticketUserRepository = ticketUserRepository;
-        this.ticketChangeTicketUserOperation = ticketChangeTicketUserOperation;
-    }
-    async destroyTicketUser(options) {
-        const { oid, ticketId, ticketUserId } = options;
-        const { ticketUserDestroyList, ticketModified } = await this.ticketChangeTicketUserOperation.destroyTicketUserList({
-            oid,
-            ticketId,
-            condition: { id: { IN: [ticketUserId] } },
-        });
-        this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified });
-        this.socketEmitService.socketTicketUserListChange(oid, {
-            ticketId,
-            ticketUserDestroyList,
-        });
-        return { ticketUserDestroyList };
-    }
-    async updateTicketUserCommission(options) {
-        const { oid, ticketId, ticketUserId, body } = options;
-        const { ticketUserModified, ticketModified } = await this.ticketChangeTicketUserOperation.updateTicketUserCommission({
-            oid,
-            ticketId,
-            ticketUserId,
-            body: {
-                commissionCalculatorType: body.commissionCalculatorType,
-                commissionMoney: body.commissionMoney,
-                commissionPercentActual: body.commissionPercentActual,
-                commissionPercentExpected: body.commissionPercentExpected,
-            },
-        });
-        this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified });
-        this.socketEmitService.socketTicketUserListChange(oid, {
-            ticketId,
-            ticketUserUpsertList: [ticketUserModified],
-        });
-        return { ticketUserModified };
-    }
-};
-exports.TicketChangeUserService = TicketChangeUserService;
-exports.TicketChangeUserService = TicketChangeUserService = __decorate([
-    (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof repositories_1.TicketUserRepository !== "undefined" && repositories_1.TicketUserRepository) === "function" ? _b : Object, typeof (_c = typeof operations_1.TicketChangeTicketUserOperation !== "undefined" && operations_1.TicketChangeTicketUserOperation) === "function" ? _c : Object])
-], TicketChangeUserService);
-
-
-/***/ }),
-/* 747 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -61283,14 +60852,14 @@ const external_request_1 = __webpack_require__(238);
 const permission_enum_1 = __webpack_require__(84);
 const request_1 = __webpack_require__(316);
 const ticket_params_1 = __webpack_require__(331);
-const request_2 = __webpack_require__(748);
-const ticket_change_laboratory_service_1 = __webpack_require__(755);
+const request_2 = __webpack_require__(740);
+const ticket_change_laboratory_service_1 = __webpack_require__(751);
 let TicketChangeLaboratoryController = class TicketChangeLaboratoryController {
     constructor(ticketChangeLaboratoryService) {
         this.ticketChangeLaboratoryService = ticketChangeLaboratoryService;
     }
-    async upsertLaboratory({ oid }, { ticketId }, body) {
-        const data = await this.ticketChangeLaboratoryService.upsertLaboratory({
+    async upsertRequestLaboratoryGroup({ oid }, { ticketId }, body) {
+        const data = await this.ticketChangeLaboratoryService.upsertRequestLaboratoryGroup({
             oid,
             ticketId,
             body,
@@ -61313,8 +60882,8 @@ let TicketChangeLaboratoryController = class TicketChangeLaboratoryController {
         });
         return { data };
     }
-    async updateTicketLaboratory({ oid }, { ticketId, ticketLaboratoryId }, body) {
-        const data = await this.ticketChangeLaboratoryService.updateTicketLaboratory({
+    async updateRequestTicketLaboratory({ oid }, { ticketId, ticketLaboratoryId }, body) {
+        const data = await this.ticketChangeLaboratoryService.updateRequestTicketLaboratory({
             oid,
             ticketId,
             ticketLaboratoryId,
@@ -61351,18 +60920,18 @@ let TicketChangeLaboratoryController = class TicketChangeLaboratoryController {
 };
 exports.TicketChangeLaboratoryController = TicketChangeLaboratoryController;
 __decorate([
-    (0, common_1.Post)(':ticketId/laboratory/upsert-laboratory'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_LABORATORY),
+    (0, common_1.Post)(':ticketId/laboratory/upsert-request-laboratory-group'),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_LABORATORY_REQUEST),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _b : Object, typeof (_c = typeof ticket_params_1.TicketParams !== "undefined" && ticket_params_1.TicketParams) === "function" ? _c : Object, typeof (_d = typeof request_2.TicketUpsertLaboratoryBody !== "undefined" && request_2.TicketUpsertLaboratoryBody) === "function" ? _d : Object]),
+    __metadata("design:paramtypes", [typeof (_b = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _b : Object, typeof (_c = typeof ticket_params_1.TicketParams !== "undefined" && ticket_params_1.TicketParams) === "function" ? _c : Object, typeof (_d = typeof request_2.TicketUpsertRequestLaboratoryGroupBody !== "undefined" && request_2.TicketUpsertRequestLaboratoryGroupBody) === "function" ? _d : Object]),
     __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
-], TicketChangeLaboratoryController.prototype, "upsertLaboratory", null);
+], TicketChangeLaboratoryController.prototype, "upsertRequestLaboratoryGroup", null);
 __decorate([
     (0, common_1.Delete)(':ticketId/laboratory/destroy-ticket-laboratory/:ticketLaboratoryId'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_LABORATORY),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_LABORATORY_REQUEST),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __metadata("design:type", Function),
@@ -61371,7 +60940,7 @@ __decorate([
 ], TicketChangeLaboratoryController.prototype, "destroyTicketLaboratory", null);
 __decorate([
     (0, common_1.Delete)(':ticketId/laboratory/destroy-ticket-laboratory-group/:ticketLaboratoryGroupId'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_LABORATORY),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_LABORATORY_REQUEST),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __metadata("design:type", Function),
@@ -61379,18 +60948,18 @@ __decorate([
     __metadata("design:returntype", typeof (_l = typeof Promise !== "undefined" && Promise) === "function" ? _l : Object)
 ], TicketChangeLaboratoryController.prototype, "destroyTicketLaboratoryGroup", null);
 __decorate([
-    (0, common_1.Post)(':ticketId/laboratory/update-ticket-laboratory/:ticketLaboratoryId'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_LABORATORY),
+    (0, common_1.Post)(':ticketId/laboratory/update-request-ticket-laboratory/:ticketLaboratoryId'),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_LABORATORY_REQUEST),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_m = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _m : Object, typeof (_o = typeof request_2.TicketChangeLaboratoryParams !== "undefined" && request_2.TicketChangeLaboratoryParams) === "function" ? _o : Object, typeof (_p = typeof request_2.TicketUpdateTicketLaboratoryBody !== "undefined" && request_2.TicketUpdateTicketLaboratoryBody) === "function" ? _p : Object]),
+    __metadata("design:paramtypes", [typeof (_m = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _m : Object, typeof (_o = typeof request_2.TicketChangeLaboratoryParams !== "undefined" && request_2.TicketChangeLaboratoryParams) === "function" ? _o : Object, typeof (_p = typeof request_2.TicketUpdateRequestTicketLaboratoryBody !== "undefined" && request_2.TicketUpdateRequestTicketLaboratoryBody) === "function" ? _p : Object]),
     __metadata("design:returntype", typeof (_q = typeof Promise !== "undefined" && Promise) === "function" ? _q : Object)
-], TicketChangeLaboratoryController.prototype, "updateTicketLaboratory", null);
+], TicketChangeLaboratoryController.prototype, "updateRequestTicketLaboratory", null);
 __decorate([
     (0, common_1.Post)(':ticketId/laboratory/update-priority-ticket-laboratory'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_LABORATORY),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_LABORATORY_REQUEST),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
@@ -61406,7 +60975,7 @@ __decorate([
     __param(2, (0, common_1.Body)()),
     __param(3, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_v = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _v : Object, typeof (_w = typeof request_2.TicketChangeLaboratoryGroupParams !== "undefined" && request_2.TicketChangeLaboratoryGroupParams) === "function" ? _w : Object, typeof (_x = typeof request_2.TicketUpdateLaboratoryGroupResultBody !== "undefined" && request_2.TicketUpdateLaboratoryGroupResultBody) === "function" ? _x : Object, typeof (_y = typeof request_1.TicketLaboratoryGroupPostQuery !== "undefined" && request_1.TicketLaboratoryGroupPostQuery) === "function" ? _y : Object]),
+    __metadata("design:paramtypes", [typeof (_v = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _v : Object, typeof (_w = typeof request_2.TicketChangeLaboratoryGroupParams !== "undefined" && request_2.TicketChangeLaboratoryGroupParams) === "function" ? _w : Object, typeof (_x = typeof request_2.TicketUpdateResultLaboratoryGroupBody !== "undefined" && request_2.TicketUpdateResultLaboratoryGroupBody) === "function" ? _x : Object, typeof (_y = typeof request_1.TicketLaboratoryGroupPostQuery !== "undefined" && request_1.TicketLaboratoryGroupPostQuery) === "function" ? _y : Object]),
     __metadata("design:returntype", typeof (_z = typeof Promise !== "undefined" && Promise) === "function" ? _z : Object)
 ], TicketChangeLaboratoryController.prototype, "updateResultTicketLaboratory", null);
 __decorate([
@@ -61427,7 +60996,7 @@ exports.TicketChangeLaboratoryController = TicketChangeLaboratoryController = __
 
 
 /***/ }),
-/* 748 */
+/* 740 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -61446,16 +61015,15 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(741), exports);
+__exportStar(__webpack_require__(742), exports);
+__exportStar(__webpack_require__(743), exports);
 __exportStar(__webpack_require__(749), exports);
 __exportStar(__webpack_require__(750), exports);
-__exportStar(__webpack_require__(751), exports);
-__exportStar(__webpack_require__(752), exports);
-__exportStar(__webpack_require__(753), exports);
-__exportStar(__webpack_require__(754), exports);
 
 
 /***/ }),
-/* 749 */
+/* 741 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -61519,183 +61087,7 @@ __decorate([
 
 
 /***/ }),
-/* 750 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketUpdateLaboratoryGroupResultBody = exports.LaboratoryGroupResultBody = void 0;
-const swagger_1 = __webpack_require__(6);
-const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(243);
-class LaboratoryGroupResultBody {
-}
-exports.LaboratoryGroupResultBody = LaboratoryGroupResultBody;
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 56 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsInt)(),
-    __metadata("design:type", Number)
-], LaboratoryGroupResultBody.prototype, "id", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 56 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], LaboratoryGroupResultBody.prototype, "laboratoryId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 56 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], LaboratoryGroupResultBody.prototype, "ticketLaboratoryId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Âm tính' }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], LaboratoryGroupResultBody.prototype, "result", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 1 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], LaboratoryGroupResultBody.prototype, "attention", void 0);
-class TicketUpdateLaboratoryGroupResultBody {
-}
-exports.TicketUpdateLaboratoryGroupResultBody = TicketUpdateLaboratoryGroupResultBody;
-__decorate([
-    (0, swagger_1.ApiProperty)({ type: LaboratoryGroupResultBody, isArray: true }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => LaboratoryGroupResultBody),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", Array)
-], TicketUpdateLaboratoryGroupResultBody.prototype, "ticketLaboratoryResultUpdateList", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: Date.now() }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsInt)(),
-    __metadata("design:type", Number)
-], TicketUpdateLaboratoryGroupResultBody.prototype, "completedAt", void 0);
-
-
-/***/ }),
-/* 751 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketUpdateTicketLaboratoryListBody = void 0;
-const swagger_1 = __webpack_require__(6);
-const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(243);
-const typescript_helper_1 = __webpack_require__(189);
-const class_validator_custom_1 = __webpack_require__(244);
-const variable_1 = __webpack_require__(21);
-class TicketLaboratoryBody {
-}
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 56 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketLaboratoryBody.prototype, "priority", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 56 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketLaboratoryBody.prototype, "laboratoryId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 25000 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketLaboratoryBody.prototype, "expectedPrice", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 22500 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => Math.round(value || 0)),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketLaboratoryBody.prototype, "discountMoney", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 22500 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Max)(100),
-    __metadata("design:type", Number)
-], TicketLaboratoryBody.prototype, "discountPercent", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ enum: (0, typescript_helper_1.valuesEnum)(variable_1.DiscountType), example: variable_1.DiscountType.VND }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_custom_1.IsEnumValue)(variable_1.DiscountType),
-    __metadata("design:type", typeof (_a = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _a : Object)
-], TicketLaboratoryBody.prototype, "discountType", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 22500 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => Math.round(value || 0)),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketLaboratoryBody.prototype, "actualPrice", void 0);
-class TicketUpdateTicketLaboratoryListBody {
-}
-exports.TicketUpdateTicketLaboratoryListBody = TicketUpdateTicketLaboratoryListBody;
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 56 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketUpdateTicketLaboratoryListBody.prototype, "customerId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ type: TicketLaboratoryBody, isArray: true }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => TicketLaboratoryBody),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", Array)
-], TicketUpdateTicketLaboratoryListBody.prototype, "ticketLaboratoryList", void 0);
-
-
-/***/ }),
-/* 752 */
+/* 742 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -61744,7 +61136,7 @@ __decorate([
 
 
 /***/ }),
-/* 753 */
+/* 743 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -61759,14 +61151,14 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketUpdateTicketLaboratoryBody = void 0;
+exports.TicketUpdateRequestTicketLaboratoryBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
 const class_validator_1 = __webpack_require__(243);
 const typescript_helper_1 = __webpack_require__(189);
 const class_validator_custom_1 = __webpack_require__(244);
 const variable_1 = __webpack_require__(21);
-const request_1 = __webpack_require__(741);
+const request_1 = __webpack_require__(744);
 class TicketLaboratoryBody {
 }
 __decorate([
@@ -61808,9 +61200,9 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], TicketLaboratoryBody.prototype, "actualPrice", void 0);
-class TicketUpdateTicketLaboratoryBody {
+class TicketUpdateRequestTicketLaboratoryBody {
 }
-exports.TicketUpdateTicketLaboratoryBody = TicketUpdateTicketLaboratoryBody;
+exports.TicketUpdateRequestTicketLaboratoryBody = TicketUpdateRequestTicketLaboratoryBody;
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({ type: request_1.TicketUserBasicBody, isArray: true }),
     (0, class_transformer_1.Expose)(),
@@ -61818,18 +61210,376 @@ __decorate([
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.ValidateNested)({ each: true }),
     __metadata("design:type", Array)
-], TicketUpdateTicketLaboratoryBody.prototype, "ticketUserRequestList", void 0);
+], TicketUpdateRequestTicketLaboratoryBody.prototype, "ticketUserRequestList", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: TicketLaboratoryBody }),
     (0, class_transformer_1.Expose)(),
     (0, class_transformer_1.Type)(() => TicketLaboratoryBody),
     (0, class_validator_1.ValidateNested)({ each: true }),
     __metadata("design:type", TicketLaboratoryBody)
-], TicketUpdateTicketLaboratoryBody.prototype, "ticketLaboratory", void 0);
+], TicketUpdateRequestTicketLaboratoryBody.prototype, "ticketLaboratory", void 0);
 
 
 /***/ }),
-/* 754 */
+/* 744 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(745), exports);
+__exportStar(__webpack_require__(746), exports);
+__exportStar(__webpack_require__(747), exports);
+__exportStar(__webpack_require__(748), exports);
+
+
+/***/ }),
+/* 745 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TicketAddTicketUserPositionListBody = exports.TicketUserAddBody = void 0;
+const swagger_1 = __webpack_require__(6);
+const class_transformer_1 = __webpack_require__(17);
+const class_validator_1 = __webpack_require__(243);
+const class_validator_custom_1 = __webpack_require__(244);
+const position_entity_1 = __webpack_require__(76);
+class TicketUserAddBody {
+}
+exports.TicketUserAddBody = TicketUserAddBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 56 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketUserAddBody.prototype, "roleId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 56 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketUserAddBody.prototype, "userId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: position_entity_1.PositionType.TicketReception }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsEnumValue)(position_entity_1.PositionType),
+    __metadata("design:type", typeof (_a = typeof position_entity_1.PositionType !== "undefined" && position_entity_1.PositionType) === "function" ? _a : Object)
+], TicketUserAddBody.prototype, "positionType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 45 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketUserAddBody.prototype, "positionInteractId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 45 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketUserAddBody.prototype, "ticketItemId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 45 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketUserAddBody.prototype, "quantity", void 0);
+class TicketAddTicketUserPositionListBody {
+}
+exports.TicketAddTicketUserPositionListBody = TicketAddTicketUserPositionListBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: TicketUserAddBody, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => TicketUserAddBody),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], TicketAddTicketUserPositionListBody.prototype, "ticketUserList", void 0);
+
+
+/***/ }),
+/* 746 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TicketUserBasicBody = exports.TicketChangeUserParams = void 0;
+const swagger_1 = __webpack_require__(6);
+const class_transformer_1 = __webpack_require__(17);
+const class_validator_1 = __webpack_require__(243);
+const class_validator_custom_1 = __webpack_require__(244);
+const ticket_params_1 = __webpack_require__(331);
+class TicketChangeUserParams extends ticket_params_1.TicketParams {
+}
+exports.TicketChangeUserParams = TicketChangeUserParams;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 45 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => Number),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsInt)(),
+    (0, class_validator_custom_1.IsNumberGreaterThan)(0),
+    __metadata("design:type", Number)
+], TicketChangeUserParams.prototype, "ticketUserId", void 0);
+class TicketUserBasicBody {
+}
+exports.TicketUserBasicBody = TicketUserBasicBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 56 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketUserBasicBody.prototype, "positionId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 56 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketUserBasicBody.prototype, "userId", void 0);
+
+
+/***/ }),
+/* 747 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TicketUpdateTicketUserCommissionBody = void 0;
+const swagger_1 = __webpack_require__(6);
+const class_transformer_1 = __webpack_require__(17);
+const class_validator_1 = __webpack_require__(243);
+const typescript_helper_1 = __webpack_require__(189);
+const class_validator_custom_1 = __webpack_require__(244);
+const position_entity_1 = __webpack_require__(76);
+class TicketUpdateTicketUserCommissionBody {
+}
+exports.TicketUpdateTicketUserCommissionBody = TicketUpdateTicketUserCommissionBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ enum: (0, typescript_helper_1.valuesEnum)(position_entity_1.CommissionCalculatorType), example: position_entity_1.CommissionCalculatorType.VND }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsEnumValue)(position_entity_1.CommissionCalculatorType),
+    __metadata("design:type", typeof (_a = typeof position_entity_1.CommissionCalculatorType !== "undefined" && position_entity_1.CommissionCalculatorType) === "function" ? _a : Object)
+], TicketUpdateTicketUserCommissionBody.prototype, "commissionCalculatorType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 25000 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketUpdateTicketUserCommissionBody.prototype, "commissionMoney", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 25000 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketUpdateTicketUserCommissionBody.prototype, "commissionPercentActual", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 25000 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketUpdateTicketUserCommissionBody.prototype, "commissionPercentExpected", void 0);
+
+
+/***/ }),
+/* 748 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TicketUpdateTicketUserPositionListBody = void 0;
+const swagger_1 = __webpack_require__(6);
+const class_transformer_1 = __webpack_require__(17);
+const class_validator_1 = __webpack_require__(243);
+const class_validator_custom_1 = __webpack_require__(244);
+const position_entity_1 = __webpack_require__(76);
+const ticket_change_user_request_1 = __webpack_require__(746);
+class TicketUpdateTicketUserPositionListBody {
+}
+exports.TicketUpdateTicketUserPositionListBody = TicketUpdateTicketUserPositionListBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: position_entity_1.PositionType.TicketReception }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsEnumValue)(position_entity_1.PositionType),
+    __metadata("design:type", typeof (_a = typeof position_entity_1.PositionType !== "undefined" && position_entity_1.PositionType) === "function" ? _a : Object)
+], TicketUpdateTicketUserPositionListBody.prototype, "positionType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 45 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketUpdateTicketUserPositionListBody.prototype, "positionInteractId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 45 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketUpdateTicketUserPositionListBody.prototype, "ticketItemId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 45 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketUpdateTicketUserPositionListBody.prototype, "quantity", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: ticket_change_user_request_1.TicketUserBasicBody, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => ticket_change_user_request_1.TicketUserBasicBody),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], TicketUpdateTicketUserPositionListBody.prototype, "ticketUserList", void 0);
+
+
+/***/ }),
+/* 749 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TicketUpdateResultLaboratoryGroupBody = exports.LaboratoryGroupResultBody = void 0;
+const swagger_1 = __webpack_require__(6);
+const class_transformer_1 = __webpack_require__(17);
+const class_validator_1 = __webpack_require__(243);
+class LaboratoryGroupResultBody {
+}
+exports.LaboratoryGroupResultBody = LaboratoryGroupResultBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 56 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], LaboratoryGroupResultBody.prototype, "id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 56 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], LaboratoryGroupResultBody.prototype, "laboratoryId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 56 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], LaboratoryGroupResultBody.prototype, "ticketLaboratoryId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Âm tính' }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], LaboratoryGroupResultBody.prototype, "result", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 1 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], LaboratoryGroupResultBody.prototype, "attention", void 0);
+class TicketUpdateResultLaboratoryGroupBody {
+}
+exports.TicketUpdateResultLaboratoryGroupBody = TicketUpdateResultLaboratoryGroupBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: LaboratoryGroupResultBody, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => LaboratoryGroupResultBody),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], TicketUpdateResultLaboratoryGroupBody.prototype, "ticketLaboratoryResultUpdateList", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: Date.now() }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsInt)(),
+    __metadata("design:type", Number)
+], TicketUpdateResultLaboratoryGroupBody.prototype, "completedAt", void 0);
+
+
+/***/ }),
+/* 750 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -61844,7 +61594,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketUpsertLaboratoryBody = exports.TicketLaboratoryGroupUpdateBody = exports.TicketLaboratoryGroupAddBody = exports.TicketLaboratoryUpdateBody = exports.TicketLaboratoryAddBody = void 0;
+exports.TicketUpsertRequestLaboratoryGroupBody = exports.TicketLaboratoryGroupUpdateBody = exports.TicketLaboratoryGroupAddBody = exports.TicketLaboratoryUpdateBody = exports.TicketLaboratoryAddBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
 const class_validator_1 = __webpack_require__(243);
@@ -62020,9 +61770,9 @@ __decorate([
     (0, class_validator_1.ValidateNested)({ each: true }),
     __metadata("design:type", Array)
 ], TicketLaboratoryGroupUpdateBody.prototype, "ticketLaboratoryList", void 0);
-class TicketUpsertLaboratoryBody {
+class TicketUpsertRequestLaboratoryGroupBody {
 }
-exports.TicketUpsertLaboratoryBody = TicketUpsertLaboratoryBody;
+exports.TicketUpsertRequestLaboratoryGroupBody = TicketUpsertRequestLaboratoryGroupBody;
 __decorate([
     (0, swagger_1.ApiProperty)({ type: TicketLaboratoryGroupAddBody, isArray: true }),
     (0, class_transformer_1.Expose)(),
@@ -62030,18 +61780,18 @@ __decorate([
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.ValidateNested)({ each: true }),
     __metadata("design:type", Array)
-], TicketUpsertLaboratoryBody.prototype, "ticketLaboratoryGroupAddList", void 0);
+], TicketUpsertRequestLaboratoryGroupBody.prototype, "ticketLaboratoryGroupAddList", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: TicketLaboratoryGroupUpdateBody, isArray: true }),
     (0, class_transformer_1.Expose)(),
     (0, class_transformer_1.Type)(() => TicketLaboratoryGroupUpdateBody),
     (0, class_validator_1.ValidateNested)({ each: true }),
     __metadata("design:type", TicketLaboratoryGroupUpdateBody)
-], TicketUpsertLaboratoryBody.prototype, "ticketLaboratoryGroupUpdate", void 0);
+], TicketUpsertRequestLaboratoryGroupBody.prototype, "ticketLaboratoryGroupUpdate", void 0);
 
 
 /***/ }),
-/* 755 */
+/* 751 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -62065,7 +61815,7 @@ var __rest = (this && this.__rest) || function (s, e) {
         }
     return t;
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketChangeLaboratoryService = void 0;
 const common_1 = __webpack_require__(3);
@@ -62075,9 +61825,8 @@ const operations_1 = __webpack_require__(164);
 const repositories_1 = __webpack_require__(42);
 const socket_emit_service_1 = __webpack_require__(341);
 const api_ticket_laboratory_group_service_1 = __webpack_require__(621);
-const ticket_change_user_service_1 = __webpack_require__(746);
 let TicketChangeLaboratoryService = class TicketChangeLaboratoryService {
-    constructor(socketEmitService, ticketLaboratoryRepository, ticketLaboratoryGroupRepository, ticketLaboratoryResultRepository, ticketAddSelectLaboratoryOperation, ticketChangeSelectLaboratoryOperation, ticketUpdateTicketLaboratoryOperation, ticketDestroyTicketLaboratoryOperation, ticketDestroyTlgOperation, ticketChangeUserService, apiTicketLaboratoryGroupService) {
+    constructor(socketEmitService, ticketLaboratoryRepository, ticketLaboratoryGroupRepository, ticketLaboratoryResultRepository, ticketAddSelectLaboratoryOperation, ticketChangeSelectLaboratoryOperation, ticketUpdateTicketLaboratoryOperation, ticketDestroyTicketLaboratoryOperation, ticketDestroyTlgOperation, apiTicketLaboratoryGroupService) {
         this.socketEmitService = socketEmitService;
         this.ticketLaboratoryRepository = ticketLaboratoryRepository;
         this.ticketLaboratoryGroupRepository = ticketLaboratoryGroupRepository;
@@ -62087,13 +61836,12 @@ let TicketChangeLaboratoryService = class TicketChangeLaboratoryService {
         this.ticketUpdateTicketLaboratoryOperation = ticketUpdateTicketLaboratoryOperation;
         this.ticketDestroyTicketLaboratoryOperation = ticketDestroyTicketLaboratoryOperation;
         this.ticketDestroyTlgOperation = ticketDestroyTlgOperation;
-        this.ticketChangeUserService = ticketChangeUserService;
         this.apiTicketLaboratoryGroupService = apiTicketLaboratoryGroupService;
     }
-    async upsertLaboratory(options) {
+    async upsertRequestLaboratoryGroup(options) {
         const { oid, ticketId, body } = options;
         if (body.ticketLaboratoryGroupAddList.length) {
-            const result = await this.ticketAddSelectLaboratoryOperation.addSelectLaboratoryList({
+            const result = await this.ticketAddSelectLaboratoryOperation.addTicketLaboratoryGroupList({
                 oid,
                 ticketId,
                 tlgDtoList: body.ticketLaboratoryGroupAddList,
@@ -62101,8 +61849,8 @@ let TicketChangeLaboratoryService = class TicketChangeLaboratoryService {
             this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: result.ticket });
             this.socketEmitService.socketTicketLaboratoryListChange(oid, {
                 ticketId,
-                ticketLaboratoryUpsertList: result.ticketLaboratoryInsertList,
-                ticketLaboratoryGroupUpsertList: result.ticketLaboratoryGroupInsertList,
+                ticketLaboratoryUpsertedList: result.ticketLaboratoryCreatedList,
+                ticketLaboratoryGroupUpsertedList: result.ticketLaboratoryGroupCreatedList,
             });
         }
         if (body.ticketLaboratoryGroupUpdate) {
@@ -62116,9 +61864,9 @@ let TicketChangeLaboratoryService = class TicketChangeLaboratoryService {
             this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: result.ticket });
             this.socketEmitService.socketTicketLaboratoryListChange(oid, {
                 ticketId,
-                ticketLaboratoryUpsertList: result.ticketLaboratoryInsertList,
-                ticketLaboratoryDestroyList: result.ticketLaboratoryDestroyList,
-                ticketLaboratoryGroupUpsertList: [result.ticketLaboratoryGroupUpdate],
+                ticketLaboratoryUpsertedList: result.ticketLaboratoryCreatedList,
+                ticketLaboratoryDestroyedList: result.ticketLaboratoryDestroyedList,
+                ticketLaboratoryGroupUpsertedList: [result.ticketLaboratoryGroupModified],
             });
         }
         return true;
@@ -62134,11 +61882,11 @@ let TicketChangeLaboratoryService = class TicketChangeLaboratoryService {
         this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket });
         this.socketEmitService.socketTicketLaboratoryListChange(oid, {
             ticketId,
-            ticketLaboratoryDestroyList: [result.ticketLaboratoryDestroy],
-            ticketLaboratoryGroupDestroyList: result.ticketLaboratoryGroupDestroy
-                ? [result.ticketLaboratoryGroupDestroy]
+            ticketLaboratoryDestroyedList: [result.ticketLaboratoryDestroyed],
+            ticketLaboratoryGroupDestroyedList: result.ticketLaboratoryGroupDestroyed
+                ? [result.ticketLaboratoryGroupDestroyed]
                 : undefined,
-            ticketLaboratoryGroupUpsertList: result.ticketLaboratoryGroupModified
+            ticketLaboratoryGroupUpsertedList: result.ticketLaboratoryGroupModified
                 ? [result.ticketLaboratoryGroupModified]
                 : undefined,
         });
@@ -62165,13 +61913,13 @@ let TicketChangeLaboratoryService = class TicketChangeLaboratoryService {
         this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket });
         this.socketEmitService.socketTicketLaboratoryListChange(oid, {
             ticketId,
-            ticketLaboratoryGroupDestroyList: [result.ticketLaboratoryGroupDestroy],
-            ticketLaboratoryDestroyList: result.ticketLaboratoryDestroyList,
-            ticketLaboratoryResultDestroyList: result.ticketLaboratoryResultDestroyList,
+            ticketLaboratoryGroupDestroyedList: [result.ticketLaboratoryGroupDestroyed],
+            ticketLaboratoryDestroyedList: result.ticketLaboratoryDestroyedList,
+            ticketLaboratoryResultDestroyedList: result.ticketLaboratoryResultDestroyedList,
         });
         return true;
     }
-    async updateTicketLaboratory(options) {
+    async updateRequestTicketLaboratory(options) {
         const { oid, ticketId, ticketLaboratoryId, body } = options;
         const result = await this.ticketUpdateTicketLaboratoryOperation.updateTicketLaboratory({
             oid,
@@ -62184,12 +61932,12 @@ let TicketChangeLaboratoryService = class TicketChangeLaboratoryService {
         this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified });
         this.socketEmitService.socketTicketLaboratoryListChange(oid, {
             ticketId,
-            ticketLaboratoryUpsertList: [ticketLaboratoryModified],
+            ticketLaboratoryUpsertedList: [ticketLaboratoryModified],
         });
         this.socketEmitService.socketTicketUserListChange(oid, {
             ticketId,
-            ticketUserUpsertList: result.ticketUserCreatedList,
-            ticketUserDestroyList: result.ticketUserDestroyList,
+            ticketUserUpsertedList: result.ticketUserCreatedList,
+            ticketUserDestroyedList: result.ticketUserDestroyedList,
         });
         return true;
     }
@@ -62202,15 +61950,15 @@ let TicketChangeLaboratoryService = class TicketChangeLaboratoryService {
         const { oid, ticketId, ticketLaboratoryGroupId, body } = options;
         const response = (_a = options.query) === null || _a === void 0 ? void 0 : _a.response;
         const ticketLaboratoryGroupUpdate = await this.ticketLaboratoryGroupRepository.updateOneAndReturnEntity({ oid, id: ticketLaboratoryGroupId }, { completedAt: body.completedAt, status: variable_1.TicketLaboratoryStatus.Completed });
-        const ticketLaboratoryUpdateList = await this.ticketLaboratoryRepository.updateAndReturnEntity({ oid, ticketId, ticketLaboratoryGroupId }, { completedAt: body.completedAt, status: variable_1.TicketLaboratoryStatus.Completed });
+        const ticketLaboratoryModifiedList = await this.ticketLaboratoryRepository.updateAndReturnEntity({ oid, ticketId, ticketLaboratoryGroupId }, { completedAt: body.completedAt, status: variable_1.TicketLaboratoryStatus.Completed });
         const tlrBodyInsertList = body.ticketLaboratoryResultUpdateList.filter((i) => {
             return !i.id;
         });
         const tlrBodyUpdateList = body.ticketLaboratoryResultUpdateList.filter((i) => {
             return !!i.id;
         });
-        let tlrInsertList = [];
-        let tlrUpdateList = [];
+        let tlrCreatedList = [];
+        let tlrModifiedList = [];
         if (tlrBodyInsertList.length) {
             const tlrDtoInsertList = tlrBodyInsertList.map((i) => {
                 const dtoInsert = Object.assign(Object.assign({}, i), { oid,
@@ -62218,11 +61966,11 @@ let TicketChangeLaboratoryService = class TicketChangeLaboratoryService {
                     ticketLaboratoryGroupId, laboratoryGroupId: ticketLaboratoryGroupUpdate.laboratoryGroupId, customerId: (ticketLaboratoryGroupUpdate === null || ticketLaboratoryGroupUpdate === void 0 ? void 0 : ticketLaboratoryGroupUpdate.customerId) || 0 });
                 return dtoInsert;
             });
-            tlrInsertList =
+            tlrCreatedList =
                 await this.ticketLaboratoryResultRepository.insertManyAndReturnEntity(tlrDtoInsertList);
         }
         if (tlrBodyUpdateList.length) {
-            tlrUpdateList = await this.ticketLaboratoryResultRepository.updateResultList({
+            tlrModifiedList = await this.ticketLaboratoryResultRepository.updateResultList({
                 oid,
                 ticketId,
                 ticketLaboratoryResultDtoList: body.ticketLaboratoryResultUpdateList,
@@ -62230,11 +61978,11 @@ let TicketChangeLaboratoryService = class TicketChangeLaboratoryService {
         }
         this.socketEmitService.socketTicketLaboratoryListChange(oid, {
             ticketId,
-            ticketLaboratoryGroupUpsertList: [ticketLaboratoryGroupUpdate],
-            ticketLaboratoryUpsertList: ticketLaboratoryUpdateList,
-            ticketLaboratoryResultUpsertList: [...tlrInsertList, ...tlrUpdateList],
+            ticketLaboratoryGroupUpsertedList: [ticketLaboratoryGroupUpdate],
+            ticketLaboratoryUpsertedList: ticketLaboratoryModifiedList,
+            ticketLaboratoryResultUpsertedList: [...tlrCreatedList, ...tlrModifiedList],
         });
-        ticketLaboratoryGroupUpdate.ticketLaboratoryList = ticketLaboratoryUpdateList;
+        ticketLaboratoryGroupUpdate.ticketLaboratoryList = ticketLaboratoryModifiedList;
         await this.apiTicketLaboratoryGroupService.generateRelation([ticketLaboratoryGroupUpdate], {
             ticket: (_b = response === null || response === void 0 ? void 0 : response.ticketLaboratoryGroup) === null || _b === void 0 ? void 0 : _b.ticket,
             customer: (_c = response === null || response === void 0 ? void 0 : response.ticketLaboratoryGroup) === null || _c === void 0 ? void 0 : _c.customer,
@@ -62248,17 +61996,17 @@ let TicketChangeLaboratoryService = class TicketChangeLaboratoryService {
     async cancelResult(options) {
         const { oid, ticketId, ticketLaboratoryGroupId } = options;
         const ticketLaboratoryGroupUpdate = await this.ticketLaboratoryGroupRepository.updateOneAndReturnEntity({ oid, id: ticketLaboratoryGroupId }, { status: variable_1.TicketLaboratoryStatus.Pending });
-        const ticketLaboratoryUpdateList = await this.ticketLaboratoryRepository.updateAndReturnEntity({ oid, ticketId, ticketLaboratoryGroupId }, { status: variable_1.TicketLaboratoryStatus.Pending });
-        const ticketLaboratoryResultDestroyList = await this.ticketLaboratoryResultRepository.deleteAndReturnEntity({
+        const ticketLaboratoryModifiedList = await this.ticketLaboratoryRepository.updateAndReturnEntity({ oid, ticketId, ticketLaboratoryGroupId }, { status: variable_1.TicketLaboratoryStatus.Pending });
+        const ticketLaboratoryResultDestroyedList = await this.ticketLaboratoryResultRepository.deleteAndReturnEntity({
             oid,
             ticketId,
             ticketLaboratoryGroupId,
         });
         this.socketEmitService.socketTicketLaboratoryListChange(oid, {
             ticketId,
-            ticketLaboratoryGroupUpsertList: [ticketLaboratoryGroupUpdate],
-            ticketLaboratoryUpsertList: ticketLaboratoryUpdateList,
-            ticketLaboratoryResultDestroyList,
+            ticketLaboratoryGroupUpsertedList: [ticketLaboratoryGroupUpdate],
+            ticketLaboratoryUpsertedList: ticketLaboratoryModifiedList,
+            ticketLaboratoryResultDestroyedList,
         });
         return true;
     }
@@ -62266,12 +62014,12 @@ let TicketChangeLaboratoryService = class TicketChangeLaboratoryService {
 exports.TicketChangeLaboratoryService = TicketChangeLaboratoryService;
 exports.TicketChangeLaboratoryService = TicketChangeLaboratoryService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof repositories_1.TicketLaboratoryRepository !== "undefined" && repositories_1.TicketLaboratoryRepository) === "function" ? _b : Object, typeof (_c = typeof repositories_1.TicketLaboratoryGroupRepository !== "undefined" && repositories_1.TicketLaboratoryGroupRepository) === "function" ? _c : Object, typeof (_d = typeof repositories_1.TicketLaboratoryResultRepository !== "undefined" && repositories_1.TicketLaboratoryResultRepository) === "function" ? _d : Object, typeof (_e = typeof operations_1.TicketAddSelectLaboratoryOperation !== "undefined" && operations_1.TicketAddSelectLaboratoryOperation) === "function" ? _e : Object, typeof (_f = typeof operations_1.TicketChangeSelectLaboratoryOperation !== "undefined" && operations_1.TicketChangeSelectLaboratoryOperation) === "function" ? _f : Object, typeof (_g = typeof operations_1.TicketUpdateTicketLaboratoryOperation !== "undefined" && operations_1.TicketUpdateTicketLaboratoryOperation) === "function" ? _g : Object, typeof (_h = typeof operations_1.TicketDestroyTicketLaboratoryOperation !== "undefined" && operations_1.TicketDestroyTicketLaboratoryOperation) === "function" ? _h : Object, typeof (_j = typeof operations_1.TicketDestroyTicketLaboratoryGroupOperation !== "undefined" && operations_1.TicketDestroyTicketLaboratoryGroupOperation) === "function" ? _j : Object, typeof (_k = typeof ticket_change_user_service_1.TicketChangeUserService !== "undefined" && ticket_change_user_service_1.TicketChangeUserService) === "function" ? _k : Object, typeof (_l = typeof api_ticket_laboratory_group_service_1.ApiTicketLaboratoryGroupService !== "undefined" && api_ticket_laboratory_group_service_1.ApiTicketLaboratoryGroupService) === "function" ? _l : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof repositories_1.TicketLaboratoryRepository !== "undefined" && repositories_1.TicketLaboratoryRepository) === "function" ? _b : Object, typeof (_c = typeof repositories_1.TicketLaboratoryGroupRepository !== "undefined" && repositories_1.TicketLaboratoryGroupRepository) === "function" ? _c : Object, typeof (_d = typeof repositories_1.TicketLaboratoryResultRepository !== "undefined" && repositories_1.TicketLaboratoryResultRepository) === "function" ? _d : Object, typeof (_e = typeof operations_1.TicketAddSelectLaboratoryOperation !== "undefined" && operations_1.TicketAddSelectLaboratoryOperation) === "function" ? _e : Object, typeof (_f = typeof operations_1.TicketChangeSelectLaboratoryOperation !== "undefined" && operations_1.TicketChangeSelectLaboratoryOperation) === "function" ? _f : Object, typeof (_g = typeof operations_1.TicketUpdateTicketLaboratoryOperation !== "undefined" && operations_1.TicketUpdateTicketLaboratoryOperation) === "function" ? _g : Object, typeof (_h = typeof operations_1.TicketDestroyTicketLaboratoryOperation !== "undefined" && operations_1.TicketDestroyTicketLaboratoryOperation) === "function" ? _h : Object, typeof (_j = typeof operations_1.TicketDestroyTicketLaboratoryGroupOperation !== "undefined" && operations_1.TicketDestroyTicketLaboratoryGroupOperation) === "function" ? _j : Object, typeof (_k = typeof api_ticket_laboratory_group_service_1.ApiTicketLaboratoryGroupService !== "undefined" && api_ticket_laboratory_group_service_1.ApiTicketLaboratoryGroupService) === "function" ? _k : Object])
 ], TicketChangeLaboratoryService);
 
 
 /***/ }),
-/* 756 */
+/* 752 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -62285,15 +62033,14 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketChangeProcedureModule = void 0;
 const common_1 = __webpack_require__(3);
 const api_ticket_procedure_service_1 = __webpack_require__(363);
-const ticket_change_user_module_1 = __webpack_require__(739);
-const ticket_change_procedure_controller_1 = __webpack_require__(757);
-const ticket_change_procedure_service_1 = __webpack_require__(766);
+const ticket_change_procedure_controller_1 = __webpack_require__(753);
+const ticket_change_procedure_service_1 = __webpack_require__(761);
 let TicketChangeProcedureModule = class TicketChangeProcedureModule {
 };
 exports.TicketChangeProcedureModule = TicketChangeProcedureModule;
 exports.TicketChangeProcedureModule = TicketChangeProcedureModule = __decorate([
     (0, common_1.Module)({
-        imports: [ticket_change_user_module_1.TicketChangeUserModule],
+        imports: [],
         controllers: [ticket_change_procedure_controller_1.TicketChangeProcedureController],
         providers: [ticket_change_procedure_service_1.TicketChangeProcedureService, api_ticket_procedure_service_1.ApiTicketProcedureService],
         exports: [ticket_change_procedure_service_1.TicketChangeProcedureService],
@@ -62302,7 +62049,7 @@ exports.TicketChangeProcedureModule = TicketChangeProcedureModule = __decorate([
 
 
 /***/ }),
-/* 757 */
+/* 753 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -62328,10 +62075,10 @@ const interceptor_1 = __webpack_require__(251);
 const external_request_1 = __webpack_require__(238);
 const permission_enum_1 = __webpack_require__(84);
 const request_1 = __webpack_require__(305);
-const request_2 = __webpack_require__(758);
-const ticket_add_ticket_procedure_list_body_1 = __webpack_require__(759);
-const ticket_update_result_procedure_request_1 = __webpack_require__(764);
-const ticket_change_procedure_service_1 = __webpack_require__(766);
+const request_2 = __webpack_require__(754);
+const ticket_add_ticket_procedure_list_body_1 = __webpack_require__(755);
+const ticket_update_result_procedure_request_1 = __webpack_require__(760);
+const ticket_change_procedure_service_1 = __webpack_require__(761);
 let TicketChangeProcedureController = class TicketChangeProcedureController {
     constructor(ticketChangeProcedureService) {
         this.ticketChangeProcedureService = ticketChangeProcedureService;
@@ -62352,8 +62099,8 @@ let TicketChangeProcedureController = class TicketChangeProcedureController {
         });
         return { data };
     }
-    async updateTicketProcedure({ oid }, { ticketId, ticketProcedureId }, body) {
-        const data = await this.ticketChangeProcedureService.updateTicketProcedure({
+    async updateRequestTicketProcedure({ oid }, { ticketId, ticketProcedureId }, body) {
+        const data = await this.ticketChangeProcedureService.updateRequestTicketProcedure({
             oid,
             ticketId,
             ticketProcedureId,
@@ -62378,8 +62125,8 @@ let TicketChangeProcedureController = class TicketChangeProcedureController {
         });
         return { data };
     }
-    async cancelTicketProcedureItem({ oid }, { ticketId }, body) {
-        const data = await this.ticketChangeProcedureService.cancelTicketProcedureItem({
+    async cancelResultTicketProcedureItem({ oid }, { ticketId }, body) {
+        const data = await this.ticketChangeProcedureService.cancelResultTicketProcedureItem({
             oid,
             ticketId,
             body,
@@ -62390,7 +62137,7 @@ let TicketChangeProcedureController = class TicketChangeProcedureController {
 exports.TicketChangeProcedureController = TicketChangeProcedureController;
 __decorate([
     (0, common_1.Post)(':ticketId/procedure/add-ticket-procedure-list'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
@@ -62400,7 +62147,7 @@ __decorate([
 ], TicketChangeProcedureController.prototype, "addTicketProcedureList", null);
 __decorate([
     (0, common_1.Delete)(':ticketId/procedure/destroy-ticket-procedure/:ticketProcedureId'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __metadata("design:type", Function),
@@ -62408,18 +62155,18 @@ __decorate([
     __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], TicketChangeProcedureController.prototype, "destroyTicketProcedure", null);
 __decorate([
-    (0, common_1.Post)(':ticketId/procedure/update-ticket-procedure/:ticketProcedureId'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE),
+    (0, common_1.Post)(':ticketId/procedure/update-request-ticket-procedure/:ticketProcedureId'),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_j = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _j : Object, typeof (_k = typeof request_2.TicketChangeProcedureParams !== "undefined" && request_2.TicketChangeProcedureParams) === "function" ? _k : Object, typeof (_l = typeof request_2.TicketUpdateTicketProcedureBody !== "undefined" && request_2.TicketUpdateTicketProcedureBody) === "function" ? _l : Object]),
+    __metadata("design:paramtypes", [typeof (_j = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _j : Object, typeof (_k = typeof request_2.TicketChangeProcedureParams !== "undefined" && request_2.TicketChangeProcedureParams) === "function" ? _k : Object, typeof (_l = typeof request_2.TicketUpdateRequestTicketProcedureBody !== "undefined" && request_2.TicketUpdateRequestTicketProcedureBody) === "function" ? _l : Object]),
     __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
-], TicketChangeProcedureController.prototype, "updateTicketProcedure", null);
+], TicketChangeProcedureController.prototype, "updateRequestTicketProcedure", null);
 __decorate([
     (0, common_1.Post)(':ticketId/procedure/update-priority-ticket-procedure'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
@@ -62441,15 +62188,15 @@ __decorate([
     __metadata("design:returntype", typeof (_v = typeof Promise !== "undefined" && Promise) === "function" ? _v : Object)
 ], TicketChangeProcedureController.prototype, "updateResultTicketProcedureItem", null);
 __decorate([
-    (0, common_1.Post)(':ticketId/procedure/cancel-ticket-procedure-item'),
+    (0, common_1.Post)(':ticketId/procedure/cancel-result-ticket-procedure-item'),
     (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE_RESULT),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_w = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _w : Object, typeof (_x = typeof request_1.TicketParams !== "undefined" && request_1.TicketParams) === "function" ? _x : Object, typeof (_y = typeof request_2.TicketCancelProcedureItemBody !== "undefined" && request_2.TicketCancelProcedureItemBody) === "function" ? _y : Object]),
+    __metadata("design:paramtypes", [typeof (_w = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _w : Object, typeof (_x = typeof request_1.TicketParams !== "undefined" && request_1.TicketParams) === "function" ? _x : Object, typeof (_y = typeof request_2.TicketCancelResultProcedureItemBody !== "undefined" && request_2.TicketCancelResultProcedureItemBody) === "function" ? _y : Object]),
     __metadata("design:returntype", typeof (_z = typeof Promise !== "undefined" && Promise) === "function" ? _z : Object)
-], TicketChangeProcedureController.prototype, "cancelTicketProcedureItem", null);
+], TicketChangeProcedureController.prototype, "cancelResultTicketProcedureItem", null);
 exports.TicketChangeProcedureController = TicketChangeProcedureController = __decorate([
     (0, swagger_1.ApiTags)('Ticket'),
     (0, swagger_1.ApiBearerAuth)('access-token'),
@@ -62459,7 +62206,7 @@ exports.TicketChangeProcedureController = TicketChangeProcedureController = __de
 
 
 /***/ }),
-/* 758 */
+/* 754 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -62478,17 +62225,16 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(755), exports);
+__exportStar(__webpack_require__(756), exports);
+__exportStar(__webpack_require__(757), exports);
+__exportStar(__webpack_require__(758), exports);
 __exportStar(__webpack_require__(759), exports);
 __exportStar(__webpack_require__(760), exports);
-__exportStar(__webpack_require__(761), exports);
-__exportStar(__webpack_require__(762), exports);
-__exportStar(__webpack_require__(763), exports);
-__exportStar(__webpack_require__(764), exports);
-__exportStar(__webpack_require__(765), exports);
 
 
 /***/ }),
-/* 759 */
+/* 755 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -62511,7 +62257,7 @@ const typescript_helper_1 = __webpack_require__(189);
 const class_validator_custom_1 = __webpack_require__(244);
 const variable_1 = __webpack_require__(21);
 const procedure_entity_1 = __webpack_require__(69);
-const request_1 = __webpack_require__(741);
+const request_1 = __webpack_require__(744);
 class TicketProcedureItemBody {
 }
 __decorate([
@@ -62549,7 +62295,7 @@ __decorate([
     (0, class_transformer_1.Expose)(),
     (0, class_validator_custom_1.IsEnumValue)(procedure_entity_1.ProcedureType),
     __metadata("design:type", typeof (_a = typeof procedure_entity_1.ProcedureType !== "undefined" && procedure_entity_1.ProcedureType) === "function" ? _a : Object)
-], TicketProcedureBasicBody.prototype, "type", void 0);
+], TicketProcedureBasicBody.prototype, "procedureType", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 4 }),
     (0, class_transformer_1.Expose)(),
@@ -62669,7 +62415,7 @@ __decorate([
 
 
 /***/ }),
-/* 760 */
+/* 756 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -62683,38 +62429,38 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketCancelProcedureItemBody = void 0;
+exports.TicketCancelResultProcedureItemBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
 const class_validator_1 = __webpack_require__(243);
-class TicketCancelProcedureItemBody {
+class TicketCancelResultProcedureItemBody {
 }
-exports.TicketCancelProcedureItemBody = TicketCancelProcedureItemBody;
+exports.TicketCancelResultProcedureItemBody = TicketCancelResultProcedureItemBody;
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
-], TicketCancelProcedureItemBody.prototype, "ticketProcedureItemId", void 0);
+], TicketCancelResultProcedureItemBody.prototype, "ticketProcedureItemId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsInt)(),
     __metadata("design:type", Number)
-], TicketCancelProcedureItemBody.prototype, "ticketProcedureId", void 0);
+], TicketCancelResultProcedureItemBody.prototype, "ticketProcedureId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: '' }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], TicketCancelProcedureItemBody.prototype, "cancelReason", void 0);
+], TicketCancelResultProcedureItemBody.prototype, "cancelReason", void 0);
 
 
 /***/ }),
-/* 761 */
+/* 757 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -62757,7 +62503,7 @@ __decorate([
 
 
 /***/ }),
-/* 762 */
+/* 758 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -62806,7 +62552,7 @@ __decorate([
 
 
 /***/ }),
-/* 763 */
+/* 759 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -62819,17 +62565,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketDestroyTicketProcedureParams = exports.TicketAddTicketProcedure = exports.TicketUpdateTicketProcedureListBody = void 0;
+exports.TicketUpdateRequestTicketProcedureBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
 const class_validator_1 = __webpack_require__(243);
 const typescript_helper_1 = __webpack_require__(189);
 const class_validator_custom_1 = __webpack_require__(244);
 const variable_1 = __webpack_require__(21);
-const request_1 = __webpack_require__(741);
-class TicketProcedureBody {
+const request_1 = __webpack_require__(744);
+class TicketProcedureItemBody {
 }
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 56 }),
@@ -62837,14 +62583,51 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], TicketProcedureBody.prototype, "procedureId", void 0);
+], TicketProcedureItemBody.prototype, "id", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: Date.now() }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketProcedureItemBody.prototype, "registeredAt", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketProcedureItemBody.prototype, "indexSession", void 0);
+class TicketProcedureBody {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: variable_1.TicketProcedureStatus.Pending }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsEnumValue)(variable_1.TicketProcedureStatus),
+    __metadata("design:type", typeof (_a = typeof variable_1.TicketProcedureStatus !== "undefined" && variable_1.TicketProcedureStatus) === "function" ? _a : Object)
+], TicketProcedureBody.prototype, "status", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 4 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_custom_1.IsNumberGreaterThan)(0),
+    __metadata("design:type", Number)
+], TicketProcedureBody.prototype, "quantity", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 4 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], TicketProcedureBody.prototype, "quantity", void 0);
+], TicketProcedureBody.prototype, "totalSessions", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 4 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketProcedureBody.prototype, "finishedSessions", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 25000 }),
     (0, class_transformer_1.Expose)(),
@@ -62874,7 +62657,7 @@ __decorate([
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_custom_1.IsEnumValue)(variable_1.DiscountType),
-    __metadata("design:type", typeof (_a = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _a : Object)
+    __metadata("design:type", typeof (_b = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _b : Object)
 ], TicketProcedureBody.prototype, "discountType", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 22500 }),
@@ -62884,63 +62667,36 @@ __decorate([
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
 ], TicketProcedureBody.prototype, "actualPrice", void 0);
-class TicketUpdateTicketProcedureListBody {
+class TicketUpdateRequestTicketProcedureBody {
 }
-exports.TicketUpdateTicketProcedureListBody = TicketUpdateTicketProcedureListBody;
-__decorate([
-    (0, swagger_1.ApiProperty)({ type: TicketProcedureBody, isArray: true }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => TicketProcedureBody),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", Array)
-], TicketUpdateTicketProcedureListBody.prototype, "ticketProcedureList", void 0);
-class TicketAddTicketProcedure {
-}
-exports.TicketAddTicketProcedure = TicketAddTicketProcedure;
+exports.TicketUpdateRequestTicketProcedureBody = TicketUpdateRequestTicketProcedureBody;
 __decorate([
     (0, swagger_1.ApiProperty)({ type: request_1.TicketUserBasicBody, isArray: true }),
     (0, class_transformer_1.Expose)(),
     (0, class_transformer_1.Type)(() => request_1.TicketUserBasicBody),
-    (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsArray)(),
     (0, class_validator_1.ValidateNested)({ each: true }),
     __metadata("design:type", Array)
-], TicketAddTicketProcedure.prototype, "ticketUserList", void 0);
+], TicketUpdateRequestTicketProcedureBody.prototype, "ticketUserRequestList", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: TicketProcedureItemBody }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => TicketProcedureItemBody),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], TicketUpdateRequestTicketProcedureBody.prototype, "ticketProcedureItemList", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ type: TicketProcedureBody }),
     (0, class_transformer_1.Expose)(),
     (0, class_transformer_1.Type)(() => TicketProcedureBody),
-    (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.ValidateNested)({ each: true }),
     __metadata("design:type", TicketProcedureBody)
-], TicketAddTicketProcedure.prototype, "ticketProcedure", void 0);
-class TicketDestroyTicketProcedureParams {
-}
-exports.TicketDestroyTicketProcedureParams = TicketDestroyTicketProcedureParams;
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 45 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => Number),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsInt)(),
-    (0, class_validator_custom_1.IsNumberGreaterThan)(0),
-    __metadata("design:type", Number)
-], TicketDestroyTicketProcedureParams.prototype, "ticketId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 45 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => Number),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsInt)(),
-    (0, class_validator_custom_1.IsNumberGreaterThan)(0),
-    __metadata("design:type", Number)
-], TicketDestroyTicketProcedureParams.prototype, "ticketProcedureId", void 0);
+], TicketUpdateRequestTicketProcedureBody.prototype, "ticketProcedure", void 0);
 
 
 /***/ }),
-/* 764 */
+/* 760 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -62970,7 +62726,7 @@ const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
 const class_validator_1 = __webpack_require__(243);
 const file_1 = __webpack_require__(263);
-const request_1 = __webpack_require__(741);
+const request_1 = __webpack_require__(744);
 class TicketProcedureItemUpdateBody extends file_1.MultipleFileUpload {
 }
 exports.TicketProcedureItemUpdateBody = TicketProcedureItemUpdateBody;
@@ -63128,7 +62884,7 @@ __decorate([
 
 
 /***/ }),
-/* 765 */
+/* 761 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -63141,151 +62897,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a, _b;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketUpdateTicketProcedureBody = void 0;
-const swagger_1 = __webpack_require__(6);
-const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(243);
-const typescript_helper_1 = __webpack_require__(189);
-const class_validator_custom_1 = __webpack_require__(244);
-const variable_1 = __webpack_require__(21);
-const request_1 = __webpack_require__(741);
-class TicketProcedureItemBody {
-}
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 56 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketProcedureItemBody.prototype, "id", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: Date.now() }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketProcedureItemBody.prototype, "registeredAt", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)(),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketProcedureItemBody.prototype, "indexSession", void 0);
-class TicketProcedureBody {
-}
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: variable_1.TicketProcedureStatus.Pending }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_custom_1.IsEnumValue)(variable_1.TicketProcedureStatus),
-    __metadata("design:type", typeof (_a = typeof variable_1.TicketProcedureStatus !== "undefined" && variable_1.TicketProcedureStatus) === "function" ? _a : Object)
-], TicketProcedureBody.prototype, "status", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 4 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_custom_1.IsNumberGreaterThan)(0),
-    __metadata("design:type", Number)
-], TicketProcedureBody.prototype, "quantity", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 4 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketProcedureBody.prototype, "totalSessions", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 4 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketProcedureBody.prototype, "finishedSessions", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 25000 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketProcedureBody.prototype, "expectedPrice", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 22500 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => Math.round(value || 0)),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketProcedureBody.prototype, "discountMoney", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 22500 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Max)(100),
-    (0, class_validator_1.Min)(0),
-    __metadata("design:type", Number)
-], TicketProcedureBody.prototype, "discountPercent", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ enum: (0, typescript_helper_1.valuesEnum)(variable_1.DiscountType), example: variable_1.DiscountType.VND }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_custom_1.IsEnumValue)(variable_1.DiscountType),
-    __metadata("design:type", typeof (_b = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _b : Object)
-], TicketProcedureBody.prototype, "discountType", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 22500 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => Math.round(value || 0)),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketProcedureBody.prototype, "actualPrice", void 0);
-class TicketUpdateTicketProcedureBody {
-}
-exports.TicketUpdateTicketProcedureBody = TicketUpdateTicketProcedureBody;
-__decorate([
-    (0, swagger_1.ApiProperty)({ type: request_1.TicketUserBasicBody, isArray: true }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => request_1.TicketUserBasicBody),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", Array)
-], TicketUpdateTicketProcedureBody.prototype, "ticketUserRequestList", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ type: TicketProcedureItemBody }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => TicketProcedureItemBody),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", Array)
-], TicketUpdateTicketProcedureBody.prototype, "ticketProcedureItemList", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ type: TicketProcedureBody }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => TicketProcedureBody),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", TicketProcedureBody)
-], TicketUpdateTicketProcedureBody.prototype, "ticketProcedure", void 0);
-
-
-/***/ }),
-/* 766 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketChangeProcedureService = void 0;
 const common_1 = __webpack_require__(3);
@@ -63294,14 +62906,14 @@ const variable_1 = __webpack_require__(21);
 const appointment_entity_1 = __webpack_require__(47);
 const image_entity_1 = __webpack_require__(19);
 const position_entity_1 = __webpack_require__(76);
+const procedure_entity_1 = __webpack_require__(69);
 const operations_1 = __webpack_require__(164);
 const repositories_1 = __webpack_require__(42);
 const image_manager_service_1 = __webpack_require__(256);
 const socket_emit_service_1 = __webpack_require__(341);
 const api_ticket_procedure_service_1 = __webpack_require__(363);
-const ticket_change_user_service_1 = __webpack_require__(746);
 let TicketChangeProcedureService = class TicketChangeProcedureService {
-    constructor(socketEmitService, imageManagerService, ticketProcedureRepository, ticketProcedureItemRepository, ticketUserRepository, appointmentRepository, ticketAddTicketProcedureListOperation, ticketDestroyTicketProcedureOperation, ticketUpdateTicketProcedureOperation, ticketChangeTicketUserOperation, ticketChangeUserService, apiTicketProcedureService) {
+    constructor(socketEmitService, imageManagerService, ticketProcedureRepository, ticketProcedureItemRepository, ticketUserRepository, appointmentRepository, ticketAddTicketProcedureListOperation, ticketDestroyTicketProcedureOperation, ticketUpdateTicketProcedureOperation, ticketChangeTicketUserOperation, apiTicketProcedureService) {
         this.socketEmitService = socketEmitService;
         this.imageManagerService = imageManagerService;
         this.ticketProcedureRepository = ticketProcedureRepository;
@@ -63312,7 +62924,6 @@ let TicketChangeProcedureService = class TicketChangeProcedureService {
         this.ticketDestroyTicketProcedureOperation = ticketDestroyTicketProcedureOperation;
         this.ticketUpdateTicketProcedureOperation = ticketUpdateTicketProcedureOperation;
         this.ticketChangeTicketUserOperation = ticketChangeTicketUserOperation;
-        this.ticketChangeUserService = ticketChangeUserService;
         this.apiTicketProcedureService = apiTicketProcedureService;
     }
     async addTicketProcedureList(options) {
@@ -63332,11 +62943,13 @@ let TicketChangeProcedureService = class TicketChangeProcedureService {
         this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified });
         this.socketEmitService.socketTicketProcedureListChange(oid, {
             ticketId,
-            ticketProcedureUpsertList: ticketProcedureCreatedList,
+            ticketProcedureUpsertedList: ticketProcedureCreatedList,
+            ticketUserUpsertedList: ticketUserCreatedList,
         });
-        this.socketEmitService.socketTicketUserListChange(oid, {
-            ticketId,
-            ticketUserUpsertList: ticketUserCreatedList,
+        ticketProcedureCreatedList.forEach((tr) => {
+            tr.ticketUserRequestList = ticketUserCreatedList.filter((tu) => {
+                return tr.id === tu.ticketItemId;
+            });
         });
         return { ticketModified, ticketProcedureCreatedList };
     }
@@ -63351,19 +62964,14 @@ let TicketChangeProcedureService = class TicketChangeProcedureService {
         this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket });
         this.socketEmitService.socketTicketProcedureListChange(oid, {
             ticketId,
-            ticketProcedureDestroyList: [result.ticketProcedureDestroy],
+            ticketProcedureDestroyedList: [result.ticketProcedureDestroyed],
+            ticketUserDestroyedList: result.ticketUserDestroyedList || [],
         });
-        if (result.ticketUserDestroyList) {
-            this.socketEmitService.socketTicketUserListChange(oid, {
-                ticketId,
-                ticketUserDestroyList: result.ticketUserDestroyList,
-            });
-        }
-        return true;
+        return { ticketId, ticketProcedureId };
     }
-    async updateTicketProcedure(options) {
+    async updateRequestTicketProcedure(options) {
         const { oid, ticketId, ticketProcedureId, body } = options;
-        const result = await this.ticketUpdateTicketProcedureOperation.updateTicketProcedure({
+        const updateResult = await this.ticketUpdateTicketProcedureOperation.updateTicketProcedure({
             oid,
             ticketId,
             ticketProcedureId,
@@ -63371,7 +62979,7 @@ let TicketChangeProcedureService = class TicketChangeProcedureService {
             ticketProcedureItemUpdateList: body.ticketProcedureItemList,
             ticketUserRequestList: body.ticketUserRequestList,
         });
-        const { ticketModified, ticketProcedureModified } = result;
+        const { ticketModified, ticketProcedureModified } = updateResult;
         await this.apiTicketProcedureService.generateRelation({
             oid,
             ticketProcedureList: [ticketProcedureModified],
@@ -63380,13 +62988,11 @@ let TicketChangeProcedureService = class TicketChangeProcedureService {
         this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified });
         this.socketEmitService.socketTicketProcedureListChange(oid, {
             ticketId,
-            ticketProcedureUpsertList: [ticketProcedureModified],
+            ticketProcedureUpsertedList: [ticketProcedureModified],
+            ticketUserUpsertedList: updateResult.ticketUserCreatedList,
+            ticketUserDestroyedList: updateResult.ticketUserDestroyedList,
         });
-        this.socketEmitService.socketTicketUserListChange(oid, {
-            ticketId,
-            ticketUserUpsertList: result.ticketUserCreatedList,
-            ticketUserDestroyList: result.ticketUserDestroyList,
-        });
+        ticketProcedureModified.ticketUserRequestList = updateResult.ticketUserCreatedList || [];
         return { ticketProcedureModified };
     }
     async updatePriorityTicketProcedure(options) {
@@ -63398,7 +63004,7 @@ let TicketChangeProcedureService = class TicketChangeProcedureService {
         });
         this.socketEmitService.socketTicketProcedureListChange(oid, {
             ticketId,
-            ticketProcedureUpsertList: ticketProcedureList,
+            ticketProcedureUpsertedList: ticketProcedureList,
         });
         return { ticketProcedureList };
     }
@@ -63421,8 +63027,10 @@ let TicketChangeProcedureService = class TicketChangeProcedureService {
             }
         }
         let imageIdsUpdateString = ticketProcedureItemOrigin.imageIds;
+        let imageDestroyedList = [];
+        let imageCreatedList = [];
         if (body.imagesChange) {
-            const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
+            const imageChangeResponse = await this.imageManagerService.changeCloudinaryImageLink({
                 oid,
                 files,
                 imageIdsWait: body.imagesChange.imageIdsWait,
@@ -63436,7 +63044,9 @@ let TicketChangeProcedureService = class TicketChangeProcedureService {
                     ticketItemChildId: ticketProcedureItemId,
                 },
             });
-            imageIdsUpdateString = JSON.stringify(imageIdsUpdate);
+            imageIdsUpdateString = JSON.stringify(imageChangeResponse.imageIdsNew);
+            imageDestroyedList = imageChangeResponse.imageDestroyedList;
+            imageCreatedList = imageChangeResponse.imageCreatedList;
         }
         const ticketProcedureItemModified = await this.ticketProcedureItemRepository.updateOneAndReturnEntity({
             oid,
@@ -63460,19 +63070,22 @@ let TicketChangeProcedureService = class TicketChangeProcedureService {
                     ? variable_1.TicketProcedureStatus.Executing
                     : variable_1.TicketProcedureStatus.Completed,
             });
-            await this.appointmentRepository.updateOneAndReturnEntity({
-                oid,
-                customerId: ticketProcedureOrigin.customerId,
-                fromTicketId: ticketId,
-                toTicketId: ticketId,
-                ticketProcedureId,
-                ticketProcedureItemId,
-            }, {
-                status: appointment_entity_1.AppointmentStatus.Completed,
-                cancelReason: '',
-            });
+            if (ticketProcedureModified.procedureType === procedure_entity_1.ProcedureType.Regimen) {
+                await this.appointmentRepository.updateOneAndReturnEntity({
+                    oid,
+                    customerId: ticketProcedureOrigin.customerId,
+                    fromTicketId: ticketId,
+                    toTicketId: ticketId,
+                    ticketProcedureId,
+                    ticketProcedureItemId,
+                }, {
+                    status: appointment_entity_1.AppointmentStatus.Completed,
+                    cancelReason: '',
+                });
+            }
         }
-        let ticketUserList = [];
+        let ticketUserCreatedList = [];
+        let ticketUserDestroyedList = [];
         if (body.ticketUserResultList) {
             const changeUserResult = await this.ticketChangeTicketUserOperation.changeTicketUserList({
                 oid,
@@ -63487,15 +63100,11 @@ let TicketChangeProcedureService = class TicketChangeProcedureService {
                     ticketItemChildId: ticketProcedureItemId,
                 },
             });
-            ticketUserList = changeUserResult.ticketUserCreatedList;
+            ticketUserCreatedList = changeUserResult.ticketUserCreatedList;
+            ticketUserDestroyedList = changeUserResult.ticketUserDestroyedList;
             this.socketEmitService.socketTicketChange(oid, {
                 type: 'UPDATE',
                 ticket: changeUserResult.ticketModified,
-            });
-            this.socketEmitService.socketTicketUserListChange(oid, {
-                ticketId,
-                ticketUserUpsertList: changeUserResult.ticketUserCreatedList,
-                ticketUserDestroyList: changeUserResult.ticketUserDestroyList,
             });
         }
         await this.apiTicketProcedureService.generateRelation({
@@ -63505,14 +63114,18 @@ let TicketChangeProcedureService = class TicketChangeProcedureService {
                 ticketProcedureItemList: { imageList: true, ticketUserResultList: true },
                 ticketUserRequestList: true,
             },
-        }),
-            this.socketEmitService.socketTicketProcedureListChange(oid, {
-                ticketId,
-                ticketProcedureUpsertList: [ticketProcedureModified],
-            });
+        });
+        this.socketEmitService.socketTicketProcedureListChange(oid, {
+            ticketId,
+            ticketProcedureUpsertedList: [ticketProcedureModified],
+            ticketUserUpsertedList: ticketUserCreatedList,
+            ticketUserDestroyedList,
+            imageDestroyedList,
+            imageUpsertedList: imageCreatedList,
+        });
         return { ticketProcedureModified };
     }
-    async cancelTicketProcedureItem(options) {
+    async cancelResultTicketProcedureItem(options) {
         const { oid, ticketId, body } = options;
         const { ticketProcedureId, ticketProcedureItemId } = body;
         const ticketProcedureOrigin = await this.ticketProcedureRepository.findOneBy({
@@ -63548,19 +63161,22 @@ let TicketChangeProcedureService = class TicketChangeProcedureService {
                     : variable_1.TicketProcedureStatus.Completed,
             });
         }
-        await this.appointmentRepository.updateOneAndReturnEntity({
-            oid,
-            customerId: ticketProcedureOrigin.customerId,
-            fromTicketId: ticketId,
-            toTicketId: ticketId,
-            ticketProcedureId,
-            ticketProcedureItemId,
-        }, {
-            status: appointment_entity_1.AppointmentStatus.Cancelled,
-            cancelReason: body.cancelReason,
-        });
+        if (ticketProcedureModified.procedureType === procedure_entity_1.ProcedureType.Regimen) {
+            await this.appointmentRepository.updateOneAndReturnEntity({
+                oid,
+                customerId: ticketProcedureOrigin.customerId,
+                fromTicketId: ticketId,
+                toTicketId: ticketId,
+                ticketProcedureId,
+                ticketProcedureItemId,
+            }, {
+                status: appointment_entity_1.AppointmentStatus.Cancelled,
+                cancelReason: body.cancelReason,
+            });
+        }
+        let ticketUserDestroyedList = [];
         if (ticketProcedureItemOrigin.status === variable_1.TicketProcedureStatus.Completed) {
-            await this.ticketUserRepository.deleteAndReturnEntity({
+            ticketUserDestroyedList = await this.ticketUserRepository.deleteAndReturnEntity({
                 oid,
                 positionType: position_entity_1.PositionType.ProcedureResult,
                 ticketId,
@@ -63578,7 +63194,8 @@ let TicketChangeProcedureService = class TicketChangeProcedureService {
         });
         this.socketEmitService.socketTicketProcedureListChange(oid, {
             ticketId,
-            ticketProcedureUpsertList: [ticketProcedureModified],
+            ticketProcedureUpsertedList: [ticketProcedureModified],
+            ticketUserDestroyedList,
         });
         return { ticketProcedureModified };
     }
@@ -63586,12 +63203,12 @@ let TicketChangeProcedureService = class TicketChangeProcedureService {
 exports.TicketChangeProcedureService = TicketChangeProcedureService;
 exports.TicketChangeProcedureService = TicketChangeProcedureService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof image_manager_service_1.ImageManagerService !== "undefined" && image_manager_service_1.ImageManagerService) === "function" ? _b : Object, typeof (_c = typeof repositories_1.TicketProcedureRepository !== "undefined" && repositories_1.TicketProcedureRepository) === "function" ? _c : Object, typeof (_d = typeof repositories_1.TicketProcedureItemRepository !== "undefined" && repositories_1.TicketProcedureItemRepository) === "function" ? _d : Object, typeof (_e = typeof repositories_1.TicketUserRepository !== "undefined" && repositories_1.TicketUserRepository) === "function" ? _e : Object, typeof (_f = typeof repositories_1.AppointmentRepository !== "undefined" && repositories_1.AppointmentRepository) === "function" ? _f : Object, typeof (_g = typeof operations_1.TicketAddTicketProcedureListOperation !== "undefined" && operations_1.TicketAddTicketProcedureListOperation) === "function" ? _g : Object, typeof (_h = typeof operations_1.TicketDestroyTicketProcedureOperation !== "undefined" && operations_1.TicketDestroyTicketProcedureOperation) === "function" ? _h : Object, typeof (_j = typeof operations_1.TicketUpdateTicketProcedureOperation !== "undefined" && operations_1.TicketUpdateTicketProcedureOperation) === "function" ? _j : Object, typeof (_k = typeof operations_1.TicketChangeTicketUserOperation !== "undefined" && operations_1.TicketChangeTicketUserOperation) === "function" ? _k : Object, typeof (_l = typeof ticket_change_user_service_1.TicketChangeUserService !== "undefined" && ticket_change_user_service_1.TicketChangeUserService) === "function" ? _l : Object, typeof (_m = typeof api_ticket_procedure_service_1.ApiTicketProcedureService !== "undefined" && api_ticket_procedure_service_1.ApiTicketProcedureService) === "function" ? _m : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof image_manager_service_1.ImageManagerService !== "undefined" && image_manager_service_1.ImageManagerService) === "function" ? _b : Object, typeof (_c = typeof repositories_1.TicketProcedureRepository !== "undefined" && repositories_1.TicketProcedureRepository) === "function" ? _c : Object, typeof (_d = typeof repositories_1.TicketProcedureItemRepository !== "undefined" && repositories_1.TicketProcedureItemRepository) === "function" ? _d : Object, typeof (_e = typeof repositories_1.TicketUserRepository !== "undefined" && repositories_1.TicketUserRepository) === "function" ? _e : Object, typeof (_f = typeof repositories_1.AppointmentRepository !== "undefined" && repositories_1.AppointmentRepository) === "function" ? _f : Object, typeof (_g = typeof operations_1.TicketAddTicketProcedureListOperation !== "undefined" && operations_1.TicketAddTicketProcedureListOperation) === "function" ? _g : Object, typeof (_h = typeof operations_1.TicketDestroyTicketProcedureOperation !== "undefined" && operations_1.TicketDestroyTicketProcedureOperation) === "function" ? _h : Object, typeof (_j = typeof operations_1.TicketUpdateTicketProcedureOperation !== "undefined" && operations_1.TicketUpdateTicketProcedureOperation) === "function" ? _j : Object, typeof (_k = typeof operations_1.TicketChangeTicketUserOperation !== "undefined" && operations_1.TicketChangeTicketUserOperation) === "function" ? _k : Object, typeof (_l = typeof api_ticket_procedure_service_1.ApiTicketProcedureService !== "undefined" && api_ticket_procedure_service_1.ApiTicketProcedureService) === "function" ? _l : Object])
 ], TicketChangeProcedureService);
 
 
 /***/ }),
-/* 767 */
+/* 762 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -63604,9 +63221,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketChangeProductModule = void 0;
 const common_1 = __webpack_require__(3);
-const ticket_change_user_module_1 = __webpack_require__(739);
-const ticket_change_product_controller_1 = __webpack_require__(768);
-const ticket_change_product_service_1 = __webpack_require__(777);
+const ticket_change_user_module_1 = __webpack_require__(763);
+const ticket_change_product_controller_1 = __webpack_require__(766);
+const ticket_change_product_service_1 = __webpack_require__(775);
 let TicketChangeProductModule = class TicketChangeProductModule {
 };
 exports.TicketChangeProductModule = TicketChangeProductModule;
@@ -63620,7 +63237,36 @@ exports.TicketChangeProductModule = TicketChangeProductModule = __decorate([
 
 
 /***/ }),
-/* 768 */
+/* 763 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TicketChangeUserModule = void 0;
+const common_1 = __webpack_require__(3);
+const ticket_change_user_controller_1 = __webpack_require__(764);
+const ticket_change_user_service_1 = __webpack_require__(765);
+let TicketChangeUserModule = class TicketChangeUserModule {
+};
+exports.TicketChangeUserModule = TicketChangeUserModule;
+exports.TicketChangeUserModule = TicketChangeUserModule = __decorate([
+    (0, common_1.Module)({
+        imports: [],
+        controllers: [ticket_change_user_controller_1.TicketChangeUserController],
+        providers: [ticket_change_user_service_1.TicketChangeUserService],
+        exports: [ticket_change_user_service_1.TicketChangeUserService],
+    })
+], TicketChangeUserModule);
+
+
+/***/ }),
+/* 764 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -63636,7 +63282,168 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, _17, _18, _19, _20, _21;
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TicketChangeUserController = void 0;
+const common_1 = __webpack_require__(3);
+const swagger_1 = __webpack_require__(6);
+const user_guard_1 = __webpack_require__(157);
+const external_request_1 = __webpack_require__(238);
+const permission_enum_1 = __webpack_require__(84);
+const ticket_params_1 = __webpack_require__(331);
+const request_1 = __webpack_require__(744);
+const ticket_change_user_service_1 = __webpack_require__(765);
+let TicketChangeUserController = class TicketChangeUserController {
+    constructor(ticketChangeUserService) {
+        this.ticketChangeUserService = ticketChangeUserService;
+    }
+    async destroyTicketUser({ oid }, { ticketId, ticketUserId }) {
+        const data = await this.ticketChangeUserService.destroyTicketUser({
+            oid,
+            ticketId,
+            ticketUserId,
+        });
+        return { data };
+    }
+    async updateTicketUserCommission({ oid }, { ticketId, ticketUserId }, body) {
+        const data = await this.ticketChangeUserService.updateTicketUserCommission({
+            oid,
+            ticketId,
+            ticketUserId,
+            body,
+        });
+        return { data };
+    }
+    async updateTicketUserPositionList({ oid }, { ticketId }, body) {
+        const data = true;
+        return { data };
+    }
+};
+exports.TicketChangeUserController = TicketChangeUserController;
+__decorate([
+    (0, common_1.Delete)(':ticketId/user/destroy-ticket-user/:ticketUserId'),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_USER_POSITION),
+    __param(0, (0, external_request_1.External)()),
+    __param(1, (0, common_1.Param)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_b = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _b : Object, typeof (_c = typeof request_1.TicketChangeUserParams !== "undefined" && request_1.TicketChangeUserParams) === "function" ? _c : Object]),
+    __metadata("design:returntype", typeof (_d = typeof Promise !== "undefined" && Promise) === "function" ? _d : Object)
+], TicketChangeUserController.prototype, "destroyTicketUser", null);
+__decorate([
+    (0, common_1.Post)(':ticketId/user/update-ticket-user-commission/:ticketUserId'),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_USER_COMMISSION),
+    __param(0, (0, external_request_1.External)()),
+    __param(1, (0, common_1.Param)()),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_e = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _e : Object, typeof (_f = typeof request_1.TicketChangeUserParams !== "undefined" && request_1.TicketChangeUserParams) === "function" ? _f : Object, typeof (_g = typeof request_1.TicketUpdateTicketUserCommissionBody !== "undefined" && request_1.TicketUpdateTicketUserCommissionBody) === "function" ? _g : Object]),
+    __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
+], TicketChangeUserController.prototype, "updateTicketUserCommission", null);
+__decorate([
+    (0, common_1.Post)(':ticketId/user/update-ticket-user-position'),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_USER_POSITION),
+    __param(0, (0, external_request_1.External)()),
+    __param(1, (0, common_1.Param)()),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_j = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _j : Object, typeof (_k = typeof ticket_params_1.TicketParams !== "undefined" && ticket_params_1.TicketParams) === "function" ? _k : Object, typeof (_l = typeof request_1.TicketUpdateTicketUserPositionListBody !== "undefined" && request_1.TicketUpdateTicketUserPositionListBody) === "function" ? _l : Object]),
+    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
+], TicketChangeUserController.prototype, "updateTicketUserPositionList", null);
+exports.TicketChangeUserController = TicketChangeUserController = __decorate([
+    (0, swagger_1.ApiTags)('Ticket'),
+    (0, swagger_1.ApiBearerAuth)('access-token'),
+    (0, common_1.Controller)('ticket'),
+    __metadata("design:paramtypes", [typeof (_a = typeof ticket_change_user_service_1.TicketChangeUserService !== "undefined" && ticket_change_user_service_1.TicketChangeUserService) === "function" ? _a : Object])
+], TicketChangeUserController);
+
+
+/***/ }),
+/* 765 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TicketChangeUserService = void 0;
+const common_1 = __webpack_require__(3);
+const operations_1 = __webpack_require__(164);
+const repositories_1 = __webpack_require__(42);
+const socket_emit_service_1 = __webpack_require__(341);
+let TicketChangeUserService = class TicketChangeUserService {
+    constructor(socketEmitService, ticketUserRepository, ticketChangeTicketUserOperation) {
+        this.socketEmitService = socketEmitService;
+        this.ticketUserRepository = ticketUserRepository;
+        this.ticketChangeTicketUserOperation = ticketChangeTicketUserOperation;
+    }
+    async destroyTicketUser(options) {
+        const { oid, ticketId, ticketUserId } = options;
+        const { ticketUserDestroyedList, ticketModified } = await this.ticketChangeTicketUserOperation.destroyTicketUserList({
+            oid,
+            ticketId,
+            condition: { id: { IN: [ticketUserId] } },
+        });
+        this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified });
+        this.socketEmitService.socketTicketUserListChange(oid, {
+            ticketId,
+            ticketUserDestroyedList,
+        });
+        return { ticketUserDestroyedList };
+    }
+    async updateTicketUserCommission(options) {
+        const { oid, ticketId, ticketUserId, body } = options;
+        const { ticketUserModified, ticketModified } = await this.ticketChangeTicketUserOperation.updateTicketUserCommission({
+            oid,
+            ticketId,
+            ticketUserId,
+            body: {
+                commissionCalculatorType: body.commissionCalculatorType,
+                commissionMoney: body.commissionMoney,
+                commissionPercentActual: body.commissionPercentActual,
+                commissionPercentExpected: body.commissionPercentExpected,
+            },
+        });
+        this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified });
+        this.socketEmitService.socketTicketUserListChange(oid, {
+            ticketId,
+            ticketUserUpsertedList: [ticketUserModified],
+        });
+        return { ticketUserModified };
+    }
+};
+exports.TicketChangeUserService = TicketChangeUserService;
+exports.TicketChangeUserService = TicketChangeUserService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof socket_emit_service_1.SocketEmitService !== "undefined" && socket_emit_service_1.SocketEmitService) === "function" ? _a : Object, typeof (_b = typeof repositories_1.TicketUserRepository !== "undefined" && repositories_1.TicketUserRepository) === "function" ? _b : Object, typeof (_c = typeof operations_1.TicketChangeTicketUserOperation !== "undefined" && operations_1.TicketChangeTicketUserOperation) === "function" ? _c : Object])
+], TicketChangeUserService);
+
+
+/***/ }),
+/* 766 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3, _4, _5, _6;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketChangeProductController = void 0;
 const common_1 = __webpack_require__(3);
@@ -63646,20 +63453,11 @@ const external_request_1 = __webpack_require__(238);
 const ticket_product_entity_1 = __webpack_require__(71);
 const permission_enum_1 = __webpack_require__(84);
 const request_1 = __webpack_require__(305);
-const request_2 = __webpack_require__(769);
-const ticket_change_product_service_1 = __webpack_require__(777);
+const request_2 = __webpack_require__(767);
+const ticket_change_product_service_1 = __webpack_require__(775);
 let TicketChangeProductController = class TicketChangeProductController {
     constructor(ticketChangeProductService) {
         this.ticketChangeProductService = ticketChangeProductService;
-    }
-    async addTicketProduct({ oid }, { ticketId }, body) {
-        const data = await this.ticketChangeProductService.addTicketProductList({
-            oid,
-            ticketId,
-            ticketProductType: ticket_product_entity_1.TicketProductType.Product,
-            body,
-        });
-        return { data };
     }
     async addTicketProductConsumable({ oid }, { ticketId }, body) {
         const data = await this.ticketChangeProductService.addTicketProductList({
@@ -63676,15 +63474,6 @@ let TicketChangeProductController = class TicketChangeProductController {
             ticketId,
             ticketProductType: ticket_product_entity_1.TicketProductType.Prescription,
             body,
-        });
-        return { data };
-    }
-    async destroyTicketProduct({ oid }, { ticketId, ticketProductId }) {
-        const data = await this.ticketChangeProductService.destroyTicketProduct({
-            oid,
-            ticketId,
-            ticketProductId,
-            ticketProductType: ticket_product_entity_1.TicketProductType.Product,
         });
         return { data };
     }
@@ -63706,15 +63495,6 @@ let TicketChangeProductController = class TicketChangeProductController {
         });
         return { data };
     }
-    async updatePriorityTicketProduct({ oid }, { ticketId }, body) {
-        const data = await this.ticketChangeProductService.updatePriorityTicketProduct({
-            oid,
-            ticketId,
-            ticketProductType: ticket_product_entity_1.TicketProductType.Product,
-            body,
-        });
-        return { data };
-    }
     async updatePriorityTicketProductConsumable({ oid }, { ticketId }, body) {
         const data = await this.ticketChangeProductService.updatePriorityTicketProduct({
             oid,
@@ -63729,16 +63509,6 @@ let TicketChangeProductController = class TicketChangeProductController {
             oid,
             ticketId,
             ticketProductType: ticket_product_entity_1.TicketProductType.Prescription,
-            body,
-        });
-        return { data };
-    }
-    async updateTicketProduct({ oid }, { ticketId, ticketProductId }, body) {
-        const data = await this.ticketChangeProductService.updateTicketProduct({
-            oid,
-            ticketId,
-            ticketProductId,
-            ticketProductType: ticket_product_entity_1.TicketProductType.Product,
             body,
         });
         return { data };
@@ -63766,24 +63536,14 @@ let TicketChangeProductController = class TicketChangeProductController {
 };
 exports.TicketChangeProductController = TicketChangeProductController;
 __decorate([
-    (0, common_1.Post)(':ticketId/product/add-ticket-product-list'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _b : Object, typeof (_c = typeof request_1.TicketParams !== "undefined" && request_1.TicketParams) === "function" ? _c : Object, typeof (_d = typeof request_2.TicketAddTicketProductListBody !== "undefined" && request_2.TicketAddTicketProductListBody) === "function" ? _d : Object]),
-    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
-], TicketChangeProductController.prototype, "addTicketProduct", null);
-__decorate([
     (0, common_1.Post)(':ticketId/consumable/add-ticket-product-consumable-list'),
     (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT_CONSUMABLE),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _f : Object, typeof (_g = typeof request_1.TicketParams !== "undefined" && request_1.TicketParams) === "function" ? _g : Object, typeof (_h = typeof request_2.TicketAddTicketProductListBody !== "undefined" && request_2.TicketAddTicketProductListBody) === "function" ? _h : Object]),
-    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
+    __metadata("design:paramtypes", [typeof (_b = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _b : Object, typeof (_c = typeof request_1.TicketParams !== "undefined" && request_1.TicketParams) === "function" ? _c : Object, typeof (_d = typeof request_2.TicketAddTicketProductListBody !== "undefined" && request_2.TicketAddTicketProductListBody) === "function" ? _d : Object]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
 ], TicketChangeProductController.prototype, "addTicketProductConsumable", null);
 __decorate([
     (0, common_1.Post)(':ticketId/prescription/add-ticket-product-prescription-list'),
@@ -63792,26 +63552,17 @@ __decorate([
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_k = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _k : Object, typeof (_l = typeof request_1.TicketParams !== "undefined" && request_1.TicketParams) === "function" ? _l : Object, typeof (_m = typeof request_2.TicketAddTicketProductListBody !== "undefined" && request_2.TicketAddTicketProductListBody) === "function" ? _m : Object]),
-    __metadata("design:returntype", typeof (_o = typeof Promise !== "undefined" && Promise) === "function" ? _o : Object)
+    __metadata("design:paramtypes", [typeof (_f = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _f : Object, typeof (_g = typeof request_1.TicketParams !== "undefined" && request_1.TicketParams) === "function" ? _g : Object, typeof (_h = typeof request_2.TicketAddTicketProductListBody !== "undefined" && request_2.TicketAddTicketProductListBody) === "function" ? _h : Object]),
+    __metadata("design:returntype", typeof (_j = typeof Promise !== "undefined" && Promise) === "function" ? _j : Object)
 ], TicketChangeProductController.prototype, "addTicketProductPrescription", null);
-__decorate([
-    (0, common_1.Delete)(':ticketId/product/destroy-ticket-product/:ticketProductId'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_p = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _p : Object, typeof (_q = typeof request_2.TicketChangeProductParams !== "undefined" && request_2.TicketChangeProductParams) === "function" ? _q : Object]),
-    __metadata("design:returntype", typeof (_r = typeof Promise !== "undefined" && Promise) === "function" ? _r : Object)
-], TicketChangeProductController.prototype, "destroyTicketProduct", null);
 __decorate([
     (0, common_1.Delete)(':ticketId/consumable/destroy-ticket-product-consumable/:ticketProductId'),
     (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT_CONSUMABLE),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_s = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _s : Object, typeof (_t = typeof request_2.TicketChangeProductParams !== "undefined" && request_2.TicketChangeProductParams) === "function" ? _t : Object]),
-    __metadata("design:returntype", typeof (_u = typeof Promise !== "undefined" && Promise) === "function" ? _u : Object)
+    __metadata("design:paramtypes", [typeof (_k = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _k : Object, typeof (_l = typeof request_2.TicketChangeProductParams !== "undefined" && request_2.TicketChangeProductParams) === "function" ? _l : Object]),
+    __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
 ], TicketChangeProductController.prototype, "destroyTicketProductConsumable", null);
 __decorate([
     (0, common_1.Delete)(':ticketId/prescription/destroy-ticket-product-prescription/:ticketProductId'),
@@ -63819,19 +63570,9 @@ __decorate([
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_v = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _v : Object, typeof (_w = typeof request_2.TicketChangeProductParams !== "undefined" && request_2.TicketChangeProductParams) === "function" ? _w : Object]),
-    __metadata("design:returntype", typeof (_x = typeof Promise !== "undefined" && Promise) === "function" ? _x : Object)
+    __metadata("design:paramtypes", [typeof (_o = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _o : Object, typeof (_p = typeof request_2.TicketChangeProductParams !== "undefined" && request_2.TicketChangeProductParams) === "function" ? _p : Object]),
+    __metadata("design:returntype", typeof (_q = typeof Promise !== "undefined" && Promise) === "function" ? _q : Object)
 ], TicketChangeProductController.prototype, "destroyTicketProductPrescription", null);
-__decorate([
-    (0, common_1.Post)(':ticketId/product/update-priority-ticket-product'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT_CONSUMABLE),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_y = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _y : Object, typeof (_z = typeof request_1.TicketParams !== "undefined" && request_1.TicketParams) === "function" ? _z : Object, typeof (_0 = typeof request_2.TicketUpdatePriorityTicketProductBody !== "undefined" && request_2.TicketUpdatePriorityTicketProductBody) === "function" ? _0 : Object]),
-    __metadata("design:returntype", typeof (_1 = typeof Promise !== "undefined" && Promise) === "function" ? _1 : Object)
-], TicketChangeProductController.prototype, "updatePriorityTicketProduct", null);
 __decorate([
     (0, common_1.Post)(':ticketId/consumable/update-priority-ticket-product-consumable'),
     (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT_CONSUMABLE),
@@ -63839,8 +63580,8 @@ __decorate([
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_2 = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _2 : Object, typeof (_3 = typeof request_1.TicketParams !== "undefined" && request_1.TicketParams) === "function" ? _3 : Object, typeof (_4 = typeof request_2.TicketUpdatePriorityTicketProductBody !== "undefined" && request_2.TicketUpdatePriorityTicketProductBody) === "function" ? _4 : Object]),
-    __metadata("design:returntype", typeof (_5 = typeof Promise !== "undefined" && Promise) === "function" ? _5 : Object)
+    __metadata("design:paramtypes", [typeof (_r = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _r : Object, typeof (_s = typeof request_1.TicketParams !== "undefined" && request_1.TicketParams) === "function" ? _s : Object, typeof (_t = typeof request_2.TicketUpdatePriorityTicketProductBody !== "undefined" && request_2.TicketUpdatePriorityTicketProductBody) === "function" ? _t : Object]),
+    __metadata("design:returntype", typeof (_u = typeof Promise !== "undefined" && Promise) === "function" ? _u : Object)
 ], TicketChangeProductController.prototype, "updatePriorityTicketProductConsumable", null);
 __decorate([
     (0, common_1.Post)(':ticketId/prescription/update-priority-ticket-product-prescription'),
@@ -63849,19 +63590,9 @@ __decorate([
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_6 = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _6 : Object, typeof (_7 = typeof request_1.TicketParams !== "undefined" && request_1.TicketParams) === "function" ? _7 : Object, typeof (_8 = typeof request_2.TicketUpdatePriorityTicketProductBody !== "undefined" && request_2.TicketUpdatePriorityTicketProductBody) === "function" ? _8 : Object]),
-    __metadata("design:returntype", typeof (_9 = typeof Promise !== "undefined" && Promise) === "function" ? _9 : Object)
+    __metadata("design:paramtypes", [typeof (_v = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _v : Object, typeof (_w = typeof request_1.TicketParams !== "undefined" && request_1.TicketParams) === "function" ? _w : Object, typeof (_x = typeof request_2.TicketUpdatePriorityTicketProductBody !== "undefined" && request_2.TicketUpdatePriorityTicketProductBody) === "function" ? _x : Object]),
+    __metadata("design:returntype", typeof (_y = typeof Promise !== "undefined" && Promise) === "function" ? _y : Object)
 ], TicketChangeProductController.prototype, "updatePriorityTicketProductPrescription", null);
-__decorate([
-    (0, common_1.Post)(':ticketId/product/update-ticket-product/:ticketProductId'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT),
-    __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Param)()),
-    __param(2, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_10 = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _10 : Object, typeof (_11 = typeof request_2.TicketChangeProductParams !== "undefined" && request_2.TicketChangeProductParams) === "function" ? _11 : Object, typeof (_12 = typeof request_2.TicketUpdateTicketProductBody !== "undefined" && request_2.TicketUpdateTicketProductBody) === "function" ? _12 : Object]),
-    __metadata("design:returntype", typeof (_13 = typeof Promise !== "undefined" && Promise) === "function" ? _13 : Object)
-], TicketChangeProductController.prototype, "updateTicketProduct", null);
 __decorate([
     (0, common_1.Post)(':ticketId/consumable/update-ticket-product-consumable/:ticketProductId'),
     (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT_CONSUMABLE),
@@ -63869,8 +63600,8 @@ __decorate([
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_14 = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _14 : Object, typeof (_15 = typeof request_2.TicketChangeProductParams !== "undefined" && request_2.TicketChangeProductParams) === "function" ? _15 : Object, typeof (_16 = typeof request_2.TicketUpdateTicketProductBody !== "undefined" && request_2.TicketUpdateTicketProductBody) === "function" ? _16 : Object]),
-    __metadata("design:returntype", typeof (_17 = typeof Promise !== "undefined" && Promise) === "function" ? _17 : Object)
+    __metadata("design:paramtypes", [typeof (_z = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _z : Object, typeof (_0 = typeof request_2.TicketChangeProductParams !== "undefined" && request_2.TicketChangeProductParams) === "function" ? _0 : Object, typeof (_1 = typeof request_2.TicketUpdateTicketProductBody !== "undefined" && request_2.TicketUpdateTicketProductBody) === "function" ? _1 : Object]),
+    __metadata("design:returntype", typeof (_2 = typeof Promise !== "undefined" && Promise) === "function" ? _2 : Object)
 ], TicketChangeProductController.prototype, "updateTicketProductConsumable", null);
 __decorate([
     (0, common_1.Post)(':ticketId/prescription/update-ticket-product-prescription/:ticketProductId'),
@@ -63879,8 +63610,8 @@ __decorate([
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_18 = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _18 : Object, typeof (_19 = typeof request_2.TicketChangeProductParams !== "undefined" && request_2.TicketChangeProductParams) === "function" ? _19 : Object, typeof (_20 = typeof request_2.TicketUpdateTicketProductBody !== "undefined" && request_2.TicketUpdateTicketProductBody) === "function" ? _20 : Object]),
-    __metadata("design:returntype", typeof (_21 = typeof Promise !== "undefined" && Promise) === "function" ? _21 : Object)
+    __metadata("design:paramtypes", [typeof (_3 = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _3 : Object, typeof (_4 = typeof request_2.TicketChangeProductParams !== "undefined" && request_2.TicketChangeProductParams) === "function" ? _4 : Object, typeof (_5 = typeof request_2.TicketUpdateTicketProductBody !== "undefined" && request_2.TicketUpdateTicketProductBody) === "function" ? _5 : Object]),
+    __metadata("design:returntype", typeof (_6 = typeof Promise !== "undefined" && Promise) === "function" ? _6 : Object)
 ], TicketChangeProductController.prototype, "updateTicketProductPrescription", null);
 exports.TicketChangeProductController = TicketChangeProductController = __decorate([
     (0, swagger_1.ApiTags)('Ticket'),
@@ -63891,7 +63622,7 @@ exports.TicketChangeProductController = TicketChangeProductController = __decora
 
 
 /***/ }),
-/* 769 */
+/* 767 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -63910,17 +63641,17 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(768), exports);
+__exportStar(__webpack_require__(769), exports);
 __exportStar(__webpack_require__(770), exports);
 __exportStar(__webpack_require__(771), exports);
 __exportStar(__webpack_require__(772), exports);
 __exportStar(__webpack_require__(773), exports);
 __exportStar(__webpack_require__(774), exports);
-__exportStar(__webpack_require__(775), exports);
-__exportStar(__webpack_require__(776), exports);
 
 
 /***/ }),
-/* 770 */
+/* 768 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -64106,7 +63837,7 @@ __decorate([
 
 
 /***/ }),
-/* 771 */
+/* 769 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -64149,7 +63880,7 @@ __decorate([
 
 
 /***/ }),
-/* 772 */
+/* 770 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -64276,7 +64007,7 @@ __decorate([
 
 
 /***/ }),
-/* 773 */
+/* 771 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -64446,7 +64177,7 @@ __decorate([
 
 
 /***/ }),
-/* 774 */
+/* 772 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -64495,7 +64226,7 @@ __decorate([
 
 
 /***/ }),
-/* 775 */
+/* 773 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -64564,7 +64295,7 @@ __decorate([
 
 
 /***/ }),
-/* 776 */
+/* 774 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -64586,7 +64317,7 @@ const class_validator_1 = __webpack_require__(243);
 const typescript_helper_1 = __webpack_require__(189);
 const class_validator_custom_1 = __webpack_require__(244);
 const variable_1 = __webpack_require__(21);
-const request_1 = __webpack_require__(741);
+const request_1 = __webpack_require__(744);
 class TicketProductBody {
 }
 __decorate([
@@ -64683,7 +64414,7 @@ __decorate([
 
 
 /***/ }),
-/* 777 */
+/* 775 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -64704,7 +64435,7 @@ const ticket_product_entity_1 = __webpack_require__(71);
 const operations_1 = __webpack_require__(164);
 const repositories_1 = __webpack_require__(42);
 const socket_emit_service_1 = __webpack_require__(341);
-const ticket_change_user_service_1 = __webpack_require__(746);
+const ticket_change_user_service_1 = __webpack_require__(765);
 let TicketChangeProductService = class TicketChangeProductService {
     constructor(socketEmitService, ticketProductRepository, ticketProductManager, ticketAddTicketProductOperation, ticketDestroyTicketProductOperation, ticketUpdateTicketProductOperation, ticketChangeUserService) {
         this.socketEmitService = socketEmitService;
@@ -64725,22 +64456,16 @@ let TicketChangeProductService = class TicketChangeProductService {
         });
         const { ticket } = result;
         this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket });
-        if (ticketProductType === ticket_product_entity_1.TicketProductType.Product) {
-            this.socketEmitService.socketTicketProductChange(oid, {
-                ticketId,
-                ticketProductUpsertList: result.ticketProductList,
-            });
-        }
         if (ticketProductType === ticket_product_entity_1.TicketProductType.Consumable) {
             this.socketEmitService.socketTicketConsumableChange(oid, {
                 ticketId,
-                ticketProductUpsertList: result.ticketProductList,
+                ticketProductUpsertedList: result.ticketProductList,
             });
         }
         if (ticketProductType === ticket_product_entity_1.TicketProductType.Prescription) {
             this.socketEmitService.socketTicketPrescriptionChange(oid, {
                 ticketId,
-                ticketProductUpsertList: result.ticketProductList,
+                ticketProductUpsertedList: result.ticketProductList,
             });
         }
         return true;
@@ -64755,28 +64480,22 @@ let TicketChangeProductService = class TicketChangeProductService {
         });
         const { ticket, ticketProductDestroy } = result;
         this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket });
-        if (ticketProductDestroy.type === ticket_product_entity_1.TicketProductType.Product) {
-            this.socketEmitService.socketTicketProductChange(oid, {
-                ticketId,
-                ticketProductDestroyList: [ticketProductDestroy],
-            });
-        }
         if (ticketProductDestroy.type === ticket_product_entity_1.TicketProductType.Consumable) {
             this.socketEmitService.socketTicketConsumableChange(oid, {
                 ticketId,
-                ticketProductDestroyList: [ticketProductDestroy],
+                ticketProductDestroyedList: [ticketProductDestroy],
             });
         }
         if (ticketProductDestroy.type === ticket_product_entity_1.TicketProductType.Prescription) {
             this.socketEmitService.socketTicketPrescriptionChange(oid, {
                 ticketId,
-                ticketProductDestroyList: [ticketProductDestroy],
+                ticketProductDestroyedList: [ticketProductDestroy],
             });
         }
         if (result.ticketUserDestroyList) {
             this.socketEmitService.socketTicketUserListChange(oid, {
                 ticketId,
-                ticketUserDestroyList: result.ticketUserDestroyList,
+                ticketUserDestroyedList: result.ticketUserDestroyList,
             });
         }
         return true;
@@ -64792,22 +64511,16 @@ let TicketChangeProductService = class TicketChangeProductService {
             options: { requireEqualLength: true },
         });
         ticketProductList.sort((a, b) => (a.priority < b.priority ? -1 : 1));
-        if (ticketProductType === ticket_product_entity_1.TicketProductType.Product) {
-            this.socketEmitService.socketTicketProductChange(oid, {
-                ticketId,
-                ticketProductReplaceList: ticketProductList,
-            });
-        }
         if (ticketProductType === ticket_product_entity_1.TicketProductType.Consumable) {
             this.socketEmitService.socketTicketConsumableChange(oid, {
                 ticketId,
-                ticketProductReplaceList: ticketProductList,
+                ticketProductUpsertedList: ticketProductList,
             });
         }
         if (ticketProductType === ticket_product_entity_1.TicketProductType.Prescription) {
             this.socketEmitService.socketTicketPrescriptionChange(oid, {
                 ticketId,
-                ticketProductReplaceList: ticketProductList,
+                ticketProductUpsertedList: ticketProductList,
             });
         }
         return true;
@@ -64824,28 +64537,22 @@ let TicketChangeProductService = class TicketChangeProductService {
         });
         const { ticketModified, ticketProductModified } = result;
         this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified });
-        if (ticketProductModified.type === ticket_product_entity_1.TicketProductType.Product) {
-            this.socketEmitService.socketTicketProductChange(oid, {
-                ticketId,
-                ticketProductUpsertList: [ticketProductModified],
-            });
-        }
         if (ticketProductModified.type === ticket_product_entity_1.TicketProductType.Consumable) {
             this.socketEmitService.socketTicketConsumableChange(oid, {
                 ticketId,
-                ticketProductUpsertList: [ticketProductModified],
+                ticketProductUpsertedList: [ticketProductModified],
             });
         }
         if (ticketProductModified.type === ticket_product_entity_1.TicketProductType.Prescription) {
             this.socketEmitService.socketTicketPrescriptionChange(oid, {
                 ticketId,
-                ticketProductUpsertList: [ticketProductModified],
+                ticketProductUpsertedList: [ticketProductModified],
             });
         }
         this.socketEmitService.socketTicketUserListChange(oid, {
             ticketId,
-            ticketUserUpsertList: result.ticketUserCreatedList,
-            ticketUserDestroyList: result.ticketUserDestroyList,
+            ticketUserUpsertedList: result.ticketUserCreatedList,
+            ticketUserDestroyedList: result.ticketUserDestroyList,
         });
         return true;
     }
@@ -64858,7 +64565,7 @@ exports.TicketChangeProductService = TicketChangeProductService = __decorate([
 
 
 /***/ }),
-/* 778 */
+/* 776 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -64872,8 +64579,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketChangeRadiologyModule = void 0;
 const common_1 = __webpack_require__(3);
 const api_ticket_radiology_module_1 = __webpack_require__(630);
-const ticket_change_radiology_controller_1 = __webpack_require__(779);
-const ticket_change_radiology_service_1 = __webpack_require__(787);
+const ticket_change_radiology_controller_1 = __webpack_require__(777);
+const ticket_change_radiology_service_1 = __webpack_require__(785);
 let TicketChangeRadiologyModule = class TicketChangeRadiologyModule {
 };
 exports.TicketChangeRadiologyModule = TicketChangeRadiologyModule;
@@ -64887,7 +64594,7 @@ exports.TicketChangeRadiologyModule = TicketChangeRadiologyModule = __decorate([
 
 
 /***/ }),
-/* 779 */
+/* 777 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -64914,8 +64621,8 @@ const external_request_1 = __webpack_require__(238);
 const permission_enum_1 = __webpack_require__(84);
 const request_1 = __webpack_require__(328);
 const request_2 = __webpack_require__(305);
-const request_3 = __webpack_require__(780);
-const ticket_change_radiology_service_1 = __webpack_require__(787);
+const request_3 = __webpack_require__(778);
+const ticket_change_radiology_service_1 = __webpack_require__(785);
 let TicketChangeRadiologyController = class TicketChangeRadiologyController {
     constructor(ticketChangeRadiologyService) {
         this.ticketChangeRadiologyService = ticketChangeRadiologyService;
@@ -64936,8 +64643,8 @@ let TicketChangeRadiologyController = class TicketChangeRadiologyController {
         });
         return { data };
     }
-    async updateTicketRadiology({ oid }, { ticketId, ticketRadiologyId }, body) {
-        const data = await this.ticketChangeRadiologyService.updateTicketRadiology({
+    async updateRequestTicketRadiology({ oid }, { ticketId, ticketRadiologyId }, body) {
+        const data = await this.ticketChangeRadiologyService.updateRequestTicketRadiology({
             oid,
             ticketId,
             ticketRadiologyId,
@@ -64975,7 +64682,7 @@ let TicketChangeRadiologyController = class TicketChangeRadiologyController {
 exports.TicketChangeRadiologyController = TicketChangeRadiologyController;
 __decorate([
     (0, common_1.Post)(':ticketId/radiology/add-ticket-radiology-list'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_RADIOLOGY),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_RADIOLOGY_REQUEST),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
@@ -64985,7 +64692,7 @@ __decorate([
 ], TicketChangeRadiologyController.prototype, "addTicketRadiologyList", null);
 __decorate([
     (0, common_1.Delete)(':ticketId/radiology/destroy-ticket-radiology/:ticketRadiologyId'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_RADIOLOGY),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_RADIOLOGY_REQUEST),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __metadata("design:type", Function),
@@ -64993,18 +64700,18 @@ __decorate([
     __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], TicketChangeRadiologyController.prototype, "destroyTicketRadiology", null);
 __decorate([
-    (0, common_1.Post)(':ticketId/radiology/update-ticket-radiology/:ticketRadiologyId'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_RADIOLOGY),
+    (0, common_1.Post)(':ticketId/radiology/update-request-ticket-radiology/:ticketRadiologyId'),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_RADIOLOGY_REQUEST),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_j = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _j : Object, typeof (_k = typeof request_3.TicketChangeRadiologyParams !== "undefined" && request_3.TicketChangeRadiologyParams) === "function" ? _k : Object, typeof (_l = typeof request_3.TicketUpdateTicketRadiologyBody !== "undefined" && request_3.TicketUpdateTicketRadiologyBody) === "function" ? _l : Object]),
+    __metadata("design:paramtypes", [typeof (_j = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _j : Object, typeof (_k = typeof request_3.TicketChangeRadiologyParams !== "undefined" && request_3.TicketChangeRadiologyParams) === "function" ? _k : Object, typeof (_l = typeof request_3.TicketUpdateRequestTicketRadiologyBody !== "undefined" && request_3.TicketUpdateRequestTicketRadiologyBody) === "function" ? _l : Object]),
     __metadata("design:returntype", typeof (_m = typeof Promise !== "undefined" && Promise) === "function" ? _m : Object)
-], TicketChangeRadiologyController.prototype, "updateTicketRadiology", null);
+], TicketChangeRadiologyController.prototype, "updateRequestTicketRadiology", null);
 __decorate([
     (0, common_1.Post)(':ticketId/radiology/update-priority-ticket-radiology'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_RADIOLOGY),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_CHANGE_RADIOLOGY_REQUEST),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
@@ -65023,7 +64730,7 @@ __decorate([
     __param(3, (0, common_1.Query)()),
     __param(4, (0, common_1.UploadedFiles)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_s = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _s : Object, typeof (_t = typeof request_3.TicketChangeRadiologyParams !== "undefined" && request_3.TicketChangeRadiologyParams) === "function" ? _t : Object, typeof (_u = typeof request_3.TicketRadiologyUpdateResultBody !== "undefined" && request_3.TicketRadiologyUpdateResultBody) === "function" ? _u : Object, typeof (_v = typeof request_1.TicketRadiologyPostQuery !== "undefined" && request_1.TicketRadiologyPostQuery) === "function" ? _v : Object, Array]),
+    __metadata("design:paramtypes", [typeof (_s = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _s : Object, typeof (_t = typeof request_3.TicketChangeRadiologyParams !== "undefined" && request_3.TicketChangeRadiologyParams) === "function" ? _t : Object, typeof (_u = typeof request_3.TicketUpdateResultTicketRadiologyBody !== "undefined" && request_3.TicketUpdateResultTicketRadiologyBody) === "function" ? _u : Object, typeof (_v = typeof request_1.TicketRadiologyPostQuery !== "undefined" && request_1.TicketRadiologyPostQuery) === "function" ? _v : Object, Array]),
     __metadata("design:returntype", typeof (_w = typeof Promise !== "undefined" && Promise) === "function" ? _w : Object)
 ], TicketChangeRadiologyController.prototype, "updateResultTicketRadiology", null);
 __decorate([
@@ -65033,7 +64740,7 @@ __decorate([
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_x = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _x : Object, typeof (_y = typeof request_3.TicketChangeRadiologyParams !== "undefined" && request_3.TicketChangeRadiologyParams) === "function" ? _y : Object, typeof (_z = typeof request_3.TicketRadiologyCancelResultBody !== "undefined" && request_3.TicketRadiologyCancelResultBody) === "function" ? _z : Object]),
+    __metadata("design:paramtypes", [typeof (_x = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _x : Object, typeof (_y = typeof request_3.TicketChangeRadiologyParams !== "undefined" && request_3.TicketChangeRadiologyParams) === "function" ? _y : Object, typeof (_z = typeof request_3.TicketCancelResultTicketRadiologyBody !== "undefined" && request_3.TicketCancelResultTicketRadiologyBody) === "function" ? _z : Object]),
     __metadata("design:returntype", typeof (_0 = typeof Promise !== "undefined" && Promise) === "function" ? _0 : Object)
 ], TicketChangeRadiologyController.prototype, "cancelResultTicketRadiology", null);
 exports.TicketChangeRadiologyController = TicketChangeRadiologyController = __decorate([
@@ -65045,7 +64752,7 @@ exports.TicketChangeRadiologyController = TicketChangeRadiologyController = __de
 
 
 /***/ }),
-/* 780 */
+/* 778 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -65064,16 +64771,16 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(779), exports);
+__exportStar(__webpack_require__(780), exports);
 __exportStar(__webpack_require__(781), exports);
 __exportStar(__webpack_require__(782), exports);
 __exportStar(__webpack_require__(783), exports);
 __exportStar(__webpack_require__(784), exports);
-__exportStar(__webpack_require__(785), exports);
-__exportStar(__webpack_require__(786), exports);
 
 
 /***/ }),
-/* 781 */
+/* 779 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -65095,7 +64802,7 @@ const class_validator_1 = __webpack_require__(243);
 const typescript_helper_1 = __webpack_require__(189);
 const class_validator_custom_1 = __webpack_require__(244);
 const variable_1 = __webpack_require__(21);
-const request_1 = __webpack_require__(741);
+const request_1 = __webpack_require__(744);
 class TicketRadiologyAddBody {
 }
 exports.TicketRadiologyAddBody = TicketRadiologyAddBody;
@@ -65257,7 +64964,68 @@ __decorate([
 
 
 /***/ }),
-/* 782 */
+/* 780 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.TicketCancelResultTicketRadiologyBody = void 0;
+const swagger_1 = __webpack_require__(6);
+const class_transformer_1 = __webpack_require__(17);
+const class_validator_1 = __webpack_require__(243);
+const DOMPurify = __webpack_require__(578);
+class TicketCancelResultTicketRadiologyBody {
+}
+exports.TicketCancelResultTicketRadiologyBody = TicketCancelResultTicketRadiologyBody;
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 25 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketCancelResultTicketRadiologyBody.prototype, "printHtmlId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Mổ viêm ruột thừa 2002' }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => DOMPurify.sanitize(value)),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TicketCancelResultTicketRadiologyBody.prototype, "description", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 'Trước khi vào khám 5 ngày, bla...bla...' }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TicketCancelResultTicketRadiologyBody.prototype, "result", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '' }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TicketCancelResultTicketRadiologyBody.prototype, "customStyles", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: '' }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], TicketCancelResultTicketRadiologyBody.prototype, "customVariables", void 0);
+
+
+/***/ }),
+/* 781 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -65300,7 +65068,7 @@ __decorate([
 
 
 /***/ }),
-/* 783 */
+/* 782 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -65349,7 +65117,7 @@ __decorate([
 
 
 /***/ }),
-/* 784 */
+/* 783 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -65362,55 +65130,79 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketRadiologyCancelResultBody = void 0;
+exports.TicketUpdateRequestTicketRadiologyBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
 const class_validator_1 = __webpack_require__(243);
-const DOMPurify = __webpack_require__(578);
-class TicketRadiologyCancelResultBody {
+const typescript_helper_1 = __webpack_require__(189);
+const class_validator_custom_1 = __webpack_require__(244);
+const variable_1 = __webpack_require__(21);
+const request_1 = __webpack_require__(744);
+class TicketRadiologyBody {
 }
-exports.TicketRadiologyCancelResultBody = TicketRadiologyCancelResultBody;
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 25 }),
+    (0, swagger_1.ApiProperty)({ example: 25000 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], TicketRadiologyCancelResultBody.prototype, "printHtmlId", void 0);
+], TicketRadiologyBody.prototype, "expectedPrice", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Mổ viêm ruột thừa 2002' }),
+    (0, swagger_1.ApiProperty)({ example: 22500 }),
     (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => DOMPurify.sanitize(value)),
+    (0, class_transformer_1.Transform)(({ value }) => Math.round(value || 0)),
     (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], TicketRadiologyCancelResultBody.prototype, "description", void 0);
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketRadiologyBody.prototype, "discountMoney", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: 'Trước khi vào khám 5 ngày, bla...bla...' }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], TicketRadiologyCancelResultBody.prototype, "result", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: '' }),
+    (0, swagger_1.ApiProperty)({ example: 22500 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], TicketRadiologyCancelResultBody.prototype, "customStyles", void 0);
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Max)(100),
+    (0, class_validator_1.Min)(0),
+    __metadata("design:type", Number)
+], TicketRadiologyBody.prototype, "discountPercent", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({ example: '' }),
+    (0, swagger_1.ApiProperty)({ enum: (0, typescript_helper_1.valuesEnum)(variable_1.DiscountType), example: variable_1.DiscountType.VND }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], TicketRadiologyCancelResultBody.prototype, "customVariables", void 0);
+    (0, class_validator_custom_1.IsEnumValue)(variable_1.DiscountType),
+    __metadata("design:type", typeof (_a = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _a : Object)
+], TicketRadiologyBody.prototype, "discountType", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 22500 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => Math.round(value || 0)),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketRadiologyBody.prototype, "actualPrice", void 0);
+class TicketUpdateRequestTicketRadiologyBody {
+}
+exports.TicketUpdateRequestTicketRadiologyBody = TicketUpdateRequestTicketRadiologyBody;
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ type: request_1.TicketUserBasicBody, isArray: true }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => request_1.TicketUserBasicBody),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", Array)
+], TicketUpdateRequestTicketRadiologyBody.prototype, "ticketUserRequestList", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ type: TicketRadiologyBody }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Type)(() => TicketRadiologyBody),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    __metadata("design:type", TicketRadiologyBody)
+], TicketUpdateRequestTicketRadiologyBody.prototype, "ticketRadiology", void 0);
 
 
 /***/ }),
-/* 785 */
+/* 784 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -65435,13 +65227,13 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketRadiologyUpdateResultBody = exports.TicketRadiologyUpdateBody = void 0;
+exports.TicketUpdateResultTicketRadiologyBody = exports.TicketRadiologyUpdateBody = void 0;
 const swagger_1 = __webpack_require__(6);
 const class_transformer_1 = __webpack_require__(17);
 const class_validator_1 = __webpack_require__(243);
 const DOMPurify = __webpack_require__(578);
 const file_1 = __webpack_require__(263);
-const request_1 = __webpack_require__(741);
+const request_1 = __webpack_require__(744);
 class TicketRadiologyUpdateBody extends file_1.MultipleFileUpload {
 }
 exports.TicketRadiologyUpdateBody = TicketRadiologyUpdateBody;
@@ -65504,9 +65296,9 @@ __decorate([
     (0, class_validator_1.IsArray)(),
     __metadata("design:type", Array)
 ], ImagesChangeBody.prototype, "externalUrlList", void 0);
-class TicketRadiologyUpdateResultBody extends file_1.MultipleFileUpload {
+class TicketUpdateResultTicketRadiologyBody extends file_1.MultipleFileUpload {
 }
-exports.TicketRadiologyUpdateResultBody = TicketRadiologyUpdateResultBody;
+exports.TicketUpdateResultTicketRadiologyBody = TicketUpdateResultTicketRadiologyBody;
 __decorate([
     (0, swagger_1.ApiProperty)({
         type: 'string',
@@ -65547,7 +65339,7 @@ __decorate([
         message: ({ value }) => `Validate TicketUserBasicBody failed. Value = ${JSON.stringify(value)}.`,
     }),
     __metadata("design:type", Array)
-], TicketRadiologyUpdateResultBody.prototype, "ticketUserResultList", void 0);
+], TicketUpdateResultTicketRadiologyBody.prototype, "ticketUserResultList", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_transformer_1.Expose)(),
@@ -65580,7 +65372,7 @@ __decorate([
         },
     }),
     __metadata("design:type", TicketRadiologyUpdateBody)
-], TicketRadiologyUpdateResultBody.prototype, "ticketRadiology", void 0);
+], TicketUpdateResultTicketRadiologyBody.prototype, "ticketRadiology", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_transformer_1.Expose)(),
@@ -65611,96 +65403,11 @@ __decorate([
         message: ({ value }) => `Validate imagesChange failed. Value = ${value}`,
     }),
     __metadata("design:type", ImagesChangeBody)
-], TicketRadiologyUpdateResultBody.prototype, "imagesChange", void 0);
+], TicketUpdateResultTicketRadiologyBody.prototype, "imagesChange", void 0);
 
 
 /***/ }),
-/* 786 */
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a;
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.TicketUpdateTicketRadiologyBody = void 0;
-const swagger_1 = __webpack_require__(6);
-const class_transformer_1 = __webpack_require__(17);
-const class_validator_1 = __webpack_require__(243);
-const typescript_helper_1 = __webpack_require__(189);
-const class_validator_custom_1 = __webpack_require__(244);
-const variable_1 = __webpack_require__(21);
-const request_1 = __webpack_require__(741);
-class TicketRadiologyBody {
-}
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 25000 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketRadiologyBody.prototype, "expectedPrice", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 22500 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => Math.round(value || 0)),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketRadiologyBody.prototype, "discountMoney", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 22500 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.Max)(100),
-    (0, class_validator_1.Min)(0),
-    __metadata("design:type", Number)
-], TicketRadiologyBody.prototype, "discountPercent", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ enum: (0, typescript_helper_1.valuesEnum)(variable_1.DiscountType), example: variable_1.DiscountType.VND }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_custom_1.IsEnumValue)(variable_1.DiscountType),
-    __metadata("design:type", typeof (_a = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _a : Object)
-], TicketRadiologyBody.prototype, "discountType", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 22500 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => Math.round(value || 0)),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketRadiologyBody.prototype, "actualPrice", void 0);
-class TicketUpdateTicketRadiologyBody {
-}
-exports.TicketUpdateTicketRadiologyBody = TicketUpdateTicketRadiologyBody;
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({ type: request_1.TicketUserBasicBody, isArray: true }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => request_1.TicketUserBasicBody),
-    (0, class_validator_1.IsArray)(),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", Array)
-], TicketUpdateTicketRadiologyBody.prototype, "ticketUserRequestList", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ type: TicketRadiologyBody }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Type)(() => TicketRadiologyBody),
-    (0, class_validator_1.ValidateNested)({ each: true }),
-    __metadata("design:type", TicketRadiologyBody)
-], TicketUpdateTicketRadiologyBody.prototype, "ticketRadiology", void 0);
-
-
-/***/ }),
-/* 787 */
+/* 785 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -65754,8 +65461,8 @@ let TicketChangeRadiologyService = class TicketChangeRadiologyService {
         this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified });
         this.socketEmitService.socketTicketRadiologyListChange(oid, {
             ticketId,
-            ticketRadiologyUpsertList: ticketRadiologyCreatedList,
-            ticketUserUpsertList: ticketUserCreatedList,
+            ticketRadiologyUpsertedList: ticketRadiologyCreatedList,
+            ticketUserUpsertedList: ticketUserCreatedList,
         });
         ticketRadiologyCreatedList.forEach((tr) => {
             tr.ticketUserRequestList = ticketUserCreatedList.filter((tu) => {
@@ -65786,12 +65493,12 @@ let TicketChangeRadiologyService = class TicketChangeRadiologyService {
         this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket });
         this.socketEmitService.socketTicketRadiologyListChange(oid, {
             ticketId,
-            ticketRadiologyDestroyList: [result.ticketRadiologyDestroy],
-            ticketUserDestroyList: result.ticketUserDestroyList || [],
+            ticketRadiologyDestroyedList: [result.ticketRadiologyDestroyed],
+            ticketUserDestroyedList: result.ticketUserDestroyedList || [],
         });
-        return true;
+        return { ticketId, ticketRadiologyId };
     }
-    async updateTicketRadiology(options) {
+    async updateRequestTicketRadiology(options) {
         const { oid, ticketId, ticketRadiologyId, body } = options;
         const result = await this.ticketUpdateTicketRadiologyOperation.updateTicketRadiology({
             oid,
@@ -65804,9 +65511,9 @@ let TicketChangeRadiologyService = class TicketChangeRadiologyService {
         this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified });
         this.socketEmitService.socketTicketRadiologyListChange(oid, {
             ticketId,
-            ticketRadiologyUpsertList: [ticketRadiologyModified],
-            ticketUserUpsertList: result.ticketUserCreatedList,
-            ticketUserDestroyList: result.ticketUserDestroyList,
+            ticketRadiologyUpsertedList: [ticketRadiologyModified],
+            ticketUserUpsertedList: result.ticketUserCreatedList,
+            ticketUserDestroyedList: result.ticketUserDestroyedList,
         });
         ticketRadiologyModified.ticketUserRequestList = result.ticketUserCreatedList || [];
         return { ticketRadiologyModified };
@@ -65823,7 +65530,7 @@ let TicketChangeRadiologyService = class TicketChangeRadiologyService {
         });
         this.socketEmitService.socketTicketRadiologyListChange(oid, {
             ticketId,
-            ticketRadiologyUpsertList: ticketRadiologyList,
+            ticketRadiologyUpsertedList: ticketRadiologyList,
         });
         return true;
     }
@@ -65836,8 +65543,10 @@ let TicketChangeRadiologyService = class TicketChangeRadiologyService {
         });
         const { ticketId, customerId } = ticketRadiologyOrigin;
         let imageIdsUpdateString = ticketRadiologyOrigin.imageIds;
+        let imageCreatedList = [];
+        let imageDestroyedList = [];
         if (body.imagesChange) {
-            const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
+            const changeImageResponse = await this.imageManagerService.changeCloudinaryImageLink({
                 oid,
                 files,
                 imageIdsWait: body.imagesChange.imageIdsWait,
@@ -65851,7 +65560,9 @@ let TicketChangeRadiologyService = class TicketChangeRadiologyService {
                     ticketItemChildId: 0,
                 },
             });
-            imageIdsUpdateString = JSON.stringify(imageIdsUpdate);
+            imageIdsUpdateString = JSON.stringify(changeImageResponse.imageIdsNew);
+            imageCreatedList = changeImageResponse.imageCreatedList;
+            imageDestroyedList = changeImageResponse.imageDestroyedList;
         }
         const ticketRadiologyModified = await this.ticketRadiologyRepository.updateOneAndReturnEntity({
             oid,
@@ -65868,7 +65579,7 @@ let TicketChangeRadiologyService = class TicketChangeRadiologyService {
             status: ticket_radiology_entity_1.TicketRadiologyStatus.Completed,
         });
         let ticketUserCreatedList = [];
-        let ticketUserDestroyList = [];
+        let ticketUserDestroyedList = [];
         if ((_a = body.ticketUserResultList) === null || _a === void 0 ? void 0 : _a.length) {
             const changeUserResult = await this.ticketChangeTicketUserOperation.changeTicketUserList({
                 oid,
@@ -65884,7 +65595,7 @@ let TicketChangeRadiologyService = class TicketChangeRadiologyService {
                 },
             });
             ticketUserCreatedList = changeUserResult.ticketUserCreatedList;
-            ticketUserDestroyList = changeUserResult.ticketUserDestroyList;
+            ticketUserDestroyedList = changeUserResult.ticketUserDestroyedList;
             this.socketEmitService.socketTicketChange(oid, {
                 type: 'UPDATE',
                 ticket: changeUserResult.ticketModified,
@@ -65897,11 +65608,13 @@ let TicketChangeRadiologyService = class TicketChangeRadiologyService {
         });
         this.socketEmitService.socketTicketRadiologyListChange(oid, {
             ticketId,
-            ticketRadiologyUpsertList: [ticketRadiologyModified],
-            ticketUserUpsertList: ticketUserCreatedList,
-            ticketUserDestroyList,
+            ticketRadiologyUpsertedList: [ticketRadiologyModified],
+            ticketUserUpsertedList: ticketUserCreatedList,
+            ticketUserDestroyedList,
+            imageUpsertedList: imageCreatedList,
+            imageDestroyedList,
         });
-        ticketRadiologyModified.ticketUserRequestList = ticketUserCreatedList || [];
+        ticketRadiologyModified.ticketUserResultList = ticketUserCreatedList || [];
         return { ticketRadiologyModified };
     }
     async cancelResultTicketRadiology(options) {
@@ -65911,7 +65624,7 @@ let TicketChangeRadiologyService = class TicketChangeRadiologyService {
             id: ticketRadiologyId,
         });
         const { ticketId } = ticketRadiologyOrigin;
-        await this.imageManagerService.removeImageList({
+        const { imageDestroyedList } = await this.imageManagerService.removeImageList({
             oid,
             idRemoveList: JSON.parse(ticketRadiologyOrigin.imageIds),
         });
@@ -65930,7 +65643,7 @@ let TicketChangeRadiologyService = class TicketChangeRadiologyService {
             status: ticket_radiology_entity_1.TicketRadiologyStatus.Pending,
         });
         ticketRadiologyModified.imageList = [];
-        const { ticketModified, ticketUserDestroyList } = await this.ticketChangeTicketUserOperation.destroyTicketUserList({
+        const { ticketModified, ticketUserDestroyedList } = await this.ticketChangeTicketUserOperation.destroyTicketUserList({
             oid,
             ticketId,
             condition: {
@@ -65942,8 +65655,9 @@ let TicketChangeRadiologyService = class TicketChangeRadiologyService {
         this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified });
         this.socketEmitService.socketTicketRadiologyListChange(oid, {
             ticketId: ticketRadiologyOrigin.ticketId,
-            ticketRadiologyUpsertList: [ticketRadiologyModified],
-            ticketUserDestroyList,
+            ticketRadiologyUpsertedList: [ticketRadiologyModified],
+            ticketUserDestroyedList,
+            imageDestroyedList,
         });
         return { ticketRadiologyModified };
     }
@@ -65956,7 +65670,7 @@ exports.TicketChangeRadiologyService = TicketChangeRadiologyService = __decorate
 
 
 /***/ }),
-/* 788 */
+/* 786 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -65969,8 +65683,8 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketMoneyModule = void 0;
 const common_1 = __webpack_require__(3);
-const api_ticket_money_controller_1 = __webpack_require__(789);
-const ticket_money_service_1 = __webpack_require__(795);
+const api_ticket_money_controller_1 = __webpack_require__(787);
+const ticket_money_service_1 = __webpack_require__(793);
 let TicketMoneyModule = class TicketMoneyModule {
 };
 exports.TicketMoneyModule = TicketMoneyModule;
@@ -65985,7 +65699,7 @@ exports.TicketMoneyModule = TicketMoneyModule = __decorate([
 
 
 /***/ }),
-/* 789 */
+/* 787 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -66010,8 +65724,8 @@ const user_guard_1 = __webpack_require__(157);
 const external_request_1 = __webpack_require__(238);
 const permission_enum_1 = __webpack_require__(84);
 const request_1 = __webpack_require__(305);
-const request_2 = __webpack_require__(790);
-const ticket_money_service_1 = __webpack_require__(795);
+const request_2 = __webpack_require__(788);
+const ticket_money_service_1 = __webpack_require__(793);
 let ApiTicketMoneyController = class ApiTicketMoneyController {
     constructor(ticketMoneyService) {
         this.ticketMoneyService = ticketMoneyService;
@@ -66115,7 +65829,7 @@ exports.ApiTicketMoneyController = ApiTicketMoneyController = __decorate([
 
 
 /***/ }),
-/* 790 */
+/* 788 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -66134,14 +65848,14 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(789), exports);
+__exportStar(__webpack_require__(790), exports);
 __exportStar(__webpack_require__(791), exports);
 __exportStar(__webpack_require__(792), exports);
-__exportStar(__webpack_require__(793), exports);
-__exportStar(__webpack_require__(794), exports);
 
 
 /***/ }),
-/* 791 */
+/* 789 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -66216,7 +65930,7 @@ __decorate([
 
 
 /***/ }),
-/* 792 */
+/* 790 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -66368,7 +66082,7 @@ __decorate([
 
 
 /***/ }),
-/* 793 */
+/* 791 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -66419,7 +66133,7 @@ __decorate([
 
 
 /***/ }),
-/* 794 */
+/* 792 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -66470,7 +66184,7 @@ __decorate([
 
 
 /***/ }),
-/* 795 */
+/* 793 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -66576,32 +66290,32 @@ let TicketMoneyService = class TicketMoneyService {
         if ((_a = prepaymentResult.ticketProcedureModifiedList) === null || _a === void 0 ? void 0 : _a.length) {
             this.socketEmitService.socketTicketProcedureListChange(oid, {
                 ticketId,
-                ticketProcedureUpsertList: prepaymentResult.ticketProcedureModifiedList,
+                ticketProcedureUpsertedList: prepaymentResult.ticketProcedureModifiedList,
             });
         }
         if ((_b = prepaymentResult.ticketProductConsumableModifiedList) === null || _b === void 0 ? void 0 : _b.length) {
             this.socketEmitService.socketTicketConsumableChange(oid, {
                 ticketId,
-                ticketProductUpsertList: prepaymentResult.ticketProductConsumableModifiedList,
+                ticketProductUpsertedList: prepaymentResult.ticketProductConsumableModifiedList,
             });
         }
         if ((_c = prepaymentResult.ticketProductPrescriptionModifiedList) === null || _c === void 0 ? void 0 : _c.length) {
             this.socketEmitService.socketTicketPrescriptionChange(oid, {
                 ticketId,
-                ticketProductUpsertList: prepaymentResult.ticketProductPrescriptionModifiedList,
+                ticketProductUpsertedList: prepaymentResult.ticketProductPrescriptionModifiedList,
             });
         }
         if ((_d = prepaymentResult.ticketLaboratoryModifiedList) === null || _d === void 0 ? void 0 : _d.length) {
             this.socketEmitService.socketTicketLaboratoryListChange(oid, {
                 ticketId,
-                ticketLaboratoryUpsertList: prepaymentResult.ticketLaboratoryModifiedList,
-                ticketLaboratoryGroupUpsertList: prepaymentResult.ticketLaboratoryGroupModifiedList || [],
+                ticketLaboratoryUpsertedList: prepaymentResult.ticketLaboratoryModifiedList,
+                ticketLaboratoryGroupUpsertedList: prepaymentResult.ticketLaboratoryGroupModifiedList || [],
             });
         }
         if ((_e = prepaymentResult.ticketRadiologyModifiedList) === null || _e === void 0 ? void 0 : _e.length) {
             this.socketEmitService.socketTicketRadiologyListChange(oid, {
                 ticketId,
-                ticketRadiologyUpsertList: prepaymentResult.ticketRadiologyModifiedList,
+                ticketRadiologyUpsertedList: prepaymentResult.ticketRadiologyModifiedList,
             });
         }
         return { ticketModified, customer, paymentCreated };
@@ -66627,32 +66341,32 @@ let TicketMoneyService = class TicketMoneyService {
         if ((_a = refundResult.ticketProcedureModifiedList) === null || _a === void 0 ? void 0 : _a.length) {
             this.socketEmitService.socketTicketProcedureListChange(oid, {
                 ticketId,
-                ticketProcedureUpsertList: refundResult.ticketProcedureModifiedList,
+                ticketProcedureUpsertedList: refundResult.ticketProcedureModifiedList,
             });
         }
         if ((_b = refundResult.ticketProductConsumableModifiedList) === null || _b === void 0 ? void 0 : _b.length) {
             this.socketEmitService.socketTicketConsumableChange(oid, {
                 ticketId,
-                ticketProductUpsertList: refundResult.ticketProductConsumableModifiedList,
+                ticketProductUpsertedList: refundResult.ticketProductConsumableModifiedList,
             });
         }
         if ((_c = refundResult.ticketProductPrescriptionModifiedList) === null || _c === void 0 ? void 0 : _c.length) {
             this.socketEmitService.socketTicketPrescriptionChange(oid, {
                 ticketId,
-                ticketProductUpsertList: refundResult.ticketProductPrescriptionModifiedList,
+                ticketProductUpsertedList: refundResult.ticketProductPrescriptionModifiedList,
             });
         }
         if ((_d = refundResult.ticketLaboratoryModifiedList) === null || _d === void 0 ? void 0 : _d.length) {
             this.socketEmitService.socketTicketLaboratoryListChange(oid, {
                 ticketId,
-                ticketLaboratoryUpsertList: refundResult.ticketLaboratoryModifiedList,
-                ticketLaboratoryGroupUpsertList: refundResult.ticketLaboratoryGroupModifiedList || [],
+                ticketLaboratoryUpsertedList: refundResult.ticketLaboratoryModifiedList,
+                ticketLaboratoryGroupUpsertedList: refundResult.ticketLaboratoryGroupModifiedList || [],
             });
         }
         if ((_e = refundResult.ticketRadiologyModifiedList) === null || _e === void 0 ? void 0 : _e.length) {
             this.socketEmitService.socketTicketRadiologyListChange(oid, {
                 ticketId,
-                ticketRadiologyUpsertList: refundResult.ticketRadiologyModifiedList,
+                ticketRadiologyUpsertedList: refundResult.ticketRadiologyModifiedList,
             });
         }
         return { ticketModified, customer, paymentCreated };
@@ -66666,7 +66380,7 @@ exports.TicketMoneyService = TicketMoneyService = __decorate([
 
 
 /***/ }),
-/* 796 */
+/* 794 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -66680,9 +66394,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketOrderModule = void 0;
 const common_1 = __webpack_require__(3);
 const ticket_action_service_1 = __webpack_require__(731);
-const ticket_money_module_1 = __webpack_require__(788);
-const ticket_order_controller_1 = __webpack_require__(797);
-const ticket_order_service_1 = __webpack_require__(804);
+const ticket_money_module_1 = __webpack_require__(786);
+const ticket_order_controller_1 = __webpack_require__(795);
+const ticket_order_service_1 = __webpack_require__(802);
 let TicketOrderModule = class TicketOrderModule {
 };
 exports.TicketOrderModule = TicketOrderModule;
@@ -66696,7 +66410,7 @@ exports.TicketOrderModule = TicketOrderModule = __decorate([
 
 
 /***/ }),
-/* 797 */
+/* 795 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -66722,8 +66436,8 @@ const user_guard_1 = __webpack_require__(157);
 const external_request_1 = __webpack_require__(238);
 const permission_enum_1 = __webpack_require__(84);
 const request_1 = __webpack_require__(726);
-const request_2 = __webpack_require__(798);
-const ticket_order_service_1 = __webpack_require__(804);
+const request_2 = __webpack_require__(796);
+const ticket_order_service_1 = __webpack_require__(802);
 let TicketOrderController = class TicketOrderController {
     constructor(ticketOrderService) {
         this.ticketOrderService = ticketOrderService;
@@ -66805,7 +66519,7 @@ __decorate([
 ], TicketOrderController.prototype, "draftUpsert", null);
 __decorate([
     (0, common_1.Patch)('/order/:id/deposited-update'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_DRAFT_CRUD, permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT, permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_DRAFT_CRUD, permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT, permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
@@ -66815,7 +66529,7 @@ __decorate([
 ], TicketOrderController.prototype, "depositedUpdate", null);
 __decorate([
     (0, common_1.Post)('/order/debt-success-create'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_DRAFT_CRUD, permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT, permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE, permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT_SEND_PRODUCT, permission_enum_1.PermissionId.TICKET_PAYMENT_MONEY, permission_enum_1.PermissionId.TICKET_CLOSE),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_DRAFT_CRUD, permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT, permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST, permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT_SEND_PRODUCT, permission_enum_1.PermissionId.TICKET_PAYMENT_MONEY, permission_enum_1.PermissionId.TICKET_CLOSE),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -66824,7 +66538,7 @@ __decorate([
 ], TicketOrderController.prototype, "debtSuccessCreate", null);
 __decorate([
     (0, common_1.Patch)('/order/:id/debt-success-update'),
-    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_DRAFT_CRUD, permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT, permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE, permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT_SEND_PRODUCT, permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT_RETURN_PRODUCT, permission_enum_1.PermissionId.TICKET_PAYMENT_MONEY, permission_enum_1.PermissionId.TICKET_REOPEN, permission_enum_1.PermissionId.TICKET_CLOSE),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_DRAFT_CRUD, permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT, permission_enum_1.PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST, permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT_SEND_PRODUCT, permission_enum_1.PermissionId.TICKET_CHANGE_PRODUCT_RETURN_PRODUCT, permission_enum_1.PermissionId.TICKET_PAYMENT_MONEY, permission_enum_1.PermissionId.TICKET_REOPEN, permission_enum_1.PermissionId.TICKET_CLOSE),
     __param(0, (0, external_request_1.External)()),
     __param(1, (0, common_1.Param)()),
     __param(2, (0, common_1.Body)()),
@@ -66878,7 +66592,7 @@ exports.TicketOrderController = TicketOrderController = __decorate([
 
 
 /***/ }),
-/* 798 */
+/* 796 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -66897,15 +66611,15 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+__exportStar(__webpack_require__(797), exports);
+__exportStar(__webpack_require__(798), exports);
 __exportStar(__webpack_require__(799), exports);
 __exportStar(__webpack_require__(800), exports);
 __exportStar(__webpack_require__(801), exports);
-__exportStar(__webpack_require__(802), exports);
-__exportStar(__webpack_require__(803), exports);
 
 
 /***/ }),
-/* 799 */
+/* 797 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -66941,7 +66655,7 @@ __decorate([
 
 
 /***/ }),
-/* 800 */
+/* 798 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -66987,7 +66701,7 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_custom_1.IsEnumValue)(procedure_entity_1.ProcedureType),
     __metadata("design:type", typeof (_a = typeof procedure_entity_1.ProcedureType !== "undefined" && procedure_entity_1.ProcedureType) === "function" ? _a : Object)
-], TicketOrderProcedureDraft.prototype, "type", void 0);
+], TicketOrderProcedureDraft.prototype, "procedureType", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: (0, typescript_helper_1.valuesEnum)(variable_1.PaymentMoneyStatus), example: variable_1.PaymentMoneyStatus.NoEffect }),
     (0, class_transformer_1.Expose)(),
@@ -67051,7 +66765,7 @@ __decorate([
 
 
 /***/ }),
-/* 801 */
+/* 799 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -67197,7 +66911,7 @@ __decorate([
 
 
 /***/ }),
-/* 802 */
+/* 800 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -67233,7 +66947,7 @@ __decorate([
 
 
 /***/ }),
-/* 803 */
+/* 801 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -67254,10 +66968,10 @@ const class_transformer_1 = __webpack_require__(17);
 const class_validator_1 = __webpack_require__(243);
 const class_validator_custom_1 = __webpack_require__(244);
 const variable_1 = __webpack_require__(21);
-const ticket_order_expense_draft_1 = __webpack_require__(799);
-const ticket_order_procedure_draft_1 = __webpack_require__(800);
-const ticket_order_product_draft_1 = __webpack_require__(801);
-const ticket_order_surcharge_draft_1 = __webpack_require__(802);
+const ticket_order_expense_draft_1 = __webpack_require__(797);
+const ticket_order_procedure_draft_1 = __webpack_require__(798);
+const ticket_order_product_draft_1 = __webpack_require__(799);
+const ticket_order_surcharge_draft_1 = __webpack_require__(800);
 class TicketOrderBasic {
 }
 __decorate([
@@ -67527,7 +67241,7 @@ __decorate([
 
 
 /***/ }),
-/* 804 */
+/* 802 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -67561,7 +67275,7 @@ const operations_1 = __webpack_require__(164);
 const repositories_1 = __webpack_require__(42);
 const socket_emit_service_1 = __webpack_require__(341);
 const ticket_action_service_1 = __webpack_require__(731);
-const ticket_money_service_1 = __webpack_require__(795);
+const ticket_money_service_1 = __webpack_require__(793);
 let TicketOrderService = class TicketOrderService {
     constructor(socketEmitService, ticketOrderDraftOperation, ticketOrderDepositedOperation, ticketRepository, ticketActionService, ticketMoneyService) {
         this.socketEmitService = socketEmitService;
@@ -67782,7 +67496,7 @@ exports.TicketOrderService = TicketOrderService = __decorate([
 
 
 /***/ }),
-/* 805 */
+/* 803 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -67797,8 +67511,8 @@ exports.TicketQueryModule = void 0;
 const common_1 = __webpack_require__(3);
 const api_ticket_procedure_service_1 = __webpack_require__(363);
 const api_ticket_radiology_service_1 = __webpack_require__(632);
-const api_ticket_query_controller_1 = __webpack_require__(806);
-const ticket_query_service_1 = __webpack_require__(807);
+const api_ticket_query_controller_1 = __webpack_require__(804);
+const ticket_query_service_1 = __webpack_require__(805);
 let TicketQueryModule = class TicketQueryModule {
 };
 exports.TicketQueryModule = TicketQueryModule;
@@ -67812,7 +67526,7 @@ exports.TicketQueryModule = TicketQueryModule = __decorate([
 
 
 /***/ }),
-/* 806 */
+/* 804 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -67837,7 +67551,7 @@ const dto_1 = __webpack_require__(307);
 const user_guard_1 = __webpack_require__(157);
 const external_request_1 = __webpack_require__(238);
 const request_1 = __webpack_require__(305);
-const ticket_query_service_1 = __webpack_require__(807);
+const ticket_query_service_1 = __webpack_require__(805);
 let ApiTicketQueryController = class ApiTicketQueryController {
     constructor(ticketQueryService) {
         this.ticketQueryService = ticketQueryService;
@@ -67893,7 +67607,7 @@ exports.ApiTicketQueryController = ApiTicketQueryController = __decorate([
 
 
 /***/ }),
-/* 807 */
+/* 805 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -67911,7 +67625,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketQueryService = void 0;
 const common_1 = __webpack_require__(3);
 const exception_filter_1 = __webpack_require__(9);
-const helpers_1 = __webpack_require__(181);
+const image_entity_1 = __webpack_require__(19);
 const payment_entity_1 = __webpack_require__(51);
 const ticket_product_entity_1 = __webpack_require__(71);
 const repositories_1 = __webpack_require__(42);
@@ -67999,16 +67713,6 @@ let TicketQueryService = class TicketQueryService {
         const ticketIdList = ticketList.map((i) => i.id);
         const customerIdList = ticketList.map((i) => i.customerId);
         const customerSourceIdList = ticketList.map((i) => i.customerSourceId).filter((i) => !!i);
-        const imageIdList = ticketList
-            .map((i) => {
-            try {
-                return JSON.parse(i.imageIds);
-            }
-            catch (error) {
-                return [];
-            }
-        })
-            .flat();
         const dataPromise = await Promise.all([
             (relation === null || relation === void 0 ? void 0 : relation.customer)
                 ? this.customerRepository.findMany({ condition: { oid, id: { IN: customerIdList } } })
@@ -68110,9 +67814,14 @@ let TicketQueryService = class TicketQueryService {
                     condition: { oid, ticketId: { IN: ticketIdList } },
                 })
                 : undefined,
-            (relation === null || relation === void 0 ? void 0 : relation.imageList) && imageIdList.length
+            (relation === null || relation === void 0 ? void 0 : relation.imageList)
                 ? this.imageRepository.findMany({
-                    condition: { oid, id: { IN: imageIdList } },
+                    condition: {
+                        oid,
+                        imageInteractType: image_entity_1.ImageInteractType.Customer,
+                        imageInteractId: { IN: customerIdList },
+                        ticketId: { IN: ticketIdList },
+                    },
                 })
                 : undefined,
             (relation === null || relation === void 0 ? void 0 : relation.customerSource) && (customerSourceIdList === null || customerSourceIdList === void 0 ? void 0 : customerSourceIdList.length)
@@ -68144,7 +67853,6 @@ let TicketQueryService = class TicketQueryService {
         const imageList = dataPromise[15];
         const customerSourceList = dataPromise[16];
         const toAppointmentList = dataPromise[17];
-        const imageMap = helpers_1.ESArray.arrayToKeyValue(imageList || [], 'id');
         ticketList.forEach((ticket) => {
             if (relation === null || relation === void 0 ? void 0 : relation.customer) {
                 ticket.customer = customerList.find((i) => {
@@ -68222,13 +67930,7 @@ let TicketQueryService = class TicketQueryService {
                 });
             }
             if (relation === null || relation === void 0 ? void 0 : relation.imageList) {
-                try {
-                    const imageIdList = JSON.parse(ticket.imageIds);
-                    ticket.imageList = imageIdList.map((imageId) => imageMap[imageId]).filter((i) => !!i);
-                }
-                catch (error) {
-                    ticket.imageList = [];
-                }
+                ticket.imageList = imageList;
             }
             if (relation === null || relation === void 0 ? void 0 : relation.customerSource) {
                 ticket.customerSource = (customerSourceList || []).find((i) => {
@@ -68252,7 +67954,7 @@ exports.TicketQueryService = TicketQueryService = __decorate([
 
 
 /***/ }),
-/* 808 */
+/* 806 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -68265,9 +67967,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketReceptionModule = void 0;
 const common_1 = __webpack_require__(3);
-const ticket_change_user_module_1 = __webpack_require__(739);
-const api_ticket_reception_controller_1 = __webpack_require__(809);
-const ticket_reception_service_1 = __webpack_require__(812);
+const ticket_change_user_module_1 = __webpack_require__(763);
+const api_ticket_reception_controller_1 = __webpack_require__(807);
+const ticket_reception_service_1 = __webpack_require__(810);
 let TicketReceptionModule = class TicketReceptionModule {
 };
 exports.TicketReceptionModule = TicketReceptionModule;
@@ -68281,7 +67983,7 @@ exports.TicketReceptionModule = TicketReceptionModule = __decorate([
 
 
 /***/ }),
-/* 809 */
+/* 807 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -68306,8 +68008,8 @@ const user_guard_1 = __webpack_require__(157);
 const external_request_1 = __webpack_require__(238);
 const permission_enum_1 = __webpack_require__(84);
 const request_1 = __webpack_require__(305);
-const request_2 = __webpack_require__(810);
-const ticket_reception_service_1 = __webpack_require__(812);
+const request_2 = __webpack_require__(808);
+const ticket_reception_service_1 = __webpack_require__(810);
 let ApiTicketReceptionController = class ApiTicketReceptionController {
     constructor(ticketReceptionService) {
         this.ticketReceptionService = ticketReceptionService;
@@ -68357,7 +68059,7 @@ exports.ApiTicketReceptionController = ApiTicketReceptionController = __decorate
 
 
 /***/ }),
-/* 810 */
+/* 808 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -68376,11 +68078,11 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-__exportStar(__webpack_require__(811), exports);
+__exportStar(__webpack_require__(809), exports);
 
 
 /***/ }),
-/* 811 */
+/* 809 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -68401,8 +68103,8 @@ const class_transformer_1 = __webpack_require__(17);
 const class_validator_1 = __webpack_require__(243);
 const ticket_entity_1 = __webpack_require__(59);
 const request_1 = __webpack_require__(371);
-const request_2 = __webpack_require__(758);
-const request_3 = __webpack_require__(741);
+const request_2 = __webpack_require__(754);
+const request_3 = __webpack_require__(744);
 class TicketAttributeBody {
 }
 __decorate([
@@ -68552,7 +68254,7 @@ __decorate([
 
 
 /***/ }),
-/* 812 */
+/* 810 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -68655,7 +68357,7 @@ let TicketReceptionService = class TicketReceptionService {
             commissionMoney: 0,
             profit: 0,
             paid: 0,
-            imageIds: JSON.stringify([]),
+            imageDiagnosisIds: JSON.stringify([]),
             endedAt: null,
         });
         if (ticketReception.fromAppointmentId) {
@@ -68753,15 +68455,15 @@ let TicketReceptionService = class TicketReceptionService {
                     return Object.assign(Object.assign({}, i), { ticketItemId: 0, ticketItemChildId: 0, ticketItemExpectedPrice: ticketModified.totalMoney + ticketModified.discountMoney, ticketItemActualPrice: ticketModified.totalMoney, positionInteractId: 0, quantity: 1 });
                 }),
                 destroy: {
-                    positionType: position_entity_1.PositionType.Ticket,
+                    positionType: position_entity_1.PositionType.TicketReception,
                     ticketItemId: 0,
                     ticketItemChildId: 0,
                 },
             });
             this.socketEmitService.socketTicketUserListChange(oid, {
                 ticketId,
-                ticketUserDestroyList: responseChangeUser.ticketUserDestroyList,
-                ticketUserUpsertList: responseChangeUser.ticketUserCreatedList,
+                ticketUserDestroyedList: responseChangeUser.ticketUserDestroyedList,
+                ticketUserUpsertedList: responseChangeUser.ticketUserCreatedList,
             });
         }
         ticketModified.customer = await this.customerRepository.findOneById(ticketModified.customerId);
@@ -68777,7 +68479,7 @@ exports.TicketReceptionService = TicketReceptionService = __decorate([
 
 
 /***/ }),
-/* 813 */
+/* 811 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -68798,7 +68500,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AppController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
-const app_service_1 = __webpack_require__(814);
+const app_service_1 = __webpack_require__(812);
 let AppController = class AppController {
     constructor(appService) {
         this.appService = appService;
@@ -68823,7 +68525,7 @@ exports.AppController = AppController = __decorate([
 
 
 /***/ }),
-/* 814 */
+/* 812 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -68854,7 +68556,7 @@ exports.AppService = AppService = AppService_1 = __decorate([
 
 
 /***/ }),
-/* 815 */
+/* 813 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -68866,10 +68568,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.HealthModule = void 0;
-const axios_1 = __webpack_require__(816);
+const axios_1 = __webpack_require__(814);
 const common_1 = __webpack_require__(3);
-const terminus_1 = __webpack_require__(817);
-const health_controller_1 = __webpack_require__(818);
+const terminus_1 = __webpack_require__(815);
+const health_controller_1 = __webpack_require__(816);
 let HealthModule = class HealthModule {
 };
 exports.HealthModule = HealthModule;
@@ -68882,19 +68584,19 @@ exports.HealthModule = HealthModule = __decorate([
 
 
 /***/ }),
-/* 816 */
+/* 814 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/axios");
 
 /***/ }),
-/* 817 */
+/* 815 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/terminus");
 
 /***/ }),
-/* 818 */
+/* 816 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -68911,9 +68613,9 @@ var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.HealthController = void 0;
 const common_1 = __webpack_require__(3);
-const schedule_1 = __webpack_require__(819);
+const schedule_1 = __webpack_require__(817);
 const swagger_1 = __webpack_require__(6);
-const terminus_1 = __webpack_require__(817);
+const terminus_1 = __webpack_require__(815);
 let HealthController = class HealthController {
     constructor(health, http, db, disk, memory) {
         this.health = health;
@@ -68947,13 +68649,13 @@ exports.HealthController = HealthController = __decorate([
 
 
 /***/ }),
-/* 819 */
+/* 817 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/schedule");
 
 /***/ }),
-/* 820 */
+/* 818 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -68982,7 +68684,7 @@ exports.ImageManagerModule = ImageManagerModule = __decorate([
 
 
 /***/ }),
-/* 821 */
+/* 819 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -68995,10 +68697,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CronJobModule = void 0;
 const common_1 = __webpack_require__(3);
-const schedule_1 = __webpack_require__(819);
+const schedule_1 = __webpack_require__(817);
 const google_driver_module_1 = __webpack_require__(227);
-const cron_job_controller_1 = __webpack_require__(822);
-const postgresql_job_1 = __webpack_require__(823);
+const cron_job_controller_1 = __webpack_require__(820);
+const postgresql_job_1 = __webpack_require__(821);
 let CronJobModule = class CronJobModule {
 };
 exports.CronJobModule = CronJobModule;
@@ -69012,7 +68714,7 @@ exports.CronJobModule = CronJobModule = __decorate([
 
 
 /***/ }),
-/* 822 */
+/* 820 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -69031,7 +68733,7 @@ exports.CronJobController = void 0;
 const common_1 = __webpack_require__(3);
 const swagger_1 = __webpack_require__(6);
 const root_guard_1 = __webpack_require__(15);
-const postgresql_job_1 = __webpack_require__(823);
+const postgresql_job_1 = __webpack_require__(821);
 let CronJobController = class CronJobController {
     constructor(postgresqlJob) {
         this.postgresqlJob = postgresqlJob;
@@ -69058,7 +68760,7 @@ exports.CronJobController = CronJobController = __decorate([
 
 
 /***/ }),
-/* 823 */
+/* 821 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -69076,9 +68778,9 @@ var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.PostgresqlJob = void 0;
 const common_1 = __webpack_require__(3);
-const schedule_1 = __webpack_require__(819);
-const fs_1 = __webpack_require__(824);
-const mime_types_1 = __webpack_require__(825);
+const schedule_1 = __webpack_require__(817);
+const fs_1 = __webpack_require__(822);
+const mime_types_1 = __webpack_require__(823);
 const path_1 = __webpack_require__(33);
 const cache_data_service_1 = __webpack_require__(40);
 const google_driver_service_1 = __webpack_require__(229);
@@ -69140,19 +68842,19 @@ exports.PostgresqlJob = PostgresqlJob = PostgresqlJob_1 = __decorate([
 
 
 /***/ }),
-/* 824 */
+/* 822 */
 /***/ ((module) => {
 
 module.exports = require("fs");
 
 /***/ }),
-/* 825 */
+/* 823 */
 /***/ ((module) => {
 
 module.exports = require("mime-types");
 
 /***/ }),
-/* 826 */
+/* 824 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -69165,9 +68867,9 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.EventListenerModule = void 0;
 const common_1 = __webpack_require__(3);
-const event_emitter_1 = __webpack_require__(827);
-const visit_event_emit_1 = __webpack_require__(828);
-const visit_event_listener_1 = __webpack_require__(830);
+const event_emitter_1 = __webpack_require__(825);
+const visit_event_emit_1 = __webpack_require__(826);
+const visit_event_listener_1 = __webpack_require__(828);
 let EventListenerModule = class EventListenerModule {
 };
 exports.EventListenerModule = EventListenerModule;
@@ -69183,13 +68885,13 @@ exports.EventListenerModule = EventListenerModule = __decorate([
 
 
 /***/ }),
-/* 827 */
+/* 825 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/event-emitter");
 
 /***/ }),
-/* 828 */
+/* 826 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -69206,8 +68908,8 @@ var _a;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VisitEventEmit = void 0;
 const common_1 = __webpack_require__(3);
-const event_emitter_1 = __webpack_require__(827);
-const visit_event_constants_1 = __webpack_require__(829);
+const event_emitter_1 = __webpack_require__(825);
+const visit_event_constants_1 = __webpack_require__(827);
 let VisitEventEmit = class VisitEventEmit {
     constructor(eventEmitter) {
         this.eventEmitter = eventEmitter;
@@ -69227,7 +68929,7 @@ exports.VisitEventEmit = VisitEventEmit = __decorate([
 
 
 /***/ }),
-/* 829 */
+/* 827 */
 /***/ ((__unused_webpack_module, exports) => {
 
 
@@ -69240,7 +68942,7 @@ exports.VISIT_EVENT = {
 
 
 /***/ }),
-/* 830 */
+/* 828 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -69257,8 +68959,8 @@ var VisitEventListener_1;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.VisitEventListener = void 0;
 const common_1 = __webpack_require__(3);
-const event_emitter_1 = __webpack_require__(827);
-const visit_event_constants_1 = __webpack_require__(829);
+const event_emitter_1 = __webpack_require__(825);
+const visit_event_constants_1 = __webpack_require__(827);
 let VisitEventListener = VisitEventListener_1 = class VisitEventListener {
     constructor() {
         this.logger = new common_1.Logger(VisitEventListener_1.name);
@@ -69288,7 +68990,7 @@ exports.VisitEventListener = VisitEventListener = VisitEventListener_1 = __decor
 
 
 /***/ }),
-/* 831 */
+/* 829 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -69303,8 +69005,8 @@ exports.SocketModule = void 0;
 const common_1 = __webpack_require__(3);
 const jwt_extend_module_1 = __webpack_require__(158);
 const socket_emit_service_1 = __webpack_require__(341);
-const socket_controller_1 = __webpack_require__(832);
-const socket_gateway_1 = __webpack_require__(833);
+const socket_controller_1 = __webpack_require__(830);
+const socket_gateway_1 = __webpack_require__(831);
 let SocketModule = class SocketModule {
 };
 exports.SocketModule = SocketModule;
@@ -69320,7 +69022,7 @@ exports.SocketModule = SocketModule = __decorate([
 
 
 /***/ }),
-/* 832 */
+/* 830 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -69368,7 +69070,7 @@ exports.SocketController = SocketController = __decorate([
 
 
 /***/ }),
-/* 833 */
+/* 831 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -69386,9 +69088,9 @@ var _a, _b, _c, _d, _e, _f;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.SocketGateway = void 0;
 const common_1 = __webpack_require__(3);
-const websockets_1 = __webpack_require__(834);
+const websockets_1 = __webpack_require__(832);
 const request_ip_1 = __webpack_require__(8);
-const socket_io_1 = __webpack_require__(835);
+const socket_io_1 = __webpack_require__(833);
 const cache_data_service_1 = __webpack_require__(40);
 const jwt_extend_service_1 = __webpack_require__(160);
 const socket_emit_service_1 = __webpack_require__(341);
@@ -69464,13 +69166,13 @@ exports.SocketGateway = SocketGateway = SocketGateway_1 = __decorate([
 
 
 /***/ }),
-/* 834 */
+/* 832 */
 /***/ ((module) => {
 
 module.exports = require("@nestjs/websockets");
 
 /***/ }),
-/* 835 */
+/* 833 */
 /***/ ((module) => {
 
 module.exports = require("socket.io");

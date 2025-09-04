@@ -50,7 +50,7 @@ export class ApiOrganizationService {
     let logoImageId = organizationOrigin.logoImageId || 0
 
     if (body.imagesChange) {
-      const logoIdNewList = await this.imageManagerService.changeCloudinaryImageLink({
+      const { imageIdsNew } = await this.imageManagerService.changeCloudinaryImageLink({
         oid,
         files,
         imageIdsWait: [0],
@@ -64,7 +64,7 @@ export class ApiOrganizationService {
           ticketItemChildId: 0,
         },
       })
-      logoImageId = logoIdNewList[0]
+      logoImageId = imageIdsNew[0]
     }
 
     const organization = await this.organizationRepository.updateOneAndReturnEntity(

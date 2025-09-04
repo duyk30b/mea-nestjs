@@ -9,10 +9,10 @@ import { TicketParams } from '../ticket-query/request/ticket.params'
 import {
   TicketChangeLaboratoryGroupParams,
   TicketChangeLaboratoryParams,
-  TicketUpdateLaboratoryGroupResultBody,
   TicketUpdatePriorityTicketLaboratoryBody,
-  TicketUpdateTicketLaboratoryBody,
-  TicketUpsertLaboratoryBody,
+  TicketUpdateRequestTicketLaboratoryBody,
+  TicketUpdateResultLaboratoryGroupBody,
+  TicketUpsertRequestLaboratoryGroupBody,
 } from './request'
 import { TicketChangeLaboratoryService } from './ticket-change-laboratory.service'
 
@@ -22,14 +22,14 @@ import { TicketChangeLaboratoryService } from './ticket-change-laboratory.servic
 export class TicketChangeLaboratoryController {
   constructor(private readonly ticketChangeLaboratoryService: TicketChangeLaboratoryService) { }
 
-  @Post(':ticketId/laboratory/upsert-laboratory')
-  @UserPermission(PermissionId.TICKET_CHANGE_LABORATORY)
-  async upsertLaboratory(
+  @Post(':ticketId/laboratory/upsert-request-laboratory-group')
+  @UserPermission(PermissionId.TICKET_CHANGE_LABORATORY_REQUEST)
+  async upsertRequestLaboratoryGroup(
     @External() { oid }: TExternal,
     @Param() { ticketId }: TicketParams,
-    @Body() body: TicketUpsertLaboratoryBody
+    @Body() body: TicketUpsertRequestLaboratoryGroupBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeLaboratoryService.upsertLaboratory({
+    const data = await this.ticketChangeLaboratoryService.upsertRequestLaboratoryGroup({
       oid,
       ticketId,
       body,
@@ -38,7 +38,7 @@ export class TicketChangeLaboratoryController {
   }
 
   @Delete(':ticketId/laboratory/destroy-ticket-laboratory/:ticketLaboratoryId')
-  @UserPermission(PermissionId.TICKET_CHANGE_LABORATORY)
+  @UserPermission(PermissionId.TICKET_CHANGE_LABORATORY_REQUEST)
   async destroyTicketLaboratory(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketLaboratoryId }: TicketChangeLaboratoryParams
@@ -52,7 +52,7 @@ export class TicketChangeLaboratoryController {
   }
 
   @Delete(':ticketId/laboratory/destroy-ticket-laboratory-group/:ticketLaboratoryGroupId')
-  @UserPermission(PermissionId.TICKET_CHANGE_LABORATORY)
+  @UserPermission(PermissionId.TICKET_CHANGE_LABORATORY_REQUEST)
   async destroyTicketLaboratoryGroup(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketLaboratoryGroupId }: TicketChangeLaboratoryGroupParams
@@ -65,14 +65,14 @@ export class TicketChangeLaboratoryController {
     return { data }
   }
 
-  @Post(':ticketId/laboratory/update-ticket-laboratory/:ticketLaboratoryId')
-  @UserPermission(PermissionId.TICKET_CHANGE_LABORATORY)
-  async updateTicketLaboratory(
+  @Post(':ticketId/laboratory/update-request-ticket-laboratory/:ticketLaboratoryId')
+  @UserPermission(PermissionId.TICKET_CHANGE_LABORATORY_REQUEST)
+  async updateRequestTicketLaboratory(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketLaboratoryId }: TicketChangeLaboratoryParams,
-    @Body() body: TicketUpdateTicketLaboratoryBody
+    @Body() body: TicketUpdateRequestTicketLaboratoryBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeLaboratoryService.updateTicketLaboratory({
+    const data = await this.ticketChangeLaboratoryService.updateRequestTicketLaboratory({
       oid,
       ticketId,
       ticketLaboratoryId,
@@ -82,7 +82,7 @@ export class TicketChangeLaboratoryController {
   }
 
   @Post(':ticketId/laboratory/update-priority-ticket-laboratory')
-  @UserPermission(PermissionId.TICKET_CHANGE_LABORATORY)
+  @UserPermission(PermissionId.TICKET_CHANGE_LABORATORY_REQUEST)
   async updatePriorityTicketLaboratory(
     @External() { oid }: TExternal,
     @Param() { ticketId }: TicketParams,
@@ -101,7 +101,7 @@ export class TicketChangeLaboratoryController {
   async updateResultTicketLaboratory(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketLaboratoryGroupId }: TicketChangeLaboratoryGroupParams,
-    @Body() body: TicketUpdateLaboratoryGroupResultBody,
+    @Body() body: TicketUpdateResultLaboratoryGroupBody,
     @Query() query: TicketLaboratoryGroupPostQuery
   ): Promise<BaseResponse> {
     const data = await this.ticketChangeLaboratoryService.updateResult({

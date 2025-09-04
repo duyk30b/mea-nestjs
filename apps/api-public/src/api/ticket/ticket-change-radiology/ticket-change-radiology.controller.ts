@@ -18,11 +18,11 @@ import { TicketRadiologyPostQuery } from '../../api-ticket-radiology/request'
 import { TicketParams } from '../ticket-query/request'
 import {
   TicketAddTicketRadiologyListBody,
+  TicketCancelResultTicketRadiologyBody,
   TicketChangeRadiologyParams,
-  TicketRadiologyCancelResultBody,
-  TicketRadiologyUpdateResultBody,
   TicketUpdatePriorityTicketRadiologyBody,
-  TicketUpdateTicketRadiologyBody,
+  TicketUpdateRequestTicketRadiologyBody,
+  TicketUpdateResultTicketRadiologyBody,
 } from './request'
 import { TicketChangeRadiologyService } from './ticket-change-radiology.service'
 
@@ -33,7 +33,7 @@ export class TicketChangeRadiologyController {
   constructor(private readonly ticketChangeRadiologyService: TicketChangeRadiologyService) { }
 
   @Post(':ticketId/radiology/add-ticket-radiology-list')
-  @UserPermission(PermissionId.TICKET_CHANGE_RADIOLOGY)
+  @UserPermission(PermissionId.TICKET_CHANGE_RADIOLOGY_REQUEST)
   async addTicketRadiologyList(
     @External() { oid }: TExternal,
     @Param() { ticketId }: TicketParams,
@@ -48,7 +48,7 @@ export class TicketChangeRadiologyController {
   }
 
   @Delete(':ticketId/radiology/destroy-ticket-radiology/:ticketRadiologyId')
-  @UserPermission(PermissionId.TICKET_CHANGE_RADIOLOGY)
+  @UserPermission(PermissionId.TICKET_CHANGE_RADIOLOGY_REQUEST)
   async destroyTicketRadiology(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketRadiologyId }: TicketChangeRadiologyParams
@@ -61,14 +61,14 @@ export class TicketChangeRadiologyController {
     return { data }
   }
 
-  @Post(':ticketId/radiology/update-ticket-radiology/:ticketRadiologyId')
-  @UserPermission(PermissionId.TICKET_CHANGE_RADIOLOGY)
-  async updateTicketRadiology(
+  @Post(':ticketId/radiology/update-request-ticket-radiology/:ticketRadiologyId')
+  @UserPermission(PermissionId.TICKET_CHANGE_RADIOLOGY_REQUEST)
+  async updateRequestTicketRadiology(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketRadiologyId }: TicketChangeRadiologyParams,
-    @Body() body: TicketUpdateTicketRadiologyBody
+    @Body() body: TicketUpdateRequestTicketRadiologyBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeRadiologyService.updateTicketRadiology({
+    const data = await this.ticketChangeRadiologyService.updateRequestTicketRadiology({
       oid,
       ticketId,
       ticketRadiologyId,
@@ -78,7 +78,7 @@ export class TicketChangeRadiologyController {
   }
 
   @Post(':ticketId/radiology/update-priority-ticket-radiology')
-  @UserPermission(PermissionId.TICKET_CHANGE_RADIOLOGY)
+  @UserPermission(PermissionId.TICKET_CHANGE_RADIOLOGY_REQUEST)
   async updatePriorityTicketRadiology(
     @External() { oid }: TExternal,
     @Param() { ticketId }: TicketParams,
@@ -99,7 +99,7 @@ export class TicketChangeRadiologyController {
   async updateResultTicketRadiology(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketRadiologyId }: TicketChangeRadiologyParams,
-    @Body() body: TicketRadiologyUpdateResultBody,
+    @Body() body: TicketUpdateResultTicketRadiologyBody,
     @Query() query: TicketRadiologyPostQuery,
     @UploadedFiles() files: FileUploadDto[]
   ): Promise<BaseResponse> {
@@ -118,7 +118,7 @@ export class TicketChangeRadiologyController {
   async cancelResultTicketRadiology(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketRadiologyId }: TicketChangeRadiologyParams,
-    @Body() body: TicketRadiologyCancelResultBody
+    @Body() body: TicketCancelResultTicketRadiologyBody
   ): Promise<BaseResponse> {
     const data = await this.ticketChangeRadiologyService.cancelResultTicketRadiology({
       oid,

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
-import { ESArray } from '../../../../../_libs/common/helpers'
 import {
   Appointment,
   Customer,
@@ -18,6 +17,7 @@ import {
   TicketSurcharge,
   TicketUser,
 } from '../../../../../_libs/database/entities'
+import { ImageInteractType } from '../../../../../_libs/database/entities/image.entity'
 import Payment, { PaymentVoucherType } from '../../../../../_libs/database/entities/payment.entity'
 import TicketProduct, {
   TicketProductType,
@@ -144,15 +144,6 @@ export class TicketQueryService {
     const ticketIdList = ticketList.map((i) => i.id)
     const customerIdList = ticketList.map((i) => i.customerId)
     const customerSourceIdList = ticketList.map((i) => i.customerSourceId).filter((i) => !!i)
-    const imageIdList = ticketList
-      .map((i) => {
-        try {
-          return JSON.parse(i.imageIds) as number[]
-        } catch (error) {
-          return []
-        }
-      })
-      .flat()
 
     const dataPromise = await Promise.all([
       relation?.customer
@@ -285,9 +276,14 @@ export class TicketQueryService {
           condition: { oid, ticketId: { IN: ticketIdList } },
         })
         : undefined,
-      relation?.imageList && imageIdList.length
+      relation?.imageList
         ? this.imageRepository.findMany({
-          condition: { oid, id: { IN: imageIdList } },
+          condition: {
+            oid,
+            imageInteractType: ImageInteractType.Customer,
+            imageInteractId: { IN: customerIdList },
+            ticketId: { IN: ticketIdList },
+          },
         })
         : undefined,
       relation?.customerSource && customerSourceIdList?.length
@@ -320,8 +316,6 @@ export class TicketQueryService {
     const imageList: Image[] = dataPromise[15]
     const customerSourceList: CustomerSource[] = dataPromise[16]
     const toAppointmentList: Appointment[] = dataPromise[17]
-
-    const imageMap = ESArray.arrayToKeyValue(imageList || [], 'id')
 
     ticketList.forEach((ticket: Ticket) => {
       if (relation?.customer) {
@@ -410,12 +404,7 @@ export class TicketQueryService {
         })
       }
       if (relation?.imageList) {
-        try {
-          const imageIdList: number[] = JSON.parse(ticket.imageIds)
-          ticket.imageList = imageIdList.map((imageId) => imageMap[imageId]).filter((i) => !!i)
-        } catch (error) {
-          ticket.imageList = []
-        }
+        ticket.imageList = imageList
       }
       if (relation?.customerSource) {
         ticket.customerSource = (customerSourceList || []).find((i) => {

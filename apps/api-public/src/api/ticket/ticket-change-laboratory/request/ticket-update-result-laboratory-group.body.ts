@@ -34,7 +34,7 @@ export class LaboratoryGroupResultBody {
   attention: number
 }
 
-export class TicketUpdateLaboratoryGroupResultBody {
+export class TicketUpdateResultLaboratoryGroupBody {
   @ApiProperty({ type: LaboratoryGroupResultBody, isArray: true })
   @Expose()
   @Type(() => LaboratoryGroupResultBody)

@@ -31,7 +31,7 @@ export default class TicketProcedure extends BaseEntity {
 
   @Column({ type: 'smallint', default: ProcedureType.Basic })
   @Expose()
-  type: ProcedureType
+  procedureType: ProcedureType
 
   @Column({ default: 1 })
   @Expose()

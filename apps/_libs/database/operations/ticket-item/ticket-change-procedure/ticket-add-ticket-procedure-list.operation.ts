@@ -32,7 +32,7 @@ export type TicketProcedureAddType = {
     | 'priority'
     | 'paymentMoneyStatus'
     | 'procedureId'
-    | 'type'
+    | 'procedureType'
     | 'status'
     | 'quantity'
     | 'totalSessions'

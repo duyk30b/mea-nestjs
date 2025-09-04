@@ -5,6 +5,7 @@ import {
   Customer,
   Discount,
   Distributor,
+  Image,
   Laboratory,
   Organization,
   Position,
@@ -150,31 +151,27 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_ATTRIBUTE, data)
   }
 
-  socketTicketUserListChange(
-    oid: number,
-    data: {
-      ticketId: number
-      ticketUserDestroyList?: TicketUser[]
-      ticketUserUpsertList?: TicketUser[]
-    }
-  ) {
-    if (!this.io) return
-    if (!data.ticketUserDestroyList?.length && !data.ticketUserUpsertList?.length) {
-      return
-    }
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_USER, data)
-  }
-
   socketTicketProcedureListChange(
     oid: number,
     data: {
       ticketId: number
-      ticketProcedureUpsertList?: TicketProcedure[]
-      ticketProcedureDestroyList?: TicketProcedure[]
+      ticketProcedureUpsertedList?: TicketProcedure[]
+      ticketProcedureDestroyedList?: TicketProcedure[]
+      ticketUserDestroyedList?: TicketUser[]
+      ticketUserUpsertedList?: TicketUser[]
+      imageDestroyedList?: Image[]
+      imageUpsertedList?: Image[]
     }
   ) {
     if (!this.io) return
-    if (!data.ticketProcedureUpsertList?.length && !data.ticketProcedureDestroyList?.length) {
+    if (
+      !data.ticketProcedureUpsertedList?.length
+      && !data.ticketProcedureDestroyedList?.length
+      && !data.ticketUserDestroyedList?.length
+      && !data.ticketUserUpsertedList?.length
+      && !data.imageDestroyedList?.length
+      && !data.imageUpsertedList?.length
+    ) {
       return
     }
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_PROCEDURE, data)
@@ -184,14 +181,23 @@ export class SocketEmitService {
     oid: number,
     data: {
       ticketId: number
-      ticketRadiologyUpsertList?: TicketRadiology[]
-      ticketRadiologyDestroyList?: TicketRadiology[]
-      ticketUserDestroyList?: TicketUser[]
-      ticketUserUpsertList?: TicketUser[]
+      ticketRadiologyUpsertedList?: TicketRadiology[]
+      ticketRadiologyDestroyedList?: TicketRadiology[]
+      ticketUserDestroyedList?: TicketUser[]
+      ticketUserUpsertedList?: TicketUser[]
+      imageDestroyedList?: Image[]
+      imageUpsertedList?: Image[]
     }
   ) {
     if (!this.io) return
-    if (!data.ticketRadiologyUpsertList?.length && !data.ticketRadiologyDestroyList?.length) {
+    if (
+      !data.ticketRadiologyUpsertedList?.length
+      && !data.ticketRadiologyDestroyedList?.length
+      && !data.ticketUserDestroyedList?.length
+      && !data.ticketUserUpsertedList?.length
+      && !data.imageDestroyedList?.length
+      && !data.imageUpsertedList?.length
+    ) {
       return
     }
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_RADIOLOGY, data)
@@ -201,38 +207,26 @@ export class SocketEmitService {
     oid: number,
     data: {
       ticketId: number
-      ticketLaboratoryUpsertList?: TicketLaboratory[]
-      ticketLaboratoryDestroyList?: TicketLaboratory[]
-      ticketLaboratoryGroupUpsertList?: TicketLaboratoryGroup[]
-      ticketLaboratoryGroupDestroyList?: TicketLaboratoryGroup[]
-      ticketLaboratoryResultUpsertList?: TicketLaboratoryResult[]
-      ticketLaboratoryResultDestroyList?: TicketLaboratoryResult[]
+      ticketLaboratoryUpsertedList?: TicketLaboratory[]
+      ticketLaboratoryDestroyedList?: TicketLaboratory[]
+      ticketLaboratoryGroupUpsertedList?: TicketLaboratoryGroup[]
+      ticketLaboratoryGroupDestroyedList?: TicketLaboratoryGroup[]
+      ticketLaboratoryResultUpsertedList?: TicketLaboratoryResult[]
+      ticketLaboratoryResultDestroyedList?: TicketLaboratoryResult[]
+      ticketUserDestroyedList?: TicketUser[]
+      ticketUserUpsertedList?: TicketUser[]
     }
   ) {
     if (!this.io) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_LABORATORY, data)
   }
 
-  socketTicketProductChange(
-    oid: number,
-    data: {
-      ticketId: number
-      ticketProductUpsertList?: TicketProduct[]
-      ticketProductDestroyList?: TicketProduct[]
-      ticketProductReplaceList?: TicketProduct[]
-    }
-  ) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_PRODUCT, data)
-  }
-
   socketTicketConsumableChange(
     oid: number,
     data: {
       ticketId: number
-      ticketProductUpsertList?: TicketProduct[]
-      ticketProductDestroyList?: TicketProduct[]
-      ticketProductReplaceList?: TicketProduct[]
+      ticketProductUpsertedList?: TicketProduct[]
+      ticketProductDestroyedList?: TicketProduct[]
     }
   ) {
     if (!this.io) return
@@ -243,9 +237,8 @@ export class SocketEmitService {
     oid: number,
     data: {
       ticketId: number
-      ticketProductUpsertList?: TicketProduct[]
-      ticketProductDestroyList?: TicketProduct[]
-      ticketProductReplaceList?: TicketProduct[]
+      ticketProductUpsertedList?: TicketProduct[]
+      ticketProductDestroyedList?: TicketProduct[]
     }
   ) {
     if (!this.io) return
@@ -256,12 +249,41 @@ export class SocketEmitService {
     oid: number,
     data: {
       ticketId: number
-      ticketBatchUpsertList?: TicketBatch[]
-      ticketBatchDestroyList?: TicketBatch[]
-      ticketBatchReplaceList?: TicketBatch[]
+      ticketBatchUpsertedList?: TicketBatch[]
+      ticketBatchDestroyedList?: TicketBatch[]
     }
   ) {
     if (!this.io) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_BATCH, data)
+  }
+
+  socketTicketUserListChange(
+    oid: number,
+    data: {
+      ticketId: number
+      ticketUserDestroyedList?: TicketUser[]
+      ticketUserUpsertedList?: TicketUser[]
+    }
+  ) {
+    if (!this.io) return
+    if (!data.ticketUserDestroyedList?.length && !data.ticketUserUpsertedList?.length) {
+      return
+    }
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_USER, data)
+  }
+
+  socketImageListChange(
+    oid: number,
+    data: {
+      ticketId: number
+      imageDestroyedList?: Image[]
+      imageUpsertedList?: Image[]
+    }
+  ) {
+    if (!this.io) return
+    if (!data.imageDestroyedList?.length && !data.imageUpsertedList?.length) {
+      return
+    }
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_IMAGE, data)
   }
 }

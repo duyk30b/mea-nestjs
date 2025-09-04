@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common'
 import { FileUploadDto } from '../../../../../_libs/common/dto/file'
 import { BusinessError } from '../../../../../_libs/database/common/error'
 import { TicketUser } from '../../../../../_libs/database/entities'
-import { ImageInteractType } from '../../../../../_libs/database/entities/image.entity'
+import Image, { ImageInteractType } from '../../../../../_libs/database/entities/image.entity'
 import { PositionType } from '../../../../../_libs/database/entities/position.entity'
 import { TicketRadiologyStatus } from '../../../../../_libs/database/entities/ticket-radiology.entity'
 import {
@@ -22,10 +22,10 @@ import { ApiTicketRadiologyService } from '../../api-ticket-radiology/api-ticket
 import { TicketRadiologyPostQuery } from '../../api-ticket-radiology/request'
 import {
   TicketAddTicketRadiologyListBody,
-  TicketRadiologyCancelResultBody,
-  TicketRadiologyUpdateResultBody,
+  TicketCancelResultTicketRadiologyBody,
   TicketUpdatePriorityTicketRadiologyBody,
-  TicketUpdateTicketRadiologyBody,
+  TicketUpdateRequestTicketRadiologyBody,
+  TicketUpdateResultTicketRadiologyBody,
 } from './request'
 
 @Injectable()
@@ -64,8 +64,8 @@ export class TicketChangeRadiologyService {
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified })
     this.socketEmitService.socketTicketRadiologyListChange(oid, {
       ticketId,
-      ticketRadiologyUpsertList: ticketRadiologyCreatedList,
-      ticketUserUpsertList: ticketUserCreatedList,
+      ticketRadiologyUpsertedList: ticketRadiologyCreatedList,
+      ticketUserUpsertedList: ticketUserCreatedList,
     })
 
     ticketRadiologyCreatedList.forEach((tr) => {
@@ -107,18 +107,18 @@ export class TicketChangeRadiologyService {
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
     this.socketEmitService.socketTicketRadiologyListChange(oid, {
       ticketId,
-      ticketRadiologyDestroyList: [result.ticketRadiologyDestroy],
-      ticketUserDestroyList: result.ticketUserDestroyList || [],
+      ticketRadiologyDestroyedList: [result.ticketRadiologyDestroyed],
+      ticketUserDestroyedList: result.ticketUserDestroyedList || [],
     })
 
-    return true
+    return { ticketId, ticketRadiologyId }
   }
 
-  async updateTicketRadiology(options: {
+  async updateRequestTicketRadiology(options: {
     oid: number
     ticketId: number
     ticketRadiologyId: number
-    body: TicketUpdateTicketRadiologyBody
+    body: TicketUpdateRequestTicketRadiologyBody
   }) {
     const { oid, ticketId, ticketRadiologyId, body } = options
     const result = await this.ticketUpdateTicketRadiologyOperation.updateTicketRadiology({
@@ -133,9 +133,9 @@ export class TicketChangeRadiologyService {
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified })
     this.socketEmitService.socketTicketRadiologyListChange(oid, {
       ticketId,
-      ticketRadiologyUpsertList: [ticketRadiologyModified],
-      ticketUserUpsertList: result.ticketUserCreatedList,
-      ticketUserDestroyList: result.ticketUserDestroyList,
+      ticketRadiologyUpsertedList: [ticketRadiologyModified],
+      ticketUserUpsertedList: result.ticketUserCreatedList,
+      ticketUserDestroyedList: result.ticketUserDestroyedList,
     })
 
     ticketRadiologyModified.ticketUserRequestList = result.ticketUserCreatedList || []
@@ -159,7 +159,7 @@ export class TicketChangeRadiologyService {
 
     this.socketEmitService.socketTicketRadiologyListChange(oid, {
       ticketId,
-      ticketRadiologyUpsertList: ticketRadiologyList,
+      ticketRadiologyUpsertedList: ticketRadiologyList,
     })
 
     return true
@@ -168,7 +168,7 @@ export class TicketChangeRadiologyService {
   async updateResultTicketRadiology(options: {
     oid: number
     ticketRadiologyId: number
-    body: TicketRadiologyUpdateResultBody
+    body: TicketUpdateResultTicketRadiologyBody
     query: TicketRadiologyPostQuery
     files: FileUploadDto[]
   }) {
@@ -181,8 +181,10 @@ export class TicketChangeRadiologyService {
     const { ticketId, customerId } = ticketRadiologyOrigin
 
     let imageIdsUpdateString = ticketRadiologyOrigin.imageIds
+    let imageCreatedList: Image[] = []
+    let imageDestroyedList: Image[] = []
     if (body.imagesChange) {
-      const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
+      const changeImageResponse = await this.imageManagerService.changeCloudinaryImageLink({
         oid,
         files,
         imageIdsWait: body.imagesChange.imageIdsWait,
@@ -196,7 +198,9 @@ export class TicketChangeRadiologyService {
           ticketItemChildId: 0,
         },
       })
-      imageIdsUpdateString = JSON.stringify(imageIdsUpdate)
+      imageIdsUpdateString = JSON.stringify(changeImageResponse.imageIdsNew)
+      imageCreatedList = changeImageResponse.imageCreatedList
+      imageDestroyedList = changeImageResponse.imageDestroyedList
     }
 
     const ticketRadiologyModified = await this.ticketRadiologyRepository.updateOneAndReturnEntity(
@@ -218,7 +222,7 @@ export class TicketChangeRadiologyService {
     )
 
     let ticketUserCreatedList: TicketUser[] = []
-    let ticketUserDestroyList: TicketUser[] = []
+    let ticketUserDestroyedList: TicketUser[] = []
     if (body.ticketUserResultList?.length) {
       const changeUserResult = await this.ticketChangeTicketUserOperation.changeTicketUserList({
         oid,
@@ -242,7 +246,7 @@ export class TicketChangeRadiologyService {
         },
       })
       ticketUserCreatedList = changeUserResult.ticketUserCreatedList
-      ticketUserDestroyList = changeUserResult.ticketUserDestroyList
+      ticketUserDestroyedList = changeUserResult.ticketUserDestroyedList
       this.socketEmitService.socketTicketChange(oid, {
         type: 'UPDATE',
         ticket: changeUserResult.ticketModified,
@@ -257,12 +261,14 @@ export class TicketChangeRadiologyService {
 
     this.socketEmitService.socketTicketRadiologyListChange(oid, {
       ticketId,
-      ticketRadiologyUpsertList: [ticketRadiologyModified],
-      ticketUserUpsertList: ticketUserCreatedList,
-      ticketUserDestroyList,
+      ticketRadiologyUpsertedList: [ticketRadiologyModified],
+      ticketUserUpsertedList: ticketUserCreatedList,
+      ticketUserDestroyedList,
+      imageUpsertedList: imageCreatedList,
+      imageDestroyedList,
     })
 
-    ticketRadiologyModified.ticketUserRequestList = ticketUserCreatedList || []
+    ticketRadiologyModified.ticketUserResultList = ticketUserCreatedList || []
 
     return { ticketRadiologyModified }
   }
@@ -270,7 +276,7 @@ export class TicketChangeRadiologyService {
   async cancelResultTicketRadiology(options: {
     oid: number
     ticketRadiologyId: number
-    body: TicketRadiologyCancelResultBody
+    body: TicketCancelResultTicketRadiologyBody
   }) {
     const { oid, ticketRadiologyId, body } = options
 
@@ -281,7 +287,7 @@ export class TicketChangeRadiologyService {
 
     const { ticketId } = ticketRadiologyOrigin
 
-    await this.imageManagerService.removeImageList({
+    const { imageDestroyedList } = await this.imageManagerService.removeImageList({
       oid,
       idRemoveList: JSON.parse(ticketRadiologyOrigin.imageIds),
     })
@@ -305,7 +311,7 @@ export class TicketChangeRadiologyService {
     )
     ticketRadiologyModified.imageList = []
 
-    const { ticketModified, ticketUserDestroyList } =
+    const { ticketModified, ticketUserDestroyedList } =
       await this.ticketChangeTicketUserOperation.destroyTicketUserList({
         oid,
         ticketId,
@@ -318,8 +324,9 @@ export class TicketChangeRadiologyService {
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified })
     this.socketEmitService.socketTicketRadiologyListChange(oid, {
       ticketId: ticketRadiologyOrigin.ticketId,
-      ticketRadiologyUpsertList: [ticketRadiologyModified],
-      ticketUserDestroyList,
+      ticketRadiologyUpsertedList: [ticketRadiologyModified],
+      ticketUserDestroyedList,
+      imageDestroyedList,
     })
     return { ticketRadiologyModified }
   }

@@ -47,7 +47,7 @@ export class TicketAddSelectLaboratoryOperation {
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
   ) { }
 
-  async addSelectLaboratoryList<U extends TicketLaboratoryGroupInsertBasicType>(params: {
+  async addTicketLaboratoryGroupList<U extends TicketLaboratoryGroupInsertBasicType>(params: {
     oid: number
     ticketId: number
     tlgDtoList: NoExtra<TicketLaboratoryGroupInsertBasicType, U>[]
@@ -77,7 +77,7 @@ export class TicketAddSelectLaboratoryOperation {
         }
         return tlgEntity
       })
-      const tlgInsertList = await this.ticketLaboratoryGroupManager.insertManyAndReturnEntity(
+      const tlgCreatedList = await this.ticketLaboratoryGroupManager.insertManyAndReturnEntity(
         manager,
         tlgEntityList
       )
@@ -90,8 +90,8 @@ export class TicketAddSelectLaboratoryOperation {
               oid,
               ticketId,
               customerId: ticketOrigin.customerId,
-              ticketLaboratoryGroupId: tlgInsertList[tlgDtoIndex].id,
-              roomId: tlgInsertList[tlgDtoIndex].roomId,
+              ticketLaboratoryGroupId: tlgCreatedList[tlgDtoIndex].id,
+              roomId: tlgCreatedList[tlgDtoIndex].roomId,
               status: TicketLaboratoryStatus.Pending,
               completedAt: null,
             }
@@ -99,19 +99,19 @@ export class TicketAddSelectLaboratoryOperation {
           })
         })
         .flat()
-      const tlInsertList = await this.ticketLaboratoryManager.insertManyAndReturnEntity(
+      const tlCreatedList = await this.ticketLaboratoryManager.insertManyAndReturnEntity(
         manager,
         tlEntityList
       )
 
       // === 5. UPDATE TICKET: MONEY  ===
-      const laboratoryMoneyAdd = tlInsertList.reduce((acc, cur) => {
+      const laboratoryMoneyAdd = tlCreatedList.reduce((acc, cur) => {
         return acc + cur.actualPrice
       }, 0)
-      const itemsDiscountAdd = tlInsertList.reduce((acc, cur) => {
+      const itemsDiscountAdd = tlCreatedList.reduce((acc, cur) => {
         return acc + cur.discountMoney
       }, 0)
-      const itemsCostAmountAdd = tlInsertList.reduce((acc, cur) => {
+      const itemsCostAmountAdd = tlCreatedList.reduce((acc, cur) => {
         return acc + cur.costPrice
       }, 0)
       let ticket: Ticket = ticketOrigin
@@ -129,8 +129,8 @@ export class TicketAddSelectLaboratoryOperation {
       }
       return {
         ticket,
-        ticketLaboratoryInsertList: tlInsertList,
-        ticketLaboratoryGroupInsertList: tlgInsertList,
+        ticketLaboratoryCreatedList: tlCreatedList,
+        ticketLaboratoryGroupCreatedList: tlgCreatedList,
       }
     })
 

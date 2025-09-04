@@ -42,7 +42,7 @@ export class TicketDestroyTicketProcedureOperation {
       )
 
       // === 2. DELETE TICKET PROCEDURE ===
-      const ticketProcedureDestroy = await this.ticketProcedureManager.deleteOneAndReturnEntity(
+      const ticketProcedureDestroyed = await this.ticketProcedureManager.deleteOneAndReturnEntity(
         manager,
         {
           oid,
@@ -52,7 +52,14 @@ export class TicketDestroyTicketProcedureOperation {
         }
       )
 
-      if (ticketProcedureDestroy.type === ProcedureType.Regimen) {
+      if (ticketProcedureDestroyed.procedureType === ProcedureType.SingleProcess) {
+        await this.ticketProcedureItemManager.deleteAndReturnEntity(manager, {
+          oid,
+          ticketId,
+          ticketProcedureId,
+        })
+      }
+      if (ticketProcedureDestroyed.procedureType === ProcedureType.Regimen) {
         await this.ticketProcedureItemManager.deleteAndReturnEntity(manager, {
           oid,
           ticketId,
@@ -67,21 +74,21 @@ export class TicketDestroyTicketProcedureOperation {
       }
 
       // === 3. DELETE TICKET USER ===
-      const ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+      const ticketUserDestroyedList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
         oid,
         positionType: {
           IN: [PositionType.ProcedureRequest, PositionType.ProcedureResult],
         },
         ticketId,
-        ticketItemId: ticketProcedureDestroy.id,
+        ticketItemId: ticketProcedureDestroyed.id,
       })
 
       // === 4. UPDATE TICKET: MONEY  ===
       const procedureMoneyDelete =
-        ticketProcedureDestroy.quantity * ticketProcedureDestroy.actualPrice
+        ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.actualPrice
       const itemsDiscountDelete =
-        ticketProcedureDestroy.quantity * ticketProcedureDestroy.discountMoney
-      const commissionMoneyDelete = ticketUserDestroyList.reduce((acc, item) => {
+        ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.discountMoney
+      const commissionMoneyDelete = ticketUserDestroyedList.reduce((acc, item) => {
         return acc + item.commissionMoney * item.quantity
       }, 0)
 
@@ -99,7 +106,7 @@ export class TicketDestroyTicketProcedureOperation {
         })
       }
 
-      return { ticket, ticketProcedureDestroy, ticketUserDestroyList }
+      return { ticket, ticketProcedureDestroyed, ticketUserDestroyedList }
     })
 
     return transaction

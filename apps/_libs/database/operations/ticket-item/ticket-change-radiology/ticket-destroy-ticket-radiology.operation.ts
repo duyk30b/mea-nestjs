@@ -33,7 +33,7 @@ export class TicketDestroyTicketRadiologyOperation {
       )
 
       // === 2. DELETE TICKET RADIOLOGY ===
-      const ticketRadiologyDestroy = await this.ticketRadiologyManager.deleteOneAndReturnEntity(
+      const ticketRadiologyDestroyed = await this.ticketRadiologyManager.deleteOneAndReturnEntity(
         manager,
         {
           oid,
@@ -43,18 +43,18 @@ export class TicketDestroyTicketRadiologyOperation {
       )
 
       // === 3. DELETE TICKET USER ===
-      const ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+      const ticketUserDestroyedList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
         oid,
         positionType: { IN: [PositionType.RadiologyRequest, PositionType.RadiologyResult] },
-        ticketItemId: ticketRadiologyDestroy.id,
+        ticketItemId: ticketRadiologyDestroyed.id,
       })
 
       // === 4. UPDATE TICKET: MONEY  ===
-      const radiologyMoneyDelete = ticketRadiologyDestroy.actualPrice
-      const itemsDiscountDelete = ticketRadiologyDestroy.discountMoney
-      const itemsCostAmountDelete = ticketRadiologyDestroy.costPrice
+      const radiologyMoneyDelete = ticketRadiologyDestroyed.actualPrice
+      const itemsDiscountDelete = ticketRadiologyDestroyed.discountMoney
+      const itemsCostAmountDelete = ticketRadiologyDestroyed.costPrice
 
-      const commissionMoneyDelete = ticketUserDestroyList.reduce((acc, item) => {
+      const commissionMoneyDelete = ticketUserDestroyedList.reduce((acc, item) => {
         return acc + item.commissionMoney * item.quantity
       }, 0)
 
@@ -73,7 +73,7 @@ export class TicketDestroyTicketRadiologyOperation {
         })
       }
 
-      return { ticket, ticketRadiologyDestroy, ticketUserDestroyList }
+      return { ticket, ticketRadiologyDestroyed, ticketUserDestroyedList }
     })
 
     return transaction

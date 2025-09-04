@@ -63,9 +63,9 @@ export class TicketChangeSelectLaboratoryOperation {
       )
 
       // === 2. UPDATE ===
-      let tlgUpdate: TicketLaboratoryGroup
+      let tlgModified: TicketLaboratoryGroup
       if (ticketLaboratoryGroupDto.id !== 0) {
-        tlgUpdate = await this.ticketLaboratoryGroupManager.updateOneAndReturnEntity(
+        tlgModified = await this.ticketLaboratoryGroupManager.updateOneAndReturnEntity(
           manager,
           { oid, ticketId, id: ticketLaboratoryGroupDto.id },
           {
@@ -75,7 +75,7 @@ export class TicketChangeSelectLaboratoryOperation {
         )
       }
 
-      const tlDestroyList = await this.ticketLaboratoryManager.deleteAndReturnEntity(manager, {
+      const tlDestroyedList = await this.ticketLaboratoryManager.deleteAndReturnEntity(manager, {
         oid,
         ticketId,
         ticketLaboratoryGroupId: ticketLaboratoryGroupDto.id,
@@ -103,38 +103,38 @@ export class TicketChangeSelectLaboratoryOperation {
             ticketLaboratoryGroupId: ticketLaboratoryGroupDto.id,
             roomId: ticketLaboratoryGroupDto.roomId,
             status: TicketLaboratoryStatus.Pending,
-            paymentMoneyStatus: tlgUpdate.paymentMoneyStatus,
+            paymentMoneyStatus: tlgModified.paymentMoneyStatus,
             completedAt: null,
           }
           return tlEntity
         })
 
-      const tlInsertList = await this.ticketLaboratoryManager.insertManyAndReturnEntity(
+      const tlCreatedList = await this.ticketLaboratoryManager.insertManyAndReturnEntity(
         manager,
         tlEntityList
       )
 
       // === 5. UPDATE TICKET: MONEY  ===
       const laboratoryMoneyAdd =
-        tlInsertList.reduce((acc, cur) => {
+        tlCreatedList.reduce((acc, cur) => {
           return acc + cur.actualPrice
         }, 0)
-        - tlDestroyList.reduce((acc, cur) => {
+        - tlDestroyedList.reduce((acc, cur) => {
           return acc + cur.actualPrice
         }, 0)
 
       const itemsDiscountAdd =
-        tlInsertList.reduce((acc, cur) => {
+        tlCreatedList.reduce((acc, cur) => {
           return acc + cur.discountMoney
         }, 0)
-        - tlDestroyList.reduce((acc, cur) => {
+        - tlDestroyedList.reduce((acc, cur) => {
           return acc + cur.discountMoney
         }, 0)
       const itemsCostAmountAdd =
-        tlInsertList.reduce((acc, cur) => {
+        tlCreatedList.reduce((acc, cur) => {
           return acc + cur.costPrice
         }, 0)
-        - tlDestroyList.reduce((acc, cur) => {
+        - tlDestroyedList.reduce((acc, cur) => {
           return acc + cur.costPrice
         }, 0)
 
@@ -153,9 +153,9 @@ export class TicketChangeSelectLaboratoryOperation {
       }
       return {
         ticket,
-        ticketLaboratoryInsertList: tlInsertList,
-        ticketLaboratoryDestroyList: tlDestroyList,
-        ticketLaboratoryGroupUpdate: tlgUpdate,
+        ticketLaboratoryCreatedList: tlCreatedList,
+        ticketLaboratoryDestroyedList: tlDestroyedList,
+        ticketLaboratoryGroupModified: tlgModified,
       }
     })
 

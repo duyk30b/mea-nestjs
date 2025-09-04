@@ -38,7 +38,7 @@ export class TicketOrderController {
   @UserPermission(
     PermissionId.TICKET_DRAFT_CRUD,
     PermissionId.TICKET_CHANGE_PRODUCT,
-    PermissionId.TICKET_CHANGE_PROCEDURE
+    PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST
   )
   async depositedUpdate(
     @External() { oid, uid }: TExternal,
@@ -58,7 +58,7 @@ export class TicketOrderController {
   @UserPermission(
     PermissionId.TICKET_DRAFT_CRUD,
     PermissionId.TICKET_CHANGE_PRODUCT,
-    PermissionId.TICKET_CHANGE_PROCEDURE,
+    PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST,
     PermissionId.TICKET_CHANGE_PRODUCT_SEND_PRODUCT,
     PermissionId.TICKET_PAYMENT_MONEY,
     PermissionId.TICKET_CLOSE
@@ -79,7 +79,7 @@ export class TicketOrderController {
   @UserPermission(
     PermissionId.TICKET_DRAFT_CRUD,
     PermissionId.TICKET_CHANGE_PRODUCT,
-    PermissionId.TICKET_CHANGE_PROCEDURE,
+    PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST,
     PermissionId.TICKET_CHANGE_PRODUCT_SEND_PRODUCT,
     PermissionId.TICKET_CHANGE_PRODUCT_RETURN_PRODUCT,
     PermissionId.TICKET_PAYMENT_MONEY,

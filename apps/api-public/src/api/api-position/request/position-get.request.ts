@@ -31,7 +31,7 @@ export class PositionGetQuery {
   @ApiPropertyOptional({
     type: String,
     example: JSON.stringify(<PositionFilterQuery>{
-      positionType: PositionType.Ticket,
+      positionType: PositionType.TicketReception,
     }),
   })
   @Expose()

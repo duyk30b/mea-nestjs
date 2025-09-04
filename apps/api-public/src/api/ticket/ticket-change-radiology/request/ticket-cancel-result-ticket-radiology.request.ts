@@ -3,7 +3,7 @@ import { Expose, Transform } from 'class-transformer'
 import { IsDefined, IsNumber, IsString } from 'class-validator'
 import * as DOMPurify from 'isomorphic-dompurify'
 
-export class TicketRadiologyCancelResultBody {
+export class TicketCancelResultTicketRadiologyBody {
   @ApiProperty({ example: 25 })
   @Expose()
   @IsDefined()

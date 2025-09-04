@@ -158,7 +158,7 @@ export class TicketLaboratoryGroupUpdateBody {
   ticketLaboratoryList: TicketLaboratoryUpdateBody[]
 }
 
-export class TicketUpsertLaboratoryBody {
+export class TicketUpsertRequestLaboratoryGroupBody {
   @ApiProperty({ type: TicketLaboratoryGroupAddBody, isArray: true })
   @Expose()
   @Type(() => TicketLaboratoryGroupAddBody)

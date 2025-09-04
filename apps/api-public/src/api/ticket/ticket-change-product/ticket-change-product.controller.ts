@@ -20,22 +20,6 @@ import { TicketChangeProductService } from './ticket-change-product.service'
 export class TicketChangeProductController {
   constructor(private readonly ticketChangeProductService: TicketChangeProductService) { }
 
-  @Post(':ticketId/product/add-ticket-product-list')
-  @UserPermission(PermissionId.TICKET_CHANGE_PRODUCT)
-  async addTicketProduct(
-    @External() { oid }: TExternal,
-    @Param() { ticketId }: TicketParams,
-    @Body() body: TicketAddTicketProductListBody
-  ): Promise<BaseResponse> {
-    const data = await this.ticketChangeProductService.addTicketProductList({
-      oid,
-      ticketId,
-      ticketProductType: TicketProductType.Product,
-      body,
-    })
-    return { data }
-  }
-
   @Post(':ticketId/consumable/add-ticket-product-consumable-list')
   @UserPermission(PermissionId.TICKET_CHANGE_PRODUCT_CONSUMABLE)
   async addTicketProductConsumable(
@@ -64,21 +48,6 @@ export class TicketChangeProductController {
       ticketId,
       ticketProductType: TicketProductType.Prescription,
       body,
-    })
-    return { data }
-  }
-
-  @Delete(':ticketId/product/destroy-ticket-product/:ticketProductId')
-  @UserPermission(PermissionId.TICKET_CHANGE_PRODUCT)
-  async destroyTicketProduct(
-    @External() { oid }: TExternal,
-    @Param() { ticketId, ticketProductId }: TicketChangeProductParams
-  ): Promise<BaseResponse> {
-    const data = await this.ticketChangeProductService.destroyTicketProduct({
-      oid,
-      ticketId,
-      ticketProductId,
-      ticketProductType: TicketProductType.Product,
     })
     return { data }
   }
@@ -113,22 +82,6 @@ export class TicketChangeProductController {
     return { data }
   }
 
-  @Post(':ticketId/product/update-priority-ticket-product')
-  @UserPermission(PermissionId.TICKET_CHANGE_PRODUCT_CONSUMABLE)
-  async updatePriorityTicketProduct(
-    @External() { oid }: TExternal,
-    @Param() { ticketId }: TicketParams,
-    @Body() body: TicketUpdatePriorityTicketProductBody
-  ): Promise<BaseResponse> {
-    const data = await this.ticketChangeProductService.updatePriorityTicketProduct({
-      oid,
-      ticketId,
-      ticketProductType: TicketProductType.Product,
-      body,
-    })
-    return { data }
-  }
-
   @Post(':ticketId/consumable/update-priority-ticket-product-consumable')
   @UserPermission(PermissionId.TICKET_CHANGE_PRODUCT_CONSUMABLE)
   async updatePriorityTicketProductConsumable(
@@ -156,23 +109,6 @@ export class TicketChangeProductController {
       oid,
       ticketId,
       ticketProductType: TicketProductType.Prescription,
-      body,
-    })
-    return { data }
-  }
-
-  @Post(':ticketId/product/update-ticket-product/:ticketProductId')
-  @UserPermission(PermissionId.TICKET_CHANGE_PRODUCT)
-  async updateTicketProduct(
-    @External() { oid }: TExternal,
-    @Param() { ticketId, ticketProductId }: TicketChangeProductParams,
-    @Body() body: TicketUpdateTicketProductBody
-  ): Promise<BaseResponse> {
-    const data = await this.ticketChangeProductService.updateTicketProduct({
-      oid,
-      ticketId,
-      ticketProductId,
-      ticketProductType: TicketProductType.Product,
       body,
     })
     return { data }

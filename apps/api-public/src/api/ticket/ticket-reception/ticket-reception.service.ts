@@ -108,7 +108,7 @@ export class TicketReceptionService {
       commissionMoney: 0,
       profit: 0,
       paid: 0,
-      imageIds: JSON.stringify([]),
+      imageDiagnosisIds: JSON.stringify([]),
       endedAt: null,
     })
 
@@ -250,15 +250,15 @@ export class TicketReceptionService {
             }
           }),
         destroy: {
-          positionType: PositionType.Ticket,
+          positionType: PositionType.TicketReception,
           ticketItemId: 0,
           ticketItemChildId: 0,
         },
       })
       this.socketEmitService.socketTicketUserListChange(oid, {
         ticketId,
-        ticketUserDestroyList: responseChangeUser.ticketUserDestroyList,
-        ticketUserUpsertList: responseChangeUser.ticketUserCreatedList,
+        ticketUserDestroyedList: responseChangeUser.ticketUserDestroyedList,
+        ticketUserUpsertedList: responseChangeUser.ticketUserCreatedList,
       })
     }
 

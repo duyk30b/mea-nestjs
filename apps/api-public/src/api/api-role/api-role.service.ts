@@ -71,9 +71,16 @@ export class ApiRoleService {
 
   async createOne(oid: number, body: RoleCreateBody): Promise<BaseResponse> {
     const { userIdList, ...other } = body
+    let roleCode = body.roleCode
+    if (!roleCode) {
+      const count = await this.roleRepository.getMaxId()
+      roleCode = (count + 1).toString()
+    }
+
     const role = await this.roleRepository.insertOneFullFieldAndReturnEntity({
       ...other,
       oid,
+      roleCode,
     })
 
     if (userIdList.length) {

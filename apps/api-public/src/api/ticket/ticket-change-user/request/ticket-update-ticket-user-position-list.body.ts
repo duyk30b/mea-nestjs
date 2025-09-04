@@ -6,7 +6,7 @@ import { PositionType } from '../../../../../../_libs/database/entities/position
 import { TicketUserBasicBody } from './ticket-change-user.request'
 
 export class TicketUpdateTicketUserPositionListBody {
-  @ApiProperty({ example: PositionType.Ticket })
+  @ApiProperty({ example: PositionType.TicketReception })
   @Expose()
   @IsDefined()
   @IsEnumValue(PositionType)

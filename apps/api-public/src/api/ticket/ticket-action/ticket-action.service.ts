@@ -127,21 +127,15 @@ export class TicketActionService {
       })
     }
     if (ticketProductModifiedAll) {
-      this.socketEmitService.socketTicketProductChange(oid, {
-        ticketId,
-        ticketProductUpsertList: ticketProductModifiedAll.filter((i) => {
-          return i.type === TicketProductType.Product
-        }),
-      })
       this.socketEmitService.socketTicketConsumableChange(oid, {
         ticketId,
-        ticketProductUpsertList: ticketProductModifiedAll.filter((i) => {
+        ticketProductUpsertedList: ticketProductModifiedAll.filter((i) => {
           return i.type === TicketProductType.Consumable
         }),
       })
       this.socketEmitService.socketTicketPrescriptionChange(oid, {
         ticketId,
-        ticketProductUpsertList: ticketProductModifiedAll.filter((i) => {
+        ticketProductUpsertedList: ticketProductModifiedAll.filter((i) => {
           return i.type === TicketProductType.Prescription
         }),
       })
@@ -184,23 +178,17 @@ export class TicketActionService {
 
     this.socketEmitService.socketTicketUserListChange(oid, {
       ticketId,
-      ticketUserUpsertList: returnProductResult.ticketUserModifiedList || [],
-    })
-    this.socketEmitService.socketTicketProductChange(oid, {
-      ticketId,
-      ticketProductReplaceList: ticketProductModifiedAll.filter((i) => {
-        return i.type === TicketProductType.Product
-      }),
+      ticketUserUpsertedList: returnProductResult.ticketUserModifiedList || [],
     })
     this.socketEmitService.socketTicketConsumableChange(oid, {
       ticketId,
-      ticketProductReplaceList: ticketProductModifiedAll.filter((i) => {
+      ticketProductUpsertedList: ticketProductModifiedAll.filter((i) => {
         return i.type === TicketProductType.Consumable
       }),
     })
     this.socketEmitService.socketTicketPrescriptionChange(oid, {
       ticketId,
-      ticketProductReplaceList: ticketProductModifiedAll.filter((i) => {
+      ticketProductUpsertedList: ticketProductModifiedAll.filter((i) => {
         return i.type === TicketProductType.Prescription
       }),
     })
@@ -233,8 +221,8 @@ export class TicketActionService {
     if (closeResult.ticketUserDeletedList?.length || closeResult.ticketUserModifiedList?.length) {
       this.socketEmitService.socketTicketUserListChange(oid, {
         ticketId,
-        ticketUserDestroyList: closeResult.ticketUserDeletedList,
-        ticketUserUpsertList: [...closeResult.ticketUserModifiedList],
+        ticketUserDestroyedList: closeResult.ticketUserDeletedList,
+        ticketUserUpsertedList: [...closeResult.ticketUserModifiedList],
       })
     }
     return { ticketModified, customerModified, paymentCreatedList }
@@ -357,7 +345,7 @@ export class TicketActionService {
 
     await this.imageManagerService.removeImageList({
       oid,
-      idRemoveList: JSON.parse(ticket.imageIds || '[]'),
+      idRemoveList: JSON.parse(ticket.imageDiagnosisIds || '[]'),
     })
     await this.ticketRepository.update({ oid, id: ticketId }, { status: TicketStatus.Cancelled })
     await this.ticketRepository.destroy({ oid, ticketId })

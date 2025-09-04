@@ -67,7 +67,7 @@ class ImagesChangeBody {
   externalUrlList: string[]
 }
 
-export class TicketRadiologyUpdateResultBody extends MultipleFileUpload {
+export class TicketUpdateResultTicketRadiologyBody extends MultipleFileUpload {
   @ApiProperty({
     type: 'string',
     example: JSON.stringify(<TicketUserBasicBody[]>[{ userId: 1, positionId: 2 }]),

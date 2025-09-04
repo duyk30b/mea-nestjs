@@ -1,23 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsNumber, Max, ValidateNested } from 'class-validator'
+import { IsArray, IsDefined, IsNumber, Max, Min, ValidateNested } from 'class-validator'
 import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
 import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
 import { DiscountType } from '../../../../../../_libs/database/common/variable'
+import { TicketUserBasicBody } from '../../ticket-change-user/request'
 
-class TicketLaboratoryBody {
-  @ApiProperty({ example: 56 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  priority: number
-
-  @ApiProperty({ example: 56 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  laboratoryId: number
-
+class TicketRadiologyBody {
   @ApiProperty({ example: 25_000 })
   @Expose()
   @IsDefined()
@@ -36,6 +25,7 @@ class TicketLaboratoryBody {
   @IsDefined()
   @IsNumber()
   @Max(100)
+  @Min(0)
   discountPercent: number
 
   @ApiProperty({ enum: valuesEnum(DiscountType), example: DiscountType.VND })
@@ -52,18 +42,17 @@ class TicketLaboratoryBody {
   actualPrice: number
 }
 
-export class TicketUpdateTicketLaboratoryListBody {
-  @ApiProperty({ example: 56 })
+export class TicketUpdateRequestTicketRadiologyBody {
+  @ApiPropertyOptional({ type: TicketUserBasicBody, isArray: true })
   @Expose()
-  @IsDefined()
-  @IsNumber()
-  customerId: number
-
-  @ApiProperty({ type: TicketLaboratoryBody, isArray: true })
-  @Expose()
-  @Type(() => TicketLaboratoryBody)
-  @IsDefined()
+  @Type(() => TicketUserBasicBody)
   @IsArray()
   @ValidateNested({ each: true })
-  ticketLaboratoryList: TicketLaboratoryBody[]
+  ticketUserRequestList: TicketUserBasicBody[]
+
+  @ApiProperty({ type: TicketRadiologyBody })
+  @Expose()
+  @Type(() => TicketRadiologyBody)
+  @ValidateNested({ each: true })
+  ticketRadiology: TicketRadiologyBody
 }

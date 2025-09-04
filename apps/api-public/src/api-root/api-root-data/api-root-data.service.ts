@@ -28,23 +28,23 @@ export class ApiRootDataService {
 
   async startMigrationData(body: RootMigrationDataBody): Promise<BaseResponse<boolean>> {
     if (body.key !== '8aobvoyupp8') return
-    await this.migrationTicketImage()
+    await this.migrationTicketDiagnosisImage()
     await this.migrationTicketRadiologyImage()
     await this.migrationOrganizationImage()
     await this.migrationUserImage()
     return { data: true }
   }
 
-  async migrationTicketImage() {
+  async migrationTicketDiagnosisImage() {
     const ticketList = await this.ticketRepository.findMany({
-      condition: { imageIds: { NOT: '[]' } },
+      condition: { imageDiagnosisIds: { NOT: '[]' } },
     })
     console.log('🚀 ~ ticketList:', ticketList.length)
 
     const imageTempList = ticketList
       .map((ticket) => {
         try {
-          const imageIdList: number[] = JSON.parse(ticket.imageIds)
+          const imageIdList: number[] = JSON.parse(ticket.imageDiagnosisIds)
           return imageIdList.map((imageId) => {
             const temp: Partial<Image> = {
               id: imageId,

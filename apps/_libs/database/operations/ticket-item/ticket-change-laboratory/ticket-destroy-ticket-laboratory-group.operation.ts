@@ -38,7 +38,7 @@ export class TicketDestroyTicketLaboratoryGroupOperation {
       )
 
       // === 2. DELETE TICKET LABORATORY ===
-      const ticketLaboratoryGroupDestroy =
+      const ticketLaboratoryGroupDestroyed =
         await this.ticketLaboratoryGroupManager.deleteOneAndReturnEntity(manager, {
           oid,
           ticketId,
@@ -46,7 +46,7 @@ export class TicketDestroyTicketLaboratoryGroupOperation {
           paymentMoneyStatus: { IN: [PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending] },
         })
 
-      const ticketLaboratoryDestroyList = await this.ticketLaboratoryManager.deleteAndReturnEntity(
+      const ticketLaboratoryDestroyedList = await this.ticketLaboratoryManager.deleteAndReturnEntity(
         manager,
         {
           oid,
@@ -56,7 +56,7 @@ export class TicketDestroyTicketLaboratoryGroupOperation {
         }
       )
 
-      const ticketLaboratoryResultDestroyList =
+      const ticketLaboratoryResultDestroyedList =
         await this.ticketLaboratoryResultManager.deleteAndReturnEntity(manager, {
           oid,
           ticketId,
@@ -64,15 +64,15 @@ export class TicketDestroyTicketLaboratoryGroupOperation {
         })
 
       // === 4. UPDATE TICKET: MONEY  ===
-      const laboratoryMoneyDelete = ticketLaboratoryDestroyList.reduce(
+      const laboratoryMoneyDelete = ticketLaboratoryDestroyedList.reduce(
         (acc, item) => acc + item.actualPrice,
         0
       )
-      const itemsDiscountDelete = ticketLaboratoryDestroyList.reduce(
+      const itemsDiscountDelete = ticketLaboratoryDestroyedList.reduce(
         (acc, item) => acc + item.discountMoney,
         0
       )
-      const itemsCostAmountDelete = ticketLaboratoryDestroyList.reduce(
+      const itemsCostAmountDelete = ticketLaboratoryDestroyedList.reduce(
         (acc, item) => acc + item.costPrice,
         0
       )
@@ -93,9 +93,9 @@ export class TicketDestroyTicketLaboratoryGroupOperation {
 
       return {
         ticket,
-        ticketLaboratoryDestroyList,
-        ticketLaboratoryGroupDestroy,
-        ticketLaboratoryResultDestroyList,
+        ticketLaboratoryDestroyedList,
+        ticketLaboratoryGroupDestroyed,
+        ticketLaboratoryResultDestroyedList,
       }
     })
 

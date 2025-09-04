@@ -82,11 +82,11 @@ export class TicketUpdateTicketLaboratoryOperation {
           ticketLaboratoryModified.costPrice - ticketLaboratoryOrigin.costPrice
       }
 
-      let ticketUserDestroyList: TicketUser[] = []
+      let ticketUserDestroyedList: TicketUser[] = []
       let ticketUserCreatedList: TicketUser[] = []
       let commissionMoneyAdd = 0
       if (ticketUserRequestList) {
-        ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+        ticketUserDestroyedList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
           oid,
           ticketId,
           positionType: PositionType.LaboratoryRequest,
@@ -115,7 +115,7 @@ export class TicketUpdateTicketLaboratoryOperation {
           ticketUserCreatedList.reduce((acc, item) => {
             return acc + item.quantity * item.commissionMoney
           }, 0)
-          - ticketUserDestroyList.reduce((acc, item) => {
+          - ticketUserDestroyedList.reduce((acc, item) => {
             return acc + item.quantity * item.commissionMoney
           }, 0)
       }
@@ -140,7 +140,7 @@ export class TicketUpdateTicketLaboratoryOperation {
           },
         })
       }
-      return { ticketModified, ticketLaboratoryModified, ticketUserDestroyList, ticketUserCreatedList }
+      return { ticketModified, ticketLaboratoryModified, ticketUserDestroyedList, ticketUserCreatedList }
     })
 
     return transaction

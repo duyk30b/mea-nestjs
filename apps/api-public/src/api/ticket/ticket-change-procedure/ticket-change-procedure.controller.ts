@@ -15,10 +15,10 @@ import { External, TExternal } from '../../../../../_libs/common/request/externa
 import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { TicketParams } from '../ticket-query/request'
 import {
-  TicketCancelProcedureItemBody,
+  TicketCancelResultProcedureItemBody,
   TicketChangeProcedureParams,
   TicketUpdatePriorityTicketProcedureBody,
-  TicketUpdateTicketProcedureBody,
+  TicketUpdateRequestTicketProcedureBody,
 } from './request'
 import { TicketAddTicketProcedureListBody } from './request/ticket-add-ticket-procedure-list.body'
 import { TicketProcedureUpdateResultBody } from './request/ticket-update-result-procedure.request'
@@ -31,7 +31,7 @@ export class TicketChangeProcedureController {
   constructor(private readonly ticketChangeProcedureService: TicketChangeProcedureService) { }
 
   @Post(':ticketId/procedure/add-ticket-procedure-list')
-  @UserPermission(PermissionId.TICKET_CHANGE_PROCEDURE)
+  @UserPermission(PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST)
   async addTicketProcedureList(
     @External() { oid }: TExternal,
     @Param() { ticketId }: TicketParams,
@@ -46,7 +46,7 @@ export class TicketChangeProcedureController {
   }
 
   @Delete(':ticketId/procedure/destroy-ticket-procedure/:ticketProcedureId')
-  @UserPermission(PermissionId.TICKET_CHANGE_PROCEDURE)
+  @UserPermission(PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST)
   async destroyTicketProcedure(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketProcedureId }: TicketChangeProcedureParams
@@ -59,14 +59,14 @@ export class TicketChangeProcedureController {
     return { data }
   }
 
-  @Post(':ticketId/procedure/update-ticket-procedure/:ticketProcedureId')
-  @UserPermission(PermissionId.TICKET_CHANGE_PROCEDURE)
-  async updateTicketProcedure(
+  @Post(':ticketId/procedure/update-request-ticket-procedure/:ticketProcedureId')
+  @UserPermission(PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST)
+  async updateRequestTicketProcedure(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketProcedureId }: TicketChangeProcedureParams,
-    @Body() body: TicketUpdateTicketProcedureBody
+    @Body() body: TicketUpdateRequestTicketProcedureBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeProcedureService.updateTicketProcedure({
+    const data = await this.ticketChangeProcedureService.updateRequestTicketProcedure({
       oid,
       ticketId,
       ticketProcedureId,
@@ -76,7 +76,7 @@ export class TicketChangeProcedureController {
   }
 
   @Post(':ticketId/procedure/update-priority-ticket-procedure')
-  @UserPermission(PermissionId.TICKET_CHANGE_PROCEDURE)
+  @UserPermission(PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST)
   async updatePriorityTicketProcedure(
     @External() { oid }: TExternal,
     @Param() { ticketId }: TicketParams,
@@ -109,14 +109,14 @@ export class TicketChangeProcedureController {
     return { data }
   }
 
-  @Post(':ticketId/procedure/cancel-ticket-procedure-item')
+  @Post(':ticketId/procedure/cancel-result-ticket-procedure-item')
   @UserPermission(PermissionId.TICKET_CHANGE_PROCEDURE_RESULT)
-  async cancelTicketProcedureItem(
+  async cancelResultTicketProcedureItem(
     @External() { oid }: TExternal,
     @Param() { ticketId }: TicketParams,
-    @Body() body: TicketCancelProcedureItemBody
+    @Body() body: TicketCancelResultProcedureItemBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeProcedureService.cancelTicketProcedureItem({
+    const data = await this.ticketChangeProcedureService.cancelResultTicketProcedureItem({
       oid,
       ticketId,
       body,

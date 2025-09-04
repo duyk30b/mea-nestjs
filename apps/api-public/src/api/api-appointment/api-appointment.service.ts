@@ -281,7 +281,7 @@ export class ApiAppointmentService {
       commissionMoney: 0,
       profit: 0,
       paid: 0,
-      imageIds: JSON.stringify([]),
+      imageDiagnosisIds: JSON.stringify([]),
       startedAt: null,
       endedAt: null,
     })

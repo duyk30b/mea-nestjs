@@ -8,7 +8,7 @@ import Radiology from './radiology.entity'
 import Role from './role.entity'
 
 export enum PositionType {
-  Ticket = 1,
+  TicketReception = 1,
   ProductRequest = 2,
   TicketPrescriptionRequest = 3,
   ProcedureRequest = 4,
@@ -48,7 +48,7 @@ export default class Position {
   @Expose()
   positionInteractId: number
 
-  @Column({ type: 'smallint', default: PositionType.Ticket })
+  @Column({ type: 'smallint', default: PositionType.TicketReception })
   @Expose()
   positionType: PositionType
 

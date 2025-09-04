@@ -6,7 +6,7 @@ import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/c
 import { DiscountType } from '../../../../../../_libs/database/common/variable'
 import { TicketUserBasicBody } from '../../ticket-change-user/request'
 
-class TicketRadiologyBody {
+class TicketLaboratoryBody {
   @ApiProperty({ example: 25_000 })
   @Expose()
   @IsDefined()
@@ -42,7 +42,7 @@ class TicketRadiologyBody {
   actualPrice: number
 }
 
-export class TicketUpdateTicketRadiologyBody {
+export class TicketUpdateRequestTicketLaboratoryBody {
   @ApiPropertyOptional({ type: TicketUserBasicBody, isArray: true })
   @Expose()
   @Type(() => TicketUserBasicBody)
@@ -50,9 +50,9 @@ export class TicketUpdateTicketRadiologyBody {
   @ValidateNested({ each: true })
   ticketUserRequestList: TicketUserBasicBody[]
 
-  @ApiProperty({ type: TicketRadiologyBody })
+  @ApiProperty({ type: TicketLaboratoryBody })
   @Expose()
-  @Type(() => TicketRadiologyBody)
+  @Type(() => TicketLaboratoryBody)
   @ValidateNested({ each: true })
-  ticketRadiology: TicketRadiologyBody
+  ticketLaboratory: TicketLaboratoryBody
 }

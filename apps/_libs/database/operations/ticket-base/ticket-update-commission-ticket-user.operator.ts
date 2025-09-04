@@ -58,7 +58,7 @@ export class TicketUpdateCommissionTicketUserOperator {
       let expectedPrice = 0
       let quantity = 0
 
-      if (tu.positionType === PositionType.Ticket) {
+      if (tu.positionType === PositionType.TicketReception) {
         expectedPrice = ticketOrigin.totalMoney + ticketOrigin.discountMoney
         actualPrice = ticketOrigin.totalMoney
       }

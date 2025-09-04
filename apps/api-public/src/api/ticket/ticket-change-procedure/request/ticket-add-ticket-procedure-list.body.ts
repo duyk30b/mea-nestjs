@@ -51,7 +51,7 @@ class TicketProcedureBasicBody {
   @ApiProperty({ example: ProcedureType.Basic })
   @Expose()
   @IsEnumValue(ProcedureType)
-  type: ProcedureType
+  procedureType: ProcedureType
 
   @ApiProperty({ example: 4 })
   @Expose()

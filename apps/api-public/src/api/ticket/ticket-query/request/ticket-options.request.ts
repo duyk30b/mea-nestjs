@@ -74,16 +74,16 @@ export class TicketRelationQuery {
   ticketRadiologyList?: TicketRadiologyGetManyQuery
 
   @Expose()
-  @IsObject()
-  ticketUserList?: { user?: boolean }
-
-  @Expose()
   @IsBoolean()
   toAppointment?: boolean
 
   @Expose()
   @IsBoolean()
   customerSource?: boolean
+
+  @Expose()
+  @IsObject()
+  ticketUserList?: { user?: boolean }
 
   @Expose()
   @IsBoolean()

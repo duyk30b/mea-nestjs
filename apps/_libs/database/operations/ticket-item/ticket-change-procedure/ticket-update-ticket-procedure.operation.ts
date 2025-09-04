@@ -128,8 +128,7 @@ export class TicketUpdateTicketProcedureOperation {
           - ticketProcedureOrigin.quantity * ticketProcedureOrigin.discountMoney
       }
 
-      if (ticketProcedureItemUpdateList && ticketProcedureOrigin.type === ProcedureType.Regimen) {
-        // DELETE OLD
+      if ([ProcedureType.Basic, ProcedureType.Regimen].includes(ticketProcedureOrigin.procedureType)) {
         await this.ticketProcedureItemManager.delete(manager, {
           oid,
           ticketId,
@@ -137,6 +136,8 @@ export class TicketUpdateTicketProcedureOperation {
           status: { NOT: TicketProcedureStatus.Completed },
           id: { NOT_IN: [0, ...ticketProcedureItemUpdateList.map((i) => i.id)] },
         })
+      }
+      if ([ProcedureType.Regimen].includes(ticketProcedureOrigin.procedureType)) {
         await this.appointmentManager.delete(manager, {
           oid,
           fromTicketId: ticketId,
@@ -150,7 +151,22 @@ export class TicketUpdateTicketProcedureOperation {
             ],
           },
         })
+      }
 
+      if ([ProcedureType.Basic, ProcedureType.Regimen].includes(ticketProcedureOrigin.procedureType)) {
+        await this.ticketProcedureItemManager.delete(manager, {
+          oid,
+          ticketId,
+          ticketProcedureId,
+          status: { NOT: TicketProcedureStatus.Completed },
+          id: { NOT_IN: [0, ...ticketProcedureItemUpdateList.map((i) => i.id)] },
+        })
+      }
+
+      if (
+        ticketProcedureItemUpdateList
+        && [ProcedureType.Basic, ProcedureType.Regimen].includes(ticketProcedureOrigin.procedureType)
+      ) {
         // INSERT NEW
         const tpiInsertList = ticketProcedureItemUpdateList
           .filter((i) => !i.id)
@@ -226,11 +242,11 @@ export class TicketUpdateTicketProcedureOperation {
         }
       }
 
-      let ticketUserDestroyList: TicketUser[] = []
+      let ticketUserDestroyedList: TicketUser[] = []
       let ticketUserCreatedList: TicketUser[] = []
       let commissionMoneyAdd = 0
       if (ticketUserRequestList) {
-        ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+        ticketUserDestroyedList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
           oid,
           ticketId,
           positionType: PositionType.ProcedureRequest,
@@ -259,7 +275,7 @@ export class TicketUpdateTicketProcedureOperation {
           ticketUserCreatedList.reduce((acc, item) => {
             return acc + item.quantity * item.commissionMoney
           }, 0)
-          - ticketUserDestroyList.reduce((acc, item) => {
+          - ticketUserDestroyedList.reduce((acc, item) => {
             return acc + item.quantity * item.commissionMoney
           }, 0)
       }
@@ -282,7 +298,7 @@ export class TicketUpdateTicketProcedureOperation {
         ticketModified,
         ticketProcedureModified,
         ticketUserCreatedList,
-        ticketUserDestroyList,
+        ticketUserDestroyedList,
       }
     })
 

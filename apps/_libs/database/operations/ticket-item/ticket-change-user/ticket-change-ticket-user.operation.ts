@@ -38,9 +38,9 @@ export class TicketChangeTicketUserOperation {
         { updatedAt: Date.now() }
       )
 
-      let ticketUserDestroyList: TicketUser[] = []
+      let ticketUserDestroyedList: TicketUser[] = []
       if (data.destroy) {
-        ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+        ticketUserDestroyedList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
           oid,
           ticketId,
           positionType: data.destroy.positionType,
@@ -60,7 +60,7 @@ export class TicketChangeTicketUserOperation {
       const commissionMoneyAdd = ticketUserCreatedList.reduce((acc, item) => {
         return acc + item.quantity * item.commissionMoney
       }, 0)
-      const commissionMoneyDestroy = ticketUserDestroyList.reduce((acc, item) => {
+      const commissionMoneyDestroy = ticketUserDestroyedList.reduce((acc, item) => {
         return acc + item.quantity * item.commissionMoney
       }, 0)
 
@@ -75,7 +75,7 @@ export class TicketChangeTicketUserOperation {
         })
       }
 
-      return { ticketModified, ticketUserDestroyList, ticketUserCreatedList }
+      return { ticketModified, ticketUserDestroyedList, ticketUserCreatedList }
     })
 
     return transaction
@@ -94,13 +94,13 @@ export class TicketChangeTicketUserOperation {
         { updatedAt: Date.now() }
       )
 
-      const ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+      const ticketUserDestroyedList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
         ...condition,
         oid,
         ticketId,
       })
 
-      const commissionMoneyDestroy = ticketUserDestroyList.reduce((acc, item) => {
+      const commissionMoneyDestroy = ticketUserDestroyedList.reduce((acc, item) => {
         return acc + item.quantity * item.commissionMoney
       }, 0)
 
@@ -115,7 +115,7 @@ export class TicketChangeTicketUserOperation {
         })
       }
 
-      return { ticketModified, ticketUserDestroyList }
+      return { ticketModified, ticketUserDestroyedList }
     })
 
     return transaction

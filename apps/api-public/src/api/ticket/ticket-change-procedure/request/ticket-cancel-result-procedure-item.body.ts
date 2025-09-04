@@ -6,7 +6,7 @@ import {
   IsString,
 } from 'class-validator'
 
-export class TicketCancelProcedureItemBody {
+export class TicketCancelResultProcedureItemBody {
   @ApiProperty()
   @Expose()
   @IsDefined()

@@ -142,8 +142,9 @@ export class ImageManagerService implements OnModuleInit {
     const imageIdsRemove = imageIdsOld.filter((i) => !imageIdsWait.includes(i))
 
     // chưa xử lý việc xóa ảnh thực sự trên host
+    let imageDestroyedList: Image[] = []
     if (imageIdsRemove.length) {
-      await this.imageRepository.updateAndReturnEntity(
+      imageDestroyedList = await this.imageRepository.updateAndReturnEntity(
         { oid, id: { IN: imageIdsRemove } },
         { waitDelete: 1 }
       )
@@ -171,17 +172,18 @@ export class ImageManagerService implements OnModuleInit {
 
     // sắp xếp sao cho đúng vị trí
     const imageIdsNew = []
+    const imageCreatedListAction = [...imageCreatedList] // phải tạo mảng mới vì có sửa mảng bằng shift()
     for (let i = 0; i < imageIdsWait.length; i++) {
       if (imageIdsWait[i] !== 0) {
         imageIdsNew[i] = imageIdsWait[i]
       }
       if (imageIdsWait[i] === 0) {
-        const imageCreated = imageCreatedList.shift() // push từng phần tư vào thôi
+        const imageCreated = imageCreatedListAction.shift() // push từng phần tư vào thôi
         imageIdsNew[i] = imageCreated.id
       }
     }
 
-    return imageIdsNew
+    return { imageIdsNew, imageCreatedList, imageDestroyedList }
   }
 
   async removeImageGoogleDriver(oid: number, imageRemoveList: Image[]) {
@@ -224,12 +226,14 @@ export class ImageManagerService implements OnModuleInit {
       return i.hostType === ImageHostType.Cloudinary
     })
     const imageGoogleWaitDelete = imageWaitDeleteList.filter((i) => {
-      return i.hostType === ImageHostType.Cloudinary
+      return i.hostType === ImageHostType.GoogleDriver
     })
 
     await Promise.all([
       this.removeImageCloudinary(oid, imageCloudinaryWaitDelete),
       this.removeImageGoogleDriver(oid, imageGoogleWaitDelete),
     ])
+
+    return { imageDestroyedList: imageWaitDeleteList }
   }
 }
