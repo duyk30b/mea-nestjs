@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
-import {
-  RoomManager,
-  TicketManager,
-} from '../../repositories'
+import { BusinessError } from '../../common/error'
+import { RoomManager, TicketManager } from '../../repositories'
 
 @Injectable()
 export class RoomOperation {
@@ -28,6 +26,9 @@ export class RoomOperation {
         oid,
         id: { IN: roomIdSourceList },
       })
+      if (roomIdSourceList.length !== roomIdSourceList.length) {
+        throw new BusinessError('ID phòng không phù hợp')
+      }
 
       await this.ticketManager.update(
         manager,

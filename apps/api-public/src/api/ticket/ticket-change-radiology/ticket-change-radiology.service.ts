@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common'
 import { FileUploadDto } from '../../../../../_libs/common/dto/file'
 import { BusinessError } from '../../../../../_libs/database/common/error'
 import { TicketUser } from '../../../../../_libs/database/entities'
+import { ImageInteractType } from '../../../../../_libs/database/entities/image.entity'
 import { PositionType } from '../../../../../_libs/database/entities/position.entity'
 import { TicketRadiologyStatus } from '../../../../../_libs/database/entities/ticket-radiology.entity'
 import {
@@ -183,12 +184,17 @@ export class TicketChangeRadiologyService {
     if (body.imagesChange) {
       const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
         oid,
-        ticketId,
-        customerId,
         files,
         imageIdsWait: body.imagesChange.imageIdsWait,
         externalUrlList: body.imagesChange.externalUrlList,
         imageIdsOld: JSON.parse(ticketRadiologyOrigin.imageIds),
+        imageInteract: {
+          imageInteractType: ImageInteractType.Customer,
+          imageInteractId: customerId,
+          ticketId,
+          ticketItemId: ticketRadiologyId,
+          ticketItemChildId: 0,
+        },
       })
       imageIdsUpdateString = JSON.stringify(imageIdsUpdate)
     }

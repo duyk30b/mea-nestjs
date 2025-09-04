@@ -1,8 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
-import { TicketAttributeInsertType } from '../../../../_libs/database/entities/ticket-attribute.entity'
-import { TicketAttributeRepository } from '../../../../_libs/database/repositories/ticket-attribute.repository'
+import Image, { ImageInteractType } from '../../../../_libs/database/entities/image.entity'
+import {
+  ImageManager,
+  ImageRepository,
+  OrganizationRepository,
+  TicketRadiologyRepository,
+  TicketRepository,
+  UserRepository,
+} from '../../../../_libs/database/repositories'
 import { RootMigrationDataBody } from './request/root-migration-data.body'
 
 @Injectable()
@@ -11,126 +18,149 @@ export class ApiRootDataService {
 
   constructor(
     private readonly dataSource: DataSource,
-    private readonly ticketAttributeRepository: TicketAttributeRepository
+    private readonly organizationRepository: OrganizationRepository,
+    private readonly userRepository: UserRepository,
+    private readonly imageRepository: ImageRepository,
+    private readonly imageManager: ImageManager,
+    private readonly ticketRepository: TicketRepository,
+    private readonly ticketRadiologyRepository: TicketRadiologyRepository
   ) { }
 
   async startMigrationData(body: RootMigrationDataBody): Promise<BaseResponse<boolean>> {
     if (body.key !== '8aobvoyupp8') return
+    await this.migrationTicketImage()
+    await this.migrationTicketRadiologyImage()
+    await this.migrationOrganizationImage()
+    await this.migrationUserImage()
     return { data: true }
   }
 
-  // async migrationTicketAttribute() {
-  //   const ticketDiagnosisAll = await this.ticketDiagnosisRepository.findMany({
-  //     condition: {},
-  //     sort: { id: 'ASC' },
-  //   })
-  //   console.log('🚀 ~ ticketDiagnosisAll:', ticketDiagnosisAll.length)
+  async migrationTicketImage() {
+    const ticketList = await this.ticketRepository.findMany({
+      condition: { imageIds: { NOT: '[]' } },
+    })
+    console.log('🚀 ~ ticketList:', ticketList.length)
 
-  //   for (let i = 0; i < ticketDiagnosisAll.length; i += 100) {
-  //     const ticketAttributeBatch = ticketDiagnosisAll
-  //       .slice(i, i + 100)
-  //       .map((i) => {
-  //         const ticketAttributeList = []
-  //         if (i.reason) {
-  //           const ticketAttribute: TicketAttributeInsertType = {
-  //             key: 'reason',
-  //             value: i.reason,
-  //             oid: i.oid,
-  //             ticketId: i.ticketId,
-  //           }
-  //           ticketAttributeList.push(ticketAttribute)
-  //         }
-  //         if (i.healthHistory) {
-  //           const ticketAttribute: TicketAttributeInsertType = {
-  //             key: 'healthHistory',
-  //             value: i.healthHistory,
-  //             oid: i.oid,
-  //             ticketId: i.ticketId,
-  //           }
-  //           ticketAttributeList.push(ticketAttribute)
-  //         }
-  //         if (i.summary) {
-  //           const ticketAttribute: TicketAttributeInsertType = {
-  //             key: 'summary',
-  //             value: i.summary,
-  //             oid: i.oid,
-  //             ticketId: i.ticketId,
-  //           }
-  //           ticketAttributeList.push(ticketAttribute)
-  //         }
-  //         if (i.diagnosis) {
-  //           const ticketAttribute: TicketAttributeInsertType = {
-  //             key: 'diagnosis',
-  //             value: i.diagnosis,
-  //             oid: i.oid,
-  //             ticketId: i.ticketId,
-  //           }
-  //           ticketAttributeList.push(ticketAttribute)
-  //         }
-  //         if (i.general) {
-  //           try {
-  //             const general: Record<string, any> = JSON.parse(i.general)
-  //             Object.keys(general).forEach((key) => {
-  //               const ticketAttribute: TicketAttributeInsertType = {
-  //                 key,
-  //                 value: general[key],
-  //                 oid: i.oid,
-  //                 ticketId: i.ticketId,
-  //               }
-  //               ticketAttributeList.push(ticketAttribute)
-  //             })
-  //           } catch (error) {
-  //             console.log('🚀 ~ file: ~ ticketAttributeBatch ~ error:', error)
-  //             console.log('🚀 ~ file: ~ ticketAttributeBatch ~ i.general:', i.general)
-  //           }
-  //         }
-  //         if (i.regional) {
-  //           try {
-  //             const regional: Record<string, any> = JSON.parse(i.regional)
-  //             Object.keys(regional).forEach((key) => {
-  //               const ticketAttribute: TicketAttributeInsertType = {
-  //                 key,
-  //                 value: regional[key],
-  //                 oid: i.oid,
-  //                 ticketId: i.ticketId,
-  //               }
-  //               ticketAttributeList.push(ticketAttribute)
-  //             })
-  //           } catch (error) {
-  //             console.log('🚀 ~ file: ~ ticketAttributeBatch ~ error:', error)
-  //             console.log('🚀 ~ file: ~ ticketAttributeBatch ~ i.regional:', i.regional)
-  //           }
-  //         }
-  //         if (i.special) {
-  //           try {
-  //             const special: Record<string, any> = JSON.parse(i.special)
-  //             Object.keys(special).forEach((key) => {
-  //               const ticketAttribute: TicketAttributeInsertType = {
-  //                 key,
-  //                 value: special[key],
-  //                 oid: i.oid,
-  //                 ticketId: i.ticketId,
-  //               }
-  //               ticketAttributeList.push(ticketAttribute)
-  //             })
-  //           } catch (error) {
-  //             console.log('🚀 ~ file: ~ ticketAttributeBatch ~ error:', error)
-  //             console.log('🚀 ~ file: ~ ticketAttributeBatch ~ i.special:', i.special)
-  //           }
-  //         }
-  //         if (i.advice) {
-  //           const ticketAttribute: TicketAttributeInsertType = {
-  //             key: 'advice',
-  //             value: i.advice,
-  //             oid: i.oid,
-  //             ticketId: i.ticketId,
-  //           }
-  //           ticketAttributeList.push(ticketAttribute)
-  //         }
-  //         return ticketAttributeList
-  //       })
-  //       .flat()
-  //     await this.ticketAttributeRepository.insertMany(ticketAttributeBatch)
-  //   }
-  // }
+    const imageTempList = ticketList
+      .map((ticket) => {
+        try {
+          const imageIdList: number[] = JSON.parse(ticket.imageIds)
+          return imageIdList.map((imageId) => {
+            const temp: Partial<Image> = {
+              id: imageId,
+              imageInteractType: ImageInteractType.Customer,
+              imageInteractId: ticket.customerId,
+              ticketId: ticket.id,
+            }
+            return temp
+          })
+        } catch (error) {
+          return []
+        }
+      })
+      .flat()
+
+    await this.imageManager.bulkUpdate({
+      manager: this.imageRepository.getManager(),
+      tempList: imageTempList,
+      compare: ['id'],
+      update: ['imageInteractType', 'imageInteractId', 'ticketId'],
+    })
+  }
+
+  async migrationTicketRadiologyImage() {
+    const ticketRadiologyList = await this.ticketRadiologyRepository.findMany({
+      condition: { imageIds: { NOT: '[]' } },
+    })
+    console.log('🚀 ~ ticketList:', ticketRadiologyList.length)
+
+    const imageTempList = ticketRadiologyList
+      .map((ticketRadiology) => {
+        try {
+          const imageIdList: number[] = JSON.parse(ticketRadiology.imageIds)
+          return imageIdList.map((imageId) => {
+            const temp: Partial<Image> = {
+              id: imageId,
+              imageInteractType: ImageInteractType.Customer,
+              imageInteractId: ticketRadiology.customerId,
+              ticketId: ticketRadiology.ticketId,
+              ticketItemId: ticketRadiology.id,
+              ticketItemChildId: 0,
+            }
+            return temp
+          })
+        } catch (error) {
+          return []
+        }
+      })
+      .flat()
+
+    await this.imageManager.bulkUpdate({
+      manager: this.imageRepository.getManager(),
+      tempList: imageTempList,
+      compare: ['id'],
+      update: [
+        'imageInteractType',
+        'imageInteractId',
+        'ticketId',
+        'ticketItemId',
+        'ticketItemChildId',
+      ],
+    })
+  }
+
+  async migrationOrganizationImage() {
+    const organizationList = await this.organizationRepository.findMany({
+      condition: { logoImageId: { NOT: 0 } },
+    })
+    console.log('🚀 ~ organizationList:', organizationList.length)
+
+    const imageTempList = organizationList.map((organization) => {
+      const temp: Partial<Image> = {
+        id: organization.logoImageId,
+        imageInteractType: ImageInteractType.Organization,
+        imageInteractId: organization.id,
+      }
+      return temp
+    })
+
+    await this.imageManager.bulkUpdate({
+      manager: this.imageRepository.getManager(),
+      tempList: imageTempList,
+      compare: ['id'],
+      update: ['imageInteractType', 'imageInteractId'],
+    })
+  }
+
+  async migrationUserImage() {
+    const userList = await this.userRepository.findMany({
+      condition: { imageIds: { NOT: '[]' } },
+    })
+    console.log('🚀 ~ userList:', userList.length)
+
+    const imageTempList = userList
+      .map((user) => {
+        try {
+          const imageIdList: number[] = JSON.parse(user.imageIds)
+          return imageIdList.map((imageId) => {
+            const temp: Partial<Image> = {
+              id: imageId,
+              imageInteractType: ImageInteractType.User,
+              imageInteractId: user.id,
+            }
+            return temp
+          })
+        } catch (error) {
+          return []
+        }
+      })
+      .flat()
+
+    await this.imageManager.bulkUpdate({
+      manager: this.imageRepository.getManager(),
+      tempList: imageTempList,
+      compare: ['id'],
+      update: ['imageInteractType', 'imageInteractId'],
+    })
+  }
 }

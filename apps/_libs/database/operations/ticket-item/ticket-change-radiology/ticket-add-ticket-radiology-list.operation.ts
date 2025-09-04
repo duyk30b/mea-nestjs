@@ -27,6 +27,8 @@ export type TicketRadiologyAddWrapType = {
     | 'discountPercent'
     | 'discountType'
     | 'actualPrice'
+    | 'description'
+    | 'result'
     | 'createdAt'
   >
   ticketUserRequestAddList: Pick<TicketUser, 'positionId' | 'userId'>[]
@@ -68,8 +70,6 @@ export class TicketAddTicketRadiologyListOperation {
           status: TicketRadiologyStatus.Pending,
           customerId: ticketModified.customerId,
           completedAt: null,
-          description: '',
-          result: '',
           imageIds: '[]',
         }
         return insert

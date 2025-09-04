@@ -556,7 +556,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 var Image_1;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ImageHostType = void 0;
+exports.ImageInteractType = exports.ImageHostType = void 0;
 const class_transformer_1 = __webpack_require__(17);
 const typeorm_1 = __webpack_require__(18);
 var ImageHostType;
@@ -564,6 +564,12 @@ var ImageHostType;
     ImageHostType["GoogleDriver"] = "GoogleDriver";
     ImageHostType["Cloudinary"] = "Cloudinary";
 })(ImageHostType || (exports.ImageHostType = ImageHostType = {}));
+var ImageInteractType;
+(function (ImageInteractType) {
+    ImageInteractType[ImageInteractType["Organization"] = 1] = "Organization";
+    ImageInteractType[ImageInteractType["User"] = 2] = "User";
+    ImageInteractType[ImageInteractType["Customer"] = 3] = "Customer";
+})(ImageInteractType || (exports.ImageInteractType = ImageInteractType = {}));
 let Image = Image_1 = class Image {
     static fromRaw(raw) {
         if (!raw)
@@ -587,6 +593,16 @@ __decorate([
     __metadata("design:type", Number)
 ], Image.prototype, "id", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'varchar', length: 25, default: ImageInteractType.Customer }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], Image.prototype, "imageInteractType", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 0 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], Image.prototype, "imageInteractId", void 0);
+__decorate([
     (0, typeorm_1.Column)({ default: 0 }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Number)
@@ -595,7 +611,12 @@ __decorate([
     (0, typeorm_1.Column)({ default: 0 }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Number)
-], Image.prototype, "customerId", void 0);
+], Image.prototype, "ticketItemId", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 0 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], Image.prototype, "ticketItemChildId", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 50 }),
     (0, class_transformer_1.Expose)(),
@@ -637,7 +658,13 @@ __decorate([
     __metadata("design:type", Number)
 ], Image.prototype, "waitDelete", void 0);
 Image = Image_1 = __decorate([
-    (0, typeorm_1.Entity)('Image')
+    (0, typeorm_1.Entity)('Image'),
+    (0, typeorm_1.Index)('IDX_Image__oid_imageInteractType_imageInteractId_ticketId', [
+        'oid',
+        'imageInteractType',
+        'imageInteractId',
+        'ticketId',
+    ])
 ], Image);
 exports["default"] = Image;
 
@@ -14530,6 +14557,7 @@ exports.RoomOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(44);
 const typeorm_2 = __webpack_require__(18);
+const error_1 = __webpack_require__(14);
 const repositories_1 = __webpack_require__(42);
 let RoomOperation = class RoomOperation {
     constructor(dataSource, roomManager, ticketManager, manager) {
@@ -14545,6 +14573,9 @@ let RoomOperation = class RoomOperation {
                 oid,
                 id: { IN: roomIdSourceList },
             });
+            if (roomIdSourceList.length !== roomIdSourceList.length) {
+                throw new error_1.BusinessError('ID phòng không phù hợp');
+            }
             await this.ticketManager.update(manager, { oid, roomId: { IN: roomIdSourceList } }, { roomId: roomIdTarget });
             return { roomDestroyedList: roomSourceList };
         });
@@ -17955,7 +17986,7 @@ let TicketAddTicketRadiologyListOperation = class TicketAddTicketRadiologyListOp
             let ticketModified = await this.ticketManager.updateOneAndReturnEntity(manager, { oid, id: ticketId, status: ticket_entity_1.TicketStatus.Executing }, { updatedAt: Date.now() });
             const ticketRadiologyInsertList = ticketRadiologyAddWrapList.map((i) => {
                 const insert = Object.assign(Object.assign({}, i.ticketRadiologyAdd), { oid,
-                    ticketId, status: ticket_radiology_entity_1.TicketRadiologyStatus.Pending, customerId: ticketModified.customerId, completedAt: null, description: '', result: '', imageIds: '[]' });
+                    ticketId, status: ticket_radiology_entity_1.TicketRadiologyStatus.Pending, customerId: ticketModified.customerId, completedAt: null, imageIds: '[]' });
                 return insert;
             });
             const ticketRadiologyCreatedList = await this.ticketRadiologyManager.insertManyAndReturnEntity(manager, ticketRadiologyInsertList);
@@ -21994,6 +22025,7 @@ const cache_data_service_1 = __webpack_require__(40);
 const exception_filter_1 = __webpack_require__(9);
 const helpers_1 = __webpack_require__(181);
 const string_helper_1 = __webpack_require__(186);
+const image_entity_1 = __webpack_require__(19);
 const repositories_1 = __webpack_require__(42);
 const user_repository_1 = __webpack_require__(152);
 const image_manager_service_1 = __webpack_require__(256);
@@ -22052,12 +22084,17 @@ let ApiMeService = class ApiMeService {
         if (imagesChange) {
             const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
                 oid,
-                ticketId: 0,
-                customerId: 0,
                 files,
                 imageIdsWait: body.imagesChange.imageIdsWait,
                 externalUrlList: body.imagesChange.externalUrlList,
                 imageIdsOld: JSON.parse(userOrigin.imageIds || '[]'),
+                imageInteract: {
+                    imageInteractType: image_entity_1.ImageInteractType.User,
+                    imageInteractId: userId,
+                    ticketId: 0,
+                    ticketItemId: 0,
+                    ticketItemChildId: 0,
+                },
             });
             imageIdsStringifyUpdate = JSON.stringify(imageIdsUpdate);
         }
@@ -22161,8 +22198,6 @@ let ImageManagerService = ImageManagerService_1 = class ImageManagerService {
         const imageInsertList = imageHostInsertList.map((i, index) => {
             const draft = {
                 oid,
-                ticketId,
-                customerId,
                 name: i.name,
                 size: Number(i.size),
                 mimeType: i.mimeType,
@@ -22170,6 +22205,11 @@ let ImageManagerService = ImageManagerService_1 = class ImageManagerService {
                 hostAccount: email,
                 externalId: i.id,
                 externalUrl: '',
+                imageInteractType: image_entity_1.ImageInteractType.Customer,
+                imageInteractId: customerId,
+                ticketId,
+                ticketItemId: 0,
+                ticketItemChildId: 0,
             };
             return draft;
         });
@@ -22198,7 +22238,7 @@ let ImageManagerService = ImageManagerService_1 = class ImageManagerService {
         return imageIdsUpdate;
     }
     async changeCloudinaryImageLink(options) {
-        const { oid, ticketId, customerId, imageIdsWait, imageIdsOld, files, externalUrlList } = options;
+        const { oid, imageInteract, imageIdsWait, imageIdsOld, files, externalUrlList } = options;
         const imageIdsRemove = imageIdsOld.filter((i) => !imageIdsWait.includes(i));
         if (imageIdsRemove.length) {
             await this.imageRepository.updateAndReturnEntity({ oid, id: { IN: imageIdsRemove } }, { waitDelete: 1 });
@@ -22206,8 +22246,6 @@ let ImageManagerService = ImageManagerService_1 = class ImageManagerService {
         const imageInsertList = externalUrlList.map((i) => {
             const insert = {
                 oid,
-                ticketId,
-                customerId,
                 name: '',
                 mimeType: '',
                 size: 0,
@@ -22215,6 +22253,11 @@ let ImageManagerService = ImageManagerService_1 = class ImageManagerService {
                 hostAccount: '',
                 externalId: '',
                 externalUrl: i,
+                imageInteractType: imageInteract.imageInteractType,
+                imageInteractId: imageInteract.imageInteractId,
+                ticketId: imageInteract.ticketId,
+                ticketItemId: imageInteract.ticketItemId,
+                ticketItemChildId: imageInteract.ticketItemChildId,
             };
             return insert;
         });
@@ -29599,28 +29642,158 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 var ApiRootDataService_1;
-var _a, _b;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ApiRootDataService = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
-const ticket_attribute_repository_1 = __webpack_require__(136);
+const image_entity_1 = __webpack_require__(19);
+const repositories_1 = __webpack_require__(42);
 let ApiRootDataService = ApiRootDataService_1 = class ApiRootDataService {
-    constructor(dataSource, ticketAttributeRepository) {
+    constructor(dataSource, organizationRepository, userRepository, imageRepository, imageManager, ticketRepository, ticketRadiologyRepository) {
         this.dataSource = dataSource;
-        this.ticketAttributeRepository = ticketAttributeRepository;
+        this.organizationRepository = organizationRepository;
+        this.userRepository = userRepository;
+        this.imageRepository = imageRepository;
+        this.imageManager = imageManager;
+        this.ticketRepository = ticketRepository;
+        this.ticketRadiologyRepository = ticketRadiologyRepository;
         this.logger = new common_1.Logger(ApiRootDataService_1.name);
     }
     async startMigrationData(body) {
         if (body.key !== '8aobvoyupp8')
             return;
+        await this.migrationTicketImage();
+        await this.migrationTicketRadiologyImage();
+        await this.migrationOrganizationImage();
+        await this.migrationUserImage();
         return { data: true };
+    }
+    async migrationTicketImage() {
+        const ticketList = await this.ticketRepository.findMany({
+            condition: { imageIds: { NOT: '[]' } },
+        });
+        console.log('🚀 ~ ticketList:', ticketList.length);
+        const imageTempList = ticketList
+            .map((ticket) => {
+            try {
+                const imageIdList = JSON.parse(ticket.imageIds);
+                return imageIdList.map((imageId) => {
+                    const temp = {
+                        id: imageId,
+                        imageInteractType: image_entity_1.ImageInteractType.Customer,
+                        imageInteractId: ticket.customerId,
+                        ticketId: ticket.id,
+                    };
+                    return temp;
+                });
+            }
+            catch (error) {
+                return [];
+            }
+        })
+            .flat();
+        await this.imageManager.bulkUpdate({
+            manager: this.imageRepository.getManager(),
+            tempList: imageTempList,
+            compare: ['id'],
+            update: ['imageInteractType', 'imageInteractId', 'ticketId'],
+        });
+    }
+    async migrationTicketRadiologyImage() {
+        const ticketRadiologyList = await this.ticketRadiologyRepository.findMany({
+            condition: { imageIds: { NOT: '[]' } },
+        });
+        console.log('🚀 ~ ticketList:', ticketRadiologyList.length);
+        const imageTempList = ticketRadiologyList
+            .map((ticketRadiology) => {
+            try {
+                const imageIdList = JSON.parse(ticketRadiology.imageIds);
+                return imageIdList.map((imageId) => {
+                    const temp = {
+                        id: imageId,
+                        imageInteractType: image_entity_1.ImageInteractType.Customer,
+                        imageInteractId: ticketRadiology.customerId,
+                        ticketId: ticketRadiology.ticketId,
+                        ticketItemId: ticketRadiology.id,
+                        ticketItemChildId: 0,
+                    };
+                    return temp;
+                });
+            }
+            catch (error) {
+                return [];
+            }
+        })
+            .flat();
+        await this.imageManager.bulkUpdate({
+            manager: this.imageRepository.getManager(),
+            tempList: imageTempList,
+            compare: ['id'],
+            update: [
+                'imageInteractType',
+                'imageInteractId',
+                'ticketId',
+                'ticketItemId',
+                'ticketItemChildId',
+            ],
+        });
+    }
+    async migrationOrganizationImage() {
+        const organizationList = await this.organizationRepository.findMany({
+            condition: { logoImageId: { NOT: 0 } },
+        });
+        console.log('🚀 ~ organizationList:', organizationList.length);
+        const imageTempList = organizationList.map((organization) => {
+            const temp = {
+                id: organization.logoImageId,
+                imageInteractType: image_entity_1.ImageInteractType.Organization,
+                imageInteractId: organization.id,
+            };
+            return temp;
+        });
+        await this.imageManager.bulkUpdate({
+            manager: this.imageRepository.getManager(),
+            tempList: imageTempList,
+            compare: ['id'],
+            update: ['imageInteractType', 'imageInteractId'],
+        });
+    }
+    async migrationUserImage() {
+        const userList = await this.userRepository.findMany({
+            condition: { imageIds: { NOT: '[]' } },
+        });
+        console.log('🚀 ~ userList:', userList.length);
+        const imageTempList = userList
+            .map((user) => {
+            try {
+                const imageIdList = JSON.parse(user.imageIds);
+                return imageIdList.map((imageId) => {
+                    const temp = {
+                        id: imageId,
+                        imageInteractType: image_entity_1.ImageInteractType.User,
+                        imageInteractId: user.id,
+                    };
+                    return temp;
+                });
+            }
+            catch (error) {
+                return [];
+            }
+        })
+            .flat();
+        await this.imageManager.bulkUpdate({
+            manager: this.imageRepository.getManager(),
+            tempList: imageTempList,
+            compare: ['id'],
+            update: ['imageInteractType', 'imageInteractId'],
+        });
     }
 };
 exports.ApiRootDataService = ApiRootDataService;
 exports.ApiRootDataService = ApiRootDataService = ApiRootDataService_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _a : Object, typeof (_b = typeof ticket_attribute_repository_1.TicketAttributeRepository !== "undefined" && ticket_attribute_repository_1.TicketAttributeRepository) === "function" ? _b : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof typeorm_1.DataSource !== "undefined" && typeorm_1.DataSource) === "function" ? _a : Object, typeof (_b = typeof repositories_1.OrganizationRepository !== "undefined" && repositories_1.OrganizationRepository) === "function" ? _b : Object, typeof (_c = typeof repositories_1.UserRepository !== "undefined" && repositories_1.UserRepository) === "function" ? _c : Object, typeof (_d = typeof repositories_1.ImageRepository !== "undefined" && repositories_1.ImageRepository) === "function" ? _d : Object, typeof (_e = typeof repositories_1.ImageManager !== "undefined" && repositories_1.ImageManager) === "function" ? _e : Object, typeof (_f = typeof repositories_1.TicketRepository !== "undefined" && repositories_1.TicketRepository) === "function" ? _f : Object, typeof (_g = typeof repositories_1.TicketRadiologyRepository !== "undefined" && repositories_1.TicketRadiologyRepository) === "function" ? _g : Object])
 ], ApiRootDataService);
 
 
@@ -38378,6 +38551,7 @@ const cache_data_service_1 = __webpack_require__(40);
 const exception_filter_1 = __webpack_require__(9);
 const string_helper_1 = __webpack_require__(186);
 const jwt_config_1 = __webpack_require__(161);
+const image_entity_1 = __webpack_require__(19);
 const image_repository_1 = __webpack_require__(107);
 const organization_repository_1 = __webpack_require__(111);
 const environments_1 = __webpack_require__(30);
@@ -38410,12 +38584,17 @@ let ApiOrganizationService = class ApiOrganizationService {
         if (body.imagesChange) {
             const logoIdNewList = await this.imageManagerService.changeCloudinaryImageLink({
                 oid,
-                ticketId: 0,
-                customerId: 0,
                 files,
                 imageIdsWait: [0],
                 externalUrlList: body.imagesChange.externalUrlList,
                 imageIdsOld: [organizationOrigin.logoImageId || 0],
+                imageInteract: {
+                    imageInteractType: image_entity_1.ImageInteractType.Organization,
+                    imageInteractId: oid,
+                    ticketId: 0,
+                    ticketItemId: 0,
+                    ticketItemChildId: 0,
+                },
             });
             logoImageId = logoIdNewList[0];
         }
@@ -60476,6 +60655,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketChangeAttributeService = void 0;
 const common_1 = __webpack_require__(3);
 const helpers_1 = __webpack_require__(181);
+const image_entity_1 = __webpack_require__(19);
 const repositories_1 = __webpack_require__(42);
 const image_manager_service_1 = __webpack_require__(256);
 const socket_emit_service_1 = __webpack_require__(341);
@@ -60494,12 +60674,17 @@ let TicketChangeAttributeService = class TicketChangeAttributeService {
         if (imagesChange) {
             const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
                 oid,
-                ticketId,
-                customerId: ticket.customerId,
                 files,
                 imageIdsWait: imagesChange.imageIdsWait,
                 externalUrlList: imagesChange.externalUrlList,
                 imageIdsOld: JSON.parse(ticket.imageIds || '[]'),
+                imageInteract: {
+                    imageInteractType: image_entity_1.ImageInteractType.Customer,
+                    imageInteractId: ticket.customerId,
+                    ticketId,
+                    ticketItemId: 0,
+                    ticketItemChildId: 0,
+                },
             });
             if (ticket.imageIds !== JSON.stringify(imageIdsUpdate)) {
                 const ticketUpdateList = await this.ticketRepository.updateAndReturnEntity({ oid, id: ticketId }, { imageIds: JSON.stringify(imageIdsUpdate) });
@@ -63107,6 +63292,7 @@ const common_1 = __webpack_require__(3);
 const error_1 = __webpack_require__(14);
 const variable_1 = __webpack_require__(21);
 const appointment_entity_1 = __webpack_require__(47);
+const image_entity_1 = __webpack_require__(19);
 const position_entity_1 = __webpack_require__(76);
 const operations_1 = __webpack_require__(164);
 const repositories_1 = __webpack_require__(42);
@@ -63238,12 +63424,17 @@ let TicketChangeProcedureService = class TicketChangeProcedureService {
         if (body.imagesChange) {
             const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
                 oid,
-                ticketId,
-                customerId,
                 files,
                 imageIdsWait: body.imagesChange.imageIdsWait,
                 externalUrlList: body.imagesChange.externalUrlList,
                 imageIdsOld: JSON.parse(ticketProcedureItemOrigin.imageIds),
+                imageInteract: {
+                    imageInteractType: image_entity_1.ImageInteractType.Customer,
+                    imageInteractId: customerId,
+                    ticketId,
+                    ticketItemId: ticketProcedureId,
+                    ticketItemChildId: ticketProcedureItemId,
+                },
             });
             imageIdsUpdateString = JSON.stringify(imageIdsUpdate);
         }
@@ -65527,6 +65718,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketChangeRadiologyService = void 0;
 const common_1 = __webpack_require__(3);
 const error_1 = __webpack_require__(14);
+const image_entity_1 = __webpack_require__(19);
 const position_entity_1 = __webpack_require__(76);
 const ticket_radiology_entity_1 = __webpack_require__(72);
 const operations_1 = __webpack_require__(164);
@@ -65647,12 +65839,17 @@ let TicketChangeRadiologyService = class TicketChangeRadiologyService {
         if (body.imagesChange) {
             const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
                 oid,
-                ticketId,
-                customerId,
                 files,
                 imageIdsWait: body.imagesChange.imageIdsWait,
                 externalUrlList: body.imagesChange.externalUrlList,
                 imageIdsOld: JSON.parse(ticketRadiologyOrigin.imageIds),
+                imageInteract: {
+                    imageInteractType: image_entity_1.ImageInteractType.Customer,
+                    imageInteractId: customerId,
+                    ticketId,
+                    ticketItemId: ticketRadiologyId,
+                    ticketItemChildId: 0,
+                },
             });
             imageIdsUpdateString = JSON.stringify(imageIdsUpdate);
         }

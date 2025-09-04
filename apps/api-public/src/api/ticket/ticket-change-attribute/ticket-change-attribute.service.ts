@@ -2,8 +2,13 @@
 import { Injectable } from '@nestjs/common'
 import { FileUploadDto } from '../../../../../_libs/common/dto/file'
 import { ESArray } from '../../../../../_libs/common/helpers'
+import { ImageInteractType } from '../../../../../_libs/database/entities/image.entity'
 import { TicketAttributeInsertType } from '../../../../../_libs/database/entities/ticket-attribute.entity'
-import { ImageRepository, TicketAttributeRepository, TicketRepository } from '../../../../../_libs/database/repositories'
+import {
+  ImageRepository,
+  TicketAttributeRepository,
+  TicketRepository,
+} from '../../../../../_libs/database/repositories'
 import { ImageManagerService } from '../../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { TicketUpdateDiagnosisBody, TicketUpdateTicketAttributeListBody } from './request'
@@ -35,12 +40,17 @@ export class TicketChangeAttributeService {
     if (imagesChange) {
       const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
         oid,
-        ticketId,
-        customerId: ticket.customerId,
         files,
         imageIdsWait: imagesChange.imageIdsWait,
         externalUrlList: imagesChange.externalUrlList,
         imageIdsOld: JSON.parse(ticket.imageIds || '[]'),
+        imageInteract: {
+          imageInteractType: ImageInteractType.Customer,
+          imageInteractId: ticket.customerId,
+          ticketId,
+          ticketItemId: 0,
+          ticketItemChildId: 0,
+        },
       })
       if (ticket.imageIds !== JSON.stringify(imageIdsUpdate)) {
         const ticketUpdateList = await this.ticketRepository.updateAndReturnEntity(

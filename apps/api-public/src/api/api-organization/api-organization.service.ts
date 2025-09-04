@@ -7,6 +7,7 @@ import { decrypt, encrypt } from '../../../../_libs/common/helpers/string.helper
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import { JwtConfig } from '../../../../_libs/common/jwt-extend/jwt.config'
 import { Image } from '../../../../_libs/database/entities'
+import { ImageInteractType } from '../../../../_libs/database/entities/image.entity'
 import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
 import { OrganizationRepository } from '../../../../_libs/database/repositories/organization.repository'
 import { GlobalConfig } from '../../../../_libs/environments'
@@ -51,12 +52,17 @@ export class ApiOrganizationService {
     if (body.imagesChange) {
       const logoIdNewList = await this.imageManagerService.changeCloudinaryImageLink({
         oid,
-        ticketId: 0,
-        customerId: 0,
         files,
         imageIdsWait: [0],
         externalUrlList: body.imagesChange.externalUrlList,
         imageIdsOld: [organizationOrigin.logoImageId || 0],
+        imageInteract: {
+          imageInteractType: ImageInteractType.Organization,
+          imageInteractId: oid,
+          ticketId: 0,
+          ticketItemId: 0,
+          ticketItemChildId: 0,
+        },
       })
       logoImageId = logoIdNewList[0]
     }

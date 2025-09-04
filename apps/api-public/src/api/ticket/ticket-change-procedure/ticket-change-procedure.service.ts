@@ -5,6 +5,7 @@ import { BusinessError } from '../../../../../_libs/database/common/error'
 import { TicketProcedureStatus } from '../../../../../_libs/database/common/variable'
 import { TicketUser } from '../../../../../_libs/database/entities'
 import { AppointmentStatus } from '../../../../../_libs/database/entities/appointment.entity'
+import { ImageInteractType } from '../../../../../_libs/database/entities/image.entity'
 import { PositionType } from '../../../../../_libs/database/entities/position.entity'
 import {
   TicketAddTicketProcedureListOperation,
@@ -197,12 +198,17 @@ export class TicketChangeProcedureService {
     if (body.imagesChange) {
       const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
         oid,
-        ticketId,
-        customerId,
         files,
         imageIdsWait: body.imagesChange.imageIdsWait,
         externalUrlList: body.imagesChange.externalUrlList,
         imageIdsOld: JSON.parse(ticketProcedureItemOrigin.imageIds),
+        imageInteract: {
+          imageInteractType: ImageInteractType.Customer,
+          imageInteractId: customerId,
+          ticketId,
+          ticketItemId: ticketProcedureId,
+          ticketItemChildId: ticketProcedureItemId,
+        },
       })
       imageIdsUpdateString = JSON.stringify(imageIdsUpdate)
     }

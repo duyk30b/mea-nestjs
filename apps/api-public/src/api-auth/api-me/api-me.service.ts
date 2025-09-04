@@ -6,6 +6,7 @@ import { BusinessException } from '../../../../_libs/common/exception-filter/exc
 import { ESArray } from '../../../../_libs/common/helpers'
 import { encrypt } from '../../../../_libs/common/helpers/string.helper'
 import { User } from '../../../../_libs/database/entities'
+import { ImageInteractType } from '../../../../_libs/database/entities/image.entity'
 import { ImageRepository } from '../../../../_libs/database/repositories'
 import { UserRepository } from '../../../../_libs/database/repositories/user.repository'
 import { ImageManagerService } from '../../components/image-manager/image-manager.service'
@@ -82,12 +83,17 @@ export class ApiMeService {
     if (imagesChange) {
       const imageIdsUpdate = await this.imageManagerService.changeCloudinaryImageLink({
         oid,
-        ticketId: 0,
-        customerId: 0,
         files,
         imageIdsWait: body.imagesChange.imageIdsWait,
         externalUrlList: body.imagesChange.externalUrlList,
         imageIdsOld: JSON.parse(userOrigin.imageIds || '[]'),
+        imageInteract: {
+          imageInteractType: ImageInteractType.User,
+          imageInteractId: userId,
+          ticketId: 0,
+          ticketItemId: 0,
+          ticketItemChildId: 0,
+        },
       })
       imageIdsStringifyUpdate = JSON.stringify(imageIdsUpdate)
     }

@@ -5,6 +5,7 @@ import { ESArray } from '../../../../_libs/common/helpers'
 import Image, {
   ImageHostType,
   ImageInsertType,
+  ImageInteractType,
 } from '../../../../_libs/database/entities/image.entity'
 import { SettingKey } from '../../../../_libs/database/entities/setting.entity'
 import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
@@ -79,8 +80,6 @@ export class ImageManagerService implements OnModuleInit {
     const imageInsertList: ImageInsertType[] = imageHostInsertList.map((i, index) => {
       const draft: ImageInsertType = {
         oid,
-        ticketId,
-        customerId,
         name: i.name,
         size: Number(i.size),
         mimeType: i.mimeType,
@@ -88,6 +87,11 @@ export class ImageManagerService implements OnModuleInit {
         hostAccount: email,
         externalId: i.id,
         externalUrl: '',
+        imageInteractType: ImageInteractType.Customer,
+        imageInteractId: customerId,
+        ticketId,
+        ticketItemId: 0,
+        ticketItemChildId: 0,
       }
       return draft
     })
@@ -122,14 +126,19 @@ export class ImageManagerService implements OnModuleInit {
 
   async changeCloudinaryImageLink(options: {
     oid: number
-    ticketId: number
-    customerId: number
+    imageInteract: {
+      imageInteractType: ImageInteractType // Loại hình ảnh
+      imageInteractId: number // customerId, ticketId, organizationId
+      ticketId: number
+      ticketItemId: number
+      ticketItemChildId: number
+    }
     files: FileUploadDto[]
     externalUrlList: string[]
     imageIdsOld: number[] // ví dụ [1,4,3,20,21,12,7,3]
     imageIdsWait: number[] // ví dụ [1,4,3,0,0,0,12,7,3] // số 0 tương ứng với mỗi image mới chưa có ID
   }) {
-    const { oid, ticketId, customerId, imageIdsWait, imageIdsOld, files, externalUrlList } = options
+    const { oid, imageInteract, imageIdsWait, imageIdsOld, files, externalUrlList } = options
     const imageIdsRemove = imageIdsOld.filter((i) => !imageIdsWait.includes(i))
 
     // chưa xử lý việc xóa ảnh thực sự trên host
@@ -143,8 +152,6 @@ export class ImageManagerService implements OnModuleInit {
     const imageInsertList = externalUrlList.map((i) => {
       const insert: ImageInsertType = {
         oid,
-        ticketId,
-        customerId,
         name: '',
         mimeType: '',
         size: 0,
@@ -152,6 +159,11 @@ export class ImageManagerService implements OnModuleInit {
         hostAccount: '',
         externalId: '',
         externalUrl: i,
+        imageInteractType: imageInteract.imageInteractType,
+        imageInteractId: imageInteract.imageInteractId,
+        ticketId: imageInteract.ticketId,
+        ticketItemId: imageInteract.ticketItemId,
+        ticketItemChildId: imageInteract.ticketItemChildId,
       }
       return insert
     })
