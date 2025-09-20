@@ -22,6 +22,10 @@ export class PositionRelationQuery {
 
   @Expose()
   @IsBoolean()
+  regimenRequest?: boolean
+
+  @Expose()
+  @IsBoolean()
   procedureRequest?: boolean
 
   @Expose()

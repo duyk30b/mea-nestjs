@@ -12,7 +12,7 @@ import {
 } from 'class-validator'
 import { TicketStatus } from '../../../../../../_libs/database/entities/ticket.entity'
 import { CustomerCreateBody } from '../../../api-customer/request'
-import { TicketProcedureWrapBody } from '../../ticket-change-procedure/request'
+import { TicketProcedureNormalWrapBody, TicketRegimenWrapBody } from '../../ticket-change-procedure/request'
 import { TicketUserBasicBody } from '../../ticket-change-user/request'
 
 class TicketAttributeBody {
@@ -96,13 +96,6 @@ export class TicketReceptionCreateTicketBody {
   @ValidateNested({ each: true })
   ticketUserReceptionList: TicketUserBasicBody[]
 
-  @ApiProperty({ type: TicketProcedureWrapBody, isArray: true })
-  @Expose()
-  @Type(() => TicketProcedureWrapBody)
-  @IsArray()
-  @ValidateNested({ each: true })
-  ticketProcedureWrapList?: TicketProcedureWrapBody[]
-
   @ApiProperty({ type: CustomerCreateBody })
   @Expose()
   @Type(() => CustomerCreateBody)
@@ -115,6 +108,20 @@ export class TicketReceptionCreateTicketBody {
   @IsDefined()
   @ValidateNested({ each: true })
   ticketReception: TicketReceptionCreate
+
+  @ApiProperty({ type: TicketRegimenWrapBody })
+  @Expose()
+  @Type(() => TicketRegimenWrapBody)
+  @IsDefined()
+  @ValidateNested({ each: true })
+  ticketRegimenAddWrapList: TicketRegimenWrapBody[]
+
+  @ApiProperty({ type: TicketProcedureNormalWrapBody })
+  @Expose()
+  @Type(() => TicketProcedureNormalWrapBody)
+  @IsDefined()
+  @ValidateNested({ each: true })
+  ticketProcedureNormalWrapList: TicketProcedureNormalWrapBody[]
 }
 
 export class TicketReceptionUpdateTicketBody {

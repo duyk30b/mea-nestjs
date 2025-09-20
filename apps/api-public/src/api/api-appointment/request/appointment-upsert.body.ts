@@ -2,15 +2,10 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import { IsDefined, IsIn, IsNumber, IsOptional, IsString, ValidateNested } from 'class-validator'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { AppointmentStatus, AppointmentType } from '../../../../../_libs/database/entities/appointment.entity'
+import { AppointmentStatus } from '../../../../../_libs/database/entities/appointment.entity'
 import { CustomerCreateBody } from '../../api-customer/request'
 
 export class AppointmentBody {
-  @ApiPropertyOptional({ example: AppointmentType.Ticket })
-  @Expose()
-  @IsEnumValue(AppointmentType)
-  type: AppointmentType
-
   @ApiProperty({ example: 0 })
   @Expose()
   @IsOptional()

@@ -40,7 +40,11 @@ export class ApiTicketQueryController {
     @Param() { id }: IdParam,
     @Query() query: TicketGetOneQuery
   ): Promise<BaseResponse> {
-    const data = await this.ticketQueryService.getOne(oid, id, query)
+    const data = await this.ticketQueryService.getOne({
+      oid,
+      ticketId: id,
+      relation: query?.relation || {},
+    })
     return { data }
   }
 }

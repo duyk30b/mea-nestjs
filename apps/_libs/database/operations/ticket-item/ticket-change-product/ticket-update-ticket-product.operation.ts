@@ -80,9 +80,7 @@ export class TicketUpdateTicketProductOperation {
           [DeliveryStatus.Pending, DeliveryStatus.NoStock].includes(
             ticketProductOrigin.deliveryStatus
           )
-          && [PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending].includes(
-            ticketProductOrigin.paymentMoneyStatus
-          )
+          && [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.TicketPaid].includes(ticketProductOrigin.paymentMoneyStatus)
         ) {
           ticketProductModified = await this.ticketProductManager.updateOneAndReturnEntity(
             manager,

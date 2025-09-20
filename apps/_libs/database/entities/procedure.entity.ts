@@ -37,18 +37,6 @@ export default class Procedure {
   @Expose()
   procedureType: ProcedureType
 
-  @Column({ type: 'smallint', default: 1 })
-  @Expose()
-  totalSessions: number
-
-  @Column({ type: 'smallint', default: 0 })
-  @Expose()
-  gapHours: number
-
-  @Column({ type: 'smallint', default: 24 })
-  @Expose()
-  gapHoursType: number
-
   @Column({ default: 0 })
   @Expose()
   price: number

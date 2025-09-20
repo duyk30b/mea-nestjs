@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
+import { ESArray } from '../../../../../_libs/common/helpers'
+import { TicketRegimenStatus } from '../../../../../_libs/database/common/variable'
 import {
   Appointment,
   Customer,
@@ -14,6 +16,7 @@ import {
   TicketLaboratoryResult,
   TicketProcedure,
   TicketRadiology,
+  TicketRegimen,
   TicketSurcharge,
   TicketUser,
 } from '../../../../../_libs/database/entities'
@@ -41,12 +44,8 @@ import { ImageRepository } from '../../../../../_libs/database/repositories/imag
 import { TicketRepository } from '../../../../../_libs/database/repositories/ticket.repository'
 import { ApiTicketProcedureService } from '../../api-ticket-procedure/api-ticket-procedure.service'
 import { ApiTicketRadiologyService } from '../../api-ticket-radiology/api-ticket-radiology.service'
-import {
-  TicketGetManyQuery,
-  TicketGetOneQuery,
-  TicketPaginationQuery,
-  TicketRelationQuery,
-} from './request'
+import { ApiTicketRegimenService } from '../../api-ticket-regimen/api-ticket-regimen.service'
+import { TicketGetManyQuery, TicketPaginationQuery, TicketRelationQuery } from './request'
 
 @Injectable()
 export class TicketQueryService {
@@ -67,6 +66,7 @@ export class TicketQueryService {
     private readonly customerSourceRepository: CustomerSourceRepository,
     private readonly imageRepository: ImageRepository,
     private readonly apiTicketProcedureService: ApiTicketProcedureService,
+    private readonly apiTicketRegimenService: ApiTicketRegimenService,
     private readonly apiTicketRadiologyService: ApiTicketRadiologyService
   ) { }
 
@@ -122,7 +122,8 @@ export class TicketQueryService {
     return { ticketList }
   }
 
-  async getOne(oid: number, ticketId: number, { relation }: TicketGetOneQuery) {
+  async getOne(data: { oid: number; ticketId: number; relation: TicketRelationQuery }) {
+    const { oid, ticketId, relation } = data
     const ticket = await this.ticketRepository.findOneBy({ oid, id: ticketId })
     if (!ticket) {
       throw new BusinessException('error.Database.NotFound')
@@ -141,8 +142,8 @@ export class TicketQueryService {
     relation: TicketRelationQuery
   }) {
     const { oid, ticketList, relation } = options
-    const ticketIdList = ticketList.map((i) => i.id)
-    const customerIdList = ticketList.map((i) => i.customerId)
+    const ticketIdList = ESArray.uniqueArray(ticketList.map((i) => i.id))
+    const customerIdList = ESArray.uniqueArray(ticketList.map((i) => i.customerId))
     const customerSourceIdList = ticketList.map((i) => i.customerSourceId).filter((i) => !!i)
 
     const dataPromise = await Promise.all([
@@ -212,6 +213,30 @@ export class TicketQueryService {
           },
           relation: relation?.ticketProcedureList.relation,
           sort: { priority: 'ASC' },
+        })
+        : undefined,
+      relation?.ticketRegimenList
+        ? this.apiTicketRegimenService.getList(oid, {
+          filter: {
+            ...(relation?.ticketRegimenList.filter || {}),
+            oid,
+            customerId: { IN: customerIdList },
+            ticketId: { IN: ticketIdList },
+          },
+          relation: relation?.ticketRegimenList.relation,
+          sort: { id: 'ASC' },
+        })
+        : undefined,
+      relation?.ticketRegimenListExtra
+        ? this.apiTicketRegimenService.getList(oid, {
+          filter: {
+            oid,
+            customerId: { IN: customerIdList },
+            status: { IN: [TicketRegimenStatus.Pending, TicketRegimenStatus.Executing] },
+            // ticketId: { IN: ticketIdList },
+          },
+          relation: relation?.ticketRegimenListExtra.relation,
+          sort: { id: 'ASC' },
         })
         : undefined,
       relation?.ticketLaboratoryList
@@ -305,17 +330,19 @@ export class TicketQueryService {
     const ticketProductConsumableList: TicketProduct[] = dataPromise[4]
     const ticketBatchList: TicketBatch[] = dataPromise[5]
     const ticketProcedureList: TicketProcedure[] = dataPromise[6]?.ticketProcedureList || []
-    const ticketLaboratoryList: TicketLaboratory[] = dataPromise[7]
-    const ticketLaboratoryGroupList: TicketLaboratoryGroup[] = dataPromise[8]
-    const ticketLaboratoryResultList: TicketLaboratoryResult[] = dataPromise[9]
-    const ticketRadiologyList: TicketRadiology[] = dataPromise[10]?.ticketRadiologyList || []
-    const ticketUserList: TicketUser[] = dataPromise[11]
-    const ticketAttributeList: TicketAttribute[] = dataPromise[12]
-    const ticketSurchargeList: TicketSurcharge[] = dataPromise[13]
-    const ticketExpenseList: TicketExpense[] = dataPromise[14]
-    const imageList: Image[] = dataPromise[15]
-    const customerSourceList: CustomerSource[] = dataPromise[16]
-    const toAppointmentList: Appointment[] = dataPromise[17]
+    const ticketRegimenList: TicketRegimen[] = dataPromise[7]?.ticketRegimenList || []
+    const ticketRegimenListExtra: TicketRegimen[] = dataPromise[8]?.ticketRegimenList || []
+    const ticketLaboratoryList: TicketLaboratory[] = dataPromise[9]
+    const ticketLaboratoryGroupList: TicketLaboratoryGroup[] = dataPromise[10]
+    const ticketLaboratoryResultList: TicketLaboratoryResult[] = dataPromise[11]
+    const ticketRadiologyList: TicketRadiology[] = dataPromise[12]?.ticketRadiologyList || []
+    const ticketUserList: TicketUser[] = dataPromise[13]
+    const ticketAttributeList: TicketAttribute[] = dataPromise[14]
+    const ticketSurchargeList: TicketSurcharge[] = dataPromise[15]
+    const ticketExpenseList: TicketExpense[] = dataPromise[16]
+    const imageList: Image[] = dataPromise[17]
+    const customerSourceList: CustomerSource[] = dataPromise[18]
+    const toAppointmentList: Appointment[] = dataPromise[19]
 
     ticketList.forEach((ticket: Ticket) => {
       if (relation?.customer) {
@@ -351,6 +378,20 @@ export class TicketQueryService {
       if (relation?.ticketProcedureList) {
         ticket.ticketProcedureList = ticketProcedureList.filter((i) => {
           return i.ticketId === ticket.id
+        })
+      }
+      if (relation?.ticketRegimenList) {
+        ticket.ticketRegimenList = ticketRegimenList.filter((tr) => {
+          return tr.ticketId === ticket.id && tr.customerId === ticket.customerId
+        })
+      }
+      if (relation?.ticketRegimenListExtra) {
+        ticket.ticketRegimenListExtra = ticketRegimenListExtra.filter((tr) => {
+          return (
+            tr.ticketId !== ticket.id
+            && tr.customerId === ticket.customerId
+            && [TicketRegimenStatus.Pending, TicketRegimenStatus.Executing].includes(tr.status)
+          )
         })
       }
       if (relation?.ticketLaboratoryList) {

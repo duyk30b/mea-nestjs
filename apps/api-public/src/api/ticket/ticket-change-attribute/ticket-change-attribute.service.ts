@@ -50,7 +50,6 @@ export class TicketChangeAttributeService {
             imageInteractId: ticketModified.customerId,
             ticketId,
             ticketItemId: 0,
-            ticketItemChildId: 0,
           },
         })
       if (ticketModified.imageDiagnosisIds !== JSON.stringify(imageIdsNew)) {

@@ -5,27 +5,27 @@ import { BusinessError } from '../../common/error'
 import { DiscountType, PaymentMoneyStatus } from '../../common/variable'
 import { TicketLaboratoryGroup } from '../../entities'
 import {
-  PaymentTicketItemInsertType,
-  TicketItemType,
+    PaymentTicketItemInsertType,
+    TicketItemType,
 } from '../../entities/payment-ticket-item.entity'
 import {
-  MoneyDirection,
-  PaymentActionType,
-  PaymentInsertType,
-  PaymentPersonType,
-  PaymentVoucherType,
+    MoneyDirection,
+    PaymentActionType,
+    PaymentInsertType,
+    PaymentPersonType,
+    PaymentVoucherType,
 } from '../../entities/payment.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
 import {
-  CustomerManager,
-  PaymentManager,
-  PaymentTicketItemManager,
-  TicketLaboratoryGroupManager,
-  TicketLaboratoryManager,
-  TicketManager,
-  TicketProcedureManager,
-  TicketProductManager,
-  TicketRadiologyManager,
+    CustomerManager,
+    PaymentManager,
+    PaymentTicketItemManager,
+    TicketLaboratoryGroupManager,
+    TicketLaboratoryManager,
+    TicketManager,
+    TicketProcedureManager,
+    TicketProductManager,
+    TicketRadiologyManager,
 } from '../../repositories'
 
 @Injectable()
@@ -178,7 +178,7 @@ export class CustomerPrepaymentTicketItemListOperation {
       // Cập nhật thanh toán vào item
       const ticketProcedureModifiedList = await this.ticketProcedureManager.bulkUpdate({
         manager,
-        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.Pending },
+        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.PendingPayment },
         compare: ['id'],
         tempList: ticketItemList
           .filter((i) => i.ticketItemType === TicketItemType.TicketProcedure)
@@ -189,7 +189,7 @@ export class CustomerPrepaymentTicketItemListOperation {
 
       const ticketProductConsumableModifiedList = await this.ticketProductManager.bulkUpdate({
         manager,
-        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.Pending },
+        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.PendingPayment },
         compare: ['id'],
         tempList: ticketItemList
           .filter((i) => i.ticketItemType === TicketItemType.TicketProductConsumable)
@@ -200,7 +200,7 @@ export class CustomerPrepaymentTicketItemListOperation {
 
       const ticketProductPrescriptionModifiedList = await this.ticketProductManager.bulkUpdate({
         manager,
-        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.Pending },
+        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.PendingPayment },
         compare: ['id'],
         tempList: ticketItemList
           .filter((i) => i.ticketItemType === TicketItemType.TicketProductPrescription)
@@ -211,7 +211,7 @@ export class CustomerPrepaymentTicketItemListOperation {
 
       const ticketLaboratoryModifiedList = await this.ticketLaboratoryManager.bulkUpdate({
         manager,
-        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.Pending },
+        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.PendingPayment },
         compare: ['id'],
         tempList: ticketItemList
           .filter((i) => i.ticketItemType === TicketItemType.TicketLaboratory)
@@ -222,7 +222,7 @@ export class CustomerPrepaymentTicketItemListOperation {
 
       const ticketRadiologyModifiedList = await this.ticketRadiologyManager.bulkUpdate({
         manager,
-        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.Pending },
+        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.PendingPayment },
         compare: ['id'],
         tempList: ticketItemList
           .filter((i) => i.ticketItemType === TicketItemType.TicketRadiology)

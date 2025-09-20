@@ -3,11 +3,15 @@ import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
 import { ESTimer } from '../../../common/helpers/time.helper'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
-import { DeliveryStatus, TicketProcedureStatus } from '../../common/variable'
+import { DeliveryStatus } from '../../common/variable'
 import { Ticket } from '../../entities'
 import { TicketAttributeInsertType } from '../../entities/ticket-attribute.entity'
 import { TicketExpenseInsertType } from '../../entities/ticket-expense.entity'
-import { TicketProcedureInsertType } from '../../entities/ticket-procedure.entity'
+import {
+  TicketProcedureInsertType,
+  TicketProcedureStatus,
+  TicketProcedureType,
+} from '../../entities/ticket-procedure.entity'
 import { TicketProductInsertType, TicketProductType } from '../../entities/ticket-product.entity'
 import { TicketSurchargeInsertType } from '../../entities/ticket-surcharge.entity'
 import {
@@ -139,8 +143,15 @@ export class TicketOrderDepositedOperation {
             ticketId,
             customerId: ticket.customerId,
             createdAt: ticket.registeredAt,
-            status: TicketProcedureStatus.Completed,
-            finishedSessions: 0,
+            status: TicketProcedureStatus.NoEffect,
+            imageIds: JSON.stringify([]),
+            result: '',
+            completedAt: null,
+            costAmount: 0,
+            ticketRegimenId: 0,
+            commissionAmount: 0,
+            ticketProcedureType: TicketProcedureType.Normal,
+            sessionIndex: 0,
           }
           return ticketProcedure
         })

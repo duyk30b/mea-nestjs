@@ -40,7 +40,7 @@ export default class TicketLaboratoryGroup {
   @Expose()
   status: TicketLaboratoryStatus
 
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.NoEffect })
+  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
   @Expose()
   paymentMoneyStatus: PaymentMoneyStatus
 

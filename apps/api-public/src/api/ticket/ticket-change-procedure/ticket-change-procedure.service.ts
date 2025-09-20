@@ -1,34 +1,46 @@
 /* eslint-disable max-len */
 import { Injectable } from '@nestjs/common'
 import { FileUploadDto } from '../../../../../_libs/common/dto/file'
-import { BusinessError } from '../../../../../_libs/database/common/error'
-import { TicketProcedureStatus } from '../../../../../_libs/database/common/variable'
-import { TicketUser } from '../../../../../_libs/database/entities'
-import { AppointmentStatus } from '../../../../../_libs/database/entities/appointment.entity'
+import { ESArray } from '../../../../../_libs/common/helpers'
+import {
+  PaymentMoneyStatus,
+  TicketRegimenStatus,
+} from '../../../../../_libs/database/common/variable'
+import { TicketRegimen } from '../../../../../_libs/database/entities'
 import Image, { ImageInteractType } from '../../../../../_libs/database/entities/image.entity'
 import { PositionType } from '../../../../../_libs/database/entities/position.entity'
-import { ProcedureType } from '../../../../../_libs/database/entities/procedure.entity'
+import {
+  TicketProcedureStatus,
+  TicketProcedureType,
+} from '../../../../../_libs/database/entities/ticket-procedure.entity'
 import {
   TicketAddTicketProcedureListOperation,
-  TicketChangeTicketUserOperation,
+  TicketChangeItemMoneyManager,
   TicketDestroyTicketProcedureOperation,
-  TicketUpdateTicketProcedureOperation,
+  TicketDestroyTicketRegimenOperation,
+  TicketUpdateMoneyTicketProcedureOperation,
+  TicketUpdateMoneyTicketRegimenOperation,
+  TicketUpdateUserTicketProcedureOperation,
+  TicketUpdateUserTicketRegimenOperation,
 } from '../../../../../_libs/database/operations'
 import {
-  AppointmentRepository,
-  TicketProcedureItemRepository,
+  ImageRepository,
   TicketProcedureRepository,
+  TicketRegimenRepository,
+  TicketRepository,
   TicketUserRepository,
 } from '../../../../../_libs/database/repositories'
 import { ImageManagerService } from '../../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
-import { ApiTicketProcedureService } from '../../api-ticket-procedure/api-ticket-procedure.service'
 import {
   TicketAddTicketProcedureListBody,
-  TicketCancelResultProcedureItemBody,
   TicketProcedureUpdateResultBody,
+  TicketUpdateMoneyTicketProcedureBody,
+  TicketUpdateMoneyTicketRegimenBody,
   TicketUpdatePriorityTicketProcedureBody,
-  TicketUpdateRequestTicketProcedureBody,
+  TicketUpdateUserRequestTicketProcedureBody,
+  TicketUpdateUserRequestTicketRegimenBody,
+  TicketUpdateUserResultTicketProcedureBody,
 } from './request'
 
 @Injectable()
@@ -37,14 +49,18 @@ export class TicketChangeProcedureService {
     private readonly socketEmitService: SocketEmitService,
     private readonly imageManagerService: ImageManagerService,
     private readonly ticketProcedureRepository: TicketProcedureRepository,
-    private readonly ticketProcedureItemRepository: TicketProcedureItemRepository,
+    private readonly ticketRepository: TicketRepository,
     private readonly ticketUserRepository: TicketUserRepository,
-    private readonly appointmentRepository: AppointmentRepository,
+    private readonly ticketRegimenRepository: TicketRegimenRepository,
+    private readonly imageRepository: ImageRepository,
     private readonly ticketAddTicketProcedureListOperation: TicketAddTicketProcedureListOperation,
     private readonly ticketDestroyTicketProcedureOperation: TicketDestroyTicketProcedureOperation,
-    private readonly ticketUpdateTicketProcedureOperation: TicketUpdateTicketProcedureOperation,
-    private readonly ticketChangeTicketUserOperation: TicketChangeTicketUserOperation,
-    private readonly apiTicketProcedureService: ApiTicketProcedureService
+    private readonly ticketDestroyTicketRegimenOperation: TicketDestroyTicketRegimenOperation,
+    private readonly ticketUpdateUserTicketProcedureOperation: TicketUpdateUserTicketProcedureOperation,
+    private readonly ticketUpdateMoneyTicketProcedureOperation: TicketUpdateMoneyTicketProcedureOperation,
+    private readonly ticketUpdateMoneyTicketRegimenOperation: TicketUpdateMoneyTicketRegimenOperation,
+    private readonly ticketUpdateUserTicketRegimenOperation: TicketUpdateUserTicketRegimenOperation,
+    private readonly ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
   ) { }
 
   async addTicketProcedureList(options: {
@@ -56,31 +72,22 @@ export class TicketChangeProcedureService {
     const result = await this.ticketAddTicketProcedureListOperation.addTicketProcedureList({
       oid,
       ticketId,
-      ticketProcedureDtoList: body.ticketProcedureWrapList.map((i) => {
-        return {
-          ticketProcedureAdd: i.ticketProcedure,
-          ticketProcedureItemAddList: i.ticketProcedureItemList,
-          ticketUserRequestAddList: i.ticketUserRequestList,
-        }
-      }),
+      ticketRegimenAddWrapList: body.ticketRegimenAddWrapList,
+      ticketProcedureNormalWrapList: body.ticketProcedureNormalWrapList,
     })
 
-    const { ticketModified, ticketProcedureCreatedList, ticketUserCreatedList } = result
+    const { ticketModified, ticketRegimenCreatedList, ticketProcedureNormalCreatedList } = result
 
-    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified })
+    this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
     this.socketEmitService.socketTicketProcedureListChange(oid, {
       ticketId,
-      ticketProcedureUpsertedList: ticketProcedureCreatedList,
-      ticketUserUpsertedList: ticketUserCreatedList,
+      customerId: ticketModified.customerId,
+      ticketProcedureNormalCreatedList,
+      ticketRegimenCreatedList,
+      ticketUserUpsertedList: result.ticketUserCreatedList,
     })
 
-    ticketProcedureCreatedList.forEach((tr) => {
-      tr.ticketUserRequestList = ticketUserCreatedList.filter((tu) => {
-        return tr.id === tu.ticketItemId
-      })
-    })
-
-    return { ticketModified, ticketProcedureCreatedList }
+    return { ticketModified, ticketRegimenCreatedList, ticketProcedureNormalCreatedList }
   }
 
   async destroyTicketProcedure(options: {
@@ -95,50 +102,125 @@ export class TicketChangeProcedureService {
       ticketProcedureId,
     })
 
-    const { ticket } = result
+    const { ticketModified } = result
 
-    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
+    this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
     this.socketEmitService.socketTicketProcedureListChange(oid, {
       ticketId,
-      ticketProcedureDestroyedList: [result.ticketProcedureDestroyed],
+      customerId: ticketModified.customerId,
+      ticketProcedureDestroyed: result.ticketProcedureDestroyed,
       ticketUserDestroyedList: result.ticketUserDestroyedList || [],
     })
 
     return { ticketId, ticketProcedureId }
   }
 
-  async updateRequestTicketProcedure(options: {
+  async destroyTicketRegimen(options: { oid: number; ticketId: number; ticketRegimenId: number }) {
+    const { oid, ticketId, ticketRegimenId } = options
+    const result = await this.ticketDestroyTicketRegimenOperation.destroyTicketRegimen({
+      oid,
+      ticketId,
+      ticketRegimenId,
+    })
+
+    const { ticketModified } = result
+
+    this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+    this.socketEmitService.socketTicketProcedureListChange(oid, {
+      ticketId,
+      customerId: ticketModified.customerId,
+      ticketRegimenDestroyed: result.ticketRegimenDestroyed,
+      ticketUserDestroyedList: result.ticketUserDestroyedList || [],
+    })
+
+    return { ticketId, ticketRegimenId }
+  }
+
+  async updateMoneyTicketProcedure(options: {
     oid: number
     ticketId: number
     ticketProcedureId: number
-    body: TicketUpdateRequestTicketProcedureBody
+    body: TicketUpdateMoneyTicketProcedureBody
   }) {
     const { oid, ticketId, ticketProcedureId, body } = options
-    const updateResult = await this.ticketUpdateTicketProcedureOperation.updateTicketProcedure({
-      oid,
-      ticketId,
-      ticketProcedureId,
-      ticketProcedureUpdateDto: body.ticketProcedure,
-      ticketProcedureItemUpdateList: body.ticketProcedureItemList,
-      ticketUserRequestList: body.ticketUserRequestList,
-    })
+    const updateResult =
+      await this.ticketUpdateMoneyTicketProcedureOperation.updateMoneyTicketProcedure({
+        oid,
+        ticketId,
+        ticketProcedureId,
+        ticketProcedureUpdateDto: body,
+      })
     const { ticketModified, ticketProcedureModified } = updateResult
 
-    await this.apiTicketProcedureService.generateRelation({
-      oid,
-      ticketProcedureList: [ticketProcedureModified],
-      relation: { ticketProcedureItemList: { imageList: true } },
-    })
-
-    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified })
+    this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
     this.socketEmitService.socketTicketProcedureListChange(oid, {
       ticketId,
-      ticketProcedureUpsertedList: [ticketProcedureModified],
+      customerId: ticketModified.customerId,
+      ticketProcedureModifiedList: [ticketProcedureModified],
+      ticketUserUpsertedList: updateResult.ticketUserCreatedList,
+      ticketUserDestroyedList: updateResult.ticketUserDestroyedList,
+    })
+
+    return { ticketProcedureModified }
+  }
+
+  async updateUserRequestTicketProcedure(options: {
+    oid: number
+    ticketId: number
+    ticketProcedureId: number
+    body: TicketUpdateUserRequestTicketProcedureBody
+  }) {
+    const { oid, ticketId, ticketProcedureId, body } = options
+    const updateResult =
+      await this.ticketUpdateUserTicketProcedureOperation.updateUserTicketProcedure({
+        oid,
+        ticketId,
+        ticketProcedureId,
+        ticketUserUpdateList: body.ticketUserRequestList,
+        positionType: PositionType.ProcedureRequest,
+      })
+    const { ticketModified, ticketProcedureModified } = updateResult
+
+    this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+    this.socketEmitService.socketTicketProcedureListChange(oid, {
+      ticketId,
+      customerId: ticketModified.customerId,
+      ticketProcedureModifiedList: [ticketProcedureModified],
       ticketUserUpsertedList: updateResult.ticketUserCreatedList,
       ticketUserDestroyedList: updateResult.ticketUserDestroyedList,
     })
 
     ticketProcedureModified.ticketUserRequestList = updateResult.ticketUserCreatedList || []
+    return { ticketProcedureModified }
+  }
+
+  async updateUserResultTicketProcedure(options: {
+    oid: number
+    ticketId: number
+    ticketProcedureId: number
+    body: TicketUpdateUserResultTicketProcedureBody
+  }) {
+    const { oid, ticketId, ticketProcedureId, body } = options
+    const updateResult =
+      await this.ticketUpdateUserTicketProcedureOperation.updateUserTicketProcedure({
+        oid,
+        ticketId,
+        ticketProcedureId,
+        ticketUserUpdateList: body.ticketUserResultList,
+        positionType: PositionType.ProcedureResult,
+      })
+    const { ticketModified, ticketProcedureModified } = updateResult
+    ticketProcedureModified.ticketUserResultList = updateResult.ticketUserCreatedList || []
+
+    this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+    this.socketEmitService.socketTicketProcedureListChange(oid, {
+      ticketId,
+      customerId: ticketModified.customerId,
+      ticketProcedureModifiedList: [ticketProcedureModified],
+      ticketUserUpsertedList: updateResult.ticketUserCreatedList,
+      ticketUserDestroyedList: updateResult.ticketUserDestroyedList,
+    })
+
     return { ticketProcedureModified }
   }
 
@@ -156,40 +238,86 @@ export class TicketChangeProcedureService {
 
     this.socketEmitService.socketTicketProcedureListChange(oid, {
       ticketId,
-      ticketProcedureUpsertedList: ticketProcedureList,
+      customerId: ticketProcedureList[0].customerId,
+      // ticketProcedureUpsertedList: ticketProcedureList,
     })
 
     return { ticketProcedureList }
   }
 
-  async updateResultTicketProcedureItem(options: {
+  async updateMoneyTicketRegimen(options: {
     oid: number
     ticketId: number
+    ticketRegimenId: number
+    body: TicketUpdateMoneyTicketRegimenBody
+  }) {
+    const { oid, ticketId, ticketRegimenId, body } = options
+    const updateResult =
+      await this.ticketUpdateMoneyTicketRegimenOperation.updateMoneyTicketRegimen({
+        oid,
+        ticketId,
+        ticketRegimenId,
+        ticketRegimenUpdateDto: body.ticketRegimen,
+        ticketProcedureUpdateList: body.ticketProcedureList,
+      })
+    const { ticketModified, ticketRegimenModified } = updateResult
+
+    this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+    this.socketEmitService.socketTicketProcedureListChange(oid, {
+      ticketId,
+      customerId: ticketModified.customerId,
+      ticketRegimenModified,
+      ticketUserUpsertedList: updateResult.ticketUserCreatedList,
+      ticketUserDestroyedList: updateResult.ticketUserDestroyedList,
+    })
+
+    return { ticketRegimenModified }
+  }
+
+  async updateUserRequestTicketRegimen(options: {
+    oid: number
+    ticketId: number
+    ticketRegimenId: number
+    body: TicketUpdateUserRequestTicketRegimenBody
+  }) {
+    const { oid, ticketId, ticketRegimenId, body } = options
+    const updateResult = await this.ticketUpdateUserTicketRegimenOperation.updateUserTicketRegimen({
+      oid,
+      ticketId,
+      ticketRegimenId,
+      positionType: PositionType.RegimenRequest,
+      ticketUserRequestList: body.ticketUserRequestList,
+    })
+    const { ticketModified, ticketRegimenModified } = updateResult
+
+    this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+    this.socketEmitService.socketTicketProcedureListChange(oid, {
+      ticketId,
+      customerId: ticketModified.customerId,
+      ticketRegimenModified,
+      ticketUserUpsertedList: updateResult.ticketUserCreatedList,
+      ticketUserDestroyedList: updateResult.ticketUserDestroyedList,
+    })
+
+    return { ticketRegimenModified }
+  }
+
+  async updateResultTicketProcedure(options: {
+    oid: number
+    ticketId: number
+    ticketProcedureId: number
     body: TicketProcedureUpdateResultBody
     files: FileUploadDto[]
   }) {
-    const { oid, ticketId, body, files } = options
-    const { ticketProcedureId, ticketProcedureItemId } = body.ticketProcedureItem
+    const { oid, ticketId, ticketProcedureId, body, files } = options
 
     const ticketProcedureOrigin = await this.ticketProcedureRepository.findOneBy({
       oid,
       id: ticketProcedureId,
     })
-    const ticketProcedureItemOrigin = await this.ticketProcedureItemRepository.findOneBy({
-      oid,
-      id: ticketProcedureItemId,
-      ticketProcedureId,
-    })
-    const { customerId } = ticketProcedureOrigin
-    if (ticketProcedureItemOrigin.status === TicketProcedureStatus.Pending) {
-      if (ticketProcedureItemOrigin.indexSession !== ticketProcedureOrigin.finishedSessions) {
-        throw new BusinessError(
-          `Không đúng buổi thực hiện, hiện tại cần thực hiện buổi ${ticketProcedureOrigin.finishedSessions + 1}`
-        )
-      }
-    }
 
-    let imageIdsUpdateString = ticketProcedureItemOrigin.imageIds
+    const { customerId } = ticketProcedureOrigin
+    let imageIdsUpdateString = ticketProcedureOrigin.imageIds
     let imageDestroyedList: Image[] = []
     let imageCreatedList: Image[] = []
     if (body.imagesChange) {
@@ -198,13 +326,12 @@ export class TicketChangeProcedureService {
         files,
         imageIdsWait: body.imagesChange.imageIdsWait,
         externalUrlList: body.imagesChange.externalUrlList,
-        imageIdsOld: JSON.parse(ticketProcedureItemOrigin.imageIds),
+        imageIdsOld: JSON.parse(ticketProcedureOrigin.imageIds),
         imageInteract: {
           imageInteractType: ImageInteractType.Customer,
           imageInteractId: customerId,
           ticketId,
           ticketItemId: ticketProcedureId,
-          ticketItemChildId: ticketProcedureItemId,
         },
       })
       imageIdsUpdateString = JSON.stringify(imageChangeResponse.imageIdsNew)
@@ -213,207 +340,154 @@ export class TicketChangeProcedureService {
       imageCreatedList = imageChangeResponse.imageCreatedList
     }
 
-    const ticketProcedureItemModified =
-      await this.ticketProcedureItemRepository.updateOneAndReturnEntity(
-        {
-          oid,
-          ticketId,
-          id: body.ticketProcedureItem.ticketProcedureItemId,
-        },
-        {
-          result: body.ticketProcedureItem.result,
-          completedAt: body.ticketProcedureItem.completedAt,
-          imageIds: imageIdsUpdateString,
-          status: TicketProcedureStatus.Completed,
-        }
-      )
+    const ticketProcedureModified = await this.ticketProcedureRepository.updateOneAndReturnEntity(
+      { oid, id: ticketProcedureId },
+      {
+        ticketId,
+        result: body.ticketProcedure.result,
+        completedAt: body.ticketProcedure.completedAt,
+        imageIds: imageIdsUpdateString,
+        status: TicketProcedureStatus.Completed,
+      }
+    )
 
-    let ticketProcedureModified = ticketProcedureOrigin
-    if (ticketProcedureItemOrigin.status === TicketProcedureStatus.Pending) {
-      ticketProcedureModified = await this.ticketProcedureRepository.updateOneAndReturnEntity(
-        {
+    if (ticketProcedureModified.imageIds !== '[]') {
+      let imageIdList: number[] = []
+      try {
+        imageIdList = JSON.parse(ticketProcedureModified.imageIds)
+      } catch (error) {
+        imageIdList = []
+      }
+      if (imageIdList.length) {
+        const imageList = await this.imageRepository.findManyBy({
           oid,
-          ticketId,
-          id: ticketProcedureId,
-        },
-        {
-          finishedSessions: ticketProcedureOrigin.finishedSessions + 1,
-          status:
-            ticketProcedureOrigin.finishedSessions + 1 < ticketProcedureOrigin.totalSessions
-              ? TicketProcedureStatus.Executing
-              : TicketProcedureStatus.Completed,
-        }
-      )
-      if (ticketProcedureModified.procedureType === ProcedureType.Regimen) {
-        await this.appointmentRepository.updateOneAndReturnEntity(
-          {
-            oid,
-            customerId: ticketProcedureOrigin.customerId,
-            fromTicketId: ticketId,
-            toTicketId: ticketId,
-            ticketProcedureId,
-            ticketProcedureItemId,
-          },
-          {
-            status: AppointmentStatus.Completed,
-            cancelReason: '',
-          }
-        )
+          id: { IN: imageIdList },
+        })
+        const imageMap = ESArray.arrayToKeyValue(imageList, 'id')
+        ticketProcedureModified.imageList = imageIdList.map((imageId) => {
+          return imageMap[imageId]
+        })
       }
     }
 
-    let ticketUserCreatedList: TicketUser[] = []
-    let ticketUserDestroyedList: TicketUser[] = []
-    if (body.ticketUserResultList) {
-      const changeUserResult = await this.ticketChangeTicketUserOperation.changeTicketUserList({
-        oid,
-        ticketId,
-        createdAt: ticketProcedureItemModified.completedAt,
-        ticketUserDtoList: body.ticketUserResultList.map((i) => {
-          return {
-            ...i,
-            ticketItemId: ticketProcedureId,
-            ticketItemChildId: ticketProcedureItemId,
-            positionInteractId: ticketProcedureModified.procedureId,
-            quantity: 1,
-            ticketItemExpectedPrice: ticketProcedureModified.expectedPrice,
-            ticketItemActualPrice: ticketProcedureModified.actualPrice,
-          }
-        }),
-        destroy: {
-          positionType: PositionType.ProcedureResult,
-          ticketItemId: ticketProcedureId,
-          ticketItemChildId: ticketProcedureItemId,
-        },
+    let ticketRegimenModified: TicketRegimen
+    if (
+      ticketProcedureOrigin.ticketProcedureType === TicketProcedureType.InRegimen
+      && ticketProcedureOrigin.status !== TicketProcedureStatus.Completed
+    ) {
+      const ticketProcedureList = await this.ticketProcedureRepository.findMany({
+        condition: { oid, customerId, ticketRegimenId: ticketProcedureOrigin.ticketRegimenId },
+        sort: { completedAt: 'ASC', id: 'ASC' },
       })
-      ticketUserCreatedList = changeUserResult.ticketUserCreatedList
-      ticketUserDestroyedList = changeUserResult.ticketUserDestroyedList
-      this.socketEmitService.socketTicketChange(oid, {
-        type: 'UPDATE',
-        ticket: changeUserResult.ticketModified,
+      const everyCompleted = ticketProcedureList.every((i) => {
+        return i.status === TicketProcedureStatus.Completed
       })
-    }
 
-    await this.apiTicketProcedureService.generateRelation({
-      ticketProcedureList: [ticketProcedureModified],
-      oid,
-      relation: {
-        ticketProcedureItemList: { imageList: true, ticketUserResultList: true },
-        ticketUserRequestList: true,
-      },
-    })
+      ticketRegimenModified = await this.ticketRegimenRepository.updateOneAndReturnEntity(
+        { oid, id: ticketProcedureOrigin.ticketRegimenId },
+        { status: everyCompleted ? TicketRegimenStatus.Completed : TicketRegimenStatus.Executing }
+      )
+
+      if (ticketProcedureModified.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect) {
+        const ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
+          oid,
+          ticketId,
+          itemMoney: {
+            procedureMoneyAdd:
+              ticketProcedureModified.actualPrice * ticketProcedureModified.quantity,
+            itemsDiscountAdd:
+              ticketProcedureModified.discountMoney * ticketProcedureModified.quantity,
+            commissionMoneyAdd: 0,
+          },
+        })
+        this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+      }
+    }
 
     this.socketEmitService.socketTicketProcedureListChange(oid, {
       ticketId,
-      ticketProcedureUpsertedList: [ticketProcedureModified],
-      ticketUserUpsertedList: ticketUserCreatedList,
-      ticketUserDestroyedList,
+      customerId: ticketProcedureModified.customerId,
+      ticketProcedureModifiedList: [ticketProcedureModified],
+      ticketRegimenModified: ticketRegimenModified || undefined,
       imageDestroyedList,
       imageUpsertedList: imageCreatedList,
     })
 
-    return { ticketProcedureModified }
+    return { ticketProcedureModified, ticketRegimenModified }
   }
 
-  async cancelResultTicketProcedureItem(options: {
-    oid: number
-    ticketId: number
-    body: TicketCancelResultProcedureItemBody
-  }) {
-    const { oid, ticketId, body } = options
-    const { ticketProcedureId, ticketProcedureItemId } = body
+  async cancelResultTicketProcedure(options: { oid: number; ticketProcedureId: number }) {
+    const { oid, ticketProcedureId } = options
 
     const ticketProcedureOrigin = await this.ticketProcedureRepository.findOneBy({
       oid,
       id: ticketProcedureId,
     })
-    const ticketProcedureItemOrigin = await this.ticketProcedureItemRepository.findOneBy({
+    const { ticketId, customerId } = ticketProcedureOrigin
+
+    const { imageDestroyedList } = await this.imageManagerService.removeImageList({
       oid,
-      id: ticketProcedureItemId,
-      ticketProcedureId,
+      idRemoveList: JSON.parse(ticketProcedureOrigin.imageIds),
     })
-    const { customerId } = ticketProcedureOrigin
 
-    if (ticketProcedureItemOrigin.indexSession !== ticketProcedureOrigin.finishedSessions) {
-      throw new BusinessError(
-        `Hủy buổi hẹn không phù hợp, hiện tại cần hủy buổi ${ticketProcedureOrigin.finishedSessions + 1}`
-      )
-    }
+    const ticketUserDestroyList = await this.ticketUserRepository.deleteAndReturnEntity({
+      oid,
+      ticketId,
+      positionType: PositionType.ProcedureResult,
+      ticketItemId: ticketProcedureOrigin.id,
+    })
 
-    if (ticketProcedureItemOrigin.status === TicketProcedureStatus.Completed) {
-      await this.imageManagerService.removeImageList({
-        oid,
-        idRemoveList: JSON.parse(ticketProcedureItemOrigin.imageIds),
+    const ticketProcedureModified = await this.ticketProcedureRepository.updateOneAndReturnEntity(
+      { oid, ticketId, id: ticketProcedureId },
+      {
+        ticketId: 0,
+        status: TicketProcedureStatus.Pending,
+        result: '',
+        imageIds: JSON.stringify([]),
+        completedAt: null,
+        commissionAmount: 0,
+      }
+    )
+
+    let ticketRegimenModified: TicketRegimen
+    if (ticketProcedureOrigin.ticketProcedureType === TicketProcedureType.InRegimen) {
+      const ticketProcedureList = await this.ticketProcedureRepository.findMany({
+        condition: { oid, customerId, ticketRegimenId: ticketProcedureOrigin.ticketRegimenId },
+        sort: { completedAt: 'ASC', id: 'ASC' },
       })
-    }
-
-    const ticketProcedureItemModified =
-      await this.ticketProcedureItemRepository.updateOneAndReturnEntity(
-        { oid, ticketId, id: ticketProcedureItemId },
-        {
-          status: TicketProcedureStatus.Cancelled,
-          result: body.cancelReason,
-          imageIds: JSON.stringify([]),
-        }
+      const everyPending = ticketProcedureList.every((i) => {
+        return i.status === TicketProcedureStatus.Pending
+      })
+      ticketRegimenModified = await this.ticketRegimenRepository.updateOneAndReturnEntity(
+        { oid, id: ticketProcedureOrigin.ticketRegimenId },
+        { status: everyPending ? TicketRegimenStatus.Pending : TicketRegimenStatus.Executing }
       )
-
-    let ticketProcedureModified = ticketProcedureOrigin
-    if (ticketProcedureItemOrigin.status === TicketProcedureStatus.Pending) {
-      ticketProcedureModified = await this.ticketProcedureRepository.updateOneAndReturnEntity(
-        { oid, ticketId, id: ticketProcedureId },
-        {
-          finishedSessions: ticketProcedureOrigin.finishedSessions + 1,
-          status:
-            ticketProcedureOrigin.finishedSessions + 1 < ticketProcedureOrigin.totalSessions
-              ? TicketProcedureStatus.Executing
-              : TicketProcedureStatus.Completed,
-        }
-      )
-    }
-
-    if (ticketProcedureModified.procedureType === ProcedureType.Regimen) {
-      await this.appointmentRepository.updateOneAndReturnEntity(
-        {
+      if (ticketProcedureModified.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect) {
+        const ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
           oid,
-          customerId: ticketProcedureOrigin.customerId,
-          fromTicketId: ticketId,
-          toTicketId: ticketId,
-          ticketProcedureId,
-          ticketProcedureItemId,
-        },
-        {
-          status: AppointmentStatus.Cancelled,
-          cancelReason: body.cancelReason,
-        }
-      )
+          ticketId,
+          itemMoney: {
+            procedureMoneyAdd:
+              -ticketProcedureModified.actualPrice * ticketProcedureModified.quantity,
+            itemsDiscountAdd:
+              -ticketProcedureModified.discountMoney * ticketProcedureModified.quantity,
+            commissionMoneyAdd: ticketUserDestroyList.reduce((acc, item) => {
+              return acc + item.quantity * item.commissionMoney
+            }, 0),
+          },
+        })
+        this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+      }
     }
-
-    let ticketUserDestroyedList: TicketUser[] = []
-    if (ticketProcedureItemOrigin.status === TicketProcedureStatus.Completed) {
-      ticketUserDestroyedList = await this.ticketUserRepository.deleteAndReturnEntity({
-        oid,
-        positionType: PositionType.ProcedureResult,
-        ticketId,
-        ticketItemId: ticketProcedureId,
-        ticketItemChildId: ticketProcedureItemId,
-      })
-    }
-
-    await this.apiTicketProcedureService.generateRelation({
-      ticketProcedureList: [ticketProcedureModified],
-      oid,
-      relation: {
-        ticketProcedureItemList: { imageList: true, ticketUserResultList: true },
-        ticketUserRequestList: true,
-      },
-    })
 
     this.socketEmitService.socketTicketProcedureListChange(oid, {
       ticketId,
-      ticketProcedureUpsertedList: [ticketProcedureModified],
-      ticketUserDestroyedList,
+      customerId: ticketProcedureOrigin.customerId,
+      ticketProcedureModifiedList: [ticketProcedureModified],
+      ticketRegimenModified: ticketRegimenModified || undefined,
+      imageDestroyedList,
     })
 
-    return { ticketProcedureModified }
+    return { ticketProcedureModified, ticketRegimenModified }
   }
 }

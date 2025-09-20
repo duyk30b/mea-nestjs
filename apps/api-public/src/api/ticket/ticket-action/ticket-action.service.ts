@@ -21,6 +21,7 @@ import {
 import { TicketRepository } from '../../../../../_libs/database/repositories'
 import { ImageManagerService } from '../../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
+import { TicketQueryService } from '../ticket-query/ticket-query.service'
 import { TicketClinicChangeDiscountBody, TicketReturnProductListBody } from './request'
 import { TicketChangeAllMoneyBody } from './request/ticket-change-all-money.body'
 
@@ -37,7 +38,8 @@ export class TicketActionService {
     private readonly ticketChangeAllMoneyOperator: TicketChangeAllMoneyOperator,
     private readonly ticketCloseOperation: TicketCloseOperation,
     private readonly ticketChangeDiscountOperation: TicketChangeDiscountOperation,
-    private readonly customerRefundMoneyOperation: CustomerRefundMoneyOperation
+    private readonly customerRefundMoneyOperation: CustomerRefundMoneyOperation,
+    private readonly ticketQueryService: TicketQueryService
   ) { }
 
   async startExecuting(options: { oid: number; ticketId: number }) {
@@ -317,14 +319,10 @@ export class TicketActionService {
 
   async destroy(params: { oid: number; ticketId: number }) {
     const { oid, ticketId } = params
-    const ticket = await this.ticketRepository.findOne({
-      relationLoadStrategy: 'query',
+    const { ticket } = await this.ticketQueryService.getOne({
+      oid,
+      ticketId,
       relation: { ticketProductList: {}, ticketRadiologyList: {} },
-      condition: {
-        id: ticketId,
-        oid,
-        // status: { IN: [TicketStatus.Draft, TicketStatus.Schedule, TicketStatus.Cancelled] },
-      },
     })
 
     if (!ticket) {
@@ -348,7 +346,7 @@ export class TicketActionService {
       idRemoveList: JSON.parse(ticket.imageDiagnosisIds || '[]'),
     })
     await this.ticketRepository.update({ oid, id: ticketId }, { status: TicketStatus.Cancelled })
-    await this.ticketRepository.destroy({ oid, ticketId })
+    await this.ticketRepository.destroyAll({ oid, ticketId })
     this.socketEmitService.socketTicketChange(oid, { type: 'DESTROY', ticket })
     return { ticketId }
   }

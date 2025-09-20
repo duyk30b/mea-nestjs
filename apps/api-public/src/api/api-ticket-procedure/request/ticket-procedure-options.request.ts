@@ -1,5 +1,5 @@
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsInt, IsObject, IsOptional, ValidateNested } from 'class-validator'
+import { IsBoolean, IsIn, IsInt, IsOptional, ValidateNested } from 'class-validator'
 import {
   ConditionNumber,
   ConditionTimestamp,
@@ -10,8 +10,8 @@ import {
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 import {
   PaymentMoneyStatus,
-  TicketProcedureStatus,
 } from '../../../../../_libs/database/common/variable'
+import { TicketProcedureStatus } from '../../../../../_libs/database/entities/ticket-procedure.entity'
 
 export class TicketProcedureRelationQuery {
   @Expose()
@@ -27,12 +27,16 @@ export class TicketProcedureRelationQuery {
   ticket?: boolean
 
   @Expose()
-  @IsObject()
-  ticketProcedureItemList?: { imageList?: boolean; ticketUserResultList?: true }
+  @IsBoolean()
+  imageList?: boolean
 
   @Expose()
   @IsBoolean()
   ticketUserRequestList?: boolean
+
+  @Expose()
+  @IsBoolean()
+  ticketUserResultList?: boolean
 }
 
 const ConditionEnumPaymentMoneyStatus = createConditionEnum(PaymentMoneyStatus)

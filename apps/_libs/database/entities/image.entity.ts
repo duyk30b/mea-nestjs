@@ -44,10 +44,6 @@ export default class Image {
   @Expose()
   ticketItemId: number
 
-  @Column({ default: 0 })
-  @Expose()
-  ticketItemChildId: number
-
   @Column({ type: 'varchar', length: 50 })
   @Expose()
   name: string

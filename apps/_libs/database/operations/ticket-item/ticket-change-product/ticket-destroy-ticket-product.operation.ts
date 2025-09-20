@@ -40,7 +40,7 @@ export class TicketDestroyTicketProductOperation {
         {
           oid,
           deliveryStatus: { IN: [DeliveryStatus.NoStock, DeliveryStatus.Pending] },
-          paymentMoneyStatus: { IN: [PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending] },
+          paymentMoneyStatus: { IN: [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.TicketPaid] },
           id: ticketProductId,
           type: ticketProductType,
         }

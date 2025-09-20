@@ -3,10 +3,10 @@ import { DataSource } from 'typeorm'
 import { PaymentMoneyStatus } from '../../../common/variable'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import {
-  TicketLaboratoryGroupManager,
-  TicketLaboratoryManager,
-  TicketLaboratoryResultManager,
-  TicketManager,
+    TicketLaboratoryGroupManager,
+    TicketLaboratoryManager,
+    TicketLaboratoryResultManager,
+    TicketManager,
 } from '../../../repositories'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
 
@@ -43,18 +43,16 @@ export class TicketDestroyTicketLaboratoryGroupOperation {
           oid,
           ticketId,
           id: ticketLaboratoryGroupId,
-          paymentMoneyStatus: { IN: [PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending] },
+          paymentMoneyStatus: { IN: [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.TicketPaid] },
         })
 
-      const ticketLaboratoryDestroyedList = await this.ticketLaboratoryManager.deleteAndReturnEntity(
-        manager,
-        {
+      const ticketLaboratoryDestroyedList =
+        await this.ticketLaboratoryManager.deleteAndReturnEntity(manager, {
           oid,
           ticketId,
           ticketLaboratoryGroupId,
-          paymentMoneyStatus: { IN: [PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending] },
-        }
-      )
+          paymentMoneyStatus: { IN: [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.TicketPaid] },
+        })
 
       const ticketLaboratoryResultDestroyedList =
         await this.ticketLaboratoryResultManager.deleteAndReturnEntity(manager, {

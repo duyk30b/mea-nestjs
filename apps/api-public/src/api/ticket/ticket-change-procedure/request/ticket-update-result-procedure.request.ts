@@ -11,21 +11,8 @@ import {
   ValidationError,
 } from 'class-validator'
 import { MultipleFileUpload } from '../../../../../../_libs/common/dto/file'
-import { TicketUserBasicBody } from '../../ticket-change-user/request'
 
-export class TicketProcedureItemUpdateBody extends MultipleFileUpload {
-  @ApiProperty()
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  ticketProcedureItemId: number
-
-  @ApiProperty()
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  ticketProcedureId: number
-
+export class TicketProcedureUpdateBody extends MultipleFileUpload {
   @ApiProperty()
   @Expose()
   @IsDefined()
@@ -53,49 +40,12 @@ class ImagesChangeBody {
 }
 
 export class TicketProcedureUpdateResultBody extends MultipleFileUpload {
-  @ApiProperty({
-    type: 'string',
-    example: JSON.stringify(<TicketUserBasicBody[]>[{}]),
-  })
-  @Expose()
-  @Transform(({ value }) => {
-    if (value === undefined) return undefined
-    try {
-      const err = []
-      const result = JSON.parse(value).map((i: any) => {
-        const instance = Object.assign(new TicketUserBasicBody(), i)
-        const validate = validateSync(instance, {
-          whitelist: true,
-          forbidNonWhitelisted: true,
-          skipMissingProperties: true,
-        })
-        if (validate.length) {
-          const errValidate = validate.map((i: ValidationError) => {
-            const { target, ...other } = i
-            return other
-          })
-          err.push(...errValidate)
-        }
-        return instance
-      })
-      if (err.length) return JSON.stringify(err)
-      else return result
-    } catch (error) {
-      return error.message
-    }
-  })
-  @IsArray({
-    message: ({ value }) =>
-      `Validate TicketUserBasicBody failed. Value = ${JSON.stringify(value)}.`,
-  })
-  ticketUserResultList: TicketUserBasicBody[]
-
   @ApiProperty()
   @Expose()
   @Transform(({ value }) => {
     if (value === undefined) return undefined
     try {
-      const instance = Object.assign(new TicketProcedureItemUpdateBody(), JSON.parse(value))
+      const instance = Object.assign(new TicketProcedureUpdateBody(), JSON.parse(value))
       const validate = validateSync(instance, {
         whitelist: true,
         forbidNonWhitelisted: true,
@@ -118,7 +68,7 @@ export class TicketProcedureUpdateResultBody extends MultipleFileUpload {
       return `Validate imagesChange failed. Value = ${JSON.stringify(value)}: `
     },
   })
-  ticketProcedureItem: TicketProcedureItemUpdateBody
+  ticketProcedure: TicketProcedureUpdateBody
 
   @ApiProperty()
   @Expose()

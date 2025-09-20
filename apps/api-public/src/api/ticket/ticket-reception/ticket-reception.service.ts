@@ -159,21 +159,17 @@ export class TicketReceptionService {
       ticket.ticketUserList = responseChangeUser.ticketUserCreatedList
     }
 
-    if (body.ticketProcedureWrapList?.length) {
+    if (body.ticketProcedureNormalWrapList?.length || body.ticketRegimenAddWrapList?.length) {
       const result = await this.ticketAddTicketProcedureListOperation.addTicketProcedureList({
         oid,
         ticketId: ticket.id,
-        ticketProcedureDtoList: body.ticketProcedureWrapList.map((i) => {
-          return {
-            ticketProcedureAdd: i.ticketProcedure,
-            ticketProcedureItemAddList: i.ticketProcedureItemList,
-            ticketUserRequestAddList: i.ticketUserRequestList,
-          }
-        }),
+        ticketRegimenAddWrapList: body.ticketRegimenAddWrapList,
+        ticketProcedureNormalWrapList: body.ticketProcedureNormalWrapList,
       })
 
       Object.assign(ticket, result.ticketModified)
-      ticket.ticketProcedureList = result.ticketProcedureCreatedList
+      ticket.ticketProcedureList = result.ticketProcedureNormalCreatedList
+      ticket.ticketRegimenList = result.ticketRegimenCreatedList
     }
 
     ticket.customer = customer
@@ -252,7 +248,6 @@ export class TicketReceptionService {
         destroy: {
           positionType: PositionType.TicketReception,
           ticketItemId: 0,
-          ticketItemChildId: 0,
         },
       })
       this.socketEmitService.socketTicketUserListChange(oid, {

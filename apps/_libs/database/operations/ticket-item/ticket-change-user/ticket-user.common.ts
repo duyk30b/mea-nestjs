@@ -11,7 +11,6 @@ export type TicketUserAddType = Pick<
   | 'positionId'
   | 'userId'
   | 'ticketItemId'
-  | 'ticketItemChildId'
   | 'positionInteractId' // không lấy theo position được vì nó có thể bằng 0 trong trường hợp tất cả,
   | 'ticketItemExpectedPrice'
   | 'ticketItemActualPrice'
@@ -58,7 +57,6 @@ export class TicketUserCommon {
         positionType: position.positionType,
         positionInteractId: i.positionInteractId, // không lấy theo position được vì nó có thể bằng 0 trong trường hợp tất cả,
         ticketItemId: i.ticketItemId,
-        ticketItemChildId: i.ticketItemChildId,
         ticketItemExpectedPrice: i.ticketItemExpectedPrice,
         ticketItemActualPrice: i.ticketItemActualPrice,
         quantity: i.quantity,

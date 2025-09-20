@@ -2,15 +2,9 @@ import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { PaymentMoneyStatus } from '../../../common/variable'
 import { PositionType } from '../../../entities/position.entity'
-import { ProcedureType } from '../../../entities/procedure.entity'
+import { TicketProcedureStatus } from '../../../entities/ticket-procedure.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
-import {
-  AppointmentManager,
-  TicketManager,
-  TicketProcedureItemManager,
-  TicketProcedureManager,
-  TicketUserManager,
-} from '../../../repositories'
+import { TicketManager, TicketProcedureManager, TicketUserManager } from '../../../repositories'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
 
 @Injectable()
@@ -19,10 +13,8 @@ export class TicketDestroyTicketProcedureOperation {
     private dataSource: DataSource,
     private ticketManager: TicketManager,
     private ticketProcedureManager: TicketProcedureManager,
-    private ticketProcedureItemManager: TicketProcedureItemManager,
     private ticketUserManager: TicketUserManager,
-    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager,
-    private appointmentManager: AppointmentManager
+    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
   ) { }
 
   async destroyTicketProcedure(params: {
@@ -48,30 +40,11 @@ export class TicketDestroyTicketProcedureOperation {
           oid,
           ticketId,
           id: ticketProcedureId,
-          paymentMoneyStatus: { IN: [PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending] },
+          paymentMoneyStatus: { IN: [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.TicketPaid] },
+          status: { IN: [TicketProcedureStatus.NoEffect, TicketProcedureStatus.Pending] },
+          costAmount: 0, // nếu có costAmount thì phải hủy kết quả trước
         }
       )
-
-      if (ticketProcedureDestroyed.procedureType === ProcedureType.SingleProcess) {
-        await this.ticketProcedureItemManager.deleteAndReturnEntity(manager, {
-          oid,
-          ticketId,
-          ticketProcedureId,
-        })
-      }
-      if (ticketProcedureDestroyed.procedureType === ProcedureType.Regimen) {
-        await this.ticketProcedureItemManager.deleteAndReturnEntity(manager, {
-          oid,
-          ticketId,
-          ticketProcedureId,
-        })
-        await this.appointmentManager.deleteAndReturnEntity(manager, {
-          oid,
-          fromTicketId: ticketId,
-          toTicketId: ticketId,
-          ticketProcedureId,
-        })
-      }
 
       // === 3. DELETE TICKET USER ===
       const ticketUserDestroyedList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
@@ -92,9 +65,9 @@ export class TicketDestroyTicketProcedureOperation {
         return acc + item.commissionMoney * item.quantity
       }, 0)
 
-      let ticket: Ticket = ticketOrigin
+      let ticketModified: Ticket = ticketOrigin
       if (procedureMoneyDelete != 0 || itemsDiscountDelete != 0 || commissionMoneyDelete != 0) {
-        ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
+        ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
           manager,
           oid,
           ticketOrigin,
@@ -106,7 +79,7 @@ export class TicketDestroyTicketProcedureOperation {
         })
       }
 
-      return { ticket, ticketProcedureDestroyed, ticketUserDestroyedList }
+      return { ticketModified, ticketProcedureDestroyed, ticketUserDestroyedList }
     })
 
     return transaction

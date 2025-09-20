@@ -61,7 +61,6 @@ export class ApiOrganizationService {
           imageInteractId: oid,
           ticketId: 0,
           ticketItemId: 0,
-          ticketItemChildId: 0,
         },
       })
       logoImageId = imageIdsNew[0]

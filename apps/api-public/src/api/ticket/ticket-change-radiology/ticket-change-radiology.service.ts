@@ -91,7 +91,7 @@ export class TicketChangeRadiologyService {
       throw new BusinessError('Phiếu đã hoàn thành không thể xóa')
     }
 
-    const imageIdsUpdate = await this.imageManagerService.removeImageList({
+    await this.imageManagerService.removeImageList({
       oid,
       idRemoveList: JSON.parse(ticketRadiologyOrigin.imageIds),
     })
@@ -195,7 +195,6 @@ export class TicketChangeRadiologyService {
           imageInteractId: customerId,
           ticketId,
           ticketItemId: ticketRadiologyId,
-          ticketItemChildId: 0,
         },
       })
       imageIdsUpdateString = JSON.stringify(changeImageResponse.imageIdsNew)
@@ -242,7 +241,6 @@ export class TicketChangeRadiologyService {
         destroy: {
           positionType: PositionType.RadiologyResult,
           ticketItemId: ticketRadiologyId,
-          ticketItemChildId: 0,
         },
       })
       ticketUserCreatedList = changeUserResult.ticketUserCreatedList
@@ -285,8 +283,6 @@ export class TicketChangeRadiologyService {
       id: ticketRadiologyId,
     })
 
-    const { ticketId } = ticketRadiologyOrigin
-
     const { imageDestroyedList } = await this.imageManagerService.removeImageList({
       oid,
       idRemoveList: JSON.parse(ticketRadiologyOrigin.imageIds),
@@ -311,21 +307,9 @@ export class TicketChangeRadiologyService {
     )
     ticketRadiologyModified.imageList = []
 
-    const { ticketModified, ticketUserDestroyedList } =
-      await this.ticketChangeTicketUserOperation.destroyTicketUserList({
-        oid,
-        ticketId,
-        condition: {
-          positionType: PositionType.RadiologyResult,
-          ticketItemId: ticketRadiologyId,
-          ticketItemChildId: 0,
-        },
-      })
-    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified })
     this.socketEmitService.socketTicketRadiologyListChange(oid, {
       ticketId: ticketRadiologyOrigin.ticketId,
       ticketRadiologyUpsertedList: [ticketRadiologyModified],
-      ticketUserDestroyedList,
       imageDestroyedList,
     })
     return { ticketRadiologyModified }

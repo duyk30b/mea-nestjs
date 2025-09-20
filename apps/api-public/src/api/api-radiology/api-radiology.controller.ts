@@ -52,7 +52,7 @@ export class ApiRadiologyController {
   }
 
   @Post('create')
-  @UserPermission(PermissionId.RADIOLOGY_CREATE)
+  @UserPermission(PermissionId.MASTER_DATA_RADIOLOGY)
   async create(
     @External() { oid }: TExternal,
     @Body() body: RadiologyUpsertBody
@@ -62,7 +62,7 @@ export class ApiRadiologyController {
   }
 
   @Patch('update/:id')
-  @UserPermission(PermissionId.RADIOLOGY_UPDATE)
+  @UserPermission(PermissionId.MASTER_DATA_RADIOLOGY)
   @ApiParam({ name: 'id', example: 1 })
   async update(
     @External() { oid }: TExternal,
@@ -74,7 +74,7 @@ export class ApiRadiologyController {
   }
 
   @Delete('destroy/:id')
-  @UserPermission(PermissionId.RADIOLOGY_DELETE)
+  @UserPermission(PermissionId.MASTER_DATA_RADIOLOGY)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(
     @External() { oid }: TExternal,
@@ -92,7 +92,7 @@ export class ApiRadiologyController {
   }
 
   @Post('system-copy')
-  @UserPermission(PermissionId.RADIOLOGY_CREATE)
+  @UserPermission(PermissionId.MASTER_DATA_RADIOLOGY)
   async systemCopy(
     @External() { oid }: TExternal,
     @Body() body: RadiologySystemCopyBody

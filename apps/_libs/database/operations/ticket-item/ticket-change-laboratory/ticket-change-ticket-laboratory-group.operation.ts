@@ -27,6 +27,7 @@ export type TicketLaboratoryUpdateBasicType = Pick<
   | 'discountType'
   | 'actualPrice'
   | 'createdAt'
+  | 'paymentMoneyStatus'
 >
 
 export type TicketLaboratoryGroupUpdateBasicType = Pick<
@@ -103,7 +104,6 @@ export class TicketChangeSelectLaboratoryOperation {
             ticketLaboratoryGroupId: ticketLaboratoryGroupDto.id,
             roomId: ticketLaboratoryGroupDto.roomId,
             status: TicketLaboratoryStatus.Pending,
-            paymentMoneyStatus: tlgModified.paymentMoneyStatus,
             completedAt: null,
           }
           return tlEntity

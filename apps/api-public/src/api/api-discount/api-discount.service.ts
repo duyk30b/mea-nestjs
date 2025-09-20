@@ -2,7 +2,13 @@ import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
 import { ESArray } from '../../../../_libs/common/helpers'
 import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { Laboratory, Procedure, Product, Radiology } from '../../../../_libs/database/entities'
+import {
+  Laboratory,
+  Procedure,
+  Product,
+  Radiology,
+  Regimen,
+} from '../../../../_libs/database/entities'
 import Discount, { DiscountInteractType } from '../../../../_libs/database/entities/discount.entity'
 import {
   DiscountRepository,
@@ -10,6 +16,7 @@ import {
   ProcedureRepository,
   ProductRepository,
   RadiologyRepository,
+  RegimenRepository,
 } from '../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
@@ -26,6 +33,7 @@ export class ApiDiscountService {
     private readonly socketEmitService: SocketEmitService,
     private readonly discountRepository: DiscountRepository,
     private readonly productRepository: ProductRepository,
+    private readonly regimenRepository: RegimenRepository,
     private readonly procedureRepository: ProcedureRepository,
     private readonly radiologyRepository: RadiologyRepository,
     private readonly laboratoryRepository: LaboratoryRepository
@@ -87,6 +95,9 @@ export class ApiDiscountService {
     const productIdList = discountList
       .filter((i) => i.discountInteractType === DiscountInteractType.Product)
       .map((i) => i.discountInteractId)
+    const regimenIdList = discountList
+      .filter((i) => i.discountInteractType === DiscountInteractType.Regimen)
+      .map((i) => i.discountInteractId)
     const procedureIdList = discountList
       .filter((i) => i.discountInteractType === DiscountInteractType.Procedure)
       .map((i) => i.discountInteractId)
@@ -97,23 +108,34 @@ export class ApiDiscountService {
       .filter((i) => i.discountInteractType === DiscountInteractType.Laboratory)
       .map((i) => i.discountInteractId)
 
-    const [productList, procedureList, radiologyList, laboratoryList] = await Promise.all([
-      relation?.product && productIdList.length
-        ? this.productRepository.findManyBy({ id: { IN: ESArray.uniqueArray(productIdList) } })
-        : <Product[]>[],
-      relation?.procedure && procedureIdList.length
-        ? this.procedureRepository.findManyBy({ id: { IN: ESArray.uniqueArray(procedureIdList) } })
-        : <Procedure[]>[],
-      relation?.radiology && radiologyIdList.length
-        ? this.radiologyRepository.findManyBy({ id: { IN: ESArray.uniqueArray(radiologyIdList) } })
-        : <Radiology[]>[],
-      relation?.laboratory && laboratoryIdList.length
-        ? this.laboratoryRepository.findManyBy({
-          id: { IN: ESArray.uniqueArray(laboratoryIdList) },
-        })
-        : <Laboratory[]>[],
-    ])
+    const [productList, regimenList, procedureList, radiologyList, laboratoryList] =
+      await Promise.all([
+        relation?.product && productIdList.length
+          ? this.productRepository.findManyBy({ id: { IN: ESArray.uniqueArray(productIdList) } })
+          : <Product[]>[],
+        relation?.regimen && regimenIdList.length
+          ? this.regimenRepository.findManyBy({
+            id: { IN: ESArray.uniqueArray(regimenIdList) },
+          })
+          : <Regimen[]>[],
+        relation?.procedure && procedureIdList.length
+          ? this.procedureRepository.findManyBy({
+            id: { IN: ESArray.uniqueArray(procedureIdList) },
+          })
+          : <Procedure[]>[],
+        relation?.radiology && radiologyIdList.length
+          ? this.radiologyRepository.findManyBy({
+            id: { IN: ESArray.uniqueArray(radiologyIdList) },
+          })
+          : <Radiology[]>[],
+        relation?.laboratory && laboratoryIdList.length
+          ? this.laboratoryRepository.findManyBy({
+            id: { IN: ESArray.uniqueArray(laboratoryIdList) },
+          })
+          : <Laboratory[]>[],
+      ])
     const productMap = ESArray.arrayToKeyValue(productList, 'id')
+    const regimenMap = ESArray.arrayToKeyValue(regimenList, 'id')
     const procedureMap = ESArray.arrayToKeyValue(procedureList, 'id')
     const laboratoryMap = ESArray.arrayToKeyValue(laboratoryList, 'id')
     const radiologyMap = ESArray.arrayToKeyValue(radiologyList, 'id')
@@ -121,6 +143,9 @@ export class ApiDiscountService {
     discountList.forEach((discount: Discount) => {
       if (discount.discountInteractType === DiscountInteractType.Product) {
         discount.product = productMap[discount.discountInteractId]
+      }
+      if (discount.discountInteractType === DiscountInteractType.Regimen) {
+        discount.regimen = regimenMap[discount.discountInteractId]
       }
       if (discount.discountInteractType === DiscountInteractType.Procedure) {
         discount.procedure = procedureMap[discount.discountInteractId]

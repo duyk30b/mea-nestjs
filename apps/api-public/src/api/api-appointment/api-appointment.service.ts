@@ -6,8 +6,6 @@ import { DeliveryStatus, DiscountType } from '../../../../_libs/database/common/
 import {
   Customer,
   CustomerSource,
-  TicketProcedure,
-  TicketProcedureItem,
 } from '../../../../_libs/database/entities'
 import Appointment, {
   AppointmentStatus,
@@ -18,12 +16,9 @@ import {
   CustomerRepository,
   CustomerSourceRepository,
   TicketAttributeRepository,
-  TicketProcedureItemRepository,
-  TicketProcedureRepository,
   TicketRepository,
 } from '../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../socket/socket-emit.service'
-import { ApiTicketProcedureService } from '../api-ticket-procedure/api-ticket-procedure.service'
 import {
   AppointmentCreateBody,
   AppointmentGetManyQuery,
@@ -41,11 +36,8 @@ export class ApiAppointmentService {
     private readonly appointmentRepository: AppointmentRepository,
     private readonly customerRepository: CustomerRepository,
     private readonly customerSourceRepository: CustomerSourceRepository,
-    private readonly ticketProcedureRepository: TicketProcedureRepository,
-    private readonly ticketProcedureItemRepository: TicketProcedureItemRepository,
     private readonly ticketRepository: TicketRepository,
-    private readonly ticketAttributeRepository: TicketAttributeRepository,
-    private readonly apiTicketProcedureService: ApiTicketProcedureService
+    private readonly ticketAttributeRepository: TicketAttributeRepository
   ) { }
 
   async pagination(oid: number, query: AppointmentPaginationQuery) {
@@ -59,7 +51,6 @@ export class ApiAppointmentService {
         oid,
         customerId: filter?.customerId,
         status: filter?.status,
-        type: filter?.type,
         registeredAt: filter?.registeredAt,
       },
       sort,
@@ -79,7 +70,6 @@ export class ApiAppointmentService {
         oid,
         customerId: filter?.customerId,
         status: filter?.status,
-        type: filter?.type,
         registeredAt: filter?.registeredAt,
       },
       limit,
@@ -112,7 +102,6 @@ export class ApiAppointmentService {
     const appointmentIdList = appointmentList.map((i) => i.id)
     const customerIdList = appointmentList.map((i) => i.customerId)
     const customerSourceIdList = appointmentList.map((i) => i.customerSourceId).filter((i) => !!i)
-    const ticketProcedureIdList = appointmentList.map((i) => i.ticketProcedureId).filter((i) => !!i)
 
     const toTicketIdList = appointmentList.map((i) => i.toTicketId).filter((i) => !!i)
 
@@ -130,16 +119,6 @@ export class ApiAppointmentService {
           id: { IN: ESArray.uniqueArray(customerSourceIdList) },
         })
         : undefined,
-      relation?.ticketProcedure && ticketProcedureIdList.length
-        ? this.apiTicketProcedureService.getList(oid, {
-          filter: {
-            ...(relation?.ticketProcedure.filter || {}),
-            oid,
-            id: { IN: ESArray.uniqueArray(ticketProcedureIdList) },
-          },
-          relation: relation?.ticketProcedure.relation,
-        })
-        : undefined,
       relation?.toTicket && toTicketIdList.length
         ? this.ticketRepository.findManyBy({
           oid,
@@ -150,12 +129,10 @@ export class ApiAppointmentService {
 
     const customerList: Customer[] = promiseData[0]
     const customerSourceList: CustomerSource[] = promiseData[1]
-    const ticketProcedureList: TicketProcedure[] = promiseData[2]?.ticketProcedureList || []
-    const toTicketList: Ticket[] = promiseData[3]
+    const toTicketList: Ticket[] = promiseData[2]
 
     const customerMap = ESArray.arrayToKeyValue(customerList || [], 'id')
     const customerSourceMap = ESArray.arrayToKeyValue(customerSourceList || [], 'id')
-    const ticketProcedureMap = ESArray.arrayToKeyValue(ticketProcedureList || [], 'id')
     const toTicketMap = ESArray.arrayToKeyValue(toTicketList || [], 'id')
 
     appointmentList.forEach((appointment: Appointment) => {
@@ -167,17 +144,6 @@ export class ApiAppointmentService {
       }
       if (relation?.toTicket) {
         appointment.toTicket = toTicketMap[appointment.toTicketId]
-      }
-      if (relation?.ticketProcedure) {
-        appointment.ticketProcedure = ticketProcedureMap[appointment.ticketProcedureId]
-      }
-      if (relation?.ticketProcedureItem) {
-        if (appointment.ticketProcedure?.ticketProcedureItemList) {
-          appointment.ticketProcedureItem =
-            appointment.ticketProcedure.ticketProcedureItemList.find((i) => {
-              return i.id === appointment.ticketProcedureItemId
-            })
-        }
       }
     })
     return appointmentList
@@ -207,8 +173,6 @@ export class ApiAppointmentService {
       toTicketId: 0,
       cancelReason: '',
       oid,
-      ticketProcedureId: 0,
-      ticketProcedureItemId: 0,
     })
     return { appointment }
   }

@@ -37,13 +37,13 @@ export class ApiLaboratorySampleController {
   }
 
   @Post('create')
-  @UserPermission(PermissionId.LABORATORY_SAMPLE_CRUD)
+  @UserPermission(PermissionId.MASTER_DATA_LABORATORY_SAMPLE)
   async createOne(@External() { oid }: TExternal, @Body() body: LaboratorySampleCreateBody) {
     return await this.apiLaboratorySampleService.createOne(oid, body)
   }
 
   @Patch('update/:id')
-  @UserPermission(PermissionId.LABORATORY_SAMPLE_CRUD)
+  @UserPermission(PermissionId.MASTER_DATA_LABORATORY_SAMPLE)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
     @External() { oid }: TExternal,
@@ -54,7 +54,7 @@ export class ApiLaboratorySampleController {
   }
 
   @Delete('destroy/:id')
-  @UserPermission(PermissionId.LABORATORY_SAMPLE_CRUD)
+  @UserPermission(PermissionId.MASTER_DATA_LABORATORY_SAMPLE)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiLaboratorySampleService.destroyOne(oid, id)

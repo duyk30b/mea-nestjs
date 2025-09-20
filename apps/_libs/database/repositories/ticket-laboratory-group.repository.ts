@@ -27,19 +27,16 @@ export class TicketLaboratoryGroupManager extends _PostgreSqlManager<
   calculatorPaymentMoneyStatus(options: { ticketLaboratoryList?: TicketLaboratory[] }) {
     const { ticketLaboratoryList } = options
 
-    let paymentMoneyStatus = PaymentMoneyStatus.NoEffect
-    if (ticketLaboratoryList.every((i) => i.paymentMoneyStatus === PaymentMoneyStatus.NoEffect)) {
-      paymentMoneyStatus = PaymentMoneyStatus.NoEffect
-    }
+    let paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
     const hasPaid = ticketLaboratoryList.some(
       (i) => i.paymentMoneyStatus === PaymentMoneyStatus.Paid
     )
     const hasPending = ticketLaboratoryList.some(
-      (i) => i.paymentMoneyStatus === PaymentMoneyStatus.Pending
+      (i) => i.paymentMoneyStatus === PaymentMoneyStatus.PendingPayment
     )
     if (hasPaid && !hasPending) paymentMoneyStatus = PaymentMoneyStatus.Paid
-    if (!hasPaid && hasPending) paymentMoneyStatus = PaymentMoneyStatus.Pending
-    if (hasPaid && hasPending) paymentMoneyStatus = PaymentMoneyStatus.Partial
+    if (!hasPaid && hasPending) paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
+    if (hasPaid && hasPending) paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
 
     return { paymentMoneyStatus }
   }

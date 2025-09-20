@@ -81,7 +81,7 @@ export enum AttributeLayoutType {
   InputAndLabelLeft = 'Input và Nhãn bên trái',
 }
 
-export enum TicketProcedureStatus {
+export enum TicketRegimenStatus {
   Empty = 1,
   Pending = 2,
   Executing = 3,
@@ -96,8 +96,8 @@ export enum TicketLaboratoryStatus {
 }
 
 export enum PaymentMoneyStatus {
-  NoEffect = 1,
-  Pending = 2,
-  Partial = 3,
+  TicketPaid = 1,
+  NoEffect = 2,
+  PendingPayment = 3,
   Paid = 4,
 }

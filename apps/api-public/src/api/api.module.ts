@@ -28,6 +28,7 @@ import { ApiPurchaseOrderItemModule } from './api-purchase-order-item/api-purcha
 import { ApiRadiologyGroupModule } from './api-radiology-group/api-radiology-group.module'
 import { ApiRadiologySampleModule } from './api-radiology-sample/api-radiology-sample.module'
 import { ApiRadiologyModule } from './api-radiology/api-radiology.module'
+import { ApiRegimenModule } from './api-regimen/api-regimen.module'
 import { ApiRoleModule } from './api-role/api-role.module'
 import { ApiRoomModule } from './api-room/api-room.module'
 import { ApiSettingModule } from './api-setting/api-setting.module'
@@ -39,6 +40,7 @@ import { ApiTicketLaboratoryModule } from './api-ticket-laboratory/api-ticket-la
 import { ApiTicketProcedureModule } from './api-ticket-procedure/api-ticket-procedure.module'
 import { ApiTicketProductModule } from './api-ticket-product/api-ticket-product.module'
 import { ApiTicketRadiologyModule } from './api-ticket-radiology/api-ticket-radiology.module'
+import { ApiTicketRegimenModule } from './api-ticket-regimen/api-ticket-regimen.module'
 import { ApiUserRoleModule } from './api-user-role/api-user-role.module'
 import { ApiUserRoomModule } from './api-user-room/api-user-room.module'
 import { ApiUserModule } from './api-user/api-user.module'
@@ -49,60 +51,63 @@ import { TicketModule } from './ticket/ticket.module'
 
 @Module({
   imports: [
+    ApiPermissionModule,
     ApiAddressModule,
     ApiICDModule,
-
-    ApiAppointmentModule,
-    ApiBatchModule,
-    ApiCustomerModule,
-    ApiCustomerSourceModule,
-    ApiDistributorModule,
-    ApiPermissionModule,
-    ApiProcedureModule,
-    ApiProductModule,
-    ApiProductMovementModule,
-    ApiPurchaseOrderModule,
-    ApiPurchaseOrderItemModule,
 
     StatisticModule,
     ApiSettingModule,
 
     ApiOrganizationModule,
     ApiRoleModule,
-    ApiPositionModule,
     ApiUserModule,
     ApiUserRoleModule,
     ApiUserRoomModule,
 
-    ApiLaboratoryModule,
-    ApiLaboratoryGroupModule,
-    ApiLaboratorySampleModule,
-    ApiRadiologyModule,
-    ApiRadiologyGroupModule,
-    ApiPrescriptionSampleModule,
-
-    ApiWarehouseModule,
+    ApiDistributorModule,
+    ApiProductModule,
     ApiProductGroupModule,
-    ApiProcedureGroupModule,
-    ApiPrintHtmlModule,
-    ApiPrintHtmlSettingModule,
+    ApiBatchModule,
+    ApiCustomerModule,
 
+    ApiProductMovementModule,
+    ApiPurchaseOrderModule,
+    ApiPurchaseOrderItemModule,
+    ApiStockCheckModule,
+    ApiPaymentModule,
+
+    ApiAppointmentModule,
     ApiTicketProcedureModule,
+    ApiTicketRegimenModule,
     ApiTicketProductModule,
     ApiTicketBatchModule,
     ApiTicketLaboratoryModule,
     ApiTicketLaboratoryGroupModule,
     ApiTicketRadiologyModule,
 
-    ApiStockCheckModule,
-    ApiPaymentModule,
-    ApiPaymentMethodModule,
     ApiDiscountModule,
 
     ApiRoomModule,
+    ApiProcedureModule,
+    ApiProcedureGroupModule,
+    ApiRegimenModule,
+    ApiLaboratoryModule,
+    ApiLaboratoryGroupModule,
+    ApiRadiologyModule,
+    ApiRadiologyGroupModule,
+    ApiPrintHtmlModule,
+    ApiPrintHtmlSettingModule,
+    ApiWarehouseModule,
+    ApiPaymentMethodModule,
     ApiExpenseModule,
     ApiSurchargeModule,
+    ApiPositionModule,
+    ApiCustomerSourceModule,
+
+    ApiLaboratorySampleModule,
+    ApiPrescriptionSampleModule,
     ApiRadiologySampleModule,
+
     TicketModule,
   ],
   controllers: [],

@@ -7,6 +7,7 @@ import {
   Procedure,
   Product,
   Radiology,
+  Regimen,
 } from '../../../../_libs/database/entities'
 import Position, {
   PositionInsertType,
@@ -18,6 +19,7 @@ import {
   ProcedureRepository,
   ProductRepository,
   RadiologyRepository,
+  RegimenRepository,
 } from '../../../../_libs/database/repositories'
 import { PositionRepository } from '../../../../_libs/database/repositories/position.repository'
 import {
@@ -35,6 +37,7 @@ export class ApiPositionService {
   constructor(
     private readonly positionRepository: PositionRepository,
     private readonly productRepository: ProductRepository,
+    private readonly regimenRepository: RegimenRepository,
     private readonly procedureRepository: ProcedureRepository,
     private readonly radiologyRepository: RadiologyRepository,
     private readonly laboratoryRepository: LaboratoryRepository,
@@ -144,17 +147,16 @@ export class ApiPositionService {
     const productIdList = positionList
       .filter((i) => [PositionType.ProductRequest].includes(i.positionType))
       .map((i) => i.positionInteractId)
+    const regimenIdList = positionList
+      .filter((i) => [PositionType.RegimenRequest].includes(i.positionType))
+      .map((i) => i.positionInteractId)
     const procedureIdList = positionList
       .filter((i) =>
-        [PositionType.ProcedureRequest, PositionType.ProcedureResult].includes(
-          i.positionType
-        ))
+        [PositionType.ProcedureRequest, PositionType.ProcedureResult].includes(i.positionType))
       .map((i) => i.positionInteractId)
     const radiologyIdList = positionList
       .filter((i) =>
-        [PositionType.RadiologyRequest, PositionType.RadiologyResult].includes(
-          i.positionType
-        ))
+        [PositionType.RadiologyRequest, PositionType.RadiologyResult].includes(i.positionType))
       .map((i) => i.positionInteractId)
     const laboratoryIdList = positionList
       .filter((i) => [PositionType.LaboratoryRequest].includes(i.positionType))
@@ -163,35 +165,47 @@ export class ApiPositionService {
       .filter((i) => [PositionType.LaboratoryRequest].includes(i.positionType))
       .map((i) => i.positionInteractId)
 
-    const [productList, procedureList, radiologyList, laboratoryList, laboratoryGroupList] =
-      await Promise.all([
-        relation?.productRequest && productIdList.length
-          ? this.productRepository.findManyBy({ id: { IN: ESArray.uniqueArray(productIdList) } })
-          : <Product[]>[],
-        (relation?.procedureRequest || relation?.procedureResult) && procedureIdList.length
-          ? this.procedureRepository.findMany({
-            condition: { id: { IN: ESArray.uniqueArray(procedureIdList) } },
-          })
-          : <Procedure[]>[],
-        (relation?.radiologyRequest || relation?.radiologyResult) && radiologyIdList.length
-          ? this.radiologyRepository.findManyBy({
-            id: { IN: ESArray.uniqueArray(radiologyIdList) },
-          })
-          : <Radiology[]>[],
-        relation?.laboratoryRequest && laboratoryIdList.length
-          ? this.laboratoryRepository.findMany({
-            condition: { id: { IN: ESArray.uniqueArray(laboratoryIdList) } },
-          })
-          : <Laboratory[]>[],
-        (relation?.laboratoryGroupRequest || relation?.laboratoryGroupResult)
-          && laboratoryGroupIdList.length
-          ? this.laboratoryGroupRepository.findMany({
-            condition: { id: { IN: ESArray.uniqueArray(laboratoryIdList) } },
-          })
-          : <LaboratoryGroup[]>[],
-      ])
+    const [
+      productList,
+      regimenList,
+      procedureList,
+      radiologyList,
+      laboratoryList,
+      laboratoryGroupList,
+    ] = await Promise.all([
+      relation?.productRequest && productIdList.length
+        ? this.productRepository.findManyBy({ id: { IN: ESArray.uniqueArray(productIdList) } })
+        : <Product[]>[],
+      relation?.regimenRequest && regimenIdList.length
+        ? this.regimenRepository.findMany({
+          condition: { id: { IN: ESArray.uniqueArray(procedureIdList) } },
+        })
+        : <Regimen[]>[],
+      (relation?.procedureRequest || relation?.procedureResult) && procedureIdList.length
+        ? this.procedureRepository.findMany({
+          condition: { id: { IN: ESArray.uniqueArray(procedureIdList) } },
+        })
+        : <Procedure[]>[],
+      (relation?.radiologyRequest || relation?.radiologyResult) && radiologyIdList.length
+        ? this.radiologyRepository.findManyBy({
+          id: { IN: ESArray.uniqueArray(radiologyIdList) },
+        })
+        : <Radiology[]>[],
+      relation?.laboratoryRequest && laboratoryIdList.length
+        ? this.laboratoryRepository.findMany({
+          condition: { id: { IN: ESArray.uniqueArray(laboratoryIdList) } },
+        })
+        : <Laboratory[]>[],
+      (relation?.laboratoryGroupRequest || relation?.laboratoryGroupResult)
+        && laboratoryGroupIdList.length
+        ? this.laboratoryGroupRepository.findMany({
+          condition: { id: { IN: ESArray.uniqueArray(laboratoryIdList) } },
+        })
+        : <LaboratoryGroup[]>[],
+    ])
 
     const productMap = ESArray.arrayToKeyValue(productList, 'id')
+    const regimenMap = ESArray.arrayToKeyValue(regimenList, 'id')
     const procedureMap = ESArray.arrayToKeyValue(procedureList, 'id')
     const radiologyMap = ESArray.arrayToKeyValue(radiologyList, 'id')
     const laboratoryMap = ESArray.arrayToKeyValue(laboratoryList, 'id')
@@ -201,8 +215,8 @@ export class ApiPositionService {
       if (position.positionType === PositionType.ProductRequest) {
         position.productRequest = productMap[position.positionInteractId]
       }
-      if (position.positionType === PositionType.ProcedureRequest) {
-        position.procedureRequest = procedureMap[position.positionInteractId]
+      if (position.positionType === PositionType.RegimenRequest) {
+        position.regimenRequest = regimenMap[position.positionInteractId]
       }
       if (position.positionType === PositionType.ProcedureResult) {
         position.procedureResult = procedureMap[position.positionInteractId]

@@ -1,7 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
-import { OrganizationPermission } from '../../../../_libs/common/guards/organization.guard'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
@@ -21,7 +20,7 @@ export class ApiProcedureController {
   constructor(private readonly apiProcedureService: ApiProcedureService) { }
 
   @Get('pagination')
-  @OrganizationPermission(PermissionId.PROCEDURE)
+  @UserPermission()
   async pagination(
     @External() { oid }: TExternal,
     @Query() query: ProcedurePaginationQuery
@@ -31,7 +30,7 @@ export class ApiProcedureController {
   }
 
   @Get('list')
-  @OrganizationPermission(PermissionId.PROCEDURE)
+  @UserPermission()
   async list(
     @External() { oid }: TExternal,
     @Query() query: ProcedureGetManyQuery
@@ -41,7 +40,7 @@ export class ApiProcedureController {
   }
 
   @Get('detail/:id')
-  @OrganizationPermission(PermissionId.PROCEDURE)
+  @UserPermission()
   async detail(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -52,7 +51,7 @@ export class ApiProcedureController {
   }
 
   @Post('create')
-  @UserPermission(PermissionId.PROCEDURE_CREATE)
+  @UserPermission(PermissionId.MASTER_DATA_PROCEDURE)
   async create(
     @External() { oid }: TExternal,
     @Body() body: ProcedureUpsertBody
@@ -62,7 +61,7 @@ export class ApiProcedureController {
   }
 
   @Patch('update/:id')
-  @UserPermission(PermissionId.PROCEDURE_UPDATE)
+  @UserPermission(PermissionId.MASTER_DATA_PROCEDURE)
   @ApiParam({ name: 'id', example: 1 })
   async update(
     @External() { oid }: TExternal,
@@ -74,7 +73,7 @@ export class ApiProcedureController {
   }
 
   @Delete('destroy/:id')
-  @UserPermission(PermissionId.PROCEDURE_DELETE)
+  @UserPermission(PermissionId.MASTER_DATA_PROCEDURE)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(
     @External() { oid }: TExternal,

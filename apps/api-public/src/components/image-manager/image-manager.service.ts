@@ -91,7 +91,6 @@ export class ImageManagerService implements OnModuleInit {
         imageInteractId: customerId,
         ticketId,
         ticketItemId: 0,
-        ticketItemChildId: 0,
       }
       return draft
     })
@@ -131,7 +130,6 @@ export class ImageManagerService implements OnModuleInit {
       imageInteractId: number // customerId, ticketId, organizationId
       ticketId: number
       ticketItemId: number
-      ticketItemChildId: number
     }
     files: FileUploadDto[]
     externalUrlList: string[]
@@ -164,7 +162,6 @@ export class ImageManagerService implements OnModuleInit {
         imageInteractId: imageInteract.imageInteractId,
         ticketId: imageInteract.ticketId,
         ticketItemId: imageInteract.ticketItemId,
-        ticketItemChildId: imageInteract.ticketItemChildId,
       }
       return insert
     })
@@ -217,22 +214,25 @@ export class ImageManagerService implements OnModuleInit {
 
   async removeImageList(options: { oid: number; idRemoveList: number[] }) {
     const { oid, idRemoveList } = options
-    const imageWaitDeleteList = await this.imageRepository.updateAndReturnEntity(
-      { oid, id: { IN: idRemoveList } },
-      { waitDelete: 1 }
-    )
+    let imageWaitDeleteList: Image[] = []
+    if (idRemoveList.length) {
+      imageWaitDeleteList = await this.imageRepository.updateAndReturnEntity(
+        { oid, id: { IN: idRemoveList } },
+        { waitDelete: 1 }
+      )
 
-    const imageCloudinaryWaitDelete = imageWaitDeleteList.filter((i) => {
-      return i.hostType === ImageHostType.Cloudinary
-    })
-    const imageGoogleWaitDelete = imageWaitDeleteList.filter((i) => {
-      return i.hostType === ImageHostType.GoogleDriver
-    })
+      const imageCloudinaryWaitDelete = imageWaitDeleteList.filter((i) => {
+        return i.hostType === ImageHostType.Cloudinary
+      })
+      const imageGoogleWaitDelete = imageWaitDeleteList.filter((i) => {
+        return i.hostType === ImageHostType.GoogleDriver
+      })
 
-    await Promise.all([
-      this.removeImageCloudinary(oid, imageCloudinaryWaitDelete),
-      this.removeImageGoogleDriver(oid, imageGoogleWaitDelete),
-    ])
+      await Promise.all([
+        this.removeImageCloudinary(oid, imageCloudinaryWaitDelete),
+        this.removeImageGoogleDriver(oid, imageGoogleWaitDelete),
+      ])
+    }
 
     return { imageDestroyedList: imageWaitDeleteList }
   }

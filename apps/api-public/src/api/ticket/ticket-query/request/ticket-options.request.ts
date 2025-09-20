@@ -15,6 +15,7 @@ import { TicketLaboratoryGetManyQuery } from '../../../api-ticket-laboratory/req
 import { TicketProcedureGetManyQuery } from '../../../api-ticket-procedure/request'
 import { TicketProductGetManyQuery } from '../../../api-ticket-product/request'
 import { TicketRadiologyGetManyQuery } from '../../../api-ticket-radiology/request'
+import { TicketRegimenGetManyQuery } from '../../../api-ticket-regimen/request'
 
 export class TicketRelationQuery {
   @Expose()
@@ -56,6 +57,14 @@ export class TicketRelationQuery {
   @Expose()
   @IsObject()
   ticketProcedureList?: TicketProcedureGetManyQuery
+
+  @Expose()
+  @IsObject()
+  ticketRegimenList?: TicketRegimenGetManyQuery
+
+  @Expose()
+  @IsObject()
+  ticketRegimenListExtra?: TicketRegimenGetManyQuery
 
   @Expose()
   @IsObject()

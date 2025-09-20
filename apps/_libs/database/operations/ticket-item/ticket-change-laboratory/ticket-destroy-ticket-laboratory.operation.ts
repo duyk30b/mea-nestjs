@@ -4,10 +4,10 @@ import { PaymentMoneyStatus, TicketLaboratoryStatus } from '../../../common/vari
 import { TicketLaboratoryGroup } from '../../../entities'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import {
-  TicketLaboratoryGroupManager,
-  TicketLaboratoryManager,
-  TicketLaboratoryResultManager,
-  TicketManager,
+    TicketLaboratoryGroupManager,
+    TicketLaboratoryManager,
+    TicketLaboratoryResultManager,
+    TicketManager,
 } from '../../../repositories'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
 
@@ -46,7 +46,7 @@ export class TicketDestroyTicketLaboratoryOperation {
           ticketId,
           id: ticketLaboratoryId,
           status: TicketLaboratoryStatus.Pending,
-          paymentMoneyStatus: { IN: [PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending] },
+          paymentMoneyStatus: { IN: [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.TicketPaid] },
         }
       )
 

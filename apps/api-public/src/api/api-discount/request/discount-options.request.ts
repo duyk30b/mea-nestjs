@@ -9,6 +9,10 @@ export class DiscountRelationQuery {
 
   @Expose()
   @IsBoolean()
+  regimen?: boolean
+
+  @Expose()
+  @IsBoolean()
   procedure?: boolean
 
   @Expose()

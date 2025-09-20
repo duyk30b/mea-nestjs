@@ -4,11 +4,11 @@ import { DataSource, EntityManager } from 'typeorm'
 import { DeliveryStatus, DiscountType, PaymentMoneyStatus } from '../../common/variable'
 import { TicketStatus } from '../../entities/ticket.entity'
 import {
-  TicketLaboratoryManager,
-  TicketManager,
-  TicketProcedureManager,
-  TicketProductManager,
-  TicketRadiologyManager,
+    TicketLaboratoryManager,
+    TicketManager,
+    TicketProcedureManager,
+    TicketProductManager,
+    TicketRadiologyManager,
 } from '../../repositories'
 import { TicketCalculatorMoney } from './ticket-calculator-money.operator'
 import { TicketUpdateCommissionTicketUserOperator } from './ticket-update-commission-ticket-user.operator'
@@ -59,7 +59,7 @@ export class TicketChangeAllMoneyOperator {
           oid,
           ticketId,
           deliveryStatus: DeliveryStatus.Pending,
-          paymentMoneyStatus: { IN: [PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending] },
+          paymentMoneyStatus: { IN: [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.TicketPaid] },
         },
         compare: ['id'],
         tempList: options.ticketProductUpdate,
@@ -72,7 +72,7 @@ export class TicketChangeAllMoneyOperator {
         condition: {
           oid,
           ticketId,
-          paymentMoneyStatus: { IN: [PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending] },
+          paymentMoneyStatus: { IN: [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.TicketPaid] },
         },
         compare: ['id'],
         tempList: options.ticketProcedureUpdate,
@@ -85,7 +85,7 @@ export class TicketChangeAllMoneyOperator {
         condition: {
           oid,
           ticketId,
-          paymentMoneyStatus: { IN: [PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending] },
+          paymentMoneyStatus: { IN: [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.TicketPaid] },
         },
         compare: ['id'],
         tempList: options.ticketLaboratoryUpdate,
@@ -98,7 +98,7 @@ export class TicketChangeAllMoneyOperator {
         condition: {
           oid,
           ticketId,
-          paymentMoneyStatus: { IN: [PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending] },
+          paymentMoneyStatus: { IN: [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.TicketPaid] },
         },
         compare: ['id'],
         tempList: options.ticketRadiologyUpdate,

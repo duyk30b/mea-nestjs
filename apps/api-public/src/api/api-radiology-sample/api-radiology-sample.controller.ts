@@ -37,13 +37,13 @@ export class ApiRadiologySampleController {
   }
 
   @Post('create')
-  @UserPermission(PermissionId.RADIOLOGY_SAMPLE_CRUD)
+  @UserPermission(PermissionId.MASTER_DATA_RADIOLOGY_CONTENT_SAMPLE)
   async createOne(@External() { oid }: TExternal, @Body() body: RadiologySampleCreateBody) {
     return await this.apiRadiologySampleService.createOne(oid, body)
   }
 
   @Patch('update/:id')
-  @UserPermission(PermissionId.RADIOLOGY_SAMPLE_CRUD)
+  @UserPermission(PermissionId.MASTER_DATA_RADIOLOGY_CONTENT_SAMPLE)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
     @External() { oid }: TExternal,
@@ -54,7 +54,7 @@ export class ApiRadiologySampleController {
   }
 
   @Delete('destroy/:id')
-  @UserPermission(PermissionId.RADIOLOGY_SAMPLE_CRUD)
+  @UserPermission(PermissionId.MASTER_DATA_RADIOLOGY_CONTENT_SAMPLE)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiRadiologySampleService.destroyOne(oid, id)

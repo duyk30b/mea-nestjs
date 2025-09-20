@@ -85,7 +85,6 @@ export class ApiRootDataService {
               imageInteractId: ticketRadiology.customerId,
               ticketId: ticketRadiology.ticketId,
               ticketItemId: ticketRadiology.id,
-              ticketItemChildId: 0,
             }
             return temp
           })
@@ -104,7 +103,6 @@ export class ApiRootDataService {
         'imageInteractId',
         'ticketId',
         'ticketItemId',
-        'ticketItemChildId',
       ],
     })
   }

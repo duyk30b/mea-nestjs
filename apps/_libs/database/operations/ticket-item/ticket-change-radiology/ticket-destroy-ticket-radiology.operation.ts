@@ -38,7 +38,7 @@ export class TicketDestroyTicketRadiologyOperation {
         {
           oid,
           id: ticketRadiologyId,
-          paymentMoneyStatus: { IN: [PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending] },
+          paymentMoneyStatus: { IN: [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.TicketPaid] },
         }
       )
 

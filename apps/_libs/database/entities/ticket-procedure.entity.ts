@@ -1,15 +1,27 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
-import { DiscountType, PaymentMoneyStatus, TicketProcedureStatus } from '../common/variable'
+import { DiscountType, PaymentMoneyStatus } from '../common/variable'
 import Customer from './customer.entity'
-import Procedure, { ProcedureType } from './procedure.entity'
-import TicketProcedureItem from './ticket-procedure-item.entity'
+import Image from './image.entity'
+import Procedure from './procedure.entity'
 import TicketUser from './ticket-user.entity'
 import Ticket from './ticket.entity'
 
+export enum TicketProcedureStatus {
+  NoEffect = 1,
+  Pending = 2,
+  Completed = 3,
+}
+
+export enum TicketProcedureType {
+  Normal = 1,
+  InRegimen = 2,
+}
+
 @Entity('TicketProcedure')
 @Index('IDX_TicketProcedure__oid_ticketId', ['oid', 'ticketId'])
+@Index('IDX_TicketProcedure__oid_customerId', ['oid', 'customerId'])
 @Index('IDX_TicketProcedure__oid_procedureId', ['oid', 'procedureId'])
 @Index('IDX_TicketProcedure__oid_createdAt', ['oid', 'createdAt'])
 export default class TicketProcedure extends BaseEntity {
@@ -29,21 +41,21 @@ export default class TicketProcedure extends BaseEntity {
   @Expose()
   procedureId: number
 
-  @Column({ type: 'smallint', default: ProcedureType.Basic })
+  @Column({ type: 'smallint', default: TicketProcedureType.Normal })
   @Expose()
-  procedureType: ProcedureType
+  ticketProcedureType: TicketProcedureType
+
+  @Column({ default: 0 })
+  @Expose()
+  ticketRegimenId: number
+
+  @Column({ default: 0 })
+  @Expose()
+  sessionIndex: number
 
   @Column({ default: 1 })
   @Expose()
   quantity: number
-
-  @Column({ default: 0 })
-  @Expose()
-  totalSessions: number
-
-  @Column({ default: 0 })
-  @Expose()
-  finishedSessions: number
 
   @Column({
     type: 'bigint',
@@ -82,11 +94,11 @@ export default class TicketProcedure extends BaseEntity {
   @Expose()
   actualPrice: number // Giá thực tế
 
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.NoEffect })
+  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
   @Expose()
   paymentMoneyStatus: PaymentMoneyStatus
 
-  @Column({ type: 'smallint', default: TicketProcedureStatus.Pending })
+  @Column({ type: 'smallint', default: TicketProcedureStatus.NoEffect })
   @Expose()
   status: TicketProcedureStatus
 
@@ -99,6 +111,33 @@ export default class TicketProcedure extends BaseEntity {
   })
   @Expose()
   createdAt: number
+
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  completedAt: number
+
+  @Column({ type: 'text', default: '' })
+  @Expose({})
+  result: string // Kết luận
+
+  @Column({ type: 'varchar', length: 100, default: JSON.stringify([]) })
+  @Expose()
+  imageIds: string
+
+  @Column({ default: 0 })
+  @Expose()
+  costAmount: number // Tiền hoa hồng'
+
+  @Column({ default: 0 })
+  @Expose()
+  commissionAmount: number // Tiền hoa hồng
 
   @Expose()
   @ManyToOne((type) => Ticket, (ticket) => ticket.ticketProcedureList, {
@@ -118,10 +157,16 @@ export default class TicketProcedure extends BaseEntity {
   procedure: Procedure
 
   @Expose()
-  ticketProcedureItemList: TicketProcedureItem[]
+  ticketUserRequestList: TicketUser[]
 
   @Expose()
-  ticketUserRequestList: TicketUser[]
+  ticketUserResultList: TicketUser[]
+
+  @Expose()
+  imageIdList: number[]
+
+  @Expose()
+  imageList: Image[]
 
   static fromRaw(raw: { [P in keyof TicketProcedure]: any }) {
     if (!raw) return null
@@ -134,6 +179,7 @@ export default class TicketProcedure extends BaseEntity {
     entity.actualPrice = Number(raw.actualPrice)
 
     entity.createdAt = Number(raw.createdAt)
+    entity.completedAt = raw.completedAt == null ? raw.completedAt : Number(raw.completedAt)
     return entity
   }
 
@@ -148,8 +194,10 @@ export type TicketProcedureRelationType = {
     | 'ticket'
     | 'procedure'
     | 'customer'
-    | 'ticketProcedureItemList'
+    | 'imageIdList'
+    | 'imageList'
     | 'ticketUserRequestList'
+    | 'ticketUserResultList'
   >]?: boolean
 }
 
@@ -166,7 +214,8 @@ export type TicketProcedureUpdateType = {
 }
 
 export type TicketProcedureSortType = {
-  [P in keyof Pick<TicketProcedure, 'id' | 'ticketId' | 'procedureId' | 'priority'>]?:
-  | 'ASC'
-  | 'DESC'
+  [P in keyof Pick<
+    TicketProcedure,
+    'id' | 'ticketId' | 'procedureId' | 'priority' | 'completedAt'
+  >]?: 'ASC' | 'DESC'
 }

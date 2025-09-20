@@ -92,7 +92,6 @@ export class ApiMeService {
           imageInteractId: userId,
           ticketId: 0,
           ticketItemId: 0,
-          ticketItemChildId: 0,
         },
       })
       imageIdsStringifyUpdate = JSON.stringify(imageIdsNew)

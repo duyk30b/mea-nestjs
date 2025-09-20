@@ -1,14 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
 import {
-  IsArray,
-  IsDefined,
-  IsIn,
-  IsNumber,
-  IsString,
-  Max,
-  Min,
-  ValidateNested,
+    IsArray,
+    IsDefined,
+    IsIn,
+    IsNumber,
+    IsString,
+    Max,
+    Min,
+    ValidateNested,
 } from 'class-validator'
 import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
 import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
@@ -40,11 +40,11 @@ export class TicketRadiologyAddBody {
   @IsNumber()
   roomId: number
 
-  @ApiProperty({ example: PaymentMoneyStatus.NoEffect })
+  @ApiProperty({ example: PaymentMoneyStatus.TicketPaid })
   @Expose()
   @IsDefined()
   @IsEnumValue(PaymentMoneyStatus)
-  @IsIn([PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending])
+  @IsIn([PaymentMoneyStatus.TicketPaid, PaymentMoneyStatus.PendingPayment])
   paymentMoneyStatus: PaymentMoneyStatus
 
   @ApiProperty({ example: Date.now() })

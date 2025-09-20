@@ -148,10 +148,10 @@ export const permissionTicket: Permission[] = [
     level: 2,
     code: PermissionId[PermissionId.TICKET_CHANGE_RADIOLOGY_RESULT],
     isActive: 1,
-    pathId: `${PermissionId.RADIOLOGY}.${PermissionId.TICKET_CHANGE_RADIOLOGY_RESULT}`,
+    pathId: `${PermissionId.TICKET}.${PermissionId.TICKET_CHANGE_RADIOLOGY_RESULT}`,
     name: 'Trả kết quả phiếu CĐHA',
-    parentId: PermissionId.RADIOLOGY,
-    rootId: PermissionId.RADIOLOGY,
+    parentId: PermissionId.TICKET,
+    rootId: PermissionId.TICKET,
   },
   {
     id: PermissionId.TICKET_CHANGE_PRODUCT_SEND_PRODUCT,

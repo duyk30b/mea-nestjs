@@ -2,10 +2,10 @@ import { Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import {
-  DeliveryStatus,
-  DiscountType,
-  PaymentMoneyStatus,
-  PickupStrategy,
+    DeliveryStatus,
+    DiscountType,
+    PaymentMoneyStatus,
+    PickupStrategy,
 } from '../common/variable'
 import Batch from './batch.entity'
 import Customer from './customer.entity'
@@ -29,7 +29,7 @@ export default class TicketProduct extends BaseEntity {
   @Expose()
   pickupStrategy: PickupStrategy
 
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.NoEffect })
+  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
   @Expose()
   paymentMoneyStatus: PaymentMoneyStatus
 

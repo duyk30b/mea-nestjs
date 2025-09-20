@@ -2,16 +2,27 @@ import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { ESTimer } from '../../../common/helpers/time.helper'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
-import { DeliveryStatus, TicketProcedureStatus } from '../../common/variable'
+import { DeliveryStatus } from '../../common/variable'
 import { TicketAttributeInsertType } from '../../entities/ticket-attribute.entity'
-import TicketExpense, { TicketExpenseInsertType, TicketExpenseRelationType } from '../../entities/ticket-expense.entity'
-import TicketProcedure, { TicketProcedureInsertType, TicketProcedureRelationType } from '../../entities/ticket-procedure.entity'
-import TicketProduct, { TicketProductInsertType, TicketProductRelationType, TicketProductType } from '../../entities/ticket-product.entity'
-import TicketSurcharge, { TicketSurchargeInsertType, TicketSurchargeRelationType } from '../../entities/ticket-surcharge.entity'
-import Ticket, {
-  TicketInsertType,
-  TicketStatus,
-} from '../../entities/ticket.entity'
+import TicketExpense, {
+  TicketExpenseInsertType,
+  TicketExpenseRelationType,
+} from '../../entities/ticket-expense.entity'
+import TicketProcedure, {
+  TicketProcedureInsertType,
+  TicketProcedureStatus,
+  TicketProcedureType,
+} from '../../entities/ticket-procedure.entity'
+import TicketProduct, {
+  TicketProductInsertType,
+  TicketProductRelationType,
+  TicketProductType,
+} from '../../entities/ticket-product.entity'
+import TicketSurcharge, {
+  TicketSurchargeInsertType,
+  TicketSurchargeRelationType,
+} from '../../entities/ticket-surcharge.entity'
+import Ticket, { TicketInsertType, TicketStatus } from '../../entities/ticket.entity'
 import {
   TicketAttributeManager,
   TicketExpenseManager,
@@ -54,13 +65,17 @@ export type TicketOrderProductDraftType = Omit<
   >
 >
 
-export type TicketOrderProcedureDraftType = Omit<
+export type TicketOrderProcedureDraftType = Pick<
   TicketProcedure,
-  | keyof TicketProcedureRelationType
-  | keyof Pick<
-    TicketProcedure,
-    'oid' | 'id' | 'ticketId' | 'customerId' | 'status' | 'createdAt' | 'finishedSessions'
-  >
+  | 'priority'
+  | 'procedureId'
+  | 'quantity'
+  | 'expectedPrice'
+  | 'discountMoney'
+  | 'discountPercent'
+  | 'discountType'
+  | 'actualPrice'
+  | 'paymentMoneyStatus'
 >
 
 export type TicketOrderSurchargeDraftType = Omit<
@@ -179,7 +194,13 @@ export class TicketOrderDraftOperation {
             status: TicketProcedureStatus.Completed,
             imageIds: JSON.stringify([]),
             result: '',
-            finishedSessions: 0,
+            completedAt: null,
+            costAmount: 0,
+            ticketRegimenId: 0,
+            ticketRegimenItemId: 0,
+            commissionAmount: 0,
+            ticketProcedureType: TicketProcedureType.Normal,
+            sessionIndex: 0,
           }
           return ticketProcedure
         })

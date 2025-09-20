@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
-import { BaseCondition } from '../../../../common/dto'
 import { TicketUser } from '../../../entities'
 import { CommissionCalculatorType, PositionType } from '../../../entities/position.entity'
-import { TicketManager, TicketUserManager } from '../../../repositories'
+import {
+  TicketManager,
+  TicketProcedureManager,
+  TicketRegimenManager,
+  TicketUserManager,
+} from '../../../repositories'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
 import { TicketUserAddType, TicketUserCommon } from './ticket-user.common'
 
@@ -16,6 +20,8 @@ export class TicketChangeTicketUserOperation {
     private ticketUserCommon: TicketUserCommon,
     private ticketManager: TicketManager,
     private ticketUserManager: TicketUserManager,
+    private ticketProcedureManager: TicketProcedureManager,
+    private ticketRegimenManager: TicketRegimenManager,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
   ) { }
 
@@ -27,7 +33,6 @@ export class TicketChangeTicketUserOperation {
     destroy?: {
       positionType: PositionType
       ticketItemId: number
-      ticketItemChildId: number
     }
   }) {
     const { oid, ticketId, createdAt, ticketUserDtoList } = data
@@ -45,7 +50,6 @@ export class TicketChangeTicketUserOperation {
           ticketId,
           positionType: data.destroy.positionType,
           ticketItemId: data.destroy.ticketItemId,
-          ticketItemChildId: data.destroy.ticketItemChildId,
         })
       }
 
@@ -81,12 +85,8 @@ export class TicketChangeTicketUserOperation {
     return transaction
   }
 
-  async destroyTicketUserList(data: {
-    oid: number
-    ticketId: number
-    condition: BaseCondition<TicketUser>
-  }) {
-    const { oid, ticketId, condition } = data
+  async destroyTicketUser(data: { oid: number; ticketId: number; ticketUserId: number }) {
+    const { oid, ticketId, ticketUserId } = data
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       let ticketModified = await this.ticketManager.updateOneAndReturnEntity(
         manager,
@@ -94,15 +94,14 @@ export class TicketChangeTicketUserOperation {
         { updatedAt: Date.now() }
       )
 
-      const ticketUserDestroyedList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
-        ...condition,
+      const ticketUserDestroyed = await this.ticketUserManager.deleteOneAndReturnEntity(manager, {
         oid,
         ticketId,
+        id: ticketUserId,
       })
 
-      const commissionMoneyDestroy = ticketUserDestroyedList.reduce((acc, item) => {
-        return acc + item.quantity * item.commissionMoney
-      }, 0)
+      const commissionMoneyDestroy =
+        ticketUserDestroyed.quantity * ticketUserDestroyed.commissionMoney
 
       if (commissionMoneyDestroy != 0) {
         ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
@@ -113,9 +112,29 @@ export class TicketChangeTicketUserOperation {
             commissionMoneyAdd: -commissionMoneyDestroy,
           },
         })
+
+        if (
+          [PositionType.ProcedureRequest, PositionType.ProcedureResult].includes(
+            ticketUserDestroyed.positionType
+          )
+        ) {
+          const ticketProcedureModified =
+            await this.ticketProcedureManager.updateOneAndReturnEntity(
+              manager,
+              { oid, ticketId, id: ticketUserDestroyed.ticketItemId },
+              { commissionAmount: () => `commissionAmount - ${commissionMoneyDestroy}` }
+            )
+          if (ticketProcedureModified.ticketRegimenId) {
+            await this.ticketRegimenManager.updateOneAndReturnEntity(
+              manager,
+              { oid, id: ticketProcedureModified.ticketRegimenId },
+              { commissionAmount: () => `commissionAmount - ${commissionMoneyDestroy}` }
+            )
+          }
+        }
       }
 
-      return { ticketModified, ticketUserDestroyedList }
+      return { ticketModified, ticketUserDestroyed }
     })
 
     return transaction

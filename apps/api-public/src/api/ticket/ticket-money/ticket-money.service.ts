@@ -134,7 +134,8 @@ export class TicketMoneyService {
     if (prepaymentResult.ticketProcedureModifiedList?.length) {
       this.socketEmitService.socketTicketProcedureListChange(oid, {
         ticketId,
-        ticketProcedureUpsertedList: prepaymentResult.ticketProcedureModifiedList,
+        customerId: ticketModified.customerId,
+        ticketProcedureModifiedList: prepaymentResult.ticketProcedureModifiedList,
       })
     }
     if (prepaymentResult.ticketProductConsumableModifiedList?.length) {
@@ -194,7 +195,8 @@ export class TicketMoneyService {
     if (refundResult.ticketProcedureModifiedList?.length) {
       this.socketEmitService.socketTicketProcedureListChange(oid, {
         ticketId,
-        ticketProcedureUpsertedList: refundResult.ticketProcedureModifiedList,
+        customerId: ticketModified.customerId,
+        ticketProcedureModifiedList: refundResult.ticketProcedureModifiedList,
       })
     }
     if (refundResult.ticketProductConsumableModifiedList?.length) {

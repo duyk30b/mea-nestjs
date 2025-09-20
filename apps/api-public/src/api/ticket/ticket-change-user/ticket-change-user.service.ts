@@ -14,20 +14,20 @@ export class TicketChangeUserService {
 
   async destroyTicketUser(options: { oid: number; ticketId: number; ticketUserId: number }) {
     const { oid, ticketId, ticketUserId } = options
-    const { ticketUserDestroyedList, ticketModified } =
-      await this.ticketChangeTicketUserOperation.destroyTicketUserList({
+    const { ticketUserDestroyed, ticketModified } =
+      await this.ticketChangeTicketUserOperation.destroyTicketUser({
         oid,
         ticketId,
-        condition: { id: { IN: [ticketUserId] } },
+        ticketUserId,
       })
 
     this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified })
     this.socketEmitService.socketTicketUserListChange(oid, {
       ticketId,
-      ticketUserDestroyedList,
+      ticketUserDestroyedList: [ticketUserDestroyed],
     })
 
-    return { ticketUserDestroyedList }
+    return { ticketUserDestroyedList: [ticketUserDestroyed] }
   }
 
   async updateTicketUserCommission(options: {

@@ -36,24 +36,6 @@ export class ProcedureCreate {
   @IsInt()
   price: number // Giá dịch vụ
 
-  @ApiProperty({ example: 105000 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  totalSessions: number // Giá dịch vụ
-
-  @ApiProperty({ example: 105000 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  gapHours: number // Giá dịch vụ
-
-  @ApiProperty({ example: 105000 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  gapHoursType: number // Giá dịch vụ
-
   @ApiProperty({ example: 1 })
   @Expose()
   @IsDefined()

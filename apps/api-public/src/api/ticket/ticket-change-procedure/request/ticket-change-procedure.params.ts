@@ -20,3 +20,21 @@ export class TicketChangeProcedureParams {
   @IsNumberGreaterThan(0)
   ticketProcedureId: number
 }
+
+export class TicketChangeRegimenParams {
+  @ApiProperty({ example: 45 })
+  @Expose()
+  @Type(() => Number)
+  @IsDefined()
+  @IsInt()
+  @IsNumberGreaterThan(0)
+  ticketId: number
+
+  @ApiProperty({ example: 45 })
+  @Expose()
+  @Type(() => Number)
+  @IsDefined()
+  @IsInt()
+  @IsNumberGreaterThan(0)
+  ticketRegimenId: number
+}

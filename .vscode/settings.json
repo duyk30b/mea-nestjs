@@ -7,6 +7,7 @@
   "editor.inlayHints.fontSize": 10,
   "editor.suggest.insertMode": "replace",
   "workbench.editor.wrapTabs": true,
+  "editor.acceptSuggestionOnCommitCharacter": false,
   "window.title": "${rootName}",
   "workbench.colorCustomizations": {
     "editorInlayHint.background": "#4d4d4d99",

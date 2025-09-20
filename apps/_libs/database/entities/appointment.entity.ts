@@ -2,8 +2,6 @@ import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import CustomerSource from './customer-source.entity'
 import Customer from './customer.entity'
-import TicketProcedureItem from './ticket-procedure-item.entity'
-import TicketProcedure from './ticket-procedure.entity'
 import Ticket from './ticket.entity'
 
 export enum AppointmentStatus {
@@ -11,11 +9,6 @@ export enum AppointmentStatus {
   Confirm = 2, // Xác nhận
   Completed = 3, // Hoàn thành
   Cancelled = 4, // Hủy
-}
-
-export enum AppointmentType {
-  Ticket = 1, // Phiếu khám
-  TicketProcedure = 2, // Dịch vụ
 }
 
 @Entity('Appointment')
@@ -28,10 +21,6 @@ export default class Appointment {
   @PrimaryGeneratedColumn({})
   @Expose({})
   id: number
-
-  @Column({ type: 'smallint', default: AppointmentType.Ticket })
-  @Expose()
-  type: AppointmentType
 
   @Column({ type: 'smallint', default: AppointmentStatus.Waiting })
   @Expose()
@@ -67,14 +56,6 @@ export default class Appointment {
   @Expose()
   toTicketId: number
 
-  @Column({ default: 0 })
-  @Expose()
-  ticketProcedureId: number
-
-  @Column({ default: 0 })
-  @Expose()
-  ticketProcedureItemId: number
-
   @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   cancelReason: string // Lý do hẹn
@@ -92,12 +73,6 @@ export default class Appointment {
   @Expose()
   toTicket: Ticket
 
-  @Expose()
-  ticketProcedure: TicketProcedure
-
-  @Expose()
-  ticketProcedureItem: TicketProcedureItem
-
   static fromRaw(raw: { [P in keyof Appointment]: any }) {
     if (!raw) return null
     const entity = new Appointment()
@@ -114,10 +89,7 @@ export default class Appointment {
 }
 
 export type AppointmentRelationType = {
-  [P in keyof Pick<
-    Appointment,
-    'customer' | 'customerSource' | 'ticketProcedure' | 'ticketProcedureItem' | 'toTicket'
-  >]?: boolean
+  [P in keyof Pick<Appointment, 'customer' | 'customerSource' | 'toTicket'>]?: boolean
 }
 
 export type AppointmentInsertType = Omit<

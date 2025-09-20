@@ -5,26 +5,26 @@ import { BusinessError } from '../../common/error'
 import { DiscountType, PaymentMoneyStatus } from '../../common/variable'
 import { TicketLaboratoryGroup } from '../../entities'
 import {
-  PaymentTicketItemInsertType,
-  TicketItemType,
+    PaymentTicketItemInsertType,
+    TicketItemType,
 } from '../../entities/payment-ticket-item.entity'
 import {
-  MoneyDirection,
-  PaymentActionType,
-  PaymentInsertType,
-  PaymentPersonType,
-  PaymentVoucherType,
+    MoneyDirection,
+    PaymentActionType,
+    PaymentInsertType,
+    PaymentPersonType,
+    PaymentVoucherType,
 } from '../../entities/payment.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
 import {
-  CustomerManager,
-  PaymentManager, PaymentTicketItemManager,
-  TicketLaboratoryGroupManager,
-  TicketLaboratoryManager,
-  TicketManager,
-  TicketProcedureManager,
-  TicketProductManager,
-  TicketRadiologyManager,
+    CustomerManager,
+    PaymentManager, PaymentTicketItemManager,
+    TicketLaboratoryGroupManager,
+    TicketLaboratoryManager,
+    TicketManager,
+    TicketProcedureManager,
+    TicketProductManager,
+    TicketRadiologyManager,
 } from '../../repositories'
 
 @Injectable()
@@ -171,7 +171,7 @@ export class CustomerRefundTicketItemListOperation {
           .map((i) => ({
             ...i,
             id: i.ticketItemId,
-            paymentMoneyStatus: PaymentMoneyStatus.Pending,
+            paymentMoneyStatus: PaymentMoneyStatus.PendingPayment,
           })),
         update: ['paymentMoneyStatus'],
         options: { requireEqualLength: true },
@@ -186,7 +186,7 @@ export class CustomerRefundTicketItemListOperation {
           .map((i) => ({
             ...i,
             id: i.ticketItemId,
-            paymentMoneyStatus: PaymentMoneyStatus.Pending,
+            paymentMoneyStatus: PaymentMoneyStatus.PendingPayment,
           })),
         update: ['paymentMoneyStatus'],
         options: { requireEqualLength: true },
@@ -201,7 +201,7 @@ export class CustomerRefundTicketItemListOperation {
           .map((i) => ({
             ...i,
             id: i.ticketItemId,
-            paymentMoneyStatus: PaymentMoneyStatus.Pending,
+            paymentMoneyStatus: PaymentMoneyStatus.PendingPayment,
           })),
         update: ['paymentMoneyStatus'],
         options: { requireEqualLength: true },
@@ -216,7 +216,7 @@ export class CustomerRefundTicketItemListOperation {
           .map((i) => ({
             ...i,
             id: i.ticketItemId,
-            paymentMoneyStatus: PaymentMoneyStatus.Pending,
+            paymentMoneyStatus: PaymentMoneyStatus.PendingPayment,
           })),
         update: ['paymentMoneyStatus'],
         options: { requireEqualLength: true },
@@ -231,7 +231,7 @@ export class CustomerRefundTicketItemListOperation {
           .map((i) => ({
             ...i,
             id: i.ticketItemId,
-            paymentMoneyStatus: PaymentMoneyStatus.Pending,
+            paymentMoneyStatus: PaymentMoneyStatus.PendingPayment,
           })),
         update: ['paymentMoneyStatus'],
         options: { requireEqualLength: true },

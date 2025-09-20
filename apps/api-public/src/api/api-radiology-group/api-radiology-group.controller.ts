@@ -37,13 +37,13 @@ export class ApiRadiologyGroupController {
   }
 
   @Post('create')
-  @UserPermission(PermissionId.RADIOLOGY_GROUP_CRUD)
+  @UserPermission(PermissionId.MASTER_DATA_RADIOLOGY)
   async createOne(@External() { oid }: TExternal, @Body() body: RadiologyGroupUpsertBody) {
     return await this.apiRadiologyGroupService.createOne(oid, body)
   }
 
   @Patch('update/:id')
-  @UserPermission(PermissionId.RADIOLOGY_GROUP_CRUD)
+  @UserPermission(PermissionId.MASTER_DATA_RADIOLOGY)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
     @External() { oid }: TExternal,
@@ -54,20 +54,20 @@ export class ApiRadiologyGroupController {
   }
 
   @Delete('destroy/:id')
-  @UserPermission(PermissionId.RADIOLOGY_GROUP_CRUD)
+  @UserPermission(PermissionId.MASTER_DATA_RADIOLOGY)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.apiRadiologyGroupService.destroyOne(oid, id)
   }
 
   @Put('replace-all')
-  @UserPermission(PermissionId.RADIOLOGY_GROUP_CRUD)
+  @UserPermission(PermissionId.MASTER_DATA_RADIOLOGY)
   async replaceAll(@External() { oid }: TExternal, @Body() body: RadiologyGroupReplaceAllBody) {
     return await this.apiRadiologyGroupService.replaceAll(oid, body)
   }
 
   @Get('system-list')
-  @UserPermission(PermissionId.RADIOLOGY_GROUP_CRUD)
+  @UserPermission(PermissionId.MASTER_DATA_RADIOLOGY)
   async systemList() {
     return await this.apiRadiologyGroupService.systemList()
   }

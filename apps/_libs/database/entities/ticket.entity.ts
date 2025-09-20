@@ -5,7 +5,6 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm'
 import { DeliveryStatus, DiscountType } from '../common/variable'
@@ -23,6 +22,7 @@ import TicketLaboratory from './ticket-laboratory.entity'
 import TicketProcedure from './ticket-procedure.entity'
 import TicketProduct from './ticket-product.entity'
 import TicketRadiology from './ticket-radiology.entity'
+import TicketRegimen from './ticket-regimen.entity'
 import TicketSurcharge from './ticket-surcharge.entity'
 import TicketUser from './ticket-user.entity'
 
@@ -300,46 +300,39 @@ export default class Ticket {
   @Expose()
   toAppointment: Appointment
 
-  @OneToMany(() => TicketAttribute, (ticketAttribute) => ticketAttribute.ticket)
   @Expose()
   ticketAttributeList: TicketAttribute[]
 
-  @OneToMany(() => TicketProduct, (ticketProduct) => ticketProduct.ticket)
   @Expose()
   ticketProductList: TicketProduct[]
 
-  @OneToMany(() => TicketProduct, (ticketProductConsumable) => ticketProductConsumable.ticket)
   @Expose()
   ticketProductConsumableList: TicketProduct[]
 
-  @OneToMany(() => TicketProduct, (ticketProductPrescription) => ticketProductPrescription.ticket)
   @Expose()
   ticketProductPrescriptionList: TicketProduct[]
 
-  @OneToMany(() => TicketBatch, (ticketBatch) => ticketBatch.ticket)
   @Expose()
   ticketBatchList: TicketBatch[]
 
-  @OneToMany(() => TicketProcedure, (ticketProcedure) => ticketProcedure.ticket)
   @Expose()
   ticketProcedureList: TicketProcedure[]
 
-  @OneToMany(() => TicketLaboratory, (ticketLaboratory) => ticketLaboratory.ticket)
+  @Expose()
+  ticketRegimenList: TicketRegimen[]
+
+  @Expose()
+  ticketRegimenListExtra: TicketRegimen[]
+
   @Expose()
   ticketLaboratoryList: TicketLaboratory[]
 
-  @OneToMany(() => TicketLaboratoryGroup, (ticketLaboratoryGroup) => ticketLaboratoryGroup.ticket)
   @Expose()
   ticketLaboratoryGroupList: TicketLaboratoryGroup[]
 
-  @OneToMany(
-    () => TicketLaboratoryResult,
-    (ticketLaboratoryResult) => ticketLaboratoryResult.ticket
-  )
   @Expose()
   ticketLaboratoryResultList: TicketLaboratoryResult[]
 
-  @OneToMany(() => TicketRadiology, (ticketRadiology) => ticketRadiology.ticket)
   @Expose()
   ticketRadiologyList: TicketRadiology[]
 
@@ -350,7 +343,6 @@ export default class Ticket {
   ticketSurchargeList: TicketSurcharge[]
 
   @Expose()
-  @OneToMany(() => TicketUser, (ticketUser) => ticketUser.ticket)
   ticketUserList: TicketUser[]
 
   @Expose()
@@ -405,6 +397,8 @@ export type TicketRelationType = {
     | 'ticketAttributeList'
     | 'ticketExpenseList'
     | 'ticketSurchargeList'
+    | 'ticketRegimenList'
+    | 'ticketRegimenListExtra'
     | 'paymentList'
     | 'customerSource'
     | 'imageList'

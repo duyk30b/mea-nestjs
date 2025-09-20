@@ -5,6 +5,7 @@ import Laboratory from './laboratory.entity'
 import Procedure from './procedure.entity'
 import Product from './product.entity'
 import Radiology from './radiology.entity'
+import Regimen from './regimen.entity'
 
 export enum DiscountInteractType {
   Product = 1,
@@ -88,6 +89,9 @@ export default class Discount {
   product: Product
 
   @Expose()
+  regimen: Regimen
+
+  @Expose()
   procedure: Procedure
 
   @Expose()
@@ -112,7 +116,10 @@ export default class Discount {
 }
 
 export type DiscountRelationType = {
-  [P in keyof Pick<Discount, 'product' | 'procedure' | 'radiology' | 'laboratory'>]?: boolean
+  [P in keyof Pick<
+    Discount,
+    'product' | 'regimen' | 'procedure' | 'radiology' | 'laboratory'
+  >]?: boolean
 }
 
 export type DiscountInsertType = Omit<

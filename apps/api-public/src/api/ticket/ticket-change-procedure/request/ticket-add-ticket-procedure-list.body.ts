@@ -1,69 +1,29 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
-import {
-  IsArray,
-  IsDefined,
-  IsIn,
-  IsInt,
-  IsNumber,
-  IsOptional,
-  Max,
-  Min,
-  ValidateNested,
-} from 'class-validator'
+import { IsArray, IsDefined, IsIn, IsNumber, Max, Min, ValidateNested } from 'class-validator'
 import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
 import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import {
-  DiscountType,
-  PaymentMoneyStatus,
-  TicketProcedureStatus,
-} from '../../../../../../_libs/database/common/variable'
-import { ProcedureType } from '../../../../../../_libs/database/entities/procedure.entity'
+import { DiscountType, PaymentMoneyStatus } from '../../../../../../_libs/database/common/variable'
+import { TicketProcedureStatus } from '../../../../../../_libs/database/entities/ticket-procedure.entity'
 import { TicketUserBasicBody } from '../../ticket-change-user/request'
 
-class TicketProcedureItemBody {
-  @ApiProperty({ example: Date.now() })
-  @Expose()
-  @IsOptional()
-  @IsNumber()
-  registeredAt: number
-
-  @ApiProperty()
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  indexSession: number
-}
-
-class TicketProcedureBasicBody {
-  @ApiProperty({ example: 1 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  priority: number
-
+class TicketRegimenBasicBody {
   @ApiProperty({ example: 56 })
   @Expose()
   @IsDefined()
   @IsNumber()
-  procedureId: number
+  regimenId: number
 
-  @ApiProperty({ example: ProcedureType.Basic })
-  @Expose()
-  @IsEnumValue(ProcedureType)
-  procedureType: ProcedureType
-
-  @ApiProperty({ example: 4 })
+  @ApiProperty({ example: PaymentMoneyStatus.TicketPaid })
   @Expose()
   @IsDefined()
-  @IsNumber()
-  quantity: number
-
-  @ApiProperty({ example: 4 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  totalSessions: number
+  @IsEnumValue(PaymentMoneyStatus)
+  @IsIn([
+    PaymentMoneyStatus.TicketPaid,
+    PaymentMoneyStatus.NoEffect,
+    PaymentMoneyStatus.PendingPayment,
+  ])
+  paymentMoneyStatus: PaymentMoneyStatus
 
   @ApiProperty({ example: 25_000 })
   @Expose()
@@ -98,36 +58,100 @@ class TicketProcedureBasicBody {
   @IsDefined()
   @IsNumber()
   actualPrice: number
+}
 
-  @ApiProperty({ example: TicketProcedureStatus.Pending })
+class TicketProcedureBasicBody {
+  @ApiProperty({ example: 1 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  priority: number
+
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  procedureId: number
+
+  @ApiProperty({ enum: valuesEnum(TicketProcedureStatus), example: TicketProcedureStatus.NoEffect })
   @Expose()
   @IsDefined()
   @IsEnumValue(TicketProcedureStatus)
   status: TicketProcedureStatus
 
-  @ApiProperty({ example: PaymentMoneyStatus.NoEffect })
+  @ApiProperty({ example: PaymentMoneyStatus.TicketPaid })
   @Expose()
   @IsDefined()
   @IsEnumValue(PaymentMoneyStatus)
-  @IsIn([PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending])
+  @IsIn([
+    PaymentMoneyStatus.TicketPaid,
+    PaymentMoneyStatus.NoEffect,
+    PaymentMoneyStatus.PendingPayment,
+  ])
   paymentMoneyStatus: PaymentMoneyStatus
 
-  @ApiProperty({ example: Date.now() })
+  @ApiProperty({ example: 4 })
   @Expose()
-  @Transform(({ value }) => (value != null ? Number(value) : value))
-  @IsOptional()
-  @IsInt()
-  createdAt: number
+  @IsDefined()
+  @IsNumber()
+  quantity: number
+
+  @ApiProperty({ example: 25_000 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  expectedPrice: number
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @Transform(({ value }) => Math.round(value || 0))
+  @IsDefined()
+  @IsNumber()
+  discountMoney: number
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  @Max(100)
+  @Min(0)
+  discountPercent: number
+
+  @ApiProperty({ enum: valuesEnum(DiscountType), example: DiscountType.VND })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(DiscountType)
+  discountType: DiscountType
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  actualPrice: number
 }
 
-export class TicketProcedureWrapBody {
-  @ApiProperty({ type: TicketProcedureItemBody })
+export class TicketProcedureRegimenAddWrapBody {
+  @ApiProperty({ type: TicketProcedureBasicBody })
   @Expose()
-  @Type(() => TicketProcedureItemBody)
+  @Type(() => TicketProcedureBasicBody)
   @IsDefined()
-  @IsArray()
   @ValidateNested({ each: true })
-  ticketProcedureItemList: TicketProcedureItemBody[]
+  ticketProcedureAdd: TicketProcedureBasicBody
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  totalSession: number
+}
+
+export class TicketProcedureNormalWrapBody {
+  @ApiProperty({ type: TicketProcedureBasicBody })
+  @Expose()
+  @Type(() => TicketProcedureBasicBody)
+  @IsDefined()
+  @ValidateNested({ each: true })
+  ticketProcedureAdd: TicketProcedureBasicBody
 
   @ApiProperty({ type: TicketUserBasicBody, isArray: true })
   @Expose()
@@ -135,21 +159,44 @@ export class TicketProcedureWrapBody {
   @IsDefined()
   @IsArray()
   @ValidateNested({ each: true })
-  ticketUserRequestList: TicketUserBasicBody[]
+  ticketUserRequestAddList: TicketUserBasicBody[]
+}
 
-  @ApiProperty({ type: TicketProcedureBasicBody })
+export class TicketRegimenWrapBody {
+  @ApiProperty({ type: TicketRegimenBasicBody })
   @Expose()
-  @Type(() => TicketProcedureBasicBody)
+  @Type(() => TicketRegimenBasicBody)
   @IsDefined()
   @ValidateNested({ each: true })
-  ticketProcedure: TicketProcedureBasicBody
+  ticketRegimenAdd: TicketRegimenBasicBody
+
+  @ApiProperty({ type: TicketProcedureRegimenAddWrapBody })
+  @Expose()
+  @Type(() => TicketProcedureRegimenAddWrapBody)
+  @IsDefined()
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketProcedureRegimenAddWrapList: TicketProcedureRegimenAddWrapBody[]
+
+  @ApiProperty({ type: TicketUserBasicBody, isArray: true })
+  @Expose()
+  @Type(() => TicketUserBasicBody)
+  @IsDefined()
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketUserRequestAddList: TicketUserBasicBody[]
 }
 
 export class TicketAddTicketProcedureListBody {
-  @ApiProperty({ type: TicketProcedureWrapBody })
+  @ApiProperty({ type: TicketRegimenWrapBody })
   @Expose()
-  @Type(() => TicketProcedureWrapBody)
-  @IsDefined()
+  @Type(() => TicketRegimenWrapBody)
   @ValidateNested({ each: true })
-  ticketProcedureWrapList: TicketProcedureWrapBody[]
+  ticketRegimenAddWrapList?: TicketRegimenWrapBody[]
+
+  @ApiProperty({ type: TicketProcedureNormalWrapBody })
+  @Expose()
+  @Type(() => TicketProcedureNormalWrapBody)
+  @ValidateNested({ each: true })
+  ticketProcedureNormalWrapList?: TicketProcedureNormalWrapBody[]
 }

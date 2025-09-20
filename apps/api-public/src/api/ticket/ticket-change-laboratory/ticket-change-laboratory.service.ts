@@ -66,22 +66,22 @@ export class TicketChangeLaboratoryService {
     }
 
     if (body.ticketLaboratoryGroupUpdate) {
-      const { ticketLaboratoryList: ticketLaboratoryListDto, ...ticketLaboratoryGroupDto } =
-        body.ticketLaboratoryGroupUpdate
-      const result = await this.ticketChangeSelectLaboratoryOperation.changeSelectLaboratoryList({
-        oid,
-        ticketId,
-        ticketLaboratoryGroupDto,
-        ticketLaboratoryListDto,
-      })
+      // const { ticketLaboratoryList: ticketLaboratoryListDto, ...ticketLaboratoryGroupDto } =
+      //   body.ticketLaboratoryGroupUpdate
+      // const result = await this.ticketChangeSelectLaboratoryOperation.changeSelectLaboratoryList({
+      //   oid,
+      //   ticketId,
+      //   ticketLaboratoryGroupDto,
+      //   ticketLaboratoryListDto,
+      // })
 
-      this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: result.ticket })
-      this.socketEmitService.socketTicketLaboratoryListChange(oid, {
-        ticketId,
-        ticketLaboratoryUpsertedList: result.ticketLaboratoryCreatedList,
-        ticketLaboratoryDestroyedList: result.ticketLaboratoryDestroyedList,
-        ticketLaboratoryGroupUpsertedList: [result.ticketLaboratoryGroupModified],
-      })
+      // this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: result.ticket })
+      // this.socketEmitService.socketTicketLaboratoryListChange(oid, {
+      //   ticketId,
+      //   ticketLaboratoryUpsertedList: result.ticketLaboratoryCreatedList,
+      //   ticketLaboratoryDestroyedList: result.ticketLaboratoryDestroyedList,
+      //   ticketLaboratoryGroupUpsertedList: [result.ticketLaboratoryGroupModified],
+      // })
     }
     return true
   }

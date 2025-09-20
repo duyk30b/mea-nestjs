@@ -42,7 +42,7 @@ export class ApiLaboratoryController {
   }
 
   @Get('detail/:id')
-  @UserPermission(PermissionId.LABORATORY)
+  @UserPermission()
   async detail(
     @External() { oid }: TExternal,
     @Param() { id }: IdParam,
@@ -53,7 +53,7 @@ export class ApiLaboratoryController {
   }
 
   @Post('create')
-  @UserPermission(PermissionId.LABORATORY_CREATE)
+  @UserPermission(PermissionId.MASTER_DATA_LABORATORY)
   async create(
     @External() { oid }: TExternal,
     @Body() body: LaboratoryCreateBody
@@ -63,7 +63,7 @@ export class ApiLaboratoryController {
   }
 
   @Patch('update/:id')
-  @UserPermission(PermissionId.LABORATORY_UPDATE)
+  @UserPermission(PermissionId.MASTER_DATA_LABORATORY)
   @ApiParam({ name: 'id', example: 1 })
   async update(
     @External() { oid }: TExternal,
@@ -75,7 +75,7 @@ export class ApiLaboratoryController {
   }
 
   @Delete('destroy/:id')
-  @UserPermission(PermissionId.LABORATORY_DELETE)
+  @UserPermission(PermissionId.MASTER_DATA_LABORATORY)
   @ApiParam({ name: 'id', example: 1 })
   async destroy(@External() { oid }: TExternal, @Param() { id }: IdParam): Promise<BaseResponse> {
     const data = await this.apiLaboratoryService.destroy(oid, id)
@@ -90,7 +90,7 @@ export class ApiLaboratoryController {
   }
 
   @Post('system-copy')
-  @UserPermission(PermissionId.LABORATORY_CREATE)
+  @UserPermission(PermissionId.MASTER_DATA_LABORATORY)
   async systemCopy(
     @External() { oid }: TExternal,
     @Body() body: LaboratorySystemCopyBody

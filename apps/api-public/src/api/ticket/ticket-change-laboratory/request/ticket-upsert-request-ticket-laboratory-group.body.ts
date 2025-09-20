@@ -1,14 +1,14 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
 import {
-  IsArray,
-  IsDefined,
-  IsIn,
-  IsInt,
-  IsNumber,
-  Max,
-  Min,
-  ValidateNested,
+    IsArray,
+    IsDefined,
+    IsIn,
+    IsInt,
+    IsNumber,
+    Max,
+    Min,
+    ValidateNested,
 } from 'class-validator'
 import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
 import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
@@ -79,17 +79,15 @@ export class TicketLaboratoryAddBody {
   @IsInt()
   createdAt: number
 
-  @ApiProperty({ example: PaymentMoneyStatus.NoEffect })
+  @ApiProperty({ example: PaymentMoneyStatus.TicketPaid })
   @Expose()
   @IsDefined()
   @IsEnumValue(PaymentMoneyStatus)
-  @IsIn([PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending])
+  @IsIn([PaymentMoneyStatus.TicketPaid, PaymentMoneyStatus.PendingPayment])
   paymentMoneyStatus: PaymentMoneyStatus
 }
 
-export class TicketLaboratoryUpdateBody extends OmitType(TicketLaboratoryAddBody, [
-  'paymentMoneyStatus',
-]) { }
+export class TicketLaboratoryUpdateBody extends OmitType(TicketLaboratoryAddBody, []) { }
 
 export class TicketLaboratoryGroupAddBody {
   @ApiProperty({ example: 56 })
@@ -110,11 +108,11 @@ export class TicketLaboratoryGroupAddBody {
   @IsInt()
   createdAt: number
 
-  @ApiProperty({ example: PaymentMoneyStatus.NoEffect })
+  @ApiProperty({ example: PaymentMoneyStatus.TicketPaid })
   @Expose()
   @IsDefined()
   @IsEnumValue(PaymentMoneyStatus)
-  @IsIn([PaymentMoneyStatus.NoEffect, PaymentMoneyStatus.Pending])
+  @IsIn([PaymentMoneyStatus.TicketPaid, PaymentMoneyStatus.PendingPayment])
   paymentMoneyStatus: PaymentMoneyStatus
 
   @ApiProperty({ type: TicketLaboratoryAddBody, isArray: true })

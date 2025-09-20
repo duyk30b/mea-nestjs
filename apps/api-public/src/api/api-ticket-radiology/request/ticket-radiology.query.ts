@@ -26,7 +26,7 @@ export class TicketRadiologyGetQuery {
   })
   @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
-  relation: TicketRadiologyRelationQuery
+  relation?: TicketRadiologyRelationQuery
 
   @ApiPropertyOptional({
     type: String,

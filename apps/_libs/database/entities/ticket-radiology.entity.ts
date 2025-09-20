@@ -54,7 +54,7 @@ export default class TicketRadiology extends BaseEntity {
   @Expose()
   status: TicketRadiologyStatus
 
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.NoEffect })
+  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
   @Expose()
   paymentMoneyStatus: PaymentMoneyStatus
 

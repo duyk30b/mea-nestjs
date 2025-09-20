@@ -14,10 +14,10 @@ import {
   TicketProcedure,
   TicketProduct,
   TicketRadiology,
+  TicketRegimen,
   TicketSurcharge,
   TicketUser,
 } from '../entities'
-import { TicketProductType } from '../entities/ticket-product.entity'
 import {
   TicketInsertType,
   TicketRelationType,
@@ -69,7 +69,7 @@ export class TicketRepository extends _PostgreSqlRepository<
     return number
   }
 
-  async destroy(options: { oid: number; ticketId: number }) {
+  async destroyAll(options: { oid: number; ticketId: number }) {
     const { oid, ticketId } = options
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       const whereTicket: FindOptionsWhere<Ticket> = {
@@ -83,15 +83,16 @@ export class TicketRepository extends _PostgreSqlRepository<
       }
       await manager.delete(Appointment, { oid, fromTicketId: ticketId })
       await manager.delete(TicketAttribute, { oid, ticketId })
-      await manager.delete(TicketBatch, { oid, ticketId })
       await manager.delete(TicketExpense, { oid, ticketId })
+      await manager.delete(TicketSurcharge, { oid, ticketId })
       await manager.delete(TicketLaboratory, { oid, ticketId })
       await manager.delete(TicketLaboratoryGroup, { oid, ticketId })
       await manager.delete(TicketLaboratoryResult, { oid, ticketId })
+      await manager.delete(TicketRegimen, { oid, ticketId })
       await manager.delete(TicketProcedure, { oid, ticketId })
       await manager.delete(TicketProduct, { oid, ticketId })
+      await manager.delete(TicketBatch, { oid, ticketId })
       await manager.delete(TicketRadiology, { oid, ticketId })
-      await manager.delete(TicketSurcharge, { oid, ticketId })
       await manager.delete(TicketUser, { oid, ticketId })
     })
   }

@@ -7,14 +7,12 @@ import {
   Procedure,
   Ticket,
   TicketProcedure,
-  TicketProcedureItem,
   TicketUser,
 } from '../../../../_libs/database/entities'
 import { PositionType } from '../../../../_libs/database/entities/position.entity'
 import {
   CustomerRepository,
   ProcedureRepository,
-  TicketProcedureItemRepository,
   TicketRepository,
 } from '../../../../_libs/database/repositories'
 import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
@@ -31,7 +29,6 @@ import {
 export class ApiTicketProcedureService {
   constructor(
     private readonly ticketProcedureRepository: TicketProcedureRepository,
-    private readonly ticketProcedureItemRepository: TicketProcedureItemRepository,
     private readonly ticketRepository: TicketRepository,
     private readonly customerRepository: CustomerRepository,
     private readonly procedureRepository: ProcedureRepository,
@@ -116,69 +113,54 @@ export class ApiTicketProcedureService {
     const customerIdList = ticketProcedureList.map((i) => i.customerId)
     const procedureIdList = ticketProcedureList.map((i) => i.procedureId)
 
-    const [ticketList, customerList, procedureList, ticketProcedureItemList, ticketUserList] =
-      await Promise.all([
-        relation?.ticket && ticketIdList.length
-          ? this.ticketRepository.findManyBy({
-            id: { IN: ESArray.uniqueArray(ticketIdList) },
-          })
-          : <Ticket[]>[],
-        relation?.customer && customerIdList.length
-          ? this.customerRepository.findManyBy({
-            id: { IN: ESArray.uniqueArray(customerIdList) },
-          })
-          : <Customer[]>[],
-        relation?.procedure && procedureIdList.length
-          ? this.procedureRepository.findManyBy({
-            id: { IN: ESArray.uniqueArray(procedureIdList) },
-          })
-          : <Procedure[]>[],
+    const imageIdList: number[] = ticketProcedureList
+      .map((i) => {
+        try {
+          return JSON.parse(i.imageIds) as number[]
+        } catch (error) {
+          return []
+        }
+      })
+      .flat()
 
-        relation?.ticketProcedureItemList && ticketProcedureIdList.length
-          ? this.ticketProcedureItemRepository.findMany({
-            condition: {
-              oid,
-              ticketId: { IN: ESArray.uniqueArray(ticketIdList) },
-              ticketProcedureId: { IN: ESArray.uniqueArray(ticketProcedureIdList) },
-            },
-            sort: { id: 'ASC' },
-          })
-          : <TicketProcedureItem[]>[],
+    const [ticketList, customerList, procedureList, ticketUserList, imageList] = await Promise.all([
+      relation?.ticket && ticketIdList.length
+        ? this.ticketRepository.findManyBy({
+          id: { IN: ESArray.uniqueArray(ticketIdList) },
+        })
+        : <Ticket[]>[],
+      relation?.customer && customerIdList.length
+        ? this.customerRepository.findManyBy({
+          id: { IN: ESArray.uniqueArray(customerIdList) },
+        })
+        : <Customer[]>[],
+      relation?.procedure && procedureIdList.length
+        ? this.procedureRepository.findManyBy({
+          id: { IN: ESArray.uniqueArray(procedureIdList) },
+        })
+        : <Procedure[]>[],
 
-        (relation?.ticketUserRequestList
-          || relation?.ticketProcedureItemList?.ticketUserResultList)
-          && ticketProcedureIdList.length
-          ? this.ticketUserRepository.findManyBy({
-            oid,
-            ticketId: { IN: ESArray.uniqueArray(ticketIdList) },
-            positionType: { IN: [PositionType.ProcedureRequest, PositionType.ProcedureResult] },
-            ticketItemId: { IN: ESArray.uniqueArray(ticketProcedureIdList) },
-          })
-          : <TicketUser[]>[],
-      ])
+      (relation?.ticketUserRequestList || relation?.ticketUserResultList)
+        && ticketProcedureIdList.length
+        ? this.ticketUserRepository.findManyBy({
+          oid,
+          ticketId: { IN: ESArray.uniqueArray(ticketIdList) },
+          positionType: { IN: [PositionType.ProcedureRequest, PositionType.ProcedureResult] },
+          ticketItemId: { IN: ESArray.uniqueArray(ticketProcedureIdList) },
+        })
+        : <TicketUser[]>[],
+
+      relation?.imageList && imageIdList.length
+        ? this.imageRepository.findManyBy({
+          id: { IN: ESArray.uniqueArray(imageIdList) },
+        })
+        : <Image[]>[],
+    ])
 
     const ticketMap = ESArray.arrayToKeyValue(ticketList, 'id')
     const procedureMap = ESArray.arrayToKeyValue(procedureList, 'id')
     const customerMap = ESArray.arrayToKeyValue(customerList, 'id')
-
-    let imageMap: Record<string, Image> = {}
-    if (relation?.ticketProcedureItemList?.imageList) {
-      const imageIdList: number[] = ESArray.uniqueArray(
-        ticketProcedureItemList
-          .map((i) => {
-            try {
-              return JSON.parse(i.imageIds) as number[]
-            } catch (error) {
-              return []
-            }
-          })
-          .flat()
-      )
-      if (imageIdList.length) {
-        const imageList = await this.imageRepository.findManyByIds(imageIdList)
-        imageMap = ESArray.arrayToKeyValue(imageList || [], 'id')
-      }
-    }
+    const imageMap = ESArray.arrayToKeyValue(imageList, 'id')
 
     ticketProcedureList.forEach((tp: TicketProcedure) => {
       if (relation.ticket) {
@@ -197,35 +179,25 @@ export class ApiTicketProcedureService {
             ticketUser.ticketId === tp.ticketId
             && ticketUser.positionType === PositionType.ProcedureRequest
             && ticketUser.ticketItemId === tp.id
-            && ticketUser.ticketItemChildId === 0
           )
         })
       }
-
-      if (relation.ticketProcedureItemList) {
-        tp.ticketProcedureItemList = ticketProcedureItemList.filter((i) => {
-          return i.ticketProcedureId === tp.id
+      if (relation.ticketUserResultList) {
+        tp.ticketUserResultList = ticketUserList.filter((ticketUser) => {
+          return (
+            ticketUser.ticketId === tp.ticketId
+            && ticketUser.positionType === PositionType.ProcedureResult
+            && ticketUser.ticketItemId === tp.id
+          )
         })
-        tp.ticketProcedureItemList.forEach((tpi) => {
-          if (relation.ticketProcedureItemList.imageList) {
-            try {
-              const imageIdList: number[] = JSON.parse(tpi.imageIds)
-              tpi.imageList = imageIdList.map((i) => imageMap[i])
-            } catch (error) {
-              tpi.imageList = []
-            }
-          }
-          if (relation.ticketProcedureItemList.ticketUserResultList) {
-            tpi.ticketUserResultList = ticketUserList.filter((ticketUser) => {
-              return (
-                ticketUser.ticketId === tpi.ticketId
-                && ticketUser.positionType === PositionType.ProcedureResult
-                && ticketUser.ticketItemId === tp.id 
-                && ticketUser.ticketItemChildId === tpi.id 
-              )
-            })
-          }
-        })
+      }
+      if (relation.imageList) {
+        try {
+          const imageIds: number[] = JSON.parse(tp.imageIds)
+          tp.imageList = imageIds.map((i) => imageMap[i])
+        } catch (error) {
+          tp.imageList = []
+        }
       }
     })
 

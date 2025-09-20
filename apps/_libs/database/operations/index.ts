@@ -28,7 +28,11 @@ export * from './ticket-base/ticket-update-commission-ticket-user.operator'
 
 export * from './ticket-item/ticket-change-procedure/ticket-add-ticket-procedure-list.operation'
 export * from './ticket-item/ticket-change-procedure/ticket-destroy-ticket-procedure.operation'
-export * from './ticket-item/ticket-change-procedure/ticket-update-ticket-procedure.operation'
+export * from './ticket-item/ticket-change-procedure/ticket-destroy-ticket-regimen.operation'
+export * from './ticket-item/ticket-change-procedure/ticket-update-money-ticket-procedure.operation'
+export * from './ticket-item/ticket-change-procedure/ticket-update-money-ticket-regimen.operation'
+export * from './ticket-item/ticket-change-procedure/ticket-update-user-ticket-procedure.operation'
+export * from './ticket-item/ticket-change-procedure/ticket-update-user-ticket-regimen.operation'
 
 export * from './ticket-item/ticket-change-product/ticket-add-ticket-product.operation'
 export * from './ticket-item/ticket-change-product/ticket-destroy-ticket-product.operation'

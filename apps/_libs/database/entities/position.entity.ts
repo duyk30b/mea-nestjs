@@ -5,6 +5,7 @@ import Laboratory from './laboratory.entity'
 import Procedure from './procedure.entity'
 import Product from './product.entity'
 import Radiology from './radiology.entity'
+import Regimen from './regimen.entity'
 import Role from './role.entity'
 
 export enum PositionType {
@@ -13,11 +14,12 @@ export enum PositionType {
   TicketPrescriptionRequest = 3,
   ProcedureRequest = 4,
   ProcedureResult = 5,
-  LaboratoryRequest = 6,
-  LaboratoryGroupRequest = 7,
-  LaboratoryGroupResult = 8,
-  RadiologyRequest = 9,
-  RadiologyResult = 10,
+  RegimenRequest = 6,
+  LaboratoryRequest = 7,
+  LaboratoryGroupRequest = 8,
+  LaboratoryGroupResult = 9,
+  RadiologyRequest = 10,
+  RadiologyResult = 11,
 }
 
 export enum CommissionCalculatorType {
@@ -75,6 +77,9 @@ export default class Position {
   productRequest: Product
 
   @Expose()
+  regimenRequest: Regimen
+
+  @Expose()
   procedureRequest: Procedure
 
   @Expose()
@@ -114,6 +119,7 @@ export type PositionRelationType = {
     Position,
     | 'role'
     | 'productRequest'
+    | 'regimenRequest'
     | 'procedureRequest'
     | 'procedureResult'
     | 'laboratoryRequest'

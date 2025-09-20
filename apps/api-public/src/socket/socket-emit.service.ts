@@ -22,6 +22,7 @@ import {
   TicketProcedure,
   TicketProduct,
   TicketRadiology,
+  TicketRegimen,
   TicketUser,
 } from '../../../_libs/database/entities'
 import { SOCKET_EVENT } from './socket.variable'
@@ -45,6 +46,24 @@ export class SocketEmitService {
   settingReload(oid: number) {
     if (!this.io) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_SETTING_RELOAD)
+  }
+
+  masterDataChange(
+    oid: number,
+    data: {
+      Distributor?: boolean
+      Procedure?: boolean
+      Regimen?: boolean
+      Laboratory?: boolean
+      Radiology?: boolean
+      Position?: boolean
+      Discount?: boolean
+      Surcharge?: boolean
+      Expense?: boolean
+    }
+  ) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_MASTER_DATA_CHANGE, data)
   }
 
   customerUpsert(oid: number, data: { customer: Customer }) {
@@ -155,8 +174,13 @@ export class SocketEmitService {
     oid: number,
     data: {
       ticketId: number
-      ticketProcedureUpsertedList?: TicketProcedure[]
-      ticketProcedureDestroyedList?: TicketProcedure[]
+      customerId: number
+      ticketProcedureNormalCreatedList?: TicketProcedure[]
+      ticketProcedureModifiedList?: TicketProcedure[]
+      ticketProcedureDestroyed?: TicketProcedure
+      ticketRegimenCreatedList?: TicketRegimen[]
+      ticketRegimenModified?: TicketRegimen
+      ticketRegimenDestroyed?: TicketRegimen
       ticketUserDestroyedList?: TicketUser[]
       ticketUserUpsertedList?: TicketUser[]
       imageDestroyedList?: Image[]
@@ -165,8 +189,12 @@ export class SocketEmitService {
   ) {
     if (!this.io) return
     if (
-      !data.ticketProcedureUpsertedList?.length
-      && !data.ticketProcedureDestroyedList?.length
+      !data.ticketProcedureNormalCreatedList?.length
+      && !data.ticketProcedureModifiedList?.length
+      && !data.ticketProcedureDestroyed
+      && !data.ticketRegimenCreatedList?.length
+      && !data.ticketRegimenModified
+      && !data.ticketRegimenDestroyed
       && !data.ticketUserDestroyedList?.length
       && !data.ticketUserUpsertedList?.length
       && !data.imageDestroyedList?.length

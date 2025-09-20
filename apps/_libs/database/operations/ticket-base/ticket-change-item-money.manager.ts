@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
+import { BusinessError } from '../../common/error'
 import { DeliveryStatus, DiscountType } from '../../common/variable'
 import { Ticket } from '../../entities'
 import { TicketManager } from '../../repositories'
@@ -14,9 +15,10 @@ export class TicketChangeItemMoneyManager {
   ) { }
 
   async changeItemMoney(options: {
-    manager: EntityManager
+    manager?: EntityManager
     oid: number
-    ticketOrigin: Ticket
+    ticketId?: number
+    ticketOrigin?: Ticket
     itemMoney: {
       productMoneyAdd?: number
       procedureMoneyAdd?: number
@@ -32,7 +34,17 @@ export class TicketChangeItemMoneyManager {
       deliveryStatus?: DeliveryStatus
     }
   }) {
-    const { manager, oid, ticketOrigin, itemMoney, other } = options
+    const { oid, ticketId, itemMoney, other } = options
+
+    let ticketOrigin = options.ticketOrigin
+    const manager = options.manager || this.manager
+
+    if (!ticketOrigin) {
+      ticketOrigin = await this.ticketManager.findOneBy(manager, { oid, id: ticketId })
+    }
+    if (!ticketOrigin) {
+      throw new BusinessError('Không tìm thấy Ticket với ticketId = ', ticketId)
+    }
 
     // === 5. UPDATE TICKET: MONEY  ===
     const productMoneyUpdate = ticketOrigin.productMoney + (itemMoney.productMoneyAdd || 0)
