@@ -37,6 +37,21 @@ export class ESArray {
   static uniqueArray = <T>(array: T[]) => {
     return Array.from(new Set(array))
   }
+
+  static max = <
+    T,
+    K extends { [P in keyof T]: T[P] extends number | string | Date ? P : never }[keyof T],
+  >(
+    array: T[],
+    property: K
+  ): T[K] | undefined => {
+    if (array.length === 0) return undefined
+
+    return array.reduce((maxValue, item) => {
+      const currentValue = item[property]
+      return maxValue < currentValue ? currentValue : maxValue
+    }, array[0][property])
+  }
 }
 
 export const uniqueArray = <T>(array: T[]) => {

@@ -42,18 +42,16 @@ export class PurchaseOrderRepository extends _PostgreSqlRepository<
     super(PurchaseOrder, purchaseOrderRepository)
   }
 
-  async destroy(params: { oid: number; purchaseOrderId: number }) {
+  async destroy(params: { oid: number; purchaseOrderId: string }) {
     const { oid, purchaseOrderId } = params
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-      const purchaseOrderDeleteResult = await manager.delete(PurchaseOrder, {
+      const purchaseOrderDeleteResult = await this.managerDeleteOne(manager, {
         oid,
         id: purchaseOrderId,
         paid: 0,
-        status: In([PurchaseOrderStatus.Draft, PurchaseOrderStatus.Cancelled]),
+        status: { IN: [PurchaseOrderStatus.Draft, PurchaseOrderStatus.Cancelled] },
       })
-      if (purchaseOrderDeleteResult.affected !== 1) {
-        throw new Error(`Delete PurchaseOrder ${purchaseOrderId} failed: Status invalid`)
-      }
+
       await manager.delete(PurchaseOrderItem, { oid, purchaseOrderId })
     })
   }

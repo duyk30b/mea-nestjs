@@ -31,9 +31,8 @@ export class ApiFileTicketDownloadExcel {
         status: query.filter?.status,
         roomId: query.filter?.roomId,
         customerId: query.filter?.customerId,
-        registeredAt: query.filter?.registeredAt,
-        startedAt: query.filter?.startedAt,
-        updatedAt: query.filter?.updatedAt,
+        createdAt: query.filter?.createdAt,
+        receptionAt: query.filter?.receptionAt,
       },
       sort: { id: 'ASC' },
     })
@@ -91,7 +90,7 @@ export class ApiFileTicketDownloadExcel {
           ticketCode: { alignment: { horizontal: 'center' } },
           customerName: { alignment: { wrapText: true } },
           status: { alignment: { wrapText: true } },
-          registeredAt: { alignment: { horizontal: 'center' }, numFmt: 'dd/mm/yyyy h:mm:ss' },
+          createdAt: { alignment: { horizontal: 'center' }, numFmt: 'dd/mm/yyyy h:mm:ss' },
           endedAt: { alignment: { horizontal: 'center' }, numFmt: 'dd/mm/yyyy h:mm:ss' },
           itemsCostAmount: { numFmt: '###,##0', font: { bold: true } },
           itemsDiscount: { numFmt: '###,##0' },
@@ -122,8 +121,8 @@ export class ApiFileTicketDownloadExcel {
               + ticket.dailyIndex?.toString().padStart(2, '0'),
             customerName: ticket.customer?.fullName || '',
             status: TicketStatusText[ticket.status],
-            registeredAt: ticket.registeredAt
-              ? new Date(ticket.registeredAt + 7 * 60 * 60 * 1000)
+            createdAt: ticket.createdAt
+              ? new Date(ticket.createdAt + 7 * 60 * 60 * 1000)
               : '', // fix giờ do hệ thống lệch giờ
             endedAt: ticket.endedAt ? new Date(ticket.endedAt + 7 * 60 * 60 * 1000) : '', // fix giờ do hệ thống lệch giờ
             itemsCostAmount: ticket.itemsCostAmount,
@@ -248,7 +247,7 @@ export class ApiFileTicketDownloadExcel {
         { key: 'ticketCode', width: 15 },
         { key: 'customerName', width: 30 },
         { key: 'status', width: 15 },
-        { key: 'registeredAt', width: 20 },
+        { key: 'createdAt', width: 20 },
         { key: 'endedAt', width: 20 },
         { key: 'itemsCostAmount', width: 10 },
         { key: 'itemsDiscount', width: 10 },

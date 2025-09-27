@@ -4,7 +4,15 @@ import { DataSource, EntityManager } from 'typeorm'
 import { MovementType } from '../../common/variable'
 import { Product } from '../../entities'
 import { ProductMovementInsertType } from '../../entities/product-movement.entity'
-import { BatchManager, ProductManager, ProductMovementManager, PurchaseOrderItemManager, StockCheckItemManager, TicketBatchManager, TicketProductManager } from '../../repositories'
+import {
+  BatchManager,
+  ProductManager,
+  ProductMovementManager,
+  PurchaseOrderItemManager,
+  StockCheckItemManager,
+  TicketBatchManager,
+  TicketProductManager,
+} from '../../repositories'
 
 @Injectable()
 export class ProductOperation {
@@ -103,17 +111,23 @@ export class ProductOperation {
         { oid, productId: { IN: productIdSourceList } },
         { productId: productIdTarget }
       )
-      await this.productMovementManager.delete(manager, {
-        oid,
-        productId: { IN: productIdSourceList },
-      })
+      // await this.productMovementManager.delete(manager, {
+      //   oid,
+      //   productId: { IN: productIdSourceList },
+      // })
+
+      await this.productMovementManager.update(
+        manager,
+        { oid, productId: { IN: productIdSourceList } },
+        { productId: productIdTarget }
+      )
 
       const productMovement: ProductMovementInsertType = {
         oid,
         movementType: MovementType.UserChange,
         contactId: userId,
-        voucherId: 0,
-        voucherProductId: 0,
+        voucherId: '0',
+        voucherProductId: '0',
         warehouseId: 0,
         productId: productIdTarget,
         batchId: 0,

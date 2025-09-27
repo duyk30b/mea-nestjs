@@ -1,14 +1,21 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity, Index } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
+import { Exclude, Expose } from 'class-transformer'
+import { Column, Entity, Index, PrimaryColumn } from 'typeorm'
 import Expense from './expense.entity'
 
 @Entity('TicketExpense')
 @Index('IDX_TicketExpense__ticketId', ['oid', 'ticketId'])
-export default class TicketExpense extends BaseEntity {
+export default class TicketExpense {
   @Column()
+  @Exclude()
+  oid: number
+
+  @PrimaryColumn({ type: 'bigint' })
   @Expose()
-  ticketId: number
+  id: string
+
+  @Column({ type: 'bigint' })
+  @Expose()
+  ticketId: string
 
   @Column({ default: 0 })
   @Expose()

@@ -259,7 +259,7 @@ export class ApiUserService {
 
     const hashPassword = await bcrypt.hash(password, 5)
     const secret = encrypt(password, user.username)
-    const affected = await this.userRepository.update({ oid, id }, { hashPassword, secret })
+    const affected = await this.userRepository.updateBasic({ oid, id }, { hashPassword, secret })
     if (affected === 0) {
       throw new BusinessException('error.Database.UpdateFailed')
     }

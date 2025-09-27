@@ -1,5 +1,12 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm'
 import Customer from './customer.entity'
 import Distributor from './distributor.entity'
 import PaymentMethod from './payment-method.entity'
@@ -49,17 +56,17 @@ export default class Payment {
   @Exclude()
   oid: number
 
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn({ type: 'bigint' })
   @Expose()
-  id: number
+  id: string
 
   @Column({ type: 'smallint', default: PaymentVoucherType.Other })
   @Expose()
   voucherType: PaymentVoucherType
 
-  @Column({ default: 0 }) // ticketId hoặc purchaseOrderId
+  @Column({ type: 'bigint', default: 0 }) // ticketId hoặc purchaseOrderId
   @Expose()
-  voucherId: number
+  voucherId: string
 
   @Column({ type: 'smallint', default: PaymentPersonType.Other })
   @Expose()

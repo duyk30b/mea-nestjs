@@ -5,11 +5,11 @@ import { BaseResponse } from '../../../../_libs/common/interceptor/transform-res
 import { ProcedureGroupInsertType } from '../../../../_libs/database/entities/procedure-group.entity'
 import { ProcedureGroupRepository } from '../../../../_libs/database/repositories/procedure-group.repository'
 import {
-  ProcedureGroupCreateBody,
-  ProcedureGroupGetManyQuery,
-  ProcedureGroupPaginationQuery,
-  ProcedureGroupReplaceAllBody,
-  ProcedureGroupUpdateBody,
+    ProcedureGroupCreateBody,
+    ProcedureGroupGetManyQuery,
+    ProcedureGroupPaginationQuery,
+    ProcedureGroupReplaceAllBody,
+    ProcedureGroupUpdateBody,
 } from './request'
 
 @Injectable()
@@ -65,7 +65,7 @@ export class ApiProcedureGroupService {
   }
 
   async updateOne(oid: number, id: number, body: ProcedureGroupUpdateBody): Promise<BaseResponse> {
-    const affected = await this.procedureGroupRepository.update({ id, oid }, body)
+    const affected = await this.procedureGroupRepository.updateBasic({ id, oid }, body)
     const data = await this.procedureGroupRepository.findOneBy({ oid, id })
     return { data }
   }

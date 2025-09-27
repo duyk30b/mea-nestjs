@@ -3,11 +3,12 @@ import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
 import { TicketUser } from '../../../entities'
 import { CommissionCalculatorType, PositionType } from '../../../entities/position.entity'
+import { TicketProcedureType } from '../../../entities/ticket-procedure.entity'
 import {
-  TicketManager,
-  TicketProcedureManager,
-  TicketRegimenManager,
-  TicketUserManager,
+  TicketProcedureRepository,
+  TicketRegimenRepository,
+  TicketRepository,
+  TicketUserRepository,
 } from '../../../repositories'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
 import { TicketUserAddType, TicketUserCommon } from './ticket-user.common'
@@ -17,27 +18,27 @@ export class TicketChangeTicketUserOperation {
   constructor(
     private dataSource: DataSource,
     @InjectEntityManager() private manager: EntityManager,
+    private ticketRepository: TicketRepository,
+    private ticketUserRepository: TicketUserRepository,
+    private ticketProcedureRepository: TicketProcedureRepository,
+    private ticketRegimenRepository: TicketRegimenRepository,
     private ticketUserCommon: TicketUserCommon,
-    private ticketManager: TicketManager,
-    private ticketUserManager: TicketUserManager,
-    private ticketProcedureManager: TicketProcedureManager,
-    private ticketRegimenManager: TicketRegimenManager,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
   ) { }
 
   async changeTicketUserList(data: {
     oid: number
-    ticketId: number
+    ticketId: string
     createdAt: number
     ticketUserDtoList: TicketUserAddType[]
     destroy?: {
       positionType: PositionType
-      ticketItemId: number
+      ticketItemId: string
     }
   }) {
     const { oid, ticketId, createdAt, ticketUserDtoList } = data
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-      let ticketModified = await this.ticketManager.updateOneAndReturnEntity(
+      let ticketModified = await this.ticketRepository.managerUpdateOne(
         manager,
         { oid, id: ticketId },
         { updatedAt: Date.now() }
@@ -45,7 +46,7 @@ export class TicketChangeTicketUserOperation {
 
       let ticketUserDestroyedList: TicketUser[] = []
       if (data.destroy) {
-        ticketUserDestroyedList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+        ticketUserDestroyedList = await this.ticketUserRepository.managerDelete(manager, {
           oid,
           ticketId,
           positionType: data.destroy.positionType,
@@ -85,16 +86,16 @@ export class TicketChangeTicketUserOperation {
     return transaction
   }
 
-  async destroyTicketUser(data: { oid: number; ticketId: number; ticketUserId: number }) {
+  async destroyTicketUser(data: { oid: number; ticketId: string; ticketUserId: string }) {
     const { oid, ticketId, ticketUserId } = data
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-      let ticketModified = await this.ticketManager.updateOneAndReturnEntity(
+      let ticketModified = await this.ticketRepository.managerUpdateOne(
         manager,
         { oid, id: ticketId },
         { updatedAt: Date.now() }
       )
 
-      const ticketUserDestroyed = await this.ticketUserManager.deleteOneAndReturnEntity(manager, {
+      const ticketUserDestroyed = await this.ticketUserRepository.managerDeleteOne(manager, {
         oid,
         ticketId,
         id: ticketUserId,
@@ -112,26 +113,37 @@ export class TicketChangeTicketUserOperation {
             commissionMoneyAdd: -commissionMoneyDestroy,
           },
         })
+      }
 
-        if (
-          [PositionType.ProcedureRequest, PositionType.ProcedureResult].includes(
-            ticketUserDestroyed.positionType
+      if (
+        commissionMoneyDestroy != 0
+        && [PositionType.ProcedureRequest, PositionType.ProcedureResult].includes(
+          ticketUserDestroyed.positionType
+        )
+      ) {
+        const ticketProcedureModified = await this.ticketProcedureRepository.managerUpdateOne(
+          manager,
+          { oid, ticketId, id: ticketUserDestroyed.ticketItemId },
+          { commissionAmount: () => `commissionAmount - ${commissionMoneyDestroy}` }
+        )
+        if (ticketProcedureModified.ticketProcedureType === TicketProcedureType.InRegimen) {
+          await this.ticketRegimenRepository.managerUpdateOne(
+            manager,
+            { oid, id: ticketProcedureModified.ticketRegimenId },
+            { commissionAmount: () => `commissionAmount - ${commissionMoneyDestroy}` }
           )
-        ) {
-          const ticketProcedureModified =
-            await this.ticketProcedureManager.updateOneAndReturnEntity(
-              manager,
-              { oid, ticketId, id: ticketUserDestroyed.ticketItemId },
-              { commissionAmount: () => `commissionAmount - ${commissionMoneyDestroy}` }
-            )
-          if (ticketProcedureModified.ticketRegimenId) {
-            await this.ticketRegimenManager.updateOneAndReturnEntity(
-              manager,
-              { oid, id: ticketProcedureModified.ticketRegimenId },
-              { commissionAmount: () => `commissionAmount - ${commissionMoneyDestroy}` }
-            )
-          }
         }
+      }
+
+      if (
+        commissionMoneyDestroy != 0
+        && [PositionType.RegimenRequest].includes(ticketUserDestroyed.positionType)
+      ) {
+        await this.ticketRegimenRepository.managerUpdateOne(
+          manager,
+          { oid, id: ticketUserDestroyed.ticketItemId },
+          { commissionAmount: () => `commissionAmount - ${commissionMoneyDestroy}` }
+        )
       }
 
       return { ticketModified, ticketUserDestroyed }
@@ -142,8 +154,8 @@ export class TicketChangeTicketUserOperation {
 
   async updateTicketUserCommission(data: {
     oid: number
-    ticketId: number
-    ticketUserId: number
+    ticketId: string
+    ticketUserId: string
     body: {
       commissionCalculatorType: CommissionCalculatorType
       commissionMoney: number
@@ -153,19 +165,19 @@ export class TicketChangeTicketUserOperation {
   }) {
     const { oid, ticketId, ticketUserId, body } = data
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-      let ticketModified = await this.ticketManager.updateOneAndReturnEntity(
+      let ticketModified = await this.ticketRepository.managerUpdateOne(
         manager,
         { oid, id: ticketId },
         { updatedAt: Date.now() }
       )
 
-      const ticketUserOrigin = await this.ticketUserManager.updateOneAndReturnEntity(
+      const ticketUserOrigin = await this.ticketUserRepository.managerUpdateOne(
         manager,
         { oid, id: ticketUserId },
         { ticketId } // update lấy transaction
       )
 
-      const ticketUserModified = await this.ticketUserManager.updateOneAndReturnEntity(
+      const ticketUserModified = await this.ticketUserRepository.managerUpdateOne(
         manager,
         { oid, id: ticketUserId },
         body

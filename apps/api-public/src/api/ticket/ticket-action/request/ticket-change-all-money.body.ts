@@ -3,8 +3,8 @@ import { Expose, Transform, Type } from 'class-transformer'
 import {
   IsArray,
   IsDefined,
-  IsInt,
   IsNumber,
+  IsString,
   Max,
   Min,
   ValidateNested,
@@ -19,8 +19,8 @@ class TicketItemChangeMoney {
   @ApiProperty({ example: 56 })
   @Expose()
   @IsDefined()
-  @IsInt()
-  id: number
+  @IsString()
+  id: string
 
   @ApiProperty({ example: 3 })
   @Expose()

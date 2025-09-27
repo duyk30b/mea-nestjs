@@ -1,6 +1,5 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
+import { Exclude, Expose } from 'class-transformer'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
 import Customer from './customer.entity'
 import Laboratory from './laboratory.entity'
 import Ticket from './ticket.entity'
@@ -8,10 +7,18 @@ import Ticket from './ticket.entity'
 @Entity('TicketLaboratoryResult')
 @Index('IDX_TicketLaboratoryResult__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketLaboratoryResult__oid_laboratoryId', ['oid', 'laboratoryId'])
-export default class TicketLaboratoryResult extends BaseEntity {
+export default class TicketLaboratoryResult {
   @Column()
+  @Exclude()
+  oid: number
+
+  @PrimaryColumn({ type: 'bigint' })
   @Expose()
-  ticketId: number
+  id: string
+
+  @Column({ type: 'bigint' })
+  @Expose()
+  ticketId: string
 
   @Column()
   @Expose()
@@ -25,13 +32,13 @@ export default class TicketLaboratoryResult extends BaseEntity {
   @Expose()
   laboratoryGroupId: number
 
-  @Column()
+  @Column({ type: 'bigint' })
   @Expose()
-  ticketLaboratoryId: number
+  ticketLaboratoryId: string
 
-  @Column()
+  @Column({ type: 'bigint' })
   @Expose()
-  ticketLaboratoryGroupId: number
+  ticketLaboratoryGroupId: string
 
   @Column({ type: 'varchar', length: 255 })
   @Expose({})
@@ -77,7 +84,7 @@ export type TicketLaboratoryResultRelationType = {
 
 export type TicketLaboratoryResultInsertType = Omit<
   TicketLaboratoryResult,
-  keyof TicketLaboratoryResultRelationType | keyof Pick<TicketLaboratoryResult, 'id'>
+  keyof TicketLaboratoryResultRelationType
 >
 
 export type TicketLaboratoryResultUpdateType = {

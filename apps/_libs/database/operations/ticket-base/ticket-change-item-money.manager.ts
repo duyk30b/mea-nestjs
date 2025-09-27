@@ -17,7 +17,7 @@ export class TicketChangeItemMoneyManager {
   async changeItemMoney(options: {
     manager?: EntityManager
     oid: number
-    ticketId?: number
+    ticketId?: string
     ticketOrigin?: Ticket
     itemMoney: {
       productMoneyAdd?: number

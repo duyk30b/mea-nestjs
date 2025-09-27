@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
-import { TicketLaboratoryStatus } from '../../../common/variable'
+import { GenerateId } from '../../../common/generate-id'
+import { PaymentMoneyStatus, TicketLaboratoryStatus } from '../../../common/variable'
 import { TicketLaboratoryGroup } from '../../../entities'
 import { TicketLaboratoryGroupInsertType } from '../../../entities/ticket-laboratory-group.entity'
 import TicketLaboratory, {
@@ -27,13 +28,12 @@ export type TicketLaboratoryInsertBasicType = Pick<
   | 'discountPercent'
   | 'discountType'
   | 'actualPrice'
-  | 'paymentMoneyStatus'
   | 'createdAt'
 >
 
 export type TicketLaboratoryGroupInsertBasicType = Pick<
   TicketLaboratoryGroup,
-  'laboratoryGroupId' | 'createdAt' | 'roomId' | 'paymentMoneyStatus'
+  'laboratoryGroupId' | 'createdAt' | 'roomId'
 > & { ticketLaboratoryList: TicketLaboratoryInsertBasicType[] }
 
 @Injectable()
@@ -49,7 +49,7 @@ export class TicketAddSelectLaboratoryOperation {
 
   async addTicketLaboratoryGroupList<U extends TicketLaboratoryGroupInsertBasicType>(params: {
     oid: number
-    ticketId: number
+    ticketId: string
     tlgDtoList: NoExtra<TicketLaboratoryGroupInsertBasicType, U>[]
   }) {
     const { oid, ticketId, tlgDtoList } = params
@@ -67,11 +67,13 @@ export class TicketAddSelectLaboratoryOperation {
       const tlgEntityList = tlgDtoList.map((i) => {
         const tlgEntity: NoExtra<TicketLaboratoryGroupInsertType> = {
           ...i,
+          id: GenerateId.nextId(),
           oid,
           ticketId,
           roomId: i.roomId,
           customerId: ticketOrigin.customerId,
           status: TicketLaboratoryStatus.Pending,
+          paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
           completedAt: null,
           result: '',
         }
@@ -87,12 +89,14 @@ export class TicketAddSelectLaboratoryOperation {
           return tlgDto.ticketLaboratoryList.map((tlDto) => {
             const tlEntity: NoExtra<TicketLaboratoryInsertType> = {
               ...tlDto,
+              id: GenerateId.nextId(),
               oid,
               ticketId,
               customerId: ticketOrigin.customerId,
               ticketLaboratoryGroupId: tlgCreatedList[tlgDtoIndex].id,
               roomId: tlgCreatedList[tlgDtoIndex].roomId,
               status: TicketLaboratoryStatus.Pending,
+              paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
               completedAt: null,
             }
             return tlEntity
@@ -114,9 +118,9 @@ export class TicketAddSelectLaboratoryOperation {
       const itemsCostAmountAdd = tlCreatedList.reduce((acc, cur) => {
         return acc + cur.costPrice
       }, 0)
-      let ticket: Ticket = ticketOrigin
+      let ticketModified: Ticket = ticketOrigin
       if (laboratoryMoneyAdd != 0 || itemsDiscountAdd != 0) {
-        ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
+        ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
           manager,
           oid,
           ticketOrigin,
@@ -128,7 +132,7 @@ export class TicketAddSelectLaboratoryOperation {
         })
       }
       return {
-        ticket,
+        ticketModified,
         ticketLaboratoryCreatedList: tlCreatedList,
         ticketLaboratoryGroupCreatedList: tlgCreatedList,
       }

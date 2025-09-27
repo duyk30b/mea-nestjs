@@ -63,7 +63,7 @@ export class ApiMeService {
     const hashPassword = await bcrypt.hash(newPassword, 5)
     const secret = encrypt(newPassword, user.username)
 
-    await this.userRepository.update({ oid, id }, { hashPassword, secret })
+    await this.userRepository.updateBasic({ oid, id }, { hashPassword, secret })
     return true
   }
 
@@ -81,20 +81,20 @@ export class ApiMeService {
 
     let imageIdsStringifyUpdate = userOrigin.imageIds
     if (imagesChange) {
-      const { imageIdsNew } = await this.imageManagerService.changeCloudinaryImageLink({
+      const { imageIdListNew } = await this.imageManagerService.changeCloudinaryImageLink({
         oid,
         files,
-        imageIdsWait: body.imagesChange.imageIdsWait,
+        imageIdWaitList: body.imagesChange.imageIdWaitList,
         externalUrlList: body.imagesChange.externalUrlList,
-        imageIdsOld: JSON.parse(userOrigin.imageIds || '[]'),
+        imageIdListOld: JSON.parse(userOrigin.imageIds || '[]'),
         imageInteract: {
           imageInteractType: ImageInteractType.User,
           imageInteractId: userId,
-          ticketId: 0,
-          ticketItemId: 0,
+          ticketId: '0',
+          ticketItemId: '0',
         },
       })
-      imageIdsStringifyUpdate = JSON.stringify(imageIdsNew)
+      imageIdsStringifyUpdate = JSON.stringify(imageIdListNew)
     }
 
     if (userOrigin.imageIds !== imageIdsStringifyUpdate) {

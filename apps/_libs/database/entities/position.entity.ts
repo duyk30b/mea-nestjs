@@ -9,17 +9,18 @@ import Regimen from './regimen.entity'
 import Role from './role.entity'
 
 export enum PositionType {
-  TicketReception = 1,
-  ProductRequest = 2,
-  TicketPrescriptionRequest = 3,
-  ProcedureRequest = 4,
-  ProcedureResult = 5,
-  RegimenRequest = 6,
-  LaboratoryRequest = 7,
-  LaboratoryGroupRequest = 8,
-  LaboratoryGroupResult = 9,
-  RadiologyRequest = 10,
-  RadiologyResult = 11,
+  Reception = 1,
+  TicketClinic = 2,
+  ProductRequest = 3,
+  TicketPrescriptionRequest = 4,
+  ProcedureRequest = 5,
+  ProcedureResult = 6,
+  RegimenRequest = 7,
+  LaboratoryRequest = 8,
+  LaboratoryGroupRequest = 9,
+  LaboratoryGroupResult = 10,
+  RadiologyRequest = 11,
+  RadiologyResult = 12,
 }
 
 export enum CommissionCalculatorType {
@@ -50,7 +51,7 @@ export default class Position {
   @Expose()
   positionInteractId: number
 
-  @Column({ type: 'smallint', default: PositionType.TicketReception })
+  @Column({ type: 'smallint', default: PositionType.Reception })
   @Expose()
   positionType: PositionType
 

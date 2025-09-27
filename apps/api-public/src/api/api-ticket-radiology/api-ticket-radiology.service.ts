@@ -60,7 +60,8 @@ export class ApiTicketRadiologyService {
     return { ticketRadiologyList, page, limit, total }
   }
 
-  async getOne(oid: number, id: number, query: TicketRadiologyGetOneQuery) {
+  async getOne(props: { oid: number; id: string; query: TicketRadiologyGetOneQuery }) {
+    const { oid, id, query } = props
     const ticketRadiology = await this.ticketRadiologyRepository.findOne({
       // relation: relationEntity,
       condition: { oid, id },

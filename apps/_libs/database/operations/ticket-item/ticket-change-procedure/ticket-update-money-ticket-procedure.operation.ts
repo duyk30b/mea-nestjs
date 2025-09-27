@@ -5,9 +5,12 @@ import { BusinessError } from '../../../common/error'
 import { PaymentMoneyStatus } from '../../../common/variable'
 import { TicketProcedure, TicketUser } from '../../../entities'
 import { PositionType } from '../../../entities/position.entity'
-import { TicketProcedureStatus } from '../../../entities/ticket-procedure.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
-import { TicketManager, TicketProcedureManager, TicketUserManager } from '../../../repositories'
+import {
+  TicketProcedureRepository,
+  TicketRepository,
+  TicketUserRepository,
+} from '../../../repositories'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
 import { TicketUserCommon } from '../ticket-change-user/ticket-user.common'
 
@@ -20,17 +23,17 @@ type TicketProcedureUpdateDtoType = Pick<
 export class TicketUpdateMoneyTicketProcedureOperation {
   constructor(
     private dataSource: DataSource,
-    private ticketManager: TicketManager,
-    private ticketProcedureManager: TicketProcedureManager,
-    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager,
-    private ticketUserManager: TicketUserManager,
-    private ticketUserCommon: TicketUserCommon
+    private ticketRepository: TicketRepository,
+    private ticketProcedureRepository: TicketProcedureRepository,
+    private ticketUserRepository: TicketUserRepository,
+    private ticketUserCommon: TicketUserCommon,
+    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
   ) { }
 
   async updateMoneyTicketProcedure<T extends TicketProcedureUpdateDtoType>(params: {
     oid: number
-    ticketId: number
-    ticketProcedureId: number
+    ticketId: string
+    ticketProcedureId: string
     ticketProcedureUpdateDto: NoExtra<TicketProcedureUpdateDtoType, T>
   }) {
     const { oid, ticketId, ticketProcedureId, ticketProcedureUpdateDto } = params
@@ -39,24 +42,20 @@ export class TicketUpdateMoneyTicketProcedureOperation {
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. UPDATE TICKET FOR TRANSACTION ===
-      const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(
+      const ticketOrigin = await this.ticketRepository.managerUpdateOne(
         manager,
         { oid, id: ticketId, status: TicketStatus.Executing },
         { updatedAt: Date.now() }
       )
 
       // === 2. UPDATE TICKET PROCEDURE ===
-      const ticketProcedureOrigin = await this.ticketProcedureManager.findOneBy(manager, {
+      const ticketProcedureOrigin = await this.ticketProcedureRepository.managerFindOneBy(manager, {
         oid,
         ticketId,
         id: ticketProcedureId,
       })
 
-      if (
-        ![PaymentMoneyStatus.TicketPaid, PaymentMoneyStatus.PendingPayment].includes(
-          ticketProcedureOrigin.paymentMoneyStatus
-        )
-      ) {
+      if (ticketProcedureOrigin.paymentMoneyStatus == PaymentMoneyStatus.Paid) {
         throw new BusinessError('Không thể sửa phiếu đã thanh toán')
       }
 
@@ -64,7 +63,7 @@ export class TicketUpdateMoneyTicketProcedureOperation {
       let ticketUserCreatedList: TicketUser[] = []
       let commissionMoneyChange = 0
       if (ticketProcedureOrigin.commissionAmount) {
-        ticketUserDestroyedList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+        ticketUserDestroyedList = await this.ticketUserRepository.managerDelete(manager, {
           oid,
           ticketId,
           positionType: { IN: [PositionType.ProcedureRequest, PositionType.ProcedureResult] },
@@ -81,7 +80,6 @@ export class TicketUpdateMoneyTicketProcedureOperation {
               userId: i.userId,
               quantity: 1,
               ticketItemId: ticketProcedureOrigin.id,
-              ticketItemChildId: 0,
               positionInteractId: ticketProcedureOrigin.procedureId,
               ticketItemExpectedPrice: ticketProcedureUpdateDto.expectedPrice,
               ticketItemActualPrice: ticketProcedureUpdateDto.actualPrice,
@@ -99,7 +97,7 @@ export class TicketUpdateMoneyTicketProcedureOperation {
       }
 
       // Update ticketProcedure sau vì có thay đổi commission khi update ticketUser
-      const ticketProcedureModified = await this.ticketProcedureManager.updateOneAndReturnEntity(
+      const ticketProcedureModified = await this.ticketProcedureRepository.managerUpdateOne(
         manager,
         { oid, id: ticketProcedureId },
         {

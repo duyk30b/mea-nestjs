@@ -1,5 +1,5 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
+import { Exclude, Expose } from 'class-transformer'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import { DiscountType, PaymentMoneyStatus } from '../common/variable'
 import Customer from './customer.entity'
@@ -17,10 +17,18 @@ export enum TicketRadiologyStatus {
 @Index('IDX_TicketRadiology__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketRadiology__oid_radiologyId', ['oid', 'radiologyId'])
 @Index('IDX_TicketRadiology__oid_createdAt', ['oid', 'createdAt'])
-export default class TicketRadiology extends BaseEntity {
+export default class TicketRadiology {
   @Column()
+  @Exclude()
+  oid: number
+
+  @PrimaryColumn({ type: 'bigint' })
   @Expose()
-  ticketId: number
+  id: string
+
+  @Column({ type: 'bigint' })
+  @Expose()
+  ticketId: string
 
   @Column({ default: 1 })
   @Expose()
@@ -54,7 +62,7 @@ export default class TicketRadiology extends BaseEntity {
   @Expose()
   status: TicketRadiologyStatus
 
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
+  @Column({ type: 'smallint', default: PaymentMoneyStatus.PendingPaid })
   @Expose()
   paymentMoneyStatus: PaymentMoneyStatus
 

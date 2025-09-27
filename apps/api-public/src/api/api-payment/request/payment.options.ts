@@ -1,5 +1,6 @@
 import { Expose, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsNumber, IsObject, ValidateNested } from 'class-validator'
+import { IsBoolean, IsIn, IsNumber, IsObject, IsString, ValidateNested } from 'class-validator'
+import { stream } from 'exceljs'
 import { ConditionTimestamp } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 import { valuesEnum } from '../../../../../_libs/common/helpers/typescript.helper'
@@ -51,8 +52,8 @@ export class PaymentFilterQuery {
   voucherType: PaymentVoucherType
 
   @Expose()
-  @IsNumber()
-  voucherId: number
+  @IsString()
+  voucherId: string
 
   @Expose()
   @IsNumber()

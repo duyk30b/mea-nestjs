@@ -8,6 +8,7 @@ import {
 } from 'typeorm'
 import { BaseCondition } from '../../common/dto'
 import { NoExtra } from '../../common/helpers/typescript.helper'
+import { GenerateId } from '../common/generate-id'
 import { PostgreSqlRaw } from '../common/postgresql.raw'
 
 type EntityType<_ENTITY> = EntityTarget<_ENTITY> & {
@@ -91,6 +92,9 @@ export abstract class _PostgreSqlManager<
     data: NoExtra<Partial<_INSERT>, X>[]
   ): Promise<number[]> {
     if (!data.length) return []
+    data.forEach((i) => {
+      if (!i['id']) i['id'] = GenerateId.nextId()
+    })
     const insertResult = await manager.insert(this.entity, data)
     const idList = insertResult.identifiers.map((i) => i.id)
     return idList
@@ -109,6 +113,9 @@ export abstract class _PostgreSqlManager<
     data: NoExtra<Partial<_INSERT>, X>[]
   ): Promise<{ [P in keyof _ENTITY]: any }[]> {
     if (!data.length) return []
+    data.forEach((i) => {
+      if (!i['id']) i['id'] = GenerateId.nextId()
+    })
     const insertResult: InsertResult = await manager
       .createQueryBuilder()
       .insert()
@@ -148,6 +155,9 @@ export abstract class _PostgreSqlManager<
     manager: EntityManager,
     data: NoExtra<Partial<_INSERT>, X>
   ): Promise<number> {
+    if (!data['id']) {
+      data['id'] = GenerateId.nextId()
+    }
     const insertResult = await manager.insert(this.entity, data)
     const id = insertResult.identifiers[0].id
     if (!id) {
@@ -172,6 +182,9 @@ export abstract class _PostgreSqlManager<
     manager: EntityManager,
     data: NoExtra<Partial<_INSERT>, X>
   ): Promise<{ [P in keyof _ENTITY]: any }> {
+    if (!data['id']) {
+      data['id'] = GenerateId.nextId()
+    }
     const insertResult: InsertResult = await manager
       .createQueryBuilder()
       .insert()
@@ -280,8 +293,8 @@ export abstract class _PostgreSqlManager<
       console.log(`Insert ${this.entity['name']} failed, upsertList: `, upsertList)
       throw new Error(
         `Insert ${this.entity['name']} failed: `
-        + `upsertResult.raw?.length = ${upsertResult.raw?.length}`
-        + `upsertList.length = ${upsertList.length}`
+          + `upsertResult.raw?.length = ${upsertResult.raw?.length}`
+          + `upsertList.length = ${upsertList.length}`
       )
     }
     return this.entity.fromRaws(upsertResult.raw)
@@ -335,16 +348,16 @@ export abstract class _PostgreSqlManager<
     tempList: T[]
     condition?: BaseCondition<_ENTITY>
     compare:
-    | Extract<keyof T, keyof _ENTITY>[]
-    | { [P in Extract<keyof T, keyof _ENTITY>]?: boolean | ((t?: string, u?: string) => string) }
+      | Extract<keyof T, keyof _ENTITY>[]
+      | { [P in Extract<keyof T, keyof _ENTITY>]?: boolean | ((t?: string, u?: string) => string) }
     update:
-    | Extract<keyof T, keyof _ENTITY>[]
-    | {
-      [P in keyof _ENTITY]?:
-      | ((t?: string, u?: string) => string)
-      | boolean
-      | { cast: 'int' | 'bigint' | 'numeric' | 'text' }
-    }
+      | Extract<keyof T, keyof _ENTITY>[]
+      | {
+          [P in keyof _ENTITY]?:
+            | ((t?: string, u?: string) => string)
+            | boolean
+            | { cast: 'int' | 'bigint' | 'numeric' | 'text' }
+        }
     options?: { requireEqualLength?: boolean }
   }) {
     const { manager } = options
@@ -375,9 +388,9 @@ export abstract class _PostgreSqlManager<
     let updateName: string[] = []
     let updateObject: {
       [P in Extract<keyof T, keyof _ENTITY>]?:
-      | ((t?: string, u?: string) => string)
-      | boolean
-      | { cast: 'int' | 'bigint' | 'numeric' | 'text' }
+        | ((t?: string, u?: string) => string)
+        | boolean
+        | { cast: 'int' | 'bigint' | 'numeric' | 'text' }
     } = {}
 
     if (Array.isArray(options.update)) {
@@ -407,30 +420,31 @@ export abstract class _PostgreSqlManager<
       }).join(`,
               `)}
       FROM (VALUES `
-      + tempList
-        .map((record) => {
-          return `(${tempColumns
-            .map((field) => {
-              if (record[field] === null) {
-                return `NULL`
-              } else if (typeof record[field] === 'number') {
-                return `${record[field]}`
-              } else if (typeof record[field] === 'string') {
-                return `'${record[field]}'`
-              } else {
-                return `${record[field]}`
-              }
-            })
-            .join(', ')})`
-        })
-        .join(', ')
-      + `) 
+        + tempList
+          .map((record) => {
+            return `(${tempColumns
+              .map((field) => {
+                if (record[field] === null) {
+                  return `NULL`
+                } else if (typeof record[field] === 'number') {
+                  return `${record[field]}`
+                } else if (typeof record[field] === 'string') {
+                  return `'${record[field]}'`
+                } else {
+                  return `${record[field]}`
+                }
+              })
+              .join(', ')})`
+          })
+          .join(', ')
+        + `) 
           AS temp(${tempColumns.map((field) => `"${field}"`).join(', ')})
-      WHERE   ${conditionRaw
-        ? conditionRaw
-        + ` 
+      WHERE   ${
+        conditionRaw
+          ? conditionRaw
+            + ` 
           AND `
-        : ''
+          : ''
       }${compareName.map((field) => {
         if (typeof compareObject[field] !== 'function') {
           return `"${tableName}"."${field}" = "temp"."${field}"`
@@ -449,8 +463,8 @@ export abstract class _PostgreSqlManager<
         console.log(`Update ${tableName} failed, tempList: `, tempList)
         throw new Error(
           `Update ${tableName} failed: `
-          + `modifiedRaw[0].length = ${modifiedRaw[0].length}`
-          + `tempList.length = ${tempList.length}`
+            + `modifiedRaw[0].length = ${modifiedRaw[0].length}`
+            + `tempList.length = ${tempList.length}`
         )
       }
     }

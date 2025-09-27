@@ -30,8 +30,8 @@ export class TicketUpdateTicketRadiologyOperation {
 
   async updateTicketRadiology<T extends TicketRadiologyUpdateDtoType>(params: {
     oid: number
-    ticketId: number
-    ticketRadiologyId: number
+    ticketId: string
+    ticketRadiologyId: string
     ticketRadiologyUpdateDto: NoExtra<TicketRadiologyUpdateDtoType, T>
     ticketUserRequestList?: Pick<TicketUser, 'positionId' | 'userId'>[]
   }) {
@@ -90,7 +90,6 @@ export class TicketUpdateTicketRadiologyOperation {
               userId: i.userId,
               quantity: 1,
               ticketItemId: ticketRadiologyModified.id,
-              ticketItemChildId: 0,
               positionInteractId: ticketRadiologyModified.radiologyId,
               ticketItemExpectedPrice: ticketRadiologyModified.expectedPrice,
               ticketItemActualPrice: ticketRadiologyModified.actualPrice,

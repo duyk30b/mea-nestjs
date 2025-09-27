@@ -25,6 +25,10 @@ export default class RegimenItem {
   @Expose()
   quantity: number
 
+  @Column({ type: 'smallint', default: 1 })
+  @Expose()
+  gapDay: number
+
   @Expose()
   procedure: Procedure
 

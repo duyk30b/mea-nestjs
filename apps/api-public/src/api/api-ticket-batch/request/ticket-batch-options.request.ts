@@ -35,7 +35,7 @@ export class TicketBatchFilterQuery {
 
   @Expose()
   @IsInt()
-  ticketId: number
+  ticketId: string
 
   @Expose()
   @Transform((params: TransformFnParams) => transformConditionEnum(params, DeliveryStatus))

@@ -28,12 +28,7 @@ export class PositionGetQuery {
   @ValidateNested({ each: true })
   relation: PositionRelationQuery
 
-  @ApiPropertyOptional({
-    type: String,
-    example: JSON.stringify(<PositionFilterQuery>{
-      positionType: PositionType.TicketReception,
-    }),
-  })
+  @ApiPropertyOptional({ type: String })
   @Expose()
   @Transform(({ value }) => {
     try {
@@ -73,10 +68,7 @@ export class PositionGetQuery {
   sort?: PositionSortQuery
 }
 
-export class PositionPaginationQuery extends IntersectionType(
-  PositionGetQuery,
-  PaginationQuery
-) { }
+export class PositionPaginationQuery extends IntersectionType(PositionGetQuery, PaginationQuery) { }
 
 export class PositionGetManyQuery extends IntersectionType(
   PickType(PositionGetQuery, ['filter', 'relation', 'sort']),

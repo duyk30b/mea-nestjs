@@ -18,8 +18,8 @@ export class TicketDestroyTicketRadiologyOperation {
 
   async destroyTicketRadiology(params: {
     oid: number
-    ticketId: number
-    ticketRadiologyId: number
+    ticketId: string
+    ticketRadiologyId: string
   }) {
     const { oid, ticketId, ticketRadiologyId } = params
     const PREFIX = `ticketId=${ticketId} destroyTicketRadiology failed`
@@ -38,7 +38,7 @@ export class TicketDestroyTicketRadiologyOperation {
         {
           oid,
           id: ticketRadiologyId,
-          paymentMoneyStatus: { IN: [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.TicketPaid] },
+          paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
         }
       )
 
@@ -58,9 +58,9 @@ export class TicketDestroyTicketRadiologyOperation {
         return acc + item.commissionMoney * item.quantity
       }, 0)
 
-      let ticket: Ticket = ticketOrigin
+      let ticketModified: Ticket = ticketOrigin
       if (radiologyMoneyDelete != 0 || commissionMoneyDelete != 0 || itemsDiscountDelete != 0) {
-        ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
+        ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
           manager,
           oid,
           ticketOrigin,
@@ -73,7 +73,7 @@ export class TicketDestroyTicketRadiologyOperation {
         })
       }
 
-      return { ticket, ticketRadiologyDestroyed, ticketUserDestroyedList }
+      return { ticketModified, ticketRadiologyDestroyed, ticketUserDestroyedList }
     })
 
     return transaction

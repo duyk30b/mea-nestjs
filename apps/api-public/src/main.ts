@@ -1,6 +1,6 @@
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
-import { ClassSerializerInterceptor, Logger, ValidationError, ValidationPipe } from '@nestjs/common'
+import { ClassSerializerInterceptor, ValidationError, ValidationPipe } from '@nestjs/common'
 import { NestFactory, Reflector } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
@@ -14,15 +14,17 @@ import { RootGuard } from '../../_libs/common/guards/root.guard'
 import { AccessLogInterceptor } from '../../_libs/common/interceptor/access-log.interceptor'
 import { TimeoutInterceptor } from '../../_libs/common/interceptor/timeout.interceptor'
 import { TransformResponseInterceptor } from '../../_libs/common/interceptor/transform-response.interceptor'
+import { NestLogger } from '../../_libs/common/nest-core/nest-logger'
 import { GlobalConfig } from '../../_libs/environments'
 import { AppModule } from './app.module'
 
 async function bootstrap() {
-  const logger = new Logger('bootstrap')
+  const logger = new NestLogger('bootstrap')
 
   const fastifyAdapter = new FastifyAdapter()
   const app = await NestFactory.create<NestFastifyApplication>(AppModule, fastifyAdapter, {
-    logger: ['error', 'warn', 'log', 'debug'],
+    logger: new NestLogger(),
+    //  logger: ['error', 'warn', 'log', 'debug'],
   })
   app.register(cors, { origin: '*' })
   app.register(contentParser)

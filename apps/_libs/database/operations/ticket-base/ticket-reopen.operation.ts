@@ -22,7 +22,7 @@ export class TicketReopenOperation {
 
   async reopen(params: {
     oid: number
-    ticketId: number
+    ticketId: string
     time: number
     userId: number
     note: string

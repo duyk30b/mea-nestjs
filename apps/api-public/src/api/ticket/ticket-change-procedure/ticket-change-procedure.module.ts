@@ -1,12 +1,25 @@
 import { Module } from '@nestjs/common'
-import { ApiTicketProcedureService } from '../../api-ticket-procedure/api-ticket-procedure.service'
+import { TicketAddTicketProcedureListService } from './service/ticket-add-ticket-procedure-list.service'
+import { TicketCancelResultTicketProcedureService } from './service/ticket-cancel-result-ticket-procedure.service'
+import { TicketChangeProcedureService } from './service/ticket-change-procedure.service'
+import { TicketChangeRegimenService } from './service/ticket-change-regimen.service'
+import { TicketDestroyTicketProcedureService } from './service/ticket-destroy-ticket-procedure.service'
+import { TicketProcessResultTicketProcedureService } from './service/ticket-process-result-ticket-procedure.service'
+import { TicketUpdateUserTicketProcedureService } from './service/ticket-update-user-ticket-procedure.service'
 import { TicketChangeProcedureController } from './ticket-change-procedure.controller'
-import { TicketChangeProcedureService } from './ticket-change-procedure.service'
 
 @Module({
   imports: [],
   controllers: [TicketChangeProcedureController],
-  providers: [TicketChangeProcedureService, ApiTicketProcedureService],
-  exports: [TicketChangeProcedureService],
+  providers: [
+    TicketAddTicketProcedureListService,
+    TicketChangeProcedureService,
+    TicketUpdateUserTicketProcedureService,
+    TicketChangeRegimenService,
+    TicketProcessResultTicketProcedureService,
+    TicketCancelResultTicketProcedureService,
+    TicketDestroyTicketProcedureService,
+  ],
+  exports: [TicketAddTicketProcedureListService],
 })
 export class TicketChangeProcedureModule { }

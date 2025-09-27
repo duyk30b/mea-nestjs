@@ -3,26 +3,23 @@ import { MigrationInterface, QueryRunner } from 'typeorm'
 
 export class Version501720076523845 implements MigrationInterface {
     public async up(queryRunner: QueryRunner): Promise<void> {
-        if ('Procedure') {
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "Procedure" DROP COLUMN "consumableHint"
             `)
-        }
 
-        if ('Batch') {
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "Batch"
                     ADD "wholesalePrice" bigint NOT NULL DEFAULT '0',
                     ADD "retailPrice" bigint NOT NULL DEFAULT '0'
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 UPDATE  "Batch" "batch"
                 SET     "wholesalePrice" = product."wholesalePrice",
                         "retailPrice" = product."retailPrice"
                 FROM    "Product" "product"
                 WHERE   "batch"."productId" = "product"."id"
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 DELETE FROM "Batch" 
                 WHERE quantity = 0
                     AND id NOT IN (
@@ -33,76 +30,68 @@ export class Version501720076523845 implements MigrationInterface {
                         SELECT DISTINCT "batchId" FROM "BatchMovement"
                     )
             `)
-        }
 
-        if ('ReceiptItem') {
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "ReceiptItem"
                     ADD "wholesalePrice" bigint NOT NULL DEFAULT '0',
                     ADD "retailPrice" bigint NOT NULL DEFAULT '0'
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 UPDATE  "ReceiptItem" "ri"
                 SET     "wholesalePrice" = product."wholesalePrice",
                         "retailPrice" = product."retailPrice"
                 FROM    "Product" "product"
                 WHERE   "ri"."productId" = "product"."id"
             `)
-        }
 
-        if ('Setting') {
-            await queryRunner.query(`
+        await queryRunner.query(`
                 DROP INDEX "public"."IDX_OrganizationSetting__type";
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "OrganizationSetting" RENAME TO "Setting";
                 ALTER SEQUENCE "OrganizationSetting_id_seq" RENAME TO "Setting_id_seq"
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "Setting" RENAME COLUMN "type" TO "key";
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 CREATE UNIQUE INDEX "IDX_Setting__oid_key" ON "Setting" ("oid", "key")
             `)
-        }
 
-        if ('Remove oid = 0 & uid = 0') {
-            await queryRunner.query(`
+        await queryRunner.query(`
                 UPDATE  "Organization" "org"
                 SET     "id" = 4
                 WHERE   "org"."id" = 1
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 UPDATE  "Organization" "org"
                 SET     "id" = 1
                 WHERE   "org"."id" = 0
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 UPDATE  "User" "u"
                 SET     "id" = 4, "oid" = 4
                 WHERE   "u"."id" = 1
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 UPDATE  "User" "u"
                 SET     "id" = 1, "oid" = 1
                 WHERE   "u"."id" = 0
             `)
-        }
 
-        if ('CREATE TicketProduct & TicketProcedure') {
-            await queryRunner.query(`
+        await queryRunner.query(`
                 DROP INDEX "public"."IDX_InvoiceItem__invoiceId";
                 DROP INDEX "public"."IDX_InvoiceItem__customerId_type";
                 DROP INDEX "public"."IDX_InvoiceItem__oid_productId";
                 DROP INDEX "public"."IDX_InvoiceItem__oid_batchId";
                 DROP INDEX "public"."IDX_InvoiceItem__oid_procedureId";
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "InvoiceItem" RENAME TO "TicketProduct";
                 ALTER SEQUENCE "InvoiceItem_id_seq" RENAME TO "TicketProduct_id_seq"
             `)
 
-            await queryRunner.query(`
+        await queryRunner.query(`
                 CREATE TABLE "TicketProcedure" (
                     "oid" integer NOT NULL,
                     "id" SERIAL NOT NULL,
@@ -124,7 +113,7 @@ export class Version501720076523845 implements MigrationInterface {
                     CONSTRAINT "PK_28c40343d4615cf570084ca67a4" PRIMARY KEY ("id")
                 )
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 INSERT INTO "TicketProcedure" (oid, "invoiceId", "customerId","productId",
                     "batchId", "procedureId", "type",
                     "quantity", "unitRate", "costAmount", "expectedPrice", "discountMoney",
@@ -135,14 +124,12 @@ export class Version501720076523845 implements MigrationInterface {
                     "discountPercent", "discountType", "actualPrice", "hintUsage"
                 FROM "TicketProduct";
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                   DELETE FROM "TicketProduct" WHERE "productId" = 0;
                   DELETE FROM "TicketProcedure" WHERE "procedureId" = 0;
               `)
-        }
 
-        if ('TicketProduct') {
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "TicketProduct" DROP COLUMN "procedureId";
                 ALTER TABLE "TicketProduct" DROP COLUMN "type";
                 ALTER TABLE "TicketProduct" ALTER COLUMN "productId" DROP DEFAULT;
@@ -151,7 +138,7 @@ export class Version501720076523845 implements MigrationInterface {
                 ALTER TABLE "TicketProduct" RENAME COLUMN "discountType" TO "discountType_temp";
             `)
 
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "TicketProduct"
                     ADD "deliveryStatus" smallint NOT NULL DEFAULT '2',
                     ADD "quantityPrescription" integer NOT NULL DEFAULT '0',
@@ -159,27 +146,25 @@ export class Version501720076523845 implements MigrationInterface {
                     ADD "discountType" character varying(25) NOT NULL DEFAULT 'VNĐ',
                     ADD "discountPercent" numeric(7, 3) NOT NULL DEFAULT '0'
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 UPDATE  "TicketProduct" "tk"
                 SET     "discountPercent" = "discountPercent_temp",
                         "discountType" = "discountType_temp"
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "TicketProduct" 
                     DROP COLUMN "discountPercent_temp",
                     DROP COLUMN "discountType_temp"
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 CREATE INDEX "IDX_TicketProduct__oid_ticketId" ON "TicketProduct" ("oid", "ticketId")
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 CREATE INDEX "IDX_TicketProduct__oid_customerId" 
                     ON "TicketProduct" ("oid", "customerId")
             `)
-        }
 
-        if ('TicketProcedure') {
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "TicketProcedure" DROP COLUMN "productId";
                 ALTER TABLE "TicketProcedure" DROP COLUMN "batchId";
                 ALTER TABLE "TicketProcedure" DROP COLUMN "type";
@@ -188,53 +173,51 @@ export class Version501720076523845 implements MigrationInterface {
                 ALTER TABLE "TicketProcedure" DROP COLUMN "hintUsage";
             `)
 
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "TicketProcedure" RENAME COLUMN "invoiceId" TO "ticketId";
                 ALTER TABLE "TicketProcedure" RENAME COLUMN "quantity" TO "quantity_temp";
                 ALTER TABLE "TicketProcedure" RENAME COLUMN "discountPercent" TO "discountPercent_temp";
                 ALTER TABLE "TicketProcedure" RENAME COLUMN "discountType" TO "discountType_temp";
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "TicketProcedure"
                     ADD "createdAt" bigint,
                     ADD "quantity" integer NOT NULL DEFAULT '0',
                     ADD "discountPercent" numeric(7, 3) NOT NULL DEFAULT '0',
                     ADD "discountType" character varying(25) NOT NULL DEFAULT 'VNĐ'
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 UPDATE  "TicketProcedure" "tk"
                 SET     "quantity" = "quantity_temp",
                         "discountPercent" = "discountPercent_temp",
                         "discountType" = "discountType_temp"
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "TicketProcedure" 
                     DROP COLUMN "quantity_temp",
                     DROP COLUMN "discountPercent_temp",
                     DROP COLUMN "discountType_temp"
                 `)
 
-            await queryRunner.query(`
+        await queryRunner.query(`
                 CREATE INDEX "IDX_TicketProcedure__oid_procedureId" 
                     ON "TicketProcedure" ("oid", "procedureId")
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 CREATE INDEX "IDX_TicketProcedure__oid_ticketId" 
                     ON "TicketProcedure" ("oid", "ticketId")
             `)
-        }
 
-        if ('Ticket') {
-            await queryRunner.query(`
+        await queryRunner.query(`
                 DROP INDEX "public"."IDX_Invoice__oid_customerId";
                 DROP INDEX "public"."IDX_Invoice__oid_startedAt";
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "Invoice" RENAME TO "Ticket";
                 ALTER SEQUENCE "Invoice_id_seq" RENAME TO "Ticket_id_seq"
             `)
 
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "Ticket" ALTER COLUMN "totalCostAmount" SET DEFAULT '0';
                 ALTER TABLE "Ticket" ALTER COLUMN "totalMoney" SET DEFAULT '0';
                 ALTER TABLE "Ticket" ALTER COLUMN "profit" SET DEFAULT '0';
@@ -242,7 +225,7 @@ export class Version501720076523845 implements MigrationInterface {
                 ALTER TABLE "Ticket" RENAME COLUMN "discountType" TO "discountType_temp";
             `)
 
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "Ticket"
                     ADD "voucherType" smallint NOT NULL DEFAULT '2',
                     ADD "ticketStatus" smallint NOT NULL DEFAULT '2',
@@ -262,7 +245,7 @@ export class Version501720076523845 implements MigrationInterface {
                     ADD "visitId" integer NOT NULL DEFAULT '0'
             `)
 
-            await queryRunner.query(`
+        await queryRunner.query(`
                 UPDATE  "Ticket" "tk"
                 SET     "productsMoney" = "temp"."sumMoney"
                 FROM    ( 
@@ -272,7 +255,7 @@ export class Version501720076523845 implements MigrationInterface {
                 ) AS "temp" 
                 WHERE "tk"."id" = "temp"."ticketId"
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 UPDATE  "Ticket" "tk"
                 SET     "proceduresMoney" = "temp"."sumMoney"
                 FROM    ( 
@@ -283,8 +266,8 @@ export class Version501720076523845 implements MigrationInterface {
                 WHERE "tk"."id" = "temp"."ticketId"
             `)
 
-            // update status sau khi update tiền
-            await queryRunner.query(`
+        // update status sau khi update tiền
+        await queryRunner.query(`
                 UPDATE  "Ticket" "tk"
                 SET     "voucherType" = 2,
                         "registeredAt" = "startedAt",
@@ -309,8 +292,8 @@ export class Version501720076523845 implements MigrationInterface {
                         END
             `)
 
-            // lưu ý thằng deleteAt => deleted chỉ có thể là refund => cancel
-            await queryRunner.query(`
+        // lưu ý thằng deleteAt => deleted chỉ có thể là refund => cancel
+        await queryRunner.query(`
                 ALTER TABLE "Ticket" 
                     DROP COLUMN "deletedAt",
                     DROP COLUMN "status",
@@ -318,53 +301,47 @@ export class Version501720076523845 implements MigrationInterface {
                     DROP COLUMN "discountPercent_temp",
                     DROP COLUMN "discountType_temp";
                 `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 CREATE INDEX "IDX_Ticket__oid_registeredAt" ON "Ticket" ("oid", "registeredAt")
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 CREATE INDEX "IDX_Ticket__oid_customerId" ON "Ticket" ("oid", "customerId")
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 CREATE INDEX "IDX_Ticket__oid_ticketStatus" ON "Ticket" ("oid", "ticketStatus")
             `)
-        }
 
-        if ('TicketSurcharge') {
-            await queryRunner.query(`
+        await queryRunner.query(`
                 DROP INDEX "public"."IDX_InvoiceSurcharge__invoiceId";
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "InvoiceSurcharge" RENAME TO "TicketSurcharge";
                 ALTER SEQUENCE "InvoiceSurcharge_id_seq" RENAME TO "TicketSurcharge_id_seq"
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "TicketSurcharge"
                     RENAME COLUMN "invoiceId" TO "ticketId"
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 CREATE INDEX "IDX_TicketSurcharge__ticketId" ON "TicketSurcharge" ("oid", "ticketId")
             `)
-        }
 
-        if ('TicketExpense') {
-            await queryRunner.query(`
+        await queryRunner.query(`
                 DROP INDEX "public"."IDX_InvoiceExpense__invoiceId";
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "InvoiceExpense" RENAME TO "TicketExpense";
                 ALTER SEQUENCE "InvoiceExpense_id_seq" RENAME TO "TicketExpense_id_seq"
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "TicketExpense"
                     RENAME COLUMN "invoiceId" TO "ticketId"
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 CREATE INDEX "IDX_TicketExpense__ticketId" ON "TicketExpense" ("oid", "ticketId")
             `)
-        }
 
-        if ('TicketDiagnosis') {
-            await queryRunner.query(`
+        await queryRunner.query(`
                 CREATE TABLE "TicketDiagnosis" (
                     "oid" integer NOT NULL,
                     "id" SERIAL NOT NULL,
@@ -379,13 +356,11 @@ export class Version501720076523845 implements MigrationInterface {
                     CONSTRAINT "PK_ced4dd5b732bb39a400ad2e15b6" PRIMARY KEY ("id")
                 )
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 CREATE INDEX "IDX_TicketDiagnosis__oid_ticketId" ON "TicketDiagnosis" ("oid", "ticketId")
             `)
-        }
 
-        if ('Radiology') {
-            await queryRunner.query(`
+        await queryRunner.query(`
                 CREATE TABLE "Radiology" (
                     "oid" integer NOT NULL,
                     "id" SERIAL NOT NULL,
@@ -404,10 +379,8 @@ export class Version501720076523845 implements MigrationInterface {
                     CONSTRAINT "PK_73221f9dce01012a68295e2ffce" PRIMARY KEY ("id")
                 )
             `)
-        }
 
-        if ('TicketRadiology') {
-            await queryRunner.query(`
+        await queryRunner.query(`
                 CREATE TABLE "TicketRadiology" (
                     "oid" integer NOT NULL,
                     "id" SERIAL NOT NULL,
@@ -427,18 +400,16 @@ export class Version501720076523845 implements MigrationInterface {
                     CONSTRAINT "PK_43b4dfbda258fb0db966494989b" PRIMARY KEY ("id")
                 )
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
             CREATE INDEX "IDX_TicketRadiology__oid_radiologyId" 
                 ON "TicketRadiology" ("oid", "radiologyId")
         `)
-            await queryRunner.query(`
+        await queryRunner.query(`
             CREATE INDEX "IDX_TicketRadiology__oid_ticketId" 
                 ON "TicketRadiology" ("oid", "ticketId")
         `)
-        }
 
-        if ('Image') {
-            await queryRunner.query(`
+        await queryRunner.query(`
                 CREATE TABLE "Image" (
                     "oid" integer NOT NULL,
                     "id" SERIAL NOT NULL,
@@ -452,10 +423,8 @@ export class Version501720076523845 implements MigrationInterface {
                     CONSTRAINT "PK_ddecd6b02f6dd0d3d10a0a74717" PRIMARY KEY ("id")
                 )
             `)
-        }
 
-        if ('old table VISIT') {
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "Visit"
                     ADD "voucherType" smallint NOT NULL DEFAULT '3',
                     ADD "ticketStatus" smallint NOT NULL DEFAULT '2',
@@ -466,7 +435,7 @@ export class Version501720076523845 implements MigrationInterface {
                     ADD "note" character varying(255) DEFAULT ''
             `)
 
-            await queryRunner.query(`
+        await queryRunner.query(`
                 UPDATE  "Visit" "vs"
                 SET     "voucherType" = 3,
                         "ticketStatus" = CASE 
@@ -484,7 +453,7 @@ export class Version501720076523845 implements MigrationInterface {
                         END
             `)
 
-            await queryRunner.query(`
+        await queryRunner.query(`
                 INSERT INTO "Ticket" (oid, "customerId", "totalCostAmount", "discountMoney",
                     "surcharge", "totalMoney", "expense", "profit", "debt", "note",
                     "startedAt", "paid", "year", "month", "date",
@@ -503,19 +472,19 @@ export class Version501720076523845 implements MigrationInterface {
                 FROM "Visit";
             `)
 
-            // VisitDiagnosis
-            await queryRunner.query(`
+        // VisitDiagnosis
+        await queryRunner.query(`
                 ALTER TABLE "VisitDiagnosis"
                     ADD "ticketId" integer NOT NULL DEFAULT '0',
                     ADD "imageIds" character varying(100) NOT NULL DEFAULT '[]'
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 UPDATE  "VisitDiagnosis" "vd"
                 SET     "ticketId" = ticket."id"
                 FROM    "Ticket" "ticket"
                 WHERE   "vd"."visitId" = "ticket"."visitId"
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 INSERT INTO "TicketDiagnosis" (oid, "ticketId", "reason", "healthHistory",
                     "summary", "diagnosis", "vitalSigns", "imageIds", "advice"
                     )
@@ -524,18 +493,18 @@ export class Version501720076523845 implements MigrationInterface {
                 FROM "VisitDiagnosis";
             `)
 
-            // VisitProcedure
-            await queryRunner.query(`
+        // VisitProcedure
+        await queryRunner.query(`
                 ALTER TABLE "VisitProcedure"
                     ADD "ticketId" integer NOT NULL DEFAULT '0'
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 UPDATE  "VisitProcedure" "vd"
                 SET     "ticketId" = ticket."id"
                 FROM    "Ticket" "ticket"
                 WHERE   "vd"."visitId" = "ticket"."visitId"
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 INSERT INTO "TicketProcedure" (oid, "ticketId", "customerId", "procedureId",
                     "expectedPrice", "discountMoney", "actualPrice", "createdAt", 
                     "quantity", "discountPercent", "discountType"
@@ -546,8 +515,8 @@ export class Version501720076523845 implements MigrationInterface {
                 FROM "VisitProcedure";
             `)
 
-            // VisitProduct
-            await queryRunner.query(`
+        // VisitProduct
+        await queryRunner.query(`
                 ALTER TABLE "VisitProduct"
                     ADD "ticketId" integer NOT NULL DEFAULT '0',
                     ADD "customerId" integer NOT NULL DEFAULT '0',
@@ -555,7 +524,7 @@ export class Version501720076523845 implements MigrationInterface {
                     ADD "deliveryStatus" smallint NOT NULL DEFAULT '2',
                     ADD "quantityReturn" numeric(10, 3) NOT NULL DEFAULT '0'
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 UPDATE  "VisitProduct" "vp"
                 SET     "ticketId"          = ticket."id",
                         "customerId"        = ticket."customerId",
@@ -566,13 +535,13 @@ export class Version501720076523845 implements MigrationInterface {
                 FROM    "Ticket" "ticket"
                 WHERE   "vp"."visitId" = "ticket"."visitId"
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 UPDATE  "VisitProduct" "vp"
                 SET     "batchId"          = vb."batchId"
                 FROM    "VisitBatch" "vb"
                 WHERE   "vp"."id" = "vb"."visitProductId"
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 INSERT INTO "TicketProduct" (oid, "ticketId", "customerId", "expectedPrice",
                     "actualPrice", "hintUsage", "productId", "batchId", 
                     "costAmount", "quantity", "unitRate", "deliveryStatus",
@@ -585,7 +554,7 @@ export class Version501720076523845 implements MigrationInterface {
                 FROM "VisitProduct";
             `)
 
-            await queryRunner.query(`
+        await queryRunner.query(`
                 DROP TABLE "Visit" CASCADE;
                 DROP TABLE "VisitDiagnosis" CASCADE;
                 DROP TABLE "VisitProcedure" CASCADE;
@@ -593,14 +562,14 @@ export class Version501720076523845 implements MigrationInterface {
                 DROP TABLE "VisitBatch" CASCADE;
             `)
 
-            await queryRunner.query(`
+        await queryRunner.query(`
                 UPDATE  "CustomerPayment" "c"
                 SET     "voucherId"         = ticket."id"
                 FROM    "Ticket" "ticket"
                 WHERE   "c"."voucherId"     = "ticket"."visitId"
                     AND "c"."voucherType"   = 3
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 UPDATE  "ProductMovement" "c"
                 SET     "voucherId"         = ticket."id"
                 FROM    "Ticket" "ticket"
@@ -608,17 +577,16 @@ export class Version501720076523845 implements MigrationInterface {
                     AND "c"."voucherType"   = 3
             `)
 
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "CustomerPayment" DROP COLUMN "voucherType"
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "CustomerPayment" RENAME COLUMN "voucherId" TO "ticketId";
             `)
-            await queryRunner.query(`
+        await queryRunner.query(`
                 ALTER TABLE "Ticket" DROP COLUMN "visitId"
             `)
-            // còn productmovement, paymenthistory
-        }
+        // còn productmovement, paymenthistory
     }
 
     public async down(queryRunner: QueryRunner): Promise<void> { }

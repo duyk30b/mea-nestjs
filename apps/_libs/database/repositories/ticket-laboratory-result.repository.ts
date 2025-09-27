@@ -42,10 +42,10 @@ export class TicketLaboratoryResultRepository extends _PostgreSqlRepository<
 
   async updateResultList(options: {
     oid: number
-    ticketId: number
+    ticketId: string
     ticketLaboratoryResultDtoList: {
-      id: number
-      ticketLaboratoryId: number
+      id: string // có khả năng lỗi cao vì so sánh bigint
+      ticketLaboratoryId: string
       laboratoryId: number
       attention: number
       result: string

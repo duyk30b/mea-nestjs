@@ -6,6 +6,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  PrimaryColumn,
   PrimaryGeneratedColumn,
 } from 'typeorm'
 import StockCheckItem from './stock-check-item.entity'
@@ -26,9 +27,9 @@ export default class StockCheck {
   @Exclude()
   oid: number
 
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn({ type: 'bigint' })
   @Expose()
-  id: number
+  id: string
 
   @Column({
     type: 'bigint',

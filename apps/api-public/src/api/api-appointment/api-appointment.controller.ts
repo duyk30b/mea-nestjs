@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
-import { IdParam } from '../../../../_libs/common/dto/param'
+import { GenerateIdParam } from '../../../../_libs/common/dto/param'
 import { OrganizationPermission } from '../../../../_libs/common/guards/organization.guard'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
@@ -46,10 +46,10 @@ export class ApiAppointmentController {
   @OrganizationPermission(PermissionId.APPOINTMENT)
   async detail(
     @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
+    @Param() { id }: GenerateIdParam,
     @Query() query: AppointmentGetOneQuery
   ): Promise<BaseResponse> {
-    const data = await this.apiAppointmentService.getOne(oid, id, query)
+    const data = await this.apiAppointmentService.getOne({ oid, id, query })
     return { data }
   }
 
@@ -67,17 +67,17 @@ export class ApiAppointmentController {
   @UserPermission(PermissionId.APPOINTMENT_UPDATE)
   async update(
     @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
+    @Param() { id }: GenerateIdParam,
     @Body() body: AppointmentUpdateBody
   ): Promise<BaseResponse> {
-    const data = await this.apiAppointmentService.updateOne(oid, +id, body)
+    const data = await this.apiAppointmentService.updateOne(oid, id, body)
     return { data }
   }
 
   @Delete('delete/:id')
   @UserPermission(PermissionId.APPOINTMENT_DELETE)
   @ApiParam({ name: 'id', example: 1 })
-  async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam): Promise<BaseResponse> {
+  async deleteOne(@External() { oid }: TExternal, @Param() { id }: GenerateIdParam): Promise<BaseResponse> {
     const data = await this.apiAppointmentService.deleteOne(oid, id)
     return { data }
   }
@@ -86,7 +86,7 @@ export class ApiAppointmentController {
   @UserPermission(PermissionId.APPOINTMENT_REGISTER_TICKET)
   async registerTicketClinic(
     @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
+    @Param() { id }: GenerateIdParam,
     @Body() body: AppointmentRegisterTicketClinicBody
   ): Promise<BaseResponse> {
     const data = await this.apiAppointmentService.registerTicketClinic({

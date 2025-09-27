@@ -333,7 +333,7 @@ export class ApiAuthService {
 
     const hashPassword = await bcrypt.hash(body.password, 5)
     const secret = encrypt(body.password, body.username)
-    await this.userRepository.update({ id: user.id }, { hashPassword, secret })
+    await this.userRepository.updateBasic({ id: user.id }, { hashPassword, secret })
 
     await this.cacheTokenService.removeAllRefreshToken({ oid: user.oid, uid: user.id })
 

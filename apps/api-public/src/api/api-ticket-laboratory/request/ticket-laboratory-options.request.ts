@@ -40,7 +40,7 @@ export class TicketLaboratoryFilterQuery {
 
   @Expose()
   @IsInt()
-  ticketId: number
+  ticketId: string
 
   @Expose()
   @Type(() => ConditionTimestamp)

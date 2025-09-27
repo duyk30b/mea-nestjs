@@ -26,7 +26,7 @@ export class StockCheckReconcileOperation {
 
   async startReconcile(params: {
     oid: number
-    stockCheckId: number
+    stockCheckId: string
     userId: number
     time: number
   }) {

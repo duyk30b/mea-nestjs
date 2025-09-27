@@ -16,23 +16,34 @@ import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { TicketParams } from '../ticket-query/request'
 import {
   TicketChangeProcedureParams,
+  TicketChangeRegimenItemParams,
   TicketChangeRegimenParams,
+  TicketProcessResultTicketProcedureBody,
   TicketUpdateMoneyTicketProcedureBody,
   TicketUpdateMoneyTicketRegimenBody,
-  TicketUpdatePriorityTicketProcedureBody,
-  TicketUpdateUserRequestTicketProcedureBody,
   TicketUpdateUserRequestTicketRegimenBody,
-  TicketUpdateUserResultTicketProcedureBody,
+  TicketUpdateUserTicketProcedureBody,
 } from './request'
 import { TicketAddTicketProcedureListBody } from './request/ticket-add-ticket-procedure-list.body'
-import { TicketProcedureUpdateResultBody } from './request/ticket-update-result-procedure.request'
-import { TicketChangeProcedureService } from './ticket-change-procedure.service'
+import { TicketAddTicketProcedureListService } from './service/ticket-add-ticket-procedure-list.service'
+import { TicketChangeProcedureService } from './service/ticket-change-procedure.service'
+import { TicketChangeRegimenService } from './service/ticket-change-regimen.service'
+import { TicketDestroyTicketProcedureService } from './service/ticket-destroy-ticket-procedure.service'
+import { TicketProcessResultTicketProcedureService } from './service/ticket-process-result-ticket-procedure.service'
+import { TicketUpdateUserTicketProcedureService } from './service/ticket-update-user-ticket-procedure.service'
 
 @ApiTags('Ticket')
 @ApiBearerAuth('access-token')
 @Controller('ticket')
 export class TicketChangeProcedureController {
-  constructor(private readonly ticketChangeProcedureService: TicketChangeProcedureService) { }
+  constructor(
+    private readonly ticketAddTicketProcedureListService: TicketAddTicketProcedureListService,
+    private readonly ticketChangeProcedureService: TicketChangeProcedureService,
+    private readonly ticketUpdateUserTicketProcedureService: TicketUpdateUserTicketProcedureService,
+    private readonly ticketChangeRegimenService: TicketChangeRegimenService,
+    private readonly ticketProcessResultTicketProcedureService: TicketProcessResultTicketProcedureService,
+    private readonly ticketDestroyTicketProcedureService: TicketDestroyTicketProcedureService
+  ) { }
 
   @Post(':ticketId/procedure/add-ticket-procedure-list')
   @UserPermission(PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST)
@@ -41,7 +52,7 @@ export class TicketChangeProcedureController {
     @Param() { ticketId }: TicketParams,
     @Body() body: TicketAddTicketProcedureListBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeProcedureService.addTicketProcedureList({
+    const data = await this.ticketAddTicketProcedureListService.addTicketProcedureList({
       oid,
       ticketId,
       body,
@@ -55,24 +66,10 @@ export class TicketChangeProcedureController {
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketProcedureId }: TicketChangeProcedureParams
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeProcedureService.destroyTicketProcedure({
+    const data = await this.ticketDestroyTicketProcedureService.destroyTicketProcedure({
       oid,
       ticketId,
       ticketProcedureId,
-    })
-    return { data }
-  }
-
-  @Delete(':ticketId/procedure/destroy-ticket-regimen/:ticketRegimenId')
-  @UserPermission(PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST)
-  async destroyTicketRegimen(
-    @External() { oid }: TExternal,
-    @Param() { ticketId, ticketRegimenId }: TicketChangeRegimenParams
-  ): Promise<BaseResponse> {
-    const data = await this.ticketChangeProcedureService.destroyTicketRegimen({
-      oid,
-      ticketId,
-      ticketRegimenId,
     })
     return { data }
   }
@@ -93,14 +90,14 @@ export class TicketChangeProcedureController {
     return { data }
   }
 
-  @Post(':ticketId/procedure/update-user-request-ticket-procedure/:ticketProcedureId')
+  @Post(':ticketId/procedure/update-user-ticket-procedure/:ticketProcedureId')
   @UserPermission(PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST)
-  async updateUserRequestTicketProcedure(
+  async updateUserTicketProcedure(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketProcedureId }: TicketChangeProcedureParams,
-    @Body() body: TicketUpdateUserRequestTicketProcedureBody
+    @Body() body: TicketUpdateUserTicketProcedureBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeProcedureService.updateUserRequestTicketProcedure({
+    const data = await this.ticketUpdateUserTicketProcedureService.updateUserTicketProcedure({
       oid,
       ticketId,
       ticketProcedureId,
@@ -109,33 +106,16 @@ export class TicketChangeProcedureController {
     return { data }
   }
 
-  @Post(':ticketId/procedure/update-user-result-ticket-procedure/:ticketProcedureId')
+  @Delete(':ticketId/procedure/destroy-ticket-regimen/:ticketRegimenId')
   @UserPermission(PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST)
-  async updateUserResultTicketProcedure(
+  async destroyTicketRegimen(
     @External() { oid }: TExternal,
-    @Param() { ticketId, ticketProcedureId }: TicketChangeProcedureParams,
-    @Body() body: TicketUpdateUserResultTicketProcedureBody
+    @Param() { ticketId, ticketRegimenId }: TicketChangeRegimenParams
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeProcedureService.updateUserResultTicketProcedure({
+    const data = await this.ticketChangeRegimenService.destroyTicketRegimen({
       oid,
       ticketId,
-      ticketProcedureId,
-      body,
-    })
-    return { data }
-  }
-
-  @Post(':ticketId/procedure/update-priority-ticket-procedure')
-  @UserPermission(PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST)
-  async updatePriorityTicketProcedure(
-    @External() { oid }: TExternal,
-    @Param() { ticketId }: TicketParams,
-    @Body() body: TicketUpdatePriorityTicketProcedureBody
-  ): Promise<BaseResponse> {
-    const data = await this.ticketChangeProcedureService.updatePriorityTicketProcedure({
-      oid,
-      ticketId,
-      body,
+      ticketRegimenId,
     })
     return { data }
   }
@@ -147,7 +127,7 @@ export class TicketChangeProcedureController {
     @Param() { ticketId, ticketRegimenId }: TicketChangeRegimenParams,
     @Body() body: TicketUpdateMoneyTicketRegimenBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeProcedureService.updateMoneyTicketRegimen({
+    const data = await this.ticketChangeRegimenService.updateMoneyTicketRegimen({
       oid,
       ticketId,
       ticketRegimenId,
@@ -163,7 +143,7 @@ export class TicketChangeProcedureController {
     @Param() { ticketId, ticketRegimenId }: TicketChangeRegimenParams,
     @Body() body: TicketUpdateUserRequestTicketRegimenBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeProcedureService.updateUserRequestTicketRegimen({
+    const data = await this.ticketChangeRegimenService.updateUserRequestTicketRegimen({
       oid,
       ticketId,
       ticketRegimenId,
@@ -172,20 +152,19 @@ export class TicketChangeProcedureController {
     return { data }
   }
 
-  @Post(':ticketId/procedure/update-result-ticket-procedure/:ticketProcedureId')
+  @Post(':ticketId/procedure/process-result-ticket-procedure')
   @UserPermission(PermissionId.TICKET_CHANGE_PROCEDURE_RESULT)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FastifyFilesInterceptor('files', 10, {}))
-  async updateResultTicketProcedureNormal(
+  async processResultTicketProcedureNormal(
     @External() { oid }: TExternal,
-    @Param() { ticketId, ticketProcedureId }: TicketChangeProcedureParams,
-    @Body() body: TicketProcedureUpdateResultBody,
+    @Param() { ticketId }: TicketParams,
+    @Body() body: TicketProcessResultTicketProcedureBody,
     @UploadedFiles() files: FileUploadDto[]
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeProcedureService.updateResultTicketProcedure({
+    const data = await this.ticketProcessResultTicketProcedureService.processResultTicketProcedure({
       oid,
       ticketId,
-      ticketProcedureId,
       body,
       files,
     })
@@ -198,9 +177,22 @@ export class TicketChangeProcedureController {
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketProcedureId }: TicketChangeProcedureParams
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeProcedureService.cancelResultTicketProcedure({
+    const data = await this.ticketProcessResultTicketProcedureService.processResultTicketProcedure({
       oid,
-      ticketProcedureId,
+      ticketId,
+      body: {
+        ticketProcedureResult: {
+          ticketProcedureId,
+          quantity: 0,
+          completedAt: null,
+          result: '',
+        },
+        ticketUserResultList: [],
+        ticketProductProcedureResultList: [],
+        imagesChange: { externalUrlList: [], imageIdWaitList: [] },
+        files: [],
+      },
+      files: [],
     })
     return { data }
   }

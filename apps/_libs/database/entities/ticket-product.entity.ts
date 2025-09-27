@@ -1,11 +1,11 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
+import { Exclude, Expose } from 'class-transformer'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
 import {
-    DeliveryStatus,
-    DiscountType,
-    PaymentMoneyStatus,
-    PickupStrategy,
+  DeliveryStatus,
+  DiscountType,
+  PaymentEffect,
+  PaymentMoneyStatus,
+  PickupStrategy,
 } from '../common/variable'
 import Batch from './batch.entity'
 import Customer from './customer.entity'
@@ -15,31 +15,52 @@ import Ticket from './ticket.entity'
 export enum TicketProductType {
   Prescription = 1,
   Consumable = 2,
+  Procedure = 3,
 }
 
 @Entity('TicketProduct')
 @Index('IDX_TicketProduct__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketProduct__oid_customerId', ['oid', 'customerId'])
-export default class TicketProduct extends BaseEntity {
+export default class TicketProduct {
+  @Column()
+  @Exclude()
+  oid: number
+
+  @PrimaryColumn({ type: 'bigint' })
+  @Expose()
+  id: string
+
   @Column({ default: 1 })
   @Expose()
   priority: number
+
+  @Column({ type: 'smallint', default: TicketProductType.Prescription })
+  @Expose()
+  type: TicketProductType
 
   @Column({ default: PickupStrategy.AutoWithFIFO, type: 'smallint' })
   @Expose()
   pickupStrategy: PickupStrategy
 
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
+  @Column({ type: 'smallint', default: DeliveryStatus.Pending })
+  @Expose()
+  deliveryStatus: DeliveryStatus
+
+  @Column({ type: 'smallint', default: PaymentMoneyStatus.PendingPaid })
   @Expose()
   paymentMoneyStatus: PaymentMoneyStatus
+
+  @Column({ type: 'smallint', default: PaymentEffect.SelfPayment })
+  @Expose()
+  paymentEffect: PaymentEffect
 
   @Column()
   @Expose()
   customerId: number
 
-  @Column()
+  @Column({ type: 'bigint' })
   @Expose()
-  ticketId: number
+  ticketId: string
 
   @Column({ type: 'varchar', length: 50, default: JSON.stringify([0]) })
   @Expose()
@@ -53,13 +74,9 @@ export default class TicketProduct extends BaseEntity {
   @Expose()
   batchId: number // nếu batchId = 0, thì chỉ có thể là autoPick hoặc noImpact
 
-  @Column({ type: 'smallint', default: TicketProductType.Prescription })
+  @Column({ type: 'bigint', default: 0 })
   @Expose()
-  type: TicketProductType
-
-  @Column({ type: 'smallint', default: DeliveryStatus.Pending })
-  @Expose()
-  deliveryStatus: DeliveryStatus
+  ticketProcedureId: string
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()
@@ -187,10 +204,7 @@ export type TicketProductRelationType = {
   [P in keyof Pick<TicketProduct, 'ticket' | 'customer' | 'product' | 'batch'>]?: boolean
 }
 
-export type TicketProductInsertType = Omit<
-  TicketProduct,
-  keyof TicketProductRelationType | keyof Pick<TicketProduct, 'id'>
->
+export type TicketProductInsertType = Omit<TicketProduct, keyof TicketProductRelationType>
 
 export type TicketProductUpdateType = {
   [K in Exclude<

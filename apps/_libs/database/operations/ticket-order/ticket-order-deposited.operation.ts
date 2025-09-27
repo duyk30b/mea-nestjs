@@ -3,7 +3,8 @@ import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
 import { ESTimer } from '../../../common/helpers/time.helper'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
-import { DeliveryStatus } from '../../common/variable'
+import { GenerateId } from '../../common/generate-id'
+import { DeliveryStatus, PaymentEffect, PaymentMoneyStatus } from '../../common/variable'
 import { Ticket } from '../../entities'
 import { TicketAttributeInsertType } from '../../entities/ticket-attribute.entity'
 import { TicketExpenseInsertType } from '../../entities/ticket-expense.entity'
@@ -51,7 +52,7 @@ export type TicketOrderDepositedUpdateType = Pick<
   | 'expense'
   | 'commissionMoney'
   | 'profit'
-  | 'registeredAt'
+  | 'createdAt'
   | 'note'
 >
 
@@ -72,7 +73,7 @@ export class TicketOrderDepositedOperation {
 
   async update<T extends TicketOrderDepositedUpdateType>(params: {
     oid: number
-    ticketId: number
+    ticketId: string
     ticketOrderDepositedUpdateDto: NoExtra<TicketOrderDepositedUpdateType, T>
     ticketOrderProductDraftListDto: TicketOrderProductDraftType[]
     ticketOrderProcedureDraftListDto: TicketOrderProcedureDraftType[]
@@ -83,14 +84,15 @@ export class TicketOrderDepositedOperation {
     const {
       oid,
       ticketId,
-      ticketOrderDepositedUpdateDto,
       ticketOrderProductDraftListDto,
       ticketOrderProcedureDraftListDto,
       ticketOrderSurchargeDraftListDto,
       ticketOrderExpenseDraftListDto,
       ticketAttributeDraftListDto,
     } = params
-    const registeredAt = ticketOrderDepositedUpdateDto.registeredAt
+    const ticketOrderDepositedUpdateDto: TicketOrderDepositedUpdateType =
+      params.ticketOrderDepositedUpdateDto
+    const createdAt = ticketOrderDepositedUpdateDto.createdAt
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       const ticket = await this.ticketManager.updateOneAndReturnEntity(
@@ -102,11 +104,11 @@ export class TicketOrderDepositedOperation {
           // deliveryStatus: DeliveryStatus.Pending, // Deposited thì chưa gửi hàng, vẫn giữ nguyên vậy
           // paid: 0, // giữ nguyên số tiền đã trả
           debt: () => `${ticketOrderDepositedUpdateDto.totalMoney} - paid`,
-          registeredAt,
-          startedAt: registeredAt,
-          year: ESTimer.info(registeredAt, 7).year,
-          month: ESTimer.info(registeredAt, 7).month + 1,
-          date: ESTimer.info(registeredAt, 7).date,
+          createdAt,
+          receptionAt: createdAt,
+          year: ESTimer.info(createdAt, 7).year,
+          month: ESTimer.info(createdAt, 7).month + 1,
+          date: ESTimer.info(createdAt, 7).date,
         }
       )
 
@@ -120,12 +122,16 @@ export class TicketOrderDepositedOperation {
         const ticketProductListInsert = ticketOrderProductDraftListDto.map((i) => {
           const ticketProduct: NoExtra<TicketProductInsertType> = {
             ...i,
+            id: GenerateId.nextId(),
             oid,
             ticketId,
             customerId: ticket.customerId,
             quantityPrescription: i.quantity, // cho lấy số lượng kê đơn bằng số lượng bán
             deliveryStatus: DeliveryStatus.Pending,
             type: TicketProductType.Prescription,
+            ticketProcedureId: '0',
+            paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+            paymentEffect: PaymentEffect.SelfPayment,
           }
           return ticketProduct
         })
@@ -139,19 +145,22 @@ export class TicketOrderDepositedOperation {
         const ticketProcedureListInsert = ticketOrderProcedureDraftListDto.map((i) => {
           const ticketProcedure: TicketProcedureInsertType = {
             ...i,
+            id: GenerateId.nextId(),
             oid,
             ticketId,
             customerId: ticket.customerId,
-            createdAt: ticket.registeredAt,
+            createdAt: ticket.createdAt,
             status: TicketProcedureStatus.NoEffect,
             imageIds: JSON.stringify([]),
             result: '',
             completedAt: null,
             costAmount: 0,
-            ticketRegimenId: 0,
             commissionAmount: 0,
             ticketProcedureType: TicketProcedureType.Normal,
-            sessionIndex: 0,
+            ticketRegimenId: '0',
+            ticketRegimenItemId: '0',
+            indexSession: 0,
+            paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
           }
           return ticketProcedure
         })

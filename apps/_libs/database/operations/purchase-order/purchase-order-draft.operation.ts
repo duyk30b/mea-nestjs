@@ -3,18 +3,28 @@ import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
 import { ESTimer } from '../../../common/helpers/time.helper'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
+import { GenerateId } from '../../common/generate-id'
 import { DeliveryStatus } from '../../common/variable'
 import { PurchaseOrder, PurchaseOrderItem } from '../../entities'
 import { PurchaseOrderItemInsertType } from '../../entities/purchase-order-item.entity'
-import { PurchaseOrderInsertType, PurchaseOrderStatus } from '../../entities/purchase-order.entity'
+import {
+  PurchaseOrderInsertType,
+  PurchaseOrderStatus,
+  PurchaseOrderUpdateType,
+} from '../../entities/purchase-order.entity'
 import { PurchaseOrderItemManager, PurchaseOrderManager } from '../../repositories'
 
-export type PurchaseOrderDraftUpsertType = Omit<
-  PurchaseOrderInsertType,
-  keyof Pick<
-    PurchaseOrder,
-    'oid' | 'status' | 'deliveryStatus' | 'paid' | 'debt' | 'year' | 'month' | 'date' | 'endedAt'
-  >
+export type PurchaseOrderDraftUpsertType = Pick<
+  PurchaseOrder,
+  | 'distributorId'
+  | 'itemsActualMoney'
+  | 'discountMoney'
+  | 'discountPercent'
+  | 'discountType'
+  | 'surcharge'
+  | 'totalMoney'
+  | 'note'
+  | 'startedAt'
 >
 
 export type PurchaseOrderItemDraftType = Omit<
@@ -30,16 +40,21 @@ export class PurchaseOrderDraftOperation {
     private purchaseOrderItemManager: PurchaseOrderItemManager
   ) { }
 
-  async createDraft<T extends PurchaseOrderDraftUpsertType, X extends PurchaseOrderItemDraftType>(params: {
+  async createDraft<
+    T extends PurchaseOrderDraftUpsertType,
+    X extends PurchaseOrderItemDraftType,
+  >(props: {
     oid: number
     purchaseOrderInsertDto: NoExtra<PurchaseOrderDraftUpsertType, T>
     purchaseOrderItemListDto: NoExtra<PurchaseOrderItemDraftType, X>[]
   }) {
-    const { oid, purchaseOrderInsertDto, purchaseOrderItemListDto } = params
+    const { oid, purchaseOrderItemListDto } = props
+    const purchaseOrderInsertDto: PurchaseOrderDraftUpsertType = props.purchaseOrderInsertDto
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       const purchaseOrderInsert: PurchaseOrderInsertType = {
         ...purchaseOrderInsertDto,
+        id: GenerateId.nextId(),
         oid,
         status: PurchaseOrderStatus.Draft,
         deliveryStatus: DeliveryStatus.Pending,
@@ -52,11 +67,15 @@ export class PurchaseOrderDraftOperation {
         endedAt: null,
       }
 
-      const purchaseOrder = await this.purchaseOrderManager.insertOneAndReturnEntity(manager, purchaseOrderInsert)
+      const purchaseOrder = await this.purchaseOrderManager.insertOneAndReturnEntity(
+        manager,
+        purchaseOrderInsert
+      )
 
       const purchaseOrderItemListInsert = purchaseOrderItemListDto.map((i) => {
+        const itemDraft: PurchaseOrderItemDraftType = i
         const purchaseOrderItem: PurchaseOrderItemInsertType = {
-          ...i,
+          ...itemDraft,
           oid,
           purchaseOrderId: purchaseOrder.id,
           distributorId: purchaseOrderInsert.distributorId,
@@ -69,20 +88,25 @@ export class PurchaseOrderDraftOperation {
     })
   }
 
-  async updateDraft<T extends PurchaseOrderDraftUpsertType, X extends PurchaseOrderItemDraftType>(params: {
+  async updateDraft<
+    T extends PurchaseOrderDraftUpsertType,
+    X extends PurchaseOrderItemDraftType,
+  >(props: {
     oid: number
-    purchaseOrderId: number
+    purchaseOrderId: string
     purchaseOrderUpdateDto: NoExtra<PurchaseOrderDraftUpsertType, T>
     purchaseOrderItemListDto: NoExtra<PurchaseOrderItemDraftType, X>[]
   }) {
-    const { oid, purchaseOrderId, purchaseOrderUpdateDto, purchaseOrderItemListDto } = params
+    const { oid, purchaseOrderId } = props
+    const purchaseOrderUpdateDto: PurchaseOrderDraftUpsertType = props.purchaseOrderUpdateDto
+    const purchaseOrderItemListDto: PurchaseOrderItemDraftType[] = props.purchaseOrderItemListDto
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-      const purchaseOrderUpdate: PurchaseOrderDraftUpsertType = {
+      const purchaseOrderUpdate: PurchaseOrderUpdateType = {
         ...purchaseOrderUpdateDto,
-        oid,
         distributorId: purchaseOrderUpdateDto.distributorId,
         status: PurchaseOrderStatus.Draft,
+        deliveryStatus: DeliveryStatus.Pending,
         paid: 0,
         debt: purchaseOrderUpdateDto.totalMoney,
         year: ESTimer.info(purchaseOrderUpdateDto.startedAt as number, 7).year,

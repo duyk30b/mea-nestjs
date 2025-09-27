@@ -1,12 +1,5 @@
 import { Exclude, Expose } from 'class-transformer'
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm'
+import { Column, Entity, Index, PrimaryColumn } from 'typeorm'
 import { DeliveryStatus, DiscountType } from '../common/variable'
 import Appointment from './appointment.entity'
 import CustomerSource from './customer-source.entity'
@@ -22,6 +15,8 @@ import TicketLaboratory from './ticket-laboratory.entity'
 import TicketProcedure from './ticket-procedure.entity'
 import TicketProduct from './ticket-product.entity'
 import TicketRadiology from './ticket-radiology.entity'
+import TicketReception from './ticket-reception.entity'
+import TicketRegimenItem from './ticket-regimen-item.entity'
 import TicketRegimen from './ticket-regimen.entity'
 import TicketSurcharge from './ticket-surcharge.entity'
 import TicketUser from './ticket-user.entity'
@@ -47,18 +42,19 @@ export const TicketStatusText = {
 }
 
 @Entity('Ticket')
-@Index('IDX_Ticket__oid_registeredAt', ['oid', 'registeredAt'])
+@Index('IDX_Ticket__oid_createdAt', ['oid', 'createdAt'])
+@Index('IDX_Ticket__oid_receptionAt', ['oid', 'receptionAt'])
 @Index('IDX_Ticket__oid_roomId', ['oid', 'roomId'])
 @Index('IDX_Ticket__oid_customerId', ['oid', 'customerId'])
 @Index('IDX_Ticket__oid_status', ['oid', 'status'])
 export default class Ticket {
-  @Column({ name: 'oid' })
+  @Column()
   @Exclude()
   oid: number
 
-  @PrimaryGeneratedColumn({ name: 'id' })
-  @Expose({ name: 'id' })
-  id: number
+  @PrimaryColumn({ type: 'bigint' })
+  @Expose()
+  id: string
 
   @Column()
   @Expose()
@@ -71,6 +67,10 @@ export default class Ticket {
   @Column({ default: 0 })
   @Expose()
   roomId: number
+
+  @Column({ type: 'smallint', default: 0 })
+  @Expose()
+  isPaymentEachItem: number
 
   @Column({ type: 'smallint', default: TicketStatus.Draft })
   @Expose()
@@ -243,7 +243,7 @@ export default class Ticket {
     },
   })
   @Expose()
-  registeredAt: number
+  createdAt: number
 
   @Column({
     type: 'bigint',
@@ -254,18 +254,7 @@ export default class Ticket {
     },
   })
   @Expose()
-  startedAt: number
-
-  @Column({
-    type: 'bigint',
-    nullable: true,
-    transformer: {
-      to: (value) => value,
-      from: (value) => (value == null ? value : Number(value)),
-    },
-  })
-  @Expose()
-  endedAt: number
+  receptionAt: number
 
   @Column({
     type: 'bigint',
@@ -278,39 +267,43 @@ export default class Ticket {
   @Expose()
   updatedAt: number
 
+  @Column({
+    type: 'bigint',
+    nullable: true,
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  endedAt: number
+
   @Column({ type: 'varchar', length: 255, default: '' })
   @Expose()
   note: string // Tên dịch vụ
 
-  @ManyToOne((type) => CustomerSource, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'customerSourceId', referencedColumnName: 'id' })
-  @Expose()
-  customerSource: CustomerSource
-
-  @ManyToOne((type) => Customer, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'customerId', referencedColumnName: 'id' })
+  // @ManyToOne((type) => Customer, { createForeignKeyConstraints: false })
+  // @JoinColumn({ name: 'customerId', referencedColumnName: 'id' })
   @Expose()
   customer: Customer
 
   @Expose()
   paymentList: Payment[]
 
-  // @OneToOne(() => Appointment, { createForeignKeyConstraints: false })
-  // @JoinColumn({ name: 'id', referencedColumnName: 'fromTicketId' }) // không JoinColumn trên cùng cột id được, vkl
   @Expose()
-  toAppointment: Appointment
+  ticketReceptionList: TicketReception[]
 
   @Expose()
   ticketAttributeList: TicketAttribute[]
 
   @Expose()
+  ticketSurchargeList: TicketSurcharge[]
+
+  @Expose()
+  ticketExpenseList: TicketExpense[]
+
+  @Expose()
   ticketProductList: TicketProduct[]
-
-  @Expose()
-  ticketProductConsumableList: TicketProduct[]
-
-  @Expose()
-  ticketProductPrescriptionList: TicketProduct[]
 
   @Expose()
   ticketBatchList: TicketBatch[]
@@ -322,13 +315,13 @@ export default class Ticket {
   ticketRegimenList: TicketRegimen[]
 
   @Expose()
-  ticketRegimenListExtra: TicketRegimen[]
-
-  @Expose()
-  ticketLaboratoryList: TicketLaboratory[]
+  ticketRegimenItemList: TicketRegimenItem[]
 
   @Expose()
   ticketLaboratoryGroupList: TicketLaboratoryGroup[]
+
+  @Expose()
+  ticketLaboratoryList: TicketLaboratory[]
 
   @Expose()
   ticketLaboratoryResultList: TicketLaboratoryResult[]
@@ -337,19 +330,16 @@ export default class Ticket {
   ticketRadiologyList: TicketRadiology[]
 
   @Expose()
-  ticketExpenseList: TicketExpense[]
-
-  @Expose()
-  ticketSurchargeList: TicketSurcharge[]
-
-  @Expose()
   ticketUserList: TicketUser[]
 
   @Expose()
-  imageDiagnosisList: Image[]
+  imageList: Image[]
 
   @Expose()
-  imageList: Image[]
+  customerSource: CustomerSource
+
+  @Expose()
+  toAppointment: Appointment
 
   static fromRaw(raw: { [P in keyof Ticket]: any }) {
     if (!raw) return null
@@ -377,10 +367,9 @@ export default class Ticket {
     entity.expense = Number(raw.expense)
     entity.commissionMoney = Number(raw.commissionMoney)
 
-    entity.registeredAt = raw.registeredAt == null ? raw.registeredAt : Number(raw.registeredAt)
-    entity.startedAt = raw.startedAt == null ? raw.startedAt : Number(raw.startedAt)
+    entity.createdAt = raw.createdAt == null ? raw.createdAt : Number(raw.createdAt)
+    entity.receptionAt = raw.receptionAt == null ? raw.receptionAt : Number(raw.receptionAt)
     entity.endedAt = raw.endedAt == null ? raw.endedAt : Number(raw.endedAt)
-    entity.updatedAt = raw.updatedAt == null ? raw.updatedAt : Number(raw.updatedAt)
 
     return entity
   }
@@ -394,48 +383,26 @@ export type TicketRelationType = {
   [P in keyof Pick<
     Ticket,
     | 'customer'
-    | 'ticketAttributeList'
-    | 'ticketExpenseList'
-    | 'ticketSurchargeList'
-    | 'ticketRegimenList'
-    | 'ticketRegimenListExtra'
-    | 'paymentList'
-    | 'customerSource'
-    | 'imageList'
-    | 'imageDiagnosisList'
+    | 'customer'
     | 'toAppointment'
+    | 'ticketReceptionList'
+    | 'ticketAttributeList'
+    | 'ticketSurchargeList'
+    | 'ticketExpenseList'
+    | 'ticketProductList'
+    | 'ticketBatchList'
+    | 'ticketProcedureList'
+    | 'ticketRegimenList'
+    | 'ticketRegimenItemList'
+    | 'ticketLaboratoryGroupList'
+    | 'ticketLaboratoryList'
+    | 'ticketLaboratoryResultList'
+    | 'ticketRadiologyList'
+    | 'ticketUserList'
+    | 'imageList'
+    | 'customerSource'
+    | 'paymentList'
   >]?: boolean
-} & {
-  [P in keyof Pick<
-    Ticket,
-    'ticketProductList' | 'ticketProductConsumableList' | 'ticketProductPrescriptionList'
-  >]?: { [P in keyof Pick<TicketProduct, 'product'>]?: boolean } | false
-} & {
-  [P in keyof Pick<Ticket, 'ticketBatchList'>]?:
-  | { [P in keyof Pick<TicketBatch, 'batch'>]?: boolean }
-  | false
-} & {
-  [P in keyof Pick<Ticket, 'ticketProcedureList'>]?:
-  | { [P in keyof Pick<TicketProcedure, 'procedure'>]?: boolean }
-  | false
-} & {
-  [P in keyof Pick<Ticket, 'ticketRadiologyList'>]?:
-  | { [P in keyof Pick<TicketRadiology, 'radiology'>]?: boolean }
-  | false
-} & {
-  [P in keyof Pick<Ticket, 'ticketLaboratoryList'>]?:
-  | { [P in keyof Pick<TicketLaboratory, 'laboratory' | 'laboratoryList'>]?: boolean }
-  | false
-} & {
-  [P in keyof Pick<Ticket, 'ticketLaboratoryGroupList'>]?:
-  | { [P in keyof Pick<TicketLaboratoryGroup, 'laboratoryGroup'>]?: boolean }
-  | false
-} & {
-  [P in keyof Pick<Ticket, 'ticketLaboratoryResultList'>]?: boolean
-} & {
-  [P in keyof Pick<Ticket, 'ticketUserList'>]?:
-  | { [P in keyof Pick<TicketUser, 'user'>]?: boolean }
-  | false
 }
 
 export type TicketInsertType = Omit<
@@ -450,5 +417,5 @@ export type TicketUpdateType = {
 }
 
 export type TicketSortType = {
-  [P in keyof Pick<Ticket, 'id' | 'customerId' | 'registeredAt'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<Ticket, 'id' | 'customerId' | 'createdAt' | 'receptionAt'>]?: 'ASC' | 'DESC'
 }

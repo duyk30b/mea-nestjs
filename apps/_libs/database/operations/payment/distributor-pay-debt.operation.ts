@@ -9,7 +9,12 @@ import {
   PaymentVoucherType,
 } from '../../entities/payment.entity'
 import { PurchaseOrderStatus } from '../../entities/purchase-order.entity'
-import { DistributorManager, PaymentManager, PurchaseOrderManager } from '../../repositories'
+import {
+  DistributorManager,
+  PaymentManager,
+  PurchaseOrderManager,
+  PurchaseOrderRepository,
+} from '../../repositories'
 
 @Injectable()
 export class DistributorPayDebtOperation {
@@ -17,7 +22,8 @@ export class DistributorPayDebtOperation {
     private dataSource: DataSource,
     private distributorManager: DistributorManager,
     private paymentManager: PaymentManager,
-    private purchaseOrderManager: PurchaseOrderManager
+    private purchaseOrderManager: PurchaseOrderManager,
+    private purchaseOrderRepository: PurchaseOrderRepository
   ) { }
 
   async startPayDebt(options: {
@@ -28,7 +34,7 @@ export class DistributorPayDebtOperation {
     time: number
     paidAmount: number
     note: string
-    dataList: { purchaseOrderId: number; paidAmount: number }[]
+    dataList: { purchaseOrderId: string; paidAmount: number }[]
   }) {
     const { oid, distributorId, cashierId, paymentMethodId, time, paidAmount, note, dataList } =
       options
@@ -40,7 +46,7 @@ export class DistributorPayDebtOperation {
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. UPDATE CUSTOMER ===
-      const purchaseOrderModifiedList = await this.purchaseOrderManager.bulkUpdate({
+      const purchaseOrderModifiedList = await this.purchaseOrderRepository.managerBulkUpdate({
         manager,
         tempList: dataList.map((i) => ({
           id: i.purchaseOrderId,
@@ -52,7 +58,7 @@ export class DistributorPayDebtOperation {
           distributorId,
           debt: { RAW_QUERY: '"debt" >= temp."paidAmount"' },
         },
-        compare: ['id'],
+        compare: { id: { cast: 'bigint' } },
         update: {
           paid: (t) => `paid + "${t}"."paidAmount"`,
           debt: (t) => `debt - "${t}"."paidAmount"`,

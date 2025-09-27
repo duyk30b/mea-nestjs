@@ -11,8 +11,8 @@ import { TicketItemType } from '../../../../../../_libs/database/entities/paymen
 class TicketItemBody {
   @Expose()
   @IsDefined()
-  @IsInt()
-  ticketItemId: number
+  @IsString()
+  ticketItemId: string
 
   @Expose()
   @IsDefined()

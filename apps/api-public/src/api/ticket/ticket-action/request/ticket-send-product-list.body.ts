@@ -7,7 +7,7 @@ export class TicketSendProductListBody {
   @Expose()
   @IsDefined()
   @IsArray()
-  ticketProductIdList: number[]
+  ticketProductIdList: string[]
 }
 
 export class TicketPaymentMoneyBody {

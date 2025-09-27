@@ -36,13 +36,13 @@ export default class Image {
   @Expose()
   imageInteractId: number // customerId, UserId, OrganizationId
 
-  @Column({ default: 0 })
+  @Column({ type: 'bigint' })
   @Expose()
-  ticketId: number
+  ticketId: string
 
-  @Column({ default: 0 })
+  @Column({ type: 'bigint', default: 0 })
   @Expose()
-  ticketItemId: number
+  ticketItemId: string
 
   @Column({ type: 'varchar', length: 50 })
   @Expose()

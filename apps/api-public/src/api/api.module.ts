@@ -47,6 +47,7 @@ import { ApiUserModule } from './api-user/api-user.module'
 import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
 import { ApiPurchaseOrderModule } from './purchase-order/api-purchase-order.module'
 import { StatisticModule } from './statistics/statistic.module'
+import { TicketReceptionModule } from './ticket-reception/ticket-reception.module'
 import { TicketModule } from './ticket/ticket.module'
 
 @Module({
@@ -109,6 +110,7 @@ import { TicketModule } from './ticket/ticket.module'
     ApiRadiologySampleModule,
 
     TicketModule,
+    TicketReceptionModule,
   ],
   controllers: [],
   providers: [],

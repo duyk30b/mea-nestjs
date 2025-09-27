@@ -1,5 +1,5 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
+import { Exclude, Expose } from 'class-transformer'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import { MovementType } from '../common/variable'
 import Customer from './customer.entity'
@@ -18,7 +18,15 @@ import User from './user.entity'
   'movementType',
   'id',
 ])
-export default class ProductMovement extends BaseEntity {
+export default class ProductMovement {
+  @Column()
+  @Exclude()
+  oid: number
+
+  @PrimaryColumn({ type: 'bigint' })
+  @Expose()
+  id: string
+
   @Column({ type: 'smallint' })
   @Expose()
   movementType: MovementType
@@ -27,13 +35,13 @@ export default class ProductMovement extends BaseEntity {
   @Expose()
   contactId: number
 
-  @Column() // ticketId hoặc purchaseOrder hoặc stockCheckId
+  @Column({ type: 'bigint' }) // ticketId hoặc purchaseOrder hoặc stockCheckId
   @Expose()
-  voucherId: number
+  voucherId: string
 
-  @Column({ default: 0 }) // ticketProductId hoặc purchaseOrderItemId hoặc stockCheckItemId
+  @Column({ type: 'bigint', default: 0 }) // ticketProductId hoặc purchaseOrderItemId hoặc stockCheckItemId
   @Expose()
-  voucherProductId: number
+  voucherProductId: string
 
   @Column({ default: 0 })
   @Expose()
@@ -149,38 +157,24 @@ export default class ProductMovement extends BaseEntity {
   createdAt: number
 
   @Expose()
-  @ManyToOne((type) => Product, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'productId', referencedColumnName: 'id' })
   product: Product
 
   @Expose()
-  @ManyToOne((type) => Ticket, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'contactId', referencedColumnName: 'id' })
   distributor: Distributor
 
   @Expose()
-  @ManyToOne((type) => PurchaseOrder, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
   purchaseOrder: PurchaseOrder
 
   @Expose()
-  @ManyToOne((type) => Ticket, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'contactId', referencedColumnName: 'id' })
   customer: Customer
 
   @Expose()
-  @ManyToOne((type) => Ticket, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
   ticket: Ticket
 
   @Expose()
-  @ManyToOne((type) => StockCheck, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'voucherId', referencedColumnName: 'id' })
   stockCheck: StockCheck
 
   @Expose()
-  @ManyToOne((type) => User, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'contactId', referencedColumnName: 'id' })
   user: User
 
   static fromRaw(raw: { [P in keyof ProductMovement]: any }) {

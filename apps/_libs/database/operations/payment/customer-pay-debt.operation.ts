@@ -9,7 +9,7 @@ import {
   PaymentVoucherType,
 } from '../../entities/payment.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
-import { CustomerManager, PaymentManager, TicketManager } from '../../repositories'
+import { CustomerManager, PaymentManager, TicketRepository } from '../../repositories'
 
 @Injectable()
 export class CustomerPayDebtOperation {
@@ -17,7 +17,7 @@ export class CustomerPayDebtOperation {
     private dataSource: DataSource,
     private customerManager: CustomerManager,
     private paymentManager: PaymentManager,
-    private ticketManager: TicketManager
+    private ticketRepository: TicketRepository
   ) { }
 
   async startPayDebt(options: {
@@ -28,7 +28,7 @@ export class CustomerPayDebtOperation {
     time: number
     paidAmount: number
     note: string
-    dataList: { ticketId: number; paidAmount: number }[]
+    dataList: { ticketId: string; paidAmount: number }[]
   }) {
     const { oid, customerId, cashierId, paymentMethodId, time, paidAmount, dataList } = options
     let note = options.note
@@ -40,7 +40,7 @@ export class CustomerPayDebtOperation {
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. UPDATE CUSTOMER ===
-      const ticketModifiedList = await this.ticketManager.bulkUpdate({
+      const ticketModifiedList = await this.ticketRepository.managerBulkUpdate({
         manager,
         tempList: dataList.map((i) => ({
           id: i.ticketId,
@@ -52,7 +52,7 @@ export class CustomerPayDebtOperation {
           customerId,
           debt: { RAW_QUERY: '"debt" >= temp."paidAmount"' },
         },
-        compare: ['id'],
+        compare: { id: { cast: 'bigint' } },
         update: {
           paid: (t) => `paid + "${t}"."paidAmount"`,
           debt: (t) => `debt - "${t}"."paidAmount"`,

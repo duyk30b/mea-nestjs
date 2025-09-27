@@ -1,7 +1,7 @@
 import { Controller, Delete, Get, Param, Post } from '@nestjs/common'
 import { Body, Query } from '@nestjs/common/decorators/http/route-params.decorator'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IdParam } from '../../../../_libs/common/dto/param'
+import { GenerateIdParam } from '../../../../_libs/common/dto/param'
 import { OrganizationPermission } from '../../../../_libs/common/guards/organization.guard'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
@@ -36,7 +36,7 @@ export class ApiStockCheckController {
   @OrganizationPermission(PermissionId.STOCK_CHECK)
   async detail(
     @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
+    @Param() { id }: GenerateIdParam,
     @Query() query: StockCheckGetOneQuery
   ) {
     return await this.apiStockCheckService.getOne({ oid, id, query })
@@ -54,7 +54,7 @@ export class ApiStockCheckController {
 
   @Delete('draft-destroy/:id')
   @UserPermission(PermissionId.STOCK_CHECK_DRAFT_CRUD)
-  async draftDestroy(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+  async draftDestroy(@External() { oid }: TExternal, @Param() { id }: GenerateIdParam) {
     return await this.apiStockCheckService.destroy({
       oid,
       stockCheckId: id,
@@ -63,7 +63,7 @@ export class ApiStockCheckController {
 
   @Post('draft-submit/:id')
   @UserPermission(PermissionId.STOCK_CHECK_DRAFT_CRUD)
-  async draftSubmit(@External() { oid, uid }: TExternal, @Param() { id }: IdParam) {
+  async draftSubmit(@External() { oid, uid }: TExternal, @Param() { id }: GenerateIdParam) {
     return await this.apiStockCheckService.draftSubmit({
       oid,
       stockCheckId: id,
@@ -73,7 +73,7 @@ export class ApiStockCheckController {
 
   @Post('pending-approve/:id')
   @UserPermission(PermissionId.STOCK_CHECK_DRAFT_CRUD)
-  async pendingApprove(@External() { oid, uid }: TExternal, @Param() { id }: IdParam) {
+  async pendingApprove(@External() { oid, uid }: TExternal, @Param() { id }: GenerateIdParam) {
     return await this.apiStockCheckService.pendingApprove({
       oid,
       stockCheckId: id,
@@ -83,7 +83,7 @@ export class ApiStockCheckController {
 
   @Post('confirm-reconcile/:id')
   @UserPermission(PermissionId.STOCK_CHECK_DRAFT_CRUD)
-  async confirmReconcile(@External() { oid, uid }: TExternal, @Param() { id }: IdParam) {
+  async confirmReconcile(@External() { oid, uid }: TExternal, @Param() { id }: GenerateIdParam) {
     return await this.apiStockCheckService.confirmReconcile({
       oid,
       stockCheckId: id,
@@ -93,7 +93,7 @@ export class ApiStockCheckController {
 
   @Post('void/:id')
   @UserPermission(PermissionId.STOCK_CHECK_DRAFT_CRUD)
-  async void(@External() { oid, uid }: TExternal, @Param() { id }: IdParam) {
+  async void(@External() { oid, uid }: TExternal, @Param() { id }: GenerateIdParam) {
     return await this.apiStockCheckService.void({
       oid,
       stockCheckId: id,
@@ -103,7 +103,7 @@ export class ApiStockCheckController {
 
   @Delete('cancelled-destroy/:id')
   @UserPermission(PermissionId.STOCK_CHECK_CANCELLED_DESTROY)
-  async cancelledDestroy(@External() { oid }: TExternal, @Param() { id }: IdParam) {
+  async cancelledDestroy(@External() { oid }: TExternal, @Param() { id }: GenerateIdParam) {
     return await this.apiStockCheckService.destroy({
       oid,
       stockCheckId: id,

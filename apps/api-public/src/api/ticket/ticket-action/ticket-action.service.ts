@@ -4,9 +4,7 @@ import { BusinessException } from '../../../../../_libs/common/exception-filter/
 import { BusinessError } from '../../../../../_libs/database/common/error'
 import { DeliveryStatus } from '../../../../../_libs/database/common/variable'
 import { Customer, Payment } from '../../../../../_libs/database/entities'
-import TicketProduct, {
-  TicketProductType,
-} from '../../../../../_libs/database/entities/ticket-product.entity'
+import TicketProduct from '../../../../../_libs/database/entities/ticket-product.entity'
 import { TicketRadiologyStatus } from '../../../../../_libs/database/entities/ticket-radiology.entity'
 import { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
 import {
@@ -14,14 +12,18 @@ import {
   TicketChangeAllMoneyOperator,
   TicketChangeDiscountOperation,
   TicketCloseOperation,
+  TicketDestroyOperation,
   TicketReopenOperation,
   TicketReturnProductOperation,
   TicketSendProductOperation,
 } from '../../../../../_libs/database/operations'
-import { TicketRepository } from '../../../../../_libs/database/repositories'
+import {
+  TicketProductRepository,
+  TicketRadiologyRepository,
+  TicketRepository,
+} from '../../../../../_libs/database/repositories'
 import { ImageManagerService } from '../../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
-import { TicketQueryService } from '../ticket-query/ticket-query.service'
 import { TicketClinicChangeDiscountBody, TicketReturnProductListBody } from './request'
 import { TicketChangeAllMoneyBody } from './request/ticket-change-all-money.body'
 
@@ -32,6 +34,8 @@ export class TicketActionService {
     private readonly cacheDataService: CacheDataService,
     private readonly imageManagerService: ImageManagerService,
     private readonly ticketRepository: TicketRepository,
+    private readonly ticketProductRepository: TicketProductRepository,
+    private readonly ticketRadiologyRepository: TicketRadiologyRepository,
     private readonly ticketReopenOperation: TicketReopenOperation,
     private readonly ticketSendProductOperation: TicketSendProductOperation,
     private readonly ticketReturnProductOperation: TicketReturnProductOperation,
@@ -39,10 +43,10 @@ export class TicketActionService {
     private readonly ticketCloseOperation: TicketCloseOperation,
     private readonly ticketChangeDiscountOperation: TicketChangeDiscountOperation,
     private readonly customerRefundMoneyOperation: CustomerRefundMoneyOperation,
-    private readonly ticketQueryService: TicketQueryService
+    private readonly ticketDestroyOperation: TicketDestroyOperation
   ) { }
 
-  async startExecuting(options: { oid: number; ticketId: number }) {
+  async startExecuting(options: { oid: number; ticketId: string }) {
     const { oid, ticketId } = options
     const ticketModified = await this.ticketRepository.updateOneAndReturnEntity(
       {
@@ -50,38 +54,35 @@ export class TicketActionService {
         id: ticketId,
         status: { IN: [TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Deposited] },
       },
-      {
-        status: TicketStatus.Executing,
-        startedAt: Date.now(),
-      }
+      { status: TicketStatus.Executing }
     )
-    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified })
+    this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
     return { ticketModified }
   }
 
   async changeDiscount(params: {
     oid: number
-    ticketId: number
+    ticketId: string
     body: TicketClinicChangeDiscountBody
   }) {
     const { oid, ticketId, body } = params
-    const { ticket } = await this.ticketChangeDiscountOperation.changeDiscount({
+    const { ticketModified } = await this.ticketChangeDiscountOperation.changeDiscount({
       oid,
       ticketId,
       discountType: body.discountType,
       discountMoney: body.discountMoney,
       discountPercent: body.discountPercent,
     })
-    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
+    this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
 
-    return { ticket }
+    return { ticketModified }
   }
 
-  async changeAllMoney(params: { oid: number; ticketId: number; body: TicketChangeAllMoneyBody }) {
+  async changeAllMoney(params: { oid: number; ticketId: string; body: TicketChangeAllMoneyBody }) {
     const { oid, ticketId, body } = params
     const time = Date.now()
 
-    const { ticket } = await this.ticketChangeAllMoneyOperator.changeItemMoney({
+    const { ticketModified } = await this.ticketChangeAllMoneyOperator.changeItemMoney({
       oid,
       ticketUpdate: { id: ticketId },
       ticketProductUpdate: body.ticketProductList,
@@ -91,15 +92,15 @@ export class TicketActionService {
     })
 
     // Còn tất cả các item khác cũng cần bắn, nhưng mệt, làm sau
-    this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticket] })
-    return { ticket }
+    this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
+    return { ticketModified }
   }
 
   async sendProduct(params: {
     oid: number
-    ticketId: number
+    ticketId: string
     sendAll: boolean
-    ticketProductIdList: number[]
+    ticketProductIdList: string[]
     options?: { noEmitTicket?: boolean }
   }) {
     const { oid, ticketId, sendAll, ticketProductIdList, options } = params
@@ -116,9 +117,7 @@ export class TicketActionService {
     })
     const { ticketModified, ticketProductModifiedAll } = sendProductResult
     if (!options?.noEmitTicket) {
-      this.socketEmitService.socketTicketListChange(oid, {
-        ticketUpsertedList: [ticketModified],
-      })
+      this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
     }
     if (sendProductResult.productModifiedList) {
       this.socketEmitService.productListChange(oid, {
@@ -129,17 +128,9 @@ export class TicketActionService {
       })
     }
     if (ticketProductModifiedAll) {
-      this.socketEmitService.socketTicketConsumableChange(oid, {
+      this.socketEmitService.socketTicketChange(oid, {
         ticketId,
-        ticketProductUpsertedList: ticketProductModifiedAll.filter((i) => {
-          return i.type === TicketProductType.Consumable
-        }),
-      })
-      this.socketEmitService.socketTicketPrescriptionChange(oid, {
-        ticketId,
-        ticketProductUpsertedList: ticketProductModifiedAll.filter((i) => {
-          return i.type === TicketProductType.Prescription
-        }),
+        ticketProduct: { upsertedList: ticketProductModifiedAll },
       })
     }
 
@@ -151,7 +142,7 @@ export class TicketActionService {
 
   async returnProduct(params: {
     oid: number
-    ticketId: number
+    ticketId: string
     returnList: TicketReturnProductListBody['returnList']
     returnAll: boolean
   }) {
@@ -174,25 +165,10 @@ export class TicketActionService {
     })
 
     this.socketEmitService.socketTicketChange(oid, {
-      type: 'UPDATE',
-      ticket: returnProductResult.ticket,
-    })
-
-    this.socketEmitService.socketTicketUserListChange(oid, {
       ticketId,
-      ticketUserUpsertedList: returnProductResult.ticketUserModifiedList || [],
-    })
-    this.socketEmitService.socketTicketConsumableChange(oid, {
-      ticketId,
-      ticketProductUpsertedList: ticketProductModifiedAll.filter((i) => {
-        return i.type === TicketProductType.Consumable
-      }),
-    })
-    this.socketEmitService.socketTicketPrescriptionChange(oid, {
-      ticketId,
-      ticketProductUpsertedList: ticketProductModifiedAll.filter((i) => {
-        return i.type === TicketProductType.Prescription
-      }),
+      ticketModified: returnProductResult.ticket,
+      ticketUser: { upsertedList: returnProductResult.ticketUserModifiedList || [] },
+      ticketProduct: { upsertedList: ticketProductModifiedAll },
     })
 
     return { ticketModified: returnProductResult.ticket, ticketProductModifiedAll }
@@ -201,7 +177,7 @@ export class TicketActionService {
   async close(params: {
     oid: number
     userId: number
-    ticketId: number
+    ticketId: string
     options?: { noEmitTicket?: boolean; noEmitCustomer?: boolean }
   }) {
     const { oid, userId, ticketId, options } = params
@@ -215,22 +191,24 @@ export class TicketActionService {
     const { ticketModified, customerModified, paymentCreatedList } = closeResult
 
     if (!options?.noEmitTicket) {
-      this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+      this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
     }
     if (customerModified && !options?.noEmitCustomer) {
       this.socketEmitService.customerUpsert(oid, { customer: customerModified })
     }
     if (closeResult.ticketUserDeletedList?.length || closeResult.ticketUserModifiedList?.length) {
-      this.socketEmitService.socketTicketUserListChange(oid, {
+      this.socketEmitService.socketTicketChange(oid, {
         ticketId,
-        ticketUserDestroyedList: closeResult.ticketUserDeletedList,
-        ticketUserUpsertedList: [...closeResult.ticketUserModifiedList],
+        ticketUser: {
+          destroyedList: closeResult.ticketUserDeletedList,
+          upsertedList: [...closeResult.ticketUserModifiedList],
+        },
       })
     }
     return { ticketModified, customerModified, paymentCreatedList }
   }
 
-  async reopen(params: { oid: number; userId: number; ticketId: number }) {
+  async reopen(params: { oid: number; userId: number; ticketId: string }) {
     const { oid, userId, ticketId } = params
     const reopenResult = await this.ticketReopenOperation.reopen({
       oid,
@@ -241,7 +219,7 @@ export class TicketActionService {
     })
     const { ticketModified, customerModified, paymentCreatedList } = reopenResult
 
-    this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+    this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
 
     if (customerModified) {
       this.socketEmitService.customerUpsert(oid, { customer: customerModified })
@@ -249,7 +227,7 @@ export class TicketActionService {
     return { ticketModified, customerModified, paymentCreatedList }
   }
 
-  async terminate(options: { oid: number; userId: number; ticketId: number }) {
+  async terminate(options: { oid: number; userId: number; ticketId: string }) {
     const { oid, userId, ticketId } = options
     const time = Date.now()
 
@@ -314,16 +292,18 @@ export class TicketActionService {
     if (customerModified) {
       this.socketEmitService.customerUpsert(oid, { customer: customerModified })
     }
+
+    this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
     return { ticketModified, customerModified, paymentCreatedList, ticketProductModifiedAll }
   }
 
-  async destroy(params: { oid: number; ticketId: number }) {
+  async destroy(params: { oid: number; ticketId: string }) {
     const { oid, ticketId } = params
-    const { ticket } = await this.ticketQueryService.getOne({
-      oid,
-      ticketId,
-      relation: { ticketProductList: {}, ticketRadiologyList: {} },
-    })
+    const [ticket, ticketProductList, ticketRadiologyList] = await Promise.all([
+      this.ticketRepository.findOneBy({ oid, id: ticketId }),
+      this.ticketProductRepository.findManyBy({ oid, ticketId }),
+      this.ticketRadiologyRepository.findManyBy({ oid, ticketId }),
+    ])
 
     if (!ticket) {
       throw new BusinessException('error.Database.NotFound')
@@ -333,11 +313,11 @@ export class TicketActionService {
       throw new BusinessError('Không thể hủy phiếu đã thanh toán, cần hoàn trả thanh toán trước')
     }
 
-    if (ticket.ticketProductList.find((i) => i.deliveryStatus === DeliveryStatus.Delivered)) {
+    if (ticketProductList.find((i) => i.deliveryStatus === DeliveryStatus.Delivered)) {
       throw new BusinessError('Không thể hủy phiếu đã gửi hàng, cần hoàn trả hàng trước khi hủy')
     }
 
-    if (ticket.ticketRadiologyList.find((i) => i.status === TicketRadiologyStatus.Completed)) {
+    if (ticketRadiologyList.find((i) => i.status === TicketRadiologyStatus.Completed)) {
       throw new BusinessError('Không thể hủy phiếu CĐHA đã có kết quả, cần hủy kết quả trước')
     }
 
@@ -345,9 +325,12 @@ export class TicketActionService {
       oid,
       idRemoveList: JSON.parse(ticket.imageDiagnosisIds || '[]'),
     })
-    await this.ticketRepository.update({ oid, id: ticketId }, { status: TicketStatus.Cancelled })
-    await this.ticketRepository.destroyAll({ oid, ticketId })
-    this.socketEmitService.socketTicketChange(oid, { type: 'DESTROY', ticket })
+    await this.ticketRepository.updateBasic(
+      { oid, id: ticketId },
+      { status: TicketStatus.Cancelled }
+    )
+    await this.ticketDestroyOperation.destroyAll({ oid, ticketId })
+    this.socketEmitService.socketTicketChange(oid, { ticketId, ticketDestroyedId: ticketId })
     return { ticketId }
   }
 }

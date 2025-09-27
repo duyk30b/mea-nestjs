@@ -39,8 +39,8 @@ export class TicketUpdateTicketProductOperation {
 
   async updateTicketProduct<T extends TicketProductUpdateDtoType>(params: {
     oid: number
-    ticketId: number
-    ticketProductId: number
+    ticketId: string
+    ticketProductId: string
     ticketProductType: TicketProductType
     ticketProductUpdateDto?: NoExtra<TicketProductUpdateDtoType, T>
     ticketUserRequestList?: Pick<TicketUser, 'positionId' | 'userId'>[]
@@ -80,7 +80,7 @@ export class TicketUpdateTicketProductOperation {
           [DeliveryStatus.Pending, DeliveryStatus.NoStock].includes(
             ticketProductOrigin.deliveryStatus
           )
-          && [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.TicketPaid].includes(ticketProductOrigin.paymentMoneyStatus)
+          && ticketProductOrigin.paymentMoneyStatus === PaymentMoneyStatus.PendingPaid
         ) {
           ticketProductModified = await this.ticketProductManager.updateOneAndReturnEntity(
             manager,
@@ -143,7 +143,6 @@ export class TicketUpdateTicketProductOperation {
               userId: i.userId,
               quantity: 1,
               ticketItemId: ticketProductModified.id,
-              ticketItemChildId: 0,
               positionInteractId: ticketProductModified.productId,
               ticketItemExpectedPrice: ticketProductModified.expectedPrice,
               ticketItemActualPrice: ticketProductModified.actualPrice,

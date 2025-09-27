@@ -6,8 +6,8 @@ export class LaboratoryGroupResultBody {
   @ApiProperty({ example: 56 })
   @Expose()
   @IsDefined()
-  @IsInt()
-  id: number
+  @IsString()
+  id: string
 
   @ApiProperty({ example: 56 })
   @Expose()
@@ -19,7 +19,7 @@ export class LaboratoryGroupResultBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  ticketLaboratoryId: number
+  ticketLaboratoryId: string
 
   @ApiProperty({ example: 'Âm tính' })
   @Expose()

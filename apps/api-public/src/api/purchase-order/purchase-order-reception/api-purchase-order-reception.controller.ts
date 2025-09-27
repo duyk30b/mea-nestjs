@@ -1,7 +1,7 @@
 import { Controller, Param, Patch, Post } from '@nestjs/common'
 import { Body } from '@nestjs/common/decorators/http/route-params.decorator'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IdParam } from '../../../../../_libs/common/dto/param'
+import { GenerateIdParam, IdParam } from '../../../../../_libs/common/dto/param'
 import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
 import { BaseResponse } from '../../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
@@ -31,7 +31,7 @@ export class ApiPurchaseOrderReceptionController {
   @UserPermission(PermissionId.PURCHASE_ORDER_DRAFT_CRUD)
   async updateDraft(
     @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
+    @Param() { id }: GenerateIdParam,
     @Body() body: PurchaseOrderUpsertDraftBody
   ): Promise<BaseResponse> {
     const data = await this.apiPurchaseOrderReceptionService.updateDraft({
@@ -46,7 +46,7 @@ export class ApiPurchaseOrderReceptionController {
   @UserPermission(PermissionId.PURCHASE_ORDER_DEPOSITED_UPDATE)
   async depositedUpdate(
     @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
+    @Param() { id }: GenerateIdParam,
     @Body() body: PurchaseOrderUpdateDepositedBody
   ): Promise<BaseResponse> {
     const data = await this.apiPurchaseOrderReceptionService.depositedUpdate({

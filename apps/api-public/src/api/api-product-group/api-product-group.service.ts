@@ -5,11 +5,11 @@ import { BaseResponse } from '../../../../_libs/common/interceptor/transform-res
 import { ProductGroupInsertType } from '../../../../_libs/database/entities/product-group.entity'
 import { ProductGroupRepository } from '../../../../_libs/database/repositories/product-group.repository'
 import {
-  ProductGroupCreateBody,
-  ProductGroupGetManyQuery,
-  ProductGroupPaginationQuery,
-  ProductGroupReplaceAllBody,
-  ProductGroupUpdateBody,
+    ProductGroupCreateBody,
+    ProductGroupGetManyQuery,
+    ProductGroupPaginationQuery,
+    ProductGroupReplaceAllBody,
+    ProductGroupUpdateBody,
 } from './request'
 
 @Injectable()
@@ -67,7 +67,7 @@ export class ApiProductGroupService {
   }
 
   async updateOne(oid: number, id: number, body: ProductGroupUpdateBody): Promise<BaseResponse> {
-    const affected = await this.productGroupRepository.update({ id, oid }, body)
+    const affected = await this.productGroupRepository.updateBasic({ id, oid }, body)
     const data = await this.productGroupRepository.findOneBy({ oid, id })
     return { data }
   }

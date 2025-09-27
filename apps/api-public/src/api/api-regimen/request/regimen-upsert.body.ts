@@ -24,6 +24,12 @@ export class RegimenItemBody {
   @IsDefined()
   @IsInt()
   quantity: number // Giá dịch vụ
+
+  @ApiProperty({ example: 1 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  gapDay: number // Giá dịch vụ
 }
 
 export class RegimenBody {
@@ -38,18 +44,6 @@ export class RegimenBody {
   @IsDefined()
   @IsString()
   name: string // tên dịch vụ
-
-  @ApiProperty({ example: 105000 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  gapHours: number // Giá dịch vụ
-
-  @ApiProperty({ example: 105000 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  gapHoursType: number // Giá dịch vụ
 
   @ApiProperty({ example: 1 })
   @Expose()

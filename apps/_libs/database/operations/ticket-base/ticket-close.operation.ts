@@ -41,7 +41,7 @@ export class TicketCloseOperation {
 
   async startClose(params: {
     oid: number
-    ticketId: number
+    ticketId: string
     time: number
     note: string
     userId: number

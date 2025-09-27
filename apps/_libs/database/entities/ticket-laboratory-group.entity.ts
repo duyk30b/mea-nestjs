@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
 import { PaymentMoneyStatus, TicketLaboratoryStatus } from '../common/variable'
 import Customer from './customer.entity'
 import LaboratoryGroup from './laboratory-group.entity'
@@ -12,17 +12,17 @@ import Ticket from './ticket.entity'
 @Index('IDX_TicketLaboratoryGroup__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketLaboratoryGroup__oid_createdAt', ['oid', 'createdAt'])
 export default class TicketLaboratoryGroup {
-  @Column({ name: 'oid' })
+  @Column()
   @Exclude()
   oid: number
 
-  @PrimaryGeneratedColumn({ name: 'id' })
-  @Expose({ name: 'id' })
-  id: number
-
-  @Column()
+  @PrimaryColumn({ type: 'bigint' })
   @Expose()
-  ticketId: number
+  id: string
+
+  @Column({ type: 'bigint' })
+  @Expose()
+  ticketId: string
 
   @Expose()
   @Column({ default: 0 })
@@ -40,7 +40,7 @@ export default class TicketLaboratoryGroup {
   @Expose()
   status: TicketLaboratoryStatus
 
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
+  @Column({ type: 'smallint', default: PaymentMoneyStatus.PendingPaid })
   @Expose()
   paymentMoneyStatus: PaymentMoneyStatus
 
@@ -124,7 +124,7 @@ export type TicketLaboratoryGroupRelationType = {
 
 export type TicketLaboratoryGroupInsertType = Omit<
   TicketLaboratoryGroup,
-  keyof TicketLaboratoryGroupRelationType | keyof Pick<TicketLaboratoryGroup, 'id'>
+  keyof TicketLaboratoryGroupRelationType
 >
 
 export type TicketLaboratoryGroupUpdateType = {

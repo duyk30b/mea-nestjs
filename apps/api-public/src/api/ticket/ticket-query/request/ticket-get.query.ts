@@ -28,10 +28,7 @@ export class TicketGetQuery {
 
   @ApiPropertyOptional({
     type: String,
-    example: JSON.stringify(<TicketFilterQuery>{
-      customerId: 1,
-      startedAt: { GT: 150000 },
-    }),
+    example: JSON.stringify(<TicketFilterQuery>{ customerId: 1 }),
   })
   @Expose()
   @Transform(({ value }) => {

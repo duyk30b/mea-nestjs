@@ -50,20 +50,20 @@ export class ApiOrganizationService {
     let logoImageId = organizationOrigin.logoImageId || 0
 
     if (body.imagesChange) {
-      const { imageIdsNew } = await this.imageManagerService.changeCloudinaryImageLink({
+      const { imageIdListNew } = await this.imageManagerService.changeCloudinaryImageLink({
         oid,
         files,
-        imageIdsWait: [0],
+        imageIdWaitList: [0],
         externalUrlList: body.imagesChange.externalUrlList,
-        imageIdsOld: [organizationOrigin.logoImageId || 0],
+        imageIdListOld: [organizationOrigin.logoImageId || 0],
         imageInteract: {
           imageInteractType: ImageInteractType.Organization,
           imageInteractId: oid,
-          ticketId: 0,
-          ticketItemId: 0,
+          ticketId: '0',
+          ticketItemId: '0',
         },
       })
-      logoImageId = imageIdsNew[0]
+      logoImageId = imageIdListNew[0]
     }
 
     const organization = await this.organizationRepository.updateOneAndReturnEntity(

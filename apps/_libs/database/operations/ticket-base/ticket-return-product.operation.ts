@@ -2,20 +2,19 @@ import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { ESArray } from '../../../common/helpers/array.helper'
 import { DeliveryStatus, MovementType } from '../../common/variable'
-import { TicketUser } from '../../entities'
+import { TicketBatch, TicketUser } from '../../entities'
 import { PositionType } from '../../entities/position.entity'
-import { ProductMovementInsertType } from '../../entities/product-movement.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
 import {
-  BatchManager,
-  ProductManager,
-  ProductMovementManager,
   TicketBatchManager,
+  TicketBatchRepository,
   TicketManager,
   TicketProductManager,
+  TicketProductRepository,
   TicketUserManager,
+  TicketUserRepository,
 } from '../../repositories'
-import { ProductPutawayOperation } from '../product/product-putaway.operation'
+import { ProductPutawayManager } from '../product/product-putaway.manager'
 import { TicketChangeItemMoneyManager } from './ticket-change-item-money.manager'
 
 @Injectable()
@@ -23,22 +22,22 @@ export class TicketReturnProductOperation {
   constructor(
     private dataSource: DataSource,
     private ticketManager: TicketManager,
-    private productManager: ProductManager,
-    private batchManager: BatchManager,
     private ticketProductManager: TicketProductManager,
+    private ticketProductRepository: TicketProductRepository,
     private ticketBatchManager: TicketBatchManager,
+    private ticketBatchRepository: TicketBatchRepository,
     private ticketUserManager: TicketUserManager,
+    private ticketUseRepository: TicketUserRepository,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager,
-    private productMovementManager: ProductMovementManager,
-    private productPutawayOperation: ProductPutawayOperation
+    private productPutawayManager: ProductPutawayManager
   ) { }
 
   async returnProduct(data: {
     oid: number
-    ticketId: number
+    ticketId: string
     time: number
     returnList: {
-      ticketBatchId: number
+      ticketBatchId: string
       quantityReturn: number
     }[]
     returnAll: boolean
@@ -57,22 +56,25 @@ export class TicketReturnProductOperation {
 
       if (!returnList.length && !returnAll) return { ticket: ticketOrigin }
 
-      const ticketBatchOriginList = await this.ticketBatchManager.findManyBy(manager, {
-        oid,
-        ticketId,
-        deliveryStatus: DeliveryStatus.Delivered,
-        ...(returnAll
-          ? {}
-          : {
-            id: { IN: returnList.filter((i) => !!i.ticketBatchId).map((i) => i.ticketBatchId) },
-          }),
-      })
+      let ticketBatchOriginList: TicketBatch[] = []
       if (returnAll) {
+        ticketBatchOriginList = await this.ticketBatchManager.findManyBy(manager, {
+          oid,
+          ticketId,
+          deliveryStatus: DeliveryStatus.Delivered,
+        })
         returnList = ticketBatchOriginList.map((i) => {
           return {
             ticketBatchId: i.id,
             quantityReturn: i.quantity,
           }
+        })
+      } else {
+        ticketBatchOriginList = await this.ticketBatchManager.findManyBy(manager, {
+          id: { IN: returnList.filter((i) => !!i.ticketBatchId).map((i) => i.ticketBatchId) },
+          oid,
+          ticketId,
+          deliveryStatus: DeliveryStatus.Delivered,
         })
       }
 
@@ -86,27 +88,19 @@ export class TicketReturnProductOperation {
       })
       const ticketProductOriginMap = ESArray.arrayToKeyValue(ticketProductOriginList, 'id')
 
-      // === 2. Product and Batch origin
-      const productIdList = ticketBatchOriginList.map((i) => i.productId)
-      const batchIdList = ticketBatchOriginList.map((i) => i.batchId)
-      const productOriginList = await this.productManager.updateAndReturnEntity(
+      const putawayContainer = await this.productPutawayManager.startPutaway({
         manager,
-        { oid, id: { IN: ESArray.uniqueArray(productIdList) }, isActive: 1 },
-        { updatedAt: time }
-      )
-      const batchOriginList = await this.batchManager.updateAndReturnEntity(
-        manager,
-        { oid, id: { IN: ESArray.uniqueArray(batchIdList) }, isActive: 1 },
-        { updatedAt: time }
-      )
-      const putawayContainer = this.productPutawayOperation.generatePutawayPlan({
-        productOriginList,
-        batchOriginList,
-        voucherBatchList: returnList.map((i) => {
+        oid,
+        voucherId: ticketId,
+        contactId: ticketOrigin.customerId,
+        movementType: MovementType.Ticket,
+        isRefund: 1,
+        time,
+        voucherBatchPutawayList: returnList.map((i) => {
           const ticketBatchOrigin = ticketBatchOriginMap[i.ticketBatchId]
           return {
             voucherProductId: ticketBatchOrigin.ticketProductId,
-            voucherBatchId: i.ticketBatchId,
+            voucherBatchId: ticketBatchOrigin.id,
             warehouseId: ticketBatchOrigin.warehouseId,
             productId: ticketBatchOrigin.productId,
             batchId: ticketBatchOrigin.batchId,
@@ -115,16 +109,19 @@ export class TicketReturnProductOperation {
               ticketBatchOrigin.quantity == 0
                 ? 0
                 : (ticketBatchOrigin.costAmount * i.quantityReturn) / ticketBatchOrigin.quantity,
+            expectedPrice: ticketBatchOrigin.expectedPrice,
+            actualPrice: ticketBatchOrigin.actualPrice,
           }
         }),
       })
+      const { putawayPlan, batchModifiedList, productModifiedList } = putawayContainer
 
       // 3. === UPDATE for TICKET_PRODUCT ===
-      const ticketProductModifiedList = await this.ticketProductManager.bulkUpdate({
+      const ticketProductModifiedList = await this.ticketProductRepository.managerBulkUpdate({
         manager,
         condition: { oid, ticketId, deliveryStatus: { EQUAL: DeliveryStatus.Delivered } },
-        compare: ['id', 'productId'],
-        tempList: putawayContainer.putawayVoucherProductList.map((i) => {
+        compare: { id: { cast: 'bigint' }, productId: true },
+        tempList: putawayPlan.putawayVoucherProductList.map((i) => {
           return {
             id: i.voucherProductId,
             productId: i.productId,
@@ -160,11 +157,16 @@ export class TicketReturnProductOperation {
       const ticketProductModifiedMap = ESArray.arrayToKeyValue(ticketProductModifiedList, 'id')
 
       // 4. === TICKET_BATCH: UPDATE ===
-      const ticketBatchModifiedList = await this.ticketBatchManager.bulkUpdate({
+      const ticketBatchModifiedList = await this.ticketBatchRepository.managerBulkUpdate({
         manager,
         condition: { oid, ticketId, deliveryStatus: { EQUAL: DeliveryStatus.Delivered } },
-        compare: ['id', 'ticketProductId', 'productId', 'batchId'],
-        tempList: putawayContainer.putawayVoucherBatchList.map((i) => {
+        compare: {
+          id: { cast: 'bigint' },
+          ticketProductId: { cast: 'bigint' },
+          productId: true,
+          batchId: true,
+        },
+        tempList: putawayPlan.putawayVoucherBatchList.map((i) => {
           return {
             id: i.voucherBatchId,
             ticketProductId: i.voucherProductId,
@@ -196,76 +198,6 @@ export class TicketReturnProductOperation {
         })
       }
 
-      // 5. === UPDATE for PRODUCT and BATCH ===
-      const productModifiedList = await this.productManager.bulkUpdate({
-        manager,
-        condition: { oid },
-        compare: ['id'],
-        tempList: putawayContainer.putawayProductList.map((i) => {
-          return {
-            id: i.productId,
-            putawayQuantity: i.putawayQuantity, // không được cộng trừ theo thằng này vì trường hợp NoImpact
-            quantity: i.closeQuantity,
-          }
-        }),
-        update: ['quantity'],
-        options: { requireEqualLength: true },
-      })
-      const productModifiedMap = ESArray.arrayToKeyValue(productModifiedList, 'id')
-
-      const batchModifiedList = await this.batchManager.bulkUpdate({
-        manager,
-        condition: { oid },
-        compare: ['id', 'productId'],
-        tempList: putawayContainer.putawayBatchList
-          .filter((i) => !!i.batchId)
-          .map((i) => {
-            return {
-              id: i.batchId,
-              productId: i.productId,
-              putawayQuantity: i.putawayQuantity,
-              putawayCostAmount: i.putawayCostAmount,
-            }
-          }),
-        update: {
-          quantity: () => `"quantity" + "putawayQuantity"`,
-          costAmount: () => `"costAmount" + "putawayCostAmount"`,
-        },
-        options: { requireEqualLength: true },
-      })
-      const batchModifiedMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')
-
-      // 6. === CREATE: PRODUCT_MOVEMENT ===
-      const productMovementInsertList = putawayContainer.putawayMovementList.map((paMovement) => {
-        const tpOrigin = ticketProductOriginMap[paMovement.voucherProductId]
-        const productMovementInsert: ProductMovementInsertType = {
-          oid,
-          movementType: MovementType.Ticket,
-          contactId: ticketOrigin.customerId,
-          voucherId: ticketOrigin.id,
-          voucherProductId: tpOrigin.id,
-          warehouseId: paMovement.warehouseId,
-          productId: paMovement.productId,
-          batchId: paMovement.batchId,
-
-          createdAt: time,
-          isRefund: 1,
-          expectedPrice: tpOrigin.expectedPrice,
-          actualPrice: tpOrigin.actualPrice,
-
-          quantity: paMovement.putawayQuantity,
-          costAmount: paMovement.putawayCostAmount,
-          openQuantityProduct: paMovement.openQuantityProduct,
-          closeQuantityProduct: paMovement.closeQuantityProduct,
-          openQuantityBatch: paMovement.openQuantityBatch,
-          closeQuantityBatch: paMovement.closeQuantityBatch,
-          openCostAmountBatch: paMovement.openCostAmountBatch,
-          closeCostAmountBatch: paMovement.closeCostAmountBatch,
-        }
-        return productMovementInsert
-      })
-      await this.productMovementManager.insertMany(manager, productMovementInsertList)
-
       // 9. === TICKET_USER and POSITION
       const ticketUserOriginList = await this.ticketUserManager.findManyBy(manager, {
         oid,
@@ -276,10 +208,10 @@ export class TicketReturnProductOperation {
       let ticketUserModifiedList: TicketUser[] = []
       let commissionMoneyReturn = 0
       if (ticketUserOriginList.length) {
-        ticketUserModifiedList = await this.ticketUserManager.bulkUpdate({
+        ticketUserModifiedList = await this.ticketUseRepository.managerBulkUpdate({
           manager,
           condition: { oid, ticketId, positionType: PositionType.ProductRequest },
-          compare: ['ticketItemId'],
+          compare: { ticketItemId: { cast: 'bigint' } },
           update: ['quantity'],
           tempList: ticketProductModifiedList.map((i) => {
             return { quantity: i.quantity, ticketItemId: i.id }

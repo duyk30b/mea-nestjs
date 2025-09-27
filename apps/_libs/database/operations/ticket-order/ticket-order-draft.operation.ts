@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { ESTimer } from '../../../common/helpers/time.helper'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
-import { DeliveryStatus } from '../../common/variable'
+import { GenerateId } from '../../common/generate-id'
+import { DeliveryStatus, PaymentEffect, PaymentMoneyStatus } from '../../common/variable'
 import { TicketAttributeInsertType } from '../../entities/ticket-attribute.entity'
 import TicketExpense, {
   TicketExpenseInsertType,
@@ -52,7 +53,7 @@ export type TicketOrderDraftUpsertType = Pick<
   | 'expense'
   | 'commissionMoney'
   | 'profit'
-  | 'registeredAt'
+  | 'createdAt'
   | 'note'
 >
 
@@ -61,7 +62,16 @@ export type TicketOrderProductDraftType = Omit<
   | keyof TicketProductRelationType
   | keyof Pick<
     TicketProduct,
-    'oid' | 'id' | 'ticketId' | 'deliveryStatus' | 'customerId' | 'quantityPrescription' | 'type'
+    | 'oid'
+    | 'id'
+    | 'ticketId'
+    | 'deliveryStatus'
+    | 'customerId'
+    | 'quantityPrescription'
+    | 'type'
+    | 'ticketProcedureId'
+    | 'paymentMoneyStatus'
+    | 'paymentEffect'
   >
 >
 
@@ -75,7 +85,6 @@ export type TicketOrderProcedureDraftType = Pick<
   | 'discountPercent'
   | 'discountType'
   | 'actualPrice'
-  | 'paymentMoneyStatus'
 >
 
 export type TicketOrderSurchargeDraftType = Omit<
@@ -106,7 +115,7 @@ export class TicketOrderDraftOperation {
     X extends TicketOrderProcedureDraftType,
   >(params: {
     oid: number
-    ticketId: number
+    ticketId: string
     ticketOrderDraftUpsertDto: NoExtra<TicketOrderDraftUpsertType, T>
     ticketOrderProductDraftListDto: NoExtra<TicketOrderProductDraftType, U>[]
     ticketOrderProcedureDraftListDto: NoExtra<TicketOrderProcedureDraftType, X>[]
@@ -118,13 +127,14 @@ export class TicketOrderDraftOperation {
       oid,
       ticketId,
       ticketOrderProductDraftListDto,
-      ticketOrderProcedureDraftListDto,
       ticketOrderSurchargeDraftListDto,
       ticketOrderExpenseDraftListDto,
       ticketAttributeDraftListDto,
     } = params
+    const ticketOrderProcedureDraftListDto: TicketOrderProcedureDraftType[] =
+      params.ticketOrderProcedureDraftListDto
     const ticketOrderDraftUpsertDto: TicketOrderDraftUpsertType = params.ticketOrderDraftUpsertDto
-    const registeredAt = ticketOrderDraftUpsertDto.registeredAt
+    const createdAt = ticketOrderDraftUpsertDto.createdAt
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       let ticket: Ticket
@@ -136,13 +146,15 @@ export class TicketOrderDraftOperation {
           : DeliveryStatus.NoStock,
         paid: 0,
         debt: ticketOrderDraftUpsertDto.totalMoney,
-        startedAt: registeredAt,
-        year: ESTimer.info(registeredAt, 7).year,
-        month: ESTimer.info(registeredAt, 7).month + 1,
-        date: ESTimer.info(registeredAt, 7).date,
+        createdAt,
+        receptionAt: createdAt,
+        year: ESTimer.info(createdAt, 7).year,
+        month: ESTimer.info(createdAt, 7).month + 1,
+        date: ESTimer.info(createdAt, 7).date,
         dailyIndex: 0,
         endedAt: null,
         imageDiagnosisIds: '[]',
+        isPaymentEachItem: 0,
       }
       if (!ticketId) {
         ticket = await this.ticketManager.insertOneAndReturnEntity(manager, {
@@ -167,13 +179,17 @@ export class TicketOrderDraftOperation {
         const ticketProductListInsert = ticketOrderProductDraftListDto.map((i) => {
           const ticketProduct: NoExtra<TicketProductInsertType> = {
             ...i,
+            id: GenerateId.nextId(),
             oid,
             ticketId: ticket.id,
             customerId: ticketOrderDraftUpsertDto.customerId,
             deliveryStatus: DeliveryStatus.Pending,
             quantityPrescription: i.quantity,
             type: TicketProductType.Prescription,
+            paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+            paymentEffect: PaymentEffect.SelfPayment,
             costAmount: i.costAmount, // tính lãi tạm thời, chỉ có thể tính chính xác khi gửi hàng, lúc đó tính cost theo từng lô hàng
+            ticketProcedureId: '0',
           }
           return ticketProduct
         })
@@ -187,20 +203,22 @@ export class TicketOrderDraftOperation {
         const ticketProcedureListInsert = ticketOrderProcedureDraftListDto.map((i) => {
           const ticketProcedure: TicketProcedureInsertType = {
             ...i,
+            id: GenerateId.nextId(),
             oid,
             ticketId: ticket.id,
             customerId: ticketOrderDraftUpsertDto.customerId,
-            createdAt: ticketOrderDraftUpsertDto.registeredAt,
+            createdAt: ticketOrderDraftUpsertDto.createdAt,
             status: TicketProcedureStatus.Completed,
             imageIds: JSON.stringify([]),
             result: '',
             completedAt: null,
             costAmount: 0,
-            ticketRegimenId: 0,
-            ticketRegimenItemId: 0,
+            ticketRegimenId: '0',
+            ticketRegimenItemId: '0',
+            indexSession: 0,
             commissionAmount: 0,
             ticketProcedureType: TicketProcedureType.Normal,
-            sessionIndex: 0,
+            paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
           }
           return ticketProcedure
         })

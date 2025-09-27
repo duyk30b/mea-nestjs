@@ -44,7 +44,7 @@ export class PurchaseOrderDepositedOperation {
     X extends PurchaseOrderItemDepositedType,
   >(params: {
     oid: number
-    purchaseOrderId: number
+    purchaseOrderId: string
     purchaseOrderUpdateDto: NoExtra<PurchaseOrderDepositedUpdateType, T>
     purchaseOrderItemListDto: NoExtra<PurchaseOrderItemDepositedType, X>[]
   }) {

@@ -1,21 +1,34 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity, Index } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
-import { DiscountType, PaymentMoneyStatus, TicketRegimenStatus } from '../common/variable'
+import { Exclude, Expose } from 'class-transformer'
+import { Column, Entity, Index, PrimaryColumn } from 'typeorm'
+import {
+  DiscountType,
+  PaymentEffect,
+  PaymentMoneyStatus,
+  TicketRegimenStatus,
+} from '../common/variable'
 import Customer from './customer.entity'
 import Regimen from './regimen.entity'
 import TicketProcedure from './ticket-procedure.entity'
+import TicketRegimenItem from './ticket-regimen-item.entity'
 import TicketUser from './ticket-user.entity'
 import Ticket from './ticket.entity'
 
 @Entity('TicketRegimen')
-@Index('IDX_TicketRegimen__oid_customerId', ['oid', 'customerId'])
 @Index('IDX_TicketRegimen__oid_ticketId', ['oid', 'ticketId'])
+@Index('IDX_TicketRegimen__oid_customerId', ['oid', 'customerId'])
 @Index('IDX_TicketRegimen__oid_regimenId', ['oid', 'regimenId'])
-export default class TicketRegimen extends BaseEntity {
+export default class TicketRegimen {
   @Column()
+  @Exclude()
+  oid: number
+
+  @PrimaryColumn({ type: 'bigint' })
   @Expose()
-  ticketId: number
+  id: string
+
+  @Column({ type: 'bigint' })
+  @Expose()
+  ticketId: string
 
   @Column()
   @Expose()
@@ -24,6 +37,22 @@ export default class TicketRegimen extends BaseEntity {
   @Column()
   @Expose()
   regimenId: number
+
+  @Column({ type: 'smallint', default: PaymentMoneyStatus.PendingPaid })
+  @Expose()
+  paymentMoneyStatus: PaymentMoneyStatus
+
+  @Column({ type: 'smallint', default: TicketRegimenStatus.Pending })
+  @Expose()
+  status: TicketRegimenStatus
+
+  @Column({ default: 0 })
+  @Expose()
+  costAmount: number // Tiền hoa hồng'
+
+  @Column({ default: 0 })
+  @Expose()
+  commissionAmount: number // Tiền hoa hồng
 
   @Column({ default: 0 })
   @Expose()
@@ -50,22 +79,6 @@ export default class TicketRegimen extends BaseEntity {
   @Column({ default: 0 })
   @Expose()
   actualPrice: number // Giá thực tế
-
-  @Column({ default: 0 })
-  @Expose()
-  costAmount: number // Tiền hoa hồng'
-
-  @Column({ default: 0 })
-  @Expose()
-  commissionAmount: number // Tiền hoa hồng
-
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
-  @Expose()
-  paymentMoneyStatus: PaymentMoneyStatus
-
-  @Column({ type: 'smallint', default: TicketRegimenStatus.Pending })
-  @Expose()
-  status: TicketRegimenStatus
 
   @Column({
     type: 'bigint',
@@ -98,10 +111,13 @@ export default class TicketRegimen extends BaseEntity {
   regimen: Regimen
 
   @Expose()
-  ticketProcedureList: TicketProcedure[]
+  ticketUserRequestList: TicketUser[]
 
   @Expose()
-  ticketUserRequestList: TicketUser[]
+  ticketRegimenItemList: TicketRegimenItem[]
+
+  @Expose()
+  ticketProcedureList: TicketProcedure[]
 
   static fromRaw(raw: { [P in keyof TicketRegimen]: any }) {
     if (!raw) return null
@@ -126,14 +142,16 @@ export default class TicketRegimen extends BaseEntity {
 export type TicketRegimenRelationType = {
   [P in keyof Pick<
     TicketRegimen,
-    'ticket' | 'regimen' | 'customer' | 'ticketProcedureList' | 'ticketUserRequestList'
+    | 'ticket'
+    | 'regimen'
+    | 'customer'
+    | 'ticketRegimenItemList'
+    | 'ticketProcedureList'
+    | 'ticketUserRequestList'
   >]?: boolean
 }
 
-export type TicketRegimenInsertType = Omit<
-  TicketRegimen,
-  keyof TicketRegimenRelationType | keyof Pick<TicketRegimen, 'id'>
->
+export type TicketRegimenInsertType = Omit<TicketRegimen, keyof TicketRegimenRelationType>
 
 export type TicketRegimenUpdateType = {
   [K in Exclude<

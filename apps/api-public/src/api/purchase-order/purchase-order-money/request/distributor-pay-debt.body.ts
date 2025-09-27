@@ -7,8 +7,8 @@ class DataList {
   @ApiProperty({ example: 12 })
   @Expose()
   @IsDefined()
-  @IsInt()
-  purchaseOrderId: number
+  @IsString()
+  purchaseOrderId: string
 
   @Expose()
   @IsDefined()

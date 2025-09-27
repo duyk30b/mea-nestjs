@@ -57,7 +57,7 @@ export class ApiCustomerSourceService {
   }
 
   async updateOne(oid: number, id: number, body: CustomerSourceUpdateBody): Promise<BaseResponse> {
-    const affected = await this.customerSourceRepository.update({ id, oid }, body)
+    const affected = await this.customerSourceRepository.updateBasic({ id, oid }, body)
     const data = await this.customerSourceRepository.findOneBy({ oid, id })
     return { data }
   }

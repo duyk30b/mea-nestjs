@@ -1,6 +1,6 @@
 import { Body, Controller, Param, Post } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IdParam } from '../../../../../_libs/common/dto'
+import { GenerateIdParam } from '../../../../../_libs/common/dto'
 import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
 import { BaseResponse } from '../../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
@@ -22,7 +22,7 @@ export class ApiPurchaseOrderMoneyController {
   @UserPermission(PermissionId.PURCHASE_ORDER_PAYMENT_MONEY)
   async prepaymentMoney(
     @External() { oid, uid }: TExternal,
-    @Param() { id }: IdParam,
+    @Param() { id }: GenerateIdParam,
     @Body() body: DistributorPrepaymentBody
   ): Promise<BaseResponse> {
     const data = await this.purchaseOrderMoneyService.prepaymentMoney({
@@ -52,7 +52,7 @@ export class ApiPurchaseOrderMoneyController {
   @UserPermission(PermissionId.PURCHASE_ORDER_REFUND_MONEY)
   async refundMoney(
     @External() { oid, uid }: TExternal,
-    @Param() { id }: IdParam,
+    @Param() { id }: GenerateIdParam,
     @Body() body: DistributorRefundMoneyBody
   ): Promise<BaseResponse> {
     const data = await this.purchaseOrderMoneyService.refundMoney({

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
+import { GenerateId } from '../../../common/generate-id'
 import { TicketLaboratoryStatus } from '../../../common/variable'
 import { TicketLaboratoryGroup } from '../../../entities'
 import TicketLaboratory, {
@@ -48,7 +49,7 @@ export class TicketChangeSelectLaboratoryOperation {
 
   async changeSelectLaboratoryList<U extends TicketLaboratoryGroupUpdateBasicType>(params: {
     oid: number
-    ticketId: number
+    ticketId: string
     ticketLaboratoryGroupDto: NoExtra<TicketLaboratoryGroupUpdateBasicType, U>
     ticketLaboratoryListDto: TicketLaboratoryUpdateBasicType[]
   }) {
@@ -65,7 +66,7 @@ export class TicketChangeSelectLaboratoryOperation {
 
       // === 2. UPDATE ===
       let tlgModified: TicketLaboratoryGroup
-      if (ticketLaboratoryGroupDto.id !== 0) {
+      if (ticketLaboratoryGroupDto.id) {
         tlgModified = await this.ticketLaboratoryGroupManager.updateOneAndReturnEntity(
           manager,
           { oid, ticketId, id: ticketLaboratoryGroupDto.id },
@@ -98,6 +99,7 @@ export class TicketChangeSelectLaboratoryOperation {
         .map((tlDto) => {
           const tlEntity: NoExtra<TicketLaboratoryInsertType> = {
             ...tlDto,
+            id: GenerateId.nextId(),
             oid,
             ticketId,
             customerId: ticketOrigin.customerId,

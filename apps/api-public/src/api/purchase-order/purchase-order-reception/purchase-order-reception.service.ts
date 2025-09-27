@@ -135,7 +135,7 @@ export class ApiPurchaseOrderReceptionService {
 
   async updateDraft(params: {
     oid: number
-    purchaseOrderId: number
+    purchaseOrderId: string
     body: PurchaseOrderUpsertDraftBody
   }) {
     const { oid, purchaseOrderId, body } = params
@@ -240,7 +240,7 @@ export class ApiPurchaseOrderReceptionService {
 
   async depositedUpdate(params: {
     oid: number
-    purchaseOrderId: number
+    purchaseOrderId: string
     body: PurchaseOrderUpdateDepositedBody
   }) {
     const { oid, purchaseOrderId, body } = params

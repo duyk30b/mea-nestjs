@@ -1,6 +1,5 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
+import { Exclude, Expose } from 'class-transformer'
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm'
 import { DeliveryStatus, DiscountType } from '../common/variable'
 import Distributor from './distributor.entity'
 import Payment from './payment.entity'
@@ -19,7 +18,15 @@ export enum PurchaseOrderStatus {
 @Entity('PurchaseOrder')
 @Index('IDX_PurchaseOrder__oid_distributorId', ['oid', 'distributorId'])
 @Index('IDX_PurchaseOrder__oid_startedAt', ['oid', 'startedAt'])
-export default class PurchaseOrder extends BaseEntity {
+export default class PurchaseOrder {
+  @Column()
+  @Exclude()
+  oid: number
+
+  @PrimaryColumn({ type: 'bigint' })
+  @Expose()
+  id: string
+
   @Column()
   @Expose()
   distributorId: number
@@ -166,17 +173,13 @@ export default class PurchaseOrder extends BaseEntity {
 }
 
 export type PurchaseOrderRelationType = {
-  [P in keyof Pick<PurchaseOrder, 'distributor' | 'paymentList'>]?: boolean
-} & {
-  [P in keyof Pick<PurchaseOrder, 'purchaseOrderItemList'>]?:
-  | { [P in keyof Pick<PurchaseOrderItem, 'product' | 'batch'>]?: boolean }
-  | false
+  [P in keyof Pick<
+    PurchaseOrder,
+    'distributor' | 'paymentList' | 'purchaseOrderItemList'
+  >]?: boolean
 }
 
-export type PurchaseOrderInsertType = Omit<
-  PurchaseOrder,
-  keyof PurchaseOrderRelationType | keyof Pick<PurchaseOrder, 'id'>
->
+export type PurchaseOrderInsertType = Omit<PurchaseOrder, keyof PurchaseOrderRelationType>
 
 export type PurchaseOrderUpdateType = {
   [K in Exclude<

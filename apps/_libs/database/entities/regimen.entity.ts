@@ -30,14 +30,6 @@ export default class Regimen {
   @Expose()
   name: string
 
-  @Column({ default: 24 })
-  @Expose()
-  gapHours: number
-
-  @Column({ type: 'smallint', default: 24 })
-  @Expose()
-  gapHoursType: number
-
   @Column({ type: 'smallint', default: 1 })
   @Expose()
   isActive: 0 | 1

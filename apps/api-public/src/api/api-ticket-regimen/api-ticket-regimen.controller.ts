@@ -1,7 +1,7 @@
 import { Controller, Get, Param } from '@nestjs/common'
 import { Query } from '@nestjs/common/decorators/http/route-params.decorator'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IdParam } from '../../../../_libs/common/dto'
+import { GenerateIdParam } from '../../../../_libs/common/dto'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
@@ -28,7 +28,7 @@ export class ApiTicketRegimenController {
   @UserPermission()
   async detail(
     @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
+    @Param() { id }: GenerateIdParam,
     @Query() query: TicketRegimenGetOneQuery
   ): Promise<BaseResponse> {
     const data = await this.apiTicketRegimenService.detail({ oid, id, query })

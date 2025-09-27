@@ -5,26 +5,32 @@ import { BusinessError } from '../../common/error'
 import { DiscountType, PaymentMoneyStatus } from '../../common/variable'
 import { TicketLaboratoryGroup } from '../../entities'
 import {
-    PaymentTicketItemInsertType,
-    TicketItemType,
+  PaymentTicketItemInsertType,
+  TicketItemType,
 } from '../../entities/payment-ticket-item.entity'
 import {
-    MoneyDirection,
-    PaymentActionType,
-    PaymentInsertType,
-    PaymentPersonType,
-    PaymentVoucherType,
+  MoneyDirection,
+  PaymentActionType,
+  PaymentInsertType,
+  PaymentPersonType,
+  PaymentVoucherType,
 } from '../../entities/payment.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
 import {
-    CustomerManager,
-    PaymentManager, PaymentTicketItemManager,
-    TicketLaboratoryGroupManager,
-    TicketLaboratoryManager,
-    TicketManager,
-    TicketProcedureManager,
-    TicketProductManager,
-    TicketRadiologyManager,
+  CustomerManager,
+  PaymentManager,
+  PaymentTicketItemManager,
+  TicketLaboratoryGroupManager,
+  TicketLaboratoryGroupRepository,
+  TicketLaboratoryManager,
+  TicketLaboratoryRepository,
+  TicketManager,
+  TicketProcedureManager,
+  TicketProcedureRepository,
+  TicketProductManager,
+  TicketProductRepository,
+  TicketRadiologyManager,
+  TicketRadiologyRepository,
 } from '../../repositories'
 
 @Injectable()
@@ -39,12 +45,17 @@ export class CustomerRefundTicketItemListOperation {
     private ticketProcedureManager: TicketProcedureManager,
     private ticketLaboratoryManager: TicketLaboratoryManager,
     private ticketLaboratoryGroupManager: TicketLaboratoryGroupManager,
-    private ticketRadiologyManager: TicketRadiologyManager
+    private ticketRadiologyManager: TicketRadiologyManager,
+    private ticketProductRepository: TicketProductRepository,
+    private ticketProcedureRepository: TicketProcedureRepository,
+    private ticketLaboratoryRepository: TicketLaboratoryRepository,
+    private ticketLaboratoryGroupRepository: TicketLaboratoryGroupRepository,
+    private ticketRadiologyRepository: TicketRadiologyRepository
   ) { }
 
   async startRefundTicketItemList(options: {
     oid: number
-    ticketId: number
+    ticketId: string
     customerId: number
     cashierId: number
     paymentMethodId: number
@@ -53,7 +64,7 @@ export class CustomerRefundTicketItemListOperation {
     note: string
     ticketItemList: {
       ticketItemType: TicketItemType
-      ticketItemId: number
+      ticketItemId: string
       interactId: number
       expectedPrice: number
       discountMoney: number
@@ -162,76 +173,78 @@ export class CustomerRefundTicketItemListOperation {
         )
 
       // Cập nhật thanh toán vào item
-      const ticketProcedureModifiedList = await this.ticketProcedureManager.bulkUpdate({
+      const ticketProcedureModifiedList = await this.ticketProcedureRepository.managerBulkUpdate({
         manager,
         condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.Paid },
-        compare: ['id'],
+        compare: { id: { cast: 'bigint' } },
         tempList: ticketItemList
           .filter((i) => i.ticketItemType === TicketItemType.TicketProcedure)
           .map((i) => ({
             ...i,
             id: i.ticketItemId,
-            paymentMoneyStatus: PaymentMoneyStatus.PendingPayment,
+            paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
           })),
         update: ['paymentMoneyStatus'],
         options: { requireEqualLength: true },
       })
 
-      const ticketProductConsumableModifiedList = await this.ticketProductManager.bulkUpdate({
-        manager,
-        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.Paid },
-        compare: ['id'],
-        tempList: ticketItemList
-          .filter((i) => i.ticketItemType === TicketItemType.TicketProductConsumable)
-          .map((i) => ({
-            ...i,
-            id: i.ticketItemId,
-            paymentMoneyStatus: PaymentMoneyStatus.PendingPayment,
-          })),
-        update: ['paymentMoneyStatus'],
-        options: { requireEqualLength: true },
-      })
+      const ticketProductConsumableModifiedList =
+        await this.ticketProductRepository.managerBulkUpdate({
+          manager,
+          condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.Paid },
+          compare: { id: { cast: 'bigint' } },
+          tempList: ticketItemList
+            .filter((i) => i.ticketItemType === TicketItemType.TicketProductConsumable)
+            .map((i) => ({
+              ...i,
+              id: i.ticketItemId,
+              paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+            })),
+          update: ['paymentMoneyStatus'],
+          options: { requireEqualLength: true },
+        })
 
-      const ticketProductPrescriptionModifiedList = await this.ticketProductManager.bulkUpdate({
-        manager,
-        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.Paid },
-        compare: ['id'],
-        tempList: ticketItemList
-          .filter((i) => i.ticketItemType === TicketItemType.TicketProductPrescription)
-          .map((i) => ({
-            ...i,
-            id: i.ticketItemId,
-            paymentMoneyStatus: PaymentMoneyStatus.PendingPayment,
-          })),
-        update: ['paymentMoneyStatus'],
-        options: { requireEqualLength: true },
-      })
+      const ticketProductPrescriptionModifiedList =
+        await this.ticketProductRepository.managerBulkUpdate({
+          manager,
+          condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.Paid },
+          compare: { id: { cast: 'bigint' } },
+          tempList: ticketItemList
+            .filter((i) => i.ticketItemType === TicketItemType.TicketProductPrescription)
+            .map((i) => ({
+              ...i,
+              id: i.ticketItemId,
+              paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+            })),
+          update: ['paymentMoneyStatus'],
+          options: { requireEqualLength: true },
+        })
 
-      const ticketLaboratoryModifiedList = await this.ticketLaboratoryManager.bulkUpdate({
+      const ticketLaboratoryModifiedList = await this.ticketLaboratoryRepository.managerBulkUpdate({
         manager,
         condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.Paid },
-        compare: ['id'],
+        compare: { id: { cast: 'bigint' } },
         tempList: ticketItemList
           .filter((i) => i.ticketItemType === TicketItemType.TicketLaboratory)
           .map((i) => ({
             ...i,
             id: i.ticketItemId,
-            paymentMoneyStatus: PaymentMoneyStatus.PendingPayment,
+            paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
           })),
         update: ['paymentMoneyStatus'],
         options: { requireEqualLength: true },
       })
 
-      const ticketRadiologyModifiedList = await this.ticketRadiologyManager.bulkUpdate({
+      const ticketRadiologyModifiedList = await this.ticketRadiologyRepository.managerBulkUpdate({
         manager,
         condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.Paid },
-        compare: ['id'],
+        compare: { id: { cast: 'bigint' } },
         tempList: ticketItemList
           .filter((i) => i.ticketItemType === TicketItemType.TicketRadiology)
           .map((i) => ({
             ...i,
             id: i.ticketItemId,
-            paymentMoneyStatus: PaymentMoneyStatus.PendingPayment,
+            paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
           })),
         update: ['paymentMoneyStatus'],
         options: { requireEqualLength: true },
@@ -259,14 +272,15 @@ export class CustomerRefundTicketItemListOperation {
               paymentMoneyStatus,
             }
           })
-        ticketLaboratoryGroupModifiedList = await this.ticketLaboratoryGroupManager.bulkUpdate({
-          manager,
-          compare: ['id'],
-          condition: { oid },
-          tempList: tlgUpdateList,
-          update: ['paymentMoneyStatus'],
-          options: { requireEqualLength: true },
-        })
+        ticketLaboratoryGroupModifiedList =
+          await this.ticketLaboratoryGroupRepository.managerBulkUpdate({
+            manager,
+            compare: { id: { cast: 'bigint' } },
+            condition: { oid },
+            tempList: tlgUpdateList,
+            update: ['paymentMoneyStatus'],
+            options: { requireEqualLength: true },
+          })
       }
 
       return {

@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
 import Position, { CommissionCalculatorType, PositionType } from './position.entity'
 import Role from './role.entity'
 import Ticket from './ticket.entity'
@@ -9,17 +9,17 @@ import User from './user.entity'
 @Index('IDX_TicketUser__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketUser__oid_createdAt', ['oid', 'createdAt'])
 export default class TicketUser {
-  @Column({ name: 'oid' })
+  @Column()
   @Exclude()
   oid: number
 
-  @PrimaryGeneratedColumn({ name: 'id' })
-  @Expose({ name: 'id' })
-  id: number
-
-  @Column()
+  @PrimaryColumn({ type: 'bigint' })
   @Expose()
-  ticketId: number
+  id: string
+
+  @Column({ type: 'bigint' })
+  @Expose()
+  ticketId: string
 
   @Column({ default: 0 })
   @Expose()
@@ -41,9 +41,9 @@ export default class TicketUser {
   @Expose()
   positionInteractId: number // procedureId hoặc productId hoặc radiologyId
 
-  @Column({ type: 'integer', default: 0 })
+  @Column({ type: 'bigint', default: 0 })
   @Expose()
-  ticketItemId: number // ticketProcedureId hoặc ticketProductId hoặc ticketRadiologyId
+  ticketItemId: string // ticketProcedureId hoặc ticketProductId hoặc ticketRadiologyId
 
   @Column({
     type: 'bigint',

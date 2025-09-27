@@ -15,7 +15,7 @@ export class StatisticTicketService {
     const { dataRaws } = await this.ticketRepository.findAndSelect({
       condition: {
         oid,
-        startedAt: query?.filter?.startedAt,
+        createdAt: query?.filter?.createdAt,
         status: query?.filter?.status,
       },
       groupBy: ['customerId'],
@@ -64,7 +64,7 @@ export class StatisticTicketService {
         oid,
         roomId: filter.roomId,
         status: filter?.status,
-        startedAt: {
+        createdAt: {
           GTE: fromTime.getTime(),
           LTE: toTime.getTime(),
         },

@@ -7,8 +7,8 @@ class DataList {
   @ApiProperty({ example: 12 })
   @Expose()
   @IsDefined()
-  @IsInt()
-  ticketId: number
+  @IsString()
+  ticketId: string
 
   @Expose()
   @IsDefined()

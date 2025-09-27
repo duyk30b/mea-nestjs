@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Param, Patch, Post } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IdParam } from '../../../../../_libs/common/dto'
+import { GenerateIdParam } from '../../../../../_libs/common/dto'
 import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
 import { BaseResponse } from '../../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
@@ -42,7 +42,7 @@ export class TicketOrderController {
   )
   async depositedUpdate(
     @External() { oid, uid }: TExternal,
-    @Param() { id }: IdParam,
+    @Param() { id }: GenerateIdParam,
     @Body() body: TicketOrderDepositedUpdateBody
   ): Promise<BaseResponse> {
     const data = await this.ticketOrderService.depositedUpdate({
@@ -88,7 +88,7 @@ export class TicketOrderController {
   )
   async debtSuccessUpdate(
     @External() { oid, uid }: TExternal,
-    @Param() { id }: IdParam,
+    @Param() { id }: GenerateIdParam,
     @Body() body: TicketOrderDebtSuccessUpdateBody
   ): Promise<BaseResponse> {
     const data = await this.ticketOrderService.debtSuccessUpdate({
@@ -105,7 +105,7 @@ export class TicketOrderController {
   @UserPermission(PermissionId.TICKET_DESTROY)
   async draftDestroy(
     @External() { oid }: TExternal,
-    @Param() { id }: IdParam
+    @Param() { id }: GenerateIdParam
   ): Promise<BaseResponse> {
     const data = await this.ticketOrderService.destroy({
       oid,
@@ -118,7 +118,7 @@ export class TicketOrderController {
   @UserPermission(PermissionId.TICKET_DESTROY)
   async depositedDestroy(
     @External() { oid }: TExternal,
-    @Param() { id }: IdParam
+    @Param() { id }: GenerateIdParam
   ): Promise<BaseResponse> {
     const data = await this.ticketOrderService.destroy({
       oid,
@@ -129,7 +129,7 @@ export class TicketOrderController {
 
   @Delete('/order/:id/cancelled-destroy')
   @UserPermission(PermissionId.TICKET_DESTROY)
-  async destroy(@External() { oid }: TExternal, @Param() { id }: IdParam): Promise<BaseResponse> {
+  async destroy(@External() { oid }: TExternal, @Param() { id }: GenerateIdParam): Promise<BaseResponse> {
     const data = await this.ticketOrderService.destroy({
       oid,
       ticketId: id,
@@ -145,7 +145,7 @@ export class TicketOrderController {
   )
   async sendProductAndPaymentAndClose(
     @External() { oid, uid }: TExternal,
-    @Param() { id }: IdParam,
+    @Param() { id }: GenerateIdParam,
     @Body() body: TicketSendProductAndPaymentBody
   ): Promise<BaseResponse> {
     const data = await this.ticketOrderService.sendProductAndPaymentAndClose({

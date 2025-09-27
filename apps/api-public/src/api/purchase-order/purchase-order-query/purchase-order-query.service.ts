@@ -74,7 +74,7 @@ export class ApiPurchaseOrderQueryService {
     return { purchaseOrderList }
   }
 
-  async getOne(oid: number, purchaseOrderId: number, query: PurchaseOrderGetOneQuery) {
+  async getOne(oid: number, purchaseOrderId: string, query: PurchaseOrderGetOneQuery) {
     const purchaseOrder = await this.purchaseOrderRepository.findOneBy({ oid, id: purchaseOrderId })
     if (!purchaseOrder) {
       throw new BusinessException('error.Database.NotFound')

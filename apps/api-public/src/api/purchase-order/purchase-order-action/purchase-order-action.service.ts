@@ -27,7 +27,7 @@ export class PurchaseOrderActionService {
     private readonly distributorRefundMoneyOperation: DistributorRefundMoneyOperation
   ) { }
 
-  async destroy(params: { oid: number; purchaseOrderId: number }) {
+  async destroy(params: { oid: number; purchaseOrderId: string }) {
     const { oid, purchaseOrderId } = params
     await this.purchaseOrderRepository.destroy({ oid, purchaseOrderId })
     return { purchaseOrderId }
@@ -36,7 +36,7 @@ export class PurchaseOrderActionService {
   async sendProductAndPaymentAndClose(params: {
     oid: number
     userId: number
-    purchaseOrderId: number
+    purchaseOrderId: string
     body: PurchaseOrderPaymentMoneyBody
   }) {
     const { oid, userId, purchaseOrderId, body } = params
@@ -78,10 +78,10 @@ export class PurchaseOrderActionService {
       })
     }
     this.socketEmitService.productListChange(oid, {
-      productUpsertedList: sendProductResult.productList || [],
+      productUpsertedList: sendProductResult.productModifiedList || [],
     })
     this.socketEmitService.batchListChange(oid, {
-      batchUpsertedList: sendProductResult.batchList || [],
+      batchUpsertedList: sendProductResult.batchModifiedList || [],
     })
 
     return {
@@ -91,7 +91,7 @@ export class PurchaseOrderActionService {
     }
   }
 
-  async sendProduct(params: { oid: number; userId: number; purchaseOrderId: number }) {
+  async sendProduct(params: { oid: number; userId: number; purchaseOrderId: string }) {
     const { oid, userId, purchaseOrderId } = params
 
     const sendProductResult = await this.purchaseOrderSendProductOperation.sendProduct({
@@ -102,15 +102,15 @@ export class PurchaseOrderActionService {
     })
 
     this.socketEmitService.productListChange(oid, {
-      productUpsertedList: sendProductResult.productList || [],
+      productUpsertedList: sendProductResult.productModifiedList || [],
     })
     this.socketEmitService.batchListChange(oid, {
-      batchUpsertedList: sendProductResult.batchList || [],
+      batchUpsertedList: sendProductResult.batchModifiedList || [],
     })
     return { purchaseOrderModified: sendProductResult.purchaseOrder }
   }
 
-  async close(params: { oid: number; userId: number; purchaseOrderId: number }) {
+  async close(params: { oid: number; userId: number; purchaseOrderId: string }) {
     const { oid, userId, purchaseOrderId } = params
 
     const closeResult = await this.purchaseOrderCloseOperation.startClose({
@@ -132,7 +132,7 @@ export class PurchaseOrderActionService {
     }
   }
 
-  async terminate(params: { oid: number; userId: number; purchaseOrderId: number }) {
+  async terminate(params: { oid: number; userId: number; purchaseOrderId: string }) {
     const { oid, userId, purchaseOrderId } = params
     const time = Date.now()
     let distributorModified: Distributor
@@ -178,10 +178,10 @@ export class PurchaseOrderActionService {
         time: Date.now(),
       })
       this.socketEmitService.productListChange(oid, {
-        productUpsertedList: returnResult.productList || [],
+        productUpsertedList: returnResult.productModifiedList || [],
       })
       this.socketEmitService.batchListChange(oid, {
-        batchUpsertedList: returnResult.batchList || [],
+        batchUpsertedList: returnResult.batchModifiedList || [],
       })
     }
 

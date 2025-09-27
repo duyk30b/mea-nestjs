@@ -76,8 +76,8 @@ export class StockCheckUpsertDraftBody {
   @ApiPropertyOptional({ example: 52 })
   @Expose()
   @IsDefined()
-  @IsNumber()
-  stockCheckId: number
+  @IsString()
+  stockCheckId: string
 
   @ApiProperty({ type: StockCheckItemBody, isArray: true })
   @Expose()

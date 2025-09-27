@@ -1,6 +1,5 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
+import { Exclude, Expose } from 'class-transformer'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
 import { DiscountType, PaymentMoneyStatus } from '../common/variable'
 import Customer from './customer.entity'
 import Image from './image.entity'
@@ -24,14 +23,22 @@ export enum TicketProcedureType {
 @Index('IDX_TicketProcedure__oid_customerId', ['oid', 'customerId'])
 @Index('IDX_TicketProcedure__oid_procedureId', ['oid', 'procedureId'])
 @Index('IDX_TicketProcedure__oid_createdAt', ['oid', 'createdAt'])
-export default class TicketProcedure extends BaseEntity {
+export default class TicketProcedure {
+  @Column()
+  @Exclude()
+  oid: number
+
+  @PrimaryColumn({ type: 'bigint' })
+  @Expose()
+  id: string
+
   @Column({ default: 1 })
   @Expose()
   priority: number
 
-  @Column()
+  @Column({ type: 'bigint' })
   @Expose()
-  ticketId: number
+  ticketId: string
 
   @Column()
   @Expose()
@@ -45,13 +52,13 @@ export default class TicketProcedure extends BaseEntity {
   @Expose()
   ticketProcedureType: TicketProcedureType
 
-  @Column({ default: 0 })
+  @Column({ type: 'bigint', default: 0 })
   @Expose()
-  ticketRegimenId: number
+  ticketRegimenItemId: string
 
-  @Column({ default: 0 })
+  @Column({ type: 'bigint', default: 0 })
   @Expose()
-  sessionIndex: number
+  ticketRegimenId: string
 
   @Column({ default: 1 })
   @Expose()
@@ -94,13 +101,17 @@ export default class TicketProcedure extends BaseEntity {
   @Expose()
   actualPrice: number // Giá thực tế
 
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
+  @Column({ type: 'smallint', default: PaymentMoneyStatus.PendingPaid })
   @Expose()
   paymentMoneyStatus: PaymentMoneyStatus
 
   @Column({ type: 'smallint', default: TicketProcedureStatus.NoEffect })
   @Expose()
   status: TicketProcedureStatus
+
+  @Column({ type: 'smallint', default: 0 })
+  @Expose()
+  indexSession: number
 
   @Column({
     type: 'bigint',
@@ -140,10 +151,6 @@ export default class TicketProcedure extends BaseEntity {
   commissionAmount: number // Tiền hoa hồng
 
   @Expose()
-  @ManyToOne((type) => Ticket, (ticket) => ticket.ticketProcedureList, {
-    createForeignKeyConstraints: false,
-  })
-  @JoinColumn({ name: 'ticketId', referencedColumnName: 'id' })
   ticket: Ticket
 
   @Expose()
@@ -201,10 +208,7 @@ export type TicketProcedureRelationType = {
   >]?: boolean
 }
 
-export type TicketProcedureInsertType = Omit<
-  TicketProcedure,
-  keyof TicketProcedureRelationType | keyof Pick<TicketProcedure, 'id'>
->
+export type TicketProcedureInsertType = Omit<TicketProcedure, keyof TicketProcedureRelationType>
 
 export type TicketProcedureUpdateType = {
   [K in Exclude<

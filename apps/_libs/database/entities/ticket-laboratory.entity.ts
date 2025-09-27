@@ -1,6 +1,5 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
+import { Exclude, Expose } from 'class-transformer'
+import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm'
 import { DiscountType, PaymentMoneyStatus, TicketLaboratoryStatus } from '../common/variable'
 import Customer from './customer.entity'
 import Laboratory from './laboratory.entity'
@@ -11,10 +10,18 @@ import Ticket from './ticket.entity'
 @Index('IDX_TicketLaboratory__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketLaboratory__oid_laboratoryId', ['oid', 'laboratoryId'])
 @Index('IDX_TicketLaboratory__oid_createdAt', ['oid', 'createdAt'])
-export default class TicketLaboratory extends BaseEntity {
+export default class TicketLaboratory {
   @Column()
+  @Exclude()
+  oid: number
+
+  @PrimaryColumn({ type: 'bigint' })
   @Expose()
-  ticketId: number
+  id: string
+
+  @Column({ type: 'bigint' })
+  @Expose()
+  ticketId: string
 
   @Column({ default: 1 })
   @Expose()
@@ -36,15 +43,15 @@ export default class TicketLaboratory extends BaseEntity {
   @Expose()
   laboratoryGroupId: number
 
-  @Column({ default: 0 })
+  @Column({ type: 'bigint', default: 0 })
   @Expose()
-  ticketLaboratoryGroupId: number
+  ticketLaboratoryGroupId: string
 
   @Column({ type: 'smallint', default: TicketLaboratoryStatus.Pending })
   @Expose()
   status: TicketLaboratoryStatus
 
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
+  @Column({ type: 'smallint', default: PaymentMoneyStatus.PendingPaid })
   @Expose()
   paymentMoneyStatus: PaymentMoneyStatus
 
@@ -167,10 +174,7 @@ export type TicketLaboratoryRelationType = {
   >]?: boolean
 }
 
-export type TicketLaboratoryInsertType = Omit<
-  TicketLaboratory,
-  keyof TicketLaboratoryRelationType | keyof Pick<TicketLaboratory, 'id'>
->
+export type TicketLaboratoryInsertType = Omit<TicketLaboratory, keyof TicketLaboratoryRelationType>
 
 export type TicketLaboratoryUpdateType = {
   [K in Exclude<

@@ -3,10 +3,10 @@ import { DataSource } from 'typeorm'
 import { PaymentMoneyStatus } from '../../../common/variable'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import {
-    TicketLaboratoryGroupManager,
-    TicketLaboratoryManager,
-    TicketLaboratoryResultManager,
-    TicketManager,
+  TicketLaboratoryGroupManager,
+  TicketLaboratoryManager,
+  TicketLaboratoryResultManager,
+  TicketManager,
 } from '../../../repositories'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
 
@@ -23,8 +23,8 @@ export class TicketDestroyTicketLaboratoryGroupOperation {
 
   async destroyTicketLaboratoryGroup(params: {
     oid: number
-    ticketId: number
-    ticketLaboratoryGroupId: number
+    ticketId: string
+    ticketLaboratoryGroupId: string
   }) {
     const { oid, ticketId, ticketLaboratoryGroupId } = params
     const PREFIX = `ticketId=${ticketLaboratoryGroupId} destroyTicketLaboratoryGroup failed`
@@ -43,7 +43,7 @@ export class TicketDestroyTicketLaboratoryGroupOperation {
           oid,
           ticketId,
           id: ticketLaboratoryGroupId,
-          paymentMoneyStatus: { IN: [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.TicketPaid] },
+          paymentMoneyStatus: { IN: [PaymentMoneyStatus.PendingPaid] },
         })
 
       const ticketLaboratoryDestroyedList =
@@ -51,7 +51,7 @@ export class TicketDestroyTicketLaboratoryGroupOperation {
           oid,
           ticketId,
           ticketLaboratoryGroupId,
-          paymentMoneyStatus: { IN: [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.TicketPaid] },
+          paymentMoneyStatus: { IN: [PaymentMoneyStatus.PendingPaid] },
         })
 
       const ticketLaboratoryResultDestroyedList =
@@ -75,9 +75,9 @@ export class TicketDestroyTicketLaboratoryGroupOperation {
         0
       )
 
-      let ticket: Ticket = ticketOrigin
+      let ticketModified: Ticket = ticketOrigin
       if (laboratoryMoneyDelete != 0 || itemsDiscountDelete != 0) {
-        ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
+        ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
           manager,
           oid,
           ticketOrigin,
@@ -90,7 +90,7 @@ export class TicketDestroyTicketLaboratoryGroupOperation {
       }
 
       return {
-        ticket,
+        ticketModified,
         ticketLaboratoryDestroyedList,
         ticketLaboratoryGroupDestroyed,
         ticketLaboratoryResultDestroyedList,

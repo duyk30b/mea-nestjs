@@ -24,7 +24,7 @@ export class PurchaseOrderReopenOperation {
   async reopen(params: {
     oid: number
     userId: number
-    purchaseOrderId: number
+    purchaseOrderId: string
     time: number
     note: string
   }) {

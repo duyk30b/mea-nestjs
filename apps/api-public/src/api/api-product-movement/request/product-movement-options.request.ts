@@ -2,6 +2,7 @@ import { Expose, Transform, TransformFnParams } from 'class-transformer'
 import { IsBoolean, IsNumber, IsOptional } from 'class-validator'
 import {
   ConditionNumber,
+  ConditionString,
   SortQuery,
   createConditionEnum,
   transformConditionEnum,
@@ -48,7 +49,7 @@ export class ProductMovementFilterQuery {
   @Expose()
   @Transform(transformConditionNumber)
   @IsOptional()
-  voucherId: number | ConditionNumber
+  voucherId: string | ConditionString
 
   @Expose()
   @Transform(transformConditionNumber)

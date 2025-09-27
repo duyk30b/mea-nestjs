@@ -15,7 +15,9 @@ import Product, {
 import { PurchaseOrderItemInsertType } from '../../../../_libs/database/entities/purchase-order-item.entity'
 import {
   BatchRepository,
-  ProductGroupRepository, ProductManager, ProductRepository,
+  ProductGroupRepository,
+  ProductManager,
+  ProductRepository,
 } from '../../../../_libs/database/repositories'
 import { ProductExcelRules } from '../api-file-product/product-excel.rule'
 import { ExcelProcess } from '../common/excel-process'
@@ -163,23 +165,25 @@ export class ApiFilePurchaseOrderUploadExcel {
       time,
     })
 
-    const purchaseOrderItemInsertList: PurchaseOrderItemInsertType[] = dataPlainList.map((plain) => {
-      const item: PurchaseOrderItemInsertType = {
-        oid,
-        distributorId: 0,
-        productId: plain.productId,
-        batchId: plain.batchId || 0,
-        warehouseId: 0,
-        lotNumber: plain.lotNumber,
-        expiryDate: plain.expiryDate,
-        unitRate: 1,
-        quantity: plain.quantity,
-        costPrice: plain.costPrice,
-        listPrice: plain.retailPrice,
-        purchaseOrderId: 0,
+    const purchaseOrderItemInsertList: PurchaseOrderItemInsertType[] = dataPlainList.map(
+      (plain) => {
+        const item: PurchaseOrderItemInsertType = {
+          oid,
+          distributorId: 0,
+          productId: plain.productId,
+          batchId: plain.batchId || 0,
+          warehouseId: 0,
+          lotNumber: plain.lotNumber,
+          expiryDate: plain.expiryDate,
+          unitRate: 1,
+          quantity: plain.quantity,
+          costPrice: plain.costPrice,
+          listPrice: plain.retailPrice,
+          purchaseOrderId: ' 0',
+        }
+        return item
       }
-      return item
-    })
+    )
 
     return { data: { purchaseOrderItemInsertList, productCreatedList, productModifiedList } }
   }

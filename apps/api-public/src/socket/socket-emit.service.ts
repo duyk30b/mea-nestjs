@@ -22,7 +22,9 @@ import {
   TicketProcedure,
   TicketProduct,
   TicketRadiology,
+  TicketReception,
   TicketRegimen,
+  TicketRegimenItem,
   TicketUser,
 } from '../../../_libs/database/entities'
 import { SOCKET_EVENT } from './socket.variable'
@@ -36,6 +38,40 @@ export class SocketEmitService {
     if (!this.io) return
     const dataDemo = new Date().toISOString()
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SERVER_EMIT_DEMO, { dataDemo })
+  }
+
+  socketTicketChange(
+    oid: number,
+    data: {
+      ticketId: string
+      ticketDestroyedId?: string
+      ticketModified?: Ticket
+      imageList?: { destroyedList?: Image[]; upsertedList?: Image[] }
+      ticketAttribute?: { destroyedList?: TicketAttribute[]; upsertedList?: TicketAttribute[] }
+      ticketUser?: { destroyedList?: TicketUser[]; upsertedList?: TicketUser[] }
+      ticketReception?: { destroyedList?: TicketReception[]; upsertedList?: TicketReception[] }
+      ticketProduct?: { destroyedList?: TicketProduct[]; upsertedList?: TicketProduct[] }
+      ticketBatch?: { destroyedList?: TicketBatch[]; upsertedList?: TicketBatch[] }
+      ticketProcedure?: { destroyedList?: TicketProcedure[]; upsertedList?: TicketProcedure[] }
+      ticketRegimen?: { destroyedList?: TicketRegimen[]; upsertedList?: TicketRegimen[] }
+      ticketRegimenItem?: {
+        destroyedList?: TicketRegimenItem[]
+        upsertedList?: TicketRegimenItem[]
+      }
+      ticketLaboratoryGroup?: {
+        destroyedList?: TicketLaboratoryGroup[]
+        upsertedList?: TicketLaboratoryGroup[]
+      }
+      ticketLaboratory?: { destroyedList?: TicketLaboratory[]; upsertedList?: TicketLaboratory[] }
+      ticketLaboratoryResult?: {
+        destroyedList?: TicketLaboratoryResult[]
+        upsertedList?: TicketLaboratoryResult[]
+      }
+      ticketRadiology?: { destroyedList?: TicketRadiology[]; upsertedList?: TicketRadiology[] }
+    }
+  ) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE, data)
   }
 
   organizationUpdate(oid: number, data: { organization: Organization }) {
@@ -147,171 +183,5 @@ export class SocketEmitService {
   ) {
     if (!this.io) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_PURCHASE_ORDER_LIST_CHANGE, data)
-  }
-
-  socketTicketChange(oid: number, data: { type: 'CREATE' | 'UPDATE' | 'DESTROY'; ticket: Ticket }) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE, data)
-  }
-
-  socketTicketListChange(
-    oid: number,
-    data: { ticketDestroyedList?: Ticket[]; ticketUpsertedList?: Ticket[] }
-  ) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_LIST_CHANGE, data)
-  }
-
-  socketTicketAttributeListChange(
-    oid: number,
-    data: { ticketId: number; ticketAttributeList: TicketAttribute[] }
-  ) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_ATTRIBUTE, data)
-  }
-
-  socketTicketProcedureListChange(
-    oid: number,
-    data: {
-      ticketId: number
-      customerId: number
-      ticketProcedureNormalCreatedList?: TicketProcedure[]
-      ticketProcedureModifiedList?: TicketProcedure[]
-      ticketProcedureDestroyed?: TicketProcedure
-      ticketRegimenCreatedList?: TicketRegimen[]
-      ticketRegimenModified?: TicketRegimen
-      ticketRegimenDestroyed?: TicketRegimen
-      ticketUserDestroyedList?: TicketUser[]
-      ticketUserUpsertedList?: TicketUser[]
-      imageDestroyedList?: Image[]
-      imageUpsertedList?: Image[]
-    }
-  ) {
-    if (!this.io) return
-    if (
-      !data.ticketProcedureNormalCreatedList?.length
-      && !data.ticketProcedureModifiedList?.length
-      && !data.ticketProcedureDestroyed
-      && !data.ticketRegimenCreatedList?.length
-      && !data.ticketRegimenModified
-      && !data.ticketRegimenDestroyed
-      && !data.ticketUserDestroyedList?.length
-      && !data.ticketUserUpsertedList?.length
-      && !data.imageDestroyedList?.length
-      && !data.imageUpsertedList?.length
-    ) {
-      return
-    }
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_PROCEDURE, data)
-  }
-
-  socketTicketRadiologyListChange(
-    oid: number,
-    data: {
-      ticketId: number
-      ticketRadiologyUpsertedList?: TicketRadiology[]
-      ticketRadiologyDestroyedList?: TicketRadiology[]
-      ticketUserDestroyedList?: TicketUser[]
-      ticketUserUpsertedList?: TicketUser[]
-      imageDestroyedList?: Image[]
-      imageUpsertedList?: Image[]
-    }
-  ) {
-    if (!this.io) return
-    if (
-      !data.ticketRadiologyUpsertedList?.length
-      && !data.ticketRadiologyDestroyedList?.length
-      && !data.ticketUserDestroyedList?.length
-      && !data.ticketUserUpsertedList?.length
-      && !data.imageDestroyedList?.length
-      && !data.imageUpsertedList?.length
-    ) {
-      return
-    }
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_RADIOLOGY, data)
-  }
-
-  socketTicketLaboratoryListChange(
-    oid: number,
-    data: {
-      ticketId: number
-      ticketLaboratoryUpsertedList?: TicketLaboratory[]
-      ticketLaboratoryDestroyedList?: TicketLaboratory[]
-      ticketLaboratoryGroupUpsertedList?: TicketLaboratoryGroup[]
-      ticketLaboratoryGroupDestroyedList?: TicketLaboratoryGroup[]
-      ticketLaboratoryResultUpsertedList?: TicketLaboratoryResult[]
-      ticketLaboratoryResultDestroyedList?: TicketLaboratoryResult[]
-      ticketUserDestroyedList?: TicketUser[]
-      ticketUserUpsertedList?: TicketUser[]
-    }
-  ) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_LABORATORY, data)
-  }
-
-  socketTicketConsumableChange(
-    oid: number,
-    data: {
-      ticketId: number
-      ticketProductUpsertedList?: TicketProduct[]
-      ticketProductDestroyedList?: TicketProduct[]
-    }
-  ) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_CONSUMABLE, data)
-  }
-
-  socketTicketPrescriptionChange(
-    oid: number,
-    data: {
-      ticketId: number
-      ticketProductUpsertedList?: TicketProduct[]
-      ticketProductDestroyedList?: TicketProduct[]
-    }
-  ) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_PRESCRIPTION, data)
-  }
-
-  socketTicketBatchListChange(
-    oid: number,
-    data: {
-      ticketId: number
-      ticketBatchUpsertedList?: TicketBatch[]
-      ticketBatchDestroyedList?: TicketBatch[]
-    }
-  ) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_BATCH, data)
-  }
-
-  socketTicketUserListChange(
-    oid: number,
-    data: {
-      ticketId: number
-      ticketUserDestroyedList?: TicketUser[]
-      ticketUserUpsertedList?: TicketUser[]
-    }
-  ) {
-    if (!this.io) return
-    if (!data.ticketUserDestroyedList?.length && !data.ticketUserUpsertedList?.length) {
-      return
-    }
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_USER, data)
-  }
-
-  socketImageListChange(
-    oid: number,
-    data: {
-      ticketId: number
-      imageDestroyedList?: Image[]
-      imageUpsertedList?: Image[]
-    }
-  ) {
-    if (!this.io) return
-    if (!data.imageDestroyedList?.length && !data.imageUpsertedList?.length) {
-      return
-    }
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE_IMAGE, data)
   }
 }

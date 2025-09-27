@@ -12,13 +12,17 @@ import {
   TicketUpdatePriorityTicketProductBody,
   TicketUpdateTicketProductBody,
 } from './request'
+import { TicketAddTicketProductService } from './service/ticket-add-ticket-product-list.service'
 import { TicketChangeProductService } from './ticket-change-product.service'
 
 @ApiTags('Ticket')
 @ApiBearerAuth('access-token')
 @Controller('ticket')
 export class TicketChangeProductController {
-  constructor(private readonly ticketChangeProductService: TicketChangeProductService) { }
+  constructor(
+    private readonly ticketChangeProductService: TicketChangeProductService,
+    private readonly ticketAddTicketProductService: TicketAddTicketProductService
+  ) { }
 
   @Post(':ticketId/consumable/add-ticket-product-consumable-list')
   @UserPermission(PermissionId.TICKET_CHANGE_PRODUCT_CONSUMABLE)
@@ -27,7 +31,7 @@ export class TicketChangeProductController {
     @Param() { ticketId }: TicketParams,
     @Body() body: TicketAddTicketProductListBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeProductService.addTicketProductList({
+    const data = await this.ticketAddTicketProductService.addTicketProductList({
       oid,
       ticketId,
       ticketProductType: TicketProductType.Consumable,
@@ -43,7 +47,7 @@ export class TicketChangeProductController {
     @Param() { ticketId }: TicketParams,
     @Body() body: TicketAddTicketProductListBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeProductService.addTicketProductList({
+    const data = await this.ticketAddTicketProductService.addTicketProductList({
       oid,
       ticketId,
       ticketProductType: TicketProductType.Prescription,

@@ -1,6 +1,6 @@
 import { Controller, Get, Param, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IdParam } from '../../../../_libs/common/dto'
+import { GenerateIdParam } from '../../../../_libs/common/dto'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
@@ -27,7 +27,7 @@ export class ApiTicketLaboratoryGroupController {
   @UserPermission()
   async detail(
     @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
+    @Param() { id }: GenerateIdParam,
     @Query() query: TicketLaboratoryGroupGetOneQuery
   ): Promise<BaseResponse> {
     const data = await this.apiTicketLaboratoryGroupService.getOne(oid, id, query)

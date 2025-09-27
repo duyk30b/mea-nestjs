@@ -63,13 +63,13 @@ export class BusinessException extends Error {
 
 @Catch(Error)
 export class ServerExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(ServerExceptionFilter.name)
+
   catch(exception: Error, host: ArgumentsHost) {
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR
     let { message } = exception
     const { stack } = exception
     let details: any = undefined
-    Logger.error(stack)
-
     const errors: any[] = (exception as any).errors || []
     const i18n = I18nContext.current<I18nTranslations>(host)
 
@@ -133,23 +133,25 @@ export class ServerExceptionFilter implements ExceptionFilter {
         email: external.organization?.email,
       }
 
-      const logMessage = JSON.stringify({
+      const errorObject = {
         statusCode,
         message,
         type: '[HTTP]',
         method,
         path: urlParse.pathname,
         query: urlParse.query,
-        errors,
         body,
         external: basicExternal,
-      })
+        errors,
+      }
       if (statusCode === HttpStatus.UNPROCESSABLE_ENTITY) {
-        Logger.warn(logMessage, exception.name)
+        this.logger.warn(JSON.stringify(errorObject, null, 2), ValidationException.name)
+        // this.logger.warn(stack)
       } else if (statusCode === HttpStatus.NOT_FOUND) {
-        Logger.debug(logMessage, exception.name)
+        this.logger.error(`${exception.name}: ${errorObject.method} ${errorObject.path}`)
+        this.logger.error(JSON.stringify(errorObject))
       } else {
-        Logger.error(logMessage, exception.name)
+        this.logger.error(JSON.stringify(errorObject, null, 2), stack, exception.name)
       }
 
       return response.code(statusCode).send({
@@ -160,7 +162,10 @@ export class ServerExceptionFilter implements ExceptionFilter {
         path: originalUrl,
         time: new Date().toISOString(),
       })
-    } else if (host.getType() === 'rpc') {
+    }
+
+    // type rpc
+    else if (host.getType() === 'rpc') {
       if (res.constructor.name === 'NatsContext') {
         // const response = host.switchToRpc().getContext<NatsContext>()
         const response: NatsContext = res

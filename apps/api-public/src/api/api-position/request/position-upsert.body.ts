@@ -20,7 +20,7 @@ import {
 import { PositionFilterQuery } from './position-options.request'
 
 export class PositionCreateBody {
-  @ApiProperty({ enum: PositionType, example: PositionType.TicketReception })
+  @ApiProperty({ enum: PositionType, example: PositionType.Reception })
   @Expose()
   @IsDefined()
   @IsEnumValue(PositionType)

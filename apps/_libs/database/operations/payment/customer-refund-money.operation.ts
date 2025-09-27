@@ -22,7 +22,7 @@ export class CustomerRefundMoneyOperation {
 
   async startRefundMoney(options: {
     oid: number
-    ticketId: number
+    ticketId: string
     customerId: number
     cashierId: number
     paymentMethodId: number

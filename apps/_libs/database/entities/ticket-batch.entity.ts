@@ -1,6 +1,5 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
 import { DeliveryStatus } from '../common/variable'
 import Batch from './batch.entity'
 import Customer from './customer.entity'
@@ -11,26 +10,26 @@ import Ticket from './ticket.entity'
 @Index('IDX_TicketBatch__oid_ticketId', ['oid', 'ticketId'])
 @Index('IDX_TicketBatch__oid_productId', ['oid', 'productId'])
 @Index('IDX_TicketBatch__oid_customerId', ['oid', 'customerId'])
-export default class TicketBatch extends BaseEntity {
-  @Column({ name: 'oid' })
+export default class TicketBatch {
+  @Column()
   @Exclude()
   oid: number
 
-  @PrimaryGeneratedColumn({ name: 'id' })
-  @Expose({ name: 'id' })
-  id: number
+  @PrimaryColumn({ type: 'bigint' })
+  @Expose()
+  id: string
 
   @Column()
   @Expose()
   customerId: number
 
-  @Column()
+  @Column({ type: 'bigint' })
   @Expose()
-  ticketId: number
+  ticketId: string
 
-  @Column()
+  @Column({ type: 'bigint' })
   @Expose()
-  ticketProductId: number
+  ticketProductId: string
 
   @Column()
   @Expose()
@@ -128,10 +127,7 @@ export type TicketBatchRelationType = {
   [P in keyof Pick<TicketBatch, 'ticket' | 'customer' | 'product' | 'batch'>]?: boolean
 }
 
-export type TicketBatchInsertType = Omit<
-  TicketBatch,
-  keyof TicketBatchRelationType | keyof Pick<TicketBatch, 'id'>
->
+export type TicketBatchInsertType = Omit<TicketBatch, keyof TicketBatchRelationType>
 
 export type TicketBatchUpdateType = {
   [K in Exclude<
@@ -141,5 +137,7 @@ export type TicketBatchUpdateType = {
 }
 
 export type TicketBatchSortType = {
-  [P in keyof Pick<TicketBatch, 'oid' | 'id' | 'ticketId' | 'productId' | 'ticketProductId'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<TicketBatch, 'oid' | 'id' | 'ticketId' | 'productId' | 'ticketProductId'>]?:
+  | 'ASC'
+  | 'DESC'
 }

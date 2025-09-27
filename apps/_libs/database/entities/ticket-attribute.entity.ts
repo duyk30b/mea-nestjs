@@ -1,22 +1,30 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+  PrimaryGeneratedColumn,
+} from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
 import Ticket from './ticket.entity'
 
 @Entity('TicketAttribute')
 @Index('IDX_TicketAttribute__oid_ticketId', ['oid', 'ticketId'])
 export default class TicketAttribute {
-  @Column({ name: 'oid' })
+  @Column()
   @Exclude()
   oid: number
 
-  @PrimaryGeneratedColumn({ name: 'id' })
-  @Expose({ name: 'id' })
-  id: number
+  @PrimaryColumn({ type: 'bigint' })
+  @Expose()
+  id: string
 
-  @Column()
-  @Expose({})
-  ticketId: number
+  @Column({ type: 'bigint' })
+  @Expose()
+  ticketId: string
 
   @Column({ nullable: false, type: 'varchar', length: 100 })
   @Expose({})

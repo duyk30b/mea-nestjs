@@ -41,7 +41,7 @@ export class ApiTicketLaboratoryService {
     return { ticketLaboratoryList, page, limit, total }
   }
 
-  async getOne(oid: number, id: number, query: TicketLaboratoryGetOneQuery) {
+  async getOne(oid: number, id: string, query: TicketLaboratoryGetOneQuery) {
     const { relation } = query
     const ticketLaboratory = await this.ticketLaboratoryRepository.findOne({
       relation: {

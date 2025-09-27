@@ -1,7 +1,7 @@
 import { Controller, Get, Param } from '@nestjs/common'
 import { Query } from '@nestjs/common/decorators/http/route-params.decorator'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IdParam } from '../../../../../_libs/common/dto/param'
+import { GenerateIdParam } from '../../../../../_libs/common/dto/param'
 import { OrganizationPermission } from '../../../../../_libs/common/guards/organization.guard'
 import { BaseResponse } from '../../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
@@ -43,7 +43,7 @@ export class ApiPurchaseOrderQueryController {
   @OrganizationPermission(PermissionId.PURCHASE_ORDER)
   async detail(
     @External() { oid }: TExternal,
-    @Param() { id }: IdParam,
+    @Param() { id }: GenerateIdParam,
     @Query() query: PurchaseOrderGetOneQuery
   ): Promise<BaseResponse> {
     const data = await this.apiPurchaseOrderQueryService.getOne(oid, id, query)

@@ -1,11 +1,11 @@
 /* eslint-disable max-len */
 import { Injectable } from '@nestjs/common'
 import { FileUploadDto } from '../../../../../_libs/common/dto/file'
-import { ESArray } from '../../../../../_libs/common/helpers'
-import { ImageInteractType } from '../../../../../_libs/database/entities/image.entity'
-import { TicketAttributeInsertType } from '../../../../../_libs/database/entities/ticket-attribute.entity'
+import Image, { ImageInteractType } from '../../../../../_libs/database/entities/image.entity'
+import TicketAttribute, {
+  TicketAttributeInsertType,
+} from '../../../../../_libs/database/entities/ticket-attribute.entity'
 import {
-  ImageRepository,
   TicketAttributeRepository,
   TicketRepository,
 } from '../../../../../_libs/database/repositories'
@@ -19,13 +19,12 @@ export class TicketChangeAttributeService {
     private readonly socketEmitService: SocketEmitService,
     private readonly ticketAttributeRepository: TicketAttributeRepository,
     private readonly imageManagerService: ImageManagerService,
-    private readonly imageRepository: ImageRepository,
     private readonly ticketRepository: TicketRepository
   ) { }
 
   async updateDiagnosis(options: {
     oid: number
-    ticketId: number
+    ticketId: string
     body: TicketUpdateDiagnosisBody
     files: FileUploadDto[]
   }) {
@@ -37,42 +36,40 @@ export class TicketChangeAttributeService {
       { note: body.note }
     )
     // 1. Update Ticket Image
+    let imageCreatedList: Image[] = []
+    let imageDestroyedList: Image[] = []
+    let imageIdsNew = '[]'
     if (imagesChange) {
-      const { imageIdsNew, imageCreatedList, imageDestroyedList } =
-        await this.imageManagerService.changeCloudinaryImageLink({
-          oid,
-          files,
-          imageIdsWait: imagesChange.imageIdsWait,
-          externalUrlList: imagesChange.externalUrlList,
-          imageIdsOld: JSON.parse(ticketModified.imageDiagnosisIds || '[]'),
-          imageInteract: {
-            imageInteractType: ImageInteractType.Customer,
-            imageInteractId: ticketModified.customerId,
-            ticketId,
-            ticketItemId: 0,
-          },
-        })
-      if (ticketModified.imageDiagnosisIds !== JSON.stringify(imageIdsNew)) {
+      const imageResponse = await this.imageManagerService.changeCloudinaryImageLink({
+        oid,
+        files,
+        imageIdWaitList: imagesChange.imageIdWaitList,
+        externalUrlList: imagesChange.externalUrlList,
+        imageIdListOld: JSON.parse(ticketModified.imageDiagnosisIds || '[]'),
+        imageInteract: {
+          imageInteractType: ImageInteractType.Customer,
+          imageInteractId: ticketModified.customerId,
+          ticketId,
+          ticketItemId: '0',
+        },
+      })
+      imageCreatedList = imageResponse.imageCreatedList
+      imageDestroyedList = imageResponse.imageDestroyedList
+      imageIdsNew = JSON.stringify(imageResponse.imageIdListNew)
+
+      if (ticketModified.imageDiagnosisIds !== imageIdsNew) {
         ticketModified = await this.ticketRepository.updateOneAndReturnEntity(
           { oid, id: ticketId },
-          { imageDiagnosisIds: JSON.stringify(imageIdsNew) }
+          { imageDiagnosisIds: imageIdsNew }
         )
-        const imageDiagnosisIds: number[] = JSON.parse(ticketModified.imageDiagnosisIds)
-        const imageDiagnosisList = await this.imageRepository.findManyByIds(imageDiagnosisIds)
-        const imageDiagnosisMap = ESArray.arrayToKeyValue(imageDiagnosisList, 'id')
-        ticketModified.imageDiagnosisList = imageDiagnosisIds.map((i) => imageDiagnosisMap[i])
-
-        this.socketEmitService.socketImageListChange(oid, {
-          ticketId,
-          imageUpsertedList: imageCreatedList,
-          imageDestroyedList,
-        })
       }
     }
 
     // 2. Update Attribute
+    let ticketAttributeDestroyedList: TicketAttribute[] = []
+    let ticketAttributeCreatedList: TicketAttribute[] = []
     if (ticketAttributeChangeList) {
-      await this.ticketAttributeRepository.delete({
+      ticketAttributeDestroyedList = await this.ticketAttributeRepository.deleteAndReturnEntity({
         oid,
         ticketId,
         key: { IN: ticketAttributeKeyList },
@@ -86,35 +83,34 @@ export class TicketChangeAttributeService {
         return dto
       })
 
-      await this.ticketAttributeRepository.insertMany(ticketAttributeInsertList)
-
-      const ticketAttributeList = await this.ticketAttributeRepository.findManyBy({
-        oid,
-        ticketId,
-      })
-
-      this.socketEmitService.socketTicketAttributeListChange(oid, {
-        ticketId,
-        ticketAttributeList,
-      })
+      ticketAttributeCreatedList =
+        await this.ticketAttributeRepository.insertManyAndReturnEntity(ticketAttributeInsertList)
     }
-    this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+    this.socketEmitService.socketTicketChange(oid, {
+      ticketId,
+      ticketModified,
+      ticketAttribute: {
+        destroyedList: ticketAttributeDestroyedList,
+        upsertedList: ticketAttributeCreatedList,
+      },
+    })
     return true
   }
 
   async updateTicketAttributeList(options: {
     oid: number
-    ticketId: number
+    ticketId: string
     body: TicketUpdateTicketAttributeListBody
   }) {
     const { oid, ticketId, body } = options
     const ticketAttributeKeyList = body.ticketAttributeList.map((i) => i.key)
 
-    await this.ticketAttributeRepository.delete({
-      oid,
-      ticketId,
-      key: { IN: ticketAttributeKeyList },
-    })
+    const ticketAttributeDestroyedList =
+      await this.ticketAttributeRepository.deleteAndReturnEntity({
+        oid,
+        ticketId,
+        key: { IN: ticketAttributeKeyList },
+      })
 
     const ticketAttributeInsertList = body.ticketAttributeList
       .filter((i) => !!i.value)
@@ -127,12 +123,15 @@ export class TicketChangeAttributeService {
         }
         return dto
       })
-    const ticketAttributeList =
+    const ticketAttributeCreatedList =
       await this.ticketAttributeRepository.insertManyAndReturnEntity(ticketAttributeInsertList)
 
-    this.socketEmitService.socketTicketAttributeListChange(oid, {
+    this.socketEmitService.socketTicketChange(oid, {
       ticketId,
-      ticketAttributeList,
+      ticketAttribute: {
+        destroyedList: ticketAttributeDestroyedList,
+        upsertedList: ticketAttributeCreatedList,
+      },
     })
 
     return true

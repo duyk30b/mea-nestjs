@@ -1,7 +1,7 @@
 import { Controller, Delete, Param, Post } from '@nestjs/common'
 import { Body } from '@nestjs/common/decorators/http/route-params.decorator'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IdParam } from '../../../../../_libs/common/dto/param'
+import { GenerateIdParam, IdParam } from '../../../../../_libs/common/dto/param'
 import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
 import { BaseResponse } from '../../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
@@ -21,7 +21,7 @@ export class ApiPurchaseOrderActionController {
   @UserPermission(PermissionId.PURCHASE_ORDER_DRAFT_CRUD)
   async draftDestroy(
     @External() { oid }: TExternal,
-    @Param() { id }: IdParam
+    @Param() { id }: GenerateIdParam
   ): Promise<BaseResponse> {
     const data = await this.purchaseOrderActionService.destroy({
       oid,
@@ -34,7 +34,7 @@ export class ApiPurchaseOrderActionController {
   @UserPermission(PermissionId.PURCHASE_ORDER_DEPOSITED_DESTROY)
   async depositedDestroy(
     @External() { oid }: TExternal,
-    @Param() { id }: IdParam
+    @Param() { id }: GenerateIdParam
   ): Promise<BaseResponse> {
     const data = await this.purchaseOrderActionService.destroy({
       oid,
@@ -47,7 +47,7 @@ export class ApiPurchaseOrderActionController {
   @UserPermission(PermissionId.PURCHASE_ORDER_CANCELLED_DESTROY)
   async cancelledDestroy(
     @External() { oid }: TExternal,
-    @Param() { id }: IdParam
+    @Param() { id }: GenerateIdParam
   ): Promise<BaseResponse> {
     const data = await this.purchaseOrderActionService.destroy({
       oid,
@@ -60,7 +60,7 @@ export class ApiPurchaseOrderActionController {
   @UserPermission(PermissionId.PURCHASE_ORDER_SEND_PRODUCT, PermissionId.PURCHASE_ORDER_CLOSE)
   async sendProductAndPaymentAndClose(
     @External() { oid, uid }: TExternal,
-    @Param() { id }: IdParam,
+    @Param() { id }: GenerateIdParam,
     @Body() body: PurchaseOrderPaymentMoneyBody
   ): Promise<BaseResponse> {
     const data = await this.purchaseOrderActionService.sendProductAndPaymentAndClose({
@@ -76,7 +76,7 @@ export class ApiPurchaseOrderActionController {
   @UserPermission(PermissionId.PURCHASE_ORDER_SEND_PRODUCT)
   async sendProduct(
     @External() { oid, uid }: TExternal,
-    @Param() { id }: IdParam
+    @Param() { id }: GenerateIdParam
   ): Promise<BaseResponse> {
     const data = await this.purchaseOrderActionService.sendProduct({
       oid,
@@ -90,7 +90,7 @@ export class ApiPurchaseOrderActionController {
   @UserPermission(PermissionId.PURCHASE_ORDER_CLOSE)
   async close(
     @External() { oid, uid }: TExternal,
-    @Param() { id }: IdParam
+    @Param() { id }: GenerateIdParam
   ): Promise<BaseResponse> {
     const data = await this.purchaseOrderActionService.close({
       oid,
@@ -104,7 +104,7 @@ export class ApiPurchaseOrderActionController {
   @UserPermission(PermissionId.PURCHASE_ORDER_TERMINATE)
   async terminate(
     @External() { oid, uid }: TExternal,
-    @Param() { id }: IdParam
+    @Param() { id }: GenerateIdParam
   ): Promise<BaseResponse> {
     const data = await this.purchaseOrderActionService.terminate({
       oid,

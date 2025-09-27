@@ -9,17 +9,16 @@ import {
   TicketRegimen,
   TicketUser,
 } from '../../../../_libs/database/entities'
-import Image from '../../../../_libs/database/entities/image.entity'
 import { PositionType } from '../../../../_libs/database/entities/position.entity'
+import { TicketProcedureType } from '../../../../_libs/database/entities/ticket-procedure.entity'
 import {
   CustomerRepository,
-  ImageRepository,
   RegimenRepository,
-  TicketProcedureRepository,
   TicketRepository,
 } from '../../../../_libs/database/repositories'
 import { TicketRegimenRepository } from '../../../../_libs/database/repositories/ticket-regimen.repository'
 import { TicketUserRepository } from '../../../../_libs/database/repositories/ticket-user.repository'
+import { ApiTicketProcedureService } from '../api-ticket-procedure/api-ticket-procedure.service'
 import {
   TicketRegimenGetManyQuery,
   TicketRegimenGetOneQuery,
@@ -31,12 +30,11 @@ import {
 export class ApiTicketRegimenService {
   constructor(
     private readonly ticketRegimenRepository: TicketRegimenRepository,
-    private readonly ticketProcedureRepository: TicketProcedureRepository,
     private readonly ticketRepository: TicketRepository,
     private readonly customerRepository: CustomerRepository,
     private readonly regimenRepository: RegimenRepository,
     private readonly ticketUserRepository: TicketUserRepository,
-    private readonly imageRepository: ImageRepository
+    private readonly apiTicketProcedureService: ApiTicketProcedureService
   ) { }
 
   async pagination(oid: number, query: TicketRegimenPaginationQuery) {
@@ -83,7 +81,7 @@ export class ApiTicketRegimenService {
     return { ticketRegimenList }
   }
 
-  async detail(options: { oid: number; id: number; query: TicketRegimenGetOneQuery }) {
+  async detail(options: { oid: number; id: string; query: TicketRegimenGetOneQuery }) {
     const { oid, id, query } = options
     const relation = query.relation
     const ticketRegimen = await this.ticketRegimenRepository.findOne({
@@ -136,53 +134,32 @@ export class ApiTicketRegimenService {
         })
         : <TicketUser[]>[],
       relation?.ticketProcedureList && ticketRegimenIdList.length
-        ? this.ticketProcedureRepository.findMany({
-          condition: {
+        ? this.apiTicketProcedureService.getList(oid, {
+          relation: {
+            imageList: true,
+            ticketUserResultList: true,
+          },
+          filter: {
             oid,
             customerId: { IN: customerIdList },
             ticketRegimenId: { IN: ticketRegimenIdList },
+            ticketProcedureType: TicketProcedureType.InRegimen,
             // ticketId: { IN: ticketIdList }, // ticketProcedure có thể gắn với bất kỳ ticketId nào sử dụng nó
           },
           sort: { completedAt: 'ASC', id: 'ASC' },
         })
-        : <TicketProcedure[]>[],
+        : undefined,
     ])
 
     const ticketList: Ticket[] = dataPromise[0]
     const customerList: Customer[] = dataPromise[1]
     const regimenList: Regimen[] = dataPromise[2]
     const ticketUserRequestList: TicketUser[] = dataPromise[3]
-    const ticketProcedureList: TicketProcedure[] = dataPromise[4]
-
-    ticketProcedureList.forEach((tp) => {
-      try {
-        tp.imageIdList = JSON.parse(tp.imageIds)
-      } catch (error) {
-        tp.imageIdList = []
-      }
-    })
-
-    const [imageList, ticketUserResultList] = await Promise.all([
-      relation?.ticketProcedureList?.imageList && ticketProcedureList.length
-        ? this.imageRepository.findManyBy({
-          oid,
-          id: { IN: ticketProcedureList.map((i) => i.imageIdList).flat() },
-        })
-        : <Image[]>[],
-      relation?.ticketProcedureList?.ticketUserResultList && ticketRegimenIdList.length
-        ? this.ticketUserRepository.findManyBy({
-          oid,
-          ticketId: { IN: ESArray.uniqueArray(ticketIdList) },
-          positionType: { IN: [PositionType.ProcedureResult] },
-          ticketItemId: { IN: ESArray.uniqueArray(ticketProcedureList.map((i) => i.id)) },
-        })
-        : <TicketUser[]>[],
-    ])
+    const ticketProcedureList: TicketProcedure[] = dataPromise[4]?.ticketProcedureList || []
 
     const ticketMap = ESArray.arrayToKeyValue(ticketList, 'id')
     const regimenMap = ESArray.arrayToKeyValue(regimenList, 'id')
     const customerMap = ESArray.arrayToKeyValue(customerList, 'id')
-    const imageMap = ESArray.arrayToKeyValue(imageList, 'id')
 
     ticketRegimenList.forEach((ticketRegimen: TicketRegimen) => {
       if (relation.ticket) {
@@ -208,20 +185,6 @@ export class ApiTicketRegimenService {
       if (relation.ticketProcedureList) {
         ticketRegimen.ticketProcedureList = ticketProcedureList.filter((tp) => {
           return tp.ticketRegimenId === ticketRegimen.id
-        })
-        ticketRegimen.ticketProcedureList.forEach((tp) => {
-          if (relation.ticketProcedureList?.imageList) {
-            tp.imageList = tp.imageIdList.map((imageId) => imageMap[imageId])
-          }
-          if (relation.ticketProcedureList?.ticketUserResultList) {
-            tp.ticketUserResultList = ticketUserResultList.filter((tu) => {
-              return (
-                tu.ticketId === tp.ticketId
-                && tu.positionType === PositionType.ProcedureResult
-                && tu.ticketItemId === tp.id
-              )
-            })
-          }
         })
       }
     })

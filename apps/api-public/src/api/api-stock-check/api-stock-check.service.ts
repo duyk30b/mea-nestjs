@@ -81,7 +81,7 @@ export class ApiStockCheckService {
 
   async getOne(options: {
     oid: number
-    id: number
+    id: string
     query: StockCheckGetOneQuery
   }): Promise<BaseResponse> {
     const { oid, id, query } = options
@@ -164,7 +164,7 @@ export class ApiStockCheckService {
 
   async draftSubmit(params: {
     oid: number
-    stockCheckId: number
+    stockCheckId: string
     userId: number
   }): Promise<BaseResponse> {
     const { oid, stockCheckId, userId } = params
@@ -183,7 +183,7 @@ export class ApiStockCheckService {
 
   async pendingApprove(params: {
     oid: number
-    stockCheckId: number
+    stockCheckId: string
     userId: number
   }): Promise<BaseResponse> {
     const { oid, stockCheckId, userId } = params
@@ -202,7 +202,7 @@ export class ApiStockCheckService {
 
   async confirmReconcile(params: {
     oid: number
-    stockCheckId: number
+    stockCheckId: string
     userId: number
   }): Promise<BaseResponse> {
     const { oid, stockCheckId, userId } = params
@@ -223,7 +223,7 @@ export class ApiStockCheckService {
     return { data: { stockCheck } }
   }
 
-  async void(params: { oid: number; stockCheckId: number; userId: number }): Promise<BaseResponse> {
+  async void(params: { oid: number; stockCheckId: string; userId: number }): Promise<BaseResponse> {
     const { oid, stockCheckId, userId } = params
     const stockCheck = await this.stockCheckRepository.updateOneAndReturnEntity(
       {
@@ -242,7 +242,7 @@ export class ApiStockCheckService {
     return { data: { stockCheck } }
   }
 
-  async destroy(params: { oid: number; stockCheckId: number }): Promise<BaseResponse> {
+  async destroy(params: { oid: number; stockCheckId: string }): Promise<BaseResponse> {
     const { oid, stockCheckId } = params
     const stockCheckOrigin = await this.stockCheckRepository.findOneBy({ oid, id: stockCheckId })
     if (![StockCheckStatus.Draft, StockCheckStatus.Cancelled].includes(stockCheckOrigin.status)) {

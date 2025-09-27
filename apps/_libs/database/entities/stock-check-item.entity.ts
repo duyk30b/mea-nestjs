@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
 import Batch from './batch.entity'
 import Product from './product.entity'
 import StockCheck from './stock-check.entity'
@@ -11,13 +11,13 @@ export default class StockCheckItem {
   @Exclude()
   oid: number
 
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn({ type: 'bigint' })
   @Expose()
-  id: number
+  id: string
 
-  @Column()
+  @Column({ type: 'bigint' })
   @Expose()
-  stockCheckId: number
+  stockCheckId: string
 
   @Column({ default: 0 })
   @Expose()

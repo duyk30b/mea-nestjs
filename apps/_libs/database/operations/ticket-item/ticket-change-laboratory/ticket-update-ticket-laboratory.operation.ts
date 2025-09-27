@@ -31,8 +31,8 @@ export class TicketUpdateTicketLaboratoryOperation {
 
   async updateTicketLaboratory<T extends TicketLaboratoryUpdateDtoType>(params: {
     oid: number
-    ticketId: number
-    ticketLaboratoryId: number
+    ticketId: string
+    ticketLaboratoryId: string
     ticketLaboratoryUpdateDto?: NoExtra<TicketLaboratoryUpdateDtoType, T>
     ticketUserRequestList?: Pick<TicketUser, 'positionId' | 'userId'>[]
   }) {
@@ -103,7 +103,6 @@ export class TicketUpdateTicketLaboratoryOperation {
               userId: i.userId,
               quantity: 1,
               ticketItemId: ticketLaboratoryModified.id,
-              ticketItemChildId: 0,
               positionInteractId: ticketLaboratoryModified.laboratoryId,
               ticketItemExpectedPrice: ticketLaboratoryModified.expectedPrice,
               ticketItemActualPrice: ticketLaboratoryModified.actualPrice,

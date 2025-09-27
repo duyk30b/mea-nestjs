@@ -43,19 +43,19 @@ export class ImageManagerService implements OnModuleInit {
 
   async changeGoogleDriverImageList(options: {
     oid: number
-    ticketId: number
+    ticketId: string
     customerId: number
-    imageIdsOld: number[]
-    imageIdsKeep: number[]
+    imageIdListOld: number[]
+    imageIdListKeep: number[]
     files: FileUploadDto[]
     filesPosition: number[]
   }) {
-    const { oid, ticketId, customerId, imageIdsKeep, imageIdsOld, files, filesPosition } = options
+    const { oid, ticketId, customerId, imageIdListKeep, imageIdListOld, files, filesPosition } = options
 
-    const imageOldList = imageIdsOld.length
-      ? await this.imageRepository.findManyByIds(imageIdsOld)
+    const imageOldList = imageIdListOld.length
+      ? await this.imageRepository.findManyByIds(imageIdListOld)
       : []
-    const imageRemoveList = imageOldList.filter((i) => !imageIdsKeep.includes(i.id))
+    const imageRemoveList = imageOldList.filter((i) => !imageIdListKeep.includes(i.id))
     // tách các imageRemove ra làm nhiều nhóm, vì có thể mỗi image lại được quản lý bởi email khác nhau
     const imageRemoveMapList = ESArray.arrayToKeyArray(imageRemoveList, 'hostAccount')
 
@@ -90,7 +90,7 @@ export class ImageManagerService implements OnModuleInit {
         imageInteractType: ImageInteractType.Customer,
         imageInteractId: customerId,
         ticketId,
-        ticketItemId: 0,
+        ticketItemId: '0',
       }
       return draft
     })
@@ -103,21 +103,21 @@ export class ImageManagerService implements OnModuleInit {
       .filter((i) => imageHostTrashFailed.includes(i.externalId))
       .map((i) => i.id)
 
-    const [imageIdsNew] = await Promise.all([
+    const [imageIdListNew] = await Promise.all([
       this.imageRepository.insertManyFullField(imageInsertList),
       imageIdsRemoveSuccess.length
         ? this.imageRepository.delete({ id: { IN: imageIdsRemoveSuccess } })
         : null,
       imageIdsRemoveFailed.length
-        ? this.imageRepository.update({ id: { IN: imageIdsRemoveFailed } }, { waitDelete: 1 })
+        ? this.imageRepository.updateBasic({ id: { IN: imageIdsRemoveFailed } }, { waitDelete: 1 })
         : null,
     ])
 
     // sắp xếp sao cho đúng vị trí
-    const imageIdsUpdate = [...imageIdsKeep]
+    const imageIdsUpdate = [...imageIdListKeep]
     filesPosition.sort((a, b) => (a < b ? -1 : 1))
     for (let i = 0; i < filesPosition.length; i++) {
-      imageIdsUpdate.splice(filesPosition[i], 0, imageIdsNew[i])
+      imageIdsUpdate.splice(filesPosition[i], 0, imageIdListNew[i])
     }
 
     return imageIdsUpdate
@@ -128,16 +128,16 @@ export class ImageManagerService implements OnModuleInit {
     imageInteract: {
       imageInteractType: ImageInteractType // Loại hình ảnh
       imageInteractId: number // customerId, ticketId, organizationId
-      ticketId: number
-      ticketItemId: number
+      ticketId: string
+      ticketItemId: string
     }
     files: FileUploadDto[]
     externalUrlList: string[]
-    imageIdsOld: number[] // ví dụ [1,4,3,20,21,12,7,3]
-    imageIdsWait: number[] // ví dụ [1,4,3,0,0,0,12,7,3] // số 0 tương ứng với mỗi image mới chưa có ID
+    imageIdListOld: number[] // ví dụ [1,4,3,20,21,12,7,3]
+    imageIdWaitList: number[] // ví dụ [1,4,3,0,0,0,12,7,3] // số 0 tương ứng với mỗi image mới chưa có ID
   }) {
-    const { oid, imageInteract, imageIdsWait, imageIdsOld, files, externalUrlList } = options
-    const imageIdsRemove = imageIdsOld.filter((i) => !imageIdsWait.includes(i))
+    const { oid, imageInteract, imageIdWaitList, imageIdListOld, files, externalUrlList } = options
+    const imageIdsRemove = imageIdListOld.filter((i) => !imageIdWaitList.includes(i))
 
     // chưa xử lý việc xóa ảnh thực sự trên host
     let imageDestroyedList: Image[] = []
@@ -168,19 +168,19 @@ export class ImageManagerService implements OnModuleInit {
     const imageCreatedList = await this.imageRepository.insertManyAndReturnEntity(imageInsertList)
 
     // sắp xếp sao cho đúng vị trí
-    const imageIdsNew = []
+    const imageIdListNew = []
     const imageCreatedListAction = [...imageCreatedList] // phải tạo mảng mới vì có sửa mảng bằng shift()
-    for (let i = 0; i < imageIdsWait.length; i++) {
-      if (imageIdsWait[i] !== 0) {
-        imageIdsNew[i] = imageIdsWait[i]
+    for (let i = 0; i < imageIdWaitList.length; i++) {
+      if (imageIdWaitList[i] !== 0) {
+        imageIdListNew[i] = imageIdWaitList[i]
       }
-      if (imageIdsWait[i] === 0) {
+      if (imageIdWaitList[i] === 0) {
         const imageCreated = imageCreatedListAction.shift() // push từng phần tư vào thôi
-        imageIdsNew[i] = imageCreated.id
+        imageIdListNew[i] = imageCreated.id
       }
     }
 
-    return { imageIdsNew, imageCreatedList, imageDestroyedList }
+    return { imageIdListNew, imageCreatedList, imageDestroyedList }
   }
 
   async removeImageGoogleDriver(oid: number, imageRemoveList: Image[]) {

@@ -27,7 +27,7 @@ export class TicketProductManager extends _PostgreSqlManager<
   async calculatorDeliveryStatus(options: {
     manager: EntityManager
     oid: number
-    ticketId: number
+    ticketId: string
     ticketProductList?: TicketProduct[]
   }) {
     const { manager, oid, ticketId } = options

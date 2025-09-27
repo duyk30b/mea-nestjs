@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer'
-import { IsBoolean, IsNumber, IsObject } from 'class-validator'
+import { IsBoolean, IsNumber, IsObject, IsString } from 'class-validator'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 
 export class PurchaseOrderItemRelationQuery {
@@ -18,8 +18,8 @@ export class PurchaseOrderItemRelationQuery {
 
 export class PurchaseOrderItemFilterQuery {
   @Expose()
-  @IsNumber()
-  purchaseOrderId: number
+  @IsString()
+  purchaseOrderId: string
 
   @Expose()
   @IsNumber()

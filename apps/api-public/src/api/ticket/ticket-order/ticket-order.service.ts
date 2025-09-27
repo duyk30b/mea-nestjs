@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common'
-import { PaymentMoneyStatus } from '../../../../../_libs/database/common/variable'
+import { PaymentEffect, PaymentMoneyStatus } from '../../../../../_libs/database/common/variable'
 import { Customer, Payment, TicketProduct } from '../../../../../_libs/database/entities'
 import Ticket, { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
 import {
-    TicketOrderDepositedOperation,
-    TicketOrderDraftOperation,
+  TicketDestroyOperation,
+  TicketOrderDepositedOperation,
+  TicketOrderDraftOperation,
 } from '../../../../../_libs/database/operations'
 import { TicketRepository } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
@@ -12,10 +13,10 @@ import { TicketSendProductAndPaymentBody } from '../ticket-action/request'
 import { TicketActionService } from '../ticket-action/ticket-action.service'
 import { TicketMoneyService } from '../ticket-money/ticket-money.service'
 import {
-    TicketOrderDebtSuccessInsertBody,
-    TicketOrderDebtSuccessUpdateBody,
-    TicketOrderDepositedUpdateBody,
-    TicketOrderDraftUpsertBody,
+  TicketOrderDebtSuccessInsertBody,
+  TicketOrderDebtSuccessUpdateBody,
+  TicketOrderDepositedUpdateBody,
+  TicketOrderDraftUpsertBody,
 } from './request'
 
 @Injectable()
@@ -24,6 +25,7 @@ export class TicketOrderService {
     private readonly socketEmitService: SocketEmitService,
     private readonly ticketOrderDraftOperation: TicketOrderDraftOperation,
     private readonly ticketOrderDepositedOperation: TicketOrderDepositedOperation,
+    private readonly ticketDestroyOperation: TicketDestroyOperation,
     private readonly ticketRepository: TicketRepository,
     private readonly ticketActionService: TicketActionService,
     private readonly ticketMoneyService: TicketMoneyService
@@ -46,14 +48,12 @@ export class TicketOrderService {
         return {
           ...i,
           printPrescription: 1,
-          paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
-          createdAt: body.ticketOrderDraftUpsert.registeredAt,
+          createdAt: body.ticketOrderDraftUpsert.createdAt,
         }
       }),
       ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
         return {
           ...i,
-          paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
         }
       }),
       ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
@@ -66,7 +66,7 @@ export class TicketOrderService {
   async depositedUpdate(params: {
     oid: number
     userId: number
-    ticketId: number
+    ticketId: string
     body: TicketOrderDepositedUpdateBody
   }) {
     const { oid, userId, ticketId, body } = params
@@ -85,14 +85,14 @@ export class TicketOrderService {
         return {
           ...i,
           printPrescription: 1,
-          paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
-          createdAt: body.ticketOrderDepositedUpdate.registeredAt,
+          paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+          createdAt: body.ticketOrderDepositedUpdate.createdAt,
         }
       }),
       ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
         return {
           ...i,
-          paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
+          paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
         }
       }),
       ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
@@ -109,11 +109,11 @@ export class TicketOrderService {
   }) {
     const { oid, body, userId } = params
     const { paid, ...ticketOrderDraftInsertBody } = body.ticketOrderDebtSuccessInsert
-    const time = ticketOrderDraftInsertBody.registeredAt
+    const time = ticketOrderDraftInsertBody.createdAt
 
     const draftResponse = await this.ticketOrderDraftOperation.upsert({
       oid,
-      ticketId: 0,
+      ticketId: '',
       ticketOrderDraftUpsertDto: {
         ...ticketOrderDraftInsertBody,
         customerSourceId: 0,
@@ -125,14 +125,12 @@ export class TicketOrderService {
         return {
           ...i,
           printPrescription: 1,
-          paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
-          createdAt: body.ticketOrderDebtSuccessInsert.registeredAt,
+          createdAt: body.ticketOrderDebtSuccessInsert.createdAt,
         }
       }),
       ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
         return {
           ...i,
-          paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
         }
       }),
       ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
@@ -169,7 +167,7 @@ export class TicketOrderService {
   async debtSuccessUpdate(params: {
     oid: number
     userId: number
-    ticketId: number
+    ticketId: string
     body: TicketOrderDebtSuccessUpdateBody
   }) {
     const { oid, userId, ticketId, body } = params
@@ -224,14 +222,14 @@ export class TicketOrderService {
         return {
           ...i,
           printPrescription: 1,
-          paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
-          createdAt: body.ticketOrderDebtSuccessUpdate.registeredAt,
+          createdAt: body.ticketOrderDebtSuccessUpdate.createdAt,
+          paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
         }
       }),
       ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
         return {
           ...i,
-          paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
+          paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
         }
       }),
       ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
@@ -266,15 +264,15 @@ export class TicketOrderService {
   }
 
   // ================= ACTION ================= //
-  async destroy(params: { oid: number; ticketId: number }) {
+  async destroy(params: { oid: number; ticketId: string }) {
     const { oid, ticketId } = params
-    await this.ticketRepository.destroyAll({ oid, ticketId })
+    await this.ticketDestroyOperation.destroyAll({ oid, ticketId })
     return { ticketId }
   }
 
   async sendProductAndPaymentAndClose(params: {
     oid: number
-    ticketId: number
+    ticketId: string
     userId: number
     body: TicketSendProductAndPaymentBody
   }) {
@@ -331,7 +329,7 @@ export class TicketOrderService {
       customerModified = closeResult.customerModified
     }
     if (ticketModified) {
-      this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+      this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
     }
     if (customerModified) {
       this.socketEmitService.customerUpsert(oid, { customer: customerModified })

@@ -5,34 +5,34 @@ import { BaseResponse } from '../../../../_libs/common/interceptor/transform-res
 import { BusinessError } from '../../../../_libs/database/common/error'
 import { LaboratoryGroup } from '../../../../_libs/database/entities'
 import Discount, {
-  DiscountInsertType,
-  DiscountInteractType,
+    DiscountInsertType,
+    DiscountInteractType,
 } from '../../../../_libs/database/entities/discount.entity'
 import Laboratory, {
-  LaboratoryInsertType,
-  LaboratoryValueType,
+    LaboratoryInsertType,
+    LaboratoryValueType,
 } from '../../../../_libs/database/entities/laboratory.entity'
 import Position, {
-  PositionInsertType,
-  PositionType,
+    PositionInsertType,
+    PositionType,
 } from '../../../../_libs/database/entities/position.entity'
 import {
-  DiscountRepository,
-  LaboratoryGroupRepository,
-  PositionRepository,
+    DiscountRepository,
+    LaboratoryGroupRepository,
+    PositionRepository,
 } from '../../../../_libs/database/repositories'
 import { LaboratoryRepository } from '../../../../_libs/database/repositories/laboratory.repository'
 import { TicketLaboratoryRepository } from '../../../../_libs/database/repositories/ticket-laboratory.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import { ApiLaboratoryGroupService } from '../api-laboratory-group/api-laboratory-group.service'
 import {
-  LaboratoryCreateBody,
-  LaboratoryGetManyQuery,
-  LaboratoryGetOneQuery,
-  LaboratoryPaginationQuery,
-  LaboratoryRelationQuery,
-  LaboratorySystemCopyBody,
-  LaboratoryUpdateBody,
+    LaboratoryCreateBody,
+    LaboratoryGetManyQuery,
+    LaboratoryGetOneQuery,
+    LaboratoryPaginationQuery,
+    LaboratoryRelationQuery,
+    LaboratorySystemCopyBody,
+    LaboratoryUpdateBody,
 } from './request'
 
 @Injectable()
@@ -422,7 +422,7 @@ export class ApiLaboratoryService {
     const laboratoryParentCreatedList = await this.laboratoryRepository.insertManyAndReturnEntity(
       laboratoryParentInsertList
     )
-    await this.laboratoryRepository.update(
+    await this.laboratoryRepository.updateBasic(
       { id: { IN: laboratoryParentCreatedList.map((i) => i.id) } },
       {
         parentId: () => `"id"`,

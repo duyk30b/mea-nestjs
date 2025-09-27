@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsNumber, Max, Min, ValidateNested } from 'class-validator'
+import { IsArray, IsDefined, IsNumber, IsString, Max, Min, ValidateNested } from 'class-validator'
 import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
 import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
 import { DiscountType } from '../../../../../../_libs/database/common/variable'
@@ -40,18 +40,18 @@ class TicketRegimenBasicBody {
   actualPrice: number
 }
 
-class TicketProcedureBody {
+class TicketRegimenItemUpdateBody {
   @ApiProperty({ example: 56 })
   @Expose()
   @IsDefined()
-  @IsNumber()
-  id: number
+  @IsString()
+  id: string
 
   @ApiProperty({ example: 4 })
   @Expose()
   @IsDefined()
   @IsNumber()
-  quantity: number
+  quantityTotal: number
 
   @ApiProperty({ example: 25_000 })
   @Expose()
@@ -87,18 +87,18 @@ class TicketProcedureBody {
 }
 
 export class TicketUpdateMoneyTicketRegimenBody {
-  @ApiProperty({ type: TicketProcedureBody })
+  @ApiProperty({ type: TicketRegimenItemUpdateBody })
   @Expose()
-  @Type(() => TicketProcedureBody)
+  @Type(() => TicketRegimenItemUpdateBody)
   @IsDefined()
   @IsArray()
   @ValidateNested({ each: true })
-  ticketProcedureList: TicketProcedureBody[]
+  ticketRegimenItemUpdateList: TicketRegimenItemUpdateBody[]
 
   @ApiProperty({ type: TicketRegimenBasicBody })
   @Expose()
   @Type(() => TicketRegimenBasicBody)
   @IsDefined()
   @ValidateNested({ each: true })
-  ticketRegimen: TicketRegimenBasicBody
+  ticketRegimenUpdate: TicketRegimenBasicBody
 }

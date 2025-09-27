@@ -1,6 +1,5 @@
-import { Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
+import { Exclude, Expose } from 'class-transformer'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
 import Batch from './batch.entity'
 import Product from './product.entity'
 import PurchaseOrder from './purchase-order.entity'
@@ -8,10 +7,18 @@ import PurchaseOrder from './purchase-order.entity'
 @Entity('PurchaseOrderItem')
 @Index('IDX_PurchaseOrderItem__oid_productId', ['oid', 'productId'])
 @Index('IDX_PurchaseOrderItem__oid_purchaseOrderId', ['oid', 'purchaseOrderId'])
-export default class PurchaseOrderItem extends BaseEntity {
+export default class PurchaseOrderItem {
   @Column()
+  @Exclude()
+  oid: number
+
+  @PrimaryColumn({ type: 'bigint' })
   @Expose()
-  purchaseOrderId: number
+  id: string
+
+  @Column({ type: 'bigint' })
+  @Expose()
+  purchaseOrderId: string
 
   @Column()
   @Expose()

@@ -1,19 +1,18 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { ESArray } from '../../../common/helpers/array.helper'
+import { GenerateId } from '../../common/generate-id'
 import { DeliveryStatus, MovementType } from '../../common/variable'
-import { ProductMovementInsertType } from '../../entities/product-movement.entity'
+import { TicketProduct } from '../../entities'
 import { TicketBatchInsertType } from '../../entities/ticket-batch.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
 import {
-  BatchManager,
-  ProductManager,
-  ProductMovementManager,
-  TicketBatchManager,
-  TicketManager,
+  TicketBatchRepository,
   TicketProductManager,
+  TicketProductRepository,
+  TicketRepository,
 } from '../../repositories'
-import { ProductPickingOperation } from '../product/product-picking.operation'
+import { ProductPickupManager } from '../product/product-pickup.manager'
 import { TicketChangeItemMoneyManager } from './ticket-change-item-money.manager'
 
 export type SendItem = {
@@ -29,20 +28,18 @@ export type SendItem = {
 export class TicketSendProductOperation {
   constructor(
     private dataSource: DataSource,
-    private ticketManager: TicketManager,
-    private productManager: ProductManager,
-    private batchManager: BatchManager,
+    private ticketRepository: TicketRepository,
+    private ticketProductRepository: TicketProductRepository,
     private ticketProductManager: TicketProductManager,
-    private ticketBatchManager: TicketBatchManager,
-    private productMovementManager: ProductMovementManager,
+    private ticketBatchRepository: TicketBatchRepository,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager,
-    private productPickingOperation: ProductPickingOperation
+    private productPickupManager: ProductPickupManager
   ) { }
 
   async sendProduct(data: {
     oid: number
-    ticketId: number
-    ticketProductIdList: number[]
+    ticketId: string
+    ticketProductIdList: string[]
     sendAll: boolean
     time: number
     allowNegativeQuantity: boolean
@@ -53,7 +50,7 @@ export class TicketSendProductOperation {
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // 1. === UPDATE TRANSACTION for TICKET ===
-      let ticketModified = await this.ticketManager.updateOneAndReturnEntity(
+      let ticketModified = await this.ticketRepository.managerUpdateOne(
         manager,
         {
           oid,
@@ -64,55 +61,67 @@ export class TicketSendProductOperation {
         },
         { updatedAt: Date.now(), status: TicketStatus.Executing }
       )
-      const ticketProductOriginList = await this.ticketProductManager.findManyBy(manager, {
-        oid,
-        ticketId,
-        ...(sendAll ? {} : { id: { IN: ticketProductIdList } }),
-        deliveryStatus: DeliveryStatus.Pending, // chỉ update những thằng "Pending" thôi
-      })
+
+      let ticketProductOriginList: TicketProduct[] = []
+      if (sendAll) {
+        ticketProductOriginList = await this.ticketProductRepository.managerFindManyBy(manager, {
+          oid,
+          ticketId,
+          deliveryStatus: DeliveryStatus.Pending, // chỉ update những thằng "Pending" thôi
+        })
+      } else {
+        ticketProductOriginList = await this.ticketProductRepository.managerFindManyBy(manager, {
+          oid,
+          ticketId,
+          id: { IN: ticketProductIdList },
+          deliveryStatus: DeliveryStatus.Pending, // chỉ update những thằng "Pending" thôi
+        })
+      }
       if (ticketProductOriginList.length === 0) {
         return { ticketModified }
       }
       const ticketProductOriginMap = ESArray.arrayToKeyValue(ticketProductOriginList, 'id')
 
       // === 2. Product and Batch origin
-      const productIdList = ticketProductOriginList.map((i) => i.productId)
-      const productOriginList = await this.productManager.updateAndReturnEntity(
+      const pickupContainer = await this.productPickupManager.startPickup({
         manager,
-        { oid, id: { IN: productIdList }, isActive: 1 },
-        { updatedAt: time }
-      )
-      const batchOriginList = await this.batchManager.updateAndReturnEntity(
-        manager,
-        { oid, productId: { IN: productIdList }, isActive: 1 },
-        { updatedAt: time }
-      )
-      const batchOriginMap = ESArray.arrayToKeyValue(batchOriginList, 'id')
-      const pickingContainer = this.productPickingOperation.generatePickingPlan({
-        productOriginList,
-        batchOriginList,
-        voucherBatchList: ticketProductOriginList.map((i) => {
+        oid,
+        voucherId: ticketId,
+        contactId: ticketModified.customerId,
+        movementType: MovementType.Ticket,
+        isRefund: 0,
+        time,
+        allowNegativeQuantity,
+        voucherProductPickupList: ticketProductOriginList.map((i) => {
           return {
-            ...i,
+            pickupStrategy: i.pickupStrategy,
+            expectedPrice: i.expectedPrice,
+            actualPrice: i.actualPrice,
+            productId: i.productId,
+            batchId: i.batchId,
+            warehouseIds: i.warehouseIds,
+            quantity: i.quantity,
             voucherProductId: i.id,
             voucherBatchId: 0,
             costAmount: null,
           }
         }),
-        allowNegativeQuantity,
       })
+      const { pickupPlan, batchModifiedList, productModifiedList } = pickupContainer
+      const batchModifiedMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')
+      const productModifiedMap = ESArray.arrayToKeyValue(productModifiedList, 'id')
 
       // 3. === TICKET_PRODUCT: update Delivery ===
-      const ticketProductModifiedList = await this.ticketProductManager.bulkUpdate({
+      const ticketProductModifiedList = await this.ticketProductRepository.managerBulkUpdate({
         manager,
         condition: { oid, ticketId, deliveryStatus: { EQUAL: DeliveryStatus.Pending } },
-        compare: ['id', 'productId', 'quantity'],
-        tempList: pickingContainer.pickingVoucherProductList.map((i) => {
+        compare: { id: { cast: 'bigint' }, productId: true, quantity: true },
+        tempList: pickupPlan.pickupVoucherProductList.map((i) => {
           return {
             id: i.voucherProductId,
             productId: i.productId,
-            quantity: i.pickingQuantity,
-            costAmount: i.pickingCostAmount,
+            quantity: i.pickupQuantity,
+            costAmount: i.pickupCostAmount,
             deliveryStatus: DeliveryStatus.Delivered,
           }
         }),
@@ -122,100 +131,30 @@ export class TicketSendProductOperation {
       const ticketProductModifiedMap = ESArray.arrayToKeyValue(ticketProductModifiedList, 'id')
 
       // 4. === TICKET_BATCH: insert
-      const ticketBatchInsertList = pickingContainer.pickingVoucherBatchList.map(
-        (pickingTicketBatch) => {
-          const tp = ticketProductModifiedMap[pickingTicketBatch.voucherProductId]
-          const batchOrigin = batchOriginMap[pickingTicketBatch.batchId]
-          const ticketBatchInsert: TicketBatchInsertType = {
-            oid,
-            ticketId,
-            customerId: tp.customerId,
-            ticketProductId: tp.id,
-            warehouseId: batchOrigin?.warehouseId || 0,
-            productId: tp.productId,
-            batchId: pickingTicketBatch.batchId || 0, // thằng pickupStrategy.NoImpact luôn lấy batchId = 0
-            deliveryStatus: DeliveryStatus.Delivered,
-            unitRate: tp.unitRate,
-            quantity: pickingTicketBatch.pickingQuantity,
-            costAmount: pickingTicketBatch.pickingCostAmount,
-            actualPrice: tp.actualPrice,
-            expectedPrice: tp.expectedPrice,
-          }
-          return ticketBatchInsert
+      const ticketBatchInsertList = pickupPlan.pickupVoucherBatchList.map((pickupTicketBatch) => {
+        const tp = ticketProductModifiedMap[pickupTicketBatch.voucherProductId]
+        const batchOrigin = batchModifiedMap[pickupTicketBatch.batchId]
+        const ticketBatchInsert: TicketBatchInsertType = {
+          id: GenerateId.nextId(),
+          oid,
+          ticketId,
+          customerId: tp.customerId,
+          ticketProductId: tp.id,
+          warehouseId: batchOrigin?.warehouseId || 0,
+          productId: tp.productId,
+          batchId: pickupTicketBatch.batchId || 0, // thằng pickupStrategy.NoImpact luôn lấy batchId = 0
+          deliveryStatus: DeliveryStatus.Delivered,
+          unitRate: tp.unitRate,
+          quantity: pickupTicketBatch.pickupQuantity,
+          costAmount: pickupTicketBatch.pickupCostAmount,
+          actualPrice: tp.actualPrice,
+          expectedPrice: tp.expectedPrice,
         }
-      )
-      await this.ticketBatchManager.insertManyAndReturnEntity(manager, ticketBatchInsertList)
+        return ticketBatchInsert
+      })
+      await this.ticketBatchRepository.managerInsertMany(manager, ticketBatchInsertList)
 
       // 4. === UPDATE for PRODUCT and BATCH ===
-      const productModifiedList = await this.productManager.bulkUpdate({
-        manager,
-        condition: { oid }, // thằng NoImpact Inventory vẫn được update nhé
-        compare: ['id'],
-        tempList: pickingContainer.pickingProductList.map((i) => {
-          return {
-            id: i.productId,
-            quantity: i.closeQuantity,
-            pickingQuantity: i.pickingQuantity, // không được cộng trừ theo thằng này, vì với trường hợp NoImpact nó vẫn nhặt
-          }
-        }),
-        update: ['quantity'],
-        options: { requireEqualLength: true },
-      })
-      const productModifiedMap = ESArray.arrayToKeyValue(productModifiedList, 'id')
-
-      const batchModifiedList = await this.batchManager.bulkUpdate({
-        manager,
-        condition: { oid },
-        compare: ['id', 'productId'],
-        tempList: pickingContainer.pickingBatchList
-          .filter((i) => !!i.batchId)
-          .map((i) => {
-            return {
-              id: i.batchId,
-              productId: i.productId,
-              pickingQuantity: i.pickingQuantity,
-              pickingCostAmount: i.pickingCostAmount,
-            }
-          }),
-        update: {
-          quantity: () => `"quantity" - "pickingQuantity"`,
-          costAmount: () => `"costAmount" - "pickingCostAmount"`,
-        },
-        options: { requireEqualLength: true },
-      })
-      const batchModifiedMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')
-
-      // === 5. CREATE: PRODUCT_MOVEMENT ===
-      const productMovementInsertList = pickingContainer.pickingMovementList.map((paMovement) => {
-        const tpOrigin = ticketProductOriginMap[paMovement.voucherProductId]
-        const batch = batchModifiedMap[paMovement.batchId] // có thể null
-        const productMovementInsert: ProductMovementInsertType = {
-          oid,
-          movementType: MovementType.Ticket,
-          contactId: ticketModified.customerId,
-          voucherId: ticketModified.id,
-          voucherProductId: tpOrigin.id,
-          warehouseId: batch?.warehouseId || 0,
-          productId: paMovement.productId,
-          batchId: paMovement.batchId,
-
-          createdAt: time,
-          isRefund: 0,
-          expectedPrice: tpOrigin.expectedPrice,
-          actualPrice: tpOrigin.actualPrice,
-
-          quantity: -paMovement.pickingQuantity,
-          costAmount: -paMovement.pickingCostAmount,
-          openQuantityProduct: paMovement.openQuantityProduct,
-          closeQuantityProduct: paMovement.closeQuantityProduct,
-          openQuantityBatch: paMovement.openQuantityBatch,
-          closeQuantityBatch: paMovement.closeQuantityBatch,
-          openCostAmountBatch: paMovement.openCostAmountBatch,
-          closeCostAmountBatch: paMovement.closeCostAmountBatch,
-        }
-        return productMovementInsert
-      })
-      await this.productMovementManager.insertMany(manager, productMovementInsertList)
 
       // 6. === UPDATE: TICKET MONEY AND DELIVERY ===
       const costAmountOrigin = ticketProductOriginList.reduce((acc, cur) => {

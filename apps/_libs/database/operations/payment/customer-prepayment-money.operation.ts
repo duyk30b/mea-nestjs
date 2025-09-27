@@ -21,7 +21,7 @@ export class CustomerPrepaymentMoneyOperation {
 
   async startPrePaymentMoney(options: {
     oid: number
-    ticketId: number
+    ticketId: string
     customerId: number
     cashierId: number
     paymentMethodId: number

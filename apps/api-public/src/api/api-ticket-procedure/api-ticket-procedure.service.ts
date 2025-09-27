@@ -44,10 +44,14 @@ export class ApiTicketProcedureService {
       limit,
       condition: {
         oid,
-        customerId: filter?.customerId,
-        paymentMoneyStatus: filter?.paymentMoneyStatus,
-        procedureId: filter?.procedureId,
         ticketId: filter?.ticketId,
+        ticketRegimenId: filter?.ticketRegimenId,
+        customerId: filter?.customerId,
+        procedureId: filter?.procedureId,
+        ticketProcedureType: filter?.ticketProcedureType,
+        paymentMoneyStatus: filter?.paymentMoneyStatus,
+        status: filter?.status,
+        createdAt: filter?.createdAt,
       },
       sort,
     })
@@ -64,11 +68,14 @@ export class ApiTicketProcedureService {
     const ticketProcedureList = await this.ticketProcedureRepository.findMany({
       condition: {
         oid,
-        id: filter.id,
-        customerId: filter?.customerId,
-        paymentMoneyStatus: filter?.paymentMoneyStatus,
-        procedureId: filter?.procedureId,
         ticketId: filter?.ticketId,
+        ticketRegimenId: filter?.ticketRegimenId,
+        customerId: filter?.customerId,
+        procedureId: filter?.procedureId,
+        ticketProcedureType: filter?.ticketProcedureType,
+        paymentMoneyStatus: filter?.paymentMoneyStatus,
+        status: filter?.status,
+        createdAt: filter?.createdAt,
       },
       limit,
       sort,
@@ -80,7 +87,7 @@ export class ApiTicketProcedureService {
     return { ticketProcedureList }
   }
 
-  async detail(options: { oid: number; id: number; query: TicketProcedureGetOneQuery }) {
+  async detail(options: { oid: number; id: string; query: TicketProcedureGetOneQuery }) {
     const { oid, id, query } = options
     const relation = query.relation
     const ticketProcedure = await this.ticketProcedureRepository.findOne({
@@ -107,21 +114,18 @@ export class ApiTicketProcedureService {
     relation?: TicketProcedureRelationQuery
   }) {
     const { oid, ticketProcedureList, relation } = object
-
+    ticketProcedureList.forEach((i) => {
+      try {
+        i.imageIdList = JSON.parse(i.imageIds)
+      } catch (error) {
+        i.imageIdList = []
+      }
+    })
     const ticketProcedureIdList = ticketProcedureList.map((i) => i.id)
     const ticketIdList = ticketProcedureList.map((i) => i.ticketId)
     const customerIdList = ticketProcedureList.map((i) => i.customerId)
     const procedureIdList = ticketProcedureList.map((i) => i.procedureId)
-
-    const imageIdList: number[] = ticketProcedureList
-      .map((i) => {
-        try {
-          return JSON.parse(i.imageIds) as number[]
-        } catch (error) {
-          return []
-        }
-      })
-      .flat()
+    const imageIdList: number[] = ticketProcedureList.map((i) => i.imageIdList).flat()
 
     const [ticketList, customerList, procedureList, ticketUserList, imageList] = await Promise.all([
       relation?.ticket && ticketIdList.length
@@ -192,12 +196,7 @@ export class ApiTicketProcedureService {
         })
       }
       if (relation.imageList) {
-        try {
-          const imageIds: number[] = JSON.parse(tp.imageIds)
-          tp.imageList = imageIds.map((i) => imageMap[i])
-        } catch (error) {
-          tp.imageList = []
-        }
+        tp.imageList = tp.imageIdList.map((i) => imageMap[i])
       }
     })
 

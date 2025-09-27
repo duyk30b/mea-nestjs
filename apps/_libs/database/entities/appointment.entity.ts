@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
 import CustomerSource from './customer-source.entity'
 import Customer from './customer.entity'
 import Ticket from './ticket.entity'
@@ -14,13 +14,13 @@ export enum AppointmentStatus {
 @Entity('Appointment')
 @Index('IDX_Appointment__fromTicketId', ['fromTicketId'])
 export default class Appointment {
-  @Column({})
+  @Column()
   @Exclude()
   oid: number
 
-  @PrimaryGeneratedColumn({})
-  @Expose({})
-  id: number
+  @PrimaryColumn({ type: 'bigint' })
+  @Expose()
+  id: string
 
   @Column({ type: 'smallint', default: AppointmentStatus.Waiting })
   @Expose()
@@ -48,13 +48,13 @@ export default class Appointment {
   @Expose()
   registeredAt: number
 
-  @Column({ default: 0 })
+  @Column({ type: 'bigint', default: 0 })
   @Expose()
-  fromTicketId: number
+  fromTicketId: string
 
-  @Column({ default: 0 })
+  @Column({ type: 'bigint', default: 0 })
   @Expose()
-  toTicketId: number
+  toTicketId: string
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()

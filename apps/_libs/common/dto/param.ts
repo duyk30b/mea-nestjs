@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
-import { IsDefined, IsInt, IsMongoId, IsNotEmpty } from 'class-validator'
+import { IsDefined, IsInt, IsMongoId, IsNotEmpty, IsString } from 'class-validator'
 import { IsNumberGreaterThan } from '../transform-validate/class-validator.custom'
 
 export class IdParam {
@@ -18,5 +18,13 @@ export class IdMongoParam {
   @Expose()
   @IsNotEmpty()
   @IsMongoId()
+  id: string
+}
+
+export class GenerateIdParam {
+  @ApiProperty({ example: '63fdde9517a7317f0e8f959a' })
+  @Expose()
+  @IsNotEmpty()
+  @IsString()
   id: string
 }

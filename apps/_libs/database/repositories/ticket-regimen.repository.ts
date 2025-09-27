@@ -12,19 +12,6 @@ import { _PostgreSqlManager } from './_postgresql.manager'
 import { _PostgreSqlRepository } from './_postgresql.repository'
 
 @Injectable()
-export class TicketRegimenManager extends _PostgreSqlManager<
-  TicketRegimen,
-  TicketRegimenRelationType,
-  TicketRegimenInsertType,
-  TicketRegimenUpdateType,
-  TicketRegimenSortType
-> {
-  constructor() {
-    super(TicketRegimen)
-  }
-}
-
-@Injectable()
 export class TicketRegimenRepository extends _PostgreSqlRepository<
   TicketRegimen,
   TicketRegimenRelationType,

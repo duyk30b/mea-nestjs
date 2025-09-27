@@ -28,7 +28,7 @@ export class TicketMoneyService {
 
   async prepaymentMoney(data: {
     oid: number
-    ticketId: number
+    ticketId: string
     userId: number
     body: CustomerPrepaymentBody
     options?: { noEmitTicket?: boolean }
@@ -46,7 +46,7 @@ export class TicketMoneyService {
     })
     const { ticketModified, customer, paymentCreated } = prepaymentResult
     if (!options?.noEmitTicket) {
-      this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+      this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
     }
 
     return { ticketModified, customer, paymentCreated }
@@ -71,7 +71,12 @@ export class TicketMoneyService {
     })
     const { ticketModifiedList, customerModified, paymentCreatedList } = payDebtResult
     if (!options?.noEmitTicket) {
-      this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: ticketModifiedList })
+      ticketModifiedList.forEach((ticket) => {
+        this.socketEmitService.socketTicketChange(oid, {
+          ticketId: ticket.id,
+          ticketModified: ticket,
+        })
+      })
     }
     if (!options?.noEmitCustomer) {
       this.socketEmitService.customerUpsert(oid, { customer: customerModified })
@@ -82,7 +87,7 @@ export class TicketMoneyService {
 
   async refundMoney(data: {
     oid: number
-    ticketId: number
+    ticketId: string
     userId: number
     body: CustomerRefundMoneyBody
     options?: { noEmitTicket?: boolean }
@@ -100,7 +105,7 @@ export class TicketMoneyService {
     })
     const { ticketModified, customer, paymentCreated } = payDebtResult
     if (!options?.noEmitTicket) {
-      this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+      this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
     }
 
     return { ticketModified, customer, paymentCreated }
@@ -109,7 +114,7 @@ export class TicketMoneyService {
   async prepaymentTicketItemList(data: {
     oid: number
     userId: number
-    ticketId: number
+    ticketId: string
     body: CustomerPrepaymentTicketItemListBody
     options?: { noEmitTicket?: boolean }
   }) {
@@ -128,48 +133,30 @@ export class TicketMoneyService {
       })
     const { ticketModified, customer, paymentCreated } = prepaymentResult
     if (!options?.noEmitTicket) {
-      this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+      this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
     }
 
-    if (prepaymentResult.ticketProcedureModifiedList?.length) {
-      this.socketEmitService.socketTicketProcedureListChange(oid, {
-        ticketId,
-        customerId: ticketModified.customerId,
-        ticketProcedureModifiedList: prepaymentResult.ticketProcedureModifiedList,
-      })
-    }
-    if (prepaymentResult.ticketProductConsumableModifiedList?.length) {
-      this.socketEmitService.socketTicketConsumableChange(oid, {
-        ticketId,
-        ticketProductUpsertedList: prepaymentResult.ticketProductConsumableModifiedList,
-      })
-    }
-    if (prepaymentResult.ticketProductPrescriptionModifiedList?.length) {
-      this.socketEmitService.socketTicketPrescriptionChange(oid, {
-        ticketId,
-        ticketProductUpsertedList: prepaymentResult.ticketProductPrescriptionModifiedList,
-      })
-    }
-    if (prepaymentResult.ticketLaboratoryModifiedList?.length) {
-      this.socketEmitService.socketTicketLaboratoryListChange(oid, {
-        ticketId,
-        ticketLaboratoryUpsertedList: prepaymentResult.ticketLaboratoryModifiedList,
-        ticketLaboratoryGroupUpsertedList: prepaymentResult.ticketLaboratoryGroupModifiedList || [],
-      })
-    }
-    if (prepaymentResult.ticketRadiologyModifiedList?.length) {
-      this.socketEmitService.socketTicketRadiologyListChange(oid, {
-        ticketId,
-        ticketRadiologyUpsertedList: prepaymentResult.ticketRadiologyModifiedList,
-      })
-    }
+    this.socketEmitService.socketTicketChange(oid, {
+      ticketId,
+      ticketProcedure: { upsertedList: prepaymentResult.ticketProcedureModifiedList },
+      ticketProduct: {
+        upsertedList: [
+          ...prepaymentResult.ticketProductConsumableModifiedList,
+          ...prepaymentResult.ticketProductPrescriptionModifiedList,
+        ],
+      },
+      ticketLaboratory: { upsertedList: prepaymentResult.ticketLaboratoryModifiedList },
+      ticketLaboratoryGroup: { upsertedList: prepaymentResult.ticketLaboratoryGroupModifiedList },
+      ticketRadiology: { upsertedList: prepaymentResult.ticketRadiologyModifiedList },
+    })
+
     return { ticketModified, customer, paymentCreated }
   }
 
   async refundTicketItemList(params: {
     oid: number
     userId: number
-    ticketId: number
+    ticketId: string
     body: CustomerRefundTicketItemListBody
     options?: { noEmitTicket?: boolean }
   }) {
@@ -189,41 +176,23 @@ export class TicketMoneyService {
     )
     const { ticketModified, customer, paymentCreated } = refundResult
     if (!options?.noEmitTicket) {
-      this.socketEmitService.socketTicketListChange(oid, { ticketUpsertedList: [ticketModified] })
+      this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
     }
 
-    if (refundResult.ticketProcedureModifiedList?.length) {
-      this.socketEmitService.socketTicketProcedureListChange(oid, {
-        ticketId,
-        customerId: ticketModified.customerId,
-        ticketProcedureModifiedList: refundResult.ticketProcedureModifiedList,
-      })
-    }
-    if (refundResult.ticketProductConsumableModifiedList?.length) {
-      this.socketEmitService.socketTicketConsumableChange(oid, {
-        ticketId,
-        ticketProductUpsertedList: refundResult.ticketProductConsumableModifiedList,
-      })
-    }
-    if (refundResult.ticketProductPrescriptionModifiedList?.length) {
-      this.socketEmitService.socketTicketPrescriptionChange(oid, {
-        ticketId,
-        ticketProductUpsertedList: refundResult.ticketProductPrescriptionModifiedList,
-      })
-    }
-    if (refundResult.ticketLaboratoryModifiedList?.length) {
-      this.socketEmitService.socketTicketLaboratoryListChange(oid, {
-        ticketId,
-        ticketLaboratoryUpsertedList: refundResult.ticketLaboratoryModifiedList,
-        ticketLaboratoryGroupUpsertedList: refundResult.ticketLaboratoryGroupModifiedList || [],
-      })
-    }
-    if (refundResult.ticketRadiologyModifiedList?.length) {
-      this.socketEmitService.socketTicketRadiologyListChange(oid, {
-        ticketId,
-        ticketRadiologyUpsertedList: refundResult.ticketRadiologyModifiedList,
-      })
-    }
+    this.socketEmitService.socketTicketChange(oid, {
+      ticketId,
+      ticketProcedure: { upsertedList: refundResult.ticketProcedureModifiedList },
+      ticketProduct: {
+        upsertedList: [
+          ...refundResult.ticketProductConsumableModifiedList,
+          ...refundResult.ticketProductPrescriptionModifiedList,
+        ],
+      },
+      ticketLaboratory: { upsertedList: refundResult.ticketLaboratoryModifiedList },
+      ticketLaboratoryGroup: { upsertedList: refundResult.ticketLaboratoryGroupModifiedList },
+      ticketRadiology: { upsertedList: refundResult.ticketRadiologyModifiedList },
+    })
+
     return { ticketModified, customer, paymentCreated }
   }
 }

@@ -10,12 +10,6 @@ import {
 } from '../../../../../../_libs/common/dto'
 import { DeliveryStatus } from '../../../../../../_libs/database/common/variable'
 import { TicketStatus } from '../../../../../../_libs/database/entities/ticket.entity'
-import { TicketLaboratoryGroupGetManyQuery } from '../../../api-ticket-laboratory-group/request'
-import { TicketLaboratoryGetManyQuery } from '../../../api-ticket-laboratory/request'
-import { TicketProcedureGetManyQuery } from '../../../api-ticket-procedure/request'
-import { TicketProductGetManyQuery } from '../../../api-ticket-product/request'
-import { TicketRadiologyGetManyQuery } from '../../../api-ticket-radiology/request'
-import { TicketRegimenGetManyQuery } from '../../../api-ticket-regimen/request'
 
 export class TicketRelationQuery {
   @Expose()
@@ -28,6 +22,14 @@ export class TicketRelationQuery {
 
   @Expose()
   @IsBoolean()
+  ticketReceptionList?: boolean
+
+  @Expose()
+  @IsBoolean()
+  ticketAttributeList?: boolean
+
+  @Expose()
+  @IsBoolean()
   ticketSurchargeList?: boolean
 
   @Expose()
@@ -36,67 +38,55 @@ export class TicketRelationQuery {
 
   @Expose()
   @IsBoolean()
-  ticketAttributeList?: boolean
-
-  @Expose()
-  @IsObject()
-  ticketProductList?: TicketProductGetManyQuery
-
-  @Expose()
-  @IsObject()
-  ticketProductConsumableList?: TicketProductGetManyQuery
-
-  @Expose()
-  @IsObject()
-  ticketProductPrescriptionList?: TicketProductGetManyQuery
+  ticketProductList?: boolean
 
   @Expose()
   @IsObject()
   ticketBatchList?: { batch?: boolean }
 
   @Expose()
-  @IsObject()
-  ticketProcedureList?: TicketProcedureGetManyQuery
+  @IsBoolean()
+  ticketProcedureList?: boolean
 
   @Expose()
-  @IsObject()
-  ticketRegimenList?: TicketRegimenGetManyQuery
+  @IsBoolean()
+  ticketRegimenList?: boolean
 
   @Expose()
-  @IsObject()
-  ticketRegimenListExtra?: TicketRegimenGetManyQuery
+  @IsBoolean()
+  ticketRegimenItemList?: boolean
 
   @Expose()
-  @IsObject()
-  ticketLaboratoryGroupList?: TicketLaboratoryGroupGetManyQuery
+  @IsBoolean()
+  ticketLaboratoryGroupList?: boolean
+
+  @Expose()
+  @IsBoolean()
+  ticketLaboratoryList?: boolean
 
   @Expose()
   @IsBoolean()
   ticketLaboratoryResultList?: boolean
 
   @Expose()
-  @IsObject()
-  ticketLaboratoryList?: TicketLaboratoryGetManyQuery
-
-  @Expose()
-  @IsObject()
-  ticketRadiologyList?: TicketRadiologyGetManyQuery
+  @IsBoolean()
+  ticketRadiologyList?: boolean
 
   @Expose()
   @IsBoolean()
-  toAppointment?: boolean
+  ticketUserList?: boolean
+
+  @Expose()
+  @IsBoolean()
+  imageList?: boolean
 
   @Expose()
   @IsBoolean()
   customerSource?: boolean
 
   @Expose()
-  @IsObject()
-  ticketUserList?: { user?: boolean }
-
-  @Expose()
   @IsBoolean()
-  imageList?: boolean
+  toAppointment?: boolean
 }
 
 const ConditionEnumTicketStatus = createConditionEnum(TicketStatus)
@@ -134,21 +124,20 @@ export class TicketFilterQuery {
   @Expose()
   @Type(() => ConditionTimestamp)
   @ValidateNested({ each: true })
-  registeredAt: ConditionTimestamp
+  createdAt: ConditionTimestamp
 
   @Expose()
   @Type(() => ConditionTimestamp)
   @ValidateNested({ each: true })
-  startedAt: ConditionTimestamp
-
-  @Expose()
-  @Type(() => ConditionTimestamp)
-  @ValidateNested({ each: true })
-  updatedAt: ConditionTimestamp
+  receptionAt: ConditionTimestamp
 }
 
 export class TicketSortQuery extends SortQuery {
   @Expose()
   @IsIn(['ASC', 'DESC'])
-  registeredAt: 'ASC' | 'DESC'
+  createdAt: 'ASC' | 'DESC'
+
+  @Expose()
+  @IsIn(['ASC', 'DESC'])
+  receptionAt: 'ASC' | 'DESC'
 }

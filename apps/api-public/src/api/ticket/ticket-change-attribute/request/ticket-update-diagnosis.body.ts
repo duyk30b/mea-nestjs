@@ -32,7 +32,7 @@ class ImagesChangeBody {
   @IsDefined()
   @IsArray()
   @IsNumber({}, { each: true })
-  imageIdsWait: number[]
+  imageIdWaitList: number[]
 
   @Expose()
   @IsDefined()

@@ -21,7 +21,7 @@ export class DistributorRefundMoneyOperation {
 
   async startRefundMoney(options: {
     oid: number
-    purchaseOrderId: number
+    purchaseOrderId: string
     distributorId: number
     cashierId: number
     paymentMethodId: number

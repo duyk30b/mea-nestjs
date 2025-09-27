@@ -194,7 +194,7 @@ export class ApiFileCustomerUploadExcel {
           const paymentInsert: PaymentInsertType = {
             oid,
             voucherType: PaymentVoucherType.Other,
-            voucherId: 0,
+            voucherId: '0',
             personType: PaymentPersonType.Customer,
             personId: i.customerId,
 

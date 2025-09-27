@@ -23,7 +23,7 @@ export class PurchaseOrderMoneyService {
   async prepaymentMoney(data: {
     oid: number
     userId: number
-    purchaseOrderId: number
+    purchaseOrderId: string
     body: DistributorPrepaymentBody
     options?: { noEmitPurchaseOrder?: boolean }
   }) {
@@ -81,7 +81,7 @@ export class PurchaseOrderMoneyService {
   async refundMoney(data: {
     oid: number
     userId: number
-    purchaseOrderId: number
+    purchaseOrderId: string
     body: DistributorRefundMoneyBody
     options?: { noEmitPurchaseOrder?: boolean }
   }) {

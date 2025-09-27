@@ -19,8 +19,8 @@ export class TicketDestroyTicketProductOperation {
 
   async destroyTicketProduct(params: {
     oid: number
-    ticketId: number
-    ticketProductId: number
+    ticketId: string
+    ticketProductId: string
     ticketProductType: TicketProductType
   }) {
     const { oid, ticketId, ticketProductId, ticketProductType } = params
@@ -40,7 +40,7 @@ export class TicketDestroyTicketProductOperation {
         {
           oid,
           deliveryStatus: { IN: [DeliveryStatus.NoStock, DeliveryStatus.Pending] },
-          paymentMoneyStatus: { IN: [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.TicketPaid] },
+          paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
           id: ticketProductId,
           type: ticketProductType,
         }
@@ -73,9 +73,9 @@ export class TicketDestroyTicketProductOperation {
         return acc + item.commissionMoney * item.quantity
       }, 0)
 
-      let ticket: Ticket = ticketOrigin
+      let ticketModified: Ticket = ticketOrigin
       if (productMoneyDelete != 0 || commissionMoneyDelete != 0 || itemsDiscountDelete != 0) {
-        ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
+        ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
           manager,
           oid,
           ticketOrigin,
@@ -89,7 +89,7 @@ export class TicketDestroyTicketProductOperation {
         })
       }
 
-      return { ticket, ticketProductDestroy, ticketUserDestroyList }
+      return { ticketModified, ticketProductDestroy, ticketUserDestroyList }
     })
 
     return transaction

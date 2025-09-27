@@ -1,28 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
-import { DataSource, EntityManager, FindOptionsWhere, In, Repository } from 'typeorm'
+import { DataSource, EntityManager, Repository } from 'typeorm'
+import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel'
 import { ESTimer } from '../../common/helpers/time.helper'
-import {
-  Appointment,
-  Ticket,
-  TicketAttribute,
-  TicketBatch,
-  TicketExpense,
-  TicketLaboratory,
-  TicketLaboratoryGroup,
-  TicketLaboratoryResult,
-  TicketProcedure,
-  TicketProduct,
-  TicketRadiology,
-  TicketRegimen,
-  TicketSurcharge,
-  TicketUser,
-} from '../entities'
+import { Ticket } from '../entities'
 import {
   TicketInsertType,
   TicketRelationType,
   TicketSortType,
-  TicketStatus,
   TicketUpdateType,
 } from '../entities/ticket.entity'
 import { _PostgreSqlManager } from './_postgresql.manager'
@@ -57,11 +42,39 @@ export class TicketRepository extends _PostgreSqlRepository<
     super(Ticket, ticketRepository)
   }
 
+  async startTransaction(isolationLevel?: IsolationLevel) {
+    const queryRunner = this.dataSource.createQueryRunner()
+    await queryRunner.connect()
+    await queryRunner.startTransaction(isolationLevel)
+
+    const commit = async () => {
+      await queryRunner.commitTransaction()
+      await queryRunner.release()
+    }
+    const rollback = async () => {
+      await queryRunner.rollbackTransaction()
+      await queryRunner.release()
+    }
+    return {
+      manager: queryRunner.manager,
+      commit,
+      rollback,
+    }
+  }
+
+  async transaction<T>(
+    isolationLevel?: IsolationLevel,
+    runInTransaction?: (entityManager: EntityManager) => Promise<T>
+  ) {
+    const transaction = await this.dataSource.transaction(isolationLevel, runInTransaction)
+    return transaction
+  }
+
   async countToday(oid: number) {
     const now = new Date()
     const number = await this.countBy({
       oid,
-      registeredAt: {
+      createdAt: {
         GTE: ESTimer.startOfDate(now, 7).getTime(),
         LTE: ESTimer.endOfDate(now, 7).getTime(),
       },
@@ -69,35 +82,7 @@ export class TicketRepository extends _PostgreSqlRepository<
     return number
   }
 
-  async destroyAll(options: { oid: number; ticketId: number }) {
-    const { oid, ticketId } = options
-    return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-      const whereTicket: FindOptionsWhere<Ticket> = {
-        id: ticketId,
-        oid,
-        status: In([TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Cancelled]),
-      }
-      const ticketDeleteResult = await manager.delete(Ticket, whereTicket)
-      if (ticketDeleteResult.affected !== 1) {
-        throw new Error(`Destroy Ticket ${ticketId} failed: Status invalid`)
-      }
-      await manager.delete(Appointment, { oid, fromTicketId: ticketId })
-      await manager.delete(TicketAttribute, { oid, ticketId })
-      await manager.delete(TicketExpense, { oid, ticketId })
-      await manager.delete(TicketSurcharge, { oid, ticketId })
-      await manager.delete(TicketLaboratory, { oid, ticketId })
-      await manager.delete(TicketLaboratoryGroup, { oid, ticketId })
-      await manager.delete(TicketLaboratoryResult, { oid, ticketId })
-      await manager.delete(TicketRegimen, { oid, ticketId })
-      await manager.delete(TicketProcedure, { oid, ticketId })
-      await manager.delete(TicketProduct, { oid, ticketId })
-      await manager.delete(TicketBatch, { oid, ticketId })
-      await manager.delete(TicketRadiology, { oid, ticketId })
-      await manager.delete(TicketUser, { oid, ticketId })
-    })
-  }
-
-  async refreshLaboratoryMoney(options: { oid: number; ticketId: number }) {
+  async refreshLaboratoryMoney(options: { oid: number; ticketId: string }) {
     const { oid, ticketId } = options
     const updateResult: [any[], number] = await this.manager.query(`
         UPDATE  "Ticket" "ticket" 
@@ -123,7 +108,7 @@ export class TicketRepository extends _PostgreSqlRepository<
     return Ticket.fromRaws(updateResult[0])
   }
 
-  async refreshRadiologyMoney(options: { oid: number; ticketId: number }) {
+  async refreshRadiologyMoney(options: { oid: number; ticketId: string }) {
     const { oid, ticketId } = options
     const updateResult: [any[], number] = await this.manager.query(`
         UPDATE  "Ticket" "ticket" 
@@ -149,7 +134,7 @@ export class TicketRepository extends _PostgreSqlRepository<
     return Ticket.fromRaws(updateResult[0])
   }
 
-  async changeLaboratoryMoney(options: { oid: number; ticketId: number; laboratoryMoney: number }) {
+  async changeLaboratoryMoney(options: { oid: number; ticketId: string; laboratoryMoney: number }) {
     const { oid, ticketId, laboratoryMoney } = options
     const updateResult: [any[], number] = await this.manager.query(`
         UPDATE  "Ticket" "ticket" 

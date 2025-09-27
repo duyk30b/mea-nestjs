@@ -24,13 +24,17 @@ import {
   TicketUpdateRequestTicketRadiologyBody,
   TicketUpdateResultTicketRadiologyBody,
 } from './request'
+import { TicketAddTicketRadiologyListService } from './service/ticket-add-ticket-radiology-list.operation'
 import { TicketChangeRadiologyService } from './ticket-change-radiology.service'
 
 @ApiTags('Ticket')
 @ApiBearerAuth('access-token')
 @Controller('ticket')
 export class TicketChangeRadiologyController {
-  constructor(private readonly ticketChangeRadiologyService: TicketChangeRadiologyService) { }
+  constructor(
+    private readonly ticketChangeRadiologyService: TicketChangeRadiologyService,
+    private readonly ticketAddTicketRadiologyListService: TicketAddTicketRadiologyListService
+  ) { }
 
   @Post(':ticketId/radiology/add-ticket-radiology-list')
   @UserPermission(PermissionId.TICKET_CHANGE_RADIOLOGY_REQUEST)
@@ -39,7 +43,7 @@ export class TicketChangeRadiologyController {
     @Param() { ticketId }: TicketParams,
     @Body() body: TicketAddTicketRadiologyListBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeRadiologyService.addTicketRadiologyList({
+    const data = await this.ticketAddTicketRadiologyListService.addTicketRadiologyList({
       oid,
       ticketId,
       body,

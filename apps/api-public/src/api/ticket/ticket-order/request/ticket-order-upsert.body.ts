@@ -124,7 +124,7 @@ class TicketOrderBasic {
   @Expose()
   @IsDefined()
   @IsNumber()
-  registeredAt: number
+  createdAt: number
 
   @ApiProperty({ example: '' })
   @Expose()
@@ -225,7 +225,7 @@ export class TicketOrderDraftUpsertBody extends TicketOrderRelation {
   @Type(() => Number)
   @IsDefined()
   @IsInt()
-  ticketId: number
+  ticketId: string
 
   @ApiProperty({ type: TicketOrderBasicDraftUpsert })
   @Expose()

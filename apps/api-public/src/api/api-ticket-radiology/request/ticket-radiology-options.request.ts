@@ -1,11 +1,11 @@
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
 import { IsBoolean, IsIn, IsInt, IsObject, IsOptional, ValidateNested } from 'class-validator'
 import {
-  ConditionNumber,
+  ConditionString,
   ConditionTimestamp,
   createConditionEnum,
   transformConditionEnum,
-  transformConditionNumber,
+  transformConditionString,
 } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 import { PaymentMoneyStatus } from '../../../../../_libs/database/common/variable'
@@ -46,14 +46,14 @@ export class TicketRadiologyFilterQuery {
   oid?: number
 
   @Expose()
-  @Transform(transformConditionNumber)
+  @Transform(transformConditionString)
   @IsOptional()
-  id?: number | ConditionNumber
+  id?: string | ConditionString
 
   @Expose()
-  @Transform(transformConditionNumber)
+  @Transform(transformConditionString)
   @IsOptional()
-  ticketId?: number | ConditionNumber
+  ticketId?: string | ConditionString
 
   @Expose()
   @IsInt()

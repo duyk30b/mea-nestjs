@@ -27,7 +27,7 @@ export class PaymentOtherService {
     const paymentInsert: PaymentInsertType = {
       oid,
       voucherType: PaymentVoucherType.Other,
-      voucherId: 0,
+      voucherId: '0',
       personType: PaymentPersonType.Other,
       personId: 0,
 
@@ -52,7 +52,7 @@ export class PaymentOtherService {
     const paymentInsert: PaymentInsertType = {
       oid,
       voucherType: PaymentVoucherType.Other,
-      voucherId: 0,
+      voucherId: '0',
       personType: PaymentPersonType.Other,
       personId: 0,
 
@@ -72,26 +72,26 @@ export class PaymentOtherService {
     return { payment }
   }
 
-  async destroyMoneyOut(options: { oid: number; userId: number; paymentId: number }) {
+  async destroyMoneyOut(options: { oid: number; userId: number; paymentId: string }) {
     const { oid, userId, paymentId } = options
     const payment = await this.paymentRepository.deleteAndReturnEntity({
       oid,
       id: paymentId,
       cashierId: userId, // chỉ được xóa phiếu do chính mình tạo ra
-      voucherId: 0,
+      voucherId: '0',
       moneyDirection: MoneyDirection.Out,
       debtAmount: 0,
     })
     return { payment }
   }
 
-  async destroyMoneyIn(options: { oid: number; userId: number; paymentId: number }) {
+  async destroyMoneyIn(options: { oid: number; userId: number; paymentId: string }) {
     const { oid, userId, paymentId } = options
     const payment = await this.paymentRepository.deleteAndReturnEntity({
       oid,
       id: paymentId,
       cashierId: userId, // chỉ được xóa phiếu do chính mình tạo ra
-      voucherId: 0,
+      voucherId: '0',
       moneyDirection: MoneyDirection.In,
       debtAmount: 0,
     })

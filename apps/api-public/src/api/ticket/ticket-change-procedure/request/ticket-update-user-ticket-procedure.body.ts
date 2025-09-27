@@ -3,7 +3,7 @@ import { Expose, Type } from 'class-transformer'
 import { IsArray, IsDefined, ValidateNested } from 'class-validator'
 import { TicketUserBasicBody } from '../../ticket-change-user/request'
 
-export class TicketUpdateUserRequestTicketProcedureBody {
+export class TicketUpdateUserTicketProcedureBody {
   @ApiProperty({ type: TicketUserBasicBody, isArray: true })
   @Expose()
   @Type(() => TicketUserBasicBody)
@@ -11,9 +11,7 @@ export class TicketUpdateUserRequestTicketProcedureBody {
   @IsArray()
   @ValidateNested({ each: true })
   ticketUserRequestList: TicketUserBasicBody[]
-}
 
-export class TicketUpdateUserResultTicketProcedureBody {
   @ApiProperty({ type: TicketUserBasicBody, isArray: true })
   @Expose()
   @Type(() => TicketUserBasicBody)

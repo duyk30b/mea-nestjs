@@ -207,7 +207,7 @@ export class ApiPaymentService {
   async updateInfo(options: {
     oid: number
     userId: number
-    paymentId: number
+    paymentId: string
     body: PaymentUpdateInfoBody
   }) {
     const { oid, userId, paymentId, body } = options

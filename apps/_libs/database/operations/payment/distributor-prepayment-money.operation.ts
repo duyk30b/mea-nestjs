@@ -21,7 +21,7 @@ export class DistributorPrepaymentMoneyOperation {
 
   async startPrePaymentMoney(options: {
     oid: number
-    purchaseOrderId: number
+    purchaseOrderId: string
     distributorId: number
     cashierId: number
     paymentMethodId: number
@@ -29,8 +29,16 @@ export class DistributorPrepaymentMoneyOperation {
     paidAmount: number
     note: string
   }) {
-    const { oid, purchaseOrderId, distributorId, cashierId, paymentMethodId, time, paidAmount, note } =
-      options
+    const {
+      oid,
+      purchaseOrderId,
+      distributorId,
+      cashierId,
+      paymentMethodId,
+      time,
+      paidAmount,
+      note,
+    } = options
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. UPDATE TICKET ===

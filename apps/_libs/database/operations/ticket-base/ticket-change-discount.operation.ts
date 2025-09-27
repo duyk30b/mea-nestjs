@@ -13,7 +13,7 @@ export class TicketChangeDiscountOperation {
 
   async changeDiscount(params: {
     oid: number
-    ticketId: number
+    ticketId: string
     discountType: DiscountType
     discountMoney: number
     discountPercent: number
@@ -42,7 +42,7 @@ export class TicketChangeDiscountOperation {
         - ticketOrigin.commissionMoney
 
       // === 2. UPDATE TICKET ===
-      const ticket = await this.ticketManager.updateOneAndReturnEntity(
+      const ticketModified = await this.ticketManager.updateOneAndReturnEntity(
         manager,
         { oid, id: ticketId },
         {
@@ -55,7 +55,7 @@ export class TicketChangeDiscountOperation {
         }
       )
 
-      return { ticket }
+      return { ticketModified }
     })
   }
 }

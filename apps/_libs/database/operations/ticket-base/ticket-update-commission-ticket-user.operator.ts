@@ -11,20 +11,21 @@ import {
   TicketUser,
 } from '../../entities'
 import { PositionType } from '../../entities/position.entity'
-import { TicketUserManager } from '../../repositories'
+import { TicketUserManager, TicketUserRepository } from '../../repositories'
 
 @Injectable()
 export class TicketUpdateCommissionTicketUserOperator {
   constructor(
     private dataSource: DataSource,
     @InjectEntityManager() private manager: EntityManager,
-    private ticketUserManager: TicketUserManager
+    private ticketUserManager: TicketUserManager,
+    private ticketUserRepository: TicketUserRepository
   ) { }
 
   async updateCommissionTicketUser(options: {
     manager: EntityManager
     oid: number
-    ticketId: number
+    ticketId: string
     ticketOrigin: Ticket
     ticketProcedureList: TicketProcedure[]
     ticketProductList: TicketProduct[]
@@ -58,7 +59,7 @@ export class TicketUpdateCommissionTicketUserOperator {
       let expectedPrice = 0
       let quantity = 0
 
-      if (tu.positionType === PositionType.TicketReception) {
+      if (tu.positionType === PositionType.Reception) {
         expectedPrice = ticketOrigin.totalMoney + ticketOrigin.discountMoney
         actualPrice = ticketOrigin.totalMoney
       }
@@ -99,10 +100,10 @@ export class TicketUpdateCommissionTicketUserOperator {
       TicketUser.reCalculatorCommission(tu)
     })
 
-    const ticketUserModifiedList = await this.ticketUserManager.bulkUpdate({
+    const ticketUserModifiedList = await this.ticketUserRepository.managerBulkUpdate({
       manager,
       tempList: ticketUserList,
-      compare: ['id'],
+      compare: { id: { cast: 'bigint' } },
       condition: { oid },
       update: [
         'ticketItemExpectedPrice',

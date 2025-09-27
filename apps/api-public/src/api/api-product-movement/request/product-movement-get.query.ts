@@ -34,13 +34,7 @@ export class ProductMovementGetQuery {
   @ValidateNested({ each: true })
   relation: ProductMovementRelationQuery
 
-  @ApiPropertyOptional({
-    type: String,
-    example: JSON.stringify(<ProductMovementFilterQuery>{
-      voucherId: 3,
-      movementType: MovementType.PurchaseOrder,
-    }),
-  })
+  @ApiPropertyOptional({ type: String })
   @Expose()
   @Transform(({ value }) => {
     try {

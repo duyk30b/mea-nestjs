@@ -1,10 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { EntityManager } from 'typeorm'
-import { ESArray } from '../../../../common/helpers'
+import { ESArray, NoExtra } from '../../../../common/helpers'
 import { BusinessError } from '../../../common/error'
 import Position, { CommissionCalculatorType } from '../../../entities/position.entity'
 import TicketUser, { TicketUserInsertType } from '../../../entities/ticket-user.entity'
-import { PositionManager, TicketUserManager } from '../../../repositories'
+import {
+  PositionRepository,
+  TicketUserRepository,
+} from '../../../repositories'
 
 export type TicketUserAddType = Pick<
   TicketUser,
@@ -20,23 +23,23 @@ export type TicketUserAddType = Pick<
 @Injectable()
 export class TicketUserCommon {
   constructor(
-    private ticketUserManager: TicketUserManager,
-    private positionManager: PositionManager
+    private ticketUserRepository: TicketUserRepository,
+    private positionRepository: PositionRepository
   ) { }
 
-  async addTicketUserList(data: {
+  async addTicketUserList<T extends TicketUserAddType>(data: {
     manager: EntityManager
     oid: number
-    ticketId: number
+    ticketId: string
     createdAt: number
-    ticketUserDtoList: TicketUserAddType[]
+    ticketUserDtoList: NoExtra<TicketUserAddType, T>[]
   }) {
     const { manager, oid, ticketId, createdAt, ticketUserDtoList } = data
 
     let positionMap: Record<string, Position> = {}
 
     if (ticketUserDtoList.length) {
-      const positionList = await this.positionManager.findManyBy(manager, {
+      const positionList = await this.positionRepository.managerFindManyBy(manager, {
         oid,
         id: { IN: ticketUserDtoList.map((i) => i.positionId) },
       })
@@ -79,7 +82,7 @@ export class TicketUserCommon {
       return ticketUserInsert
     })
 
-    const ticketUserCreatedList = await this.ticketUserManager.insertManyAndReturnEntity(
+    const ticketUserCreatedList = await this.ticketUserRepository.managerInsertMany(
       manager,
       ticketUserInsertList
     )

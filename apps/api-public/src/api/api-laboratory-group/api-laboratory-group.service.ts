@@ -118,10 +118,10 @@ export class ApiLaboratoryGroupService {
       await this.laboratoryGroupRepository.insertMany(laboratoryGroupInsertLit)
     }
     if (laboratoryGroupUpdateLit.length) {
-      await this.laboratoryGroupManager.bulkUpdate({
+      await this.laboratoryGroupRepository.managerBulkUpdate({
         manager: this.laboratoryGroupRepository.getManager(),
         condition: { oid },
-        compare: ['id'],
+        compare: { id: { cast: 'bigint' } },
         update: ['name', 'roomId', 'printHtmlId'],
         tempList: laboratoryGroupUpdateLit,
         options: { requireEqualLength: true },

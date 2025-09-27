@@ -1,5 +1,5 @@
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
+import { Column, Entity, Index, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm'
 import { DiscountType } from '../common/variable'
 import Payment from './payment.entity'
 import TicketLaboratoryGroup from './ticket-laboratory-group.entity'
@@ -24,25 +24,25 @@ export default class PaymentTicketItem {
   @Exclude()
   oid: number
 
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn({ type: 'bigint' })
   @Expose()
-  id: number
+  id: string
 
-  @Column({ default: 0 })
+  @Column({ type: 'bigint' })
   @Expose()
-  paymentId: number
+  paymentId: string
 
-  @Column({ default: 0 })
+  @Column({ type: 'bigint' })
   @Expose()
-  ticketId: number
+  ticketId: string
 
   @Column({ type: 'smallint', default: TicketItemType.Other })
   @Expose()
   ticketItemType: TicketItemType
 
-  @Column({ default: 0 }) // ticketId hoặc purchaseOrderId
+  @Column({ type: 'bigint' }) // ticketId hoặc purchaseOrderId
   @Expose()
-  ticketItemId: number
+  ticketItemId: string
 
   @Column({ type: 'integer', default: 0 })
   @Expose()

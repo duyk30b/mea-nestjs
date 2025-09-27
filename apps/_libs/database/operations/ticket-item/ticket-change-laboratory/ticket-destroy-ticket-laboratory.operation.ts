@@ -4,10 +4,10 @@ import { PaymentMoneyStatus, TicketLaboratoryStatus } from '../../../common/vari
 import { TicketLaboratoryGroup } from '../../../entities'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import {
-    TicketLaboratoryGroupManager,
-    TicketLaboratoryManager,
-    TicketLaboratoryResultManager,
-    TicketManager,
+  TicketLaboratoryGroupManager,
+  TicketLaboratoryManager,
+  TicketLaboratoryResultManager,
+  TicketManager,
 } from '../../../repositories'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
 
@@ -24,8 +24,8 @@ export class TicketDestroyTicketLaboratoryOperation {
 
   async destroyTicketLaboratory(params: {
     oid: number
-    ticketId: number
-    ticketLaboratoryId: number
+    ticketId: string
+    ticketLaboratoryId: string
   }) {
     const { oid, ticketId, ticketLaboratoryId } = params
     const PREFIX = `ticketId=${ticketId} destroyTicketLaboratory failed`
@@ -46,7 +46,7 @@ export class TicketDestroyTicketLaboratoryOperation {
           ticketId,
           id: ticketLaboratoryId,
           status: TicketLaboratoryStatus.Pending,
-          paymentMoneyStatus: { IN: [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.TicketPaid] },
+          paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
         }
       )
 
@@ -95,9 +95,9 @@ export class TicketDestroyTicketLaboratoryOperation {
       const itemsDiscountDelete = ticketLaboratoryDestroyed.discountMoney
       const itemsCostAmountDelete = ticketLaboratoryDestroyed.costPrice
 
-      let ticket: Ticket = ticketOrigin
+      let ticketModified: Ticket = ticketOrigin
       if (laboratoryMoneyDelete != 0 || itemsDiscountDelete != 0) {
-        ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
+        ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
           manager,
           oid,
           ticketOrigin,
@@ -110,7 +110,7 @@ export class TicketDestroyTicketLaboratoryOperation {
       }
 
       return {
-        ticket,
+        ticketModified,
         ticketLaboratoryDestroyed,
         ticketLaboratoryGroupDestroyed: ticketLaboratoryGroupDestroyed as TicketLaboratoryGroup | null,
         ticketLaboratoryGroupModified: ticketLaboratoryGroupModified as TicketLaboratoryGroup | null,

@@ -9,8 +9,8 @@ export class AppointmentBody {
   @ApiProperty({ example: 0 })
   @Expose()
   @IsOptional()
-  @IsNumber()
-  fromTicketId: number
+  @IsString()
+  fromTicketId: string
 
   @ApiProperty({ example: Date.now() })
   @Expose()

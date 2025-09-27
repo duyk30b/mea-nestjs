@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { TicketProductType } from '../../../../../_libs/database/entities/ticket-product.entity'
 import {
-  TicketAddTicketProductOperation,
   TicketDestroyTicketProductOperation,
   TicketUpdateTicketProductOperation,
 } from '../../../../../_libs/database/operations'
@@ -10,9 +9,7 @@ import {
   TicketProductRepository,
 } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
-import { TicketChangeUserService } from '../ticket-change-user/ticket-change-user.service'
 import {
-  TicketAddTicketProductListBody,
   TicketUpdatePriorityTicketProductBody,
   TicketUpdateTicketProductBody,
 } from './request'
@@ -23,50 +20,14 @@ export class TicketChangeProductService {
     private readonly socketEmitService: SocketEmitService,
     private readonly ticketProductRepository: TicketProductRepository,
     private readonly ticketProductManager: TicketProductManager,
-    private readonly ticketAddTicketProductOperation: TicketAddTicketProductOperation,
     private readonly ticketDestroyTicketProductOperation: TicketDestroyTicketProductOperation,
-    private readonly ticketUpdateTicketProductOperation: TicketUpdateTicketProductOperation,
-
-    private readonly ticketChangeUserService: TicketChangeUserService
+    private readonly ticketUpdateTicketProductOperation: TicketUpdateTicketProductOperation
   ) { }
-
-  async addTicketProductList(options: {
-    oid: number
-    ticketId: number
-    ticketProductType: TicketProductType
-    body: TicketAddTicketProductListBody
-  }) {
-    const { oid, ticketId, ticketProductType, body } = options
-    const result = await this.ticketAddTicketProductOperation.addTicketProductList({
-      oid,
-      ticketId,
-      ticketProductType,
-      ticketProductDtoList: body.ticketProductList,
-    })
-
-    const { ticket } = result
-
-    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
-    if (ticketProductType === TicketProductType.Consumable) {
-      this.socketEmitService.socketTicketConsumableChange(oid, {
-        ticketId,
-        ticketProductUpsertedList: result.ticketProductList,
-      })
-    }
-    if (ticketProductType === TicketProductType.Prescription) {
-      this.socketEmitService.socketTicketPrescriptionChange(oid, {
-        ticketId,
-        ticketProductUpsertedList: result.ticketProductList,
-      })
-    }
-
-    return true
-  }
 
   async destroyTicketProduct(options: {
     oid: number
-    ticketId: number
-    ticketProductId: number
+    ticketId: string
+    ticketProductId: string
     ticketProductType: TicketProductType
   }) {
     const { oid, ticketId, ticketProductId, ticketProductType } = options
@@ -77,69 +38,44 @@ export class TicketChangeProductService {
       ticketProductType,
     })
 
-    const { ticket, ticketProductDestroy } = result
-
-    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket })
-    if (ticketProductDestroy.type === TicketProductType.Consumable) {
-      this.socketEmitService.socketTicketConsumableChange(oid, {
-        ticketId,
-        ticketProductDestroyedList: [ticketProductDestroy],
-      })
-    }
-    if (ticketProductDestroy.type === TicketProductType.Prescription) {
-      this.socketEmitService.socketTicketPrescriptionChange(oid, {
-        ticketId,
-        ticketProductDestroyedList: [ticketProductDestroy],
-      })
-    }
-    if (result.ticketUserDestroyList) {
-      this.socketEmitService.socketTicketUserListChange(oid, {
-        ticketId,
-        ticketUserDestroyedList: result.ticketUserDestroyList,
-      })
-    }
+    this.socketEmitService.socketTicketChange(oid, {
+      ticketId,
+      ticketModified: result.ticketModified,
+      ticketProduct: { destroyedList: [result.ticketProductDestroy] },
+      ticketUser: { destroyedList: result.ticketUserDestroyList },
+    })
 
     return true
   }
 
   async updatePriorityTicketProduct(options: {
     oid: number
-    ticketId: number
+    ticketId: string
     ticketProductType: TicketProductType
     body: TicketUpdatePriorityTicketProductBody
   }) {
     const { oid, ticketId, body, ticketProductType } = options
-    const ticketProductList = await this.ticketProductManager.bulkUpdate({
+    const ticketProductList = await this.ticketProductRepository.managerBulkUpdate({
       manager: this.ticketProductRepository.getManager(),
       condition: { oid, ticketId },
       update: ['priority'],
-      compare: ['id'],
+      compare: { id: { cast: 'bigint' } },
       tempList: body.ticketProductList,
       options: { requireEqualLength: true },
     })
 
-    ticketProductList.sort((a, b) => (a.priority < b.priority ? -1 : 1))
-
-    if (ticketProductType === TicketProductType.Consumable) {
-      this.socketEmitService.socketTicketConsumableChange(oid, {
-        ticketId,
-        ticketProductUpsertedList: ticketProductList,
-      })
-    }
-    if (ticketProductType === TicketProductType.Prescription) {
-      this.socketEmitService.socketTicketPrescriptionChange(oid, {
-        ticketId,
-        ticketProductUpsertedList: ticketProductList,
-      })
-    }
+    this.socketEmitService.socketTicketChange(oid, {
+      ticketId,
+      ticketProduct: { upsertedList: ticketProductList },
+    })
 
     return true
   }
 
   async updateTicketProduct(options: {
     oid: number
-    ticketId: number
-    ticketProductId: number
+    ticketId: string
+    ticketProductId: string
     ticketProductType: TicketProductType
     body: TicketUpdateTicketProductBody
   }) {
@@ -152,26 +88,17 @@ export class TicketChangeProductService {
       ticketProductUpdateDto: body.ticketProduct,
       ticketUserRequestList: body.ticketUserRequestList,
     })
-    const { ticketModified, ticketProductModified } = result
 
-    this.socketEmitService.socketTicketChange(oid, { type: 'UPDATE', ticket: ticketModified })
-    if (ticketProductModified.type === TicketProductType.Consumable) {
-      this.socketEmitService.socketTicketConsumableChange(oid, {
-        ticketId,
-        ticketProductUpsertedList: [ticketProductModified],
-      })
-    }
-    if (ticketProductModified.type === TicketProductType.Prescription) {
-      this.socketEmitService.socketTicketPrescriptionChange(oid, {
-        ticketId,
-        ticketProductUpsertedList: [ticketProductModified],
-      })
-    }
-    this.socketEmitService.socketTicketUserListChange(oid, {
+    this.socketEmitService.socketTicketChange(oid, {
       ticketId,
-      ticketUserUpsertedList: result.ticketUserCreatedList,
-      ticketUserDestroyedList: result.ticketUserDestroyList,
+      ticketModified: result.ticketModified,
+      ticketProduct: { upsertedList: [result.ticketProductModified] },
+      ticketUser: {
+        upsertedList: result.ticketUserCreatedList,
+        destroyedList: result.ticketUserDestroyList,
+      },
     })
+
     return true
   }
 }

@@ -23,13 +23,13 @@ export class TicketUpdateItemsMoneyOperation {
 
   async updateItemsMoney(params: {
     oid: number
-    ticketId: number
+    ticketId: string
     itemsActualMoney: number
     discountMoney: number
     discountPercent: number
     discountType: DiscountType
     ticketProductUpdateList: {
-      ticketProductId: number
+      ticketProductId: string
       quantity: number
       discountMoney: number
       discountPercent: number
@@ -37,21 +37,21 @@ export class TicketUpdateItemsMoneyOperation {
       actualPrice: number
     }[]
     ticketProcedureUpdateList: {
-      ticketProcedureId: number
+      ticketProcedureId: string
       discountMoney: number
       discountPercent: number
       discountType: DiscountType
       actualPrice: number
     }[]
     ticketLaboratoryUpdateList: {
-      ticketLaboratoryId: number
+      ticketLaboratoryId: string
       discountMoney: number
       discountPercent: number
       discountType: DiscountType
       actualPrice: number
     }[]
     ticketRadiologyUpdateList: {
-      ticketRadiologyId: number
+      ticketRadiologyId: string
       discountMoney: number
       discountPercent: number
       discountType: DiscountType

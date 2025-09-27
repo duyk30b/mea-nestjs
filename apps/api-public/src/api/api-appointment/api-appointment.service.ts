@@ -3,10 +3,7 @@ import { BusinessException } from '../../../../_libs/common/exception-filter/exc
 import { ESArray } from '../../../../_libs/common/helpers'
 import { ESTimer } from '../../../../_libs/common/helpers/time.helper'
 import { DeliveryStatus, DiscountType } from '../../../../_libs/database/common/variable'
-import {
-  Customer,
-  CustomerSource,
-} from '../../../../_libs/database/entities'
+import { Customer, CustomerSource } from '../../../../_libs/database/entities'
 import Appointment, {
   AppointmentStatus,
 } from '../../../../_libs/database/entities/appointment.entity'
@@ -81,7 +78,8 @@ export class ApiAppointmentService {
     return { appointmentList }
   }
 
-  async getOne(oid: number, id: number, query?: AppointmentGetOneQuery) {
+  async getOne(props: { oid: number; id: string; query?: AppointmentGetOneQuery }) {
+    const { oid, id, query } = props
     const appointment = await this.appointmentRepository.findOneBy({ oid, id })
     if (!appointment) {
       throw BusinessException.create({ message: 'error.Database.NotFound', details: 'Appointment' })
@@ -170,14 +168,14 @@ export class ApiAppointmentService {
     const appointment = await this.appointmentRepository.insertOneFullFieldAndReturnEntity({
       ...ticketBody,
       customerId,
-      toTicketId: 0,
+      toTicketId: '0',
       cancelReason: '',
       oid,
     })
     return { appointment }
   }
 
-  async updateOne(oid: number, id: number, body: AppointmentUpdateBody) {
+  async updateOne(oid: number, id: string, body: AppointmentUpdateBody) {
     const [appointment] = await this.appointmentRepository.updateAndReturnEntity({ oid, id }, body)
     if (!appointment) {
       throw BusinessException.create({
@@ -188,7 +186,7 @@ export class ApiAppointmentService {
     return { appointment }
   }
 
-  async deleteOne(oid: number, id: number) {
+  async deleteOne(oid: number, id: string) {
     const affected = await this.appointmentRepository.delete({
       oid,
       id,
@@ -204,7 +202,7 @@ export class ApiAppointmentService {
 
   async registerTicketClinic(options: {
     oid: number
-    appointmentId: number
+    appointmentId: string
     body: AppointmentRegisterTicketClinicBody
   }) {
     const { oid, appointmentId, body } = options
@@ -212,43 +210,52 @@ export class ApiAppointmentService {
     const appointment = await this.appointmentRepository.findOneBy({ oid, id: appointmentId })
     const customer = await this.customerRepository.findOneBy({ oid, id: appointment.customerId })
     const countToday = await this.ticketRepository.countToday(oid)
-    const registeredAt = body.registeredAt
+    const receptionAt = body.receptionAt
+    
+    let ticket: Ticket
+    if (!body.toTicketId) {
+      ticket = await this.ticketRepository.insertOneFullFieldAndReturnEntity({
+        oid,
+        roomId: body.roomId,
+        isPaymentEachItem: body.isPaymentEachItem,
+        customerId: customer.id,
+        status: TicketStatus.Schedule,
+        createdAt: receptionAt,
+        receptionAt,
+        dailyIndex: countToday + 1,
+        year: ESTimer.info(receptionAt, 7).year,
+        month: ESTimer.info(receptionAt, 7).month + 1,
+        date: ESTimer.info(receptionAt, 7).date,
 
-    const ticket = await this.ticketRepository.insertOneFullFieldAndReturnEntity({
-      oid,
-      roomId: body.roomId,
-      customerId: customer.id,
-      status: TicketStatus.Schedule,
-      registeredAt,
-      dailyIndex: countToday + 1,
-      year: ESTimer.info(registeredAt, 7).year,
-      month: ESTimer.info(registeredAt, 7).month + 1,
-      date: ESTimer.info(registeredAt, 7).date,
-
-      customerSourceId: 0,
-      debt: 0,
-      note: '',
-      deliveryStatus: DeliveryStatus.NoStock,
-      procedureMoney: 0,
-      productMoney: 0,
-      radiologyMoney: 0,
-      laboratoryMoney: 0,
-      itemsCostAmount: 0,
-      itemsDiscount: 0,
-      itemsActualMoney: 0,
-      discountMoney: 0,
-      discountPercent: 0,
-      discountType: DiscountType.Percent,
-      surcharge: 0,
-      totalMoney: 0,
-      expense: 0,
-      commissionMoney: 0,
-      profit: 0,
-      paid: 0,
-      imageDiagnosisIds: JSON.stringify([]),
-      startedAt: null,
-      endedAt: null,
-    })
+        customerSourceId: 0,
+        debt: 0,
+        note: '',
+        deliveryStatus: DeliveryStatus.NoStock,
+        procedureMoney: 0,
+        productMoney: 0,
+        radiologyMoney: 0,
+        laboratoryMoney: 0,
+        itemsCostAmount: 0,
+        itemsDiscount: 0,
+        itemsActualMoney: 0,
+        discountMoney: 0,
+        discountPercent: 0,
+        discountType: DiscountType.Percent,
+        surcharge: 0,
+        totalMoney: 0,
+        expense: 0,
+        commissionMoney: 0,
+        profit: 0,
+        paid: 0,
+        imageDiagnosisIds: JSON.stringify([]),
+        endedAt: null,
+      })
+    } else {
+      ticket = await this.ticketRepository.updateOneAndReturnEntity(
+        { oid, id: body.toTicketId },
+        { receptionAt: body.receptionAt }
+      )
+    }
 
     if (appointment.reason) {
       ticket.ticketAttributeList =
@@ -264,7 +271,7 @@ export class ApiAppointmentService {
 
     ticket.customer = customer
 
-    this.socketEmitService.socketTicketChange(oid, { type: 'CREATE', ticket })
+    this.socketEmitService.socketTicketChange(oid, { ticketId: ticket.id, ticketModified: ticket })
 
     await this.appointmentRepository.updateAndReturnEntity(
       { oid, id: appointmentId },
