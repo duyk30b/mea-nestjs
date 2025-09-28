@@ -96,11 +96,9 @@ export enum TicketLaboratoryStatus {
 }
 
 export enum PaymentMoneyStatus {
-  PendingPaid = 1,
-  Paid = 2,
-}
-
-export enum PaymentEffect {
-  SelfPayment = 1,
-  RelationPayment = 2,
+  NoEffect = -1,
+  TicketPaid = 1,
+  PendingPayment = 2,
+  PartialPaid = 3,
+  FullPaid = 4,
 }

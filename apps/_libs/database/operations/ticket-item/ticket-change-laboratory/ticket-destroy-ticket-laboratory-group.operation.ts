@@ -43,7 +43,9 @@ export class TicketDestroyTicketLaboratoryGroupOperation {
           oid,
           ticketId,
           id: ticketLaboratoryGroupId,
-          paymentMoneyStatus: { IN: [PaymentMoneyStatus.PendingPaid] },
+          paymentMoneyStatus: {
+            IN: [PaymentMoneyStatus.TicketPaid, PaymentMoneyStatus.PendingPayment],
+          },
         })
 
       const ticketLaboratoryDestroyedList =
@@ -51,7 +53,9 @@ export class TicketDestroyTicketLaboratoryGroupOperation {
           oid,
           ticketId,
           ticketLaboratoryGroupId,
-          paymentMoneyStatus: { IN: [PaymentMoneyStatus.PendingPaid] },
+          paymentMoneyStatus: {
+            IN: [PaymentMoneyStatus.TicketPaid, PaymentMoneyStatus.PendingPayment],
+          },
         })
 
       const ticketLaboratoryResultDestroyedList =

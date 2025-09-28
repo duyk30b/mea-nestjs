@@ -16,7 +16,6 @@ import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { TicketParams } from '../ticket-query/request'
 import {
   TicketChangeProcedureParams,
-  TicketChangeRegimenItemParams,
   TicketChangeRegimenParams,
   TicketProcessResultTicketProcedureBody,
   TicketUpdateMoneyTicketProcedureBody,
@@ -29,6 +28,7 @@ import { TicketAddTicketProcedureListService } from './service/ticket-add-ticket
 import { TicketChangeProcedureService } from './service/ticket-change-procedure.service'
 import { TicketChangeRegimenService } from './service/ticket-change-regimen.service'
 import { TicketDestroyTicketProcedureService } from './service/ticket-destroy-ticket-procedure.service'
+import { TicketDestroyTicketRegimenService } from './service/ticket-destroy-ticket-regimen.service'
 import { TicketProcessResultTicketProcedureService } from './service/ticket-process-result-ticket-procedure.service'
 import { TicketUpdateUserTicketProcedureService } from './service/ticket-update-user-ticket-procedure.service'
 
@@ -42,7 +42,8 @@ export class TicketChangeProcedureController {
     private readonly ticketUpdateUserTicketProcedureService: TicketUpdateUserTicketProcedureService,
     private readonly ticketChangeRegimenService: TicketChangeRegimenService,
     private readonly ticketProcessResultTicketProcedureService: TicketProcessResultTicketProcedureService,
-    private readonly ticketDestroyTicketProcedureService: TicketDestroyTicketProcedureService
+    private readonly ticketDestroyTicketProcedureService: TicketDestroyTicketProcedureService,
+    private readonly ticketDestroyTicketRegimenService: TicketDestroyTicketRegimenService
   ) { }
 
   @Post(':ticketId/procedure/add-ticket-procedure-list')
@@ -112,7 +113,7 @@ export class TicketChangeProcedureController {
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketRegimenId }: TicketChangeRegimenParams
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeRegimenService.destroyTicketRegimen({
+    const data = await this.ticketDestroyTicketRegimenService.destroyTicketRegimen({
       oid,
       ticketId,
       ticketRegimenId,

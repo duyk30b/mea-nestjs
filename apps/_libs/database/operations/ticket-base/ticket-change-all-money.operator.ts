@@ -68,7 +68,7 @@ export class TicketChangeAllMoneyOperator {
           ticketId,
           deliveryStatus: DeliveryStatus.Pending,
           paymentMoneyStatus: {
-            IN: [PaymentMoneyStatus.PendingPaid],
+            IN: [PaymentMoneyStatus.TicketPaid, PaymentMoneyStatus.PendingPayment],
           },
         },
         compare: { id: { cast: 'bigint' } },
@@ -83,7 +83,7 @@ export class TicketChangeAllMoneyOperator {
           oid,
           ticketId,
           paymentMoneyStatus: {
-            IN: [PaymentMoneyStatus.PendingPaid],
+            IN: [PaymentMoneyStatus.TicketPaid, PaymentMoneyStatus.PendingPayment],
           },
         },
         compare: { id: { cast: 'bigint' } },
@@ -98,7 +98,7 @@ export class TicketChangeAllMoneyOperator {
           oid,
           ticketId,
           paymentMoneyStatus: {
-            IN: [PaymentMoneyStatus.PendingPaid],
+            IN: [PaymentMoneyStatus.TicketPaid, PaymentMoneyStatus.PendingPayment],
           },
         },
         compare: { id: { cast: 'bigint' } },
@@ -113,7 +113,7 @@ export class TicketChangeAllMoneyOperator {
           oid,
           ticketId,
           paymentMoneyStatus: {
-            IN: [PaymentMoneyStatus.PendingPaid],
+            IN: [PaymentMoneyStatus.TicketPaid, PaymentMoneyStatus.PendingPayment],
           },
         },
         compare: { id: { cast: 'bigint' } },

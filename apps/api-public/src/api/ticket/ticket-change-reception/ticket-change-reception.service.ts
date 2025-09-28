@@ -12,7 +12,6 @@ import { TicketReceptionInsertType } from '../../../../../_libs/database/entitie
 import Ticket, { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
 import {
   TicketChangeTicketUserOperation,
-  TicketDestroyOperation,
   TicketUserAddType,
 } from '../../../../../_libs/database/operations'
 import {
@@ -23,6 +22,7 @@ import {
   TicketRepository,
 } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
+import { TicketDestroyService } from '../ticket-action/ticket-destroy.service'
 import { TicketAddTicketProcedureListService } from '../ticket-change-procedure/service/ticket-add-ticket-procedure-list.service'
 import { TicketCreateTicketReceptionBody, TicketUpdateTicketReceptionBody } from './request'
 
@@ -37,7 +37,7 @@ export class TicketChangeReceptionService {
     private readonly ticketAttributeRepository: TicketAttributeRepository,
     private readonly ticketChangeTicketUserOperation: TicketChangeTicketUserOperation,
     private readonly ticketAddTicketProcedureListService: TicketAddTicketProcedureListService,
-    private readonly ticketDestroyOperation: TicketDestroyOperation
+    private readonly ticketDestroyService: TicketDestroyService
   ) { }
 
   async receptionCreate(options: { oid: number; body: TicketCreateTicketReceptionBody }) {
@@ -243,9 +243,9 @@ export class TicketChangeReceptionService {
     if (
       [TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Cancelled].includes(ticket.status)
     ) {
-      const { ticketDestroyed } = await this.ticketDestroyOperation.destroyAll({ oid, ticketId })
+      await this.ticketDestroyService.destroy({ oid, ticketId })
       this.socketEmitService.socketTicketChange(oid, { ticketId, ticketDestroyedId: ticketId })
-      return { ticketDestroyed }
+      return { ticketDestroyedId: ticketId }
     }
 
     const ticketReceptionList = await this.ticketReceptionRepository.findManyBy({

@@ -1,11 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, PrimaryColumn } from 'typeorm'
-import {
-  DiscountType,
-  PaymentEffect,
-  PaymentMoneyStatus,
-  TicketRegimenStatus,
-} from '../common/variable'
+import { DiscountType, TicketRegimenStatus } from '../common/variable'
 import Customer from './customer.entity'
 import Regimen from './regimen.entity'
 import TicketProcedure from './ticket-procedure.entity'
@@ -38,9 +33,9 @@ export default class TicketRegimen {
   @Expose()
   regimenId: number
 
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.PendingPaid })
+  @Column({ type: 'smallint', default: 0 })
   @Expose()
-  paymentMoneyStatus: PaymentMoneyStatus
+  isPaymentEachSession: number
 
   @Column({ type: 'smallint', default: TicketRegimenStatus.Pending })
   @Expose()

@@ -2,13 +2,11 @@ import { Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../../../_libs/common/cache-data/cache-data.service'
 import { FileUploadDto } from '../../../../../../_libs/common/dto/file'
 import { ESArray } from '../../../../../../_libs/common/helpers'
-import { BusinessError } from '../../../../../../_libs/database/common/error'
 import { GenerateId } from '../../../../../../_libs/database/common/generate-id'
 import {
   DeliveryStatus,
   DiscountType,
   MovementType,
-  PaymentEffect,
   PaymentMoneyStatus,
   TicketRegimenStatus,
 } from '../../../../../../_libs/database/common/variable'
@@ -80,8 +78,8 @@ export class TicketProcessResultTicketProcedureService {
   }) {
     const { oid, ticketId, body, files } = props
     const { ticketProcedureResult } = body
-    const time = ticketProcedureResult.completedAt
     const ticketProcedureId = ticketProcedureResult.ticketProcedureId
+    const createdAt = Date.now()
 
     const allowNegativeQuantity = await this.cacheDataService.getSettingAllowNegativeQuantity(oid)
 
@@ -143,7 +141,7 @@ export class TicketProcessResultTicketProcedureService {
             manager,
             oid,
             ticketId,
-            createdAt: time,
+            createdAt,
             ticketUserDtoList: body.ticketUserResultList
               .map((i, index) => {
                 return {
@@ -211,7 +209,7 @@ export class TicketProcessResultTicketProcedureService {
             contactId: ticketOrigin.customerId,
             movementType: MovementType.Ticket,
             isRefund: 1,
-            time,
+            time: createdAt,
             voucherBatchPutawayList: ticketBatchProcedureDestroyedList.map((i) => {
               return {
                 voucherProductId: i.ticketProductId,
@@ -237,7 +235,7 @@ export class TicketProcessResultTicketProcedureService {
             contactId: ticketOrigin.customerId,
             movementType: MovementType.Ticket,
             isRefund: 0,
-            time,
+            time: createdAt,
             allowNegativeQuantity,
             voucherProductPickupList: body.ticketProductProcedureResultList.map((i) => {
               return {
@@ -276,7 +274,7 @@ export class TicketProcessResultTicketProcedureService {
               quantity: i.pickupQuantity,
               deliveryStatus: DeliveryStatus.Delivered,
 
-              paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+              paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
               pickupStrategy: i.pickupStrategy,
               warehouseIds: JSON.stringify([]),
               productId: i.productId,
@@ -285,12 +283,11 @@ export class TicketProcessResultTicketProcedureService {
               ticketProcedureId,
 
               priority: 0,
-              createdAt: time,
+              createdAt,
               unitRate: 1,
               quantityPrescription: 0,
               printPrescription: 0,
               hintUsage: '',
-              paymentEffect: PaymentEffect.RelationPayment,
             }
             return insert
           })
@@ -331,20 +328,20 @@ export class TicketProcessResultTicketProcedureService {
         }
       }
 
-      const commissionMoneyAdd =
-        ticketUserResultCreatedList.reduce((acc, cur) => {
-          return acc + cur.quantity * cur.commissionMoney
-        }, 0)
-        - ticketUserResultDestroyedList.reduce((acc, cur) => {
-          return acc + cur.quantity * cur.commissionMoney
-        }, 0)
-
       const itemCostAmountAdd =
         ticketProductProcedureCreatedList.reduce((acc, item) => {
           return acc + item.costAmount
         }, 0)
         - ticketProductProcedureDestroyList.reduce((acc, item) => {
           return acc + item.costAmount
+        }, 0)
+
+      const commissionMoneyAdd =
+        ticketUserResultCreatedList.reduce((acc, cur) => {
+          return acc + cur.quantity * cur.commissionMoney
+        }, 0)
+        - ticketUserResultDestroyedList.reduce((acc, cur) => {
+          return acc + cur.quantity * cur.commissionMoney
         }, 0)
 
       const ticketProcedureModified = await this.ticketProcedureRepository.managerUpdateOne(
@@ -362,7 +359,18 @@ export class TicketProcessResultTicketProcedureService {
         }
       )
 
-      if (itemCostAmountAdd !== 0 || commissionMoneyAdd !== 0) {
+      let procedureMoneyAdd = 0
+      let itemsDiscountAdd = 0
+      if (ticketProcedureOrigin.status === TicketProcedureStatus.NoEffect) {
+        procedureMoneyAdd = ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice
+        itemsDiscountAdd = ticketProcedureOrigin.quantity * ticketProcedureOrigin.discountMoney
+      }
+      if (
+        itemCostAmountAdd !== 0
+        || commissionMoneyAdd !== 0
+        || itemsDiscountAdd !== 0
+        || procedureMoneyAdd !== 0
+      ) {
         ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
           manager,
           oid,
@@ -370,19 +378,30 @@ export class TicketProcessResultTicketProcedureService {
           itemMoney: {
             commissionMoneyAdd,
             itemsCostAmountAdd: itemCostAmountAdd,
+            procedureMoneyAdd,
+            itemsDiscountAdd,
           },
         })
       }
 
       if (ticketProcedureModified.ticketProcedureType === TicketProcedureType.InRegimen) {
         if (
-          ticketProcedureOrigin.status === TicketProcedureStatus.Pending
+          [TicketProcedureStatus.NoEffect, TicketProcedureStatus.Pending].includes(
+            ticketProcedureOrigin.status
+          )
           && ticketProcedureModified.status === TicketProcedureStatus.Completed
         ) {
+          const quantityPayment =
+            ticketProcedureOrigin.status === TicketProcedureStatus.NoEffect
+              ? ticketProcedureModified.quantity
+              : 0
           ticketRegimenItemModified = await this.ticketRegimenItemRepository.managerUpdateOne(
             manager,
             { oid, id: ticketProcedureModified.ticketRegimenItemId },
-            { quantityFinish: () => `quantityFinish + ${ticketProcedureModified.quantity}` }
+            {
+              quantityFinish: () => `quantityFinish + ${ticketProcedureModified.quantity}`,
+              quantityPayment: () => `quantityPayment + ${quantityPayment}`,
+            }
           )
         }
         if (
@@ -396,13 +415,7 @@ export class TicketProcessResultTicketProcedureService {
           )
         }
 
-        if (ticketRegimenItemModified) {
-          if (ticketRegimenItemModified.quantityFinish > ticketRegimenItemModified.quantityTotal) {
-            throw new BusinessError('Số lượng thực hiện không hợp lệ')
-          }
-        }
-
-        const { ticketRegimenId } = ticketRegimenItemModified
+        const { ticketRegimenId } = ticketProcedureOrigin
 
         let ticketRegimenStatus = TicketRegimenStatus.Executing
         const ticketRegimenItemList = await this.ticketRegimenItemRepository.managerFindManyBy(
@@ -411,7 +424,7 @@ export class TicketProcessResultTicketProcedureService {
         )
         if (
           ticketRegimenItemList.every((i) => {
-            return i.quantityFinish === i.quantityTotal
+            return i.quantityFinish === i.quantityExpected
           })
         ) {
           ticketRegimenStatus = TicketRegimenStatus.Completed

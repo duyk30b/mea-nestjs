@@ -104,6 +104,7 @@ export class CustomerRefundTicketItemListOperation {
           id: ticketId,
           status: { IN: [TicketStatus.Deposited, TicketStatus.Executing] },
           paid: { GTE: refundAmount },
+          isPaymentEachItem: 1,
         },
         {
           paid: () => `paid - ${refundAmount}`,
@@ -175,14 +176,14 @@ export class CustomerRefundTicketItemListOperation {
       // Cập nhật thanh toán vào item
       const ticketProcedureModifiedList = await this.ticketProcedureRepository.managerBulkUpdate({
         manager,
-        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.Paid },
+        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.FullPaid },
         compare: { id: { cast: 'bigint' } },
         tempList: ticketItemList
           .filter((i) => i.ticketItemType === TicketItemType.TicketProcedure)
           .map((i) => ({
             ...i,
             id: i.ticketItemId,
-            paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+            paymentMoneyStatus: PaymentMoneyStatus.PendingPayment,
           })),
         update: ['paymentMoneyStatus'],
         options: { requireEqualLength: true },
@@ -191,14 +192,14 @@ export class CustomerRefundTicketItemListOperation {
       const ticketProductConsumableModifiedList =
         await this.ticketProductRepository.managerBulkUpdate({
           manager,
-          condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.Paid },
+          condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.FullPaid },
           compare: { id: { cast: 'bigint' } },
           tempList: ticketItemList
             .filter((i) => i.ticketItemType === TicketItemType.TicketProductConsumable)
             .map((i) => ({
               ...i,
               id: i.ticketItemId,
-              paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+              paymentMoneyStatus: PaymentMoneyStatus.PendingPayment,
             })),
           update: ['paymentMoneyStatus'],
           options: { requireEqualLength: true },
@@ -207,14 +208,14 @@ export class CustomerRefundTicketItemListOperation {
       const ticketProductPrescriptionModifiedList =
         await this.ticketProductRepository.managerBulkUpdate({
           manager,
-          condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.Paid },
+          condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.FullPaid },
           compare: { id: { cast: 'bigint' } },
           tempList: ticketItemList
             .filter((i) => i.ticketItemType === TicketItemType.TicketProductPrescription)
             .map((i) => ({
               ...i,
               id: i.ticketItemId,
-              paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+              paymentMoneyStatus: PaymentMoneyStatus.PendingPayment,
             })),
           update: ['paymentMoneyStatus'],
           options: { requireEqualLength: true },
@@ -222,14 +223,14 @@ export class CustomerRefundTicketItemListOperation {
 
       const ticketLaboratoryModifiedList = await this.ticketLaboratoryRepository.managerBulkUpdate({
         manager,
-        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.Paid },
+        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.FullPaid },
         compare: { id: { cast: 'bigint' } },
         tempList: ticketItemList
           .filter((i) => i.ticketItemType === TicketItemType.TicketLaboratory)
           .map((i) => ({
             ...i,
             id: i.ticketItemId,
-            paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+            paymentMoneyStatus: PaymentMoneyStatus.PendingPayment,
           })),
         update: ['paymentMoneyStatus'],
         options: { requireEqualLength: true },
@@ -237,14 +238,14 @@ export class CustomerRefundTicketItemListOperation {
 
       const ticketRadiologyModifiedList = await this.ticketRadiologyRepository.managerBulkUpdate({
         manager,
-        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.Paid },
+        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.FullPaid },
         compare: { id: { cast: 'bigint' } },
         tempList: ticketItemList
           .filter((i) => i.ticketItemType === TicketItemType.TicketRadiology)
           .map((i) => ({
             ...i,
             id: i.ticketItemId,
-            paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+            paymentMoneyStatus: PaymentMoneyStatus.PendingPayment,
           })),
         update: ['paymentMoneyStatus'],
         options: { requireEqualLength: true },

@@ -54,7 +54,11 @@ export class TicketUpdateTicketRadiologyOperation {
 
       let ticketRadiologyModified: TicketRadiology = ticketRadiologyOrigin
       if (ticketRadiologyUpdateDto) {
-        if (ticketRadiologyOrigin.paymentMoneyStatus !== PaymentMoneyStatus.Paid) {
+        if (
+          [PaymentMoneyStatus.TicketPaid, PaymentMoneyStatus.PendingPayment].includes(
+            ticketRadiologyOrigin.paymentMoneyStatus
+          )
+        ) {
           ticketRadiologyModified = await this.ticketRadiologyManager.updateOneAndReturnEntity(
             manager,
             { oid, id: ticketRadiologyId },

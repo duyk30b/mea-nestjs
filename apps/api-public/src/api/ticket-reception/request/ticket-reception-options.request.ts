@@ -1,5 +1,5 @@
 import { Expose, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsNumber, ValidateNested } from 'class-validator'
+import { IsBoolean, IsIn, IsNumber, IsString, ValidateNested } from 'class-validator'
 import {
   ConditionTimestamp,
   SortQuery,
@@ -25,7 +25,7 @@ export class TicketReceptionRelationQuery {
 
 export class TicketReceptionFilterQuery {
   @Expose()
-  @IsNumber()
+  @IsString()
   ticketId: string
 
   @Expose()

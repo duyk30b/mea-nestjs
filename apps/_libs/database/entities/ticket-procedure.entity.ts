@@ -101,7 +101,7 @@ export default class TicketProcedure {
   @Expose()
   actualPrice: number // Giá thực tế
 
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.PendingPaid })
+  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
   @Expose()
   paymentMoneyStatus: PaymentMoneyStatus
 

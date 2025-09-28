@@ -12,12 +12,16 @@ import {
 } from './request'
 import { TicketChangeAllMoneyBody } from './request/ticket-change-all-money.body'
 import { TicketActionService } from './ticket-action.service'
+import { TicketDestroyService } from './ticket-destroy.service'
 
 @ApiTags('Ticket')
 @ApiBearerAuth('access-token')
 @Controller('ticket')
 export class TicketActionController {
-  constructor(private readonly ticketActionService: TicketActionService) { }
+  constructor(
+    private readonly ticketActionService: TicketActionService,
+    private readonly ticketDestroyService: TicketDestroyService
+  ) { }
 
   @Post('/:ticketId/start-executing')
   @UserPermission(PermissionId.TICKET_START_EXECUTING)
@@ -119,7 +123,7 @@ export class TicketActionController {
     @External() { oid }: TExternal,
     @Param() { ticketId }: TicketParams
   ): Promise<BaseResponse> {
-    const data = await this.ticketActionService.destroy({
+    const data = await this.ticketDestroyService.destroy({
       oid,
       ticketId,
     })

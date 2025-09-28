@@ -129,7 +129,11 @@ export class TicketChangeLaboratoryService {
     if (ticketLaboratoryGroupOrigin.status === TicketLaboratoryStatus.Completed) {
       throw new BusinessError('Phiếu đã hoàn thành không thể xóa')
     }
-    if (ticketLaboratoryGroupOrigin.paymentMoneyStatus === PaymentMoneyStatus.Paid) {
+    if (
+      [PaymentMoneyStatus.PartialPaid, PaymentMoneyStatus.FullPaid].includes(
+        ticketLaboratoryGroupOrigin.paymentMoneyStatus
+      )
+    ) {
       throw new BusinessError('Phiếu đã đóng tiền không thể xóa')
     }
 

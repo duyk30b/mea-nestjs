@@ -3,7 +3,6 @@ import { DataSource } from 'typeorm'
 import { GenerateId } from '../../../../../../_libs/database/common/generate-id'
 import {
   DeliveryStatus,
-  PaymentEffect,
   PaymentMoneyStatus,
 } from '../../../../../../_libs/database/common/variable'
 import {
@@ -62,8 +61,9 @@ export class TicketAddTicketProductService {
           pickupStrategy: i.pickupStrategy, // nếu không xuất kho thì costAmount lấy giá trị trên luôn
           type: ticketProductType,
           ticketProcedureId: '0',
-          paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
-          paymentEffect: PaymentEffect.SelfPayment,
+          paymentMoneyStatus: ticketOrigin.isPaymentEachItem
+            ? PaymentMoneyStatus.PendingPayment
+            : PaymentMoneyStatus.TicketPaid,
         }
         return insert
       })

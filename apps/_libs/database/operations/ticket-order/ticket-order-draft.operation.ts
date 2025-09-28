@@ -3,7 +3,7 @@ import { DataSource } from 'typeorm'
 import { ESTimer } from '../../../common/helpers/time.helper'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { GenerateId } from '../../common/generate-id'
-import { DeliveryStatus, PaymentEffect, PaymentMoneyStatus } from '../../common/variable'
+import { DeliveryStatus, PaymentMoneyStatus } from '../../common/variable'
 import { TicketAttributeInsertType } from '../../entities/ticket-attribute.entity'
 import TicketExpense, {
   TicketExpenseInsertType,
@@ -71,7 +71,6 @@ export type TicketOrderProductDraftType = Omit<
     | 'type'
     | 'ticketProcedureId'
     | 'paymentMoneyStatus'
-    | 'paymentEffect'
   >
 >
 
@@ -186,8 +185,7 @@ export class TicketOrderDraftOperation {
             deliveryStatus: DeliveryStatus.Pending,
             quantityPrescription: i.quantity,
             type: TicketProductType.Prescription,
-            paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
-            paymentEffect: PaymentEffect.SelfPayment,
+            paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
             costAmount: i.costAmount, // tính lãi tạm thời, chỉ có thể tính chính xác khi gửi hàng, lúc đó tính cost theo từng lô hàng
             ticketProcedureId: '0',
           }
@@ -218,7 +216,7 @@ export class TicketOrderDraftOperation {
             indexSession: 0,
             commissionAmount: 0,
             ticketProcedureType: TicketProcedureType.Normal,
-            paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+            paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
           }
           return ticketProcedure
         })

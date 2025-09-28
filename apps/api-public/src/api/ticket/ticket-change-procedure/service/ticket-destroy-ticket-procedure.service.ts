@@ -54,7 +54,13 @@ export class TicketDestroyTicketProcedureService {
           oid,
           ticketId,
           id: ticketProcedureId,
-          paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+          paymentMoneyStatus: {
+            IN: [
+              PaymentMoneyStatus.NoEffect,
+              PaymentMoneyStatus.TicketPaid,
+              PaymentMoneyStatus.PendingPayment,
+            ],
+          },
           status: { IN: [TicketProcedureStatus.NoEffect, TicketProcedureStatus.Pending] },
           costAmount: 0, // nếu có costAmount thì phải hủy kết quả trước
         }
@@ -83,19 +89,32 @@ export class TicketDestroyTicketProcedureService {
         return acc + item.commissionMoney * item.quantity
       }, 0)
       const costAmountDelete = ticketProcedureDestroyed.costAmount
-      const procedureMoneyDelete =
-        ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.actualPrice
-      const itemsDiscountDelete =
-        ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.discountMoney
+
+      let procedureMoneyDelete = 0
+      let itemsDiscountDelete = 0
+      if (
+        !(
+          ticketProcedureDestroyed.ticketProcedureType === TicketProcedureType.InRegimen
+          && ticketProcedureDestroyed.status === TicketProcedureStatus.NoEffect
+        )
+      ) {
+        procedureMoneyDelete =
+          ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.actualPrice
+        itemsDiscountDelete =
+          ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.discountMoney
+      }
 
       let ticketRegimenModified: TicketRegimen
       let ticketRegimenItemModified: TicketRegimenItem
       if (ticketProcedureDestroyed.ticketProcedureType === TicketProcedureType.InRegimen) {
-        ticketRegimenItemModified = await this.ticketRegimenItemRepository.managerUpdateOne(
-          manager,
-          { oid, id: ticketProcedureDestroyed.ticketRegimenItemId },
-          { quantityFinish: () => `quantityFinish - ${ticketProcedureDestroyed.quantity}` }
-        )
+        if (ticketProcedureDestroyed.status !== TicketProcedureStatus.Pending) {
+          // trường hợp NoEffect thì chưa tính quantityPayment
+          ticketRegimenItemModified = await this.ticketRegimenItemRepository.managerUpdateOne(
+            manager,
+            { oid, id: ticketProcedureDestroyed.ticketRegimenItemId },
+            { quantityPayment: () => `quantityPayment - ${ticketProcedureDestroyed.quantity}` }
+          )
+        }
 
         if (commissionMoneyDelete != 0 || costAmountDelete !== 0) {
           ticketRegimenModified = await this.ticketRegimenRepository.managerUpdateOne(

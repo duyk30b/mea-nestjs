@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { PaymentEffect, PaymentMoneyStatus } from '../../../../../_libs/database/common/variable'
+import { PaymentMoneyStatus } from '../../../../../_libs/database/common/variable'
 import { Customer, Payment, TicketProduct } from '../../../../../_libs/database/entities'
 import Ticket, { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
 import {
-  TicketDestroyOperation,
   TicketOrderDepositedOperation,
   TicketOrderDraftOperation,
 } from '../../../../../_libs/database/operations'
@@ -11,6 +10,7 @@ import { TicketRepository } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { TicketSendProductAndPaymentBody } from '../ticket-action/request'
 import { TicketActionService } from '../ticket-action/ticket-action.service'
+import { TicketDestroyService } from '../ticket-action/ticket-destroy.service'
 import { TicketMoneyService } from '../ticket-money/ticket-money.service'
 import {
   TicketOrderDebtSuccessInsertBody,
@@ -25,7 +25,7 @@ export class TicketOrderService {
     private readonly socketEmitService: SocketEmitService,
     private readonly ticketOrderDraftOperation: TicketOrderDraftOperation,
     private readonly ticketOrderDepositedOperation: TicketOrderDepositedOperation,
-    private readonly ticketDestroyOperation: TicketDestroyOperation,
+    private readonly ticketDestroyService: TicketDestroyService,
     private readonly ticketRepository: TicketRepository,
     private readonly ticketActionService: TicketActionService,
     private readonly ticketMoneyService: TicketMoneyService
@@ -85,14 +85,14 @@ export class TicketOrderService {
         return {
           ...i,
           printPrescription: 1,
-          paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+          paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
           createdAt: body.ticketOrderDepositedUpdate.createdAt,
         }
       }),
       ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
         return {
           ...i,
-          paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+          paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
         }
       }),
       ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
@@ -223,13 +223,13 @@ export class TicketOrderService {
           ...i,
           printPrescription: 1,
           createdAt: body.ticketOrderDebtSuccessUpdate.createdAt,
-          paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+          paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
         }
       }),
       ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
         return {
           ...i,
-          paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+          paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
         }
       }),
       ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
@@ -266,7 +266,7 @@ export class TicketOrderService {
   // ================= ACTION ================= //
   async destroy(params: { oid: number; ticketId: string }) {
     const { oid, ticketId } = params
-    await this.ticketDestroyOperation.destroyAll({ oid, ticketId })
+    await this.ticketDestroyService.destroy({ oid, ticketId })
     return { ticketId }
   }
 

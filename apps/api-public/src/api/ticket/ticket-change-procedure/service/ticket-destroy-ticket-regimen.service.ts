@@ -1,21 +1,26 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { PaymentMoneyStatus, TicketRegimenStatus } from '../../../common/variable'
-import { PositionType } from '../../../entities/position.entity'
-import { TicketProcedureStatus } from '../../../entities/ticket-procedure.entity'
-import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
+import {
+  PaymentMoneyStatus,
+  TicketRegimenStatus,
+} from '../../../../../../_libs/database/common/variable'
+import { PositionType } from '../../../../../../_libs/database/entities/position.entity'
+import { TicketProcedureStatus } from '../../../../../../_libs/database/entities/ticket-procedure.entity'
+import Ticket, { TicketStatus } from '../../../../../../_libs/database/entities/ticket.entity'
+import { TicketChangeItemMoneyManager } from '../../../../../../_libs/database/operations/ticket-base/ticket-change-item-money.manager'
 import {
   TicketProcedureRepository,
   TicketRegimenItemRepository,
   TicketRegimenRepository,
   TicketRepository,
   TicketUserRepository,
-} from '../../../repositories'
-import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
+} from '../../../../../../_libs/database/repositories'
+import { SocketEmitService } from '../../../../socket/socket-emit.service'
 
 @Injectable()
-export class TicketDestroyTicketRegimenOperation {
+export class TicketDestroyTicketRegimenService {
   constructor(
+    private readonly socketEmitService: SocketEmitService,
     private dataSource: DataSource,
     private ticketRepository: TicketRepository,
     private ticketRegimenRepository: TicketRegimenRepository,
@@ -42,7 +47,6 @@ export class TicketDestroyTicketRegimenOperation {
         oid,
         ticketId,
         id: ticketRegimenId,
-        paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
         status: { IN: [TicketRegimenStatus.Empty, TicketRegimenStatus.Pending] },
       })
 
@@ -51,6 +55,19 @@ export class TicketDestroyTicketRegimenOperation {
         manager,
         { oid, ticketRegimenId }
       )
+
+      ticketRegimenItemDestroyedList.forEach((i) => {
+        if (
+          [PaymentMoneyStatus.FullPaid, PaymentMoneyStatus.PendingPayment].includes(
+            i.paymentMoneyStatus
+          )
+        ) {
+          throw new Error('Không thể xóa liệu trình đã thanh toán')
+        }
+        if (i.quantityFinish > 0) {
+          throw new Error('Không thể xóa liệu trình đã thực hiện')
+        }
+      })
 
       const ticketProcedureDestroyedList = await this.ticketProcedureRepository.managerDelete(
         manager,
@@ -61,7 +78,11 @@ export class TicketDestroyTicketRegimenOperation {
         if (i.status === TicketProcedureStatus.Completed) {
           throw new Error('Không thể xóa liệu trình đã thực hiện')
         }
-        if (i.paymentMoneyStatus === PaymentMoneyStatus.Paid) {
+        if (
+          [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.PartialPaid].includes(
+            i.paymentMoneyStatus
+          )
+        ) {
           throw new Error('Không thể xóa liệu trình đã thanh toán')
         }
       })
@@ -75,8 +96,12 @@ export class TicketDestroyTicketRegimenOperation {
       })
 
       // === 4. UPDATE TICKET: MONEY  ===
-      const procedureMoneyDelete = ticketRegimenDestroyed.actualPrice
-      const itemsDiscountDelete = ticketRegimenDestroyed.discountMoney
+      const procedureMoneyDelete = ticketRegimenItemDestroyedList.reduce((acc, item) => {
+        return acc + item.quantityPayment * item.actualPrice
+      }, 0)
+      const itemsDiscountDelete = ticketRegimenItemDestroyedList.reduce((acc, item) => {
+        return acc + item.quantityPayment * item.discountMoney
+      }, 0)
       const commissionMoneyDelete = ticketUserDestroyedList.reduce((acc, item) => {
         return acc + item.commissionMoney * item.quantity
       }, 0)
@@ -94,6 +119,15 @@ export class TicketDestroyTicketRegimenOperation {
           },
         })
       }
+
+      this.socketEmitService.socketTicketChange(oid, {
+        ticketId,
+        ticketModified,
+        ticketUser: { destroyedList: ticketUserDestroyedList || [] },
+        ticketRegimen: { destroyedList: [ticketRegimenDestroyed] },
+        ticketRegimenItem: { destroyedList: ticketRegimenItemDestroyedList },
+        ticketProcedure: { destroyedList: ticketProcedureDestroyedList },
+      })
 
       return {
         ticketModified,

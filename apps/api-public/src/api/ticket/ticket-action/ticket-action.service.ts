@@ -1,28 +1,21 @@
 import { Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../../_libs/common/cache-data/cache-data.service'
-import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
-import { BusinessError } from '../../../../../_libs/database/common/error'
 import { DeliveryStatus } from '../../../../../_libs/database/common/variable'
 import { Customer, Payment } from '../../../../../_libs/database/entities'
 import TicketProduct from '../../../../../_libs/database/entities/ticket-product.entity'
-import { TicketRadiologyStatus } from '../../../../../_libs/database/entities/ticket-radiology.entity'
 import { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
 import {
   CustomerRefundMoneyOperation,
   TicketChangeAllMoneyOperator,
   TicketChangeDiscountOperation,
   TicketCloseOperation,
-  TicketDestroyOperation,
   TicketReopenOperation,
   TicketReturnProductOperation,
   TicketSendProductOperation,
 } from '../../../../../_libs/database/operations'
 import {
-  TicketProductRepository,
-  TicketRadiologyRepository,
   TicketRepository,
 } from '../../../../../_libs/database/repositories'
-import { ImageManagerService } from '../../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { TicketClinicChangeDiscountBody, TicketReturnProductListBody } from './request'
 import { TicketChangeAllMoneyBody } from './request/ticket-change-all-money.body'
@@ -32,18 +25,14 @@ export class TicketActionService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
     private readonly cacheDataService: CacheDataService,
-    private readonly imageManagerService: ImageManagerService,
     private readonly ticketRepository: TicketRepository,
-    private readonly ticketProductRepository: TicketProductRepository,
-    private readonly ticketRadiologyRepository: TicketRadiologyRepository,
     private readonly ticketReopenOperation: TicketReopenOperation,
     private readonly ticketSendProductOperation: TicketSendProductOperation,
     private readonly ticketReturnProductOperation: TicketReturnProductOperation,
     private readonly ticketChangeAllMoneyOperator: TicketChangeAllMoneyOperator,
     private readonly ticketCloseOperation: TicketCloseOperation,
     private readonly ticketChangeDiscountOperation: TicketChangeDiscountOperation,
-    private readonly customerRefundMoneyOperation: CustomerRefundMoneyOperation,
-    private readonly ticketDestroyOperation: TicketDestroyOperation
+    private readonly customerRefundMoneyOperation: CustomerRefundMoneyOperation
   ) { }
 
   async startExecuting(options: { oid: number; ticketId: string }) {
@@ -54,7 +43,7 @@ export class TicketActionService {
         id: ticketId,
         status: { IN: [TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Deposited] },
       },
-      { status: TicketStatus.Executing }
+      { status: TicketStatus.Executing, receptionAt: Date.now() }
     )
     this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
     return { ticketModified }
@@ -295,42 +284,5 @@ export class TicketActionService {
 
     this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
     return { ticketModified, customerModified, paymentCreatedList, ticketProductModifiedAll }
-  }
-
-  async destroy(params: { oid: number; ticketId: string }) {
-    const { oid, ticketId } = params
-    const [ticket, ticketProductList, ticketRadiologyList] = await Promise.all([
-      this.ticketRepository.findOneBy({ oid, id: ticketId }),
-      this.ticketProductRepository.findManyBy({ oid, ticketId }),
-      this.ticketRadiologyRepository.findManyBy({ oid, ticketId }),
-    ])
-
-    if (!ticket) {
-      throw new BusinessException('error.Database.NotFound')
-    }
-
-    if (ticket.paid) {
-      throw new BusinessError('Không thể hủy phiếu đã thanh toán, cần hoàn trả thanh toán trước')
-    }
-
-    if (ticketProductList.find((i) => i.deliveryStatus === DeliveryStatus.Delivered)) {
-      throw new BusinessError('Không thể hủy phiếu đã gửi hàng, cần hoàn trả hàng trước khi hủy')
-    }
-
-    if (ticketRadiologyList.find((i) => i.status === TicketRadiologyStatus.Completed)) {
-      throw new BusinessError('Không thể hủy phiếu CĐHA đã có kết quả, cần hủy kết quả trước')
-    }
-
-    await this.imageManagerService.removeImageList({
-      oid,
-      idRemoveList: JSON.parse(ticket.imageDiagnosisIds || '[]'),
-    })
-    await this.ticketRepository.updateBasic(
-      { oid, id: ticketId },
-      { status: TicketStatus.Cancelled }
-    )
-    await this.ticketDestroyOperation.destroyAll({ oid, ticketId })
-    this.socketEmitService.socketTicketChange(oid, { ticketId, ticketDestroyedId: ticketId })
-    return { ticketId }
   }
 }

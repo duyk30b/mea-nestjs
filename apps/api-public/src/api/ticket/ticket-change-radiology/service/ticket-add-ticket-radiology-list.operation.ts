@@ -51,7 +51,9 @@ export class TicketAddTicketRadiologyListService {
           customerId: ticketModified.customerId,
           completedAt: null,
           imageIds: '[]',
-          paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+          paymentMoneyStatus: ticketModified.isPaymentEachItem
+            ? PaymentMoneyStatus.PendingPayment
+            : PaymentMoneyStatus.TicketPaid,
         }
         return insert
       })

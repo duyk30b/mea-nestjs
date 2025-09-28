@@ -111,6 +111,7 @@ export class CustomerPrepaymentTicketItemListOperation {
               TicketStatus.Executing,
             ],
           },
+          isPaymentEachItem: 1,
         },
         {
           paid: () => `paid + ${paidAmount}`,
@@ -191,12 +192,12 @@ export class CustomerPrepaymentTicketItemListOperation {
         condition: {
           oid,
           ticketId,
-          paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+          paymentMoneyStatus: PaymentMoneyStatus.PendingPayment,
         },
         compare: { id: { cast: 'bigint' } },
         tempList: ticketItemList
           .filter((i) => i.ticketItemType === TicketItemType.TicketProcedure)
-          .map((i) => ({ ...i, id: i.ticketItemId, paymentMoneyStatus: PaymentMoneyStatus.Paid })),
+          .map((i) => ({ ...i, id: i.ticketItemId, paymentMoneyStatus: PaymentMoneyStatus.FullPaid })),
         update: ['paymentMoneyStatus'],
         options: { requireEqualLength: true },
       })
@@ -204,14 +205,14 @@ export class CustomerPrepaymentTicketItemListOperation {
       const ticketProductConsumableModifiedList =
         await this.ticketProductRepository.managerBulkUpdate({
           manager,
-          condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.PendingPaid },
+          condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.PendingPayment },
           compare: { id: { cast: 'bigint' } },
           tempList: ticketItemList
             .filter((i) => i.ticketItemType === TicketItemType.TicketProductConsumable)
             .map((i) => ({
               ...i,
               id: i.ticketItemId,
-              paymentMoneyStatus: PaymentMoneyStatus.Paid,
+              paymentMoneyStatus: PaymentMoneyStatus.FullPaid,
             })),
           update: ['paymentMoneyStatus'],
           options: { requireEqualLength: true },
@@ -220,14 +221,14 @@ export class CustomerPrepaymentTicketItemListOperation {
       const ticketProductPrescriptionModifiedList =
         await this.ticketProductRepository.managerBulkUpdate({
           manager,
-          condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.PendingPaid },
+          condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.PendingPayment },
           compare: { id: { cast: 'bigint' } },
           tempList: ticketItemList
             .filter((i) => i.ticketItemType === TicketItemType.TicketProductPrescription)
             .map((i) => ({
               ...i,
               id: i.ticketItemId,
-              paymentMoneyStatus: PaymentMoneyStatus.Paid,
+              paymentMoneyStatus: PaymentMoneyStatus.FullPaid,
             })),
           update: ['paymentMoneyStatus'],
           options: { requireEqualLength: true },
@@ -235,22 +236,22 @@ export class CustomerPrepaymentTicketItemListOperation {
 
       const ticketLaboratoryModifiedList = await this.ticketLaboratoryRepository.managerBulkUpdate({
         manager,
-        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.PendingPaid },
+        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.PendingPayment },
         compare: { id: { cast: 'bigint' } },
         tempList: ticketItemList
           .filter((i) => i.ticketItemType === TicketItemType.TicketLaboratory)
-          .map((i) => ({ ...i, id: i.ticketItemId, paymentMoneyStatus: PaymentMoneyStatus.Paid })),
+          .map((i) => ({ ...i, id: i.ticketItemId, paymentMoneyStatus: PaymentMoneyStatus.FullPaid })),
         update: ['paymentMoneyStatus'],
         options: { requireEqualLength: true },
       })
 
       const ticketRadiologyModifiedList = await this.ticketRadiologyRepository.managerBulkUpdate({
         manager,
-        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.PendingPaid },
+        condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.PendingPayment },
         compare: { id: { cast: 'bigint' } },
         tempList: ticketItemList
           .filter((i) => i.ticketItemType === TicketItemType.TicketRadiology)
-          .map((i) => ({ ...i, id: i.ticketItemId, paymentMoneyStatus: PaymentMoneyStatus.Paid })),
+          .map((i) => ({ ...i, id: i.ticketItemId, paymentMoneyStatus: PaymentMoneyStatus.FullPaid })),
         update: ['paymentMoneyStatus'],
         options: { requireEqualLength: true },
       })

@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, PrimaryColumn } from 'typeorm'
-import { DiscountType, PaymentEffect } from '../common/variable'
+import { DiscountType, PaymentMoneyStatus } from '../common/variable'
 
 @Entity('TicketRegimenItem')
 @Index('IDX_TicketRegimenItem__oid_ticketId', ['oid', 'ticketId'])
@@ -33,11 +33,23 @@ export default class TicketRegimenItem {
   @Expose()
   ticketRegimenId: string
 
-  @Column({ default: 0 })
+  @Column({ type: 'smallint', default: 0 })
   @Expose()
-  quantityTotal: number
+  isPaymentEachSession: number
 
-  @Column({ default: 0 })
+  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
+  @Expose()
+  paymentMoneyStatus: PaymentMoneyStatus
+
+  @Column({ type: 'smallint', default: 0 })
+  @Expose()
+  quantityPayment: number
+
+  @Column({ type: 'smallint', default: 0 })
+  @Expose()
+  quantityExpected: number
+
+  @Column({ type: 'smallint', default: 0 })
   @Expose()
   quantityFinish: number
 

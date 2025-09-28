@@ -55,7 +55,11 @@ export class TicketUpdateMoneyTicketProcedureOperation {
         id: ticketProcedureId,
       })
 
-      if (ticketProcedureOrigin.paymentMoneyStatus == PaymentMoneyStatus.Paid) {
+      if (
+        [PaymentMoneyStatus.PartialPaid, PaymentMoneyStatus.FullPaid].includes(
+          ticketProcedureOrigin.paymentMoneyStatus
+        )
+      ) {
         throw new BusinessError('Không thể sửa phiếu đã thanh toán')
       }
 

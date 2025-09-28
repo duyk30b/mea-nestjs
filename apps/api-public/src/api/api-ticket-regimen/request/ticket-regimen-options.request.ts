@@ -68,11 +68,6 @@ export class TicketRegimenFilterQuery {
   regimenId?: number
 
   @Expose()
-  @Transform((params: TransformFnParams) => transformConditionEnum(params, PaymentMoneyStatus))
-  @IsOptional()
-  paymentMoneyStatus?: PaymentMoneyStatus | InstanceType<typeof ConditionEnumPaymentMoneyStatus>
-
-  @Expose()
   @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketRegimenStatus))
   @IsOptional()
   status?: TicketRegimenStatus | InstanceType<typeof ConditionEnumTicketRegimenStatus>

@@ -54,7 +54,11 @@ export class TicketUpdateTicketLaboratoryOperation {
         id: ticketLaboratoryId,
       })
 
-      if (ticketLaboratoryOrigin.paymentMoneyStatus === PaymentMoneyStatus.Paid) {
+      if (
+        [PaymentMoneyStatus.PartialPaid, PaymentMoneyStatus.FullPaid].includes(
+          ticketLaboratoryOrigin.paymentMoneyStatus
+        )
+      ) {
         throw new BusinessError('Xét nghiệm đã thanh toán không thể sửa')
       }
 
@@ -78,8 +82,7 @@ export class TicketUpdateTicketLaboratoryOperation {
           ticketLaboratoryModified.actualPrice - ticketLaboratoryOrigin.actualPrice
         itemsDiscountAdd =
           ticketLaboratoryModified.discountMoney - ticketLaboratoryOrigin.discountMoney
-        itemsCostAmountAdd =
-          ticketLaboratoryModified.costPrice - ticketLaboratoryOrigin.costPrice
+        itemsCostAmountAdd = ticketLaboratoryModified.costPrice - ticketLaboratoryOrigin.costPrice
       }
 
       let ticketUserDestroyedList: TicketUser[] = []
@@ -139,7 +142,12 @@ export class TicketUpdateTicketLaboratoryOperation {
           },
         })
       }
-      return { ticketModified, ticketLaboratoryModified, ticketUserDestroyedList, ticketUserCreatedList }
+      return {
+        ticketModified,
+        ticketLaboratoryModified,
+        ticketUserDestroyedList,
+        ticketUserCreatedList,
+      }
     })
 
     return transaction

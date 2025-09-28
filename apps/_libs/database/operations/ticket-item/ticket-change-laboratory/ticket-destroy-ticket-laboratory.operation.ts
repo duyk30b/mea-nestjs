@@ -46,7 +46,9 @@ export class TicketDestroyTicketLaboratoryOperation {
           ticketId,
           id: ticketLaboratoryId,
           status: TicketLaboratoryStatus.Pending,
-          paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+          paymentMoneyStatus: {
+            IN: [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.TicketPaid],
+          },
         }
       )
 
@@ -112,8 +114,10 @@ export class TicketDestroyTicketLaboratoryOperation {
       return {
         ticketModified,
         ticketLaboratoryDestroyed,
-        ticketLaboratoryGroupDestroyed: ticketLaboratoryGroupDestroyed as TicketLaboratoryGroup | null,
-        ticketLaboratoryGroupModified: ticketLaboratoryGroupModified as TicketLaboratoryGroup | null,
+        ticketLaboratoryGroupDestroyed:
+          ticketLaboratoryGroupDestroyed as TicketLaboratoryGroup | null,
+        ticketLaboratoryGroupModified:
+          ticketLaboratoryGroupModified as TicketLaboratoryGroup | null,
         ticketLaboratoryResultDestroyedList,
       }
     })

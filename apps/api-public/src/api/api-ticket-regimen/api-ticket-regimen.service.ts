@@ -46,7 +46,6 @@ export class ApiTicketRegimenService {
       condition: {
         oid,
         customerId: filter?.customerId,
-        paymentMoneyStatus: filter?.paymentMoneyStatus,
         regimenId: filter?.regimenId,
         ticketId: filter?.ticketId,
       },
@@ -67,7 +66,6 @@ export class ApiTicketRegimenService {
         oid,
         id: filter.id,
         customerId: filter?.customerId,
-        paymentMoneyStatus: filter?.paymentMoneyStatus,
         regimenId: filter?.regimenId,
         ticketId: filter?.ticketId,
       },

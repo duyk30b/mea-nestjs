@@ -73,7 +73,9 @@ export class TicketAddSelectLaboratoryOperation {
           roomId: i.roomId,
           customerId: ticketOrigin.customerId,
           status: TicketLaboratoryStatus.Pending,
-          paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+          paymentMoneyStatus: ticketOrigin.isPaymentEachItem
+            ? PaymentMoneyStatus.PendingPayment
+            : PaymentMoneyStatus.TicketPaid,
           completedAt: null,
           result: '',
         }
@@ -96,7 +98,9 @@ export class TicketAddSelectLaboratoryOperation {
               ticketLaboratoryGroupId: tlgCreatedList[tlgDtoIndex].id,
               roomId: tlgCreatedList[tlgDtoIndex].roomId,
               status: TicketLaboratoryStatus.Pending,
-              paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+              paymentMoneyStatus: ticketOrigin.isPaymentEachItem
+                ? PaymentMoneyStatus.PendingPayment
+                : PaymentMoneyStatus.TicketPaid,
               completedAt: null,
             }
             return tlEntity

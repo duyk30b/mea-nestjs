@@ -62,7 +62,7 @@ export default class TicketRadiology {
   @Expose()
   status: TicketRadiologyStatus
 
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.PendingPaid })
+  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
   @Expose()
   paymentMoneyStatus: PaymentMoneyStatus
 

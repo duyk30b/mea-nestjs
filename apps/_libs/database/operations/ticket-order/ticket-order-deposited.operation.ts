@@ -4,7 +4,7 @@ import { DataSource, EntityManager } from 'typeorm'
 import { ESTimer } from '../../../common/helpers/time.helper'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
 import { GenerateId } from '../../common/generate-id'
-import { DeliveryStatus, PaymentEffect, PaymentMoneyStatus } from '../../common/variable'
+import { DeliveryStatus, PaymentMoneyStatus } from '../../common/variable'
 import { Ticket } from '../../entities'
 import { TicketAttributeInsertType } from '../../entities/ticket-attribute.entity'
 import { TicketExpenseInsertType } from '../../entities/ticket-expense.entity'
@@ -130,8 +130,7 @@ export class TicketOrderDepositedOperation {
             deliveryStatus: DeliveryStatus.Pending,
             type: TicketProductType.Prescription,
             ticketProcedureId: '0',
-            paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
-            paymentEffect: PaymentEffect.SelfPayment,
+            paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
           }
           return ticketProduct
         })
@@ -160,7 +159,7 @@ export class TicketOrderDepositedOperation {
             ticketRegimenId: '0',
             ticketRegimenItemId: '0',
             indexSession: 0,
-            paymentMoneyStatus: PaymentMoneyStatus.PendingPaid,
+            paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
           }
           return ticketProcedure
         })

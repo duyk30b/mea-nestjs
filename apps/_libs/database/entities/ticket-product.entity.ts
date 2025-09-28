@@ -3,7 +3,6 @@ import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typ
 import {
   DeliveryStatus,
   DiscountType,
-  PaymentEffect,
   PaymentMoneyStatus,
   PickupStrategy,
 } from '../common/variable'
@@ -46,13 +45,9 @@ export default class TicketProduct {
   @Expose()
   deliveryStatus: DeliveryStatus
 
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.PendingPaid })
+  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
   @Expose()
   paymentMoneyStatus: PaymentMoneyStatus
-
-  @Column({ type: 'smallint', default: PaymentEffect.SelfPayment })
-  @Expose()
-  paymentEffect: PaymentEffect
 
   @Column()
   @Expose()
