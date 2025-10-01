@@ -7,11 +7,8 @@ import {
 import { TicketLaboratoryResult } from '../../../../../_libs/database/entities'
 import { TicketLaboratoryResultInsertType } from '../../../../../_libs/database/entities/ticket-laboratory-result.entity'
 import {
-  TicketAddSelectLaboratoryOperation,
-  TicketChangeSelectLaboratoryOperation,
   TicketDestroyTicketLaboratoryGroupOperation,
   TicketDestroyTicketLaboratoryOperation,
-  TicketUpdateTicketLaboratoryOperation,
 } from '../../../../../_libs/database/operations'
 import {
   TicketLaboratoryGroupRepository,
@@ -19,13 +16,10 @@ import {
   TicketLaboratoryResultRepository,
 } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
-import { ApiTicketLaboratoryGroupService } from '../../api-ticket-laboratory-group/api-ticket-laboratory-group.service'
 import { TicketLaboratoryGroupPostQuery } from '../../api-ticket-laboratory-group/request'
 import {
   TicketUpdatePriorityTicketLaboratoryBody,
-  TicketUpdateRequestTicketLaboratoryBody,
   TicketUpdateResultLaboratoryGroupBody,
-  TicketUpsertRequestLaboratoryGroupBody,
 } from './request'
 
 @Injectable()
@@ -35,55 +29,9 @@ export class TicketChangeLaboratoryService {
     private readonly ticketLaboratoryRepository: TicketLaboratoryRepository,
     private readonly ticketLaboratoryGroupRepository: TicketLaboratoryGroupRepository,
     private readonly ticketLaboratoryResultRepository: TicketLaboratoryResultRepository,
-    private readonly ticketAddSelectLaboratoryOperation: TicketAddSelectLaboratoryOperation,
-    private readonly ticketChangeSelectLaboratoryOperation: TicketChangeSelectLaboratoryOperation,
-    private readonly ticketUpdateTicketLaboratoryOperation: TicketUpdateTicketLaboratoryOperation,
     private readonly ticketDestroyTicketLaboratoryOperation: TicketDestroyTicketLaboratoryOperation,
-    private readonly ticketDestroyTlgOperation: TicketDestroyTicketLaboratoryGroupOperation,
-    private readonly apiTicketLaboratoryGroupService: ApiTicketLaboratoryGroupService
+    private readonly ticketDestroyTlgOperation: TicketDestroyTicketLaboratoryGroupOperation
   ) { }
-
-  async upsertRequestLaboratoryGroup(options: {
-    oid: number
-    ticketId: string
-    body: TicketUpsertRequestLaboratoryGroupBody
-  }) {
-    const { oid, ticketId, body } = options
-
-    if (body.ticketLaboratoryGroupAddList.length) {
-      const result = await this.ticketAddSelectLaboratoryOperation.addTicketLaboratoryGroupList({
-        oid,
-        ticketId,
-        tlgDtoList: body.ticketLaboratoryGroupAddList,
-      })
-
-      this.socketEmitService.socketTicketChange(oid, {
-        ticketId,
-        ticketModified: result.ticketModified,
-        ticketLaboratory: { upsertedList: result.ticketLaboratoryCreatedList },
-        ticketLaboratoryGroup: { upsertedList: result.ticketLaboratoryGroupCreatedList },
-      })
-    }
-
-    // if (body.ticketLaboratoryGroupUpdate) {
-    //   const { ticketLaboratoryList: ticketLaboratoryListDto, ...ticketLaboratoryGroupDto } =
-    //     body.ticketLaboratoryGroupUpdate
-    //   const result = await this.ticketChangeSelectLaboratoryOperation.changeSelectLaboratoryList({
-    //     oid,
-    //     ticketId,
-    //     ticketLaboratoryGroupDto,
-    //     ticketLaboratoryListDto,
-    //   })
-    //   this.socketEmitService.socketTicketChangeOld(oid, { type: 'UPDATE', ticket: result.ticket })
-    //   this.socketEmitService.socketTicketLaboratoryListChange(oid, {
-    //     ticketId,
-    //     ticketLaboratoryUpsertedList: result.ticketLaboratoryCreatedList,
-    //     ticketLaboratoryDestroyedList: result.ticketLaboratoryDestroyedList,
-    //     ticketLaboratoryGroupUpsertedList: [result.ticketLaboratoryGroupModified],
-    //   })
-    // }
-    // return true
-  }
 
   async destroyTicketLaboratory(options: {
     oid: number
@@ -149,36 +97,6 @@ export class TicketChangeLaboratoryService {
       ticketLaboratory: { destroyedList: result.ticketLaboratoryDestroyedList },
       ticketLaboratoryGroup: { destroyedList: [result.ticketLaboratoryGroupDestroyed] },
       ticketLaboratoryResult: { destroyedList: result.ticketLaboratoryResultDestroyedList },
-    })
-
-    return true
-  }
-
-  async updateRequestTicketLaboratory(options: {
-    oid: number
-    ticketId: string
-    ticketLaboratoryId: string
-    body: TicketUpdateRequestTicketLaboratoryBody
-  }) {
-    const { oid, ticketId, ticketLaboratoryId, body } = options
-    const result = await this.ticketUpdateTicketLaboratoryOperation.updateTicketLaboratory({
-      oid,
-      ticketId,
-      ticketLaboratoryId,
-      ticketLaboratoryUpdateDto: body.ticketLaboratory,
-      ticketUserRequestList: body.ticketUserRequestList,
-    })
-
-    this.socketEmitService.socketTicketChange(oid, {
-      ticketId,
-      ticketModified: result.ticketModified,
-      ticketLaboratory: {
-        upsertedList: [result.ticketLaboratoryModified],
-      },
-      ticketUser: {
-        upsertedList: result.ticketUserCreatedList,
-        destroyedList: result.ticketUserDestroyedList,
-      },
     })
 
     return true

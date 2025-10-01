@@ -61,7 +61,9 @@ export class TicketDestroyTicketProcedureService {
               PaymentMoneyStatus.PendingPayment,
             ],
           },
-          status: { IN: [TicketProcedureStatus.NoEffect, TicketProcedureStatus.Pending] },
+          status: {
+            IN: [TicketProcedureStatus.NoEffect, TicketProcedureStatus.Pending],
+          },
           costAmount: 0, // nếu có costAmount thì phải hủy kết quả trước
         }
       )
@@ -88,16 +90,11 @@ export class TicketDestroyTicketProcedureService {
       const commissionMoneyDelete = ticketUserDestroyedList.reduce((acc, item) => {
         return acc + item.commissionMoney * item.quantity
       }, 0)
-      const costAmountDelete = ticketProcedureDestroyed.costAmount
 
       let procedureMoneyDelete = 0
       let itemsDiscountDelete = 0
-      if (
-        !(
-          ticketProcedureDestroyed.ticketProcedureType === TicketProcedureType.InRegimen
-          && ticketProcedureDestroyed.status === TicketProcedureStatus.NoEffect
-        )
-      ) {
+      let remainingMoneyAdd = 0 // remainingMoney của ticketRegimen thay đổi theo khi có isPaymentEachItem
+      if (ticketProcedureDestroyed.status !== TicketProcedureStatus.NoEffect) {
         procedureMoneyDelete =
           ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.actualPrice
         itemsDiscountDelete =
@@ -107,34 +104,49 @@ export class TicketDestroyTicketProcedureService {
       let ticketRegimenModified: TicketRegimen
       let ticketRegimenItemModified: TicketRegimenItem
       if (ticketProcedureDestroyed.ticketProcedureType === TicketProcedureType.InRegimen) {
-        if (ticketProcedureDestroyed.status !== TicketProcedureStatus.Pending) {
-          // trường hợp NoEffect thì chưa tính quantityPayment
-          ticketRegimenItemModified = await this.ticketRegimenItemRepository.managerUpdateOne(
-            manager,
-            { oid, id: ticketProcedureDestroyed.ticketRegimenItemId },
-            { quantityPayment: () => `quantityPayment - ${ticketProcedureDestroyed.quantity}` }
-          )
+        let quantityPaymentDelete = 0
+        if (ticketProcedureDestroyed.status !== TicketProcedureStatus.NoEffect) {
+          quantityPaymentDelete = ticketProcedureDestroyed.quantity
+          if (ticketOrigin.isPaymentEachItem) {
+            remainingMoneyAdd = procedureMoneyDelete
+          }
         }
 
-        if (commissionMoneyDelete != 0 || costAmountDelete !== 0) {
-          ticketRegimenModified = await this.ticketRegimenRepository.managerUpdateOne(
-            manager,
-            { oid, id: ticketProcedureDestroyed.ticketRegimenId },
-            {
-              commissionAmount: () => `commissionAmount - ${commissionMoneyDelete}`,
-              costAmount: () => `commissionAmount - ${costAmountDelete}`,
-            }
-          )
-        }
+        ticketRegimenItemModified = await this.ticketRegimenItemRepository.managerUpdateOne(
+          manager,
+          { oid, id: ticketProcedureDestroyed.ticketRegimenItemId },
+          {
+            quantityPayment: () => `quantityPayment - ${quantityPaymentDelete}`,
+            quantityExpected: () => `quantityExpected - ${ticketProcedureDestroyed.quantity}`,
+            paymentMoneyAmount: () =>
+              `paymentMoneyAmount - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.actualPrice}`,
+            expectedMoneyAmount: () =>
+              `expectedMoneyAmount - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.expectedPrice}`,
+            discountMoneyAmount: () =>
+              `discountMoneyAmount - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.discountMoney}`,
+            actualMoneyAmount: () =>
+              `actualMoneyAmount - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.actualPrice}`,
+          }
+        )
+
+        ticketRegimenModified = await this.ticketRegimenRepository.managerUpdateOne(
+          manager,
+          { oid, id: ticketProcedureDestroyed.ticketRegimenId },
+          {
+            expectedMoney: () =>
+              `expectedMoney - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.expectedPrice}`,
+            actualMoney: () =>
+              `actualMoney - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.actualPrice}`,
+            discountMoney: () => `discountMoney - ${itemsDiscountDelete}`,
+            commissionAmount: () => `commissionAmount - ${commissionMoneyDelete}`,
+            spentMoney: () => `spentMoney - ${procedureMoneyDelete}`,
+            remainingMoney: () => `remainingMoney + ${remainingMoneyAdd}`,
+          }
+        )
       }
 
       let ticketModified: Ticket = ticketOrigin
-      if (
-        procedureMoneyDelete != 0
-        || itemsDiscountDelete != 0
-        || commissionMoneyDelete != 0
-        || costAmountDelete !== 0
-      ) {
+      if (procedureMoneyDelete != 0 || itemsDiscountDelete != 0 || commissionMoneyDelete != 0) {
         ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
           manager,
           oid,
@@ -143,7 +155,6 @@ export class TicketDestroyTicketProcedureService {
             procedureMoneyAdd: -procedureMoneyDelete,
             itemsDiscountAdd: -itemsDiscountDelete,
             commissionMoneyAdd: -commissionMoneyDelete,
-            itemsCostAmountAdd: -costAmountDelete,
           },
         })
       }

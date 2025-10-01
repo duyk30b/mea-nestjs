@@ -19,8 +19,8 @@ import {
   SplitBatchByExpiryDate,
   SplitBatchByWarehouse,
 } from '../../../../../_libs/database/entities/product.entity'
-import { DiscountUpdateBody } from '../../api-discount/request'
-import { PositionBasicBody } from '../../api-position/request'
+import { DiscountUpdateBody } from '../../master-data/discount/request'
+import { PositionBasicBody } from '../../master-data/position/request'
 
 export class UnitConversionBody {
   @Expose()

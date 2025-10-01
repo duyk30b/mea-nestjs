@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common'
-import { ApiLaboratoryGroupService } from '../../api/api-laboratory-group/api-laboratory-group.service'
+import { LaboratoryGroupService } from '../../api/master-data/laboratory-group/laboratory-group.service'
 import { ApiFileLaboratoryController } from './api-file-laboratory.controller'
 import { ApiFileLaboratoryDownloadExcel } from './api-file-laboratory.download-excel'
 import { ApiFileLaboratoryUploadExcel } from './api-file-laboratory.upload-excel'
@@ -10,7 +10,7 @@ import { ApiFileLaboratoryUploadExcel } from './api-file-laboratory.upload-excel
   providers: [
     ApiFileLaboratoryDownloadExcel,
     ApiFileLaboratoryUploadExcel,
-    ApiLaboratoryGroupService,
+    LaboratoryGroupService,
   ],
 })
 export class ApiFileLaboratoryModule { }

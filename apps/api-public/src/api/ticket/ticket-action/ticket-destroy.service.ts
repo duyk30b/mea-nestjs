@@ -2,11 +2,16 @@ import { Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../../_libs/common/cache-data/cache-data.service'
 import { BusinessError } from '../../../../../_libs/database/common/error'
 import { DeliveryStatus } from '../../../../../_libs/database/common/variable'
+import {
+  PaymentPersonType,
+  PaymentVoucherType,
+} from '../../../../../_libs/database/entities/payment.entity'
 import { TicketProcedureStatus } from '../../../../../_libs/database/entities/ticket-procedure.entity'
 import { TicketRadiologyStatus } from '../../../../../_libs/database/entities/ticket-radiology.entity'
 import { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
 import {
   AppointmentRepository,
+  PaymentRepository,
   TicketAttributeRepository,
   TicketBatchRepository,
   TicketExpenseRepository,
@@ -47,7 +52,8 @@ export class TicketDestroyService {
     private readonly ticketLaboratoryRepository: TicketLaboratoryRepository,
     private readonly ticketLaboratoryGroupRepository: TicketLaboratoryGroupRepository,
     private readonly ticketLaboratoryResultRepository: TicketLaboratoryResultRepository,
-    private readonly ticketUserRepository: TicketUserRepository
+    private readonly ticketUserRepository: TicketUserRepository,
+    private readonly paymentRepository: PaymentRepository
   ) { }
 
   async destroy(params: { oid: number; ticketId: string }) {
@@ -89,9 +95,9 @@ export class TicketDestroyService {
         manager,
         { oid, ticketId }
       )
-      if (ticketProcedureDestroyedList.find((i) => i.status === TicketProcedureStatus.Completed)) {
-        throw new BusinessError('Cần XÓA tất dịch vụ đã hoàn thành trước khi HỦY phiếu khám')
-      }
+      // if (ticketProcedureDestroyedList.find((i) => i.status === TicketProcedureStatus.Completed)) {
+      //   throw new BusinessError('Cần XÓA tất dịch vụ đã hoàn thành trước khi HỦY phiếu khám')
+      // }
       await this.ticketRegimenRepository.managerDelete(manager, { oid, ticketId })
       await this.ticketRegimenItemRepository.managerDelete(manager, { oid, ticketId })
 
@@ -107,6 +113,13 @@ export class TicketDestroyService {
         throw new BusinessError('Cần XÓA tất phiếu CĐHA đã hoàn thành trước khi HỦY phiếu khám')
       }
       await this.ticketUserRepository.managerDelete(manager, { oid, ticketId })
+      await this.paymentRepository.managerDelete(manager, {
+        oid,
+        voucherType: PaymentVoucherType.Ticket,
+        voucherId: ticketId,
+        personType: PaymentPersonType.Customer,
+        personId: ticketDestroyed.customerId,
+      })
 
       await this.imageManagerService.removeImageList({
         oid,

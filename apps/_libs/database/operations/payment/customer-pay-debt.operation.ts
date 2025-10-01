@@ -71,7 +71,7 @@ export class CustomerPayDebtOperation {
       )
 
       let customerOpenDebt = customerModified.debt + paidAmount
-      if (!note && dataList.length > 0) {
+      if (!note && dataList.length > 1) {
         note = `Trả nợ ${paidAmount} vào ${dataList.length} đơn: ${dataList.map((i) => i.ticketId)}`
       }
 

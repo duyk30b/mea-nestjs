@@ -362,6 +362,7 @@ export class TicketProcessResultTicketProcedureService {
       let procedureMoneyAdd = 0
       let itemsDiscountAdd = 0
       if (ticketProcedureOrigin.status === TicketProcedureStatus.NoEffect) {
+        // Trường hợp Pending vẫn tính tiền rồi (nên không cộng vào nữa)
         procedureMoneyAdd = ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice
         itemsDiscountAdd = ticketProcedureOrigin.quantity * ticketProcedureOrigin.discountMoney
       }
@@ -401,6 +402,8 @@ export class TicketProcessResultTicketProcedureService {
             {
               quantityFinish: () => `quantityFinish + ${ticketProcedureModified.quantity}`,
               quantityPayment: () => `quantityPayment + ${quantityPayment}`,
+              paymentMoneyAmount: () =>
+                `paymentMoneyAmount + ${quantityPayment * ticketProcedureModified.actualPrice}`,
             }
           )
         }
@@ -422,18 +425,10 @@ export class TicketProcessResultTicketProcedureService {
           manager,
           { oid, ticketId, ticketRegimenId }
         )
-        if (
-          ticketRegimenItemList.every((i) => {
-            return i.quantityFinish === i.quantityExpected
-          })
-        ) {
+        if (ticketRegimenItemList.every((i) => i.quantityFinish === i.quantityExpected)) {
           ticketRegimenStatus = TicketRegimenStatus.Completed
         }
-        if (
-          ticketRegimenItemList.every((i) => {
-            return i.quantityFinish === 0
-          })
-        ) {
+        if (ticketRegimenItemList.every((i) => i.quantityFinish === 0)) {
           ticketRegimenStatus = TicketRegimenStatus.Pending
         }
 
@@ -444,6 +439,7 @@ export class TicketProcessResultTicketProcedureService {
             status: ticketRegimenStatus,
             costAmount: () => `costAmount + ${itemCostAmountAdd}`,
             commissionAmount: () => `commissionAmount + ${commissionMoneyAdd}`,
+            spentMoney: () => `spentMoney + ${procedureMoneyAdd}`,
           }
         )
       }

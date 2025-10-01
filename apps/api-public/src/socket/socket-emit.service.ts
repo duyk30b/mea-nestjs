@@ -3,16 +3,12 @@ import { Server } from 'socket.io'
 import {
   Batch,
   Customer,
-  Discount,
   Distributor,
   Image,
-  Laboratory,
   Organization,
-  Position,
   Procedure,
   Product,
   PurchaseOrder,
-  Radiology,
   Ticket,
   TicketAttribute,
   TicketBatch,
@@ -74,6 +70,24 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE, data)
   }
 
+  socketMasterDataChange(
+    oid: number,
+    data: {
+      distributor?: boolean
+      procedure?: boolean
+      regimen?: boolean
+      laboratory?: boolean
+      radiology?: boolean
+      position?: boolean
+      discount?: boolean
+      surcharge?: boolean
+      expense?: boolean
+    }
+  ) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_MASTER_DATA_CHANGE, data)
+  }
+
   organizationUpdate(oid: number, data: { organization: Organization }) {
     if (!this.io) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_ORGANIZATION_UPDATE)
@@ -84,32 +98,9 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_SETTING_RELOAD)
   }
 
-  masterDataChange(
-    oid: number,
-    data: {
-      Distributor?: boolean
-      Procedure?: boolean
-      Regimen?: boolean
-      Laboratory?: boolean
-      Radiology?: boolean
-      Position?: boolean
-      Discount?: boolean
-      Surcharge?: boolean
-      Expense?: boolean
-    }
-  ) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_MASTER_DATA_CHANGE, data)
-  }
-
   customerUpsert(oid: number, data: { customer: Customer }) {
     if (!this.io) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_CUSTOMER_UPSERT, data)
-  }
-
-  distributorUpsert(oid: number, data: { distributor: Distributor }) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_DISTRIBUTOR_UPSERT, data)
   }
 
   batchListChange(
@@ -132,46 +123,6 @@ export class SocketEmitService {
       return
     }
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_PRODUCT_LIST_CHANGE, data)
-  }
-
-  procedureListChange(
-    oid: number,
-    data: { procedureDestroyedList?: Procedure[]; procedureUpsertedList?: Procedure[] }
-  ) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_PROCEDURE_LIST_CHANGE, data)
-  }
-
-  laboratoryListChange(
-    oid: number,
-    data: { laboratoryDestroyedList?: Laboratory[]; laboratoryUpsertedList?: Laboratory[] }
-  ) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_LABORATORY_LIST_CHANGE, data)
-  }
-
-  radiologyListChange(
-    oid: number,
-    data: { radiologyDestroyedList?: Radiology[]; radiologyUpsertedList?: Radiology[] }
-  ) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_RADIOLOGY_LIST_CHANGE, data)
-  }
-
-  positionListChange(
-    oid: number,
-    data: { positionDestroyedList?: Position[]; positionUpsertedList?: Position[] }
-  ) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_POSITION_LIST_CHANGE, data)
-  }
-
-  discountListChange(
-    oid: number,
-    data: { discountDestroyedList?: Discount[]; discountUpsertedList?: Discount[] }
-  ) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_DISCOUNT_LIST_CHANGE, data)
   }
 
   socketPurchaseOrderListChange(

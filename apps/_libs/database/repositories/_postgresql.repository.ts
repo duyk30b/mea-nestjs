@@ -706,7 +706,7 @@ export abstract class _PostgreSqlRepository<
   }
 
   async managerBulkUpdate<T extends Partial<_ENTITY> | Record<string, any>>(options: {
-    manager: EntityManager
+    manager?: EntityManager
     tempList: T[]
     condition?: BaseCondition<_ENTITY>
     compare:
@@ -727,7 +727,7 @@ export abstract class _PostgreSqlRepository<
     }
     options?: { requireEqualLength?: boolean }
   }) {
-    const { manager } = options
+    const manager = options.manager || this.repository.manager
     const tableName = this.entity['name']
 
     const tempList = options.tempList || []

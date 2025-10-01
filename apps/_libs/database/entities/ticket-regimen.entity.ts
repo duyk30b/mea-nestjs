@@ -33,10 +33,6 @@ export default class TicketRegimen {
   @Expose()
   regimenId: number
 
-  @Column({ type: 'smallint', default: 0 })
-  @Expose()
-  isPaymentEachSession: number
-
   @Column({ type: 'smallint', default: TicketRegimenStatus.Pending })
   @Expose()
   status: TicketRegimenStatus
@@ -51,7 +47,19 @@ export default class TicketRegimen {
 
   @Column({ default: 0 })
   @Expose()
-  expectedPrice: number // Giá dự kiến
+  expectedMoney: number // Giá thực tế
+
+  @Column({ default: 0 })
+  @Expose()
+  actualMoney: number
+
+  @Column({ default: 0 })
+  @Expose()
+  spentMoney: number
+
+  @Column({ default: 0 })
+  @Expose()
+  remainingMoney: number
 
   @Column({ type: 'varchar', length: 25, default: DiscountType.VND })
   @Expose()
@@ -70,10 +78,6 @@ export default class TicketRegimen {
   @Column({ default: 0 })
   @Expose()
   discountMoney: number // tiền giảm giá
-
-  @Column({ default: 0 })
-  @Expose()
-  actualPrice: number // Giá thực tế
 
   @Column({
     type: 'bigint',
@@ -119,10 +123,7 @@ export default class TicketRegimen {
     const entity = new TicketRegimen()
     Object.assign(entity, raw)
 
-    entity.expectedPrice = Number(raw.expectedPrice)
-    entity.discountMoney = Number(raw.discountMoney)
     entity.discountPercent = Number(raw.discountPercent)
-    entity.actualPrice = Number(raw.actualPrice)
 
     entity.createdAt = Number(raw.createdAt)
     entity.completedAt = raw.completedAt == null ? raw.completedAt : Number(raw.completedAt)

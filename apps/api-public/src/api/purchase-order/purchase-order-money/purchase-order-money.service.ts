@@ -72,7 +72,7 @@ export class PurchaseOrderMoneyService {
       })
     }
     if (!options?.noEmitDistributor) {
-      this.socketEmitService.distributorUpsert(oid, { distributor: distributorModified })
+      this.socketEmitService.socketMasterDataChange(oid, { distributor: true })
     }
 
     return { purchaseOrderModifiedList, distributorModified, paymentCreatedList }

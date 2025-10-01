@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, PrimaryColumn } from 'typeorm'
-import { DiscountType, PaymentMoneyStatus } from '../common/variable'
+import { DiscountType } from '../common/variable'
 
 @Entity('TicketRegimenItem')
 @Index('IDX_TicketRegimenItem__oid_ticketId', ['oid', 'ticketId'])
@@ -35,14 +35,6 @@ export default class TicketRegimenItem {
 
   @Column({ type: 'smallint', default: 0 })
   @Expose()
-  isPaymentEachSession: number
-
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
-  @Expose()
-  paymentMoneyStatus: PaymentMoneyStatus
-
-  @Column({ type: 'smallint', default: 0 })
-  @Expose()
   quantityPayment: number
 
   @Column({ type: 'smallint', default: 0 })
@@ -59,7 +51,7 @@ export default class TicketRegimenItem {
 
   @Column({ default: 0 })
   @Expose()
-  expectedPrice: number // Giá dự kiến
+  expectedMoneyAmount: number // Giá dự kiến
 
   @Column({ type: 'varchar', length: 25, default: DiscountType.VND })
   @Expose()
@@ -77,21 +69,25 @@ export default class TicketRegimenItem {
 
   @Column({ default: 0 })
   @Expose()
-  discountMoney: number // tiền giảm giá
+  discountMoneyAmount: number // Giá thực tế
 
   @Column({ default: 0 })
   @Expose()
-  actualPrice: number // Giá thực tế
+  actualMoneyAmount: number // Giá thực tế
+
+  @Column({ default: 0 })
+  @Expose()
+  paymentMoneyAmount: number // Giá thực tế
 
   static fromRaw(raw: { [P in keyof TicketRegimenItem]: any }) {
     if (!raw) return null
     const entity = new TicketRegimenItem()
     Object.assign(entity, raw)
 
-    entity.expectedPrice = Number(raw.expectedPrice)
-    entity.discountMoney = Number(raw.discountMoney)
+    entity.expectedMoneyAmount = Number(raw.expectedMoneyAmount)
     entity.discountPercent = Number(raw.discountPercent)
-    entity.actualPrice = Number(raw.actualPrice)
+    entity.actualMoneyAmount = Number(raw.actualMoneyAmount)
+    entity.paymentMoneyAmount = Number(raw.paymentMoneyAmount)
 
     return entity
   }

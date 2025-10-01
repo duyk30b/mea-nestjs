@@ -73,14 +73,14 @@ export class ApiDistributorService {
       oid,
       debt: 0,
     })
-    this.socketEmitService.distributorUpsert(oid, { distributor })
+    this.socketEmitService.socketMasterDataChange(oid, { distributor: true })
     return { distributor }
   }
 
   async updateOne(oid: number, id: number, body: DistributorUpdateBody) {
     const distributor = await this.distributorRepository.updateOneAndReturnEntity({ oid, id }, body)
 
-    this.socketEmitService.distributorUpsert(oid, { distributor })
+    this.socketEmitService.socketMasterDataChange(oid, { distributor: true })
     return { distributor }
   }
 
@@ -100,7 +100,7 @@ export class ApiDistributorService {
         }),
       ])
     }
-
+    this.socketEmitService.socketMasterDataChange(oid, { distributor: true })
     return { purchaseOrderList, distributorId, success: purchaseOrderList.length === 0 }
   }
 }

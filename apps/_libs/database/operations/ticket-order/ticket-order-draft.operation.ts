@@ -206,7 +206,7 @@ export class TicketOrderDraftOperation {
             ticketId: ticket.id,
             customerId: ticketOrderDraftUpsertDto.customerId,
             createdAt: ticketOrderDraftUpsertDto.createdAt,
-            status: TicketProcedureStatus.Completed,
+            status: TicketProcedureStatus.NoAction,
             imageIds: JSON.stringify([]),
             result: '',
             completedAt: null,

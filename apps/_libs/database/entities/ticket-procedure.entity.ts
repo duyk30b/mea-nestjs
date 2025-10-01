@@ -8,7 +8,8 @@ import TicketUser from './ticket-user.entity'
 import Ticket from './ticket.entity'
 
 export enum TicketProcedureStatus {
-  NoEffect = 1,
+  NoEffect = -1, // dùng cho trường hợp không ảnh hưởng đến ai
+  NoAction = 1,
   Pending = 2,
   Completed = 3,
 }
@@ -105,7 +106,7 @@ export default class TicketProcedure {
   @Expose()
   paymentMoneyStatus: PaymentMoneyStatus
 
-  @Column({ type: 'smallint', default: TicketProcedureStatus.NoEffect })
+  @Column({ type: 'smallint', default: TicketProcedureStatus.NoAction })
   @Expose()
   status: TicketProcedureStatus
 

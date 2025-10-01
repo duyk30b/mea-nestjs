@@ -5,7 +5,7 @@ import { ESArray } from '../../../../_libs/common/helpers'
 import { BusinessError } from '../../../../_libs/database/common/error'
 import { RadiologyInsertType } from '../../../../_libs/database/entities/radiology.entity'
 import { RadiologyGroupRepository, RadiologyManager } from '../../../../_libs/database/repositories'
-import { ApiRadiologyGroupService } from '../../api/api-radiology-group/api-radiology-group.service'
+import { RadiologyGroupService } from '../../api/master-data/radiology-group/radiology-group.service'
 import { ExcelProcess } from '../common/excel-process'
 import { RadiologyExcelRules } from './radiology-excel.rule'
 
@@ -28,7 +28,7 @@ export class ApiFileRadiologyUploadExcel {
     private dataSource: DataSource,
     private readonly radiologyManager: RadiologyManager,
     private readonly radiologyGroupRepository: RadiologyGroupRepository,
-    private readonly apiRadiologyGroupService: ApiRadiologyGroupService
+    private readonly radiologyGroupService: RadiologyGroupService
   ) { }
 
   async uploadExcel(options: { oid: number; userId: number; file: FileUploadDto }) {
@@ -50,7 +50,7 @@ export class ApiFileRadiologyUploadExcel {
     })
 
     const groupNameList = dataConvertList.map((i) => i.radiologyGroupName || '')
-    const radiologyGroupList = await this.apiRadiologyGroupService.createByGroupName(
+    const radiologyGroupList = await this.radiologyGroupService.createByGroupName(
       oid,
       groupNameList
     )

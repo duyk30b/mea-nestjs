@@ -73,8 +73,8 @@ export class PurchaseOrderActionService {
     paymentCreatedList.push(...closeResult.paymentCreatedList)
 
     if (closeResult.distributorModified) {
-      this.socketEmitService.distributorUpsert(oid, {
-        distributor: closeResult.distributorModified,
+      this.socketEmitService.socketMasterDataChange(oid, {
+        distributor: true,
       })
     }
     this.socketEmitService.productListChange(oid, {
@@ -121,8 +121,8 @@ export class PurchaseOrderActionService {
       note: '',
     })
     if (closeResult.distributorModified) {
-      this.socketEmitService.distributorUpsert(oid, {
-        distributor: closeResult.distributorModified,
+      this.socketEmitService.socketMasterDataChange(oid, {
+        distributor: true,
       })
     }
     return {
@@ -186,7 +186,7 @@ export class PurchaseOrderActionService {
     }
 
     if (distributorModified) {
-      this.socketEmitService.distributorUpsert(oid, { distributor: distributorModified })
+      this.socketEmitService.socketMasterDataChange(oid, { distributor: true })
     }
 
     const purchaseOrderModified = await this.purchaseOrderRepository.updateOneAndReturnEntity(

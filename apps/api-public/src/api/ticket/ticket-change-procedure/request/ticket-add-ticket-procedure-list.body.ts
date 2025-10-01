@@ -14,17 +14,11 @@ class TicketRegimenBasicBody {
   @IsNumber()
   regimenId: number
 
-  @ApiProperty({})
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  isPaymentEachSession: number
-
   @ApiProperty({ example: 25_000 })
   @Expose()
   @IsDefined()
   @IsNumber()
-  expectedPrice: number
+  expectedMoney: number
 
   @ApiProperty({ example: 22_500 })
   @Expose()
@@ -52,7 +46,59 @@ class TicketRegimenBasicBody {
   @Transform(({ value }) => Math.round(value || 0))
   @IsDefined()
   @IsNumber()
-  actualPrice: number
+  actualMoney: number
+}
+
+export class TicketRegimenItemAddBody {
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  procedureId: number
+
+  @ApiProperty({ example: 1 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  gapDay: number // Giá dịch vụ
+
+  @ApiProperty({ example: 4 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  quantityExpected: number
+
+  @ApiProperty({ example: 25_000 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  expectedMoneyAmount: number
+
+  @ApiProperty({ example: 25_000 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  discountMoneyAmount: number
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  @Max(100)
+  @Min(0)
+  discountPercent: number
+
+  @ApiProperty({ enum: valuesEnum(DiscountType), example: DiscountType.VND })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(DiscountType)
+  discountType: DiscountType
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  actualMoneyAmount: number
 }
 
 class TicketProcedureBasicBody {
@@ -68,7 +114,7 @@ class TicketProcedureBasicBody {
   @IsNumber()
   procedureId: number
 
-  @ApiProperty({ enum: valuesEnum(TicketProcedureStatus), example: TicketProcedureStatus.NoEffect })
+  @ApiProperty({})
   @Expose()
   @IsDefined()
   @IsEnumValue(TicketProcedureStatus)
@@ -79,71 +125,6 @@ class TicketProcedureBasicBody {
   @IsDefined()
   @IsNumber()
   quantity: number
-
-  @ApiProperty({ example: 25_000 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  expectedPrice: number
-
-  @ApiProperty({ example: 22_500 })
-  @Expose()
-  @Transform(({ value }) => Math.round(value || 0))
-  @IsDefined()
-  @IsNumber()
-  discountMoney: number
-
-  @ApiProperty({ example: 22_500 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  @Max(100)
-  @Min(0)
-  discountPercent: number
-
-  @ApiProperty({ enum: valuesEnum(DiscountType), example: DiscountType.VND })
-  @Expose()
-  @IsDefined()
-  @IsEnumValue(DiscountType)
-  discountType: DiscountType
-
-  @ApiProperty({ example: 22_500 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  actualPrice: number
-}
-
-export class TicketRegimenItemAddBody {
-  @ApiProperty({ example: 56 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  procedureId: number
-
-  @ApiProperty({})
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  isPaymentEachSession: number
-
-  @ApiProperty({ example: 1 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  gapDay: number // Giá dịch vụ
-
-  @ApiProperty({ example: 4 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  quantityPayment: number
-
-  @ApiProperty({ example: 4 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  quantityExpected: number
 
   @ApiProperty({ example: 25_000 })
   @Expose()

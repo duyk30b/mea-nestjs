@@ -31,6 +31,16 @@ export class Version11011759083828671 implements MigrationInterface {
                 ALTER TABLE "TicketProduct" DROP COLUMN "paymentEffect"
             `)
 
+            await queryRunner.query(`
+                ALTER TABLE "Laboratory" DROP CONSTRAINT "UNIQUE_Laboratory__oid_laboratoryCode"
+            `)
+
+            await queryRunner.query(`
+                UPDATE "Ticket"
+                    SET "receptionAt" = "createdAt"
+                    WHERE "receptionAt" IS NULL;
+            `)
+
             await queryRunner.commitTransaction()
         } catch (error) {
             await queryRunner.rollbackTransaction()

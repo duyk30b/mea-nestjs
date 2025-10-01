@@ -25,12 +25,13 @@ import {
 } from './request'
 import { TicketAddTicketProcedureListBody } from './request/ticket-add-ticket-procedure-list.body'
 import { TicketAddTicketProcedureListService } from './service/ticket-add-ticket-procedure-list.service'
-import { TicketChangeProcedureService } from './service/ticket-change-procedure.service'
-import { TicketChangeRegimenService } from './service/ticket-change-regimen.service'
 import { TicketDestroyTicketProcedureService } from './service/ticket-destroy-ticket-procedure.service'
 import { TicketDestroyTicketRegimenService } from './service/ticket-destroy-ticket-regimen.service'
 import { TicketProcessResultTicketProcedureService } from './service/ticket-process-result-ticket-procedure.service'
+import { TicketUpdateMoneyTicketProcedureService } from './service/ticket-update-money-ticket-procedure.service'
+import { TicketUpdateMoneyTicketRegimenService } from './service/ticket-update-money-ticket-regimen.service'
 import { TicketUpdateUserTicketProcedureService } from './service/ticket-update-user-ticket-procedure.service'
+import { TicketUpdateUserTicketRegimenOperation } from './service/ticket-update-user-ticket-regimen.service'
 
 @ApiTags('Ticket')
 @ApiBearerAuth('access-token')
@@ -38,12 +39,13 @@ import { TicketUpdateUserTicketProcedureService } from './service/ticket-update-
 export class TicketChangeProcedureController {
   constructor(
     private readonly ticketAddTicketProcedureListService: TicketAddTicketProcedureListService,
-    private readonly ticketChangeProcedureService: TicketChangeProcedureService,
+    private readonly ticketUpdateMoneyTicketProcedureService: TicketUpdateMoneyTicketProcedureService,
     private readonly ticketUpdateUserTicketProcedureService: TicketUpdateUserTicketProcedureService,
-    private readonly ticketChangeRegimenService: TicketChangeRegimenService,
+    private readonly ticketUpdateUserTicketRegimenOperation: TicketUpdateUserTicketRegimenOperation,
     private readonly ticketProcessResultTicketProcedureService: TicketProcessResultTicketProcedureService,
     private readonly ticketDestroyTicketProcedureService: TicketDestroyTicketProcedureService,
-    private readonly ticketDestroyTicketRegimenService: TicketDestroyTicketRegimenService
+    private readonly ticketDestroyTicketRegimenService: TicketDestroyTicketRegimenService,
+    private readonly ticketUpdateMoneyTicketRegimenService: TicketUpdateMoneyTicketRegimenService
   ) { }
 
   @Post(':ticketId/procedure/add-ticket-procedure-list')
@@ -82,7 +84,7 @@ export class TicketChangeProcedureController {
     @Param() { ticketId, ticketProcedureId }: TicketChangeProcedureParams,
     @Body() body: TicketUpdateMoneyTicketProcedureBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeProcedureService.updateMoneyTicketProcedure({
+    const data = await this.ticketUpdateMoneyTicketProcedureService.updateMoneyTicketProcedure({
       oid,
       ticketId,
       ticketProcedureId,
@@ -128,7 +130,7 @@ export class TicketChangeProcedureController {
     @Param() { ticketId, ticketRegimenId }: TicketChangeRegimenParams,
     @Body() body: TicketUpdateMoneyTicketRegimenBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeRegimenService.updateMoneyTicketRegimen({
+    const data = await this.ticketUpdateMoneyTicketRegimenService.updateMoneyTicketRegimen({
       oid,
       ticketId,
       ticketRegimenId,
@@ -144,7 +146,7 @@ export class TicketChangeProcedureController {
     @Param() { ticketId, ticketRegimenId }: TicketChangeRegimenParams,
     @Body() body: TicketUpdateUserRequestTicketRegimenBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeRegimenService.updateUserRequestTicketRegimen({
+    const data = await this.ticketUpdateUserTicketRegimenOperation.updateUserRequestTicketRegimen({
       oid,
       ticketId,
       ticketRegimenId,
@@ -174,7 +176,7 @@ export class TicketChangeProcedureController {
 
   @Post(':ticketId/procedure/cancel-result-ticket-procedure/:ticketProcedureId')
   @UserPermission(PermissionId.TICKET_CHANGE_PROCEDURE_RESULT)
-  async cancelResultTicketProcedureItem(
+  async cancelResultTicketProcedure(
     @External() { oid }: TExternal,
     @Param() { ticketId, ticketProcedureId }: TicketChangeProcedureParams
   ): Promise<BaseResponse> {

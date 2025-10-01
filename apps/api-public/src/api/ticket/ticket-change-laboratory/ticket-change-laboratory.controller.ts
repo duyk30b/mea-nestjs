@@ -14,13 +14,19 @@ import {
   TicketUpdateResultLaboratoryGroupBody,
   TicketUpsertRequestLaboratoryGroupBody,
 } from './request'
+import { TicketUpdateRequestTicketLaboratoryService } from './service/ticket-update-request-ticket-laboratory.service'
+import { TicketUpsertLaboratoryService } from './service/ticket-upsert-ticket-laboratory-group.service'
 import { TicketChangeLaboratoryService } from './ticket-change-laboratory.service'
 
 @ApiTags('Ticket')
 @ApiBearerAuth('access-token')
 @Controller('ticket')
 export class TicketChangeLaboratoryController {
-  constructor(private readonly ticketChangeLaboratoryService: TicketChangeLaboratoryService) { }
+  constructor(
+    private readonly ticketChangeLaboratoryService: TicketChangeLaboratoryService,
+    private readonly ticketUpsertLaboratoryService: TicketUpsertLaboratoryService,
+    private readonly ticketUpdateRequestTicketLaboratoryService: TicketUpdateRequestTicketLaboratoryService
+  ) { }
 
   @Post(':ticketId/laboratory/upsert-request-laboratory-group')
   @UserPermission(PermissionId.TICKET_CHANGE_LABORATORY_REQUEST)
@@ -29,7 +35,7 @@ export class TicketChangeLaboratoryController {
     @Param() { ticketId }: TicketParams,
     @Body() body: TicketUpsertRequestLaboratoryGroupBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeLaboratoryService.upsertRequestLaboratoryGroup({
+    const data = await this.ticketUpsertLaboratoryService.upsertRequestLaboratoryGroup({
       oid,
       ticketId,
       body,
@@ -72,7 +78,7 @@ export class TicketChangeLaboratoryController {
     @Param() { ticketId, ticketLaboratoryId }: TicketChangeLaboratoryParams,
     @Body() body: TicketUpdateRequestTicketLaboratoryBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketChangeLaboratoryService.updateRequestTicketLaboratory({
+    const data = await this.ticketUpdateRequestTicketLaboratoryService.updateRequestTicketLaboratory({
       oid,
       ticketId,
       ticketLaboratoryId,

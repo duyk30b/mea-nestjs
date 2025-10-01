@@ -28,20 +28,15 @@ export * from './ticket-base/ticket-return-product.operation'
 export * from './ticket-base/ticket-send-product.operation'
 export * from './ticket-base/ticket-update-commission-ticket-user.operator'
 
-export * from './ticket-item/ticket-change-procedure/ticket-update-money-ticket-procedure.operation'
-export * from './ticket-item/ticket-change-regimen/ticket-update-user-ticket-regimen.operation'
-
 export * from './ticket-item/ticket-change-product/ticket-destroy-ticket-product.operation'
 export * from './ticket-item/ticket-change-product/ticket-update-ticket-product.operation'
 
 export * from './ticket-item/ticket-change-radiology/ticket-destroy-ticket-radiology.operation'
 export * from './ticket-item/ticket-change-radiology/ticket-update-ticket-radiology.operation'
 
-export * from './ticket-item/ticket-change-laboratory/ticket-add-ticket-laboratory-group.operation'
 export * from './ticket-item/ticket-change-laboratory/ticket-change-ticket-laboratory-group.operation'
 export * from './ticket-item/ticket-change-laboratory/ticket-destroy-ticket-laboratory-group.operation'
 export * from './ticket-item/ticket-change-laboratory/ticket-destroy-ticket-laboratory.operation'
-export * from './ticket-item/ticket-change-laboratory/ticket-update-ticket-laboratory.operation'
 
 export * from './ticket-item/ticket-change-user/ticket-change-ticket-user.operation'
 export * from './ticket-item/ticket-change-user/ticket-user.common'

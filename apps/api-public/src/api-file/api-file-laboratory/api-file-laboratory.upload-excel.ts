@@ -8,7 +8,7 @@ import {
   LaboratoryValueType,
 } from '../../../../_libs/database/entities/laboratory.entity'
 import { LaboratoryGroupRepository, LaboratoryManager } from '../../../../_libs/database/repositories'
-import { ApiLaboratoryGroupService } from '../../api/api-laboratory-group/api-laboratory-group.service'
+import { LaboratoryGroupService } from '../../api/master-data/laboratory-group/laboratory-group.service'
 import { ExcelProcess } from '../common/excel-process'
 import { LaboratoryExcelRules } from './laboratory-excel.rule'
 
@@ -34,7 +34,7 @@ export class ApiFileLaboratoryUploadExcel {
     private dataSource: DataSource,
     private readonly laboratoryManager: LaboratoryManager,
     private readonly laboratoryGroupRepository: LaboratoryGroupRepository,
-    private readonly apiLaboratoryGroupService: ApiLaboratoryGroupService
+    private readonly laboratoryGroupService: LaboratoryGroupService
   ) { }
 
   async uploadExcel(options: { oid: number; userId: number; file: FileUploadDto }) {
@@ -56,7 +56,7 @@ export class ApiFileLaboratoryUploadExcel {
     })
 
     const groupNameList = dataConvertList.map((i) => i.laboratoryGroupName || '')
-    const laboratoryGroupList = await this.apiLaboratoryGroupService.createByGroupName(
+    const laboratoryGroupList = await this.laboratoryGroupService.createByGroupName(
       oid,
       groupNameList
     )

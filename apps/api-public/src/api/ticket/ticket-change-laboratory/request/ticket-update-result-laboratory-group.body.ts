@@ -18,7 +18,7 @@ export class LaboratoryGroupResultBody {
   @ApiProperty({ example: 56 })
   @Expose()
   @IsDefined()
-  @IsNumber()
+  @IsString()
   ticketLaboratoryId: string
 
   @ApiProperty({ example: 'Âm tính' })

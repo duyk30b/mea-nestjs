@@ -37,8 +37,8 @@ export class TicketRelationQuery {
   ticketExpenseList?: boolean
 
   @Expose()
-  @IsBoolean()
-  ticketProductList?: boolean
+  @IsObject()
+  ticketProductList?: { product?: boolean; batch?: boolean }
 
   @Expose()
   @IsObject()

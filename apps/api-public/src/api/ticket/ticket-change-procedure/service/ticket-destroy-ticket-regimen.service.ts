@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
+import { BusinessError } from '../../../../../../_libs/database/common/error'
 import {
-  PaymentMoneyStatus,
   TicketRegimenStatus,
 } from '../../../../../../_libs/database/common/variable'
 import { PositionType } from '../../../../../../_libs/database/entities/position.entity'
-import { TicketProcedureStatus } from '../../../../../../_libs/database/entities/ticket-procedure.entity'
+import {
+  TicketProcedureStatus,
+  TicketProcedureType,
+} from '../../../../../../_libs/database/entities/ticket-procedure.entity'
 import Ticket, { TicketStatus } from '../../../../../../_libs/database/entities/ticket.entity'
 import { TicketChangeItemMoneyManager } from '../../../../../../_libs/database/operations/ticket-base/ticket-change-item-money.manager'
 import {
@@ -47,43 +50,42 @@ export class TicketDestroyTicketRegimenService {
         oid,
         ticketId,
         id: ticketRegimenId,
-        status: { IN: [TicketRegimenStatus.Empty, TicketRegimenStatus.Pending] },
       })
+
+      if (
+        ![TicketRegimenStatus.Empty, TicketRegimenStatus.Pending].includes(
+          ticketRegimenDestroyed.status
+        )
+      ) {
+        throw new BusinessError('Trạng thái liệu trình không hợp lệ')
+      }
+      if (ticketRegimenDestroyed.spentMoney !== 0 || ticketRegimenDestroyed.costAmount !== 0) {
+        throw new BusinessError('Không thể xóa liệu trình đã sử dụng tiền')
+      }
 
       // === 3. DELETE TICKET_REGIMEN_ITEM ===
       const ticketRegimenItemDestroyedList = await this.ticketRegimenItemRepository.managerDelete(
         manager,
-        { oid, ticketRegimenId }
+        { oid, ticketId, ticketRegimenId }
       )
 
       ticketRegimenItemDestroyedList.forEach((i) => {
-        if (
-          [PaymentMoneyStatus.FullPaid, PaymentMoneyStatus.PendingPayment].includes(
-            i.paymentMoneyStatus
-          )
-        ) {
-          throw new Error('Không thể xóa liệu trình đã thanh toán')
-        }
         if (i.quantityFinish > 0) {
-          throw new Error('Không thể xóa liệu trình đã thực hiện')
+          throw new BusinessError('Không thể xóa liệu trình có buổi hoàn thành')
+        }
+        if (i.quantityPayment > 0) {
+          throw new BusinessError('Không thể xóa liệu trình có buổi đã thanh toán')
         }
       })
 
       const ticketProcedureDestroyedList = await this.ticketProcedureRepository.managerDelete(
         manager,
-        { oid, ticketRegimenId }
+        { oid, ticketId, ticketRegimenId, ticketProcedureType: TicketProcedureType.InRegimen }
       )
 
       ticketProcedureDestroyedList.forEach((i) => {
         if (i.status === TicketProcedureStatus.Completed) {
-          throw new Error('Không thể xóa liệu trình đã thực hiện')
-        }
-        if (
-          [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.PartialPaid].includes(
-            i.paymentMoneyStatus
-          )
-        ) {
-          throw new Error('Không thể xóa liệu trình đã thanh toán')
+          throw new BusinessError('Không thể xóa dịch vụ đã thực hiện')
         }
       })
 
@@ -96,11 +98,15 @@ export class TicketDestroyTicketRegimenService {
       })
 
       // === 4. UPDATE TICKET: MONEY  ===
-      const procedureMoneyDelete = ticketRegimenItemDestroyedList.reduce((acc, item) => {
-        return acc + item.quantityPayment * item.actualPrice
+      const procedureMoneyDelete = ticketProcedureDestroyedList.reduce((acc, item) => {
+        const money =
+          item.status !== TicketProcedureStatus.NoEffect ? item.actualPrice * item.quantity : 0
+        return acc + money
       }, 0)
-      const itemsDiscountDelete = ticketRegimenItemDestroyedList.reduce((acc, item) => {
-        return acc + item.quantityPayment * item.discountMoney
+      const itemsDiscountDelete = ticketProcedureDestroyedList.reduce((acc, item) => {
+        const discount =
+          item.status !== TicketProcedureStatus.NoEffect ? item.discountMoney * item.quantity : 0
+        return acc + discount
       }, 0)
       const commissionMoneyDelete = ticketUserDestroyedList.reduce((acc, item) => {
         return acc + item.commissionMoney * item.quantity

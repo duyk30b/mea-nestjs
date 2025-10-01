@@ -1,8 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
-import { IsDefined, IsInt, IsString } from 'class-validator'
+import { IsDefined, IsInt, IsNumber, IsString } from 'class-validator'
 
 export class PaymentUpdateInfoBody {
+  @ApiProperty({ example: 12 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  createdAt: number
+
   @ApiProperty({ example: 12 })
   @Expose()
   @IsDefined()

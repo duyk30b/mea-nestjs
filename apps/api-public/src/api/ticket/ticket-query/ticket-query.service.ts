@@ -188,6 +188,10 @@ export class TicketQueryService {
         : undefined,
       relation?.ticketProductList
         ? this.ticketProductRepository.findMany({
+          relation: {
+            product: relation?.ticketProductList?.product,
+            batch: relation?.ticketProductList?.batch,
+          },
           condition: { oid, ticketId: { IN: ticketIdList } },
           sort: { priority: 'ASC' },
         })

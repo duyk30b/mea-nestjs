@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { ESArray } from '../../../../_libs/common/helpers/array.helper'
+import { BusinessError } from '../../../../_libs/database/common/error'
 import {
   Customer,
   Distributor,
@@ -211,9 +212,14 @@ export class ApiPaymentService {
     body: PaymentUpdateInfoBody
   }) {
     const { oid, userId, paymentId, body } = options
+    const paymentOrigin = await this.paymentRepository.findOneBy({ oid, id: paymentId })
+    if (paymentOrigin.cashierId !== userId) {
+      throw new BusinessError('Không được sửa phiếu thanh toán do tài khoản khác tạo phiếu')
+    }
     const payment = await this.paymentRepository.updateOneAndReturnEntity(
       { oid, id: paymentId, cashierId: userId }, // chỉ sửa phiếu do chính mình tạo ra
       {
+        createdAt: body.createdAt,
         paymentMethodId: body.paymentMethodId,
         note: body.note,
       }

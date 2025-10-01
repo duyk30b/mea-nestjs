@@ -21,7 +21,6 @@ export enum LaboratoryValueType {
 }
 @Entity('Laboratory')
 @Index('IDX_Laboratory__oid_parentId', ['oid', 'parentId'])
-@Unique('UNIQUE_Laboratory__oid_laboratoryCode', ['oid', 'laboratoryCode'])
 export default class Laboratory {
   @Exclude()
   @Column()

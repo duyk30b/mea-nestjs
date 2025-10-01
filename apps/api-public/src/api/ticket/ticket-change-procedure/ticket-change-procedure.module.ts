@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common'
 import { TicketAddTicketProcedureListService } from './service/ticket-add-ticket-procedure-list.service'
-import { TicketCancelResultTicketProcedureService } from './service/ticket-cancel-result-ticket-procedure.service'
-import { TicketChangeProcedureService } from './service/ticket-change-procedure.service'
-import { TicketChangeRegimenService } from './service/ticket-change-regimen.service'
 import { TicketDestroyTicketProcedureService } from './service/ticket-destroy-ticket-procedure.service'
 import { TicketDestroyTicketRegimenService } from './service/ticket-destroy-ticket-regimen.service'
 import { TicketProcessResultTicketProcedureService } from './service/ticket-process-result-ticket-procedure.service'
+import { TicketUpdateMoneyTicketProcedureService } from './service/ticket-update-money-ticket-procedure.service'
+import { TicketUpdateMoneyTicketRegimenService } from './service/ticket-update-money-ticket-regimen.service'
 import { TicketUpdateUserTicketProcedureService } from './service/ticket-update-user-ticket-procedure.service'
+import { TicketUpdateUserTicketRegimenOperation } from './service/ticket-update-user-ticket-regimen.service'
 import { TicketChangeProcedureController } from './ticket-change-procedure.controller'
 
 @Module({
@@ -14,13 +14,13 @@ import { TicketChangeProcedureController } from './ticket-change-procedure.contr
   controllers: [TicketChangeProcedureController],
   providers: [
     TicketAddTicketProcedureListService,
-    TicketChangeProcedureService,
+    TicketUpdateMoneyTicketProcedureService,
     TicketUpdateUserTicketProcedureService,
-    TicketChangeRegimenService,
     TicketProcessResultTicketProcedureService,
-    TicketCancelResultTicketProcedureService,
     TicketDestroyTicketProcedureService,
     TicketDestroyTicketRegimenService,
+    TicketUpdateMoneyTicketRegimenService,
+    TicketUpdateUserTicketRegimenOperation,
   ],
   exports: [TicketAddTicketProcedureListService],
 })

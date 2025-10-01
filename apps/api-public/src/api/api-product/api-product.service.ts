@@ -168,7 +168,6 @@ export class ApiProductService {
       const positionUpsertedList =
         await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
       productInserted.positionRequestList = positionUpsertedList
-      this.socketEmitService.positionListChange(oid, { positionUpsertedList })
     }
 
     if (discountList?.length) {
@@ -184,8 +183,11 @@ export class ApiProductService {
       const discountUpsertedList =
         await this.discountRepository.insertManyFullFieldAndReturnEntity(discountListDto)
       productInserted.discountList = discountUpsertedList
-      this.socketEmitService.discountListChange(oid, { discountUpsertedList })
     }
+    this.socketEmitService.socketMasterDataChange(oid, {
+      position: !!positionRequestList?.length,
+      discount: !!discountList?.length,
+    })
 
     return { product: productInserted }
   }
@@ -258,10 +260,6 @@ export class ApiProductService {
       const positionUpsertedList =
         await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
       productModified.positionRequestList = positionUpsertedList
-      this.socketEmitService.positionListChange(oid, {
-        positionUpsertedList,
-        positionDestroyedList,
-      })
     }
 
     if (discountList) {
@@ -282,12 +280,11 @@ export class ApiProductService {
       const discountUpsertedList =
         await this.discountRepository.insertManyFullFieldAndReturnEntity(discountListDto)
       productModified.discountList = discountUpsertedList
-      this.socketEmitService.discountListChange(oid, {
-        discountUpsertedList,
-        discountDestroyedList,
-      })
     }
-
+    this.socketEmitService.socketMasterDataChange(oid, {
+      position: !!positionRequestList,
+      discount: !!discountList,
+    })
     return { product: productModified }
   }
 
@@ -326,13 +323,10 @@ export class ApiProductService {
         }),
       ])
 
-      if (positionDestroyedList.length) {
-        this.socketEmitService.positionListChange(oid, { positionDestroyedList })
-      }
-
-      if (discountDestroyedList.length) {
-        this.socketEmitService.discountListChange(oid, { discountDestroyedList })
-      }
+      this.socketEmitService.socketMasterDataChange(oid, {
+        position: !!positionDestroyedList?.length,
+        discount: !!discountDestroyedList?.length,
+      })
 
       await this.organizationRepository.updateDataVersion(oid)
       this.cacheDataService.clearOrganization(oid)
@@ -438,8 +432,7 @@ export class ApiProductService {
         })
         product.positionRequestList = positionList.filter((i) => {
           return (
-            i.positionType === PositionType.ProductRequest
-            && i.positionInteractId === product.id
+            i.positionType === PositionType.ProductRequest && i.positionInteractId === product.id
           )
         })
       }

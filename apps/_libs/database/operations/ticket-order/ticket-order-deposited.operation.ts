@@ -149,7 +149,7 @@ export class TicketOrderDepositedOperation {
             ticketId,
             customerId: ticket.customerId,
             createdAt: ticket.createdAt,
-            status: TicketProcedureStatus.NoEffect,
+            status: TicketProcedureStatus.NoAction,
             imageIds: JSON.stringify([]),
             result: '',
             completedAt: null,
