@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
 import { ESTimer } from '../../../../../_libs/common/helpers'
-import { arrayToKeyValue, ESArray } from '../../../../../_libs/common/helpers/array.helper'
+import { ESArray } from '../../../../../_libs/common/helpers/array.helper'
 import { BusinessError } from '../../../../../_libs/database/common/error'
 import { LaboratoryGroup } from '../../../../../_libs/database/entities'
 import Discount, {
@@ -404,7 +404,7 @@ export class LaboratoryService {
     })
 
     const laboratoryParentSystemList = laboratorySystemList.filter((i) => i.level === 1)
-    const laboratoryParentSystemMap = arrayToKeyValue(laboratoryParentSystemList, 'id')
+    const laboratoryParentSystemMap = ESArray.arrayToKeyValue(laboratoryParentSystemList, 'id')
     laboratorySystemList.forEach((i) => {
       if (!laboratoryParentSystemMap[i.parentId].children) {
         laboratoryParentSystemMap[i.parentId].children = []

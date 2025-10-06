@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { CacheDataService } from '../../../../../../_libs/common/cache-data/cache-data.service'
+import { ESArray, NoExtra } from '../../../../../../_libs/common/helpers'
 import { GenerateId } from '../../../../../../_libs/database/common/generate-id'
 import {
   PaymentMoneyStatus,
@@ -67,11 +68,16 @@ export class TicketAddTicketProcedureListService {
 
     const createdAt = Date.now()
 
+    const ticketRegimenAddMap = ESArray.arrayToKeyValue(
+      ticketRegimenWrapList.map((i) => i.ticketRegimenAdd),
+      'id'
+    )
+
     const transaction = await this.ticketRepository.transaction(
       'READ UNCOMMITTED',
       async (manager) => {
         // === 1. UPDATE TICKET FOR TRANSACTION ===
-        let ticketModified = await this.ticketRepository.managerUpdateOne(
+        const ticketOrigin = await this.ticketRepository.managerUpdateOne(
           manager,
           {
             oid,
@@ -87,7 +93,7 @@ export class TicketAddTicketProcedureListService {
           },
           { updatedAt: Date.now() }
         )
-        const { customerId } = ticketModified
+        const { customerId } = ticketOrigin
 
         // // === 2. INSERT TICKET_REGIMEN ===
         const ticketUserRegimenCreatedList = await this.ticketUserCommon.addTicketUserList({
@@ -104,8 +110,8 @@ export class TicketAddTicketProcedureListService {
                   quantity: 1,
                   ticketItemId: ticketRegimenAdd.id,
                   positionInteractId: ticketRegimenAdd.regimenId,
-                  ticketItemExpectedPrice: ticketRegimenAdd.expectedMoney,
-                  ticketItemActualPrice: ticketRegimenAdd.actualMoney,
+                  ticketItemExpectedPrice: ticketRegimenAdd.moneyAmountRegular,
+                  ticketItemActualPrice: ticketRegimenAdd.moneyAmountSale,
                 }
               })
             })
@@ -118,7 +124,7 @@ export class TicketAddTicketProcedureListService {
             const ticketRegimenAdd = trWrap.ticketRegimenAdd
             const temp = trWrap.ticketRegimenItemAddList.map((triAdd, triIndex) => {
               const ticketRegimenItemAdd = triAdd
-              const insert = {
+              const insert: NoExtra<TicketRegimenItemInsertType> = {
                 ...ticketRegimenItemAdd,
                 id: GenerateId.nextId(),
                 oid,
@@ -126,9 +132,19 @@ export class TicketAddTicketProcedureListService {
                 ticketId,
                 regimenId: ticketRegimenAdd.regimenId,
                 ticketRegimenId: ticketRegimenAdd.id,
-                quantityFinish: 0,
-                quantityPayment: 0,
-                paymentMoneyAmount: 0,
+                quantityRegular: ticketRegimenItemAdd.quantityRegular,
+                quantityUsed: 0,
+                quantityPaid: 0,
+                quantityActual: ticketRegimenAdd.isEffectTotalMoney
+                  ? ticketRegimenItemAdd.quantityRegular
+                  : 0,
+                moneyAmountRegular: ticketRegimenItemAdd.moneyAmountRegular,
+                moneyAmountSale: ticketRegimenItemAdd.moneyAmountSale,
+                moneyAmountUsed: 0,
+                moneyAmountPaid: 0,
+                moneyAmountActual: ticketRegimenAdd.isEffectTotalMoney
+                  ? ticketRegimenItemAdd.moneyAmountSale
+                  : 0,
               } satisfies TicketRegimenItemInsertType
               return insert
             })
@@ -144,18 +160,32 @@ export class TicketAddTicketProcedureListService {
 
         const ticketProcedureRegimenInsertList = ticketRegimenItemCreatedList
           .map((triCreated, triIndex) => {
-            const length = triCreated.quantityExpected
-            const totalExpectedMoneyRemain = triCreated.expectedMoneyAmount
+            const length = triCreated.quantityRegular
+            const totalMoneyAmountRegularRemain = triCreated.moneyAmountRegular
+            const totalMoneyAmountSaleRemain = triCreated.moneyAmountSale
             const totalDiscountMoneyRemain = triCreated.discountMoneyAmount
-            const totalActualMoneyRemain = triCreated.actualMoneyAmount
 
-            const expectedPrice = Math.floor(totalExpectedMoneyRemain / length / 1000) * 1000
+            const expectedPrice = Math.floor(totalMoneyAmountRegularRemain / length / 1000) * 1000
             const discountMoney = Math.floor(totalDiscountMoneyRemain / length / 1000) * 1000
-            const actualPrice = Math.floor(totalActualMoneyRemain / length / 1000) * 1000
+            const actualPrice = Math.floor(totalMoneyAmountSaleRemain / length / 1000) * 1000
 
-            const firstExpectedPrice = totalExpectedMoneyRemain - expectedPrice * (length - 1)
+            const firstExpectedPrice = totalMoneyAmountRegularRemain - expectedPrice * (length - 1)
             const firstDiscountMoney = totalDiscountMoneyRemain - discountMoney * (length - 1)
-            const firstActualPrice = totalActualMoneyRemain - actualPrice * (length - 1)
+            const firstActualPrice = totalMoneyAmountSaleRemain - actualPrice * (length - 1)
+
+            const ticketRegimenAdd = ticketRegimenAddMap[triCreated.ticketRegimenId]
+            const isEffectTotalMoney = ticketRegimenAdd.isEffectTotalMoney
+
+            let paymentMoneyStatus = PaymentMoneyStatus.NoEffect
+            let ticketProcedureStatus = TicketProcedureStatus.NoEffect
+            if (isEffectTotalMoney) {
+              ticketProcedureStatus = TicketProcedureStatus.Pending
+              if (ticketOrigin.isPaymentEachItem) {
+                paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
+              } else {
+                paymentMoneyStatus = PaymentMoneyStatus.TicketPaid
+              }
+            }
 
             const tpInsertList = Array.from({ length }, (_, i) => {
               const tpInsert: TicketProcedureInsertType = {
@@ -169,8 +199,8 @@ export class TicketAddTicketProcedureListService {
                 indexSession: i + 1,
                 createdAt,
                 ticketProcedureType: TicketProcedureType.InRegimen,
-                paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
-                status: TicketProcedureStatus.NoEffect,
+                status: ticketProcedureStatus,
+                paymentMoneyStatus,
                 costAmount: 0,
                 commissionAmount: 0,
                 completedAt: null,
@@ -205,6 +235,7 @@ export class TicketAddTicketProcedureListService {
               oid,
               ticketId,
               customerId,
+              isEffectTotalMoney: ticketRegimenAdd.isEffectTotalMoney,
               status: TicketRegimenStatus.Pending,
               completedAt: null,
               costAmount: 0,
@@ -212,8 +243,11 @@ export class TicketAddTicketProcedureListService {
                 .filter((tu) => tu.ticketItemId === ticketRegimenAdd.id)
                 .reduce((acc, cur) => acc + cur.quantity * cur.commissionMoney, 0),
               createdAt,
-              spentMoney: 0,
-              remainingMoney: 0,
+              moneyAmountUsed: 0,
+              moneyAmountPaid: 0,
+              moneyAmountActual: ticketRegimenAdd.isEffectTotalMoney
+                ? ticketRegimenAdd.moneyAmountSale
+                : 0,
             } satisfies TicketRegimenInsertType
             return insert
           })
@@ -257,7 +291,7 @@ export class TicketAddTicketProcedureListService {
                 ticketRegimenId: '0',
                 ticketRegimenItemId: '0',
                 indexSession: 0,
-                paymentMoneyStatus: ticketModified.isPaymentEachItem
+                paymentMoneyStatus: ticketOrigin.isPaymentEachItem
                   ? PaymentMoneyStatus.PendingPayment
                   : PaymentMoneyStatus.TicketPaid,
                 createdAt,
@@ -275,15 +309,23 @@ export class TicketAddTicketProcedureListService {
 
         // === 5. UPDATE TICKET: MONEY  ===
         const itemsDiscountAdd =
-          ticketRegimenItemCreatedList.reduce((acc, item) => {
-            return acc + 0 // chỗ này do quantityPayment luôn = 0
+          ticketProcedureRegimenCreatedList.reduce((acc, item) => {
+            const discount =
+              item.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+                ? item.quantity * item.discountMoney
+                : 0
+            return acc + discount
           }, 0)
           + ticketProcedureNormalCreatedList.reduce((acc, item) => {
             return acc + item.quantity * item.discountMoney
           }, 0)
         const procedureMoneyAdd =
-          ticketRegimenItemCreatedList.reduce((acc, item) => {
-            return acc + item.paymentMoneyAmount // chỗ này thì luôn = 0
+          ticketProcedureRegimenCreatedList.reduce((acc, item) => {
+            const money =
+              item.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+                ? item.quantity * item.actualPrice
+                : 0
+            return acc + money
           }, 0)
           + ticketProcedureNormalCreatedList.reduce((acc, item) => {
             return acc + item.quantity * item.actualPrice
@@ -295,6 +337,7 @@ export class TicketAddTicketProcedureListService {
           return acc + item.quantity * item.commissionMoney
         }, 0)
 
+        let ticketModified = ticketOrigin
         if (procedureMoneyAdd != 0 || itemsDiscountAdd !== 0 || commissionMoneyAdd !== 0) {
           ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
             manager,

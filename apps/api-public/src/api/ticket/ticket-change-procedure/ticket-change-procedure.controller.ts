@@ -191,7 +191,7 @@ export class TicketChangeProcedureController {
           result: '',
         },
         ticketUserResultList: [],
-        ticketProductProcedureResultList: [],
+        ticketProductConsumableList: [],
         imagesChange: { externalUrlList: [], imageIdWaitList: [] },
         files: [],
       },

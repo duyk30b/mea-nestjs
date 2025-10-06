@@ -1,3 +1,27 @@
+# Logic thanh toán
+
+                                     Ticket Regimen                    TicketRegimenItem
+- Đóng tiền vào TRI                 - moneyPaid tăng                 - moneyPaid tăng
+                                                                     - quantityPaid tăng
+
+- Đóng tiền vào TR                  - moneyPaid tăng                 - moneyPaid = 0
+                                                                     - quantityPaid = 0
+
+
+- ĐÓng tiền vào Ticket              - moneyPaid 0                   - moneyPaid = 0
+                                    - quantityPaid 0                - quantityPaid = 0
+
+
+
+- Sử dụng 1 TP                                                      - quantityUsed tăng
+                                                                    - moneyUsed tăng
+
+# 1. Logic paidQuantity
+- Đã sử dụng
+
+- Thanh toán Item   : Cộng tiền Buổi           - Cộng tiền Ticket
+- Thanh toán Ticket : Cộng tiền Buổi           - Cộng tiền Ticket
+
 # Liệu trình với thanh toán theo tổng
 
 1. Tạo mới
@@ -52,3 +76,6 @@
 ************ Đã sử dụng bao nhiêu tiền ở TicketRegimen (phải tính lại) ********
 
 - Có 1 conflict hiện tại đó là: các liệu trình đã sử dụng full tiền ( chưa có cách giải quyết )
+
+
+# Logic

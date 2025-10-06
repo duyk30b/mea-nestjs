@@ -2054,14 +2054,14 @@ let CacheDataService = class CacheDataService {
                 const currentPermissionIds = JSON.parse(roleList[i].permissionIds || '[]');
                 permissionIds = permissionIds.concat(currentPermissionIds);
             }
-            permissionIds = (0, array_helper_1.uniqueArray)(permissionIds);
+            permissionIds = array_helper_1.ESArray.uniqueArray(permissionIds);
         }
         return permissionIds;
     }
     async getPermissionAllMap() {
         if (!this.permissionAllMap) {
             const permissionAll = await this.permissionRepository.findManyBy({});
-            this.permissionAllMap = (0, array_helper_1.arrayToKeyValue)(permissionAll, 'id');
+            this.permissionAllMap = array_helper_1.ESArray.arrayToKeyValue(permissionAll, 'id');
         }
         return this.permissionAllMap;
     }
@@ -8791,10 +8791,7 @@ let TicketRegimenItem = TicketRegimenItem_1 = class TicketRegimenItem {
             return null;
         const entity = new TicketRegimenItem_1();
         Object.assign(entity, raw);
-        entity.expectedMoneyAmount = Number(raw.expectedMoneyAmount);
         entity.discountPercent = Number(raw.discountPercent);
-        entity.actualMoneyAmount = Number(raw.actualMoneyAmount);
-        entity.paymentMoneyAmount = Number(raw.paymentMoneyAmount);
         return entity;
     }
     static fromRaws(raws) {
@@ -8837,35 +8834,60 @@ __decorate([
     __metadata("design:type", String)
 ], TicketRegimenItem.prototype, "ticketRegimenId", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'smallint', default: 0 }),
-    (0, class_transformer_1.Expose)(),
-    __metadata("design:type", Number)
-], TicketRegimenItem.prototype, "quantityPayment", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'smallint', default: 0 }),
-    (0, class_transformer_1.Expose)(),
-    __metadata("design:type", Number)
-], TicketRegimenItem.prototype, "quantityExpected", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'smallint', default: 0 }),
-    (0, class_transformer_1.Expose)(),
-    __metadata("design:type", Number)
-], TicketRegimenItem.prototype, "quantityFinish", void 0);
-__decorate([
     (0, typeorm_1.Column)({ type: 'smallint', default: 1 }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Number)
 ], TicketRegimenItem.prototype, "gapDay", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'smallint', default: 0 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], TicketRegimenItem.prototype, "quantityRegular", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'smallint', default: 0 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], TicketRegimenItem.prototype, "quantityActual", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'smallint', default: 0 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], TicketRegimenItem.prototype, "quantityPaid", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'smallint', default: 0 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], TicketRegimenItem.prototype, "quantityUsed", void 0);
+__decorate([
     (0, typeorm_1.Column)({ default: 0 }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Number)
-], TicketRegimenItem.prototype, "expectedMoneyAmount", void 0);
+], TicketRegimenItem.prototype, "moneyAmountRegular", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'varchar', length: 25, default: variable_1.DiscountType.VND }),
+    (0, typeorm_1.Column)({ default: 0 }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", typeof (_a = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _a : Object)
-], TicketRegimenItem.prototype, "discountType", void 0);
+    __metadata("design:type", Number)
+], TicketRegimenItem.prototype, "moneyAmountSale", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 0 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], TicketRegimenItem.prototype, "moneyAmountActual", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 0 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], TicketRegimenItem.prototype, "moneyAmountPaid", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 0 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], TicketRegimenItem.prototype, "moneyAmountUsed", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 0 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], TicketRegimenItem.prototype, "discountMoneyAmount", void 0);
 __decorate([
     (0, typeorm_1.Column)({
         type: 'decimal',
@@ -8878,20 +8900,10 @@ __decorate([
     __metadata("design:type", Number)
 ], TicketRegimenItem.prototype, "discountPercent", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ default: 0 }),
+    (0, typeorm_1.Column)({ type: 'varchar', length: 25, default: variable_1.DiscountType.VND }),
     (0, class_transformer_1.Expose)(),
-    __metadata("design:type", Number)
-], TicketRegimenItem.prototype, "discountMoneyAmount", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ default: 0 }),
-    (0, class_transformer_1.Expose)(),
-    __metadata("design:type", Number)
-], TicketRegimenItem.prototype, "actualMoneyAmount", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ default: 0 }),
-    (0, class_transformer_1.Expose)(),
-    __metadata("design:type", Number)
-], TicketRegimenItem.prototype, "paymentMoneyAmount", void 0);
+    __metadata("design:type", typeof (_a = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _a : Object)
+], TicketRegimenItem.prototype, "discountType", void 0);
 TicketRegimenItem = TicketRegimenItem_1 = __decorate([
     (0, typeorm_1.Entity)('TicketRegimenItem'),
     (0, typeorm_1.Index)('IDX_TicketRegimenItem__oid_ticketId', ['oid', 'ticketId'])
@@ -8928,6 +8940,10 @@ let TicketRegimen = TicketRegimen_1 = class TicketRegimen {
             return null;
         const entity = new TicketRegimen_1();
         Object.assign(entity, raw);
+        entity.costAmount = Number(raw.costAmount);
+        entity.commissionAmount = Number(raw.commissionAmount);
+        entity.moneyAmountUsed = Number(raw.moneyAmountUsed);
+        entity.moneyAmountPaid = Number(raw.moneyAmountPaid);
         entity.discountPercent = Number(raw.discountPercent);
         entity.createdAt = Number(raw.createdAt);
         entity.completedAt = raw.completedAt == null ? raw.completedAt : Number(raw.completedAt);
@@ -8963,6 +8979,11 @@ __decorate([
     __metadata("design:type", Number)
 ], TicketRegimen.prototype, "regimenId", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ default: 0 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], TicketRegimen.prototype, "isEffectTotalMoney", void 0);
+__decorate([
     (0, typeorm_1.Column)({ type: 'smallint', default: variable_1.TicketRegimenStatus.Pending }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", typeof (_a = typeof variable_1.TicketRegimenStatus !== "undefined" && variable_1.TicketRegimenStatus) === "function" ? _a : Object)
@@ -8981,22 +9002,27 @@ __decorate([
     (0, typeorm_1.Column)({ default: 0 }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Number)
-], TicketRegimen.prototype, "expectedMoney", void 0);
+], TicketRegimen.prototype, "moneyAmountRegular", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 0 }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Number)
-], TicketRegimen.prototype, "actualMoney", void 0);
+], TicketRegimen.prototype, "moneyAmountSale", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 0 }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Number)
-], TicketRegimen.prototype, "spentMoney", void 0);
+], TicketRegimen.prototype, "moneyAmountActual", void 0);
 __decorate([
     (0, typeorm_1.Column)({ default: 0 }),
     (0, class_transformer_1.Expose)(),
     __metadata("design:type", Number)
-], TicketRegimen.prototype, "remainingMoney", void 0);
+], TicketRegimen.prototype, "moneyAmountUsed", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 0 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], TicketRegimen.prototype, "moneyAmountPaid", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'varchar', length: 25, default: variable_1.DiscountType.VND }),
     (0, class_transformer_1.Expose)(),
@@ -14171,7 +14197,7 @@ exports.WarehouseRepository = WarehouseRepository = __decorate([
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.arrayToKeyValue = exports.uniqueArray = exports.ESArray = void 0;
+exports.ESArray = void 0;
 class ESArray {
 }
 exports.ESArray = ESArray;
@@ -14220,19 +14246,6 @@ ESArray.max = (array, property) => {
         return maxValue < currentValue ? currentValue : maxValue;
     }, array[0][property]);
 };
-const uniqueArray = (array) => {
-    return Array.from(new Set(array));
-};
-exports.uniqueArray = uniqueArray;
-const arrayToKeyValue = (array, property) => {
-    const object = {};
-    array.forEach((item) => {
-        const key = item[property].toString();
-        object[key] = item;
-    });
-    return object;
-};
-exports.arrayToKeyValue = arrayToKeyValue;
 
 
 /***/ }),
@@ -39095,7 +39108,7 @@ let ApiPrescriptionSampleService = class ApiPrescriptionSampleService {
                 oid,
                 id: { IN: productIdList },
             });
-            const productMap = (0, array_helper_1.arrayToKeyValue)(productList, 'id');
+            const productMap = array_helper_1.ESArray.arrayToKeyValue(productList, 'id');
             data.forEach((i) => {
                 i.medicineList.forEach((j) => {
                     j.product = productMap[j.productId] || null;
@@ -41189,25 +41202,25 @@ let ApiProductMovementService = class ApiProductMovementService {
                 : [],
             relation?.purchaseOrder && purchaseOrderIds.length
                 ? this.purchaseOrderRepository.findMany({
-                    condition: { id: { IN: (0, array_helper_1.uniqueArray)(purchaseOrderIds) } },
+                    condition: { id: { IN: array_helper_1.ESArray.uniqueArray(purchaseOrderIds) } },
                 })
                 : [],
             relation?.ticket && ticketIds.length
-                ? this.ticketRepository.findMany({ condition: { id: { IN: (0, array_helper_1.uniqueArray)(ticketIds) } } })
+                ? this.ticketRepository.findMany({ condition: { id: { IN: array_helper_1.ESArray.uniqueArray(ticketIds) } } })
                 : [],
             relation?.stockCheck && stockCheckIds.length
                 ? this.stockCheckRepository.findMany({
-                    condition: { id: { IN: (0, array_helper_1.uniqueArray)(stockCheckIds) } },
+                    condition: { id: { IN: array_helper_1.ESArray.uniqueArray(stockCheckIds) } },
                 })
                 : [],
             relation?.distributor && distributorIds.length
-                ? this.distributorRepository.findManyBy({ id: { IN: (0, array_helper_1.uniqueArray)(distributorIds) } })
+                ? this.distributorRepository.findManyBy({ id: { IN: array_helper_1.ESArray.uniqueArray(distributorIds) } })
                 : [],
             relation?.customer && customerIds.length
-                ? this.customerRepository.findManyBy({ id: { IN: (0, array_helper_1.uniqueArray)(customerIds) } })
+                ? this.customerRepository.findManyBy({ id: { IN: array_helper_1.ESArray.uniqueArray(customerIds) } })
                 : [],
             relation?.user && userIds.length
-                ? this.userRepository.findMany({ condition: { id: { IN: (0, array_helper_1.uniqueArray)(userIds) } } })
+                ? this.userRepository.findMany({ condition: { id: { IN: array_helper_1.ESArray.uniqueArray(userIds) } } })
                 : [],
         ]);
         const productMap = array_helper_1.ESArray.arrayToKeyValue(productList, 'id');
@@ -53269,7 +53282,7 @@ let LaboratoryService = class LaboratoryService {
             sort: { priority: 'ASC' },
         });
         const laboratoryParentSystemList = laboratorySystemList.filter((i) => i.level === 1);
-        const laboratoryParentSystemMap = (0, array_helper_1.arrayToKeyValue)(laboratoryParentSystemList, 'id');
+        const laboratoryParentSystemMap = array_helper_1.ESArray.arrayToKeyValue(laboratoryParentSystemList, 'id');
         laboratorySystemList.forEach((i) => {
             if (!laboratoryParentSystemMap[i.parentId].children) {
                 laboratoryParentSystemMap[i.parentId].children = [];
@@ -64918,6 +64931,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.TicketAddTicketProcedureListService = void 0;
 const common_1 = __webpack_require__(3);
 const cache_data_service_1 = __webpack_require__(41);
+const helpers_1 = __webpack_require__(193);
 const generate_id_1 = __webpack_require__(101);
 const variable_1 = __webpack_require__(21);
 const ticket_procedure_entity_1 = __webpack_require__(76);
@@ -64958,8 +64972,9 @@ let TicketAddTicketProcedureListService = class TicketAddTicketProcedureListServ
             };
         });
         const createdAt = Date.now();
+        const ticketRegimenAddMap = helpers_1.ESArray.arrayToKeyValue(ticketRegimenWrapList.map((i) => i.ticketRegimenAdd), 'id');
         const transaction = await this.ticketRepository.transaction('READ UNCOMMITTED', async (manager) => {
-            let ticketModified = await this.ticketRepository.managerUpdateOne(manager, {
+            const ticketOrigin = await this.ticketRepository.managerUpdateOne(manager, {
                 oid,
                 id: ticketId,
                 status: {
@@ -64971,7 +64986,7 @@ let TicketAddTicketProcedureListService = class TicketAddTicketProcedureListServ
                     ],
                 },
             }, { updatedAt: Date.now() });
-            const { customerId } = ticketModified;
+            const { customerId } = ticketOrigin;
             const ticketUserRegimenCreatedList = await this.ticketUserCommon.addTicketUserList({
                 manager,
                 oid,
@@ -64986,8 +65001,8 @@ let TicketAddTicketProcedureListService = class TicketAddTicketProcedureListServ
                             quantity: 1,
                             ticketItemId: ticketRegimenAdd.id,
                             positionInteractId: ticketRegimenAdd.regimenId,
-                            ticketItemExpectedPrice: ticketRegimenAdd.expectedMoney,
-                            ticketItemActualPrice: ticketRegimenAdd.actualMoney,
+                            ticketItemExpectedPrice: ticketRegimenAdd.moneyAmountRegular,
+                            ticketItemActualPrice: ticketRegimenAdd.moneyAmountSale,
                         };
                     });
                 })
@@ -65007,9 +65022,19 @@ let TicketAddTicketProcedureListService = class TicketAddTicketProcedureListServ
                         ticketId,
                         regimenId: ticketRegimenAdd.regimenId,
                         ticketRegimenId: ticketRegimenAdd.id,
-                        quantityFinish: 0,
-                        quantityPayment: 0,
-                        paymentMoneyAmount: 0,
+                        quantityRegular: ticketRegimenItemAdd.quantityRegular,
+                        quantityUsed: 0,
+                        quantityPaid: 0,
+                        quantityActual: ticketRegimenAdd.isEffectTotalMoney
+                            ? ticketRegimenItemAdd.quantityRegular
+                            : 0,
+                        moneyAmountRegular: ticketRegimenItemAdd.moneyAmountRegular,
+                        moneyAmountSale: ticketRegimenItemAdd.moneyAmountSale,
+                        moneyAmountUsed: 0,
+                        moneyAmountPaid: 0,
+                        moneyAmountActual: ticketRegimenAdd.isEffectTotalMoney
+                            ? ticketRegimenItemAdd.moneyAmountSale
+                            : 0,
                     };
                     return insert;
                 });
@@ -65019,16 +65044,29 @@ let TicketAddTicketProcedureListService = class TicketAddTicketProcedureListServ
             const ticketRegimenItemCreatedList = await this.ticketRegimenItemRepository.managerInsertMany(manager, ticketRegimenItemInsertList);
             const ticketProcedureRegimenInsertList = ticketRegimenItemCreatedList
                 .map((triCreated, triIndex) => {
-                const length = triCreated.quantityExpected;
-                const totalExpectedMoneyRemain = triCreated.expectedMoneyAmount;
+                const length = triCreated.quantityRegular;
+                const totalMoneyAmountRegularRemain = triCreated.moneyAmountRegular;
+                const totalMoneyAmountSaleRemain = triCreated.moneyAmountSale;
                 const totalDiscountMoneyRemain = triCreated.discountMoneyAmount;
-                const totalActualMoneyRemain = triCreated.actualMoneyAmount;
-                const expectedPrice = Math.floor(totalExpectedMoneyRemain / length / 1000) * 1000;
+                const expectedPrice = Math.floor(totalMoneyAmountRegularRemain / length / 1000) * 1000;
                 const discountMoney = Math.floor(totalDiscountMoneyRemain / length / 1000) * 1000;
-                const actualPrice = Math.floor(totalActualMoneyRemain / length / 1000) * 1000;
-                const firstExpectedPrice = totalExpectedMoneyRemain - expectedPrice * (length - 1);
+                const actualPrice = Math.floor(totalMoneyAmountSaleRemain / length / 1000) * 1000;
+                const firstExpectedPrice = totalMoneyAmountRegularRemain - expectedPrice * (length - 1);
                 const firstDiscountMoney = totalDiscountMoneyRemain - discountMoney * (length - 1);
-                const firstActualPrice = totalActualMoneyRemain - actualPrice * (length - 1);
+                const firstActualPrice = totalMoneyAmountSaleRemain - actualPrice * (length - 1);
+                const ticketRegimenAdd = ticketRegimenAddMap[triCreated.ticketRegimenId];
+                const isEffectTotalMoney = ticketRegimenAdd.isEffectTotalMoney;
+                let paymentMoneyStatus = variable_1.PaymentMoneyStatus.NoEffect;
+                let ticketProcedureStatus = ticket_procedure_entity_1.TicketProcedureStatus.NoEffect;
+                if (isEffectTotalMoney) {
+                    ticketProcedureStatus = ticket_procedure_entity_1.TicketProcedureStatus.Pending;
+                    if (ticketOrigin.isPaymentEachItem) {
+                        paymentMoneyStatus = variable_1.PaymentMoneyStatus.PendingPayment;
+                    }
+                    else {
+                        paymentMoneyStatus = variable_1.PaymentMoneyStatus.TicketPaid;
+                    }
+                }
                 const tpInsertList = Array.from({ length }, (_, i) => {
                     const tpInsert = {
                         id: generate_id_1.GenerateId.nextId(),
@@ -65041,8 +65079,8 @@ let TicketAddTicketProcedureListService = class TicketAddTicketProcedureListServ
                         indexSession: i + 1,
                         createdAt,
                         ticketProcedureType: ticket_procedure_entity_1.TicketProcedureType.InRegimen,
-                        paymentMoneyStatus: variable_1.PaymentMoneyStatus.NoEffect,
-                        status: ticket_procedure_entity_1.TicketProcedureStatus.NoEffect,
+                        status: ticketProcedureStatus,
+                        paymentMoneyStatus,
                         costAmount: 0,
                         commissionAmount: 0,
                         completedAt: null,
@@ -65069,6 +65107,7 @@ let TicketAddTicketProcedureListService = class TicketAddTicketProcedureListServ
                     oid,
                     ticketId,
                     customerId,
+                    isEffectTotalMoney: ticketRegimenAdd.isEffectTotalMoney,
                     status: variable_1.TicketRegimenStatus.Pending,
                     completedAt: null,
                     costAmount: 0,
@@ -65076,8 +65115,11 @@ let TicketAddTicketProcedureListService = class TicketAddTicketProcedureListServ
                         .filter((tu) => tu.ticketItemId === ticketRegimenAdd.id)
                         .reduce((acc, cur) => acc + cur.quantity * cur.commissionMoney, 0),
                     createdAt,
-                    spentMoney: 0,
-                    remainingMoney: 0,
+                    moneyAmountUsed: 0,
+                    moneyAmountPaid: 0,
+                    moneyAmountActual: ticketRegimenAdd.isEffectTotalMoney
+                        ? ticketRegimenAdd.moneyAmountSale
+                        : 0,
                 };
                 return insert;
             }));
@@ -65114,7 +65156,7 @@ let TicketAddTicketProcedureListService = class TicketAddTicketProcedureListServ
                     ticketRegimenId: '0',
                     ticketRegimenItemId: '0',
                     indexSession: 0,
-                    paymentMoneyStatus: ticketModified.isPaymentEachItem
+                    paymentMoneyStatus: ticketOrigin.isPaymentEachItem
                         ? variable_1.PaymentMoneyStatus.PendingPayment
                         : variable_1.PaymentMoneyStatus.TicketPaid,
                     createdAt,
@@ -65128,14 +65170,20 @@ let TicketAddTicketProcedureListService = class TicketAddTicketProcedureListServ
                 };
                 return insert;
             }));
-            const itemsDiscountAdd = ticketRegimenItemCreatedList.reduce((acc, item) => {
-                return acc + 0;
+            const itemsDiscountAdd = ticketProcedureRegimenCreatedList.reduce((acc, item) => {
+                const discount = item.paymentMoneyStatus !== variable_1.PaymentMoneyStatus.NoEffect
+                    ? item.quantity * item.discountMoney
+                    : 0;
+                return acc + discount;
             }, 0)
                 + ticketProcedureNormalCreatedList.reduce((acc, item) => {
                     return acc + item.quantity * item.discountMoney;
                 }, 0);
-            const procedureMoneyAdd = ticketRegimenItemCreatedList.reduce((acc, item) => {
-                return acc + item.paymentMoneyAmount;
+            const procedureMoneyAdd = ticketProcedureRegimenCreatedList.reduce((acc, item) => {
+                const money = item.paymentMoneyStatus !== variable_1.PaymentMoneyStatus.NoEffect
+                    ? item.quantity * item.actualPrice
+                    : 0;
+                return acc + money;
             }, 0)
                 + ticketProcedureNormalCreatedList.reduce((acc, item) => {
                     return acc + item.quantity * item.actualPrice;
@@ -65146,6 +65194,7 @@ let TicketAddTicketProcedureListService = class TicketAddTicketProcedureListServ
             ].reduce((acc, item) => {
                 return acc + item.quantity * item.commissionMoney;
             }, 0);
+            let ticketModified = ticketOrigin;
             if (procedureMoneyAdd != 0 || itemsDiscountAdd !== 0 || commissionMoneyAdd !== 0) {
                 ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
                     manager,
@@ -65251,7 +65300,11 @@ let TicketDestroyTicketProcedureService = class TicketDestroyTicketProcedureServ
                     ],
                 },
                 status: {
-                    IN: [ticket_procedure_entity_1.TicketProcedureStatus.NoEffect, ticket_procedure_entity_1.TicketProcedureStatus.Pending],
+                    IN: [
+                        ticket_procedure_entity_1.TicketProcedureStatus.NoEffect,
+                        ticket_procedure_entity_1.TicketProcedureStatus.NoAction,
+                        ticket_procedure_entity_1.TicketProcedureStatus.Pending,
+                    ],
                 },
                 costAmount: 0,
             });
@@ -65268,39 +65321,11 @@ let TicketDestroyTicketProcedureService = class TicketDestroyTicketProcedureServ
             }, 0);
             let procedureMoneyDelete = 0;
             let itemsDiscountDelete = 0;
-            let remainingMoneyAdd = 0;
-            if (ticketProcedureDestroyed.status !== ticket_procedure_entity_1.TicketProcedureStatus.NoEffect) {
+            if (ticketProcedureDestroyed.paymentMoneyStatus !== variable_1.PaymentMoneyStatus.NoEffect) {
                 procedureMoneyDelete =
                     ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.actualPrice;
                 itemsDiscountDelete =
                     ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.discountMoney;
-            }
-            let ticketRegimenModified;
-            let ticketRegimenItemModified;
-            if (ticketProcedureDestroyed.ticketProcedureType === ticket_procedure_entity_1.TicketProcedureType.InRegimen) {
-                let quantityPaymentDelete = 0;
-                if (ticketProcedureDestroyed.status !== ticket_procedure_entity_1.TicketProcedureStatus.NoEffect) {
-                    quantityPaymentDelete = ticketProcedureDestroyed.quantity;
-                    if (ticketOrigin.isPaymentEachItem) {
-                        remainingMoneyAdd = procedureMoneyDelete;
-                    }
-                }
-                ticketRegimenItemModified = await this.ticketRegimenItemRepository.managerUpdateOne(manager, { oid, id: ticketProcedureDestroyed.ticketRegimenItemId }, {
-                    quantityPayment: () => `quantityPayment - ${quantityPaymentDelete}`,
-                    quantityExpected: () => `quantityExpected - ${ticketProcedureDestroyed.quantity}`,
-                    paymentMoneyAmount: () => `paymentMoneyAmount - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.actualPrice}`,
-                    expectedMoneyAmount: () => `expectedMoneyAmount - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.expectedPrice}`,
-                    discountMoneyAmount: () => `discountMoneyAmount - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.discountMoney}`,
-                    actualMoneyAmount: () => `actualMoneyAmount - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.actualPrice}`,
-                });
-                ticketRegimenModified = await this.ticketRegimenRepository.managerUpdateOne(manager, { oid, id: ticketProcedureDestroyed.ticketRegimenId }, {
-                    expectedMoney: () => `expectedMoney - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.expectedPrice}`,
-                    actualMoney: () => `actualMoney - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.actualPrice}`,
-                    discountMoney: () => `discountMoney - ${itemsDiscountDelete}`,
-                    commissionAmount: () => `commissionAmount - ${commissionMoneyDelete}`,
-                    spentMoney: () => `spentMoney - ${procedureMoneyDelete}`,
-                    remainingMoney: () => `remainingMoney + ${remainingMoneyAdd}`,
-                });
             }
             let ticketModified = ticketOrigin;
             if (procedureMoneyDelete != 0 || itemsDiscountDelete != 0 || commissionMoneyDelete != 0) {
@@ -65313,6 +65338,32 @@ let TicketDestroyTicketProcedureService = class TicketDestroyTicketProcedureServ
                         itemsDiscountAdd: -itemsDiscountDelete,
                         commissionMoneyAdd: -commissionMoneyDelete,
                     },
+                });
+            }
+            let ticketRegimenModified;
+            let ticketRegimenItemModified;
+            if (ticketProcedureDestroyed.ticketProcedureType === ticket_procedure_entity_1.TicketProcedureType.InRegimen) {
+                let moneyAmountActual = 0;
+                let quantityActual = 0;
+                if (ticketProcedureDestroyed.paymentMoneyStatus !== variable_1.PaymentMoneyStatus.NoEffect) {
+                    moneyAmountActual =
+                        ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.actualPrice;
+                    quantityActual = ticketProcedureDestroyed.quantity;
+                }
+                ticketRegimenModified = await this.ticketRegimenRepository.managerUpdateOne(manager, { oid, id: ticketProcedureDestroyed.ticketRegimenId }, {
+                    moneyAmountRegular: () => `moneyAmountRegular - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.expectedPrice}`,
+                    moneyAmountSale: () => `moneyAmountSale - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.actualPrice}`,
+                    moneyAmountActual: () => `moneyAmountActual - ${moneyAmountActual}`,
+                    discountMoney: () => `discountMoney - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.discountMoney}`,
+                    commissionAmount: () => `commissionAmount - ${commissionMoneyDelete}`,
+                });
+                ticketRegimenItemModified = await this.ticketRegimenItemRepository.managerUpdateOne(manager, { oid, id: ticketProcedureDestroyed.ticketRegimenItemId }, {
+                    moneyAmountRegular: () => `moneyAmountRegular - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.expectedPrice}`,
+                    moneyAmountSale: () => `moneyAmountSale - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.actualPrice}`,
+                    moneyAmountActual: () => `moneyAmountActual - ${moneyAmountActual}`,
+                    discountMoneyAmount: () => `discountMoneyAmount - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.discountMoney}`,
+                    quantityRegular: () => `quantityRegular - ${ticketProcedureDestroyed.quantity}`,
+                    quantityActual: () => `quantityActual - ${quantityActual}`,
                 });
             }
             this.socketEmitService.socketTicketChange(oid, {
@@ -65390,22 +65441,36 @@ let TicketDestroyTicketRegimenService = class TicketDestroyTicketRegimenService 
             if (![variable_1.TicketRegimenStatus.Empty, variable_1.TicketRegimenStatus.Pending].includes(ticketRegimenDestroyed.status)) {
                 throw new error_1.BusinessError('Trạng thái liệu trình không hợp lệ');
             }
-            if (ticketRegimenDestroyed.spentMoney !== 0 || ticketRegimenDestroyed.costAmount !== 0) {
-                throw new error_1.BusinessError('Không thể xóa liệu trình đã sử dụng tiền');
+            if (ticketRegimenDestroyed.moneyAmountUsed !== 0
+                || ticketRegimenDestroyed.moneyAmountPaid !== 0
+                || ticketRegimenDestroyed.costAmount !== 0) {
+                throw new error_1.BusinessError('Liệu trình đã sử dụng tiền không thể xóa');
             }
             const ticketRegimenItemDestroyedList = await this.ticketRegimenItemRepository.managerDelete(manager, { oid, ticketId, ticketRegimenId });
             ticketRegimenItemDestroyedList.forEach((i) => {
-                if (i.quantityFinish > 0) {
+                if (i.quantityUsed > 0 || i.moneyAmountUsed > 0) {
                     throw new error_1.BusinessError('Không thể xóa liệu trình có buổi hoàn thành');
                 }
-                if (i.quantityPayment > 0) {
+                if (i.quantityPaid > 0 || i.moneyAmountPaid) {
                     throw new error_1.BusinessError('Không thể xóa liệu trình có buổi đã thanh toán');
                 }
             });
-            const ticketProcedureDestroyedList = await this.ticketProcedureRepository.managerDelete(manager, { oid, ticketId, ticketRegimenId, ticketProcedureType: ticket_procedure_entity_1.TicketProcedureType.InRegimen });
+            const ticketProcedureDestroyedList = await this.ticketProcedureRepository.managerDelete(manager, {
+                oid,
+                ticketId,
+                ticketRegimenId,
+                ticketProcedureType: ticket_procedure_entity_1.TicketProcedureType.InRegimen,
+            });
             ticketProcedureDestroyedList.forEach((i) => {
                 if (i.status === ticket_procedure_entity_1.TicketProcedureStatus.Completed) {
                     throw new error_1.BusinessError('Không thể xóa dịch vụ đã thực hiện');
+                }
+                if (![
+                    variable_1.PaymentMoneyStatus.NoEffect,
+                    variable_1.PaymentMoneyStatus.TicketPaid,
+                    variable_1.PaymentMoneyStatus.PendingPayment,
+                ].includes(i.paymentMoneyStatus)) {
+                    throw new error_1.BusinessError('Không thể xóa dịch vụ đã thanh toán');
                 }
             });
             const ticketUserDestroyedList = await this.ticketUserRepository.managerDelete(manager, {
@@ -65415,11 +65480,15 @@ let TicketDestroyTicketRegimenService = class TicketDestroyTicketRegimenService 
                 ticketItemId: ticketRegimenDestroyed.id,
             });
             const procedureMoneyDelete = ticketProcedureDestroyedList.reduce((acc, item) => {
-                const money = item.status !== ticket_procedure_entity_1.TicketProcedureStatus.NoEffect ? item.actualPrice * item.quantity : 0;
+                const money = item.paymentMoneyStatus !== variable_1.PaymentMoneyStatus.NoEffect
+                    ? item.actualPrice * item.quantity
+                    : 0;
                 return acc + money;
             }, 0);
             const itemsDiscountDelete = ticketProcedureDestroyedList.reduce((acc, item) => {
-                const discount = item.status !== ticket_procedure_entity_1.TicketProcedureStatus.NoEffect ? item.discountMoney * item.quantity : 0;
+                const discount = item.paymentMoneyStatus !== variable_1.PaymentMoneyStatus.NoEffect
+                    ? item.discountMoney * item.quantity
+                    : 0;
                 return acc + discount;
             }, 0);
             const commissionMoneyDelete = ticketUserDestroyedList.reduce((acc, item) => {
@@ -65547,10 +65616,10 @@ let TicketProcessResultTicketProcedureService = class TicketProcessResultTicketP
             let imageCreatedList = [];
             let productModifiedList = [];
             let batchModifiedList = [];
-            let ticketProductProcedureDestroyList = [];
-            let ticketProductProcedureCreatedList = [];
-            let ticketBatchProcedureCreatedList = [];
-            let ticketBatchProcedureDestroyedList = [];
+            let ticketProductConsumableDestroyList = [];
+            let ticketProductConsumableCreatedList = [];
+            let ticketBatchConsumableCreatedList = [];
+            let ticketBatchConsumableDestroyedList = [];
             let ticketRegimenModified;
             let ticketRegimenItemModified;
             if (body.ticketUserResultList) {
@@ -65602,20 +65671,20 @@ let TicketProcessResultTicketProcedureService = class TicketProcessResultTicketP
                 imageDestroyedList = imageChangeResponse.imageDestroyedList;
                 imageCreatedList = imageChangeResponse.imageCreatedList;
             }
-            if (body.ticketProductProcedureResultList) {
+            if (body.ticketProductConsumableList) {
                 if (ticketProcedureOrigin.status === ticket_procedure_entity_1.TicketProcedureStatus.Completed) {
-                    ticketProductProcedureDestroyList = await this.ticketProductRepository.managerDelete(manager, {
+                    ticketProductConsumableDestroyList = await this.ticketProductRepository.managerDelete(manager, {
                         oid,
                         ticketId,
                         type: ticket_product_entity_1.TicketProductType.Procedure,
                         ticketProcedureId,
                     });
                 }
-                if (ticketProductProcedureDestroyList.length) {
-                    ticketBatchProcedureDestroyedList = await this.ticketBatchRepository.managerDelete(manager, {
+                if (ticketProductConsumableDestroyList.length) {
+                    ticketBatchConsumableDestroyedList = await this.ticketBatchRepository.managerDelete(manager, {
                         oid,
                         ticketId,
-                        ticketProductId: { IN: ticketProductProcedureDestroyList.map((i) => i.id) },
+                        ticketProductId: { IN: ticketProductConsumableDestroyList.map((i) => i.id) },
                     });
                     const putawayContainer = await this.productPutawayManager.startPutaway({
                         manager,
@@ -65625,7 +65694,7 @@ let TicketProcessResultTicketProcedureService = class TicketProcessResultTicketP
                         movementType: variable_1.MovementType.Ticket,
                         isRefund: 1,
                         time: createdAt,
-                        voucherBatchPutawayList: ticketBatchProcedureDestroyedList.map((i) => {
+                        voucherBatchPutawayList: ticketBatchConsumableDestroyedList.map((i) => {
                             return {
                                 voucherProductId: i.ticketProductId,
                                 voucherBatchId: i.id,
@@ -65641,7 +65710,7 @@ let TicketProcessResultTicketProcedureService = class TicketProcessResultTicketP
                     });
                     const { putawayPlan } = putawayContainer;
                 }
-                if (body.ticketProductProcedureResultList.length) {
+                if (body.ticketProductConsumableList.length) {
                     const pickingContainer = await this.productPickupManager.startPickup({
                         manager,
                         oid,
@@ -65651,7 +65720,7 @@ let TicketProcessResultTicketProcedureService = class TicketProcessResultTicketP
                         isRefund: 0,
                         time: createdAt,
                         allowNegativeQuantity,
-                        voucherProductPickupList: body.ticketProductProcedureResultList.map((i) => {
+                        voucherProductPickupList: body.ticketProductConsumableList.map((i) => {
                             return {
                                 voucherProductId: generate_id_1.GenerateId.nextId(),
                                 productId: i.productId,
@@ -65700,8 +65769,8 @@ let TicketProcessResultTicketProcedureService = class TicketProcessResultTicketP
                         };
                         return insert;
                     });
-                    ticketProductProcedureCreatedList = await this.ticketProductRepository.managerInsertMany(manager, ticketProductInsertList);
-                    const ticketProductCreatedMap = helpers_1.ESArray.arrayToKeyValue(ticketProductProcedureCreatedList, 'id');
+                    ticketProductConsumableCreatedList = await this.ticketProductRepository.managerInsertMany(manager, ticketProductInsertList);
+                    const ticketProductCreatedMap = helpers_1.ESArray.arrayToKeyValue(ticketProductConsumableCreatedList, 'id');
                     const ticketBatchInsertList = pickupPlan.pickupVoucherBatchList.map((i) => {
                         const ticketProductCreated = ticketProductCreatedMap[i.voucherProductId];
                         const batchOrigin = batchModifiedMap[i.batchId];
@@ -65723,13 +65792,13 @@ let TicketProcessResultTicketProcedureService = class TicketProcessResultTicketP
                         };
                         return ticketBatchInsert;
                     });
-                    ticketBatchProcedureCreatedList = await this.ticketBatchRepository.managerInsertMany(manager, ticketBatchInsertList);
+                    ticketBatchConsumableCreatedList = await this.ticketBatchRepository.managerInsertMany(manager, ticketBatchInsertList);
                 }
             }
-            const itemCostAmountAdd = ticketProductProcedureCreatedList.reduce((acc, item) => {
+            const itemsCostAmountAdd = ticketProductConsumableCreatedList.reduce((acc, item) => {
                 return acc + item.costAmount;
             }, 0)
-                - ticketProductProcedureDestroyList.reduce((acc, item) => {
+                - ticketProductConsumableDestroyList.reduce((acc, item) => {
                     return acc + item.costAmount;
                 }, 0);
             const commissionMoneyAdd = ticketUserResultCreatedList.reduce((acc, cur) => {
@@ -65738,8 +65807,17 @@ let TicketProcessResultTicketProcedureService = class TicketProcessResultTicketP
                 - ticketUserResultDestroyedList.reduce((acc, cur) => {
                     return acc + cur.quantity * cur.commissionMoney;
                 }, 0);
+            let paymentMoneyStatus = ticketProcedureOrigin.paymentMoneyStatus;
+            if (paymentMoneyStatus === variable_1.PaymentMoneyStatus.NoEffect) {
+                if (ticketOrigin.isPaymentEachItem) {
+                    paymentMoneyStatus = variable_1.PaymentMoneyStatus.PendingPayment;
+                }
+                else {
+                    paymentMoneyStatus = variable_1.PaymentMoneyStatus.TicketPaid;
+                }
+            }
             const ticketProcedureModified = await this.ticketProcedureRepository.managerUpdateOne(manager, { oid, id: ticketProcedureId }, {
-                costAmount: () => `costAmount + ${itemCostAmountAdd}`,
+                costAmount: () => `costAmount + ${itemsCostAmountAdd}`,
                 commissionAmount: () => `commissionAmount + ${commissionMoneyAdd}`,
                 imageIds,
                 result: ticketProcedureResult.result,
@@ -65747,6 +65825,7 @@ let TicketProcessResultTicketProcedureService = class TicketProcessResultTicketP
                 status: ticketProcedureResult.completedAt
                     ? ticket_procedure_entity_1.TicketProcedureStatus.Completed
                     : ticket_procedure_entity_1.TicketProcedureStatus.Pending,
+                paymentMoneyStatus,
             });
             let procedureMoneyAdd = 0;
             let itemsDiscountAdd = 0;
@@ -65754,7 +65833,7 @@ let TicketProcessResultTicketProcedureService = class TicketProcessResultTicketP
                 procedureMoneyAdd = ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice;
                 itemsDiscountAdd = ticketProcedureOrigin.quantity * ticketProcedureOrigin.discountMoney;
             }
-            if (itemCostAmountAdd !== 0
+            if (itemsCostAmountAdd !== 0
                 || commissionMoneyAdd !== 0
                 || itemsDiscountAdd !== 0
                 || procedureMoneyAdd !== 0) {
@@ -65764,43 +65843,63 @@ let TicketProcessResultTicketProcedureService = class TicketProcessResultTicketP
                     ticketOrigin,
                     itemMoney: {
                         commissionMoneyAdd,
-                        itemsCostAmountAdd: itemCostAmountAdd,
+                        itemsCostAmountAdd,
                         procedureMoneyAdd,
                         itemsDiscountAdd,
                     },
                 });
             }
             if (ticketProcedureModified.ticketProcedureType === ticket_procedure_entity_1.TicketProcedureType.InRegimen) {
+                let moneyAmountActual = 0;
+                let quantityActual = 0;
+                if (ticketProcedureOrigin.paymentMoneyStatus === variable_1.PaymentMoneyStatus.NoEffect) {
+                    moneyAmountActual = ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice;
+                    quantityActual = ticketProcedureOrigin.quantity;
+                }
                 if ([ticket_procedure_entity_1.TicketProcedureStatus.NoEffect, ticket_procedure_entity_1.TicketProcedureStatus.Pending].includes(ticketProcedureOrigin.status)
                     && ticketProcedureModified.status === ticket_procedure_entity_1.TicketProcedureStatus.Completed) {
-                    const quantityPayment = ticketProcedureOrigin.status === ticket_procedure_entity_1.TicketProcedureStatus.NoEffect
-                        ? ticketProcedureModified.quantity
-                        : 0;
                     ticketRegimenItemModified = await this.ticketRegimenItemRepository.managerUpdateOne(manager, { oid, id: ticketProcedureModified.ticketRegimenItemId }, {
-                        quantityFinish: () => `quantityFinish + ${ticketProcedureModified.quantity}`,
-                        quantityPayment: () => `quantityPayment + ${quantityPayment}`,
-                        paymentMoneyAmount: () => `paymentMoneyAmount + ${quantityPayment * ticketProcedureModified.actualPrice}`,
+                        quantityUsed: () => `quantityUsed + ${ticketProcedureModified.quantity}`,
+                        moneyAmountUsed: () => `moneyAmountUsed + ${ticketProcedureModified.quantity * ticketProcedureModified.actualPrice}`,
+                        moneyAmountActual: () => `moneyAmountActual + ${moneyAmountActual}`,
+                        quantityActual: () => `quantityActual + ${quantityActual}`,
                     });
                 }
                 if (ticketProcedureOrigin.status === ticket_procedure_entity_1.TicketProcedureStatus.Completed
                     && ticketProcedureModified.status === ticket_procedure_entity_1.TicketProcedureStatus.Pending) {
-                    ticketRegimenItemModified = await this.ticketRegimenItemRepository.managerUpdateOne(manager, { oid, id: ticketProcedureModified.ticketRegimenItemId }, { quantityFinish: () => `quantityFinish - ${ticketProcedureModified.quantity}` });
+                    ticketRegimenItemModified = await this.ticketRegimenItemRepository.managerUpdateOne(manager, { oid, id: ticketProcedureModified.ticketRegimenItemId }, {
+                        quantityUsed: () => `quantityUsed - ${ticketProcedureModified.quantity}`,
+                        moneyAmountUsed: () => `moneyAmountUsed - ${ticketProcedureModified.quantity * ticketProcedureModified.actualPrice}`,
+                    });
                 }
                 const { ticketRegimenId } = ticketProcedureOrigin;
                 let ticketRegimenStatus = variable_1.TicketRegimenStatus.Executing;
                 const ticketRegimenItemList = await this.ticketRegimenItemRepository.managerFindManyBy(manager, { oid, ticketId, ticketRegimenId });
-                if (ticketRegimenItemList.every((i) => i.quantityFinish === i.quantityExpected)) {
+                if (ticketRegimenItemList.every((i) => i.quantityUsed === i.quantityRegular)) {
                     ticketRegimenStatus = variable_1.TicketRegimenStatus.Completed;
                 }
-                if (ticketRegimenItemList.every((i) => i.quantityFinish === 0)) {
+                if (ticketRegimenItemList.every((i) => i.quantityUsed === 0)) {
                     ticketRegimenStatus = variable_1.TicketRegimenStatus.Pending;
                 }
-                ticketRegimenModified = await this.ticketRegimenRepository.managerUpdateOne(manager, { oid, id: ticketProcedureModified.ticketRegimenId }, {
-                    status: ticketRegimenStatus,
-                    costAmount: () => `costAmount + ${itemCostAmountAdd}`,
-                    commissionAmount: () => `commissionAmount + ${commissionMoneyAdd}`,
-                    spentMoney: () => `spentMoney + ${procedureMoneyAdd}`,
-                });
+                if ([ticket_procedure_entity_1.TicketProcedureStatus.NoEffect, ticket_procedure_entity_1.TicketProcedureStatus.Pending].includes(ticketProcedureOrigin.status)
+                    && ticketProcedureModified.status === ticket_procedure_entity_1.TicketProcedureStatus.Completed) {
+                    ticketRegimenModified = await this.ticketRegimenRepository.managerUpdateOne(manager, { oid, id: ticketProcedureModified.ticketRegimenId }, {
+                        status: ticketRegimenStatus,
+                        costAmount: () => `costAmount + ${itemsCostAmountAdd}`,
+                        commissionAmount: () => `commissionAmount + ${commissionMoneyAdd}`,
+                        moneyAmountUsed: () => `moneyAmountUsed + ${ticketProcedureModified.quantity * ticketProcedureModified.actualPrice}`,
+                        moneyAmountActual: () => `moneyAmountActual + ${moneyAmountActual}`,
+                    });
+                }
+                if (ticketProcedureOrigin.status === ticket_procedure_entity_1.TicketProcedureStatus.Completed
+                    && ticketProcedureModified.status === ticket_procedure_entity_1.TicketProcedureStatus.Pending) {
+                    ticketRegimenModified = await this.ticketRegimenRepository.managerUpdateOne(manager, { oid, id: ticketProcedureModified.ticketRegimenId }, {
+                        status: ticketRegimenStatus,
+                        costAmount: () => `costAmount + ${itemsCostAmountAdd}`,
+                        commissionAmount: () => `commissionAmount + ${commissionMoneyAdd}`,
+                        moneyAmountUsed: () => `moneyAmountUsed - ${ticketProcedureModified.quantity * ticketProcedureModified.actualPrice}`,
+                    });
+                }
             }
             await transaction.commit();
             this.socketEmitService.socketTicketChange(oid, {
@@ -65822,12 +65921,12 @@ let TicketProcessResultTicketProcedureService = class TicketProcessResultTicketP
                     upsertedList: ticketRegimenItemModified ? [ticketRegimenItemModified] : [],
                 },
                 ticketProduct: {
-                    upsertedList: ticketProductProcedureCreatedList,
-                    destroyedList: ticketProductProcedureDestroyList,
+                    upsertedList: ticketProductConsumableCreatedList,
+                    destroyedList: ticketProductConsumableDestroyList,
                 },
                 ticketBatch: {
-                    upsertedList: ticketBatchProcedureCreatedList,
-                    destroyedList: ticketBatchProcedureDestroyedList,
+                    upsertedList: ticketBatchConsumableCreatedList,
+                    destroyedList: ticketBatchConsumableDestroyedList,
                 },
             });
         }
@@ -65866,6 +65965,7 @@ const typeorm_1 = __webpack_require__(18);
 const error_1 = __webpack_require__(14);
 const variable_1 = __webpack_require__(21);
 const position_entity_1 = __webpack_require__(81);
+const ticket_procedure_entity_1 = __webpack_require__(76);
 const ticket_entity_1 = __webpack_require__(60);
 const ticket_change_item_money_manager_1 = __webpack_require__(203);
 const ticket_user_common_1 = __webpack_require__(210);
@@ -65893,6 +65993,9 @@ let TicketUpdateMoneyTicketProcedureService = class TicketUpdateMoneyTicketProce
             });
             if ([variable_1.PaymentMoneyStatus.PartialPaid, variable_1.PaymentMoneyStatus.FullPaid].includes(ticketProcedureOrigin.paymentMoneyStatus)) {
                 throw new error_1.BusinessError('Không thể sửa phiếu đã thanh toán');
+            }
+            if (ticketProcedureOrigin.ticketProcedureType !== ticket_procedure_entity_1.TicketProcedureType.Normal) {
+                throw new error_1.BusinessError('Chỉ có thể sửa dịch vụ thường');
             }
             let ticketUserDestroyedList = [];
             let ticketUserCreatedList = [];
@@ -66034,7 +66137,7 @@ let TicketUpdateMoneyTicketRegimenService = class TicketUpdateMoneyTicketRegimen
             if (![variable_1.TicketRegimenStatus.Pending].includes(ticketRegimenOrigin.status)) {
                 throw new error_1.BusinessError('Trạng thái liệu trình không hợp lệ');
             }
-            if (ticketRegimenOrigin.spentMoney > 0) {
+            if (ticketRegimenOrigin.moneyAmountPaid > 0 || ticketRegimenOrigin.moneyAmountUsed) {
                 throw new error_1.BusinessError('Không thể sửa phiếu đã thanh toán');
             }
             let ticketUserDestroyedList = [];
@@ -66059,8 +66162,8 @@ let TicketUpdateMoneyTicketRegimenService = class TicketUpdateMoneyTicketRegimen
                             quantity: 1,
                             ticketItemId: ticketRegimenId,
                             positionInteractId: ticketRegimenOrigin.regimenId,
-                            ticketItemExpectedPrice: ticketRegimenUpdate.expectedMoney,
-                            ticketItemActualPrice: ticketRegimenUpdate.actualMoney,
+                            ticketItemExpectedPrice: ticketRegimenUpdate.moneyAmountRegular,
+                            ticketItemActualPrice: ticketRegimenUpdate.moneyAmountSale,
                         };
                     }),
                 });
@@ -66073,51 +66176,62 @@ let TicketUpdateMoneyTicketRegimenService = class TicketUpdateMoneyTicketRegimen
                         }, 0);
             }
             const ticketRegimenModified = await this.ticketRegimenRepository.managerUpdateOne(manager, { oid, id: ticketRegimenId }, {
-                expectedMoney: ticketRegimenUpdate.expectedMoney,
+                moneyAmountRegular: ticketRegimenUpdate.moneyAmountRegular,
+                moneyAmountSale: ticketRegimenUpdate.moneyAmountSale,
+                moneyAmountActual: ticketRegimenOrigin.isEffectTotalMoney
+                    ? ticketRegimenUpdate.moneyAmountSale
+                    : 0,
                 discountType: ticketRegimenUpdate.discountType,
                 discountMoney: ticketRegimenUpdate.discountMoney,
                 discountPercent: ticketRegimenUpdate.discountPercent,
-                actualMoney: ticketRegimenUpdate.actualMoney,
                 commissionAmount: ticketRegimenOrigin.commissionAmount + commissionMoneyChange,
             });
             const ticketRegimenItemModifiedList = await this.ticketRegimenItemRepository.managerBulkUpdate({
                 manager,
                 condition: { oid, ticketId, ticketRegimenId },
-                tempList: ticketRegimenItemUpdateList,
+                tempList: ticketRegimenItemUpdateList.map((i) => {
+                    return {
+                        ...i,
+                        moneyAmountActual: ticketRegimenOrigin.isEffectTotalMoney
+                            ? i.moneyAmountSale
+                            : 0,
+                    };
+                }),
                 compare: { id: { cast: 'bigint' } },
                 update: [
-                    'expectedMoneyAmount',
-                    'actualMoneyAmount',
+                    'moneyAmountRegular',
+                    'moneyAmountSale',
+                    'moneyAmountActual',
                     'discountMoneyAmount',
                     'discountPercent',
                     'discountType',
-                    'quantityExpected',
+                    'quantityRegular',
                 ],
                 options: {},
             });
             const ticketRegimenItemModifiedMap = helpers_1.ESArray.arrayToKeyValue(ticketRegimenItemModifiedList, 'id');
-            const ticketProductOriginList = await this.ticketProcedureRepository.findManyBy({
+            const ticketProcedureOriginList = await this.ticketProcedureRepository.findManyBy({
                 oid,
                 ticketId,
                 ticketRegimenId,
                 ticketProcedureType: ticket_procedure_entity_1.TicketProcedureType.InRegimen,
             });
-            const tpFixMapTri = helpers_1.ESArray.arrayToKeyArray(ticketProductOriginList, 'ticketRegimenItemId');
+            const tpFixMapTri = helpers_1.ESArray.arrayToKeyArray(ticketProcedureOriginList, 'ticketRegimenItemId');
             Object.keys(tpFixMapTri).forEach((triId) => {
                 const triModified = ticketRegimenItemModifiedMap[triId];
                 const lengthArray = tpFixMapTri[triId]?.length;
-                if (lengthArray !== triModified.quantityExpected) {
+                if (lengthArray !== triModified.quantityRegular) {
                     throw new error_1.BusinessError('Số lượng phiếu dịch vụ không đúng');
                 }
-                const totalExpectedMoneyRemain = triModified.expectedMoneyAmount;
+                const totalMoneyAmountRegularRemain = triModified.moneyAmountRegular;
+                const totalMoneyAmountSaleRemain = triModified.moneyAmountSale;
                 const totalDiscountMoneyRemain = triModified.discountMoneyAmount;
-                const totalActualMoneyRemain = triModified.actualMoneyAmount;
-                const expectedPrice = Math.floor(totalExpectedMoneyRemain / lengthArray / 1000) * 1000;
+                const expectedPrice = Math.floor(totalMoneyAmountRegularRemain / lengthArray / 1000) * 1000;
                 const discountMoney = Math.floor(totalDiscountMoneyRemain / lengthArray / 1000) * 1000;
-                const actualPrice = Math.floor(totalActualMoneyRemain / lengthArray / 1000) * 1000;
-                const firstExpectedPrice = totalExpectedMoneyRemain - expectedPrice * (lengthArray - 1);
+                const actualPrice = Math.floor(totalMoneyAmountSaleRemain / lengthArray / 1000) * 1000;
+                const firstExpectedPrice = totalMoneyAmountRegularRemain - expectedPrice * (lengthArray - 1);
                 const firstDiscountMoney = totalDiscountMoneyRemain - discountMoney * (lengthArray - 1);
-                const firstActualPrice = totalActualMoneyRemain - actualPrice * (lengthArray - 1);
+                const firstActualPrice = totalMoneyAmountSaleRemain - actualPrice * (lengthArray - 1);
                 tpFixMapTri[triId].forEach((tp, tpIndex) => {
                     tp.expectedPrice = tpIndex === 0 ? firstExpectedPrice : expectedPrice;
                     tp.discountMoney = tpIndex === 0 ? firstDiscountMoney : discountMoney;
@@ -66155,7 +66269,7 @@ let TicketUpdateMoneyTicketRegimenService = class TicketUpdateMoneyTicketRegimen
                 const money = item.status !== ticket_procedure_entity_1.TicketProcedureStatus.NoEffect ? item.actualPrice * item.quantity : 0;
                 return acc + money;
             }, 0)
-                - ticketProductOriginList.reduce((acc, item) => {
+                - ticketProcedureOriginList.reduce((acc, item) => {
                     const money = item.status !== ticket_procedure_entity_1.TicketProcedureStatus.NoEffect ? item.actualPrice * item.quantity : 0;
                     return acc + money;
                 }, 0);
@@ -66163,7 +66277,7 @@ let TicketUpdateMoneyTicketRegimenService = class TicketUpdateMoneyTicketRegimen
                 const discount = item.status !== ticket_procedure_entity_1.TicketProcedureStatus.NoEffect ? item.discountMoney * item.quantity : 0;
                 return acc + discount;
             }, 0)
-                - ticketProductOriginList.reduce((acc, item) => {
+                - ticketProcedureOriginList.reduce((acc, item) => {
                     const discount = item.status !== ticket_procedure_entity_1.TicketProcedureStatus.NoEffect ? item.discountMoney * item.quantity : 0;
                     return acc + discount;
                 }, 0);
@@ -66394,8 +66508,8 @@ let TicketUpdateUserTicketRegimenOperation = class TicketUpdateUserTicketRegimen
                         quantity: 1,
                         ticketItemId: ticketRegimenId,
                         positionInteractId: ticketRegimenOrigin.regimenId,
-                        ticketItemExpectedPrice: ticketRegimenOrigin.expectedMoney,
-                        ticketItemActualPrice: ticketRegimenOrigin.actualMoney,
+                        ticketItemExpectedPrice: ticketRegimenOrigin.moneyAmountRegular,
+                        ticketItemActualPrice: ticketRegimenOrigin.moneyAmountSale,
                     };
                 }),
             });
@@ -66573,7 +66687,7 @@ let TicketChangeProcedureController = class TicketChangeProcedureController {
                     result: '',
                 },
                 ticketUserResultList: [],
-                ticketProductProcedureResultList: [],
+                ticketProductConsumableList: [],
                 imagesChange: { externalUrlList: [], imageIdWaitList: [] },
                 files: [],
             },
@@ -66744,6 +66858,13 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
+], TicketRegimenBasicBody.prototype, "isEffectTotalMoney", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 56 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
 ], TicketRegimenBasicBody.prototype, "regimenId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 25000 }),
@@ -66751,7 +66872,15 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], TicketRegimenBasicBody.prototype, "expectedMoney", void 0);
+], TicketRegimenBasicBody.prototype, "moneyAmountRegular", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 22500 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_transformer_1.Transform)(({ value }) => Math.round(value || 0)),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketRegimenBasicBody.prototype, "moneyAmountSale", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 22500 }),
     (0, class_transformer_1.Expose)(),
@@ -66776,14 +66905,6 @@ __decorate([
     (0, class_validator_custom_1.IsEnumValue)(variable_1.DiscountType),
     __metadata("design:type", typeof (_a = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _a : Object)
 ], TicketRegimenBasicBody.prototype, "discountType", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 22500 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_transformer_1.Transform)(({ value }) => Math.round(value || 0)),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketRegimenBasicBody.prototype, "actualMoney", void 0);
 class TicketRegimenItemAddBody {
 }
 exports.TicketRegimenItemAddBody = TicketRegimenItemAddBody;
@@ -66807,14 +66928,21 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], TicketRegimenItemAddBody.prototype, "quantityExpected", void 0);
+], TicketRegimenItemAddBody.prototype, "quantityRegular", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 25000 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], TicketRegimenItemAddBody.prototype, "expectedMoneyAmount", void 0);
+], TicketRegimenItemAddBody.prototype, "moneyAmountRegular", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 22500 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketRegimenItemAddBody.prototype, "moneyAmountSale", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 25000 }),
     (0, class_transformer_1.Expose)(),
@@ -66838,13 +66966,6 @@ __decorate([
     (0, class_validator_custom_1.IsEnumValue)(variable_1.DiscountType),
     __metadata("design:type", typeof (_b = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _b : Object)
 ], TicketRegimenItemAddBody.prototype, "discountType", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 22500 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketRegimenItemAddBody.prototype, "actualMoneyAmount", void 0);
 class TicketProcedureBasicBody {
 }
 __decorate([
@@ -67122,7 +67243,7 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], TicketProcedureResultBody.prototype, "result", void 0);
-class TicketProductProcedureBody {
+class TicketProductConsumableBody {
 }
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 56 }),
@@ -67130,28 +67251,28 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], TicketProductProcedureBody.prototype, "productId", void 0);
+], TicketProductConsumableBody.prototype, "productId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 56 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], TicketProductProcedureBody.prototype, "quantity", void 0);
+], TicketProductConsumableBody.prototype, "quantity", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ enum: variable_1.PickupStrategy, example: variable_1.PickupStrategy.AutoWithExpiryDate }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_custom_1.IsEnumValue)(variable_1.PickupStrategy),
     __metadata("design:type", typeof (_a = typeof variable_1.PickupStrategy !== "undefined" && variable_1.PickupStrategy) === "function" ? _a : Object)
-], TicketProductProcedureBody.prototype, "pickupStrategy", void 0);
+], TicketProductConsumableBody.prototype, "pickupStrategy", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
-], TicketProductProcedureBody.prototype, "warehouseIds", void 0);
+], TicketProductConsumableBody.prototype, "warehouseIds", void 0);
 class TicketProcessResultTicketProcedureBody extends file_1.MultipleFileUpload {
 }
 exports.TicketProcessResultTicketProcedureBody = TicketProcessResultTicketProcedureBody;
@@ -67266,7 +67387,7 @@ __decorate([
         try {
             const err = [];
             const result = JSON.parse(value).map((i) => {
-                const instance = Object.assign(new TicketProductProcedureBody(), i);
+                const instance = Object.assign(new TicketProductConsumableBody(), i);
                 const validate = (0, class_validator_1.validateSync)(instance, {
                     whitelist: true,
                     forbidNonWhitelisted: true,
@@ -67291,10 +67412,10 @@ __decorate([
         }
     }),
     (0, class_validator_1.IsArray)({
-        message: ({ value }) => `Validate ticketProductProcedureResultList failed. Value = ${value}`,
+        message: ({ value }) => `Validate ticketProductConsumableList failed. Value = ${value}`,
     }),
     __metadata("design:type", Array)
-], TicketProcessResultTicketProcedureBody.prototype, "ticketProductProcedureResultList", void 0);
+], TicketProcessResultTicketProcedureBody.prototype, "ticketProductConsumableList", void 0);
 
 
 /***/ }),
@@ -67395,7 +67516,14 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], TicketRegimenBasicBody.prototype, "expectedMoney", void 0);
+], TicketRegimenBasicBody.prototype, "moneyAmountRegular", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 22500 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketRegimenBasicBody.prototype, "moneyAmountSale", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 22500 }),
     (0, class_transformer_1.Expose)(),
@@ -67420,13 +67548,6 @@ __decorate([
     (0, class_validator_custom_1.IsEnumValue)(variable_1.DiscountType),
     __metadata("design:type", typeof (_a = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _a : Object)
 ], TicketRegimenBasicBody.prototype, "discountType", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 22500 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketRegimenBasicBody.prototype, "actualMoney", void 0);
 class TicketRegimenItemUpdateBody {
 }
 __decorate([
@@ -67442,14 +67563,21 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], TicketRegimenItemUpdateBody.prototype, "quantityExpected", void 0);
+], TicketRegimenItemUpdateBody.prototype, "quantityRegular", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 25000 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], TicketRegimenItemUpdateBody.prototype, "expectedMoneyAmount", void 0);
+], TicketRegimenItemUpdateBody.prototype, "moneyAmountRegular", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({ example: 22500 }),
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], TicketRegimenItemUpdateBody.prototype, "moneyAmountSale", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 25000 }),
     (0, class_transformer_1.Expose)(),
@@ -67473,13 +67601,6 @@ __decorate([
     (0, class_validator_custom_1.IsEnumValue)(variable_1.DiscountType),
     __metadata("design:type", typeof (_b = typeof variable_1.DiscountType !== "undefined" && variable_1.DiscountType) === "function" ? _b : Object)
 ], TicketRegimenItemUpdateBody.prototype, "discountType", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ example: 22500 }),
-    (0, class_transformer_1.Expose)(),
-    (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
-], TicketRegimenItemUpdateBody.prototype, "actualMoneyAmount", void 0);
 class TicketUpdateMoneyTicketRegimenBody {
 }
 exports.TicketUpdateMoneyTicketRegimenBody = TicketUpdateMoneyTicketRegimenBody;

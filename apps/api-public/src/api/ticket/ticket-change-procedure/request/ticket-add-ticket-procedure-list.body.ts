@@ -12,13 +12,26 @@ class TicketRegimenBasicBody {
   @Expose()
   @IsDefined()
   @IsNumber()
+  isEffectTotalMoney: number
+
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
   regimenId: number
 
   @ApiProperty({ example: 25_000 })
   @Expose()
   @IsDefined()
   @IsNumber()
-  expectedMoney: number
+  moneyAmountRegular: number
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @Transform(({ value }) => Math.round(value || 0))
+  @IsDefined()
+  @IsNumber()
+  moneyAmountSale: number
 
   @ApiProperty({ example: 22_500 })
   @Expose()
@@ -40,13 +53,6 @@ class TicketRegimenBasicBody {
   @IsDefined()
   @IsEnumValue(DiscountType)
   discountType: DiscountType
-
-  @ApiProperty({ example: 22_500 })
-  @Expose()
-  @Transform(({ value }) => Math.round(value || 0))
-  @IsDefined()
-  @IsNumber()
-  actualMoney: number
 }
 
 export class TicketRegimenItemAddBody {
@@ -66,13 +72,19 @@ export class TicketRegimenItemAddBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  quantityExpected: number
+  quantityRegular: number
 
   @ApiProperty({ example: 25_000 })
   @Expose()
   @IsDefined()
   @IsNumber()
-  expectedMoneyAmount: number
+  moneyAmountRegular: number
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  moneyAmountSale: number
 
   @ApiProperty({ example: 25_000 })
   @Expose()
@@ -93,12 +105,6 @@ export class TicketRegimenItemAddBody {
   @IsDefined()
   @IsEnumValue(DiscountType)
   discountType: DiscountType
-
-  @ApiProperty({ example: 22_500 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  actualMoneyAmount: number
 }
 
 class TicketProcedureBasicBody {

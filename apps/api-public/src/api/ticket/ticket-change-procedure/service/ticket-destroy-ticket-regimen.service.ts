@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { BusinessError } from '../../../../../../_libs/database/common/error'
 import {
+  PaymentMoneyStatus,
   TicketRegimenStatus,
 } from '../../../../../../_libs/database/common/variable'
 import { PositionType } from '../../../../../../_libs/database/entities/position.entity'
@@ -59,8 +60,12 @@ export class TicketDestroyTicketRegimenService {
       ) {
         throw new BusinessError('Trạng thái liệu trình không hợp lệ')
       }
-      if (ticketRegimenDestroyed.spentMoney !== 0 || ticketRegimenDestroyed.costAmount !== 0) {
-        throw new BusinessError('Không thể xóa liệu trình đã sử dụng tiền')
+      if (
+        ticketRegimenDestroyed.moneyAmountUsed !== 0
+        || ticketRegimenDestroyed.moneyAmountPaid !== 0
+        || ticketRegimenDestroyed.costAmount !== 0
+      ) {
+        throw new BusinessError('Liệu trình đã sử dụng tiền không thể xóa')
       }
 
       // === 3. DELETE TICKET_REGIMEN_ITEM ===
@@ -70,22 +75,36 @@ export class TicketDestroyTicketRegimenService {
       )
 
       ticketRegimenItemDestroyedList.forEach((i) => {
-        if (i.quantityFinish > 0) {
+        if (i.quantityUsed > 0 || i.moneyAmountUsed > 0) {
           throw new BusinessError('Không thể xóa liệu trình có buổi hoàn thành')
         }
-        if (i.quantityPayment > 0) {
+        if (i.quantityPaid > 0 || i.moneyAmountPaid) {
           throw new BusinessError('Không thể xóa liệu trình có buổi đã thanh toán')
         }
       })
 
       const ticketProcedureDestroyedList = await this.ticketProcedureRepository.managerDelete(
         manager,
-        { oid, ticketId, ticketRegimenId, ticketProcedureType: TicketProcedureType.InRegimen }
+        {
+          oid,
+          ticketId,
+          ticketRegimenId,
+          ticketProcedureType: TicketProcedureType.InRegimen,
+        }
       )
 
       ticketProcedureDestroyedList.forEach((i) => {
         if (i.status === TicketProcedureStatus.Completed) {
           throw new BusinessError('Không thể xóa dịch vụ đã thực hiện')
+        }
+        if (
+          ![
+            PaymentMoneyStatus.NoEffect,
+            PaymentMoneyStatus.TicketPaid,
+            PaymentMoneyStatus.PendingPayment,
+          ].includes(i.paymentMoneyStatus)
+        ) {
+          throw new BusinessError('Không thể xóa dịch vụ đã thanh toán')
         }
       })
 
@@ -100,12 +119,16 @@ export class TicketDestroyTicketRegimenService {
       // === 4. UPDATE TICKET: MONEY  ===
       const procedureMoneyDelete = ticketProcedureDestroyedList.reduce((acc, item) => {
         const money =
-          item.status !== TicketProcedureStatus.NoEffect ? item.actualPrice * item.quantity : 0
+          item.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+            ? item.actualPrice * item.quantity
+            : 0
         return acc + money
       }, 0)
       const itemsDiscountDelete = ticketProcedureDestroyedList.reduce((acc, item) => {
         const discount =
-          item.status !== TicketProcedureStatus.NoEffect ? item.discountMoney * item.quantity : 0
+          item.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+            ? item.discountMoney * item.quantity
+            : 0
         return acc + discount
       }, 0)
       const commissionMoneyDelete = ticketUserDestroyedList.reduce((acc, item) => {

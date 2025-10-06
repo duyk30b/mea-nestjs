@@ -9,7 +9,7 @@ import { RoleRepository } from '../../database/repositories/role.repository'
 import { SettingRepository } from '../../database/repositories/setting.repository'
 import { UserRoleRepository } from '../../database/repositories/user-role.repository'
 import { UserRepository } from '../../database/repositories/user.repository'
-import { arrayToKeyValue, ESArray, uniqueArray } from '../helpers/array.helper'
+import { ESArray } from '../helpers/array.helper'
 
 @Injectable()
 export class CacheDataService {
@@ -167,7 +167,7 @@ export class CacheDataService {
         const currentPermissionIds: number[] = JSON.parse(roleList[i].permissionIds || '[]')
         permissionIds = permissionIds.concat(currentPermissionIds)
       }
-      permissionIds = uniqueArray(permissionIds)
+      permissionIds = ESArray.uniqueArray(permissionIds)
     }
     return permissionIds
   }
@@ -175,7 +175,7 @@ export class CacheDataService {
   async getPermissionAllMap() {
     if (!this.permissionAllMap) {
       const permissionAll = await this.permissionRepository.findManyBy({})
-      this.permissionAllMap = arrayToKeyValue(permissionAll, 'id')
+      this.permissionAllMap = ESArray.arrayToKeyValue(permissionAll, 'id')
     }
     return this.permissionAllMap
   }

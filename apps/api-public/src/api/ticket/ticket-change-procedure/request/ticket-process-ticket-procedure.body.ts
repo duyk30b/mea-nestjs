@@ -54,7 +54,7 @@ class TicketProcedureResultBody {
   result: string
 }
 
-class TicketProductProcedureBody {
+class TicketProductConsumableBody {
   @ApiProperty({ example: 56 })
   @Expose()
   @IsDefined()
@@ -179,7 +179,7 @@ export class TicketProcessResultTicketProcedureBody extends MultipleFileUpload {
     try {
       const err = []
       const result = JSON.parse(value).map((i: any) => {
-        const instance = Object.assign(new TicketProductProcedureBody(), i)
+        const instance = Object.assign(new TicketProductConsumableBody(), i)
         const validate = validateSync(instance, {
           whitelist: true,
           forbidNonWhitelisted: true,
@@ -201,7 +201,7 @@ export class TicketProcessResultTicketProcedureBody extends MultipleFileUpload {
     }
   })
   @IsArray({
-    message: ({ value }) => `Validate ticketProductProcedureResultList failed. Value = ${value}`,
+    message: ({ value }) => `Validate ticketProductConsumableList failed. Value = ${value}`,
   })
-  ticketProductProcedureResultList: TicketProductProcedureBody[]
+  ticketProductConsumableList: TicketProductConsumableBody[]
 }

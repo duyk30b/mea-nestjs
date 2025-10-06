@@ -119,10 +119,10 @@ export class TicketProcessResultTicketProcedureService {
       let imageCreatedList: Image[] = []
       let productModifiedList: Product[] = []
       let batchModifiedList: Batch[] = []
-      let ticketProductProcedureDestroyList: TicketProduct[] = []
-      let ticketProductProcedureCreatedList: TicketProduct[] = []
-      let ticketBatchProcedureCreatedList: TicketBatch[] = []
-      let ticketBatchProcedureDestroyedList: TicketBatch[] = []
+      let ticketProductConsumableDestroyList: TicketProduct[] = []
+      let ticketProductConsumableCreatedList: TicketProduct[] = []
+      let ticketBatchConsumableCreatedList: TicketBatch[] = []
+      let ticketBatchConsumableDestroyedList: TicketBatch[] = []
       let ticketRegimenModified: TicketRegimen
       let ticketRegimenItemModified: TicketRegimenItem
 
@@ -179,9 +179,9 @@ export class TicketProcessResultTicketProcedureService {
         imageCreatedList = imageChangeResponse.imageCreatedList
       }
 
-      if (body.ticketProductProcedureResultList) {
+      if (body.ticketProductConsumableList) {
         if (ticketProcedureOrigin.status === TicketProcedureStatus.Completed) {
-          ticketProductProcedureDestroyList = await this.ticketProductRepository.managerDelete(
+          ticketProductConsumableDestroyList = await this.ticketProductRepository.managerDelete(
             manager,
             {
               oid,
@@ -192,13 +192,13 @@ export class TicketProcessResultTicketProcedureService {
           )
         }
 
-        if (ticketProductProcedureDestroyList.length) {
-          ticketBatchProcedureDestroyedList = await this.ticketBatchRepository.managerDelete(
+        if (ticketProductConsumableDestroyList.length) {
+          ticketBatchConsumableDestroyedList = await this.ticketBatchRepository.managerDelete(
             manager,
             {
               oid,
               ticketId,
-              ticketProductId: { IN: ticketProductProcedureDestroyList.map((i) => i.id) },
+              ticketProductId: { IN: ticketProductConsumableDestroyList.map((i) => i.id) },
             }
           )
 
@@ -210,7 +210,7 @@ export class TicketProcessResultTicketProcedureService {
             movementType: MovementType.Ticket,
             isRefund: 1,
             time: createdAt,
-            voucherBatchPutawayList: ticketBatchProcedureDestroyedList.map((i) => {
+            voucherBatchPutawayList: ticketBatchConsumableDestroyedList.map((i) => {
               return {
                 voucherProductId: i.ticketProductId,
                 voucherBatchId: i.id,
@@ -227,7 +227,7 @@ export class TicketProcessResultTicketProcedureService {
           const { putawayPlan } = putawayContainer
         }
 
-        if (body.ticketProductProcedureResultList.length) {
+        if (body.ticketProductConsumableList.length) {
           const pickingContainer = await this.productPickupManager.startPickup({
             manager,
             oid,
@@ -237,7 +237,7 @@ export class TicketProcessResultTicketProcedureService {
             isRefund: 0,
             time: createdAt,
             allowNegativeQuantity,
-            voucherProductPickupList: body.ticketProductProcedureResultList.map((i) => {
+            voucherProductPickupList: body.ticketProductConsumableList.map((i) => {
               return {
                 voucherProductId: GenerateId.nextId(),
                 productId: i.productId,
@@ -291,12 +291,12 @@ export class TicketProcessResultTicketProcedureService {
             }
             return insert
           })
-          ticketProductProcedureCreatedList = await this.ticketProductRepository.managerInsertMany(
+          ticketProductConsumableCreatedList = await this.ticketProductRepository.managerInsertMany(
             manager,
             ticketProductInsertList
           )
           const ticketProductCreatedMap = ESArray.arrayToKeyValue(
-            ticketProductProcedureCreatedList,
+            ticketProductConsumableCreatedList,
             'id'
           )
 
@@ -321,18 +321,18 @@ export class TicketProcessResultTicketProcedureService {
             }
             return ticketBatchInsert
           })
-          ticketBatchProcedureCreatedList = await this.ticketBatchRepository.managerInsertMany(
+          ticketBatchConsumableCreatedList = await this.ticketBatchRepository.managerInsertMany(
             manager,
             ticketBatchInsertList
           )
         }
       }
 
-      const itemCostAmountAdd =
-        ticketProductProcedureCreatedList.reduce((acc, item) => {
+      const itemsCostAmountAdd =
+        ticketProductConsumableCreatedList.reduce((acc, item) => {
           return acc + item.costAmount
         }, 0)
-        - ticketProductProcedureDestroyList.reduce((acc, item) => {
+        - ticketProductConsumableDestroyList.reduce((acc, item) => {
           return acc + item.costAmount
         }, 0)
 
@@ -344,11 +344,20 @@ export class TicketProcessResultTicketProcedureService {
           return acc + cur.quantity * cur.commissionMoney
         }, 0)
 
+      let paymentMoneyStatus = ticketProcedureOrigin.paymentMoneyStatus
+      if (paymentMoneyStatus === PaymentMoneyStatus.NoEffect) {
+        if (ticketOrigin.isPaymentEachItem) {
+          paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
+        } else {
+          paymentMoneyStatus = PaymentMoneyStatus.TicketPaid
+        }
+      }
+
       const ticketProcedureModified = await this.ticketProcedureRepository.managerUpdateOne(
         manager,
         { oid, id: ticketProcedureId },
         {
-          costAmount: () => `costAmount + ${itemCostAmountAdd}`,
+          costAmount: () => `costAmount + ${itemsCostAmountAdd}`,
           commissionAmount: () => `commissionAmount + ${commissionMoneyAdd}`,
           imageIds,
           result: ticketProcedureResult.result,
@@ -356,6 +365,7 @@ export class TicketProcessResultTicketProcedureService {
           status: ticketProcedureResult.completedAt
             ? TicketProcedureStatus.Completed
             : TicketProcedureStatus.Pending,
+          paymentMoneyStatus,
         }
       )
 
@@ -367,7 +377,7 @@ export class TicketProcessResultTicketProcedureService {
         itemsDiscountAdd = ticketProcedureOrigin.quantity * ticketProcedureOrigin.discountMoney
       }
       if (
-        itemCostAmountAdd !== 0
+        itemsCostAmountAdd !== 0
         || commissionMoneyAdd !== 0
         || itemsDiscountAdd !== 0
         || procedureMoneyAdd !== 0
@@ -378,7 +388,7 @@ export class TicketProcessResultTicketProcedureService {
           ticketOrigin,
           itemMoney: {
             commissionMoneyAdd,
-            itemsCostAmountAdd: itemCostAmountAdd,
+            itemsCostAmountAdd,
             procedureMoneyAdd,
             itemsDiscountAdd,
           },
@@ -386,24 +396,28 @@ export class TicketProcessResultTicketProcedureService {
       }
 
       if (ticketProcedureModified.ticketProcedureType === TicketProcedureType.InRegimen) {
+        let moneyAmountActual = 0
+        let quantityActual = 0
+        if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.NoEffect) {
+          moneyAmountActual = ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice
+          quantityActual = ticketProcedureOrigin.quantity
+        }
+
         if (
           [TicketProcedureStatus.NoEffect, TicketProcedureStatus.Pending].includes(
             ticketProcedureOrigin.status
           )
           && ticketProcedureModified.status === TicketProcedureStatus.Completed
         ) {
-          const quantityPayment =
-            ticketProcedureOrigin.status === TicketProcedureStatus.NoEffect
-              ? ticketProcedureModified.quantity
-              : 0
           ticketRegimenItemModified = await this.ticketRegimenItemRepository.managerUpdateOne(
             manager,
             { oid, id: ticketProcedureModified.ticketRegimenItemId },
             {
-              quantityFinish: () => `quantityFinish + ${ticketProcedureModified.quantity}`,
-              quantityPayment: () => `quantityPayment + ${quantityPayment}`,
-              paymentMoneyAmount: () =>
-                `paymentMoneyAmount + ${quantityPayment * ticketProcedureModified.actualPrice}`,
+              quantityUsed: () => `quantityUsed + ${ticketProcedureModified.quantity}`,
+              moneyAmountUsed: () =>
+                `moneyAmountUsed + ${ticketProcedureModified.quantity * ticketProcedureModified.actualPrice}`,
+              moneyAmountActual: () => `moneyAmountActual + ${moneyAmountActual}`,
+              quantityActual: () => `quantityActual + ${quantityActual}`,
             }
           )
         }
@@ -414,7 +428,11 @@ export class TicketProcessResultTicketProcedureService {
           ticketRegimenItemModified = await this.ticketRegimenItemRepository.managerUpdateOne(
             manager,
             { oid, id: ticketProcedureModified.ticketRegimenItemId },
-            { quantityFinish: () => `quantityFinish - ${ticketProcedureModified.quantity}` }
+            {
+              quantityUsed: () => `quantityUsed - ${ticketProcedureModified.quantity}`,
+              moneyAmountUsed: () =>
+                `moneyAmountUsed - ${ticketProcedureModified.quantity * ticketProcedureModified.actualPrice}`,
+            }
           )
         }
 
@@ -425,23 +443,48 @@ export class TicketProcessResultTicketProcedureService {
           manager,
           { oid, ticketId, ticketRegimenId }
         )
-        if (ticketRegimenItemList.every((i) => i.quantityFinish === i.quantityExpected)) {
+        if (ticketRegimenItemList.every((i) => i.quantityUsed === i.quantityRegular)) {
           ticketRegimenStatus = TicketRegimenStatus.Completed
         }
-        if (ticketRegimenItemList.every((i) => i.quantityFinish === 0)) {
+        if (ticketRegimenItemList.every((i) => i.quantityUsed === 0)) {
           ticketRegimenStatus = TicketRegimenStatus.Pending
         }
 
-        ticketRegimenModified = await this.ticketRegimenRepository.managerUpdateOne(
-          manager,
-          { oid, id: ticketProcedureModified.ticketRegimenId },
-          {
-            status: ticketRegimenStatus,
-            costAmount: () => `costAmount + ${itemCostAmountAdd}`,
-            commissionAmount: () => `commissionAmount + ${commissionMoneyAdd}`,
-            spentMoney: () => `spentMoney + ${procedureMoneyAdd}`,
-          }
-        )
+        if (
+          [TicketProcedureStatus.NoEffect, TicketProcedureStatus.Pending].includes(
+            ticketProcedureOrigin.status
+          )
+          && ticketProcedureModified.status === TicketProcedureStatus.Completed
+        ) {
+          ticketRegimenModified = await this.ticketRegimenRepository.managerUpdateOne(
+            manager,
+            { oid, id: ticketProcedureModified.ticketRegimenId },
+            {
+              status: ticketRegimenStatus,
+              costAmount: () => `costAmount + ${itemsCostAmountAdd}`,
+              commissionAmount: () => `commissionAmount + ${commissionMoneyAdd}`,
+              moneyAmountUsed: () =>
+                `moneyAmountUsed + ${ticketProcedureModified.quantity * ticketProcedureModified.actualPrice}`,
+              moneyAmountActual: () => `moneyAmountActual + ${moneyAmountActual}`,
+            }
+          )
+        }
+        if (
+          ticketProcedureOrigin.status === TicketProcedureStatus.Completed
+          && ticketProcedureModified.status === TicketProcedureStatus.Pending
+        ) {
+          ticketRegimenModified = await this.ticketRegimenRepository.managerUpdateOne(
+            manager,
+            { oid, id: ticketProcedureModified.ticketRegimenId },
+            {
+              status: ticketRegimenStatus,
+              costAmount: () => `costAmount + ${itemsCostAmountAdd}`,
+              commissionAmount: () => `commissionAmount + ${commissionMoneyAdd}`,
+              moneyAmountUsed: () =>
+                `moneyAmountUsed - ${ticketProcedureModified.quantity * ticketProcedureModified.actualPrice}`,
+            }
+          )
+        }
       }
 
       await transaction.commit()
@@ -465,12 +508,12 @@ export class TicketProcessResultTicketProcedureService {
           upsertedList: ticketRegimenItemModified ? [ticketRegimenItemModified] : [],
         },
         ticketProduct: {
-          upsertedList: ticketProductProcedureCreatedList,
-          destroyedList: ticketProductProcedureDestroyList,
+          upsertedList: ticketProductConsumableCreatedList,
+          destroyedList: ticketProductConsumableDestroyList,
         },
         ticketBatch: {
-          upsertedList: ticketBatchProcedureCreatedList,
-          destroyedList: ticketBatchProcedureDestroyedList,
+          upsertedList: ticketBatchConsumableCreatedList,
+          destroyedList: ticketBatchConsumableDestroyedList,
         },
       })
     } catch (error) {

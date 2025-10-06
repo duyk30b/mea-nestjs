@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { ESArray, uniqueArray } from '../../../../_libs/common/helpers/array.helper'
+import { ESArray } from '../../../../_libs/common/helpers/array.helper'
 import { MovementType } from '../../../../_libs/database/common/variable'
 import {
   Customer,
@@ -89,26 +89,26 @@ export class ApiProductMovementService {
         : <Product[]>[],
       relation?.purchaseOrder && purchaseOrderIds.length
         ? this.purchaseOrderRepository.findMany({
-          condition: { id: { IN: uniqueArray(purchaseOrderIds) } },
+          condition: { id: { IN: ESArray.uniqueArray(purchaseOrderIds) } },
         })
         : <PurchaseOrder[]>[],
       relation?.ticket && ticketIds.length
-        ? this.ticketRepository.findMany({ condition: { id: { IN: uniqueArray(ticketIds) } } })
+        ? this.ticketRepository.findMany({ condition: { id: { IN: ESArray.uniqueArray(ticketIds) } } })
         : <Ticket[]>[],
       relation?.stockCheck && stockCheckIds.length
         ? this.stockCheckRepository.findMany({
-          condition: { id: { IN: uniqueArray(stockCheckIds) } },
+          condition: { id: { IN: ESArray.uniqueArray(stockCheckIds) } },
         })
         : <StockCheck[]>[],
       relation?.distributor && distributorIds.length
-        ? this.distributorRepository.findManyBy({ id: { IN: uniqueArray(distributorIds) } })
+        ? this.distributorRepository.findManyBy({ id: { IN: ESArray.uniqueArray(distributorIds) } })
         : <Distributor[]>[],
       relation?.customer && customerIds.length
-        ? this.customerRepository.findManyBy({ id: { IN: uniqueArray(customerIds) } })
+        ? this.customerRepository.findManyBy({ id: { IN: ESArray.uniqueArray(customerIds) } })
         : <Customer[]>[],
 
       relation?.user && userIds.length
-        ? this.userRepository.findMany({ condition: { id: { IN: uniqueArray(userIds) } } })
+        ? this.userRepository.findMany({ condition: { id: { IN: ESArray.uniqueArray(userIds) } } })
         : <User[]>[],
     ])
 

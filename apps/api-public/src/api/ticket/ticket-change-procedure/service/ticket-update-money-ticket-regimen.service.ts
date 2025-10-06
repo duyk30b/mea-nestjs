@@ -66,7 +66,7 @@ export class TicketUpdateMoneyTicketRegimenService {
       if (![TicketRegimenStatus.Pending].includes(ticketRegimenOrigin.status)) {
         throw new BusinessError('Trạng thái liệu trình không hợp lệ')
       }
-      if (ticketRegimenOrigin.spentMoney > 0) {
+      if (ticketRegimenOrigin.moneyAmountPaid > 0 || ticketRegimenOrigin.moneyAmountUsed) {
         throw new BusinessError('Không thể sửa phiếu đã thanh toán')
       }
 
@@ -92,8 +92,8 @@ export class TicketUpdateMoneyTicketRegimenService {
               quantity: 1,
               ticketItemId: ticketRegimenId,
               positionInteractId: ticketRegimenOrigin.regimenId,
-              ticketItemExpectedPrice: ticketRegimenUpdate.expectedMoney,
-              ticketItemActualPrice: ticketRegimenUpdate.actualMoney,
+              ticketItemExpectedPrice: ticketRegimenUpdate.moneyAmountRegular,
+              ticketItemActualPrice: ticketRegimenUpdate.moneyAmountSale,
             }
           }),
         })
@@ -112,11 +112,14 @@ export class TicketUpdateMoneyTicketRegimenService {
         manager,
         { oid, id: ticketRegimenId },
         {
-          expectedMoney: ticketRegimenUpdate.expectedMoney,
+          moneyAmountRegular: ticketRegimenUpdate.moneyAmountRegular,
+          moneyAmountSale: ticketRegimenUpdate.moneyAmountSale,
+          moneyAmountActual: ticketRegimenOrigin.isEffectTotalMoney
+            ? ticketRegimenUpdate.moneyAmountSale
+            : 0,
           discountType: ticketRegimenUpdate.discountType,
           discountMoney: ticketRegimenUpdate.discountMoney,
           discountPercent: ticketRegimenUpdate.discountPercent,
-          actualMoney: ticketRegimenUpdate.actualMoney,
           commissionAmount: ticketRegimenOrigin.commissionAmount + commissionMoneyChange,
         }
       )
@@ -125,15 +128,23 @@ export class TicketUpdateMoneyTicketRegimenService {
         await this.ticketRegimenItemRepository.managerBulkUpdate({
           manager,
           condition: { oid, ticketId, ticketRegimenId },
-          tempList: ticketRegimenItemUpdateList,
+          tempList: ticketRegimenItemUpdateList.map((i) => {
+            return {
+              ...i,
+              moneyAmountActual: ticketRegimenOrigin.isEffectTotalMoney
+                ? i.moneyAmountSale
+                : 0,
+            }
+          }),
           compare: { id: { cast: 'bigint' } },
           update: [
-            'expectedMoneyAmount',
-            'actualMoneyAmount',
+            'moneyAmountRegular',
+            'moneyAmountSale',
+            'moneyAmountActual',
             'discountMoneyAmount',
             'discountPercent',
             'discountType',
-            'quantityExpected',
+            'quantityRegular',
           ],
           options: {},
         })
@@ -142,31 +153,31 @@ export class TicketUpdateMoneyTicketRegimenService {
         ticketRegimenItemModifiedList,
         'id'
       )
-      const ticketProductOriginList = await this.ticketProcedureRepository.findManyBy({
+      const ticketProcedureOriginList = await this.ticketProcedureRepository.findManyBy({
         oid,
         ticketId,
         ticketRegimenId,
         ticketProcedureType: TicketProcedureType.InRegimen,
       })
-      const tpFixMapTri = ESArray.arrayToKeyArray(ticketProductOriginList, 'ticketRegimenItemId')
+      const tpFixMapTri = ESArray.arrayToKeyArray(ticketProcedureOriginList, 'ticketRegimenItemId')
 
       Object.keys(tpFixMapTri).forEach((triId) => {
         const triModified = ticketRegimenItemModifiedMap[triId]
         const lengthArray = tpFixMapTri[triId]?.length
-        if (lengthArray !== triModified.quantityExpected) {
+        if (lengthArray !== triModified.quantityRegular) {
           throw new BusinessError('Số lượng phiếu dịch vụ không đúng')
         }
-        const totalExpectedMoneyRemain = triModified.expectedMoneyAmount
+        const totalMoneyAmountRegularRemain = triModified.moneyAmountRegular
+        const totalMoneyAmountSaleRemain = triModified.moneyAmountSale
         const totalDiscountMoneyRemain = triModified.discountMoneyAmount
-        const totalActualMoneyRemain = triModified.actualMoneyAmount
 
-        const expectedPrice = Math.floor(totalExpectedMoneyRemain / lengthArray / 1000) * 1000
+        const expectedPrice = Math.floor(totalMoneyAmountRegularRemain / lengthArray / 1000) * 1000
         const discountMoney = Math.floor(totalDiscountMoneyRemain / lengthArray / 1000) * 1000
-        const actualPrice = Math.floor(totalActualMoneyRemain / lengthArray / 1000) * 1000
+        const actualPrice = Math.floor(totalMoneyAmountSaleRemain / lengthArray / 1000) * 1000
 
-        const firstExpectedPrice = totalExpectedMoneyRemain - expectedPrice * (lengthArray - 1)
+        const firstExpectedPrice = totalMoneyAmountRegularRemain - expectedPrice * (lengthArray - 1)
         const firstDiscountMoney = totalDiscountMoneyRemain - discountMoney * (lengthArray - 1)
-        const firstActualPrice = totalActualMoneyRemain - actualPrice * (lengthArray - 1)
+        const firstActualPrice = totalMoneyAmountSaleRemain - actualPrice * (lengthArray - 1)
 
         tpFixMapTri[triId].forEach((tp, tpIndex) => {
           tp.expectedPrice = tpIndex === 0 ? firstExpectedPrice : expectedPrice
@@ -214,7 +225,7 @@ export class TicketUpdateMoneyTicketRegimenService {
             item.status !== TicketProcedureStatus.NoEffect ? item.actualPrice * item.quantity : 0
           return acc + money
         }, 0)
-        - ticketProductOriginList.reduce((acc, item) => {
+        - ticketProcedureOriginList.reduce((acc, item) => {
           const money =
             item.status !== TicketProcedureStatus.NoEffect ? item.actualPrice * item.quantity : 0
           return acc + money
@@ -225,7 +236,7 @@ export class TicketUpdateMoneyTicketRegimenService {
             item.status !== TicketProcedureStatus.NoEffect ? item.discountMoney * item.quantity : 0
           return acc + discount
         }, 0)
-        - ticketProductOriginList.reduce((acc, item) => {
+        - ticketProcedureOriginList.reduce((acc, item) => {
           const discount =
             item.status !== TicketProcedureStatus.NoEffect ? item.discountMoney * item.quantity : 0
           return acc + discount

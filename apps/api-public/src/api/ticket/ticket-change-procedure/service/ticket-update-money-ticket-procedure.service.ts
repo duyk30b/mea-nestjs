@@ -4,6 +4,7 @@ import { BusinessError } from '../../../../../../_libs/database/common/error'
 import { PaymentMoneyStatus } from '../../../../../../_libs/database/common/variable'
 import { TicketProcedure, TicketUser } from '../../../../../../_libs/database/entities'
 import { PositionType } from '../../../../../../_libs/database/entities/position.entity'
+import { TicketProcedureType } from '../../../../../../_libs/database/entities/ticket-procedure.entity'
 import Ticket, { TicketStatus } from '../../../../../../_libs/database/entities/ticket.entity'
 import { TicketChangeItemMoneyManager } from '../../../../../../_libs/database/operations/ticket-base/ticket-change-item-money.manager'
 import { TicketUserCommon } from '../../../../../../_libs/database/operations/ticket-item/ticket-change-user/ticket-user.common'
@@ -63,6 +64,9 @@ export class TicketUpdateMoneyTicketProcedureService {
         )
       ) {
         throw new BusinessError('Không thể sửa phiếu đã thanh toán')
+      }
+      if (ticketProcedureOrigin.ticketProcedureType !== TicketProcedureType.Normal) {
+        throw new BusinessError('Chỉ có thể sửa dịch vụ thường')
       }
 
       let ticketUserDestroyedList: TicketUser[] = []

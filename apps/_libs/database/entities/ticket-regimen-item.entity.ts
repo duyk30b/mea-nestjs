@@ -33,29 +33,49 @@ export default class TicketRegimenItem {
   @Expose()
   ticketRegimenId: string
 
-  @Column({ type: 'smallint', default: 0 })
-  @Expose()
-  quantityPayment: number
-
-  @Column({ type: 'smallint', default: 0 })
-  @Expose()
-  quantityExpected: number
-
-  @Column({ type: 'smallint', default: 0 })
-  @Expose()
-  quantityFinish: number
-
   @Column({ type: 'smallint', default: 1 })
   @Expose()
   gapDay: number
 
+  @Column({ type: 'smallint', default: 0 })
+  @Expose()
+  quantityRegular: number // Tổng số buổi setup ban đầu
+
+  @Column({ type: 'smallint', default: 0 })
+  @Expose()
+  quantityActual: number // Số buổi cần phải thanh toán
+
+  @Column({ type: 'smallint', default: 0 })
+  @Expose()
+  quantityPaid: number // Số buổi đã thanh toán
+
+  @Column({ type: 'smallint', default: 0 })
+  @Expose()
+  quantityUsed: number // Số buổi đã sử dụng
+
   @Column({ default: 0 })
   @Expose()
-  expectedMoneyAmount: number // Giá dự kiến
+  moneyAmountRegular: number // Tổng tiền gốc
 
-  @Column({ type: 'varchar', length: 25, default: DiscountType.VND })
+  @Column({ default: 0 })
   @Expose()
-  discountType: DiscountType // Loại giảm giá
+  moneyAmountSale: number // Tổng tiền sau chiết khấu
+
+  @Column({ default: 0 })
+  @Expose()
+  moneyAmountActual: number // Tổng tiền cần phải thanh toán
+
+  @Column({ default: 0 })
+  @Expose()
+  moneyAmountPaid: number // Tổng tiền đã thanh toán
+
+  @Column({ default: 0 })
+  @Expose()
+  moneyAmountUsed: number // Tổng tiền đã sử dụng
+
+  @Column({ default: 0 })
+  @Expose()
+  discountMoneyAmount: number // tiền giảm giá
 
   @Column({
     type: 'decimal',
@@ -67,27 +87,16 @@ export default class TicketRegimenItem {
   @Expose()
   discountPercent: number // % giảm giá
 
-  @Column({ default: 0 })
+  @Column({ type: 'varchar', length: 25, default: DiscountType.VND })
   @Expose()
-  discountMoneyAmount: number // Giá thực tế
-
-  @Column({ default: 0 })
-  @Expose()
-  actualMoneyAmount: number // Giá thực tế
-
-  @Column({ default: 0 })
-  @Expose()
-  paymentMoneyAmount: number // Giá thực tế
+  discountType: DiscountType // Loại giảm giá
 
   static fromRaw(raw: { [P in keyof TicketRegimenItem]: any }) {
     if (!raw) return null
     const entity = new TicketRegimenItem()
     Object.assign(entity, raw)
 
-    entity.expectedMoneyAmount = Number(raw.expectedMoneyAmount)
     entity.discountPercent = Number(raw.discountPercent)
-    entity.actualMoneyAmount = Number(raw.actualMoneyAmount)
-    entity.paymentMoneyAmount = Number(raw.paymentMoneyAmount)
 
     return entity
   }
