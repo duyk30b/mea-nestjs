@@ -3,15 +3,14 @@ import { Server } from 'socket.io'
 import {
   Batch,
   Customer,
-  Distributor,
   Image,
   Organization,
-  Procedure,
   Product,
   PurchaseOrder,
   Ticket,
   TicketAttribute,
   TicketBatch,
+  TicketExpense,
   TicketLaboratory,
   TicketLaboratoryGroup,
   TicketLaboratoryResult,
@@ -21,6 +20,7 @@ import {
   TicketReception,
   TicketRegimen,
   TicketRegimenItem,
+  TicketSurcharge,
   TicketUser,
 } from '../../../_libs/database/entities'
 import { SOCKET_EVENT } from './socket.variable'
@@ -64,6 +64,8 @@ export class SocketEmitService {
         upsertedList?: TicketLaboratoryResult[]
       }
       ticketRadiology?: { destroyedList?: TicketRadiology[]; upsertedList?: TicketRadiology[] }
+      ticketSurcharge?: { destroyedList?: TicketSurcharge[]; upsertedList?: TicketSurcharge[] }
+      ticketExpense?: { destroyedList?: TicketExpense[]; upsertedList?: TicketExpense[] }
     }
   ) {
     if (!this.io) return

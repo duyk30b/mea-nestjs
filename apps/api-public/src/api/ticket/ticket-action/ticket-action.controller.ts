@@ -11,6 +11,7 @@ import {
   TicketSendProductListBody,
 } from './request'
 import { TicketChangeAllMoneyBody } from './request/ticket-change-all-money.body'
+import { TicketChangeSurchargeListBody } from './request/ticket-change-surcharge-list.body'
 import { TicketActionService } from './ticket-action.service'
 import { TicketDestroyService } from './ticket-destroy.service'
 
@@ -41,6 +42,17 @@ export class TicketActionController {
     @Body() body: TicketClinicChangeDiscountBody
   ): Promise<BaseResponse> {
     const data = await this.ticketActionService.changeDiscount({ oid, ticketId, body })
+    return { data }
+  }
+
+  @Post('/:ticketId/change-surcharge-list')
+  @UserPermission(PermissionId.TICKET_CHANGE_SURCHARGE_LIST)
+  async changeSurchargeList(
+    @External() { oid }: TExternal,
+    @Param() { ticketId }: TicketParams,
+    @Body() body: TicketChangeSurchargeListBody
+  ): Promise<BaseResponse> {
+    const data = await this.ticketActionService.changeSurchargeList({ oid, ticketId, body })
     return { data }
   }
 

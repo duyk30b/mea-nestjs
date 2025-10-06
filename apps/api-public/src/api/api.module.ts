@@ -25,7 +25,6 @@ import { ApiRoleModule } from './api-role/api-role.module'
 import { ApiRoomModule } from './api-room/api-room.module'
 import { ApiSettingModule } from './api-setting/api-setting.module'
 import { ApiStockCheckModule } from './api-stock-check/api-stock-check.module'
-import { ApiSurchargeModule } from './api-surcharge/api-surcharge.module'
 import { ApiTicketBatchModule } from './api-ticket-batch/api-ticket-batch.module'
 import { ApiTicketLaboratoryGroupModule } from './api-ticket-laboratory-group/api-ticket-laboratory-group.module'
 import { ApiTicketLaboratoryModule } from './api-ticket-laboratory/api-ticket-laboratory.module'
@@ -87,7 +86,6 @@ import { TicketModule } from './ticket/ticket.module'
     ApiWarehouseModule,
     ApiPaymentMethodModule,
     ApiExpenseModule,
-    ApiSurchargeModule,
     ApiCustomerSourceModule,
 
     ApiLaboratorySampleModule,
