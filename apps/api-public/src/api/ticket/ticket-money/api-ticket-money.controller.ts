@@ -12,13 +12,19 @@ import {
   CustomerRefundMoneyBody,
   CustomerRefundTicketItemListBody,
 } from './request'
+import { TicketPrepaymentTicketItemListService } from './service/ticket-prepayment-ticket-item-list.service'
+import { TicketRefundTicketItemListService } from './service/ticket-refund-ticket-item-list.service'
 import { TicketMoneyService } from './ticket-money.service'
 
 @ApiTags('Ticket')
 @ApiBearerAuth('access-token')
 @Controller('ticket')
 export class ApiTicketMoneyController {
-  constructor(private readonly ticketMoneyService: TicketMoneyService) { }
+  constructor(
+    private readonly ticketMoneyService: TicketMoneyService,
+    private readonly ticketPrepaymentTicketItemListService: TicketPrepaymentTicketItemListService,
+    private readonly ticketRefundTicketItemListService: TicketRefundTicketItemListService
+  ) { }
 
   @Post(':ticketId/prepayment-money')
   @UserPermission(PermissionId.TICKET_PAYMENT_MONEY)
@@ -68,7 +74,7 @@ export class ApiTicketMoneyController {
     @Param() { ticketId }: TicketParams,
     @Body() body: CustomerPrepaymentTicketItemListBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketMoneyService.prepaymentTicketItemList({
+    const data = await this.ticketPrepaymentTicketItemListService.startPrepayment({
       oid,
       ticketId,
       userId: uid,
@@ -84,7 +90,7 @@ export class ApiTicketMoneyController {
     @Param() { ticketId }: TicketParams,
     @Body() body: CustomerRefundTicketItemListBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketMoneyService.refundTicketItemList({
+    const data = await this.ticketRefundTicketItemListService.startRefund({
       oid,
       ticketId,
       userId: uid,

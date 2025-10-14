@@ -2,17 +2,13 @@ import { Injectable } from '@nestjs/common'
 import {
   CustomerPayDebtOperation,
   CustomerPrepaymentMoneyOperation,
-  CustomerPrepaymentTicketItemListOperation,
   CustomerRefundMoneyOperation,
-  CustomerRefundTicketItemListOperation,
 } from '../../../../../_libs/database/operations'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import {
   CustomerPayDebtBody,
   CustomerPrepaymentBody,
-  CustomerPrepaymentTicketItemListBody,
   CustomerRefundMoneyBody,
-  CustomerRefundTicketItemListBody,
 } from './request'
 
 @Injectable()
@@ -21,9 +17,7 @@ export class TicketMoneyService {
     private readonly socketEmitService: SocketEmitService,
     private readonly customerPayDebtOperation: CustomerPayDebtOperation,
     private readonly customerPrepaymentMoneyOperation: CustomerPrepaymentMoneyOperation,
-    private readonly customerPrepaymentTicketItemListOperation: CustomerPrepaymentTicketItemListOperation,
-    private readonly customerRefundMoneyOperation: CustomerRefundMoneyOperation,
-    private readonly customerRefundTicketItemListOperation: CustomerRefundTicketItemListOperation
+    private readonly customerRefundMoneyOperation: CustomerRefundMoneyOperation
   ) { }
 
   async prepaymentMoney(data: {
@@ -107,91 +101,6 @@ export class TicketMoneyService {
     if (!options?.noEmitTicket) {
       this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
     }
-
-    return { ticketModified, customer, paymentCreated }
-  }
-
-  async prepaymentTicketItemList(data: {
-    oid: number
-    userId: number
-    ticketId: string
-    body: CustomerPrepaymentTicketItemListBody
-    options?: { noEmitTicket?: boolean }
-  }) {
-    const { oid, ticketId, userId, body, options } = data
-    const prepaymentResult =
-      await this.customerPrepaymentTicketItemListOperation.startPrepaymentTicketItemList({
-        oid,
-        ticketId,
-        customerId: body.customerId,
-        cashierId: userId,
-        paymentMethodId: body.paymentMethodId,
-        time: Date.now(),
-        note: body.note,
-        paidAmount: body.paidAmount,
-        ticketItemList: body.ticketItemList,
-      })
-    const { ticketModified, customer, paymentCreated } = prepaymentResult
-    if (!options?.noEmitTicket) {
-      this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
-    }
-
-    this.socketEmitService.socketTicketChange(oid, {
-      ticketId,
-      ticketProcedure: { upsertedList: prepaymentResult.ticketProcedureModifiedList },
-      ticketProduct: {
-        upsertedList: [
-          ...prepaymentResult.ticketProductConsumableModifiedList,
-          ...prepaymentResult.ticketProductPrescriptionModifiedList,
-        ],
-      },
-      ticketLaboratory: { upsertedList: prepaymentResult.ticketLaboratoryModifiedList },
-      ticketLaboratoryGroup: { upsertedList: prepaymentResult.ticketLaboratoryGroupModifiedList },
-      ticketRadiology: { upsertedList: prepaymentResult.ticketRadiologyModifiedList },
-    })
-
-    return { ticketModified, customer, paymentCreated }
-  }
-
-  async refundTicketItemList(params: {
-    oid: number
-    userId: number
-    ticketId: string
-    body: CustomerRefundTicketItemListBody
-    options?: { noEmitTicket?: boolean }
-  }) {
-    const { oid, ticketId, userId, body, options } = params
-    const refundResult = await this.customerRefundTicketItemListOperation.startRefundTicketItemList(
-      {
-        oid,
-        ticketId,
-        customerId: body.customerId,
-        cashierId: userId,
-        paymentMethodId: body.paymentMethodId,
-        time: Date.now(),
-        refundAmount: body.refundAmount,
-        note: body.note,
-        ticketItemList: body.ticketItemList,
-      }
-    )
-    const { ticketModified, customer, paymentCreated } = refundResult
-    if (!options?.noEmitTicket) {
-      this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
-    }
-
-    this.socketEmitService.socketTicketChange(oid, {
-      ticketId,
-      ticketProcedure: { upsertedList: refundResult.ticketProcedureModifiedList },
-      ticketProduct: {
-        upsertedList: [
-          ...refundResult.ticketProductConsumableModifiedList,
-          ...refundResult.ticketProductPrescriptionModifiedList,
-        ],
-      },
-      ticketLaboratory: { upsertedList: refundResult.ticketLaboratoryModifiedList },
-      ticketLaboratoryGroup: { upsertedList: refundResult.ticketLaboratoryGroupModifiedList },
-      ticketRadiology: { upsertedList: refundResult.ticketRadiologyModifiedList },
-    })
 
     return { ticketModified, customer, paymentCreated }
   }

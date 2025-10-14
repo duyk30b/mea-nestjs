@@ -108,6 +108,26 @@ export default class TicketLaboratoryGroup {
   static fromRaws(raws: { [P in keyof TicketLaboratoryGroup]: any }[]) {
     return raws.map((i) => TicketLaboratoryGroup.fromRaw(i))
   }
+
+  static calculatorPaymentMoneyStatus(options: { ticketLaboratoryList?: TicketLaboratory[] }) {
+    const { ticketLaboratoryList } = options
+
+    let paymentMoneyStatus = PaymentMoneyStatus.TicketPaid
+    const hasPaid = ticketLaboratoryList.some((i) => {
+      return (
+        i.paymentMoneyStatus === PaymentMoneyStatus.FullPaid
+        || i.paymentMoneyStatus === PaymentMoneyStatus.PartialPaid
+      )
+    })
+    const hasPending = ticketLaboratoryList.some((i) => {
+      return i.paymentMoneyStatus === PaymentMoneyStatus.PendingPayment
+    })
+    if (hasPaid && !hasPending) paymentMoneyStatus = PaymentMoneyStatus.FullPaid
+    if (!hasPaid && hasPending) paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
+    if (hasPaid && hasPending) paymentMoneyStatus = PaymentMoneyStatus.PartialPaid
+
+    return { paymentMoneyStatus }
+  }
 }
 
 export type TicketLaboratoryGroupRelationType = {

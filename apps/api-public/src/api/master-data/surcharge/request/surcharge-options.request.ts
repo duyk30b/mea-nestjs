@@ -1,4 +1,4 @@
-import { SortQuery } from '../../../../../_libs/common/dto/query'
+import { SortQuery } from '../../../../../../_libs/common/dto/query'
 
 export class SurchargeRelationQuery {
 

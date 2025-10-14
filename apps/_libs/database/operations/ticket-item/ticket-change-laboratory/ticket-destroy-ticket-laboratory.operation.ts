@@ -76,10 +76,9 @@ export class TicketDestroyTicketLaboratoryOperation {
             id: ticketLaboratoryDestroyed.ticketLaboratoryGroupId,
           })
       } else {
-        const { paymentMoneyStatus } =
-          this.ticketLaboratoryGroupManager.calculatorPaymentMoneyStatus({
-            ticketLaboratoryList: ticketLaboratoryRemainList,
-          })
+        const { paymentMoneyStatus } = TicketLaboratoryGroup.calculatorPaymentMoneyStatus({
+          ticketLaboratoryList: ticketLaboratoryRemainList,
+        })
         ticketLaboratoryGroupModified =
           await this.ticketLaboratoryGroupManager.updateOneAndReturnEntity(
             manager,

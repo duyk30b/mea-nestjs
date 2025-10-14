@@ -1,7 +1,7 @@
 import { ApiPropertyOptional, IntersectionType, PickType } from '@nestjs/swagger'
 import { Expose, Transform, plainToInstance } from 'class-transformer'
 import { IsObject, ValidateNested } from 'class-validator'
-import { LimitQuery, PaginationQuery } from '../../../../../_libs/common/dto/query'
+import { LimitQuery, PaginationQuery } from '../../../../../../_libs/common/dto/query'
 import {
   SurchargeFilterQuery,
   SurchargeRelationQuery,

@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common'
+import { DataSource } from 'typeorm'
 import { CacheDataService } from '../../../../../_libs/common/cache-data/cache-data.service'
 import { DeliveryStatus } from '../../../../../_libs/database/common/variable'
 import { Customer, Payment } from '../../../../../_libs/database/entities'
 import TicketProduct from '../../../../../_libs/database/entities/ticket-product.entity'
+import { TicketSurchargeInsertType } from '../../../../../_libs/database/entities/ticket-surcharge.entity'
 import { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
 import {
   CustomerRefundMoneyOperation,
   TicketChangeAllMoneyOperator,
   TicketChangeDiscountOperation,
+  TicketChangeItemMoneyManager,
   TicketCloseOperation,
   TicketReopenOperation,
   TicketReturnProductOperation,
@@ -15,24 +18,29 @@ import {
 } from '../../../../../_libs/database/operations'
 import {
   TicketRepository,
+  TicketSurchargeRepository,
 } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { TicketClinicChangeDiscountBody, TicketReturnProductListBody } from './request'
 import { TicketChangeAllMoneyBody } from './request/ticket-change-all-money.body'
+import { TicketChangeSurchargeListBody } from './request/ticket-change-surcharge-list.body'
 
 @Injectable()
 export class TicketActionService {
   constructor(
-    private readonly socketEmitService: SocketEmitService,
-    private readonly cacheDataService: CacheDataService,
-    private readonly ticketRepository: TicketRepository,
-    private readonly ticketReopenOperation: TicketReopenOperation,
-    private readonly ticketSendProductOperation: TicketSendProductOperation,
-    private readonly ticketReturnProductOperation: TicketReturnProductOperation,
-    private readonly ticketChangeAllMoneyOperator: TicketChangeAllMoneyOperator,
-    private readonly ticketCloseOperation: TicketCloseOperation,
-    private readonly ticketChangeDiscountOperation: TicketChangeDiscountOperation,
-    private readonly customerRefundMoneyOperation: CustomerRefundMoneyOperation
+    private socketEmitService: SocketEmitService,
+    private cacheDataService: CacheDataService,
+    private dataSource: DataSource,
+    private ticketRepository: TicketRepository,
+    private ticketSurchargeRepository: TicketSurchargeRepository,
+    private ticketReopenOperation: TicketReopenOperation,
+    private ticketSendProductOperation: TicketSendProductOperation,
+    private ticketReturnProductOperation: TicketReturnProductOperation,
+    private ticketChangeAllMoneyOperator: TicketChangeAllMoneyOperator,
+    private ticketCloseOperation: TicketCloseOperation,
+    private ticketChangeDiscountOperation: TicketChangeDiscountOperation,
+    private customerRefundMoneyOperation: CustomerRefundMoneyOperation,
+    private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
   ) { }
 
   async startExecuting(options: { oid: number; ticketId: string }) {
@@ -65,6 +73,67 @@ export class TicketActionService {
     this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
 
     return { ticketModified }
+  }
+
+  async changeSurchargeList(params: {
+    oid: number
+    ticketId: string
+    body: TicketChangeSurchargeListBody
+  }) {
+    const { oid, ticketId, body } = params
+
+    const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
+      const ticketOrigin = await this.ticketRepository.managerUpdateOne(
+        manager,
+        { oid, id: ticketId, status: TicketStatus.Executing },
+        { updatedAt: Date.now() }
+      )
+
+      const ticketSurchargeDestroy = await this.ticketSurchargeRepository.managerDelete(manager, {
+        oid,
+        ticketId,
+      })
+      const ticketSurchargeInsert = body.ticketSurchargeBodyList.map((i) => {
+        const insert: TicketSurchargeInsertType = {
+          oid,
+          ticketId,
+          surchargeId: i.surchargeId,
+          money: i.money,
+        }
+        return insert
+      })
+
+      const ticketSurchargeCreated = await this.ticketSurchargeRepository.managerInsertMany(
+        manager,
+        ticketSurchargeInsert
+      )
+
+      const surchargeMoneyAdd =
+        ticketSurchargeCreated.reduce((acc, item) => acc + item.money, 0)
+        - ticketSurchargeDestroy.reduce((acc, item) => acc + item.money, 0)
+
+      let ticketModified = ticketOrigin
+      if (surchargeMoneyAdd) {
+        ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
+          manager,
+          oid,
+          ticketOrigin,
+          itemMoney: { surchargeMoneyAdd },
+        })
+      }
+      this.socketEmitService.socketTicketChange(oid, {
+        ticketId,
+        ticketModified,
+        ticketSurcharge: {
+          destroyedList: ticketSurchargeDestroy,
+          upsertedList: ticketSurchargeCreated,
+        },
+      })
+
+      return { ticketModified }
+    })
+
+    return transaction
   }
 
   async changeAllMoney(params: { oid: number; ticketId: string; body: TicketChangeAllMoneyBody }) {

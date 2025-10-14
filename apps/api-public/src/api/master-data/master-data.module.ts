@@ -7,6 +7,7 @@ import { ProcedureModule } from './procedure/procedure.module'
 import { RadiologyGroupModule } from './radiology-group/radiology-group.module'
 import { RadiologyModule } from './radiology/radiology.module'
 import { RegimenModule } from './regimen/api-regimen.module'
+import { SurchargeModule } from './surcharge/surcharge.module'
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { RegimenModule } from './regimen/api-regimen.module'
     RadiologyModule,
     RadiologyGroupModule,
     RegimenModule,
+    SurchargeModule,
   ],
   controllers: [],
   providers: [],

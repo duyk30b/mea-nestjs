@@ -1,23 +1,23 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
-import { IdParam } from '../../../../_libs/common/dto/param'
-import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
-import { BaseResponse } from '../../../../_libs/common/interceptor'
-import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../_libs/permission/permission.enum'
-import { ApiSurchargeService } from './api-surcharge.service'
+import { IdParam } from '../../../../../_libs/common/dto/param'
+import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
+import { BaseResponse } from '../../../../../_libs/common/interceptor'
+import { External, TExternal } from '../../../../../_libs/common/request/external.request'
+import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import {
   SurchargeCreateBody,
   SurchargeGetManyQuery,
   SurchargePaginationQuery,
   SurchargeUpdateBody,
 } from './request'
+import { SurchargeService } from './surcharge.service'
 
 @ApiTags('Surcharge')
 @ApiBearerAuth('access-token')
 @Controller('surcharge')
-export class ApiSurchargeController {
-  constructor(private readonly apiSurchargeService: ApiSurchargeService) { }
+export class SurchargeController {
+  constructor(private readonly surchargeService: SurchargeService) { }
 
   @Get('pagination')
   @UserPermission()
@@ -25,7 +25,7 @@ export class ApiSurchargeController {
     @External() { oid }: TExternal,
     @Query() query: SurchargePaginationQuery
   ): Promise<BaseResponse> {
-    const data = await this.apiSurchargeService.pagination(oid, query)
+    const data = await this.surchargeService.pagination(oid, query)
     return { data }
   }
 
@@ -35,14 +35,14 @@ export class ApiSurchargeController {
     @External() { oid }: TExternal,
     @Query() query: SurchargeGetManyQuery
   ): Promise<BaseResponse> {
-    const data = await this.apiSurchargeService.getMany(oid, query)
+    const data = await this.surchargeService.getMany(oid, query)
     return { data }
   }
 
   @Get('detail/:id')
   @UserPermission()
   async findOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
-    const data = await this.apiSurchargeService.getOne(oid, id)
+    const data = await this.surchargeService.getOne(oid, id)
   }
 
   @Post('create')
@@ -51,7 +51,7 @@ export class ApiSurchargeController {
     @External() { oid }: TExternal,
     @Body() body: SurchargeCreateBody
   ): Promise<BaseResponse> {
-    const data = await this.apiSurchargeService.createOne(oid, body)
+    const data = await this.surchargeService.createOne(oid, body)
     return { data }
   }
 
@@ -63,7 +63,7 @@ export class ApiSurchargeController {
     @Param() { id }: IdParam,
     @Body() body: SurchargeUpdateBody
   ): Promise<BaseResponse> {
-    const data = await this.apiSurchargeService.updateOne({ oid, surchargeId: id, body })
+    const data = await this.surchargeService.updateOne({ oid, surchargeId: id, body })
     return { data }
   }
 
@@ -74,7 +74,7 @@ export class ApiSurchargeController {
     @External() { oid }: TExternal,
     @Param() { id }: IdParam
   ): Promise<BaseResponse> {
-    const data = await this.apiSurchargeService.destroyOne({ oid, surchargeId: id })
+    const data = await this.surchargeService.destroyOne({ oid, surchargeId: id })
     return { data }
   }
 }

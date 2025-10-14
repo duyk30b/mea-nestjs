@@ -110,8 +110,8 @@ export class TicketAddTicketProcedureListService {
                   quantity: 1,
                   ticketItemId: ticketRegimenAdd.id,
                   positionInteractId: ticketRegimenAdd.regimenId,
-                  ticketItemExpectedPrice: ticketRegimenAdd.moneyAmountRegular,
-                  ticketItemActualPrice: ticketRegimenAdd.moneyAmountSale,
+                  ticketItemExpectedPrice: ticketRegimenAdd.expectedPrice,
+                  ticketItemActualPrice: ticketRegimenAdd.actualPrice,
                 }
               })
             })
@@ -134,14 +134,12 @@ export class TicketAddTicketProcedureListService {
                 ticketRegimenId: ticketRegimenAdd.id,
                 quantityRegular: ticketRegimenItemAdd.quantityRegular,
                 quantityUsed: 0,
-                quantityPaid: 0,
                 quantityActual: ticketRegimenAdd.isEffectTotalMoney
                   ? ticketRegimenItemAdd.quantityRegular
                   : 0,
                 moneyAmountRegular: ticketRegimenItemAdd.moneyAmountRegular,
                 moneyAmountSale: ticketRegimenItemAdd.moneyAmountSale,
                 moneyAmountUsed: 0,
-                moneyAmountPaid: 0,
                 moneyAmountActual: ticketRegimenAdd.isEffectTotalMoney
                   ? ticketRegimenItemAdd.moneyAmountSale
                   : 0,
@@ -245,8 +243,9 @@ export class TicketAddTicketProcedureListService {
               createdAt,
               moneyAmountUsed: 0,
               moneyAmountPaid: 0,
+              moneyAmountWallet: 0,
               moneyAmountActual: ticketRegimenAdd.isEffectTotalMoney
-                ? ticketRegimenAdd.moneyAmountSale
+                ? ticketRegimenAdd.actualPrice
                 : 0,
             } satisfies TicketRegimenInsertType
             return insert

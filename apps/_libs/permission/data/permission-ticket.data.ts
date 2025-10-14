@@ -204,6 +204,16 @@ export const permissionTicket: Permission[] = [
     rootId: PermissionId.PAYMENT,
   },
   {
+    id: PermissionId.TICKET_CHANGE_SURCHARGE_LIST,
+    level: 2,
+    code: PermissionId[PermissionId.TICKET_CHANGE_SURCHARGE_LIST],
+    isActive: 1,
+    pathId: `${PermissionId.PAYMENT}.${PermissionId.TICKET_CHANGE_SURCHARGE_LIST}`,
+    name: 'Chỉnh sửa phụ phí',
+    parentId: PermissionId.PAYMENT,
+    rootId: PermissionId.PAYMENT,
+  },
+  {
     id: PermissionId.TICKET_CLOSE,
     level: 2,
     code: PermissionId[PermissionId.TICKET_CLOSE],

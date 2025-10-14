@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { BusinessError } from '../../../../_libs/database/common/error'
-import { SurchargeRepository } from '../../../../_libs/database/repositories/surcharge.repository'
+import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
+import { BusinessError } from '../../../../../_libs/database/common/error'
+import { SurchargeRepository } from '../../../../../_libs/database/repositories/surcharge.repository'
+import { SocketEmitService } from '../../../socket/socket-emit.service'
 import {
   SurchargeCreateBody,
   SurchargeGetManyQuery,
@@ -10,8 +11,11 @@ import {
 } from './request'
 
 @Injectable()
-export class ApiSurchargeService {
-  constructor(private readonly surchargeRepository: SurchargeRepository) { }
+export class SurchargeService {
+  constructor(
+    private readonly socketEmitService: SocketEmitService,
+    private readonly surchargeRepository: SurchargeRepository
+  ) { }
 
   async pagination(oid: number, query: SurchargePaginationQuery) {
     const { page, limit, filter, sort, relation } = query
@@ -61,6 +65,7 @@ export class ApiSurchargeService {
       ...body,
       code,
     })
+    this.socketEmitService.socketMasterDataChange(oid, { surcharge: true })
     return { surcharge }
   }
 
@@ -82,13 +87,14 @@ export class ApiSurchargeService {
       { id: surchargeId, oid },
       body
     )
+    this.socketEmitService.socketMasterDataChange(oid, { surcharge: true })
     return { surcharge }
   }
 
   async destroyOne(options: { oid: number; surchargeId: number }) {
     const { oid, surchargeId } = options
     await this.surchargeRepository.delete({ oid, id: surchargeId })
-
+    this.socketEmitService.socketMasterDataChange(oid, { surcharge: true })
     return { surchargeId }
   }
 }

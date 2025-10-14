@@ -5,19 +5,19 @@ import {
   IsEnumValue,
   IsNumberGreaterThan,
 } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType } from '../../../../../../_libs/database/common/variable'
+import { DiscountType, PaymentMoneyStatus } from '../../../../../../_libs/database/common/variable'
 import { TicketItemType } from '../../../../../../_libs/database/entities/payment-ticket-item.entity'
 
 class TicketItemBody {
   @Expose()
   @IsDefined()
-  @IsString()
-  ticketItemId: string
+  @IsEnumValue(TicketItemType)
+  ticketItemType: TicketItemType
 
   @Expose()
   @IsDefined()
-  @IsEnumValue(TicketItemType)
-  ticketItemType: TicketItemType
+  @IsString()
+  ticketItemId: string
 
   @Expose()
   @IsDefined()
@@ -48,6 +48,11 @@ class TicketItemBody {
   @Expose()
   @IsDefined()
   quantity: number
+
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(PaymentMoneyStatus)
+  paymentMoneyStatus: PaymentMoneyStatus
 }
 
 export class CustomerPrepaymentTicketItemListBody {
@@ -79,7 +84,47 @@ export class CustomerPrepaymentTicketItemListBody {
   @Type(() => TicketItemBody)
   @IsArray()
   @ValidateNested({ each: true })
-  ticketItemList: TicketItemBody[]
+  ticketRegimenBodyList: TicketItemBody[]
+
+  @ApiProperty({ type: TicketItemBody, isArray: true })
+  @Expose()
+  @IsDefined()
+  @Type(() => TicketItemBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketProcedureBodyList: TicketItemBody[]
+
+  @ApiProperty({ type: TicketItemBody, isArray: true })
+  @Expose()
+  @IsDefined()
+  @Type(() => TicketItemBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketProductConsumableBodyList: TicketItemBody[]
+
+  @ApiProperty({ type: TicketItemBody, isArray: true })
+  @Expose()
+  @IsDefined()
+  @Type(() => TicketItemBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketProductPrescriptionBodyList: TicketItemBody[]
+
+  @ApiProperty({ type: TicketItemBody, isArray: true })
+  @Expose()
+  @IsDefined()
+  @Type(() => TicketItemBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketLaboratoryBodyList: TicketItemBody[]
+
+  @ApiProperty({ type: TicketItemBody, isArray: true })
+  @Expose()
+  @IsDefined()
+  @Type(() => TicketItemBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketRadiologyBodyList: TicketItemBody[]
 }
 
 export class CustomerRefundTicketItemListBody {
@@ -111,5 +156,45 @@ export class CustomerRefundTicketItemListBody {
   @Type(() => TicketItemBody)
   @IsArray()
   @ValidateNested({ each: true })
-  ticketItemList: TicketItemBody[]
+  ticketRegimenBodyList: TicketItemBody[]
+
+  @ApiProperty({ type: TicketItemBody, isArray: true })
+  @Expose()
+  @IsDefined()
+  @Type(() => TicketItemBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketProcedureBodyList: TicketItemBody[]
+
+  @ApiProperty({ type: TicketItemBody, isArray: true })
+  @Expose()
+  @IsDefined()
+  @Type(() => TicketItemBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketProductConsumableBodyList: TicketItemBody[]
+
+  @ApiProperty({ type: TicketItemBody, isArray: true })
+  @Expose()
+  @IsDefined()
+  @Type(() => TicketItemBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketProductPrescriptionBodyList: TicketItemBody[]
+
+  @ApiProperty({ type: TicketItemBody, isArray: true })
+  @Expose()
+  @IsDefined()
+  @Type(() => TicketItemBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketLaboratoryBodyList: TicketItemBody[]
+
+  @ApiProperty({ type: TicketItemBody, isArray: true })
+  @Expose()
+  @IsDefined()
+  @Type(() => TicketItemBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketRadiologyBodyList: TicketItemBody[]
 }

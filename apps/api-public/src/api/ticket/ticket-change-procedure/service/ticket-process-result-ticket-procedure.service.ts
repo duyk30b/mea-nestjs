@@ -110,6 +110,14 @@ export class TicketProcessResultTicketProcedureService {
         ticketId,
         id: ticketProcedureId,
       })
+      let ticketRegimenOrigin: TicketRegimen
+      if (ticketProcedureOrigin.ticketProcedureType === TicketProcedureType.InRegimen) {
+        ticketRegimenOrigin = await this.ticketRegimenRepository.managerFindOneBy(manager, {
+          oid,
+          ticketId,
+          id: ticketProcedureOrigin.ticketRegimenId,
+        })
+      }
 
       let ticketModified = ticketOrigin
       let imageIds = ticketProcedureOrigin.imageIds
@@ -344,12 +352,62 @@ export class TicketProcessResultTicketProcedureService {
           return acc + cur.quantity * cur.commissionMoney
         }, 0)
 
+      // === Tính toán việc trả tiền ===
       let paymentMoneyStatus = ticketProcedureOrigin.paymentMoneyStatus
-      if (paymentMoneyStatus === PaymentMoneyStatus.NoEffect) {
-        if (ticketOrigin.isPaymentEachItem) {
-          paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
-        } else {
-          paymentMoneyStatus = PaymentMoneyStatus.TicketPaid
+      let ticketProcedureStatus = ticketProcedureOrigin.status
+      // 1. Với trường hợp hoàn thành
+      if (!ticketProcedureOrigin.completedAt && ticketProcedureResult.completedAt) {
+        ticketProcedureStatus = TicketProcedureStatus.Completed
+        const moneyAmountTemp = ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice
+        // Không cần làm việc với trường hợp cập nhật hoàn thành
+        if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.NoEffect) {
+          if (ticketOrigin.isPaymentEachItem) {
+            if (ticketRegimenOrigin.moneyAmountWallet >= moneyAmountTemp) {
+              paymentMoneyStatus = PaymentMoneyStatus.FullPaid
+            } else {
+              paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
+            }
+          } else {
+            paymentMoneyStatus = PaymentMoneyStatus.TicketPaid
+          }
+        }
+        if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.PendingPayment) {
+          if (ticketRegimenOrigin.moneyAmountWallet >= moneyAmountTemp) {
+            paymentMoneyStatus = PaymentMoneyStatus.FullPaid
+          } else {
+            paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
+          }
+        }
+      }
+      // 2. Với trường hợp hủy
+      if (ticketProcedureOrigin.completedAt && !ticketProcedureResult.completedAt) {
+        if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.TicketPaid) {
+          if (ticketRegimenOrigin.isEffectTotalMoney) {
+            paymentMoneyStatus = PaymentMoneyStatus.TicketPaid
+            ticketProcedureStatus = TicketProcedureStatus.Pending
+          } else {
+            paymentMoneyStatus = PaymentMoneyStatus.NoEffect
+            ticketProcedureStatus = TicketProcedureStatus.NoEffect
+          }
+        }
+        if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.FullPaid) {
+          if (ticketRegimenOrigin.isEffectTotalMoney) {
+            paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
+            ticketProcedureStatus = TicketProcedureStatus.Pending
+          } else {
+            paymentMoneyStatus = PaymentMoneyStatus.NoEffect
+            ticketProcedureStatus = TicketProcedureStatus.NoEffect
+          }
+        }
+        // Hủy cũng có thể đang PendingPayment, vì hoàn thành rồi cũng có thể đang chưa thanh toán
+        if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.PendingPayment) {
+          if (ticketRegimenOrigin.isEffectTotalMoney) {
+            paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
+            ticketProcedureStatus = TicketProcedureStatus.Pending
+          } else {
+            paymentMoneyStatus = PaymentMoneyStatus.NoEffect
+            ticketProcedureStatus = TicketProcedureStatus.NoEffect
+          }
         }
       }
 
@@ -362,20 +420,26 @@ export class TicketProcessResultTicketProcedureService {
           imageIds,
           result: ticketProcedureResult.result,
           completedAt: ticketProcedureResult.completedAt,
-          status: ticketProcedureResult.completedAt
-            ? TicketProcedureStatus.Completed
-            : TicketProcedureStatus.Pending,
+          status: ticketProcedureStatus,
           paymentMoneyStatus,
         }
       )
 
       let procedureMoneyAdd = 0
       let itemsDiscountAdd = 0
-      if (ticketProcedureOrigin.status === TicketProcedureStatus.NoEffect) {
-        // Trường hợp Pending vẫn tính tiền rồi (nên không cộng vào nữa)
-        procedureMoneyAdd = ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice
-        itemsDiscountAdd = ticketProcedureOrigin.quantity * ticketProcedureOrigin.discountMoney
+      if (!ticketProcedureOrigin.completedAt && ticketProcedureModified.completedAt) {
+        if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.NoEffect) {
+          procedureMoneyAdd = ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice
+          itemsDiscountAdd = ticketProcedureOrigin.quantity * ticketProcedureOrigin.discountMoney
+        }
       }
+      if (ticketProcedureOrigin.completedAt && !ticketProcedureModified.completedAt) {
+        if (ticketProcedureModified.paymentMoneyStatus === PaymentMoneyStatus.NoEffect) {
+          procedureMoneyAdd = -ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice
+          itemsDiscountAdd = -ticketProcedureOrigin.quantity * ticketProcedureOrigin.discountMoney
+        }
+      }
+
       if (
         itemsCostAmountAdd !== 0
         || commissionMoneyAdd !== 0
@@ -396,94 +460,152 @@ export class TicketProcessResultTicketProcedureService {
       }
 
       if (ticketProcedureModified.ticketProcedureType === TicketProcedureType.InRegimen) {
-        let moneyAmountActual = 0
-        let quantityActual = 0
-        if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.NoEffect) {
-          moneyAmountActual = ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice
-          quantityActual = ticketProcedureOrigin.quantity
+        // === 1. Xử lý cho TicketRegimenItem ===
+        if (ticketProcedureOrigin.ticketRegimenItemId) {
+          let quantityUsedAdd = 0
+          let moneyAmountUsedAdd = 0
+          let quantityActualAdd = 0
+          let moneyAmountActualAdd = 0
+
+          // Trường hợp hoàn thành
+          if (!ticketProcedureOrigin.completedAt && ticketProcedureModified.completedAt) {
+            quantityUsedAdd = ticketProcedureModified.quantity
+            moneyAmountUsedAdd =
+              ticketProcedureModified.quantity * ticketProcedureModified.actualPrice
+            if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.NoEffect) {
+              quantityActualAdd = ticketProcedureModified.quantity
+              moneyAmountActualAdd =
+                ticketProcedureModified.quantity * ticketProcedureModified.actualPrice
+            }
+          }
+
+          // Trường hợp hủy
+          if (ticketProcedureOrigin.completedAt && !ticketProcedureModified.completedAt) {
+            quantityUsedAdd = -ticketProcedureModified.quantity
+            moneyAmountUsedAdd =
+              -ticketProcedureModified.quantity * ticketProcedureModified.actualPrice
+            if (ticketProcedureModified.paymentMoneyStatus === PaymentMoneyStatus.NoEffect) {
+              quantityActualAdd = -ticketProcedureModified.quantity
+              moneyAmountActualAdd =
+                -ticketProcedureModified.quantity * ticketProcedureModified.actualPrice
+            }
+          }
+          if (
+            quantityUsedAdd != 0
+            || moneyAmountUsedAdd != 0
+            || quantityActualAdd != 0
+            || moneyAmountActualAdd != 0
+          ) {
+            ticketRegimenItemModified = await this.ticketRegimenItemRepository.managerUpdateOne(
+              manager,
+              { oid, id: ticketProcedureModified.ticketRegimenItemId },
+              {
+                quantityUsed: () => `quantityUsed + ${quantityUsedAdd}`,
+                moneyAmountUsed: () => `moneyAmountUsed + ${moneyAmountUsedAdd}`,
+                quantityActual: () => `quantityActual + ${quantityActualAdd}`,
+                moneyAmountActual: () => `moneyAmountActual + ${moneyAmountActualAdd}`,
+              }
+            )
+          }
         }
 
-        if (
-          [TicketProcedureStatus.NoEffect, TicketProcedureStatus.Pending].includes(
-            ticketProcedureOrigin.status
-          )
-          && ticketProcedureModified.status === TicketProcedureStatus.Completed
-        ) {
-          ticketRegimenItemModified = await this.ticketRegimenItemRepository.managerUpdateOne(
+        // === 2. Xử lý cho TicketRegimen ===
+        if (ticketProcedureOrigin.ticketRegimenId) {
+          const { ticketRegimenId } = ticketProcedureOrigin
+          let ticketRegimenStatus = TicketRegimenStatus.Executing
+          const ticketRegimenItemList = await this.ticketRegimenItemRepository.managerFindManyBy(
             manager,
-            { oid, id: ticketProcedureModified.ticketRegimenItemId },
-            {
-              quantityUsed: () => `quantityUsed + ${ticketProcedureModified.quantity}`,
-              moneyAmountUsed: () =>
-                `moneyAmountUsed + ${ticketProcedureModified.quantity * ticketProcedureModified.actualPrice}`,
-              moneyAmountActual: () => `moneyAmountActual + ${moneyAmountActual}`,
-              quantityActual: () => `quantityActual + ${quantityActual}`,
-            }
+            { oid, ticketId, ticketRegimenId }
           )
-        }
-        if (
-          ticketProcedureOrigin.status === TicketProcedureStatus.Completed
-          && ticketProcedureModified.status === TicketProcedureStatus.Pending
-        ) {
-          ticketRegimenItemModified = await this.ticketRegimenItemRepository.managerUpdateOne(
-            manager,
-            { oid, id: ticketProcedureModified.ticketRegimenItemId },
-            {
-              quantityUsed: () => `quantityUsed - ${ticketProcedureModified.quantity}`,
-              moneyAmountUsed: () =>
-                `moneyAmountUsed - ${ticketProcedureModified.quantity * ticketProcedureModified.actualPrice}`,
-            }
-          )
-        }
+          if (ticketRegimenItemList.every((i) => i.quantityUsed === i.quantityRegular)) {
+            ticketRegimenStatus = TicketRegimenStatus.Completed
+          }
+          if (ticketRegimenItemList.every((i) => i.quantityUsed === 0)) {
+            ticketRegimenStatus = TicketRegimenStatus.Pending
+          }
 
-        const { ticketRegimenId } = ticketProcedureOrigin
+          let moneyAmountUsedAdd = 0
+          let moneyAmountActualAdd = 0
+          let moneyAmountPaidAdd = 0
+          let moneyAmountWalletAdd = 0
 
-        let ticketRegimenStatus = TicketRegimenStatus.Executing
-        const ticketRegimenItemList = await this.ticketRegimenItemRepository.managerFindManyBy(
-          manager,
-          { oid, ticketId, ticketRegimenId }
-        )
-        if (ticketRegimenItemList.every((i) => i.quantityUsed === i.quantityRegular)) {
-          ticketRegimenStatus = TicketRegimenStatus.Completed
-        }
-        if (ticketRegimenItemList.every((i) => i.quantityUsed === 0)) {
-          ticketRegimenStatus = TicketRegimenStatus.Pending
-        }
+          if (!ticketProcedureOrigin.completedAt && ticketProcedureModified.completedAt) {
+            const moneyAmountTemp =
+              ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice
+            moneyAmountUsedAdd = moneyAmountTemp
+            // Không cần làm việc với trường hợp cập nhật hoàn thành
+            if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.NoEffect) {
+              moneyAmountActualAdd = moneyAmountTemp
+              if (ticketOrigin.isPaymentEachItem) {
+                if (ticketRegimenOrigin.moneyAmountWallet >= moneyAmountTemp) {
+                  moneyAmountPaidAdd = moneyAmountTemp
+                  moneyAmountWalletAdd = -moneyAmountTemp
+                }
+              }
+            }
+            if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.PendingPayment) {
+              if (ticketRegimenOrigin.moneyAmountWallet >= moneyAmountTemp) {
+                moneyAmountPaidAdd = moneyAmountTemp
+                moneyAmountWalletAdd = -moneyAmountTemp
+              }
+            }
+          }
+          // 2. Với trường hợp hủy
+          if (ticketProcedureOrigin.completedAt && !ticketProcedureModified.completedAt) {
+            const moneyAmountTemp =
+              ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice
+            moneyAmountUsedAdd = -moneyAmountTemp
 
-        if (
-          [TicketProcedureStatus.NoEffect, TicketProcedureStatus.Pending].includes(
-            ticketProcedureOrigin.status
-          )
-          && ticketProcedureModified.status === TicketProcedureStatus.Completed
-        ) {
-          ticketRegimenModified = await this.ticketRegimenRepository.managerUpdateOne(
-            manager,
-            { oid, id: ticketProcedureModified.ticketRegimenId },
-            {
-              status: ticketRegimenStatus,
-              costAmount: () => `costAmount + ${itemsCostAmountAdd}`,
-              commissionAmount: () => `commissionAmount + ${commissionMoneyAdd}`,
-              moneyAmountUsed: () =>
-                `moneyAmountUsed + ${ticketProcedureModified.quantity * ticketProcedureModified.actualPrice}`,
-              moneyAmountActual: () => `moneyAmountActual + ${moneyAmountActual}`,
+            if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.TicketPaid) {
+              if (ticketRegimenOrigin.isEffectTotalMoney) {
+              } else {
+                // ticketProcedureModified.paymentMoneyStatus === PaymentMoneyStatus.NoEffect
+                moneyAmountActualAdd = -moneyAmountTemp
+              }
             }
-          )
-        }
-        if (
-          ticketProcedureOrigin.status === TicketProcedureStatus.Completed
-          && ticketProcedureModified.status === TicketProcedureStatus.Pending
-        ) {
-          ticketRegimenModified = await this.ticketRegimenRepository.managerUpdateOne(
-            manager,
-            { oid, id: ticketProcedureModified.ticketRegimenId },
-            {
-              status: ticketRegimenStatus,
-              costAmount: () => `costAmount + ${itemsCostAmountAdd}`,
-              commissionAmount: () => `commissionAmount + ${commissionMoneyAdd}`,
-              moneyAmountUsed: () =>
-                `moneyAmountUsed - ${ticketProcedureModified.quantity * ticketProcedureModified.actualPrice}`,
+            if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.FullPaid) {
+              if (ticketRegimenOrigin.isEffectTotalMoney) {
+                // ticketProcedureModified.paymentMoneyStatus === PaymentMoneyStatus.Pending
+              } else {
+                // ticketProcedureModified.paymentMoneyStatus === PaymentMoneyStatus.NoEffect
+                moneyAmountActualAdd = -moneyAmountTemp
+                moneyAmountPaidAdd = -moneyAmountTemp
+                moneyAmountWalletAdd = moneyAmountTemp
+              }
             }
-          )
+            // Hủy cũng có thể đang PendingPayment, vì hoàn thành rồi cũng có thể đang chưa thanh toán
+            if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.PendingPayment) {
+              if (ticketRegimenOrigin.isEffectTotalMoney) {
+              } else {
+                // ticketProcedureModified.paymentMoneyStatus === PaymentMoneyStatus.NoEffect
+                moneyAmountActualAdd = -moneyAmountTemp
+              }
+            }
+          }
+
+          if (
+            ticketRegimenStatus !== ticketRegimenOrigin.status
+            || itemsCostAmountAdd !== 0
+            || commissionMoneyAdd !== 0
+            || moneyAmountActualAdd !== 0
+            || moneyAmountUsedAdd !== 0
+            || moneyAmountPaidAdd !== 0
+            || moneyAmountWalletAdd !== 0
+          ) {
+            ticketRegimenModified = await this.ticketRegimenRepository.managerUpdateOne(
+              manager,
+              { oid, id: ticketProcedureModified.ticketRegimenId },
+              {
+                status: ticketRegimenStatus,
+                costAmount: () => `costAmount + ${itemsCostAmountAdd}`,
+                commissionAmount: () => `commissionAmount + ${commissionMoneyAdd}`,
+                moneyAmountActual: () => `moneyAmountActual + ${moneyAmountActualAdd}`,
+                moneyAmountUsed: () => `moneyAmountUsed + ${moneyAmountUsedAdd}`,
+                moneyAmountPaid: () => `moneyAmountPaid + ${moneyAmountPaidAdd}`,
+                moneyAmountWallet: () => `moneyAmountWallet + ${moneyAmountWalletAdd}`,
+              }
+            )
+          }
         }
       }
 

@@ -132,10 +132,10 @@ export class TicketDestroyTicketProcedureService {
           manager,
           { oid, id: ticketProcedureDestroyed.ticketRegimenId },
           {
-            moneyAmountRegular: () =>
-              `moneyAmountRegular - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.expectedPrice}`,
-            moneyAmountSale: () =>
-              `moneyAmountSale - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.actualPrice}`,
+            expectedPrice: () =>
+              `expectedPrice - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.expectedPrice}`,
+            actualPrice: () =>
+              `actualPrice - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.actualPrice}`,
             moneyAmountActual: () => `moneyAmountActual - ${moneyAmountActual}`,
             discountMoney: () =>
               `discountMoney - ${ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.discountMoney}`,

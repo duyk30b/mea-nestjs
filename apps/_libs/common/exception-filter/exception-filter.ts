@@ -140,7 +140,7 @@ export class ServerExceptionFilter implements ExceptionFilter {
         method,
         path: urlParse.pathname,
         query: urlParse.query,
-        body,
+        // body,
         external: basicExternal,
         errors,
       }

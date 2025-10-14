@@ -47,10 +47,6 @@ export default class TicketRegimenItem {
 
   @Column({ type: 'smallint', default: 0 })
   @Expose()
-  quantityPaid: number // Số buổi đã thanh toán
-
-  @Column({ type: 'smallint', default: 0 })
-  @Expose()
   quantityUsed: number // Số buổi đã sử dụng
 
   @Column({ default: 0 })
@@ -64,10 +60,6 @@ export default class TicketRegimenItem {
   @Column({ default: 0 })
   @Expose()
   moneyAmountActual: number // Tổng tiền cần phải thanh toán
-
-  @Column({ default: 0 })
-  @Expose()
-  moneyAmountPaid: number // Tổng tiền đã thanh toán
 
   @Column({ default: 0 })
   @Expose()

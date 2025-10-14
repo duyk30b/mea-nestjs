@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, Repository } from 'typeorm'
-import { PaymentMoneyStatus } from '../common/variable'
-import { TicketLaboratory, TicketLaboratoryGroup } from '../entities'
+import { TicketLaboratoryGroup } from '../entities'
 import {
   TicketLaboratoryGroupInsertType,
   TicketLaboratoryGroupRelationType,
@@ -22,26 +21,6 @@ export class TicketLaboratoryGroupManager extends _PostgreSqlManager<
 > {
   constructor() {
     super(TicketLaboratoryGroup)
-  }
-
-  calculatorPaymentMoneyStatus(options: { ticketLaboratoryList?: TicketLaboratory[] }) {
-    const { ticketLaboratoryList } = options
-
-    let paymentMoneyStatus = PaymentMoneyStatus.TicketPaid
-    const hasPaid = ticketLaboratoryList.some((i) => {
-      return (
-        i.paymentMoneyStatus === PaymentMoneyStatus.FullPaid
-        || i.paymentMoneyStatus === PaymentMoneyStatus.PartialPaid
-      )
-    })
-    const hasPending = ticketLaboratoryList.some((i) => {
-      return i.paymentMoneyStatus === PaymentMoneyStatus.PendingPayment
-    })
-    if (hasPaid && !hasPending) paymentMoneyStatus = PaymentMoneyStatus.FullPaid
-    if (!hasPaid && hasPending) paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
-    if (hasPaid && hasPending) paymentMoneyStatus = PaymentMoneyStatus.PartialPaid
-
-    return { paymentMoneyStatus }
   }
 }
 

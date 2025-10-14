@@ -51,11 +51,11 @@ export default class TicketRegimen {
 
   @Column({ default: 0 })
   @Expose()
-  moneyAmountRegular: number // Giá gốc
+  expectedPrice: number // Giá gốc
 
   @Column({ default: 0 })
   @Expose()
-  moneyAmountSale: number
+  actualPrice: number
 
   @Column({ default: 0 })
   @Expose()
@@ -63,11 +63,15 @@ export default class TicketRegimen {
 
   @Column({ default: 0 })
   @Expose()
-  moneyAmountUsed: number
+  moneyAmountUsed: number // Tiền TicketProcedure đã được trả và đã sử dụng
 
   @Column({ default: 0 })
   @Expose()
-  moneyAmountPaid: number
+  moneyAmountPaid: number // Tiền TicketProcedure đã được trả
+
+  @Column({ default: 0 })
+  @Expose()
+  moneyAmountWallet: number // Tiền chờ, chưa chuyển sang TicketProcedure
 
   @Column({ type: 'varchar', length: 25, default: DiscountType.VND })
   @Expose()

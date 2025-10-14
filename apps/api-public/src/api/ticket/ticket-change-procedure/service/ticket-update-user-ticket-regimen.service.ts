@@ -69,8 +69,8 @@ export class TicketUpdateUserTicketRegimenOperation {
             quantity: 1,
             ticketItemId: ticketRegimenId,
             positionInteractId: ticketRegimenOrigin.regimenId,
-            ticketItemExpectedPrice: ticketRegimenOrigin.moneyAmountRegular,
-            ticketItemActualPrice: ticketRegimenOrigin.moneyAmountSale,
+            ticketItemExpectedPrice: ticketRegimenOrigin.expectedPrice,
+            ticketItemActualPrice: ticketRegimenOrigin.actualPrice,
           }
         }),
       })

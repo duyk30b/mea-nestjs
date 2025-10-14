@@ -24,14 +24,14 @@ class TicketRegimenBasicBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  moneyAmountRegular: number
+  expectedPrice: number
 
   @ApiProperty({ example: 22_500 })
   @Expose()
   @Transform(({ value }) => Math.round(value || 0))
   @IsDefined()
   @IsNumber()
-  moneyAmountSale: number
+  actualPrice: number
 
   @ApiProperty({ example: 22_500 })
   @Expose()

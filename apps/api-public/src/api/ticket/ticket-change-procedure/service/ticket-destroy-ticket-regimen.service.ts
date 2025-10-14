@@ -63,6 +63,7 @@ export class TicketDestroyTicketRegimenService {
       if (
         ticketRegimenDestroyed.moneyAmountUsed !== 0
         || ticketRegimenDestroyed.moneyAmountPaid !== 0
+        || ticketRegimenDestroyed.moneyAmountWallet !== 0
         || ticketRegimenDestroyed.costAmount !== 0
       ) {
         throw new BusinessError('Liệu trình đã sử dụng tiền không thể xóa')
@@ -77,9 +78,6 @@ export class TicketDestroyTicketRegimenService {
       ticketRegimenItemDestroyedList.forEach((i) => {
         if (i.quantityUsed > 0 || i.moneyAmountUsed > 0) {
           throw new BusinessError('Không thể xóa liệu trình có buổi hoàn thành')
-        }
-        if (i.quantityPaid > 0 || i.moneyAmountPaid) {
-          throw new BusinessError('Không thể xóa liệu trình có buổi đã thanh toán')
         }
       })
 

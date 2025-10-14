@@ -92,8 +92,8 @@ export class TicketUpdateMoneyTicketRegimenService {
               quantity: 1,
               ticketItemId: ticketRegimenId,
               positionInteractId: ticketRegimenOrigin.regimenId,
-              ticketItemExpectedPrice: ticketRegimenUpdate.moneyAmountRegular,
-              ticketItemActualPrice: ticketRegimenUpdate.moneyAmountSale,
+              ticketItemExpectedPrice: ticketRegimenUpdate.expectedPrice,
+              ticketItemActualPrice: ticketRegimenUpdate.actualPrice,
             }
           }),
         })
@@ -112,10 +112,10 @@ export class TicketUpdateMoneyTicketRegimenService {
         manager,
         { oid, id: ticketRegimenId },
         {
-          moneyAmountRegular: ticketRegimenUpdate.moneyAmountRegular,
-          moneyAmountSale: ticketRegimenUpdate.moneyAmountSale,
+          expectedPrice: ticketRegimenUpdate.expectedPrice,
+          actualPrice: ticketRegimenUpdate.actualPrice,
           moneyAmountActual: ticketRegimenOrigin.isEffectTotalMoney
-            ? ticketRegimenUpdate.moneyAmountSale
+            ? ticketRegimenUpdate.actualPrice
             : 0,
           discountType: ticketRegimenUpdate.discountType,
           discountMoney: ticketRegimenUpdate.discountMoney,

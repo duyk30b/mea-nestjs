@@ -834,7 +834,7 @@ export abstract class _PostgreSqlRepository<
         console.log(`Update ${tableName} failed, tempList: `, tempList)
         throw new Error(
           `Update ${tableName} failed: `
-          + `modifiedRaw[0].length = ${modifiedRaw[0].length}`
+          + `modifiedRaw[0].length = ${modifiedRaw[0].length}, `
           + `tempList.length = ${tempList.length}`
         )
       }

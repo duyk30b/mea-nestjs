@@ -28,6 +28,7 @@ export class TicketChangeItemMoneyManager {
       itemsCostAmountAdd?: number
       itemsDiscountAdd?: number
 
+      surchargeMoneyAdd?: number
       commissionMoneyAdd?: number
     }
     other?: {
@@ -60,16 +61,21 @@ export class TicketChangeItemMoneyManager {
     const commissionMoneyUpdate = ticketOrigin.commissionMoney + (itemMoney.commissionMoneyAdd || 0)
 
     const discountType = ticketOrigin.discountType
-    let discountPercent = ticketOrigin.discountPercent
-    let discountMoney = ticketOrigin.discountMoney
+    let discountPercentUpdate = ticketOrigin.discountPercent
+    let discountMoneyUpdate = ticketOrigin.discountMoney
     if (discountType === DiscountType.VND) {
-      discountPercent =
-        itemsActualMoneyUpdate == 0 ? 0 : Math.floor((discountMoney * 100) / itemsActualMoneyUpdate)
+      discountPercentUpdate =
+        itemsActualMoneyUpdate == 0
+          ? 0
+          : Math.floor((discountMoneyUpdate * 100) / itemsActualMoneyUpdate)
     }
     if (discountType === DiscountType.Percent) {
-      discountMoney = Math.floor((discountPercent * itemsActualMoneyUpdate) / 100)
+      discountMoneyUpdate = Math.floor((discountPercentUpdate * itemsActualMoneyUpdate) / 100)
     }
-    const totalMoneyUpdate = itemsActualMoneyUpdate - discountMoney + ticketOrigin.surcharge
+
+    const surchargeUpdate = ticketOrigin.surcharge + (itemMoney.surchargeMoneyAdd || 0)
+
+    const totalMoneyUpdate = itemsActualMoneyUpdate - discountMoneyUpdate + surchargeUpdate
     const debtUpdate = totalMoneyUpdate - ticketOrigin.paid
     const profitUpdate =
       totalMoneyUpdate - itemsCostAmountUpdate - ticketOrigin.expense - commissionMoneyUpdate
@@ -94,8 +100,9 @@ export class TicketChangeItemMoneyManager {
         itemsActualMoney: itemsActualMoneyUpdate,
         itemsDiscount: itemsDiscountUpdate,
 
-        discountPercent,
-        discountMoney,
+        discountPercent: discountPercentUpdate,
+        discountMoney: discountMoneyUpdate,
+        surcharge: surchargeUpdate,
         totalMoney: totalMoneyUpdate,
         debt: debtUpdate,
         profit: profitUpdate,
