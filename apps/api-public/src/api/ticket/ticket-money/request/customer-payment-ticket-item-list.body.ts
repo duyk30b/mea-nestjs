@@ -51,6 +51,10 @@ class TicketItemBody {
 
   @Expose()
   @IsDefined()
+  sessionIndex: number
+
+  @Expose()
+  @IsDefined()
   @IsEnumValue(PaymentMoneyStatus)
   paymentMoneyStatus: PaymentMoneyStatus
 }

@@ -6041,6 +6041,11 @@ __decorate([
     __metadata("design:type", Number)
 ], PaymentTicketItem.prototype, "interactId", void 0);
 __decorate([
+    (0, typeorm_1.Column)({ type: 'smallint', default: 0 }),
+    (0, class_transformer_1.Expose)(),
+    __metadata("design:type", Number)
+], PaymentTicketItem.prototype, "sessionIndex", void 0);
+__decorate([
     (0, typeorm_1.Column)({
         type: 'bigint',
         default: 0,
@@ -17843,7 +17848,7 @@ let TicketReopenOperation = class TicketReopenOperation {
     async reopen(params) {
         const { oid, userId, ticketId, time, note } = params;
         const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-            const ticketModified = await this.ticketManager.updateOneAndReturnEntity(manager, { oid, id: ticketId }, { endedAt: null, status: ticket_entity_1.TicketStatus.Executing });
+            const ticketModified = await this.ticketManager.updateOneAndReturnEntity(manager, { oid, id: ticketId, status: { IN: [ticket_entity_1.TicketStatus.Debt, ticket_entity_1.TicketStatus.Completed] } }, { endedAt: null, status: ticket_entity_1.TicketStatus.Executing });
             let customerModified;
             const paymentCreatedList = [];
             if (ticketModified.debt > 0) {
@@ -17906,6 +17911,7 @@ exports.TicketReturnProductOperation = void 0;
 const common_1 = __webpack_require__(3);
 const typeorm_1 = __webpack_require__(18);
 const array_helper_1 = __webpack_require__(164);
+const error_1 = __webpack_require__(14);
 const variable_1 = __webpack_require__(21);
 const position_entity_1 = __webpack_require__(81);
 const ticket_entity_1 = __webpack_require__(60);
@@ -17945,6 +17951,9 @@ let TicketReturnProductOperation = class TicketReturnProductOperation {
                         quantityReturn: i.quantity,
                     };
                 });
+                if (!returnList.length) {
+                    return { ticket: ticketOrigin };
+                }
             }
             else {
                 ticketBatchOriginList = await this.ticketBatchManager.findManyBy(manager, {
@@ -17953,6 +17962,9 @@ let TicketReturnProductOperation = class TicketReturnProductOperation {
                     ticketId,
                     deliveryStatus: variable_1.DeliveryStatus.Delivered,
                 });
+                if (ticketBatchOriginList.length !== returnList.length) {
+                    throw new error_1.BusinessError('Thông tin hoàn trả không đúng');
+                }
             }
             const ticketBatchOriginMap = array_helper_1.ESArray.arrayToKeyValue(ticketBatchOriginList, 'id');
             const ticketProductOriginList = await this.ticketProductManager.findManyBy(manager, {
@@ -70700,13 +70712,15 @@ let TicketChangeReceptionService = class TicketChangeReceptionService {
             oid,
             ticketId: ticket.id,
         });
-        const ticketReceptionFind = ticketReceptionList.find((i) => {
+        const findIndex = ticketReceptionList.findIndex((i) => {
             return i.id === ticketReceptionId && !i.isFirstReception;
         });
-        if (!ticketReceptionFind) {
+        if (findIndex === -1) {
             throw new error_1.BusinessError('Phiếu khám đã hoạt động, không thể xóa');
         }
         await this.ticketReceptionRepository.deleteOneAndReturnEntity({ oid, id: ticketReceptionId });
+        ticketReceptionList.splice(findIndex, 1);
+        ticket.ticketReceptionList = ticketReceptionList;
         this.socketEmitService.socketTicketChange(oid, {
             ticketId,
             ticketReception: { upsertedList: ticket.ticketReceptionList },
@@ -71161,6 +71175,11 @@ __decorate([
 __decorate([
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
+    __metadata("design:type", Number)
+], TicketItemBody.prototype, "sessionIndex", void 0);
+__decorate([
+    (0, class_transformer_1.Expose)(),
+    (0, class_validator_1.IsDefined)(),
     (0, class_validator_custom_1.IsEnumValue)(variable_1.PaymentMoneyStatus),
     __metadata("design:type", typeof (_c = typeof variable_1.PaymentMoneyStatus !== "undefined" && variable_1.PaymentMoneyStatus) === "function" ? _c : Object)
 ], TicketItemBody.prototype, "paymentMoneyStatus", void 0);
@@ -71563,6 +71582,7 @@ let TicketPrepaymentTicketItemListService = class TicketPrepaymentTicketItemList
                     discountType: i.discountType,
                     actualPrice: i.actualPrice,
                     quantity: i.quantity,
+                    sessionIndex: i.sessionIndex,
                 };
                 return inserter;
             });
@@ -71901,6 +71921,7 @@ let TicketRefundTicketItemListService = class TicketRefundTicketItemListService 
                     discountType: i.discountType,
                     actualPrice: i.actualPrice,
                     quantity: i.quantity,
+                    sessionIndex: i.sessionIndex,
                 };
                 return inserter;
             });

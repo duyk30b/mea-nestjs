@@ -49,6 +49,10 @@ export default class PaymentTicketItem {
   @Expose()
   interactId: number
 
+  @Column({ type: 'smallint', default: 0 })
+  @Expose()
+  sessionIndex: number
+
   @Column({
     type: 'bigint',
     default: 0,

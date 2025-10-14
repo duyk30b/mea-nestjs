@@ -166,6 +166,7 @@ export class TicketPrepaymentTicketItemListService {
           discountType: i.discountType,
           actualPrice: i.actualPrice,
           quantity: i.quantity,
+          sessionIndex: i.sessionIndex,
         }
         return inserter
       })

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { ESArray } from '../../../common/helpers/array.helper'
+import { BusinessError } from '../../common/error'
 import { DeliveryStatus, MovementType } from '../../common/variable'
 import { TicketBatch, TicketUser } from '../../entities'
 import { PositionType } from '../../entities/position.entity'
@@ -30,7 +31,7 @@ export class TicketReturnProductOperation {
     private ticketUseRepository: TicketUserRepository,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager,
     private productPutawayManager: ProductPutawayManager
-  ) { }
+  ) {}
 
   async returnProduct(data: {
     oid: number
@@ -69,6 +70,9 @@ export class TicketReturnProductOperation {
             quantityReturn: i.quantity,
           }
         })
+        if (!returnList.length) {
+          return { ticket: ticketOrigin }
+        }
       } else {
         ticketBatchOriginList = await this.ticketBatchManager.findManyBy(manager, {
           id: { IN: returnList.filter((i) => !!i.ticketBatchId).map((i) => i.ticketBatchId) },
@@ -76,6 +80,9 @@ export class TicketReturnProductOperation {
           ticketId,
           deliveryStatus: DeliveryStatus.Delivered,
         })
+        if (ticketBatchOriginList.length !== returnList.length) {
+          throw new BusinessError('Thông tin hoàn trả không đúng')
+        }
       }
 
       const ticketBatchOriginMap = ESArray.arrayToKeyValue(ticketBatchOriginList, 'id')
@@ -131,27 +138,27 @@ export class TicketReturnProductOperation {
         }),
         update: options?.changePendingIfNoStock
           ? {
-            quantity: (t: string, u: string) => ` CASE
+              quantity: (t: string, u: string) => ` CASE
                                     WHEN  ("quantity" = "${t}"."putawayQuantity")
                                       THEN "quantity"
                                     ELSE "${u}"."quantity" - "${t}"."putawayQuantity"
                                   END`,
-            costAmount: () => `"costAmount" - "putawayCostAmount"`,
-            deliveryStatus: (t: string) => ` CASE
+              costAmount: () => `"costAmount" - "putawayCostAmount"`,
+              deliveryStatus: (t: string) => ` CASE
                                     WHEN  ("quantity" = "${t}"."putawayQuantity")
                                       THEN ${DeliveryStatus.Pending}
                                     ELSE "deliveryStatus"
                                   END`,
-          }
+            }
           : {
-            quantity: () => `"quantity" - "putawayQuantity"`,
-            costAmount: () => `"costAmount" - "putawayCostAmount"`,
-            deliveryStatus: (t: string) => ` CASE
+              quantity: () => `"quantity" - "putawayQuantity"`,
+              costAmount: () => `"costAmount" - "putawayCostAmount"`,
+              deliveryStatus: (t: string) => ` CASE
                                     WHEN  ("quantity" = "${t}"."putawayQuantity")
                                       THEN ${DeliveryStatus.NoStock}
                                     ELSE "deliveryStatus"
                                   END`,
-          },
+            },
         options: { requireEqualLength: true },
       })
       const ticketProductModifiedMap = ESArray.arrayToKeyValue(ticketProductModifiedList, 'id')

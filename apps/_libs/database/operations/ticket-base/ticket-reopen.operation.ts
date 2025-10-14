@@ -32,7 +32,7 @@ export class TicketReopenOperation {
       // === 1. UPDATE TICKET FOR TRANSACTION ===
       const ticketModified = await this.ticketManager.updateOneAndReturnEntity(
         manager,
-        { oid, id: ticketId },
+        { oid, id: ticketId, status: { IN: [TicketStatus.Debt, TicketStatus.Completed] } },
         { endedAt: null, status: TicketStatus.Executing }
       )
 

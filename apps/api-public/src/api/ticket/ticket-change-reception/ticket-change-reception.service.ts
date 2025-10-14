@@ -252,15 +252,16 @@ export class TicketChangeReceptionService {
       oid,
       ticketId: ticket.id,
     })
-    const ticketReceptionFind = ticketReceptionList.find((i) => {
+    const findIndex = ticketReceptionList.findIndex((i) => {
       return i.id === ticketReceptionId && !i.isFirstReception
     })
-    if (!ticketReceptionFind) {
+    if (findIndex === -1) {
       throw new BusinessError('Phiếu khám đã hoạt động, không thể xóa')
     }
 
     await this.ticketReceptionRepository.deleteOneAndReturnEntity({ oid, id: ticketReceptionId })
-
+    ticketReceptionList.splice(findIndex, 1)
+    ticket.ticketReceptionList = ticketReceptionList
     this.socketEmitService.socketTicketChange(oid, {
       ticketId,
       ticketReception: { upsertedList: ticket.ticketReceptionList },
