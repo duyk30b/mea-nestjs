@@ -17,6 +17,8 @@ services:
     stdin_open: true
     networks:
       - mn_network
+    depends_on:
+      - mongo
     build:
       dockerfile: Dockerfile
       context: './'
@@ -121,3 +123,34 @@ services:
       - ./data/portainer:/data
     ports:
       - 29000:9000
+
+  mongo:
+    image: mongo:8.0.15-noble
+    container_name: mc_mongo
+    restart: unless-stopped
+    networks:
+      - mn_network
+    # volumes:
+    #   - ./data/mongo:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: mea_mongodb
+    ports:
+      - 27017:27017
+
+  mongo-express:
+    image: mongo-express:1.0.2-20
+    container_name: mc_mongo_express
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    networks:
+      - mn_network
+    ports:
+      - 28081:8081
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+      ME_CONFIG_BASICAUTH_ENABLED: true
+      ME_CONFIG_BASICAUTH_USERNAME: mongoexpressuser
+      ME_CONFIG_BASICAUTH_PASSWORD: mongoexpresspass

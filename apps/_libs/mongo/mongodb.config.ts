@@ -10,21 +10,22 @@ const MongoDbConfig = {
   maxPool: parseInt(process.env.DATABASE_MAX_POOL) || 20,
   username: process.env.DATABASE_MONGO_USERNAME,
   password: process.env.DATABASE_MONGO_PASSWORD,
-  database: process.env.DATABASE_NAME,
-  authSource: process.env.DATABASE_AUTH_SOURCE || 'admin',
+  database: process.env.DATABASE_MONGO_NAME,
+  authSource: process.env.DATABASE_MONGO_AUTH_SOURCE || 'admin',
   logging: process.env.NODE_ENV === 'local',
 }
 
 const { username, password, host, port, database, authSource, logging } = MongoDbConfig
 
-export const mongoDbUri = `mongodb://${username}:${password}@${host}:${port}/${database}?authSource=${authSource}`
+export const mongoDbUri = `mongodb://${username}:${password}@${host}:${port}`
+console.log('🚀 ~ mongodb.config.ts:21 ~ mongoDbUri:', mongoDbUri)
 
-@Injectable()
-export default class MongodbConfigService implements MongooseOptionsFactory {
-  createMongooseOptions(): MongooseModuleOptions {
-    mongoose.set('debug', logging)
-    mongoose.set('toObject', { virtuals: true })
-    mongoose.set('toJSON', { virtuals: true })
-    return { uri: mongoDbUri }
-  }
-}
+// @Injectable()
+// export default class MongodbConfigService implements MongooseOptionsFactory {
+//   createMongooseOptions(): MongooseModuleOptions {
+//     mongoose.set('debug', logging)
+//     mongoose.set('toObject', { virtuals: true })
+//     mongoose.set('toJSON', { virtuals: true })
+//     return { uri: mongoDbUri }
+//   }
+// }

@@ -35,7 +35,7 @@ async function bootstrap() {
   app.use(requestIp.mw())
 
   app.useGlobalInterceptors(
-    new AccessLogInterceptor(),
+    // new AccessLogInterceptor(),
     new TimeoutInterceptor(),
     new TransformResponseInterceptor(),
     new ClassSerializerInterceptor(app.get(Reflector), {
