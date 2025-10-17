@@ -20,6 +20,7 @@ const dataPlainExample = {
   customerCode: '',
   fullName: '',
   phone: '',
+  citizenIdCard: '',
   debt: 0,
   birthday: 0,
   yearOfBirth: 0,
@@ -69,6 +70,7 @@ export class ApiFileCustomerUploadExcel {
         customerCode: item.customerCode || '',
         fullName: item.fullName || '',
         phone: item.phone || '',
+        citizenIdCard: item.citizenIdCard || '',
         debt: item.debt != null ? item.debt : null, // để nguyên vì có thể không cập nhật thông tin nợ
         birthday: item.birthday ? (item.birthday as Date).getTime() : null,
         yearOfBirth:
@@ -140,6 +142,7 @@ export class ApiFileCustomerUploadExcel {
             customerCode: plain.customerCode,
             fullName: plain.fullName,
             phone: plain.phone,
+            citizenIdCard: plain.citizenIdCard,
             debt: plain.debt || 0, // nếu khách hàng mới thì nợ = 0 khi không điền giá trị
             birthday: plain.birthday,
             gender: plain.gender,

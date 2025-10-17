@@ -15,6 +15,10 @@ export default class Customer extends BaseEntity {
   @Expose()
   fullName: string
 
+  @Column({ type: 'varchar', length: 20, default: '' })
+  @Expose()
+  citizenIdCard: string
+
   @Column({ default: 0 })
   @Expose()
   customerSourceId: number

@@ -355,58 +355,70 @@ export class TicketProcessResultTicketProcedureService {
       // === Tính toán việc trả tiền ===
       let paymentMoneyStatus = ticketProcedureOrigin.paymentMoneyStatus
       let ticketProcedureStatus = ticketProcedureOrigin.status
-      // 1. Với trường hợp hoàn thành
-      if (!ticketProcedureOrigin.completedAt && ticketProcedureResult.completedAt) {
-        ticketProcedureStatus = TicketProcedureStatus.Completed
-        const moneyAmountTemp = ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice
-        // Không cần làm việc với trường hợp cập nhật hoàn thành
-        if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.NoEffect) {
-          if (ticketOrigin.isPaymentEachItem) {
+
+      if (ticketProcedureOrigin.ticketProcedureType === TicketProcedureType.Normal) {
+        if (!ticketProcedureOrigin.completedAt && ticketProcedureResult.completedAt) {
+          ticketProcedureStatus = TicketProcedureStatus.Completed
+        }
+        if (ticketProcedureOrigin.completedAt && !ticketProcedureResult.completedAt) {
+          ticketProcedureStatus = TicketProcedureStatus.Pending
+        }
+      }
+
+      if (ticketProcedureOrigin.ticketProcedureType === TicketProcedureType.InRegimen) {
+        // 1. Với trường hợp hoàn thành
+        if (!ticketProcedureOrigin.completedAt && ticketProcedureResult.completedAt) {
+          ticketProcedureStatus = TicketProcedureStatus.Completed
+          const moneyAmountTemp = ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice
+          // Không cần làm việc với trường hợp cập nhật hoàn thành
+          if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.NoEffect) {
+            if (ticketOrigin.isPaymentEachItem) {
+              if (ticketRegimenOrigin.moneyAmountWallet >= moneyAmountTemp) {
+                paymentMoneyStatus = PaymentMoneyStatus.FullPaid
+              } else {
+                paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
+              }
+            } else {
+              paymentMoneyStatus = PaymentMoneyStatus.TicketPaid
+            }
+          }
+          if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.PendingPayment) {
             if (ticketRegimenOrigin.moneyAmountWallet >= moneyAmountTemp) {
               paymentMoneyStatus = PaymentMoneyStatus.FullPaid
             } else {
               paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
             }
-          } else {
-            paymentMoneyStatus = PaymentMoneyStatus.TicketPaid
           }
         }
-        if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.PendingPayment) {
-          if (ticketRegimenOrigin.moneyAmountWallet >= moneyAmountTemp) {
-            paymentMoneyStatus = PaymentMoneyStatus.FullPaid
-          } else {
-            paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
+        // 2. Với trường hợp hủy
+        if (ticketProcedureOrigin.completedAt && !ticketProcedureResult.completedAt) {
+          if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.TicketPaid) {
+            if (ticketRegimenOrigin.isEffectTotalMoney) {
+              paymentMoneyStatus = PaymentMoneyStatus.TicketPaid
+              ticketProcedureStatus = TicketProcedureStatus.Pending
+            } else {
+              paymentMoneyStatus = PaymentMoneyStatus.NoEffect
+              ticketProcedureStatus = TicketProcedureStatus.NoEffect
+            }
           }
-        }
-      }
-      // 2. Với trường hợp hủy
-      if (ticketProcedureOrigin.completedAt && !ticketProcedureResult.completedAt) {
-        if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.TicketPaid) {
-          if (ticketRegimenOrigin.isEffectTotalMoney) {
-            paymentMoneyStatus = PaymentMoneyStatus.TicketPaid
-            ticketProcedureStatus = TicketProcedureStatus.Pending
-          } else {
-            paymentMoneyStatus = PaymentMoneyStatus.NoEffect
-            ticketProcedureStatus = TicketProcedureStatus.NoEffect
+          if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.FullPaid) {
+            if (ticketRegimenOrigin.isEffectTotalMoney) {
+              paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
+              ticketProcedureStatus = TicketProcedureStatus.Pending
+            } else {
+              paymentMoneyStatus = PaymentMoneyStatus.NoEffect
+              ticketProcedureStatus = TicketProcedureStatus.NoEffect
+            }
           }
-        }
-        if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.FullPaid) {
-          if (ticketRegimenOrigin.isEffectTotalMoney) {
-            paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
-            ticketProcedureStatus = TicketProcedureStatus.Pending
-          } else {
-            paymentMoneyStatus = PaymentMoneyStatus.NoEffect
-            ticketProcedureStatus = TicketProcedureStatus.NoEffect
-          }
-        }
-        // Hủy cũng có thể đang PendingPayment, vì hoàn thành rồi cũng có thể đang chưa thanh toán
-        if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.PendingPayment) {
-          if (ticketRegimenOrigin.isEffectTotalMoney) {
-            paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
-            ticketProcedureStatus = TicketProcedureStatus.Pending
-          } else {
-            paymentMoneyStatus = PaymentMoneyStatus.NoEffect
-            ticketProcedureStatus = TicketProcedureStatus.NoEffect
+          // Hủy cũng có thể đang PendingPayment, vì hoàn thành rồi cũng có thể đang chưa thanh toán
+          if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.PendingPayment) {
+            if (ticketRegimenOrigin.isEffectTotalMoney) {
+              paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
+              ticketProcedureStatus = TicketProcedureStatus.Pending
+            } else {
+              paymentMoneyStatus = PaymentMoneyStatus.NoEffect
+              ticketProcedureStatus = TicketProcedureStatus.NoEffect
+            }
           }
         }
       }
