@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { DeliveryStatus } from '../../common/variable'
+import { DeliveryStatus, PaymentMoneyStatus } from '../../common/variable'
 import { Customer, TicketUser } from '../../entities'
 import Payment, {
   MoneyDirection,
@@ -9,7 +9,7 @@ import Payment, {
   PaymentPersonType,
   PaymentVoucherType,
 } from '../../entities/payment.entity'
-import { TicketStatus } from '../../entities/ticket.entity'
+import { TicketStatus, TicketUpdateType } from '../../entities/ticket.entity'
 import {
   CustomerManager,
   PaymentManager,
@@ -75,18 +75,27 @@ export class TicketCloseOperation {
           endedAt: time,
         }
       )
-
+      if (ticketUpdated.status === TicketStatus.Executing) {
+        return { ticketModified: ticketUpdated }
+      }
+      const { customerId } = ticketUpdated
       // === 2. TICKET: Update profit and discountItems ===
 
       const ticketProcedureList = await this.ticketProcedureManager.findManyBy(manager, {
         ticketId,
+        paymentMoneyStatus: { NOT: PaymentMoneyStatus.NoEffect },
       })
-      const ticketProductList = await this.ticketProductManager.findManyBy(manager, { ticketId })
+      const ticketProductList = await this.ticketProductManager.findManyBy(manager, {
+        ticketId,
+        paymentMoneyStatus: { NOT: PaymentMoneyStatus.NoEffect },
+      })
       const ticketLaboratoryList = await this.ticketLaboratoryManager.findManyBy(manager, {
         ticketId,
+        paymentMoneyStatus: { NOT: PaymentMoneyStatus.NoEffect },
       })
       const ticketRadiologyList = await this.ticketRadiologyManager.findManyBy(manager, {
         ticketId,
+        paymentMoneyStatus: { NOT: PaymentMoneyStatus.NoEffect },
       })
       const ticketUserList = await this.ticketUserManager.findManyBy(manager, { ticketId })
 
@@ -125,24 +134,24 @@ export class TicketCloseOperation {
 
       let customerModified: Customer
       const paymentCreatedList: Payment[] = []
-      if (ticketUpdated.debt) {
+      if (ticketFix.debt) {
         let paidByTopUp = 0
         const customerOrigin = await this.customerManager.updateOneAndReturnEntity(
           manager,
-          { oid, id: ticketUpdated.customerId },
+          { oid, id: customerId },
           { updatedAt: Date.now() }
         )
         if (customerOrigin.debt < 0) {
           const topUpMoney = -customerOrigin.debt
-          paidByTopUp = Math.min(ticketUpdated.debt, topUpMoney)
+          paidByTopUp = Math.min(ticketFix.debt, topUpMoney)
         }
-        const newDebtTicket = ticketUpdated.debt - paidByTopUp
+        const newDebtTicket = ticketFix.debt - paidByTopUp
         const newDebtCustomer = customerOrigin.debt + paidByTopUp + newDebtTicket
-        // const newDebtCustomer = customerOrigin.debt + ticketUpdated.debt ==> tính đi tính lại thì nó vẫn thế này
+        // const newDebtCustomer = customerOrigin.debt + ticketFix.debt ==> tính đi tính lại thì nó vẫn thế này
 
         customerModified = await this.customerManager.updateOneAndReturnEntity(
           manager,
-          { oid, id: ticketUpdated.customerId },
+          { oid, id: customerId },
           { debt: newDebtCustomer }
         )
 
@@ -153,7 +162,7 @@ export class TicketCloseOperation {
           voucherType: PaymentVoucherType.Ticket,
           voucherId: ticketId,
           personType: PaymentPersonType.Customer,
-          personId: ticketUpdated.customerId,
+          personId: customerId,
 
           cashierId: userId,
           paymentMethodId: 0,
@@ -176,8 +185,8 @@ export class TicketCloseOperation {
 
       const ticketModified = await this.ticketManager.updateOneAndReturnEntity(
         manager,
-        { oid, id: ticketUpdated.id },
-        ticketFix
+        { oid, id: ticketId },
+        ticketFix as TicketUpdateType
       )
 
       await queryRunner.commitTransaction()

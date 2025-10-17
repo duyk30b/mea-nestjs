@@ -1,62 +1,44 @@
 import { Injectable } from '@nestjs/common'
-import { InjectEntityManager } from '@nestjs/typeorm'
-import { DataSource, EntityManager } from 'typeorm'
-import { DeliveryStatus, DiscountType, PaymentMoneyStatus } from '../../common/variable'
-import { TicketStatus } from '../../entities/ticket.entity'
+import { DataSource } from 'typeorm'
 import {
-  TicketLaboratoryManager,
+  DeliveryStatus,
+  PaymentMoneyStatus,
+} from '../../../../../../_libs/database/common/variable'
+import { TicketStatus } from '../../../../../../_libs/database/entities/ticket.entity'
+import {
+  TicketCalculatorMoney,
+  TicketUpdateCommissionTicketUserOperator,
+} from '../../../../../../_libs/database/operations'
+import {
   TicketLaboratoryRepository,
-  TicketManager,
-  TicketProcedureManager,
   TicketProcedureRepository,
-  TicketProductManager,
   TicketProductRepository,
-  TicketRadiologyManager,
   TicketRadiologyRepository,
-} from '../../repositories'
-import { TicketCalculatorMoney } from './ticket-calculator-money.operator'
-import { TicketUpdateCommissionTicketUserOperator } from './ticket-update-commission-ticket-user.operator'
-
-export type TicketItemChangeMoney = {
-  id: string
-  quantity?: number
-  discountMoney: number
-  discountPercent: number
-  discountType: DiscountType
-  actualPrice: number
-}
+  TicketRepository,
+} from '../../../../../../_libs/database/repositories'
+import { SocketEmitService } from '../../../../socket/socket-emit.service'
+import { TicketChangeAllMoneyBody } from '../request'
 
 @Injectable()
-export class TicketChangeAllMoneyOperator {
+export class TicketChangeAllMoneyService {
   constructor(
+    private socketEmitService: SocketEmitService,
     private dataSource: DataSource,
-    @InjectEntityManager() private manager: EntityManager,
-    private ticketManager: TicketManager,
-    private ticketProcedureManager: TicketProcedureManager,
-    private ticketProductManager: TicketProductManager,
-    private ticketLaboratoryManager: TicketLaboratoryManager,
-    private ticketRadiologyManager: TicketRadiologyManager,
-    private ticketProcedureRepository: TicketProcedureRepository,
+    private ticketRepository: TicketRepository,
     private ticketProductRepository: TicketProductRepository,
-    private ticketLaboratoryRepository: TicketLaboratoryRepository,
+    private ticketProcedureRepository: TicketProcedureRepository,
     private ticketRadiologyRepository: TicketRadiologyRepository,
+    private ticketLaboratoryRepository: TicketLaboratoryRepository,
     private ticketCalculatorMoney: TicketCalculatorMoney,
     private ticketUpdateCommissionTicketUserOperator: TicketUpdateCommissionTicketUserOperator
   ) { }
 
-  async changeItemMoney(options: {
-    oid: number
-    ticketUpdate: Partial<TicketItemChangeMoney>
-    ticketProcedureUpdate: TicketItemChangeMoney[]
-    ticketProductUpdate: TicketItemChangeMoney[]
-    ticketLaboratoryUpdate: TicketItemChangeMoney[]
-    ticketRadiologyUpdate: TicketItemChangeMoney[]
-  }) {
-    const { oid } = options
-    const ticketId = options.ticketUpdate.id
+  async changeAllMoney(params: { oid: number; ticketId: string; body: TicketChangeAllMoneyBody }) {
+    const { oid, ticketId, body } = params
+    const time = Date.now()
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
-      const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(
+      const ticketOrigin = await this.ticketRepository.managerUpdateOne(
         manager,
         { oid, id: ticketId, status: TicketStatus.Executing },
         { updatedAt: Date.now() }
@@ -72,7 +54,7 @@ export class TicketChangeAllMoneyOperator {
           },
         },
         compare: { id: { cast: 'bigint' } },
-        tempList: options.ticketProductUpdate,
+        tempList: body.ticketProductList,
         update: ['quantity', 'discountMoney', 'discountPercent', 'discountType', 'actualPrice'],
         options: { requireEqualLength: true },
       })
@@ -87,7 +69,7 @@ export class TicketChangeAllMoneyOperator {
           },
         },
         compare: { id: { cast: 'bigint' } },
-        tempList: options.ticketProcedureUpdate,
+        tempList: body.ticketProcedureList,
         update: ['quantity', 'discountMoney', 'discountPercent', 'discountType', 'actualPrice'],
         options: { requireEqualLength: true },
       })
@@ -102,7 +84,7 @@ export class TicketChangeAllMoneyOperator {
           },
         },
         compare: { id: { cast: 'bigint' } },
-        tempList: options.ticketLaboratoryUpdate,
+        tempList: body.ticketLaboratoryList,
         update: ['discountMoney', 'discountPercent', 'discountType', 'actualPrice'],
         options: { requireEqualLength: true },
       })
@@ -117,24 +99,24 @@ export class TicketChangeAllMoneyOperator {
           },
         },
         compare: { id: { cast: 'bigint' } },
-        tempList: options.ticketRadiologyUpdate,
+        tempList: body.ticketRadiologyList,
         update: ['discountMoney', 'discountPercent', 'discountType', 'actualPrice'],
         options: { requireEqualLength: true },
       })
 
-      const ticketProductList = await this.ticketProductManager.findManyBy(manager, {
+      const ticketProductList = await this.ticketProductRepository.managerFindManyBy(manager, {
         oid,
         ticketId,
       })
-      const ticketProcedureList = await this.ticketProcedureManager.findManyBy(manager, {
+      const ticketProcedureList = await this.ticketProcedureRepository.managerFindManyBy(manager, {
         oid,
         ticketId,
       })
-      const ticketLaboratoryList = await this.ticketLaboratoryManager.findManyBy(manager, {
-        oid,
-        ticketId,
-      })
-      const ticketRadiologyList = await this.ticketRadiologyManager.findManyBy(manager, {
+      const ticketLaboratoryList = await this.ticketLaboratoryRepository.managerFindManyBy(
+        manager,
+        { oid, ticketId }
+      )
+      const ticketRadiologyList = await this.ticketRadiologyRepository.managerFindManyBy(manager, {
         oid,
         ticketId,
       })
@@ -161,11 +143,21 @@ export class TicketChangeAllMoneyOperator {
         ticketUserList: ticketUserModifiedList,
       })
 
-      const ticketModified = await this.ticketManager.updateOneAndReturnEntity(
+      const ticketModified = await this.ticketRepository.managerUpdateOne(
         manager,
         { oid, id: ticketOrigin.id },
         ticketMoneyBody
       )
+
+      this.socketEmitService.socketTicketChange(oid, {
+        ticketId,
+        ticketModified,
+        ticketProcedure: { upsertedList: ticketProcedureModifiedList },
+        ticketProduct: { upsertedList: ticketProductModifiedList },
+        ticketLaboratory: { upsertedList: ticketLaboratoryModifiedList },
+        ticketRadiology: { upsertedList: ticketRadiologyModifiedList },
+      })
+
       return { ticketModified }
     })
 

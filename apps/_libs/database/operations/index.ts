@@ -19,7 +19,6 @@ export * from './statistic/statistic-product.operation'
 export * from './statistic/statistic-purchase-order.operation'
 
 export * from './ticket-base/ticket-calculator-money.operator'
-export * from './ticket-base/ticket-change-all-money.operator'
 export * from './ticket-base/ticket-change-discount.operation'
 export * from './ticket-base/ticket-change-item-money.manager'
 export * from './ticket-base/ticket-close.operation'

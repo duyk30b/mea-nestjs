@@ -17,6 +17,11 @@ export class CustomerCreateBody {
   @IsNotEmpty()
   fullName: string
 
+  @ApiProperty({})
+  @Expose()
+  @IsDefined()
+  citizenIdCard: string
+
   @ApiPropertyOptional({ example: '0986123456' })
   @Expose()
   @Validate(IsPhone)

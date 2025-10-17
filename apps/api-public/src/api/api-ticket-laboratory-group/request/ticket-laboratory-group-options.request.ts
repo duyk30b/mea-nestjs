@@ -19,7 +19,11 @@ export class TicketLaboratoryGroupRelationQuery {
 
   @Expose()
   @IsBoolean()
-  ticketUserList: boolean
+  ticketUserRequestList: boolean
+
+  @Expose()
+  @IsBoolean()
+  ticketUserResultList: boolean
 
   @Expose()
   @IsBoolean()
@@ -87,9 +91,9 @@ export class TicketLaboratoryGroupResponseQuery {
   ticketLaboratoryGroup: {
     ticket?: boolean
     customer?: boolean
-    ticketUserList?: boolean
+    ticketUserRequestList?: boolean
+    ticketUserResultList?: boolean
     ticketLaboratoryList?: boolean
     ticketLaboratoryResultMap?: boolean
-    imageList?: boolean
   }
 }

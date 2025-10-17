@@ -96,7 +96,6 @@ export class TicketUpdateMoneyTicketProcedureService {
             }
           }),
         })
-
         commissionMoneyChange =
           ticketUserCreatedList.reduce((acc, item) => {
             return acc + item.quantity * item.commissionMoney

@@ -12,6 +12,7 @@ import {
 } from './request'
 import { TicketChangeAllMoneyBody } from './request/ticket-change-all-money.body'
 import { TicketChangeSurchargeListBody } from './request/ticket-change-surcharge-list.body'
+import { TicketChangeAllMoneyService } from './service/ticket-change-all-money.service'
 import { TicketActionService } from './ticket-action.service'
 import { TicketDestroyService } from './ticket-destroy.service'
 
@@ -21,7 +22,8 @@ import { TicketDestroyService } from './ticket-destroy.service'
 export class TicketActionController {
   constructor(
     private readonly ticketActionService: TicketActionService,
-    private readonly ticketDestroyService: TicketDestroyService
+    private readonly ticketDestroyService: TicketDestroyService,
+    private readonly ticketChangeAllMoneyService: TicketChangeAllMoneyService
   ) { }
 
   @Post('/:ticketId/start-executing')
@@ -63,7 +65,7 @@ export class TicketActionController {
     @Param() { ticketId }: TicketParams,
     @Body() body: TicketChangeAllMoneyBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketActionService.changeAllMoney({ oid, body, ticketId })
+    const data = await this.ticketChangeAllMoneyService.changeAllMoney({ oid, body, ticketId })
     return { data }
   }
 

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common'
+import { ESArray } from '../../../../../_libs/common/helpers'
 import { BusinessError } from '../../../../../_libs/database/common/error'
 import {
   PaymentMoneyStatus,
@@ -166,6 +167,13 @@ export class TicketChangeLaboratoryService {
     }
 
     ticketLaboratoryGroupUpdate.ticketLaboratoryList = ticketLaboratoryModifiedList
+    ticketLaboratoryGroupUpdate.ticketLaboratoryResultMap = ESArray.arrayToKeyValue(
+      [...tlrCreatedList, ...tlrModifiedList],
+      'laboratoryId'
+    )
+    // chưa xử lý TicketUser
+    ticketLaboratoryGroupUpdate.ticketUserRequestList = []
+    ticketLaboratoryGroupUpdate.ticketUserResultList = []
 
     this.socketEmitService.socketTicketChange(oid, {
       ticketId,

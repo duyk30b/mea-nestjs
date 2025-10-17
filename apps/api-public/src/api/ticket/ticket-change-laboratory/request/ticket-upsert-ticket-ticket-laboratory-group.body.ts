@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
 import {
+  ArrayMinSize,
   IsArray,
   IsDefined,
   IsInt,
@@ -142,14 +143,17 @@ export class TicketLaboratoryGroupUpdateBody {
   ticketLaboratoryList: TicketLaboratoryUpdateBody[]
 }
 
-export class TicketUpsertRequestLaboratoryGroupBody {
+export class TicketAddTicketLaboratoryGroupBody {
   @ApiProperty({ type: TicketLaboratoryGroupAddBody, isArray: true })
   @Expose()
   @Type(() => TicketLaboratoryGroupAddBody)
   @IsArray()
+  @ArrayMinSize(1)
   @ValidateNested({ each: true })
   ticketLaboratoryGroupAddList: TicketLaboratoryGroupAddBody[]
+}
 
+export class TicketUpdateTicketLaboratoryGroupBody {
   @ApiProperty({ type: TicketLaboratoryGroupUpdateBody, isArray: true })
   @Expose()
   @Type(() => TicketLaboratoryGroupUpdateBody)

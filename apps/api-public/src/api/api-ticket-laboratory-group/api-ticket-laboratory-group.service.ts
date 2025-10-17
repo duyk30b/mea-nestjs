@@ -107,7 +107,9 @@ export class ApiTicketLaboratoryGroupService {
         ? this.customerRepository.findManyBy({ id: { IN: customerIdList } })
         : <Customer[]>[],
 
-      relation?.ticketUserList && ticketIdList.length && tlgIdList.length
+      (relation?.ticketUserRequestList || relation?.ticketUserResultList)
+        && ticketIdList.length
+        && tlgIdList.length
         ? this.ticketUserRepository.findMany({
           condition: {
             ticketId: { IN: ticketIdList },
@@ -138,8 +140,15 @@ export class ApiTicketLaboratoryGroupService {
       tlg.ticket = ticketList.find((t) => t.id === tlg.ticketId)
       tlg.customer = customerList.find((c) => c.id === tlg.customerId)
 
-      if (relation.ticketUserList) {
-        tlg.ticketUserList = ticketUserList.filter((tu) => tu.ticketItemId === tlg.id)
+      if (relation.ticketUserRequestList) {
+        tlg.ticketUserRequestList = ticketUserList.filter((tu) => {
+          return tu.ticketItemId === tlg.id && tu.positionType === PositionType.LaboratoryGroupRequest
+        })
+      }
+      if (relation.ticketUserResultList) {
+        tlg.ticketUserRequestList = ticketUserList.filter((tu) => {
+          return tu.ticketItemId === tlg.id && tu.positionType === PositionType.LaboratoryGroupResult
+        })
       }
       if (relation.ticketLaboratoryList) {
         tlg.ticketLaboratoryList = ticketLaboratoryList.filter((tl) => {

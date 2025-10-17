@@ -8,7 +8,6 @@ import { TicketSurchargeInsertType } from '../../../../../_libs/database/entitie
 import { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
 import {
   CustomerRefundMoneyOperation,
-  TicketChangeAllMoneyOperator,
   TicketChangeDiscountOperation,
   TicketChangeItemMoneyManager,
   TicketCloseOperation,
@@ -22,7 +21,6 @@ import {
 } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { TicketClinicChangeDiscountBody, TicketReturnProductListBody } from './request'
-import { TicketChangeAllMoneyBody } from './request/ticket-change-all-money.body'
 import { TicketChangeSurchargeListBody } from './request/ticket-change-surcharge-list.body'
 
 @Injectable()
@@ -36,7 +34,6 @@ export class TicketActionService {
     private ticketReopenOperation: TicketReopenOperation,
     private ticketSendProductOperation: TicketSendProductOperation,
     private ticketReturnProductOperation: TicketReturnProductOperation,
-    private ticketChangeAllMoneyOperator: TicketChangeAllMoneyOperator,
     private ticketCloseOperation: TicketCloseOperation,
     private ticketChangeDiscountOperation: TicketChangeDiscountOperation,
     private customerRefundMoneyOperation: CustomerRefundMoneyOperation,
@@ -134,24 +131,6 @@ export class TicketActionService {
     })
 
     return transaction
-  }
-
-  async changeAllMoney(params: { oid: number; ticketId: string; body: TicketChangeAllMoneyBody }) {
-    const { oid, ticketId, body } = params
-    const time = Date.now()
-
-    const { ticketModified } = await this.ticketChangeAllMoneyOperator.changeItemMoney({
-      oid,
-      ticketUpdate: { id: ticketId },
-      ticketProductUpdate: body.ticketProductList,
-      ticketProcedureUpdate: body.ticketProcedureList,
-      ticketLaboratoryUpdate: body.ticketLaboratoryList,
-      ticketRadiologyUpdate: body.ticketRadiologyList,
-    })
-
-    // Còn tất cả các item khác cũng cần bắn, nhưng mệt, làm sau
-    this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
-    return { ticketModified }
   }
 
   async sendProduct(params: {

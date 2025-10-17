@@ -87,7 +87,10 @@ export default class TicketLaboratoryGroup {
   laboratoryGroup: LaboratoryGroup
 
   @Expose()
-  ticketUserList: TicketUser[]
+  ticketUserRequestList: TicketUser[]
+
+  @Expose()
+  ticketUserResultList: TicketUser[]
 
   @Expose()
   ticketLaboratoryList: TicketLaboratory[]
@@ -136,7 +139,8 @@ export type TicketLaboratoryGroupRelationType = {
     | 'ticket'
     | 'customer'
     | 'laboratoryGroup'
-    | 'ticketUserList'
+    | 'ticketUserRequestList'
+    | 'ticketUserResultList'
     | 'ticketLaboratoryList'
     | 'ticketLaboratoryResultMap'
   >]?: boolean

@@ -7,15 +7,17 @@ import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { TicketLaboratoryGroupPostQuery } from '../../api-ticket-laboratory-group/request'
 import { TicketParams } from '../ticket-query/request/ticket.params'
 import {
+  TicketAddTicketLaboratoryGroupBody,
   TicketChangeLaboratoryGroupParams,
   TicketChangeLaboratoryParams,
   TicketUpdatePriorityTicketLaboratoryBody,
   TicketUpdateRequestTicketLaboratoryBody,
   TicketUpdateResultLaboratoryGroupBody,
-  TicketUpsertRequestLaboratoryGroupBody,
+  TicketUpdateTicketLaboratoryGroupBody,
 } from './request'
+import { TicketAddTicketLaboratoryGroupService } from './service/ticket-add-ticket-laboratory-group.service'
 import { TicketUpdateRequestTicketLaboratoryService } from './service/ticket-update-request-ticket-laboratory.service'
-import { TicketUpsertLaboratoryService } from './service/ticket-upsert-ticket-laboratory-group.service'
+import { TicketUpdateTicketLaboratoryGroupService } from './service/ticket-update-ticket-laboratory-group.service'
 import { TicketChangeLaboratoryService } from './ticket-change-laboratory.service'
 
 @ApiTags('Ticket')
@@ -24,18 +26,34 @@ import { TicketChangeLaboratoryService } from './ticket-change-laboratory.servic
 export class TicketChangeLaboratoryController {
   constructor(
     private readonly ticketChangeLaboratoryService: TicketChangeLaboratoryService,
-    private readonly ticketUpsertLaboratoryService: TicketUpsertLaboratoryService,
+    private readonly ticketAddTicketLaboratoryGroupService: TicketAddTicketLaboratoryGroupService,
+    private readonly ticketUpdateTicketLaboratoryGroupService: TicketUpdateTicketLaboratoryGroupService,
     private readonly ticketUpdateRequestTicketLaboratoryService: TicketUpdateRequestTicketLaboratoryService
   ) { }
 
-  @Post(':ticketId/laboratory/upsert-request-laboratory-group')
+  @Post(':ticketId/laboratory/add-ticket-laboratory-group')
   @UserPermission(PermissionId.TICKET_CHANGE_LABORATORY_REQUEST)
-  async upsertRequestLaboratoryGroup(
+  async addTicketLaboratoryGroup(
     @External() { oid }: TExternal,
     @Param() { ticketId }: TicketParams,
-    @Body() body: TicketUpsertRequestLaboratoryGroupBody
+    @Body() body: TicketAddTicketLaboratoryGroupBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketUpsertLaboratoryService.upsertRequestLaboratoryGroup({
+    const data = await this.ticketAddTicketLaboratoryGroupService.addTicketLaboratoryGroup({
+      oid,
+      ticketId,
+      body,
+    })
+    return { data }
+  }
+
+  @Post(':ticketId/laboratory/update-ticket-laboratory-group')
+  @UserPermission(PermissionId.TICKET_CHANGE_LABORATORY_REQUEST)
+  async updateTicketLaboratoryGroup(
+    @External() { oid }: TExternal,
+    @Param() { ticketId }: TicketParams,
+    @Body() body: TicketUpdateTicketLaboratoryGroupBody
+  ): Promise<BaseResponse> {
+    const data = await this.ticketUpdateTicketLaboratoryGroupService.updateTicketLaboratoryGroup({
       oid,
       ticketId,
       body,
