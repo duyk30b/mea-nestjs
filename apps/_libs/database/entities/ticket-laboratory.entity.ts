@@ -101,6 +101,14 @@ export default class TicketLaboratory {
   @Expose()
   actualPrice: number // Giá thực tế
 
+  @Column({ default: 0 })
+  @Expose()
+  paid: number // tiền đã thanh toán
+
+  @Column({ default: 0 })
+  @Expose()
+  debt: number // tiền nợ
+
   @Column({
     type: 'bigint',
     transformer: {
@@ -156,6 +164,8 @@ export default class TicketLaboratory {
     entity.discountMoney = Number(raw.discountMoney)
     entity.discountPercent = Number(raw.discountPercent)
     entity.actualPrice = Number(raw.actualPrice)
+    entity.paid = Number(raw.paid)
+    entity.debt = Number(raw.debt)
 
     entity.createdAt = Number(raw.createdAt)
     entity.completedAt = raw.completedAt == null ? raw.completedAt : Number(raw.completedAt)

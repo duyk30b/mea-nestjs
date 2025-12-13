@@ -6,12 +6,13 @@ import { External, TExternal } from '../../../../../_libs/common/request/externa
 import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { TicketParams } from '../ticket-query/request'
 import {
+  TicketChangeAllMoneyBody,
+  TicketChangeSurchargeListBody,
   TicketClinicChangeDiscountBody,
   TicketReturnProductListBody,
   TicketSendProductListBody,
+  TicketTerminalBody,
 } from './request'
-import { TicketChangeAllMoneyBody } from './request/ticket-change-all-money.body'
-import { TicketChangeSurchargeListBody } from './request/ticket-change-surcharge-list.body'
 import { TicketChangeAllMoneyService } from './service/ticket-change-all-money.service'
 import { TicketActionService } from './ticket-action.service'
 import { TicketDestroyService } from './ticket-destroy.service'
@@ -79,8 +80,7 @@ export class TicketActionController {
     const data = await this.ticketActionService.sendProduct({
       oid,
       ticketId,
-      sendAll: false,
-      ticketProductIdList: body.ticketProductIdList,
+      body,
     })
     return { data }
   }
@@ -95,8 +95,7 @@ export class TicketActionController {
     const data = await this.ticketActionService.returnProduct({
       oid,
       ticketId,
-      returnAll: false,
-      returnList: body.returnList,
+      body,
     })
     return { data }
   }
@@ -125,9 +124,15 @@ export class TicketActionController {
   @UserPermissionOr(PermissionId.TICKET_TERMINATE)
   async terminate(
     @External() { oid, uid }: TExternal,
-    @Param() { ticketId }: TicketParams
+    @Param() { ticketId }: TicketParams,
+    @Body() body: TicketTerminalBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketActionService.terminate({ oid, userId: uid, ticketId })
+    const data = await this.ticketActionService.terminate({
+      oid,
+      userId: uid,
+      ticketId,
+      body,
+    })
     return { data }
   }
 

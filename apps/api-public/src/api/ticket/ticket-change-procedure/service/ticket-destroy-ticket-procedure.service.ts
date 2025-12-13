@@ -69,6 +69,8 @@ export class TicketDestroyTicketProcedureService {
             ],
           },
           costAmount: 0, // nếu có costAmount thì phải hủy kết quả trước
+          paid: 0, // nếu có paid thì phải hủy thanh toán trước
+          debt: 0, // nếu có debt thì phải hủy thanh toán trước
         }
       )
 

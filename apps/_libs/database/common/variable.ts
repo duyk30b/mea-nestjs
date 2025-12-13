@@ -101,4 +101,5 @@ export enum PaymentMoneyStatus {
   PendingPayment = 2,
   PartialPaid = 3,
   FullPaid = 4,
+  Debt = 5,
 }

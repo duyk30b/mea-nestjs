@@ -89,12 +89,6 @@ export class TicketProductAddBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  costAmount: number
-
-  @ApiProperty({ example: 25_000 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
   expectedPrice: number
 
   @ApiProperty({ example: 22_500 })

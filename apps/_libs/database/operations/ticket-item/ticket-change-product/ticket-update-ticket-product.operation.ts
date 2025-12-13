@@ -20,7 +20,6 @@ export type TicketProductUpdateDtoType = {
     | 'discountType'
     | 'discountMoney'
     | 'discountPercent'
-    | 'costAmount'
     | 'actualPrice'
     | 'hintUsage'
   >]: TicketProduct[K] | (() => string)
@@ -80,9 +79,11 @@ export class TicketUpdateTicketProductOperation {
           [DeliveryStatus.Pending, DeliveryStatus.NoStock].includes(
             ticketProductOrigin.deliveryStatus
           )
-          && [PaymentMoneyStatus.TicketPaid, PaymentMoneyStatus.PendingPayment].includes(
-            ticketProductOrigin.paymentMoneyStatus
-          )
+          && [
+            PaymentMoneyStatus.TicketPaid,
+            PaymentMoneyStatus.PendingPayment,
+            PaymentMoneyStatus.NoEffect,
+          ].includes(ticketProductOrigin.paymentMoneyStatus)
         ) {
           ticketProductModified = await this.ticketProductManager.updateOneAndReturnEntity(
             manager,
@@ -95,13 +96,22 @@ export class TicketUpdateTicketProductOperation {
               discountType: ticketProductUpdateDto.discountType,
               discountMoney: ticketProductUpdateDto.discountMoney,
               discountPercent: ticketProductUpdateDto.discountPercent,
-              costAmount: ticketProductUpdateDto.costAmount,
               actualPrice: ticketProductUpdateDto.actualPrice,
               hintUsage: ticketProductUpdateDto.hintUsage,
               deliveryStatus:
                 ticketProductUpdateDto.quantity === 0
                   ? DeliveryStatus.NoStock
                   : DeliveryStatus.Pending,
+              paymentMoneyStatus: (() => {
+                if (ticketProductUpdateDto.actualPrice === 0) {
+                  return PaymentMoneyStatus.NoEffect
+                }
+                if (ticketOrigin.isPaymentEachItem) {
+                  return PaymentMoneyStatus.PendingPayment
+                } else {
+                  return PaymentMoneyStatus.TicketPaid
+                }
+              })(),
             }
           )
           productMoneyAdd =

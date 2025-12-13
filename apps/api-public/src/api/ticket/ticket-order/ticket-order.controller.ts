@@ -10,7 +10,8 @@ import {
   TicketOrderDebtSuccessInsertBody,
   TicketOrderDebtSuccessUpdateBody,
   TicketOrderDepositedUpdateBody,
-  TicketOrderDraftUpsertBody,
+  TicketOrderDraftInsertBody,
+  TicketOrderDraftUpdateBody,
 } from './request'
 import { TicketOrderService } from './ticket-order.service'
 
@@ -20,15 +21,31 @@ import { TicketOrderService } from './ticket-order.service'
 export class TicketOrderController {
   constructor(private readonly ticketOrderService: TicketOrderService) { }
 
-  @Post('/order/draft-upsert')
+  @Post('/order/draft-insert')
   @UserPermission(PermissionId.TICKET_DRAFT_CRUD)
-  async draftUpsert(
+  async draftInsert(
     @External() { oid, uid }: TExternal,
-    @Body() body: TicketOrderDraftUpsertBody
+    @Body() body: TicketOrderDraftInsertBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketOrderService.draftUpsert({
+    const data = await this.ticketOrderService.draftInsert({
       oid,
       userId: uid,
+      body,
+    })
+    return { data }
+  }
+
+  @Post('/order/:id/draft-update')
+  @UserPermission(PermissionId.TICKET_DRAFT_CRUD)
+  async draftUpdate(
+    @External() { oid, uid }: TExternal,
+    @Param() { id }: GenerateIdParam,
+    @Body() body: TicketOrderDraftUpdateBody
+  ): Promise<BaseResponse> {
+    const data = await this.ticketOrderService.draftUpdate({
+      oid,
+      userId: uid,
+      ticketId: id,
       body,
     })
     return { data }
@@ -101,35 +118,12 @@ export class TicketOrderController {
   }
 
   // ================= ACTION ================= //
-  @Delete('/order/:id/draft-destroy')
+  @Delete('/order/:id/destroy')
   @UserPermission(PermissionId.TICKET_DESTROY)
   async draftDestroy(
     @External() { oid }: TExternal,
     @Param() { id }: GenerateIdParam
   ): Promise<BaseResponse> {
-    const data = await this.ticketOrderService.destroy({
-      oid,
-      ticketId: id,
-    })
-    return { data }
-  }
-
-  @Delete('/order/:id/deposited-destroy')
-  @UserPermission(PermissionId.TICKET_DESTROY)
-  async depositedDestroy(
-    @External() { oid }: TExternal,
-    @Param() { id }: GenerateIdParam
-  ): Promise<BaseResponse> {
-    const data = await this.ticketOrderService.destroy({
-      oid,
-      ticketId: id,
-    })
-    return { data }
-  }
-
-  @Delete('/order/:id/cancelled-destroy')
-  @UserPermission(PermissionId.TICKET_DESTROY)
-  async destroy(@External() { oid }: TExternal, @Param() { id }: GenerateIdParam): Promise<BaseResponse> {
     const data = await this.ticketOrderService.destroy({
       oid,
       ticketId: id,

@@ -1,31 +1,29 @@
 import { Injectable } from '@nestjs/common'
 import { ESArray } from '../../../../_libs/common/helpers/array.helper'
-import { BusinessError } from '../../../../_libs/database/common/error'
 import {
   Customer,
   Distributor,
-  PaymentMethod,
   PaymentTicketItem,
   PurchaseOrder,
   Ticket,
   User,
+  Wallet,
 } from '../../../../_libs/database/entities'
 import Payment, {
-  PaymentActionType,
   PaymentPersonType,
   PaymentVoucherType,
 } from '../../../../_libs/database/entities/payment.entity'
 import {
   CustomerRepository,
   DistributorRepository,
-  PaymentMethodRepository,
   PaymentTicketItemRepository,
   PurchaseOrderRepository,
   TicketRepository,
   UserRepository,
+  WalletRepository,
 } from '../../../../_libs/database/repositories'
 import { PaymentRepository } from '../../../../_libs/database/repositories/payment.repository'
-import { PaymentGetManyQuery, PaymentPaginationQuery, PaymentUpdateInfoBody } from './request'
+import { PaymentGetManyQuery, PaymentPaginationQuery } from './request'
 import { PaymentRelationQuery } from './request/payment.options'
 
 @Injectable()
@@ -33,7 +31,7 @@ export class ApiPaymentService {
   constructor(
     private readonly paymentRepository: PaymentRepository,
     private readonly paymentTicketItemRepository: PaymentTicketItemRepository,
-    private readonly paymentMethodRepository: PaymentMethodRepository,
+    private readonly walletRepository: WalletRepository,
     private readonly customerRepository: CustomerRepository,
     private readonly ticketRepository: TicketRepository,
     private readonly purchaseOrderRepository: PurchaseOrderRepository,
@@ -52,7 +50,7 @@ export class ApiPaymentService {
         voucherId: filter?.voucherId,
         personType: filter?.personType,
         personId: filter?.personId,
-        paymentMethodId: filter?.paymentMethodId,
+        walletId: filter?.walletId,
         moneyDirection: filter?.moneyDirection,
         cashierId: filter?.cashierId,
         createdAt: filter?.createdAt,
@@ -78,7 +76,7 @@ export class ApiPaymentService {
         voucherId: filter?.voucherId,
         personType: filter?.personType,
         personId: filter?.personId,
-        paymentMethodId: filter?.paymentMethodId,
+        walletId: filter?.walletId,
         moneyDirection: filter?.moneyDirection,
         cashierId: filter?.cashierId,
         createdAt: filter?.createdAt,
@@ -96,12 +94,7 @@ export class ApiPaymentService {
   async generateRelation(paymentList: Payment[], relation: PaymentRelationQuery) {
     const paymentIdList = paymentList.map((i) => i.id)
     const paymentIdListHasTicketItem = paymentList
-      .filter((i) => {
-        return [
-          PaymentActionType.PrepaymentForTicketItemList,
-          PaymentActionType.RefundForTicketItemList,
-        ].includes(i.paymentActionType)
-      })
+      .filter((i) => i.paidItem || i.debtItem)
       .map((i) => i.id)
 
     const ticketIdList = paymentList
@@ -121,7 +114,7 @@ export class ApiPaymentService {
       .filter((i) => i.personType === PaymentPersonType.Employee)
       .map((i) => i.personId)
     const cashierIdList = paymentList.map((i) => i.cashierId)
-    const paymentMethodIdList = paymentList.map((i) => i.paymentMethodId)
+    const walletIdList = paymentList.map((i) => i.walletId)
     const userIdList = [...cashierIdList, ...employeeIdList]
 
     const [
@@ -130,7 +123,7 @@ export class ApiPaymentService {
       customerList,
       distributorList,
       userList,
-      paymentMethodList,
+      walletList,
       paymentTicketItemList,
     ] = await Promise.all([
       relation?.ticket && ticketIdList.length
@@ -154,11 +147,11 @@ export class ApiPaymentService {
       (relation?.employee || relation?.cashier) && userIdList.length
         ? this.userRepository.findManyBy({ id: { IN: ESArray.uniqueArray(userIdList) } })
         : <User[]>[],
-      relation?.paymentMethod && paymentMethodIdList.length
-        ? this.paymentMethodRepository.findManyBy({
-          id: { IN: ESArray.uniqueArray(paymentMethodIdList) },
+      relation?.wallet && walletIdList.length
+        ? this.walletRepository.findManyBy({
+          id: { IN: ESArray.uniqueArray(walletIdList) },
         })
-        : <PaymentMethod[]>[],
+        : <Wallet[]>[],
       relation?.paymentTicketItemList && paymentIdListHasTicketItem.length
         ? this.paymentTicketItemRepository.findManyBy({
           paymentId: { IN: paymentIdListHasTicketItem },
@@ -171,7 +164,7 @@ export class ApiPaymentService {
     const customerMap = ESArray.arrayToKeyValue(customerList, 'id')
     const distributorMap = ESArray.arrayToKeyValue(distributorList, 'id')
     const userMap = ESArray.arrayToKeyValue(userList, 'id')
-    const paymentMethodMap = ESArray.arrayToKeyValue(paymentMethodList, 'id')
+    const walletMap = ESArray.arrayToKeyValue(walletList, 'id')
 
     paymentList.forEach((payment: Payment) => {
       if (relation?.ticket) {
@@ -197,34 +190,12 @@ export class ApiPaymentService {
           (i) => i.paymentId === payment.id
         )
       }
-      if (relation?.paymentMethod) {
-        payment.paymentMethod = paymentMethodMap[payment.paymentMethodId]
+      if (relation?.wallet) {
+        payment.wallet = walletMap[payment.walletId]
       }
     })
 
     return paymentList
-  }
-
-  async updateInfo(options: {
-    oid: number
-    userId: number
-    paymentId: string
-    body: PaymentUpdateInfoBody
-  }) {
-    const { oid, userId, paymentId, body } = options
-    const paymentOrigin = await this.paymentRepository.findOneBy({ oid, id: paymentId })
-    if (paymentOrigin.cashierId !== userId) {
-      throw new BusinessError('Không được sửa phiếu thanh toán do tài khoản khác tạo phiếu')
-    }
-    const payment = await this.paymentRepository.updateOneAndReturnEntity(
-      { oid, id: paymentId, cashierId: userId }, // chỉ sửa phiếu do chính mình tạo ra
-      {
-        createdAt: body.createdAt,
-        paymentMethodId: body.paymentMethodId,
-        note: body.note,
-      }
-    )
-    return { payment }
   }
 
   async sumMoney(oid: number, query: PaymentGetManyQuery) {
@@ -232,7 +203,7 @@ export class ApiPaymentService {
     const { dataRaws } = await this.paymentRepository.findAndSelect({
       condition: {
         oid,
-        paymentMethodId: filter?.paymentMethodId,
+        walletId: filter?.walletId,
         personType: filter?.personType,
         personId: filter?.personId,
         moneyDirection: filter?.moneyDirection,
@@ -241,7 +212,8 @@ export class ApiPaymentService {
       },
       select: ['moneyDirection'],
       aggregate: {
-        sumPaidAmount: { SUM: ['paidAmount'] },
+        sumPaidAmount: { SUM: ['paid', 'paidItem'] },
+        sumDebtAmount: { SUM: ['debt', 'debtItem'] },
         count: { COUNT: '*' },
       },
       groupBy: ['moneyDirection'],
@@ -250,6 +222,7 @@ export class ApiPaymentService {
       return {
         moneyDirection: i.moneyDirection,
         sumPaidAmount: Number(i.sumPaidAmount),
+        sumDebtAmount: Number(i.sumDebtAmount),
         count: Number(i.count),
       }
     })

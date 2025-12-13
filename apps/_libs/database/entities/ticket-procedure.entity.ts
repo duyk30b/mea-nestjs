@@ -102,6 +102,14 @@ export default class TicketProcedure {
   @Expose()
   actualPrice: number // Giá thực tế
 
+  @Column({ default: 0 })
+  @Expose()
+  paid: number // tiền đã thanh toán
+
+  @Column({ default: 0 })
+  @Expose()
+  debt: number // tiền nợ
+
   @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
   @Expose()
   paymentMoneyStatus: PaymentMoneyStatus
@@ -185,6 +193,8 @@ export default class TicketProcedure {
     entity.discountMoney = Number(raw.discountMoney)
     entity.discountPercent = Number(raw.discountPercent)
     entity.actualPrice = Number(raw.actualPrice)
+    entity.paid = Number(raw.paid)
+    entity.debt = Number(raw.debt)
 
     entity.createdAt = Number(raw.createdAt)
     entity.completedAt = raw.completedAt == null ? raw.completedAt : Number(raw.completedAt)

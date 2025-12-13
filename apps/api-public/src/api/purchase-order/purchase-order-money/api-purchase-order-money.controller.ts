@@ -7,9 +7,9 @@ import { External, TExternal } from '../../../../../_libs/common/request/externa
 import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { PurchaseOrderMoneyService } from './purchase-order-money.service'
 import {
-  DistributorPayDebtBody,
-  DistributorPrepaymentBody,
-  DistributorRefundMoneyBody,
+  PurchaseOrderPayDebtBody,
+  PurchaseOrderPaymentBody,
+  PurchaseOrderRefundMoneyBody,
 } from './request'
 
 @ApiTags('PurchaseOrder')
@@ -18,14 +18,14 @@ import {
 export class ApiPurchaseOrderMoneyController {
   constructor(private readonly purchaseOrderMoneyService: PurchaseOrderMoneyService) { }
 
-  @Post('/:id/prepayment-money')
+  @Post('/:id/payment')
   @UserPermission(PermissionId.PURCHASE_ORDER_PAYMENT_MONEY)
-  async prepaymentMoney(
+  async payment(
     @External() { oid, uid }: TExternal,
     @Param() { id }: GenerateIdParam,
-    @Body() body: DistributorPrepaymentBody
+    @Body() body: PurchaseOrderPaymentBody
   ): Promise<BaseResponse> {
-    const data = await this.purchaseOrderMoneyService.prepaymentMoney({
+    const data = await this.purchaseOrderMoneyService.payment({
       oid,
       userId: uid,
       body,
@@ -38,7 +38,7 @@ export class ApiPurchaseOrderMoneyController {
   @UserPermission(PermissionId.PURCHASE_ORDER_PAYMENT_MONEY)
   async payDebt(
     @External() { oid, uid }: TExternal,
-    @Body() body: DistributorPayDebtBody
+    @Body() body: PurchaseOrderPayDebtBody
   ): Promise<BaseResponse> {
     const data = await this.purchaseOrderMoneyService.payDebt({
       oid,
@@ -53,7 +53,7 @@ export class ApiPurchaseOrderMoneyController {
   async refundMoney(
     @External() { oid, uid }: TExternal,
     @Param() { id }: GenerateIdParam,
-    @Body() body: DistributorRefundMoneyBody
+    @Body() body: PurchaseOrderRefundMoneyBody
   ): Promise<BaseResponse> {
     const data = await this.purchaseOrderMoneyService.refundMoney({
       oid,

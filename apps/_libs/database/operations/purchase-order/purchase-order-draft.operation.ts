@@ -60,7 +60,7 @@ export class PurchaseOrderDraftOperation {
         deliveryStatus: DeliveryStatus.Pending,
         distributorId: purchaseOrderInsertDto.distributorId,
         paid: 0,
-        debt: purchaseOrderInsertDto.totalMoney,
+        debt: 0,
         year: ESTimer.info(purchaseOrderInsertDto.startedAt, 7).year,
         month: ESTimer.info(purchaseOrderInsertDto.startedAt, 7).month + 1,
         date: ESTimer.info(purchaseOrderInsertDto.startedAt, 7).date,

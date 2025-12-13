@@ -211,7 +211,7 @@ export class ApiAppointmentService {
     const customer = await this.customerRepository.findOneBy({ oid, id: appointment.customerId })
     const countToday = await this.ticketRepository.countToday(oid)
     const receptionAt = body.receptionAt
-    
+
     let ticket: Ticket
     if (!body.toTicketId) {
       ticket = await this.ticketRepository.insertOneFullFieldAndReturnEntity({
@@ -228,7 +228,6 @@ export class ApiAppointmentService {
         date: ESTimer.info(receptionAt, 7).date,
 
         customerSourceId: 0,
-        debt: 0,
         note: '',
         deliveryStatus: DeliveryStatus.NoStock,
         procedureMoney: 0,
@@ -247,6 +246,9 @@ export class ApiAppointmentService {
         commissionMoney: 0,
         profit: 0,
         paid: 0,
+        paidItem: 0,
+        debt: 0,
+        debtItem: 0,
         imageDiagnosisIds: JSON.stringify([]),
         endedAt: null,
       })

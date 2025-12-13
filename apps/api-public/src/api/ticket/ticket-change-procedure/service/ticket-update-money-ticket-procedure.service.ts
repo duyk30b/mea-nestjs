@@ -24,7 +24,7 @@ type TicketProcedureUpdateDtoType = Pick<
 @Injectable()
 export class TicketUpdateMoneyTicketProcedureService {
   constructor(
-    private readonly socketEmitService: SocketEmitService,
+    private socketEmitService: SocketEmitService,
     private dataSource: DataSource,
     private ticketRepository: TicketRepository,
     private ticketProcedureRepository: TicketProcedureRepository,
@@ -59,9 +59,13 @@ export class TicketUpdateMoneyTicketProcedureService {
       })
 
       if (
-        [PaymentMoneyStatus.PartialPaid, PaymentMoneyStatus.FullPaid].includes(
-          ticketProcedureOrigin.paymentMoneyStatus
-        )
+        [
+          PaymentMoneyStatus.PartialPaid,
+          PaymentMoneyStatus.FullPaid,
+          PaymentMoneyStatus.Debt,
+        ].includes(ticketProcedureOrigin.paymentMoneyStatus)
+        || ticketProcedureOrigin.paid !== 0
+        || ticketProcedureOrigin.debt !== 0
       ) {
         throw new BusinessError('Không thể sửa phiếu đã thanh toán')
       }

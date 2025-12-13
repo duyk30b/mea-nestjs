@@ -37,10 +37,11 @@ export class TicketProductManager extends _PostgreSqlManager<
     }
 
     let deliveryStatus = DeliveryStatus.Delivered
-    if (ticketProductList.every((i) => i.deliveryStatus === DeliveryStatus.NoStock)) {
+    if (!ticketProductList.length) {
       deliveryStatus = DeliveryStatus.NoStock
-    }
-    if (ticketProductList.some((i) => i.deliveryStatus === DeliveryStatus.Pending)) {
+    } else if (ticketProductList.every((i) => i.deliveryStatus === DeliveryStatus.NoStock)) {
+      deliveryStatus = DeliveryStatus.NoStock
+    } else if (ticketProductList.some((i) => i.deliveryStatus === DeliveryStatus.Pending)) {
       deliveryStatus = DeliveryStatus.Pending
     }
 

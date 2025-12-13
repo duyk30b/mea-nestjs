@@ -1,6 +1,5 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
-import { BaseEntity } from '../common/base.entity'
 import { DiscountType, PaymentMoneyStatus } from '../common/variable'
 import Customer from './customer.entity'
 import Image from './image.entity'
@@ -112,6 +111,14 @@ export default class TicketRadiology {
   @Expose()
   actualPrice: number // Giá thực tế
 
+  @Column({ default: 0 })
+  @Expose()
+  paid: number // tiền đã thanh toán
+
+  @Column({ default: 0 })
+  @Expose()
+  debt: number // tiền nợ
+
   @Column({
     type: 'bigint',
     transformer: {
@@ -181,6 +188,8 @@ export default class TicketRadiology {
     entity.discountMoney = Number(raw.discountMoney)
     entity.discountPercent = Number(raw.discountPercent)
     entity.actualPrice = Number(raw.actualPrice)
+    entity.paid = Number(raw.paid)
+    entity.debt = Number(raw.debt)
 
     entity.createdAt = Number(raw.createdAt)
     entity.completedAt = raw.completedAt == null ? raw.completedAt : Number(raw.completedAt)

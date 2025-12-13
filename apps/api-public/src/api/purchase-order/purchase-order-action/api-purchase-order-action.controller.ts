@@ -1,13 +1,14 @@
 import { Controller, Delete, Param, Post } from '@nestjs/common'
 import { Body } from '@nestjs/common/decorators/http/route-params.decorator'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { GenerateIdParam, IdParam } from '../../../../../_libs/common/dto/param'
-import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
+import { GenerateIdParam } from '../../../../../_libs/common/dto/param'
+import { UserPermission, UserPermissionOr } from '../../../../../_libs/common/guards/user.guard.'
 import { BaseResponse } from '../../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../../_libs/permission/permission.enum'
+import { PurchaseOrderPaymentBody } from '../purchase-order-money/request'
 import { PurchaseOrderActionService } from './purchase-order-action.service'
-import { PurchaseOrderPaymentMoneyBody } from './request'
+import { PurchaseOrderTerminalBody } from './request'
 
 @ApiTags('PurchaseOrder')
 @ApiBearerAuth('access-token')
@@ -17,35 +18,13 @@ export class ApiPurchaseOrderActionController {
 
   // ================== ACTION ================== //
 
-  @Delete('/:id/draft-destroy')
-  @UserPermission(PermissionId.PURCHASE_ORDER_DRAFT_CRUD)
+  @Delete('/:id/destroy')
+  @UserPermissionOr(
+    PermissionId.PURCHASE_ORDER_DRAFT_CRUD,
+    PermissionId.PURCHASE_ORDER_DEPOSITED_DESTROY,
+    PermissionId.PURCHASE_ORDER_CANCELLED_DESTROY
+  )
   async draftDestroy(
-    @External() { oid }: TExternal,
-    @Param() { id }: GenerateIdParam
-  ): Promise<BaseResponse> {
-    const data = await this.purchaseOrderActionService.destroy({
-      oid,
-      purchaseOrderId: id,
-    })
-    return { data }
-  }
-
-  @Delete('/:id/deposited-destroy')
-  @UserPermission(PermissionId.PURCHASE_ORDER_DEPOSITED_DESTROY)
-  async depositedDestroy(
-    @External() { oid }: TExternal,
-    @Param() { id }: GenerateIdParam
-  ): Promise<BaseResponse> {
-    const data = await this.purchaseOrderActionService.destroy({
-      oid,
-      purchaseOrderId: id,
-    })
-    return { data }
-  }
-
-  @Delete('/:id/cancelled-destroy')
-  @UserPermission(PermissionId.PURCHASE_ORDER_CANCELLED_DESTROY)
-  async cancelledDestroy(
     @External() { oid }: TExternal,
     @Param() { id }: GenerateIdParam
   ): Promise<BaseResponse> {
@@ -61,7 +40,7 @@ export class ApiPurchaseOrderActionController {
   async sendProductAndPaymentAndClose(
     @External() { oid, uid }: TExternal,
     @Param() { id }: GenerateIdParam,
-    @Body() body: PurchaseOrderPaymentMoneyBody
+    @Body() body: PurchaseOrderPaymentBody
   ): Promise<BaseResponse> {
     const data = await this.purchaseOrderActionService.sendProductAndPaymentAndClose({
       oid,
@@ -104,12 +83,14 @@ export class ApiPurchaseOrderActionController {
   @UserPermission(PermissionId.PURCHASE_ORDER_TERMINATE)
   async terminate(
     @External() { oid, uid }: TExternal,
-    @Param() { id }: GenerateIdParam
+    @Param() { id }: GenerateIdParam,
+    @Body() body: PurchaseOrderTerminalBody
   ): Promise<BaseResponse> {
     const data = await this.purchaseOrderActionService.terminate({
       oid,
       userId: uid,
       purchaseOrderId: id,
+      body,
     })
     return { data }
   }

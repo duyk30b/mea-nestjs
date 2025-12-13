@@ -220,7 +220,7 @@ export default class Ticket {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  paid: number // tiền đã thanh toán
+  paid: number // tiền thanh toán vào Ticket
 
   @Column({
     type: 'bigint',
@@ -228,7 +228,23 @@ export default class Ticket {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  debt: number // tiền nợ
+  paidItem: number // tiền thanh toán vào Item
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  debt: number // tiền nợ của Ticket
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  debtItem: number // tiền nợ của Item
 
   @Column({ type: 'varchar', length: 100, default: JSON.stringify([]) })
   @Expose()
@@ -362,6 +378,8 @@ export default class Ticket {
     entity.profit = Number(raw.profit)
     entity.paid = Number(raw.paid)
     entity.debt = Number(raw.debt)
+    entity.paidItem = Number(raw.paidItem)
+    entity.debtItem = Number(raw.debtItem)
 
     entity.surcharge = Number(raw.surcharge)
     entity.expense = Number(raw.expense)

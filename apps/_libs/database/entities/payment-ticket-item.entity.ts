@@ -95,6 +95,22 @@ export default class PaymentTicketItem {
   @Expose()
   quantity: number
 
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  paidItem: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  debtItem: number
+
   @Expose()
   payment: Payment
 
@@ -125,6 +141,8 @@ export default class PaymentTicketItem {
     entity.discountMoney = Number(raw.discountMoney)
     entity.discountPercent = Number(raw.discountPercent)
     entity.actualPrice = Number(raw.actualPrice)
+    entity.paidItem = Number(raw.paidItem)
+    entity.debtItem = Number(raw.debtItem)
 
     return entity
   }

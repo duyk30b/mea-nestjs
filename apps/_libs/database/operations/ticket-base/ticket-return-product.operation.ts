@@ -31,21 +31,24 @@ export class TicketReturnProductOperation {
     private ticketUseRepository: TicketUserRepository,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager,
     private productPutawayManager: ProductPutawayManager
-  ) {}
+  ) { }
 
   async returnProduct(data: {
     oid: number
     ticketId: string
     time: number
-    returnList: {
+    returnType:
+    | 'ALL'
+    | {
       ticketBatchId: string
       quantityReturn: number
     }[]
-    returnAll: boolean
     options?: { changePendingIfNoStock?: boolean }
   }) {
-    const { oid, ticketId, time, options, returnAll } = data
-    let returnList = data.returnList
+    const { oid, ticketId, time, options, returnType } = data
+    if (returnType !== 'ALL' && !returnType.length) {
+      throw new BusinessError('Danh sách hoàn trả không hợp lệ')
+    }
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // 1. === UPDATE TICKET FOR TRANSACTION ===
@@ -55,10 +58,9 @@ export class TicketReturnProductOperation {
         { updatedAt: Date.now() }
       )
 
-      if (!returnList.length && !returnAll) return { ticket: ticketOrigin }
-
+      let returnList: { ticketBatchId: string; quantityReturn: number }[] = []
       let ticketBatchOriginList: TicketBatch[] = []
-      if (returnAll) {
+      if (returnType === 'ALL') {
         ticketBatchOriginList = await this.ticketBatchManager.findManyBy(manager, {
           oid,
           ticketId,
@@ -74,6 +76,7 @@ export class TicketReturnProductOperation {
           return { ticket: ticketOrigin }
         }
       } else {
+        returnList = returnType
         ticketBatchOriginList = await this.ticketBatchManager.findManyBy(manager, {
           id: { IN: returnList.filter((i) => !!i.ticketBatchId).map((i) => i.ticketBatchId) },
           oid,
@@ -138,27 +141,27 @@ export class TicketReturnProductOperation {
         }),
         update: options?.changePendingIfNoStock
           ? {
-              quantity: (t: string, u: string) => ` CASE
+            quantity: (t: string, u: string) => ` CASE
                                     WHEN  ("quantity" = "${t}"."putawayQuantity")
                                       THEN "quantity"
                                     ELSE "${u}"."quantity" - "${t}"."putawayQuantity"
                                   END`,
-              costAmount: () => `"costAmount" - "putawayCostAmount"`,
-              deliveryStatus: (t: string) => ` CASE
+            costAmount: () => `"costAmount" - "putawayCostAmount"`,
+            deliveryStatus: (t: string) => ` CASE
                                     WHEN  ("quantity" = "${t}"."putawayQuantity")
                                       THEN ${DeliveryStatus.Pending}
                                     ELSE "deliveryStatus"
                                   END`,
-            }
+          }
           : {
-              quantity: () => `"quantity" - "putawayQuantity"`,
-              costAmount: () => `"costAmount" - "putawayCostAmount"`,
-              deliveryStatus: (t: string) => ` CASE
+            quantity: () => `"quantity" - "putawayQuantity"`,
+            costAmount: () => `"costAmount" - "putawayCostAmount"`,
+            deliveryStatus: (t: string) => ` CASE
                                     WHEN  ("quantity" = "${t}"."putawayQuantity")
                                       THEN ${DeliveryStatus.NoStock}
                                     ELSE "deliveryStatus"
                                   END`,
-            },
+          },
         options: { requireEqualLength: true },
       })
       const ticketProductModifiedMap = ESArray.arrayToKeyValue(ticketProductModifiedList, 'id')
@@ -255,7 +258,7 @@ export class TicketReturnProductOperation {
           ticketId,
         })
 
-      const ticket = await this.ticketChangeItemMoneyManager.changeItemMoney({
+      const ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
         manager,
         oid,
         ticketOrigin,
@@ -269,7 +272,7 @@ export class TicketReturnProductOperation {
       })
 
       return {
-        ticket,
+        ticketModified,
         productModifiedList,
         batchModifiedList,
         ticketUserModifiedList,

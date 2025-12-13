@@ -1,266 +1,266 @@
 import { Injectable } from '@nestjs/common'
-import { PaymentMoneyStatus } from '../../../../../_libs/database/common/variable'
+import { CacheDataService } from '../../../../../_libs/common/cache-data/cache-data.service'
 import { Customer, Payment, TicketProduct } from '../../../../../_libs/database/entities'
+import { PaymentActionType } from '../../../../../_libs/database/entities/payment.entity'
 import Ticket, { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
 import {
-  TicketOrderDepositedOperation,
-  TicketOrderDraftOperation,
+  TicketCloseOperation,
+  TicketPaymentOperation,
+  TicketReopenOperation,
+  TicketReturnProductOperation,
+  TicketSendProductOperation,
 } from '../../../../../_libs/database/operations'
 import { TicketRepository } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { TicketSendProductAndPaymentBody } from '../ticket-action/request'
-import { TicketActionService } from '../ticket-action/ticket-action.service'
 import { TicketDestroyService } from '../ticket-action/ticket-destroy.service'
-import { TicketMoneyService } from '../ticket-money/ticket-money.service'
 import {
   TicketOrderDebtSuccessInsertBody,
   TicketOrderDebtSuccessUpdateBody,
   TicketOrderDepositedUpdateBody,
-  TicketOrderDraftUpsertBody,
+  TicketOrderDraftInsertBody,
+  TicketOrderDraftUpdateBody,
 } from './request'
+import { TicketOrderBasicUpsertService } from './service/ticket-order-basic-upsert.service'
 
 @Injectable()
 export class TicketOrderService {
   constructor(
-    private readonly socketEmitService: SocketEmitService,
-    private readonly ticketOrderDraftOperation: TicketOrderDraftOperation,
-    private readonly ticketOrderDepositedOperation: TicketOrderDepositedOperation,
-    private readonly ticketDestroyService: TicketDestroyService,
-    private readonly ticketRepository: TicketRepository,
-    private readonly ticketActionService: TicketActionService,
-    private readonly ticketMoneyService: TicketMoneyService
+    private socketEmitService: SocketEmitService,
+    private cacheDataService: CacheDataService,
+    private ticketDestroyService: TicketDestroyService,
+    private ticketRepository: TicketRepository,
+    private ticketCloseOperation: TicketCloseOperation,
+    private ticketReopenOperation: TicketReopenOperation,
+    private ticketPaymentOperation: TicketPaymentOperation,
+    private ticketOrderBasicUpsertService: TicketOrderBasicUpsertService,
+    private ticketReturnProductOperation: TicketReturnProductOperation,
+    private ticketSendProductOperation: TicketSendProductOperation
   ) { }
 
-  async draftUpsert(params: { oid: number; userId: number; body: TicketOrderDraftUpsertBody }) {
+  async draftInsert(params: { oid: number; userId: number; body: TicketOrderDraftInsertBody }) {
     const { oid, body, userId } = params
 
-    const { ticket } = await this.ticketOrderDraftOperation.upsert({
+    const result = await this.ticketOrderBasicUpsertService.startUpsert({
       oid,
-      ticketId: body.ticketId,
-      ticketOrderDraftUpsertDto: {
-        ...body.ticketOrderDraftUpsert,
-        customerSourceId: 0,
-        laboratoryMoney: 0,
-        radiologyMoney: 0,
-        commissionMoney: 0,
-      },
-      ticketOrderProductDraftListDto: body.ticketOrderProductDraftList.map((i) => {
-        return {
-          ...i,
-          printPrescription: 1,
-          createdAt: body.ticketOrderDraftUpsert.createdAt,
-        }
-      }),
-      ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
-        return {
-          ...i,
-        }
-      }),
-      ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
-      ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
-      // ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
+      ticketId: '',
+      customerId: body.customerId,
+      body,
     })
-    return { ticket }
+
+    return { ticketCreated: result.ticket }
+  }
+
+  async draftUpdate(params: {
+    oid: number
+    ticketId: string
+    userId: number
+    body: TicketOrderDraftUpdateBody
+  }) {
+    const { oid, body, ticketId, userId } = params
+
+    const result = await this.ticketOrderBasicUpsertService.startUpsert({
+      oid,
+      ticketId,
+      customerId: 0, // không truyền customerId vì không cho sửa
+      body,
+    })
+
+    return { ticketModified: result.ticket }
   }
 
   async depositedUpdate(params: {
     oid: number
-    userId: number
     ticketId: string
+    userId: number
     body: TicketOrderDepositedUpdateBody
   }) {
-    const { oid, userId, ticketId, body } = params
+    const { oid, body, ticketId, userId } = params
 
-    const { ticket } = await this.ticketOrderDepositedOperation.update({
+    const result = await this.ticketOrderBasicUpsertService.startUpsert({
       oid,
       ticketId,
-      ticketOrderDepositedUpdateDto: {
-        ...body.ticketOrderDepositedUpdate,
-        customerSourceId: 0,
-        laboratoryMoney: 0,
-        radiologyMoney: 0,
-        commissionMoney: 0,
-      },
-      ticketOrderProductDraftListDto: body.ticketOrderProductDraftList.map((i) => {
-        return {
-          ...i,
-          printPrescription: 1,
-          paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
-          createdAt: body.ticketOrderDepositedUpdate.createdAt,
-        }
-      }),
-      ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
-        return {
-          ...i,
-          paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
-        }
-      }),
-      ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
-      ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
-      // ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
+      customerId: 0, // không truyền customerId vì không cho sửa
+      body,
     })
-    return { ticket }
+
+    return { ticketModified: result.ticket }
   }
 
-  async debtSuccessCreate(params: {
+  async debtSuccessCreate(props: {
     oid: number
     userId: number
     body: TicketOrderDebtSuccessInsertBody
   }) {
-    const { oid, body, userId } = params
-    const { paid, ...ticketOrderDraftInsertBody } = body.ticketOrderDebtSuccessInsert
-    const time = ticketOrderDraftInsertBody.createdAt
+    const { oid, body, userId } = props
 
-    const draftResponse = await this.ticketOrderDraftOperation.upsert({
+    const { ticket: ticketCreated } = await this.ticketOrderBasicUpsertService.startUpsert({
       oid,
       ticketId: '',
-      ticketOrderDraftUpsertDto: {
-        ...ticketOrderDraftInsertBody,
-        customerSourceId: 0,
-        laboratoryMoney: 0,
-        radiologyMoney: 0,
-        commissionMoney: 0,
-      },
-      ticketOrderProductDraftListDto: body.ticketOrderProductDraftList.map((i) => {
-        return {
-          ...i,
-          printPrescription: 1,
-          createdAt: body.ticketOrderDebtSuccessInsert.createdAt,
-        }
-      }),
-      ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
-        return {
-          ...i,
-        }
-      }),
-      ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
-      ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
-      // ticketAttributeDraftListDto: body.ticketOrderAttributeDaftList,
+      customerId: body.customerId,
+      body,
     })
 
-    const ticketId = draftResponse.ticket.id
-    const customerId = draftResponse.ticket.customerId
+    const { paid } = body
+    const debt = ticketCreated.totalMoney - paid
+    const time = body.ticketOrderBasic.createdAt
+    const ticketId = ticketCreated.id
+    const customerId = ticketCreated.customerId
 
-    if (body.ticketOrderProductDraftList.length) {
-      await this.ticketActionService.sendProduct({
+    let ticketModified: Ticket
+    let customer: Customer
+
+    if (body.ticketOrderProductBodyList.length) {
+      const allowNegativeQuantity = await this.cacheDataService.getSettingAllowNegativeQuantity(oid)
+      const sendProductResult = await this.ticketSendProductOperation.sendProduct({
         oid,
         ticketId,
-        ticketProductIdList: draftResponse.ticket.ticketProductList || [].map((i) => i.id),
-        sendAll: true,
+        sendType: 'ALL',
+        time,
+        allowNegativeQuantity,
+      })
+      ticketModified = sendProductResult.ticketModified || ticketModified
+      this.socketEmitService.productListChange(oid, {
+        productUpsertedList: sendProductResult.productModifiedList,
+        batchUpsertedList: sendProductResult.batchModifiedList,
       })
     }
 
-    if (paid > 0) {
-      await this.ticketMoneyService.prepaymentMoney({
+    if (paid > 0 || debt > 0) {
+      const prepaymentResult = await this.ticketPaymentOperation.startPaymentMoney({
         oid,
+        ticketId,
         userId,
-        ticketId,
-        body: { customerId, paymentMethodId: 0, paidAmount: paid, note: '' },
+        walletId: body.walletId,
+        paidAdd: paid,
+        debtAdd: debt,
+        time,
+        note: '',
+        paymentActionType: paid > 0 ? PaymentActionType.PaymentMoney : PaymentActionType.Debit,
+        paidItemAdd: 0,
+        debtItemAdd: 0,
       })
+      customer = prepaymentResult.customerModified || customer
+      ticketModified = prepaymentResult.ticketModified || ticketModified
     }
 
-    const closeResult = await this.ticketActionService.close({ oid, userId, ticketId })
+    const closeResult = await this.ticketCloseOperation.startClose({
+      oid,
+      ticketId,
+      time,
+      userId,
+    })
+    ticketModified = closeResult.ticketModified || ticketModified
 
-    return { ticket: closeResult.ticketModified }
+    this.socketEmitService.socketTicketChange(oid, {
+      ticketId,
+      ticketModified,
+    })
+    this.socketEmitService.customerUpsert(oid, { customer })
+
+    return { ticketCreated: ticketModified }
   }
 
   async debtSuccessUpdate(params: {
     oid: number
-    userId: number
     ticketId: string
+    userId: number
     body: TicketOrderDebtSuccessUpdateBody
   }) {
-    const { oid, userId, ticketId, body } = params
-    const time = Date.now()
-    let ticket = await this.ticketRepository.findOneBy({ oid, id: ticketId })
-    const customerId = ticket.customerId
+    const { oid, ticketId, userId, body } = params
+    const paidUpdate = body.paid
+    const debtUpdate = body.ticketOrderBasic.totalMoney - paidUpdate
+    const time = body.ticketOrderBasic.createdAt
 
-    if ([TicketStatus.Draft, TicketStatus.Schedule].includes(ticket.status)) {
+    let customerModified: Customer
+    let ticketModified: Ticket
+
+    const ticketOrigin = await this.ticketRepository.findOneBy({ oid, id: ticketId })
+    if ([TicketStatus.Debt, TicketStatus.Completed].includes(ticketOrigin.status)) {
+      const responseReopen = await this.ticketReopenOperation.reopen({
+        oid,
+        ticketId,
+      })
+      ticketModified = responseReopen.ticketModified
+    }
+
+    const returnProductResult = await this.ticketReturnProductOperation.returnProduct({
+      oid,
+      ticketId,
+      time: Date.now(),
+      returnType: 'ALL',
+    })
+    ticketModified = returnProductResult.ticketModified || ticketModified
+
+    const updateResult = await this.ticketOrderBasicUpsertService.startUpsert({
+      oid,
+      ticketId,
+      customerId: 0, // không truyền customerId vì không cho sửa
+      body,
+    })
+    const customerId = updateResult.ticket.customerId
+
+    const allowNegativeQuantity = await this.cacheDataService.getSettingAllowNegativeQuantity(oid)
+    const sendProductResult = await this.ticketSendProductOperation.sendProduct({
+      oid,
+      ticketId,
+      sendType: 'ALL',
+      time,
+      allowNegativeQuantity,
+    })
+
+    ticketModified = sendProductResult.ticketModified || ticketModified
+
+    if ([TicketStatus.Draft, TicketStatus.Schedule].includes(ticketModified.status)) {
       return { data: { ticketId } }
     }
-    if ([TicketStatus.Debt, TicketStatus.Completed].includes(ticket.status)) {
-      const responseReopen = await this.ticketActionService.reopen({
+    if ([TicketStatus.Debt, TicketStatus.Completed].includes(ticketModified.status)) {
+      const responseReopen = await this.ticketReopenOperation.reopen({ oid, ticketId })
+      ticketModified = responseReopen.ticketModified
+    }
+
+    if (ticketModified.paid != paidUpdate || ticketModified.debt != debtUpdate) {
+      const paymentResult = await this.ticketPaymentOperation.startPaymentMoney({
         oid,
         ticketId,
         userId,
+        walletId: body.walletId,
+        time,
+        note: 'Sửa đơn',
+        paymentActionType: PaymentActionType.PaymentMoney,
+        paidAdd: paidUpdate - ticketModified.paid,
+        debtAdd: debtUpdate - ticketModified.debt,
+        paidItemAdd: 0,
+        debtItemAdd: 0,
       })
-      ticket = responseReopen.ticketModified
-    }
-    if (ticket.paid) {
-      await this.ticketMoneyService.refundMoney({
-        oid,
-        userId,
-        ticketId,
-        body: {
-          customerId,
-          note: 'Sửa đơn',
-          paymentMethodId: 0,
-          refundAmount: ticket.paid,
-        },
-      })
-    }
-    await this.ticketActionService.returnProduct({
-      oid,
-      returnAll: true,
-      ticketId,
-      returnList: [],
-    })
-
-    const { paid: paidBody, ...ticketBodyUpdate } = body.ticketOrderDebtSuccessUpdate
-    // không update paid, giữ nguyên số tiền trước update, trả paid thêm vào ở dưới cùng
-    const responseUpdate = await this.ticketOrderDepositedOperation.update({
-      oid,
-      ticketId,
-      ticketOrderDepositedUpdateDto: {
-        ...ticketBodyUpdate,
-        customerSourceId: 0,
-        laboratoryMoney: 0,
-        radiologyMoney: 0,
-        commissionMoney: 0,
-      },
-      ticketOrderProductDraftListDto: body.ticketOrderProductDraftList.map((i) => {
-        return {
-          ...i,
-          printPrescription: 1,
-          createdAt: body.ticketOrderDebtSuccessUpdate.createdAt,
-          paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
-        }
-      }),
-      ticketOrderProcedureDraftListDto: body.ticketOrderProcedureDraftList.map((i) => {
-        return {
-          ...i,
-          paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
-        }
-      }),
-      ticketOrderSurchargeDraftListDto: body.ticketOrderSurchargeDraftList,
-      ticketOrderExpenseDraftListDto: body.ticketOrderExpenseDraftList,
-    })
-    ticket = responseUpdate.ticket
-
-    const responseSendAllProduct = await this.ticketActionService.sendProduct({
-      ticketId,
-      oid,
-      sendAll: true,
-      ticketProductIdList: responseUpdate.ticket.ticketProductList.map((i) => i.id),
-    })
-
-    if (paidBody > 0) {
-      await this.ticketMoneyService.prepaymentMoney({
-        oid,
-        userId,
-        ticketId,
-        body: { customerId, paymentMethodId: 0, paidAmount: paidBody, note: 'Sửa đơn' },
-      })
+      customerModified = paymentResult.customerModified || customerModified
+      ticketModified = paymentResult.ticketModified
     }
 
-    const closeResult = await this.ticketActionService.close({
+    const closeResult = await this.ticketCloseOperation.startClose({
       oid,
       ticketId,
+      time,
       userId,
     })
-    ticket = closeResult.ticketModified
+    ticketModified = closeResult.ticketModified
 
-    return { ticket }
+    this.socketEmitService.socketTicketChange(oid, {
+      ticketId,
+      ticketModified,
+    })
+    this.socketEmitService.customerUpsert(oid, { customer: customerModified })
+    this.socketEmitService.productListChange(oid, {
+      productUpsertedList: [
+        ...returnProductResult.productModifiedList,
+        ...sendProductResult.productModifiedList,
+      ],
+      batchUpsertedList: [
+        ...returnProductResult.batchModifiedList,
+        ...sendProductResult.batchModifiedList,
+      ],
+    })
+    return { ticketModified }
   }
 
   // ================= ACTION ================= //
@@ -278,62 +278,61 @@ export class TicketOrderService {
   }) {
     const { oid, ticketId, body, userId } = params
     const time = Date.now()
-    const paymentCreatedList: Payment[] = []
     let ticketModified: Ticket
     let customerModified: Customer
+    const paymentCreatedList: Payment[] = []
 
     let ticketProductModifiedAll: TicketProduct[]
     if (body.ticketProductIdList.length) {
-      const sendProductResult = await this.ticketActionService.sendProduct({
+      const allowNegativeQuantity = await this.cacheDataService.getSettingAllowNegativeQuantity(oid)
+      const sendProductResult = await this.ticketSendProductOperation.sendProduct({
         oid,
-        sendAll: true,
         ticketId,
-        ticketProductIdList: [],
-        options: { noEmitTicket: true },
+        sendType: 'ALL',
+        time,
+        allowNegativeQuantity,
       })
-      if (sendProductResult.ticketModified) {
-        ticketModified = sendProductResult.ticketModified
-      }
+      ticketModified = sendProductResult.ticketModified || ticketModified
       ticketProductModifiedAll = sendProductResult.ticketProductModifiedAll
+      this.socketEmitService.productListChange(oid, {
+        productUpsertedList: sendProductResult.productModifiedList,
+        batchUpsertedList: sendProductResult.batchModifiedList,
+      })
     }
-
-    const customerId = body.customerId
 
     if (body.paidAmount > 0) {
-      const prepaymentResult = await this.ticketMoneyService.prepaymentMoney({
+      const prepaymentResult = await this.ticketPaymentOperation.startPaymentMoney({
         oid,
-        userId,
         ticketId,
-        body: {
-          customerId,
-          note: body.note,
-          paidAmount: body.paidAmount,
-          paymentMethodId: body.paymentMethodId,
-        },
+        userId,
+        walletId: body.walletId,
+        time,
+        paidAdd: body.paidAmount,
+        note: '',
+        paymentActionType: PaymentActionType.PaymentMoney,
+        paidItemAdd: 0,
+        debtAdd: 0,
+        debtItemAdd: 0,
       })
+      ticketModified = prepaymentResult.ticketModified || ticketModified
+      customerModified = prepaymentResult.customerModified || customerModified
       paymentCreatedList.push(prepaymentResult.paymentCreated)
-      ticketModified = prepaymentResult.ticketModified
     }
 
-    const closeResult = await this.ticketActionService.close({
+    const closeResult = await this.ticketCloseOperation.startClose({
       oid,
       ticketId,
+      time,
       userId,
-      options: { noEmitCustomer: true, noEmitTicket: true },
     })
-    paymentCreatedList.push(...closeResult.paymentCreatedList)
-    if (closeResult.ticketModified) {
-      ticketModified = closeResult.ticketModified
+    ticketModified = closeResult.ticketModified
+    if (closeResult.paymentCreated) {
+      paymentCreatedList.push(closeResult.paymentCreated)
     }
-    if (closeResult.customerModified) {
-      customerModified = closeResult.customerModified
-    }
-    if (ticketModified) {
-      this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
-    }
-    if (customerModified) {
-      this.socketEmitService.customerUpsert(oid, { customer: customerModified })
-    }
+
+    this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
+    this.socketEmitService.customerUpsert(oid, { customer: customerModified })
+
     return {
       ticketModified: closeResult.ticketModified,
       paymentCreatedList,

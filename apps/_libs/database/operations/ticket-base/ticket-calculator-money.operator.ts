@@ -8,7 +8,6 @@ import {
   TicketRadiology,
   TicketUser,
 } from '../../entities'
-import { TicketUpdateType } from '../../entities/ticket.entity'
 
 @Injectable()
 export class TicketCalculatorMoney {
@@ -143,7 +142,6 @@ export class TicketCalculatorMoney {
     }
 
     const totalMoney = itemsActualMoney - discountMoney + ticketOrigin.surcharge
-    const debt = totalMoney - ticketOrigin.paid
     const profit = totalMoney - itemsCostAmount - ticketOrigin.expense - commissionMoney
 
     const ticketMoneyUpdate = {
@@ -159,7 +157,6 @@ export class TicketCalculatorMoney {
       discountPercent,
       discountMoney,
       totalMoney,
-      debt,
       profit,
     }
 

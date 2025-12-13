@@ -11,7 +11,11 @@ import {
   PaymentPersonType,
   PaymentVoucherType,
 } from '../../../../_libs/database/entities/payment.entity'
-import { CustomerManager, PaymentManager } from '../../../../_libs/database/repositories'
+import {
+  CustomerRepository,
+  PaymentRepository,
+  WalletRepository,
+} from '../../../../_libs/database/repositories'
 import { ExcelProcess } from '../common/excel-process'
 import { CustomerExcelRules } from './customer-excel.rule'
 
@@ -39,8 +43,9 @@ type DataPlain = typeof dataPlainExample
 export class ApiFileCustomerUploadExcel {
   constructor(
     private dataSource: DataSource,
-    private readonly customerManager: CustomerManager,
-    private paymentManager: PaymentManager
+    private customerRepository: CustomerRepository,
+    private paymentRepository: PaymentRepository,
+    private walletRepository: WalletRepository
   ) { }
 
   async uploadExcel(options: { oid: number; userId: number; file: FileUploadDto }) {
@@ -108,7 +113,7 @@ export class ApiFileCustomerUploadExcel {
       })
 
       const customerCodeList = dataPlainList.map((i) => i.customerCode)
-      const customerOriginList = await this.customerManager.findManyBy(manager, {
+      const customerOriginList = await this.customerRepository.managerFindManyBy(manager, {
         oid,
         customerCode: { IN: customerCodeList },
       })
@@ -161,12 +166,12 @@ export class ApiFileCustomerUploadExcel {
           return customerInsert
         })
 
-        await this.customerManager.insertManyAndReturnEntity(manager, customerInsertList)
+        await this.customerRepository.managerInsertMany(manager, customerInsertList)
       }
 
       // === 2. Trường hợp 2: Cập nhật Customer
       if (dataPlainUpdateList.length) {
-        await this.customerManager.bulkUpdate({
+        await this.customerRepository.managerBulkUpdate({
           manager,
           condition: { oid, id: { NOT: 0 } },
           compare: ['customerCode'],
@@ -202,21 +207,25 @@ export class ApiFileCustomerUploadExcel {
             personId: i.customerId,
 
             createdAt: time,
-            paymentMethodId: 0,
+            walletId: '0',
             paymentActionType: PaymentActionType.FixByExcel,
             moneyDirection: MoneyDirection.Other,
             note: 'Update Excel',
 
-            paidAmount: 0,
-            debtAmount: i.debtUpdate - i.debtOrigin,
-            openDebt: i.debtOrigin,
-            closeDebt: i.debtUpdate,
+            paid: 0,
+            paidItem: 0,
+            debt: i.debtUpdate - i.debtOrigin,
+            debtItem: 0,
+            personOpenDebt: i.debtOrigin,
+            personCloseDebt: i.debtUpdate,
             cashierId: userId,
+            walletOpenMoney: 0,
+            walletCloseMoney: 0,
           }
           return paymentInsert
         })
 
-        await this.paymentManager.insertMany(manager, paymentInsertList)
+        await this.paymentRepository.managerInsertMany(manager, paymentInsertList)
       }
     })
   }

@@ -57,13 +57,22 @@ export class TicketAddTicketProductService {
           ticketId,
           customerId: ticketOrigin.customerId,
           deliveryStatus: DeliveryStatus.Pending,
-          costAmount: i.costAmount, // set tạm thế, khi nào gửi hàng chọn lô mới tính chính xác được
+          costAmount: 0, // costAmount chỉ tính chính xác khi gửi hàng
           pickupStrategy: i.pickupStrategy, // nếu không xuất kho thì costAmount lấy giá trị trên luôn
           type: ticketProductType,
           ticketProcedureId: '0',
-          paymentMoneyStatus: ticketOrigin.isPaymentEachItem
-            ? PaymentMoneyStatus.PendingPayment
-            : PaymentMoneyStatus.TicketPaid,
+          paymentMoneyStatus: (() => {
+            if (i.actualPrice === 0) {
+              return PaymentMoneyStatus.NoEffect
+            }
+            if (ticketOrigin.isPaymentEachItem) {
+              return PaymentMoneyStatus.PendingPayment
+            } else {
+              return PaymentMoneyStatus.TicketPaid
+            }
+          })(),
+          paid: 0,
+          debt: 0,
         }
         return insert
       })

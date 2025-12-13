@@ -62,9 +62,10 @@ export class TicketDestroyTicketRegimenService {
       }
       if (
         ticketRegimenDestroyed.moneyAmountUsed !== 0
-        || ticketRegimenDestroyed.moneyAmountPaid !== 0
-        || ticketRegimenDestroyed.moneyAmountWallet !== 0
         || ticketRegimenDestroyed.costAmount !== 0
+        || ticketRegimenDestroyed.paid !== 0
+        || ticketRegimenDestroyed.paidItem !== 0
+        || ticketRegimenDestroyed.debt !== 0
       ) {
         throw new BusinessError('Liệu trình đã sử dụng tiền không thể xóa')
       }

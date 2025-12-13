@@ -85,6 +85,8 @@ export class TicketAddTicketLaboratoryGroupService {
                     ? PaymentMoneyStatus.PendingPayment
                     : PaymentMoneyStatus.TicketPaid,
                   completedAt: null,
+                  paid: 0,
+                  debt: 0,
                 } satisfies TicketLaboratoryInsertType
                 return tlEntity
               })

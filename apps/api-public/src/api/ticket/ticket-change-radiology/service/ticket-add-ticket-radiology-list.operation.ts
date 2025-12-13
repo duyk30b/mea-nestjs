@@ -35,11 +35,12 @@ export class TicketAddTicketRadiologyListService {
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. UPDATE TICKET FOR TRANSACTION ===
-      let ticketModified = await this.ticketManager.updateOneAndReturnEntity(
+      const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(
         manager,
         { oid, id: ticketId, status: TicketStatus.Executing },
         { updatedAt: Date.now() }
       )
+      const { customerId } = ticketOrigin
 
       // === 2. INSERT NEW ===
       const ticketRadiologyInsertList = body.ticketRadiologyWrapList.map((i) => {
@@ -48,12 +49,21 @@ export class TicketAddTicketRadiologyListService {
           oid,
           ticketId,
           status: TicketRadiologyStatus.Pending,
-          customerId: ticketModified.customerId,
+          customerId,
           completedAt: null,
           imageIds: '[]',
-          paymentMoneyStatus: ticketModified.isPaymentEachItem
-            ? PaymentMoneyStatus.PendingPayment
-            : PaymentMoneyStatus.TicketPaid,
+          paymentMoneyStatus: (() => {
+            if (i.ticketRadiology.actualPrice === 0) {
+              return PaymentMoneyStatus.NoEffect
+            }
+            if (ticketOrigin.isPaymentEachItem) {
+              return PaymentMoneyStatus.PendingPayment
+            } else {
+              return PaymentMoneyStatus.TicketPaid
+            }
+          })(),
+          paid: 0,
+          debt: 0,
         }
         return insert
       })
@@ -99,6 +109,8 @@ export class TicketAddTicketRadiologyListService {
       const commissionMoneyAdd = ticketUserCreatedList.reduce((acc, item) => {
         return acc + item.quantity * item.commissionMoney
       }, 0)
+
+      let ticketModified = ticketOrigin
       if (
         radiologyMoneyAdd != 0
         || itemsDiscountAdd != 0

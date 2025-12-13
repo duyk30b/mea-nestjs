@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { GenerateIdParam, IdParam } from '../../../../_libs/common/dto'
+import { GenerateIdParam } from '../../../../_libs/common/dto'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
@@ -50,7 +50,7 @@ export class ApiPaymentController {
     @Param() { id }: GenerateIdParam,
     @Body() body: PaymentUpdateInfoBody
   ): Promise<BaseResponse> {
-    const data = await this.apiPaymentService.updateInfo({
+    const data = await this.paymentOtherService.updateInfo({
       oid,
       paymentId: id,
       body,
@@ -97,27 +97,13 @@ export class ApiPaymentController {
     return { data }
   }
 
-  @Post('other/destroy-money-out/:id')
-  @UserPermission(PermissionId.PAYMENT_OTHER_DESTROY_MONEY_OUT)
-  async moneyOutDestroyOther(
+  @Post('destroy/:id')
+  @UserPermission(PermissionId.PAYMENT_DESTROY)
+  async destroy(
     @External() { oid, user }: TExternal,
     @Param() { id }: GenerateIdParam
   ): Promise<BaseResponse> {
-    const data = await this.paymentOtherService.destroyMoneyOut({
-      oid,
-      paymentId: id,
-      userId: user.id,
-    })
-    return { data }
-  }
-
-  @Post('other/destroy-money-in/:id')
-  @UserPermission(PermissionId.PAYMENT_OTHER_DESTROY_MONEY_IN)
-  async moneyInDestroyOther(
-    @External() { oid, user }: TExternal,
-    @Param() { id }: GenerateIdParam
-  ): Promise<BaseResponse> {
-    const data = await this.paymentOtherService.destroyMoneyIn({
+    const data = await this.paymentOtherService.destroy({
       oid,
       paymentId: id,
       userId: user.id,

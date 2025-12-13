@@ -8,7 +8,11 @@ import { TicketDestroyService } from './ticket-destroy.service'
 @Module({
   imports: [TicketQueryModule],
   controllers: [TicketActionController],
-  providers: [TicketActionService, TicketDestroyService, TicketChangeAllMoneyService],
+  providers: [
+    TicketActionService,
+    TicketDestroyService,
+    TicketChangeAllMoneyService,
+  ],
   exports: [TicketActionService, TicketDestroyService],
 })
 export class TicketActionModule { }

@@ -211,6 +211,8 @@ export class TicketAddTicketProcedureListService {
                 actualPrice: i === 0 ? firstActualPrice : actualPrice,
                 priority: 0,
                 quantity: 1,
+                paid: 0,
+                debt: 0,
               } satisfies TicketProcedureInsertType
               return tpInsert
             })
@@ -242,11 +244,13 @@ export class TicketAddTicketProcedureListService {
                 .reduce((acc, cur) => acc + cur.quantity * cur.commissionMoney, 0),
               createdAt,
               moneyAmountUsed: 0,
-              moneyAmountPaid: 0,
-              moneyAmountWallet: 0,
               moneyAmountActual: ticketRegimenAdd.isEffectTotalMoney
                 ? ticketRegimenAdd.actualPrice
                 : 0,
+              paid: 0,
+              paidItem: 0,
+              debt: 0,
+              debtItem: 0,
             } satisfies TicketRegimenInsertType
             return insert
           })
@@ -301,6 +305,8 @@ export class TicketAddTicketProcedureListService {
                 commissionAmount: ticketUserProcedureCreatedList
                   .filter((tu) => tu.ticketItemId === tpAdd.id)
                   .reduce((acc, cur) => acc + cur.quantity * cur.commissionMoney, 0),
+                paid: 0,
+                debt: 0,
               }
               return insert
             })

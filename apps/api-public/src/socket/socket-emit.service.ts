@@ -84,6 +84,7 @@ export class SocketEmitService {
       discount?: boolean
       surcharge?: boolean
       expense?: boolean
+      wallet?: boolean
     }
   ) {
     if (!this.io) return
@@ -100,28 +101,27 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_SETTING_RELOAD)
   }
 
-  customerUpsert(oid: number, data: { customer: Customer }) {
-    if (!this.io) return
+  customerUpsert(oid: number, data: { customer?: Customer }) {
+    if (!this.io || !data.customer) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_CUSTOMER_UPSERT, data)
-  }
-
-  batchListChange(
-    oid: number,
-    data: { batchDestroyedList?: Batch[]; batchUpsertedList?: Batch[] }
-  ) {
-    if (!this.io) return
-    if (!data.batchUpsertedList?.length && !data.batchDestroyedList?.length) {
-      return
-    }
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_BATCH_LIST_CHANGE, data)
   }
 
   productListChange(
     oid: number,
-    data: { productDestroyedList?: Product[]; productUpsertedList?: Product[] }
+    data: {
+      productDestroyedList?: Product[]
+      productUpsertedList?: Product[]
+      batchDestroyedList?: Batch[]
+      batchUpsertedList?: Batch[]
+    }
   ) {
     if (!this.io) return
-    if (!data.productUpsertedList?.length && !data.productDestroyedList?.length) {
+    if (
+      !data.productUpsertedList?.length
+      && !data.productDestroyedList?.length
+      && !data.batchDestroyedList?.length
+      && !data.batchUpsertedList?.length
+    ) {
       return
     }
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_PRODUCT_LIST_CHANGE, data)

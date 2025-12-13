@@ -216,8 +216,6 @@ export class ApiStockCheckService {
 
     this.socketEmitService.productListChange(oid, {
       productUpsertedList: productModifiedList || [],
-    })
-    this.socketEmitService.batchListChange(oid, {
       batchUpsertedList: batchModifiedList || [],
     })
     return { data: { stockCheck } }

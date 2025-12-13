@@ -39,12 +39,11 @@ export class TicketSendProductOperation {
   async sendProduct(data: {
     oid: number
     ticketId: string
-    ticketProductIdList: string[]
-    sendAll: boolean
+    sendType: 'ALL' | { ticketProductIdList: string[] }
     time: number
     allowNegativeQuantity: boolean
   }) {
-    const { oid, ticketId, time, sendAll, ticketProductIdList, allowNegativeQuantity } = data
+    const { oid, ticketId, time, sendType, allowNegativeQuantity } = data
     const PREFIX = `TicketId = ${ticketId}, sendProduct failed`
     const ERROR_LOGIC = `TicketId = ${ticketId}, sendProduct has a logic error occurred: `
 
@@ -63,7 +62,7 @@ export class TicketSendProductOperation {
       )
 
       let ticketProductOriginList: TicketProduct[] = []
-      if (sendAll) {
+      if (sendType === 'ALL') {
         ticketProductOriginList = await this.ticketProductRepository.managerFindManyBy(manager, {
           oid,
           ticketId,
@@ -73,7 +72,7 @@ export class TicketSendProductOperation {
         ticketProductOriginList = await this.ticketProductRepository.managerFindManyBy(manager, {
           oid,
           ticketId,
-          id: { IN: ticketProductIdList },
+          id: { IN: sendType.ticketProductIdList },
           deliveryStatus: DeliveryStatus.Pending, // chỉ update những thằng "Pending" thôi
         })
       }
@@ -121,11 +120,14 @@ export class TicketSendProductOperation {
             id: i.voucherProductId,
             productId: i.productId,
             quantity: i.pickupQuantity,
-            costAmount: i.pickupCostAmount,
+            pickupCostAmount: i.pickupCostAmount,
             deliveryStatus: DeliveryStatus.Delivered,
           }
         }),
-        update: ['costAmount', 'deliveryStatus'],
+        update: {
+          deliveryStatus: true,
+          costAmount: () => `"costAmount" + "pickupCostAmount"`,
+        },
         options: { requireEqualLength: true },
       })
       const ticketProductModifiedMap = ESArray.arrayToKeyValue(ticketProductModifiedList, 'id')
@@ -154,9 +156,7 @@ export class TicketSendProductOperation {
       })
       await this.ticketBatchRepository.managerInsertMany(manager, ticketBatchInsertList)
 
-      // 4. === UPDATE for PRODUCT and BATCH ===
-
-      // 6. === UPDATE: TICKET MONEY AND DELIVERY ===
+      // 5. === UPDATE: TICKET MONEY AND DELIVERY ===
       const costAmountOrigin = ticketProductOriginList.reduce((acc, cur) => {
         return acc + cur.costAmount
       }, 0)
@@ -165,7 +165,7 @@ export class TicketSendProductOperation {
       }, 0)
       const costAmountAdd = costAmountModified - costAmountOrigin
 
-      // === 4. ReCalculator DeliveryStatus
+      // 6. === ReCalculator DeliveryStatus
       const { deliveryStatus, ticketProductList } =
         await this.ticketProductManager.calculatorDeliveryStatus({
           manager,

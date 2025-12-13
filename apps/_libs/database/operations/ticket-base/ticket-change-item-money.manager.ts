@@ -14,7 +14,7 @@ export class TicketChangeItemMoneyManager {
     private ticketManager: TicketManager
   ) { }
 
-  async changeItemMoney(options: {
+  async changeItemMoney(props: {
     manager?: EntityManager
     oid: number
     ticketId?: string
@@ -33,12 +33,15 @@ export class TicketChangeItemMoneyManager {
     }
     other?: {
       deliveryStatus?: DeliveryStatus
+      paidAdd?: number
+      paidItemAdd?: number
+      debtItemAdd?: number
     }
   }) {
-    const { oid, ticketId, itemMoney, other } = options
+    const { oid, ticketId, itemMoney, other } = props
 
-    let ticketOrigin = options.ticketOrigin
-    const manager = options.manager || this.manager
+    let ticketOrigin = props.ticketOrigin
+    const manager = props.manager || this.manager
 
     if (!ticketOrigin) {
       ticketOrigin = await this.ticketManager.findOneBy(manager, { oid, id: ticketId })
@@ -76,7 +79,6 @@ export class TicketChangeItemMoneyManager {
     const surchargeUpdate = ticketOrigin.surcharge + (itemMoney.surchargeMoneyAdd || 0)
 
     const totalMoneyUpdate = itemsActualMoneyUpdate - discountMoneyUpdate + surchargeUpdate
-    const debtUpdate = totalMoneyUpdate - ticketOrigin.paid
     const profitUpdate =
       totalMoneyUpdate - itemsCostAmountUpdate - ticketOrigin.expense - commissionMoneyUpdate
 
@@ -104,11 +106,13 @@ export class TicketChangeItemMoneyManager {
         discountMoney: discountMoneyUpdate,
         surcharge: surchargeUpdate,
         totalMoney: totalMoneyUpdate,
-        debt: debtUpdate,
         profit: profitUpdate,
 
         // === other ===
         deliveryStatus: other?.deliveryStatus != null ? other.deliveryStatus : undefined,
+        paid: other?.paidAdd ? ticketOrigin.paid + other.paidAdd : undefined,
+        paidItem: other?.paidItemAdd ? ticketOrigin.paidItem + other.paidItemAdd : undefined,
+        debtItem: other?.debtItemAdd ? ticketOrigin.debtItem + other.debtItemAdd : undefined,
       }
     )
     return ticket

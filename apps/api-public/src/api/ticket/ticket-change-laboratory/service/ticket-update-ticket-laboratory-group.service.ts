@@ -76,6 +76,8 @@ export class TicketUpdateTicketLaboratoryGroupService {
               paymentMoneyStatus: ticketOrigin.isPaymentEachItem
                 ? PaymentMoneyStatus.PendingPayment
                 : PaymentMoneyStatus.TicketPaid,
+              paid: 0,
+              debt: 0,
             } satisfies TicketLaboratoryInsertType
             return tlEntity
           })

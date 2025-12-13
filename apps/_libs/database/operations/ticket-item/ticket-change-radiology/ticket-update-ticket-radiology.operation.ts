@@ -55,9 +55,11 @@ export class TicketUpdateTicketRadiologyOperation {
       let ticketRadiologyModified: TicketRadiology = ticketRadiologyOrigin
       if (ticketRadiologyUpdateDto) {
         if (
-          [PaymentMoneyStatus.TicketPaid, PaymentMoneyStatus.PendingPayment].includes(
-            ticketRadiologyOrigin.paymentMoneyStatus
-          )
+          [
+            PaymentMoneyStatus.TicketPaid,
+            PaymentMoneyStatus.PendingPayment,
+            PaymentMoneyStatus.NoEffect,
+          ].includes(ticketRadiologyOrigin.paymentMoneyStatus)
         ) {
           ticketRadiologyModified = await this.ticketRadiologyManager.updateOneAndReturnEntity(
             manager,
@@ -68,6 +70,16 @@ export class TicketUpdateTicketRadiologyOperation {
               discountMoney: ticketRadiologyUpdateDto.discountMoney,
               discountPercent: ticketRadiologyUpdateDto.discountPercent,
               actualPrice: ticketRadiologyUpdateDto.actualPrice,
+              paymentMoneyStatus: (() => {
+                if (ticketRadiologyUpdateDto.actualPrice === 0) {
+                  return PaymentMoneyStatus.NoEffect
+                }
+                if (ticketOrigin.isPaymentEachItem) {
+                  return PaymentMoneyStatus.PendingPayment
+                } else {
+                  return PaymentMoneyStatus.TicketPaid
+                }
+              })(),
             }
           )
         }

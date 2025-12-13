@@ -9,7 +9,6 @@ import { ApiExpenseModule } from './api-expense/api-expense.module'
 import { ApiICDModule } from './api-icd/api-icd.module'
 import { ApiLaboratorySampleModule } from './api-laboratory-sample/api-laboratory-sample.module'
 import { ApiOrganizationModule } from './api-organization/api-organization.module'
-import { ApiPaymentMethodModule } from './api-payment-method/api-payment-method.module'
 import { ApiPaymentModule } from './api-payment/api-payment.module'
 import { ApiPermissionModule } from './api-permission/api-permission.module'
 import { ApiPrescriptionSampleModule } from './api-prescription-sample/api-prescription-sample.module'
@@ -35,6 +34,7 @@ import { ApiTicketRegimenModule } from './api-ticket-regimen/api-ticket-regimen.
 import { ApiUserRoleModule } from './api-user-role/api-user-role.module'
 import { ApiUserRoomModule } from './api-user-room/api-user-room.module'
 import { ApiUserModule } from './api-user/api-user.module'
+import { ApiWalletModule } from './api-wallet/api-wallet.module'
 import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
 import { MasterDataModule } from './master-data/master-data.module'
 import { ApiPurchaseOrderModule } from './purchase-order/api-purchase-order.module'
@@ -84,7 +84,7 @@ import { TicketModule } from './ticket/ticket.module'
     ApiPrintHtmlModule,
     ApiPrintHtmlSettingModule,
     ApiWarehouseModule,
-    ApiPaymentMethodModule,
+    ApiWalletModule,
     ApiExpenseModule,
     ApiCustomerSourceModule,
 

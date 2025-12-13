@@ -56,7 +56,7 @@ export class PurchaseOrderDepositedOperation {
         oid,
         status: PurchaseOrderStatus.Deposited,
         // paid: 0, // giữ nguyên số tiền đã trả
-        debt: () => `${purchaseOrderUpdateDto.totalMoney} - paid`,
+        // debt: // giữ nguyên số nợ
         year: ESTimer.info(purchaseOrderUpdateDto.startedAt as number, 7).year,
         month: ESTimer.info(purchaseOrderUpdateDto.startedAt as number, 7).month + 1,
         date: ESTimer.info(purchaseOrderUpdateDto.startedAt as number, 7).date,

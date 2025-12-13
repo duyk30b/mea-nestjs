@@ -35,7 +35,7 @@ export default class TicketRegimen {
 
   @Column({ default: 0 })
   @Expose()
-  isEffectTotalMoney: number
+  isEffectTotalMoney: number // nếu có effect, những dịch vụ tạo ra ở trạng thái Pending => sẽ tính tổng tiền vào đơn, nếu không sẽ không tính
 
   @Column({ type: 'smallint', default: TicketRegimenStatus.Pending })
   @Expose()
@@ -59,7 +59,7 @@ export default class TicketRegimen {
 
   @Column({ default: 0 })
   @Expose()
-  moneyAmountActual: number
+  moneyAmountActual: number // tính tổng các Procedure, bỏ qua những thằng NoEffect, theo quy tắc của isEffectTotalMoney
 
   @Column({ default: 0 })
   @Expose()
@@ -67,11 +67,19 @@ export default class TicketRegimen {
 
   @Column({ default: 0 })
   @Expose()
-  moneyAmountPaid: number // Tiền TicketProcedure đã được trả
+  paidItem: number // Tiền TicketProcedure đã được trả
 
   @Column({ default: 0 })
   @Expose()
-  moneyAmountWallet: number // Tiền chờ, chưa chuyển sang TicketProcedure
+  paid: number // Tiền trả trực tiếp cho chính liệu trình
+
+  @Column({ default: 0 })
+  @Expose()
+  debt: number // Tiền nợ trực tiếp của chính liệu trình
+
+  @Column({ default: 0 })
+  @Expose()
+  debtItem: number // Tiền nợ trực tiếp của chính liệu trình
 
   @Column({ type: 'varchar', length: 25, default: DiscountType.VND })
   @Expose()
@@ -138,8 +146,11 @@ export default class TicketRegimen {
     entity.costAmount = Number(raw.costAmount)
     entity.commissionAmount = Number(raw.commissionAmount)
     entity.moneyAmountUsed = Number(raw.moneyAmountUsed)
-    entity.moneyAmountPaid = Number(raw.moneyAmountPaid)
     entity.discountPercent = Number(raw.discountPercent)
+    entity.paid = Number(raw.paid)
+    entity.paidItem = Number(raw.paidItem)
+    entity.debt = Number(raw.debt)
+    entity.debtItem = Number(raw.debtItem)
 
     entity.createdAt = Number(raw.createdAt)
     entity.completedAt = raw.completedAt == null ? raw.completedAt : Number(raw.completedAt)

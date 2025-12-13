@@ -99,7 +99,6 @@ export class TicketChangeReceptionService {
         month: ESTimer.info(ticketReceptionAdd.receptionAt, 7).month + 1,
         date: ESTimer.info(ticketReceptionAdd.receptionAt, 7).date,
 
-        debt: 0,
         note: ticketReceptionAdd.reason,
         deliveryStatus: DeliveryStatus.NoStock,
         procedureMoney: 0,
@@ -118,13 +117,20 @@ export class TicketChangeReceptionService {
         commissionMoney: 0,
         profit: 0,
         paid: 0,
+        paidItem: 0,
+        debt: 0,
+        debtItem: 0,
         imageDiagnosisIds: JSON.stringify([]),
         endedAt: null,
       })
     }
     if (body.ticketId) {
       ticket = await this.ticketRepository.updateOneAndReturnEntity(
-        { oid, id: body.ticketId },
+        {
+          oid,
+          id: body.ticketId,
+          customerId: customer.id,
+        },
         { receptionAt: ticketReceptionAdd.receptionAt }
       )
     }

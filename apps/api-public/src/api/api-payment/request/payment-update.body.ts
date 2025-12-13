@@ -9,14 +9,14 @@ export class PaymentUpdateInfoBody {
   @IsNumber()
   createdAt: number
 
-  @ApiProperty({ example: 12 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  paymentMethodId: number
-
   @ApiPropertyOptional({ example: 'Khách hàng còn bo thêm tiền' })
   @Expose()
   @IsString()
   note: string
+
+  @ApiProperty({ example: 12 })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  walletId: string
 }

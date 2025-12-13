@@ -3,10 +3,7 @@ import { DataSource } from 'typeorm'
 import { ESArray } from '../../../common/helpers/array.helper'
 import { DeliveryStatus, MovementType, PickupStrategy } from '../../common/variable'
 import { PurchaseOrderStatus } from '../../entities/purchase-order.entity'
-import {
-  PurchaseOrderItemRepository,
-  PurchaseOrderRepository,
-} from '../../repositories'
+import { PurchaseOrderItemRepository, PurchaseOrderRepository } from '../../repositories'
 import { ProductPickupManager } from '../product/product-pickup.manager'
 
 @Injectable()
@@ -29,7 +26,7 @@ export class PurchaseOrderReturnProductOperation {
 
     const transaction = await this.dataSource.transaction('REPEATABLE READ', async (manager) => {
       // === 1. PURCHASE_ORDER: update PURCHASE_ORDER ===
-      const purchaseOrder = await this.purchaseOrderRepository.managerUpdateOne(
+      const purchaseOrderModified = await this.purchaseOrderRepository.managerUpdateOne(
         manager,
         {
           oid,
@@ -39,20 +36,23 @@ export class PurchaseOrderReturnProductOperation {
         },
         { deliveryStatus: DeliveryStatus.Pending } // purchaseOrder
       )
+      const { distributorId } = purchaseOrderModified
 
       const purchaseOrderItemOriginList = await this.purchaseOrderItemRepository.managerFindManyBy(
         manager,
         { oid, purchaseOrderId }
       )
       const purchaseOrderItemOriginMap = ESArray.arrayToKeyValue(purchaseOrderItemOriginList, 'id')
-      if (purchaseOrderItemOriginList.length === 0) return { purchaseOrder }
+      if (purchaseOrderItemOriginList.length === 0) {
+        return { purchaseOrderModified }
+      }
 
       // === 2. Product and Batch origin
       const pickupContainer = await this.productPickupManager.startPickup({
         manager,
         oid,
         voucherId: purchaseOrderId,
-        contactId: purchaseOrder.distributorId,
+        contactId: distributorId,
         movementType: MovementType.PurchaseOrder,
         isRefund: 1,
         time,
@@ -74,7 +74,7 @@ export class PurchaseOrderReturnProductOperation {
       })
 
       return {
-        purchaseOrder,
+        purchaseOrderModified,
         purchaseOrderItemList: purchaseOrderItemOriginMap,
         productModifiedList: pickupContainer.productModifiedList,
         batchModifiedList: pickupContainer.batchModifiedList,

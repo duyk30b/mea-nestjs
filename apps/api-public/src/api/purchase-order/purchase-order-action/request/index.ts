@@ -1,1 +1,1 @@
-export * from './purchase-order-payment.body'
+export * from './purchase-order-terminal.body'

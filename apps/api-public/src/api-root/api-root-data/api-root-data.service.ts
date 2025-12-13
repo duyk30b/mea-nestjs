@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { BaseResponse } from '../../../../_libs/common/interceptor'
-import Image, { ImageInteractType } from '../../../../_libs/database/entities/image.entity'
+import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import {
   ImageManager,
   ImageRepository,
@@ -10,6 +9,7 @@ import {
   TicketRepository,
   UserRepository,
 } from '../../../../_libs/database/repositories'
+import { TicketDestroyService } from '../../api/ticket/ticket-action/ticket-destroy.service'
 import { RootMigrationDataBody } from './request/root-migration-data.body'
 
 @Injectable()
@@ -23,142 +23,20 @@ export class ApiRootDataService {
     private readonly imageRepository: ImageRepository,
     private readonly imageManager: ImageManager,
     private readonly ticketRepository: TicketRepository,
+    private readonly ticketDestroyService: TicketDestroyService,
     private readonly ticketRadiologyRepository: TicketRadiologyRepository
   ) { }
 
-  async startMigrationData(body: RootMigrationDataBody): Promise<BaseResponse<boolean>> {
+  async startMigrationData(body: RootMigrationDataBody) {
     if (body.key !== '8aobvoyupp8') return
-    await this.migrationTicketDiagnosisImage()
-    await this.migrationTicketRadiologyImage()
-    await this.migrationOrganizationImage()
-    await this.migrationUserImage()
-    return { data: true }
-  }
-
-  async migrationTicketDiagnosisImage() {
-    const ticketList = await this.ticketRepository.findMany({
-      condition: { imageDiagnosisIds: { NOT: '[]' } },
-    })
-    console.log('🚀 ~ ticketList:', ticketList.length)
-
-    const imageTempList = ticketList
-      .map((ticket) => {
-        try {
-          const imageIdList: number[] = JSON.parse(ticket.imageDiagnosisIds)
-          return imageIdList.map((imageId) => {
-            const temp: Partial<Image> = {
-              id: imageId,
-              imageInteractType: ImageInteractType.Customer,
-              imageInteractId: ticket.customerId,
-              ticketId: ticket.id,
-            }
-            return temp
-          })
-        } catch (error) {
-          return []
-        }
-      })
-      .flat()
-
-    await this.imageManager.bulkUpdate({
-      manager: this.imageRepository.getManager(),
-      tempList: imageTempList,
-      compare: ['id'],
-      update: ['imageInteractType', 'imageInteractId', 'ticketId'],
-    })
-  }
-
-  async migrationTicketRadiologyImage() {
-    const ticketRadiologyList = await this.ticketRadiologyRepository.findMany({
-      condition: { imageIds: { NOT: '[]' } },
-    })
-    console.log('🚀 ~ ticketList:', ticketRadiologyList.length)
-
-    const imageTempList = ticketRadiologyList
-      .map((ticketRadiology) => {
-        try {
-          const imageIdList: number[] = JSON.parse(ticketRadiology.imageIds)
-          return imageIdList.map((imageId) => {
-            const temp: Partial<Image> = {
-              id: imageId,
-              imageInteractType: ImageInteractType.Customer,
-              imageInteractId: ticketRadiology.customerId,
-              ticketId: ticketRadiology.ticketId,
-              ticketItemId: ticketRadiology.id,
-            }
-            return temp
-          })
-        } catch (error) {
-          return []
-        }
-      })
-      .flat()
-
-    await this.imageManager.bulkUpdate({
-      manager: this.imageRepository.getManager(),
-      tempList: imageTempList,
-      compare: ['id'],
-      update: [
-        'imageInteractType',
-        'imageInteractId',
-        'ticketId',
-        'ticketItemId',
-      ],
-    })
-  }
-
-  async migrationOrganizationImage() {
-    const organizationList = await this.organizationRepository.findMany({
-      condition: { logoImageId: { NOT: 0 } },
-    })
-    console.log('🚀 ~ organizationList:', organizationList.length)
-
-    const imageTempList = organizationList.map((organization) => {
-      const temp: Partial<Image> = {
-        id: organization.logoImageId,
-        imageInteractType: ImageInteractType.Organization,
-        imageInteractId: organization.id,
-      }
-      return temp
+    const ticketCancelList = await this.ticketRepository.findManyBy({
+      status: TicketStatus.Cancelled,
     })
 
-    await this.imageManager.bulkUpdate({
-      manager: this.imageRepository.getManager(),
-      tempList: imageTempList,
-      compare: ['id'],
-      update: ['imageInteractType', 'imageInteractId'],
-    })
-  }
-
-  async migrationUserImage() {
-    const userList = await this.userRepository.findMany({
-      condition: { imageIds: { NOT: '[]' } },
-    })
-    console.log('🚀 ~ userList:', userList.length)
-
-    const imageTempList = userList
-      .map((user) => {
-        try {
-          const imageIdList: number[] = JSON.parse(user.imageIds)
-          return imageIdList.map((imageId) => {
-            const temp: Partial<Image> = {
-              id: imageId,
-              imageInteractType: ImageInteractType.User,
-              imageInteractId: user.id,
-            }
-            return temp
-          })
-        } catch (error) {
-          return []
-        }
-      })
-      .flat()
-
-    await this.imageManager.bulkUpdate({
-      manager: this.imageRepository.getManager(),
-      tempList: imageTempList,
-      compare: ['id'],
-      update: ['imageInteractType', 'imageInteractId'],
-    })
+    for (let i = 0; i < ticketCancelList.length; i++) {
+      const ticketCancel = ticketCancelList[i]
+      await this.ticketDestroyService.destroy({ oid: ticketCancel.oid, ticketId: ticketCancel.id })
+    }
+    return { ticketCancelList }
   }
 }

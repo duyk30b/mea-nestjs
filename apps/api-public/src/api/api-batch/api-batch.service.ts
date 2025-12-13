@@ -99,7 +99,7 @@ export class ApiBatchService {
   async updateInfo(oid: number, id: number, body: BatchUpdateInfoBody) {
     const batch = await this.batchRepository.updateOneAndReturnEntity({ id, oid }, body)
 
-    this.socketEmitService.batchListChange(oid, { batchUpsertedList: [batch] })
+    this.socketEmitService.productListChange(oid, { batchUpsertedList: [batch] })
     return { batch }
   }
 
@@ -164,8 +164,10 @@ export class ApiBatchService {
       }
       this.productMovementRepository.insertOneFullField(productMovement)
 
-      this.socketEmitService.productListChange(oid, { productUpsertedList: [productUpdated] })
-      this.socketEmitService.batchListChange(oid, { batchUpsertedList: [batchUpdated] })
+      this.socketEmitService.productListChange(oid, {
+        productUpsertedList: [productUpdated],
+        batchUpsertedList: [batchUpdated],
+      })
     }
 
     return { batch: batchUpdated, product: productUpdated }
@@ -204,8 +206,10 @@ export class ApiBatchService {
       await this.organizationRepository.updateDataVersion(oid)
       this.cacheDataService.clearOrganization(oid)
 
-      this.socketEmitService.productListChange(oid, { productUpsertedList: [productUpdated] })
-      this.socketEmitService.batchListChange(oid, { batchDestroyedList: [batchDestroyed] })
+      this.socketEmitService.productListChange(oid, {
+        productUpsertedList: [productUpdated],
+        batchDestroyedList: [batchDestroyed],
+      })
     }
 
     return {
@@ -241,7 +245,7 @@ export class ApiBatchService {
     await this.organizationRepository.updateDataVersion(oid)
     this.cacheDataService.clearOrganization(oid)
 
-    this.socketEmitService.batchListChange(oid, {
+    this.socketEmitService.productListChange(oid, {
       batchDestroyedList,
       batchUpsertedList: [batchModified],
     })

@@ -1,19 +1,12 @@
 import { Exclude, Expose } from 'class-transformer'
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-  PrimaryColumn,
-} from 'typeorm'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
 import Customer from './customer.entity'
 import Distributor from './distributor.entity'
-import PaymentMethod from './payment-method.entity'
 import PaymentTicketItem from './payment-ticket-item.entity'
 import PurchaseOrder from './purchase-order.entity'
 import Ticket from './ticket.entity'
 import User from './user.entity'
+import Wallet from './wallet.entity'
 
 export enum PaymentPersonType {
   Other = 0,
@@ -30,13 +23,13 @@ export enum PaymentVoucherType {
 
 export enum PaymentActionType {
   Other = 0, // Tạm ứng
-  PrepaymentMoney = 1, // Tạm ứng
-  RefundMoney = 2, // Hoàn trả tiền
-  PayDebt = 3, // Trả nợ
-  Close = 4, // Đóng phiếu, thường chỉ có thể ghi nợ khi đóng phiếu
-  Reopen = 5, // Mở lại phiếu, thường thì chỉ có thể là hoàn trả nợ
-  PrepaymentForTicketItemList = 6,
-  RefundForTicketItemList = 7,
+  PaymentMoney = 1, // Thanh toán
+  RefundMoney = 2, // Hoàn tiền
+  Debit = 3, // Ghi nợ
+  CancelDebt = 4, // Hủy nợ
+  PayDebt = 5, // Trả nợ
+  Close = 6, // Đóng phiếu
+  Terminal = 7, // Hủy phiếu
   FixByExcel = 8,
 }
 
@@ -50,7 +43,7 @@ export enum MoneyDirection {
 @Index('IDX_Payment__oid_createdAt', ['oid', 'createdAt'])
 @Index('IDX_Payment__oid_personId', ['oid', 'personId'])
 @Index('IDX_Payment__oid_moneyDirection', ['oid', 'moneyDirection'])
-@Index('IDX_Payment__oid_paymentMethodId', ['oid', 'paymentMethodId'])
+@Index('IDX_Payment__oid_walletId', ['oid', 'walletId'])
 export default class Payment {
   @Column()
   @Exclude()
@@ -76,9 +69,9 @@ export default class Payment {
   @Expose()
   personId: number
 
-  @Column({ default: 0 })
+  @Column({ type: 'bigint', default: 0 })
   @Expose()
-  paymentMethodId: number
+  walletId: string
 
   @Column({
     type: 'bigint',
@@ -109,7 +102,7 @@ export default class Payment {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  paidAmount: number
+  paid: number
 
   @Column({
     type: 'bigint',
@@ -117,7 +110,7 @@ export default class Payment {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  debtAmount: number
+  paidItem: number
 
   @Column({
     type: 'bigint',
@@ -125,7 +118,7 @@ export default class Payment {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  openDebt: number
+  debt: number
 
   @Column({
     type: 'bigint',
@@ -133,7 +126,39 @@ export default class Payment {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  closeDebt: number
+  debtItem: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  personOpenDebt: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  personCloseDebt: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  walletOpenMoney: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  walletCloseMoney: number
 
   @Expose()
   ticket: Ticket
@@ -157,11 +182,11 @@ export default class Payment {
   paymentTicketItemList: PaymentTicketItem[]
 
   @Expose()
-  @ManyToOne((type) => PaymentMethod, (paymentMethod) => paymentMethod.paymentList, {
+  @ManyToOne((type) => Wallet, (wallet) => wallet.paymentList, {
     createForeignKeyConstraints: false,
   })
-  @JoinColumn({ name: 'paymentMethodId', referencedColumnName: 'id' })
-  paymentMethod: PaymentMethod
+  @JoinColumn({ name: 'walletId', referencedColumnName: 'id' })
+  wallet: Wallet
 
   static fromRaw(raw: { [P in keyof Payment]: any }) {
     if (!raw) return null
@@ -169,10 +194,14 @@ export default class Payment {
     Object.assign(entity, raw)
 
     entity.createdAt = Number(raw.createdAt)
-    entity.paidAmount = Number(raw.paidAmount)
-    entity.debtAmount = Number(raw.debtAmount)
-    entity.openDebt = Number(raw.openDebt)
-    entity.closeDebt = Number(raw.closeDebt)
+    entity.paid = Number(raw.paid)
+    entity.paidItem = Number(raw.paidItem)
+    entity.debt = Number(raw.debt)
+    entity.debtItem = Number(raw.debtItem)
+    entity.personOpenDebt = Number(raw.personOpenDebt)
+    entity.personCloseDebt = Number(raw.personCloseDebt)
+    entity.walletOpenMoney = Number(raw.walletOpenMoney)
+    entity.walletCloseMoney = Number(raw.walletCloseMoney)
 
     return entity
   }
@@ -190,7 +219,7 @@ export type PaymentRelationType = {
     | 'customer'
     | 'distributor'
     | 'employee'
-    | 'paymentMethod'
+    | 'wallet'
     | 'cashier'
     | 'paymentTicketItemList'
   >]?: boolean

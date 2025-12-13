@@ -116,19 +116,18 @@ export default class TicketLaboratoryGroup {
     const { ticketLaboratoryList } = options
 
     let paymentMoneyStatus = PaymentMoneyStatus.TicketPaid
-    const hasPaid = ticketLaboratoryList.some((i) => {
-      return (
-        i.paymentMoneyStatus === PaymentMoneyStatus.FullPaid
-        || i.paymentMoneyStatus === PaymentMoneyStatus.PartialPaid
-      )
-    })
-    const hasPending = ticketLaboratoryList.some((i) => {
-      return i.paymentMoneyStatus === PaymentMoneyStatus.PendingPayment
-    })
-    if (hasPaid && !hasPending) paymentMoneyStatus = PaymentMoneyStatus.FullPaid
-    if (!hasPaid && hasPending) paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
-    if (hasPaid && hasPending) paymentMoneyStatus = PaymentMoneyStatus.PartialPaid
 
+    if (ticketLaboratoryList.every((i) => i.paymentMoneyStatus === PaymentMoneyStatus.FullPaid)) {
+      paymentMoneyStatus = PaymentMoneyStatus.FullPaid
+    } else if (
+      ticketLaboratoryList.every((i) => i.paymentMoneyStatus === PaymentMoneyStatus.PendingPayment)
+    ) {
+      paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
+    } else if (ticketLaboratoryList.some((i) => i.paid)) {
+      paymentMoneyStatus = PaymentMoneyStatus.PartialPaid
+    } else if (ticketLaboratoryList.some((i) => i.debt)) {
+      paymentMoneyStatus = PaymentMoneyStatus.Debt
+    }
     return { paymentMoneyStatus }
   }
 }

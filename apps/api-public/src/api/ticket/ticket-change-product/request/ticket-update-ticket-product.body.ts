@@ -52,12 +52,6 @@ class TicketProductBody {
   @IsEnumValue(DiscountType)
   discountType: DiscountType
 
-  @ApiProperty({ example: 25_000 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  costAmount: number
-
   @ApiProperty({ example: 22_500 })
   @Expose()
   @Transform(({ value }) => Math.round(value || 0))

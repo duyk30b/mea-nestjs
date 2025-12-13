@@ -8,7 +8,7 @@ import {
 } from '../../../../../../_libs/database/common/variable'
 import { TicketUser } from '../../../../../../_libs/database/entities'
 import { PositionType } from '../../../../../../_libs/database/entities/position.entity'
-import {
+import TicketProcedure, {
   TicketProcedureStatus,
   TicketProcedureType,
 } from '../../../../../../_libs/database/entities/ticket-procedure.entity'
@@ -47,6 +47,7 @@ export class TicketUpdateMoneyTicketRegimenService {
   }) {
     const { oid, ticketId, ticketRegimenId, body } = props
     const { ticketRegimenUpdate, ticketRegimenItemUpdateList } = body
+    const ticketRegimenItemUpdateMap = ESArray.arrayToKeyValue(ticketRegimenItemUpdateList, 'id')
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. UPDATE TICKET FOR TRANSACTION ===
@@ -56,7 +57,7 @@ export class TicketUpdateMoneyTicketRegimenService {
         { updatedAt: Date.now() }
       )
 
-      // === 2. UPDATE TICKET PROCEDURE ===
+      // === 2. CHECK TICKET_REGIMEN ===
       const ticketRegimenOrigin = await this.ticketRegimenRepository.managerFindOneBy(manager, {
         oid,
         ticketId,
@@ -64,130 +65,56 @@ export class TicketUpdateMoneyTicketRegimenService {
       })
 
       if (![TicketRegimenStatus.Pending].includes(ticketRegimenOrigin.status)) {
-        throw new BusinessError('Trạng thái liệu trình không hợp lệ')
+        // Vẫn cho sửa nếu chưa thanh toán
+        // throw new BusinessError('Trạng thái liệu trình không hợp lệ')
       }
-      if (ticketRegimenOrigin.moneyAmountPaid > 0 || ticketRegimenOrigin.moneyAmountUsed) {
+      if (
+        ticketRegimenOrigin.paid > 0
+        || ticketRegimenOrigin.paidItem > 0
+        || ticketRegimenOrigin.debt > 0
+        || ticketRegimenOrigin.debtItem > 0
+      ) {
         throw new BusinessError('Không thể sửa phiếu đã thanh toán')
       }
 
-      let ticketUserDestroyedList: TicketUser[] = []
-      let ticketUserCreatedList: TicketUser[] = []
-      let commissionMoneyChange = 0
-      if (ticketRegimenOrigin.commissionAmount) {
-        ticketUserDestroyedList = await this.ticketUserRepository.managerDelete(manager, {
+      // === 4. UPDATE TicketProcedure ===
+      const ticketProcedureOriginList = await this.ticketProcedureRepository.findMany({
+        condition: {
           oid,
           ticketId,
-          positionType: { IN: [PositionType.RegimenRequest] },
-          ticketItemId: ticketRegimenId,
-        })
-        ticketUserCreatedList = await this.ticketUserCommon.addTicketUserList({
-          manager,
-          createdAt: ticketRegimenOrigin.createdAt,
-          oid,
-          ticketId,
-          ticketUserDtoList: ticketUserDestroyedList.map((i) => {
-            return {
-              positionId: i.positionId,
-              userId: i.userId,
-              quantity: 1,
-              ticketItemId: ticketRegimenId,
-              positionInteractId: ticketRegimenOrigin.regimenId,
-              ticketItemExpectedPrice: ticketRegimenUpdate.expectedPrice,
-              ticketItemActualPrice: ticketRegimenUpdate.actualPrice,
-            }
-          }),
-        })
-
-        commissionMoneyChange =
-          ticketUserCreatedList.reduce((acc, item) => {
-            return acc + item.quantity * item.commissionMoney
-          }, 0)
-          - ticketUserDestroyedList.reduce((acc, item) => {
-            return acc + item.quantity * item.commissionMoney
-          }, 0)
-      }
-
-      // Update ticketRegimen sau vì có thay đổi commission khi update ticketUser
-      const ticketRegimenModified = await this.ticketRegimenRepository.managerUpdateOne(
-        manager,
-        { oid, id: ticketRegimenId },
-        {
-          expectedPrice: ticketRegimenUpdate.expectedPrice,
-          actualPrice: ticketRegimenUpdate.actualPrice,
-          moneyAmountActual: ticketRegimenOrigin.isEffectTotalMoney
-            ? ticketRegimenUpdate.actualPrice
-            : 0,
-          discountType: ticketRegimenUpdate.discountType,
-          discountMoney: ticketRegimenUpdate.discountMoney,
-          discountPercent: ticketRegimenUpdate.discountPercent,
-          commissionAmount: ticketRegimenOrigin.commissionAmount + commissionMoneyChange,
-        }
-      )
-
-      const ticketRegimenItemModifiedList =
-        await this.ticketRegimenItemRepository.managerBulkUpdate({
-          manager,
-          condition: { oid, ticketId, ticketRegimenId },
-          tempList: ticketRegimenItemUpdateList.map((i) => {
-            return {
-              ...i,
-              moneyAmountActual: ticketRegimenOrigin.isEffectTotalMoney
-                ? i.moneyAmountSale
-                : 0,
-            }
-          }),
-          compare: { id: { cast: 'bigint' } },
-          update: [
-            'moneyAmountRegular',
-            'moneyAmountSale',
-            'moneyAmountActual',
-            'discountMoneyAmount',
-            'discountPercent',
-            'discountType',
-            'quantityRegular',
-          ],
-          options: {},
-        })
-
-      const ticketRegimenItemModifiedMap = ESArray.arrayToKeyValue(
-        ticketRegimenItemModifiedList,
-        'id'
-      )
-      const ticketProcedureOriginList = await this.ticketProcedureRepository.findManyBy({
-        oid,
-        ticketId,
-        ticketRegimenId,
-        ticketProcedureType: TicketProcedureType.InRegimen,
+          ticketRegimenId,
+          ticketProcedureType: TicketProcedureType.InRegimen,
+        },
+        sort: { id: 'ASC' },
       })
-      const tpFixMapTri = ESArray.arrayToKeyArray(ticketProcedureOriginList, 'ticketRegimenItemId')
-
-      Object.keys(tpFixMapTri).forEach((triId) => {
-        const triModified = ticketRegimenItemModifiedMap[triId]
-        const lengthArray = tpFixMapTri[triId]?.length
-        if (lengthArray !== triModified.quantityRegular) {
+      const ticketProcedureFixList = TicketProcedure.fromRaws(ticketProcedureOriginList)
+      const tpFixListMapTri = ESArray.arrayToKeyArray(ticketProcedureFixList, 'ticketRegimenItemId')
+      Object.keys(tpFixListMapTri).forEach((triId) => {
+        const triUpdate = ticketRegimenItemUpdateMap[triId]
+        const lengthArray = tpFixListMapTri[triId]?.length
+        if (lengthArray !== triUpdate.quantityRegular) {
           throw new BusinessError('Số lượng phiếu dịch vụ không đúng')
         }
-        const totalMoneyAmountRegularRemain = triModified.moneyAmountRegular
-        const totalMoneyAmountSaleRemain = triModified.moneyAmountSale
-        const totalDiscountMoneyRemain = triModified.discountMoneyAmount
+        const totalMoneyAmountRegular = triUpdate.moneyAmountRegular
+        const totalMoneyAmountSale = triUpdate.moneyAmountSale
+        const totalDiscountMoney = triUpdate.discountMoneyAmount
 
-        const expectedPrice = Math.floor(totalMoneyAmountRegularRemain / lengthArray / 1000) * 1000
-        const discountMoney = Math.floor(totalDiscountMoneyRemain / lengthArray / 1000) * 1000
-        const actualPrice = Math.floor(totalMoneyAmountSaleRemain / lengthArray / 1000) * 1000
+        const expectedPrice = Math.floor(totalMoneyAmountRegular / lengthArray / 1000) * 1000
+        const discountMoney = Math.floor(totalDiscountMoney / lengthArray / 1000) * 1000
+        const actualPrice = Math.floor(totalMoneyAmountSale / lengthArray / 1000) * 1000
 
-        const firstExpectedPrice = totalMoneyAmountRegularRemain - expectedPrice * (lengthArray - 1)
-        const firstDiscountMoney = totalDiscountMoneyRemain - discountMoney * (lengthArray - 1)
-        const firstActualPrice = totalMoneyAmountSaleRemain - actualPrice * (lengthArray - 1)
+        const firstExpectedPrice = totalMoneyAmountRegular - expectedPrice * (lengthArray - 1)
+        const firstDiscountMoney = totalDiscountMoney - discountMoney * (lengthArray - 1)
+        const firstActualPrice = totalMoneyAmountSale - actualPrice * (lengthArray - 1)
 
-        tpFixMapTri[triId].forEach((tp, tpIndex) => {
+        tpFixListMapTri[triId].forEach((tp, tpIndex) => {
           tp.expectedPrice = tpIndex === 0 ? firstExpectedPrice : expectedPrice
           tp.discountMoney = tpIndex === 0 ? firstDiscountMoney : discountMoney
           tp.actualPrice = tpIndex === 0 ? firstActualPrice : actualPrice
-          tp.discountPercent = triModified.discountPercent
-          tp.discountType = triModified.discountType
+          tp.discountPercent = triUpdate.discountPercent
+          tp.discountType = triUpdate.discountType
         })
       })
-      const ticketProcedureFixList = Object.values(tpFixMapTri).flat()
 
       const ticketProcedureModifiedList = await this.ticketProcedureRepository.managerBulkUpdate({
         manager,
@@ -209,15 +136,153 @@ export class TicketUpdateMoneyTicketRegimenService {
         options: {},
       })
 
+      // Nếu đã có buổi thanh toán rồi thì không sửa được
       ticketProcedureModifiedList.forEach((tp) => {
         if (
-          [PaymentMoneyStatus.FullPaid, PaymentMoneyStatus.PartialPaid].includes(
-            tp.paymentMoneyStatus
-          )
+          [
+            PaymentMoneyStatus.FullPaid,
+            PaymentMoneyStatus.PartialPaid,
+            PaymentMoneyStatus.Debt,
+          ].includes(tp.paymentMoneyStatus)
         ) {
           throw new BusinessError('Đã có dịch vụ đã thanh toán, không thể sửa')
         }
       })
+
+      // === 3. TICKET_USER ===
+      let ticketUserDestroyedList: TicketUser[] = []
+      let ticketUserCreatedList: TicketUser[] = []
+      let commissionMoneyChange = 0
+      if (ticketRegimenOrigin.commissionAmount) {
+        ticketUserDestroyedList = await this.ticketUserRepository.managerDelete(manager, {
+          oid,
+          ticketId,
+          $OR: [
+            { positionType: PositionType.RegimenRequest, ticketItemId: ticketRegimenId },
+            ...(ticketProcedureOriginList.length
+              ? [
+                {
+                  positionType: PositionType.ProcedureResult,
+                  ticketItemId: { IN: ticketProcedureOriginList.map((i) => i.id) },
+                },
+              ]
+              : []),
+          ],
+          positionType: { IN: [PositionType.RegimenRequest] },
+          ticketItemId: ticketRegimenId,
+        })
+
+        const commissionDestroy = ticketUserDestroyedList.reduce((acc, item) => {
+          return acc + item.quantity * item.commissionMoney
+        }, 0)
+
+        if (commissionDestroy !== ticketRegimenOrigin.commissionAmount) {
+          throw new BusinessError('Lỗi, hoa hồng tính toán sai', {
+            commissionDestroy,
+            'ticketRegimenOrigin.commissionAmount': ticketRegimenOrigin.commissionAmount,
+          })
+        }
+
+        ticketUserCreatedList = await this.ticketUserCommon.addTicketUserList({
+          manager,
+          createdAt: ticketRegimenOrigin.createdAt,
+          oid,
+          ticketId,
+          ticketUserDtoList: ticketUserDestroyedList.map((tuDestroyed) => {
+            if (tuDestroyed.positionType === PositionType.RegimenRequest) {
+              return {
+                positionId: tuDestroyed.positionId,
+                userId: tuDestroyed.userId,
+                quantity: 1,
+                ticketItemId: ticketRegimenId,
+                positionInteractId: ticketRegimenOrigin.regimenId,
+                ticketItemExpectedPrice: ticketRegimenUpdate.expectedPrice,
+                ticketItemActualPrice: ticketRegimenUpdate.actualPrice,
+              }
+            }
+            if (tuDestroyed.positionType === PositionType.ProcedureResult) {
+              const ticketProcedureModified = ticketProcedureModifiedList.find((tpModified) => {
+                return tpModified.id === tuDestroyed.ticketItemId
+              })
+              return {
+                positionId: tuDestroyed.positionId,
+                userId: tuDestroyed.userId,
+                quantity: 1,
+                ticketItemId: ticketProcedureModified.id,
+                positionInteractId: ticketProcedureModified.procedureId,
+                ticketItemExpectedPrice: ticketProcedureModified.expectedPrice,
+                ticketItemActualPrice: ticketProcedureModified.actualPrice,
+              }
+            }
+          }),
+        })
+
+        commissionMoneyChange =
+          ticketUserCreatedList.reduce((acc, item) => {
+            return acc + item.quantity * item.commissionMoney
+          }, 0) - commissionDestroy
+      }
+
+      const ticketRegimenItemModifiedList =
+        await this.ticketRegimenItemRepository.managerBulkUpdate({
+          manager,
+          condition: { oid, ticketId, ticketRegimenId },
+          tempList: ticketRegimenItemUpdateList.map((tri) => {
+            return {
+              ...tri,
+              moneyAmountActual: ticketProcedureModifiedList
+                .filter((tp) => {
+                  return (
+                    tp.ticketRegimenItemId === tri.id
+                    && tp.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+                  )
+                })
+                .reduce((acc, item) => acc + item.quantity * item.actualPrice, 0),
+              moneyAmountUsed: ticketProcedureModifiedList
+                .filter((tp) => {
+                  return (
+                    tp.ticketRegimenItemId === tri.id
+                    && tp.status === TicketProcedureStatus.Completed
+                  )
+                })
+                .reduce((acc, item) => acc + item.quantity * item.actualPrice, 0),
+            }
+          }),
+          compare: { id: { cast: 'bigint' } },
+          update: [
+            'moneyAmountRegular',
+            'moneyAmountSale',
+            'moneyAmountActual',
+            'moneyAmountUsed',
+            'discountMoneyAmount',
+            'discountPercent',
+            'discountType',
+            'quantityRegular',
+          ],
+          options: {},
+        })
+
+      // Update ticketRegimen sau vì có thay đổi commission khi update ticketUser
+      const ticketRegimenModified = await this.ticketRegimenRepository.managerUpdateOne(
+        manager,
+        { oid, id: ticketRegimenId },
+        {
+          expectedPrice: ticketRegimenUpdate.expectedPrice,
+          actualPrice: ticketRegimenUpdate.actualPrice,
+          moneyAmountActual: ticketRegimenItemModifiedList.reduce(
+            (acc, item) => acc + item.moneyAmountActual,
+            0
+          ),
+          moneyAmountUsed: ticketRegimenItemModifiedList.reduce(
+            (acc, item) => acc + item.moneyAmountUsed,
+            0
+          ),
+          discountType: ticketRegimenUpdate.discountType,
+          discountMoney: ticketRegimenUpdate.discountMoney,
+          discountPercent: ticketRegimenUpdate.discountPercent,
+          commissionAmount: ticketRegimenOrigin.commissionAmount + commissionMoneyChange,
+        }
+      )
 
       const procedureMoneyChange =
         ticketProcedureModifiedList.reduce((acc, item) => {

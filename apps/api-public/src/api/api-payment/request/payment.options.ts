@@ -1,6 +1,5 @@
 import { Expose, Type } from 'class-transformer'
 import { IsBoolean, IsIn, IsNumber, IsObject, IsString, ValidateNested } from 'class-validator'
-import { stream } from 'exceljs'
 import { ConditionTimestamp } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 import { valuesEnum } from '../../../../../_libs/common/helpers/typescript.helper'
@@ -38,7 +37,7 @@ export class PaymentRelationQuery {
 
   @Expose()
   @IsBoolean()
-  paymentMethod?: boolean
+  wallet?: boolean
 
   @Expose()
   @IsBoolean()
@@ -56,8 +55,8 @@ export class PaymentFilterQuery {
   voucherId: string
 
   @Expose()
-  @IsNumber()
-  paymentMethodId: number
+  @IsString()
+  walletId: string
 
   @Expose()
   @IsEnumValue(PaymentPersonType)

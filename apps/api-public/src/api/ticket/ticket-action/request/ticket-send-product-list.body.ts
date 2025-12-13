@@ -23,11 +23,11 @@ export class TicketPaymentMoneyBody {
   @IsInt()
   customerId: number
 
-  @ApiProperty({ example: 2 })
+  @ApiProperty({})
   @Expose()
   @IsDefined()
-  @IsInt()
-  paymentMethodId: number
+  @IsString()
+  walletId: string
 
   @ApiProperty({ example: 1_200_000 })
   @Expose()

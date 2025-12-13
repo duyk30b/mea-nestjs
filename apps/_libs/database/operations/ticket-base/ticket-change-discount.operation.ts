@@ -19,7 +19,7 @@ export class TicketChangeDiscountOperation {
     discountPercent: number
   }) {
     const { oid, ticketId, discountType, discountMoney, discountPercent } = params
-    const PREFIX = `ticketId=${ticketId} pay debt failed`
+    const PREFIX = `ticketId=${ticketId} changeDiscount failed`
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. TICKET: Update status để tạo transaction ===
@@ -34,7 +34,6 @@ export class TicketChangeDiscountOperation {
       )
 
       const totalMoneyUpdate = ticketOrigin.itemsActualMoney - discountMoney
-      const debtUpdate = totalMoneyUpdate - ticketOrigin.paid
       const profitUpdate =
         totalMoneyUpdate
         - ticketOrigin.itemsCostAmount
@@ -50,7 +49,6 @@ export class TicketChangeDiscountOperation {
           discountMoney,
           discountPercent,
           totalMoney: totalMoneyUpdate,
-          debt: debtUpdate,
           profit: profitUpdate,
         }
       )

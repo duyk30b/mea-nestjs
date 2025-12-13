@@ -136,8 +136,6 @@ export class ApiProductService {
       updatedAt: Date.now(),
     })
 
-    this.socketEmitService.productListChange(oid, { productUpsertedList: [productInserted] })
-
     if (productBody.quantity) {
       const batchCreated = await this.batchRepository.insertOneFullFieldAndReturnEntity({
         oid,
@@ -152,7 +150,7 @@ export class ApiProductService {
         warehouseId: 0,
         isActive: 1,
       })
-      this.socketEmitService.batchListChange(oid, { batchUpsertedList: [batchCreated] })
+      productInserted.batchList = [batchCreated]
     }
 
     if (positionRequestList?.length) {
@@ -187,6 +185,11 @@ export class ApiProductService {
     this.socketEmitService.socketMasterDataChange(oid, {
       position: !!positionRequestList?.length,
       discount: !!discountList?.length,
+    })
+
+    this.socketEmitService.productListChange(oid, {
+      productUpsertedList: [productInserted],
+      batchUpsertedList: productInserted.batchList,
     })
 
     return { product: productInserted }
@@ -331,8 +334,10 @@ export class ApiProductService {
       await this.organizationRepository.updateDataVersion(oid)
       this.cacheDataService.clearOrganization(oid)
 
-      this.socketEmitService.productListChange(oid, { productDestroyedList: [productDestroyed] })
-      this.socketEmitService.batchListChange(oid, { batchDestroyedList })
+      this.socketEmitService.productListChange(oid, {
+        productDestroyedList: [productDestroyed],
+        batchDestroyedList,
+      })
     }
 
     return {
@@ -366,8 +371,8 @@ export class ApiProductService {
     this.socketEmitService.productListChange(oid, {
       productUpsertedList: [productModified],
       productDestroyedList,
+      batchUpsertedList: batchModifiedList,
     })
-    this.socketEmitService.batchListChange(oid, { batchUpsertedList: batchModifiedList })
 
     return true
   }

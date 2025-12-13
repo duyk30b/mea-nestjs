@@ -26,7 +26,8 @@ export class StatisticTicketService {
         sumExpense: { SUM: ['expense'] },
         sumSurcharge: { SUM: ['surcharge'] },
         sumTotalMoney: { SUM: ['totalMoney'] },
-        sumDebt: { SUM: ['debt'] },
+        sumPaid: { SUM: ['paid', 'paidItem'] },
+        sumDebt: { SUM: ['debt', 'debtItem'] },
         sumProfit: { SUM: ['profit'] },
       },
       limit: query.limit || 20,
@@ -48,6 +49,7 @@ export class StatisticTicketService {
       sumSurcharge: i.sumSurcharge,
       sumTotalMoney: i.sumTotalMoney,
       sumProfit: i.sumProfit,
+      sumPaid: i.sumPaid,
       sumDebt: i.sumDebt,
       countTicket: i.countTicket,
       customer: customerMap[i.customerId],
@@ -93,7 +95,8 @@ export class StatisticTicketService {
         sumItemsDiscount: { SUM: ['itemsDiscount'] },
         sumExpense: { SUM: ['expense'] },
         sumSurcharge: { SUM: ['surcharge'] },
-        sumDebt: { SUM: ['debt'] },
+        sumPaid: { SUM: ['paid', 'paidItem'] },
+        sumDebt: { SUM: ['debt', 'debtItem'] },
         sumProfit: { SUM: ['profit'] },
       },
     })
@@ -127,6 +130,7 @@ export class StatisticTicketService {
         sumItemsDiscount: 0,
         sumExpense: 0,
         sumSurcharge: 0,
+        sumPaid: 0,
         sumDebt: 0,
         sumProfit: 0,
       }
@@ -154,6 +158,7 @@ export class StatisticTicketService {
         sumItemsDiscount: Number(i.sumItemsDiscount),
         sumExpense: Number(i.sumExpense),
         sumSurcharge: Number(i.sumSurcharge),
+        sumPaid: Number(i.sumPaid),
         sumDebt: Number(i.sumDebt),
         sumProfit: Number(i.sumProfit),
       }

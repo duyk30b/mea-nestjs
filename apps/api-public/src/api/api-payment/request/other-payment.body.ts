@@ -1,16 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
-import { IsDefined, IsInt, IsString } from 'class-validator'
-import {
-  IsNumberGreaterThan,
-} from '../../../../../_libs/common/transform-validate/class-validator.custom'
+import { IsDefined, IsString } from 'class-validator'
+import { IsNumberGreaterThan } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 
 export class OtherPaymentBody {
   @ApiProperty({ example: 12 })
   @Expose()
   @IsDefined()
-  @IsInt()
-  paymentMethodId: number
+  @IsString()
+  walletId: string
 
   @Expose()
   @IsDefined()

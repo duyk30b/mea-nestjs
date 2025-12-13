@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { DeliveryStatus, PaymentMoneyStatus } from '../../common/variable'
-import { Customer, TicketUser } from '../../entities'
+import { BusinessError } from '../../common/error'
+import { Customer } from '../../entities'
 import Payment, {
   MoneyDirection,
   PaymentActionType,
@@ -9,44 +9,27 @@ import Payment, {
   PaymentPersonType,
   PaymentVoucherType,
 } from '../../entities/payment.entity'
-import { TicketStatus, TicketUpdateType } from '../../entities/ticket.entity'
+import { TicketStatus } from '../../entities/ticket.entity'
 import {
-  CustomerManager,
-  PaymentManager,
-  TicketLaboratoryManager,
-  TicketManager,
-  TicketProcedureManager,
-  TicketProductManager,
-  TicketRadiologyManager,
-  TicketUserManager,
+  CustomerRepository,
+  PaymentRepository,
+  TicketRepository,
+  WalletRepository,
 } from '../../repositories'
-import { TicketCalculatorMoney } from './ticket-calculator-money.operator'
-import { TicketUpdateCommissionTicketUserOperator } from './ticket-update-commission-ticket-user.operator'
 
 @Injectable()
 export class TicketCloseOperation {
   constructor(
     private dataSource: DataSource,
-    private ticketManager: TicketManager,
-    private ticketProcedureManager: TicketProcedureManager,
-    private ticketProductManager: TicketProductManager,
-    private ticketLaboratoryManager: TicketLaboratoryManager,
-    private ticketRadiologyManager: TicketRadiologyManager,
-    private ticketUserManager: TicketUserManager,
-    private customerManager: CustomerManager,
-    private paymentManager: PaymentManager,
-    private ticketUpdateCommissionTicketUserOperator: TicketUpdateCommissionTicketUserOperator,
-    private ticketCalculatorMoney: TicketCalculatorMoney
+    private ticketRepository: TicketRepository,
+    private customerRepository: CustomerRepository,
+    private walletRepository: WalletRepository,
+    private paymentRepository: PaymentRepository
   ) { }
 
-  async startClose(params: {
-    oid: number
-    ticketId: string
-    time: number
-    note: string
-    userId: number
-  }) {
-    const { oid, ticketId, time, note, userId } = params
+  async startClose(params: { oid: number; ticketId: string; userId: number; time: number }) {
+    const { oid, ticketId, userId, time } = params
+
     const PREFIX = `ticketId=${ticketId} close failed`
 
     const queryRunner = this.dataSource.createQueryRunner()
@@ -55,107 +38,65 @@ export class TicketCloseOperation {
     try {
       const manager = queryRunner.manager
       // === 1. TICKET: Update status để tạo transaction ===
-      const ticketUpdated = await this.ticketManager.updateOneAndReturnEntity(
+      const ticketUpdated = await this.ticketRepository.managerUpdateOne(
         manager,
         {
           oid,
           id: ticketId,
           status: {
-            IN: [TicketStatus.Draft, TicketStatus.Deposited, TicketStatus.Executing],
+            IN: [
+              TicketStatus.Draft,
+              TicketStatus.Schedule,
+              TicketStatus.Deposited,
+              TicketStatus.Executing,
+            ],
           },
         },
         {
           status: () => `CASE 
-                            WHEN(paid > "totalMoney") THEN ${TicketStatus.Executing} 
-                            WHEN(paid < "totalMoney") THEN ${TicketStatus.Debt} 
-                            ELSE ${TicketStatus.Completed}
-                        END
-                        `,
+                              WHEN("paid" + "paidItem" < "totalMoney") THEN ${TicketStatus.Debt} 
+                              WHEN("paid" + "paidItem" = "totalMoney") THEN ${TicketStatus.Completed} 
+                              ELSE ${TicketStatus.Executing}
+                          END
+                          `,
           updatedAt: time,
           endedAt: time,
         }
       )
-      if (ticketUpdated.status === TicketStatus.Executing) {
-        return { ticketModified: ticketUpdated }
+
+      if (
+        ticketUpdated.paid + ticketUpdated.paidItem - ticketUpdated.debt
+        > ticketUpdated.totalMoney
+      ) {
+        throw new BusinessError(PREFIX, 'Cần hoàn trả tiền thừa trước khi đóng phiếu')
       }
+
       const { customerId } = ticketUpdated
-      // === 2. TICKET: Update profit and discountItems ===
-
-      const ticketProcedureList = await this.ticketProcedureManager.findManyBy(manager, {
-        ticketId,
-        paymentMoneyStatus: { NOT: PaymentMoneyStatus.NoEffect },
-      })
-      const ticketProductList = await this.ticketProductManager.findManyBy(manager, {
-        ticketId,
-        paymentMoneyStatus: { NOT: PaymentMoneyStatus.NoEffect },
-      })
-      const ticketLaboratoryList = await this.ticketLaboratoryManager.findManyBy(manager, {
-        ticketId,
-        paymentMoneyStatus: { NOT: PaymentMoneyStatus.NoEffect },
-      })
-      const ticketRadiologyList = await this.ticketRadiologyManager.findManyBy(manager, {
-        ticketId,
-        paymentMoneyStatus: { NOT: PaymentMoneyStatus.NoEffect },
-      })
-      const ticketUserList = await this.ticketUserManager.findManyBy(manager, { ticketId })
-
-      if (ticketProductList.find((i) => i.deliveryStatus === DeliveryStatus.Pending)) {
-        throw new Error('Không thể đóng phiếu khi chưa xuất hết hàng')
-      }
-
-      let ticketUserModifiedList: TicketUser[] = []
-      let ticketUserDestroyedList: TicketUser[] = []
-      const ticketUserDeletedList: TicketUser[] = []
-      if (ticketUserList.length) {
-        const response =
-          await this.ticketUpdateCommissionTicketUserOperator.updateCommissionTicketUser({
-            manager,
-            oid,
-            ticketId,
-            ticketOrigin: ticketUpdated,
-            ticketLaboratoryList,
-            ticketProcedureList,
-            ticketProductList,
-            ticketRadiologyList,
-          })
-        ticketUserModifiedList = response.ticketUserModifiedList
-        ticketUserDestroyedList = response.ticketUserDestroyedList
-      }
-
-      const ticketFix = this.ticketCalculatorMoney.reCalculatorMoney({
-        oid,
-        ticketOrigin: ticketUpdated,
-        ticketProcedureList,
-        ticketProductList,
-        ticketLaboratoryList,
-        ticketRadiologyList,
-        ticketUserList: ticketUserModifiedList,
-      })
-
+      let ticketModified = ticketUpdated
       let customerModified: Customer
-      const paymentCreatedList: Payment[] = []
-      if (ticketFix.debt) {
-        let paidByTopUp = 0
-        const customerOrigin = await this.customerManager.updateOneAndReturnEntity(
-          manager,
-          { oid, id: customerId },
-          { updatedAt: Date.now() }
-        )
-        if (customerOrigin.debt < 0) {
-          const topUpMoney = -customerOrigin.debt
-          paidByTopUp = Math.min(ticketFix.debt, topUpMoney)
+      let paymentCreated: Payment
+
+      const debtFix =
+        ticketModified.totalMoney
+        - (ticketModified.paid + ticketModified.paidItem + ticketModified.debt)
+      if (ticketUpdated.isPaymentEachItem) {
+        if (debtFix !== 0) {
+          throw new BusinessError(PREFIX, 'Chưa thanh toán đủ')
         }
-        const newDebtTicket = ticketFix.debt - paidByTopUp
-        const newDebtCustomer = customerOrigin.debt + paidByTopUp + newDebtTicket
-        // const newDebtCustomer = customerOrigin.debt + ticketFix.debt ==> tính đi tính lại thì nó vẫn thế này
-
-        customerModified = await this.customerManager.updateOneAndReturnEntity(
+      }
+      // debtFix > 0: ghi nợ
+      // debtFix cũng có thể < 0, khi đã thanh toán quá số tiền (===> thành trừ nợ)
+      if (debtFix) {
+        ticketModified = await this.ticketRepository.managerUpdateOne(
+          manager,
+          { oid, id: ticketId },
+          { debt: ticketUpdated.debt + debtFix }
+        )
+        customerModified = await this.customerRepository.managerUpdateOne(
           manager,
           { oid, id: customerId },
-          { debt: newDebtCustomer }
+          { updatedAt: Date.now(), debt: () => `debt + ${debtFix}` }
         )
-
-        ticketFix.debt = newDebtTicket
 
         const paymentInsert: PaymentInsertType = {
           oid,
@@ -165,37 +106,30 @@ export class TicketCloseOperation {
           personId: customerId,
 
           cashierId: userId,
-          paymentMethodId: 0,
+          walletId: '0',
           createdAt: time,
           paymentActionType: PaymentActionType.Close,
           moneyDirection: MoneyDirection.Other,
-          note: note || '',
+          note: '',
 
-          paidAmount: 0,
-          debtAmount: paidByTopUp + ticketFix.debt, // thực ra thì vẫn = purchaseOrderUpdated.debt
-          openDebt: customerOrigin.debt,
-          closeDebt: customerModified.debt,
+          paid: 0,
+          paidItem: 0,
+          debt: debtFix,
+          debtItem: 0,
+          personOpenDebt: customerModified.debt - debtFix,
+          personCloseDebt: customerModified.debt,
+          walletOpenMoney: 0,
+          walletCloseMoney: 0,
         }
-        const paymentCreated = await this.paymentManager.insertOneAndReturnEntity(
-          manager,
-          paymentInsert
-        )
-        paymentCreatedList.push(paymentCreated)
+
+        paymentCreated = await this.paymentRepository.managerInsertOne(manager, paymentInsert)
       }
 
-      const ticketModified = await this.ticketManager.updateOneAndReturnEntity(
-        manager,
-        { oid, id: ticketId },
-        ticketFix as TicketUpdateType
-      )
-
       await queryRunner.commitTransaction()
+
       return {
         ticketModified,
-        customerModified,
-        ticketUserModifiedList,
-        ticketUserDeletedList,
-        paymentCreatedList,
+        paymentCreated,
       }
     } catch (error) {
       console.error('error:', error)

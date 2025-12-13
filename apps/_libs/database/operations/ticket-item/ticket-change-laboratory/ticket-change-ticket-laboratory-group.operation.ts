@@ -94,7 +94,7 @@ export class TicketChangeSelectLaboratoryOperation {
 
       const laboratoryIdKeepList = tlKeepList.map((i) => i.laboratoryId)
 
-      const tlEntityList = ticketLaboratoryListDto
+      const tlInsertList = ticketLaboratoryListDto
         .filter((tlDto) => !laboratoryIdKeepList.includes(tlDto.laboratoryId))
         .map((tlDto) => {
           const tlEntity: NoExtra<TicketLaboratoryInsertType> = {
@@ -105,15 +105,17 @@ export class TicketChangeSelectLaboratoryOperation {
             customerId: ticketOrigin.customerId,
             ticketLaboratoryGroupId: ticketLaboratoryGroupDto.id,
             roomId: ticketLaboratoryGroupDto.roomId,
-            status: TicketLaboratoryStatus.Pending,
             completedAt: null,
+            paid: 0,
+            debt: 0,
+            status: TicketLaboratoryStatus.Pending,
           }
           return tlEntity
         })
 
       const tlCreatedList = await this.ticketLaboratoryManager.insertManyAndReturnEntity(
         manager,
-        tlEntityList
+        tlInsertList
       )
 
       // === 5. UPDATE TICKET: MONEY  ===

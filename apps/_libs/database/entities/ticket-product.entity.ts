@@ -140,6 +140,14 @@ export default class TicketProduct {
   @Expose()
   actualPrice: number
 
+  @Column({ default: 0 })
+  @Expose()
+  paid: number // tiền đã thanh toán
+
+  @Column({ default: 0 })
+  @Expose()
+  debt: number // tiền nợ
+
   @Column({
     type: 'bigint',
     nullable: true,
@@ -182,10 +190,13 @@ export default class TicketProduct {
     entity.quantity = Number(raw.quantity)
     entity.quantityPrescription = Number(raw.quantityPrescription)
     entity.costAmount = Number(raw.costAmount)
+
     entity.expectedPrice = Number(raw.expectedPrice)
     entity.discountMoney = Number(raw.discountMoney)
     entity.discountPercent = Number(raw.discountPercent)
     entity.actualPrice = Number(raw.actualPrice)
+    entity.paid = Number(raw.paid)
+    entity.debt = Number(raw.debt)
 
     return entity
   }

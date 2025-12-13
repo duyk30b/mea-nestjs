@@ -35,7 +35,7 @@ export class PurchaseOrderSendProductOperation {
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. PURCHASE_ORDER: initData ===
-      const purchaseOrder = await this.purchaseOrderManager.updateOneAndReturnEntity(
+      const purchaseOrderModified = await this.purchaseOrderManager.updateOneAndReturnEntity(
         manager,
         {
           oid,
@@ -50,18 +50,21 @@ export class PurchaseOrderSendProductOperation {
         },
         { status: PurchaseOrderStatus.Executing, deliveryStatus: DeliveryStatus.Delivered }
       )
+      const { distributorId } = purchaseOrderModified
       const purchaseOrderItemOriginList = await this.purchaseOrderItemManager.findManyBy(manager, {
         oid,
         purchaseOrderId,
       })
-      if (purchaseOrderItemOriginList.length === 0) return { purchaseOrder }
+      if (purchaseOrderItemOriginList.length === 0) {
+        return { purchaseOrderModified }
+      }
 
       // === 2. Product and Batch origin
       const putawayContainer = await this.productPutawayManager.startPutaway({
         manager,
         oid,
         voucherId: purchaseOrderId,
-        contactId: purchaseOrder.distributorId,
+        contactId: distributorId,
         time,
         movementType: MovementType.PurchaseOrder,
         isRefund: 0,
@@ -133,7 +136,7 @@ export class PurchaseOrderSendProductOperation {
       })
 
       return {
-        purchaseOrder,
+        purchaseOrderModified,
         purchaseOrderItemList: purchaseOrderItemOriginList,
         productModifiedList,
         batchModifiedList,

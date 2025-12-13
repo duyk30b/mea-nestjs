@@ -2,26 +2,30 @@ import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { CacheDataService } from '../../../../../_libs/common/cache-data/cache-data.service'
 import { DeliveryStatus } from '../../../../../_libs/database/common/variable'
-import { Customer, Payment } from '../../../../../_libs/database/entities'
 import TicketProduct from '../../../../../_libs/database/entities/ticket-product.entity'
 import { TicketSurchargeInsertType } from '../../../../../_libs/database/entities/ticket-surcharge.entity'
 import { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
 import {
-  CustomerRefundMoneyOperation,
   TicketChangeDiscountOperation,
   TicketChangeItemMoneyManager,
   TicketCloseOperation,
   TicketReopenOperation,
   TicketReturnProductOperation,
   TicketSendProductOperation,
+  TicketTerminalOperation,
 } from '../../../../../_libs/database/operations'
 import {
   TicketRepository,
   TicketSurchargeRepository,
 } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
-import { TicketClinicChangeDiscountBody, TicketReturnProductListBody } from './request'
-import { TicketChangeSurchargeListBody } from './request/ticket-change-surcharge-list.body'
+import {
+  TicketChangeSurchargeListBody,
+  TicketClinicChangeDiscountBody,
+  TicketReturnProductListBody,
+  TicketSendProductListBody,
+  TicketTerminalBody,
+} from './request'
 
 @Injectable()
 export class TicketActionService {
@@ -35,8 +39,8 @@ export class TicketActionService {
     private ticketSendProductOperation: TicketSendProductOperation,
     private ticketReturnProductOperation: TicketReturnProductOperation,
     private ticketCloseOperation: TicketCloseOperation,
+    private ticketTerminalOperation: TicketTerminalOperation,
     private ticketChangeDiscountOperation: TicketChangeDiscountOperation,
-    private customerRefundMoneyOperation: CustomerRefundMoneyOperation,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
   ) { }
 
@@ -136,20 +140,18 @@ export class TicketActionService {
   async sendProduct(params: {
     oid: number
     ticketId: string
-    sendAll: boolean
-    ticketProductIdList: string[]
+    body: TicketSendProductListBody
     options?: { noEmitTicket?: boolean }
   }) {
-    const { oid, ticketId, sendAll, ticketProductIdList, options } = params
+    const { oid, ticketId, body, options } = params
     const time = Date.now()
 
     const allowNegativeQuantity = await this.cacheDataService.getSettingAllowNegativeQuantity(oid)
     const sendProductResult = await this.ticketSendProductOperation.sendProduct({
       oid,
       ticketId,
-      ticketProductIdList,
+      sendType: { ticketProductIdList: body.ticketProductIdList },
       time,
-      sendAll,
       allowNegativeQuantity,
     })
     const { ticketModified, ticketProductModifiedAll } = sendProductResult
@@ -159,8 +161,6 @@ export class TicketActionService {
     if (sendProductResult.productModifiedList) {
       this.socketEmitService.productListChange(oid, {
         productUpsertedList: sendProductResult.productModifiedList,
-      })
-      this.socketEmitService.batchListChange(oid, {
         batchUpsertedList: sendProductResult.batchModifiedList,
       })
     }
@@ -180,24 +180,20 @@ export class TicketActionService {
   async returnProduct(params: {
     oid: number
     ticketId: string
-    returnList: TicketReturnProductListBody['returnList']
-    returnAll: boolean
+    body: TicketReturnProductListBody
   }) {
-    const { oid, ticketId, returnAll, returnList } = params
+    const { oid, ticketId, body } = params
 
     const returnProductResult = await this.ticketReturnProductOperation.returnProduct({
       oid,
       ticketId,
       time: Date.now(),
-      returnList,
-      returnAll,
+      returnType: body.returnList,
     })
     const ticketProductModifiedAll = returnProductResult.ticketProductModifiedAll
 
     this.socketEmitService.productListChange(oid, {
       productUpsertedList: returnProductResult.productModifiedList || [],
-    })
-    this.socketEmitService.batchListChange(oid, {
       batchUpsertedList: returnProductResult.batchModifiedList || [],
     })
 
@@ -208,129 +204,96 @@ export class TicketActionService {
       ticketProduct: { upsertedList: ticketProductModifiedAll },
     })
 
-    return { ticketModified: returnProductResult.ticket, ticketProductModifiedAll }
+    return {
+      ticketModified: returnProductResult.ticket,
+      ticketProductModifiedAll,
+    }
   }
 
-  async close(params: {
-    oid: number
-    userId: number
-    ticketId: string
-    options?: { noEmitTicket?: boolean; noEmitCustomer?: boolean }
-  }) {
-    const { oid, userId, ticketId, options } = params
+  async close(props: { oid: number; userId: number; ticketId: string }) {
+    const { oid, userId, ticketId } = props
     const closeResult = await this.ticketCloseOperation.startClose({
       oid,
       ticketId,
       time: Date.now(),
       userId,
-      note: '',
     })
-    const { ticketModified, customerModified, paymentCreatedList } = closeResult
 
-    if (!options?.noEmitTicket) {
-      this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
-    }
-    if (customerModified && !options?.noEmitCustomer) {
-      this.socketEmitService.customerUpsert(oid, { customer: customerModified })
-    }
-    if (closeResult.ticketUserDeletedList?.length || closeResult.ticketUserModifiedList?.length) {
-      this.socketEmitService.socketTicketChange(oid, {
-        ticketId,
-        ticketUser: {
-          destroyedList: closeResult.ticketUserDeletedList,
-          upsertedList: [...closeResult.ticketUserModifiedList],
-        },
-      })
-    }
-    return { ticketModified, customerModified, paymentCreatedList }
+    const { ticketModified, paymentCreated } = closeResult
+    this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
+    return { ticketModified, paymentCreated }
   }
 
   async reopen(params: { oid: number; userId: number; ticketId: string }) {
     const { oid, userId, ticketId } = params
     const reopenResult = await this.ticketReopenOperation.reopen({
       oid,
-      userId,
       ticketId,
-      time: Date.now(),
-      note: '',
     })
-    const { ticketModified, customerModified, paymentCreatedList } = reopenResult
 
+    const { ticketModified } = reopenResult
     this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
-
-    if (customerModified) {
-      this.socketEmitService.customerUpsert(oid, { customer: customerModified })
-    }
-    return { ticketModified, customerModified, paymentCreatedList }
+    return { ticketModified }
   }
 
-  async terminate(options: { oid: number; userId: number; ticketId: string }) {
-    const { oid, userId, ticketId } = options
+  async terminate(options: {
+    oid: number
+    userId: number
+    ticketId: string
+    body: TicketTerminalBody
+  }) {
+    const { oid, userId, ticketId, body } = options
     const time = Date.now()
 
-    let ticketModified = await this.ticketRepository.findOneBy({ oid, id: ticketId })
-    const paymentCreatedList: Payment[] = []
+    const ticketOrigin = await this.ticketRepository.findOneBy({ oid, id: ticketId })
+
     let ticketProductModifiedAll: TicketProduct[]
-    let customerModified: Customer
-    if ([TicketStatus.Debt, TicketStatus.Completed].includes(ticketModified.status)) {
+    let ticketModified = ticketOrigin
+
+    if ([TicketStatus.Debt, TicketStatus.Completed].includes(ticketOrigin.status)) {
       const reopenResult = await this.ticketReopenOperation.reopen({
         oid,
-        userId,
         ticketId,
-        time,
-        note: 'Hủy phiếu',
       })
-      if (reopenResult.customerModified) {
-        customerModified = reopenResult.customerModified
-      }
-      paymentCreatedList.push(...reopenResult.paymentCreatedList)
-      ticketModified = reopenResult.ticketModified
+      ticketModified = reopenResult.ticketModified || ticketModified
     }
-
-    if (ticketModified.paid > 0) {
-      const refundOverpaidResult = await this.customerRefundMoneyOperation.startRefundMoney({
-        oid,
-        customerId: ticketModified.customerId,
-        cashierId: userId,
-        ticketId,
-        refundAmount: ticketModified.paid,
-        time,
-        paymentMethodId: 0,
-        note: 'Hủy phiếu',
-      })
-      customerModified = refundOverpaidResult.customer
-      paymentCreatedList.push(refundOverpaidResult.paymentCreated)
-      ticketModified = refundOverpaidResult.ticketModified
-    }
-
     if (ticketModified.deliveryStatus === DeliveryStatus.Delivered) {
-      const returnProductResult = await this.returnProduct({
+      const returnProductResult = await this.ticketReturnProductOperation.returnProduct({
         oid,
         ticketId,
-        returnAll: true,
-        returnList: [],
+        time,
+        returnType: 'ALL',
+        options: { changePendingIfNoStock: true },
       })
-      ticketModified = returnProductResult.ticketModified
       ticketProductModifiedAll = returnProductResult.ticketProductModifiedAll
+
+      this.socketEmitService.productListChange(oid, {
+        productUpsertedList: returnProductResult.productModifiedList || [],
+        batchUpsertedList: returnProductResult.batchModifiedList || [],
+      })
+
+      ticketModified = returnProductResult.ticketModified
     }
 
-    ticketModified = await this.ticketRepository.updateOneAndReturnEntity(
-      { oid, id: ticketId },
-      {
-        status: TicketStatus.Cancelled,
-        discountMoney: ticketModified.discountMoney - ticketModified.discountMoney,
-        discountPercent: 0,
-        profit: 0,
-        totalMoney: ticketModified.totalMoney + ticketModified.discountMoney, // bỏ hết khuyến mãi thôi
-        debt: ticketModified.debt + ticketModified.discountMoney, // bỏ hết khuyến mãi thôi
-      }
-    )
+    const terminalResult = await this.ticketTerminalOperation.startTerminal({
+      oid,
+      ticketId,
+      userId,
+      time,
+      note: 'Hủy phiếu',
+      walletId: body.walletId,
+    })
+    const customerModified = terminalResult.customerModified
+    const paymentCreated = terminalResult.paymentCreated
+    ticketModified = terminalResult.ticketModified || ticketModified
 
-    if (customerModified) {
-      this.socketEmitService.customerUpsert(oid, { customer: customerModified })
-    }
+    this.socketEmitService.customerUpsert(oid, { customer: customerModified })
 
-    this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
-    return { ticketModified, customerModified, paymentCreatedList, ticketProductModifiedAll }
+    this.socketEmitService.socketTicketChange(oid, {
+      ticketId,
+      ticketModified,
+      ticketProduct: { upsertedList: ticketProductModifiedAll },
+    })
+    return { ticketModified, customerModified, paymentCreated, ticketProductModifiedAll }
   }
 }

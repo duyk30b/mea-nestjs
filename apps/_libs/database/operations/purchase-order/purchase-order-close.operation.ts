@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
+import { BusinessError } from '../../common/error'
 import { DeliveryStatus } from '../../common/variable'
 import { Distributor } from '../../entities'
 import Payment, {
@@ -10,15 +11,19 @@ import Payment, {
   PaymentVoucherType,
 } from '../../entities/payment.entity'
 import { PurchaseOrderStatus } from '../../entities/purchase-order.entity'
-import { DistributorManager, PaymentManager, PurchaseOrderManager } from '../../repositories'
+import {
+  DistributorRepository,
+  PaymentRepository,
+  PurchaseOrderRepository,
+} from '../../repositories'
 
 @Injectable()
 export class PurchaseOrderCloseOperation {
   constructor(
     private dataSource: DataSource,
-    private purchaseOrderManager: PurchaseOrderManager,
-    private distributorManager: DistributorManager,
-    private paymentManager: PaymentManager
+    private purchaseOrderRepository: PurchaseOrderRepository,
+    private distributorRepository: DistributorRepository,
+    private paymentRepository: PaymentRepository
   ) { }
 
   async startClose(params: {
@@ -29,51 +34,59 @@ export class PurchaseOrderCloseOperation {
     note: string
   }) {
     const { oid, userId, purchaseOrderId, time, note } = params
+    const PREFIX = `purchaseOrderId=${purchaseOrderId} close failed`
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. PURCHASE_ORDER: update ===
-      const purchaseOrderUpdated = await this.purchaseOrderManager.updateOneAndReturnEntity(
+      const purchaseOrderUpdated = await this.purchaseOrderRepository.managerUpdateOne(
         manager,
         {
           oid,
           id: purchaseOrderId,
           deliveryStatus: { IN: [DeliveryStatus.NoStock, DeliveryStatus.Delivered] },
-          status: { IN: [PurchaseOrderStatus.Draft, PurchaseOrderStatus.Deposited, PurchaseOrderStatus.Executing] },
+          status: {
+            IN: [
+              PurchaseOrderStatus.Draft,
+              PurchaseOrderStatus.Schedule,
+              PurchaseOrderStatus.Deposited,
+              PurchaseOrderStatus.Executing,
+            ],
+          },
         },
         {
           status: () => `CASE 
-                            WHEN(paid > "totalMoney") THEN ${PurchaseOrderStatus.Executing} 
                             WHEN(paid < "totalMoney") THEN ${PurchaseOrderStatus.Debt} 
-                            ELSE ${PurchaseOrderStatus.Completed}
+                            WHEN(paid = "totalMoney") THEN ${PurchaseOrderStatus.Completed} 
+                            ELSE ${PurchaseOrderStatus.Executing}
                         END
                         `,
           endedAt: time,
         }
       )
 
-      let newDebtPurchaseOrder = purchaseOrderUpdated.debt
-      let distributorModified: Distributor
-      const paymentCreatedList: Payment[] = []
+      if (purchaseOrderUpdated.paid - purchaseOrderUpdated.debt > purchaseOrderUpdated.totalMoney) {
+        throw new BusinessError(PREFIX, 'Cần hoàn trả tiền thừa trước khi đóng phiếu')
+      }
 
-      if (purchaseOrderUpdated.debt > 0) {
-        let paidByTopUp = 0
-        const distributorOrigin = await this.distributorManager.updateOneAndReturnEntity(
+      const { distributorId } = purchaseOrderUpdated
+      let purchaseOrderModified = purchaseOrderUpdated
+      let distributorModified: Distributor | null
+      let paymentCreated: Payment
+
+      const debtFix =
+        purchaseOrderUpdated.totalMoney - (purchaseOrderUpdated.paid + purchaseOrderUpdated.debt)
+      // debtFix > 0: ghi nợ
+      // debtFix cũng có thể < 0, khi đã thanh toán quá số tiền (===> thành trừ nợ)
+      if (debtFix) {
+        purchaseOrderModified = await this.purchaseOrderRepository.managerUpdateOne(
           manager,
-          { oid, id: purchaseOrderUpdated.distributorId, isActive: 1 },
-          { isActive: 1 }
+          { oid, id: purchaseOrderId },
+          { debt: purchaseOrderUpdated.debt + debtFix }
         )
-        if (distributorOrigin.debt < 0) {
-          const topUpMoney = -distributorOrigin.debt
-          paidByTopUp = Math.min(purchaseOrderUpdated.debt, topUpMoney)
-        }
-        newDebtPurchaseOrder = purchaseOrderUpdated.debt - paidByTopUp
-        const newDebtCustomer = distributorOrigin.debt + paidByTopUp + newDebtPurchaseOrder
-        // const newDebtCustomer = distributorOrigin.debt + purchaseOrderModified.debt ==> tính đi tính lại thì nó vẫn thế này
-
-        distributorModified = await this.distributorManager.updateOneAndReturnEntity(
+        distributorModified = await this.distributorRepository.managerUpdateOne(
           manager,
-          { oid, id: purchaseOrderUpdated.distributorId },
-          { debt: newDebtCustomer }
+          { oid, id: distributorId },
+          { debt: () => `debt + ${debtFix}` }
         )
 
         const paymentInsert: PaymentInsertType = {
@@ -84,34 +97,30 @@ export class PurchaseOrderCloseOperation {
           personId: purchaseOrderUpdated.distributorId,
 
           cashierId: userId,
-          paymentMethodId: 0,
+          walletId: '0',
           createdAt: time,
           paymentActionType: PaymentActionType.Close,
           moneyDirection: MoneyDirection.Other,
           note: note || '',
 
-          paidAmount: 0,
-          debtAmount: paidByTopUp + newDebtPurchaseOrder, // thực ra thì vẫn = purchaseOrderUpdated.debt
-          openDebt: distributorOrigin.debt,
-          closeDebt: distributorModified.debt,
+          paid: 0,
+          paidItem: 0,
+          debt: -debtFix,
+          debtItem: 0,
+          personOpenDebt: distributorModified.debt - debtFix,
+          personCloseDebt: distributorModified.debt,
+          walletOpenMoney: 0,
+          walletCloseMoney: 0,
         }
-        const paymentCreated = await this.paymentManager.insertOneAndReturnEntity(
-          manager,
-          paymentInsert
-        )
-        paymentCreatedList.push(paymentCreated)
+
+        paymentCreated = await this.paymentRepository.managerInsertOne(manager, paymentInsert)
       }
 
-      let purchaseOrderModified = purchaseOrderUpdated
-      if (purchaseOrderUpdated.debt !== newDebtPurchaseOrder) {
-        purchaseOrderModified = await this.purchaseOrderManager.updateOneAndReturnEntity(
-          manager,
-          { oid, id: purchaseOrderId },
-          { debt: newDebtPurchaseOrder, paid: purchaseOrderUpdated.totalMoney - newDebtPurchaseOrder }
-        )
+      return {
+        purchaseOrderModified,
+        distributorModified: distributorModified || null,
+        paymentCreated,
       }
-
-      return { purchaseOrderModified, paymentCreatedList, distributorModified }
     })
 
     return transaction
