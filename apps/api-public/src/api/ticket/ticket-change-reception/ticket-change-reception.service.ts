@@ -233,11 +233,8 @@ export class TicketChangeReceptionService {
       oid,
       ticketId: ticket.id,
     })
-    this.socketEmitService.socketTicketChange(oid, {
-      ticketId: ticket.id,
-      ticketModified: ticket,
-      ticketUser: { upsertedList: ticket.ticketUserList },
-      ticketReception: { upsertedList: [ticketReceptionCreated] },
+    this.socketEmitService.socketRoomTicketPaginationChange(oid, {
+      roomId: ticket.roomId,
     })
     return { ticket, ticketReceptionCreated }
   }
@@ -250,7 +247,7 @@ export class TicketChangeReceptionService {
       [TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Cancelled].includes(ticket.status)
     ) {
       await this.ticketDestroyService.destroy({ oid, ticketId })
-      this.socketEmitService.socketTicketChange(oid, { ticketId, ticketDestroyedId: ticketId })
+      this.socketEmitService.socketRoomTicketPaginationChange(oid, { roomId: ticket.roomId })
       return { ticketDestroyedId: ticketId }
     }
 

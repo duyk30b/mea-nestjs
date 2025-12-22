@@ -47,7 +47,7 @@ export class TicketOrderService {
       customerId: body.customerId,
       body,
     })
-
+    this.socketEmitService.socketRoomTicketPaginationChange(oid, { roomId: result.ticket.roomId })
     return { ticketCreated: result.ticket }
   }
 
