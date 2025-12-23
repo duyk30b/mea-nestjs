@@ -7,11 +7,17 @@
 - Kiểm tra RAM: `free -h`
 - Kiểm tra dung lượng ổ đĩa: `df -h`
 - Lấy đường dẫn tuyệt đối: `readlink -f ./`
+- Kiểm tra DNS có đang proxy qua cloudflare không: dig api.mea.vn +short
 
 2. Check App: `htop`, `git --version`
 
-3. Prepare Project
-- Cài đặt SSH để clone project từ github
+3. Chuẩn bị
+- Cài đặt SSH để kết nối github
+- git clone project
+- Cài đặt docker
+- Cài đặt nginx: tắt tạm proxy ở cloudflare
+- Restore Database
+- Start
 
 4. Run Project
 - Init: `docker compose -f docker-compose.production.yml up -d`
