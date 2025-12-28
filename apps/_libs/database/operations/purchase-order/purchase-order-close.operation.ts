@@ -103,10 +103,9 @@ export class PurchaseOrderCloseOperation {
           moneyDirection: MoneyDirection.Other,
           note: note || '',
 
-          paid: 0,
-          paidItem: 0,
-          debt: -debtFix,
-          debtItem: 0,
+          hasPaymentItem: 0,
+          paidTotal: 0,
+          debtTotal: -debtFix,
           personOpenDebt: distributorModified.debt - debtFix,
           personCloseDebt: distributorModified.debt,
           walletOpenMoney: 0,

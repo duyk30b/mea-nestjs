@@ -41,7 +41,7 @@ export class PaymentOtherService {
     let walletOpenMoney = paymentOrigin.walletOpenMoney
     let walletCloseMoney = paymentOrigin.walletCloseMoney
     if (body.walletId !== paymentOrigin.walletId) {
-      const moneyTransfer = paymentOrigin.paid + paymentOrigin.paidItem
+      const moneyTransfer = paymentOrigin.paidTotal
       if (moneyTransfer) {
         if (paymentOrigin.walletId && paymentOrigin.walletId !== '0') {
           const walletOldModified = await this.walletRepository.updateOneAndReturnEntity(
@@ -62,10 +62,9 @@ export class PaymentOtherService {
             paymentActionType: PaymentActionType.Other,
             note: body.note || 'Sửa phương thức thanh toán',
 
-            paid: 0,
-            paidItem: 0,
-            debt: 0,
-            debtItem: 0,
+            hasPaymentItem: 0,
+            paidTotal: 0,
+            debtTotal: 0,
             personOpenDebt: 0,
             personCloseDebt: 0,
             walletOpenMoney: walletOldModified.money + moneyTransfer,
@@ -124,10 +123,9 @@ export class PaymentOtherService {
       paymentActionType: PaymentActionType.Other,
       note: body.note || '',
 
-      paid: -body.paidAmount,
-      paidItem: 0,
-      debt: 0,
-      debtItem: 0,
+      hasPaymentItem: 0,
+      paidTotal: -body.paidAmount,
+      debtTotal: 0,
       personOpenDebt: 0,
       personCloseDebt: 0,
       walletOpenMoney,
@@ -164,10 +162,9 @@ export class PaymentOtherService {
       paymentActionType: PaymentActionType.Other,
       note: body.note || '',
 
-      paid: body.paidAmount,
-      paidItem: 0,
-      debt: 0,
-      debtItem: 0,
+      hasPaymentItem: 0,
+      paidTotal: body.paidAmount,
+      debtTotal: 0,
       personOpenDebt: 0,
       personCloseDebt: 0,
       walletOpenMoney,

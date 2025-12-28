@@ -42,6 +42,30 @@ export class TicketRepository extends _PostgreSqlRepository<
     super(Ticket, ticketRepository)
   }
 
+  async nextId(props: { oid: number; createdAt: number }) {
+    const { oid, createdAt } = props
+    const ticketListToday = await this.findManyBy({
+      oid,
+      createdAt: {
+        GTE: ESTimer.startOfDate(createdAt, 7).getTime(),
+        LTE: ESTimer.endOfDate(createdAt, 7).getTime(),
+      },
+    })
+    let maxDailyIndex = 0
+    ticketListToday.forEach((i) => {
+      if (i.dailyIndex > maxDailyIndex) {
+        maxDailyIndex = i.dailyIndex
+      }
+    })
+    const oidText = String(oid).padStart(4, '0')
+    const timeText = ESTimer.timeToText(new Date(), 'YYMMDD', 7)
+    const indexText = String(maxDailyIndex + 1).padStart(4, '0')
+
+    const id = oidText + timeText + indexText
+
+    return id
+  }
+
   async startTransaction(isolationLevel?: IsolationLevel) {
     const queryRunner = this.dataSource.createQueryRunner()
     await queryRunner.connect()

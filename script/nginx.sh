@@ -6,7 +6,7 @@ docker stop mc_nginx
 
 echo ">>> Xóa chứng chỉ cũ trong thư mục project"
 ls -la ./nginx/ssl/letsencrypt/
-rm -rf ~/mea-nestjs/nginx/ssl/letsencrypt/api.medihome.vn
+rm -rf ~/mea-nestjs/nginx/ssl/letsencrypt/api.mea.vn
 ls -la ./nginx/ssl/letsencrypt/
 
 echo ">>> Xóa dữ liệu chứng chỉ hệ thống"
@@ -21,7 +21,7 @@ docker run -it --rm --name certbot \
   -p 80:80 \
   certbot/certbot certonly \
   --standalone \
-  -d api.medihome.vn \
+  -d api.mea.vn \
   --email your@email.com \
   --agree-tos \
   --no-eff-email \

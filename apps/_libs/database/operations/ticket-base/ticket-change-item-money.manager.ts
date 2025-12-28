@@ -4,14 +4,15 @@ import { DataSource, EntityManager } from 'typeorm'
 import { BusinessError } from '../../common/error'
 import { DeliveryStatus, DiscountType } from '../../common/variable'
 import { Ticket } from '../../entities'
-import { TicketManager } from '../../repositories'
+import { TicketPaymentDetailRepository, TicketRepository } from '../../repositories'
 
 @Injectable()
 export class TicketChangeItemMoneyManager {
   constructor(
     private dataSource: DataSource,
     @InjectEntityManager() private manager: EntityManager,
-    private ticketManager: TicketManager
+    private ticketRepository: TicketRepository,
+    private ticketPaymentDetailRepository: TicketPaymentDetailRepository
   ) { }
 
   async changeItemMoney(props: {
@@ -33,18 +34,22 @@ export class TicketChangeItemMoneyManager {
     }
     other?: {
       deliveryStatus?: DeliveryStatus
-      paidAdd?: number
-      paidItemAdd?: number
-      debtItemAdd?: number
+      paidTotalAdd?: number
+      debtTotalAdd?: number
+    }
+    ticketPaymentDetail?: {
+      paidWaitAdd: number
+      paidItemAdd: number
+      debtItemAdd: number
     }
   }) {
-    const { oid, ticketId, itemMoney, other } = props
+    const { oid, ticketId, itemMoney, other, ticketPaymentDetail } = props
 
     let ticketOrigin = props.ticketOrigin
     const manager = props.manager || this.manager
 
     if (!ticketOrigin) {
-      ticketOrigin = await this.ticketManager.findOneBy(manager, { oid, id: ticketId })
+      ticketOrigin = await this.ticketRepository.managerFindOneBy(manager, { oid, id: ticketId })
     }
     if (!ticketOrigin) {
       throw new BusinessError('Không tìm thấy Ticket với ticketId = ', ticketId)
@@ -82,7 +87,7 @@ export class TicketChangeItemMoneyManager {
     const profitUpdate =
       totalMoneyUpdate - itemsCostAmountUpdate - ticketOrigin.expense - commissionMoneyUpdate
 
-    const ticket = await this.ticketManager.updateOneAndReturnEntity(
+    const ticket = await this.ticketRepository.managerUpdateOne(
       manager,
       { oid, id: ticketOrigin.id },
       {
@@ -110,11 +115,22 @@ export class TicketChangeItemMoneyManager {
 
         // === other ===
         deliveryStatus: other?.deliveryStatus != null ? other.deliveryStatus : undefined,
-        paid: other?.paidAdd ? ticketOrigin.paid + other.paidAdd : undefined,
-        paidItem: other?.paidItemAdd ? ticketOrigin.paidItem + other.paidItemAdd : undefined,
-        debtItem: other?.debtItemAdd ? ticketOrigin.debtItem + other.debtItemAdd : undefined,
+        paidTotal: other?.paidTotalAdd ? ticketOrigin.paidTotal + other.paidTotalAdd : undefined,
+        debtTotal: other?.debtTotalAdd ? ticketOrigin.debtTotal + other.debtTotalAdd : undefined,
       }
     )
+
+    if (ticketPaymentDetail) {
+      await this.ticketPaymentDetailRepository.managerUpdateOne(
+        manager,
+        { oid, id: ticket.id, ticketId: ticket.id },
+        {
+          paidWait: () => `"paidWait" + ${ticketPaymentDetail.paidWaitAdd}`,
+          paidItem: () => `"paidItem" + ${ticketPaymentDetail.paidItemAdd}`,
+          debtItem: () => `"debtItem" + ${ticketPaymentDetail.debtItemAdd}`,
+        }
+      )
+    }
     return ticket
   }
 }

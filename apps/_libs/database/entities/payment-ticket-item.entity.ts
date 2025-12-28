@@ -9,13 +9,15 @@ import TicketRadiology from './ticket-radiology.entity'
 import Ticket from './ticket.entity'
 
 export enum TicketItemType {
-  Other = 0, // Không xác định
-  TicketRegimen = 1,
-  TicketProcedure = 2,
-  TicketProductConsumable = 3,
-  TicketProductPrescription = 4,
-  TicketLaboratory = 5,
-  TicketRadiology = 6,
+  WAIT = 1, // Thanh toán vào tiền chờ
+  Surcharge = 2,
+  Discount = 3,
+  TicketRegimen = 4,
+  TicketProcedure = 5,
+  TicketProductConsumable = 6,
+  TicketProductPrescription = 7,
+  TicketLaboratory = 8,
+  TicketRadiology = 9,
 }
 
 @Entity('PaymentTicketItem')
@@ -37,7 +39,7 @@ export default class PaymentTicketItem {
   @Expose()
   ticketId: string
 
-  @Column({ type: 'smallint', default: TicketItemType.Other })
+  @Column({ type: 'smallint', default: 0 })
   @Expose()
   ticketItemType: TicketItemType
 
@@ -95,21 +97,13 @@ export default class PaymentTicketItem {
   @Expose()
   quantity: number
 
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
+  @Column({ default: 0 })
   @Expose()
-  paidItem: number
+  paidMoney: number
 
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
+  @Column({ default: 0 })
   @Expose()
-  debtItem: number
+  debtMoney: number
 
   @Expose()
   payment: Payment
@@ -141,8 +135,6 @@ export default class PaymentTicketItem {
     entity.discountMoney = Number(raw.discountMoney)
     entity.discountPercent = Number(raw.discountPercent)
     entity.actualPrice = Number(raw.actualPrice)
-    entity.paidItem = Number(raw.paidItem)
-    entity.debtItem = Number(raw.debtItem)
 
     return entity
   }

@@ -54,11 +54,15 @@ export class TicketOrderBasicUpsertService {
     let { ticketId } = props
     const createdAt = body.ticketOrderBasic.createdAt
 
+    const ticketIdGenerate = await this.ticketRepository.nextId({ oid, createdAt })
+    const dailyIndex = Number(ticketIdGenerate.slice(-4))
+
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       let ticket: Ticket
       if (!ticketId) {
         const ticketInsert: TicketInsertType = {
           ...body.ticketOrderBasic,
+          id: ticketIdGenerate,
           oid,
           customerId: props.customerId || 0,
           status: TicketStatus.Draft,
@@ -67,16 +71,14 @@ export class TicketOrderBasicUpsertService {
             : DeliveryStatus.NoStock,
           itemsCostAmount: 0, // costAmount chỉ tính toán khi gửi hàng
           profit: body.ticketOrderBasic.totalMoney - body.ticketOrderBasic.expense - 0,
-          paid: 0,
-          paidItem: 0,
-          debt: 0,
-          debtItem: 0,
+          paidTotal: 0,
+          debtTotal: 0,
           createdAt,
           receptionAt: createdAt,
           year: ESTimer.info(createdAt, 7).year,
           month: ESTimer.info(createdAt, 7).month + 1,
           date: ESTimer.info(createdAt, 7).date,
-          dailyIndex: 0,
+          dailyIndex,
           endedAt: null,
           imageDiagnosisIds: '[]',
           isPaymentEachItem: 0,

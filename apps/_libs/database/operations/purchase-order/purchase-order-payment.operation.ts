@@ -153,10 +153,9 @@ export class PurchaseOrderPaymentOperation {
         moneyDirection: MoneyDirection.Out,
         note,
 
-        paid: -paidAmount,
-        paidItem: 0,
-        debt: debtSubtracted,
-        debtItem: 0,
+        hasPaymentItem: 0,
+        paidTotal: -paidAmount,
+        debtTotal: debtSubtracted,
         personOpenDebt: distributorOpenDebt,
         personCloseDebt: distributorCloseDebt,
         walletOpenMoney,

@@ -121,10 +121,9 @@ export class PurchaseOrderTerminalOperation {
             purchaseOrderUpdated.paid !== 0 ? MoneyDirection.In : MoneyDirection.Other,
           note: note || '',
 
-          paid: purchaseOrderUpdated.paid,
-          paidItem: 0,
-          debt: purchaseOrderUpdated.debt,
-          debtItem: 0,
+          hasPaymentItem: 0,
+          paidTotal: purchaseOrderUpdated.paid,
+          debtTotal: purchaseOrderUpdated.debt,
           personOpenDebt: distributorModified.debt + purchaseOrderUpdated.debt,
           personCloseDebt: distributorModified.debt,
           walletOpenMoney,

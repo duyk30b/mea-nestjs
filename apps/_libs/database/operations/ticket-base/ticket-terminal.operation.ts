@@ -71,20 +71,19 @@ export class TicketTerminalOperation {
       let customerModified: Customer
       let paymentCreated: Payment
 
-      if (ticketOrigin.paidItem !== 0) {
-        throw new BusinessError('Cần hủy thanh toán trước khi hủy phiếu')
-      }
-
-      if (ticketOrigin.paid !== 0 || ticketOrigin.debt !== 0) {
+      if (ticketOrigin.paidTotal !== 0 || ticketOrigin.debtTotal !== 0) {
+        if (ticketOrigin.isPaymentEachItem) {
+          throw new BusinessError('Cần hủy thanh toán trước khi hủy phiếu')
+        }
         const { customerId } = ticketOrigin
         let walletOpenMoney = 0
         let walletCloseMoney = 0
 
-        if (ticketOrigin.debt !== 0) {
+        if (ticketOrigin.debtTotal !== 0) {
           customerModified = await this.customerRepository.managerUpdateOne(
             manager,
             { oid, id: customerId },
-            { updatedAt: Date.now(), debt: () => `debt - ${ticketOrigin.debt}` }
+            { updatedAt: Date.now(), debt: () => `debt - ${ticketOrigin.debtTotal}` }
           )
         } else {
           customerModified = await this.customerRepository.managerFindOneBy(manager, {
@@ -93,15 +92,15 @@ export class TicketTerminalOperation {
           })
         }
 
-        if (ticketOrigin.paid !== 0) {
+        if (ticketOrigin.paidTotal !== 0) {
           if (walletId && walletId !== '0') {
             const walletModified = await this.walletRepository.managerUpdateOne(
               manager,
               { oid, id: walletId },
-              { money: () => `money - ${ticketOrigin.paid}` }
+              { money: () => `money - ${ticketOrigin.paidTotal}` }
             )
             walletCloseMoney = walletModified.money
-            walletOpenMoney = walletModified.money + ticketOrigin.paid
+            walletOpenMoney = walletModified.money + ticketOrigin.paidTotal
           } else {
             // validate wallet
             const walletList = await this.walletRepository.managerFindManyBy(manager, { oid })
@@ -119,17 +118,16 @@ export class TicketTerminalOperation {
           personId: customerId,
 
           cashierId: userId,
-          walletId: ticketOrigin.paid !== 0 ? walletId : '0',
+          walletId: ticketOrigin.paidTotal !== 0 ? walletId : '0',
           createdAt: time,
           paymentActionType: PaymentActionType.Terminal,
-          moneyDirection: ticketOrigin.paid !== 0 ? MoneyDirection.Out : MoneyDirection.Other,
+          moneyDirection: ticketOrigin.paidTotal !== 0 ? MoneyDirection.Out : MoneyDirection.Other,
           note,
 
-          paid: -ticketOrigin.paid,
-          paidItem: 0,
-          debt: -ticketOrigin.debt,
-          debtItem: 0,
-          personOpenDebt: customerModified.debt + ticketOrigin.debt,
+          hasPaymentItem: ticketOrigin.isPaymentEachItem,
+          paidTotal: -ticketOrigin.paidTotal,
+          debtTotal: -ticketOrigin.debtTotal,
+          personOpenDebt: customerModified.debt + ticketOrigin.debtTotal,
           personCloseDebt: customerModified.debt,
           walletOpenMoney,
           walletCloseMoney,
@@ -140,7 +138,7 @@ export class TicketTerminalOperation {
         ticketModified = await this.ticketRepository.managerUpdateOne(
           manager,
           { oid, id: ticketId },
-          { paid: 0, debt: 0 }
+          { paidTotal: 0, debtTotal: 0 }
         )
       }
 

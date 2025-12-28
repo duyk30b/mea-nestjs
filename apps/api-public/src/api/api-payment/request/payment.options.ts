@@ -1,6 +1,6 @@
-import { Expose, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsNumber, IsObject, IsString, ValidateNested } from 'class-validator'
-import { ConditionTimestamp } from '../../../../../_libs/common/dto'
+import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
+import { IsBoolean, IsIn, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator'
+import { ConditionTimestamp, createConditionEnum, transformConditionEnum } from '../../../../../_libs/common/dto'
 import { SortQuery } from '../../../../../_libs/common/dto/query'
 import { valuesEnum } from '../../../../../_libs/common/helpers/typescript.helper'
 import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
@@ -44,7 +44,14 @@ export class PaymentRelationQuery {
   paymentTicketItemList?: boolean
 }
 
+const ConditionEnumMoneyDirection = createConditionEnum(MoneyDirection)
+
 export class PaymentFilterQuery {
+  @Expose()
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, MoneyDirection))
+  @IsOptional()
+  moneyDirection: MoneyDirection | InstanceType<typeof ConditionEnumMoneyDirection>
+
   @Expose()
   @IsEnumValue(PaymentVoucherType)
   @IsIn(valuesEnum(PaymentVoucherType))
@@ -66,11 +73,6 @@ export class PaymentFilterQuery {
   @Expose()
   @IsNumber()
   personId: number
-
-  @Expose()
-  @IsEnumValue(MoneyDirection)
-  @IsIn(valuesEnum(MoneyDirection))
-  moneyDirection: MoneyDirection
 
   @Expose()
   @IsNumber()

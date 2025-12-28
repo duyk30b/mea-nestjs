@@ -93,9 +93,7 @@ export class ApiPaymentService {
 
   async generateRelation(paymentList: Payment[], relation: PaymentRelationQuery) {
     const paymentIdList = paymentList.map((i) => i.id)
-    const paymentIdListHasTicketItem = paymentList
-      .filter((i) => i.paidItem || i.debtItem)
-      .map((i) => i.id)
+    const paymentIdListHasPaymentItem = paymentList.filter((i) => i.hasPaymentItem).map((i) => i.id)
 
     const ticketIdList = paymentList
       .filter((i) => i.voucherType === PaymentVoucherType.Ticket)
@@ -152,9 +150,9 @@ export class ApiPaymentService {
           id: { IN: ESArray.uniqueArray(walletIdList) },
         })
         : <Wallet[]>[],
-      relation?.paymentTicketItemList && paymentIdListHasTicketItem.length
+      relation?.paymentTicketItemList && paymentIdListHasPaymentItem.length
         ? this.paymentTicketItemRepository.findManyBy({
-          paymentId: { IN: paymentIdListHasTicketItem },
+          paymentId: { IN: paymentIdListHasPaymentItem },
         })
         : <PaymentTicketItem[]>[],
     ])
@@ -212,8 +210,8 @@ export class ApiPaymentService {
       },
       select: ['moneyDirection'],
       aggregate: {
-        sumPaidAmount: { SUM: ['paid', 'paidItem'] },
-        sumDebtAmount: { SUM: ['debt', 'debtItem'] },
+        sumPaidTotal: { SUM: ['paidTotal'] },
+        sumDebtTotal: { SUM: ['debtTotal'] },
         count: { COUNT: '*' },
       },
       groupBy: ['moneyDirection'],
@@ -221,8 +219,8 @@ export class ApiPaymentService {
     const aggregate = dataRaws.map((i) => {
       return {
         moneyDirection: i.moneyDirection,
-        sumPaidAmount: Number(i.sumPaidAmount),
-        sumDebtAmount: Number(i.sumDebtAmount),
+        sumPaidTotal: Number(i.sumPaidTotal),
+        sumDebtTotal: Number(i.sumDebtTotal),
         count: Number(i.count),
       }
     })

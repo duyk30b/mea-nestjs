@@ -47,7 +47,7 @@ export class TicketOrderService {
       customerId: body.customerId,
       body,
     })
-
+    this.socketEmitService.socketRoomTicketPaginationChange(oid, { roomId: result.ticket.roomId })
     return { ticketCreated: result.ticket }
   }
 
@@ -101,8 +101,8 @@ export class TicketOrderService {
       body,
     })
 
-    const { paid } = body
-    const debt = ticketCreated.totalMoney - paid
+    const { paidTotal } = body
+    const debtTotal = ticketCreated.totalMoney - paidTotal
     const time = body.ticketOrderBasic.createdAt
     const ticketId = ticketCreated.id
     const customerId = ticketCreated.customerId
@@ -126,19 +126,18 @@ export class TicketOrderService {
       })
     }
 
-    if (paid > 0 || debt > 0) {
+    if (paidTotal > 0 || debtTotal > 0) {
       const prepaymentResult = await this.ticketPaymentOperation.startPaymentMoney({
         oid,
         ticketId,
         userId,
         walletId: body.walletId,
-        paidAdd: paid,
-        debtAdd: debt,
+        hasPaymentItem: 0,
+        paidTotal,
+        debtTotal,
         time,
         note: '',
-        paymentActionType: paid > 0 ? PaymentActionType.PaymentMoney : PaymentActionType.Debit,
-        paidItemAdd: 0,
-        debtItemAdd: 0,
+        paymentActionType: paidTotal > 0 ? PaymentActionType.PaymentMoney : PaymentActionType.Debit,
       })
       customer = prepaymentResult.customerModified || customer
       ticketModified = prepaymentResult.ticketModified || ticketModified
@@ -168,7 +167,7 @@ export class TicketOrderService {
     body: TicketOrderDebtSuccessUpdateBody
   }) {
     const { oid, ticketId, userId, body } = params
-    const paidUpdate = body.paid
+    const paidUpdate = body.paidTotal
     const debtUpdate = body.ticketOrderBasic.totalMoney - paidUpdate
     const time = body.ticketOrderBasic.createdAt
 
@@ -219,7 +218,7 @@ export class TicketOrderService {
       ticketModified = responseReopen.ticketModified
     }
 
-    if (ticketModified.paid != paidUpdate || ticketModified.debt != debtUpdate) {
+    if (ticketModified.paidTotal != paidUpdate || ticketModified.debtTotal != debtUpdate) {
       const paymentResult = await this.ticketPaymentOperation.startPaymentMoney({
         oid,
         ticketId,
@@ -228,10 +227,9 @@ export class TicketOrderService {
         time,
         note: 'Sửa đơn',
         paymentActionType: PaymentActionType.PaymentMoney,
-        paidAdd: paidUpdate - ticketModified.paid,
-        debtAdd: debtUpdate - ticketModified.debt,
-        paidItemAdd: 0,
-        debtItemAdd: 0,
+        hasPaymentItem: 0,
+        paidTotal: paidUpdate - ticketModified.paidTotal,
+        debtTotal: debtUpdate - ticketModified.debtTotal,
       })
       customerModified = paymentResult.customerModified || customerModified
       ticketModified = paymentResult.ticketModified
@@ -307,12 +305,11 @@ export class TicketOrderService {
         userId,
         walletId: body.walletId,
         time,
-        paidAdd: body.paidAmount,
-        note: '',
         paymentActionType: PaymentActionType.PaymentMoney,
-        paidItemAdd: 0,
-        debtAdd: 0,
-        debtItemAdd: 0,
+        hasPaymentItem: 0,
+        paidTotal: body.paidAmount,
+        debtTotal: 0,
+        note: '',
       })
       ticketModified = prepaymentResult.ticketModified || ticketModified
       customerModified = prepaymentResult.customerModified || customerModified

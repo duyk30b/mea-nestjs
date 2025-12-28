@@ -187,7 +187,7 @@ export class TicketOrderDebtSuccessInsertBody extends TicketOrderBasicBody {
   @Expose()
   @IsDefined()
   @IsInt()
-  paid: number
+  paidTotal: number
 }
 
 export class TicketOrderDebtSuccessUpdateBody extends TicketOrderBasicBody {
@@ -201,5 +201,5 @@ export class TicketOrderDebtSuccessUpdateBody extends TicketOrderBasicBody {
   @Expose()
   @IsDefined()
   @IsInt()
-  paid: number
+  paidTotal: number
 }

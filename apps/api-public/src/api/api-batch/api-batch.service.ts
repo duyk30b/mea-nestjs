@@ -36,7 +36,7 @@ export class ApiBatchService {
     private readonly productRepository: ProductRepository,
     private readonly ticketBatchRepository: TicketBatchRepository,
     private readonly ticketProductRepository: TicketProductRepository,
-    private readonly receiptItemRepository: PurchaseOrderItemRepository,
+    private readonly purchaseOrderItemRepository: PurchaseOrderItemRepository,
     private readonly productMovementRepository: ProductMovementRepository,
     private readonly productOperation: ProductOperation
   ) { }
@@ -175,8 +175,8 @@ export class ApiBatchService {
 
   async destroyOne(options: { oid: number; batchId: number }) {
     const { oid, batchId } = options
-    const [receiptItemList, ticketBatchList, ticketProductList] = await Promise.all([
-      this.receiptItemRepository.findMany({
+    const [purchaseOrderItemList, ticketBatchList, ticketProductList] = await Promise.all([
+      this.purchaseOrderItemRepository.findMany({
         condition: { oid, batchId },
         limit: 10,
       }),
@@ -192,7 +192,7 @@ export class ApiBatchService {
 
     let productUpdated: Product
     if (
-      !(receiptItemList.length > 0 || ticketBatchList.length > 0 || ticketProductList.length > 0)
+      !(purchaseOrderItemList.length > 0 || ticketBatchList.length > 0 || ticketProductList.length > 0)
     ) {
       const batchDestroyed = await this.batchRepository.deleteOneAndReturnEntity({
         oid,
@@ -213,13 +213,13 @@ export class ApiBatchService {
     }
 
     return {
-      receiptItemList,
+      purchaseOrderItemList,
       ticketBatchList,
       ticketProductList,
       batchId,
       product: productUpdated,
       success: !(
-        receiptItemList.length > 0
+        purchaseOrderItemList.length > 0
         || ticketBatchList.length > 0
         || ticketProductList.length > 0
       ),

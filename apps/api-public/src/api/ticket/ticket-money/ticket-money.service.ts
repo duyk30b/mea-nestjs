@@ -4,13 +4,16 @@ import { TicketItemType } from '../../../../../_libs/database/entities/payment-t
 import { PaymentActionType } from '../../../../../_libs/database/entities/payment.entity'
 import { TicketProductType } from '../../../../../_libs/database/entities/ticket-product.entity'
 import {
-  TicketPaymentItemDto,
-  TicketPaymentItemMapDtoType,
+  PaymentTicketDiscountDto,
+  PaymentTicketItemDto,
+  PaymentTicketItemMapDtoType,
+  PaymentTicketSurchargeDto,
   TicketPaymentOperation,
   TicketPaymentOperationPropType,
 } from '../../../../../_libs/database/operations'
 import {
   TicketLaboratoryRepository,
+  TicketPaymentDetailRepository,
   TicketProcedureRepository,
   TicketProductRepository,
   TicketRadiologyRepository,
@@ -24,6 +27,7 @@ export class TicketMoneyService {
   constructor(
     private socketEmitService: SocketEmitService,
     private ticketRepository: TicketRepository,
+    private ticketPaymentDetailRepository: TicketPaymentDetailRepository,
     private ticketProcedureRepository: TicketProcedureRepository,
     private ticketProductRepository: TicketProductRepository,
     private ticketLaboratoryRepository: TicketLaboratoryRepository,
@@ -46,17 +50,17 @@ export class TicketMoneyService {
       time: Date.now(),
       note: body.note,
       paymentActionType: body.paymentActionType,
-      paidAdd: body.paidAdd,
-      paidItemAdd: body.paidItemAdd,
-      debtAdd: body.debtAdd,
-      debtItemAdd: body.debtItemAdd,
-      ticketPaymentItemMapDto: body.ticketPaymentItemMapBody,
+      paidTotal: body.paidTotal,
+      debtTotal: body.debtTotal,
+      hasPaymentItem: body.hasPaymentItem,
+      paymentTicketItemMapDto: body.paymentTicketItemMapDto,
     })
     const { ticketModified, customerModified, paymentCreated } = paymentResult
 
     this.socketEmitService.socketTicketChange(oid, {
       ticketId: paymentResult.ticketModified.id,
       ticketModified: paymentResult.ticketModified,
+      ticketPaymentDetailModified: paymentResult.ticketPaymentDetailModified,
       ticketRegimen: { upsertedList: paymentResult.ticketRegimentList || [] },
       ticketRegimenItem: { upsertedList: paymentResult.ticketRegimenItemModifiedList || [] },
       ticketProcedure: { upsertedList: paymentResult.ticketProcedureModifiedList },
@@ -74,7 +78,7 @@ export class TicketMoneyService {
     const { oid, userId, body } = data
 
     const totalMoneyReduce = body.dataList.reduce((acc, item) => {
-      return acc + item.debtMinus + item.debtItemMinus
+      return acc + item.debtTotalMinus
     }, 0)
     if (body.totalMoney !== totalMoneyReduce) {
       throw new BusinessError('Tổng số tiền không khớp', {
@@ -83,15 +87,20 @@ export class TicketMoneyService {
       })
     }
 
-    const ticketIdHasPaidItem = body.dataList.filter((i) => i.debtItemMinus).map((i) => i.ticketId)
-    const dataMap: Record<string, TicketPaymentItemMapDtoType> = {}
-    if (ticketIdHasPaidItem) {
+    const ticketIdHasPaidItem = body.dataList.filter((i) => i.isPaymentEachItem).map((i) => i.ticketId)
+    const dataMap: Record<string, PaymentTicketItemMapDtoType> = {}
+    if (ticketIdHasPaidItem.length) {
       const [
+        ticketPaymentDetailList,
         ticketProcedureDebtList,
         ticketProductDebtList,
         ticketLaboratoryDebtList,
         ticketRadiologyDebtList,
       ] = await Promise.all([
+        this.ticketPaymentDetailRepository.findManyBy({
+          oid,
+          ticketId: { IN: ticketIdHasPaidItem },
+        }),
         this.ticketProcedureRepository.findManyBy({
           oid,
           ticketId: { IN: ticketIdHasPaidItem },
@@ -114,9 +123,12 @@ export class TicketMoneyService {
         }),
       ])
       body.dataList.forEach((i) => {
-        const { ticketId, debtItemMinus } = i
-        if (!debtItemMinus) return
+        const { ticketId, debtTotalMinus } = i
+        if (!debtTotalMinus) return
         dataMap[ticketId] = {
+          paymentWait: { paidMoney: 0 },
+          paymentDiscount: { debtMoney: 0, paidMoney: 0 },
+          paymentSurcharge: { debtMoney: 0, paidMoney: 0 },
           ticketRegimenBodyList: [],
           ticketProcedureNoEffectBodyList: [],
           ticketProcedureHasEffectBodyList: [],
@@ -125,14 +137,34 @@ export class TicketMoneyService {
           ticketLaboratoryBodyList: [],
           ticketRadiologyBodyList: [],
         }
-        let debtRemain = debtItemMinus
+        let debtRemain = debtTotalMinus
+        const ticketPaymentDetail = ticketPaymentDetailList.find((i) => i.ticketId === ticketId)
+        if (ticketPaymentDetail.debtSurcharge) {
+          const debtSelect = Math.min(debtRemain, ticketPaymentDetail.debtSurcharge)
+          const paymentTicketSurcharge: PaymentTicketSurchargeDto = {
+            paidMoney: debtSelect,
+            debtMoney: -debtSelect,
+          }
+          debtRemain = debtRemain - debtSelect
+          dataMap[ticketId].paymentSurcharge = paymentTicketSurcharge
+        }
+        if (ticketPaymentDetail.debtDiscount) {
+          const debtSelect = Math.min(debtRemain, ticketPaymentDetail.debtDiscount)
+          const paymentTicketDiscount: PaymentTicketDiscountDto = {
+            paidMoney: debtSelect,
+            debtMoney: -debtSelect,
+          }
+          debtRemain = debtRemain - debtSelect
+          dataMap[ticketId].paymentDiscount = paymentTicketDiscount
+        }
+
         ticketProductDebtList
           .filter((i) => i.ticketId === ticketId)
           .forEach((i) => {
             const debtSelect = Math.min(debtRemain, i.debt)
             if (!debtSelect) return
             if (i.type === TicketProductType.Prescription) {
-              const ticketItemDto: TicketPaymentItemDto = {
+              const ticketItemDto: PaymentTicketItemDto = {
                 ticketItemType: TicketItemType.TicketProductPrescription,
                 ticketItemId: i.id,
                 interactId: i.productId,
@@ -143,14 +175,14 @@ export class TicketMoneyService {
                 actualPrice: i.actualPrice,
                 quantity: i.quantity,
                 sessionIndex: 0,
-                paidAdd: debtSelect,
-                debtAdd: -debtSelect,
+                paidMoney: debtSelect,
+                debtMoney: -debtSelect,
               }
               debtRemain = debtRemain - debtSelect
               dataMap[ticketId].ticketProductPrescriptionBodyList.push(ticketItemDto)
             }
             if (i.type === TicketProductType.Consumable) {
-              const ticketItemDto: TicketPaymentItemDto = {
+              const ticketItemDto: PaymentTicketItemDto = {
                 ticketItemType: TicketItemType.TicketProductConsumable,
                 ticketItemId: i.id,
                 interactId: i.productId,
@@ -161,8 +193,8 @@ export class TicketMoneyService {
                 actualPrice: i.actualPrice,
                 quantity: i.quantity,
                 sessionIndex: 0,
-                paidAdd: debtSelect,
-                debtAdd: -debtSelect,
+                paidMoney: debtSelect,
+                debtMoney: -debtSelect,
               }
               debtRemain = debtRemain - debtSelect
               dataMap[ticketId].ticketProductConsumableBodyList.push(ticketItemDto)
@@ -173,7 +205,7 @@ export class TicketMoneyService {
           .forEach((i) => {
             const debtSelect = Math.min(debtRemain, i.debt)
             if (!debtSelect) return
-            const ticketItemDto: TicketPaymentItemDto = {
+            const ticketItemDto: PaymentTicketItemDto = {
               ticketItemType: TicketItemType.TicketProcedure,
               ticketItemId: i.id,
               interactId: i.procedureId,
@@ -184,8 +216,8 @@ export class TicketMoneyService {
               actualPrice: i.actualPrice,
               quantity: i.quantity,
               sessionIndex: i.indexSession,
-              paidAdd: debtSelect,
-              debtAdd: -debtSelect,
+              paidMoney: debtSelect,
+              debtMoney: -debtSelect,
             }
             debtRemain = debtRemain - debtSelect
             dataMap[ticketId].ticketProcedureHasEffectBodyList.push(ticketItemDto)
@@ -195,7 +227,7 @@ export class TicketMoneyService {
           .forEach((i) => {
             const debtSelect = Math.min(debtRemain, i.debt)
             if (!debtSelect) return
-            const ticketItemDto: TicketPaymentItemDto = {
+            const ticketItemDto: PaymentTicketItemDto = {
               ticketItemType: TicketItemType.TicketLaboratory,
               ticketItemId: i.id,
               interactId: i.laboratoryId,
@@ -206,8 +238,8 @@ export class TicketMoneyService {
               actualPrice: i.actualPrice,
               quantity: 1,
               sessionIndex: 0,
-              paidAdd: debtSelect,
-              debtAdd: -debtSelect,
+              paidMoney: debtSelect,
+              debtMoney: -debtSelect,
             }
             debtRemain = debtRemain - debtSelect
             dataMap[ticketId].ticketLaboratoryBodyList.push(ticketItemDto)
@@ -217,7 +249,7 @@ export class TicketMoneyService {
           .forEach((i) => {
             const debtSelect = Math.min(debtRemain, i.debt)
             if (!debtSelect) return
-            const ticketItemDto: TicketPaymentItemDto = {
+            const ticketItemDto: PaymentTicketItemDto = {
               ticketItemType: TicketItemType.TicketRadiology,
               ticketItemId: i.id,
               interactId: i.radiologyId,
@@ -228,8 +260,8 @@ export class TicketMoneyService {
               actualPrice: i.actualPrice,
               quantity: 1,
               sessionIndex: 0,
-              paidAdd: debtSelect,
-              debtAdd: -debtSelect,
+              paidMoney: debtSelect,
+              debtMoney: -debtSelect,
             }
             debtRemain = debtRemain - debtSelect
             dataMap[ticketId].ticketRadiologyBodyList.push(ticketItemDto)
@@ -250,11 +282,10 @@ export class TicketMoneyService {
         time: Date.now(),
         note: body.note,
         paymentActionType: PaymentActionType.PayDebt,
-        paidAdd: i.debtMinus,
-        paidItemAdd: i.debtItemMinus,
-        debtAdd: -i.debtMinus,
-        debtItemAdd: -i.debtItemMinus,
-        ticketPaymentItemMapDto: dataMap[i.ticketId],
+        paidTotal: i.debtTotalMinus,
+        debtTotal: -i.debtTotalMinus,
+        hasPaymentItem: i.isPaymentEachItem,
+        paymentTicketItemMapDto: dataMap[i.ticketId],
       }
       return paymentProp
     })
@@ -266,6 +297,7 @@ export class TicketMoneyService {
       this.socketEmitService.socketTicketChange(oid, {
         ticketId: paymentResult.ticketModified.id,
         ticketModified: paymentResult.ticketModified,
+        ticketPaymentDetailModified: paymentResult.ticketPaymentDetailModified,
         ticketRegimen: { upsertedList: paymentResult.ticketRegimentList || [] },
         ticketRegimenItem: { upsertedList: paymentResult.ticketRegimenItemModifiedList || [] },
         ticketProcedure: { upsertedList: paymentResult.ticketProcedureModifiedList },

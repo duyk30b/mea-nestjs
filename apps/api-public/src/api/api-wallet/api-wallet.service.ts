@@ -113,10 +113,9 @@ export class ApiWalletService {
         moneyDirection: MoneyDirection.Other,
         note: 'Sửa ví',
 
-        paid: 0,
-        paidItem: 0,
-        debt: 0,
-        debtItem: 0,
+        hasPaymentItem: 0,
+        paidTotal: 0,
+        debtTotal: 0,
         personOpenDebt: 0,
         personCloseDebt: 0,
         cashierId: userId,

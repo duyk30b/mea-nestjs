@@ -8,6 +8,7 @@ import { Customer, TicketUser } from '../../../../../_libs/database/entities'
 import { AppointmentStatus } from '../../../../../_libs/database/entities/appointment.entity'
 import { PositionType } from '../../../../../_libs/database/entities/position.entity'
 import { TicketAttributeInsertType } from '../../../../../_libs/database/entities/ticket-attribute.entity'
+import { TicketPaymentDetailInsertType } from '../../../../../_libs/database/entities/ticket-payment-detail.entity'
 import { TicketReceptionInsertType } from '../../../../../_libs/database/entities/ticket-reception.entity'
 import Ticket, { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
 import {
@@ -18,6 +19,7 @@ import {
   AppointmentRepository,
   CustomerRepository,
   TicketAttributeRepository,
+  TicketPaymentDetailRepository,
   TicketReceptionRepository,
   TicketRepository,
 } from '../../../../../_libs/database/repositories'
@@ -31,6 +33,7 @@ export class TicketChangeReceptionService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
     private readonly ticketRepository: TicketRepository,
+    private readonly ticketPaymentDetailRepository: TicketPaymentDetailRepository,
     private readonly ticketReceptionRepository: TicketReceptionRepository,
     private readonly customerRepository: CustomerRepository,
     private readonly appointmentRepository: AppointmentRepository,
@@ -70,22 +73,14 @@ export class TicketChangeReceptionService {
     if (!customer) throw new BusinessException('error.SystemError')
 
     if (!body.ticketId) {
-      const ticketListToday = await this.ticketRepository.findManyBy({
+      const ticketIdGenerate = await this.ticketRepository.nextId({
         oid,
-        createdAt: {
-          GTE: ESTimer.startOfDate(ticketReceptionAdd.receptionAt, 7).getTime(),
-          LTE: ESTimer.endOfDate(ticketReceptionAdd.receptionAt, 7).getTime(),
-        },
+        createdAt: ticketReceptionAdd.receptionAt,
       })
-      let maxDailyIndex = 0
-      ticketListToday.forEach((i) => {
-        if (i.dailyIndex > maxDailyIndex) {
-          maxDailyIndex = i.dailyIndex
-        }
-      })
-
+      const dailyIndex = Number(ticketIdGenerate.slice(-4))
       ticket = await this.ticketRepository.insertOneFullFieldAndReturnEntity({
         oid,
+        id: ticketIdGenerate,
         customerId: customer.id,
         isPaymentEachItem: body.isPaymentEachItem,
         roomId: ticketReceptionAdd.roomId,
@@ -94,7 +89,7 @@ export class TicketChangeReceptionService {
         receptionAt: ticketReceptionAdd.receptionAt,
         customerSourceId: ticketReceptionAdd.customerSourceId,
 
-        dailyIndex: maxDailyIndex + 1,
+        dailyIndex,
         year: ESTimer.info(ticketReceptionAdd.receptionAt, 7).year,
         month: ESTimer.info(ticketReceptionAdd.receptionAt, 7).month + 1,
         date: ESTimer.info(ticketReceptionAdd.receptionAt, 7).date,
@@ -116,13 +111,26 @@ export class TicketChangeReceptionService {
         expense: 0,
         commissionMoney: 0,
         profit: 0,
-        paid: 0,
-        paidItem: 0,
-        debt: 0,
-        debtItem: 0,
+        paidTotal: 0,
+        debtTotal: 0,
         imageDiagnosisIds: JSON.stringify([]),
         endedAt: null,
       })
+      if (body.isPaymentEachItem) {
+        const ticketPaymentDetailInsert: TicketPaymentDetailInsertType = {
+          oid,
+          id: ticketIdGenerate,
+          ticketId: ticketIdGenerate,
+          paidWait: 0,
+          paidItem: 0,
+          paidSurcharge: 0,
+          paidDiscount: 0,
+          debtItem: 0,
+          debtSurcharge: 0,
+          debtDiscount: 0,
+        }
+        await this.ticketPaymentDetailRepository.insertOne(ticketPaymentDetailInsert)
+      }
     }
     if (body.ticketId) {
       ticket = await this.ticketRepository.updateOneAndReturnEntity(
@@ -233,11 +241,8 @@ export class TicketChangeReceptionService {
       oid,
       ticketId: ticket.id,
     })
-    this.socketEmitService.socketTicketChange(oid, {
-      ticketId: ticket.id,
-      ticketModified: ticket,
-      ticketUser: { upsertedList: ticket.ticketUserList },
-      ticketReception: { upsertedList: [ticketReceptionCreated] },
+    this.socketEmitService.socketRoomTicketPaginationChange(oid, {
+      roomId: ticket.roomId,
     })
     return { ticket, ticketReceptionCreated }
   }
@@ -250,7 +255,7 @@ export class TicketChangeReceptionService {
       [TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Cancelled].includes(ticket.status)
     ) {
       await this.ticketDestroyService.destroy({ oid, ticketId })
-      this.socketEmitService.socketTicketChange(oid, { ticketId, ticketDestroyedId: ticketId })
+      this.socketEmitService.socketRoomTicketPaginationChange(oid, { roomId: ticket.roomId })
       return { ticketDestroyedId: ticketId }
     }
 

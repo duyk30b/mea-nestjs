@@ -33,7 +33,7 @@ export class TicketChangeDiscountOperation {
         { updatedAt: Date.now() }
       )
 
-      const totalMoneyUpdate = ticketOrigin.itemsActualMoney - discountMoney
+      const totalMoneyUpdate = ticketOrigin.itemsActualMoney + ticketOrigin.surcharge - discountMoney
       const profitUpdate =
         totalMoneyUpdate
         - ticketOrigin.itemsCostAmount

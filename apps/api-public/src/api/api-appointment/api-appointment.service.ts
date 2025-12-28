@@ -7,12 +7,14 @@ import { Customer, CustomerSource } from '../../../../_libs/database/entities'
 import Appointment, {
   AppointmentStatus,
 } from '../../../../_libs/database/entities/appointment.entity'
+import { TicketPaymentDetailInsertType } from '../../../../_libs/database/entities/ticket-payment-detail.entity'
 import Ticket, { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
 import {
   AppointmentRepository,
   CustomerRepository,
   CustomerSourceRepository,
   TicketAttributeRepository,
+  TicketPaymentDetailRepository,
   TicketRepository,
 } from '../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../socket/socket-emit.service'
@@ -34,6 +36,7 @@ export class ApiAppointmentService {
     private readonly customerRepository: CustomerRepository,
     private readonly customerSourceRepository: CustomerSourceRepository,
     private readonly ticketRepository: TicketRepository,
+    private readonly ticketPaymentDetailRepository: TicketPaymentDetailRepository,
     private readonly ticketAttributeRepository: TicketAttributeRepository
   ) { }
 
@@ -209,20 +212,25 @@ export class ApiAppointmentService {
 
     const appointment = await this.appointmentRepository.findOneBy({ oid, id: appointmentId })
     const customer = await this.customerRepository.findOneBy({ oid, id: appointment.customerId })
-    const countToday = await this.ticketRepository.countToday(oid)
     const receptionAt = body.receptionAt
 
     let ticket: Ticket
     if (!body.toTicketId) {
+      const ticketIdGenerate = await this.ticketRepository.nextId({
+        oid,
+        createdAt: receptionAt,
+      })
+      const dailyIndex = Number(ticketIdGenerate.slice(-4))
       ticket = await this.ticketRepository.insertOneFullFieldAndReturnEntity({
         oid,
+        id: ticketIdGenerate,
         roomId: body.roomId,
         isPaymentEachItem: body.isPaymentEachItem,
         customerId: customer.id,
         status: TicketStatus.Schedule,
         createdAt: receptionAt,
         receptionAt,
-        dailyIndex: countToday + 1,
+        dailyIndex,
         year: ESTimer.info(receptionAt, 7).year,
         month: ESTimer.info(receptionAt, 7).month + 1,
         date: ESTimer.info(receptionAt, 7).date,
@@ -245,13 +253,26 @@ export class ApiAppointmentService {
         expense: 0,
         commissionMoney: 0,
         profit: 0,
-        paid: 0,
-        paidItem: 0,
-        debt: 0,
-        debtItem: 0,
+        paidTotal: 0,
+        debtTotal: 0,
         imageDiagnosisIds: JSON.stringify([]),
         endedAt: null,
       })
+      if (body.isPaymentEachItem) {
+        const ticketPaymentDetailInsert: TicketPaymentDetailInsertType = {
+          oid,
+          id: ticketIdGenerate,
+          ticketId: ticketIdGenerate,
+          paidWait: 0,
+          paidItem: 0,
+          paidSurcharge: 0,
+          paidDiscount: 0,
+          debtItem: 0,
+          debtSurcharge: 0,
+          debtDiscount: 0,
+        }
+        await this.ticketPaymentDetailRepository.insertOne(ticketPaymentDetailInsert)
+      }
     } else {
       ticket = await this.ticketRepository.updateOneAndReturnEntity(
         { oid, id: body.toTicketId },

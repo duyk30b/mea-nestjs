@@ -212,10 +212,9 @@ export class ApiFileCustomerUploadExcel {
             moneyDirection: MoneyDirection.Other,
             note: 'Update Excel',
 
-            paid: 0,
-            paidItem: 0,
-            debt: i.debtUpdate - i.debtOrigin,
-            debtItem: 0,
+            hasPaymentItem: 0,
+            paidTotal: 0,
+            debtTotal: i.debtUpdate - i.debtOrigin,
             personOpenDebt: i.debtOrigin,
             personCloseDebt: i.debtUpdate,
             cashierId: userId,

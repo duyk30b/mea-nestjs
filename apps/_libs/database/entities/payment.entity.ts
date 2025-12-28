@@ -96,37 +96,17 @@ export default class Payment {
   @Expose()
   note: string // Ghi chú
 
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
+  @Column({ type: 'smallint', default: 0 })
   @Expose()
-  paid: number
+  hasPaymentItem: number
 
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
+  @Column({ default: 0 })
   @Expose()
-  paidItem: number
+  paidTotal: number // tổng tiền thanh toán
 
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
+  @Column({ default: 0 })
   @Expose()
-  debt: number
-
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose()
-  debtItem: number
+  debtTotal: number // tổng tiền nợ
 
   @Column({
     type: 'bigint',
@@ -194,10 +174,6 @@ export default class Payment {
     Object.assign(entity, raw)
 
     entity.createdAt = Number(raw.createdAt)
-    entity.paid = Number(raw.paid)
-    entity.paidItem = Number(raw.paidItem)
-    entity.debt = Number(raw.debt)
-    entity.debtItem = Number(raw.debtItem)
     entity.personOpenDebt = Number(raw.personOpenDebt)
     entity.personCloseDebt = Number(raw.personCloseDebt)
     entity.walletOpenMoney = Number(raw.walletOpenMoney)

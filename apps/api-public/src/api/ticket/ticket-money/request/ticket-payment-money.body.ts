@@ -1,12 +1,20 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsInt, IsNumber, IsString, ValidateNested } from 'class-validator'
+import {
+  IsArray,
+  IsDefined,
+  IsIn,
+  IsInt,
+  IsNumber,
+  IsString,
+  ValidateNested,
+} from 'class-validator'
 import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
 import { DiscountType } from '../../../../../../_libs/database/common/variable'
 import { TicketItemType } from '../../../../../../_libs/database/entities/payment-ticket-item.entity'
 import { PaymentActionType } from '../../../../../../_libs/database/entities/payment.entity'
 
-class TicketPaymentItemBody {
+class PaymentTicketItemBody {
   @Expose()
   @IsDefined()
   @IsEnumValue(TicketItemType)
@@ -54,63 +62,112 @@ class TicketPaymentItemBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  paidAdd: number
+  paidMoney: number
 
   @Expose()
   @IsDefined()
   @IsNumber()
-  debtAdd: number
+  debtMoney: number
 }
 
-class TicketPaymentItemMapBody {
-  @ApiProperty({ type: TicketPaymentItemBody, isArray: true })
+class PaymentTicketWaitBody {
   @Expose()
-  @Type(() => TicketPaymentItemBody)
-  @IsArray()
-  @ValidateNested({ each: true })
-  ticketRegimenBodyList: TicketPaymentItemBody[]
+  @IsDefined()
+  @IsNumber()
+  paidMoney: number
+}
 
-  @ApiProperty({ type: TicketPaymentItemBody, isArray: true })
+class PaymentTicketSurchargeBody {
   @Expose()
-  @Type(() => TicketPaymentItemBody)
-  @IsArray()
-  @ValidateNested({ each: true })
-  ticketProcedureNoEffectBodyList: TicketPaymentItemBody[]
+  @IsDefined()
+  @IsNumber()
+  paidMoney: number
 
-  @ApiProperty({ type: TicketPaymentItemBody, isArray: true })
   @Expose()
-  @Type(() => TicketPaymentItemBody)
-  @IsArray()
-  @ValidateNested({ each: true })
-  ticketProcedureHasEffectBodyList: TicketPaymentItemBody[]
+  @IsDefined()
+  @IsNumber()
+  debtMoney: number
+}
 
-  @ApiProperty({ type: TicketPaymentItemBody, isArray: true })
+class PaymentTicketDiscountBody {
   @Expose()
-  @Type(() => TicketPaymentItemBody)
-  @IsArray()
-  @ValidateNested({ each: true })
-  ticketProductConsumableBodyList: TicketPaymentItemBody[]
+  @IsDefined()
+  @IsNumber()
+  paidMoney: number
 
-  @ApiProperty({ type: TicketPaymentItemBody, isArray: true })
   @Expose()
-  @Type(() => TicketPaymentItemBody)
-  @IsArray()
-  @ValidateNested({ each: true })
-  ticketProductPrescriptionBodyList: TicketPaymentItemBody[]
+  @IsDefined()
+  @IsNumber()
+  debtMoney: number
+}
 
-  @ApiProperty({ type: TicketPaymentItemBody, isArray: true })
+class PaymentTicketItemMapBody {
+  @ApiProperty({ type: PaymentTicketWaitBody })
   @Expose()
-  @Type(() => TicketPaymentItemBody)
-  @IsArray()
+  @Type(() => PaymentTicketWaitBody)
   @ValidateNested({ each: true })
-  ticketLaboratoryBodyList: TicketPaymentItemBody[]
+  paymentWait: PaymentTicketWaitBody
 
-  @ApiProperty({ type: TicketPaymentItemBody, isArray: true })
+  @ApiProperty({ type: PaymentTicketSurchargeBody })
   @Expose()
-  @Type(() => TicketPaymentItemBody)
+  @Type(() => PaymentTicketSurchargeBody)
+  @ValidateNested({ each: true })
+  paymentSurcharge: PaymentTicketSurchargeBody
+
+  @ApiProperty({ type: PaymentTicketDiscountBody })
+  @Expose()
+  @Type(() => PaymentTicketDiscountBody)
+  @ValidateNested({ each: true })
+  paymentDiscount: PaymentTicketDiscountBody
+
+  @ApiProperty({ type: PaymentTicketItemBody, isArray: true })
+  @Expose()
+  @Type(() => PaymentTicketItemBody)
   @IsArray()
   @ValidateNested({ each: true })
-  ticketRadiologyBodyList: TicketPaymentItemBody[]
+  ticketRegimenBodyList: PaymentTicketItemBody[]
+
+  @ApiProperty({ type: PaymentTicketItemBody, isArray: true })
+  @Expose()
+  @Type(() => PaymentTicketItemBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketProcedureNoEffectBodyList: PaymentTicketItemBody[]
+
+  @ApiProperty({ type: PaymentTicketItemBody, isArray: true })
+  @Expose()
+  @Type(() => PaymentTicketItemBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketProcedureHasEffectBodyList: PaymentTicketItemBody[]
+
+  @ApiProperty({ type: PaymentTicketItemBody, isArray: true })
+  @Expose()
+  @Type(() => PaymentTicketItemBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketProductConsumableBodyList: PaymentTicketItemBody[]
+
+  @ApiProperty({ type: PaymentTicketItemBody, isArray: true })
+  @Expose()
+  @Type(() => PaymentTicketItemBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketProductPrescriptionBodyList: PaymentTicketItemBody[]
+
+  @ApiProperty({ type: PaymentTicketItemBody, isArray: true })
+  @Expose()
+  @Type(() => PaymentTicketItemBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketLaboratoryBodyList: PaymentTicketItemBody[]
+
+  @ApiProperty({ type: PaymentTicketItemBody, isArray: true })
+  @Expose()
+  @Type(() => PaymentTicketItemBody)
+  @IsArray()
+  @ValidateNested({ each: true })
+  ticketRadiologyBodyList: PaymentTicketItemBody[]
 }
 
 export class TicketPaymentMoneyBody {
@@ -120,6 +177,12 @@ export class TicketPaymentMoneyBody {
   @IsString()
   walletId: string
 
+  @ApiProperty({ example: 12 })
+  @Expose()
+  @IsDefined()
+  @IsIn([0, 1])
+  hasPaymentItem: 0 | 1
+
   @Expose()
   @IsDefined()
   @IsEnumValue(PaymentActionType)
@@ -128,31 +191,21 @@ export class TicketPaymentMoneyBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  paidAdd: number
+  paidTotal: number
 
   @Expose()
   @IsDefined()
   @IsNumber()
-  paidItemAdd: number
-
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  debtAdd: number
-
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  debtItemAdd: number
+  debtTotal: number
 
   @ApiPropertyOptional({ example: 'Khách hàng còn bo thêm tiền' })
   @Expose()
   @IsString()
   note: string
 
-  @ApiProperty({ type: TicketPaymentItemMapBody })
+  @ApiProperty({ type: PaymentTicketItemMapBody })
   @Expose()
-  @Type(() => TicketPaymentItemMapBody)
+  @Type(() => PaymentTicketItemMapBody)
   @ValidateNested({ each: true })
-  ticketPaymentItemMapBody?: TicketPaymentItemMapBody
+  paymentTicketItemMapDto?: PaymentTicketItemMapBody
 }

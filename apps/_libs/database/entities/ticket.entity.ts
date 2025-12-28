@@ -12,6 +12,7 @@ import TicketExpense from './ticket-expense.entity'
 import TicketLaboratoryGroup from './ticket-laboratory-group.entity'
 import TicketLaboratoryResult from './ticket-laboratory-result.entity'
 import TicketLaboratory from './ticket-laboratory.entity'
+import TicketPaymentDetail from './ticket-payment-detail.entity'
 import TicketProcedure from './ticket-procedure.entity'
 import TicketProduct from './ticket-product.entity'
 import TicketRadiology from './ticket-radiology.entity'
@@ -214,37 +215,13 @@ export default class Ticket {
   @Expose()
   profit: number // tiền lãi = Tổng tiền - Tiền cost - Chi phí
 
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
+  @Column({ default: 0 })
   @Expose()
-  paid: number // tiền thanh toán vào Ticket
+  paidTotal: number // tổng tiền thanh toán
 
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
+  @Column({ default: 0 })
   @Expose()
-  paidItem: number // tiền thanh toán vào Item
-
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose()
-  debt: number // tiền nợ của Ticket
-
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose()
-  debtItem: number // tiền nợ của Item
+  debtTotal: number // tổng tiền nợ
 
   @Column({ type: 'varchar', length: 100, default: JSON.stringify([]) })
   @Expose()
@@ -302,6 +279,9 @@ export default class Ticket {
   // @JoinColumn({ name: 'customerId', referencedColumnName: 'id' })
   @Expose()
   customer: Customer
+
+  @Expose()
+  ticketPaymentDetail: TicketPaymentDetail
 
   @Expose()
   paymentList: Payment[]
@@ -376,10 +356,6 @@ export default class Ticket {
 
     entity.totalMoney = Number(raw.totalMoney)
     entity.profit = Number(raw.profit)
-    entity.paid = Number(raw.paid)
-    entity.debt = Number(raw.debt)
-    entity.paidItem = Number(raw.paidItem)
-    entity.debtItem = Number(raw.debtItem)
 
     entity.surcharge = Number(raw.surcharge)
     entity.expense = Number(raw.expense)
@@ -401,7 +377,7 @@ export type TicketRelationType = {
   [P in keyof Pick<
     Ticket,
     | 'customer'
-    | 'customer'
+    | 'ticketPaymentDetail'
     | 'toAppointment'
     | 'ticketReceptionList'
     | 'ticketAttributeList'
@@ -425,7 +401,7 @@ export type TicketRelationType = {
 
 export type TicketInsertType = Omit<
   Ticket,
-  keyof TicketRelationType | keyof Pick<Ticket, 'id' | 'updatedAt'>
+  keyof TicketRelationType | keyof Pick<Ticket, 'updatedAt'>
 >
 
 export type TicketUpdateType = {

@@ -54,8 +54,8 @@ export class TicketCloseOperation {
         },
         {
           status: () => `CASE 
-                              WHEN("paid" + "paidItem" < "totalMoney") THEN ${TicketStatus.Debt} 
-                              WHEN("paid" + "paidItem" = "totalMoney") THEN ${TicketStatus.Completed} 
+                              WHEN("paidTotal" < "totalMoney") THEN ${TicketStatus.Debt} 
+                              WHEN("paidTotal" = "totalMoney") THEN ${TicketStatus.Completed} 
                               ELSE ${TicketStatus.Executing}
                           END
                           `,
@@ -64,10 +64,7 @@ export class TicketCloseOperation {
         }
       )
 
-      if (
-        ticketUpdated.paid + ticketUpdated.paidItem - ticketUpdated.debt
-        > ticketUpdated.totalMoney
-      ) {
+      if (ticketUpdated.paidTotal - ticketUpdated.debtTotal > ticketUpdated.totalMoney) {
         throw new BusinessError(PREFIX, 'Cần hoàn trả tiền thừa trước khi đóng phiếu')
       }
 
@@ -77,10 +74,10 @@ export class TicketCloseOperation {
       let paymentCreated: Payment
 
       const debtFix =
-        ticketModified.totalMoney
-        - (ticketModified.paid + ticketModified.paidItem + ticketModified.debt)
+        ticketModified.totalMoney - (ticketModified.paidTotal + ticketModified.debtTotal)
       if (ticketUpdated.isPaymentEachItem) {
         if (debtFix !== 0) {
+          // Trường hợp thanh toán lẻ không fix được
           throw new BusinessError(PREFIX, 'Chưa thanh toán đủ')
         }
       }
@@ -90,7 +87,7 @@ export class TicketCloseOperation {
         ticketModified = await this.ticketRepository.managerUpdateOne(
           manager,
           { oid, id: ticketId },
-          { debt: ticketUpdated.debt + debtFix }
+          { debtTotal: ticketUpdated.debtTotal + debtFix }
         )
         customerModified = await this.customerRepository.managerUpdateOne(
           manager,
@@ -112,10 +109,9 @@ export class TicketCloseOperation {
           moneyDirection: MoneyDirection.Other,
           note: '',
 
-          paid: 0,
-          paidItem: 0,
-          debt: debtFix,
-          debtItem: 0,
+          hasPaymentItem: ticketUpdated.isPaymentEachItem,
+          paidTotal: 0,
+          debtTotal: debtFix,
           personOpenDebt: customerModified.debt - debtFix,
           personCloseDebt: customerModified.debt,
           walletOpenMoney: 0,

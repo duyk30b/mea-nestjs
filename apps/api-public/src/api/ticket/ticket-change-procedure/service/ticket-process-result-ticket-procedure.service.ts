@@ -16,6 +16,7 @@ import {
   Image,
   Product,
   TicketBatch,
+  TicketPaymentDetail,
   TicketProduct,
   TicketRegimen,
   TicketRegimenItem,
@@ -50,6 +51,7 @@ import {
   CustomerRepository,
   PaymentRepository,
   TicketBatchRepository,
+  TicketPaymentDetailRepository,
   TicketProcedureRepository,
   TicketProductRepository,
   TicketRegimenItemRepository,
@@ -68,6 +70,7 @@ export class TicketProcessResultTicketProcedureService {
     private cacheDataService: CacheDataService,
     private imageManagerService: ImageManagerService,
     private ticketRepository: TicketRepository,
+    private ticketPaymentDetailRepository: TicketPaymentDetailRepository,
     private customerRepository: CustomerRepository,
     private paymentRepository: PaymentRepository,
     private ticketProcedureRepository: TicketProcedureRepository,
@@ -115,6 +118,18 @@ export class TicketProcessResultTicketProcedureService {
         },
         { updatedAt: Date.now() }
       )
+
+      let ticketPaymentDetailOrigin: TicketPaymentDetail
+      if (ticketOrigin.isPaymentEachItem) {
+        ticketPaymentDetailOrigin = await this.ticketPaymentDetailRepository.managerFindOneBy(
+          manager,
+          {
+            oid,
+            id: ticketId,
+            ticketId,
+          }
+        )
+      }
 
       const customerId = ticketOrigin.customerId
 
@@ -359,6 +374,7 @@ export class TicketProcessResultTicketProcedureService {
       let paymentMoneyStatus = ticketProcedureOrigin.paymentMoneyStatus
       let ticketProcedureStatus = ticketProcedureOrigin.status
       let paidItemAdd = 0
+      let paidWaitAdd = 0
       let debtItemAdd = 0
       let ticketProcedurePaidUpdate = ticketProcedureOrigin.paid
       let ticketProcedureDebtUpdate = ticketProcedureOrigin.debt
@@ -390,28 +406,31 @@ export class TicketProcessResultTicketProcedureService {
         // A.1. Với trường hợp NoEffect
         if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.NoEffect) {
           if (ticketOrigin.isPaymentEachItem) {
-            if (ticketOrigin.paid >= moneyAmountTemp) {
-              // lấy tiền từ ticketPaid
+            if (ticketPaymentDetailOrigin.paidWait >= moneyAmountTemp) {
+              // transfer tiền từ paidWait vào paidItem
               paymentMoneyStatus = PaymentMoneyStatus.FullPaid
+              paidWaitAdd = -moneyAmountTemp
               paidItemAdd = moneyAmountTemp
               ticketProcedurePaidUpdate = moneyAmountTemp
             } else {
-              // không đủ tiền thì ở trạng thái Pending
+              // không đủ tiền thì thôi, vẫn ở trạng thái Pending
               paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
             }
           } else {
-            // tính tình theo Ticket thì chuyển sang trạng thái đã thanh toán theo ticket (cập nhật tiền tí nữa sẽ tính ở dưới)
+            // tính tiền theo Ticket thì chuyển sang trạng thái đã thanh toán theo ticket (cập nhật tiền tí nữa sẽ tính ở dưới)
             paymentMoneyStatus = PaymentMoneyStatus.TicketPaid
           }
         }
         // A.2. Với trường hợp PendingPayment
         if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.PendingPayment) {
-          if (ticketOrigin.paid >= moneyAmountTemp) {
-            // lấy tiền từ ticketPaid
+          if (ticketPaymentDetailOrigin.paidWait >= moneyAmountTemp) {
+            // transfer tiền từ paidWait vào paidItem
             paymentMoneyStatus = PaymentMoneyStatus.FullPaid
+            paidWaitAdd = -moneyAmountTemp
             paidItemAdd = moneyAmountTemp
             ticketProcedurePaidUpdate = moneyAmountTemp
           } else {
+            // không đủ tiền thì thôi, vẫn ở trạng thái Pending
             paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
           }
         }
@@ -421,10 +440,13 @@ export class TicketProcessResultTicketProcedureService {
       if (ticketProcedureOrigin.completedAt && !ticketProcedureResult.completedAt) {
         // Tính lại ticketPaid và ticketDebt
         if (ticketProcedureOrigin.paid || ticketProcedureOrigin.debt) {
-          paidItemAdd = -ticketProcedureOrigin.paid
-          debtItemAdd = -ticketProcedureOrigin.debt
           ticketProcedurePaidUpdate = 0
           ticketProcedureDebtUpdate = 0
+          if (ticketOrigin.isPaymentEachItem) {
+            paidItemAdd = -ticketProcedureOrigin.paid
+            paidWaitAdd = ticketProcedureOrigin.paid
+            debtItemAdd = -ticketProcedureOrigin.debt
+          }
         }
         if (ticketProcedureOrigin.ticketProcedureType === TicketProcedureType.Normal) {
           ticketProcedureStatus = TicketProcedureStatus.Pending
@@ -487,6 +509,7 @@ export class TicketProcessResultTicketProcedureService {
         || itemsDiscountAdd !== 0
         || procedureMoneyAdd !== 0
         || paidItemAdd !== 0
+        || paidWaitAdd !== 0
         || debtItemAdd !== 0
       ) {
         ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
@@ -500,7 +523,10 @@ export class TicketProcessResultTicketProcedureService {
             itemsDiscountAdd,
           },
           other: {
-            paidAdd: -paidItemAdd,
+            debtTotalAdd: debtItemAdd,
+          },
+          ticketPaymentDetail: {
+            paidWaitAdd,
             paidItemAdd,
             debtItemAdd,
           },
@@ -527,10 +553,9 @@ export class TicketProcessResultTicketProcedureService {
           moneyDirection: MoneyDirection.Other,
           note: '',
 
-          paid: 0,
-          paidItem: 0,
-          debt: 0,
-          debtItem: debtItemAdd,
+          hasPaymentItem: 0,
+          paidTotal: 0,
+          debtTotal: debtItemAdd,
           personOpenDebt: customerModified.debt - debtItemAdd,
           personCloseDebt: customerModified.debt,
           walletOpenMoney: 0,

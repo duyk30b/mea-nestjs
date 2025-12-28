@@ -14,6 +14,7 @@ import {
   TicketLaboratory,
   TicketLaboratoryGroup,
   TicketLaboratoryResult,
+  TicketPaymentDetail,
   TicketProcedure,
   TicketProduct,
   TicketRadiology,
@@ -36,12 +37,17 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SERVER_EMIT_DEMO, { dataDemo })
   }
 
+  socketRoomTicketPaginationChange(oid: number, data: { roomId: number }) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_ROOM_TICKET_PAGINATION_CHANGE, data)
+  }
+
   socketTicketChange(
     oid: number,
     data: {
       ticketId: string
-      ticketDestroyedId?: string
       ticketModified?: Ticket
+      ticketPaymentDetailModified?: TicketPaymentDetail
       imageList?: { destroyedList?: Image[]; upsertedList?: Image[] }
       ticketAttribute?: { destroyedList?: TicketAttribute[]; upsertedList?: TicketAttribute[] }
       ticketUser?: { destroyedList?: TicketUser[]; upsertedList?: TicketUser[] }

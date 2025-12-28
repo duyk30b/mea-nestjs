@@ -3,8 +3,14 @@ import { DataSource, EntityManager } from 'typeorm'
 import { ESArray } from '../../../common/helpers'
 import { BusinessError } from '../../common/error'
 import { DiscountType, PaymentMoneyStatus } from '../../common/variable'
-import { Customer, TicketLaboratoryGroup, TicketRegimen, TicketRegimenItem } from '../../entities'
 import {
+  Customer,
+  TicketLaboratoryGroup,
+  TicketPaymentDetail,
+  TicketRegimen,
+  TicketRegimenItem,
+} from '../../entities'
+import PaymentTicketItem, {
   PaymentTicketItemInsertType,
   TicketItemType,
 } from '../../entities/payment-ticket-item.entity'
@@ -22,6 +28,7 @@ import {
   PaymentTicketItemRepository,
   TicketLaboratoryGroupRepository,
   TicketLaboratoryRepository,
+  TicketPaymentDetailRepository,
   TicketProcedureRepository,
   TicketProductRepository,
   TicketRadiologyRepository,
@@ -32,29 +39,38 @@ import {
 } from '../../repositories'
 import { TicketChangeItemMoneyManager } from './ticket-change-item-money.manager'
 
-export type TicketPaymentItemDto = {
-  ticketItemType: TicketItemType
-  ticketItemId: string
-  interactId: number
-  expectedPrice: number
-  discountMoney: number
-  discountPercent: number
-  discountType: DiscountType
-  actualPrice: number
-  quantity: number
-  sessionIndex: number
-  paidAdd: number
-  debtAdd: number
-}
+export type PaymentTicketItemDto = Pick<
+  PaymentTicketItem,
+  | 'ticketItemType'
+  | 'ticketItemId'
+  | 'interactId'
+  | 'expectedPrice'
+  | 'discountMoney'
+  | 'discountPercent'
+  | 'discountType'
+  | 'actualPrice'
+  | 'quantity'
+  | 'sessionIndex'
+  | 'paidMoney'
+  | 'debtMoney'
+>
 
-export type TicketPaymentItemMapDtoType = {
-  ticketRegimenBodyList: TicketPaymentItemDto[]
-  ticketProcedureNoEffectBodyList: TicketPaymentItemDto[]
-  ticketProcedureHasEffectBodyList: TicketPaymentItemDto[]
-  ticketProductConsumableBodyList: TicketPaymentItemDto[]
-  ticketProductPrescriptionBodyList: TicketPaymentItemDto[]
-  ticketLaboratoryBodyList: TicketPaymentItemDto[]
-  ticketRadiologyBodyList: TicketPaymentItemDto[]
+export type PaymentTicketWaitDto = Pick<PaymentTicketItem, 'paidMoney'>
+
+export type PaymentTicketSurchargeDto = Pick<PaymentTicketItem, 'paidMoney' | 'debtMoney'>
+export type PaymentTicketDiscountDto = Pick<PaymentTicketItem, 'paidMoney' | 'debtMoney'>
+
+export type PaymentTicketItemMapDtoType = {
+  paymentWait: PaymentTicketWaitDto
+  paymentDiscount: PaymentTicketDiscountDto
+  paymentSurcharge: PaymentTicketSurchargeDto
+  ticketRegimenBodyList: PaymentTicketItemDto[]
+  ticketProcedureNoEffectBodyList: PaymentTicketItemDto[]
+  ticketProcedureHasEffectBodyList: PaymentTicketItemDto[]
+  ticketProductConsumableBodyList: PaymentTicketItemDto[]
+  ticketProductPrescriptionBodyList: PaymentTicketItemDto[]
+  ticketLaboratoryBodyList: PaymentTicketItemDto[]
+  ticketRadiologyBodyList: PaymentTicketItemDto[]
 }
 
 export type TicketPaymentOperationPropType = {
@@ -65,11 +81,10 @@ export type TicketPaymentOperationPropType = {
   paymentActionType: PaymentActionType
   time: number
   note: string
-  paidAdd: number
-  paidItemAdd: number
-  debtAdd: number
-  debtItemAdd: number
-  ticketPaymentItemMapDto?: TicketPaymentItemMapDtoType
+  paidTotal: number
+  debtTotal: number
+  hasPaymentItem: 0 | 1
+  paymentTicketItemMapDto?: PaymentTicketItemMapDtoType
 }
 
 @Injectable()
@@ -77,6 +92,7 @@ export class TicketPaymentOperation {
   constructor(
     private dataSource: DataSource,
     private ticketRepository: TicketRepository,
+    private ticketPaymentDetailRepository: TicketPaymentDetailRepository,
     private customerRepository: CustomerRepository,
     private walletRepository: WalletRepository,
     private paymentRepository: PaymentRepository,
@@ -97,45 +113,29 @@ export class TicketPaymentOperation {
       ticketId,
       userId,
       paymentActionType,
-      paidAdd,
-      paidItemAdd,
-      debtAdd,
-      // debtItemAdd,
-      ticketPaymentItemMapDto,
+      paidTotal,
+      debtTotal,
+      hasPaymentItem,
+      paymentTicketItemMapDto,
       time,
       note,
     } = props
     const walletId = props.walletId || '0'
     const PREFIX = `ticketId=${ticketId} startPayment failed`
 
-    const ticketItemList = [
-      ...(ticketPaymentItemMapDto?.ticketRegimenBodyList || []),
-      ...(ticketPaymentItemMapDto?.ticketProcedureNoEffectBodyList || []),
-      ...(ticketPaymentItemMapDto?.ticketProcedureHasEffectBodyList || []),
-      ...(ticketPaymentItemMapDto?.ticketProductConsumableBodyList || []),
-      ...(ticketPaymentItemMapDto?.ticketProductPrescriptionBodyList || []),
-      ...(ticketPaymentItemMapDto?.ticketLaboratoryBodyList || []),
-      ...(ticketPaymentItemMapDto?.ticketRadiologyBodyList || []),
+    const ticketItemBodyList = [
+      ...(paymentTicketItemMapDto?.ticketRegimenBodyList || []),
+      ...(paymentTicketItemMapDto?.ticketProcedureNoEffectBodyList || []),
+      ...(paymentTicketItemMapDto?.ticketProcedureHasEffectBodyList || []),
+      ...(paymentTicketItemMapDto?.ticketProductConsumableBodyList || []),
+      ...(paymentTicketItemMapDto?.ticketProductPrescriptionBodyList || []),
+      ...(paymentTicketItemMapDto?.ticketLaboratoryBodyList || []),
+      ...(paymentTicketItemMapDto?.ticketRadiologyBodyList || []),
     ]
-    const paidItemAddReduce = ticketItemList.reduce((acc, item) => {
-      return acc + item.paidAdd
-    }, 0)
-    const debtItemAddReduce = ticketItemList.reduce((acc, item) => {
-      return acc + item.debtAdd
-    }, 0)
 
-    const debtItemAdd = debtItemAddReduce // Do ở front-end không tính được debtItemAdd
-    if (paidAdd + paidItemAdd == 0 && debtAdd + debtItemAdd < 0) {
-      throw new BusinessError(PREFIX, 'Số tiền thanh toán phải > 0')
-    }
-    if (paidItemAdd !== paidItemAddReduce || debtItemAdd !== debtItemAddReduce) {
-      throw new BusinessError(PREFIX, 'Số tiền thanh toán trong Item không đúng', {
-        paidItemAdd,
-        paidItemAddReduce,
-        debtItemAdd,
-        debtItemAddReduce,
-      })
-    }
+    // if (paidAdd + paidItemAdd == 0 && debtAdd + debtItemAdd < 0) {
+    //   throw new BusinessError(PREFIX, 'Số tiền thanh toán phải > 0')
+    // }
 
     // === 1. TICKET: Update status để tạo transaction ===
     const ticketUpdated = await this.ticketRepository.managerUpdateOne(
@@ -154,37 +154,75 @@ export class TicketPaymentOperation {
         },
       },
       {
-        paid: () => `"paid" + ${paidAdd}`,
-        paidItem: () => `"paidItem" + ${paidItemAdd}`,
-        debt: () => `"debt" + ${debtAdd}`,
-        debtItem: () => `"debtItem" + ${debtItemAdd}`,
+        paidTotal: () => `"paidTotal" + ${paidTotal}`,
+        debtTotal: () => `"debtTotal" + ${debtTotal}`,
         status: () => ` CASE
-                              WHEN("status" = ${TicketStatus.Draft}) THEN ${TicketStatus.Deposited} 
-                              WHEN("status" = ${TicketStatus.Schedule}) THEN ${TicketStatus.Deposited} 
-                              WHEN("status" = ${TicketStatus.Deposited}) THEN ${TicketStatus.Deposited} 
-                              WHEN("status" = ${TicketStatus.Executing}) THEN ${TicketStatus.Executing} 
-                              WHEN("status" = ${TicketStatus.Debt} 
-                                AND "paid" + "paidItem" + ${paidAdd + paidItemAdd} = "totalMoney") 
-                                THEN ${TicketStatus.Completed} 
-                              WHEN("status" = ${TicketStatus.Debt} 
-                                AND "paid" + "paidItem" + ${paidAdd + paidItemAdd} < "totalMoney") 
-                                THEN ${TicketStatus.Debt} 
-                              ELSE "status"
-                          END`,
+                            WHEN("status" = ${TicketStatus.Draft}) THEN ${TicketStatus.Deposited} 
+                            WHEN("status" = ${TicketStatus.Schedule}) THEN ${TicketStatus.Deposited} 
+                            WHEN("status" = ${TicketStatus.Deposited}) THEN ${TicketStatus.Deposited} 
+                            WHEN("status" = ${TicketStatus.Executing}) THEN ${TicketStatus.Executing} 
+                            WHEN("status" = ${TicketStatus.Debt} AND "paidTotal" + ${paidTotal} = "totalMoney") 
+                              THEN ${TicketStatus.Completed} 
+                            WHEN("status" = ${TicketStatus.Debt} AND "paidTotal" +${paidTotal} < "totalMoney") 
+                              THEN ${TicketStatus.Debt} 
+                            ELSE "status"
+                        END`,
       }
     )
 
-    if (
-      ticketUpdated.status === TicketStatus.Debt
-      && ticketUpdated.paid > ticketUpdated.totalMoney
-    ) {
-      throw new BusinessError(PREFIX, 'Số tiền thanh toán không đúng')
+    if (ticketUpdated.status === TicketStatus.Debt) {
+      if (ticketUpdated.paidTotal >= ticketUpdated.totalMoney) {
+        throw new BusinessError(PREFIX, 'Số tiền thanh toán không đúng')
+      }
+      if (ticketUpdated.paidTotal + ticketUpdated.debtTotal != ticketUpdated.totalMoney) {
+        throw new BusinessError(PREFIX, 'Số tiền nợ không đúng')
+      }
     }
-    if (ticketUpdated.debt < 0) {
+    if (ticketUpdated.debtTotal < 0) {
       throw new BusinessError(PREFIX, 'Số tiền trả nợ không đúng')
     }
 
     const { customerId } = ticketUpdated
+    let ticketPaymentDetailModified: TicketPaymentDetail
+
+    if (hasPaymentItem) {
+      const paidWait = paymentTicketItemMapDto?.paymentWait.paidMoney || 0
+      const paidDiscount = paymentTicketItemMapDto?.paymentDiscount.paidMoney || 0
+      const debtDiscount = paymentTicketItemMapDto?.paymentDiscount.debtMoney || 0
+      const paidSurcharge = paymentTicketItemMapDto?.paymentSurcharge.paidMoney || 0
+      const debtSurcharge = paymentTicketItemMapDto?.paymentSurcharge.debtMoney || 0
+
+      const paidItemReduce = ticketItemBodyList.reduce((acc, item) => {
+        return acc + item.paidMoney
+      }, 0)
+      const debtItemReduce = ticketItemBodyList.reduce((acc, item) => {
+        return acc + item.debtMoney
+      }, 0)
+
+      if (
+        paidTotal !== paidItemReduce + paidWait + paidDiscount + paidSurcharge
+        || debtTotal !== debtItemReduce + debtDiscount + debtSurcharge
+      ) {
+        throw new BusinessError(PREFIX, 'Số tiền thanh toán trong Item không đúng', {
+          paidTotal,
+          debtTotal,
+        })
+      }
+
+      ticketPaymentDetailModified = await this.ticketPaymentDetailRepository.managerUpdateOne(
+        manager,
+        { oid, ticketId, id: ticketId },
+        {
+          paidWait: () => `"paidWait" + ${paidWait}`,
+          paidDiscount: () => `"paidDiscount" + ${paidDiscount}`,
+          paidSurcharge: () => `"paidSurcharge" + ${paidSurcharge}`,
+          paidItem: () => `"paidItem" + ${paidItemReduce}`,
+          debtDiscount: () => `"debtDiscount" + ${debtDiscount}`,
+          debtSurcharge: () => `"debtSurcharge" + ${debtSurcharge}`,
+          debtItem: () => `"debtItem" + ${debtItemReduce}`,
+        }
+      )
+    }
 
     let customerModified: Customer
     let walletOpenMoney = 0
@@ -192,13 +230,13 @@ export class TicketPaymentOperation {
     let customerOpenDebt = 0
     let customerCloseDebt = 0
 
-    if (debtAdd + debtItemAdd != 0) {
+    if (debtTotal != 0) {
       customerModified = await this.customerRepository.managerUpdateOne(
         manager,
         { oid, id: customerId },
-        { updatedAt: time, debt: () => `debt + ${debtAdd + debtItemAdd}` }
+        { updatedAt: time, debt: () => `debt + ${debtTotal}` }
       )
-      customerOpenDebt = customerModified.debt - (debtAdd + debtItemAdd)
+      customerOpenDebt = customerModified.debt - debtTotal
       customerCloseDebt = customerModified.debt
     } else {
       customerModified = await this.customerRepository.managerFindOneBy(manager, {
@@ -209,15 +247,15 @@ export class TicketPaymentOperation {
       customerCloseDebt = customerModified.debt
     }
 
-    if (paidAdd + paidItemAdd) {
+    if (paidTotal) {
       if (walletId && walletId !== '0') {
         const walletModified = await this.walletRepository.managerUpdateOne(
           manager,
           { oid, id: walletId },
-          { money: () => `money + ${paidAdd + paidItemAdd}` }
+          { money: () => `money + ${paidTotal}` }
         )
         walletCloseMoney = walletModified.money
-        walletOpenMoney = walletModified.money - (paidAdd + paidItemAdd)
+        walletOpenMoney = walletModified.money - paidTotal
       } else {
         // validate wallet
         const walletList = await this.walletRepository.managerFindManyBy(manager, { oid })
@@ -228,10 +266,10 @@ export class TicketPaymentOperation {
     }
 
     let moneyDirection = MoneyDirection.Other
-    if (paidAdd + paidItemAdd > 0) {
+    if (paidTotal > 0) {
       moneyDirection = MoneyDirection.In
     }
-    if (paidAdd + paidItemAdd < 0) {
+    if (paidTotal < 0) {
       moneyDirection = MoneyDirection.Out
     }
 
@@ -249,10 +287,9 @@ export class TicketPaymentOperation {
       moneyDirection,
       note,
 
-      paid: paidAdd,
-      paidItem: paidItemAdd,
-      debt: debtAdd,
-      debtItem: debtItemAdd,
+      hasPaymentItem,
+      paidTotal,
+      debtTotal,
       personOpenDebt: customerOpenDebt,
       personCloseDebt: customerCloseDebt,
       walletOpenMoney,
@@ -261,43 +298,108 @@ export class TicketPaymentOperation {
 
     const paymentCreated = await this.paymentRepository.managerInsertOne(manager, paymentInsert)
 
-    const paymentTicketItemInsertList = ticketItemList.map((i) => {
-      const inserter: PaymentTicketItemInsertType = {
-        oid,
-        paymentId: paymentCreated.id,
+    if (hasPaymentItem) {
+      const paymentTicketItemInsertList = ticketItemBodyList.map((i) => {
+        const inserter: PaymentTicketItemInsertType = {
+          oid,
+          paymentId: paymentCreated.id,
 
-        ticketId,
-        ticketItemType: i.ticketItemType,
-        ticketItemId: i.ticketItemId,
-        interactId: i.interactId,
+          ticketId,
+          ticketItemType: i.ticketItemType,
+          ticketItemId: i.ticketItemId,
+          interactId: i.interactId,
 
-        expectedPrice: i.expectedPrice,
-        discountMoney: i.discountMoney,
-        discountPercent: i.discountPercent,
-        discountType: i.discountType,
-        actualPrice: i.actualPrice,
-        quantity: i.quantity,
-        sessionIndex: i.sessionIndex,
-        paidItem: i.paidAdd,
-        debtItem: i.debtAdd,
+          expectedPrice: i.expectedPrice,
+          discountMoney: i.discountMoney,
+          discountPercent: i.discountPercent,
+          discountType: i.discountType,
+          actualPrice: i.actualPrice,
+          quantity: i.quantity,
+          sessionIndex: i.sessionIndex,
+          paidMoney: i.paidMoney,
+          debtMoney: i.debtMoney,
+        }
+        return inserter
+      })
+      if (paymentTicketItemMapDto.paymentWait) {
+        const inserter: PaymentTicketItemInsertType = {
+          oid,
+          paymentId: paymentCreated.id,
+
+          ticketId,
+          ticketItemType: TicketItemType.WAIT,
+          ticketItemId: '0',
+          interactId: 0,
+
+          expectedPrice: 0,
+          discountMoney: 0,
+          discountPercent: 0,
+          discountType: DiscountType.Percent,
+          actualPrice: 0,
+          quantity: 1,
+          sessionIndex: 0,
+          paidMoney: paymentTicketItemMapDto.paymentWait.paidMoney,
+          debtMoney: 0,
+        }
+        paymentTicketItemInsertList.push(inserter)
       }
-      return inserter
-    })
-    const paymentTicketItemCreatedList = await this.paymentTicketItemRepository.managerInsertMany(
-      manager,
-      paymentTicketItemInsertList
-    )
+      if (paymentTicketItemMapDto.paymentSurcharge) {
+        const inserter: PaymentTicketItemInsertType = {
+          oid,
+          paymentId: paymentCreated.id,
+
+          ticketId,
+          ticketItemType: TicketItemType.Surcharge,
+          ticketItemId: '0',
+          interactId: 0,
+
+          expectedPrice: 0,
+          discountMoney: 0,
+          discountPercent: 0,
+          discountType: DiscountType.Percent,
+          actualPrice: 0,
+          quantity: 1,
+          sessionIndex: 0,
+          paidMoney: paymentTicketItemMapDto.paymentSurcharge.paidMoney,
+          debtMoney: paymentTicketItemMapDto.paymentSurcharge.debtMoney,
+        }
+        paymentTicketItemInsertList.push(inserter)
+      }
+      if (paymentTicketItemMapDto.paymentDiscount) {
+        const inserter: PaymentTicketItemInsertType = {
+          oid,
+          paymentId: paymentCreated.id,
+
+          ticketId,
+          ticketItemType: TicketItemType.Discount,
+          ticketItemId: '0',
+          interactId: 0,
+
+          expectedPrice: 0,
+          discountMoney: 0,
+          discountPercent: 0,
+          discountType: DiscountType.Percent,
+          actualPrice: 0,
+          quantity: 1,
+          sessionIndex: 0,
+          paidMoney: paymentTicketItemMapDto.paymentDiscount.paidMoney,
+          debtMoney: paymentTicketItemMapDto.paymentDiscount.debtMoney,
+        }
+        paymentTicketItemInsertList.push(inserter)
+      }
+      await this.paymentTicketItemRepository.managerInsertMany(manager, paymentTicketItemInsertList)
+    }
 
     // === START: Cập nhật thanh toán vào item ===
     const ticketRegimenModifiedList = await this.ticketRegimenRepository.managerBulkUpdate({
       manager,
       condition: { oid, ticketId },
       compare: { id: { cast: 'bigint' } },
-      tempList: (ticketPaymentItemMapDto?.ticketRegimenBodyList || []).map((i) => ({
+      tempList: (paymentTicketItemMapDto?.ticketRegimenBodyList || []).map((i) => ({
         ...i,
         id: i.ticketItemId,
-        paidAdd: i.paidAdd,
-        debtAdd: i.debtAdd,
+        paidAdd: i.paidMoney,
+        debtAdd: i.debtMoney,
       })),
       update: {
         paid: () => `"paid" + "paidAdd"`,
@@ -311,11 +413,11 @@ export class TicketPaymentOperation {
         manager,
         condition: { oid, ticketId, paymentMoneyStatus: PaymentMoneyStatus.NoEffect },
         compare: { id: { cast: 'bigint' } },
-        tempList: (ticketPaymentItemMapDto?.ticketProcedureNoEffectBodyList || []).map((i) => ({
+        tempList: (paymentTicketItemMapDto?.ticketProcedureNoEffectBodyList || []).map((i) => ({
           ...i,
           id: i.ticketItemId,
-          paidAdd: i.paidAdd,
-          debtAdd: i.debtAdd,
+          paidAdd: i.paidMoney,
+          debtAdd: i.debtMoney,
         })),
         update: {
           paid: () => `"paid" + "paidAdd"`,
@@ -342,11 +444,11 @@ export class TicketPaymentOperation {
         manager,
         condition: { oid, ticketId, paymentMoneyStatus: { NOT: PaymentMoneyStatus.NoEffect } },
         compare: { id: { cast: 'bigint' } },
-        tempList: (ticketPaymentItemMapDto?.ticketProcedureHasEffectBodyList || []).map((i) => ({
+        tempList: (paymentTicketItemMapDto?.ticketProcedureHasEffectBodyList || []).map((i) => ({
           ...i,
           id: i.ticketItemId,
-          paidAdd: i.paidAdd,
-          debtAdd: i.debtAdd,
+          paidAdd: i.paidMoney,
+          debtAdd: i.debtMoney,
         })),
         update: {
           paid: () => `"paid" + "paidAdd"`,
@@ -373,13 +475,13 @@ export class TicketPaymentOperation {
       condition: { oid, ticketId },
       compare: { id: { cast: 'bigint' } },
       tempList: [
-        ...(ticketPaymentItemMapDto?.ticketProductConsumableBodyList || []),
-        ...(ticketPaymentItemMapDto?.ticketProductPrescriptionBodyList || []),
+        ...(paymentTicketItemMapDto?.ticketProductConsumableBodyList || []),
+        ...(paymentTicketItemMapDto?.ticketProductPrescriptionBodyList || []),
       ].map((i) => ({
         ...i,
         id: i.ticketItemId,
-        paidAdd: i.paidAdd,
-        debtAdd: i.debtAdd,
+        paidAdd: i.paidMoney,
+        debtAdd: i.debtMoney,
       })),
       update: {
         paid: () => `"paid" + "paidAdd"`,
@@ -405,11 +507,11 @@ export class TicketPaymentOperation {
       manager,
       condition: { oid, ticketId },
       compare: { id: { cast: 'bigint' } },
-      tempList: (ticketPaymentItemMapDto?.ticketLaboratoryBodyList || []).map((i) => ({
+      tempList: (paymentTicketItemMapDto?.ticketLaboratoryBodyList || []).map((i) => ({
         ...i,
         id: i.ticketItemId,
-        paidAdd: i.paidAdd,
-        debtAdd: i.debtAdd,
+        paidAdd: i.paidMoney,
+        debtAdd: i.debtMoney,
       })),
       update: {
         paid: () => `"paid" + "paidAdd"`,
@@ -435,11 +537,11 @@ export class TicketPaymentOperation {
       manager,
       condition: { oid, ticketId },
       compare: { id: { cast: 'bigint' } },
-      tempList: (ticketPaymentItemMapDto?.ticketRadiologyBodyList || []).map((i) => ({
+      tempList: (paymentTicketItemMapDto?.ticketRadiologyBodyList || []).map((i) => ({
         ...i,
         id: i.ticketItemId,
-        paidAdd: i.paidAdd,
-        debtAdd: i.debtAdd,
+        paidAdd: i.paidMoney,
+        debtAdd: i.debtMoney,
       })),
       update: {
         paid: () => `"paid" + "paidAdd"`,
@@ -554,12 +656,12 @@ export class TicketPaymentOperation {
         const tpHasEffectList = ticketProcedureHasEffectModifiedList
           .filter((i) => i.ticketRegimenId === trId)
           .map((i) => {
-            const tpBody = ticketPaymentItemMapDto.ticketProcedureHasEffectBodyList.find((j) => {
+            const tpBody = paymentTicketItemMapDto.ticketProcedureHasEffectBodyList.find((j) => {
               return j.ticketItemId === i.id
             })
             return {
-              paidItemAdd: tpBody.paidAdd,
-              debtItemAdd: tpBody.debtAdd,
+              paidItemAdd: tpBody.paidMoney,
+              debtItemAdd: tpBody.debtMoney,
             }
           })
         return {
@@ -630,9 +732,9 @@ export class TicketPaymentOperation {
 
     return {
       ticketModified,
+      ticketPaymentDetailModified,
       customerModified,
       paymentCreated,
-      paymentTicketItemCreatedList,
       ticketRegimentList: [...ticketRegimenModifiedList, ...ticketRegimenFixList],
       ticketRegimenItemModifiedList,
       ticketProcedureModifiedList: [

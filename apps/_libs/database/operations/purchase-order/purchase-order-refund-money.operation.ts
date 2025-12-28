@@ -103,10 +103,9 @@ export class PurchaseOrderRefundMoneyOperation {
         paymentActionType: PaymentActionType.RefundMoney,
         note: note || '',
 
-        paid: refundAmount,
-        paidItem: 0,
-        debt: 0,
-        debtItem: 0,
+        hasPaymentItem: 0,
+        paidTotal: refundAmount,
+        debtTotal: 0,
         personOpenDebt: distributorOpenDebt,
         personCloseDebt: distributorCloseDebt,
         walletOpenMoney,

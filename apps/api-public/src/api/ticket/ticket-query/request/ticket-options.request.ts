@@ -18,6 +18,10 @@ export class TicketRelationQuery {
 
   @Expose()
   @IsBoolean()
+  ticketPaymentDetail?: boolean
+
+  @Expose()
+  @IsBoolean()
   paymentList?: boolean
 
   @Expose()
@@ -130,6 +134,11 @@ export class TicketFilterQuery {
   @Type(() => ConditionTimestamp)
   @ValidateNested({ each: true })
   receptionAt: ConditionTimestamp
+
+  @Expose()
+  @Transform(transformConditionNumber)
+  @IsOptional()
+  debtTotal: number | ConditionNumber
 }
 
 export class TicketSortQuery extends SortQuery {
