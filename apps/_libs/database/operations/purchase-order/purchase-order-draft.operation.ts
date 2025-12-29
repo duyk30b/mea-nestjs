@@ -3,7 +3,6 @@ import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
 import { ESTimer } from '../../../common/helpers/time.helper'
 import { NoExtra } from '../../../common/helpers/typescript.helper'
-import { GenerateId } from '../../common/generate-id'
 import { DeliveryStatus } from '../../common/variable'
 import { PurchaseOrder, PurchaseOrderItem } from '../../entities'
 import { PurchaseOrderItemInsertType } from '../../entities/purchase-order-item.entity'
@@ -12,7 +11,7 @@ import {
   PurchaseOrderStatus,
   PurchaseOrderUpdateType,
 } from '../../entities/purchase-order.entity'
-import { PurchaseOrderItemManager, PurchaseOrderManager } from '../../repositories'
+import { PurchaseOrderItemRepository, PurchaseOrderRepository } from '../../repositories'
 
 export type PurchaseOrderDraftUpsertType = Pick<
   PurchaseOrder,
@@ -36,8 +35,8 @@ export class PurchaseOrderDraftOperation {
   constructor(
     private dataSource: DataSource,
     @InjectEntityManager() private manager: EntityManager,
-    private purchaseOrderManager: PurchaseOrderManager,
-    private purchaseOrderItemManager: PurchaseOrderItemManager
+    private purchaseOrderRepository: PurchaseOrderRepository,
+    private purchaseOrderItemRepository: PurchaseOrderItemRepository
   ) { }
 
   async createDraft<
@@ -50,11 +49,14 @@ export class PurchaseOrderDraftOperation {
   }) {
     const { oid, purchaseOrderItemListDto } = props
     const purchaseOrderInsertDto: PurchaseOrderDraftUpsertType = props.purchaseOrderInsertDto
+    const startedAt = purchaseOrderInsertDto.startedAt
+
+    const purchaseOrderId = await this.purchaseOrderRepository.nextId({ oid, startedAt })
 
     return await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       const purchaseOrderInsert: PurchaseOrderInsertType = {
         ...purchaseOrderInsertDto,
-        id: GenerateId.nextId(),
+        id: purchaseOrderId,
         oid,
         status: PurchaseOrderStatus.Draft,
         deliveryStatus: DeliveryStatus.Pending,
@@ -67,7 +69,7 @@ export class PurchaseOrderDraftOperation {
         endedAt: null,
       }
 
-      const purchaseOrder = await this.purchaseOrderManager.insertOneAndReturnEntity(
+      const purchaseOrder = await this.purchaseOrderRepository.managerInsertOne(
         manager,
         purchaseOrderInsert
       )
@@ -82,7 +84,7 @@ export class PurchaseOrderDraftOperation {
         }
         return purchaseOrderItem
       })
-      await this.purchaseOrderItemManager.insertMany(manager, purchaseOrderItemListInsert)
+      await this.purchaseOrderItemRepository.managerInsertMany(manager, purchaseOrderItemListInsert)
 
       return { purchaseOrder }
     })
@@ -114,7 +116,7 @@ export class PurchaseOrderDraftOperation {
         date: ESTimer.info(purchaseOrderUpdateDto.startedAt as number, 7).date,
         endedAt: null,
       }
-      const purchaseOrder = await this.purchaseOrderManager.updateOneAndReturnEntity(
+      const purchaseOrder = await this.purchaseOrderRepository.managerUpdateOne(
         manager,
         {
           id: purchaseOrderId,
@@ -124,7 +126,7 @@ export class PurchaseOrderDraftOperation {
         purchaseOrderUpdate
       )
 
-      await this.purchaseOrderItemManager.delete(manager, { oid, purchaseOrderId })
+      await this.purchaseOrderItemRepository.managerDelete(manager, { oid, purchaseOrderId })
       const purchaseOrderItemListInsert = purchaseOrderItemListDto.map((i) => {
         const purchaseOrderItem: PurchaseOrderItemInsertType = {
           ...i,
@@ -134,7 +136,7 @@ export class PurchaseOrderDraftOperation {
         }
         return purchaseOrderItem
       })
-      await this.purchaseOrderItemManager.insertMany(manager, purchaseOrderItemListInsert)
+      await this.purchaseOrderItemRepository.managerInsertMany(manager, purchaseOrderItemListInsert)
       return { purchaseOrder }
     })
   }

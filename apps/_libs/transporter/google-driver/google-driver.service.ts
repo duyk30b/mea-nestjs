@@ -25,7 +25,7 @@ export class GoogleDriverService {
   constructor(
     @Inject(GoogleDriverConfig.KEY)
     private googleDriverConfig: ConfigType<typeof GoogleDriverConfig>
-  ) { }
+  ) {}
 
   public setCache(
     email: string,
@@ -390,7 +390,7 @@ export class GoogleDriverService {
     const { fileStream, email, oid, fileName, mimetype, permission } = options
     if (!fileStream) return null
     this.logger.debug(
-      `[OID=${oid}] GoogleDriver ${email} start uploadFileStream with fine name ${fileName}`
+      `[OID=${oid}]-[START]-GoogleDriver ${email} uploadFileStream with fine name ${fileName}`
     )
     const drive = this.createDrive(email)
     if (!this.cache[email].rootFolderId) {
@@ -414,6 +414,9 @@ export class GoogleDriverService {
         mimetype,
       },
       permission
+    )
+    this.logger.debug(
+      `[OID=${oid}]-[SUCCESS]-GoogleDriver ${email} uploadFileStream with fine name ${fileName}`
     )
     return file
   }

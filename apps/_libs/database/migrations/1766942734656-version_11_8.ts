@@ -7,8 +7,6 @@ export class Version1181766942734656 implements MigrationInterface {
         await queryRunner.startTransaction()
 
         try {
-            await queryRunner.commitTransaction()
-
             await queryRunner.query(`
                 CREATE TABLE "TicketPaymentDetail" (
                     "oid" integer NOT NULL,
@@ -105,6 +103,7 @@ export class Version1181766942734656 implements MigrationInterface {
                     DROP COLUMN "debtItem",
                     DROP COLUMN "paidItem";
             `)
+            await queryRunner.commitTransaction()
         } catch (error) {
             await queryRunner.rollbackTransaction()
             throw error

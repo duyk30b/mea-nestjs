@@ -44,22 +44,21 @@ export class TicketRepository extends _PostgreSqlRepository<
 
   async nextId(props: { oid: number; createdAt: number }) {
     const { oid, createdAt } = props
+    const ddmmyy = ESTimer.timeToText(createdAt, 'YYMMDD')
+    const dayNumber = Number(oid + ddmmyy)
     const ticketListToday = await this.findManyBy({
       oid,
-      createdAt: {
-        GTE: ESTimer.startOfDate(createdAt, 7).getTime(),
-        LTE: ESTimer.endOfDate(createdAt, 7).getTime(),
+      id: {
+        GTE: (dayNumber * 10000) as any,
+        LT: ((dayNumber + 1) * 10000) as any,
       },
     })
-    let maxDailyIndex = 0
-    ticketListToday.forEach((i) => {
-      if (i.dailyIndex > maxDailyIndex) {
-        maxDailyIndex = i.dailyIndex
-      }
-    })
+    const ticketIndexList = ticketListToday.map((i) => Number(i.id.slice(-4)))
+    const nextIndex = Math.max(...ticketIndexList, 0)
+
     const oidText = String(oid).padStart(4, '0')
     const timeText = ESTimer.timeToText(new Date(), 'YYMMDD', 7)
-    const indexText = String(maxDailyIndex + 1).padStart(4, '0')
+    const indexText = String(nextIndex + 1).padStart(4, '0')
 
     const id = oidText + timeText + indexText
 

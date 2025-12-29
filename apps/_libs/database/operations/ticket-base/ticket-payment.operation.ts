@@ -321,7 +321,10 @@ export class TicketPaymentOperation {
         }
         return inserter
       })
-      if (paymentTicketItemMapDto.paymentWait) {
+      if (
+        paymentTicketItemMapDto.paymentWait
+        && paymentTicketItemMapDto.paymentWait.paidMoney !== 0
+      ) {
         const inserter: PaymentTicketItemInsertType = {
           oid,
           paymentId: paymentCreated.id,
@@ -343,7 +346,11 @@ export class TicketPaymentOperation {
         }
         paymentTicketItemInsertList.push(inserter)
       }
-      if (paymentTicketItemMapDto.paymentSurcharge) {
+      if (
+        paymentTicketItemMapDto.paymentSurcharge
+        && (paymentTicketItemMapDto.paymentSurcharge.paidMoney !== 0
+          || paymentTicketItemMapDto.paymentSurcharge.debtMoney !== 0)
+      ) {
         const inserter: PaymentTicketItemInsertType = {
           oid,
           paymentId: paymentCreated.id,
@@ -365,7 +372,11 @@ export class TicketPaymentOperation {
         }
         paymentTicketItemInsertList.push(inserter)
       }
-      if (paymentTicketItemMapDto.paymentDiscount) {
+      if (
+        paymentTicketItemMapDto.paymentDiscount
+        && (paymentTicketItemMapDto.paymentDiscount.paidMoney !== 0
+          || paymentTicketItemMapDto.paymentDiscount.debtMoney !== 0)
+      ) {
         const inserter: PaymentTicketItemInsertType = {
           oid,
           paymentId: paymentCreated.id,
