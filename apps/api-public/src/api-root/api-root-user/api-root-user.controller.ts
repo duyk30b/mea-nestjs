@@ -53,7 +53,7 @@ export class ApiRootUserController {
     return this.apiRootUserService.deviceLogout({
       oid: body.oid,
       userId: +id,
-      refreshExp: body.refreshExp,
+      clientId: body.clientId,
     })
   }
 

@@ -390,7 +390,7 @@ export class GoogleDriverService {
     const { fileStream, email, oid, fileName, mimetype, permission } = options
     if (!fileStream) return null
     this.logger.debug(
-      `[OID=${oid}]-[START]-GoogleDriver ${email} uploadFileStream with fine name ${fileName}`
+      `[OID=${oid}]-[START]-GoogleDriver ${email} uploadFileStream with file name ${fileName}`
     )
     const drive = this.createDrive(email)
     if (!this.cache[email].rootFolderId) {
@@ -416,7 +416,7 @@ export class GoogleDriverService {
       permission
     )
     this.logger.debug(
-      `[OID=${oid}]-[SUCCESS]-GoogleDriver ${email} uploadFileStream with fine name ${fileName}`
+      `[OID=${oid}]-[SUCCESS]-GoogleDriver ${email} uploadFileStream with file name ${fileName}`
     )
     return file
   }

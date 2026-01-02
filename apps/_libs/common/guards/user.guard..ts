@@ -45,11 +45,11 @@ export class UserGuard implements CanActivate {
       throw new BusinessException(external.error, {}, HttpStatus.UNAUTHORIZED)
     }
     if (!external.uid || !external.oid || !external.user || !external.organization) {
-      throw new BusinessException('common.AccountRequired', {}, HttpStatus.UNAUTHORIZED)
+      throw new BusinessException('common.AccountRequired', {}, HttpStatus.FORBIDDEN)
     }
     // Nếu user, org inactive thì loại từ vòng gửi xe
     if (!!external.user.deletedAt || external.organization.status == OrganizationStatus.Inactive) {
-      throw new BusinessException('common.AccountInactive', {}, HttpStatus.UNAUTHORIZED)
+      throw new BusinessException('common.AccountInactive', {}, HttpStatus.FORBIDDEN)
     }
     // ROOT: oid = 1 (ROOT) được xem mọi API, kể cả API inActive
     if (external.oid === 1) return true

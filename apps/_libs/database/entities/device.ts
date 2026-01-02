@@ -5,7 +5,7 @@ export default class Device {
   oid: number
 
   @Expose()
-  id: number
+  clientId: string
 
   @Expose()
   refreshExp: number
@@ -23,5 +23,8 @@ export default class Device {
   mobile: 0 | 1
 
   @Expose()
-  online: boolean | number
+  lastOnline: number
+
+  @Expose()
+  online: boolean
 }

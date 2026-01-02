@@ -67,7 +67,6 @@ services:
       - mv_redis:/data
     environment:
       - REDIS_PASSWORD=${REDIS_PASSWORD:-Abc12345}
-      - REDIS_USERNAME=${REDIS_USERNAME:-mea}
     ports:
       - '26379:6379'
 

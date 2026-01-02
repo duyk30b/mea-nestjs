@@ -41,25 +41,25 @@ export class ApiRootUserService {
       sort,
     })
 
+    const tokenList = await this.cacheTokenService.getTokenListAll()
     for (let i = 0; i < data.length; i++) {
       const user = data[i]
-      const tokenList = await this.cacheTokenService.getTokenList({
-        oid: user.oid,
-        uid: user.id,
-      })
-      user.devices = tokenList.map((j) => {
-        const device = new Device()
-        device.refreshExp = j.refreshExp
-        device.ip = j.ip
-        device.os = j.os
-        device.browser = j.browser
-        device.mobile = j.mobile
-        device.online =
-          (this.socketEmitService.connections[user.id] || []).some((k) => {
-            return k.refreshExp === j.refreshExp
-          }) || j.online
-        return device
-      })
+      user.devices = tokenList
+        .filter((i) => i.uid === user.id)
+        .map((j) => {
+          const device = new Device()
+          device.clientId = j.clientId
+          device.refreshExp = j.refreshExp
+          device.ip = j.ip
+          device.os = j.os
+          device.browser = j.browser
+          device.mobile = j.mobile
+          device.lastOnline = j.lastOnline
+          device.online = (this.socketEmitService.connections[user.id] || []).some((k) => {
+            return k.clientId === j.clientId
+          })
+          return device
+        })
     }
 
     return {
@@ -125,12 +125,12 @@ export class ApiRootUserService {
     return { data: { userId: user.id } }
   }
 
-  async deviceLogout(options: { oid: number; userId: number; refreshExp: number }) {
-    const { oid, userId, refreshExp } = options
-    const result = this.cacheTokenService.removeRefreshToken({
+  async deviceLogout(options: { oid: number; userId: number; clientId: string }) {
+    const { oid, userId, clientId } = options
+    const result = this.cacheTokenService.removeClient({
       oid,
       uid: userId,
-      refreshExp,
+      clientId,
     })
     return { data: result }
   }

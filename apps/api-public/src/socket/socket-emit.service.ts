@@ -28,7 +28,7 @@ import { SOCKET_EVENT } from './socket.variable'
 
 @Injectable()
 export class SocketEmitService {
-  public connections: Record<string, { refreshExp: number; socketId: string }[]> = null
+  public connections: Record<string, { clientId: string; socketId: string }[]> = null
   public io: Server = null
 
   demo(oid: number) {

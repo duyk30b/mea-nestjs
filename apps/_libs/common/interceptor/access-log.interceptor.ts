@@ -24,6 +24,7 @@ export class AccessLogInterceptor implements NestInterceptor {
       const request = ctx.getRequest()
       const { external }: RequestExternal = request.raw
       const basicExternal = {
+        clientId: external.clientId,
         ip: external.ip,
         browser: external.browser,
         mobile: external.mobile,

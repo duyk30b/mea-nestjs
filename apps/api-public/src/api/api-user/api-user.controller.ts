@@ -86,7 +86,7 @@ export class ApiUserController {
     return this.apiUserService.deviceLogout({
       oid,
       userId: +id,
-      refreshExp: body.refreshExp,
+      clientId: body.clientId,
     })
   }
 }

@@ -10,6 +10,7 @@ import {
 import { getClientIp } from 'request-ip'
 import { Server, Socket } from 'socket.io'
 import { CacheDataService } from '../../../_libs/common/cache-data/cache-data.service'
+import { CacheTokenService } from '../../../_libs/common/cache-data/cache-token.service'
 import { JwtExtendService } from '../../../_libs/common/jwt-extend/jwt-extend.service'
 import { SocketEmitService } from './socket-emit.service'
 import { SOCKET_EVENT } from './socket.variable'
@@ -19,7 +20,7 @@ import { SOCKET_EVENT } from './socket.variable'
 export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   private readonly logger = new Logger(SocketGateway.name)
 
-  public connections: Record<string, { refreshExp: number; socketId: string }[]> = {}
+  public connections: Record<string, { clientId: string; socketId: string }[]> = {}
 
   @WebSocketServer()
   io: Server
@@ -27,7 +28,8 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   constructor(
     private readonly socketEmitService: SocketEmitService,
     private readonly jwtExtendService: JwtExtendService,
-    private readonly cacheDataService: CacheDataService
+    private readonly cacheDataService: CacheDataService,
+    private readonly cacheTokenService: CacheTokenService
   ) { }
 
   afterInit(io: Server) {
@@ -44,14 +46,12 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         throw new Error('error.Token.Empty')
       }
       const jwtPayloadRefresh = this.jwtExtendService.verifyRefreshToken(token, ip)
-      const { uid, oid } = jwtPayloadRefresh.data
+      const { uid, oid, clientId } = jwtPayloadRefresh.data
       socket.data.user = await this.cacheDataService.getUser(oid, uid)
+      socket.data.clientId = clientId
       socket.join(oid.toString())
       this.connections[uid] ||= []
-      this.connections[uid].push({
-        socketId: socket.id,
-        refreshExp: jwtPayloadRefresh.exp,
-      })
+      this.connections[uid].push({ socketId: socket.id, clientId })
       this.logger.debug(
         `[OID=${oid}] UserId ${uid} with IP ${ip}, `
         + `socketId ${socket.id} connected, join room ${oid}`
@@ -67,7 +67,11 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   async handleDisconnect(socket: Socket) {
     const oid = socket.data.user?.oid
     const uid = socket.data.user?.id
+    const clientId = socket.data.clientId
     this.connections[uid] = this.connections[uid]?.filter((i) => i.socketId !== socket.id)
+    if (oid && uid && clientId) {
+      await this.cacheTokenService.setLastOnline({ oid, uid, clientId })
+    }
     this.logger.debug(`[OID=${oid}] UserId ${uid} with socketId ${socket.id} disconnected`)
   }
 

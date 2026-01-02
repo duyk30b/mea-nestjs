@@ -11,8 +11,7 @@
   "Token": {
     "AccessTokenExpired": "AccessToken đã hết hạn",
     "RefreshTokenExpired": "RefreshToken đã hết hạn",
-    "AccessTokenNoCache": "AccessToken không còn lưu trên cache",
-    "RefreshTokenNoCache": "RefreshToken không còn lưu trên cache",
+    "TokenNoCache": "Token không còn lưu trên cache",
     "Empty": "Mã xác thực không được phép trống",
     "Invalid": "Xác thực mã đăng nhập thất bại",
     "NoInCache": "Mã xác thực không còn lưu trong bộ nhớ",

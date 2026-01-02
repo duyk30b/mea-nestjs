@@ -64,9 +64,8 @@ export class ApiUserService {
 
     for (let i = 0; i < data.length; i++) {
       const user = data[i]
-      const tokenData = await this.cacheTokenService.getTokenList({
+      const tokenData = await this.cacheTokenService.getTokenListByOrganization({
         oid,
-        uid: user.id,
       })
       user.devices = tokenData.map((j) => {
         const device = new Device()
@@ -75,10 +74,10 @@ export class ApiUserService {
         device.os = j.os
         device.browser = j.browser
         device.mobile = j.mobile
-        device.online =
-          (this.socketEmitService.connections[user.id] || []).some((k) => {
-            return k.refreshExp === j.refreshExp
-          }) || j.online
+        device.lastOnline = j.lastOnline
+        device.online = (this.socketEmitService.connections[user.id] || []).some((k) => {
+          return k.clientId === j.clientId
+        })
         return device
       })
     }
@@ -276,12 +275,12 @@ export class ApiUserService {
     return { data: { userId } }
   }
 
-  async deviceLogout(options: { oid: number; userId: number; refreshExp: number }) {
-    const { oid, userId, refreshExp } = options
-    const result = this.cacheTokenService.removeRefreshToken({
+  async deviceLogout(options: { oid: number; userId: number; clientId: string }) {
+    const { oid, userId, clientId } = options
+    const result = this.cacheTokenService.removeClient({
       oid,
       uid: userId,
-      refreshExp,
+      clientId,
     })
     return { data: true }
   }

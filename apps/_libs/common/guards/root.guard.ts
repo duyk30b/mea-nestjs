@@ -28,7 +28,7 @@ export class RootGuard implements CanActivate {
       || !!external.user.deletedAt
       || external.organization.status == OrganizationStatus.Inactive
     ) {
-      throw new BusinessException(external.error, {}, HttpStatus.UNAUTHORIZED)
+      throw new BusinessException(external.error, {}, HttpStatus.FORBIDDEN)
     }
 
     return external.oid === 1 // ROOT có oid = 1

@@ -2,7 +2,14 @@ import { Body, Controller, Post } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { ApiAuthService } from './api-auth.service'
-import { ForgotPasswordBody, LoginBody, LoginRootBody, RefreshTokenBody, ResetPasswordBody } from './request'
+import {
+  ForgotPasswordBody,
+  LoginBody,
+  LoginRootBody,
+  LogoutBody,
+  RefreshTokenBody,
+  ResetPasswordBody,
+} from './request'
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -45,7 +52,7 @@ export class ApiAuthController {
   }
 
   @Post('logout')
-  async logout(@Body() body: RefreshTokenBody) {
-    return this.apiAuthService.logout(body.refreshToken)
+  async logout(@Body() body: LogoutBody) {
+    return this.apiAuthService.logout(body)
   }
 }

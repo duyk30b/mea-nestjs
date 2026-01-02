@@ -44,14 +44,15 @@ export class DetectClientMiddleware implements NestMiddleware {
     if (accessToken) {
       try {
         const decode = this.jwtExtendService.verifyAccessToken(accessToken, ip)
-        const { oid, uid } = decode.data
+        const { oid, uid, clientId } = decode.data
         dataExternal.oid = oid
         dataExternal.uid = uid
+        dataExternal.clientId = clientId
 
-        const checkTokenCache = await this.cacheTokenService.checkAccessToken({
+        const checkTokenCache = await this.cacheTokenService.checkClient({
           oid,
           uid,
-          accessExp: decode.exp,
+          clientId: decode.data.clientId,
         })
 
         if (checkTokenCache) {
@@ -63,7 +64,7 @@ export class DetectClientMiddleware implements NestMiddleware {
           )
           dataExternal.roomIds = await this.cacheDataService.getRoomIdList(oid, uid)
         } else {
-          dataExternal.error = 'error.Token.AccessTokenNoCache'
+          dataExternal.error = 'error.Token.TokenNoCache'
           if (process.env.NODE_ENV !== 'production') {
             // dataExternal.error = null
             // dataExternal.user = await this.cacheDataService.getUser(dataExternal.uid)

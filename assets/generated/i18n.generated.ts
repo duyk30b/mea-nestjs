@@ -28,8 +28,7 @@ export type I18nTranslations = {
         "Token": {
             "AccessTokenExpired": string;
             "RefreshTokenExpired": string;
-            "AccessTokenNoCache": string;
-            "RefreshTokenNoCache": string;
+            "TokenNoCache": string;
             "Empty": string;
             "Invalid": string;
             "NoInCache": string;

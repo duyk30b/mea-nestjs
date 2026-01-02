@@ -1,7 +1,6 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
-import User from '../../database/entities/user.entity'
 import { BusinessException } from '../exception-filter/exception-filter'
 import { IAccessTokenPayload, IRefreshTokenPayload } from '../request/payload'
 import { JwtConfig } from './jwt.config'
@@ -13,37 +12,29 @@ export class JwtExtendService {
     private readonly jwtService: JwtService
   ) { }
 
-  createAccessToken(user: User, ip: string) {
-    const userPayload: IAccessTokenPayload = {
-      oid: user.organization.id,
-      uid: user.id,
-    }
+  createAccessToken(payload: IAccessTokenPayload) {
     const exp = Math.floor((Date.now() + this.jwtConfig.accessTime) / 1000)
 
     const accessToken = this.jwtService.sign(
-      { exp, data: userPayload },
+      { exp, data: payload },
       { secret: this.jwtConfig.accessKey }
     )
     return { accessToken, accessExp: exp * 1000 }
   }
 
-  createRefreshToken(user: User, ip: string) {
-    const userPayload: IRefreshTokenPayload = {
-      oid: user.organization.id,
-      uid: user.id,
-    }
+  createRefreshToken(payload: IRefreshTokenPayload) {
     const exp = Math.floor((Date.now() + this.jwtConfig.refreshTime) / 1000)
 
     const refreshToken = this.jwtService.sign(
-      { exp, data: userPayload },
+      { exp, data: payload },
       { secret: this.jwtConfig.refreshKey }
     )
     return { refreshToken, refreshExp: exp * 1000 }
   }
 
-  createTokenFromUser(user: User, ip: string) {
-    const { accessToken, accessExp } = this.createAccessToken(user, ip)
-    const { refreshToken, refreshExp } = this.createRefreshToken(user, ip)
+  createToken(payload: { uid: number; oid: number; clientId: string }) {
+    const { accessToken, accessExp } = this.createAccessToken(payload)
+    const { refreshToken, refreshExp } = this.createRefreshToken(payload)
     return { accessToken, refreshToken, accessExp, refreshExp }
   }
 

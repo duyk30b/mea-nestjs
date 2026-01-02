@@ -12,13 +12,17 @@ import { JwtConfig } from '../../../../_libs/common/jwt-extend/jwt.config'
 import { TExternal } from '../../../../_libs/common/request/external.request'
 import { OrganizationStatus } from '../../../../_libs/database/entities/organization.entity'
 import User from '../../../../_libs/database/entities/user.entity'
-import { CustomerRepository } from '../../../../_libs/database/repositories/customer.repository'
-import { DistributorRepository } from '../../../../_libs/database/repositories/distributor.repository'
 import { OrganizationRepository } from '../../../../_libs/database/repositories/organization.repository'
 import { UserRepository } from '../../../../_libs/database/repositories/user.repository'
 import { GlobalConfig } from '../../../../_libs/environments'
 import { EmailService } from '../../components/email/email.service'
-import { ForgotPasswordBody, LoginBody, LoginRootBody, ResetPasswordBody } from './request'
+import {
+  ForgotPasswordBody,
+  LoginBody,
+  LoginRootBody,
+  LogoutBody,
+  ResetPasswordBody,
+} from './request'
 
 @Injectable()
 export class ApiAuthService {
@@ -92,7 +96,7 @@ export class ApiAuthService {
   //     ),
   //   ])
 
-  //   const token = this.jwtExtendService.createTokenFromUser(user, ip)
+  //   const token = this.jwtExtendService.createToken(user, ip)
   //   return {
   //     data: {
   //       user,
@@ -105,7 +109,7 @@ export class ApiAuthService {
   // }
 
   async login(loginDto: LoginBody, dataExternal: TExternal): Promise<BaseResponse> {
-    const { ip, os, browser, mobile } = dataExternal
+    const { clientId, ip, os, browser, mobile } = dataExternal
 
     const [user] = await this.dataSource.getRepository(User).find({
       relations: { organization: true },
@@ -123,11 +127,16 @@ export class ApiAuthService {
     const checkPassword = await bcrypt.compare(loginDto.password, user.hashPassword)
     if (!checkPassword) throw new BusinessException('error.User.WrongPassword')
 
-    const token = this.jwtExtendService.createTokenFromUser(user, ip)
-
-    await this.cacheTokenService.addAccessToken({
+    const token = this.jwtExtendService.createToken({
       oid: user.oid,
       uid: user.id,
+      clientId,
+    })
+
+    await this.cacheTokenService.setClient({
+      oid: user.oid,
+      uid: user.id,
+      clientId,
       accessExp: token.accessExp,
       refreshExp: token.refreshExp,
       ip,
@@ -148,7 +157,7 @@ export class ApiAuthService {
   }
 
   async loginRoot(loginRootDto: LoginRootBody, dataExternal: TExternal): Promise<BaseResponse> {
-    const { ip, os, browser, mobile } = dataExternal
+    const { clientId, ip, os, browser, mobile } = dataExternal
 
     const [root] = await this.dataSource.getRepository(User).find({
       relations: { organization: true },
@@ -158,10 +167,6 @@ export class ApiAuthService {
         organization: { organizationCode: loginRootDto.organizationCode },
       },
     })
-    if (!root) throw new BusinessException('error.Database.NotFound')
-    if (!root.isActive || root.organization.status == OrganizationStatus.Inactive) {
-      throw new BusinessException('common.AccountInactive')
-    }
 
     const checkPassword = await bcrypt.compare(loginRootDto.password, root.hashPassword)
     if (!checkPassword) throw new BusinessException('error.User.WrongPassword')
@@ -187,11 +192,17 @@ export class ApiAuthService {
       })
     }
 
-    const token = this.jwtExtendService.createTokenFromUser(user, ip)
+    if (!user) throw new BusinessException('error.Database.NotFound')
+    if (!user.isActive || user.organization.status == OrganizationStatus.Inactive) {
+      throw new BusinessException('common.AccountInactive')
+    }
 
-    await this.cacheTokenService.addAccessToken({
+    const token = this.jwtExtendService.createToken({ oid: user.oid, uid: user.id, clientId })
+
+    await this.cacheTokenService.setClient({
       oid: user.oid,
       uid: user.id,
+      clientId,
       accessExp: token.accessExp,
       refreshExp: token.refreshExp,
       ip,
@@ -212,7 +223,7 @@ export class ApiAuthService {
   }
 
   async loginDemo(dataExternal: TExternal): Promise<BaseResponse> {
-    const { ip, os, browser, mobile } = dataExternal
+    const { clientId, ip, os, browser, mobile } = dataExternal
 
     const [user] = await this.dataSource.getRepository(User).find({
       relations: { organization: true },
@@ -224,11 +235,12 @@ export class ApiAuthService {
       throw new BusinessException('common.AccountInactive')
     }
 
-    const token = this.jwtExtendService.createTokenFromUser(user, ip)
+    const token = this.jwtExtendService.createToken({ oid: user.oid, uid: user.id, clientId })
 
-    await this.cacheTokenService.addAccessToken({
+    await this.cacheTokenService.setClient({
       oid: user.oid,
       uid: user.id,
+      clientId,
       accessExp: token.accessExp,
       refreshExp: token.refreshExp,
       ip,
@@ -335,21 +347,21 @@ export class ApiAuthService {
     const secret = encrypt(body.password, body.username)
     await this.userRepository.updateBasic({ id: user.id }, { hashPassword, secret })
 
-    await this.cacheTokenService.removeAllRefreshToken({ oid: user.oid, uid: user.id })
+    await this.cacheTokenService.removeUser({ oid: user.oid, uid: user.id })
 
     return { data: true }
   }
 
   async grantAccessToken(refreshToken: string, dataExternal: TExternal): Promise<BaseResponse> {
-    const { ip, os, browser, mobile } = dataExternal // trường hợp này ko lấy được uid và oid do accessToken đã hết hạn nên ko có user
+    const { ip, clientId, os, browser, mobile } = dataExternal // trường hợp này ko lấy được uid và oid do accessToken đã hết hạn nên ko có user
     const jwtPayloadRefresh = this.jwtExtendService.verifyRefreshToken(refreshToken, ip)
-    const checkTokenCache = await this.cacheTokenService.checkRefreshToken({
+    const checkTokenCache = await this.cacheTokenService.checkClient({
       oid: jwtPayloadRefresh.data.oid,
       uid: jwtPayloadRefresh.data.uid,
-      refreshExp: jwtPayloadRefresh.exp,
+      clientId: jwtPayloadRefresh.data.clientId,
     })
     if (!checkTokenCache) {
-      throw new BusinessException('error.Token.RefreshTokenNoCache', {}, HttpStatus.UNAUTHORIZED)
+      throw new BusinessException('error.Token.TokenNoCache', {}, HttpStatus.FORBIDDEN)
     }
 
     const user = await this.userRepository.findOne({
@@ -360,11 +372,12 @@ export class ApiAuthService {
       },
     })
     if (!user) throw new BusinessException('error.Database.NotFound')
-    const token = this.jwtExtendService.createAccessToken(user, ip)
+    const token = this.jwtExtendService.createAccessToken({ oid: user.oid, uid: user.id, clientId })
 
-    await this.cacheTokenService.updateAccessToken({
+    await this.cacheTokenService.setClient({
       oid: user.oid,
       uid: user.id,
+      clientId,
       accessExp: token.accessExp,
       refreshExp: jwtPayloadRefresh.exp,
       ip,
@@ -378,13 +391,9 @@ export class ApiAuthService {
     }
   }
 
-  async logout(refreshToken: string) {
-    const jwtPayload = this.jwtExtendService.decodeRefreshToken(refreshToken)
-    await this.cacheTokenService.removeRefreshToken({
-      oid: jwtPayload.data.oid,
-      uid: jwtPayload.data.uid,
-      refreshExp: jwtPayload.exp,
-    })
+  async logout(body: LogoutBody) {
+    const { oid, uid, clientId } = body
+    await this.cacheTokenService.removeClient({ oid, uid, clientId })
     return { data: true }
   }
 }
