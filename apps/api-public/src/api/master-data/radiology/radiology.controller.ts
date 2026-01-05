@@ -61,7 +61,7 @@ export class RadiologyController {
     return { data }
   }
 
-  @Patch('update/:id')
+  @Post('update/:id')
   @UserPermission(PermissionId.MASTER_DATA_RADIOLOGY)
   @ApiParam({ name: 'id', example: 1 })
   async update(
@@ -73,7 +73,7 @@ export class RadiologyController {
     return { data }
   }
 
-  @Delete('destroy/:id')
+  @Post('destroy/:id')
   @UserPermission(PermissionId.MASTER_DATA_RADIOLOGY)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(

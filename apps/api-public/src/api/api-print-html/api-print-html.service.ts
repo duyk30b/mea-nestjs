@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import {
-  PrintHtmlRepository,
-} from '../../../../_libs/database/repositories/print-html.repository'
+import { PrintHtmlRepository } from '../../../../_libs/database/repositories/print-html.repository'
 import {
   PrintHtmlCreateBody,
   PrintHtmlGetManyQuery,
@@ -13,9 +11,7 @@ import {
 
 @Injectable()
 export class ApiPrintHtmlService {
-  constructor(
-    private readonly printHtmlRepository: PrintHtmlRepository
-  ) { }
+  constructor(private readonly printHtmlRepository: PrintHtmlRepository) { }
 
   async pagination(oid: number, query: PrintHtmlPaginationQuery) {
     const { page, limit, filter, sort, relation } = query
@@ -73,7 +69,7 @@ export class ApiPrintHtmlService {
   }
 
   async createOne(oid: number, body: PrintHtmlCreateBody) {
-    const printHtml = await this.printHtmlRepository.insertOneFullFieldAndReturnEntity({
+    const printHtml = await this.printHtmlRepository.insertOne({
       oid,
       ...body,
     })
@@ -82,13 +78,13 @@ export class ApiPrintHtmlService {
   }
 
   async updateOne(oid: number, id: number, body: PrintHtmlUpdateBody) {
-    const printHtml = await this.printHtmlRepository.updateOneAndReturnEntity({ id, oid }, body)
+    const printHtml = await this.printHtmlRepository.updateOne({ id, oid }, body)
     if (!printHtml) throw new BusinessException('error.Database.UpdateFailed')
     return { printHtml }
   }
 
   async destroyOne(oid: number, id: number) {
-    const affected = await this.printHtmlRepository.delete({ oid, id })
+    const affected = await this.printHtmlRepository.deleteBasic({ oid, id })
     if (affected === 0) {
       throw new BusinessException('error.Database.DeleteFailed')
     }

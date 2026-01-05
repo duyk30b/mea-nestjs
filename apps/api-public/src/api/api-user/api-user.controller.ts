@@ -49,7 +49,7 @@ export class ApiUserController {
     return await this.apiUserService.createOne(oid, body)
   }
 
-  @Patch('update/:id')
+  @Post('update/:id')
   @UserPermission(PermissionId.USER_ACCOUNT_UPDATE)
   async updateOne(
     @External() { oid }: TExternal,
@@ -59,7 +59,7 @@ export class ApiUserController {
     return await this.apiUserService.updateOne(oid, +id, body)
   }
 
-  @Patch('new-password/:id')
+  @Post('new-password/:id')
   @UserPermission(PermissionId.USER_ACCOUNT_CHANGE_PASSWORD)
   async newPassword(
     @External() { oid }: TExternal,
@@ -69,7 +69,7 @@ export class ApiUserController {
     return await this.apiUserService.newPassword(oid, +id, password)
   }
 
-  @Delete('delete/:id')
+  @Post('delete/:id')
   @UserPermission(PermissionId.USER_ACCOUNT_DELETE)
   @ApiParam({ name: 'id', example: 1 })
   async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {

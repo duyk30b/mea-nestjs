@@ -42,7 +42,7 @@ export class RadiologyGroupController {
     return await this.radiologyGroupService.createOne(oid, body)
   }
 
-  @Patch('update/:id')
+  @Post('update/:id')
   @UserPermission(PermissionId.MASTER_DATA_RADIOLOGY)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
@@ -53,14 +53,14 @@ export class RadiologyGroupController {
     return await this.radiologyGroupService.updateOne(oid, id, body)
   }
 
-  @Delete('destroy/:id')
+  @Post('destroy/:id')
   @UserPermission(PermissionId.MASTER_DATA_RADIOLOGY)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.radiologyGroupService.destroyOne(oid, id)
   }
 
-  @Put('replace-all')
+  @Post('replace-all')
   @UserPermission(PermissionId.MASTER_DATA_RADIOLOGY)
   async replaceAll(@External() { oid }: TExternal, @Body() body: RadiologyGroupReplaceAllBody) {
     return await this.radiologyGroupService.replaceAll(oid, body)

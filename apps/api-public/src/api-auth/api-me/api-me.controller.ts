@@ -27,7 +27,7 @@ export class ApiMeController {
     return { data }
   }
 
-  @Patch('change-password')
+  @Post('change-password')
   @UserPermission()
   async detail(
     @External() { oid, uid }: TExternal,

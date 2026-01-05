@@ -42,7 +42,7 @@ export class LaboratoryGroupController {
     return await this.laboratoryGroupService.createOne(oid, body)
   }
 
-  @Patch('update/:id')
+  @Post('update/:id')
   @UserPermission(PermissionId.MASTER_DATA_LABORATORY)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
@@ -53,14 +53,14 @@ export class LaboratoryGroupController {
     return await this.laboratoryGroupService.updateOne(oid, id, body)
   }
 
-  @Delete('destroy/:id')
+  @Post('destroy/:id')
   @UserPermission(PermissionId.MASTER_DATA_LABORATORY)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {
     return await this.laboratoryGroupService.destroyOne(oid, id)
   }
 
-  @Put('replace-all')
+  @Post('replace-all')
   @UserPermission(PermissionId.MASTER_DATA_LABORATORY)
   async replaceAll(
     @External() { oid }: TExternal,

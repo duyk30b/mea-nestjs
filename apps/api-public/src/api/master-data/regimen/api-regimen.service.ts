@@ -99,14 +99,14 @@ export class RegimenService {
       throw new BusinessError(`Trùng mã dịch vụ với ${existRegimen.name}`)
     }
 
-    const regimen = await this.regimenRepository.insertOneFullFieldAndReturnEntity({
+    const regimen = await this.regimenRepository.insertOne({
       ...regimenBody,
       oid,
       code,
     })
 
     if (body.regimenItemList?.length) {
-      await this.regimenItemRepository.insertManyAndReturnEntity(
+      await this.regimenItemRepository.insertMany(
         body.regimenItemList.map((i) => {
           const insert: RegimenItemInsertType = {
             ...i,
@@ -119,7 +119,7 @@ export class RegimenService {
     }
 
     if (body.positionRequestList?.length) {
-      await this.positionRepository.insertManyFullFieldAndReturnEntity(
+      await this.positionRepository.insertMany(
         body.positionRequestList.map((i) => {
           const dto: PositionInsertType = {
             ...i,
@@ -133,7 +133,7 @@ export class RegimenService {
     }
 
     if (body.discountList?.length) {
-      await this.discountRepository.insertManyFullFieldAndReturnEntity(
+      await this.discountRepository.insertMany(
         body.discountList.map((i) => {
           const dto: DiscountInsertType = {
             ...i,
@@ -168,22 +168,19 @@ export class RegimenService {
       throw new BusinessError(`Trùng mã dịch vụ với ${existRegimen.name}`)
     }
 
-    const regimen = await this.regimenRepository.updateOneAndReturnEntity(
-      { oid, id: regimenId },
-      regimenBody
-    )
+    const regimen = await this.regimenRepository.updateOne({ oid, id: regimenId }, regimenBody)
 
     await Promise.all([
-      this.regimenItemRepository.delete({ oid, regimenId }),
+      this.regimenItemRepository.deleteBasic({ oid, regimenId }),
       body.positionRequestList
-        ? this.positionRepository.deleteAndReturnEntity({
+        ? this.positionRepository.deleteMany({
           oid,
           positionInteractId: regimen.id,
           positionType: PositionType.RegimenRequest,
         })
         : undefined,
       body.discountList
-        ? await this.discountRepository.deleteAndReturnEntity({
+        ? await this.discountRepository.deleteMany({
           oid,
           discountInteractId: regimen.id,
           discountInteractType: DiscountInteractType.Regimen,
@@ -192,7 +189,7 @@ export class RegimenService {
     ])
 
     if (body.regimenItemList?.length) {
-      await this.regimenItemRepository.insertManyAndReturnEntity(
+      await this.regimenItemRepository.insertMany(
         body.regimenItemList.map((i) => {
           const insert: RegimenItemInsertType = {
             ...i,
@@ -205,7 +202,7 @@ export class RegimenService {
     }
 
     if (body.positionRequestList?.length) {
-      await this.positionRepository.insertManyFullFieldAndReturnEntity(
+      await this.positionRepository.insertMany(
         body.positionRequestList.map((i) => {
           const dto: PositionInsertType = {
             ...i,
@@ -219,7 +216,7 @@ export class RegimenService {
     }
 
     if (body.discountList?.length) {
-      await this.discountRepository.insertManyFullFieldAndReturnEntity(
+      await this.discountRepository.insertMany(
         body.discountList.map((i) => {
           const dto: DiscountInsertType = {
             ...i,
@@ -254,17 +251,17 @@ export class RegimenService {
         positionDestroyedList,
         discountDestroyedList,
       ] = await Promise.all([
-        this.regimenRepository.deleteOneAndReturnEntity({
+        this.regimenRepository.deleteOne({
           oid,
           id: regimenId,
         }),
         this.regimenItemRepository.findManyBy({ oid, regimenId }),
-        this.positionRepository.deleteAndReturnEntity({
+        this.positionRepository.deleteMany({
           oid,
           positionInteractId: regimenId,
           positionType: { IN: [PositionType.RegimenRequest] },
         }),
-        this.discountRepository.deleteAndReturnEntity({
+        this.discountRepository.deleteMany({
           oid,
           discountInteractId: regimenId,
           discountInteractType: DiscountInteractType.Regimen,

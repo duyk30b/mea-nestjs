@@ -36,13 +36,13 @@ export class ApiRootUserController {
     return await this.apiRootUserService.create(body)
   }
 
-  @Patch('update/:id')
+  @Post('update/:id')
   @ApiParam({ name: 'id', example: 1 })
   async update(@Param() { id }: IdParam, @Body() body: RootUserUpdateBody) {
     return await this.apiRootUserService.update(id, body)
   }
 
-  @Delete('delete/:id')
+  @Post('delete/:id')
   @ApiParam({ name: 'id', example: 1 })
   async userDeleteOne(@Param() { id }: IdParam) {
     return await this.apiRootUserService.deleteOne(id)

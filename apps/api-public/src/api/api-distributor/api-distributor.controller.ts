@@ -57,7 +57,7 @@ export class ApiDistributorController {
     return { data }
   }
 
-  @Patch('update/:id')
+  @Post('update/:id')
   @UserPermission(PermissionId.DISTRIBUTOR_UPDATE)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
@@ -69,7 +69,7 @@ export class ApiDistributorController {
     return { data }
   }
 
-  @Delete('destroy/:id')
+  @Post('destroy/:id')
   @UserPermission(PermissionId.DISTRIBUTOR_DELETE)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(

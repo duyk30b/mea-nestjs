@@ -51,7 +51,7 @@ export class ApiCustomerSourceService {
   }
 
   async createOne(oid: number, body: CustomerSourceCreateBody): Promise<BaseResponse> {
-    const id = await this.customerSourceRepository.insertOne({ oid, ...body })
+    const id = await this.customerSourceRepository.insertOneBasic({ oid, ...body })
     const data = await this.customerSourceRepository.findOneById(id)
     return { data }
   }
@@ -63,7 +63,7 @@ export class ApiCustomerSourceService {
   }
 
   async destroyOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.customerSourceRepository.delete({ oid, id })
+    const affected = await this.customerSourceRepository.deleteBasic({ oid, id })
     if (affected === 0) {
       throw new BusinessException('error.Database.DeleteFailed')
     }

@@ -98,15 +98,12 @@ export class ApiMeService {
     }
 
     if (userOrigin.imageIds !== imageIdsStringifyUpdate) {
-      userModified = await this.userRepository.updateOneAndReturnEntity(
+      userModified = await this.userRepository.updateOne(
         { oid, id: userId },
         { ...userInfo, imageIds: imageIdsStringifyUpdate }
       )
     } else {
-      userModified = await this.userRepository.updateOneAndReturnEntity(
-        { oid, id: userId },
-        userInfo
-      )
+      userModified = await this.userRepository.updateOne({ oid, id: userId }, userInfo)
     }
 
     const imageIdList: number[] = JSON.parse(userModified.imageIds)

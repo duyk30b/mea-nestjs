@@ -8,6 +8,7 @@ import {
   BatchManager,
   ProductManager,
   ProductMovementManager,
+  ProductMovementRepository,
   PurchaseOrderItemManager,
   StockCheckItemManager,
   TicketBatchManager,
@@ -24,7 +25,7 @@ export class ProductOperation {
     private ticketProductManager: TicketProductManager,
     private ticketBatchManager: TicketBatchManager,
     private stockCheckItemManager: StockCheckItemManager,
-    private productMovementManager: ProductMovementManager,
+    private productMovementRepository: ProductMovementRepository,
     @InjectEntityManager() private manager: EntityManager
   ) { }
 
@@ -116,7 +117,7 @@ export class ProductOperation {
       //   productId: { IN: productIdSourceList },
       // })
 
-      await this.productMovementManager.update(
+      await this.productMovementRepository.managerUpdateBasic(
         manager,
         { oid, productId: { IN: productIdSourceList } },
         { productId: productIdTarget }
@@ -148,7 +149,7 @@ export class ProductOperation {
         createdAt: Date.now(),
       }
 
-      await this.productMovementManager.insertOneFullField(manager, productMovement)
+      await this.productMovementRepository.managerInsertOneBasic(manager, productMovement)
 
       return {
         productDestroyedList: productSourceList,

@@ -123,14 +123,14 @@ export class RadiologyService {
       throw new BusinessException(`Trùng mã phiếu với ${existRadiology.name}` as any)
     }
 
-    const radiology = await this.radiologyRepository.insertOneFullFieldAndReturnEntity({
+    const radiology = await this.radiologyRepository.insertOne({
       ...radiologyBody,
       oid,
       radiologyCode,
     })
 
     if (positionRequestList?.length) {
-      await this.positionRepository.insertManyFullFieldAndReturnEntity(
+      await this.positionRepository.insertMany(
         positionRequestList.map((i) => {
           const dto: PositionInsertType = {
             ...i,
@@ -143,7 +143,7 @@ export class RadiologyService {
       )
     }
     if (positionResultList?.length) {
-      await this.positionRepository.insertManyFullFieldAndReturnEntity(
+      await this.positionRepository.insertMany(
         positionResultList.map((i) => {
           const dto: PositionInsertType = {
             ...i,
@@ -157,7 +157,7 @@ export class RadiologyService {
     }
 
     if (discountList?.length) {
-      await this.discountRepository.insertManyFullFieldAndReturnEntity(
+      await this.discountRepository.insertMany(
         discountList.map((i) => {
           const dto: DiscountInsertType = {
             ...i,
@@ -191,17 +191,17 @@ export class RadiologyService {
       }
     }
 
-    const radiology = await this.radiologyRepository.updateOneAndReturnEntity(
+    const radiology = await this.radiologyRepository.updateOne(
       { oid, id: radiologyId },
       radiologyBody
     )
     if (positionRequestList) {
-      await this.positionRepository.deleteAndReturnEntity({
+      await this.positionRepository.deleteMany({
         oid,
         positionInteractId: radiology.id,
         positionType: PositionType.RadiologyRequest,
       })
-      await this.positionRepository.insertManyFullFieldAndReturnEntity(
+      await this.positionRepository.insertMany(
         positionRequestList.map((i) => {
           const dto: PositionInsertType = {
             ...i,
@@ -214,12 +214,12 @@ export class RadiologyService {
       )
     }
     if (positionResultList) {
-      await this.positionRepository.deleteAndReturnEntity({
+      await this.positionRepository.deleteMany({
         oid,
         positionInteractId: radiology.id,
         positionType: PositionType.RadiologyResult,
       })
-      await this.positionRepository.insertManyFullFieldAndReturnEntity(
+      await this.positionRepository.insertMany(
         positionResultList.map((i) => {
           const dto: PositionInsertType = {
             ...i,
@@ -233,12 +233,12 @@ export class RadiologyService {
     }
 
     if (discountList) {
-      await this.discountRepository.deleteAndReturnEntity({
+      await this.discountRepository.deleteMany({
         oid,
         discountInteractId: radiology.id,
         discountInteractType: DiscountInteractType.Radiology,
       })
-      await this.discountRepository.insertManyFullFieldAndReturnEntity(
+      await this.discountRepository.insertMany(
         discountList.map((i) => {
           const dto: DiscountInsertType = {
             ...i,
@@ -268,16 +268,16 @@ export class RadiologyService {
 
     if (!ticketRadiologyList.length) {
       const [radiologyDestroyed, positionDestroyedList, discountDestroyedList] = await Promise.all([
-        this.radiologyRepository.deleteOneAndReturnEntity({
+        this.radiologyRepository.deleteOne({
           oid,
           id: radiologyId,
-        }), ,
-        this.positionRepository.deleteAndReturnEntity({
+        }),,        
+        this.positionRepository.deleteMany({
           oid,
           positionInteractId: radiologyId,
           positionType: { IN: [PositionType.RadiologyRequest, PositionType.RadiologyResult] },
         }),
-        this.discountRepository.deleteAndReturnEntity({
+        this.discountRepository.deleteMany({
           oid,
           discountInteractId: radiologyId,
           discountInteractType: DiscountInteractType.Radiology,
@@ -342,7 +342,7 @@ export class RadiologyService {
       }
       return dto
     })
-    const insertIds = await this.radiologyRepository.insertMany(radiologyInsertList)
+    const insertIds = await this.radiologyRepository.insertManyBasic(radiologyInsertList)
     return { success: true }
   }
 

@@ -106,7 +106,7 @@ export class PositionService {
   }
 
   async createOne(oid: number, body: PositionCreateBody) {
-    const position = await this.positionRepository.insertOneFullFieldAndReturnEntity({
+    const position = await this.positionRepository.insertOne({
       ...body,
       oid,
     })
@@ -115,20 +115,20 @@ export class PositionService {
   }
 
   async updateOne(oid: number, id: number, body: PositionUpdateBody) {
-    const position = await this.positionRepository.updateOneAndReturnEntity({ id, oid }, body)
+    const position = await this.positionRepository.updateOne({ id, oid }, body)
     this.socketEmitService.socketMasterDataChange(oid, { position: true })
     return { position }
   }
 
   async destroyOne(oid: number, id: number) {
-    const affected = await this.positionRepository.delete({ oid, id })
+    const affected = await this.positionRepository.deleteBasic({ oid, id })
     if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
     this.socketEmitService.socketMasterDataChange(oid, { position: true })
     return { data: true }
   }
 
   async replaceList(oid: number, body: PositionReplaceListBody) {
-    await this.positionRepository.delete({
+    await this.positionRepository.deleteBasic({
       oid,
       positionType: body.filter?.positionType,
     })
@@ -141,8 +141,7 @@ export class PositionService {
       return dto
     })
 
-    const positionList =
-      await this.positionRepository.insertManyAndReturnEntity(positionInsertListDto)
+    const positionList = await this.positionRepository.insertMany(positionInsertListDto)
     this.socketEmitService.socketMasterDataChange(oid, { position: true })
     return { positionList }
   }

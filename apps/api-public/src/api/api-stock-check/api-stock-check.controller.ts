@@ -52,7 +52,7 @@ export class ApiStockCheckController {
     })
   }
 
-  @Delete('draft-destroy/:id')
+  @Post('draft-destroy/:id')
   @UserPermission(PermissionId.STOCK_CHECK_DRAFT_CRUD)
   async draftDestroy(@External() { oid }: TExternal, @Param() { id }: GenerateIdParam) {
     return await this.apiStockCheckService.destroy({
@@ -101,7 +101,7 @@ export class ApiStockCheckController {
     })
   }
 
-  @Delete('cancelled-destroy/:id')
+  @Post('cancelled-destroy/:id')
   @UserPermission(PermissionId.STOCK_CHECK_CANCELLED_DESTROY)
   async cancelledDestroy(@External() { oid }: TExternal, @Param() { id }: GenerateIdParam) {
     return await this.apiStockCheckService.destroy({

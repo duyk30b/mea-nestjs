@@ -123,18 +123,15 @@ export class ApiWalletService {
         walletCloseMoney: body.money,
       }
 
-      await this.paymentRepository.insertOneAndReturnEntity(paymentInsert)
+      await this.paymentRepository.insertOneBasic(paymentInsert)
     }
-    const wallet = await this.walletRepository.updateOneAndReturnEntity(
-      { id: walletId, oid },
-      { ...body, code }
-    )
+    const wallet = await this.walletRepository.updateOne({ id: walletId, oid }, { ...body, code })
     return { wallet }
   }
 
   async destroyOne(options: { oid: number; walletId: string }) {
     const { oid, walletId } = options
-    await this.walletRepository.delete({ oid, id: walletId })
+    await this.walletRepository.deleteBasic({ oid, id: walletId })
 
     return { walletId }
   }

@@ -30,7 +30,7 @@ export class ApiPermissionService {
   }
 
   async initData() {
-    await this.permissionRepository.delete({})
+    await this.permissionRepository.deleteBasic({})
 
     const { idsEffect } = await this.permissionRepository.upsert(permissionDataAll)
 

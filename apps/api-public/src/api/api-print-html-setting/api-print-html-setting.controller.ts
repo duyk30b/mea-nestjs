@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Put, Query } from '@nestjs/common'
+import { Body, Controller, Get, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { BaseResponse } from '../../../../_libs/common/interceptor'
@@ -26,7 +26,7 @@ export class ApiPrintHtmlSettingController {
     return { data }
   }
 
-  @Put('replace-all')
+  @Post('replace-all')
   @UserPermission(PermissionId.MASTER_DATA_PRINT_HTML)
   async saveListDefault(
     @External() { oid }: TExternal,

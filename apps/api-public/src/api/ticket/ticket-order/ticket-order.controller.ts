@@ -51,7 +51,7 @@ export class TicketOrderController {
     return { data }
   }
 
-  @Patch('/order/:id/deposited-update')
+  @Post('/order/:id/deposited-update')
   @UserPermission(
     PermissionId.TICKET_DRAFT_CRUD,
     PermissionId.TICKET_CHANGE_PRODUCT,
@@ -92,7 +92,7 @@ export class TicketOrderController {
     return { data }
   }
 
-  @Patch('/order/:id/debt-success-update')
+  @Post('/order/:id/debt-success-update')
   @UserPermission(
     PermissionId.TICKET_DRAFT_CRUD,
     PermissionId.TICKET_CHANGE_PRODUCT,
@@ -118,7 +118,7 @@ export class TicketOrderController {
   }
 
   // ================= ACTION ================= //
-  @Delete('/order/:id/destroy')
+  @Post('/order/:id/destroy')
   @UserPermission(PermissionId.TICKET_DESTROY)
   async draftDestroy(
     @External() { oid }: TExternal,

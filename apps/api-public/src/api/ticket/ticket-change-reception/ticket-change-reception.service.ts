@@ -57,7 +57,7 @@ export class TicketChangeReceptionService {
         customerCode = (count + 1).toString()
       }
 
-      customer = await this.customerRepository.insertOneFullFieldAndReturnEntity({
+      customer = await this.customerRepository.insertOne({
         ...body.customer,
         debt: 0,
         oid,
@@ -78,7 +78,7 @@ export class TicketChangeReceptionService {
         createdAt: ticketReceptionAdd.receptionAt,
       })
       const dailyIndex = Number(ticketIdGenerate.slice(-4))
-      ticket = await this.ticketRepository.insertOneFullFieldAndReturnEntity({
+      ticket = await this.ticketRepository.insertOne({
         oid,
         id: ticketIdGenerate,
         customerId: customer.id,
@@ -129,11 +129,11 @@ export class TicketChangeReceptionService {
           debtSurcharge: 0,
           debtDiscount: 0,
         }
-        await this.ticketPaymentDetailRepository.insertOne(ticketPaymentDetailInsert)
+        await this.ticketPaymentDetailRepository.insertOneBasic(ticketPaymentDetailInsert)
       }
     }
     if (body.ticketId) {
-      ticket = await this.ticketRepository.updateOneAndReturnEntity(
+      ticket = await this.ticketRepository.updateOne(
         {
           oid,
           id: body.ticketId,
@@ -165,7 +165,7 @@ export class TicketChangeReceptionService {
           return dto
         })
       ticket.ticketAttributeList =
-        await this.ticketAttributeRepository.insertManyAndReturnEntity(ticketAttributeInsertList)
+        await this.ticketAttributeRepository.insertMany(ticketAttributeInsertList)
     }
 
     const ticketReceptionInsert: TicketReceptionInsertType = {
@@ -179,7 +179,7 @@ export class TicketChangeReceptionService {
       isFirstReception: body.ticketId ? 0 : 1,
     }
     const ticketReceptionCreated =
-      await this.ticketReceptionRepository.insertOneAndReturnEntity(ticketReceptionInsert)
+      await this.ticketReceptionRepository.insertOne(ticketReceptionInsert)
 
     if (body.ticketUserReceptionAddList) {
       const responseChangeUser = await this.ticketChangeTicketUserOperation.changeTicketUserList({
@@ -270,7 +270,7 @@ export class TicketChangeReceptionService {
       throw new BusinessError('Phiếu khám đã hoạt động, không thể xóa')
     }
 
-    await this.ticketReceptionRepository.deleteOneAndReturnEntity({ oid, id: ticketReceptionId })
+    await this.ticketReceptionRepository.deleteOne({ oid, id: ticketReceptionId })
     ticketReceptionList.splice(findIndex, 1)
     ticket.ticketReceptionList = ticketReceptionList
     this.socketEmitService.socketTicketChange(oid, {
@@ -291,7 +291,7 @@ export class TicketChangeReceptionService {
     const { ticketReceptionUpdate } = body
     const receptionTime = ESTimer.info(ticketReceptionUpdate.receptionAt, 7)
 
-    const ticketReceptionModified = await this.ticketReceptionRepository.updateOneAndReturnEntity(
+    const ticketReceptionModified = await this.ticketReceptionRepository.updateOne(
       { oid, id: ticketReceptionId },
       {
         roomId: ticketReceptionUpdate.roomId,
@@ -301,7 +301,7 @@ export class TicketChangeReceptionService {
       }
     )
 
-    const ticketModified = await this.ticketRepository.updateOneAndReturnEntity(
+    const ticketModified = await this.ticketRepository.updateOne(
       { oid, id: ticketId },
       {
         receptionAt: ticketReceptionUpdate.receptionAt,
@@ -321,7 +321,7 @@ export class TicketChangeReceptionService {
     if (body.ticketAttributeUpdateList) {
       const attributeKeyRemove = body.ticketAttributeUpdateList.map((i) => i.key)
       if (attributeKeyRemove.length) {
-        await this.ticketAttributeRepository.delete({
+        await this.ticketAttributeRepository.deleteBasic({
           oid,
           ticketId,
           key: { IN: body.ticketAttributeUpdateList.map((i) => i.key) },
@@ -338,7 +338,7 @@ export class TicketChangeReceptionService {
           }
           return dto
         })
-      await this.ticketAttributeRepository.insertMany(ticketAttributeInsertList)
+      await this.ticketAttributeRepository.insertManyBasic(ticketAttributeInsertList)
       ticketModified.ticketAttributeList = await this.ticketAttributeRepository.findManyBy({
         oid,
         ticketId,

@@ -42,7 +42,7 @@ export class ApiWarehouseController {
     return await this.apiWarehouseService.createOne(oid, body)
   }
 
-  @Patch('update/:id')
+  @Post('update/:id')
   @UserPermission(PermissionId.MASTER_DATA_WAREHOUSE)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
@@ -53,7 +53,7 @@ export class ApiWarehouseController {
     return await this.apiWarehouseService.updateOne(oid, id, body)
   }
 
-  @Delete('destroy/:id')
+  @Post('destroy/:id')
   @UserPermission(PermissionId.MASTER_DATA_WAREHOUSE)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {

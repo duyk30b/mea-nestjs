@@ -90,7 +90,7 @@ export class ApiCustomerService {
       throw new BusinessError(`Trùng mã khách hàng với ${existCustomer.fullName}`)
     }
 
-    const customer = await this.customerRepository.insertOneFullFieldAndReturnEntity({
+    const customer = await this.customerRepository.insertOne({
       ...body,
       oid,
       debt: 0,
@@ -112,10 +112,7 @@ export class ApiCustomerService {
       }
     }
 
-    const customer = await this.customerRepository.updateOneAndReturnEntity(
-      { oid, id: customerId },
-      customerBody
-    )
+    const customer = await this.customerRepository.updateOne({ oid, id: customerId }, customerBody)
     this.socketEmitService.customerUpsert(oid, { customer })
     return { customer }
   }
@@ -129,8 +126,8 @@ export class ApiCustomerService {
 
     if (ticketList.length === 0) {
       const [customerDestroy, paymentDestroyedList] = await Promise.all([
-        this.customerRepository.deleteAndReturnEntity({ oid, id: customerId }),
-        this.paymentRepository.deleteAndReturnEntity({
+        this.customerRepository.deleteMany({ oid, id: customerId }),
+        this.paymentRepository.deleteMany({
           oid,
           personId: customerId,
           personType: PaymentPersonType.Customer,
@@ -138,7 +135,7 @@ export class ApiCustomerService {
       ])
 
       if (paymentDestroyedList.length) {
-        await this.paymentTicketItemRepository.delete({
+        await this.paymentTicketItemRepository.deleteBasic({
           oid,
           paymentId: { IN: paymentDestroyedList.map((i) => i.id) },
         })

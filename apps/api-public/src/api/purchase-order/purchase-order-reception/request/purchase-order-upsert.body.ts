@@ -4,20 +4,19 @@ import {
   ArrayMinSize,
   IsArray,
   IsDefined,
+  IsInt,
   IsNumber,
+  IsPositive,
   IsString,
   Max,
   Min,
   ValidateNested,
 } from 'class-validator'
-import {
-  IsEnumValue,
-  IsNumberGreaterThan,
-} from '../../../../../../_libs/common/transform-validate/class-validator.custom'
+import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
 import { DiscountType } from '../../../../../../_libs/database/common/variable'
 import { PurchaseOrderItemBody } from './purchase-order-item.body'
 
-export class PurchaseOrderUpsert {
+export class PurchaseOrderInfoBody {
   @ApiPropertyOptional()
   @Expose()
   @Type(() => Number)
@@ -62,25 +61,19 @@ export class PurchaseOrderUpsert {
   @IsNumber()
   totalMoney: number
 
-  @ApiPropertyOptional({ example: 'Khách hàng còn bo thêm tiền' })
+  @ApiPropertyOptional({ example: '' })
   @Expose()
   @IsString()
   note: string
 }
 
-export class PurchaseOrderUpsertDraftBody {
-  @ApiPropertyOptional({ example: 52 })
+export class PurchaseOrderBasicBody {
+  @ApiProperty({ type: PurchaseOrderInfoBody })
   @Expose()
-  @IsDefined()
-  @IsNumberGreaterThan(0)
-  distributorId: number
-
-  @ApiProperty({ type: PurchaseOrderUpsert })
-  @Expose()
-  @Type(() => PurchaseOrderUpsert)
+  @Type(() => PurchaseOrderInfoBody)
   @IsDefined()
   @ValidateNested({ each: true })
-  purchaseOrder: PurchaseOrderUpsert
+  purchaseOrderBasic: PurchaseOrderInfoBody
 
   @ApiProperty({ type: PurchaseOrderItemBody, isArray: true })
   @Expose()
@@ -92,4 +85,48 @@ export class PurchaseOrderUpsertDraftBody {
   purchaseOrderItemList: PurchaseOrderItemBody[]
 }
 
-export class PurchaseOrderUpdateDepositedBody extends PurchaseOrderUpsertDraftBody { }
+export class PurchaseOrderDraftInsertBody extends PurchaseOrderBasicBody {
+  @ApiProperty({})
+  @Expose()
+  @IsDefined()
+  @IsPositive()
+  distributorId: number
+}
+
+export class PurchaseOrderDraftUpdateBody extends PurchaseOrderBasicBody { }
+
+export class PurchaseOrderDepositedUpdateBody extends PurchaseOrderBasicBody { }
+
+export class PurchaseOrderDebtSuccessInsertBody extends PurchaseOrderBasicBody {
+  @ApiProperty({})
+  @Expose()
+  @IsDefined()
+  @IsPositive()
+  distributorId: number
+
+  @ApiProperty({})
+  @Expose()
+  @IsDefined()
+  @IsString()
+  walletId: string
+
+  @ApiProperty({ example: 1_250_000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  paidTotal: number
+}
+
+export class PurchaseOrderDebtSuccessUpdateBody extends PurchaseOrderBasicBody {
+  @ApiProperty({})
+  @Expose()
+  @IsDefined()
+  @IsString()
+  walletId: string
+
+  @ApiProperty({ example: 1_250_000 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  paidTotal: number
+}

@@ -3,14 +3,16 @@ import { DataSource } from 'typeorm'
 import { DeliveryStatus, MovementType } from '../../../../../_libs/database/common/variable'
 import { Distributor, Payment } from '../../../../../_libs/database/entities'
 import {
+  PaymentActionType,
   PaymentPersonType,
   PaymentVoucherType,
 } from '../../../../../_libs/database/entities/payment.entity'
-import { PurchaseOrderStatus } from '../../../../../_libs/database/entities/purchase-order.entity'
+import PurchaseOrder, {
+  PurchaseOrderStatus,
+} from '../../../../../_libs/database/entities/purchase-order.entity'
 import {
   PurchaseOrderCloseOperation,
   PurchaseOrderPaymentOperation,
-  PurchaseOrderRefundMoneyOperation,
   PurchaseOrderReopenOperation,
   PurchaseOrderReturnProductOperation,
   PurchaseOrderSendProductOperation,
@@ -23,7 +25,7 @@ import {
 } from '../../../../../_libs/database/repositories'
 import { PurchaseOrderRepository } from '../../../../../_libs/database/repositories/purchase-order.repository'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
-import { PurchaseOrderPaymentBody } from '../purchase-order-money/request'
+import { PurchaseOrderPaymentMoneyBody } from '../purchase-order-money/request'
 import { PurchaseOrderTerminalBody } from './request'
 
 @Injectable()
@@ -40,7 +42,6 @@ export class PurchaseOrderActionService {
     private readonly purchaseOrderReturnProductOperation: PurchaseOrderReturnProductOperation,
     private readonly purchaseOrderReopenOperation: PurchaseOrderReopenOperation,
     private readonly purchaseOrderPaymentOperation: PurchaseOrderPaymentOperation,
-    private readonly purchaseOrderRefundMoneyOperation: PurchaseOrderRefundMoneyOperation,
     private readonly purchaseOrderTerminalOperation: PurchaseOrderTerminalOperation
   ) { }
 
@@ -52,6 +53,7 @@ export class PurchaseOrderActionService {
         oid,
         id: purchaseOrderId,
         paid: 0,
+        debt: 0,
         status: {
           IN: [
             PurchaseOrderStatus.Draft,
@@ -84,10 +86,11 @@ export class PurchaseOrderActionService {
     oid: number
     userId: number
     purchaseOrderId: string
-    body: PurchaseOrderPaymentBody
+    body: PurchaseOrderPaymentMoneyBody
   }) {
     const { oid, userId, purchaseOrderId, body } = params
     const time = Date.now()
+    let purchaseOrderModified: PurchaseOrder
 
     const sendProductResult = await this.purchaseOrderSendProductOperation.sendProduct({
       oid,
@@ -95,17 +98,20 @@ export class PurchaseOrderActionService {
       purchaseOrderId,
       time,
     })
+    purchaseOrderModified = sendProductResult.purchaseOrderModified
 
     const paymentCreatedList: Payment[] = []
-    if (body.paidAmount > 0) {
-      const prepaymentResult = await this.purchaseOrderPaymentOperation.startPayment({
-        userId,
+    if (body.paidTotal > 0) {
+      const prepaymentResult = await this.purchaseOrderPaymentOperation.startPaymentMoney({
         oid,
         purchaseOrderId,
+        userId,
         walletId: body.walletId,
-        note: body.note,
-        paidAmount: body.paidAmount,
+        paymentActionType: PaymentActionType.PaymentMoney,
+        paidTotal: body.paidTotal,
+        debtTotal: body.debtTotal,
         time,
+        note: body.note,
       })
       paymentCreatedList.push(prepaymentResult.paymentCreated)
     }
@@ -117,6 +123,8 @@ export class PurchaseOrderActionService {
       time,
       note: '',
     })
+    purchaseOrderModified = closeResult.purchaseOrderModified
+
     if (closeResult.paymentCreated) {
       paymentCreatedList.push(closeResult.paymentCreated)
     }
@@ -124,6 +132,9 @@ export class PurchaseOrderActionService {
     if (closeResult.distributorModified) {
       this.socketEmitService.socketMasterDataChange(oid, { distributor: true })
     }
+    this.socketEmitService.socketPurchaseOrderListChange(oid, {
+      purchaseOrderUpsertedList: [purchaseOrderModified],
+    })
     this.socketEmitService.productListChange(oid, {
       productUpsertedList: sendProductResult.productModifiedList || [],
       batchUpsertedList: sendProductResult.batchModifiedList || [],
@@ -145,12 +156,16 @@ export class PurchaseOrderActionService {
       purchaseOrderId,
       time: Date.now(),
     })
+    const { purchaseOrderModified } = sendProductResult
 
     this.socketEmitService.productListChange(oid, {
       productUpsertedList: sendProductResult.productModifiedList || [],
       batchUpsertedList: sendProductResult.batchModifiedList || [],
     })
-    return { purchaseOrderModified: sendProductResult.purchaseOrderModified }
+    this.socketEmitService.socketPurchaseOrderListChange(oid, {
+      purchaseOrderUpsertedList: [purchaseOrderModified],
+    })
+    return { purchaseOrderModified }
   }
 
   async close(params: { oid: number; userId: number; purchaseOrderId: string }) {
@@ -216,7 +231,7 @@ export class PurchaseOrderActionService {
       purchaseOrderId,
       userId,
       time,
-      note: body.note,
+      note: body.note || 'Hủy phiếu',
       walletId: body.walletId,
     })
     distributorModified = terminalResult.distributorModified

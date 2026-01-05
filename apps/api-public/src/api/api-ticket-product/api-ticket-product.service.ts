@@ -55,7 +55,7 @@ export class ApiTicketProductService {
   }
 
   async destroyZero(oid: number, ticketProductId: string) {
-    await this.ticketProductRepository.delete({
+    await this.ticketProductRepository.deleteBasic({
       oid,
       id: ticketProductId,
       quantity: 0,

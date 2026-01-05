@@ -6,9 +6,7 @@ import {
   LaboratoryGroupInsertType,
   LaboratoryGroupUpdateType,
 } from '../../../../../_libs/database/entities/laboratory-group.entity'
-import {
-  LaboratoryGroupRepository,
-} from '../../../../../_libs/database/repositories/laboratory-group.repository'
+import { LaboratoryGroupRepository } from '../../../../../_libs/database/repositories/laboratory-group.repository'
 import {
   LaboratoryGroupGetManyQuery,
   LaboratoryGroupPaginationQuery,
@@ -59,7 +57,7 @@ export class LaboratoryGroupService {
   }
 
   async createOne(oid: number, body: LaboratoryGroupUpsertBody): Promise<BaseResponse> {
-    const laboratoryGroup = await this.laboratoryGroupRepository.insertOneFullFieldAndReturnEntity({
+    const laboratoryGroup = await this.laboratoryGroupRepository.insertOne({
       ...body,
       oid,
     })
@@ -67,15 +65,12 @@ export class LaboratoryGroupService {
   }
 
   async updateOne(oid: number, id: number, body: LaboratoryGroupUpsertBody): Promise<BaseResponse> {
-    const laboratoryGroupList = await this.laboratoryGroupRepository.updateAndReturnEntity(
-      { id, oid },
-      body
-    )
+    const laboratoryGroupList = await this.laboratoryGroupRepository.updateMany({ id, oid }, body)
     return { data: { laboratoryGroup: laboratoryGroupList[0] } }
   }
 
   async destroyOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.laboratoryGroupRepository.delete({ oid, id })
+    const affected = await this.laboratoryGroupRepository.deleteBasic({ oid, id })
     if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
 
     return { data: true }
@@ -105,13 +100,13 @@ export class LaboratoryGroupService {
         return insertDto
       })
 
-    await this.laboratoryGroupRepository.delete({
+    await this.laboratoryGroupRepository.deleteBasic({
       oid,
       id: { NOT_IN: laboratoryGroupUpdateLit.map((i) => i.id) },
     })
 
     if (laboratoryGroupInsertLit.length) {
-      await this.laboratoryGroupRepository.insertMany(laboratoryGroupInsertLit)
+      await this.laboratoryGroupRepository.insertManyBasic(laboratoryGroupInsertLit)
     }
     if (laboratoryGroupUpdateLit.length) {
       await this.laboratoryGroupRepository.managerBulkUpdate({
@@ -151,8 +146,7 @@ export class LaboratoryGroupService {
       }
       return dto
     })
-    const lgInsertedList =
-      await this.laboratoryGroupRepository.insertManyAndReturnEntity(lgCreateList)
+    const lgInsertedList = await this.laboratoryGroupRepository.insertMany(lgCreateList)
 
     return [...laboratoryGroupAll, ...lgInsertedList]
   }

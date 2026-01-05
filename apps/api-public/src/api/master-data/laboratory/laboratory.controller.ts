@@ -62,7 +62,7 @@ export class LaboratoryController {
     return { data }
   }
 
-  @Patch('update/:id')
+  @Post('update/:id')
   @UserPermission(PermissionId.MASTER_DATA_LABORATORY)
   @ApiParam({ name: 'id', example: 1 })
   async update(
@@ -74,7 +74,7 @@ export class LaboratoryController {
     return { data }
   }
 
-  @Delete('destroy/:id')
+  @Post('destroy/:id')
   @UserPermission(PermissionId.MASTER_DATA_LABORATORY)
   @ApiParam({ name: 'id', example: 1 })
   async destroy(@External() { oid }: TExternal, @Param() { id }: IdParam): Promise<BaseResponse> {

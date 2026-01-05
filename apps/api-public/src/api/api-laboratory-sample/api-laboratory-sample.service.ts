@@ -52,23 +52,24 @@ export class ApiLaboratorySampleService {
   }
 
   async createOne(oid: number, body: LaboratorySampleCreateBody): Promise<BaseResponse> {
-    const laboratorySample = await this.laboratorySampleRepository.insertOneFullFieldAndReturnEntity({
+    const laboratorySample = await this.laboratorySampleRepository.insertOne({
       ...body,
       oid,
     })
     return { data: { laboratorySample } }
   }
 
-  async updateOne(oid: number, id: number, body: LaboratorySampleUpdateBody): Promise<BaseResponse> {
-    const laboratorySampleList = await this.laboratorySampleRepository.updateAndReturnEntity(
-      { id, oid },
-      body
-    )
+  async updateOne(
+    oid: number,
+    id: number,
+    body: LaboratorySampleUpdateBody
+  ): Promise<BaseResponse> {
+    const laboratorySampleList = await this.laboratorySampleRepository.updateMany({ id, oid }, body)
     return { data: { laboratorySample: laboratorySampleList[0] } }
   }
 
   async destroyOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.laboratorySampleRepository.delete({ oid, id })
+    const affected = await this.laboratorySampleRepository.deleteBasic({ oid, id })
     if (affected === 0) {
       throw new BusinessException('error.Database.DeleteFailed')
     }

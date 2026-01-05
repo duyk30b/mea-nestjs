@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm'
 import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { ESArray } from '../../../../_libs/common/helpers/array.helper'
 import { BusinessError } from '../../../../_libs/database/common/error'
+import { GenerateId } from '../../../../_libs/database/common/generate-id'
 import { BatchInsertType } from '../../../../_libs/database/entities/batch.entity'
 import Product, {
   ProductInsertType,
@@ -169,6 +170,7 @@ export class ApiFilePurchaseOrderUploadExcel {
       (plain) => {
         const item: PurchaseOrderItemInsertType = {
           oid,
+          id: GenerateId.nextId(),
           distributorId: 0,
           productId: plain.productId,
           batchId: plain.batchId || 0,
@@ -262,7 +264,7 @@ export class ApiFilePurchaseOrderUploadExcel {
         }
       })
 
-      productCreatedList = await this.productRepository.insertManyAndReturnEntity(productInsertList)
+      productCreatedList = await this.productRepository.insertMany(productInsertList)
       const productCreatedMapProductCode = ESArray.arrayToKeyValue(
         productCreatedList,
         'productCode'

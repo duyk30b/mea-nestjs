@@ -14,7 +14,7 @@ import { TicketChangeUserService } from './ticket-change-user.service'
 export class TicketChangeUserController {
   constructor(private readonly ticketChangeUserService: TicketChangeUserService) { }
 
-  @Delete(':ticketId/user/destroy-ticket-user/:ticketUserId')
+  @Post(':ticketId/user/destroy-ticket-user/:ticketUserId')
   @UserPermission(PermissionId.TICKET_CHANGE_USER_POSITION)
   async destroyTicketUser(
     @External() { oid }: TExternal,

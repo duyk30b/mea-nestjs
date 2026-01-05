@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Param, Query } from '@nestjs/common'
+import { Controller, Get, Param, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { GenerateIdParam } from '../../../../_libs/common/dto'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
@@ -33,7 +33,7 @@ export class ApiTicketProductController {
     return { data }
   }
 
-  @Delete('destroy-zero/:id')
+  @Post('destroy-zero/:id')
   @UserPermission()
   async destroyZero(
     @External() { oid }: TExternal,

@@ -1,10 +1,5 @@
 import { Expose } from 'class-transformer'
-import {
-  Column,
-  Entity,
-  Index,
-  PrimaryGeneratedColumn,
-} from 'typeorm'
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm'
 
 @Entity('OrganizationPayment')
 @Index('IDX_OrganizationPayment__oid', ['oid'])
@@ -15,15 +10,31 @@ export default class OrganizationPayment {
 
   @Column()
   @Expose()
-  oid: string
+  oid: number
 
   @Column({ default: 0 })
   @Expose()
-  payment: number // tổng tiền thanh toán
+  money: number // tổng tiền thanh toán
 
-  @Column({ type: 'bigint' })
+  @Column({
+    type: 'bigint',
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
   @Expose()
-  createdAt: string
+  createdAt: number
+
+  @Column({
+    type: 'bigint',
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  expiryAt: number
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
@@ -32,6 +43,8 @@ export default class OrganizationPayment {
   static fromRaw(raw: { [P in keyof OrganizationPayment]: any }) {
     if (!raw) return null
     const entity = new OrganizationPayment()
+    entity.createdAt = Number(raw.createdAt)
+    entity.expiryAt = Number(raw.expiryAt)
     Object.assign(entity, raw)
 
     return entity
@@ -46,12 +59,16 @@ export type OrganizationPaymentRelationType = {
   [P in keyof Pick<OrganizationPayment, never>]?: boolean
 }
 
-export type OrganizationPaymentInsertType = Omit<OrganizationPayment, keyof OrganizationPaymentRelationType | keyof Pick<OrganizationPayment, 'id'>>
+export type OrganizationPaymentInsertType = Omit<
+  OrganizationPayment,
+  keyof OrganizationPaymentRelationType | keyof Pick<OrganizationPayment, 'id'>
+>
 
 export type OrganizationPaymentUpdateType = {
-  [K in Exclude<keyof OrganizationPayment, keyof OrganizationPaymentRelationType | keyof Pick<OrganizationPayment, 'oid' | 'id'>>]:
-  | OrganizationPayment[K]
-  | (() => string)
+  [K in Exclude<
+    keyof OrganizationPayment,
+    keyof OrganizationPaymentRelationType | keyof Pick<OrganizationPayment, 'oid' | 'id'>
+  >]: OrganizationPayment[K] | (() => string)
 }
 
 export type OrganizationPaymentSortType = {

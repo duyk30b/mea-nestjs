@@ -123,7 +123,7 @@ export class PurchaseOrderTerminalOperation {
 
           hasPaymentItem: 0,
           paidTotal: purchaseOrderUpdated.paid,
-          debtTotal: purchaseOrderUpdated.debt,
+          debtTotal: -purchaseOrderUpdated.debt,
           personOpenDebt: distributorModified.debt + purchaseOrderUpdated.debt,
           personCloseDebt: distributorModified.debt,
           walletOpenMoney,

@@ -136,7 +136,7 @@ export class TicketActionController {
     return { data }
   }
 
-  @Delete('/:ticketId/destroy')
+  @Post('/:ticketId/destroy')
   @UserPermissionOr(PermissionId.TICKET_DESTROY)
   async destroy(
     @External() { oid }: TExternal,

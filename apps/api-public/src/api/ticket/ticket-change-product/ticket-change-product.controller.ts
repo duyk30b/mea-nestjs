@@ -56,7 +56,7 @@ export class TicketChangeProductController {
     return { data }
   }
 
-  @Delete(':ticketId/consumable/destroy-ticket-product-consumable/:ticketProductId')
+  @Post(':ticketId/consumable/destroy-ticket-product-consumable/:ticketProductId')
   @UserPermission(PermissionId.TICKET_CHANGE_PRODUCT_CONSUMABLE)
   async destroyTicketProductConsumable(
     @External() { oid }: TExternal,
@@ -71,7 +71,7 @@ export class TicketChangeProductController {
     return { data }
   }
 
-  @Delete(':ticketId/prescription/destroy-ticket-product-prescription/:ticketProductId')
+  @Post(':ticketId/prescription/destroy-ticket-product-prescription/:ticketProductId')
   @UserPermission(PermissionId.TICKET_CHANGE_PRODUCT_PRESCRIPTION)
   async destroyTicketProductPrescription(
     @External() { oid }: TExternal,

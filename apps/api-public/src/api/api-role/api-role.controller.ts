@@ -47,7 +47,7 @@ export class ApiRoleController {
     return await this.apiRoleService.createOne(oid, body)
   }
 
-  @Patch('update/:id')
+  @Post('update/:id')
   @UserPermission(PermissionId.USER_ROLE_UPDATE)
   async update(
     @External() { oid }: TExternal,
@@ -57,7 +57,7 @@ export class ApiRoleController {
     return await this.apiRoleService.updateOne(oid, +id, body)
   }
 
-  @Delete('destroy/:id')
+  @Post('destroy/:id')
   @UserPermission(PermissionId.USER_ROLE_DELETE)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {

@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common'
-import { DataSource } from 'typeorm'
 import { FileUploadDto } from '../../../../_libs/common/dto/file'
 import { ICD } from '../../../../_libs/database/entities'
 import { ICDRepository } from '../../../../_libs/database/repositories'
@@ -55,7 +54,7 @@ export class ApiFileICDUploadExcel {
     await this.icdRepository
       .getManager()
       .query(`TRUNCATE TABLE "${ICD.name}" RESTART IDENTITY CASCADE;`)
-    await this.icdRepository.insertMany(data.dataPlainList)
+    await this.icdRepository.insertManyBasic(data.dataPlainList)
     return { data: true }
   }
 }

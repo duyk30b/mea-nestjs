@@ -1,5 +1,4 @@
 import {
-  DataSource,
   EntityManager,
   EntityTarget,
   FindOptionsOrder,
@@ -8,7 +7,6 @@ import {
   Repository,
   UpdateResult,
 } from 'typeorm'
-import { IsolationLevel } from 'typeorm/driver/types/IsolationLevel'
 import { BaseCondition, BaseOperator } from '../../common/dto'
 import { NoExtra } from '../../common/helpers/typescript.helper'
 import { GenerateId } from '../common/generate-id'
@@ -133,7 +131,7 @@ export abstract class _PostgreSqlRepository<
     return number
   }
 
-  async insertMany<X extends Partial<_INSERT>>(
+  async insertManyBasic<X extends Partial<_INSERT>>(
     data: NoExtra<Partial<_INSERT>, X>[]
   ): Promise<number[]> {
     if (!data.length) return []
@@ -145,14 +143,14 @@ export abstract class _PostgreSqlRepository<
     return idList
   }
 
-  async insertManyFullField<X extends _INSERT>(data: NoExtra<_INSERT, X>[]): Promise<number[]> {
+  async insertManyBasicFullField<X extends _INSERT>(
+    data: NoExtra<_INSERT, X>[]
+  ): Promise<number[]> {
     if (!data.length) return []
-    return this.insertMany(data)
+    return this.insertManyBasic(data)
   }
 
-  async insertManyAndReturnRaws<X extends Partial<_INSERT>>(
-    data: NoExtra<Partial<_INSERT>, X>[]
-  ): Promise<{ [P in keyof _ENTITY]: any }[]> {
+  async insertMany<X extends _INSERT>(data: NoExtra<_INSERT, X>[]): Promise<_ENTITY[]> {
     if (!data.length) return []
     data.forEach((i) => {
       if (!i['id']) i['id'] = GenerateId.nextId()
@@ -164,33 +162,12 @@ export abstract class _PostgreSqlRepository<
       .returning('*')
       .execute()
     const raws = insertResult.raw
-    return raws
-  }
-
-  async insertManyAndReturnEntity<X extends Partial<_INSERT>>(
-    data: NoExtra<Partial<_INSERT>, X>[]
-  ): Promise<_ENTITY[]> {
-    const raws = await this.insertManyAndReturnRaws(data)
     return this.entity.fromRaws(raws)
   }
 
-  async insertManyFullFieldAndReturnRaws<X extends _INSERT>(
-    data: NoExtra<_INSERT, X>[]
-  ): Promise<{ [P in keyof _ENTITY]: any }[]> {
-    if (!data.length) return []
-    const raws = this.insertManyAndReturnRaws(data)
-    return raws
-  }
-
-  async insertManyFullFieldAndReturnEntity<X extends _INSERT>(
-    data: NoExtra<_INSERT, X>[]
-  ): Promise<_ENTITY[]> {
-    if (!data.length) return []
-    const raws = await this.insertManyAndReturnRaws(data)
-    return this.entity.fromRaws(raws)
-  }
-
-  async insertOne<X extends Partial<_INSERT>>(data: NoExtra<Partial<_INSERT>, X>): Promise<number> {
+  async insertOneBasic<X extends Partial<_INSERT>>(
+    data: NoExtra<Partial<_INSERT>, X>
+  ): Promise<number> {
     if (!data['id']) {
       data['id'] = GenerateId.nextId()
     }
@@ -206,14 +183,12 @@ export abstract class _PostgreSqlRepository<
     return id
   }
 
-  async insertOneFullField<X extends _INSERT>(data: NoExtra<_INSERT, X>): Promise<number> {
-    const id = this.insertOne(data)
+  async insertOneBasicFullField<X extends _INSERT>(data: NoExtra<_INSERT, X>): Promise<number> {
+    const id = this.insertOneBasic(data)
     return id
   }
 
-  async insertOneAndReturnRaw<X extends Partial<_INSERT>>(
-    data: NoExtra<Partial<_INSERT>, X>
-  ): Promise<{ [P in keyof _ENTITY]: any }> {
+  async insertOne<X extends _INSERT>(data: NoExtra<_INSERT, X>): Promise<_ENTITY> {
     if (!data['id']) {
       data['id'] = GenerateId.nextId()
     }
@@ -230,27 +205,7 @@ export abstract class _PostgreSqlRepository<
         `Insert ${this.entity['name']} failed: raws.length = ${insertResult.raw.length}`
       )
     }
-    return insertResult.raw[0]
-  }
-
-  async insertOneAndReturnEntity<X extends Partial<_INSERT>>(
-    data: NoExtra<Partial<_INSERT>, X>
-  ): Promise<_ENTITY> {
-    const raw = await this.insertOneAndReturnRaw(data)
-    return this.entity.fromRaw(raw)
-  }
-
-  async insertOneFullFieldAndReturnRaw<X extends _INSERT>(
-    data: NoExtra<_INSERT, X>
-  ): Promise<{ [P in keyof _ENTITY]: any }> {
-    const raw = this.insertOneAndReturnRaw(data)
-    return raw
-  }
-
-  async insertOneFullFieldAndReturnEntity<X extends _INSERT>(
-    data: NoExtra<_INSERT, X>
-  ): Promise<_ENTITY> {
-    const raw = await this.insertOneAndReturnRaw(data)
+    const raw = insertResult.raw[0]
     return this.entity.fromRaw(raw)
   }
 
@@ -261,22 +216,6 @@ export abstract class _PostgreSqlRepository<
     const where = this.getWhereOptions(condition)
     const updateResult = await this.repository.update(where, data)
     return updateResult.affected
-  }
-
-  async update<X extends Partial<_UPDATE>>(
-    condition: BaseCondition<_ENTITY>,
-    data: NoExtra<Partial<_UPDATE>, X>
-  ): Promise<_ENTITY[]> {
-    const where = this.getWhereOptions(condition)
-    const updateResult: UpdateResult = await this.repository
-      .createQueryBuilder()
-      .update()
-      .where(where)
-      .set(data)
-      .returning('*')
-      .execute()
-    const raws = updateResult.raw
-    return this.entity.fromRaws(raws)
   }
 
   async updateAndReturnRaw<X extends Partial<_UPDATE>>(
@@ -295,7 +234,7 @@ export abstract class _PostgreSqlRepository<
     return raw
   }
 
-  async updateAndReturnEntity<X extends Partial<_UPDATE>>(
+  async updateMany<X extends Partial<_UPDATE>>(
     condition: BaseCondition<_ENTITY>,
     data: NoExtra<Partial<_UPDATE>, X>
   ): Promise<_ENTITY[]> {
@@ -303,7 +242,7 @@ export abstract class _PostgreSqlRepository<
     return this.entity.fromRaws(raws)
   }
 
-  async updateOneAndReturnEntity<X extends Partial<_UPDATE>>(
+  async updateOne<X extends Partial<_UPDATE>>(
     condition: BaseCondition<_ENTITY>,
     data: NoExtra<Partial<_UPDATE>, X>
   ): Promise<_ENTITY> {
@@ -340,7 +279,7 @@ export abstract class _PostgreSqlRepository<
     return this.entity.fromRaws(upsertResult.raw)
   }
 
-  async delete(condition: BaseCondition<_ENTITY>) {
+  async deleteBasic(condition: BaseCondition<_ENTITY>) {
     const where = this.getWhereOptions(condition)
     const deleteResult = await this.repository.delete(where)
     return deleteResult.affected
@@ -361,12 +300,12 @@ export abstract class _PostgreSqlRepository<
     return raws
   }
 
-  async deleteAndReturnEntity(condition: BaseCondition<_ENTITY>): Promise<_ENTITY[]> {
+  async deleteMany(condition: BaseCondition<_ENTITY>): Promise<_ENTITY[]> {
     const raws = await this.deleteAndReturnRaw(condition)
     return this.entity.fromRaws(raws)
   }
 
-  async deleteOneAndReturnEntity(condition: BaseCondition<_ENTITY>): Promise<_ENTITY> {
+  async deleteOne(condition: BaseCondition<_ENTITY>): Promise<_ENTITY> {
     const raws = await this.deleteAndReturnRaw(condition)
     if (raws.length !== 1) {
       console.log(`Delete ${this.entity['name']} failed, raws: `, raws)

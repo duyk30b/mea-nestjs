@@ -61,7 +61,7 @@ export class ApiCustomerController {
     return { data }
   }
 
-  @Patch('update/:id')
+  @Post('update/:id')
   @UserPermission(PermissionId.CUSTOMER_UPDATE)
   async update(
     @External() { oid }: TExternal,
@@ -72,7 +72,7 @@ export class ApiCustomerController {
     return { data }
   }
 
-  @Delete('destroy/:id')
+  @Post('destroy/:id')
   @UserPermission(PermissionId.CUSTOMER_DELETE)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(

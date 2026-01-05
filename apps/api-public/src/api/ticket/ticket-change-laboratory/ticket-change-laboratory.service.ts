@@ -123,17 +123,15 @@ export class TicketChangeLaboratoryService {
     const { oid, ticketId, ticketLaboratoryGroupId, body } = options
     const response = options.query?.response
 
-    const ticketLaboratoryGroupUpdate =
-      await this.ticketLaboratoryGroupRepository.updateOneAndReturnEntity(
-        { oid, id: ticketLaboratoryGroupId },
-        { completedAt: body.completedAt, status: TicketLaboratoryStatus.Completed }
-      )
+    const ticketLaboratoryGroupUpdate = await this.ticketLaboratoryGroupRepository.updateOne(
+      { oid, id: ticketLaboratoryGroupId },
+      { completedAt: body.completedAt, status: TicketLaboratoryStatus.Completed }
+    )
 
-    const ticketLaboratoryModifiedList =
-      await this.ticketLaboratoryRepository.updateAndReturnEntity(
-        { oid, ticketId, ticketLaboratoryGroupId },
-        { completedAt: body.completedAt, status: TicketLaboratoryStatus.Completed }
-      )
+    const ticketLaboratoryModifiedList = await this.ticketLaboratoryRepository.updateMany(
+      { oid, ticketId, ticketLaboratoryGroupId },
+      { completedAt: body.completedAt, status: TicketLaboratoryStatus.Completed }
+    )
 
     const tlrBodyInsertList = body.ticketLaboratoryResultUpdateList.filter((i) => {
       return !i.id
@@ -155,8 +153,7 @@ export class TicketChangeLaboratoryService {
         }
         return dtoInsert
       })
-      tlrCreatedList =
-        await this.ticketLaboratoryResultRepository.insertManyAndReturnEntity(tlrDtoInsertList)
+      tlrCreatedList = await this.ticketLaboratoryResultRepository.insertMany(tlrDtoInsertList)
     }
     if (tlrBodyUpdateList.length) {
       tlrModifiedList = await this.ticketLaboratoryResultRepository.updateResultList({
@@ -190,20 +187,18 @@ export class TicketChangeLaboratoryService {
   async cancelResult(options: { oid: number; ticketId: string; ticketLaboratoryGroupId: string }) {
     const { oid, ticketId, ticketLaboratoryGroupId } = options
 
-    const ticketLaboratoryGroupUpdate =
-      await this.ticketLaboratoryGroupRepository.updateOneAndReturnEntity(
-        { oid, id: ticketLaboratoryGroupId },
-        { status: TicketLaboratoryStatus.Pending }
-      )
+    const ticketLaboratoryGroupUpdate = await this.ticketLaboratoryGroupRepository.updateOne(
+      { oid, id: ticketLaboratoryGroupId },
+      { status: TicketLaboratoryStatus.Pending }
+    )
 
-    const ticketLaboratoryModifiedList =
-      await this.ticketLaboratoryRepository.updateAndReturnEntity(
-        { oid, ticketId, ticketLaboratoryGroupId },
-        { status: TicketLaboratoryStatus.Pending }
-      )
+    const ticketLaboratoryModifiedList = await this.ticketLaboratoryRepository.updateMany(
+      { oid, ticketId, ticketLaboratoryGroupId },
+      { status: TicketLaboratoryStatus.Pending }
+    )
 
     const ticketLaboratoryResultDestroyedList =
-      await this.ticketLaboratoryResultRepository.deleteAndReturnEntity({
+      await this.ticketLaboratoryResultRepository.deleteMany({
         oid,
         ticketId,
         ticketLaboratoryGroupId,

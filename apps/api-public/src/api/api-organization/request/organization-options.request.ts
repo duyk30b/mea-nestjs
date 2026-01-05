@@ -9,6 +9,10 @@ export class OrganizationRelationQuery {
 
   @Expose()
   @IsBoolean()
+  organizationPaymentList: boolean
+
+  @Expose()
+  @IsBoolean()
   logoImage: boolean
 }
 

@@ -50,7 +50,8 @@ export class ImageManagerService implements OnModuleInit {
     files: FileUploadDto[]
     filesPosition: number[]
   }) {
-    const { oid, ticketId, customerId, imageIdListKeep, imageIdListOld, files, filesPosition } = options
+    const { oid, ticketId, customerId, imageIdListKeep, imageIdListOld, files, filesPosition } =
+      options
 
     const imageOldList = imageIdListOld.length
       ? await this.imageRepository.findManyByIds(imageIdListOld)
@@ -104,9 +105,9 @@ export class ImageManagerService implements OnModuleInit {
       .map((i) => i.id)
 
     const [imageIdListNew] = await Promise.all([
-      this.imageRepository.insertManyFullField(imageInsertList),
+      this.imageRepository.insertManyBasicFullField(imageInsertList),
       imageIdsRemoveSuccess.length
-        ? this.imageRepository.delete({ id: { IN: imageIdsRemoveSuccess } })
+        ? this.imageRepository.deleteBasic({ id: { IN: imageIdsRemoveSuccess } })
         : null,
       imageIdsRemoveFailed.length
         ? this.imageRepository.updateBasic({ id: { IN: imageIdsRemoveFailed } }, { waitDelete: 1 })
@@ -142,7 +143,7 @@ export class ImageManagerService implements OnModuleInit {
     // chưa xử lý việc xóa ảnh thực sự trên host
     let imageDestroyedList: Image[] = []
     if (imageIdsRemove.length) {
-      imageDestroyedList = await this.imageRepository.updateAndReturnEntity(
+      imageDestroyedList = await this.imageRepository.updateMany(
         { oid, id: { IN: imageIdsRemove } },
         { waitDelete: 1 }
       )
@@ -165,7 +166,7 @@ export class ImageManagerService implements OnModuleInit {
       }
       return insert
     })
-    const imageCreatedList = await this.imageRepository.insertManyAndReturnEntity(imageInsertList)
+    const imageCreatedList = await this.imageRepository.insertMany(imageInsertList)
 
     // sắp xếp sao cho đúng vị trí
     const imageIdListNew = []
@@ -204,7 +205,7 @@ export class ImageManagerService implements OnModuleInit {
       .map((i) => i.id)
 
     if (imageIdsRemoveSuccess.length) {
-      await this.imageRepository.delete({ id: { IN: imageIdsRemoveSuccess } })
+      await this.imageRepository.deleteBasic({ id: { IN: imageIdsRemoveSuccess } })
     }
   }
 
@@ -216,7 +217,7 @@ export class ImageManagerService implements OnModuleInit {
     const { oid, idRemoveList } = options
     let imageWaitDeleteList: Image[] = []
     if (idRemoveList.length) {
-      imageWaitDeleteList = await this.imageRepository.updateAndReturnEntity(
+      imageWaitDeleteList = await this.imageRepository.updateMany(
         { oid, id: { IN: idRemoveList } },
         { waitDelete: 1 }
       )

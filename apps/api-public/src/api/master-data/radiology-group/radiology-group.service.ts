@@ -63,7 +63,7 @@ export class RadiologyGroupService {
   }
 
   async createOne(oid: number, body: RadiologyGroupUpsertBody): Promise<BaseResponse> {
-    const radiologyGroup = await this.radiologyGroupRepository.insertOneAndReturnEntity({
+    const radiologyGroup = await this.radiologyGroupRepository.insertOne({
       oid,
       ...body,
     })
@@ -71,15 +71,12 @@ export class RadiologyGroupService {
   }
 
   async updateOne(oid: number, id: number, body: RadiologyGroupUpsertBody): Promise<BaseResponse> {
-    const radiologyGroupList = await this.radiologyGroupRepository.updateAndReturnEntity(
-      { id, oid },
-      body
-    )
+    const radiologyGroupList = await this.radiologyGroupRepository.updateMany({ id, oid }, body)
     return { data: { radiologyGroup: radiologyGroupList[0] } }
   }
 
   async destroyOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.radiologyGroupRepository.delete({ oid, id })
+    const affected = await this.radiologyGroupRepository.deleteBasic({ oid, id })
     if (affected === 0) throw new BusinessException('error.Database.DeleteFailed')
 
     return { data: true }
@@ -107,13 +104,13 @@ export class RadiologyGroupService {
         return insertDto
       })
 
-    await this.radiologyGroupRepository.delete({
+    await this.radiologyGroupRepository.deleteBasic({
       oid,
       id: { NOT_IN: radiologyGroupUpdateLit.map((i) => i.id) },
     })
 
     if (radiologyGroupInsertLit.length) {
-      await this.radiologyGroupRepository.insertMany(radiologyGroupInsertLit)
+      await this.radiologyGroupRepository.insertManyBasic(radiologyGroupInsertLit)
     }
     if (radiologyGroupUpdateLit.length) {
       await this.radiologyGroupManager.bulkUpdate({
@@ -152,8 +149,7 @@ export class RadiologyGroupService {
       }
       return dto
     })
-    const lgInsertedList =
-      await this.radiologyGroupRepository.insertManyAndReturnEntity(lgCreateList)
+    const lgInsertedList = await this.radiologyGroupRepository.insertMany(lgCreateList)
 
     return [...radiologyGroupAll, ...lgInsertedList]
   }

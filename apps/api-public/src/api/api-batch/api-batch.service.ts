@@ -97,7 +97,7 @@ export class ApiBatchService {
   }
 
   async updateInfo(oid: number, id: number, body: BatchUpdateInfoBody) {
-    const batch = await this.batchRepository.updateOneAndReturnEntity({ id, oid }, body)
+    const batch = await this.batchRepository.updateOne({ id, oid }, body)
 
     this.socketEmitService.productListChange(oid, { batchUpsertedList: [batch] })
     return { batch }
@@ -114,7 +114,7 @@ export class ApiBatchService {
       relation: { product: true },
       condition: { oid, id: batchId },
     })
-    const batchUpdated = await this.batchRepository.updateOneAndReturnEntity(
+    const batchUpdated = await this.batchRepository.updateOne(
       { id: batchId, oid },
       {
         lotNumber: body.lotNumber,
@@ -162,7 +162,7 @@ export class ApiBatchService {
         expectedPrice: batchOrigin.costPrice,
         createdAt: Date.now(),
       }
-      this.productMovementRepository.insertOneFullField(productMovement)
+      await this.productMovementRepository.insertOneBasic(productMovement)
 
       this.socketEmitService.productListChange(oid, {
         productUpsertedList: [productUpdated],
@@ -192,13 +192,17 @@ export class ApiBatchService {
 
     let productUpdated: Product
     if (
-      !(purchaseOrderItemList.length > 0 || ticketBatchList.length > 0 || ticketProductList.length > 0)
+      !(
+        purchaseOrderItemList.length > 0
+        || ticketBatchList.length > 0
+        || ticketProductList.length > 0
+      )
     ) {
-      const batchDestroyed = await this.batchRepository.deleteOneAndReturnEntity({
+      const batchDestroyed = await this.batchRepository.deleteOne({
         oid,
         id: batchId,
       })
-      productUpdated = await this.productRepository.updateOneAndReturnEntity(
+      productUpdated = await this.productRepository.updateOne(
         { oid, id: batchDestroyed.productId },
         { quantity: () => `quantity - ${batchDestroyed.quantity}` }
       )

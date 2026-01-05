@@ -30,7 +30,7 @@ export class TicketChangeReceptionController {
     return { data }
   }
 
-  @Delete('/:ticketId/reception-destroy/:ticketReceptionId')
+  @Post('/:ticketId/reception-destroy/:ticketReceptionId')
   @UserPermissionOr(PermissionId.TICKET_DRAFT_CRUD)
   async receptionDestroy(
     @External() { oid }: TExternal,

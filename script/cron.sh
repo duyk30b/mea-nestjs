@@ -14,7 +14,7 @@ STDERR_LOG="../data/logs/backup-postgres-stderr.log"
 JOB_ID="backup_postgres"
 
 # Chạy lúc 19h hàng ngày (2h sáng giờ Việt Nam)
-CRON_EXPRESSION="0 19 * * * cd $WORKING_DIR && $SCRIPT_FILE >> $STDOUT_LOG 2>> $STDERR_LOG #JOB_ID=$JOB_ID"
+CRON_EXPRESSION="TZ=UTC 0 19 * * * cd $WORKING_DIR && $SCRIPT_FILE >> $STDOUT_LOG 2>> $STDERR_LOG #JOB_ID=$JOB_ID"
 
 # Xóa cronjob cũ theo JOB_ID
 crontab -l 2>/dev/null | grep -v "#JOB_ID=$JOB_ID" | crontab -

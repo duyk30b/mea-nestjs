@@ -71,7 +71,7 @@ export class ApiPrintHtmlController {
     return { data }
   }
 
-  @Patch('update/:id')
+  @Post('update/:id')
   @UserPermission(PermissionId.MASTER_DATA_PRINT_HTML)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
@@ -83,7 +83,7 @@ export class ApiPrintHtmlController {
     return { data }
   }
 
-  @Delete('destroy/:id')
+  @Post('destroy/:id')
   @UserPermission(PermissionId.MASTER_DATA_PRINT_HTML)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(

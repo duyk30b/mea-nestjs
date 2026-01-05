@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsInt, IsString, ValidateNested } from 'class-validator'
+import { IsArray, IsDefined, IsInt, IsNumber, IsString, ValidateNested } from 'class-validator'
 import { IsNumberGreaterThan } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
 
 class DataList {
@@ -12,8 +12,8 @@ class DataList {
 
   @Expose()
   @IsDefined()
-  @IsNumberGreaterThan(0)
-  paidAmount: number
+  @IsNumber()
+  debtTotalMinus: number
 }
 
 export class PurchaseOrderPayDebtBody {
@@ -32,9 +32,9 @@ export class PurchaseOrderPayDebtBody {
   @Expose()
   @IsDefined()
   @IsNumberGreaterThan(0)
-  paidAmount: number
+  totalMoney: number
 
-  @ApiPropertyOptional({ example: 'Khách hàng còn bo thêm tiền' })
+  @ApiPropertyOptional({})
   @Expose()
   @IsString()
   note: string

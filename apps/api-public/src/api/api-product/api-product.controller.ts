@@ -63,7 +63,7 @@ export class ApiProductController {
     return { data }
   }
 
-  @Patch('update/:id')
+  @Post('update/:id')
   @UserPermission(PermissionId.PRODUCT_UPDATE)
   async update(
     @External() { oid }: TExternal,
@@ -74,7 +74,7 @@ export class ApiProductController {
     return { data }
   }
 
-  @Delete('destroy/:id')
+  @Post('destroy/:id')
   @UserPermission(PermissionId.PRODUCT_DELETE)
   @ApiParam({ name: 'id', example: 1 })
   async deleteOne(
@@ -85,7 +85,7 @@ export class ApiProductController {
     return { data }
   }
 
-  @Patch('merge-product')
+  @Post('merge-product')
   @UserPermission(PermissionId.PRODUCT_MERGE)
   async mergeProduct(
     @External() { oid, uid, organization }: TExternal,

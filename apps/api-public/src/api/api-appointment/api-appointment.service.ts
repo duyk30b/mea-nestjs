@@ -160,7 +160,7 @@ export class ApiAppointmentService {
         customerCode = (count + 1).toString()
       }
 
-      customerId = await this.customerRepository.insertOneFullField({
+      customerId = await this.customerRepository.insertOneBasicFullField({
         ...body.customer,
         debt: 0,
         oid,
@@ -168,7 +168,7 @@ export class ApiAppointmentService {
       })
     }
 
-    const appointment = await this.appointmentRepository.insertOneFullFieldAndReturnEntity({
+    const appointment = await this.appointmentRepository.insertOne({
       ...ticketBody,
       customerId,
       toTicketId: '0',
@@ -179,7 +179,7 @@ export class ApiAppointmentService {
   }
 
   async updateOne(oid: number, id: string, body: AppointmentUpdateBody) {
-    const [appointment] = await this.appointmentRepository.updateAndReturnEntity({ oid, id }, body)
+    const [appointment] = await this.appointmentRepository.updateMany({ oid, id }, body)
     if (!appointment) {
       throw BusinessException.create({
         message: 'error.Database.UpdateFailed',
@@ -190,7 +190,7 @@ export class ApiAppointmentService {
   }
 
   async deleteOne(oid: number, id: string) {
-    const affected = await this.appointmentRepository.delete({
+    const affected = await this.appointmentRepository.deleteBasic({
       oid,
       id,
       status: {
@@ -221,7 +221,7 @@ export class ApiAppointmentService {
         createdAt: receptionAt,
       })
       const dailyIndex = Number(ticketIdGenerate.slice(-4))
-      ticket = await this.ticketRepository.insertOneFullFieldAndReturnEntity({
+      ticket = await this.ticketRepository.insertOne({
         oid,
         id: ticketIdGenerate,
         roomId: body.roomId,
@@ -271,32 +271,31 @@ export class ApiAppointmentService {
           debtSurcharge: 0,
           debtDiscount: 0,
         }
-        await this.ticketPaymentDetailRepository.insertOne(ticketPaymentDetailInsert)
+        await this.ticketPaymentDetailRepository.insertOneBasic(ticketPaymentDetailInsert)
       }
     } else {
-      ticket = await this.ticketRepository.updateOneAndReturnEntity(
+      ticket = await this.ticketRepository.updateOne(
         { oid, id: body.toTicketId },
         { receptionAt: body.receptionAt }
       )
     }
 
     if (appointment.reason) {
-      ticket.ticketAttributeList =
-        await this.ticketAttributeRepository.insertManyFullFieldAndReturnEntity([
-          {
-            key: 'reason',
-            value: appointment.reason || '',
-            oid,
-            ticketId: ticket.id,
-          },
-        ])
+      ticket.ticketAttributeList = await this.ticketAttributeRepository.insertMany([
+        {
+          key: 'reason',
+          value: appointment.reason || '',
+          oid,
+          ticketId: ticket.id,
+        },
+      ])
     }
 
     ticket.customer = customer
 
     this.socketEmitService.socketTicketChange(oid, { ticketId: ticket.id, ticketModified: ticket })
 
-    await this.appointmentRepository.updateAndReturnEntity(
+    await this.appointmentRepository.updateMany(
       { oid, id: appointmentId },
       {
         status: AppointmentStatus.Completed,

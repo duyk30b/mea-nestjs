@@ -44,7 +44,7 @@ export class PaymentOtherService {
       const moneyTransfer = paymentOrigin.paidTotal
       if (moneyTransfer) {
         if (paymentOrigin.walletId && paymentOrigin.walletId !== '0') {
-          const walletOldModified = await this.walletRepository.updateOneAndReturnEntity(
+          const walletOldModified = await this.walletRepository.updateOne(
             { oid, id: paymentOrigin.walletId },
             { money: () => `money - ${moneyTransfer}` }
           )
@@ -70,10 +70,10 @@ export class PaymentOtherService {
             walletOpenMoney: walletOldModified.money + moneyTransfer,
             walletCloseMoney: walletOldModified.money,
           }
-          const payment = await this.paymentRepository.insertOneAndReturnEntity(paymentInsert)
+          await this.paymentRepository.insertOneBasic(paymentInsert)
         }
         if (body.walletId && body.walletId !== '0') {
-          const walletNewModified = await this.walletRepository.updateOneAndReturnEntity(
+          const walletNewModified = await this.walletRepository.updateOne(
             { oid, id: body.walletId },
             { money: () => `money + ${moneyTransfer}` }
           )
@@ -82,7 +82,7 @@ export class PaymentOtherService {
         }
       }
     }
-    const payment = await this.paymentRepository.updateOneAndReturnEntity(
+    const payment = await this.paymentRepository.updateOne(
       { oid, id: paymentId, cashierId: userId }, // chỉ sửa phiếu do chính mình tạo ra
       {
         createdAt: body.createdAt,
@@ -101,7 +101,7 @@ export class PaymentOtherService {
     let walletOpenMoney = 0
     let walletCloseMoney = 0
     if (body.walletId) {
-      const walletModified = await this.walletRepository.updateOneAndReturnEntity(
+      const walletModified = await this.walletRepository.updateOne(
         { oid, id: body.walletId },
         { money: () => `money - ${body.paidAmount}` }
       )
@@ -131,7 +131,7 @@ export class PaymentOtherService {
       walletOpenMoney,
       walletCloseMoney,
     }
-    const payment = await this.paymentRepository.insertOneAndReturnEntity(paymentInsert)
+    const payment = await this.paymentRepository.insertOne(paymentInsert)
     return { payment }
   }
 
@@ -141,7 +141,7 @@ export class PaymentOtherService {
     let walletOpenMoney = 0
     let walletCloseMoney = 0
     if (body.walletId) {
-      const walletModified = await this.walletRepository.updateOneAndReturnEntity(
+      const walletModified = await this.walletRepository.updateOne(
         { oid, id: body.walletId },
         { money: () => `money + ${body.paidAmount}` }
       )
@@ -170,7 +170,7 @@ export class PaymentOtherService {
       walletOpenMoney,
       walletCloseMoney,
     }
-    const payment = await this.paymentRepository.insertOneAndReturnEntity(paymentInsert)
+    const payment = await this.paymentRepository.insertOne(paymentInsert)
     return { payment }
   }
 
@@ -198,7 +198,7 @@ export class PaymentOtherService {
         throw new BusinessError('Không được phép xóa phiếu thanh toán của nhà cung cấp')
       }
     }
-    await this.paymentRepository.deleteAndReturnEntity({
+    await this.paymentRepository.deleteMany({
       oid,
       id: paymentId,
       cashierId: userId, // chỉ được xóa phiếu do chính mình tạo ra

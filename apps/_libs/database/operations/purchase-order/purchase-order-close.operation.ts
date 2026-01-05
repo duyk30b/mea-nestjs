@@ -70,7 +70,7 @@ export class PurchaseOrderCloseOperation {
 
       const { distributorId } = purchaseOrderUpdated
       let purchaseOrderModified = purchaseOrderUpdated
-      let distributorModified: Distributor | null
+      let distributorModified: Distributor
       let paymentCreated: Payment
 
       const debtFix =
@@ -105,7 +105,7 @@ export class PurchaseOrderCloseOperation {
 
           hasPaymentItem: 0,
           paidTotal: 0,
-          debtTotal: -debtFix,
+          debtTotal: debtFix,
           personOpenDebt: distributorModified.debt - debtFix,
           personCloseDebt: distributorModified.debt,
           walletOpenMoney: 0,

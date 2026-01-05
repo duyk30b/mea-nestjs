@@ -119,7 +119,7 @@ export class ApiStockCheckService {
 
     let stockCheck: StockCheck
     if (!stockCheckId) {
-      stockCheck = await this.stockCheckRepository.insertOneFullFieldAndReturnEntity({
+      stockCheck = await this.stockCheckRepository.insertOne({
         oid,
         createdAt: stockCheckBody.createdAt,
         createdByUserId: stockCheckBody.createdByUserId,
@@ -129,7 +129,7 @@ export class ApiStockCheckService {
         updatedByUserId: 0,
       })
     } else {
-      stockCheck = await this.stockCheckRepository.updateOneAndReturnEntity(
+      stockCheck = await this.stockCheckRepository.updateOne(
         { oid, id: stockCheckId, status: StockCheckStatus.Draft },
         {
           createdAt: stockCheckBody.createdAt,
@@ -137,7 +137,7 @@ export class ApiStockCheckService {
           note: stockCheckBody.note,
         }
       )
-      await this.stockCheckItemRepository.delete({ oid, stockCheckId })
+      await this.stockCheckItemRepository.deleteBasic({ oid, stockCheckId })
     }
     if (!stockCheck) {
       throw new BusinessException('error.Conflict')
@@ -157,7 +157,7 @@ export class ApiStockCheckService {
       }
       return insertDto
     })
-    await this.stockCheckItemRepository.insertManyFullField(stockCheckItemInsertList)
+    await this.stockCheckItemRepository.insertManyBasic(stockCheckItemInsertList)
 
     return { data: { stockCheck } }
   }
@@ -168,7 +168,7 @@ export class ApiStockCheckService {
     userId: number
   }): Promise<BaseResponse> {
     const { oid, stockCheckId, userId } = params
-    const stockCheck = await this.stockCheckRepository.updateOneAndReturnEntity(
+    const stockCheck = await this.stockCheckRepository.updateOne(
       { oid, id: stockCheckId, status: StockCheckStatus.Draft },
       {
         status: StockCheckStatus.Pending,
@@ -187,7 +187,7 @@ export class ApiStockCheckService {
     userId: number
   }): Promise<BaseResponse> {
     const { oid, stockCheckId, userId } = params
-    const stockCheck = await this.stockCheckRepository.updateOneAndReturnEntity(
+    const stockCheck = await this.stockCheckRepository.updateOne(
       { oid, id: stockCheckId, status: StockCheckStatus.Pending },
       {
         status: StockCheckStatus.Confirmed,
@@ -223,7 +223,7 @@ export class ApiStockCheckService {
 
   async void(params: { oid: number; stockCheckId: string; userId: number }): Promise<BaseResponse> {
     const { oid, stockCheckId, userId } = params
-    const stockCheck = await this.stockCheckRepository.updateOneAndReturnEntity(
+    const stockCheck = await this.stockCheckRepository.updateOne(
       {
         oid,
         id: stockCheckId,
@@ -246,8 +246,8 @@ export class ApiStockCheckService {
     if (![StockCheckStatus.Draft, StockCheckStatus.Cancelled].includes(stockCheckOrigin.status)) {
       throw new BusinessException('error.Conflict')
     }
-    await this.stockCheckItemRepository.delete({ oid, stockCheckId })
-    await this.stockCheckRepository.delete({ oid, id: stockCheckId })
+    await this.stockCheckItemRepository.deleteBasic({ oid, stockCheckId })
+    await this.stockCheckRepository.deleteBasic({ oid, id: stockCheckId })
     return { data: { stockCheckId } }
   }
 }

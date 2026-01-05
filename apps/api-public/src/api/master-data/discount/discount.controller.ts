@@ -35,7 +35,7 @@ export class DiscountController {
     return await this.discountService.createOne(oid, body)
   }
 
-  @Patch('update/:id')
+  @Post('update/:id')
   @UserPermission(PermissionId.MASTER_DATA_DISCOUNT)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
@@ -46,7 +46,7 @@ export class DiscountController {
     return await this.discountService.updateOne(oid, id, body)
   }
 
-  @Delete('destroy/:id')
+  @Post('destroy/:id')
   @UserPermission(PermissionId.MASTER_DATA_DISCOUNT)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {

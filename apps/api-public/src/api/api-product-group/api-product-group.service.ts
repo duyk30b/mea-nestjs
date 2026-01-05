@@ -5,11 +5,11 @@ import { BaseResponse } from '../../../../_libs/common/interceptor/transform-res
 import { ProductGroupInsertType } from '../../../../_libs/database/entities/product-group.entity'
 import { ProductGroupRepository } from '../../../../_libs/database/repositories/product-group.repository'
 import {
-    ProductGroupCreateBody,
-    ProductGroupGetManyQuery,
-    ProductGroupPaginationQuery,
-    ProductGroupReplaceAllBody,
-    ProductGroupUpdateBody,
+  ProductGroupCreateBody,
+  ProductGroupGetManyQuery,
+  ProductGroupPaginationQuery,
+  ProductGroupReplaceAllBody,
+  ProductGroupUpdateBody,
 } from './request'
 
 @Injectable()
@@ -61,7 +61,7 @@ export class ApiProductGroupService {
   }
 
   async createOne(oid: number, body: ProductGroupCreateBody): Promise<BaseResponse> {
-    const id = await this.productGroupRepository.insertOne({ oid, ...body })
+    const id = await this.productGroupRepository.insertOneBasic({ oid, ...body })
     const data = await this.productGroupRepository.findOneById(id)
     return { data }
   }
@@ -73,7 +73,7 @@ export class ApiProductGroupService {
   }
 
   async destroyOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.productGroupRepository.delete({ oid, id })
+    const affected = await this.productGroupRepository.deleteBasic({ oid, id })
     if (affected === 0) {
       throw new BusinessException('error.Database.DeleteFailed')
     }
@@ -95,8 +95,7 @@ export class ApiProductGroupService {
       }
       return dto
     })
-    const lgInsertedList =
-      await this.productGroupRepository.insertManyAndReturnEntity(lgCreateList)
+    const lgInsertedList = await this.productGroupRepository.insertMany(lgCreateList)
 
     return [...productGroupAll, ...lgInsertedList]
   }

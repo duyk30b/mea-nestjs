@@ -56,7 +56,7 @@ export class ApiExpenseService {
       throw new BusinessError(`Trùng mã chi phí với ${existExpense.name}`)
     }
 
-    const expense = await this.expenseRepository.insertOneFullFieldAndReturnEntity({
+    const expense = await this.expenseRepository.insertOne({
       oid,
       ...body,
       code,
@@ -78,16 +78,13 @@ export class ApiExpenseService {
       }
     }
 
-    const expense = await this.expenseRepository.updateOneAndReturnEntity(
-      { id: expenseId, oid },
-      body
-    )
+    const expense = await this.expenseRepository.updateOne({ id: expenseId, oid }, body)
     return { expense }
   }
 
   async destroyOne(options: { oid: number; expenseId: number }) {
     const { oid, expenseId } = options
-    await this.expenseRepository.delete({ oid, id: expenseId })
+    await this.expenseRepository.deleteBasic({ oid, id: expenseId })
 
     return { expenseId }
   }

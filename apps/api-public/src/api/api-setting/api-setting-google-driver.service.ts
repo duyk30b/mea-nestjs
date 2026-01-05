@@ -27,7 +27,7 @@ export class ApiSettingGoogleDriverService {
     if (!setting) return
     const { email } = JSON.parse(setting.data)
     await this.googleDriverService.logout(email)
-    await this.settingRepository.delete({ id: setting.id })
+    await this.settingRepository.deleteBasic({ id: setting.id })
     await this.cacheDataService.reloadSettingMap(oid)
     return { data: true }
   }

@@ -29,7 +29,7 @@ export class ApiPrintHtmlSettingService {
 
   async replaceAll(oid: number, body: PrintHtmlSettingReplaceAllBody) {
     const idAll = body.replaceAll.map((i) => i.id)
-    await this.printHtmlRepository.delete({ oid, id: { NOT_IN: idAll } })
+    await this.printHtmlRepository.deleteBasic({ oid, id: { NOT_IN: idAll } })
 
     const printHtmlInsertList = body.replaceAll
       .filter((i) => i.id === 0)
@@ -40,7 +40,7 @@ export class ApiPrintHtmlSettingService {
         }
         return insertList
       })
-    await this.printHtmlRepository.insertManyFullFieldAndReturnEntity(printHtmlInsertList)
+    await this.printHtmlRepository.insertMany(printHtmlInsertList)
 
     const replaceAll = body.replaceAll.filter((i) => !!i.id)
 

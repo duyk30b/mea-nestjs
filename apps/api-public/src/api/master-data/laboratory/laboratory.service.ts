@@ -138,14 +138,14 @@ export class LaboratoryService {
       laboratoryCode = ESTimer.timeToText(new Date(), 'YYMMDDhhmmss')
     }
 
-    const laboratoryParentId = await this.laboratoryRepository.insertOneFullField({
+    const laboratoryParentId = await this.laboratoryRepository.insertOneBasicFullField({
       ...laboratoryBody,
       oid,
       level: 1,
       parentId: 0,
       laboratoryCode,
     })
-    const laboratoryParent = await this.laboratoryRepository.updateOneAndReturnEntity(
+    const laboratoryParent = await this.laboratoryRepository.updateOne(
       { oid, id: laboratoryParentId },
       { parentId: laboratoryParentId }
     )
@@ -162,7 +162,7 @@ export class LaboratoryService {
         }
         return childDto
       })
-      await this.laboratoryRepository.insertManyFullFieldAndReturnEntity(childrenDto)
+      await this.laboratoryRepository.insertMany(childrenDto)
     }
 
     if (positionRequestList?.length) {
@@ -175,7 +175,7 @@ export class LaboratoryService {
         }
         return dto
       })
-      await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
+      await this.positionRepository.insertMany(positionDtoList)
     }
 
     if (discountList?.length) {
@@ -188,7 +188,7 @@ export class LaboratoryService {
         }
         return dto
       })
-      await this.discountRepository.insertManyFullFieldAndReturnEntity(discountListDto)
+      await this.discountRepository.insertMany(discountListDto)
     }
 
     this.socketEmitService.socketMasterDataChange(oid, {
@@ -228,7 +228,7 @@ export class LaboratoryService {
     if (laboratoryOrigin.valueType === LaboratoryValueType.Children) {
       // nếu trước đây nó có các laboratory con, giờ mà không dùng nữa thì xóa đi thôi
       if (laboratoryBody.valueType !== LaboratoryValueType.Children) {
-        await this.laboratoryRepository.delete({
+        await this.laboratoryRepository.deleteBasic({
           oid,
           level: 2,
           parentId: laboratoryId,
@@ -236,7 +236,7 @@ export class LaboratoryService {
       }
     }
 
-    const laboratoryParent = await this.laboratoryRepository.updateOneAndReturnEntity(
+    const laboratoryParent = await this.laboratoryRepository.updateOne(
       { oid, id: laboratoryId },
       { ...laboratoryBody, laboratoryCode }
     )
@@ -245,7 +245,7 @@ export class LaboratoryService {
       const laboratoryChildUpdateList = laboratoryChildren.filter((i) => !!i.id)
       const laboratoryChildInsertList = laboratoryChildren.filter((i) => !i.id)
 
-      await this.laboratoryRepository.deleteAndReturnEntity({
+      await this.laboratoryRepository.deleteMany({
         oid,
         parentId: laboratoryId,
         level: 2,
@@ -254,7 +254,7 @@ export class LaboratoryService {
       })
 
       if (laboratoryChildInsertList.length) {
-        await this.laboratoryRepository.insertManyFullFieldAndReturnEntity(
+        await this.laboratoryRepository.insertMany(
           laboratoryChildInsertList.map((i) => {
             const dto: LaboratoryInsertType = {
               ...laboratoryBody,
@@ -308,12 +308,12 @@ export class LaboratoryService {
     }
 
     if (positionRequestList) {
-      await this.positionRepository.deleteAndReturnEntity({
+      await this.positionRepository.deleteMany({
         oid,
         positionInteractId: laboratoryId,
         positionType: PositionType.LaboratoryRequest,
       })
-      await this.positionRepository.insertManyFullFieldAndReturnEntity(
+      await this.positionRepository.insertMany(
         positionRequestList.map((i) => {
           const dto: PositionInsertType = {
             ...i,
@@ -327,12 +327,12 @@ export class LaboratoryService {
     }
 
     if (discountList) {
-      await this.discountRepository.deleteAndReturnEntity({
+      await this.discountRepository.deleteMany({
         oid,
         discountInteractId: laboratoryId,
         discountInteractType: DiscountInteractType.Laboratory,
       })
-      await this.discountRepository.insertManyFullFieldAndReturnEntity(
+      await this.discountRepository.insertMany(
         discountList.map((i) => {
           const dto: DiscountInsertType = {
             ...i,
@@ -362,16 +362,16 @@ export class LaboratoryService {
     if (!ticketLaboratoryList.length) {
       const [laboratoryDestroyedList, positionDestroyedList, discountDestroyedList] =
         await Promise.all([
-          this.laboratoryRepository.deleteAndReturnEntity({
+          this.laboratoryRepository.deleteMany({
             oid,
             parentId: laboratoryId,
           }),
-          this.positionRepository.deleteAndReturnEntity({
+          this.positionRepository.deleteMany({
             oid,
             positionInteractId: laboratoryId,
             positionType: PositionType.LaboratoryRequest,
           }),
-          this.discountRepository.deleteAndReturnEntity({
+          this.discountRepository.deleteMany({
             oid,
             discountInteractId: laboratoryId,
             discountInteractType: DiscountInteractType.Laboratory,
@@ -451,7 +451,7 @@ export class LaboratoryService {
         return dto
       }
     )
-    const laboratoryParentCreatedList = await this.laboratoryRepository.insertManyAndReturnEntity(
+    const laboratoryParentCreatedList = await this.laboratoryRepository.insertMany(
       laboratoryParentInsertList
     )
     await this.laboratoryRepository.updateBasic(
@@ -494,7 +494,7 @@ export class LaboratoryService {
         }
         return dto
       })
-    await this.laboratoryRepository.insertMany(laboratoryChildInsertList)
+    await this.laboratoryRepository.insertManyBasic(laboratoryChildInsertList)
 
     return { success: true }
   }

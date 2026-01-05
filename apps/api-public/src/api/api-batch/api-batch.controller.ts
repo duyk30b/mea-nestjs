@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Query } from '@nestjs/common'
+import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
 import { OrganizationPermission } from '../../../../_libs/common/guards/organization.guard'
@@ -53,7 +53,7 @@ export class ApiBatchController {
     return { data }
   }
 
-  @Patch('update-info/:id')
+  @Post('update-info/:id')
   @UserPermission(PermissionId.PRODUCT_UPDATE_BATCH)
   async updateInfo(
     @External() { oid }: TExternal,
@@ -64,7 +64,7 @@ export class ApiBatchController {
     return { data }
   }
 
-  @Patch('update-info-and-quantity-and-cost-price/:id')
+  @Post('update-info-and-quantity-and-cost-price/:id')
   @UserPermission(PermissionId.PRODUCT_CHANGE_QUANTITY_AND_COST_PRICE)
   async updateInfoAndQuantity(
     @External() { oid, uid }: TExternal,
@@ -80,7 +80,7 @@ export class ApiBatchController {
     return { data }
   }
 
-  @Delete('destroy/:id')
+  @Post('destroy/:id')
   @UserPermission(PermissionId.PRODUCT_DELETE_BATCH)
   @ApiParam({ name: 'id', example: 1 })
   async deleteOne(@External() { oid }: TExternal, @Param() { id }: IdParam): Promise<BaseResponse> {
@@ -88,7 +88,7 @@ export class ApiBatchController {
     return { data }
   }
 
-  @Patch('merge-batch')
+  @Post('merge-batch')
   @UserPermission(PermissionId.PRODUCT_MERGE_BATCH)
   async batchMerge(
     @External() { oid, uid }: TExternal,

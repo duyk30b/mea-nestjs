@@ -68,7 +68,7 @@ export class ApiDistributorService {
   }
 
   async createOne(oid: number, body: DistributorCreateBody) {
-    const distributor = await this.distributorRepository.insertOneFullFieldAndReturnEntity({
+    const distributor = await this.distributorRepository.insertOne({
       ...body,
       oid,
       debt: 0,
@@ -78,7 +78,7 @@ export class ApiDistributorService {
   }
 
   async updateOne(oid: number, id: number, body: DistributorUpdateBody) {
-    const distributor = await this.distributorRepository.updateOneAndReturnEntity({ oid, id }, body)
+    const distributor = await this.distributorRepository.updateOne({ oid, id }, body)
 
     this.socketEmitService.socketMasterDataChange(oid, { distributor: true })
     return { distributor }
@@ -92,8 +92,8 @@ export class ApiDistributorService {
 
     if (!purchaseOrderList.length) {
       await Promise.allSettled([
-        this.distributorRepository.delete({ oid, id: distributorId }),
-        this.paymentRepository.delete({
+        this.distributorRepository.deleteBasic({ oid, id: distributorId }),
+        this.paymentRepository.deleteBasic({
           oid,
           personId: distributorId,
           personType: PaymentPersonType.Distributor,

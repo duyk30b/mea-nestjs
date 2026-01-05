@@ -107,14 +107,14 @@ export class ProcedureService {
       throw new BusinessError(`Trùng mã dịch vụ với ${existProcedure.name}`)
     }
 
-    const procedure = await this.procedureRepository.insertOneFullFieldAndReturnEntity({
+    const procedure = await this.procedureRepository.insertOne({
       ...procedureBody,
       oid,
       code,
     })
 
     if (positionRequestList?.length) {
-      await this.positionRepository.insertManyFullFieldAndReturnEntity(
+      await this.positionRepository.insertMany(
         positionRequestList.map((i) => {
           const dto: PositionInsertType = {
             ...i,
@@ -128,7 +128,7 @@ export class ProcedureService {
     }
 
     if (positionResultList?.length) {
-      await this.positionRepository.insertManyFullFieldAndReturnEntity(
+      await this.positionRepository.insertMany(
         positionResultList.map((i) => {
           const dto: PositionInsertType = {
             ...i,
@@ -142,7 +142,7 @@ export class ProcedureService {
     }
 
     if (discountList?.length) {
-      await this.discountRepository.insertManyFullFieldAndReturnEntity(
+      await this.discountRepository.insertMany(
         discountList.map((i) => {
           const dto: DiscountInsertType = {
             ...i,
@@ -176,19 +176,19 @@ export class ProcedureService {
       }
     }
 
-    const procedure = await this.procedureRepository.updateOneAndReturnEntity(
+    const procedure = await this.procedureRepository.updateOne(
       { oid, id: procedureId },
       procedureBody
     )
 
     if (positionRequestList) {
-      await this.positionRepository.deleteAndReturnEntity({
+      await this.positionRepository.deleteMany({
         oid,
         positionInteractId: procedure.id,
         positionType: PositionType.ProcedureRequest,
       })
 
-      await this.positionRepository.insertManyFullFieldAndReturnEntity(
+      await this.positionRepository.insertMany(
         positionRequestList.map((i) => {
           const dto: PositionInsertType = {
             ...i,
@@ -202,13 +202,13 @@ export class ProcedureService {
     }
 
     if (positionResultList) {
-      await this.positionRepository.deleteAndReturnEntity({
+      await this.positionRepository.deleteMany({
         oid,
         positionInteractId: procedure.id,
         positionType: PositionType.ProcedureResult,
       })
 
-      await this.positionRepository.insertManyFullFieldAndReturnEntity(
+      await this.positionRepository.insertMany(
         positionResultList.map((i) => {
           const dto: PositionInsertType = {
             ...i,
@@ -222,12 +222,12 @@ export class ProcedureService {
     }
 
     if (discountList) {
-      await this.discountRepository.deleteAndReturnEntity({
+      await this.discountRepository.deleteMany({
         oid,
         discountInteractId: procedure.id,
         discountInteractType: DiscountInteractType.Procedure,
       })
-      await this.discountRepository.insertManyFullFieldAndReturnEntity(
+      await this.discountRepository.insertMany(
         discountList.map((i) => {
           const dto: DiscountInsertType = {
             ...i,
@@ -257,16 +257,16 @@ export class ProcedureService {
 
     if (!ticketProcedureList.length) {
       const [procedureDestroyed, positionDestroyedList, discountDestroyedList] = await Promise.all([
-        this.procedureRepository.deleteOneAndReturnEntity({
+        this.procedureRepository.deleteOne({
           oid,
           id: procedureId,
         }),
-        this.positionRepository.deleteAndReturnEntity({
+        this.positionRepository.deleteMany({
           oid,
           positionInteractId: procedureId,
           positionType: { IN: [PositionType.ProcedureRequest, PositionType.ProcedureResult] },
         }),
-        this.discountRepository.deleteAndReturnEntity({
+        this.discountRepository.deleteMany({
           oid,
           discountInteractId: procedureId,
           discountInteractType: DiscountInteractType.Procedure,

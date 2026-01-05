@@ -37,7 +37,7 @@ export class ApiOrganizationController {
     return await this.apiOrganizationService.getInfo(oid)
   }
 
-  @Patch('update-info')
+  @Post('update-info')
   @UserPermission(PermissionId.ORGANIZATION_UPDATE_INFO)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FastifyFilesInterceptor('files', 10, {}))
@@ -49,7 +49,7 @@ export class ApiOrganizationController {
     return await this.apiOrganizationService.updateInfo({ oid, body, files })
   }
 
-  @Patch('change-email')
+  @Post('change-email')
   @UserPermission(PermissionId.ORGANIZATION_VERIFY_EMAIL)
   async changeEmail(@External() { oid }: TExternal, @Body() body: OrganizationChangeEmailBody) {
     return await this.apiOrganizationService.changeEmail(oid, body.email)

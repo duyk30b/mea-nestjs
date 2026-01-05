@@ -10,8 +10,9 @@ POSTGRES_USER="mea"
 POSTGRES_DB="mea_sql"
 
 echo "---------------------------------------------------------------------------------------"
-NOW=$(date '+%Y-%m-%d %H:%M:%S')
-echo "$NOW - [BACKUP_POSTGRES][$USER] Starting backup process..."
+NOW_UTC=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+NOW_VN=$(TZ=Asia/Ho_Chi_Minh date '+%Y-%m-%d %H:%M:%S ICT')
+echo "$NOW_UTC - [BACKUP_POSTGRES][$USER] Starting backup process..."
 echo "Working directory: $SCRIPT_DIR"
 
 git log master -2 --oneline
@@ -30,6 +31,6 @@ cd $PROJECT_DIR && docker compose -f docker-compose.production.yml exec postgres
   ls -la /backup \
 '
 
-NOW=$(date '+%Y-%m-%d %H:%M:%S')
-echo "$NOW - [BACKUP_POSTGRES][$USER] Finished backup process !!!"
+NOW_UTC=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+echo "$NOW_UTC - [BACKUP_POSTGRES][$USER] Finished backup process !!!"
 echo "---------------------------------------------------------------------------------------"

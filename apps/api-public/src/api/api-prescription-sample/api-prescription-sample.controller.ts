@@ -42,7 +42,7 @@ export class ApiPrescriptionSampleController {
     return await this.apiPrescriptionSampleService.createOne(oid, body)
   }
 
-  @Patch('update/:id')
+  @Post('update/:id')
   @UserPermission(PermissionId.MASTER_DATA_PRESCRIPTION_SAMPLE)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
@@ -53,7 +53,7 @@ export class ApiPrescriptionSampleController {
     return await this.apiPrescriptionSampleService.updateOne(oid, id, body)
   }
 
-  @Delete('destroy/:id')
+  @Post('destroy/:id')
   @UserPermission(PermissionId.MASTER_DATA_PRESCRIPTION_SAMPLE)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {

@@ -15,7 +15,7 @@ export class ApiAddressService {
 
   async replaceAll(body: AddressReplaceAllBody): Promise<BaseResponse> {
     await this.addressRepository.getManager().query(`TRUNCATE TABLE "${Address.name}" RESTART IDENTITY CASCADE;`)
-    await this.addressRepository.insertMany(body.addressAll)
+    await this.addressRepository.insertManyBasic(body.addressAll)
     return { data: true }
   }
 }

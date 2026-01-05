@@ -60,7 +60,7 @@ export class SurchargeService {
       throw new BusinessError(`Trùng mã phụ phí với ${existSurcharge.name}`)
     }
 
-    const surcharge = await this.surchargeRepository.insertOneFullFieldAndReturnEntity({
+    const surcharge = await this.surchargeRepository.insertOne({
       oid,
       ...body,
       code,
@@ -83,17 +83,14 @@ export class SurchargeService {
       }
     }
 
-    const surcharge = await this.surchargeRepository.updateOneAndReturnEntity(
-      { id: surchargeId, oid },
-      body
-    )
+    const surcharge = await this.surchargeRepository.updateOne({ id: surchargeId, oid }, body)
     this.socketEmitService.socketMasterDataChange(oid, { surcharge: true })
     return { surcharge }
   }
 
   async destroyOne(options: { oid: number; surchargeId: number }) {
     const { oid, surchargeId } = options
-    await this.surchargeRepository.delete({ oid, id: surchargeId })
+    await this.surchargeRepository.deleteBasic({ oid, id: surchargeId })
     this.socketEmitService.socketMasterDataChange(oid, { surcharge: true })
     return { surchargeId }
   }

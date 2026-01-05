@@ -81,11 +81,10 @@ export class ApiPrescriptionSampleService {
   }
 
   async createOne(oid: number, body: PrescriptionSampleCreateBody): Promise<BaseResponse> {
-    const prescriptionSample =
-      await this.prescriptionSampleRepository.insertOneFullFieldAndReturnEntity({
-        ...body,
-        oid,
-      })
+    const prescriptionSample = await this.prescriptionSampleRepository.insertOne({
+      ...body,
+      oid,
+    })
     return { data: { prescriptionSample } }
   }
 
@@ -94,7 +93,7 @@ export class ApiPrescriptionSampleService {
     id: number,
     body: PrescriptionSampleUpdateBody
   ): Promise<BaseResponse> {
-    const prescriptionSampleList = await this.prescriptionSampleRepository.updateAndReturnEntity(
+    const prescriptionSampleList = await this.prescriptionSampleRepository.updateMany(
       { id, oid },
       body
     )
@@ -102,7 +101,7 @@ export class ApiPrescriptionSampleService {
   }
 
   async destroyOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.prescriptionSampleRepository.delete({ oid, id })
+    const affected = await this.prescriptionSampleRepository.deleteBasic({ oid, id })
     if (affected === 0) {
       throw new BusinessException('error.Database.DeleteFailed')
     }

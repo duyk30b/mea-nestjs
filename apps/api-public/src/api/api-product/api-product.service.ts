@@ -129,7 +129,7 @@ export class ApiProductService {
       throw new BusinessException(`Trùng mã sản phẩm với ${existProduct.brandName}` as any)
     }
 
-    const productInserted = await this.productRepository.insertOneFullFieldAndReturnEntity({
+    const productInserted = await this.productRepository.insertOne({
       ...productBody,
       oid,
       productCode,
@@ -137,7 +137,7 @@ export class ApiProductService {
     })
 
     if (productBody.quantity) {
-      const batchCreated = await this.batchRepository.insertOneFullFieldAndReturnEntity({
+      const batchCreated = await this.batchRepository.insertOne({
         oid,
         productId: productInserted.id,
         costPrice: productBody.costPrice,
@@ -163,8 +163,7 @@ export class ApiProductService {
         }
         return dto
       })
-      const positionUpsertedList =
-        await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
+      const positionUpsertedList = await this.positionRepository.insertMany(positionDtoList)
       productInserted.positionRequestList = positionUpsertedList
     }
 
@@ -178,8 +177,7 @@ export class ApiProductService {
         }
         return dto
       })
-      const discountUpsertedList =
-        await this.discountRepository.insertManyFullFieldAndReturnEntity(discountListDto)
+      const discountUpsertedList = await this.discountRepository.insertMany(discountListDto)
       productInserted.discountList = discountUpsertedList
     }
     this.socketEmitService.socketMasterDataChange(oid, {
@@ -239,14 +237,14 @@ export class ApiProductService {
       }
     }
 
-    const productModified = await this.productRepository.updateOneAndReturnEntity(
+    const productModified = await this.productRepository.updateOne(
       { oid, id: productId },
       productBody
     )
     this.socketEmitService.productListChange(oid, { productUpsertedList: [productModified] })
 
     if (positionRequestList) {
-      const positionDestroyedList = await this.positionRepository.deleteAndReturnEntity({
+      const positionDestroyedList = await this.positionRepository.deleteMany({
         oid,
         positionInteractId: productModified.id,
         positionType: PositionType.ProductRequest,
@@ -260,13 +258,12 @@ export class ApiProductService {
         }
         return dto
       })
-      const positionUpsertedList =
-        await this.positionRepository.insertManyFullFieldAndReturnEntity(positionDtoList)
+      const positionUpsertedList = await this.positionRepository.insertMany(positionDtoList)
       productModified.positionRequestList = positionUpsertedList
     }
 
     if (discountList) {
-      const discountDestroyedList = await this.discountRepository.deleteAndReturnEntity({
+      const discountDestroyedList = await this.discountRepository.deleteMany({
         oid,
         discountInteractId: productModified.id,
         discountInteractType: DiscountInteractType.Product,
@@ -280,8 +277,7 @@ export class ApiProductService {
         }
         return dto
       })
-      const discountUpsertedList =
-        await this.discountRepository.insertManyFullFieldAndReturnEntity(discountListDto)
+      const discountUpsertedList = await this.discountRepository.insertMany(discountListDto)
       productModified.discountList = discountUpsertedList
     }
     this.socketEmitService.socketMasterDataChange(oid, {
@@ -311,15 +307,15 @@ export class ApiProductService {
         positionDestroyedList,
         discountDestroyedList,
       ] = await Promise.all([
-        this.productRepository.deleteOneAndReturnEntity({ oid, id: productId }),
-        this.batchRepository.deleteAndReturnEntity({ oid, id: productId }),
-        this.productMovementRepository.deleteAndReturnEntity({ oid, productId }),
-        this.positionRepository.deleteAndReturnEntity({
+        this.productRepository.deleteOne({ oid, id: productId }),
+        this.batchRepository.deleteMany({ oid, id: productId }),
+        this.productMovementRepository.deleteMany({ oid, productId }),
+        this.positionRepository.deleteMany({
           oid,
           positionInteractId: productId,
           positionType: PositionType.ProductRequest,
         }),
-        this.discountRepository.deleteAndReturnEntity({
+        this.discountRepository.deleteMany({
           oid,
           discountInteractId: productId,
           discountInteractType: DiscountInteractType.Product,

@@ -63,7 +63,7 @@ export class TicketChangeProcedureController {
     return { data }
   }
 
-  @Delete(':ticketId/procedure/destroy-ticket-procedure/:ticketProcedureId')
+  @Post(':ticketId/procedure/destroy-ticket-procedure/:ticketProcedureId')
   @UserPermission(PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST)
   async destroyTicketProcedure(
     @External() { oid }: TExternal,
@@ -109,7 +109,7 @@ export class TicketChangeProcedureController {
     return { data }
   }
 
-  @Delete(':ticketId/procedure/destroy-ticket-regimen/:ticketRegimenId')
+  @Post(':ticketId/procedure/destroy-ticket-regimen/:ticketRegimenId')
   @UserPermission(PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST)
   async destroyTicketRegimen(
     @External() { oid }: TExternal,

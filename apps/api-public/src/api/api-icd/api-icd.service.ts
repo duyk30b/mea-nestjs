@@ -17,7 +17,7 @@ export class ApiICDService {
     await this.icdRepository
       .getManager()
       .query(`TRUNCATE TABLE "${ICD.name}" RESTART IDENTITY CASCADE;`)
-    await this.icdRepository.insertMany(body.icdAll)
+    await this.icdRepository.insertManyBasic(body.icdAll)
     return { data: true }
   }
 }

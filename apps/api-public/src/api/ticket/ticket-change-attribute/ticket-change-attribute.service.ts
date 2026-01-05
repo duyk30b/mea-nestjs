@@ -31,7 +31,7 @@ export class TicketChangeAttributeService {
     const { oid, ticketId, body, files } = options
     const { imagesChange, ticketAttributeChangeList, ticketAttributeKeyList } = body
 
-    let ticketModified = await this.ticketRepository.updateOneAndReturnEntity(
+    let ticketModified = await this.ticketRepository.updateOne(
       { oid, id: ticketId },
       { note: body.note }
     )
@@ -58,7 +58,7 @@ export class TicketChangeAttributeService {
       imageIdsNew = JSON.stringify(imageResponse.imageIdListNew)
 
       if (ticketModified.imageDiagnosisIds !== imageIdsNew) {
-        ticketModified = await this.ticketRepository.updateOneAndReturnEntity(
+        ticketModified = await this.ticketRepository.updateOne(
           { oid, id: ticketId },
           { imageDiagnosisIds: imageIdsNew }
         )
@@ -69,7 +69,7 @@ export class TicketChangeAttributeService {
     let ticketAttributeDestroyedList: TicketAttribute[] = []
     let ticketAttributeCreatedList: TicketAttribute[] = []
     if (ticketAttributeChangeList) {
-      ticketAttributeDestroyedList = await this.ticketAttributeRepository.deleteAndReturnEntity({
+      ticketAttributeDestroyedList = await this.ticketAttributeRepository.deleteMany({
         oid,
         ticketId,
         key: { IN: ticketAttributeKeyList },
@@ -84,7 +84,7 @@ export class TicketChangeAttributeService {
       })
 
       ticketAttributeCreatedList =
-        await this.ticketAttributeRepository.insertManyAndReturnEntity(ticketAttributeInsertList)
+        await this.ticketAttributeRepository.insertMany(ticketAttributeInsertList)
     }
     this.socketEmitService.socketTicketChange(oid, {
       ticketId,
@@ -105,12 +105,13 @@ export class TicketChangeAttributeService {
     const { oid, ticketId, body } = options
     const ticketAttributeKeyList = body.ticketAttributeList.map((i) => i.key)
 
-    const ticketAttributeDestroyedList =
-      await this.ticketAttributeRepository.deleteAndReturnEntity({
+    const ticketAttributeDestroyedList = await this.ticketAttributeRepository.deleteMany(
+      {
         oid,
         ticketId,
         key: { IN: ticketAttributeKeyList },
-      })
+      }
+    )
 
     const ticketAttributeInsertList = body.ticketAttributeList
       .filter((i) => !!i.value)
@@ -124,7 +125,7 @@ export class TicketChangeAttributeService {
         return dto
       })
     const ticketAttributeCreatedList =
-      await this.ticketAttributeRepository.insertManyAndReturnEntity(ticketAttributeInsertList)
+      await this.ticketAttributeRepository.insertMany(ticketAttributeInsertList)
 
     this.socketEmitService.socketTicketChange(oid, {
       ticketId,

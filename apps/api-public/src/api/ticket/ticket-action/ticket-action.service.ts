@@ -46,7 +46,7 @@ export class TicketActionService {
 
   async startExecuting(options: { oid: number; ticketId: string }) {
     const { oid, ticketId } = options
-    const ticketModified = await this.ticketRepository.updateOneAndReturnEntity(
+    const ticketModified = await this.ticketRepository.updateOne(
       {
         oid,
         id: ticketId,

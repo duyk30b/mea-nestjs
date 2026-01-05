@@ -57,7 +57,7 @@ export class ApiWarehouseService {
   }
 
   async createOne(oid: number, body: WarehouseCreateBody): Promise<BaseResponse> {
-    const warehouse = await this.warehouseRepository.insertOneFullFieldAndReturnEntity({
+    const warehouse = await this.warehouseRepository.insertOne({
       oid,
       ...body,
     })
@@ -65,7 +65,7 @@ export class ApiWarehouseService {
   }
 
   async updateOne(oid: number, id: number, body: WarehouseUpdateBody): Promise<BaseResponse> {
-    const [warehouse] = await this.warehouseRepository.updateAndReturnEntity({ id, oid }, body)
+    const [warehouse] = await this.warehouseRepository.updateMany({ id, oid }, body)
     if (!warehouse) {
       throw BusinessException.create({
         message: 'error.Database.UpdateFailed',
@@ -84,7 +84,7 @@ export class ApiWarehouseService {
         success: false,
       }
     }
-    await this.warehouseRepository.delete({ oid, id: warehouseId })
+    await this.warehouseRepository.deleteBasic({ oid, id: warehouseId })
 
     return { data: { countBatch: 0, warehouseId } }
   }

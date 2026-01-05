@@ -66,7 +66,7 @@ export class ApiOrganizationService {
       logoImageId = imageIdListNew[0]
     }
 
-    const organization = await this.organizationRepository.updateOneAndReturnEntity(
+    const organization = await this.organizationRepository.updateOne(
       { id: oid },
       {
         name: organizationInfo.name,
@@ -96,7 +96,7 @@ export class ApiOrganizationService {
       )
     }
 
-    const [organization] = await this.organizationRepository.updateAndReturnEntity(
+    const [organization] = await this.organizationRepository.updateMany(
       { id: oid },
       {
         email,
@@ -149,7 +149,7 @@ export class ApiOrganizationService {
     if (query.email !== email) {
       throw new BusinessException('error.Token.Invalid')
     }
-    const [organization] = await this.organizationRepository.updateAndReturnEntity(
+    const [organization] = await this.organizationRepository.updateMany(
       { id: query.oid },
       { emailVerify: 1 }
     )

@@ -124,7 +124,7 @@ export type PurchaseOrderItemRelationType = {
 
 export type PurchaseOrderItemInsertType = Omit<
   PurchaseOrderItem,
-  keyof PurchaseOrderItemRelationType | keyof Pick<PurchaseOrderItem, 'id'>
+  keyof PurchaseOrderItemRelationType | keyof Pick<PurchaseOrderItem, never>
 >
 
 export type PurchaseOrderItemUpdateType = {

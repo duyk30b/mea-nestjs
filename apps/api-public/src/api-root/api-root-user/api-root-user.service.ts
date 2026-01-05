@@ -78,7 +78,7 @@ export class ApiRootUserService {
 
     const hashPassword = await bcrypt.hash(password, 5)
     const secret = encrypt(password, username)
-    const user = await this.userRepository.insertOneFullFieldAndReturnEntity({
+    const user = await this.userRepository.insertOne({
       ...other,
       oid,
       username,
@@ -97,7 +97,7 @@ export class ApiRootUserService {
 
     const hashPassword = await bcrypt.hash(password, 5)
     const secret = encrypt(password, username)
-    const [user] = await this.userRepository.updateAndReturnEntity(
+    const [user] = await this.userRepository.updateMany(
       { id: userId },
       {
         ...other,
@@ -114,10 +114,7 @@ export class ApiRootUserService {
   }
 
   async deleteOne(id: number): Promise<BaseResponse> {
-    const [user] = await this.userRepository.updateAndReturnEntity(
-      { id },
-      { deletedAt: Date.now() }
-    )
+    const [user] = await this.userRepository.updateMany({ id }, { deletedAt: Date.now() })
     if (!user) {
       throw new BusinessException('error.Database.DeleteFailed')
     }

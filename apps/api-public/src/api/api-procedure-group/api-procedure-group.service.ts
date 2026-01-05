@@ -5,11 +5,11 @@ import { BaseResponse } from '../../../../_libs/common/interceptor/transform-res
 import { ProcedureGroupInsertType } from '../../../../_libs/database/entities/procedure-group.entity'
 import { ProcedureGroupRepository } from '../../../../_libs/database/repositories/procedure-group.repository'
 import {
-    ProcedureGroupCreateBody,
-    ProcedureGroupGetManyQuery,
-    ProcedureGroupPaginationQuery,
-    ProcedureGroupReplaceAllBody,
-    ProcedureGroupUpdateBody,
+  ProcedureGroupCreateBody,
+  ProcedureGroupGetManyQuery,
+  ProcedureGroupPaginationQuery,
+  ProcedureGroupReplaceAllBody,
+  ProcedureGroupUpdateBody,
 } from './request'
 
 @Injectable()
@@ -59,7 +59,7 @@ export class ApiProcedureGroupService {
   }
 
   async createOne(oid: number, body: ProcedureGroupCreateBody): Promise<BaseResponse> {
-    const id = await this.procedureGroupRepository.insertOne({ oid, ...body })
+    const id = await this.procedureGroupRepository.insertOneBasic({ oid, ...body })
     const data = await this.procedureGroupRepository.findOneById(id)
     return { data }
   }
@@ -71,7 +71,7 @@ export class ApiProcedureGroupService {
   }
 
   async destroyOne(oid: number, id: number): Promise<BaseResponse> {
-    const affected = await this.procedureGroupRepository.delete({ oid, id })
+    const affected = await this.procedureGroupRepository.deleteBasic({ oid, id })
     if (affected === 0) {
       throw new BusinessException('error.Database.DeleteFailed')
     }
@@ -93,8 +93,7 @@ export class ApiProcedureGroupService {
       }
       return dto
     })
-    const lgInsertedList =
-      await this.procedureGroupRepository.insertManyAndReturnEntity(lgCreateList)
+    const lgInsertedList = await this.procedureGroupRepository.insertMany(lgCreateList)
 
     return [...procedureGroupAll, ...lgInsertedList]
   }

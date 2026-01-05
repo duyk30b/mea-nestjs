@@ -6,11 +6,7 @@ import { BaseResponse } from '../../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { PurchaseOrderMoneyService } from './purchase-order-money.service'
-import {
-  PurchaseOrderPayDebtBody,
-  PurchaseOrderPaymentBody,
-  PurchaseOrderRefundMoneyBody,
-} from './request'
+import { PurchaseOrderPayDebtBody, PurchaseOrderPaymentMoneyBody } from './request'
 
 @ApiTags('PurchaseOrder')
 @ApiBearerAuth('access-token')
@@ -18,14 +14,14 @@ import {
 export class ApiPurchaseOrderMoneyController {
   constructor(private readonly purchaseOrderMoneyService: PurchaseOrderMoneyService) { }
 
-  @Post('/:id/payment')
+  @Post('/:id/payment-money')
   @UserPermission(PermissionId.PURCHASE_ORDER_PAYMENT_MONEY)
   async payment(
     @External() { oid, uid }: TExternal,
     @Param() { id }: GenerateIdParam,
-    @Body() body: PurchaseOrderPaymentBody
+    @Body() body: PurchaseOrderPaymentMoneyBody
   ): Promise<BaseResponse> {
-    const data = await this.purchaseOrderMoneyService.payment({
+    const data = await this.purchaseOrderMoneyService.paymentMoney({
       oid,
       userId: uid,
       body,
@@ -44,22 +40,6 @@ export class ApiPurchaseOrderMoneyController {
       oid,
       userId: uid,
       body,
-    })
-    return { data }
-  }
-
-  @Post('/:id/refund-money')
-  @UserPermission(PermissionId.PURCHASE_ORDER_REFUND_MONEY)
-  async refundMoney(
-    @External() { oid, uid }: TExternal,
-    @Param() { id }: GenerateIdParam,
-    @Body() body: PurchaseOrderRefundMoneyBody
-  ): Promise<BaseResponse> {
-    const data = await this.purchaseOrderMoneyService.refundMoney({
-      oid,
-      userId: uid,
-      body,
-      purchaseOrderId: id,
     })
     return { data }
   }

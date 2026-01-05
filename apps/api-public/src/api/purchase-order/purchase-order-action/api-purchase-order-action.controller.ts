@@ -1,4 +1,4 @@
-import { Controller, Delete, Param, Post } from '@nestjs/common'
+import { Controller, Param, Post } from '@nestjs/common'
 import { Body } from '@nestjs/common/decorators/http/route-params.decorator'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { GenerateIdParam } from '../../../../../_libs/common/dto/param'
@@ -6,7 +6,7 @@ import { UserPermission, UserPermissionOr } from '../../../../../_libs/common/gu
 import { BaseResponse } from '../../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../../_libs/permission/permission.enum'
-import { PurchaseOrderPaymentBody } from '../purchase-order-money/request'
+import { PurchaseOrderPaymentMoneyBody } from '../purchase-order-money/request'
 import { PurchaseOrderActionService } from './purchase-order-action.service'
 import { PurchaseOrderTerminalBody } from './request'
 
@@ -18,7 +18,7 @@ export class ApiPurchaseOrderActionController {
 
   // ================== ACTION ================== //
 
-  @Delete('/:id/destroy')
+  @Post('/:id/destroy')
   @UserPermissionOr(
     PermissionId.PURCHASE_ORDER_DRAFT_CRUD,
     PermissionId.PURCHASE_ORDER_DEPOSITED_DESTROY,
@@ -40,7 +40,7 @@ export class ApiPurchaseOrderActionController {
   async sendProductAndPaymentAndClose(
     @External() { oid, uid }: TExternal,
     @Param() { id }: GenerateIdParam,
-    @Body() body: PurchaseOrderPaymentBody
+    @Body() body: PurchaseOrderPaymentMoneyBody
   ): Promise<BaseResponse> {
     const data = await this.purchaseOrderActionService.sendProductAndPaymentAndClose({
       oid,

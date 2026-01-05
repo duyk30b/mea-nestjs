@@ -63,7 +63,7 @@ export class ApiAppointmentController {
     return { data }
   }
 
-  @Patch('update/:id')
+  @Post('update/:id')
   @UserPermission(PermissionId.APPOINTMENT_UPDATE)
   async update(
     @External() { oid }: TExternal,
@@ -74,7 +74,7 @@ export class ApiAppointmentController {
     return { data }
   }
 
-  @Delete('delete/:id')
+  @Post('delete/:id')
   @UserPermission(PermissionId.APPOINTMENT_DELETE)
   @ApiParam({ name: 'id', example: 1 })
   async deleteOne(@External() { oid }: TExternal, @Param() { id }: GenerateIdParam): Promise<BaseResponse> {

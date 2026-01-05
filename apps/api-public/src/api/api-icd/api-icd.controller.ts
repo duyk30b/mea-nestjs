@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Put } from '@nestjs/common'
+import { Body, Controller, Get, Post } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { IsRoot } from '../../../../_libs/common/guards/root.guard'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
@@ -17,7 +17,7 @@ export class ApiICDController {
     return this.apiICDService.getAll()
   }
 
-  @Put('replace-all')
+  @Post('replace-all')
   @IsRoot()
   list(@Body() body: ICDReplaceAllBody) {
     return this.apiICDService.replaceAll(body)

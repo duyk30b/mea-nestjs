@@ -39,7 +39,7 @@ export class RedisController {
     return { data: { key, value } }
   }
 
-  @Delete('del/:key')
+  @Post('del/:key')
   @ApiParam({ name: 'key', example: 'demo', required: true })
   async del(@Param('key') key: string) {
     await this.redisService.del(key)

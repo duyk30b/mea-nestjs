@@ -89,7 +89,7 @@ export class ApiRoomService {
       const count = await this.roomRepository.getMaxId()
       code = (count + 1).toString()
     }
-    const room = await this.roomRepository.insertOneFullFieldAndReturnEntity({
+    const room = await this.roomRepository.insertOne({
       ...roomBody,
       oid,
       code,
@@ -113,8 +113,7 @@ export class ApiRoomService {
         return insert
       })
 
-      room.userRoomList =
-        await this.userRoomRepository.insertManyAndReturnEntity(userRoomInsertList)
+      room.userRoomList = await this.userRoomRepository.insertMany(userRoomInsertList)
     }
     this.cacheDataService.clearUserAndRoleAndRoom(oid)
     return { room }
@@ -133,7 +132,7 @@ export class ApiRoomService {
         throw new BusinessError(`Trùng mã phòng với ${existProcedure.name}`)
       }
     }
-    const room = await this.roomRepository.updateOneAndReturnEntity({ id: roomId, oid }, roomBody)
+    const room = await this.roomRepository.updateOne({ id: roomId, oid }, roomBody)
 
     if (userIdList) {
       const userList = await this.userRepository.findManyBy({
@@ -144,7 +143,7 @@ export class ApiRoomService {
         throw new BusinessException('error.Conflict')
       }
 
-      await this.userRoomRepository.delete({ oid, roomId })
+      await this.userRoomRepository.deleteBasic({ oid, roomId })
 
       const userRoomInsertList = userIdList.map((i) => {
         const insert: UserRoomInsertType = {
@@ -155,8 +154,7 @@ export class ApiRoomService {
         return insert
       })
 
-      room.userRoomList =
-        await this.userRoomRepository.insertManyAndReturnEntity(userRoomInsertList)
+      room.userRoomList = await this.userRoomRepository.insertMany(userRoomInsertList)
     }
     this.cacheDataService.clearUserAndRoleAndRoom(oid)
     return { room }
@@ -169,8 +167,8 @@ export class ApiRoomService {
     })
 
     if (!ticketList.length) {
-      await this.roomRepository.delete({ oid, id: roomId })
-      await this.userRoomRepository.delete({ oid, roomId })
+      await this.roomRepository.deleteBasic({ oid, id: roomId })
+      await this.userRoomRepository.deleteBasic({ oid, roomId })
       this.cacheDataService.clearUserAndRoleAndRoom(oid)
     }
 

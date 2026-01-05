@@ -1,13 +1,17 @@
-import { Controller, Param, Patch, Post } from '@nestjs/common'
+import { Controller, Param, Post } from '@nestjs/common'
 import { Body } from '@nestjs/common/decorators/http/route-params.decorator'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { GenerateIdParam, IdParam } from '../../../../../_libs/common/dto/param'
+import { GenerateIdParam } from '../../../../../_libs/common/dto/param'
 import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
 import { BaseResponse } from '../../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { ApiPurchaseOrderReceptionService } from './purchase-order-reception.service'
-import { PurchaseOrderUpdateDepositedBody, PurchaseOrderUpsertDraftBody } from './request'
+import {
+  PurchaseOrderDepositedUpdateBody,
+  PurchaseOrderDraftInsertBody,
+  PurchaseOrderDraftUpdateBody,
+} from './request'
 
 @ApiTags('PurchaseOrder')
 @ApiBearerAuth('access-token')
@@ -17,24 +21,24 @@ export class ApiPurchaseOrderReceptionController {
     private readonly apiPurchaseOrderReceptionService: ApiPurchaseOrderReceptionService
   ) { }
 
-  @Post('create-draft')
+  @Post('draft-insert')
   @UserPermission(PermissionId.PURCHASE_ORDER_DRAFT_CRUD)
-  async createDraft(
+  async draftInsert(
     @External() { oid }: TExternal,
-    @Body() body: PurchaseOrderUpsertDraftBody
+    @Body() body: PurchaseOrderDraftInsertBody
   ): Promise<BaseResponse> {
-    const data = await this.apiPurchaseOrderReceptionService.createDraft({ oid, body })
+    const data = await this.apiPurchaseOrderReceptionService.draftInsert({ oid, body })
     return { data }
   }
 
-  @Patch('/:id/update-draft')
+  @Post('/:id/draft-update')
   @UserPermission(PermissionId.PURCHASE_ORDER_DRAFT_CRUD)
-  async updateDraft(
+  async draftUpdate(
     @External() { oid }: TExternal,
     @Param() { id }: GenerateIdParam,
-    @Body() body: PurchaseOrderUpsertDraftBody
+    @Body() body: PurchaseOrderDraftUpdateBody
   ): Promise<BaseResponse> {
-    const data = await this.apiPurchaseOrderReceptionService.updateDraft({
+    const data = await this.apiPurchaseOrderReceptionService.draftUpdate({
       oid,
       purchaseOrderId: id,
       body,
@@ -42,12 +46,12 @@ export class ApiPurchaseOrderReceptionController {
     return { data }
   }
 
-  @Patch('/:id/deposited-update')
+  @Post('/:id/deposited-update')
   @UserPermission(PermissionId.PURCHASE_ORDER_DEPOSITED_UPDATE)
   async depositedUpdate(
     @External() { oid }: TExternal,
     @Param() { id }: GenerateIdParam,
-    @Body() body: PurchaseOrderUpdateDepositedBody
+    @Body() body: PurchaseOrderDepositedUpdateBody
   ): Promise<BaseResponse> {
     const data = await this.apiPurchaseOrderReceptionService.depositedUpdate({
       oid,

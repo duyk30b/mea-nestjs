@@ -1,5 +1,5 @@
 import { FilterQuery, Model, UpdateQuery } from 'mongoose'
-import { NoExtra } from '../common/dto/base-condition'
+import { NoExtra } from '../common/helpers'
 
 export abstract class BaseMongoRepository<
   _SCHEMA,

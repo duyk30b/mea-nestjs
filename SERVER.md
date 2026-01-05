@@ -30,6 +30,7 @@
 - Login Google Driver
 
 6. Cron Job
+- Chạy cronjob cho postgres: `sh ./script/backup-postgres.sh`
 - Lấy list crontab: `crontab -l`
 - Thêm sửa crontab (dùng nano hoặc vim): `crontab -e`
 - Thêm cuối file crontab (chạy vào 20h hàng ngày): `* 20 * * * cd /home/duy/MEA/mea-nestjs && ./script/backup-postgres.sh`

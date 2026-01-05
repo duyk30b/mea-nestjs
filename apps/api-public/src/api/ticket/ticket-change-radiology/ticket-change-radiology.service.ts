@@ -166,7 +166,7 @@ export class TicketChangeRadiologyService {
       imageDestroyedList = changeImageResponse.imageDestroyedList
     }
 
-    const ticketRadiologyModified = await this.ticketRadiologyRepository.updateOneAndReturnEntity(
+    const ticketRadiologyModified = await this.ticketRadiologyRepository.updateOne(
       {
         oid,
         ticketId,
@@ -253,7 +253,7 @@ export class TicketChangeRadiologyService {
       idRemoveList: JSON.parse(ticketRadiologyOrigin.imageIds),
     })
 
-    const ticketRadiologyModified = await this.ticketRadiologyRepository.updateOneAndReturnEntity(
+    const ticketRadiologyModified = await this.ticketRadiologyRepository.updateOne(
       {
         oid,
         ticketId: ticketRadiologyOrigin.ticketId,

@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm'
 import Image from './image.entity'
+import OrganizationPayment from './organization-payment.entity'
 import User from './user.entity'
 
 export enum OrganizationStatus {
@@ -138,6 +139,9 @@ export default class Organization {
   userList: User[]
 
   @Expose()
+  organizationPaymentList: OrganizationPayment[]
+
+  @Expose()
   dataVersionParse: { product: number; batch: number; customer: number }
 
   static fromRaw(raw: { [P in keyof Organization]: any }) {
@@ -158,7 +162,7 @@ export default class Organization {
 }
 
 export type OrganizationRelationType = {
-  [P in keyof Pick<Organization, 'userList' | 'logoImage'>]?: boolean
+  [P in keyof Pick<Organization, 'logoImage' | 'userList' | 'organizationPaymentList'>]?: boolean
 }
 
 export type OrganizationInsertType = Omit<

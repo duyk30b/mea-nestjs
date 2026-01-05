@@ -38,7 +38,7 @@ export class ApiProductGroupController {
     return this.apiProductGroupService.getOne(oid, id)
   }
 
-  @Put('replace-all')
+  @Post('replace-all')
   @UserPermission(PermissionId.PRODUCT_UPDATE)
   async replaceAll(
     @External() { oid }: TExternal,
@@ -53,7 +53,7 @@ export class ApiProductGroupController {
     return await this.apiProductGroupService.createOne(oid, body)
   }
 
-  @Patch('update/:id')
+  @Post('update/:id')
   @UserPermission(PermissionId.PRODUCT_UPDATE)
   @ApiParam({ name: 'id', example: 1 })
   async updateOne(
@@ -64,7 +64,7 @@ export class ApiProductGroupController {
     return await this.apiProductGroupService.updateOne(oid, id, body)
   }
 
-  @Delete('destroy/:id')
+  @Post('destroy/:id')
   @UserPermission(PermissionId.PRODUCT_UPDATE)
   @ApiParam({ name: 'id', example: 1 })
   async destroyOne(@External() { oid }: TExternal, @Param() { id }: IdParam) {

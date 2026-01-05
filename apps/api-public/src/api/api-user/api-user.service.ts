@@ -129,7 +129,7 @@ export class ApiUserService {
     const hashPassword = await bcrypt.hash(account.password, 5)
     const secret = encrypt(account.password, account.username)
 
-    const user = await this.userRepository.insertOneFullFieldAndReturnEntity({
+    const user = await this.userRepository.insertOne({
       ...userBody,
       oid,
       username: account.username,
@@ -155,8 +155,7 @@ export class ApiUserService {
         }
         return insert
       })
-      user.userRoleList =
-        await this.userRoleRepository.insertManyAndReturnEntity(userRoleInsertList)
+      user.userRoleList = await this.userRoleRepository.insertMany(userRoleInsertList)
     }
 
     if (roomIdList.length) {
@@ -175,8 +174,7 @@ export class ApiUserService {
         }
         return insert
       })
-      user.userRoomList =
-        await this.userRoomRepository.insertManyAndReturnEntity(userRoomInsertList)
+      user.userRoomList = await this.userRoomRepository.insertMany(userRoomInsertList)
     }
 
     this.cacheDataService.clearUserAndRoleAndRoom(user.oid)
@@ -190,7 +188,7 @@ export class ApiUserService {
     if (account) {
       const hashPassword = await bcrypt.hash(account.password, 5)
       const secret = encrypt(account.password, account.username)
-      user = await this.userRepository.updateOneAndReturnEntity(
+      user = await this.userRepository.updateOne(
         { oid, id: userId },
         {
           ...userBody,
@@ -200,7 +198,7 @@ export class ApiUserService {
         }
       )
     } else {
-      user = await this.userRepository.updateOneAndReturnEntity({ oid, id: userId }, userBody)
+      user = await this.userRepository.updateOne({ oid, id: userId }, userBody)
     }
 
     if (!user) {
@@ -208,7 +206,7 @@ export class ApiUserService {
     }
 
     if (roleIdList) {
-      await this.userRoleRepository.delete({ oid, userId })
+      await this.userRoleRepository.deleteBasic({ oid, userId })
       const roleList = await this.roleRepository.findManyBy({
         oid,
         id: { IN: roleIdList },
@@ -224,12 +222,11 @@ export class ApiUserService {
         }
         return insert
       })
-      user.userRoleList =
-        await this.userRoleRepository.insertManyAndReturnEntity(userRoleInsertList)
+      user.userRoleList = await this.userRoleRepository.insertMany(userRoleInsertList)
     }
 
     if (roomIdList) {
-      await this.userRoomRepository.delete({ oid, userId })
+      await this.userRoomRepository.deleteBasic({ oid, userId })
       const roomList = await this.roomRepository.findManyBy({
         oid,
         id: { IN: roomIdList },
@@ -245,8 +242,7 @@ export class ApiUserService {
         }
         return insert
       })
-      user.userRoomList =
-        await this.userRoomRepository.insertManyAndReturnEntity(userRoomInsertList)
+      user.userRoomList = await this.userRoomRepository.insertMany(userRoomInsertList)
     }
 
     this.cacheDataService.clearUserAndRoleAndRoom(oid)
@@ -266,10 +262,10 @@ export class ApiUserService {
   }
 
   async deleteOne(oid: number, userId: number): Promise<BaseResponse> {
-    const user = await this.userRepository.deleteOneAndReturnEntity({ oid, id: userId })
+    const user = await this.userRepository.deleteOne({ oid, id: userId })
     await Promise.all([
-      this.userRoleRepository.delete({ oid, userId }),
-      this.userRoomRepository.delete({ oid, userId }),
+      this.userRoleRepository.deleteBasic({ oid, userId }),
+      this.userRoomRepository.deleteBasic({ oid, userId }),
     ])
     this.cacheDataService.clearUserAndRoleAndRoom(oid)
     return { data: { userId } }

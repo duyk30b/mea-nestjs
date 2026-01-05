@@ -72,7 +72,7 @@ export class DiscountService {
   }
 
   async createOne(oid: number, body: DiscountCreateBody): Promise<BaseResponse> {
-    const discount = await this.discountRepository.insertOneFullFieldAndReturnEntity({
+    const discount = await this.discountRepository.insertOne({
       ...body,
       oid,
     })
@@ -82,13 +82,13 @@ export class DiscountService {
   }
 
   async updateOne(oid: number, id: number, body: DiscountUpdateBody): Promise<BaseResponse> {
-    const discount = await this.discountRepository.updateOneAndReturnEntity({ id, oid }, body)
+    const discount = await this.discountRepository.updateOne({ id, oid }, body)
     this.socketEmitService.socketMasterDataChange(oid, { discount: true })
     return { data: { discount } }
   }
 
   async destroyOne(oid: number, id: number): Promise<BaseResponse> {
-    const discountDestroyedList = await this.discountRepository.deleteAndReturnEntity({ oid, id })
+    const discountDestroyedList = await this.discountRepository.deleteMany({ oid, id })
     this.socketEmitService.socketMasterDataChange(oid, { discount: true })
     return { data: true }
   }

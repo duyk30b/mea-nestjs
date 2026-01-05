@@ -51,7 +51,7 @@ export class TicketChangeRadiologyController {
     return { data }
   }
 
-  @Delete(':ticketId/radiology/destroy-ticket-radiology/:ticketRadiologyId')
+  @Post(':ticketId/radiology/destroy-ticket-radiology/:ticketRadiologyId')
   @UserPermission(PermissionId.TICKET_CHANGE_RADIOLOGY_REQUEST)
   async destroyTicketRadiology(
     @External() { oid }: TExternal,

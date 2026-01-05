@@ -61,7 +61,7 @@ export class TicketChangeLaboratoryController {
     return { data }
   }
 
-  @Delete(':ticketId/laboratory/destroy-ticket-laboratory/:ticketLaboratoryId')
+  @Post(':ticketId/laboratory/destroy-ticket-laboratory/:ticketLaboratoryId')
   @UserPermission(PermissionId.TICKET_CHANGE_LABORATORY_REQUEST)
   async destroyTicketLaboratory(
     @External() { oid }: TExternal,
@@ -75,7 +75,7 @@ export class TicketChangeLaboratoryController {
     return { data }
   }
 
-  @Delete(':ticketId/laboratory/destroy-ticket-laboratory-group/:ticketLaboratoryGroupId')
+  @Post(':ticketId/laboratory/destroy-ticket-laboratory-group/:ticketLaboratoryGroupId')
   @UserPermission(PermissionId.TICKET_CHANGE_LABORATORY_REQUEST)
   async destroyTicketLaboratoryGroup(
     @External() { oid }: TExternal,
