@@ -1,5 +1,5 @@
 import { Expose, TransformFnParams, plainToInstance } from 'class-transformer'
-import { ArrayMinSize, IsArray, IsString, validateSync } from 'class-validator'
+import { ArrayMinSize, IsArray, IsBoolean, IsString, validateSync } from 'class-validator'
 
 export class ConditionString {
   @Expose()
@@ -19,11 +19,11 @@ export class ConditionString {
   'NOT'?: string
 
   @Expose()
-  @IsString()
+  @IsBoolean()
   'IS_NULL'?: boolean
 
   @Expose()
-  @IsString()
+  @IsBoolean()
   'NOT_NULL'?: boolean
 
   @Expose()

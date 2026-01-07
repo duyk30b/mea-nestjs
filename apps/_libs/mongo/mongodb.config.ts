@@ -1,30 +1,42 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
+import { ConfigType, registerAs } from '@nestjs/config'
 import { MongooseModuleOptions, MongooseOptionsFactory } from '@nestjs/mongoose'
-import 'dotenv/config'
 import * as mongoose from 'mongoose'
 
-const MongoDbConfig = {
+export const MongoDbConfig = registerAs('mongodb', () => ({
   type: 'mongodb',
-  host: process.env.DATABASE_MONGO_HOST,
-  port: parseInt(process.env.DATABASE_MONGO_PORT),
-  maxPool: parseInt(process.env.DATABASE_MAX_POOL) || 20,
-  username: process.env.DATABASE_MONGO_USERNAME,
-  password: process.env.DATABASE_MONGO_PASSWORD,
-  database: process.env.DATABASE_NAME,
-  authSource: process.env.DATABASE_AUTH_SOURCE || 'admin',
+  host: process.env.MONGO_HOST,
+  port: parseInt(process.env.MONGO_PORT),
+  dbName: process.env.MONGO_DATABASE_NAME,
+  username: process.env.MONGO_USERNAME,
+  password: process.env.MONGO_PASSWORD,
+  authSource: process.env.MONGO_AUTH_SOURCE || 'admin',
   logging: process.env.NODE_ENV === 'local',
-}
-
-const { username, password, host, port, database, authSource, logging } = MongoDbConfig
-
-export const mongoDbUri = `mongodb://${username}:${password}@${host}:${port}/${database}?authSource=${authSource}`
+}))
 
 @Injectable()
 export default class MongodbConfigService implements MongooseOptionsFactory {
+  constructor(@Inject(MongoDbConfig.KEY) private mongoDbConfig: ConfigType<typeof MongoDbConfig>) { }
+
   createMongooseOptions(): MongooseModuleOptions {
+    const { username, password, host, port, dbName, authSource, logging } = this.mongoDbConfig
+    const mongoDbUri = `mongodb://${username}:${password}@${host}:${port}/?authSource=${authSource}`
+
     mongoose.set('debug', logging)
     mongoose.set('toObject', { virtuals: true })
     mongoose.set('toJSON', { virtuals: true })
-    return { uri: mongoDbUri }
+    return {
+      uri: mongoDbUri,
+      dbName,
+      onConnectionCreate: (connection: mongoose.Connection) => {
+        connection.on('connected', () => console.log('MongoDB connected'))
+        connection.on('open', () => console.log('MongoDB open'))
+        connection.on('disconnected', () => console.log('MongoDB disconnected'))
+        connection.on('reconnected', () => console.log('MongoDB reconnected'))
+        connection.on('disconnecting', () => console.log('MongoDB disconnecting'))
+
+        return connection
+      },
+    }
   }
 }

@@ -36,7 +36,7 @@ export class ApiAuthService {
     private readonly jwtExtendService: JwtExtendService,
     private readonly organizationRepository: OrganizationRepository,
     private readonly userRepository: UserRepository
-  ) { }
+  ) {}
 
   // async register(registerDto: RegisterBody, ip: string): Promise<BaseResponse> {
   //   const { email, phone, username, password } = registerDto
@@ -353,7 +353,8 @@ export class ApiAuthService {
   }
 
   async grantAccessToken(refreshToken: string, dataExternal: TExternal): Promise<BaseResponse> {
-    const { ip, clientId, os, browser, mobile } = dataExternal // trường hợp này ko lấy được uid và oid do accessToken đã hết hạn nên ko có user
+    // trường hợp này ko lấy được uid và oid do accessToken đã hết hạn nên ko có user
+    const { ip, clientId, os, browser, mobile } = dataExternal
     const jwtPayloadRefresh = this.jwtExtendService.verifyRefreshToken(refreshToken, ip)
     const checkTokenCache = await this.cacheTokenService.checkClient({
       oid: jwtPayloadRefresh.data.oid,

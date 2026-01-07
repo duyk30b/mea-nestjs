@@ -7,7 +7,7 @@
 - Kiểm tra RAM: `free -h`
 - Kiểm tra dung lượng ổ đĩa: `df -h`
 - Lấy đường dẫn tuyệt đối: `readlink -f ./`
-- Kiểm tra DNS có đang proxy qua cloudflare không: dig api.mea.vn +short
+- Kiểm tra DNS có đang proxy qua cloudflare không: `dig api.mea.vn +short`
 
 2. Check App: `htop`, `git --version`
 

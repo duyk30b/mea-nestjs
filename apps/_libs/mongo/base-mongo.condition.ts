@@ -1,102 +1,134 @@
-import { ConditionAnd, ConditionType } from '../common/dto'
+import { FilterQuery } from 'mongoose'
+import { BaseCondition } from '../common/dto/base-condition'
 
 export class BaseMongoCondition<T> {
-  ruleForOneColumn(target: Record<string, any>) {
-    const each = []
-    Object.entries(target).forEach(([rule, value]: [string, any]) => {
-      if (rule === '>' || rule === 'GT') {
-        return each.push({ $gt: value })
-      }
-      if (rule === '>=' || rule === 'GTE') {
-        return each.push({ $gte: value })
-      }
-      if (rule === '<=' || rule === 'LTE') {
-        return each.push({ $lt: value })
-      }
-      if (rule === '<' || rule === 'LT') {
-        return each.push({ $lte: value })
-      }
-      if (rule === '==' || rule === 'EQUAL') {
-        return each.push({ $eq: value })
-      }
-      if (rule === '!=' || rule === 'NOT') {
-        return each.push({ $ne: value })
-      }
-      if (rule === 'IS_NULL') {
-        if (value === true) {
-          return each.push({ $or: [{ $exists: false }, { $eq: null }] })
-        }
-        if (value === false) {
-          return each.push({ $exists: true }, { $ne: null })
-        }
-      }
-      if (rule === 'NOT_NULL') {
-        if (value === false) {
-          return each.push({ $or: [{ $exists: false }, { $eq: null }] })
-        }
-        if (value === true) {
-          return each.push({ $exists: true }, { $ne: null })
-        }
-      }
-      if (rule === 'BETWEEN') {
-        return each.push({ $gte: value[0] }, { $lte: value[1] })
-      }
-      if (rule === 'IN') {
-        if (value.length === 0) {
-          return each.push({ $exists: true }, { $ne: null })
-        }
-        return each.push({ $in: value })
-      }
-    })
-
-    if (each.length === 0) return { $exists: true, $ne: null }
-    if (each.length === 1) return each[0]
-    if (each.length > 1) return { $and: each }
-  }
-
-  getConditionsAnd(conditions: ConditionAnd<T> = {}) {
-    const conditionAnd = []
-
+  getConditions(conditions: BaseCondition<T> = {}): FilterQuery<T> {
+    const filter = {}
     Object.entries(conditions).forEach(([column, target]: [string, any]) => {
-      if (['number', 'string', 'boolean'].includes(typeof target)) {
-        return conditionAnd.push({ [column]: target })
-      }
-      if (target === null) {
-        return conditionAnd.push({
+      if (column === 'id') column = '_id' // mongo search bằng _id
+      if (target === undefined) return
+      if (target == null) {
+        filter[column] = {
           $or: [{ [column]: null }, { [column]: { $exists: false } }],
-        })
+        }
+        return
+      }
+      if (['number', 'string', 'boolean'].includes(typeof target)) {
+        filter[column] = target
+        return
       }
       if (typeof target === 'object') {
         if (Object.keys(target).length === 0) return
-        if (Array.isArray(target)) {
-          if (target.length === 0) return
-          if (target.length === 1) {
-            return conditionAnd.push({
-              [column]: this.ruleForOneColumn(target[0]),
-            })
+        const ruleColumn: any = {}
+        Object.entries(target).forEach(([rule, value]: [string, any]) => {
+          if (value === undefined) return
+          if (rule === '>' || rule === 'GT') {
+            ruleColumn.$gt = value
+            return
           }
-          if (target.length > 1) {
-            return conditionAnd.push({
-              [column]: { $or: target.map((t) => this.ruleForOneColumn(t)) },
-            })
+          if (rule === '>=' || rule === 'GTE') {
+            ruleColumn.$gte = value
+            return
           }
+          if (rule === '<' || rule === 'LT') {
+            ruleColumn.$lt = value
+            return
+          }
+          if (rule === '<=' || rule === 'LTE') {
+            ruleColumn.$lte = value
+            return
+          }
+          if (rule === '==' || rule === 'EQUAL') {
+            ruleColumn.$eq = value
+            return
+          }
+          if (rule === '!=' || rule === 'NOT') {
+            ruleColumn.$ne = value
+            return
+          }
+          if (rule === 'IS_NULL') {
+            if (value === true) {
+              ruleColumn.$eq = null
+              return
+            }
+            if (value === false) {
+              ruleColumn.$exists = true
+              ruleColumn.$ne = null
+              return
+            }
+          }
+          if (rule === 'NOT_NULL') {
+            if (value === false) {
+              ruleColumn.$eq = null
+              return
+            }
+            if (value === true) {
+              ruleColumn.$exists = true
+              ruleColumn.$ne = null
+              return
+            }
+          }
+          if (rule === 'BETWEEN') {
+            ruleColumn.$gte = value[0]
+            ruleColumn.$lte = value[1]
+            return
+          }
+          if (rule === 'IN') {
+            if (value.length === 0) {
+              ruleColumn.$or = [{ $exists: false }, { $eq: null }]
+              return
+            } else {
+              ruleColumn.$in = value
+              return
+            }
+          }
+          if (rule === 'LIKE') {
+            ruleColumn.$regex = `.*${value}.*`
+            ruleColumn.$options = 'i'
+            return
+          }
+        })
+
+        if (Object.keys(ruleColumn).length === 0) {
+          filter[column] = target
         } else {
-          return conditionAnd.push({ [column]: this.ruleForOneColumn(target) })
+          filter[column] = ruleColumn
         }
       }
     })
-
-    if (conditionAnd.length === 0) return {}
-    if (conditionAnd.length === 1) return conditionAnd[0]
-    if (conditionAnd.length > 1) return { $and: conditionAnd }
+    return filter
   }
 
-  getFilterOptions(conditions: ConditionType<T> = {}) {
-    if (Array.isArray(conditions)) {
-      if (conditions.length === 0) return {}
-      if (conditions.length === 1) return this.getConditionsAnd(conditions[0])
-      return { $or: conditions.map((c) => this.getConditionsAnd(c)) }
+  getFilterOptions(condition: BaseCondition<T> = {}) {
+    if (Object.keys(condition).length === 0) return {}
+    const { $OR, $AND, ...otherCondition } = condition // xử lý riêng trường hợp $OR và $AND
+    const result = this.getConditions(otherCondition as any)
+    if ($OR && $OR.length) {
+      result.$or = $OR.map((i) => {
+        return this.getFilterOptions(i)
+      })
     }
-    return this.getConditionsAnd(conditions)
+    if ($AND && $AND.length) {
+      result.$and = $AND.map((i) => {
+        return this.getFilterOptions(i)
+      })
+    }
+    return result
+  }
+
+  getRelationOptions(relation: any) {
+    return Object.entries(relation)
+      .filter(([key, value]) => !!value)
+      .map(([key, value]) => key)
+  }
+
+  getSortOptions(sort: any) {
+    const result: any = {}
+    Object.entries(sort).forEach(([key, value]) => {
+      if (key === 'id') key = '_id' // mongo search bằng _id
+      if (value === 'ASC') result[key] = 'asc'
+      if (value === 'DESC') result[key] = 'desc'
+    })
+    return result
   }
 }

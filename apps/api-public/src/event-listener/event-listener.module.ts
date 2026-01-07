@@ -1,13 +1,13 @@
 import { Global, Module } from '@nestjs/common'
 import { EventEmitterModule } from '@nestjs/event-emitter'
-import { VisitEventEmit } from './visit-event/visit-event.emit'
-import { VisitEventListener } from './visit-event/visit-event.listener'
+import { SystemLogEmit } from './system-log/system-log.emit'
+import { SystemLogListener } from './system-log/system-log.listener'
 
 @Global()
 @Module({
   imports: [EventEmitterModule.forRoot()],
   controllers: [],
-  providers: [VisitEventEmit, VisitEventListener],
-  exports: [VisitEventEmit],
+  providers: [SystemLogEmit, SystemLogListener],
+  exports: [SystemLogEmit],
 })
-export class EventListenerModule {}
+export class EventListenerModule { }

@@ -49,6 +49,9 @@ export class TicketChangeItemMoneyManager {
     const manager = props.manager || this.manager
 
     if (!ticketOrigin) {
+      if (!ticketId || ticketId === '0') {
+        throw new Error('Lỗi dữ liệu không đầy đủ')
+      }
       ticketOrigin = await this.ticketRepository.managerFindOneBy(manager, { oid, id: ticketId })
     }
     if (!ticketOrigin) {
@@ -120,7 +123,7 @@ export class TicketChangeItemMoneyManager {
       }
     )
 
-    if (ticketPaymentDetail) {
+    if (ticketOrigin.isPaymentEachItem && ticketPaymentDetail) {
       await this.ticketPaymentDetailRepository.managerUpdateOne(
         manager,
         { oid, id: ticket.id, ticketId: ticket.id },

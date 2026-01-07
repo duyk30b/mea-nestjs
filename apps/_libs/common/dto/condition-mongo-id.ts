@@ -1,5 +1,5 @@
-import { Expose, TransformFnParams, plainToInstance } from 'class-transformer'
-import { ArrayMinSize, IsArray, IsMongoId, isMongoId, validateSync } from 'class-validator'
+import { Expose, plainToInstance, TransformFnParams } from 'class-transformer'
+import { ArrayMinSize, IsArray, IsBoolean, IsMongoId, isMongoId, IsString, validateSync } from 'class-validator'
 
 export class ConditionMongoId {
   @Expose()
@@ -19,15 +19,15 @@ export class ConditionMongoId {
   'NOT'?: string
 
   @Expose()
-  @IsMongoId()
+  @IsBoolean()
   'IS_NULL'?: boolean
 
   @Expose()
-  @IsMongoId()
+  @IsBoolean()
   'NOT_NULL'?: boolean
 
   @Expose()
-  @IsMongoId()
+  @IsString()
   'LIKE'?: string
 
   @Expose()

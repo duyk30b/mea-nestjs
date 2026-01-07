@@ -3,12 +3,16 @@ import { KafkaContext, NatsContext } from '@nestjs/microservices'
 import { Observable, throwError } from 'rxjs'
 import { catchError, tap } from 'rxjs/operators'
 import * as url from 'url'
+import { SystemLogEmit } from '../../../api-public/src/event-listener/system-log/system-log.emit'
+import { SystemLogInsertType } from '../../mongo/collections/system-log/system-log.schema'
 import { ValidationException } from '../exception-filter/exception-filter'
 import { RequestExternal } from '../request/external.request'
 
 @Injectable()
 export class AccessLogInterceptor implements NestInterceptor {
-  constructor(private readonly logger = new Logger(AccessLogInterceptor.name)) { }
+  private readonly logger = new Logger(AccessLogInterceptor.name)
+
+  constructor(private readonly systemLogEmit: SystemLogEmit) { }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const createTime = new Date()
@@ -16,84 +20,72 @@ export class AccessLogInterceptor implements NestInterceptor {
     const funcName = context.getHandler().name
     const [req, res] = context.getArgs()
 
-    const showData = true
-    const message: Record<string, any> = {}
+    const systemLog: SystemLogInsertType = {} as any
+    systemLog.controller = {} as any
 
     if (context.getType() === 'http') {
       const ctx = context.switchToHttp()
       const request = ctx.getRequest()
       const { external }: RequestExternal = request.raw
-      const basicExternal = {
-        clientId: external.clientId,
-        ip: external.ip,
-        browser: external.browser,
-        mobile: external.mobile,
-        uid: external.uid,
-        oid: external.oid,
-        username: external.user?.username,
-        phone: external.organization?.phone,
-        email: external.organization?.email,
-      }
+
+      systemLog.clientId = external.clientId
+      systemLog.ip = external.ip
+      systemLog.browser = external.browser
+      systemLog.mobile = external.mobile
+      systemLog.uid = external.uid
+      systemLog.oid = external.oid
+      systemLog.username = external.user?.username
 
       const urlParse = url.parse(request.originalUrl, true)
-      if (basicExternal.oid) {
-        message.OID = basicExternal.oid
-      }
-      message.type = '[API]'
-      message.method = request.method
-      message.url = `${request.protocol}://${request.raw.hostname}${urlParse.pathname}`
-      message.query = urlParse.query
-      message.className = className
-      message.funcName = funcName
-      message.external = basicExternal
-      if (showData) {
-        message.body = request.body
-      }
+
+      systemLog.prefixController = urlParse.pathname.split('/').filter((i) => !!i)[0]
+      systemLog.apiMethod = request.method
+      systemLog.url = `${request.protocol}://${request.raw.hostname}${urlParse.pathname}`
+      systemLog.query = urlParse.query
+
+      systemLog.controller.className = className
+      systemLog.controller.funcName = funcName
+      systemLog.body = request.body
     } else if (context.getType() === 'rpc') {
       if (res.constructor.name === 'NatsContext') {
         const response: NatsContext = res
-        message.type = '[NATS]'
-        message.subject = response.getSubject()
-        message.className = className
-        message.funcName = funcName
-        if (showData) {
-          message.request = req
-        }
+        systemLog.apiMethod = 'NATS'
+        systemLog.controller.subject = response.getSubject()
+        systemLog.controller.className = className
+        systemLog.controller.funcName = funcName
+        systemLog.request = req
       }
       if (res.constructor.name === 'KafkaContext') {
         const response: KafkaContext = res
-        message.type = '[KAFKA]'
-        message.topic = response.getTopic()
-        message.partition = response.getPartition()
-        message.offset = response.getMessage().offset
-        message.className = className
-        message.funcName = funcName
-        if (showData) {
-          message.request = req
-        }
-        message.topicInfo = {
-          topic: response.getTopic(),
-          partition: response.getPartition(),
-          offset: response.getMessage().offset,
-        }
+        systemLog.apiMethod = 'KAFKA'
+        systemLog.controller.topic = response.getTopic()
+        systemLog.controller.partition = response.getPartition()
+        systemLog.controller.offset = response.getMessage().offset
+        systemLog.controller.className = className
+        systemLog.controller.funcName = funcName
+        systemLog.request = req
       }
     }
 
     return next.handle().pipe(
       catchError((err) => {
-        message.errorMessage = err.message
-        message.time = `${Date.now() - createTime.getTime()}ms`
+        systemLog.errorMessage = err.message
+        systemLog.timeMs = Date.now() - createTime.getTime()
         if (err instanceof ValidationException) {
-          message.errors = err.errors
-          this.logger.warn(JSON.stringify(message))
+          systemLog.errorObject = err.errors
+          this.logger.warn(JSON.stringify(systemLog))
         } else {
-          this.logger.error(JSON.stringify(message))
+          this.logger.error(JSON.stringify(systemLog))
         }
+        this.systemLogEmit.emitSystemLogInsert({ data: systemLog })
         return throwError(() => err)
       }),
       tap((xx: any) => {
-        message.time = `${Date.now() - createTime.getTime()}ms`
-        this.logger.log(JSON.stringify(message))
+        systemLog.timeMs = Date.now() - createTime.getTime()
+        this.logger.log(JSON.stringify(systemLog))
+        if (systemLog.apiMethod === 'POST') {
+          this.systemLogEmit.emitSystemLogInsert({ data: systemLog })
+        }
       })
     )
   }

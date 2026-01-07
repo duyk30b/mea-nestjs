@@ -11,6 +11,7 @@ services:
       - mn_network
     depends_on:
       - postgres
+      - mongo
       - redis
     build:
       dockerfile: Dockerfile
@@ -43,6 +44,21 @@ services:
       POSTGRES_PASSWORD: ${SQL_PASSWORD:-Abc12345}
     # ports:
     #   - 25432:5432
+
+  mongo:
+    container_name: mc_mongo
+    image: mongo:8.0.15-noble
+    restart: unless-stopped
+    networks:
+      - mn_network
+    # volumes:
+    #   - ./data/mongo:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE_NAME:-mea_mongodb}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME:-root}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-example}
+    # ports:
+    #   - 27017:27017
 
   redis:
     container_name: mc_redis
@@ -95,6 +111,22 @@ services:
       - postgres
     ports:
       - ${ADMINER_PORT:-23080}:8080
+
+  mongo_express_local:
+    image: mongo-express:1.0.2-20
+    container_name: mc_mongo_express_local
+    restart: unless-stopped
+    depends_on:
+      - mongo
+    networks:
+      - mn_network
+    environment:
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USERNAME:-root}:${MONGO_PASSWORD:-example}@mongo:27017/?authSource=admin
+      ME_CONFIG_BASICAUTH_ENABLED: true
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USERNAME:-express}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD:-password}
+    ports:
+      - ${MONGO_EXPRESS_PORT:-28081}:8081
 
   redis-insight:
     container_name: mc_redis-insight

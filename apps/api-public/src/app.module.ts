@@ -1,6 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
-import { APP_GUARD } from '@nestjs/core'
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core'
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 import {
   HeaderResolver,
@@ -13,9 +13,11 @@ import * as path from 'path'
 import { CacheDataModule } from '../../_libs/common/cache-data/cache-data.module'
 import { OrganizationGuard } from '../../_libs/common/guards/organization.guard'
 import { UserGuard } from '../../_libs/common/guards/user.guard.'
+import { AccessLogInterceptor } from '../../_libs/common/interceptor'
 import { JwtExtendModule } from '../../_libs/common/jwt-extend/jwt-extend.module'
 import { DetectClientMiddleware } from '../../_libs/common/middleware/detect-client.middleware'
 import { PostgresqlModule } from '../../_libs/database/postgresql.module'
+import { MongoDbConnectModule } from '../../_libs/mongo/mongodb-connect.module'
 import { GoogleDriverModule } from '../../_libs/transporter/google-driver/google-driver.module'
 import { AuthModule } from './api-auth/auth.module'
 import { ApiFileModule } from './api-file/api-file.module'
@@ -47,7 +49,7 @@ import { SocketModule } from './socket/socket.module'
       typesOutputPath: path.join(__dirname, '../../../assets/generated/i18n.generated.ts'),
     }),
     PostgresqlModule,
-
+    MongoDbConnectModule,
     JwtExtendModule,
     GoogleDriverModule,
     HealthModule,
@@ -66,6 +68,10 @@ import { SocketModule } from './socket/socket.module'
   ],
   controllers: [AppController],
   providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: AccessLogInterceptor,
+    },
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,

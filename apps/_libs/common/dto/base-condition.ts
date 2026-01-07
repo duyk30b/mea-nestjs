@@ -25,7 +25,7 @@ export type BaseCondition<T> = {
     NOT_BETWEEN?: [T[P], T[P]]
     RAW_QUERY?: string
   })
-} & { $OR?: BaseCondition<T>[] }
+} & { $OR?: BaseCondition<T>[]; $AND?: BaseCondition<T>[] }
 
 export type BaseOperator<T> = {
   ADD?: (T | BaseOperator<T> | number)[]
