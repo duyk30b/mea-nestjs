@@ -74514,12 +74514,12 @@ let TicketOrderService = class TicketOrderService {
         this.socketEmitService.customerUpsert(oid, { customer: customerModified });
         this.socketEmitService.productListChange(oid, {
             productUpsertedList: [
-                ...returnProductResult.productModifiedList,
-                ...sendProductResult.productModifiedList,
+                ...(returnProductResult.productModifiedList || []),
+                ...(sendProductResult.productModifiedList || []),
             ],
             batchUpsertedList: [
-                ...returnProductResult.batchModifiedList,
-                ...sendProductResult.batchModifiedList,
+                ...(returnProductResult.batchModifiedList || []),
+                ...(sendProductResult.batchModifiedList || []),
             ],
         });
         return { ticketModified };
