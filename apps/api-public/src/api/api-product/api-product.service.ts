@@ -327,7 +327,11 @@ export class ApiProductService {
         discount: !!discountDestroyedList?.length,
       })
 
-      await this.organizationRepository.updateDataVersion(oid)
+      await this.organizationRepository.updateDataVersion(oid, {
+        product: true,
+        batch: true,
+        customer: false,
+      })
       this.cacheDataService.clearOrganization(oid)
 
       this.socketEmitService.productListChange(oid, {
@@ -361,7 +365,11 @@ export class ApiProductService {
         productIdSourceList,
       })
 
-    await this.organizationRepository.updateDataVersion(oid)
+    await this.organizationRepository.updateDataVersion(oid, {
+      batch: true,
+      product: true,
+      customer: false,
+    })
     this.cacheDataService.clearOrganization(oid)
 
     this.socketEmitService.productListChange(oid, {

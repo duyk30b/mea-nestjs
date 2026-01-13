@@ -1,13 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsNumber, ValidateNested } from 'class-validator'
+import { IsArray, IsDefined, IsNumber, IsString, ValidateNested } from 'class-validator'
 
 class TicketProductBody {
   @ApiProperty({ example: 56 })
   @Expose()
   @IsDefined()
-  @IsNumber()
-  id: number
+  @IsString()
+  id: string
 
   @ApiProperty({ example: 1 })
   @Expose()

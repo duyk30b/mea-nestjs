@@ -1,9 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 
 # Run: sh ./script/cron.sh
 # Cấp quyền chạy file: chmod +x ./script/cron.sh
-
-WORKING_DIR="$(dirname "$(realpath "$0")")"
+WORKING_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # File script và stdout, stderr
 SCRIPT_FILE="./backup-postgres.sh"
@@ -14,15 +13,29 @@ STDERR_LOG="../data/logs/backup-postgres-stderr.log"
 JOB_ID="backup_postgres"
 
 # Chạy lúc 19h hàng ngày (2h sáng giờ Việt Nam)
-CRON_EXPRESSION="TZ=UTC 0 19 * * * cd $WORKING_DIR && $SCRIPT_FILE >> $STDOUT_LOG 2>> $STDERR_LOG #JOB_ID=$JOB_ID"
+UTC_HOUR=19
+UTC_MINUTE=00
 
-# Xóa cronjob cũ theo JOB_ID
-crontab -l 2>/dev/null | grep -v "#JOB_ID=$JOB_ID" | crontab -
+# Ghép thành giờ UTC hợp lệ
+UTC_TIME=$(printf "%02d:%02d UTC" "$UTC_HOUR" "$UTC_MINUTE")
+# Chuyển sang local timezone của máy
+LOCAL_HOUR=$(date -d "$UTC_TIME" +"%H")
+LOCAL_MINUTE=$(date -d "$UTC_TIME" +"%M")
 
-# Thêm cronjob mới
-(crontab -l 2>/dev/null; echo "$CRON_EXPRESSION") | crontab -;
-echo "List cronjob:";
-crontab -l;
+echo "NOW: $(date)"
+echo "Crontab at: ${UTC_HOUR}:${UTC_MINUTE} UTC0 == ${LOCAL_HOUR}:${LOCAL_MINUTE} UTC$(date +"%Z")"
 
-# Grep log cronjob
-# grep CRON /var/log/syslog
+# Chạy theo giờ local đã tính toán
+CRON_EXPRESSION="${LOCAL_MINUTE} ${LOCAL_HOUR} * * * cd $WORKING_DIR && bash $SCRIPT_FILE >> $STDOUT_LOG 2>> $STDERR_LOG #JOB_ID=$JOB_ID"
+
+# Xóa job cũ và thêm job mới
+(crontab -l 2>/dev/null | grep -v "#JOB_ID=$JOB_ID"; echo "$CRON_EXPRESSION") | crontab -
+echo "List cronjob: crontab -l"
+crontab -l
+
+# Command for remove all crontab
+# crontab -r
+# Command for show log crontab
+# grep CRON /var/log/syslog | tail -10
+# Hoặc xem realtime
+# sudo tail -f /var/log/syslog | grep CRON

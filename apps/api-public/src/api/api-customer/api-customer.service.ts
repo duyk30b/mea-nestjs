@@ -141,7 +141,7 @@ export class ApiCustomerService {
         })
       }
 
-      await this.organizationRepository.updateDataVersion(oid)
+      await this.organizationRepository.updateDataVersion(oid, { product: false, batch: false, customer: true })
       this.cacheDataService.clearOrganization(oid)
     }
 

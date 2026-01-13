@@ -175,59 +175,25 @@ export class ApiBatchService {
 
   async destroyOne(options: { oid: number; batchId: number }) {
     const { oid, batchId } = options
-    const [purchaseOrderItemList, ticketBatchList, ticketProductList] = await Promise.all([
-      this.purchaseOrderItemRepository.findMany({
-        condition: { oid, batchId },
-        limit: 10,
-      }),
-      this.ticketBatchRepository.findMany({
-        condition: { oid, batchId },
-        limit: 10,
-      }),
-      this.ticketProductRepository.findMany({
-        condition: { oid, batchId },
-        limit: 10,
-      }),
-    ])
 
-    let productUpdated: Product
-    if (
-      !(
-        purchaseOrderItemList.length > 0
-        || ticketBatchList.length > 0
-        || ticketProductList.length > 0
-      )
-    ) {
-      const batchDestroyed = await this.batchRepository.deleteOne({
-        oid,
-        id: batchId,
-      })
-      productUpdated = await this.productRepository.updateOne(
-        { oid, id: batchDestroyed.productId },
-        { quantity: () => `quantity - ${batchDestroyed.quantity}` }
-      )
+    const batchDestroyed = await this.batchRepository.deleteOne({
+      oid,
+      id: batchId,
+      quantity: 0,
+    })
 
-      await this.organizationRepository.updateDataVersion(oid)
-      this.cacheDataService.clearOrganization(oid)
+    await this.organizationRepository.updateDataVersion(oid, {
+      product: true,
+      batch: true,
+      customer: true,
+    })
+    this.cacheDataService.clearOrganization(oid)
 
-      this.socketEmitService.productListChange(oid, {
-        productUpsertedList: [productUpdated],
-        batchDestroyedList: [batchDestroyed],
-      })
-    }
+    this.socketEmitService.productListChange(oid, {
+      batchDestroyedList: [batchDestroyed],
+    })
 
-    return {
-      purchaseOrderItemList,
-      ticketBatchList,
-      ticketProductList,
-      batchId,
-      product: productUpdated,
-      success: !(
-        purchaseOrderItemList.length > 0
-        || ticketBatchList.length > 0
-        || ticketProductList.length > 0
-      ),
-    }
+    return { batchId }
   }
 
   async batchMerge(options: { oid: number; body: BatchMergeBody }) {
@@ -246,7 +212,11 @@ export class ApiBatchService {
       batchIdTarget,
     })
 
-    await this.organizationRepository.updateDataVersion(oid)
+    await this.organizationRepository.updateDataVersion(oid, {
+      batch: true,
+      product: false,
+      customer: false,
+    })
     this.cacheDataService.clearOrganization(oid)
 
     this.socketEmitService.productListChange(oid, {

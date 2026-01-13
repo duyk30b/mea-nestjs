@@ -1,10 +1,10 @@
 #!/bin/bash
-
+set -euo pipefail
 # Cấp quyền chạy file: chmod +x ./script/backup-postgres.sh 
 
 USER=$(whoami)
-SCRIPT_DIR="$(dirname "$(realpath "$0")")"
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+PROJECT_SCRIPT="$(dirname "$(realpath "$0")")"
+PROJECT_DIRECTORY="$(dirname "$PROJECT_SCRIPT")"
 POSTGRES_PASSWORD="Abc12345"
 POSTGRES_USER="mea"
 POSTGRES_DB="mea_sql"
@@ -13,8 +13,8 @@ echo "--------------------------------------------------------------------------
 NOW_UTC=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
 NOW_VN=$(TZ=Asia/Ho_Chi_Minh date '+%Y-%m-%d %H:%M:%S ICT')
 echo "$NOW_UTC - [BACKUP_POSTGRES][$USER] Starting backup process..."
-echo "Working directory: $SCRIPT_DIR"
-
+echo "Working PROJECT_DIRECTORY: $PROJECT_DIRECTORY"
+echo "Working PROJECT_SCRIPT: $PROJECT_SCRIPT"
 git log master -2 --oneline
 
 # Chỉ giữ lại 3 bản sao lưu gần nhất
@@ -25,7 +25,7 @@ git log master -2 --oneline
 # Sử dụng xargs để xóa các file đó
 # Sử dụng -I {} để thay thế {} bằng tên file
 # Sử dụng rm -- {} để xóa file đó
-cd $PROJECT_DIR && docker compose -f docker-compose.production.yml exec postgres sh -c '\
+cd $PROJECT_DIRECTORY && /usr/bin/docker compose -f docker-compose.production.yml exec postgres sh -c '\
   PGPASSWORD=$POSTGRES_PASSWORD pg_dump -U $POSTGRES_USER $POSTGRES_DB > /backup/$(date +%Y-%m-%d_%H-%M-%S).sql && \
   ls -tp /backup/*.sql | grep -v "/$" | tail -n +2 | xargs -I {} rm -- {} && \
   ls -la /backup \

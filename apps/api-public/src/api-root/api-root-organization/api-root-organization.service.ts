@@ -130,7 +130,11 @@ export class ApiRootOrganizationService {
     }
 
     if (!tableNameDeleteList.includes(Organization.name)) {
-      await this.organizationRepository.updateDataVersion(oid)
+      await this.organizationRepository.updateDataVersion(oid, {
+        product: true,
+        batch: true,
+        customer: true,
+      })
     }
     this.cacheDataService.clearOrganization(oid)
     return { oid }

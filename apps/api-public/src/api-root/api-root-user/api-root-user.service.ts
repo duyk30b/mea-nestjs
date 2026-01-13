@@ -135,7 +135,7 @@ export class ApiRootUserService {
   async logoutAll() {
     const result = this.cacheTokenService.removeAllExcludeRoot()
 
-    await this.organizationRepository.updateDataVersion(undefined)
+    await this.organizationRepository.updateAllDataVersion()
     this.cacheDataService.clearOrganization(undefined)
     return { data: result }
   }

@@ -11625,9 +11625,22 @@ let OrganizationRepository = class OrganizationRepository extends _postgresql_re
         super(entities_1.Organization, organizationRepository);
         this.organizationRepository = organizationRepository;
     }
-    async updateDataVersion(oid) {
+    async updateDataVersion(oid, repository) {
+        const orgOrigin = await this.findOneById(oid);
+        orgOrigin.dataVersionParse = JSON.parse(orgOrigin.dataVersion);
         const randomNumber = Math.floor(Math.random() * 1000);
-        const organization = await this.updateOne({ id: oid }, {
+        const organizationModified = await this.updateOne({ id: oid }, {
+            dataVersion: JSON.stringify({
+                product: repository.product ? randomNumber : orgOrigin.dataVersionParse.product,
+                batch: repository.batch ? randomNumber : orgOrigin.dataVersionParse.batch,
+                customer: repository.customer ? randomNumber : orgOrigin.dataVersionParse.customer,
+            }),
+        });
+        return { organizationModified };
+    }
+    async updateAllDataVersion() {
+        const randomNumber = Math.floor(Math.random() * 1000);
+        const organization = await this.updateOne({}, {
             dataVersion: JSON.stringify({
                 product: randomNumber,
                 batch: randomNumber,
@@ -29992,7 +30005,11 @@ let ApiRootOrganizationService = ApiRootOrganizationService_1 = class ApiRootOrg
             }
         }
         if (!tableNameDeleteList.includes(entities_1.Organization.name)) {
-            await this.organizationRepository.updateDataVersion(oid);
+            await this.organizationRepository.updateDataVersion(oid, {
+                product: true,
+                batch: true,
+                customer: true,
+            });
         }
         this.cacheDataService.clearOrganization(oid);
         return { oid };
@@ -31107,7 +31124,7 @@ let ApiRootUserService = ApiRootUserService_1 = class ApiRootUserService {
     }
     async logoutAll() {
         const result = this.cacheTokenService.removeAllExcludeRoot();
-        await this.organizationRepository.updateDataVersion(undefined);
+        await this.organizationRepository.updateAllDataVersion();
         this.cacheDataService.clearOrganization(undefined);
         return { data: result };
     }
@@ -33249,46 +33266,21 @@ let ApiBatchService = class ApiBatchService {
     }
     async destroyOne(options) {
         const { oid, batchId } = options;
-        const [purchaseOrderItemList, ticketBatchList, ticketProductList] = await Promise.all([
-            this.purchaseOrderItemRepository.findMany({
-                condition: { oid, batchId },
-                limit: 10,
-            }),
-            this.ticketBatchRepository.findMany({
-                condition: { oid, batchId },
-                limit: 10,
-            }),
-            this.ticketProductRepository.findMany({
-                condition: { oid, batchId },
-                limit: 10,
-            }),
-        ]);
-        let productUpdated;
-        if (!(purchaseOrderItemList.length > 0
-            || ticketBatchList.length > 0
-            || ticketProductList.length > 0)) {
-            const batchDestroyed = await this.batchRepository.deleteOne({
-                oid,
-                id: batchId,
-            });
-            productUpdated = await this.productRepository.updateOne({ oid, id: batchDestroyed.productId }, { quantity: () => `quantity - ${batchDestroyed.quantity}` });
-            await this.organizationRepository.updateDataVersion(oid);
-            this.cacheDataService.clearOrganization(oid);
-            this.socketEmitService.productListChange(oid, {
-                productUpsertedList: [productUpdated],
-                batchDestroyedList: [batchDestroyed],
-            });
-        }
-        return {
-            purchaseOrderItemList,
-            ticketBatchList,
-            ticketProductList,
-            batchId,
-            product: productUpdated,
-            success: !(purchaseOrderItemList.length > 0
-                || ticketBatchList.length > 0
-                || ticketProductList.length > 0),
-        };
+        const batchDestroyed = await this.batchRepository.deleteOne({
+            oid,
+            id: batchId,
+            quantity: 0,
+        });
+        await this.organizationRepository.updateDataVersion(oid, {
+            product: true,
+            batch: true,
+            customer: true,
+        });
+        this.cacheDataService.clearOrganization(oid);
+        this.socketEmitService.productListChange(oid, {
+            batchDestroyedList: [batchDestroyed],
+        });
+        return { batchId };
     }
     async batchMerge(options) {
         const { oid, body } = options;
@@ -33304,7 +33296,11 @@ let ApiBatchService = class ApiBatchService {
             batchIdSourceList,
             batchIdTarget,
         });
-        await this.organizationRepository.updateDataVersion(oid);
+        await this.organizationRepository.updateDataVersion(oid, {
+            batch: true,
+            product: false,
+            customer: false,
+        });
         this.cacheDataService.clearOrganization(oid);
         this.socketEmitService.productListChange(oid, {
             batchDestroyedList,
@@ -34410,7 +34406,7 @@ let ApiCustomerService = class ApiCustomerService {
                     paymentId: { IN: paymentDestroyedList.map((i) => i.id) },
                 });
             }
-            await this.organizationRepository.updateDataVersion(oid);
+            await this.organizationRepository.updateDataVersion(oid, { product: false, batch: false, customer: true });
             this.cacheDataService.clearOrganization(oid);
         }
         return { ticketList, customerId, success: ticketList.length === 0 };
@@ -42601,7 +42597,11 @@ let ApiProductService = class ApiProductService {
                 position: !!positionDestroyedList?.length,
                 discount: !!discountDestroyedList?.length,
             });
-            await this.organizationRepository.updateDataVersion(oid);
+            await this.organizationRepository.updateDataVersion(oid, {
+                product: true,
+                batch: true,
+                customer: false,
+            });
             this.cacheDataService.clearOrganization(oid);
             this.socketEmitService.productListChange(oid, {
                 productDestroyedList: [productDestroyed],
@@ -42629,7 +42629,11 @@ let ApiProductService = class ApiProductService {
             productIdTarget,
             productIdSourceList,
         });
-        await this.organizationRepository.updateDataVersion(oid);
+        await this.organizationRepository.updateDataVersion(oid, {
+            batch: true,
+            product: true,
+            customer: false,
+        });
         this.cacheDataService.clearOrganization(oid);
         this.socketEmitService.productListChange(oid, {
             productUpsertedList: [productModified],
@@ -70388,8 +70392,8 @@ __decorate([
     (0, swagger_1.ApiProperty)({ example: 56 }),
     (0, class_transformer_1.Expose)(),
     (0, class_validator_1.IsDefined)(),
-    (0, class_validator_1.IsNumber)(),
-    __metadata("design:type", Number)
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
 ], TicketProductBody.prototype, "id", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 1 }),

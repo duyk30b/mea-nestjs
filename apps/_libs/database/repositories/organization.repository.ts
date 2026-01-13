@@ -24,10 +24,31 @@ export class OrganizationRepository extends _PostgreSqlRepository<
     super(Organization, organizationRepository)
   }
 
-  async updateDataVersion(oid: number | undefined) {
+  async updateDataVersion(
+    oid: number,
+    repository: { product: boolean; batch: boolean; customer: boolean }
+  ) {
+    const orgOrigin = await this.findOneById(oid)
+    orgOrigin.dataVersionParse = JSON.parse(orgOrigin.dataVersion)
+
+    const randomNumber = Math.floor(Math.random() * 1000)
+    const organizationModified = await this.updateOne(
+      { id: oid },
+      {
+        dataVersion: JSON.stringify({
+          product: repository.product ? randomNumber : orgOrigin.dataVersionParse.product,
+          batch: repository.batch ? randomNumber : orgOrigin.dataVersionParse.batch,
+          customer: repository.customer ? randomNumber : orgOrigin.dataVersionParse.customer,
+        }),
+      }
+    )
+    return { organizationModified }
+  }
+
+  async updateAllDataVersion() {
     const randomNumber = Math.floor(Math.random() * 1000)
     const organization = await this.updateOne(
-      { id: oid },
+      {},
       {
         dataVersion: JSON.stringify({
           product: randomNumber,
