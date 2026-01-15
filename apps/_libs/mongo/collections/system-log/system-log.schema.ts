@@ -1,16 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { Document, Types } from 'mongoose'
 
-@Schema({ collection: 'SystemLog', timestamps: true })
+@Schema({ collection: 'SystemLog', timestamps: { createdAt: true } })
 export class SystemLog {
   @Prop()
   oid: number
 
   @Prop()
   uid: number
-
-  @Prop()
-  username: string
 
   @Prop()
   clientId: string
@@ -34,13 +31,19 @@ export class SystemLog {
   url: string
 
   @Prop()
-  errorMessage: string
+  statusCode: number
 
   @Prop()
   timeMs: number
 
   @Prop()
   request: string
+
+  @Prop()
+  errorName: string
+
+  @Prop()
+  errorMessage: string
 
   @Prop({ type: Object })
   errorObject: object

@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
+import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiRoleService } from './api-role.service'
@@ -21,8 +22,12 @@ export class ApiRoleController {
 
   @Get('pagination')
   @UserPermission()
-  pagination(@External() { oid }: TExternal, @Query() query: RolePaginationQuery) {
-    return this.apiRoleService.pagination(oid, query)
+  async pagination(
+    @External() { oid }: TExternal,
+    @Query() query: RolePaginationQuery
+  ): Promise<BaseResponse> {
+    const data = this.apiRoleService.pagination(oid, query)
+    return { data }
   }
 
   @Get('list')

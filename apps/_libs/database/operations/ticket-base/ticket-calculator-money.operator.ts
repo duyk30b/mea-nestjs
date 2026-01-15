@@ -37,7 +37,7 @@ export class TicketCalculatorMoney {
         return i.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
       })
       .reduce((acc, item) => {
-        return acc + item.quantity * item.actualPrice
+        return acc + item.unitQuantity * item.unitActualPrice
       }, 0)
     const procedureMoney = ticketProcedureList
       .filter((i) => {
@@ -66,7 +66,7 @@ export class TicketCalculatorMoney {
         return i.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
       })
       .reduce((acc, item) => {
-        return acc + item.quantity * item.discountMoney
+        return acc + item.unitQuantity * item.unitDiscountMoney
       }, 0)
     const procedureDiscount = ticketProcedureList
       .filter((i) => {

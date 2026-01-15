@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
+import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiProcedureGroupService } from './api-procedure-group.service'
@@ -21,8 +22,12 @@ export class ApiProcedureGroupController {
 
   @Get('pagination')
   @UserPermission()
-  pagination(@External() { oid }: TExternal, @Query() query: ProcedureGroupPaginationQuery) {
-    return this.apiProcedureGroupService.pagination(oid, query)
+  async pagination(
+    @External() { oid }: TExternal,
+    @Query() query: ProcedureGroupPaginationQuery
+  ): Promise<BaseResponse> {
+    const data = this.apiProcedureGroupService.pagination(oid, query)
+    return { data }
   }
 
   @Get('list')
@@ -39,10 +44,7 @@ export class ApiProcedureGroupController {
 
   @Post('replace-all')
   @UserPermission(PermissionId.MASTER_DATA_PROCEDURE)
-  async replaceAll(
-    @External() { oid }: TExternal,
-    @Body() body: ProcedureGroupReplaceAllBody
-  ) {
+  async replaceAll(@External() { oid }: TExternal, @Body() body: ProcedureGroupReplaceAllBody) {
     return await this.apiProcedureGroupService.replaceAll(oid, body)
   }
 

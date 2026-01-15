@@ -41,17 +41,19 @@ export class StatisticProductService {
         condition: {
           oid,
           deliveryStatus: { IN: [DeliveryStatus.Delivered] },
-          quantity: { GT: 0 },
+          unitQuantity: { GT: 0 },
           createdAt: filter?.createdAt,
         },
         groupBy: ['productId'],
         select: ['productId'],
         aggregate: {
           count: { COUNT: '*' },
-          sumQuantity: { SUM: ['quantity'] },
+          sumQuantity: { SUM: [{ MUL: ['unitQuantity', 'unitRate'] }] },
           sumCostAmount: { SUM: ['costAmount'] },
-          sumActualAmount: { SUM: [{ MUL: ['quantity', 'actualPrice'] }] },
-          sumProfitAmount: { SUM: [{ SUB: [{ MUL: ['quantity', 'actualPrice'] }, 'costAmount'] }] },
+          sumActualAmount: { SUM: [{ MUL: ['unitQuantity', 'unitActualPrice'] }] },
+          sumProfitAmount: {
+            SUM: [{ SUB: [{ MUL: ['unitQuantity', 'unitActualPrice'] }, 'costAmount'] }],
+          },
         },
         orderBy: sortStatistic || { productId: 'DESC' },
         limit: limit || 20,
@@ -61,7 +63,7 @@ export class StatisticProductService {
         condition: {
           oid,
           deliveryStatus: { IN: [DeliveryStatus.Delivered] },
-          quantity: { GT: 0 },
+          unitQuantity: { GT: 0 },
           createdAt: filter?.createdAt,
         },
         groupBy: ['productId'],

@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../../_libs/common/dto/param'
 import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
+import { BaseResponse } from '../../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { LaboratoryGroupService } from './laboratory-group.service'
@@ -20,8 +21,12 @@ export class LaboratoryGroupController {
 
   @Get('pagination')
   @UserPermission()
-  pagination(@External() { oid }: TExternal, @Query() query: LaboratoryGroupPaginationQuery) {
-    return this.laboratoryGroupService.pagination(oid, query)
+  async pagination(
+    @External() { oid }: TExternal,
+    @Query() query: LaboratoryGroupPaginationQuery
+  ): Promise<BaseResponse> {
+    const data = await this.laboratoryGroupService.pagination(oid, query)
+    return { data }
   }
 
   @Get('list')
@@ -62,10 +67,7 @@ export class LaboratoryGroupController {
 
   @Post('replace-all')
   @UserPermission(PermissionId.MASTER_DATA_LABORATORY)
-  async replaceAll(
-    @External() { oid }: TExternal,
-    @Body() body: LaboratoryGroupReplaceAllBody
-  ) {
+  async replaceAll(@External() { oid }: TExternal, @Body() body: LaboratoryGroupReplaceAllBody) {
     return await this.laboratoryGroupService.replaceAll(oid, body)
   }
 

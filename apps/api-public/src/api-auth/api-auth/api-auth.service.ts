@@ -36,7 +36,7 @@ export class ApiAuthService {
     private readonly jwtExtendService: JwtExtendService,
     private readonly organizationRepository: OrganizationRepository,
     private readonly userRepository: UserRepository
-  ) {}
+  ) { }
 
   // async register(registerDto: RegisterBody, ip: string): Promise<BaseResponse> {
   //   const { email, phone, username, password } = registerDto
@@ -108,7 +108,7 @@ export class ApiAuthService {
   //   }
   // }
 
-  async login(loginDto: LoginBody, dataExternal: TExternal): Promise<BaseResponse> {
+  async login(loginDto: LoginBody, dataExternal: TExternal) {
     const { clientId, ip, os, browser, mobile } = dataExternal
 
     const [user] = await this.dataSource.getRepository(User).find({
@@ -146,17 +146,15 @@ export class ApiAuthService {
     })
 
     return {
-      data: {
-        user,
-        accessToken: token.accessToken,
-        accessExp: token.accessExp,
-        refreshToken: token.refreshToken,
-        refreshExp: token.refreshExp,
-      },
+      user,
+      accessToken: token.accessToken,
+      accessExp: token.accessExp,
+      refreshToken: token.refreshToken,
+      refreshExp: token.refreshExp,
     }
   }
 
-  async loginRoot(loginRootDto: LoginRootBody, dataExternal: TExternal): Promise<BaseResponse> {
+  async loginRoot(loginRootDto: LoginRootBody, dataExternal: TExternal) {
     const { clientId, ip, os, browser, mobile } = dataExternal
 
     const [root] = await this.dataSource.getRepository(User).find({
@@ -212,13 +210,11 @@ export class ApiAuthService {
     })
 
     return {
-      data: {
-        user,
-        accessToken: token.accessToken,
-        accessExp: token.accessExp,
-        refreshToken: token.refreshToken,
-        refreshExp: token.refreshExp,
-      },
+      user,
+      accessToken: token.accessToken,
+      accessExp: token.accessExp,
+      refreshToken: token.refreshToken,
+      refreshExp: token.refreshExp,
     }
   }
 
@@ -352,7 +348,7 @@ export class ApiAuthService {
     return { data: true }
   }
 
-  async grantAccessToken(refreshToken: string, dataExternal: TExternal): Promise<BaseResponse> {
+  async grantAccessToken(refreshToken: string, dataExternal: TExternal) {
     // trường hợp này ko lấy được uid và oid do accessToken đã hết hạn nên ko có user
     const { ip, clientId, os, browser, mobile } = dataExternal
     const jwtPayloadRefresh = this.jwtExtendService.verifyRefreshToken(refreshToken, ip)
@@ -387,9 +383,7 @@ export class ApiAuthService {
       mobile,
     })
 
-    return {
-      data: { accessExp: token.accessExp, accessToken: token.accessToken },
-    }
+    return { user, accessExp: token.accessExp, accessToken: token.accessToken }
   }
 
   async logout(body: LogoutBody) {

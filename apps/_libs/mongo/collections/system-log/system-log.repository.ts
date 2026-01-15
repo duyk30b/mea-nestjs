@@ -12,7 +12,7 @@ import {
 @Injectable()
 export class SystemLogRepository extends BaseMongoRepository<
   SystemLog,
-  SystemLogType,
+  SystemLogType & { createdAt: Date },
   { [P in '_id']?: 'ASC' | 'DESC' },
   { [P in never]?: boolean },
   SystemLogInsertType,

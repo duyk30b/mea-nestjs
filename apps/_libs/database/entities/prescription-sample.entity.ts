@@ -1,6 +1,6 @@
 import { Expose } from 'class-transformer'
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
-import Product from './product.entity'
+import { Column, Entity, PrimaryColumn } from 'typeorm'
+import PrescriptionSampleItem from './prescription-sample-item.entity'
 
 @Entity('PrescriptionSample')
 export default class PrescriptionSample {
@@ -8,9 +8,9 @@ export default class PrescriptionSample {
   @Column()
   oid: number
 
+  @PrimaryColumn({ type: 'bigint' })
   @Expose()
-  @PrimaryGeneratedColumn()
-  id: number
+  id: string
 
   @Expose()
   @Column({ default: 0 })
@@ -25,11 +25,7 @@ export default class PrescriptionSample {
   name: string
 
   @Expose()
-  @Column({ type: 'text', default: JSON.stringify([]) })
-  medicines: string
-
-  @Expose()
-  medicineList: { productId: number; quantity: number; hintUsage: string; product?: Product }[]
+  prescriptionSampleItemList: PrescriptionSampleItem[]
 
   static fromRaw(raw: { [P in keyof PrescriptionSample]: any }) {
     if (!raw) return null
@@ -45,7 +41,7 @@ export default class PrescriptionSample {
 }
 
 export type PrescriptionSampleRelationType = {
-  [P in keyof Pick<PrescriptionSample, 'medicineList'>]?: boolean
+  [P in keyof Pick<PrescriptionSample, 'prescriptionSampleItemList'>]?: boolean
 }
 
 export type PrescriptionSampleSortType = {

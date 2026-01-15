@@ -138,7 +138,10 @@ export class PurchaseOrderBasicUpsertService {
               return false
             }
           }
-          if (batch.costPrice != purchaseOrderItem.costPrice) {
+          if (
+            batch.costPrice
+            != Math.round(purchaseOrderItem.unitCostPrice / purchaseOrderItem.unitRate)
+          ) {
             if (splitRule.splitBatchByCostPrice === SplitBatchByCostPrice.SplitOnDifferent) {
               return false
             }
@@ -159,7 +162,7 @@ export class PurchaseOrderBasicUpsertService {
           warehouseId: purchaseOrderItem.warehouseId,
           lotNumber: purchaseOrderItem.lotNumber,
           expiryDate: purchaseOrderItem.expiryDate,
-          costPrice: purchaseOrderItem.costPrice,
+          costPrice: Math.round(purchaseOrderItem.unitCostPrice / purchaseOrderItem.unitRate),
           quantity: 0,
           costAmount: 0,
           registeredAt: Date.now(),
@@ -183,7 +186,7 @@ export class PurchaseOrderBasicUpsertService {
           oid,
           purchaseOrderId: purchaseOrder.id,
           distributorId,
-          quantity: i.quantity,
+          unitQuantity: i.unitQuantity,
         }
         return purchaseOrderItem
       })

@@ -38,11 +38,11 @@ export class ApiUserService {
     private readonly cacheDataService: CacheDataService
   ) { }
 
-  async pagination(options: { oid: number; query: UserPaginationQuery }): Promise<BaseResponse> {
+  async pagination(options: { oid: number; query: UserPaginationQuery }) {
     const { oid, query } = options
     const { page, limit, filter, sort, relation } = query
 
-    const { data, total } = await this.userRepository.pagination({
+    const { data: userList, total } = await this.userRepository.pagination({
       // relationLoadStrategy: 'join',
       page,
       limit,
@@ -62,8 +62,8 @@ export class ApiUserService {
       sort,
     })
 
-    for (let i = 0; i < data.length; i++) {
-      const user = data[i]
+    for (let i = 0; i < userList.length; i++) {
+      const user = userList[i]
       const tokenData = await this.cacheTokenService.getTokenListByOrganization({
         oid,
       })
@@ -82,10 +82,7 @@ export class ApiUserService {
       })
     }
 
-    return {
-      data,
-      meta: { total, page, limit },
-    }
+    return { userList, total, page, limit }
   }
 
   async getMany(oid: number, query: UserGetManyQuery): Promise<BaseResponse> {

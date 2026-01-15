@@ -17,10 +17,10 @@ export class ApiWarehouseService {
     private readonly batchRepository: BatchRepository
   ) { }
 
-  async pagination(oid: number, query: WarehousePaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: WarehousePaginationQuery) {
     const { page, limit, filter, sort, relation } = query
 
-    const { data, total } = await this.warehouseRepository.pagination({
+    const { data: warehouseList, total } = await this.warehouseRepository.pagination({
       page,
       limit,
       relation,
@@ -30,10 +30,7 @@ export class ApiWarehouseService {
       },
       sort,
     })
-    return {
-      data,
-      meta: { total, page, limit },
-    }
+    return { warehouseList, total, page, limit }
   }
 
   async getMany(oid: number, query: WarehouseGetManyQuery): Promise<BaseResponse> {
@@ -75,17 +72,14 @@ export class ApiWarehouseService {
     return { data: { warehouse } }
   }
 
-  async destroyOne(options: { oid: number; warehouseId: number }): Promise<BaseResponse> {
+  async destroyOne(options: { oid: number; warehouseId: number }) {
     const { oid, warehouseId } = options
     const countBatch = await this.batchRepository.countBy({ oid, warehouseId })
     if (countBatch > 0) {
-      return {
-        data: { countBatch },
-        success: false,
-      }
+      return { countBatch, warehouseId, success: false }
     }
     await this.warehouseRepository.deleteBasic({ oid, id: warehouseId })
 
-    return { data: { countBatch: 0, warehouseId } }
+    return { countBatch: 0, warehouseId, success: true }
   }
 }

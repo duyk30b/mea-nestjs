@@ -114,8 +114,8 @@ export class TicketOrderBasicUpsertService {
             ticketId: ticket.id,
             customerId,
             deliveryStatus: DeliveryStatus.Pending,
-            quantityPrescription: i.quantity,
-            quantity: i.quantity,
+            unitQuantityPrescription: i.unitQuantity,
+            unitQuantity: i.unitQuantity,
             type: TicketProductType.Prescription,
             paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
             costAmount: 0, // costAmount chỉ tính toán khi gửi hàng

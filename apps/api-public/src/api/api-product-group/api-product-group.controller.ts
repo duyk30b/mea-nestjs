@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
 import { OrganizationPermission } from '../../../../_libs/common/guards/organization.guard'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
+import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiProductGroupService } from './api-product-group.service'
@@ -22,8 +23,12 @@ export class ApiProductGroupController {
 
   @Get('pagination')
   @OrganizationPermission(PermissionId.PRODUCT)
-  pagination(@External() { oid }: TExternal, @Query() query: ProductGroupPaginationQuery) {
-    return this.apiProductGroupService.pagination(oid, query)
+  async pagination(
+    @External() { oid }: TExternal,
+    @Query() query: ProductGroupPaginationQuery
+  ): Promise<BaseResponse> {
+    const data = await this.apiProductGroupService.pagination(oid, query)
+    return { data }
   }
 
   @Get('list')
@@ -40,10 +45,7 @@ export class ApiProductGroupController {
 
   @Post('replace-all')
   @UserPermission(PermissionId.PRODUCT_UPDATE)
-  async replaceAll(
-    @External() { oid }: TExternal,
-    @Body() body: ProductGroupReplaceAllBody
-  ) {
+  async replaceAll(@External() { oid }: TExternal, @Body() body: ProductGroupReplaceAllBody) {
     return await this.apiProductGroupService.replaceAll(oid, body)
   }
 

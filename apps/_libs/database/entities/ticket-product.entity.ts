@@ -79,21 +79,15 @@ export default class TicketProduct {
 
   @Column({ default: 0 })
   @Expose()
-  quantityPrescription: number
+  unitQuantityPrescription: number
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()
   printPrescription: number
 
-  @Column({
-    type: 'decimal',
-    default: 0,
-    precision: 10,
-    scale: 3,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
+  @Column({ default: 0 })
   @Expose()
-  quantity: number
+  unitQuantity: number
 
   @Column({
     type: 'bigint',
@@ -109,7 +103,7 @@ export default class TicketProduct {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  expectedPrice: number
+  unitExpectedPrice: number
 
   @Column({
     type: 'bigint',
@@ -117,7 +111,7 @@ export default class TicketProduct {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  discountMoney: number
+  unitDiscountMoney: number
 
   @Column({
     type: 'decimal',
@@ -135,10 +129,11 @@ export default class TicketProduct {
 
   @Column({
     type: 'bigint',
+    default: 0,
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  actualPrice: number
+  unitActualPrice: number
 
   @Column({ default: 0 })
   @Expose()
@@ -187,14 +182,14 @@ export default class TicketProduct {
     const entity = new TicketProduct()
     Object.assign(entity, raw)
 
-    entity.quantity = Number(raw.quantity)
-    entity.quantityPrescription = Number(raw.quantityPrescription)
+    entity.unitQuantity = Number(raw.unitQuantity)
+    entity.unitQuantityPrescription = Number(raw.unitQuantityPrescription)
     entity.costAmount = Number(raw.costAmount)
 
-    entity.expectedPrice = Number(raw.expectedPrice)
-    entity.discountMoney = Number(raw.discountMoney)
+    entity.unitExpectedPrice = Number(raw.unitExpectedPrice)
+    entity.unitDiscountMoney = Number(raw.unitDiscountMoney)
     entity.discountPercent = Number(raw.discountPercent)
-    entity.actualPrice = Number(raw.actualPrice)
+    entity.unitActualPrice = Number(raw.unitActualPrice)
     entity.paid = Number(raw.paid)
     entity.debt = Number(raw.debt)
 

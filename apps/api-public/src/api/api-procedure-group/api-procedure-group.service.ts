@@ -16,10 +16,10 @@ import {
 export class ApiProcedureGroupService {
   constructor(private readonly procedureGroupRepository: ProcedureGroupRepository) { }
 
-  async pagination(oid: number, query: ProcedureGroupPaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: ProcedureGroupPaginationQuery) {
     const { page, limit, filter, sort, relation } = query
 
-    const { data, total } = await this.procedureGroupRepository.pagination({
+    const { data: procedureGroupList, total } = await this.procedureGroupRepository.pagination({
       page,
       limit,
       relation,
@@ -28,10 +28,7 @@ export class ApiProcedureGroupService {
       },
       sort,
     })
-    return {
-      data,
-      meta: { total, page, limit },
-    }
+    return { procedureGroupList, total, page, limit }
   }
 
   async getMany(oid: number, query: ProcedureGroupGetManyQuery): Promise<BaseResponse> {

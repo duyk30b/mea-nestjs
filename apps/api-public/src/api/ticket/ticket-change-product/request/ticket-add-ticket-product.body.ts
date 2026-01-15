@@ -70,8 +70,8 @@ export class TicketProductAddBody {
   @ApiProperty({ example: 4 })
   @Expose()
   @IsDefined()
-  @IsNumber()
-  quantityPrescription: number
+  @IsInt()
+  unitQuantityPrescription: number
 
   @ApiProperty({ example: 1 })
   @Expose()
@@ -82,21 +82,21 @@ export class TicketProductAddBody {
   @ApiProperty({ example: 4 })
   @Expose()
   @IsDefined()
-  @IsNumber()
-  quantity: number
+  @IsInt()
+  unitQuantity: number
 
   @ApiProperty({ example: 25_000 })
   @Expose()
   @IsDefined()
   @IsNumber()
-  expectedPrice: number
+  unitExpectedPrice: number
 
   @ApiProperty({ example: 22_500 })
   @Expose()
   @Transform(({ value }) => Math.round(value || 0))
   @IsDefined()
   @IsNumber()
-  discountMoney: number
+  unitDiscountMoney: number
 
   @ApiProperty({ example: 22_500 })
   @Expose()
@@ -117,7 +117,7 @@ export class TicketProductAddBody {
   @Transform(({ value }) => Math.round(value || 0))
   @IsDefined()
   @IsNumber()
-  actualPrice: number
+  unitActualPrice: number
 
   @ApiProperty({ example: 'Uống 2 lần/ngày sáng 1 viên, chiều 1 viên' })
   @Expose()

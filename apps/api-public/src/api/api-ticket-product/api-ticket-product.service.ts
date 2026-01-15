@@ -58,7 +58,7 @@ export class ApiTicketProductService {
     await this.ticketProductRepository.deleteBasic({
       oid,
       id: ticketProductId,
-      quantity: 0,
+      unitQuantity: 0,
     })
     return { ticketProductId }
   }

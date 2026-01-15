@@ -65,7 +65,13 @@ class TicketProductConsumableBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  quantity: number
+  unitQuantity: number
+
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  unitRate: number
 
   @ApiProperty({ enum: PickupStrategy, example: PickupStrategy.AutoWithExpiryDate })
   @Expose()

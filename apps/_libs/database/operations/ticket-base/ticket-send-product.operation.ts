@@ -94,12 +94,12 @@ export class TicketSendProductOperation {
         voucherProductPickupList: ticketProductOriginList.map((i) => {
           return {
             pickupStrategy: i.pickupStrategy,
-            expectedPrice: i.expectedPrice,
-            actualPrice: i.actualPrice,
+            expectedPrice: Math.round(i.unitExpectedPrice / i.unitRate),
+            actualPrice: Math.round(i.unitActualPrice / i.unitRate),
             productId: i.productId,
             batchId: i.batchId,
             warehouseIds: i.warehouseIds,
-            quantity: i.quantity,
+            quantity: i.unitQuantity * i.unitRate,
             voucherProductId: i.id,
             voucherBatchId: 0,
             costAmount: null,
@@ -114,7 +114,7 @@ export class TicketSendProductOperation {
       const ticketProductModifiedList = await this.ticketProductRepository.managerBulkUpdate({
         manager,
         condition: { oid, ticketId, deliveryStatus: { EQUAL: DeliveryStatus.Pending } },
-        compare: { id: { cast: 'bigint' }, productId: true, quantity: true },
+        compare: { id: { cast: 'bigint' }, productId: true },
         tempList: pickupPlan.pickupVoucherProductList.map((i) => {
           return {
             id: i.voucherProductId,
@@ -136,6 +136,9 @@ export class TicketSendProductOperation {
       const ticketBatchInsertList = pickupPlan.pickupVoucherBatchList.map((pickupTicketBatch) => {
         const tp = ticketProductModifiedMap[pickupTicketBatch.voucherProductId]
         const batchOrigin = batchModifiedMap[pickupTicketBatch.batchId]
+        if (!Number.isInteger(pickupTicketBatch.pickupQuantity / tp.unitRate)) {
+          throw new Error('Không thể xử lý đơn vị tính lớn, cần dùng đơn vị nhỏ hơn của sản phẩm')
+        }
         const ticketBatchInsert: TicketBatchInsertType = {
           id: GenerateId.nextId(),
           oid,
@@ -147,10 +150,10 @@ export class TicketSendProductOperation {
           batchId: pickupTicketBatch.batchId || 0, // thằng pickupStrategy.NoImpact luôn lấy batchId = 0
           deliveryStatus: DeliveryStatus.Delivered,
           unitRate: tp.unitRate,
-          quantity: pickupTicketBatch.pickupQuantity,
+          unitQuantity: pickupTicketBatch.pickupQuantity / tp.unitRate,
           costAmount: pickupTicketBatch.pickupCostAmount,
-          actualPrice: tp.actualPrice,
-          expectedPrice: tp.expectedPrice,
+          unitActualPrice: tp.unitActualPrice,
+          unitExpectedPrice: tp.unitExpectedPrice,
         }
         return ticketBatchInsert
       })

@@ -87,7 +87,9 @@ export class TicketMoneyService {
       })
     }
 
-    const ticketIdHasPaidItem = body.dataList.filter((i) => i.isPaymentEachItem).map((i) => i.ticketId)
+    const ticketIdHasPaidItem = body.dataList
+      .filter((i) => i.isPaymentEachItem)
+      .map((i) => i.ticketId)
     const dataMap: Record<string, PaymentTicketItemMapDtoType> = {}
     if (ticketIdHasPaidItem.length) {
       const [
@@ -168,12 +170,13 @@ export class TicketMoneyService {
                 ticketItemType: TicketItemType.TicketProductPrescription,
                 ticketItemId: i.id,
                 interactId: i.productId,
-                expectedPrice: i.expectedPrice,
-                discountMoney: i.discountMoney,
+                expectedPrice: Math.round(i.unitExpectedPrice / i.unitRate),
+                discountMoney: Math.round(i.unitDiscountMoney / i.unitRate),
                 discountPercent: i.discountPercent,
                 discountType: i.discountType,
-                actualPrice: i.actualPrice,
-                quantity: i.quantity,
+                actualPrice: Math.round(i.unitActualPrice / i.unitRate),
+                quantity: i.unitQuantity * i.unitRate,
+                unitRate: i.unitRate,
                 sessionIndex: 0,
                 paidMoney: debtSelect,
                 debtMoney: -debtSelect,
@@ -186,12 +189,13 @@ export class TicketMoneyService {
                 ticketItemType: TicketItemType.TicketProductConsumable,
                 ticketItemId: i.id,
                 interactId: i.productId,
-                expectedPrice: i.expectedPrice,
-                discountMoney: i.discountMoney,
+                expectedPrice: Math.round(i.unitExpectedPrice / i.unitRate),
+                discountMoney: Math.round(i.unitDiscountMoney / i.unitRate),
                 discountPercent: i.discountPercent,
                 discountType: i.discountType,
-                actualPrice: i.actualPrice,
-                quantity: i.quantity,
+                actualPrice: Math.round(i.unitActualPrice / i.unitRate),
+                quantity: i.unitQuantity * i.unitRate,
+                unitRate: i.unitRate,
                 sessionIndex: 0,
                 paidMoney: debtSelect,
                 debtMoney: -debtSelect,
@@ -215,6 +219,7 @@ export class TicketMoneyService {
               discountType: i.discountType,
               actualPrice: i.actualPrice,
               quantity: i.quantity,
+              unitRate: 1,
               sessionIndex: i.indexSession,
               paidMoney: debtSelect,
               debtMoney: -debtSelect,
@@ -237,6 +242,7 @@ export class TicketMoneyService {
               discountType: i.discountType,
               actualPrice: i.actualPrice,
               quantity: 1,
+              unitRate: 1,
               sessionIndex: 0,
               paidMoney: debtSelect,
               debtMoney: -debtSelect,
@@ -259,6 +265,7 @@ export class TicketMoneyService {
               discountType: i.discountType,
               actualPrice: i.actualPrice,
               quantity: 1,
+              unitRate: 1,
               sessionIndex: 0,
               paidMoney: debtSelect,
               debtMoney: -debtSelect,

@@ -62,7 +62,7 @@ export class TicketAddTicketProductService {
           type: ticketProductType,
           ticketProcedureId: '0',
           paymentMoneyStatus: (() => {
-            if (i.actualPrice === 0) {
+            if (i.unitActualPrice === 0) {
               return PaymentMoneyStatus.NoEffect
             }
             if (ticketOrigin.isPaymentEachItem) {
@@ -83,10 +83,10 @@ export class TicketAddTicketProductService {
 
       // === 5. UPDATE TICKET: MONEY  ===
       const productMoneyAdd = ticketProductList.reduce((acc, cur) => {
-        return acc + cur.quantity * cur.actualPrice
+        return acc + cur.unitQuantity * cur.unitActualPrice
       }, 0)
       const itemsDiscountAdd = ticketProductList.reduce((acc, cur) => {
-        return acc + cur.quantity * cur.discountMoney
+        return acc + cur.unitQuantity * cur.unitDiscountMoney
       }, 0)
       const itemsCostAmountAdd = ticketProductList.reduce((acc, cur) => {
         return acc + cur.costAmount

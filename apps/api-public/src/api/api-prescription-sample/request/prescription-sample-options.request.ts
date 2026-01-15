@@ -5,8 +5,12 @@ import { SortQuery } from '../../../../../_libs/common/dto/query'
 
 export class PrescriptionSampleRelationQuery {
   @Expose()
-  @IsBoolean()
-  medicineList: boolean
+  @IsOptional()
+  prescriptionSampleItemList?: { product?: boolean }
+
+  @Expose()
+  @IsOptional()
+  userList?: boolean
 }
 export class PrescriptionSampleFilterQuery {
   @Expose()

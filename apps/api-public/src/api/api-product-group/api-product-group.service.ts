@@ -16,10 +16,10 @@ import {
 export class ApiProductGroupService {
   constructor(private readonly productGroupRepository: ProductGroupRepository) { }
 
-  async pagination(oid: number, query: ProductGroupPaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: ProductGroupPaginationQuery) {
     const { page, limit, filter, sort, relation } = query
 
-    const { data, total } = await this.productGroupRepository.pagination({
+    const { data: productGroupList, total } = await this.productGroupRepository.pagination({
       page,
       limit,
       relation,
@@ -29,10 +29,7 @@ export class ApiProductGroupService {
       },
       sort,
     })
-    return {
-      data,
-      meta: { total, page, limit },
-    }
+    return { productGroupList, total, page, limit }
   }
 
   async getMany(oid: number, query: ProductGroupGetManyQuery): Promise<BaseResponse> {

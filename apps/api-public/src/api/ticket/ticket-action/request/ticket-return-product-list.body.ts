@@ -13,8 +13,16 @@ class ReturnListBody {
   @ApiProperty({ example: 3 })
   @Expose()
   @IsDefined()
+  @IsInt()
   @IsNumberGreaterThan(0)
-  quantityReturn: number
+  unitQuantityReturn: number
+
+  @ApiProperty({ example: 3 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  @IsNumberGreaterThan(0)
+  unitRate: number
 }
 
 export class TicketReturnProductListBody {

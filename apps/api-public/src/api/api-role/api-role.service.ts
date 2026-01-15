@@ -24,10 +24,10 @@ export class ApiRoleService {
     private readonly cacheDataService: CacheDataService
   ) { }
 
-  async pagination(oid: number, query: RolePaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: RolePaginationQuery) {
     const { page, limit, filter, sort, relation } = query
 
-    const { data, total } = await this.roleRepository.pagination({
+    const { data: roleList, total } = await this.roleRepository.pagination({
       page,
       limit,
       relation,
@@ -39,10 +39,7 @@ export class ApiRoleService {
       sort,
     })
 
-    return {
-      data,
-      meta: { page, limit, total },
-    }
+    return { roleList, page, limit, total }
   }
 
   async getMany(oid: number, query: RoleGetManyQuery): Promise<BaseResponse> {

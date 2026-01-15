@@ -24,10 +24,10 @@ export class RadiologyGroupService {
     private readonly radiologyGroupManager: RadiologyGroupManager
   ) { }
 
-  async pagination(oid: number, query: RadiologyGroupPaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: RadiologyGroupPaginationQuery) {
     const { page, limit, filter, sort, relation } = query
 
-    const { data, total } = await this.radiologyGroupRepository.pagination({
+    const { data: radiologyGroupList, total } = await this.radiologyGroupRepository.pagination({
       page,
       limit,
       relation,
@@ -36,10 +36,8 @@ export class RadiologyGroupService {
       },
       sort,
     })
-    return {
-      data,
-      meta: { total, page, limit },
-    }
+
+    return { radiologyGroupList, total, page, limit }
   }
 
   async getMany(oid: number, query: RadiologyGroupGetManyQuery): Promise<BaseResponse> {

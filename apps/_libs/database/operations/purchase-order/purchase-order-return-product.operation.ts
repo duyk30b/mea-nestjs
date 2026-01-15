@@ -60,12 +60,12 @@ export class PurchaseOrderReturnProductOperation {
         voucherProductPickupList: purchaseOrderItemOriginList.map((i) => {
           return {
             pickupStrategy: PickupStrategy.RequireBatchSelection,
-            expectedPrice: i.costPrice,
-            actualPrice: i.costPrice,
+            expectedPrice: Math.round(i.unitCostPrice / i.unitRate),
+            actualPrice: Math.round(i.unitCostPrice / i.unitRate),
             productId: i.productId,
             batchId: i.batchId,
             warehouseIds: JSON.stringify([i.warehouseId]),
-            quantity: i.quantity,
+            quantity: i.unitQuantity * i.unitRate,
             voucherProductId: i.id,
             voucherBatchId: 0,
             costAmount: null,

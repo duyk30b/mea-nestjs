@@ -168,6 +168,8 @@ export class ApiFilePurchaseOrderUploadExcel {
 
     const purchaseOrderItemInsertList: PurchaseOrderItemInsertType[] = dataPlainList.map(
       (plain) => {
+        const unitRate = 1
+
         const item: PurchaseOrderItemInsertType = {
           oid,
           id: GenerateId.nextId(),
@@ -178,9 +180,9 @@ export class ApiFilePurchaseOrderUploadExcel {
           lotNumber: plain.lotNumber,
           expiryDate: plain.expiryDate,
           unitRate: 1,
-          quantity: plain.quantity,
-          costPrice: plain.costPrice,
-          listPrice: plain.retailPrice,
+          unitQuantity: plain.quantity * unitRate, // upload qua excel thì chỉ cho unitRate = unitRate
+          unitCostPrice: plain.costPrice * unitRate,
+          unitListPrice: plain.retailPrice * unitRate,
           purchaseOrderId: ' 0',
         }
         return item

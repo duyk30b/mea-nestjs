@@ -1,10 +1,8 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
-  Patch,
   Post,
   Query,
   SerializeOptions,
@@ -12,6 +10,7 @@ import {
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto'
 import { IsRoot } from '../../../../_libs/common/guards/root.guard'
+import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { UserGroup } from '../../../../_libs/database/entities/user.entity'
 import { ApiRootUserService } from './api-root-user.service'
 import { DeviceLogoutBody } from './request/device-logout.query'
@@ -27,8 +26,9 @@ export class ApiRootUserController {
   constructor(private readonly apiRootUserService: ApiRootUserService) { }
 
   @Get('pagination')
-  pagination(@Query() query: RootUserPaginationQuery) {
-    return this.apiRootUserService.pagination(query)
+  async pagination(@Query() query: RootUserPaginationQuery): Promise<BaseResponse> {
+    const data = await this.apiRootUserService.pagination(query)
+    return { data }
   }
 
   @Post('create')

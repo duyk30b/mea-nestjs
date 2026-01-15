@@ -18,10 +18,10 @@ import {
 export class LaboratoryGroupService {
   constructor(private readonly laboratoryGroupRepository: LaboratoryGroupRepository) { }
 
-  async pagination(oid: number, query: LaboratoryGroupPaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: LaboratoryGroupPaginationQuery) {
     const { page, limit, filter, sort, relation } = query
 
-    const { data, total } = await this.laboratoryGroupRepository.pagination({
+    const { data: laboratoryGroupList, total } = await this.laboratoryGroupRepository.pagination({
       page,
       limit,
       relation,
@@ -30,10 +30,7 @@ export class LaboratoryGroupService {
       },
       sort,
     })
-    return {
-      data,
-      meta: { total, page, limit },
-    }
+    return { laboratoryGroupList, total, page, limit }
   }
 
   async getMany(oid: number, query: LaboratoryGroupGetManyQuery): Promise<BaseResponse> {

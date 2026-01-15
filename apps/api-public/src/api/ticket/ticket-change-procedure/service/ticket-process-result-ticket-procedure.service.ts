@@ -257,10 +257,10 @@ export class TicketProcessResultTicketProcedureService {
                 warehouseId: i.warehouseId,
                 productId: i.productId,
                 batchId: i.batchId,
-                quantity: i.quantity,
+                quantity: i.unitQuantity * i.unitRate,
                 costAmount: i.costAmount,
-                expectedPrice: i.expectedPrice,
-                actualPrice: i.actualPrice,
+                expectedPrice: Math.round(i.unitExpectedPrice / i.unitRate),
+                actualPrice: Math.round(i.unitActualPrice / i.unitRate),
               }
             }),
           })
@@ -283,7 +283,7 @@ export class TicketProcessResultTicketProcedureService {
                 productId: i.productId,
                 batchId: 0,
                 warehouseIds: i.warehouseIds,
-                quantity: i.quantity,
+                quantity: i.unitQuantity * i.unitRate,
                 pickupStrategy: i.pickupStrategy,
                 expectedPrice: 0,
                 actualPrice: 0,
@@ -304,14 +304,14 @@ export class TicketProcessResultTicketProcedureService {
               customerId,
               ticketId,
 
-              expectedPrice: 0,
+              unitExpectedPrice: 0,
               discountType: DiscountType.Percent,
               discountPercent: 0,
-              discountMoney: 0,
-              actualPrice: 0,
+              unitDiscountMoney: 0,
+              unitActualPrice: 0,
 
               costAmount: i.pickupCostAmount,
-              quantity: i.pickupQuantity,
+              unitQuantity: i.pickupQuantity / 1, // chỗ này thì chỉ cho lấy unitRate = 1
               deliveryStatus: DeliveryStatus.Delivered,
 
               paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
@@ -325,7 +325,7 @@ export class TicketProcessResultTicketProcedureService {
               priority: 0,
               createdAt,
               unitRate: 1,
-              quantityPrescription: 0,
+              unitQuantityPrescription: 0,
               printPrescription: 0,
               hintUsage: '',
               paid: 0,
@@ -345,6 +345,11 @@ export class TicketProcessResultTicketProcedureService {
           const ticketBatchInsertList = pickupPlan.pickupVoucherBatchList.map((i) => {
             const ticketProductCreated = ticketProductCreatedMap[i.voucherProductId]
             const batchOrigin = batchModifiedMap[i.batchId]
+            if (!Number.isInteger(i.pickupQuantity / ticketProductCreated.unitRate)) {
+              throw new Error(
+                'Không thể xử lý đơn vị tính lớn, cần dùng đơn vị nhỏ hơn của sản phẩm'
+              )
+            }
             const ticketBatchInsert: TicketBatchInsertType = {
               id: GenerateId.nextId(),
               oid,
@@ -356,10 +361,10 @@ export class TicketProcessResultTicketProcedureService {
               batchId: i.batchId || 0, // thằng pickupStrategy.NoImpact luôn lấy batchId = 0
               deliveryStatus: DeliveryStatus.Delivered,
               unitRate: 1,
-              quantity: i.pickupQuantity,
+              unitQuantity: i.pickupQuantity / ticketProductCreated.unitRate,
               costAmount: i.pickupCostAmount,
-              actualPrice: ticketProductCreated.actualPrice,
-              expectedPrice: ticketProductCreated.expectedPrice,
+              unitActualPrice: ticketProductCreated.unitActualPrice,
+              unitExpectedPrice: ticketProductCreated.unitExpectedPrice,
             }
             return ticketBatchInsert
           })

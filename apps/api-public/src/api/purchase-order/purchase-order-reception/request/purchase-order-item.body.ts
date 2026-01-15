@@ -51,17 +51,17 @@ export class PurchaseOrderItemBody {
   @Expose()
   @IsDefined()
   @IsNumberGreaterThan(0)
-  quantity: number
+  unitQuantity: number
 
   @ApiProperty({ example: 12_000 })
   @Expose()
   @IsDefined()
   @IsNumber()
-  costPrice: number
+  unitCostPrice: number
 
   @ApiProperty({ example: 12_000 })
   @Expose()
   @IsDefined()
   @IsNumber()
-  listPrice: number
+  unitListPrice: number
 }

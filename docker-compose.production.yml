@@ -112,9 +112,9 @@ services:
     ports:
       - ${ADMINER_PORT:-23080}:8080
 
-  mongo_express_local:
+  mongo_express:
     image: mongo-express:1.0.2-20
-    container_name: mc_mongo_express_local
+    container_name: mc_mongo_express
     restart: unless-stopped
     depends_on:
       - mongo
@@ -123,8 +123,8 @@ services:
     environment:
       ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USERNAME:-root}:${MONGO_PASSWORD:-example}@mongo:27017/?authSource=admin
       ME_CONFIG_BASICAUTH_ENABLED: true
-      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USERNAME:-express}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD:-password}
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_EXPRESS_USERNAME:-express_mongodb}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_EXPRESS_PASSWORD:-password_mongodb}
     ports:
       - ${MONGO_EXPRESS_PORT:-28081}:8081
 

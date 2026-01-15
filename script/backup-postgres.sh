@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+# set -euo pipefail
 # Cấp quyền chạy file: chmod +x ./script/backup-postgres.sh 
 
 USER=$(whoami)

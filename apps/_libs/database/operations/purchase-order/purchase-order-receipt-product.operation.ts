@@ -75,10 +75,10 @@ export class PurchaseOrderSendProductOperation {
             warehouseId: i.warehouseId,
             productId: i.productId,
             batchId: i.batchId,
-            costAmount: i.costPrice * i.quantity,
-            quantity: i.quantity,
-            expectedPrice: i.costPrice,
-            actualPrice: i.costPrice,
+            costAmount: Math.round(i.unitCostPrice / i.unitQuantity),
+            quantity: i.unitQuantity * i.unitRate,
+            expectedPrice: Math.round(i.unitCostPrice / i.unitRate),
+            actualPrice: Math.round(i.unitCostPrice / i.unitRate),
           }
         }),
       })
@@ -100,8 +100,8 @@ export class PurchaseOrderSendProductOperation {
         tempList: Object.values(purchaseOrderItemOriginMapProductId).map((i) => {
           return {
             id: i.productId,
-            costPrice: i.costPrice,
-            retailPrice: i.listPrice,
+            costPrice: Math.round(i.unitCostPrice / i.unitRate),
+            retailPrice: Math.round(i.unitListPrice / i.unitRate),
           }
         }),
         update: ['costPrice', 'retailPrice'],
@@ -122,7 +122,7 @@ export class PurchaseOrderSendProductOperation {
               distributorId: i.distributorId,
               lotNumber: i.lotNumber,
               expiryDate: i.expiryDate,
-              costPrice: i.costPrice,
+              costPrice: Math.floor(i.unitCostPrice / i.unitRate),
             }
           }),
         update: {

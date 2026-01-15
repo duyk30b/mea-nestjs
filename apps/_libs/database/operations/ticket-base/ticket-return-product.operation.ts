@@ -18,6 +18,12 @@ import {
 import { ProductPutawayManager } from '../product/product-putaway.manager'
 import { TicketChangeItemMoneyManager } from './ticket-change-item-money.manager'
 
+export type BatchReturnType = {
+  ticketBatchId: string
+  unitQuantityReturn: number
+  unitRate: number
+}
+
 @Injectable()
 export class TicketReturnProductOperation {
   constructor(
@@ -37,12 +43,7 @@ export class TicketReturnProductOperation {
     oid: number
     ticketId: string
     time: number
-    returnType:
-    | 'ALL'
-    | {
-      ticketBatchId: string
-      quantityReturn: number
-    }[]
+    returnType: 'ALL' | BatchReturnType[]
     options?: { changePendingIfNoStock?: boolean }
   }) {
     const { oid, ticketId, time, options, returnType } = data
@@ -58,7 +59,7 @@ export class TicketReturnProductOperation {
         { updatedAt: Date.now() }
       )
 
-      let returnList: { ticketBatchId: string; quantityReturn: number }[] = []
+      let returnList: BatchReturnType[] = []
       let ticketBatchOriginList: TicketBatch[] = []
       if (returnType === 'ALL') {
         ticketBatchOriginList = await this.ticketBatchManager.findManyBy(manager, {
@@ -69,7 +70,8 @@ export class TicketReturnProductOperation {
         returnList = ticketBatchOriginList.map((i) => {
           return {
             ticketBatchId: i.id,
-            quantityReturn: i.quantity,
+            unitQuantityReturn: i.unitQuantity,
+            unitRate: i.unitRate,
           }
         })
         if (!returnList.length) {
@@ -114,13 +116,16 @@ export class TicketReturnProductOperation {
             warehouseId: ticketBatchOrigin.warehouseId,
             productId: ticketBatchOrigin.productId,
             batchId: ticketBatchOrigin.batchId,
-            quantity: i.quantityReturn,
+            quantity: i.unitQuantityReturn * i.unitRate,
             costAmount:
-              ticketBatchOrigin.quantity == 0
+              ticketBatchOrigin.unitQuantity == 0
                 ? 0
-                : (ticketBatchOrigin.costAmount * i.quantityReturn) / ticketBatchOrigin.quantity,
-            expectedPrice: ticketBatchOrigin.expectedPrice,
-            actualPrice: ticketBatchOrigin.actualPrice,
+                : (ticketBatchOrigin.costAmount * i.unitQuantityReturn)
+                / ticketBatchOrigin.unitQuantity,
+            expectedPrice: Math.floor(
+              ticketBatchOrigin.unitExpectedPrice / ticketBatchOrigin.unitRate
+            ),
+            actualPrice: Math.floor(ticketBatchOrigin.unitActualPrice / ticketBatchOrigin.unitRate),
           }
         }),
       })
@@ -141,23 +146,24 @@ export class TicketReturnProductOperation {
         }),
         update: options?.changePendingIfNoStock
           ? {
-            quantity: (t: string, u: string) => ` CASE
-                                    WHEN  ("quantity" = "${t}"."putawayQuantity")
-                                      THEN "quantity"
-                                    ELSE "${u}"."quantity" - "${t}"."putawayQuantity"
+            unitQuantity: (t: string, u: string) => ` CASE
+                                    WHEN  ("${u}"."unitQuantity" = "${t}"."putawayQuantity" / "${u}"."unitRate")
+                                      THEN "unitQuantity"
+                                    ELSE "${u}"."unitQuantity" - "${t}"."putawayQuantity" / "${u}"."unitRate"
                                   END`,
             costAmount: () => `"costAmount" - "putawayCostAmount"`,
-            deliveryStatus: (t: string) => ` CASE
-                                    WHEN  ("quantity" = "${t}"."putawayQuantity")
+            deliveryStatus: (t: string, u: string) => ` CASE
+                                    WHEN  ("unitQuantity" = "${t}"."putawayQuantity" / "${u}"."unitRate")
                                       THEN ${DeliveryStatus.Pending}
                                     ELSE "deliveryStatus"
                                   END`,
           }
           : {
-            quantity: () => `"quantity" - "putawayQuantity"`,
-            costAmount: () => `"costAmount" - "putawayCostAmount"`,
-            deliveryStatus: (t: string) => ` CASE
-                                    WHEN  ("quantity" = "${t}"."putawayQuantity")
+            unitQuantity: (t: string, u: string) =>
+              `"${u}"."unitQuantity" - "${t}"."putawayQuantity" / "${u}"."unitRate"`,
+            costAmount: (t: string, u: string) => `"costAmount" - "putawayCostAmount"`,
+            deliveryStatus: (t: string, u: string) => ` CASE
+                                    WHEN  ("unitQuantity" = "${t}"."putawayQuantity" / "${u}"."unitRate")
                                       THEN ${DeliveryStatus.NoStock}
                                     ELSE "deliveryStatus"
                                   END`,
@@ -187,10 +193,10 @@ export class TicketReturnProductOperation {
           }
         }),
         update: {
-          quantity: () => `"quantity" - "putawayQuantity"`,
+          unitQuantity: (t: string, u: string) => `"unitQuantity" - ("${t}"."putawayQuantity" / "${u}"."unitRate")`,
           costAmount: () => `"costAmount" - "putawayCostAmount"`,
           deliveryStatus: (t: string, u: string) => ` CASE
-                                    WHEN  ("${u}"."quantity" = "${t}"."putawayQuantity")
+                                    WHEN  ("${u}"."unitQuantity" = ("${t}"."putawayQuantity" / "${u}"."unitRate"))
                                       THEN ${DeliveryStatus.NoStock}
                                     ELSE ${DeliveryStatus.Delivered}
                                   END`,
@@ -224,7 +230,7 @@ export class TicketReturnProductOperation {
           compare: { ticketItemId: { cast: 'bigint' } },
           update: ['quantity'],
           tempList: ticketProductModifiedList.map((i) => {
-            return { quantity: i.quantity, ticketItemId: i.id }
+            return { quantity: i.unitQuantity * i.unitRate, ticketItemId: i.id }
           }),
         })
 
@@ -244,10 +250,11 @@ export class TicketReturnProductOperation {
       ticketProductOriginList.forEach((tpOrigin) => {
         const tpModified = ticketProductModifiedMap[tpOrigin.id]
         productMoneyReturn
-          += tpOrigin.actualPrice * tpOrigin.quantity - tpModified.actualPrice * tpModified.quantity
+          += tpOrigin.unitActualPrice * tpOrigin.unitQuantity
+          - tpModified.unitActualPrice * tpModified.unitQuantity
         productDiscountReturn
-          += tpOrigin.discountMoney * tpOrigin.quantity
-          - tpModified.discountMoney * tpModified.quantity
+          += tpOrigin.unitDiscountMoney * tpOrigin.unitQuantity
+          - tpModified.unitDiscountMoney * tpModified.unitQuantity
         itemsCostAmountReturn += tpOrigin.costAmount - tpModified.costAmount
       })
 

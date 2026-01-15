@@ -27,11 +27,11 @@ export class ApiStockCheckService {
     private readonly stockCheckReconcileOperation: StockCheckReconcileOperation
   ) { }
 
-  async pagination(oid: number, query: StockCheckPaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: StockCheckPaginationQuery) {
     const { page, limit, relation } = query
     const { createdByUserId, updatedByUserId, createdAt, status } = query.filter || {}
 
-    const { total, data } = await this.stockCheckRepository.pagination({
+    const { total, data: stockCheckList } = await this.stockCheckRepository.pagination({
       relation: {
         stockCheckItemList: relation?.stockCheckItemList,
         createdByUser: relation?.createdByUser,
@@ -49,10 +49,7 @@ export class ApiStockCheckService {
       },
       sort: query.sort || { id: 'DESC' },
     })
-    return {
-      data,
-      meta: { total, page, limit },
-    }
+    return { stockCheckList, total, page, limit }
   }
 
   async getMany(oid: number, query: StockCheckGetManyQuery): Promise<BaseResponse> {

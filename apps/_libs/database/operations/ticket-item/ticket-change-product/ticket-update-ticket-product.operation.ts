@@ -13,14 +13,15 @@ import { TicketUserCommon } from '../ticket-change-user/ticket-user.common'
 export type TicketProductUpdateDtoType = {
   [K in keyof Pick<
     TicketProduct,
-    | 'quantity'
-    | 'quantityPrescription'
+    | 'unitRate'
+    | 'unitQuantity'
+    | 'unitQuantityPrescription'
     | 'printPrescription'
-    | 'expectedPrice'
+    | 'unitExpectedPrice'
     | 'discountType'
-    | 'discountMoney'
+    | 'unitDiscountMoney'
     | 'discountPercent'
-    | 'actualPrice'
+    | 'unitActualPrice'
     | 'hintUsage'
   >]: TicketProduct[K] | (() => string)
 }
@@ -89,21 +90,22 @@ export class TicketUpdateTicketProductOperation {
             manager,
             { oid, id: ticketProductId },
             {
-              quantity: ticketProductUpdateDto.quantity,
-              quantityPrescription: ticketProductUpdateDto.quantityPrescription,
+              unitRate: ticketProductUpdateDto.unitRate,
+              unitQuantity: ticketProductUpdateDto.unitQuantity,
+              unitQuantityPrescription: ticketProductUpdateDto.unitQuantityPrescription,
               printPrescription: ticketProductUpdateDto.printPrescription,
-              expectedPrice: ticketProductUpdateDto.expectedPrice,
+              unitExpectedPrice: ticketProductUpdateDto.unitExpectedPrice,
               discountType: ticketProductUpdateDto.discountType,
-              discountMoney: ticketProductUpdateDto.discountMoney,
+              unitDiscountMoney: ticketProductUpdateDto.unitDiscountMoney,
               discountPercent: ticketProductUpdateDto.discountPercent,
-              actualPrice: ticketProductUpdateDto.actualPrice,
+              unitActualPrice: ticketProductUpdateDto.unitActualPrice,
               hintUsage: ticketProductUpdateDto.hintUsage,
               deliveryStatus:
-                ticketProductUpdateDto.quantity === 0
+                ticketProductUpdateDto.unitQuantity === 0
                   ? DeliveryStatus.NoStock
                   : DeliveryStatus.Pending,
               paymentMoneyStatus: (() => {
-                if (ticketProductUpdateDto.actualPrice === 0) {
+                if (ticketProductUpdateDto.unitActualPrice === 0) {
                   return PaymentMoneyStatus.NoEffect
                 }
                 if (ticketOrigin.isPaymentEachItem) {
@@ -115,18 +117,18 @@ export class TicketUpdateTicketProductOperation {
             }
           )
           productMoneyAdd =
-            ticketProductModified.quantity * ticketProductModified.actualPrice
-            - ticketProductOrigin.quantity * ticketProductOrigin.actualPrice
+            ticketProductModified.unitQuantity * ticketProductModified.unitActualPrice
+            - ticketProductOrigin.unitQuantity * ticketProductOrigin.unitActualPrice
           itemsDiscountAdd =
-            ticketProductModified.quantity * ticketProductModified.discountMoney
-            - ticketProductOrigin.quantity * ticketProductOrigin.discountMoney
+            ticketProductModified.unitQuantity * ticketProductModified.unitDiscountMoney
+            - ticketProductOrigin.unitQuantity * ticketProductOrigin.unitDiscountMoney
           itemsCostAmountAdd = ticketProductModified.costAmount - ticketProductOrigin.costAmount
         } else {
           ticketProductModified = await this.ticketProductManager.updateOneAndReturnEntity(
             manager,
             { oid, id: ticketProductId },
             {
-              quantityPrescription: ticketProductUpdateDto.quantityPrescription,
+              unitQuantityPrescription: ticketProductUpdateDto.unitQuantityPrescription,
               printPrescription: ticketProductUpdateDto.printPrescription,
               hintUsage: ticketProductUpdateDto.hintUsage,
             }
@@ -156,8 +158,12 @@ export class TicketUpdateTicketProductOperation {
               quantity: 1,
               ticketItemId: ticketProductModified.id,
               positionInteractId: ticketProductModified.productId,
-              ticketItemExpectedPrice: ticketProductModified.expectedPrice,
-              ticketItemActualPrice: ticketProductModified.actualPrice,
+              ticketItemExpectedPrice: Math.round(
+                ticketProductModified.unitExpectedPrice / ticketProductModified.unitRate
+              ),
+              ticketItemActualPrice: Math.round(
+                ticketProductModified.unitActualPrice / ticketProductModified.unitRate
+              ),
             }
           }),
         })
@@ -174,7 +180,7 @@ export class TicketUpdateTicketProductOperation {
       // === 4. ReCalculator DeliveryStatus
       let deliveryStatus = ticketOrigin.deliveryStatus
       if (ticketProductModified.deliveryStatus !== DeliveryStatus.Delivered) {
-        if (ticketProductModified.quantity === 0) {
+        if (ticketProductModified.unitQuantity === 0) {
           const calc = await this.ticketProductManager.calculatorDeliveryStatus({
             manager,
             oid,

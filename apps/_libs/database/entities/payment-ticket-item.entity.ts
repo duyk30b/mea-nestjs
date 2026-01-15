@@ -97,6 +97,10 @@ export default class PaymentTicketItem {
   @Expose()
   quantity: number
 
+  @Column({ default: 1 })
+  @Expose()
+  unitRate: number
+
   @Column({ default: 0 })
   @Expose()
   paidMoney: number

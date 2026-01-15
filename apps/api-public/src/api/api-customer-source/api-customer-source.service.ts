@@ -13,10 +13,10 @@ import {
 export class ApiCustomerSourceService {
   constructor(private readonly customerSourceRepository: CustomerSourceRepository) { }
 
-  async pagination(oid: number, query: CustomerSourcePaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: CustomerSourcePaginationQuery) {
     const { page, limit, filter, sort, relation } = query
 
-    const { data, total } = await this.customerSourceRepository.pagination({
+    const { data: customerSourceList, total } = await this.customerSourceRepository.pagination({
       page,
       limit,
       relation,
@@ -25,10 +25,7 @@ export class ApiCustomerSourceService {
       },
       sort,
     })
-    return {
-      data,
-      meta: { total, page, limit },
-    }
+    return { customerSourceList, total, page, limit }
   }
 
   async getMany(oid: number, query: CustomerSourceGetManyQuery): Promise<BaseResponse> {

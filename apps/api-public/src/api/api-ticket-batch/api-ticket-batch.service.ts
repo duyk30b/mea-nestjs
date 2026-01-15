@@ -7,10 +7,10 @@ import { TicketBatchGetManyQuery, TicketBatchPaginationQuery } from './request'
 export class ApiTicketBatchService {
   constructor(private readonly ticketBatchRepository: TicketBatchRepository) { }
 
-  async pagination(oid: number, query: TicketBatchPaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: TicketBatchPaginationQuery) {
     const { page, limit, filter, relation, sort } = query
 
-    const { total, data } = await this.ticketBatchRepository.pagination({
+    const { total, data: ticketBatchList } = await this.ticketBatchRepository.pagination({
       relation,
       page,
       limit,
@@ -24,10 +24,7 @@ export class ApiTicketBatchService {
       sort,
     })
 
-    return {
-      data,
-      meta: { page, limit, total },
-    }
+    return { ticketBatchList, page, limit, total }
   }
 
   async getList(oid: number, query: TicketBatchGetManyQuery): Promise<BaseResponse> {

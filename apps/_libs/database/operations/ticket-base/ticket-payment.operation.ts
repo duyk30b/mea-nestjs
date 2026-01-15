@@ -50,6 +50,7 @@ export type PaymentTicketItemDto = Pick<
   | 'discountType'
   | 'actualPrice'
   | 'quantity'
+  | 'unitRate'
   | 'sessionIndex'
   | 'paidMoney'
   | 'debtMoney'
@@ -315,6 +316,7 @@ export class TicketPaymentOperation {
           discountType: i.discountType,
           actualPrice: i.actualPrice,
           quantity: i.quantity,
+          unitRate: i.unitRate,
           sessionIndex: i.sessionIndex,
           paidMoney: i.paidMoney,
           debtMoney: i.debtMoney,
@@ -340,6 +342,7 @@ export class TicketPaymentOperation {
           discountType: DiscountType.Percent,
           actualPrice: 0,
           quantity: 1,
+          unitRate: 1,
           sessionIndex: 0,
           paidMoney: paymentTicketItemMapDto.paymentWait.paidMoney,
           debtMoney: 0,
@@ -366,6 +369,7 @@ export class TicketPaymentOperation {
           discountType: DiscountType.Percent,
           actualPrice: 0,
           quantity: 1,
+          unitRate: 1,
           sessionIndex: 0,
           paidMoney: paymentTicketItemMapDto.paymentSurcharge.paidMoney,
           debtMoney: paymentTicketItemMapDto.paymentSurcharge.debtMoney,
@@ -392,6 +396,7 @@ export class TicketPaymentOperation {
           discountType: DiscountType.Percent,
           actualPrice: 0,
           quantity: 1,
+          unitRate: 1,
           sessionIndex: 0,
           paidMoney: paymentTicketItemMapDto.paymentDiscount.paidMoney,
           debtMoney: paymentTicketItemMapDto.paymentDiscount.debtMoney,
@@ -499,9 +504,9 @@ export class TicketPaymentOperation {
         debt: () => `"debt" + "debtAdd"`,
         paymentMoneyStatus: (t: string, u: string) => {
           return `CASE
-                          WHEN("paid" + "paidAdd" = "${u}"."quantity" * "${u}"."actualPrice" 
+                          WHEN("paid" + "paidAdd" = "${u}"."unitQuantity" * "${u}"."unitActualPrice" 
                             AND "debt" + "debtAdd" = 0) THEN ${PaymentMoneyStatus.FullPaid} 
-                          WHEN("paid" + "paidAdd" < "${u}"."quantity" * "${u}"."actualPrice" 
+                          WHEN("paid" + "paidAdd" < "${u}"."unitQuantity" * "${u}"."unitActualPrice" 
                             AND "paid" + "paidAdd" > 0) THEN ${PaymentMoneyStatus.PartialPaid} 
                           WHEN("paid" + "paidAdd" = 0 AND "debt" + "debtAdd" > 0) 
                             THEN ${PaymentMoneyStatus.Debt} 
@@ -575,15 +580,21 @@ export class TicketPaymentOperation {
     })
 
     // === Validate Update
-    const validate = [
+    const validate1 = [
       ...ticketProcedureNoEffectModifiedList,
       ...ticketProcedureHasEffectModifiedList,
-      ...ticketProductModifiedList,
       ...ticketLaboratoryModifiedList,
       ...ticketRadiologyModifiedList,
     ].forEach((i) => {
       const quantity = i['quantity'] || 1
       if (i.paid + i.debt > quantity * i.actualPrice) {
+        throw new BusinessError(PREFIX, i, 'i.paid + i.debt > i.quantity * i.actualPrice')
+      }
+      if (i.paid < 0) throw new BusinessError(PREFIX, 'i.paid < 0')
+      if (i.debt < 0) throw new BusinessError(PREFIX, 'i.debt < 0')
+    })
+    ticketProductModifiedList.forEach((i) => {
+      if (i.paid + i.debt > i.unitQuantity * i.unitActualPrice) {
         throw new BusinessError(PREFIX, i, 'i.paid + i.debt > i.quantity * i.actualPrice')
       }
       if (i.paid < 0) throw new BusinessError(PREFIX, 'i.paid < 0')

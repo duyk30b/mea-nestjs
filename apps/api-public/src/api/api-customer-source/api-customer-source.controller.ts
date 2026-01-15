@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { IdParam } from '../../../../_libs/common/dto/param'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
+import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiCustomerSourceService } from './api-customer-source.service'
@@ -20,8 +21,12 @@ export class ApiCustomerSourceController {
 
   @Get('pagination')
   @UserPermission()
-  pagination(@External() { oid }: TExternal, @Query() query: CustomerSourcePaginationQuery) {
-    return this.apiCustomerSourceService.pagination(oid, query)
+  async pagination(
+    @External() { oid }: TExternal,
+    @Query() query: CustomerSourcePaginationQuery
+  ): Promise<BaseResponse> {
+    const data = this.apiCustomerSourceService.pagination(oid, query)
+    return { data }
   }
 
   @Get('list')

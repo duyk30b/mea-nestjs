@@ -57,6 +57,48 @@ class TicketItemChangeMoney {
   actualPrice: number
 }
 
+class TicketProductChangeMoney {
+  @ApiProperty({ example: 56 })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  id: string
+
+  @ApiProperty({ example: 3 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  unitQuantity: number
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @Transform(({ value }) => Math.round(value || 0))
+  @IsDefined()
+  @IsNumber()
+  unitDiscountMoney: number
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  @Max(100)
+  @Min(0)
+  discountPercent: number
+
+  @ApiProperty({ enum: valuesEnum(DiscountType), example: DiscountType.VND })
+  @Expose()
+  @IsDefined()
+  @IsEnumValue(DiscountType)
+  discountType: DiscountType
+
+  @ApiProperty({ example: 22_500 })
+  @Expose()
+  @Transform(({ value }) => Math.round(value || 0))
+  @IsDefined()
+  @IsNumber()
+  unitActualPrice: number
+}
+
 export class TicketChangeAllMoneyBody {
   @ApiProperty({ type: TicketItemChangeMoney, isArray: true })
   @Expose()
@@ -72,7 +114,7 @@ export class TicketChangeAllMoneyBody {
   @IsDefined()
   @IsArray()
   @ValidateNested({ each: true })
-  ticketProductList: TicketItemChangeMoney[]
+  ticketProductList: TicketProductChangeMoney[]
 
   @ApiProperty({ type: TicketItemChangeMoney, isArray: true })
   @Expose()

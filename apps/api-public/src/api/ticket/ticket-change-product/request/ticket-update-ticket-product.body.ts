@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
-import { IsArray, IsDefined, IsNumber, IsString, Max, Min, ValidateNested } from 'class-validator'
+import { IsArray, IsDefined, IsInt, IsNumber, IsString, Max, Min, ValidateNested } from 'class-validator'
 import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
 import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
 import { DiscountType } from '../../../../../../_libs/database/common/variable'
@@ -10,14 +10,20 @@ class TicketProductBody {
   @ApiProperty({ example: 4 })
   @Expose()
   @IsDefined()
-  @IsNumber()
-  quantity: number
+  @IsInt()
+  unitRate: number
 
   @ApiProperty({ example: 4 })
   @Expose()
   @IsDefined()
-  @IsNumber()
-  quantityPrescription: number
+  @IsInt()
+  unitQuantity: number
+
+  @ApiProperty({ example: 4 })
+  @Expose()
+  @IsDefined()
+  @IsInt()
+  unitQuantityPrescription: number
 
   @ApiProperty({ example: 4 })
   @Expose()
@@ -29,14 +35,14 @@ class TicketProductBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  expectedPrice: number
+  unitExpectedPrice: number
 
   @ApiProperty({ example: 22_500 })
   @Expose()
   @Transform(({ value }) => Math.round(value || 0))
   @IsDefined()
   @IsNumber()
-  discountMoney: number
+  unitDiscountMoney: number
 
   @ApiProperty({ example: 22_500 })
   @Expose()
@@ -57,7 +63,7 @@ class TicketProductBody {
   @Transform(({ value }) => Math.round(value || 0))
   @IsDefined()
   @IsNumber()
-  actualPrice: number
+  unitActualPrice: number
 
   @ApiPropertyOptional({ example: 'Uống 2 lần/ngày sáng 1 viên, chiều 1 viên' })
   @Expose()

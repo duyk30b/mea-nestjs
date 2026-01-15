@@ -249,7 +249,7 @@ export class TicketUpdateItemsMoneyOperation {
         return acc + item.actualPrice * item.quantity
       }, 0)
       const productMoneyUpdate = ticketProductList.reduce((acc, item) => {
-        return acc + item.actualPrice * item.quantity
+        return acc + item.unitActualPrice * item.unitQuantity
       }, 0)
       const laboratoryMoneyUpdate = ticketLaboratoryList.reduce((acc, item) => {
         return acc + item.actualPrice
@@ -269,7 +269,6 @@ export class TicketUpdateItemsMoneyOperation {
       const discountType = params.discountType
 
       const totalMoneyUpdate = itemsActualMoneyUpdate - discountMoney
-      const debtUpdate = totalMoneyUpdate - ticketOrigin.paid
       const profitUpdate = totalMoneyUpdate - itemsCostAmountUpdate - ticketOrigin.expense
 
       // 5. UPDATE TICKET: MONEY
@@ -288,7 +287,6 @@ export class TicketUpdateItemsMoneyOperation {
           discountPercent,
           discountType,
           totalMoney: totalMoneyUpdate,
-          debt: debtUpdate,
           profit: profitUpdate,
         }
       )

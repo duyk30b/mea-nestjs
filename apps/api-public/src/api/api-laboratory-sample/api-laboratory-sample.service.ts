@@ -13,10 +13,10 @@ import {
 export class ApiLaboratorySampleService {
   constructor(private readonly laboratorySampleRepository: LaboratorySampleRepository) { }
 
-  async pagination(oid: number, query: LaboratorySamplePaginationQuery): Promise<BaseResponse> {
+  async pagination(oid: number, query: LaboratorySamplePaginationQuery) {
     const { page, limit, filter, sort, relation } = query
 
-    const { data, total } = await this.laboratorySampleRepository.pagination({
+    const { data: laboratorySampleList, total } = await this.laboratorySampleRepository.pagination({
       page,
       limit,
       relation,
@@ -25,10 +25,7 @@ export class ApiLaboratorySampleService {
       },
       sort,
     })
-    return {
-      data,
-      meta: { total, page, limit },
-    }
+    return { laboratorySampleList, total, page, limit }
   }
 
   async getMany(oid: number, query: LaboratorySampleGetManyQuery): Promise<BaseResponse> {

@@ -1,6 +1,7 @@
 import { Controller, Get, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
+import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { ApiTicketBatchService } from './api-ticket-batch.service'
 import { TicketBatchGetManyQuery, TicketBatchPaginationQuery } from './request'
@@ -13,8 +14,12 @@ export class ApiTicketBatchController {
 
   @Get('pagination')
   @UserPermission()
-  async pagination(@External() { oid }: TExternal, @Query() query: TicketBatchPaginationQuery) {
-    return await this.apiTicketBatchService.pagination(oid, query)
+  async pagination(
+    @External() { oid }: TExternal,
+    @Query() query: TicketBatchPaginationQuery
+  ): Promise<BaseResponse> {
+    const data = await this.apiTicketBatchService.pagination(oid, query)
+    return { data }
   }
 
   @Get('list')

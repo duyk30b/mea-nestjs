@@ -43,7 +43,7 @@ export class PurchaseOrderPaymentOperation {
     const { oid, purchaseOrderId, userId, paymentActionType, paidTotal, debtTotal, time, note } =
       props
     const walletId = props.walletId || '0'
-    const PREFIX = `purchaseOrderId=${purchaseOrderId} startPayment failed`
+    const PREFIX = `purchaseOrderId=${purchaseOrderId} startPayment failed: `
 
     const purchaseOrderModified = await this.purchaseOrderRepository.managerUpdateOne(
       manager,
@@ -113,6 +113,9 @@ export class PurchaseOrderPaymentOperation {
         oid,
         id: distributorId,
       })
+      if (!distributorModified) {
+        throw new BusinessError(PREFIX, 'Không tìm thấy nhà cung cấp phù hợp')
+      }
       distributorOpenDebt = distributorModified.debt
       distributorCloseDebt = distributorModified.debt
     }

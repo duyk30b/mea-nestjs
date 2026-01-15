@@ -25,7 +25,7 @@ export class ApiRootUserService {
     private readonly organizationRepository: OrganizationRepository
   ) { }
 
-  async pagination(query: RootUserPaginationQuery): Promise<BaseResponse> {
+  async pagination(query: RootUserPaginationQuery) {
     const { page, limit, filter, sort, relation } = query
 
     const { data, total } = await this.userRepository.pagination({
@@ -62,10 +62,7 @@ export class ApiRootUserService {
         })
     }
 
-    return {
-      data,
-      meta: { total, page, limit },
-    }
+    return { userList: data, total, page, limit }
   }
 
   async create(body: RootUserCreateBody): Promise<BaseResponse<{ user: User }>> {

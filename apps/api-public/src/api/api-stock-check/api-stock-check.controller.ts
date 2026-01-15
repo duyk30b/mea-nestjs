@@ -1,9 +1,10 @@
-import { Controller, Delete, Get, Param, Post } from '@nestjs/common'
+import { Controller, Get, Param, Post } from '@nestjs/common'
 import { Body, Query } from '@nestjs/common/decorators/http/route-params.decorator'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { GenerateIdParam } from '../../../../_libs/common/dto/param'
 import { OrganizationPermission } from '../../../../_libs/common/guards/organization.guard'
 import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
+import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiStockCheckService } from './api-stock-check.service'
@@ -22,8 +23,12 @@ export class ApiStockCheckController {
 
   @Get('pagination')
   @OrganizationPermission(PermissionId.STOCK_CHECK)
-  async pagination(@External() { oid }: TExternal, @Query() query: StockCheckPaginationQuery) {
-    return await this.apiStockCheckService.pagination(oid, query)
+  async pagination(
+    @External() { oid }: TExternal,
+    @Query() query: StockCheckPaginationQuery
+  ): Promise<BaseResponse> {
+    const data = await this.apiStockCheckService.pagination(oid, query)
+    return { data }
   }
 
   @Get('list')

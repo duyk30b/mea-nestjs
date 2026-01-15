@@ -55,7 +55,13 @@ export class TicketChangeAllMoneyService {
         },
         compare: { id: { cast: 'bigint' } },
         tempList: body.ticketProductList,
-        update: ['quantity', 'discountMoney', 'discountPercent', 'discountType', 'actualPrice'],
+        update: [
+          'unitQuantity',
+          'unitDiscountMoney',
+          'discountPercent',
+          'discountType',
+          'unitActualPrice',
+        ],
         options: { requireEqualLength: true },
       })
 

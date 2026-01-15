@@ -57,7 +57,7 @@ export default class PurchaseOrderItem {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  costPrice: number // Giá cost
+  unitCostPrice: number // Giá cost
 
   @Column({
     type: 'bigint',
@@ -65,17 +65,11 @@ export default class PurchaseOrderItem {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  listPrice: number // Giá cost
+  unitListPrice: number // Giá cost
 
-  @Column({
-    type: 'decimal',
-    default: 0,
-    precision: 10,
-    scale: 3,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
+  @Column({ default: 0 })
   @Expose()
-  quantity: number
+  unitQuantity: number
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()
@@ -103,8 +97,8 @@ export default class PurchaseOrderItem {
     const entity = new PurchaseOrderItem()
     Object.assign(entity, raw)
     entity.expiryDate = raw.expiryDate == null ? raw.expiryDate : Number(raw.expiryDate)
-    entity.costPrice = Number(raw.costPrice)
-    entity.quantity = Number(raw.quantity)
+    entity.unitCostPrice = Number(raw.unitCostPrice)
+    entity.unitQuantity = Number(raw.unitQuantity)
 
     return entity
   }

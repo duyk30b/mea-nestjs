@@ -51,15 +51,9 @@ export default class TicketBatch {
   @Expose()
   unitRate: number
 
-  @Column({
-    type: 'decimal',
-    default: 0,
-    precision: 10,
-    scale: 3,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
+  @Column({ default: 0 })
   @Expose()
-  quantity: number
+  unitQuantity: number
 
   @Column({
     type: 'bigint',
@@ -74,14 +68,14 @@ export default class TicketBatch {
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  expectedPrice: number
+  unitExpectedPrice: number
 
   @Column({
     type: 'bigint',
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
-  actualPrice: number
+  unitActualPrice: number
 
   @Expose()
   @ManyToOne((type) => Ticket, (ticket) => ticket.ticketProductList, {
@@ -110,10 +104,10 @@ export default class TicketBatch {
     const entity = new TicketBatch()
     Object.assign(entity, raw)
 
-    entity.quantity = Number(raw.quantity)
+    entity.unitQuantity = Number(raw.unitQuantity)
     entity.costAmount = Number(raw.costAmount)
-    entity.expectedPrice = Number(raw.expectedPrice)
-    entity.actualPrice = Number(raw.actualPrice)
+    entity.unitExpectedPrice = Number(raw.unitExpectedPrice)
+    entity.unitActualPrice = Number(raw.unitActualPrice)
 
     return entity
   }

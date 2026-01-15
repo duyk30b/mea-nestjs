@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
-import { IsDefined, IsNumber, IsString, Max, Min } from 'class-validator'
+import { IsDefined, IsInt, IsNumber, IsString, Max, Min } from 'class-validator'
 import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
 import {
   IsEnumValue,
@@ -61,21 +61,22 @@ export class TicketOrderProductBody {
   @ApiProperty({ example: 4 })
   @Expose()
   @IsDefined()
+  @IsInt()
   @IsNumberGreaterThan(0)
-  quantity: number
+  unitQuantity: number
 
   @ApiProperty({ example: 25_000 })
   @Expose()
   @IsDefined()
   @IsNumber()
-  expectedPrice: number
+  unitExpectedPrice: number
 
   @ApiProperty({ example: 22_500 })
   @Expose()
   @Transform(({ value }) => Math.round(value || 0))
   @IsDefined()
   @IsNumber()
-  discountMoney: number
+  unitDiscountMoney: number
 
   @ApiProperty({ example: 22_500 })
   @Expose()
@@ -96,7 +97,7 @@ export class TicketOrderProductBody {
   @Transform(({ value }) => Math.round(value || 0))
   @IsDefined()
   @IsNumber()
-  actualPrice: number
+  unitActualPrice: number
 
   @ApiPropertyOptional({ example: 'Uống 2 lần/ngày sáng 1 viên, chiều 1 viên' })
   @Expose()

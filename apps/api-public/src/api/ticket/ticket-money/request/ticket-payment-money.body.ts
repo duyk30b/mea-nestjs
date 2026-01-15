@@ -57,6 +57,10 @@ class PaymentTicketItemBody {
 
   @Expose()
   @IsDefined()
+  unitRate: number
+
+  @Expose()
+  @IsDefined()
   sessionIndex: number
 
   @Expose()
