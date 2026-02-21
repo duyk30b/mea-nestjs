@@ -1,6 +1,12 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
+import LaboratoryGroup from './laboratory-group.entity'
+import Laboratory from './laboratory.entity'
 import Position, { CommissionCalculatorType, PositionType } from './position.entity'
+import Procedure from './procedure.entity'
+import Product from './product.entity'
+import Radiology from './radiology.entity'
+import Regimen from './regimen.entity'
 import Role from './role.entity'
 import Ticket from './ticket.entity'
 import User from './user.entity'
@@ -124,6 +130,24 @@ export default class TicketUser {
   @Expose()
   position: Position
 
+  @Expose()
+  product: Product
+
+  @Expose()
+  procedure: Procedure
+
+  @Expose()
+  regimen: Regimen
+
+  @Expose()
+  laboratory: Laboratory
+
+  @Expose()
+  laboratoryGroup: LaboratoryGroup
+
+  @Expose()
+  radiology: Radiology
+
   static fromRaw(raw: { [P in keyof TicketUser]: any }) {
     if (!raw) return null
     const entity = new TicketUser()
@@ -178,7 +202,19 @@ export default class TicketUser {
 }
 
 export type TicketUserRelationType = {
-  [P in keyof Pick<TicketUser, 'ticket' | 'user' | 'role' | 'position'>]?: boolean
+  [P in keyof Pick<
+    TicketUser,
+    | 'ticket'
+    | 'user'
+    | 'role'
+    | 'position'
+    | 'product'
+    | 'procedure'
+    | 'regimen'
+    | 'laboratory'
+    | 'laboratoryGroup'
+    | 'radiology'
+  >]?: boolean
 }
 
 export type TicketUserInsertType = Omit<

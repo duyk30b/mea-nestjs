@@ -31,6 +31,7 @@ import { ApiTicketProcedureModule } from './api-ticket-procedure/api-ticket-proc
 import { ApiTicketProductModule } from './api-ticket-product/api-ticket-product.module'
 import { ApiTicketRadiologyModule } from './api-ticket-radiology/api-ticket-radiology.module'
 import { ApiTicketRegimenModule } from './api-ticket-regimen/api-ticket-regimen.module'
+import { ApiTicketUserModule } from './api-ticket-user/api-ticket-user.module'
 import { ApiUserRoleModule } from './api-user-role/api-user-role.module'
 import { ApiUserRoomModule } from './api-user-room/api-user-room.module'
 import { ApiUserModule } from './api-user/api-user.module'
@@ -70,6 +71,7 @@ import { TicketModule } from './ticket/ticket.module'
     ApiPaymentModule,
 
     ApiAppointmentModule,
+    ApiTicketUserModule,
     ApiTicketProcedureModule,
     ApiTicketRegimenModule,
     ApiTicketProductModule,

@@ -112,4 +112,14 @@ export const permissionUser: Permission[] = [
     parentId: PermissionId.USER,
     rootId: PermissionId.USER,
   },
+  {
+    id: PermissionId.USER_ACTION_MENU,
+    level: 2,
+    code: PermissionId[PermissionId.USER_ACTION_MENU],
+    isActive: 1,
+    pathId: `${PermissionId.USER}.${PermissionId.USER_ACTION_MENU}`,
+    name: 'Xem menu hoạt động',
+    parentId: PermissionId.USER,
+    rootId: PermissionId.USER,
+  },
 ]

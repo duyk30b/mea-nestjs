@@ -48,7 +48,10 @@ docker compose -f docker-compose.production.yml up -d nginx
 docker exec mc_nginx nginx -t
 ```
 
-2. Nginx
+3. Auth nginx
+- Tạo password: `docker run --rm httpd:2.4-alpine htpasswd -nb duyk30b nvdk30bdhyhp `
+
+4. Nginx
 - Check syntax: `docker exec mc_nginx nginx -t`
 - Reload: `docker exec mc_nginx nginx -s reload`
 

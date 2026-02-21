@@ -75,7 +75,7 @@ export class PurchaseOrderSendProductOperation {
             warehouseId: i.warehouseId,
             productId: i.productId,
             batchId: i.batchId,
-            costAmount: Math.round(i.unitCostPrice / i.unitQuantity),
+            costAmount: Math.round(i.unitCostPrice * i.unitQuantity),
             quantity: i.unitQuantity * i.unitRate,
             expectedPrice: Math.round(i.unitCostPrice / i.unitRate),
             actualPrice: Math.round(i.unitCostPrice / i.unitRate),
