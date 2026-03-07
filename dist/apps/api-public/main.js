@@ -21650,7 +21650,7 @@ exports.SystemLog = SystemLog = __decorate([
 ], SystemLog);
 const SystemLogSchema = mongoose_1.SchemaFactory.createForClass(SystemLog);
 exports.SystemLogSchema = SystemLogSchema;
-SystemLogSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 30 });
+SystemLogSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 30 * 6 });
 
 
 /***/ }),

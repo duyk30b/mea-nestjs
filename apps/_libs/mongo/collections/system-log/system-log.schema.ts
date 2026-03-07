@@ -68,9 +68,10 @@ export class SystemLog {
 const SystemLogSchema = SchemaFactory.createForClass(SystemLog)
 
 // Index không tự cập nhật khi sửa code, nó chỉ tạo lần đầu, nếu thay đổi cần chạy migration
+// Muốn cập nhật: đơn giản là xóa index cũ đi, khởi động lại app là xong
 SystemLogSchema.index(
   { createdAt: 1 },
-  { expireAfterSeconds: 60 * 60 * 24 * 30 } // Tự động xóa sau 30 ngày
+  { expireAfterSeconds: 60 * 60 * 24 * 30 * 6 } // Tự động xóa sau 180 ngày
 )
 
 export { SystemLogSchema }
