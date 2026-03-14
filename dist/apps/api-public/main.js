@@ -54694,6 +54694,8 @@ let LaboratoryService = class LaboratoryService {
                     laboratoryGroupId: laboratoryParent.laboratoryGroupId,
                     level: 2,
                     parentId: laboratoryParent.id,
+                    costPrice: 0,
+                    price: 0,
                     laboratoryCode: '',
                 };
                 return childDto;
@@ -55379,6 +55381,8 @@ __decorate([
 class LaboratoryChildCreate extends (0, swagger_1.OmitType)(LaboratoryParentUpsert, [
     'laboratoryGroupId',
     'laboratoryCode',
+    'costPrice',
+    'price',
 ]) {
 }
 exports.LaboratoryChildCreate = LaboratoryChildCreate;

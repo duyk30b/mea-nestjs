@@ -158,6 +158,8 @@ export class LaboratoryService {
           laboratoryGroupId: laboratoryParent.laboratoryGroupId,
           level: 2,
           parentId: laboratoryParent.id,
+          costPrice: 0,
+          price: 0,
           laboratoryCode: '',
         }
         return childDto

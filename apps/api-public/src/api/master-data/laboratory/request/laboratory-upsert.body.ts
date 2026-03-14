@@ -83,6 +83,8 @@ export class LaboratoryParentUpsert {
 export class LaboratoryChildCreate extends OmitType(LaboratoryParentUpsert, [
   'laboratoryGroupId',
   'laboratoryCode',
+  'costPrice',
+  'price',
 ]) { }
 export class LaboratoryChildUpdate extends OmitType(LaboratoryParentUpsert, [
   'laboratoryGroupId',
