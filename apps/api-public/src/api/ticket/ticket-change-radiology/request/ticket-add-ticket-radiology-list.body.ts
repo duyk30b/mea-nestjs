@@ -89,7 +89,7 @@ export class TicketRadiologyAddBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  printHtmlId: number
+  templateHtmlId: number
 
   @ApiProperty({ example: '' })
   @Expose()

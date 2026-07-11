@@ -5,12 +5,12 @@ import { SortQuery } from '../../../../../../_libs/common/dto/query'
 export class LaboratoryGroupRelationQuery {
   @Expose()
   @IsBoolean()
-  printHtml: boolean
+  templateHtml: boolean
 }
 export class LaboratoryGroupFilterQuery {
   @Expose()
   @IsNumber()
-  printHtmlId: number
+  templateHtmlId: number
 }
 
 export class LaboratoryGroupSortQuery extends SortQuery { }

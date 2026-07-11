@@ -19,7 +19,7 @@ export class ExpenseGetQuery {
         exposeUnsetFields: false,
         excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
       })
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })
@@ -29,7 +29,7 @@ export class ExpenseGetQuery {
 
   @ApiPropertyOptional({
     type: String,
-    example: JSON.stringify(<ExpenseFilterQuery>{ printHtmlId: 0 }),
+    example: JSON.stringify(<ExpenseFilterQuery>{}),
   })
   @Expose()
   @Transform(({ value }) => {
@@ -40,7 +40,7 @@ export class ExpenseGetQuery {
         exposeUnsetFields: false,
         excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
       })
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })
@@ -61,7 +61,7 @@ export class ExpenseGetQuery {
         exposeUnsetFields: false,
         excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
       })
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })

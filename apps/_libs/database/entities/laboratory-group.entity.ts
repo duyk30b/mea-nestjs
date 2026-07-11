@@ -1,6 +1,6 @@
 import { Expose } from 'class-transformer'
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
-import PrintHtml from './print-html.entity'
+import TemplateHtml from './template-html.entity'
 
 @Entity('LaboratoryGroup')
 export default class LaboratoryGroup {
@@ -22,12 +22,12 @@ export default class LaboratoryGroup {
 
   @Expose()
   @Column({ default: 0 })
-  printHtmlId: number
+  templateHtmlId: number
 
-  @ManyToOne((type) => PrintHtml, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'printHtmlId', referencedColumnName: 'id' })
+  @ManyToOne((type) => TemplateHtml, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'templateHtmlId', referencedColumnName: 'id' })
   @Expose()
-  printHtml: PrintHtml
+  templateHtml: TemplateHtml
 
   static fromRaw(raw: { [P in keyof LaboratoryGroup]: any }) {
     if (!raw) return null
@@ -43,7 +43,7 @@ export default class LaboratoryGroup {
 }
 
 export type LaboratoryGroupRelationType = {
-  [P in keyof Pick<LaboratoryGroup, 'printHtml'>]?: boolean
+  [P in keyof Pick<LaboratoryGroup, 'templateHtml'>]?: boolean
 }
 
 export type LaboratoryGroupInsertType = Omit<

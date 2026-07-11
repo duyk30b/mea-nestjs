@@ -2,8 +2,8 @@ import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm'
 import Discount from './discount.entity'
 import Position from './position.entity'
-import PrintHtml from './print-html.entity'
 import RadiologyGroup from './radiology-group.entity'
+import TemplateHtml from './template-html.entity'
 
 @Entity('Radiology')
 @Unique('UNIQUE_Radiology__oid_radiologyCode', ['oid', 'radiologyCode'])
@@ -30,7 +30,7 @@ export default class Radiology {
 
   @Expose()
   @Column({ default: 0 })
-  printHtmlId: number
+  templateHtmlId: number
 
   @Column({ default: 0 })
   @Expose()
@@ -87,10 +87,10 @@ export default class Radiology {
   @Expose()
   radiologyGroup: RadiologyGroup
 
-  @ManyToOne((type) => PrintHtml, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'printHtmlId', referencedColumnName: 'id' })
+  @ManyToOne((type) => TemplateHtml, { createForeignKeyConstraints: false })
+  @JoinColumn({ name: 'templateHtmlId', referencedColumnName: 'id' })
   @Expose()
-  printHtml: PrintHtml
+  templateHtml: TemplateHtml
 
   @Expose()
   positionRequestListCommon: Position[]
@@ -133,7 +133,7 @@ export type RadiologyRelationType = {
   [P in keyof Pick<
     Radiology,
     | 'radiologyGroup'
-    | 'printHtml'
+    | 'templateHtml'
     | 'positionRequestListCommon'
     | 'positionRequestList'
     | 'positionResultListCommon'

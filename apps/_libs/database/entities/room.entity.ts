@@ -3,20 +3,12 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm'
 import UserRoom from './user-room.entity'
 
 export enum RoomType {
-  Ticket = 1,
-  Product = 2,
-  Procedure = 3,
-  Laboratory = 4,
-  Radiology = 5,
-}
-
-export enum RoomTicketStyle {
-  TicketReception = 101,
-  TicketOrder = 111,
-  TicketClinicGeneral = 121,
-  TicketClinicObstetric = 122,
-  TicketClinicEye = 123,
-  TicketSpa = 151,
+  TicketOrder = 1,
+  TicketClinic = 2,
+  Product = 3,
+  Procedure = 4,
+  Laboratory = 5,
+  Radiology = 6,
 }
 
 @Entity('Room')
@@ -37,17 +29,17 @@ export default class Room {
   @Column({ type: 'varchar', length: 255 })
   name: string
 
-  @Column({ type: 'smallint', default: RoomType.Product })
+  @Column({ type: 'smallint', default: RoomType.TicketClinic })
   @Expose()
   roomType: RoomType
-
-  @Column({ type: 'smallint', default: 0 })
-  @Expose()
-  roomStyle: RoomTicketStyle
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()
   isCommon: 0 | 1
+
+  @Column({ type: 'text', default: '{}' })
+  @Expose()
+  roomSetting: string // Dạng HTML
 
   @Expose()
   @OneToMany((type) => UserRoom, (userRoom) => userRoom.room)

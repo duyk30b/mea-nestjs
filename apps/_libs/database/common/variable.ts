@@ -44,11 +44,11 @@ export enum PaymentType {
 }
 
 export enum PickupStrategy {
-  Inherit = -1, // Dùng theo cấu hình mặc định hệ thống
-  NoImpact = 0, // Không tác động đến kho
-  RequireBatchSelection = 1, // Bắt buộc chọn lô
-  AutoWithFIFO = 2, // Auto theo FIFO
-  AutoWithExpiryDate = 3, // Auto ưu tiên hạn gần
+  Inherit = 0, // Dùng theo cấu hình mặc định hệ thống
+  NoImpact = 1, // Không tác động đến kho
+  RequireBatchSelection = 2, // Bắt buộc chọn lô
+  AutoWithFIFO = 3, // Auto theo FIFO
+  AutoWithExpiryDate = 4, // Auto ưu tiên hạn gần
 }
 
 export enum MovementType {

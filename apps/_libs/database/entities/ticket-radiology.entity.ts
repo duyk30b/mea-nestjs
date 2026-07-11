@@ -43,7 +43,7 @@ export default class TicketRadiology {
 
   @Column({ default: 0 })
   @Expose()
-  printHtmlId: number
+  templateHtmlId: number
 
   @Column({ type: 'text', default: '' })
   @Expose()
@@ -209,7 +209,7 @@ export type TicketRadiologyRelationType = {
 } & {
   [P in keyof Pick<TicketRadiology, 'radiology'>]?:
   | {
-    [P in keyof Pick<Radiology, 'radiologyGroup' | 'printHtml'>]?: boolean
+    [P in keyof Pick<Radiology, 'radiologyGroup' | 'templateHtml'>]?: boolean
   }
   | boolean
 }

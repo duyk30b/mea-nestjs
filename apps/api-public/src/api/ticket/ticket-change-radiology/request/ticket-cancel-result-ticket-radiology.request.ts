@@ -8,7 +8,7 @@ export class TicketCancelResultTicketRadiologyBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  printHtmlId: number
+  templateHtmlId: number
 
   @ApiProperty({ example: 'Mổ viêm ruột thừa 2002' })
   @Expose()

@@ -19,7 +19,7 @@ export class LaboratoryGroupGetQuery {
         exposeUnsetFields: false,
         excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
       })
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })
@@ -29,7 +29,7 @@ export class LaboratoryGroupGetQuery {
 
   @ApiPropertyOptional({
     type: String,
-    example: JSON.stringify(<LaboratoryGroupFilterQuery>{ printHtmlId: 0 }),
+    example: JSON.stringify(<LaboratoryGroupFilterQuery>{}),
   })
   @Expose()
   @Transform(({ value }) => {
@@ -40,7 +40,7 @@ export class LaboratoryGroupGetQuery {
         exposeUnsetFields: false,
         excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
       })
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })
@@ -50,7 +50,7 @@ export class LaboratoryGroupGetQuery {
 
   @ApiPropertyOptional({
     type: String,
-    example: JSON.stringify(<LaboratoryGroupSortQuery>{ id: 'ASC' }),
+    example: JSON.stringify(<LaboratoryGroupSortQuery>{}),
   })
   @Expose()
   @Transform(({ value }) => {
@@ -61,7 +61,7 @@ export class LaboratoryGroupGetQuery {
         exposeUnsetFields: false,
         excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
       })
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })

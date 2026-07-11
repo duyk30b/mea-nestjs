@@ -31,7 +31,7 @@ export class RadiologySampleCreateBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  printHtmlId: number
+  templateHtmlId: number
 
   @ApiProperty({ example: '' })
   @Expose()

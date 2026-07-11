@@ -19,7 +19,7 @@ export class TicketRadiologyUpdateBody extends MultipleFileUpload {
   @Expose()
   @IsDefined()
   @IsNumber()
-  printHtmlId: number
+  templateHtmlId: number
 
   @ApiProperty({ example: 'Mổ viêm ruột thừa 2002' })
   @Expose()
@@ -95,7 +95,7 @@ export class TicketUpdateResultTicketRadiologyBody extends MultipleFileUpload {
       })
       if (err.length) return JSON.stringify(err)
       else return result
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })
@@ -124,7 +124,7 @@ export class TicketUpdateResultTicketRadiologyBody extends MultipleFileUpload {
         return JSON.stringify(errValidate)
       }
       return instance
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })
@@ -154,12 +154,12 @@ export class TicketUpdateResultTicketRadiologyBody extends MultipleFileUpload {
         return JSON.stringify(errValidate)
       }
       return instance
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })
   @IsObject({
-    message: ({ value }) => `Validate imagesChange failed. Value = ${value}`,
+    message: ({ value }) => `Validate imagesChange failed. Value = ${JSON.stringify(value)}`,
   })
   imagesChange?: ImagesChangeBody
 }

@@ -14,7 +14,7 @@ import { TicketRadiologyStatus } from '../../../../../_libs/database/entities/ti
 export class TicketRadiologyRelationQuery {
   @Expose()
   @IsOptional()
-  radiology?: { radiologyGroup?: boolean; printHtml?: boolean } | false
+  radiology?: { radiologyGroup?: boolean; templateHtml?: boolean } | false
 
   @Expose()
   @IsBoolean()

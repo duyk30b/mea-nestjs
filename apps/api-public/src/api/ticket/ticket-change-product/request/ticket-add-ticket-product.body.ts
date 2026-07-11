@@ -42,7 +42,7 @@ export class TicketProductAddBody {
       })
       if (err.length) return err
       else return JSON.stringify(result)
-    } catch (error) {
+    } catch (error: any) {
       return [error.message]
     }
   })

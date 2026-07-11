@@ -123,7 +123,7 @@ export class ApiFileRadiologyUploadExcel {
             radiologyGroupId: plain.radiologyGroupId,
             costPrice: plain.costPrice,
             price: plain.price,
-            printHtmlId: 0,
+            templateHtmlId: 0,
             requestNoteDefault: '',
             descriptionDefault: '',
             resultDefault: '',

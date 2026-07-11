@@ -65,6 +65,7 @@ export default class TicketBatch {
 
   @Column({
     type: 'bigint',
+    default: 0,
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()
@@ -72,6 +73,7 @@ export default class TicketBatch {
 
   @Column({
     type: 'bigint',
+    default: 0,
     transformer: { to: (value) => value, from: (value) => Number(value) },
   })
   @Expose()

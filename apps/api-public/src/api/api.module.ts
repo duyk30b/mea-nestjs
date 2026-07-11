@@ -12,8 +12,6 @@ import { ApiOrganizationModule } from './api-organization/api-organization.modul
 import { ApiPaymentModule } from './api-payment/api-payment.module'
 import { ApiPermissionModule } from './api-permission/api-permission.module'
 import { ApiPrescriptionSampleModule } from './api-prescription-sample/api-prescription-sample.module'
-import { ApiPrintHtmlSettingModule } from './api-print-html-setting/api-print-html-setting.module'
-import { ApiPrintHtmlModule } from './api-print-html/api-print-html.module'
 import { ApiProcedureGroupModule } from './api-procedure-group/api-procedure-group.module'
 import { ApiProductGroupModule } from './api-product-group/api-product-group.module'
 import { ApiProductMovementModule } from './api-product-movement/api-product-movement.module'
@@ -21,7 +19,6 @@ import { ApiProductModule } from './api-product/api-product.module'
 import { ApiPurchaseOrderItemModule } from './api-purchase-order-item/api-purchase-order-item.module'
 import { ApiRadiologySampleModule } from './api-radiology-sample/api-radiology-sample.module'
 import { ApiRoleModule } from './api-role/api-role.module'
-import { ApiRoomModule } from './api-room/api-room.module'
 import { ApiSettingModule } from './api-setting/api-setting.module'
 import { ApiStockCheckModule } from './api-stock-check/api-stock-check.module'
 import { ApiTicketBatchModule } from './api-ticket-batch/api-ticket-batch.module'
@@ -80,11 +77,8 @@ import { TicketModule } from './ticket/ticket.module'
     ApiTicketLaboratoryGroupModule,
     ApiTicketRadiologyModule,
 
-    ApiRoomModule,
     ApiProcedureGroupModule,
     MasterDataModule,
-    ApiPrintHtmlModule,
-    ApiPrintHtmlSettingModule,
     ApiWarehouseModule,
     ApiWalletModule,
     ApiExpenseModule,

@@ -19,7 +19,7 @@ export class LaboratoryGroupBody {
   @Expose()
   @IsDefined()
   @IsNumber()
-  printHtmlId: number
+  templateHtmlId: number
 
   @ApiProperty({ example: 25 })
   @Expose()

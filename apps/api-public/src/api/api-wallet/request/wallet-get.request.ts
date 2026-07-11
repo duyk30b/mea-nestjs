@@ -19,7 +19,7 @@ export class WalletGetQuery {
         exposeUnsetFields: false,
         excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
       })
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })
@@ -29,7 +29,7 @@ export class WalletGetQuery {
 
   @ApiPropertyOptional({
     type: String,
-    example: JSON.stringify(<WalletFilterQuery>{ printHtmlId: 0 }),
+    example: JSON.stringify(<WalletFilterQuery>{}),
   })
   @Expose()
   @Transform(({ value }) => {
@@ -40,7 +40,7 @@ export class WalletGetQuery {
         exposeUnsetFields: false,
         excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
       })
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })
@@ -61,7 +61,7 @@ export class WalletGetQuery {
         exposeUnsetFields: false,
         excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
       })
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })

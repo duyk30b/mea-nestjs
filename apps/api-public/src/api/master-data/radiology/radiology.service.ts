@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
 import { ESArray } from '../../../../../_libs/common/helpers'
-import { Discount, PrintHtml, RadiologyGroup } from '../../../../../_libs/database/entities'
+import { Discount, RadiologyGroup, TemplateHtml } from '../../../../../_libs/database/entities'
 import {
   DiscountInsertType,
   DiscountInteractType,
@@ -16,9 +16,9 @@ import Radiology, {
 import {
   DiscountRepository,
   PositionRepository,
-  PrintHtmlRepository,
   RadiologyGroupRepository,
   RadiologyRepository,
+  TemplateHtmlRepository,
   TicketRadiologyRepository,
 } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
@@ -38,7 +38,7 @@ export class RadiologyService {
     private readonly socketEmitService: SocketEmitService,
     private readonly radiologyRepository: RadiologyRepository,
     private readonly radiologyGroupRepository: RadiologyGroupRepository,
-    private readonly printHtmlRepository: PrintHtmlRepository,
+    private readonly templateHtmlRepository: TemplateHtmlRepository,
     private readonly ticketRadiologyRepository: TicketRadiologyRepository,
     private readonly positionRepository: PositionRepository,
     private readonly discountRepository: DiscountRepository,
@@ -49,7 +49,7 @@ export class RadiologyService {
     const { page, limit, filter, relation, sort } = query
     const { data: radiologyList, total } = await this.radiologyRepository.pagination({
       // relation: {
-      //   printHtml: query?.relation?.printHtml,
+      //   templateHtml: query?.relation?.templateHtml,
       //   radiologyGroup: query?.relation?.radiologyGroup,
       // },
       page,
@@ -57,7 +57,7 @@ export class RadiologyService {
       condition: {
         oid,
         radiologyGroupId: filter?.radiologyGroupId,
-        printHtmlId: filter?.printHtmlId,
+        templateHtmlId: filter?.templateHtmlId,
         updatedAt: filter?.updatedAt,
       },
       sort,
@@ -73,13 +73,13 @@ export class RadiologyService {
     const { limit, filter, relation, sort } = query
     const radiologyList = await this.radiologyRepository.findMany({
       // relation: {
-      //   printHtml: query?.relation?.printHtml,
+      //   templateHtml: query?.relation?.templateHtml,
       //   radiologyGroup: query?.relation?.radiologyGroup,
       // },
       condition: {
         oid,
         radiologyGroupId: filter?.radiologyGroupId,
-        printHtmlId: filter?.printHtmlId,
+        templateHtmlId: filter?.templateHtmlId,
         updatedAt: filter?.updatedAt,
       },
       sort,
@@ -94,7 +94,7 @@ export class RadiologyService {
   async getOne(oid: number, id: number, query: RadiologyGetOneQuery) {
     const radiology = await this.radiologyRepository.findOne({
       // relation: {
-      //   printHtml: query?.relation?.printHtml,
+      //   templateHtml: query?.relation?.templateHtml,
       //   radiologyGroup: query?.relation?.radiologyGroup,
       // },
       condition: { oid, id },
@@ -296,7 +296,7 @@ export class RadiologyService {
 
   async systemList() {
     const radiologySystemList = await this.radiologyRepository.findMany({
-      relation: { printHtml: true },
+      relation: { templateHtml: true },
       condition: { oid: 1 },
       sort: { radiologyCode: 'ASC' },
     })
@@ -331,7 +331,7 @@ export class RadiologyService {
         name: i.name,
         costPrice: i.costPrice,
         price: i.price,
-        printHtmlId: i.printHtmlId,
+        templateHtmlId: i.templateHtmlId,
         radiologyGroupId,
         descriptionDefault: i.descriptionDefault,
         requestNoteDefault: i.requestNoteDefault,
@@ -354,9 +354,9 @@ export class RadiologyService {
     const { oid, radiologyList, relation } = options
     const radiologyIdList = ESArray.uniqueArray(radiologyList.map((i) => i.id))
     const radiologyGroupIdList = ESArray.uniqueArray(radiologyList.map((i) => i.radiologyGroupId))
-    const printHtmlIdList = ESArray.uniqueArray(radiologyList.map((i) => i.printHtmlId))
+    const templateHtmlIdList = ESArray.uniqueArray(radiologyList.map((i) => i.templateHtmlId))
 
-    const [positionList, discountList, radiologyGroupList, printHtmlList] = await Promise.all([
+    const [positionList, discountList, radiologyGroupList, templateHtmlList] = await Promise.all([
       relation?.positionList && radiologyIdList.length
         ? this.positionRepository.findManyBy({
           oid,
@@ -377,23 +377,23 @@ export class RadiologyService {
           id: { IN: radiologyGroupIdList },
         })
         : <RadiologyGroup[]>[],
-      relation?.printHtml && printHtmlIdList.length
-        ? this.printHtmlRepository.findManyBy({
+      relation?.templateHtml && templateHtmlIdList.length
+        ? this.templateHtmlRepository.findManyBy({
           oid,
-          id: { IN: printHtmlIdList },
+          id: { IN: templateHtmlIdList },
         })
-        : <PrintHtml[]>[],
+        : <TemplateHtml[]>[],
     ])
 
     const radiologyGroupMap = ESArray.arrayToKeyValue(radiologyGroupList, 'id')
-    const printHtmlMap = ESArray.arrayToKeyValue(printHtmlList, 'id')
+    const templateHtmlMap = ESArray.arrayToKeyValue(templateHtmlList, 'id')
 
     radiologyList.forEach((radiology: Radiology) => {
       if (relation?.radiologyGroup) {
         radiology.radiologyGroup = radiologyGroupMap[radiology.radiologyGroupId]
       }
-      if (relation?.printHtml) {
-        radiology.printHtml = printHtmlMap[radiology.printHtmlId]
+      if (relation?.templateHtml) {
+        radiology.templateHtml = templateHtmlMap[radiology.templateHtmlId]
       }
       if (relation?.discountList) {
         radiology.discountList = discountList.filter((i) => i.discountInteractId === radiology.id)

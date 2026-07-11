@@ -80,7 +80,7 @@ export class LaboratoryGroupService {
         const insertDto: LaboratoryGroupInsertType = {
           name: i.name,
           roomId: i.roomId,
-          printHtmlId: i.printHtmlId,
+          templateHtmlId: i.templateHtmlId,
           oid,
         }
         return insertDto
@@ -91,7 +91,7 @@ export class LaboratoryGroupService {
         const insertDto: LaboratoryGroupUpdateType & { id: number } = {
           name: i.name,
           roomId: i.roomId,
-          printHtmlId: i.printHtmlId,
+          templateHtmlId: i.templateHtmlId,
           id: i.id,
         }
         return insertDto
@@ -110,7 +110,7 @@ export class LaboratoryGroupService {
         manager: this.laboratoryGroupRepository.getManager(),
         condition: { oid },
         compare: { id: { cast: 'bigint' } },
-        update: ['name', 'roomId', 'printHtmlId'],
+        update: ['name', 'roomId', 'templateHtmlId'],
         tempList: laboratoryGroupUpdateLit,
         options: { requireEqualLength: true },
       })
@@ -138,7 +138,7 @@ export class LaboratoryGroupService {
       const dto: LaboratoryGroupInsertType = {
         oid,
         name: i,
-        printHtmlId: 0,
+        templateHtmlId: 0,
         roomId: 0,
       }
       return dto

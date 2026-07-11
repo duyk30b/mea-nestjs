@@ -1,18 +1,20 @@
 {
   "files.autoSave": "off",
   "files.eol": "\n",
-  "workbench.tree.indent": 16,
+  "explorer.compactFolders": false,
   "editor.tabSize": 2,
   "editor.wordWrap": "off",
   "editor.inlayHints.fontSize": 10,
   "editor.suggest.insertMode": "replace",
-  "workbench.editor.wrapTabs": true,
   "editor.acceptSuggestionOnCommitCharacter": false,
   "window.title": "${rootName}",
   "workbench.colorCustomizations": {
     "editorInlayHint.background": "#4d4d4d99",
     "editorInlayHint.foreground": "#ffffffcc"
   },
+  "workbench.editor.enablePreview": false,
+  "workbench.editor.wrapTabs": true,
+  "workbench.tree.indent": 16,
   "[typescript]": {
     "editor.defaultFormatter": "vscode.typescript-language-features",
     "editor.codeActionsOnSave": [
@@ -22,15 +24,16 @@
     ]
   },
   "search.smartCase": true,
-  "javascript.preferences.quoteStyle": "single",
-  "javascript.format.semicolons": "remove",
-  "javascript.updateImportsOnFileMove.enabled": "always",
-  "javascript.preferences.importModuleSpecifier": "relative",
-  "typescript.preferences.quoteStyle": "single",
-  "typescript.format.semicolons": "remove",
-  "typescript.updateImportsOnFileMove.enabled": "always",
-  "typescript.preferences.importModuleSpecifier": "relative",
-  "typescript.inlayHints.parameterNames.enabled": "literals",
+  "search.exclude": {
+    "**/dist": true,
+    "**/data": true,
+    "**/node_modules": true,
+  },
+  "js/ts.preferences.quoteStyle": "single",
+  "js/ts.format.semicolons": "remove",
+  "js/ts.updateImportsOnFileMove.enabled": "always",
+  "js/ts.preferences.importModuleSpecifier": "relative",
+  "js/ts.inlayHints.parameterNames.enabled": "literals",
   "git.allowForcePush": true,
   "cSpell.language": "en,vi",
   "cSpell.words": [
@@ -63,7 +66,4 @@
     "websockets",
     "zalo"
   ],
-  "explorer.compactFolders": false,
-  "workbench.editor.enablePreview": false,
-  "typescript.tsdk": "node_modules/typescript/lib",
 }

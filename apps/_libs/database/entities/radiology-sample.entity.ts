@@ -25,7 +25,7 @@ export default class RadiologySample {
 
   @Expose()
   @Column({ default: 0 })
-  printHtmlId: number
+  templateHtmlId: number
 
   @Expose()
   @Column({ type: 'varchar', length: 255, default: '' })

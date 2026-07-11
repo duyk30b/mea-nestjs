@@ -173,7 +173,7 @@ export class TicketChangeRadiologyService {
         id: ticketRadiologyId,
       },
       {
-        printHtmlId: body.ticketRadiology.printHtmlId,
+        templateHtmlId: body.ticketRadiology.templateHtmlId,
         description: body.ticketRadiology.description,
         customStyles: body.ticketRadiology.customStyles,
         customVariables: body.ticketRadiology.customVariables,
@@ -260,7 +260,7 @@ export class TicketChangeRadiologyService {
         id: ticketRadiologyId,
       },
       {
-        printHtmlId: body.printHtmlId,
+        templateHtmlId: body.templateHtmlId,
         description: body.description,
         result: body.result,
         customStyles: body.customStyles,

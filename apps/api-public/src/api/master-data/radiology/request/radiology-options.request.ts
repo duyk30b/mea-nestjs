@@ -10,7 +10,7 @@ export class RadiologyRelationQuery {
 
   @Expose()
   @IsBoolean()
-  printHtml: boolean
+  templateHtml: boolean
 
   @Expose()
   @IsBoolean()
@@ -28,7 +28,7 @@ export class RadiologyFilterQuery {
 
   @Expose()
   @IsNumber()
-  printHtmlId: number
+  templateHtmlId: number
 
   @Expose()
   @Type(() => ConditionTimestamp)
