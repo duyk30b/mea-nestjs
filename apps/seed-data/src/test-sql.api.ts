@@ -1,10 +1,10 @@
+import { sleep } from '@libs/common/helpers/function.helper'
+import { randomFullName } from '@libs/common/helpers/random.helper'
+import { Customer } from '@libs/database/entities'
 import { Controller, Get } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { DataSource, EntityManager } from 'typeorm'
-import { sleep } from '../../_libs/common/helpers/function.helper'
-import { randomFullName } from '../../_libs/common/helpers/random.helper'
-import { Customer } from '../../_libs/database/entities'
 
 @ApiTags('Test')
 @ApiBearerAuth('access-token')

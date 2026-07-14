@@ -1,25 +1,25 @@
+import { FileUploadDto } from '@libs/common/dto/file'
+import { ESArray } from '@libs/common/helpers/array.helper'
+import { BusinessError } from '@libs/database/common/error'
+import { GenerateId } from '@libs/database/common/generate-id'
+import { BatchInsertType } from '@libs/database/entities/batch.entity'
+import Product, {
+    ProductInsertType,
+    ProductType,
+    SplitBatchByCostPrice,
+    SplitBatchByDistributor,
+    SplitBatchByExpiryDate,
+    SplitBatchByWarehouse,
+} from '@libs/database/entities/product.entity'
+import { PurchaseOrderItemInsertType } from '@libs/database/entities/purchase-order-item.entity'
+import {
+    BatchRepository,
+    ProductGroupRepository,
+    ProductManager,
+    ProductRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { FileUploadDto } from '../../../../_libs/common/dto/file'
-import { ESArray } from '../../../../_libs/common/helpers/array.helper'
-import { BusinessError } from '../../../../_libs/database/common/error'
-import { GenerateId } from '../../../../_libs/database/common/generate-id'
-import { BatchInsertType } from '../../../../_libs/database/entities/batch.entity'
-import Product, {
-  ProductInsertType,
-  ProductType,
-  SplitBatchByCostPrice,
-  SplitBatchByDistributor,
-  SplitBatchByExpiryDate,
-  SplitBatchByWarehouse,
-} from '../../../../_libs/database/entities/product.entity'
-import { PurchaseOrderItemInsertType } from '../../../../_libs/database/entities/purchase-order-item.entity'
-import {
-  BatchRepository,
-  ProductGroupRepository,
-  ProductManager,
-  ProductRepository,
-} from '../../../../_libs/database/repositories'
 import { ProductExcelRules } from '../api-file-product/product-excel.rule'
 import { ExcelProcess } from '../common/excel-process'
 

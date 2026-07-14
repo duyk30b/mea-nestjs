@@ -1,7 +1,7 @@
+import { FileUploadDto } from '@libs/common/dto/file'
+import { ICD } from '@libs/database/entities'
+import { ICDRepository } from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { FileUploadDto } from '../../../../_libs/common/dto/file'
-import { ICD } from '../../../../_libs/database/entities'
-import { ICDRepository } from '../../../../_libs/database/repositories'
 import { ExcelProcess, ExcelRuleType } from '../common/excel-process'
 
 export const ProductExcelRules = {

@@ -1,16 +1,16 @@
+import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
+import { FileUploadDto } from '@libs/common/dto/file'
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { decrypt, encrypt } from '@libs/common/helpers/string.helper'
+import { BaseResponse } from '@libs/common/interceptor/transform-response.interceptor'
+import { JwtConfig } from '@libs/common/jwt-extend/jwt.config'
+import { Image } from '@libs/database/entities'
+import { ImageInteractType } from '@libs/database/entities/image.entity'
+import { ImageRepository } from '@libs/database/repositories/image.repository'
+import { OrganizationRepository } from '@libs/database/repositories/organization.repository'
+import { GlobalConfig } from '@libs/environments'
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
-import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
-import { FileUploadDto } from '../../../../_libs/common/dto/file'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { decrypt, encrypt } from '../../../../_libs/common/helpers/string.helper'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { JwtConfig } from '../../../../_libs/common/jwt-extend/jwt.config'
-import { Image } from '../../../../_libs/database/entities'
-import { ImageInteractType } from '../../../../_libs/database/entities/image.entity'
-import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
-import { OrganizationRepository } from '../../../../_libs/database/repositories/organization.repository'
-import { GlobalConfig } from '../../../../_libs/environments'
 import { EmailService } from '../../components/email/email.service'
 import { ImageManagerService } from '../../components/image-manager/image-manager.service'
 import { OrganizationUpdateBody, VerifyOrganizationEmailQuery } from './request'
@@ -143,7 +143,7 @@ export class ApiOrganizationService {
     let email: string
     try {
       email = decrypt(query.token, this.jwtConfig.refreshKey)
-    } catch (error) {
+    } catch (error: any) {
       throw new HttpException('Thời gian reset password đã quá hạn', HttpStatus.BAD_GATEWAY)
     }
     if (query.email !== email) {

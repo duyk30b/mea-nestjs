@@ -1,14 +1,14 @@
+import { ConditionTimestamp, createConditionEnum, transformConditionEnum } from '@libs/common/dto'
+import { SortQuery } from '@libs/common/dto/query'
+import { valuesEnum } from '@libs/common/helpers/typescript.helper'
+import { IsEnumValue } from '@libs/common/transform-validate/class-validator.custom'
+import {
+    MoneyDirection,
+    PaymentPersonType,
+    PaymentVoucherType,
+} from '@libs/database/entities/payment.entity'
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
 import { IsBoolean, IsIn, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator'
-import { ConditionTimestamp, createConditionEnum, transformConditionEnum } from '../../../../../_libs/common/dto'
-import { SortQuery } from '../../../../../_libs/common/dto/query'
-import { valuesEnum } from '../../../../../_libs/common/helpers/typescript.helper'
-import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import {
-  MoneyDirection,
-  PaymentPersonType,
-  PaymentVoucherType,
-} from '../../../../../_libs/database/entities/payment.entity'
 
 export class PaymentRelationQuery {
   @Expose()

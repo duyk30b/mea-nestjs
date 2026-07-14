@@ -1,19 +1,19 @@
+import { JwtExtendModule } from '@libs/common/jwt-extend/jwt-extend.module'
+import { DetectClientMiddleware } from '@libs/common/middleware/detect-client.middleware'
+import { PostgresqlModule } from '@libs/database/postgresql.module'
+import { CacheManagerModule } from '@libs/transporter/cache-manager/cache-manager.module'
+import { GoogleDriverModule } from '@libs/transporter/google-driver/google-driver.module'
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { ThrottlerModule } from '@nestjs/throttler'
 import {
-  HeaderResolver,
-  I18nJsonLoader,
-  I18nMiddleware,
-  I18nModule,
-  QueryResolver,
+    HeaderResolver,
+    I18nJsonLoader,
+    I18nMiddleware,
+    I18nModule,
+    QueryResolver,
 } from 'nestjs-i18n'
 import * as path from 'path'
-import { JwtExtendModule } from '../../_libs/common/jwt-extend/jwt-extend.module'
-import { DetectClientMiddleware } from '../../_libs/common/middleware/detect-client.middleware'
-import { PostgresqlModule } from '../../_libs/database/postgresql.module'
-import { CacheManagerModule } from '../../_libs/transporter/cache-manager/cache-manager.module'
-import { GoogleDriverModule } from '../../_libs/transporter/google-driver/google-driver.module'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 

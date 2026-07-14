@@ -1,10 +1,10 @@
+import { IsRoot } from '@libs/common/guards/root.guard'
+import { BaseResponse } from '@libs/common/interceptor'
 import { Controller, Get, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IsRoot } from '../../../../_libs/common/guards/root.guard'
-import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { ApiRootSystemLogService } from './api-root-system-log.service'
 import {
-  RootSystemLogPaginationQuery,
+    RootSystemLogPaginationQuery,
 } from './request'
 
 @ApiTags('Root')

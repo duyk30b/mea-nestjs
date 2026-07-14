@@ -1,14 +1,11 @@
 /* eslint-disable max-len */
-import { Injectable } from '@nestjs/common'
-import { FileUploadDto } from '../../../../../_libs/common/dto/file'
-import Image, { ImageInteractType } from '../../../../../_libs/database/entities/image.entity'
+import { FileUploadDto } from '@libs/common/dto/file'
+import Image, { ImageInteractType } from '@libs/database/entities/image.entity'
 import TicketAttribute, {
   TicketAttributeInsertType,
-} from '../../../../../_libs/database/entities/ticket-attribute.entity'
-import {
-  TicketAttributeRepository,
-  TicketRepository,
-} from '../../../../../_libs/database/repositories'
+} from '@libs/database/entities/ticket-attribute.entity'
+import { TicketAttributeRepository, TicketRepository } from '@libs/database/repositories'
+import { Injectable } from '@nestjs/common'
 import { ImageManagerService } from '../../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { TicketUpdateDiagnosisBody, TicketUpdateTicketAttributeListBody } from './request'
@@ -29,11 +26,14 @@ export class TicketChangeAttributeService {
     files: FileUploadDto[]
   }) {
     const { oid, ticketId, body, files } = options
-    const { imagesChange, ticketAttributeChangeList, ticketAttributeKeyList } = body
+    const { imagesChange, ticketAttributeChangeList } = body
 
     let ticketModified = await this.ticketRepository.updateOne(
       { oid, id: ticketId },
-      { note: body.note }
+      {
+        note: body.note != null ? body.note : undefined,
+        updatedAt: Date.now(),
+      }
     )
     // 1. Update Ticket Image
     let imageCreatedList: Image[] = []
@@ -72,16 +72,18 @@ export class TicketChangeAttributeService {
       ticketAttributeDestroyedList = await this.ticketAttributeRepository.deleteMany({
         oid,
         ticketId,
-        key: { IN: ticketAttributeKeyList },
+        key: { IN: ticketAttributeChangeList.map((i) => i.key) },
       })
-      const ticketAttributeInsertList = ticketAttributeChangeList.map((i) => {
-        const dto: TicketAttributeInsertType = {
-          ...i,
-          oid,
-          ticketId,
-        }
-        return dto
-      })
+      const ticketAttributeInsertList = ticketAttributeChangeList
+        .filter((i) => !!i.value)
+        .map((i) => {
+          const dto: TicketAttributeInsertType = {
+            ...i,
+            oid,
+            ticketId,
+          }
+          return dto
+        })
 
       ticketAttributeCreatedList =
         await this.ticketAttributeRepository.insertMany(ticketAttributeInsertList)
@@ -103,15 +105,12 @@ export class TicketChangeAttributeService {
     body: TicketUpdateTicketAttributeListBody
   }) {
     const { oid, ticketId, body } = options
-    const ticketAttributeKeyList = body.ticketAttributeList.map((i) => i.key)
 
-    const ticketAttributeDestroyedList = await this.ticketAttributeRepository.deleteMany(
-      {
-        oid,
-        ticketId,
-        key: { IN: ticketAttributeKeyList },
-      }
-    )
+    const ticketAttributeDestroyedList = await this.ticketAttributeRepository.deleteMany({
+      oid,
+      ticketId,
+      key: { IN: body.ticketAttributeList.map((i) => i.key) },
+    })
 
     const ticketAttributeInsertList = body.ticketAttributeList
       .filter((i) => !!i.value)

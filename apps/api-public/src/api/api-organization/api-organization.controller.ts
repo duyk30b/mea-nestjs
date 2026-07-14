@@ -1,28 +1,28 @@
+import { FileUploadDto } from '@libs/common/dto/file'
+import { UserPermission } from '@libs/common/guards/user.guard'
 import {
-  Body,
-  Controller,
-  Get,
-  Patch,
-  Post,
-  Query,
-  Res,
-  UploadedFile,
-  UseInterceptors,
+    FastifyFilesInterceptor,
+} from '@libs/common/interceptor'
+import { External, TExternal } from '@libs/common/request/external.request'
+import { PermissionId } from '@libs/permission/permission.enum'
+import {
+    Body,
+    Controller,
+    Get,
+    Patch,
+    Post,
+    Query,
+    Res,
+    UploadedFile,
+    UseInterceptors,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger'
 import { FastifyReply } from 'fastify'
-import { FileUploadDto } from '../../../../_libs/common/dto/file'
-import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
-import {
-  FastifyFilesInterceptor,
-} from '../../../../_libs/common/interceptor'
-import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiOrganizationService } from './api-organization.service'
 import {
-  OrganizationChangeEmailBody,
-  OrganizationUpdateBody,
-  VerifyOrganizationEmailQuery,
+    OrganizationChangeEmailBody,
+    OrganizationUpdateBody,
+    VerifyOrganizationEmailQuery,
 } from './request'
 
 @ApiTags('Organization')

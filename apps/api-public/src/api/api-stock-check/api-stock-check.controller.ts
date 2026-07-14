@@ -1,18 +1,18 @@
+import { GenerateIdParam } from '@libs/common/dto/param'
+import { OrganizationPermission } from '@libs/common/guards/organization.guard'
+import { UserPermission } from '@libs/common/guards/user.guard'
+import { BaseResponse } from '@libs/common/interceptor'
+import { External, TExternal } from '@libs/common/request/external.request'
+import { PermissionId } from '@libs/permission/permission.enum'
 import { Controller, Get, Param, Post } from '@nestjs/common'
 import { Body, Query } from '@nestjs/common/decorators/http/route-params.decorator'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { GenerateIdParam } from '../../../../_libs/common/dto/param'
-import { OrganizationPermission } from '../../../../_libs/common/guards/organization.guard'
-import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
-import { BaseResponse } from '../../../../_libs/common/interceptor'
-import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiStockCheckService } from './api-stock-check.service'
 import {
-  StockCheckGetManyQuery,
-  StockCheckGetOneQuery,
-  StockCheckPaginationQuery,
-  StockCheckUpsertDraftBody,
+    StockCheckGetManyQuery,
+    StockCheckGetOneQuery,
+    StockCheckPaginationQuery,
+    StockCheckUpsertDraftBody,
 } from './request'
 
 @ApiTags('StockCheck')

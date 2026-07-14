@@ -1,8 +1,8 @@
 /* eslint-disable max-len */
+import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
+import { PermissionRepository } from '@libs/database/repositories/permission.repository'
+import { permissionDataAll } from '@libs/permission/permission.data'
 import { Injectable } from '@nestjs/common'
-import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
-import { PermissionRepository } from '../../../../_libs/database/repositories/permission.repository'
-import { permissionDataAll } from '../../../../_libs/permission/permission.data'
 import { PermissionGetManyQuery } from './request'
 
 @Injectable()

@@ -1,30 +1,30 @@
+import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
+import { DeliveryStatus } from '@libs/database/common/variable'
+import TicketProduct from '@libs/database/entities/ticket-product.entity'
+import { TicketSurchargeInsertType } from '@libs/database/entities/ticket-surcharge.entity'
+import { TicketStatus } from '@libs/database/entities/ticket.entity'
+import {
+    TicketChangeDiscountOperation,
+    TicketChangeItemMoneyManager,
+    TicketCloseOperation,
+    TicketReopenOperation,
+    TicketReturnProductOperation,
+    TicketSendProductOperation,
+    TicketTerminalOperation,
+} from '@libs/database/operations'
+import {
+    TicketRepository,
+    TicketSurchargeRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { CacheDataService } from '../../../../../_libs/common/cache-data/cache-data.service'
-import { DeliveryStatus } from '../../../../../_libs/database/common/variable'
-import TicketProduct from '../../../../../_libs/database/entities/ticket-product.entity'
-import { TicketSurchargeInsertType } from '../../../../../_libs/database/entities/ticket-surcharge.entity'
-import { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
-import {
-  TicketChangeDiscountOperation,
-  TicketChangeItemMoneyManager,
-  TicketCloseOperation,
-  TicketReopenOperation,
-  TicketReturnProductOperation,
-  TicketSendProductOperation,
-  TicketTerminalOperation,
-} from '../../../../../_libs/database/operations'
-import {
-  TicketRepository,
-  TicketSurchargeRepository,
-} from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import {
-  TicketChangeSurchargeListBody,
-  TicketClinicChangeDiscountBody,
-  TicketReturnProductListBody,
-  TicketSendProductListBody,
-  TicketTerminalBody,
+    TicketChangeSurchargeListBody,
+    TicketClinicChangeDiscountBody,
+    TicketReturnProductListBody,
+    TicketSendProductListBody,
+    TicketTerminalBody,
 } from './request'
 
 @Injectable()

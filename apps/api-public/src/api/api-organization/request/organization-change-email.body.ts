@@ -1,7 +1,7 @@
+import { IsGmail } from '@libs/common/transform-validate/class-validator.custom'
 import { ApiPropertyOptional } from '@nestjs/swagger'
 import { Transform } from 'class-transformer'
 import { IsDefined, Validate } from 'class-validator'
-import { IsGmail } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 
 export class OrganizationChangeEmailBody {
   @ApiPropertyOptional({ name: 'email', example: 'vm@gmail.com' })

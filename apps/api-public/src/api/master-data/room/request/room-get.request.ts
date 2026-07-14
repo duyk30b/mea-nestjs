@@ -1,11 +1,11 @@
+import { LimitQuery, PaginationQuery } from '@libs/common/dto/query'
 import { ApiPropertyOptional, IntersectionType, PickType } from '@nestjs/swagger'
 import { Expose, Transform, plainToInstance } from 'class-transformer'
 import { IsObject, ValidateNested } from 'class-validator'
-import { LimitQuery, PaginationQuery } from '../../../../../../_libs/common/dto/query'
 import {
-  RoomFilterQuery,
-  RoomRelationQuery,
-  RoomSortQuery,
+    RoomFilterQuery,
+    RoomRelationQuery,
+    RoomSortQuery,
 } from './room-options.request'
 
 export class RoomGetQuery {

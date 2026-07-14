@@ -1,20 +1,20 @@
+import {
+    ConditionNumber,
+    ConditionString,
+    ConditionTimestamp,
+    createConditionEnum,
+    transformConditionEnum,
+    transformConditionString,
+} from '@libs/common/dto'
+import { SortQuery } from '@libs/common/dto/query'
+import { IsEnumValue } from '@libs/common/transform-validate/class-validator.custom'
+import { PaymentMoneyStatus } from '@libs/database/common/variable'
+import {
+    TicketProcedureStatus,
+    TicketProcedureType,
+} from '@libs/database/entities/ticket-procedure.entity'
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
 import { IsBoolean, IsIn, IsInt, IsOptional, ValidateNested } from 'class-validator'
-import {
-  ConditionNumber,
-  ConditionString,
-  ConditionTimestamp,
-  createConditionEnum,
-  transformConditionEnum,
-  transformConditionString,
-} from '../../../../../_libs/common/dto'
-import { SortQuery } from '../../../../../_libs/common/dto/query'
-import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { PaymentMoneyStatus } from '../../../../../_libs/database/common/variable'
-import {
-  TicketProcedureStatus,
-  TicketProcedureType,
-} from '../../../../../_libs/database/entities/ticket-procedure.entity'
 
 export class TicketProcedureRelationQuery {
   @Expose()

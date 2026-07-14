@@ -1,8 +1,8 @@
+import { IsEnumValue } from '@libs/common/transform-validate/class-validator.custom'
+import { WalletType } from '@libs/database/entities/wallet.entity'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
 import { IsDefined, IsIn, IsNotEmpty, IsNumber, IsString } from 'class-validator'
-import { IsEnumValue } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { WalletType } from '../../../../../_libs/database/entities/wallet.entity'
 
 export class WalletCreateBody {
   @ApiProperty({ example: 105000 })

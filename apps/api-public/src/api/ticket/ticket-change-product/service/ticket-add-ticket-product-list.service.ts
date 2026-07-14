@@ -1,20 +1,20 @@
+import { GenerateId } from '@libs/database/common/generate-id'
+import {
+    DeliveryStatus,
+    PaymentMoneyStatus,
+} from '@libs/database/common/variable'
+import {
+    TicketProductInsertType,
+    TicketProductType,
+} from '@libs/database/entities/ticket-product.entity'
+import Ticket, { TicketStatus } from '@libs/database/entities/ticket.entity'
+import { TicketChangeItemMoneyManager } from '@libs/database/operations/ticket-base/ticket-change-item-money.manager'
+import {
+    TicketManager,
+    TicketProductRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { GenerateId } from '../../../../../../_libs/database/common/generate-id'
-import {
-  DeliveryStatus,
-  PaymentMoneyStatus,
-} from '../../../../../../_libs/database/common/variable'
-import {
-  TicketProductInsertType,
-  TicketProductType,
-} from '../../../../../../_libs/database/entities/ticket-product.entity'
-import Ticket, { TicketStatus } from '../../../../../../_libs/database/entities/ticket.entity'
-import { TicketChangeItemMoneyManager } from '../../../../../../_libs/database/operations/ticket-base/ticket-change-item-money.manager'
-import {
-  TicketManager,
-  TicketProductRepository,
-} from '../../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../../socket/socket-emit.service'
 import { TicketAddTicketProductListBody } from '../request'
 

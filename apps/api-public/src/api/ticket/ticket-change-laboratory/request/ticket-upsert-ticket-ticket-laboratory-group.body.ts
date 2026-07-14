@@ -1,19 +1,19 @@
+import { valuesEnum } from '@libs/common/helpers/typescript.helper'
+import { IsEnumValue } from '@libs/common/transform-validate/class-validator.custom'
+import { DiscountType } from '@libs/database/common/variable'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
 import {
-  ArrayMinSize,
-  IsArray,
-  IsDefined,
-  IsInt,
-  IsNumber,
-  IsString,
-  Max,
-  Min,
-  ValidateNested,
+    ArrayMinSize,
+    IsArray,
+    IsDefined,
+    IsInt,
+    IsNumber,
+    IsString,
+    Max,
+    Min,
+    ValidateNested,
 } from 'class-validator'
-import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
-import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType } from '../../../../../../_libs/database/common/variable'
 
 export class TicketLaboratoryAddBody {
   @ApiProperty({ example: 56 })

@@ -1,9 +1,9 @@
+import { AttributeRepository } from '@libs/database/repositories/attribute.repository'
 import { Injectable } from '@nestjs/common'
-import { AttributeRepository } from '../../../../../_libs/database/repositories/attribute.repository'
 import {
-  AttributeGetManyQuery,
-  AttributePaginationQuery,
-  AttributeUpsertBody,
+    AttributeGetManyQuery,
+    AttributePaginationQuery,
+    AttributeUpsertBody,
 } from './request'
 
 @Injectable()

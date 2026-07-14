@@ -1,16 +1,16 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
-import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
-import { FileUploadDto } from '../../../../_libs/common/dto/file'
-import { ESArray } from '../../../../_libs/common/helpers'
+import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
+import { FileUploadDto } from '@libs/common/dto/file'
+import { ESArray } from '@libs/common/helpers'
 import Image, {
-  ImageHostType,
-  ImageInsertType,
-  ImageInteractType,
-} from '../../../../_libs/database/entities/image.entity'
-import { SettingKey } from '../../../../_libs/database/entities/setting.entity'
-import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
-import { SettingRepository } from '../../../../_libs/database/repositories/setting.repository'
-import { GoogleDriverService } from '../../../../_libs/transporter/google-driver/google-driver.service'
+    ImageHostType,
+    ImageInsertType,
+    ImageInteractType,
+} from '@libs/database/entities/image.entity'
+import { SettingKey } from '@libs/database/entities/setting.entity'
+import { ImageRepository } from '@libs/database/repositories/image.repository'
+import { SettingRepository } from '@libs/database/repositories/setting.repository'
+import { GoogleDriverService } from '@libs/transporter/google-driver/google-driver.service'
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common'
 
 @Injectable()
 export class ImageManagerService implements OnModuleInit {
@@ -36,7 +36,7 @@ export class ImageManagerService implements OnModuleInit {
           defaultFolderName: '',
         })
       })
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(error.message)
     }
   }

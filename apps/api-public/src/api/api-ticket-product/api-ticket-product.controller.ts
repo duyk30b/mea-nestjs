@@ -1,9 +1,9 @@
+import { GenerateIdParam } from '@libs/common/dto'
+import { UserPermission } from '@libs/common/guards/user.guard'
+import { BaseResponse } from '@libs/common/interceptor'
+import { External, TExternal } from '@libs/common/request/external.request'
 import { Controller, Get, Param, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { GenerateIdParam } from '../../../../_libs/common/dto'
-import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
-import { BaseResponse } from '../../../../_libs/common/interceptor'
-import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { ApiTicketProductService } from './api-ticket-product.service'
 import { TicketProductGetManyQuery, TicketProductPaginationQuery } from './request'
 

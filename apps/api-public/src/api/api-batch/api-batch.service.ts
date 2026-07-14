@@ -1,28 +1,28 @@
-import { Injectable } from '@nestjs/common'
-import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { MovementType } from '../../../../_libs/database/common/variable'
-import { Product } from '../../../../_libs/database/entities'
-import { ProductMovementInsertType } from '../../../../_libs/database/entities/product-movement.entity'
-import { ProductOperation } from '../../../../_libs/database/operations'
-import { BatchOperator } from '../../../../_libs/database/operations/batch/batch.operator'
+import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { MovementType } from '@libs/database/common/variable'
+import { Product } from '@libs/database/entities'
+import { ProductMovementInsertType } from '@libs/database/entities/product-movement.entity'
+import { ProductOperation } from '@libs/database/operations'
+import { BatchOperator } from '@libs/database/operations/batch/batch.operator'
 import {
-  BatchRepository,
-  OrganizationRepository,
-  ProductMovementRepository,
-  ProductRepository,
-  PurchaseOrderItemRepository,
-  TicketBatchRepository,
-  TicketProductRepository,
-} from '../../../../_libs/database/repositories'
+    BatchRepository,
+    OrganizationRepository,
+    ProductMovementRepository,
+    ProductRepository,
+    PurchaseOrderItemRepository,
+    TicketBatchRepository,
+    TicketProductRepository,
+} from '@libs/database/repositories'
+import { Injectable } from '@nestjs/common'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
-  BatchGetManyQuery,
-  BatchGetOneQuery,
-  BatchMergeBody,
-  BatchPaginationQuery,
-  BatchUpdateInfoAndQuantityBody,
-  BatchUpdateInfoBody,
+    BatchGetManyQuery,
+    BatchGetOneQuery,
+    BatchMergeBody,
+    BatchPaginationQuery,
+    BatchUpdateInfoAndQuantityBody,
+    BatchUpdateInfoBody,
 } from './request'
 
 @Injectable()

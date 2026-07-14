@@ -1,19 +1,19 @@
+import { valuesEnum } from '@libs/common/helpers'
+import {
+    IsEnumValue,
+} from '@libs/common/transform-validate/class-validator.custom'
+import { DiscountType } from '@libs/database/common/variable'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
 import {
-  IsArray,
-  IsDefined,
-  IsNumber,
-  IsString,
-  Max,
-  Min,
-  ValidateNested,
+    IsArray,
+    IsDefined,
+    IsNumber,
+    IsString,
+    Max,
+    Min,
+    ValidateNested,
 } from 'class-validator'
-import { valuesEnum } from '../../../../../../_libs/common/helpers'
-import {
-  IsEnumValue,
-} from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType } from '../../../../../../_libs/database/common/variable'
 
 class TicketItemChangeMoney {
   @ApiProperty({ example: 56 })

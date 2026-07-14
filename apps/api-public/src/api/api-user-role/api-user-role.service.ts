@@ -1,8 +1,8 @@
+import { BaseResponse } from '@libs/common/interceptor/transform-response.interceptor'
+import { UserRoleRepository } from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { UserRoleRepository } from '../../../../_libs/database/repositories'
 import {
-  UserRoleGetManyQuery,
+    UserRoleGetManyQuery,
 } from './request'
 
 @Injectable()

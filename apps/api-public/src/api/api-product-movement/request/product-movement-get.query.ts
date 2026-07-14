@@ -1,12 +1,12 @@
+import { LimitQuery, PaginationQuery } from '@libs/common/dto/query'
+import { MovementType } from '@libs/database/common/variable'
 import { ApiPropertyOptional, IntersectionType, PickType } from '@nestjs/swagger'
 import { Expose, Transform, plainToInstance } from 'class-transformer'
 import { IsObject, ValidateNested } from 'class-validator'
-import { LimitQuery, PaginationQuery } from '../../../../../_libs/common/dto/query'
-import { MovementType } from '../../../../../_libs/database/common/variable'
 import {
-  ProductMovementFilterQuery,
-  ProductMovementRelationQuery,
-  ProductMovementSortQuery,
+    ProductMovementFilterQuery,
+    ProductMovementRelationQuery,
+    ProductMovementSortQuery,
 } from './product-movement-options.request'
 
 export class ProductMovementGetQuery {
@@ -26,7 +26,7 @@ export class ProductMovementGetQuery {
         exposeUnsetFields: false,
         excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
       })
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })
@@ -44,7 +44,7 @@ export class ProductMovementGetQuery {
         exposeUnsetFields: false,
         excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
       })
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })
@@ -65,7 +65,7 @@ export class ProductMovementGetQuery {
         exposeUnsetFields: false,
         excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
       })
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })

@@ -1,28 +1,28 @@
-import { Injectable } from '@nestjs/common'
-import { ESArray } from '../../../../_libs/common/helpers/array.helper'
+import { ESArray } from '@libs/common/helpers/array.helper'
 import {
-  Customer,
-  Distributor,
-  PaymentTicketItem,
-  PurchaseOrder,
-  Ticket,
-  User,
-  Wallet,
-} from '../../../../_libs/database/entities'
+    Customer,
+    Distributor,
+    PaymentTicketItem,
+    PurchaseOrder,
+    Ticket,
+    User,
+    Wallet,
+} from '@libs/database/entities'
 import Payment, {
-  PaymentPersonType,
-  PaymentVoucherType,
-} from '../../../../_libs/database/entities/payment.entity'
+    PaymentPersonType,
+    PaymentVoucherType,
+} from '@libs/database/entities/payment.entity'
 import {
-  CustomerRepository,
-  DistributorRepository,
-  PaymentTicketItemRepository,
-  PurchaseOrderRepository,
-  TicketRepository,
-  UserRepository,
-  WalletRepository,
-} from '../../../../_libs/database/repositories'
-import { PaymentRepository } from '../../../../_libs/database/repositories/payment.repository'
+    CustomerRepository,
+    DistributorRepository,
+    PaymentTicketItemRepository,
+    PurchaseOrderRepository,
+    TicketRepository,
+    UserRepository,
+    WalletRepository,
+} from '@libs/database/repositories'
+import { PaymentRepository } from '@libs/database/repositories/payment.repository'
+import { Injectable } from '@nestjs/common'
 import { PaymentGetManyQuery, PaymentPaginationQuery } from './request'
 import { PaymentRelationQuery } from './request/payment.options'
 

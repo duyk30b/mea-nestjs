@@ -1,16 +1,16 @@
+import { IsEnumValue } from '@libs/common/transform-validate/class-validator.custom'
+import { RoomType } from '@libs/database/entities/room.entity'
 import { ApiProperty, OmitType, PartialType } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import {
-  IsArray,
-  IsDefined,
-  IsNotEmpty,
-  IsNumber,
-  IsOptional,
-  IsString,
-  ValidateNested,
+    IsArray,
+    IsDefined,
+    IsNotEmpty,
+    IsNumber,
+    IsOptional,
+    IsString,
+    ValidateNested,
 } from 'class-validator'
-import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { RoomType } from '../../../../../../_libs/database/entities/room.entity'
 
 export class RoomCreate {
   @ApiProperty({ example: 'ABC12345' })

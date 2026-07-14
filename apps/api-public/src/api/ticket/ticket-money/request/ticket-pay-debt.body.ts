@@ -1,15 +1,15 @@
+import { IsNumberGreaterThan } from '@libs/common/transform-validate/class-validator.custom'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import {
-  IsArray,
-  IsDefined,
-  IsIn,
-  IsInt,
-  IsNumber,
-  IsString,
-  ValidateNested,
+    IsArray,
+    IsDefined,
+    IsIn,
+    IsInt,
+    IsNumber,
+    IsString,
+    ValidateNested,
 } from 'class-validator'
-import { IsNumberGreaterThan } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
 
 class DataList {
   @ApiProperty({ example: 12 })

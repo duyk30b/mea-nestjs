@@ -1,7 +1,7 @@
+import { BaseResponse } from '@libs/common/interceptor/transform-response.interceptor'
+import { ICD } from '@libs/database/entities'
+import { ICDRepository } from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { ICD } from '../../../../_libs/database/entities'
-import { ICDRepository } from '../../../../_libs/database/repositories'
 import { ICDReplaceAllBody } from './request'
 
 @Injectable()

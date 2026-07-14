@@ -1,8 +1,8 @@
+import { UserPermission } from '@libs/common/guards/user.guard'
+import { BaseResponse } from '@libs/common/interceptor'
+import { External, TExternal } from '@libs/common/request/external.request'
 import { Controller, Get, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
-import { BaseResponse } from '../../../../_libs/common/interceptor'
-import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { ApiTicketUserService } from './api-ticket-user.service'
 import { TicketUserGetManyQuery, TicketUserPaginationQuery } from './request'
 

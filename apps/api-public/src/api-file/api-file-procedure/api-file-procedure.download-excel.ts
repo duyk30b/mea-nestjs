@@ -1,11 +1,11 @@
+import { Procedure } from '@libs/database/entities'
+import { ProcedureRepository } from '@libs/database/repositories'
+import {
+    CustomStyleExcel,
+    excelOneSheetWorkbook,
+} from '@libs/file/excel-one-sheet.util'
 import { Injectable } from '@nestjs/common'
 import { Cell, Workbook, Worksheet } from 'exceljs'
-import { Procedure } from '../../../../_libs/database/entities'
-import { ProcedureRepository } from '../../../../_libs/database/repositories'
-import {
-  CustomStyleExcel,
-  excelOneSheetWorkbook,
-} from '../../../../_libs/file/excel-one-sheet.util'
 import { ProcedureExcelRules } from './procedure-excel.rule'
 
 @Injectable()

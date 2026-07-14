@@ -16,6 +16,7 @@ import ProductGroup from './product-group.entity'
 import { ProductSettingRule } from './setting.entity'
 
 export enum ProductType {
+  Inherit = 0,
   Basic = 1,
   SplitBatch = 2,
 }

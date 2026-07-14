@@ -1,7 +1,7 @@
+import { ConditionNumber, transformConditionNumber } from '@libs/common/dto'
+import { SortQuery } from '@libs/common/dto/query'
 import { Expose, Transform } from 'class-transformer'
 import { IsBoolean, IsIn, IsOptional } from 'class-validator'
-import { ConditionNumber, transformConditionNumber } from '../../../../../_libs/common/dto'
-import { SortQuery } from '../../../../../_libs/common/dto/query'
 
 export class PrescriptionSampleRelationQuery {
   @Expose()

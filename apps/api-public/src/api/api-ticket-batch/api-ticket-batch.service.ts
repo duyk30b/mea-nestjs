@@ -1,6 +1,6 @@
+import { BaseResponse } from '@libs/common/interceptor/transform-response.interceptor'
+import { TicketBatchRepository } from '@libs/database/repositories/ticket-batch.repository'
 import { Injectable } from '@nestjs/common'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { TicketBatchRepository } from '../../../../_libs/database/repositories/ticket-batch.repository'
 import { TicketBatchGetManyQuery, TicketBatchPaginationQuery } from './request'
 
 @Injectable()

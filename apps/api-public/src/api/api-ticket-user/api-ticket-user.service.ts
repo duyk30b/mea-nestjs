@@ -1,36 +1,36 @@
+import { ESArray } from '@libs/common/helpers'
+import {
+    Laboratory,
+    LaboratoryGroup,
+    Position,
+    Procedure,
+    Product,
+    Radiology,
+    Regimen,
+    Role,
+    Ticket,
+    TicketUser,
+    User,
+} from '@libs/database/entities'
+import { PositionType } from '@libs/database/entities/position.entity'
+import {
+    LaboratoryGroupRepository,
+    LaboratoryRepository,
+    PositionRepository,
+    ProcedureRepository,
+    ProductRepository,
+    RadiologyRepository,
+    RegimenRepository,
+    RoleRepository,
+    TicketRepository,
+    TicketUserRepository,
+    UserRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { ESArray } from '../../../../_libs/common/helpers'
 import {
-  Laboratory,
-  LaboratoryGroup,
-  Position,
-  Procedure,
-  Product,
-  Radiology,
-  Regimen,
-  Role,
-  Ticket,
-  TicketUser,
-  User,
-} from '../../../../_libs/database/entities'
-import { PositionType } from '../../../../_libs/database/entities/position.entity'
-import {
-  LaboratoryGroupRepository,
-  LaboratoryRepository,
-  PositionRepository,
-  ProcedureRepository,
-  ProductRepository,
-  RadiologyRepository,
-  RegimenRepository,
-  RoleRepository,
-  TicketRepository,
-  TicketUserRepository,
-  UserRepository,
-} from '../../../../_libs/database/repositories'
-import {
-  TicketUserGetManyQuery,
-  TicketUserPaginationQuery,
-  TicketUserRelationQuery,
+    TicketUserGetManyQuery,
+    TicketUserPaginationQuery,
+    TicketUserRelationQuery,
 } from './request'
 
 @Injectable()

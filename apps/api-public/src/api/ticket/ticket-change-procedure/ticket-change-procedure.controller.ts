@@ -1,27 +1,27 @@
+import { FileUploadDto } from '@libs/common/dto/file'
+import { UserPermission } from '@libs/common/guards/user.guard'
+import { BaseResponse, FastifyFilesInterceptor } from '@libs/common/interceptor'
+import { External, TExternal } from '@libs/common/request/external.request'
+import { PermissionId } from '@libs/permission/permission.enum'
 import {
-  Body,
-  Controller,
-  Delete,
-  Param,
-  Post,
-  UploadedFiles,
-  UseInterceptors,
+    Body,
+    Controller,
+    Delete,
+    Param,
+    Post,
+    UploadedFiles,
+    UseInterceptors,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger'
-import { FileUploadDto } from '../../../../../_libs/common/dto/file'
-import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
-import { BaseResponse, FastifyFilesInterceptor } from '../../../../../_libs/common/interceptor'
-import { External, TExternal } from '../../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { TicketParams } from '../ticket-query/request'
 import {
-  TicketChangeProcedureParams,
-  TicketChangeRegimenParams,
-  TicketProcessResultTicketProcedureBody,
-  TicketUpdateMoneyTicketProcedureBody,
-  TicketUpdateMoneyTicketRegimenBody,
-  TicketUpdateUserRequestTicketRegimenBody,
-  TicketUpdateUserTicketProcedureBody,
+    TicketChangeProcedureParams,
+    TicketChangeRegimenParams,
+    TicketProcessResultTicketProcedureBody,
+    TicketUpdateMoneyTicketProcedureBody,
+    TicketUpdateMoneyTicketRegimenBody,
+    TicketUpdateUserRequestTicketRegimenBody,
+    TicketUpdateUserTicketProcedureBody,
 } from './request'
 import { TicketAddTicketProcedureListBody } from './request/ticket-add-ticket-procedure-list.body'
 import { TicketAddTicketProcedureListService } from './service/ticket-add-ticket-procedure-list.service'

@@ -1,8 +1,8 @@
+import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
+import { BaseResponse } from '@libs/common/interceptor/transform-response.interceptor'
+import { SettingKey } from '@libs/database/entities/setting.entity'
+import { SettingRepository } from '@libs/database/repositories/setting.repository'
 import { Injectable } from '@nestjs/common'
-import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { SettingKey } from '../../../../_libs/database/entities/setting.entity'
-import { SettingRepository } from '../../../../_libs/database/repositories/setting.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import { SettingUpsertBody } from './request/setting-upsert.request'
 

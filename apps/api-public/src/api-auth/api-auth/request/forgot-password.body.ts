@@ -1,9 +1,9 @@
+import {
+    IsGmail,
+} from '@libs/common/transform-validate/class-validator.custom'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
 import { IsDefined, IsString, MinLength, Validate } from 'class-validator'
-import {
-  IsGmail,
-} from '../../../../../_libs/common/transform-validate/class-validator.custom'
 
 export class ForgotPasswordBody {
   @ApiProperty({ example: '0376899866' })

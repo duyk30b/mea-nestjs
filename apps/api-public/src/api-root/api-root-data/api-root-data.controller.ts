@@ -1,7 +1,7 @@
+import { IsRoot } from '@libs/common/guards/root.guard'
+import { BaseResponse } from '@libs/common/interceptor'
 import { Body, Controller, Post } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IsRoot } from '../../../../_libs/common/guards/root.guard'
-import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { ApiRootDataService } from './api-root-data.service'
 import { RootMigrationDataBody } from './request/root-migration-data.body'
 

@@ -1,25 +1,25 @@
+import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { ESArray } from '@libs/common/helpers'
+import { BusinessError } from '@libs/database/common/error'
+import { Room, UserRoom } from '@libs/database/entities'
+import { UserRoomInsertType } from '@libs/database/entities/user-room.entity'
+import { RoomOperation } from '@libs/database/operations'
+import {
+    RoomRepository,
+    TicketRepository,
+    UserRepository,
+    UserRoomRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { CacheDataService } from '../../../../../_libs/common/cache-data/cache-data.service'
-import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
-import { ESArray } from '../../../../../_libs/common/helpers'
-import { BusinessError } from '../../../../../_libs/database/common/error'
-import { Room, UserRoom } from '../../../../../_libs/database/entities'
-import { UserRoomInsertType } from '../../../../../_libs/database/entities/user-room.entity'
-import { RoomOperation } from '../../../../../_libs/database/operations'
 import {
-  RoomRepository,
-  TicketRepository,
-  UserRepository,
-  UserRoomRepository,
-} from '../../../../../_libs/database/repositories'
-import {
-  RoomCreateBody,
-  RoomGetManyQuery,
-  RoomGetOneQuery,
-  RoomMergeBody,
-  RoomPaginationQuery,
-  RoomRelationQuery,
-  RoomUpdateBody,
+    RoomCreateBody,
+    RoomGetManyQuery,
+    RoomGetOneQuery,
+    RoomMergeBody,
+    RoomPaginationQuery,
+    RoomRelationQuery,
+    RoomUpdateBody,
 } from './request'
 
 @Injectable()

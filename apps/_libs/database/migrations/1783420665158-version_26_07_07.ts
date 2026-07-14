@@ -75,9 +75,15 @@ export class Version2607071783420665158 implements MigrationInterface {
                         END;
             `)
 
+            await queryRunner.query(`
+                UPDATE "TicketAttribute"
+                SET "value" = REPLACE("value", 'T17:00:00.000Z', '')
+                WHERE "oid" = 27 AND "value" LIKE '%T17:00:00.000Z';
+            `)
+
             await queryRunner.commitTransaction()
         }
-        catch (error) {
+        catch (error: any) {
             await queryRunner.rollbackTransaction()
             throw error
         }

@@ -1,9 +1,9 @@
+import { FileUploadDto } from '@libs/common/dto/file'
+import { UserPermission } from '@libs/common/guards/user.guard'
+import { BaseResponse, FastifyFilesInterceptor } from '@libs/common/interceptor'
+import { External, TExternal } from '@libs/common/request/external.request'
 import { Body, Controller, Get, Patch, Post, UploadedFiles, UseInterceptors } from '@nestjs/common'
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger'
-import { FileUploadDto } from '../../../../_libs/common/dto/file'
-import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
-import { BaseResponse, FastifyFilesInterceptor } from '../../../../_libs/common/interceptor'
-import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { ApiMeService } from './api-me.service'
 import { UserChangePasswordBody, UserUpdateInfoBody } from './request'
 

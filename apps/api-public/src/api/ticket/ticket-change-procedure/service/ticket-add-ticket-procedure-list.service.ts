@@ -1,29 +1,29 @@
+import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
+import { ESArray, NoExtra } from '@libs/common/helpers'
+import { GenerateId } from '@libs/database/common/generate-id'
+import {
+    PaymentMoneyStatus,
+    TicketRegimenStatus,
+} from '@libs/database/common/variable'
+import {
+    TicketProcedureInsertType,
+    TicketProcedureStatus,
+    TicketProcedureType,
+} from '@libs/database/entities/ticket-procedure.entity'
+import { TicketRegimenItemInsertType } from '@libs/database/entities/ticket-regimen-item.entity'
+import { TicketRegimenInsertType } from '@libs/database/entities/ticket-regimen.entity'
+import { TicketStatus } from '@libs/database/entities/ticket.entity'
+import {
+    TicketChangeItemMoneyManager,
+    TicketUserCommon,
+} from '@libs/database/operations'
+import {
+    TicketProcedureRepository,
+    TicketRegimenItemRepository,
+    TicketRegimenRepository,
+    TicketRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { CacheDataService } from '../../../../../../_libs/common/cache-data/cache-data.service'
-import { ESArray, NoExtra } from '../../../../../../_libs/common/helpers'
-import { GenerateId } from '../../../../../../_libs/database/common/generate-id'
-import {
-  PaymentMoneyStatus,
-  TicketRegimenStatus,
-} from '../../../../../../_libs/database/common/variable'
-import {
-  TicketProcedureInsertType,
-  TicketProcedureStatus,
-  TicketProcedureType,
-} from '../../../../../../_libs/database/entities/ticket-procedure.entity'
-import { TicketRegimenItemInsertType } from '../../../../../../_libs/database/entities/ticket-regimen-item.entity'
-import { TicketRegimenInsertType } from '../../../../../../_libs/database/entities/ticket-regimen.entity'
-import { TicketStatus } from '../../../../../../_libs/database/entities/ticket.entity'
-import {
-  TicketChangeItemMoneyManager,
-  TicketUserCommon,
-} from '../../../../../../_libs/database/operations'
-import {
-  TicketProcedureRepository,
-  TicketRegimenItemRepository,
-  TicketRegimenRepository,
-  TicketRepository,
-} from '../../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../../socket/socket-emit.service'
 import { TicketAddTicketProcedureListBody } from '../request'
 

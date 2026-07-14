@@ -1,12 +1,12 @@
+import { IsEnumValue } from '@libs/common/transform-validate/class-validator.custom'
+import { DiscountType } from '@libs/database/common/variable'
+import {
+    DiscountInteractType,
+    DiscountRepeatType,
+} from '@libs/database/entities/discount.entity'
 import { ApiProperty, OmitType } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
 import { IsDefined, IsNumber, IsString } from 'class-validator'
-import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType } from '../../../../../../_libs/database/common/variable'
-import {
-  DiscountInteractType,
-  DiscountRepeatType,
-} from '../../../../../../_libs/database/entities/discount.entity'
 
 export class DiscountCreateBody {
   @ApiProperty({ example: 25 })

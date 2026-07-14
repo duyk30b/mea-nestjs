@@ -53,7 +53,7 @@ export class JwtExtendService {
         exp: jwtPayload.exp * 1000,
         iat: jwtPayload.iat * 1000,
       }
-    } catch (error) {
+    } catch (error: any) {
       if (error.name === 'TokenExpiredError') {
         throw new BusinessException('error.Token.AccessTokenExpired', {}, HttpStatus.UNAUTHORIZED)
       } else if (error.name === 'JsonWebTokenError') {
@@ -80,7 +80,7 @@ export class JwtExtendService {
         exp: jwtPayload.exp * 1000,
         iat: jwtPayload.iat * 1000,
       }
-    } catch (error) {
+    } catch (error: any) {
       if (error.name === 'TokenExpiredError') {
         throw new BusinessException('error.Token.RefreshTokenExpired', {}, HttpStatus.UNAUTHORIZED)
       } else if (error.name === 'JsonWebTokenError') {

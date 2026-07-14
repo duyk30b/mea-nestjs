@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common'
-import { DataSource } from 'typeorm'
-import { FileUploadDto } from '../../../../_libs/common/dto/file'
-import { ESArray } from '../../../../_libs/common/helpers'
-import { BusinessError } from '../../../../_libs/database/common/error'
+import { FileUploadDto } from '@libs/common/dto/file'
+import { ESArray } from '@libs/common/helpers'
+import { BusinessError } from '@libs/database/common/error'
 import {
   ProcedureInsertType,
   ProcedureType,
-} from '../../../../_libs/database/entities/procedure.entity'
-import { ProcedureGroupRepository, ProcedureManager } from '../../../../_libs/database/repositories'
-import { ApiProcedureGroupService } from '../../api/api-procedure-group/api-procedure-group.service'
+} from '@libs/database/entities/procedure.entity'
+import { ProcedureGroupRepository, ProcedureManager } from '@libs/database/repositories'
+import { Injectable } from '@nestjs/common'
+import { DataSource } from 'typeorm'
+import { ProcedureGroupService } from '../../api/master-data/procedure_group/procedure-group.service'
 import { ExcelProcess } from '../common/excel-process'
 import { ProcedureExcelRules } from './procedure-excel.rule'
 
@@ -30,7 +30,7 @@ export class ApiFileProcedureUploadExcel {
     private dataSource: DataSource,
     private readonly procedureManager: ProcedureManager,
     private readonly procedureGroupRepository: ProcedureGroupRepository,
-    private readonly apiProcedureGroupService: ApiProcedureGroupService
+    private readonly procedureGroupService: ProcedureGroupService
   ) { }
 
   async uploadExcel(options: { oid: number; userId: number; file: FileUploadDto }) {
@@ -52,7 +52,7 @@ export class ApiFileProcedureUploadExcel {
     })
 
     const groupNameList = dataConvertList.map((i) => i.procedureGroupName || '')
-    const procedureGroupList = await this.apiProcedureGroupService.createByGroupName(
+    const procedureGroupList = await this.procedureGroupService.createByGroupName(
       oid,
       groupNameList
     )

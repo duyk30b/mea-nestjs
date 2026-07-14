@@ -1,6 +1,6 @@
+import { ConditionDate, ConditionNumber, ConditionString, SortQuery } from '@libs/common/dto'
 import { Expose, Type } from 'class-transformer'
 import { ValidateNested } from 'class-validator'
-import { ConditionDate, ConditionNumber, ConditionString, SortQuery } from '../../../../../_libs/common/dto'
 import { ProductFilterQuery } from '../../../api/api-product/request'
 
 export class RootSystemLogRelationQuery { }

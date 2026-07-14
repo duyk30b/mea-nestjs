@@ -1,6 +1,6 @@
+import { ConditionTimestamp, SortQuery } from '@libs/common/dto'
 import { Expose, Type } from 'class-transformer'
 import { IsIn, ValidateNested } from 'class-validator'
-import { ConditionTimestamp, SortQuery } from '../../../../../../_libs/common/dto'
 
 export class TemplateHtmlRelationQuery { }
 export class TemplateHtmlFilterQuery {

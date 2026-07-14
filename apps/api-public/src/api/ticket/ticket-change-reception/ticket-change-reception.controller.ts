@@ -1,13 +1,13 @@
+import { UserPermissionOr } from '@libs/common/guards/user.guard'
+import { BaseResponse } from '@libs/common/interceptor'
+import { External, TExternal } from '@libs/common/request/external.request'
+import { PermissionId } from '@libs/permission/permission.enum'
 import { Body, Controller, Delete, Param, Post } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { UserPermissionOr } from '../../../../../_libs/common/guards/user.guard.'
-import { BaseResponse } from '../../../../../_libs/common/interceptor'
-import { External, TExternal } from '../../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import {
-  TicketChangeReceptionParams,
-  TicketCreateTicketReceptionBody,
-  TicketUpdateTicketReceptionBody,
+    TicketChangeReceptionParams,
+    TicketCreateTicketReceptionBody,
+    TicketUpdateTicketReceptionBody,
 } from './request'
 import { TicketChangeReceptionService } from './ticket-change-reception.service'
 

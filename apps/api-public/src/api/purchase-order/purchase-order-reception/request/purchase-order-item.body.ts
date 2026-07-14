@@ -1,7 +1,7 @@
+import { IsNumberGreaterThan } from '@libs/common/transform-validate/class-validator.custom'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
 import { IsDefined, IsInt, IsNumber, IsString } from 'class-validator'
-import { IsNumberGreaterThan } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
 
 export class PurchaseOrderItemBody {
   @ApiPropertyOptional({ example: 52 })

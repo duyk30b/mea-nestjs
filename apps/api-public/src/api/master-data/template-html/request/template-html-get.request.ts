@@ -1,11 +1,11 @@
+import { LimitQuery, PaginationQuery } from '@libs/common/dto'
 import { ApiPropertyOptional, IntersectionType, PickType } from '@nestjs/swagger'
 import { Expose, Transform, plainToInstance } from 'class-transformer'
 import { IsObject, ValidateNested } from 'class-validator'
-import { LimitQuery, PaginationQuery } from '../../../../../../_libs/common/dto'
 import {
-  TemplateHtmlFilterQuery,
-  TemplateHtmlRelationQuery,
-  TemplateHtmlSortQuery,
+    TemplateHtmlFilterQuery,
+    TemplateHtmlRelationQuery,
+    TemplateHtmlSortQuery,
 } from './template-html-options.request'
 
 export class TemplateHtmlGetQuery {

@@ -1,21 +1,20 @@
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
+import {
+  ServerExceptionFilter,
+  ValidationException,
+} from '@libs/common/exception-filter/exception-filter'
+import { RootGuard } from '@libs/common/guards/root.guard'
+import { TimeoutInterceptor } from '@libs/common/interceptor/timeout.interceptor'
+import { TransformResponseInterceptor } from '@libs/common/interceptor/transform-response.interceptor'
+import { NestLogger } from '@libs/common/nest-core/nest-logger'
+import { GlobalConfig } from '@libs/environments'
 import { ClassSerializerInterceptor, ValidationError, ValidationPipe } from '@nestjs/common'
 import { NestFactory, Reflector } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { contentParser } from 'fastify-multer'
 import * as requestIp from 'request-ip'
-import {
-  ServerExceptionFilter,
-  ValidationException,
-} from '../../_libs/common/exception-filter/exception-filter'
-import { RootGuard } from '../../_libs/common/guards/root.guard'
-import { AccessLogInterceptor } from '../../_libs/common/interceptor/access-log.interceptor'
-import { TimeoutInterceptor } from '../../_libs/common/interceptor/timeout.interceptor'
-import { TransformResponseInterceptor } from '../../_libs/common/interceptor/transform-response.interceptor'
-import { NestLogger } from '../../_libs/common/nest-core/nest-logger'
-import { GlobalConfig } from '../../_libs/environments'
 import { AppModule } from './app.module'
 
 async function bootstrap() {

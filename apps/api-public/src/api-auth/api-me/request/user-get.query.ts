@@ -1,7 +1,7 @@
+import { PaginationQuery } from '@libs/common/dto/query'
 import { ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import { IsInt, ValidateNested } from 'class-validator'
-import { PaginationQuery } from '../../../../../_libs/common/dto/query'
 import { UserFilterQuery, UserRelationQuery, UserSortQuery } from './user-options.request'
 
 export class UserPaginationQuery extends PaginationQuery {

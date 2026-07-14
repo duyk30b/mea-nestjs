@@ -1,6 +1,6 @@
+import { TicketChangeTicketUserOperation } from '@libs/database/operations'
+import { TicketUserRepository } from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { TicketChangeTicketUserOperation } from '../../../../../_libs/database/operations'
-import { TicketUserRepository } from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { TicketUpdateTicketUserCommissionBody } from './request'
 

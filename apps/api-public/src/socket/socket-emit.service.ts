@@ -1,29 +1,29 @@
+import {
+    Batch,
+    Customer,
+    Image,
+    Organization,
+    Product,
+    PurchaseOrder,
+    Ticket,
+    TicketAttribute,
+    TicketBatch,
+    TicketExpense,
+    TicketLaboratory,
+    TicketLaboratoryGroup,
+    TicketLaboratoryResult,
+    TicketPaymentDetail,
+    TicketProcedure,
+    TicketProduct,
+    TicketRadiology,
+    TicketReception,
+    TicketRegimen,
+    TicketRegimenItem,
+    TicketSurcharge,
+    TicketUser,
+} from '@libs/database/entities'
 import { Injectable } from '@nestjs/common'
 import { Server } from 'socket.io'
-import {
-  Batch,
-  Customer,
-  Image,
-  Organization,
-  Product,
-  PurchaseOrder,
-  Ticket,
-  TicketAttribute,
-  TicketBatch,
-  TicketExpense,
-  TicketLaboratory,
-  TicketLaboratoryGroup,
-  TicketLaboratoryResult,
-  TicketPaymentDetail,
-  TicketProcedure,
-  TicketProduct,
-  TicketRadiology,
-  TicketReception,
-  TicketRegimen,
-  TicketRegimenItem,
-  TicketSurcharge,
-  TicketUser,
-} from '../../../_libs/database/entities'
 import { SOCKET_EVENT } from './socket.variable'
 
 @Injectable()

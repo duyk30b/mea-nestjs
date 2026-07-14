@@ -1,11 +1,11 @@
+import { LimitQuery, PaginationQuery } from '@libs/common/dto'
 import { ApiPropertyOptional, IntersectionType, PickType } from '@nestjs/swagger'
 import { Expose, Transform, plainToInstance } from 'class-transformer'
 import { IsObject, ValidateNested } from 'class-validator'
-import { LimitQuery, PaginationQuery } from '../../../../../_libs/common/dto'
 import {
-  RootOrganizationFilterQuery,
-  RootOrganizationRelationQuery,
-  RootOrganizationSortQuery,
+    RootOrganizationFilterQuery,
+    RootOrganizationRelationQuery,
+    RootOrganizationSortQuery,
 } from './root-organization-options.request'
 
 export class RootOrganizationGetQuery {
@@ -25,7 +25,7 @@ export class RootOrganizationGetQuery {
         exposeUnsetFields: false,
         excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
       })
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })
@@ -46,7 +46,7 @@ export class RootOrganizationGetQuery {
         exposeUnsetFields: false,
         excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
       })
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })
@@ -67,7 +67,7 @@ export class RootOrganizationGetQuery {
         exposeUnsetFields: false,
         excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
       })
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })

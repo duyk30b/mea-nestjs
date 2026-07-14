@@ -130,6 +130,19 @@
       "<rootDir>/apps/",
       "<rootDir>/libs/"
     ],
-    "moduleNameMapper": {}
+    "moduleNameMapper": {
+      "^@libs$": "<rootDir>/apps/_libs",
+      "^@libs/(.*)$": "<rootDir>/apps/_libs/$1",
+      "^@api-public$": "<rootDir>/apps/api-public/src",
+      "^@api-public/(.*)$": "<rootDir>/apps/api-public/src/$1",
+      "^@event-dispatcher$": "<rootDir>/apps/event-dispatcher/src",
+      "^@event-dispatcher/(.*)$": "<rootDir>/apps/event-dispatcher/src/$1",
+      "^@file-service$": "<rootDir>/apps/file-service/src",
+      "^@file-service/(.*)$": "<rootDir>/apps/file-service/src/$1",
+      "^@seed-data$": "<rootDir>/apps/seed-data/src",
+      "^@seed-data/(.*)$": "<rootDir>/apps/seed-data/src/$1",
+      "^@worker$": "<rootDir>/apps/worker/src",
+      "^@worker/(.*)$": "<rootDir>/apps/worker/src/$1"
+    }
   }
 }

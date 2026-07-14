@@ -1,16 +1,16 @@
+import { GenerateIdParam } from '@libs/common/dto/param'
+import { UserPermission } from '@libs/common/guards/user.guard'
+import { BaseResponse } from '@libs/common/interceptor'
+import { External, TExternal } from '@libs/common/request/external.request'
+import { PermissionId } from '@libs/permission/permission.enum'
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
-import { GenerateIdParam } from '../../../../_libs/common/dto/param'
-import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
-import { BaseResponse } from '../../../../_libs/common/interceptor'
-import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiWalletService } from './api-wallet.service'
 import {
-  WalletCreateBody,
-  WalletGetManyQuery,
-  WalletPaginationQuery,
-  WalletUpdateBody,
+    WalletCreateBody,
+    WalletGetManyQuery,
+    WalletPaginationQuery,
+    WalletUpdateBody,
 } from './request'
 
 @ApiTags('Wallet')

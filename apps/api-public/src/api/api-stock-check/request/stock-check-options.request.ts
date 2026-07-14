@@ -1,12 +1,12 @@
+import {
+    ConditionTimestamp,
+    createConditionEnum,
+    transformConditionEnum,
+} from '@libs/common/dto'
+import { SortQuery } from '@libs/common/dto/query'
+import { StockCheckStatus } from '@libs/database/entities/stock-check.entity'
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
 import { IsBoolean, IsIn, IsNumber, IsOptional, ValidateNested } from 'class-validator'
-import {
-  ConditionTimestamp,
-  createConditionEnum,
-  transformConditionEnum,
-} from '../../../../../_libs/common/dto'
-import { SortQuery } from '../../../../../_libs/common/dto/query'
-import { StockCheckStatus } from '../../../../../_libs/database/entities/stock-check.entity'
 
 export class StockCheckRelationQuery {
   @Expose()

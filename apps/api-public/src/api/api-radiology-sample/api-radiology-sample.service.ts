@@ -1,13 +1,13 @@
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { BaseResponse } from '@libs/common/interceptor/transform-response.interceptor'
+import { RadiologySampleInsertType } from '@libs/database/entities/radiology-sample.entity'
+import { RadiologySampleRepository } from '@libs/database/repositories/radiology-sample.repository'
 import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { RadiologySampleInsertType } from '../../../../_libs/database/entities/radiology-sample.entity'
-import { RadiologySampleRepository } from '../../../../_libs/database/repositories/radiology-sample.repository'
 import {
-  RadiologySampleCreateBody,
-  RadiologySampleGetManyQuery,
-  RadiologySamplePaginationQuery,
-  RadiologySampleUpdateBody,
+    RadiologySampleCreateBody,
+    RadiologySampleGetManyQuery,
+    RadiologySamplePaginationQuery,
+    RadiologySampleUpdateBody,
 } from './request'
 
 @Injectable()

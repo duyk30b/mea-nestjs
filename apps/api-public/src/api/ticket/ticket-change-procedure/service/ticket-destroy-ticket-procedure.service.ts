@@ -1,21 +1,21 @@
+import { PaymentMoneyStatus } from '@libs/database/common/variable'
+import { TicketRegimen, TicketRegimenItem } from '@libs/database/entities'
+import { PositionType } from '@libs/database/entities/position.entity'
+import {
+    TicketProcedureStatus,
+    TicketProcedureType,
+} from '@libs/database/entities/ticket-procedure.entity'
+import Ticket, { TicketStatus } from '@libs/database/entities/ticket.entity'
+import { TicketChangeItemMoneyManager } from '@libs/database/operations/ticket-base/ticket-change-item-money.manager'
+import {
+    TicketProcedureRepository,
+    TicketRegimenItemRepository,
+    TicketRegimenRepository,
+    TicketRepository,
+    TicketUserRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { PaymentMoneyStatus } from '../../../../../../_libs/database/common/variable'
-import { TicketRegimen, TicketRegimenItem } from '../../../../../../_libs/database/entities'
-import { PositionType } from '../../../../../../_libs/database/entities/position.entity'
-import {
-  TicketProcedureStatus,
-  TicketProcedureType,
-} from '../../../../../../_libs/database/entities/ticket-procedure.entity'
-import Ticket, { TicketStatus } from '../../../../../../_libs/database/entities/ticket.entity'
-import { TicketChangeItemMoneyManager } from '../../../../../../_libs/database/operations/ticket-base/ticket-change-item-money.manager'
-import {
-  TicketProcedureRepository,
-  TicketRegimenItemRepository,
-  TicketRegimenRepository,
-  TicketRepository,
-  TicketUserRepository,
-} from '../../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../../socket/socket-emit.service'
 
 @Injectable()

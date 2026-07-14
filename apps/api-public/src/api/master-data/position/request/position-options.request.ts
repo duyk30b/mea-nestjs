@@ -1,13 +1,13 @@
+import {
+    ConditionNumber,
+    createConditionEnum,
+    transformConditionEnum,
+    transformConditionNumber,
+} from '@libs/common/dto'
+import { SortQuery } from '@libs/common/dto/query'
+import { PositionType } from '@libs/database/entities/position.entity'
 import { Expose, Transform, TransformFnParams } from 'class-transformer'
 import { IsBoolean, IsIn, IsNumber, IsOptional } from 'class-validator'
-import {
-  ConditionNumber,
-  createConditionEnum,
-  transformConditionEnum,
-  transformConditionNumber,
-} from '../../../../../../_libs/common/dto'
-import { SortQuery } from '../../../../../../_libs/common/dto/query'
-import { PositionType } from '../../../../../../_libs/database/entities/position.entity'
 
 const ConditionEnumPositionType = createConditionEnum(PositionType)
 

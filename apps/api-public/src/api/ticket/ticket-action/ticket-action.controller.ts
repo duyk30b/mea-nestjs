@@ -1,17 +1,17 @@
+import { UserPermission, UserPermissionOr } from '@libs/common/guards/user.guard'
+import { BaseResponse } from '@libs/common/interceptor'
+import { External, TExternal } from '@libs/common/request/external.request'
+import { PermissionId } from '@libs/permission/permission.enum'
 import { Body, Controller, Delete, Param, Post } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { UserPermission, UserPermissionOr } from '../../../../../_libs/common/guards/user.guard.'
-import { BaseResponse } from '../../../../../_libs/common/interceptor'
-import { External, TExternal } from '../../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { TicketParams } from '../ticket-query/request'
 import {
-  TicketChangeAllMoneyBody,
-  TicketChangeSurchargeListBody,
-  TicketClinicChangeDiscountBody,
-  TicketReturnProductListBody,
-  TicketSendProductListBody,
-  TicketTerminalBody,
+    TicketChangeAllMoneyBody,
+    TicketChangeSurchargeListBody,
+    TicketClinicChangeDiscountBody,
+    TicketReturnProductListBody,
+    TicketSendProductListBody,
+    TicketTerminalBody,
 } from './request'
 import { TicketChangeAllMoneyService } from './service/ticket-change-all-money.service'
 import { TicketActionService } from './ticket-action.service'

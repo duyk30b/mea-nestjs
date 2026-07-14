@@ -1,8 +1,8 @@
+import { MultipleFileUpload } from '@libs/common/dto/file'
 import { ValidationError } from '@nestjs/common'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
 import { IsArray, IsDefined, IsNumber, IsObject, IsString, validateSync } from 'class-validator'
-import { MultipleFileUpload } from '../../../../../_libs/common/dto/file'
 
 export class OrganizationInfoBody {
   @ApiPropertyOptional({ example: 'Phòng khám đa khoa Medical' })
@@ -63,7 +63,7 @@ export class OrganizationUpdateBody extends MultipleFileUpload {
         return JSON.stringify(errValidate)
       }
       return instance
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })
@@ -91,7 +91,7 @@ export class OrganizationUpdateBody extends MultipleFileUpload {
         return JSON.stringify(errValidate)
       }
       return instance
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })

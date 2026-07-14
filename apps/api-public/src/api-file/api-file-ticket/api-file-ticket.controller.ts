@@ -1,8 +1,8 @@
+import { UserPermission } from '@libs/common/guards/user.guard'
+import { External, TExternal } from '@libs/common/request/external.request'
+import { PermissionId } from '@libs/permission/permission.enum'
 import { Controller, Get, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
-import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { TicketGetManyQuery } from '../../api/ticket/ticket-query/request'
 import { ApiFileTicketDownloadExcel } from './api-file-ticket.download-excel'
 

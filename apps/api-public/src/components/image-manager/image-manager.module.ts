@@ -1,5 +1,5 @@
+import { GoogleDriverModule } from '@libs/transporter/google-driver/google-driver.module'
 import { Global, Module } from '@nestjs/common'
-import { GoogleDriverModule } from '../../../../_libs/transporter/google-driver/google-driver.module'
 import { ImageManagerService } from './image-manager.service'
 
 @Global()

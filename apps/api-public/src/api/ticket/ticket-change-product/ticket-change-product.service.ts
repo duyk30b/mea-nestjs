@@ -1,17 +1,17 @@
+import { TicketProductType } from '@libs/database/entities/ticket-product.entity'
+import {
+    TicketDestroyTicketProductOperation,
+    TicketUpdateTicketProductOperation,
+} from '@libs/database/operations'
+import {
+    TicketProductManager,
+    TicketProductRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { TicketProductType } from '../../../../../_libs/database/entities/ticket-product.entity'
-import {
-  TicketDestroyTicketProductOperation,
-  TicketUpdateTicketProductOperation,
-} from '../../../../../_libs/database/operations'
-import {
-  TicketProductManager,
-  TicketProductRepository,
-} from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import {
-  TicketUpdatePriorityTicketProductBody,
-  TicketUpdateTicketProductBody,
+    TicketUpdatePriorityTicketProductBody,
+    TicketUpdateTicketProductBody,
 } from './request'
 
 @Injectable()

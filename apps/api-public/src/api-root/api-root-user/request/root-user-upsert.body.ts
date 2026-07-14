@@ -1,16 +1,16 @@
+import { IsPhone } from '@libs/common/transform-validate/class-validator.custom'
+import { EGender } from '@libs/database/common/variable'
 import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
 import {
-  IsDefined,
-  IsIn,
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-  MinLength,
-  Validate,
+    IsDefined,
+    IsIn,
+    IsNotEmpty,
+    IsNumber,
+    IsString,
+    MinLength,
+    Validate,
 } from 'class-validator'
-import { IsPhone } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { EGender } from '../../../../../_libs/database/common/variable'
 
 export class RootUserCreateBody {
   @ApiProperty({ example: 40 })

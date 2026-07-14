@@ -1,3 +1,4 @@
+import { CustomerGroup, CustomerSource } from '@libs/database/entities'
 import { Expose } from 'class-transformer'
 import { Column, Entity, OneToMany, Unique } from 'typeorm'
 import { BaseEntity } from '../common/base.entity'
@@ -11,6 +12,26 @@ export default class Customer extends BaseEntity {
   @Expose()
   customerCode: string
 
+  @Column({ type: 'bigint', default: '0' })
+  @Expose()
+  customerGroupId: string
+
+  @Column({ default: 0 })
+  @Expose()
+  customerSourceId: number
+
+  @Column({ type: 'smallint', default: 1 })
+  @Expose()
+  isHasTicket: number
+
+  @Column({
+    type: 'bigint',
+    default: 0,
+    transformer: { to: (value) => value, from: (value) => Number(value) },
+  })
+  @Expose()
+  debt: number // tiền nợ
+
   @Column({ type: 'varchar', length: 255 })
   @Expose()
   fullName: string
@@ -18,10 +39,6 @@ export default class Customer extends BaseEntity {
   @Column({ type: 'varchar', length: 20, default: '' })
   @Expose()
   citizenIdCard: string
-
-  @Column({ default: 0 })
-  @Expose()
-  customerSourceId: number
 
   @Column({ type: 'char', length: 10, nullable: true })
   @Expose()
@@ -74,14 +91,6 @@ export default class Customer extends BaseEntity {
   @Expose()
   healthHistory: string // Tiền sử bệnh
 
-  @Column({
-    type: 'bigint',
-    default: 0,
-    transformer: { to: (value) => value, from: (value) => Number(value) },
-  })
-  @Expose()
-  debt: number // tiền nợ
-
   @Column({ type: 'varchar', length: 255, nullable: true })
   @Expose()
   note: string // Ghi chú
@@ -116,6 +125,12 @@ export default class Customer extends BaseEntity {
   @Expose()
   paymentList: Payment[]
 
+  @Expose()
+  customerGroup?: CustomerGroup
+
+  @Expose()
+  customerSource?: CustomerSource
+
   static fromRaw(raw: { [P in keyof Customer]: any }) {
     if (!raw) return null
     const entity = new Customer()
@@ -136,7 +151,7 @@ export default class Customer extends BaseEntity {
 }
 
 export type CustomerRelationType = {
-  [P in keyof Pick<Customer, 'paymentList'>]?: boolean
+  [P in keyof Pick<Customer, 'paymentList' | 'customerGroup' | 'customerSource'>]?: boolean
 }
 
 export type CustomerInsertType = Omit<
@@ -151,5 +166,7 @@ export type CustomerUpdateType = {
 }
 
 export type CustomerSortType = {
-  [P in keyof Pick<Customer, 'id' | 'customerCode' | 'debt' | 'fullName'>]?: 'ASC' | 'DESC'
+  [P in keyof Pick<Customer, 'id' | 'customerCode' | 'customerGroupId' | 'debt' | 'fullName'>]?:
+  | 'ASC'
+  | 'DESC'
 }

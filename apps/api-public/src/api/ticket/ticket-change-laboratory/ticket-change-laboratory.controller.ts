@@ -1,19 +1,19 @@
+import { UserPermission } from '@libs/common/guards/user.guard'
+import { BaseResponse } from '@libs/common/interceptor'
+import { External, TExternal } from '@libs/common/request/external.request'
+import { PermissionId } from '@libs/permission/permission.enum'
 import { Body, Controller, Delete, Param, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
-import { BaseResponse } from '../../../../../_libs/common/interceptor'
-import { External, TExternal } from '../../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { TicketLaboratoryGroupPostQuery } from '../../api-ticket-laboratory-group/request'
 import { TicketParams } from '../ticket-query/request/ticket.params'
 import {
-  TicketAddTicketLaboratoryGroupBody,
-  TicketChangeLaboratoryGroupParams,
-  TicketChangeLaboratoryParams,
-  TicketUpdatePriorityTicketLaboratoryBody,
-  TicketUpdateRequestTicketLaboratoryBody,
-  TicketUpdateResultLaboratoryGroupBody,
-  TicketUpdateTicketLaboratoryGroupBody,
+    TicketAddTicketLaboratoryGroupBody,
+    TicketChangeLaboratoryGroupParams,
+    TicketChangeLaboratoryParams,
+    TicketUpdatePriorityTicketLaboratoryBody,
+    TicketUpdateRequestTicketLaboratoryBody,
+    TicketUpdateResultLaboratoryGroupBody,
+    TicketUpdateTicketLaboratoryGroupBody,
 } from './request'
 import { TicketAddTicketLaboratoryGroupService } from './service/ticket-add-ticket-laboratory-group.service'
 import { TicketUpdateRequestTicketLaboratoryService } from './service/ticket-update-request-ticket-laboratory.service'

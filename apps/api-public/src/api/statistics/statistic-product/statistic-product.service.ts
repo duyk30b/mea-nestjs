@@ -1,12 +1,12 @@
-import { Injectable } from '@nestjs/common'
-import { ESArray } from '../../../../../_libs/common/helpers'
-import { DeliveryStatus } from '../../../../../_libs/database/common/variable'
-import { Product } from '../../../../../_libs/database/entities'
-import { StatisticProductOperation } from '../../../../../_libs/database/operations'
+import { ESArray } from '@libs/common/helpers'
+import { DeliveryStatus } from '@libs/database/common/variable'
+import { Product } from '@libs/database/entities'
+import { StatisticProductOperation } from '@libs/database/operations'
 import {
-  ProductRepository,
-  TicketProductRepository,
-} from '../../../../../_libs/database/repositories'
+    ProductRepository,
+    TicketProductRepository,
+} from '@libs/database/repositories'
+import { Injectable } from '@nestjs/common'
 import { StatisticProductHighMoneyQuery } from './request'
 import { StatisticTicketProductQuery } from './request/statistic-ticket-product.query'
 

@@ -1,11 +1,11 @@
+import {
+    ConditionNumber,
+    ConditionTimestamp,
+    transformConditionNumber,
+} from '@libs/common/dto'
+import { SortQuery } from '@libs/common/dto/query'
 import { Expose, Transform, Type } from 'class-transformer'
 import { IsArray, IsBoolean, IsIn, IsOptional, ValidateNested } from 'class-validator'
-import {
-  ConditionNumber,
-  ConditionTimestamp,
-  transformConditionNumber,
-} from '../../../../../_libs/common/dto'
-import { SortQuery } from '../../../../../_libs/common/dto/query'
 
 export class BatchRelationQuery {
   @Expose()

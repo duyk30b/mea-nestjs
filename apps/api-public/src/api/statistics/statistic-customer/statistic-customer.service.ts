@@ -1,5 +1,5 @@
+import { CustomerRepository } from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { CustomerRepository } from '../../../../../_libs/database/repositories'
 
 @Injectable()
 export class StatisticCustomerService {

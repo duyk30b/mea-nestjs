@@ -11,7 +11,7 @@ export class RedisLockService implements OnModuleInit, OnModuleDestroy {
     try {
       const redis = await this.redisClient.createClient()
       this.redisLock = new Redlock([redis], { retryJitter: 200 })
-    } catch (error) {}
+    } catch (error: any) {}
   }
 
   onModuleDestroy() {

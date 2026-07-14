@@ -1,19 +1,19 @@
+import { MultipleFileUpload } from '@libs/common/dto/file'
+import { IsPhone } from '@libs/common/transform-validate/class-validator.custom'
+import { EGender } from '@libs/database/common/variable'
 import { ValidationError } from '@nestjs/common'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
 import {
-  IsArray,
-  IsDefined,
-  IsIn,
-  IsNotEmpty,
-  IsNumber,
-  IsObject,
-  Validate,
-  validateSync,
+    IsArray,
+    IsDefined,
+    IsIn,
+    IsNotEmpty,
+    IsNumber,
+    IsObject,
+    Validate,
+    validateSync,
 } from 'class-validator'
-import { MultipleFileUpload } from '../../../../../_libs/common/dto/file'
-import { IsPhone } from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { EGender } from '../../../../../_libs/database/common/variable'
 
 class ImagesChangeBody {
   @Expose()
@@ -67,7 +67,7 @@ export class UserUpdateInfoBody extends MultipleFileUpload {
         return JSON.stringify(errValidate)
       }
       return instance
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })
@@ -95,7 +95,7 @@ export class UserUpdateInfoBody extends MultipleFileUpload {
         return JSON.stringify(errValidate)
       }
       return instance
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })

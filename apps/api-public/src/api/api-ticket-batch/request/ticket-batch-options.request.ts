@@ -1,8 +1,8 @@
+import { createConditionEnum, transformConditionEnum } from '@libs/common/dto'
+import { SortQuery } from '@libs/common/dto/query'
+import { DeliveryStatus } from '@libs/database/common/variable'
 import { Expose, Transform, TransformFnParams } from 'class-transformer'
 import { IsBoolean, IsIn, IsInt, IsOptional, IsString } from 'class-validator'
-import { createConditionEnum, transformConditionEnum } from '../../../../../_libs/common/dto'
-import { SortQuery } from '../../../../../_libs/common/dto/query'
-import { DeliveryStatus } from '../../../../../_libs/database/common/variable'
 
 export class TicketBatchRelationQuery {
   @Expose()

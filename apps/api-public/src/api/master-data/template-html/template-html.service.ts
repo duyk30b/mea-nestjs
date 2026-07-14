@@ -1,12 +1,12 @@
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { TemplateHtmlRepository } from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
-import { TemplateHtmlRepository } from '../../../../../_libs/database/repositories'
 import {
-  TemplateHtmlCreateBody,
-  TemplateHtmlGetManyQuery,
-  TemplateHtmlGetOneQuery,
-  TemplateHtmlPaginationQuery,
-  TemplateHtmlUpdateBody,
+    TemplateHtmlCreateBody,
+    TemplateHtmlGetManyQuery,
+    TemplateHtmlGetOneQuery,
+    TemplateHtmlPaginationQuery,
+    TemplateHtmlUpdateBody,
 } from './request'
 
 @Injectable()

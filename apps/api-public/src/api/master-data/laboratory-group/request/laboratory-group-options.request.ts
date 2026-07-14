@@ -1,6 +1,6 @@
+import { SortQuery } from '@libs/common/dto/query'
 import { Expose } from 'class-transformer'
 import { IsBoolean, IsNumber } from 'class-validator'
-import { SortQuery } from '../../../../../../_libs/common/dto/query'
 
 export class LaboratoryGroupRelationQuery {
   @Expose()

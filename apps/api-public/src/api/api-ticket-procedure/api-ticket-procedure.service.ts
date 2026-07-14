@@ -1,28 +1,28 @@
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { ESArray } from '@libs/common/helpers/array.helper'
+import {
+    Customer,
+    Image,
+    Procedure,
+    Ticket,
+    TicketProcedure,
+    TicketUser,
+} from '@libs/database/entities'
+import { PositionType } from '@libs/database/entities/position.entity'
+import {
+    CustomerRepository,
+    ProcedureRepository,
+    TicketRepository,
+} from '@libs/database/repositories'
+import { ImageRepository } from '@libs/database/repositories/image.repository'
+import { TicketProcedureRepository } from '@libs/database/repositories/ticket-procedure.repository'
+import { TicketUserRepository } from '@libs/database/repositories/ticket-user.repository'
 import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { ESArray } from '../../../../_libs/common/helpers/array.helper'
 import {
-  Customer,
-  Image,
-  Procedure,
-  Ticket,
-  TicketProcedure,
-  TicketUser,
-} from '../../../../_libs/database/entities'
-import { PositionType } from '../../../../_libs/database/entities/position.entity'
-import {
-  CustomerRepository,
-  ProcedureRepository,
-  TicketRepository,
-} from '../../../../_libs/database/repositories'
-import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
-import { TicketProcedureRepository } from '../../../../_libs/database/repositories/ticket-procedure.repository'
-import { TicketUserRepository } from '../../../../_libs/database/repositories/ticket-user.repository'
-import {
-  TicketProcedureGetManyQuery,
-  TicketProcedureGetOneQuery,
-  TicketProcedurePaginationQuery,
-  TicketProcedureRelationQuery,
+    TicketProcedureGetManyQuery,
+    TicketProcedureGetOneQuery,
+    TicketProcedurePaginationQuery,
+    TicketProcedureRelationQuery,
 } from './request'
 
 @Injectable()
@@ -117,7 +117,7 @@ export class ApiTicketProcedureService {
     ticketProcedureList.forEach((i) => {
       try {
         i.imageIdList = JSON.parse(i.imageIds)
-      } catch (error) {
+      } catch (error: any) {
         i.imageIdList = []
       }
     })

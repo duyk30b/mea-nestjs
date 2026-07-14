@@ -1,27 +1,33 @@
-import { Injectable } from '@nestjs/common'
-import { DataSource } from 'typeorm'
-import { FileUploadDto } from '../../../../_libs/common/dto/file'
-import { ESArray } from '../../../../_libs/common/helpers'
-import { BusinessError } from '../../../../_libs/database/common/error'
-import { CustomerInsertType } from '../../../../_libs/database/entities/customer.entity'
+import { CustomerGroupService } from '@api-public/api/master-data/customer_group/customer_group.service'
+import { CustomerSourceService } from '@api-public/api/master-data/customer_source/customer_source.service'
+import { FileUploadDto } from '@libs/common/dto/file'
+import { ESArray } from '@libs/common/helpers'
+import { BusinessError } from '@libs/database/common/error'
+import { CustomerInsertType } from '@libs/database/entities/customer.entity'
 import {
   MoneyDirection,
   PaymentActionType,
   PaymentInsertType,
   PaymentPersonType,
   PaymentVoucherType,
-} from '../../../../_libs/database/entities/payment.entity'
+} from '@libs/database/entities/payment.entity'
 import {
+  CustomerGroupRepository,
   CustomerRepository,
+  CustomerSourceRepository,
   PaymentRepository,
   WalletRepository,
-} from '../../../../_libs/database/repositories'
+} from '@libs/database/repositories'
+import { Injectable } from '@nestjs/common'
+import { DataSource } from 'typeorm'
 import { ExcelProcess } from '../common/excel-process'
 import { CustomerExcelRules } from './customer-excel.rule'
 
 const dataPlainExample = {
   _num: 0,
   customerCode: '',
+  customerGroupName: '',
+  customerSourceName: '',
   fullName: '',
   phone: '',
   citizenIdCard: '',
@@ -37,13 +43,18 @@ const dataPlainExample = {
   note: '',
 } satisfies Record<keyof typeof CustomerExcelRules, unknown>
 
-type DataPlain = typeof dataPlainExample
+type DataPlain = typeof dataPlainExample & {
+  customerGroupId: string
+  customerSourceId: number
+}
 
 @Injectable()
 export class ApiFileCustomerUploadExcel {
   constructor(
     private dataSource: DataSource,
     private customerRepository: CustomerRepository,
+    private customerGroupService: CustomerGroupService,
+    private customerSourceService: CustomerSourceService,
     private paymentRepository: PaymentRepository,
     private walletRepository: WalletRepository
   ) { }
@@ -66,13 +77,39 @@ export class ApiFileCustomerUploadExcel {
       return dataConvert as { [P in keyof typeof CustomerExcelRules]: any }
     })
 
+    const groupNameList = dataConvertList.map((i) => i.customerGroupName || '')
+    const customerGroupList = await this.customerGroupService.createByGroupName(oid, groupNameList)
+    const customerGroupMapName = ESArray.arrayToKeyValue(customerGroupList, 'name')
+
+    const sourceNameList = dataConvertList.map((i) => i.customerSourceName || '')
+    const customerSourceList = await this.customerSourceService.createBySourceName(
+      oid,
+      sourceNameList
+    )
+    const customerSourceMapName = ESArray.arrayToKeyValue(customerSourceList, 'name')
+
     const dataPlainList: DataPlain[] = dataConvertList.map((item, index) => {
       if (!item.customerCode) {
         throw new BusinessError(`Lỗi: Dòng ${index + 2}: Mã khách hàng không được để trống`)
       }
+
+      let customerGroupId = '0'
+      const customerGroupName = item.customerGroupName
+      if (customerGroupName) {
+        customerGroupId = customerGroupMapName[customerGroupName]?.id || '0'
+      }
+
+      let customerSourceId = 0
+      const customerSourceName = item.customerSourceName
+      if (customerSourceName) {
+        customerSourceId = customerSourceMapName[customerSourceName]?.id || 0
+      }
+
       const dataPlain: DataPlain = {
         _num: item._num || 0,
         customerCode: item.customerCode || '',
+        customerGroupName: item.customerGroupName || '',
+        customerSourceName: item.customerSourceName || '',
         fullName: item.fullName || '',
         phone: item.phone || '',
         citizenIdCard: item.citizenIdCard || '',
@@ -87,6 +124,9 @@ export class ApiFileCustomerUploadExcel {
         facebook: item.facebook || '',
         zalo: item.zalo || '',
         note: item.note || '',
+
+        customerGroupId,
+        customerSourceId,
       } satisfies DataPlain
       return dataPlain
     })
@@ -120,12 +160,12 @@ export class ApiFileCustomerUploadExcel {
       const customerOriginMapCode = ESArray.arrayToKeyValue(customerOriginList, 'customerCode')
 
       // Phân biệt tạo mới hay cập nhật theo customerCode vì đã được gắn ở trên
-      const dataPlainInsertList = dataPlainList.filter(
-        (i) => !customerOriginMapCode[i.customerCode]
-      )
-      const dataPlainUpdateList = dataPlainList.filter(
-        (i) => !!customerOriginMapCode[i.customerCode]
-      )
+      const dataPlainInsertList = dataPlainList.filter((i) => {
+        return !customerOriginMapCode[i.customerCode]
+      })
+      const dataPlainUpdateList = dataPlainList.filter((i) => {
+        return !!customerOriginMapCode[i.customerCode]
+      })
 
       const dataChangeDebt = dataPlainUpdateList
         .map((i) => {
@@ -145,22 +185,24 @@ export class ApiFileCustomerUploadExcel {
           const customerInsert: CustomerInsertType = {
             oid,
             customerCode: plain.customerCode,
-            fullName: plain.fullName,
             phone: plain.phone,
-            citizenIdCard: plain.citizenIdCard,
             debt: plain.debt || 0, // nếu khách hàng mới thì nợ = 0 khi không điền giá trị
+            customerGroupId: plain.customerGroupId,
+            customerSourceId: plain.customerSourceId,
+            fullName: plain.fullName,
             birthday: plain.birthday,
+            yearOfBirth: plain.yearOfBirth,
             gender: plain.gender,
             addressProvince: plain.addressProvince,
             addressWard: plain.addressWard,
             addressStreet: plain.addressStreet,
             facebook: plain.facebook,
             zalo: plain.zalo,
-            customerSourceId: 0,
-            yearOfBirth: plain.yearOfBirth,
             relative: '',
             healthHistory: '',
             note: plain.note,
+            citizenIdCard: plain.citizenIdCard,
+            isHasTicket: 0,
             isActive: 1,
           }
           return customerInsert
@@ -183,6 +225,8 @@ export class ApiFileCustomerUploadExcel {
                   WHEN "${t}"."debt" IS NOT NULL THEN "${t}"."debt"::bigint
                   ELSE "${u}"."debt"
                 END`,
+            customerGroupId: { cast: 'bigint' },
+            customerSourceId: true,
             birthday: { cast: 'bigint' },
             yearOfBirth: true,
             gender: true,
@@ -191,6 +235,7 @@ export class ApiFileCustomerUploadExcel {
             addressStreet: true,
             facebook: true,
             zalo: true,
+            citizenIdCard: true,
             note: true,
           },
           options: { requireEqualLength: true },

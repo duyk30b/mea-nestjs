@@ -1,10 +1,10 @@
+import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
+import { GoogleDriverService } from '@libs/transporter/google-driver/google-driver.service'
 import { Injectable, Logger } from '@nestjs/common'
 import { Cron } from '@nestjs/schedule'
 import { createReadStream, readdirSync, statSync } from 'fs'
 import { lookup } from 'mime-types'
 import { join } from 'path'
-import { CacheDataService } from '../../../_libs/common/cache-data/cache-data.service'
-import { GoogleDriverService } from '../../../_libs/transporter/google-driver/google-driver.service'
 
 @Injectable()
 export class PostgresqlJob {

@@ -1,15 +1,15 @@
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { PaymentPersonType } from '@libs/database/entities/payment.entity'
+import { PaymentRepository } from '@libs/database/repositories'
+import { DistributorRepository } from '@libs/database/repositories/distributor.repository'
+import { PurchaseOrderRepository } from '@libs/database/repositories/purchase-order.repository'
 import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { PaymentPersonType } from '../../../../_libs/database/entities/payment.entity'
-import { PaymentRepository } from '../../../../_libs/database/repositories'
-import { DistributorRepository } from '../../../../_libs/database/repositories/distributor.repository'
-import { PurchaseOrderRepository } from '../../../../_libs/database/repositories/purchase-order.repository'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
-  DistributorCreateBody,
-  DistributorGetManyQuery,
-  DistributorPaginationQuery,
-  DistributorUpdateBody,
+    DistributorCreateBody,
+    DistributorGetManyQuery,
+    DistributorPaginationQuery,
+    DistributorUpdateBody,
 } from './request'
 
 @Injectable()

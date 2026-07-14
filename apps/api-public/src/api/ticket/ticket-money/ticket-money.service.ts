@@ -1,24 +1,24 @@
+import { BusinessError } from '@libs/database/common/error'
+import { TicketItemType } from '@libs/database/entities/payment-ticket-item.entity'
+import { PaymentActionType } from '@libs/database/entities/payment.entity'
+import { TicketProductType } from '@libs/database/entities/ticket-product.entity'
+import {
+    PaymentTicketDiscountDto,
+    PaymentTicketItemDto,
+    PaymentTicketItemMapDtoType,
+    PaymentTicketSurchargeDto,
+    TicketPaymentOperation,
+    TicketPaymentOperationPropType,
+} from '@libs/database/operations'
+import {
+    TicketLaboratoryRepository,
+    TicketPaymentDetailRepository,
+    TicketProcedureRepository,
+    TicketProductRepository,
+    TicketRadiologyRepository,
+    TicketRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { BusinessError } from '../../../../../_libs/database/common/error'
-import { TicketItemType } from '../../../../../_libs/database/entities/payment-ticket-item.entity'
-import { PaymentActionType } from '../../../../../_libs/database/entities/payment.entity'
-import { TicketProductType } from '../../../../../_libs/database/entities/ticket-product.entity'
-import {
-  PaymentTicketDiscountDto,
-  PaymentTicketItemDto,
-  PaymentTicketItemMapDtoType,
-  PaymentTicketSurchargeDto,
-  TicketPaymentOperation,
-  TicketPaymentOperationPropType,
-} from '../../../../../_libs/database/operations'
-import {
-  TicketLaboratoryRepository,
-  TicketPaymentDetailRepository,
-  TicketProcedureRepository,
-  TicketProductRepository,
-  TicketRadiologyRepository,
-  TicketRepository,
-} from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { TicketPayDebtBody, TicketPaymentMoneyBody } from './request'
 

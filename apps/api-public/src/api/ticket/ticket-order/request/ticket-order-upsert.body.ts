@@ -1,22 +1,22 @@
+import { IsEnumValue } from '@libs/common/transform-validate/class-validator.custom'
+import { DiscountType } from '@libs/database/common/variable'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import {
-  IsArray,
-  IsDefined,
-  IsInt,
-  IsNumber,
-  IsPositive,
-  IsString,
-  Max,
-  Min,
-  ValidateNested,
+    IsArray,
+    IsDefined,
+    IsInt,
+    IsNumber,
+    IsPositive,
+    IsString,
+    Max,
+    Min,
+    ValidateNested,
 } from 'class-validator'
-import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType } from '../../../../../../_libs/database/common/variable'
 import {
-  TicketOrderAttributeBody,
-  TicketOrderExpenseBody,
-  TicketOrderSurchargeBody,
+    TicketOrderAttributeBody,
+    TicketOrderExpenseBody,
+    TicketOrderSurchargeBody,
 } from './ticket-order-other.body'
 import { TicketOrderProcedureBody } from './ticket-order-procedure.body'
 import { TicketOrderProductBody } from './ticket-order-product.body'

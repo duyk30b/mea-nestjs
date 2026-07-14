@@ -188,7 +188,7 @@ export class Version11071763106710438 implements MigrationInterface {
             `)
 
             await queryRunner.commitTransaction()
-        } catch (error) {
+        } catch (error: any) {
             await queryRunner.rollbackTransaction()
             throw error
         }

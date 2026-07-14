@@ -1,21 +1,21 @@
 import cors from '@fastify/cors'
+import {
+    ServerExceptionFilter,
+    ValidationException,
+} from '@libs/common/exception-filter/exception-filter'
+import { RootGuard } from '@libs/common/guards/root.guard'
+import {
+    AccessLogInterceptor,
+    TimeoutInterceptor,
+    TransformResponseInterceptor,
+} from '@libs/common/interceptor'
+import { GlobalConfig } from '@libs/environments'
 import { ClassSerializerInterceptor, Logger, ValidationError, ValidationPipe } from '@nestjs/common'
 import { NestFactory, Reflector } from '@nestjs/core'
 import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { contentParser } from 'fastify-multer'
 import * as requestIp from 'request-ip'
-import {
-  ServerExceptionFilter,
-  ValidationException,
-} from '../../_libs/common/exception-filter/exception-filter'
-import { RootGuard } from '../../_libs/common/guards/root.guard'
-import {
-  AccessLogInterceptor,
-  TimeoutInterceptor,
-  TransformResponseInterceptor,
-} from '../../_libs/common/interceptor'
-import { GlobalConfig } from '../../_libs/environments'
 import { AppModule } from './app.module'
 
 async function bootstrap() {

@@ -1,32 +1,32 @@
-import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
-import { ESArray } from '../../../../../_libs/common/helpers'
-import { BaseResponse } from '../../../../../_libs/common/interceptor/transform-response.interceptor'
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { ESArray } from '@libs/common/helpers'
+import { BaseResponse } from '@libs/common/interceptor/transform-response.interceptor'
 import {
-  Laboratory,
-  Procedure,
-  Product,
-  Radiology,
-  Regimen,
-} from '../../../../../_libs/database/entities'
+    Laboratory,
+    Procedure,
+    Product,
+    Radiology,
+    Regimen,
+} from '@libs/database/entities'
 import Discount, {
-  DiscountInteractType,
-} from '../../../../../_libs/database/entities/discount.entity'
+    DiscountInteractType,
+} from '@libs/database/entities/discount.entity'
 import {
-  DiscountRepository,
-  LaboratoryRepository,
-  ProcedureRepository,
-  ProductRepository,
-  RadiologyRepository,
-  RegimenRepository,
-} from '../../../../../_libs/database/repositories'
+    DiscountRepository,
+    LaboratoryRepository,
+    ProcedureRepository,
+    ProductRepository,
+    RadiologyRepository,
+    RegimenRepository,
+} from '@libs/database/repositories'
+import { Injectable } from '@nestjs/common'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import {
-  DiscountCreateBody,
-  DiscountGetManyQuery,
-  DiscountGetOneQuery,
-  DiscountRelationQuery,
-  DiscountUpdateBody,
+    DiscountCreateBody,
+    DiscountGetManyQuery,
+    DiscountGetOneQuery,
+    DiscountRelationQuery,
+    DiscountUpdateBody,
 } from './request'
 
 @Injectable()

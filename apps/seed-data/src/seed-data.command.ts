@@ -53,7 +53,7 @@
 //             const endDate = Date.now()
 //             const time = endDate - startDate
 //             console.log(`======== [SUCCESS] - ${time}ms ========`)
-//         } catch (error) {
+//         } catch (error: any) {
 //             this.logger.error(error)
 //         } finally {
 //             process.exit()

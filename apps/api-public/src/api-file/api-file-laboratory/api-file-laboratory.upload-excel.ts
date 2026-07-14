@@ -1,13 +1,13 @@
+import { FileUploadDto } from '@libs/common/dto/file'
+import { ESArray } from '@libs/common/helpers'
+import { BusinessError } from '@libs/database/common/error'
+import {
+    LaboratoryInsertType,
+    LaboratoryValueType,
+} from '@libs/database/entities/laboratory.entity'
+import { LaboratoryGroupRepository, LaboratoryManager } from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { FileUploadDto } from '../../../../_libs/common/dto/file'
-import { ESArray } from '../../../../_libs/common/helpers'
-import { BusinessError } from '../../../../_libs/database/common/error'
-import {
-  LaboratoryInsertType,
-  LaboratoryValueType,
-} from '../../../../_libs/database/entities/laboratory.entity'
-import { LaboratoryGroupRepository, LaboratoryManager } from '../../../../_libs/database/repositories'
 import { LaboratoryGroupService } from '../../api/master-data/laboratory-group/laboratory-group.service'
 import { ExcelProcess } from '../common/excel-process'
 import { LaboratoryExcelRules } from './laboratory-excel.rule'

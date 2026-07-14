@@ -1,7 +1,7 @@
+import { IsNumberGreaterThan } from '@libs/common/transform-validate/class-validator.custom'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import { ArrayMinSize, IsArray, IsDefined, IsInt, IsString, ValidateNested } from 'class-validator'
-import { IsNumberGreaterThan } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
 
 class ReturnListBody {
   @ApiProperty({ example: 56 })

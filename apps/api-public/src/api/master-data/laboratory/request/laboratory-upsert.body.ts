@@ -1,16 +1,16 @@
+import { IsEnumValue } from '@libs/common/transform-validate/class-validator.custom'
+import { LaboratoryValueType } from '@libs/database/entities/laboratory.entity'
 import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import {
-  IsArray,
-  IsDefined,
-  IsInt,
-  IsNumber,
-  IsOptional,
-  IsString,
-  ValidateNested,
+    IsArray,
+    IsDefined,
+    IsInt,
+    IsNumber,
+    IsOptional,
+    IsString,
+    ValidateNested,
 } from 'class-validator'
-import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { LaboratoryValueType } from '../../../../../../_libs/database/entities/laboratory.entity'
 import { DiscountUpdateBody } from '../../discount/request'
 import { PositionBasicBody } from '../../position/request'
 

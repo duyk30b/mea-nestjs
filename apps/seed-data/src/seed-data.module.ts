@@ -20,8 +20,8 @@
 //   ReceiptItem,
 //   Role,
 //   User,
-// } from '../../_libs/database/entities'
-// import { PostgresqlModule } from '../../_libs/database/sql.module'
+// } from '@libs/database/entities'
+// import { PostgresqlModule } from '@libs/database/sql.module'
 // import { TestApi } from './test-sql.api'
 
 // @Module({

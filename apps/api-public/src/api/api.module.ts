@@ -1,9 +1,6 @@
 import { Module } from '@nestjs/common'
 import { ApiAddressModule } from './api-address/api-address.module'
-import { ApiAppointmentModule } from './api-appointment/api-appointment.module'
 import { ApiBatchModule } from './api-batch/api-batch.module'
-import { ApiCustomerSourceModule } from './api-customer-source/api-customer-source.module'
-import { ApiCustomerModule } from './api-customer/api-customer.module'
 import { ApiDistributorModule } from './api-distributor/api-distributor.module'
 import { ApiExpenseModule } from './api-expense/api-expense.module'
 import { ApiICDModule } from './api-icd/api-icd.module'
@@ -12,8 +9,6 @@ import { ApiOrganizationModule } from './api-organization/api-organization.modul
 import { ApiPaymentModule } from './api-payment/api-payment.module'
 import { ApiPermissionModule } from './api-permission/api-permission.module'
 import { ApiPrescriptionSampleModule } from './api-prescription-sample/api-prescription-sample.module'
-import { ApiProcedureGroupModule } from './api-procedure-group/api-procedure-group.module'
-import { ApiProductGroupModule } from './api-product-group/api-product-group.module'
 import { ApiProductMovementModule } from './api-product-movement/api-product-movement.module'
 import { ApiProductModule } from './api-product/api-product.module'
 import { ApiPurchaseOrderItemModule } from './api-purchase-order-item/api-purchase-order-item.module'
@@ -34,6 +29,8 @@ import { ApiUserRoomModule } from './api-user-room/api-user-room.module'
 import { ApiUserModule } from './api-user/api-user.module'
 import { ApiWalletModule } from './api-wallet/api-wallet.module'
 import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
+import { AppointmentModule } from './appointment/appointment.module'
+import { CustomerModule } from './customer/customer.module'
 import { MasterDataModule } from './master-data/master-data.module'
 import { ApiPurchaseOrderModule } from './purchase-order/api-purchase-order.module'
 import { StatisticModule } from './statistics/statistic.module'
@@ -57,9 +54,8 @@ import { TicketModule } from './ticket/ticket.module'
 
     ApiDistributorModule,
     ApiProductModule,
-    ApiProductGroupModule,
     ApiBatchModule,
-    ApiCustomerModule,
+    CustomerModule,
 
     ApiProductMovementModule,
     ApiPurchaseOrderModule,
@@ -67,7 +63,6 @@ import { TicketModule } from './ticket/ticket.module'
     ApiStockCheckModule,
     ApiPaymentModule,
 
-    ApiAppointmentModule,
     ApiTicketUserModule,
     ApiTicketProcedureModule,
     ApiTicketRegimenModule,
@@ -77,12 +72,11 @@ import { TicketModule } from './ticket/ticket.module'
     ApiTicketLaboratoryGroupModule,
     ApiTicketRadiologyModule,
 
-    ApiProcedureGroupModule,
+    AppointmentModule,
     MasterDataModule,
     ApiWarehouseModule,
     ApiWalletModule,
     ApiExpenseModule,
-    ApiCustomerSourceModule,
 
     ApiLaboratorySampleModule,
     ApiPrescriptionSampleModule,

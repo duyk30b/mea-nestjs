@@ -1,3 +1,4 @@
+import { TicketStatus } from '@libs/database/entities/ticket.entity'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import {
@@ -10,8 +11,7 @@ import {
   MaxLength,
   ValidateNested,
 } from 'class-validator'
-import { TicketStatus } from '../../../../../../_libs/database/entities/ticket.entity'
-import { CustomerCreateBody } from '../../../api-customer/request'
+import { CustomerCreateBody } from '../../../customer/request'
 import {
   TicketProcedureWrapBody,
   TicketRegimenWrapBody,
@@ -38,12 +38,6 @@ class TicketReceptionBody {
   @IsDefined()
   @IsNumber()
   roomId: number
-
-  @ApiProperty({ example: 45 })
-  @Expose()
-  @IsDefined()
-  @IsNumber()
-  customerSourceId: number
 
   @ApiProperty({ example: 1678890707005 })
   @Expose()

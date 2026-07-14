@@ -52,7 +52,7 @@ export class CacheDataService {
         organization.dataVersionParse.product ||= 0
         organization.dataVersionParse.batch ||= 0
         organization.dataVersionParse.customer ||= 0
-      } catch (error) {
+      } catch (error: any) {
         organization.dataVersionParse = { product: 0, batch: 0, customer: 0 }
       }
       this.orgCache[oid].organization = organization
@@ -193,7 +193,7 @@ export class CacheDataService {
       organization.dataVersionParse.product ||= 0
       organization.dataVersionParse.batch ||= 0
       organization.dataVersionParse.customer ||= 0
-    } catch (error) {
+    } catch (error: any) {
       organization.dataVersionParse = { product: 0, batch: 0, customer: 0 }
     }
     this.orgCache[oid].organization = organization

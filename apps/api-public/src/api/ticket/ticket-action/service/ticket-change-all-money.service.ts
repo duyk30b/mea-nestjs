@@ -1,21 +1,21 @@
+import {
+    DeliveryStatus,
+    PaymentMoneyStatus,
+} from '@libs/database/common/variable'
+import { TicketStatus } from '@libs/database/entities/ticket.entity'
+import {
+    TicketCalculatorMoney,
+    TicketUpdateCommissionTicketUserOperator,
+} from '@libs/database/operations'
+import {
+    TicketLaboratoryRepository,
+    TicketProcedureRepository,
+    TicketProductRepository,
+    TicketRadiologyRepository,
+    TicketRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import {
-  DeliveryStatus,
-  PaymentMoneyStatus,
-} from '../../../../../../_libs/database/common/variable'
-import { TicketStatus } from '../../../../../../_libs/database/entities/ticket.entity'
-import {
-  TicketCalculatorMoney,
-  TicketUpdateCommissionTicketUserOperator,
-} from '../../../../../../_libs/database/operations'
-import {
-  TicketLaboratoryRepository,
-  TicketProcedureRepository,
-  TicketProductRepository,
-  TicketRadiologyRepository,
-  TicketRepository,
-} from '../../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../../socket/socket-emit.service'
 import { TicketChangeAllMoneyBody } from '../request'
 

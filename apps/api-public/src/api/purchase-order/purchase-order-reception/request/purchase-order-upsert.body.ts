@@ -1,19 +1,19 @@
+import { IsEnumValue } from '@libs/common/transform-validate/class-validator.custom'
+import { DiscountType } from '@libs/database/common/variable'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import {
-  ArrayMinSize,
-  IsArray,
-  IsDefined,
-  IsInt,
-  IsNumber,
-  IsPositive,
-  IsString,
-  Max,
-  Min,
-  ValidateNested,
+    ArrayMinSize,
+    IsArray,
+    IsDefined,
+    IsInt,
+    IsNumber,
+    IsPositive,
+    IsString,
+    Max,
+    Min,
+    ValidateNested,
 } from 'class-validator'
-import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType } from '../../../../../../_libs/database/common/variable'
 import { PurchaseOrderItemBody } from './purchase-order-item.body'
 
 export class PurchaseOrderInfoBody {

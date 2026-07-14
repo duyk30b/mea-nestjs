@@ -1,7 +1,7 @@
+import { IsRoot } from '@libs/common/guards/root.guard'
+import { UserPermission } from '@libs/common/guards/user.guard'
 import { Controller, Get, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IsRoot } from '../../../../_libs/common/guards/root.guard'
-import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
 import { ApiPermissionService } from './api-permission.service'
 import { PermissionGetManyQuery } from './request'
 

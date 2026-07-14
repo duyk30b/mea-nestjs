@@ -1,18 +1,18 @@
+import { GenerateId } from '@libs/database/common/generate-id'
+import {
+    PaymentMoneyStatus,
+    TicketLaboratoryStatus,
+} from '@libs/database/common/variable'
+import { TicketLaboratoryGroupInsertType } from '@libs/database/entities/ticket-laboratory-group.entity'
+import { TicketLaboratoryInsertType } from '@libs/database/entities/ticket-laboratory.entity'
+import Ticket, { TicketStatus } from '@libs/database/entities/ticket.entity'
+import { TicketChangeItemMoneyManager } from '@libs/database/operations/ticket-base/ticket-change-item-money.manager'
+import {
+    TicketLaboratoryGroupRepository,
+    TicketLaboratoryRepository,
+    TicketRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { GenerateId } from '../../../../../../_libs/database/common/generate-id'
-import {
-  PaymentMoneyStatus,
-  TicketLaboratoryStatus,
-} from '../../../../../../_libs/database/common/variable'
-import { TicketLaboratoryGroupInsertType } from '../../../../../../_libs/database/entities/ticket-laboratory-group.entity'
-import { TicketLaboratoryInsertType } from '../../../../../../_libs/database/entities/ticket-laboratory.entity'
-import Ticket, { TicketStatus } from '../../../../../../_libs/database/entities/ticket.entity'
-import { TicketChangeItemMoneyManager } from '../../../../../../_libs/database/operations/ticket-base/ticket-change-item-money.manager'
-import {
-  TicketLaboratoryGroupRepository,
-  TicketLaboratoryRepository,
-  TicketRepository,
-} from '../../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../../socket/socket-emit.service'
 import { TicketAddTicketLaboratoryGroupBody } from '../request'
 

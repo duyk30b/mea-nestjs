@@ -1,28 +1,28 @@
+import { FileUploadDto } from '@libs/common/dto/file'
+import { UserPermission } from '@libs/common/guards/user.guard'
+import { BaseResponse, FastifyFilesInterceptor } from '@libs/common/interceptor'
+import { External, TExternal } from '@libs/common/request/external.request'
+import { PermissionId } from '@libs/permission/permission.enum'
 import {
-  Body,
-  Controller,
-  Delete,
-  Param,
-  Post,
-  Query,
-  UploadedFiles,
-  UseInterceptors,
+    Body,
+    Controller,
+    Delete,
+    Param,
+    Post,
+    Query,
+    UploadedFiles,
+    UseInterceptors,
 } from '@nestjs/common'
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger'
-import { FileUploadDto } from '../../../../../_libs/common/dto/file'
-import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
-import { BaseResponse, FastifyFilesInterceptor } from '../../../../../_libs/common/interceptor'
-import { External, TExternal } from '../../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { TicketRadiologyPostQuery } from '../../api-ticket-radiology/request'
 import { TicketParams } from '../ticket-query/request'
 import {
-  TicketAddTicketRadiologyListBody,
-  TicketCancelResultTicketRadiologyBody,
-  TicketChangeRadiologyParams,
-  TicketUpdatePriorityTicketRadiologyBody,
-  TicketUpdateRequestTicketRadiologyBody,
-  TicketUpdateResultTicketRadiologyBody,
+    TicketAddTicketRadiologyListBody,
+    TicketCancelResultTicketRadiologyBody,
+    TicketChangeRadiologyParams,
+    TicketUpdatePriorityTicketRadiologyBody,
+    TicketUpdateRequestTicketRadiologyBody,
+    TicketUpdateResultTicketRadiologyBody,
 } from './request'
 import { TicketAddTicketRadiologyListService } from './service/ticket-add-ticket-radiology-list.operation'
 import { TicketChangeRadiologyService } from './ticket-change-radiology.service'

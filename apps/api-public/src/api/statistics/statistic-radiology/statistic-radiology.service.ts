@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common'
-import { ESArray } from '../../../../../_libs/common/helpers'
-import { Radiology } from '../../../../../_libs/database/entities'
+import { ESArray } from '@libs/common/helpers'
+import { Radiology } from '@libs/database/entities'
 import {
-  RadiologyRepository,
-  TicketRadiologyRepository,
-} from '../../../../../_libs/database/repositories'
+    RadiologyRepository,
+    TicketRadiologyRepository,
+} from '@libs/database/repositories'
+import { Injectable } from '@nestjs/common'
 import { StatisticTicketRadiologyQuery } from './request'
 
 @Injectable()

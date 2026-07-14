@@ -1,7 +1,7 @@
+import { SystemLogRepository } from '@libs/mongo/collections/system-log/system-log.repository'
+import { SystemLogInsertType } from '@libs/mongo/collections/system-log/system-log.schema'
 import { Injectable, Logger } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
-import { SystemLogRepository } from '../../../../_libs/mongo/collections/system-log/system-log.repository'
-import { SystemLogInsertType } from '../../../../_libs/mongo/collections/system-log/system-log.schema'
 import { SYSTEM_LOG_EVENT } from './system-log.constants'
 
 @Injectable()

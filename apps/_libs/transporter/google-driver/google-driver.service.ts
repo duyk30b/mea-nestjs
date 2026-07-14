@@ -1,11 +1,11 @@
+import { FileUploadDto } from '@libs/common/dto/file'
+import { ESTimer } from '@libs/common/helpers/time.helper'
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { ReadStream } from 'fs'
 import { OAuth2Client } from 'google-auth-library'
 import { drive_v3, google } from 'googleapis'
 import * as stream from 'stream'
-import { FileUploadDto } from '../../../_libs/common/dto/file'
-import { ESTimer } from '../../../_libs/common/helpers/time.helper'
 import { GoogleDriverConfig } from './google-driver.config'
 
 @Injectable()
@@ -25,7 +25,7 @@ export class GoogleDriverService {
   constructor(
     @Inject(GoogleDriverConfig.KEY)
     private googleDriverConfig: ConfigType<typeof GoogleDriverConfig>
-  ) {}
+  ) { }
 
   public setCache(
     email: string,
@@ -260,7 +260,7 @@ export class GoogleDriverService {
         `[OID=${oid}] GoogleDriver ${email} start trashMultipleFiles, with ${fileIds.length} file`
       )
       drive = this.createDrive(email)
-    } catch (error) {
+    } catch (error: any) {
       return { success: [], failed: fileIds }
     }
     const promiseSettled = await Promise.allSettled(fileIds.map((id) => this.trashById(drive, id)))
@@ -282,7 +282,7 @@ export class GoogleDriverService {
     let drive: drive_v3.Drive
     try {
       drive = this.createDrive(email)
-    } catch (error) {
+    } catch (error: any) {
       return { success: [], failed: fileIds }
     }
     const promiseSettled = await Promise.allSettled(fileIds.map((id) => this.deleteById(drive, id)))

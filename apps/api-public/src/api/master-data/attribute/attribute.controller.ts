@@ -1,14 +1,14 @@
+import { IsRoot } from '@libs/common/guards/root.guard'
+import { UserPermission } from '@libs/common/guards/user.guard'
+import { BaseResponse } from '@libs/common/interceptor'
+import { External, TExternal } from '@libs/common/request/external.request'
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IsRoot } from '../../../../../_libs/common/guards/root.guard'
-import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
-import { BaseResponse } from '../../../../../_libs/common/interceptor'
-import { External, TExternal } from '../../../../../_libs/common/request/external.request'
 import { AttributeService } from './attribute.service'
 import {
-  AttributeGetManyQuery,
-  AttributePaginationQuery,
-  AttributeUpsertBody,
+    AttributeGetManyQuery,
+    AttributePaginationQuery,
+    AttributeUpsertBody,
 } from './request'
 
 @ApiTags('Attribute')

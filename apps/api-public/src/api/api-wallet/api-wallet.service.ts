@@ -1,21 +1,21 @@
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { BusinessError } from '@libs/database/common/error'
+import { GenerateId } from '@libs/database/common/generate-id'
+import {
+    MoneyDirection,
+    PaymentActionType,
+    PaymentInsertType,
+    PaymentPersonType,
+    PaymentVoucherType,
+} from '@libs/database/entities/payment.entity'
+import { PaymentRepository } from '@libs/database/repositories'
+import { WalletRepository } from '@libs/database/repositories/wallet.repository'
 import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { BusinessError } from '../../../../_libs/database/common/error'
-import { GenerateId } from '../../../../_libs/database/common/generate-id'
 import {
-  MoneyDirection,
-  PaymentActionType,
-  PaymentInsertType,
-  PaymentPersonType,
-  PaymentVoucherType,
-} from '../../../../_libs/database/entities/payment.entity'
-import { PaymentRepository } from '../../../../_libs/database/repositories'
-import { WalletRepository } from '../../../../_libs/database/repositories/wallet.repository'
-import {
-  WalletCreateBody,
-  WalletGetManyQuery,
-  WalletPaginationQuery,
-  WalletUpdateBody,
+    WalletCreateBody,
+    WalletGetManyQuery,
+    WalletPaginationQuery,
+    WalletUpdateBody,
 } from './request'
 
 @Injectable()

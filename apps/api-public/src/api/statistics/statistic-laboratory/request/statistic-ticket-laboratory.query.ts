@@ -1,7 +1,7 @@
+import { PaginationQuery } from '@libs/common/dto'
 import { ApiPropertyOptional, IntersectionType, PickType } from '@nestjs/swagger'
 import { Expose, plainToInstance, Transform } from 'class-transformer'
 import { IsIn, IsObject, ValidateNested } from 'class-validator'
-import { PaginationQuery } from '../../../../../../_libs/common/dto'
 import { TicketLaboratoryGetQuery } from '../../../api-ticket-laboratory/request'
 
 class StatisticTicketLaboratorySortQuery {
@@ -36,7 +36,7 @@ export class StatisticTicketLaboratoryQuery extends IntersectionType(
         exposeUnsetFields: false,
         excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
       })
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })

@@ -1,14 +1,14 @@
+import { TicketStatus } from '@libs/database/entities/ticket.entity'
+import {
+    ImageManager,
+    ImageRepository,
+    OrganizationRepository,
+    TicketRadiologyRepository,
+    TicketRepository,
+    UserRepository,
+} from '@libs/database/repositories'
 import { Injectable, Logger } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { TicketStatus } from '../../../../_libs/database/entities/ticket.entity'
-import {
-  ImageManager,
-  ImageRepository,
-  OrganizationRepository,
-  TicketRadiologyRepository,
-  TicketRepository,
-  UserRepository,
-} from '../../../../_libs/database/repositories'
 import { TicketDestroyService } from '../../api/ticket/ticket-action/ticket-destroy.service'
 import { RootMigrationDataBody } from './request/root-migration-data.body'
 

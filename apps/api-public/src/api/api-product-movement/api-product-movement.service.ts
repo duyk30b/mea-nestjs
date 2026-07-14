@@ -1,26 +1,26 @@
+import { ESArray } from '@libs/common/helpers/array.helper'
+import { MovementType } from '@libs/database/common/variable'
+import {
+    Customer,
+    Distributor,
+    Product,
+    ProductMovement,
+    PurchaseOrder,
+    StockCheck,
+    Ticket,
+    User,
+} from '@libs/database/entities'
+import {
+    CustomerRepository,
+    DistributorRepository,
+    ProductMovementRepository,
+    ProductRepository,
+    PurchaseOrderRepository,
+    StockCheckRepository,
+    TicketRepository,
+    UserRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { ESArray } from '../../../../_libs/common/helpers/array.helper'
-import { MovementType } from '../../../../_libs/database/common/variable'
-import {
-  Customer,
-  Distributor,
-  Product,
-  ProductMovement,
-  PurchaseOrder,
-  StockCheck,
-  Ticket,
-  User,
-} from '../../../../_libs/database/entities'
-import {
-  CustomerRepository,
-  DistributorRepository,
-  ProductMovementRepository,
-  ProductRepository,
-  PurchaseOrderRepository,
-  StockCheckRepository,
-  TicketRepository,
-  UserRepository,
-} from '../../../../_libs/database/repositories'
 import { ProductMovementPaginationQuery } from './request'
 
 @Injectable()

@@ -1,7 +1,7 @@
+import { BaseResponse } from '@libs/common/interceptor/transform-response.interceptor'
+import { Address } from '@libs/database/entities'
+import { AddressRepository } from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { Address } from '../../../../_libs/database/entities'
-import { AddressRepository } from '../../../../_libs/database/repositories'
 import { AddressReplaceAllBody } from './request'
 
 @Injectable()

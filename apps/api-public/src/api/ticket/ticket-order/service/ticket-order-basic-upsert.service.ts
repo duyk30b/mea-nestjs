@@ -1,35 +1,30 @@
-import { Injectable } from '@nestjs/common'
-import { DataSource } from 'typeorm'
-import { ESTimer } from '../../../../../../_libs/common/helpers'
-import { GenerateId } from '../../../../../../_libs/database/common/generate-id'
-import {
-  DeliveryStatus,
-  PaymentMoneyStatus,
-} from '../../../../../../_libs/database/common/variable'
-import { TicketAttributeInsertType } from '../../../../../../_libs/database/entities/ticket-attribute.entity'
-import { TicketExpenseInsertType } from '../../../../../../_libs/database/entities/ticket-expense.entity'
+import { ESTimer } from '@libs/common/helpers'
+import { GenerateId } from '@libs/database/common/generate-id'
+import { DeliveryStatus, PaymentMoneyStatus } from '@libs/database/common/variable'
+import { TicketAttributeInsertType } from '@libs/database/entities/ticket-attribute.entity'
+import { TicketExpenseInsertType } from '@libs/database/entities/ticket-expense.entity'
 import {
   TicketProcedureInsertType,
   TicketProcedureStatus,
   TicketProcedureType,
-} from '../../../../../../_libs/database/entities/ticket-procedure.entity'
+} from '@libs/database/entities/ticket-procedure.entity'
 import {
   TicketProductInsertType,
   TicketProductType,
-} from '../../../../../../_libs/database/entities/ticket-product.entity'
-import { TicketSurchargeInsertType } from '../../../../../../_libs/database/entities/ticket-surcharge.entity'
-import Ticket, {
-  TicketInsertType,
-  TicketStatus,
-} from '../../../../../../_libs/database/entities/ticket.entity'
+} from '@libs/database/entities/ticket-product.entity'
+import { TicketSurchargeInsertType } from '@libs/database/entities/ticket-surcharge.entity'
+import Ticket, { TicketInsertType, TicketStatus } from '@libs/database/entities/ticket.entity'
 import {
+  CustomerRepository,
   TicketAttributeRepository,
   TicketExpenseRepository,
   TicketProcedureRepository,
   TicketProductRepository,
   TicketRepository,
   TicketSurchargeRepository,
-} from '../../../../../../_libs/database/repositories'
+} from '@libs/database/repositories'
+import { Injectable } from '@nestjs/common'
+import { DataSource } from 'typeorm'
 import { TicketOrderBasicBody } from '../request'
 
 @Injectable()
@@ -37,6 +32,7 @@ export class TicketOrderBasicUpsertService {
   constructor(
     private dataSource: DataSource,
     private ticketRepository: TicketRepository,
+    private customerRepository: CustomerRepository,
     private ticketAttributeRepository: TicketAttributeRepository,
     private ticketProductRepository: TicketProductRepository,
     private ticketProcedureRepository: TicketProcedureRepository,
@@ -47,7 +43,7 @@ export class TicketOrderBasicUpsertService {
   async startUpsert(props: {
     oid: number
     ticketId: string
-    customerId?: number
+    customerId: number // truyền giá trị = 0 khi cập nhật để tránh thay đổi customerId của ticket
     body: TicketOrderBasicBody
   }) {
     const { oid, body } = props
@@ -60,11 +56,20 @@ export class TicketOrderBasicUpsertService {
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       let ticket: Ticket
       if (!ticketId) {
+        if (!props.customerId) {
+          throw new Error('CustomerId is required when creating a new ticket')
+        }
+        const customer = await this.customerRepository.managerFindOneBy(manager, {
+          oid,
+          id: props.customerId || 0,
+        })
+
         const ticketInsert: TicketInsertType = {
           ...body.ticketOrderBasic,
           id: ticketIdGenerate,
           oid,
-          customerId: props.customerId || 0,
+          customerId: props.customerId,
+          isFirstVisit: customer.isHasTicket ? 0 : 1,
           status: TicketStatus.Draft,
           deliveryStatus: body.ticketOrderProductBodyList.length
             ? DeliveryStatus.Pending
@@ -82,12 +87,18 @@ export class TicketOrderBasicUpsertService {
           endedAt: null,
           imageDiagnosisIds: '[]',
           isPaymentEachItem: 0,
-          customerSourceId: 0,
           radiologyMoney: 0,
           laboratoryMoney: 0,
           commissionMoney: 0,
         }
         ticket = await this.ticketRepository.managerInsertOne(manager, ticketInsert)
+        if (customer.isHasTicket === 0) {
+          await this.customerRepository.managerUpdateOne(
+            manager,
+            { oid, id: customer.id },
+            { isHasTicket: 1 }
+          )
+        }
       } else {
         await this.ticketAttributeRepository.managerDeleteBasic(manager, { oid, ticketId })
         await this.ticketProductRepository.managerDeleteBasic(manager, { oid, ticketId })

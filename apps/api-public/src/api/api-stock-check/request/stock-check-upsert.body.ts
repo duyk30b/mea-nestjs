@@ -1,14 +1,14 @@
+import { IsNumberGreaterThan } from '@libs/common/transform-validate/class-validator.custom'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import {
-  ArrayMinSize,
-  IsArray,
-  IsDefined,
-  IsNumber,
-  IsString,
-  ValidateNested,
+    ArrayMinSize,
+    IsArray,
+    IsDefined,
+    IsNumber,
+    IsString,
+    ValidateNested,
 } from 'class-validator'
-import { IsNumberGreaterThan } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 
 export class StockCheckItemBody {
   @ApiPropertyOptional({ example: 52 })

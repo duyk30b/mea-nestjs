@@ -104,7 +104,7 @@ export class Version1181766942734656 implements MigrationInterface {
                     DROP COLUMN "paidItem";
             `)
             await queryRunner.commitTransaction()
-        } catch (error) {
+        } catch (error: any) {
             await queryRunner.rollbackTransaction()
             throw error
         }

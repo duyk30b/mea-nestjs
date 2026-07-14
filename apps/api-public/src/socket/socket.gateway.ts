@@ -1,17 +1,17 @@
+import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
+import { CacheTokenService } from '@libs/common/cache-data/cache-token.service'
+import { JwtExtendService } from '@libs/common/jwt-extend/jwt-extend.service'
 import { Injectable, Logger } from '@nestjs/common'
 import {
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  OnGatewayInit,
-  SubscribeMessage,
-  WebSocketGateway,
-  WebSocketServer,
+    OnGatewayConnection,
+    OnGatewayDisconnect,
+    OnGatewayInit,
+    SubscribeMessage,
+    WebSocketGateway,
+    WebSocketServer,
 } from '@nestjs/websockets'
 import { getClientIp } from 'request-ip'
 import { Server, Socket } from 'socket.io'
-import { CacheDataService } from '../../../_libs/common/cache-data/cache-data.service'
-import { CacheTokenService } from '../../../_libs/common/cache-data/cache-token.service'
-import { JwtExtendService } from '../../../_libs/common/jwt-extend/jwt-extend.service'
 import { SocketEmitService } from './socket-emit.service'
 import { SOCKET_EVENT } from './socket.variable'
 
@@ -56,7 +56,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         `[OID=${oid}] UserId ${uid} with IP ${ip}, `
         + `socketId ${socket.id} connected, join room ${oid}`
       )
-    } catch (error) {
+    } catch (error: any) {
       this.logger.warn(
         `IP ${ip} with SocketId ${socket.id} has invalid token. ERROR: ${error.message}`
       )

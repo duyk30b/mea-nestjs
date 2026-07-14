@@ -1,7 +1,7 @@
+import { LimitQuery } from '@libs/common/dto/query'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import { IsDate, IsIn } from 'class-validator'
-import { LimitQuery } from '../../../../../_libs/common/dto/query'
 
 export class StatisticTimeQuery extends LimitQuery {
   @ApiProperty()

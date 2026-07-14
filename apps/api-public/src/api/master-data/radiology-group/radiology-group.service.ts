@@ -1,20 +1,20 @@
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { ESArray } from '@libs/common/helpers'
+import { BaseResponse } from '@libs/common/interceptor/transform-response.interceptor'
+import {
+    RadiologyGroupInsertType,
+    RadiologyGroupUpdateType,
+} from '@libs/database/entities/radiology-group.entity'
+import {
+    RadiologyGroupManager,
+    RadiologyGroupRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
-import { ESArray } from '../../../../../_libs/common/helpers'
-import { BaseResponse } from '../../../../../_libs/common/interceptor/transform-response.interceptor'
 import {
-  RadiologyGroupInsertType,
-  RadiologyGroupUpdateType,
-} from '../../../../../_libs/database/entities/radiology-group.entity'
-import {
-  RadiologyGroupManager,
-  RadiologyGroupRepository,
-} from '../../../../../_libs/database/repositories'
-import {
-  RadiologyGroupGetManyQuery,
-  RadiologyGroupPaginationQuery,
-  RadiologyGroupReplaceAllBody,
-  RadiologyGroupUpsertBody,
+    RadiologyGroupGetManyQuery,
+    RadiologyGroupPaginationQuery,
+    RadiologyGroupReplaceAllBody,
+    RadiologyGroupUpsertBody,
 } from './request'
 
 @Injectable()

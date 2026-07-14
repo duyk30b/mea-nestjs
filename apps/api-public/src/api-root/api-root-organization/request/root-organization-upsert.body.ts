@@ -1,12 +1,12 @@
+import {
+    IsEnumValue,
+    IsGmail,
+    IsPhone,
+} from '@libs/common/transform-validate/class-validator.custom'
+import { OrganizationStatus } from '@libs/database/entities/organization.entity'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
 import { IsDefined, IsIn, IsInt, IsNumber, IsString, Validate } from 'class-validator'
-import {
-  IsEnumValue,
-  IsGmail,
-  IsPhone,
-} from '../../../../../_libs/common/transform-validate/class-validator.custom'
-import { OrganizationStatus } from '../../../../../_libs/database/entities/organization.entity'
 
 export class RootOrganizationCreateBody {
   @ApiProperty({ example: '0376899866' })
@@ -73,7 +73,7 @@ export class RootOrganizationCreateBody {
       })
       if (err.length) return err
       else return JSON.stringify(result)
-    } catch (error) {
+    } catch (error: any) {
       return [error.message]
     }
   })

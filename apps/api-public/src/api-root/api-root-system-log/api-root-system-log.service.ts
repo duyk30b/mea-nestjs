@@ -1,5 +1,5 @@
+import { SystemLogRepository } from '@libs/mongo/collections/system-log/system-log.repository'
 import { Injectable, Logger } from '@nestjs/common'
-import { SystemLogRepository } from '../../../../_libs/mongo/collections/system-log/system-log.repository'
 import { RootSystemLogPaginationQuery } from './request'
 
 @Injectable()

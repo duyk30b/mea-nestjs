@@ -1,12 +1,12 @@
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { BaseResponse } from '@libs/common/interceptor/transform-response.interceptor'
+import { LaboratorySampleRepository } from '@libs/database/repositories/laboratory-sample.repository'
 import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { LaboratorySampleRepository } from '../../../../_libs/database/repositories/laboratory-sample.repository'
 import {
-  LaboratorySampleCreateBody,
-  LaboratorySampleGetManyQuery,
-  LaboratorySamplePaginationQuery,
-  LaboratorySampleUpdateBody,
+    LaboratorySampleCreateBody,
+    LaboratorySampleGetManyQuery,
+    LaboratorySamplePaginationQuery,
+    LaboratorySampleUpdateBody,
 } from './request'
 
 @Injectable()

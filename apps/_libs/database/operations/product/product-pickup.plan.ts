@@ -250,7 +250,7 @@ export class ProductPickupPlan {
           let warehouseIdList = []
           try {
             warehouseIdList = JSON.parse(voucherProduct.warehouseIds)
-          } catch (error) {
+          } catch (error: any) {
             warehouseIdList = []
           }
           if (!warehouseIdList.length || warehouseIdList.includes(0)) return true // không chọn kho thì lấy tất

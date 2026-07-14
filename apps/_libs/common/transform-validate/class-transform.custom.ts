@@ -65,7 +65,7 @@ export const transformComparisonQuery = (
       callback(array)
     }
     return array
-  } catch (error) {
+  } catch (error: any) {
     return `[ERROR]: ${error.message}`
   }
 }

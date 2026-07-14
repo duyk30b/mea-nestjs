@@ -1,7 +1,7 @@
+import { SortQuery } from '@libs/common/dto/query'
 import { ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
 import { IsIn, IsNotEmpty, IsString } from 'class-validator'
-import { SortQuery } from '../../../../../_libs/common/dto/query'
 
 export class UserRelationQuery {}
 

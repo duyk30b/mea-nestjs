@@ -1,6 +1,5 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
-import CustomerSource from './customer-source.entity'
 import Customer from './customer.entity'
 import Ticket from './ticket.entity'
 
@@ -29,10 +28,6 @@ export default class Appointment {
   @Column()
   @Expose()
   customerId: number
-
-  @Column({ default: 0 })
-  @Expose()
-  customerSourceId: number
 
   @Column({ type: 'varchar', length: 255, default: '' })
   @Expose()
@@ -65,11 +60,6 @@ export default class Appointment {
   @Expose()
   customer: Customer
 
-  @ManyToOne((type) => CustomerSource, { createForeignKeyConstraints: false })
-  @JoinColumn({ name: 'customerSourceId', referencedColumnName: 'id' })
-  @Expose()
-  customerSource: CustomerSource
-
   @Expose()
   toTicket: Ticket
 
@@ -89,7 +79,7 @@ export default class Appointment {
 }
 
 export type AppointmentRelationType = {
-  [P in keyof Pick<Appointment, 'customer' | 'customerSource' | 'toTicket'>]?: boolean
+  [P in keyof Pick<Appointment, 'customer' | 'toTicket'>]?: boolean
 }
 
 export type AppointmentInsertType = Omit<

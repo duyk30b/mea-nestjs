@@ -1,8 +1,8 @@
+import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
+import { SettingKey } from '@libs/database/entities/setting.entity'
+import { SettingRepository } from '@libs/database/repositories/setting.repository'
+import { GoogleDriverService } from '@libs/transporter/google-driver/google-driver.service'
 import { Injectable } from '@nestjs/common'
-import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
-import { SettingKey } from '../../../../_libs/database/entities/setting.entity'
-import { SettingRepository } from '../../../../_libs/database/repositories/setting.repository'
-import { GoogleDriverService } from '../../../../_libs/transporter/google-driver/google-driver.service'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 
 @Injectable()

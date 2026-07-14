@@ -1,9 +1,9 @@
-import { Expose, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsNumber, IsString, ValidateNested } from 'class-validator'
 import {
   ConditionTimestamp,
   SortQuery,
-} from '../../../../../_libs/common/dto'
+} from '@libs/common/dto'
+import { Expose, Type } from 'class-transformer'
+import { IsBoolean, IsIn, IsNumber, IsString, ValidateNested } from 'class-validator'
 
 export class TicketReceptionRelationQuery {
   @Expose()
@@ -17,10 +17,6 @@ export class TicketReceptionRelationQuery {
   @Expose()
   @IsBoolean()
   customer?: boolean
-
-  @Expose()
-  @IsBoolean()
-  customerSource?: boolean
 }
 
 export class TicketReceptionFilterQuery {
@@ -35,10 +31,6 @@ export class TicketReceptionFilterQuery {
   @Expose()
   @IsNumber()
   customerId: number
-
-  @Expose()
-  @IsNumber()
-  customerSourceId: number
 
   @Expose()
   @Type(() => ConditionTimestamp)

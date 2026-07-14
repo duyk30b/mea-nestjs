@@ -1,35 +1,35 @@
-import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
-import { ESArray } from '../../../../../_libs/common/helpers'
-import { Discount, RadiologyGroup, TemplateHtml } from '../../../../../_libs/database/entities'
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { ESArray } from '@libs/common/helpers'
+import { Discount, RadiologyGroup, TemplateHtml } from '@libs/database/entities'
 import {
-  DiscountInsertType,
-  DiscountInteractType,
-} from '../../../../../_libs/database/entities/discount.entity'
+    DiscountInsertType,
+    DiscountInteractType,
+} from '@libs/database/entities/discount.entity'
 import Position, {
-  PositionInsertType,
-  PositionType,
-} from '../../../../../_libs/database/entities/position.entity'
+    PositionInsertType,
+    PositionType,
+} from '@libs/database/entities/position.entity'
 import Radiology, {
-  RadiologyInsertType,
-} from '../../../../../_libs/database/entities/radiology.entity'
+    RadiologyInsertType,
+} from '@libs/database/entities/radiology.entity'
 import {
-  DiscountRepository,
-  PositionRepository,
-  RadiologyGroupRepository,
-  RadiologyRepository,
-  TemplateHtmlRepository,
-  TicketRadiologyRepository,
-} from '../../../../../_libs/database/repositories'
+    DiscountRepository,
+    PositionRepository,
+    RadiologyGroupRepository,
+    RadiologyRepository,
+    TemplateHtmlRepository,
+    TicketRadiologyRepository,
+} from '@libs/database/repositories'
+import { Injectable } from '@nestjs/common'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { RadiologyGroupService } from '../radiology-group/radiology-group.service'
 import {
-  RadiologyGetManyQuery,
-  RadiologyGetOneQuery,
-  RadiologyPaginationQuery,
-  RadiologyRelationQuery,
-  RadiologySystemCopyBody,
-  RadiologyUpsertBody,
+    RadiologyGetManyQuery,
+    RadiologyGetOneQuery,
+    RadiologyPaginationQuery,
+    RadiologyRelationQuery,
+    RadiologySystemCopyBody,
+    RadiologyUpsertBody,
 } from './request'
 
 @Injectable()

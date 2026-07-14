@@ -1,12 +1,12 @@
+import { valuesEnum } from '@libs/common/helpers/typescript.helper'
+import {
+    IsEnumValue,
+    IsNumberGreaterThan,
+} from '@libs/common/transform-validate/class-validator.custom'
+import { DiscountType, PickupStrategy } from '@libs/database/common/variable'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
 import { IsDefined, IsInt, IsNumber, IsString, Max, Min } from 'class-validator'
-import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
-import {
-  IsEnumValue,
-  IsNumberGreaterThan,
-} from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType, PickupStrategy } from '../../../../../../_libs/database/common/variable'
 
 export class TicketOrderProductBody {
   @ApiProperty({ example: 56 })
@@ -116,7 +116,7 @@ export class TicketOrderProductBody {
   //     })
   //     if (validate.length) return validate
   //     else return JSON.stringify(instance)
-  //   } catch (error) {
+  //   } catch (error: any) {
   //     return [error.message]
   //   }
   // })

@@ -1,17 +1,17 @@
+import { GenerateIdParam } from '@libs/common/dto'
+import { UserPermission } from '@libs/common/guards/user.guard'
+import { BaseResponse } from '@libs/common/interceptor'
+import { External, TExternal } from '@libs/common/request/external.request'
+import { PermissionId } from '@libs/permission/permission.enum'
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { GenerateIdParam } from '../../../../_libs/common/dto'
-import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
-import { BaseResponse } from '../../../../_libs/common/interceptor'
-import { External, TExternal } from '../../../../_libs/common/request/external.request'
-import { PermissionId } from '../../../../_libs/permission/permission.enum'
 import { ApiPaymentService } from './api-payment.service'
 import { PaymentOtherService } from './payment-other.service'
 import {
-  OtherPaymentBody,
-  PaymentGetManyQuery,
-  PaymentPaginationQuery,
-  PaymentUpdateInfoBody,
+    OtherPaymentBody,
+    PaymentGetManyQuery,
+    PaymentPaginationQuery,
+    PaymentUpdateInfoBody,
 } from './request'
 
 @ApiTags('Payment')

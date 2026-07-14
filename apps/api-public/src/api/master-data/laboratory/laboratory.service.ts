@@ -1,38 +1,38 @@
-import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
-import { ESTimer } from '../../../../../_libs/common/helpers'
-import { ESArray } from '../../../../../_libs/common/helpers/array.helper'
-import { BusinessError } from '../../../../../_libs/database/common/error'
-import { LaboratoryGroup } from '../../../../../_libs/database/entities'
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { ESTimer } from '@libs/common/helpers'
+import { ESArray } from '@libs/common/helpers/array.helper'
+import { BusinessError } from '@libs/database/common/error'
+import { LaboratoryGroup } from '@libs/database/entities'
 import Discount, {
-  DiscountInsertType,
-  DiscountInteractType,
-} from '../../../../../_libs/database/entities/discount.entity'
+    DiscountInsertType,
+    DiscountInteractType,
+} from '@libs/database/entities/discount.entity'
 import Laboratory, {
-  LaboratoryInsertType,
-  LaboratoryValueType,
-} from '../../../../../_libs/database/entities/laboratory.entity'
+    LaboratoryInsertType,
+    LaboratoryValueType,
+} from '@libs/database/entities/laboratory.entity'
 import Position, {
-  PositionInsertType,
-  PositionType,
-} from '../../../../../_libs/database/entities/position.entity'
+    PositionInsertType,
+    PositionType,
+} from '@libs/database/entities/position.entity'
 import {
-  DiscountRepository,
-  LaboratoryGroupRepository,
-  PositionRepository,
-} from '../../../../../_libs/database/repositories'
-import { LaboratoryRepository } from '../../../../../_libs/database/repositories/laboratory.repository'
-import { TicketLaboratoryRepository } from '../../../../../_libs/database/repositories/ticket-laboratory.repository'
+    DiscountRepository,
+    LaboratoryGroupRepository,
+    PositionRepository,
+} from '@libs/database/repositories'
+import { LaboratoryRepository } from '@libs/database/repositories/laboratory.repository'
+import { TicketLaboratoryRepository } from '@libs/database/repositories/ticket-laboratory.repository'
+import { Injectable } from '@nestjs/common'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { LaboratoryGroupService } from '../laboratory-group/laboratory-group.service'
 import {
-  LaboratoryCreateBody,
-  LaboratoryGetManyQuery,
-  LaboratoryGetOneQuery,
-  LaboratoryPaginationQuery,
-  LaboratoryRelationQuery,
-  LaboratorySystemCopyBody,
-  LaboratoryUpdateBody,
+    LaboratoryCreateBody,
+    LaboratoryGetManyQuery,
+    LaboratoryGetOneQuery,
+    LaboratoryPaginationQuery,
+    LaboratoryRelationQuery,
+    LaboratorySystemCopyBody,
+    LaboratoryUpdateBody,
 } from './request'
 
 @Injectable()

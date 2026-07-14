@@ -1,8 +1,8 @@
+import { IsEnumValue } from '@libs/common/transform-validate/class-validator.custom'
+import { ProcedureType } from '@libs/database/entities/procedure.entity'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import { IsArray, IsDefined, IsIn, IsInt, IsString, ValidateNested } from 'class-validator'
-import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { ProcedureType } from '../../../../../../_libs/database/entities/procedure.entity'
 import { DiscountUpdateBody } from '../../discount/request'
 import { PositionBasicBody } from '../../position/request'
 

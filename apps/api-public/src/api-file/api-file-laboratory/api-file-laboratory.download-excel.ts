@@ -1,11 +1,11 @@
+import { Laboratory } from '@libs/database/entities'
+import { LaboratoryRepository } from '@libs/database/repositories'
+import {
+    CustomStyleExcel,
+    excelOneSheetWorkbook,
+} from '@libs/file/excel-one-sheet.util'
 import { Injectable } from '@nestjs/common'
 import { Cell, Workbook, Worksheet } from 'exceljs'
-import { Laboratory } from '../../../../_libs/database/entities'
-import { LaboratoryRepository } from '../../../../_libs/database/repositories'
-import {
-  CustomStyleExcel,
-  excelOneSheetWorkbook,
-} from '../../../../_libs/file/excel-one-sheet.util'
 import { LaboratoryExcelRules } from './laboratory-excel.rule'
 
 @Injectable()

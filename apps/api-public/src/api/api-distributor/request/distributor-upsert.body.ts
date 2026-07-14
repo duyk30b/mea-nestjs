@@ -1,7 +1,7 @@
+import { IsPhone } from '@libs/common/transform-validate/class-validator.custom'
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
 import { IsDefined, IsIn, IsNotEmpty, IsString, Validate } from 'class-validator'
-import { IsPhone } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 
 export class DistributorCreateBody {
   @ApiProperty({ example: 'Ngô Nhật Dương' })

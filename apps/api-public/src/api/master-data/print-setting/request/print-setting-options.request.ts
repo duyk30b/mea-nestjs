@@ -1,4 +1,4 @@
-import { SortQuery } from '../../../../../../_libs/common/dto'
+import { SortQuery } from '@libs/common/dto'
 
 export class PrintSettingRelationQuery { }
 export class PrintSettingFilterQuery { }

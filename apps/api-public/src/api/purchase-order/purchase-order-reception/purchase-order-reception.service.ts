@@ -1,10 +1,10 @@
+import { Distributor, PurchaseOrder } from '@libs/database/entities'
 import { Injectable } from '@nestjs/common'
-import { Distributor, PurchaseOrder } from '../../../../../_libs/database/entities'
 import {
-  PurchaseOrderDebtSuccessInsertBody,
-  PurchaseOrderDepositedUpdateBody,
-  PurchaseOrderDraftInsertBody,
-  PurchaseOrderDraftUpdateBody,
+    PurchaseOrderDebtSuccessInsertBody,
+    PurchaseOrderDepositedUpdateBody,
+    PurchaseOrderDraftInsertBody,
+    PurchaseOrderDraftUpdateBody,
 } from './request'
 import { PurchaseOrderBasicUpsertService } from './service/purchase-order-basic-upsert.service'
 

@@ -1,5 +1,5 @@
+import { PurchaseOrderItemRepository } from '@libs/database/repositories/purchase-order-item.repository'
 import { Injectable } from '@nestjs/common'
-import { PurchaseOrderItemRepository } from '../../../../_libs/database/repositories/purchase-order-item.repository'
 import { PurchaseOrderItemPaginationQuery } from './request'
 
 @Injectable()

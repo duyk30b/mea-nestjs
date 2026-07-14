@@ -1,6 +1,6 @@
+import { ESTimer } from '@libs/common/helpers/time.helper'
+import { StatisticPurchaseOrderOperation } from '@libs/database/operations/statistic/statistic-purchase-order.operation'
 import { Injectable } from '@nestjs/common'
-import { ESTimer } from '../../../../../_libs/common/helpers/time.helper'
-import { StatisticPurchaseOrderOperation } from '../../../../../_libs/database/operations/statistic/statistic-purchase-order.operation'
 import { StatisticTimeQuery } from '../request'
 
 @Injectable()

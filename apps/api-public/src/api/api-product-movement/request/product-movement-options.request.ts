@@ -1,14 +1,14 @@
+import {
+    ConditionNumber,
+    ConditionString,
+    SortQuery,
+    createConditionEnum,
+    transformConditionEnum,
+    transformConditionNumber,
+} from '@libs/common/dto'
+import { MovementType } from '@libs/database/common/variable'
 import { Expose, Transform, TransformFnParams } from 'class-transformer'
 import { IsBoolean, IsNumber, IsOptional } from 'class-validator'
-import {
-  ConditionNumber,
-  ConditionString,
-  SortQuery,
-  createConditionEnum,
-  transformConditionEnum,
-  transformConditionNumber,
-} from '../../../../../_libs/common/dto'
-import { MovementType } from '../../../../../_libs/database/common/variable'
 
 const ConditionEnumMovementType = createConditionEnum(MovementType)
 

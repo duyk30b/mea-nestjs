@@ -1,27 +1,27 @@
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { ESArray } from '@libs/common/helpers'
+import {
+    Customer,
+    Ticket,
+    TicketLaboratory,
+    TicketLaboratoryGroup,
+    TicketLaboratoryResult,
+    TicketUser,
+} from '@libs/database/entities'
+import { PositionType } from '@libs/database/entities/position.entity'
+import {
+    CustomerRepository,
+    TicketLaboratoryGroupRepository,
+    TicketLaboratoryRepository,
+    TicketLaboratoryResultRepository,
+    TicketRepository,
+    TicketUserRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { ESArray } from '../../../../_libs/common/helpers'
 import {
-  Customer,
-  Ticket,
-  TicketLaboratory,
-  TicketLaboratoryGroup,
-  TicketLaboratoryResult,
-  TicketUser,
-} from '../../../../_libs/database/entities'
-import { PositionType } from '../../../../_libs/database/entities/position.entity'
-import {
-  CustomerRepository,
-  TicketLaboratoryGroupRepository,
-  TicketLaboratoryRepository,
-  TicketLaboratoryResultRepository,
-  TicketRepository,
-  TicketUserRepository,
-} from '../../../../_libs/database/repositories'
-import {
-  TicketLaboratoryGroupGetOneQuery,
-  TicketLaboratoryGroupPaginationQuery,
-  TicketLaboratoryGroupRelationQuery,
+    TicketLaboratoryGroupGetOneQuery,
+    TicketLaboratoryGroupPaginationQuery,
+    TicketLaboratoryGroupRelationQuery,
 } from './request'
 
 @Injectable()

@@ -1,10 +1,10 @@
+import { valuesEnum } from '@libs/common/helpers/typescript.helper'
+import { IsEnumValue } from '@libs/common/transform-validate/class-validator.custom'
+import { DiscountType } from '@libs/database/common/variable'
+import { TicketProcedureStatus } from '@libs/database/entities/ticket-procedure.entity'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
 import { IsArray, IsDefined, IsInt, IsNumber, Max, Min, ValidateNested } from 'class-validator'
-import { valuesEnum } from '../../../../../../_libs/common/helpers/typescript.helper'
-import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType } from '../../../../../../_libs/database/common/variable'
-import { TicketProcedureStatus } from '../../../../../../_libs/database/entities/ticket-procedure.entity'
 import { TicketUserBasicBody } from '../../ticket-change-user/request'
 
 class TicketRegimenBasicBody {

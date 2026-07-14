@@ -1,18 +1,18 @@
+import { BusinessError } from '@libs/database/common/error'
+import {
+    MoneyDirection,
+    PaymentActionType,
+    PaymentInsertType,
+    PaymentPersonType,
+    PaymentVoucherType,
+} from '@libs/database/entities/payment.entity'
+import {
+    PurchaseOrderRepository,
+    TicketRepository,
+    WalletRepository,
+} from '@libs/database/repositories'
+import { PaymentRepository } from '@libs/database/repositories/payment.repository'
 import { Injectable } from '@nestjs/common'
-import { BusinessError } from '../../../../_libs/database/common/error'
-import {
-  MoneyDirection,
-  PaymentActionType,
-  PaymentInsertType,
-  PaymentPersonType,
-  PaymentVoucherType,
-} from '../../../../_libs/database/entities/payment.entity'
-import {
-  PurchaseOrderRepository,
-  TicketRepository,
-  WalletRepository,
-} from '../../../../_libs/database/repositories'
-import { PaymentRepository } from '../../../../_libs/database/repositories/payment.repository'
 import { OtherPaymentBody, PaymentUpdateInfoBody } from './request'
 
 @Injectable()

@@ -1,16 +1,16 @@
+import { UserPermission } from '@libs/common/guards/user.guard'
+import { BaseResponse } from '@libs/common/interceptor'
+import { External, TExternal } from '@libs/common/request/external.request'
+import { TicketProductType } from '@libs/database/entities/ticket-product.entity'
+import { PermissionId } from '@libs/permission/permission.enum'
 import { Body, Controller, Delete, Param, Post } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { UserPermission } from '../../../../../_libs/common/guards/user.guard.'
-import { BaseResponse } from '../../../../../_libs/common/interceptor'
-import { External, TExternal } from '../../../../../_libs/common/request/external.request'
-import { TicketProductType } from '../../../../../_libs/database/entities/ticket-product.entity'
-import { PermissionId } from '../../../../../_libs/permission/permission.enum'
 import { TicketParams } from '../ticket-query/request'
 import {
-  TicketAddTicketProductListBody,
-  TicketChangeProductParams,
-  TicketUpdatePriorityTicketProductBody,
-  TicketUpdateTicketProductBody,
+    TicketAddTicketProductListBody,
+    TicketChangeProductParams,
+    TicketUpdatePriorityTicketProductBody,
+    TicketUpdateTicketProductBody,
 } from './request'
 import { TicketAddTicketProductService } from './service/ticket-add-ticket-product-list.service'
 import { TicketChangeProductService } from './ticket-change-product.service'

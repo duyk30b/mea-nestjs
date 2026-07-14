@@ -1,9 +1,9 @@
+import { FileUploadDto, SingleFileUpload } from '@libs/common/dto/file'
+import { IsRoot } from '@libs/common/guards/root.guard'
+import { FastifyFileInterceptor } from '@libs/common/interceptor'
+import { External, TExternal } from '@libs/common/request/external.request'
 import { Body, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common'
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger'
-import { FileUploadDto, SingleFileUpload } from '../../../../_libs/common/dto/file'
-import { IsRoot } from '../../../../_libs/common/guards/root.guard'
-import { FastifyFileInterceptor } from '../../../../_libs/common/interceptor'
-import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { ApiFileICDUploadExcel } from './api-file-icd.upload-excel'
 
 @ApiTags('FileICD')

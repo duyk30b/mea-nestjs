@@ -1,29 +1,29 @@
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { ESArray } from '@libs/common/helpers/array.helper'
+import {
+    Customer,
+    Regimen,
+    Ticket,
+    TicketProcedure,
+    TicketRegimen,
+    TicketUser,
+} from '@libs/database/entities'
+import { PositionType } from '@libs/database/entities/position.entity'
+import { TicketProcedureType } from '@libs/database/entities/ticket-procedure.entity'
+import {
+    CustomerRepository,
+    RegimenRepository,
+    TicketRepository,
+} from '@libs/database/repositories'
+import { TicketRegimenRepository } from '@libs/database/repositories/ticket-regimen.repository'
+import { TicketUserRepository } from '@libs/database/repositories/ticket-user.repository'
 import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { ESArray } from '../../../../_libs/common/helpers/array.helper'
-import {
-  Customer,
-  Regimen,
-  Ticket,
-  TicketProcedure,
-  TicketRegimen,
-  TicketUser,
-} from '../../../../_libs/database/entities'
-import { PositionType } from '../../../../_libs/database/entities/position.entity'
-import { TicketProcedureType } from '../../../../_libs/database/entities/ticket-procedure.entity'
-import {
-  CustomerRepository,
-  RegimenRepository,
-  TicketRepository,
-} from '../../../../_libs/database/repositories'
-import { TicketRegimenRepository } from '../../../../_libs/database/repositories/ticket-regimen.repository'
-import { TicketUserRepository } from '../../../../_libs/database/repositories/ticket-user.repository'
 import { ApiTicketProcedureService } from '../api-ticket-procedure/api-ticket-procedure.service'
 import {
-  TicketRegimenGetManyQuery,
-  TicketRegimenGetOneQuery,
-  TicketRegimenPaginationQuery,
-  TicketRegimenRelationQuery,
+    TicketRegimenGetManyQuery,
+    TicketRegimenGetOneQuery,
+    TicketRegimenPaginationQuery,
+    TicketRegimenRelationQuery,
 } from './request'
 
 @Injectable()

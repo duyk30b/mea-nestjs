@@ -1,15 +1,15 @@
+import {
+    ConditionString,
+    ConditionTimestamp,
+    createConditionEnum,
+    transformConditionEnum,
+    transformConditionString,
+} from '@libs/common/dto'
+import { SortQuery } from '@libs/common/dto/query'
+import { PaymentMoneyStatus } from '@libs/database/common/variable'
+import { TicketRadiologyStatus } from '@libs/database/entities/ticket-radiology.entity'
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
 import { IsBoolean, IsIn, IsInt, IsObject, IsOptional, ValidateNested } from 'class-validator'
-import {
-  ConditionString,
-  ConditionTimestamp,
-  createConditionEnum,
-  transformConditionEnum,
-  transformConditionString,
-} from '../../../../../_libs/common/dto'
-import { SortQuery } from '../../../../../_libs/common/dto/query'
-import { PaymentMoneyStatus } from '../../../../../_libs/database/common/variable'
-import { TicketRadiologyStatus } from '../../../../../_libs/database/entities/ticket-radiology.entity'
 
 export class TicketRadiologyRelationQuery {
   @Expose()

@@ -1,9 +1,9 @@
+import { MultipleFileUpload } from '@libs/common/dto/file'
 import { ValidationError } from '@nestjs/common'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
 import {
   Allow,
-  ArrayMinSize,
   IsArray,
   IsDefined,
   IsNotEmpty,
@@ -13,7 +13,6 @@ import {
   MaxLength,
   validateSync,
 } from 'class-validator'
-import { MultipleFileUpload } from '../../../../../../_libs/common/dto/file'
 
 class TicketAttributeBody {
   @Expose()
@@ -43,7 +42,6 @@ class ImagesChangeBody {
 export class TicketUpdateDiagnosisBody extends MultipleFileUpload {
   @ApiProperty({ example: '' })
   @Expose()
-  @IsDefined()
   @IsString()
   note: string
 
@@ -74,7 +72,7 @@ export class TicketUpdateDiagnosisBody extends MultipleFileUpload {
       })
       if (err.length) return JSON.stringify(err)
       else return result
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })
@@ -84,25 +82,6 @@ export class TicketUpdateDiagnosisBody extends MultipleFileUpload {
       + JSON.stringify(<TicketAttributeBody[]>[{ key: 'REASON', value: 'Đau bụng' }]),
   })
   ticketAttributeChangeList: TicketAttributeBody[]
-
-  @ApiProperty()
-  @Expose()
-  @Transform(({ value }) => {
-    try {
-      const err = []
-      const result: string[] = JSON.parse(value)
-      result.forEach((i) => {
-        if (!i || typeof i !== 'string') err.push(i)
-      })
-      if (err.length) return JSON.stringify(err)
-      else return result
-    } catch (error) {
-      return error.message
-    }
-  })
-  @IsArray()
-  @ArrayMinSize(1)
-  ticketAttributeKeyList: string[]
 
   @ApiProperty()
   @Expose()
@@ -123,7 +102,7 @@ export class TicketUpdateDiagnosisBody extends MultipleFileUpload {
         return JSON.stringify(errValidate)
       }
       return instance
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })

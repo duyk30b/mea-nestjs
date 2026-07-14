@@ -1,22 +1,24 @@
+import { CustomerService } from '@api-public/api/customer/customer.service'
+import { Customer } from '@libs/database/entities'
+import { CustomerRepository } from '@libs/database/repositories'
+import { CustomStyleExcel, excelOneSheetWorkbook } from '@libs/file/excel-one-sheet.util'
 import { Injectable } from '@nestjs/common'
 import { Cell, Workbook, Worksheet } from 'exceljs'
-import { Customer } from '../../../../_libs/database/entities'
-import { CustomerRepository } from '../../../../_libs/database/repositories'
-import {
-  CustomStyleExcel,
-  excelOneSheetWorkbook,
-} from '../../../../_libs/file/excel-one-sheet.util'
 import { CustomerExcelRules } from './customer-excel.rule'
 
 @Injectable()
 export class ApiFileCustomerDownloadExcel {
-  constructor(private readonly customerRepository: CustomerRepository) { }
+  constructor(
+    private readonly customerRepository: CustomerRepository,
+    private readonly customerService: CustomerService
+  ) { }
 
   async downloadExcel(options: { oid: number }) {
     const { oid } = options
 
-    const customerList = await this.customerRepository.findMany({
-      condition: { oid },
+    const { customerList } = await this.customerService.getMany(oid, {
+      relation: { customerSource: true, customerGroup: true },
+      filter: {},
       sort: { customerCode: 'ASC' },
     })
 
@@ -42,9 +44,10 @@ export class ApiFileCustomerDownloadExcel {
         customerCode: { alignment: { wrapText: true } },
         fullName: { alignment: { wrapText: true } },
         phone: { alignment: { horizontal: 'center' } },
-        citizenIdCard: { alignment: { horizontal: 'center' } },
         debt: { alignment: { horizontal: 'right' } },
-        birthday: { alignment: { horizontal: 'center' } },
+        customerGroupName: { alignment: { wrapText: true } },
+        customerSourceName: { alignment: { wrapText: true } },
+        birthday: { alignment: { horizontal: 'center' }, numFmt: 'dd/mm/yyyy' },
         yearOfBirth: { alignment: { horizontal: 'center' } },
         gender: { alignment: { horizontal: 'center' } },
         addressProvince: { alignment: { wrapText: true } },
@@ -52,6 +55,7 @@ export class ApiFileCustomerDownloadExcel {
         addressStreet: { alignment: { wrapText: true } },
         facebook: { alignment: { wrapText: true } },
         zalo: { alignment: { wrapText: true } },
+        citizenIdCard: { alignment: { horizontal: 'center' } },
         note: { alignment: { wrapText: true } },
       },
       data: [],
@@ -65,9 +69,10 @@ export class ApiFileCustomerDownloadExcel {
         customerCode: customer.customerCode || '',
         fullName: customer.fullName || '',
         phone: customer.phone || '',
-        citizenIdCard: customer.citizenIdCard || '',
         debt: customer.debt || 0,
-        birthday: customer.birthday || '',
+        customerGroupName: customer.customerGroup?.name || '',
+        customerSourceName: customer.customerSource?.name || '',
+        birthday: customer.birthday ? new Date(customer.birthday) : '',
         yearOfBirth: customer.yearOfBirth || '',
         gender: [0, 1].includes(customer.gender) ? customer.gender : '',
         addressProvince: customer.addressProvince || '',
@@ -75,6 +80,7 @@ export class ApiFileCustomerDownloadExcel {
         addressStreet: customer.addressStreet || '',
         facebook: customer.facebook || '',
         zalo: customer.zalo || '',
+        citizenIdCard: customer.citizenIdCard || '',
         note: customer.note || '',
       }
       dataRow.data.push(data)

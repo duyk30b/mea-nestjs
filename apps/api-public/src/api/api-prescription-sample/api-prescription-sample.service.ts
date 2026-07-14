@@ -1,18 +1,18 @@
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { ESArray } from '@libs/common/helpers/array.helper'
+import { BaseResponse } from '@libs/common/interceptor/transform-response.interceptor'
+import { PrescriptionSample, PrescriptionSampleItem } from '@libs/database/entities'
+import { PrescriptionSampleItemInsertType } from '@libs/database/entities/prescription-sample-item.entity'
+import { PrescriptionSampleItemRepository } from '@libs/database/repositories'
+import { PrescriptionSampleRepository } from '@libs/database/repositories/prescription-sample.repository'
+import { ProductRepository } from '@libs/database/repositories/product.repository'
 import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { ESArray } from '../../../../_libs/common/helpers/array.helper'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { PrescriptionSample, PrescriptionSampleItem } from '../../../../_libs/database/entities'
-import { PrescriptionSampleItemInsertType } from '../../../../_libs/database/entities/prescription-sample-item.entity'
-import { PrescriptionSampleItemRepository } from '../../../../_libs/database/repositories'
-import { PrescriptionSampleRepository } from '../../../../_libs/database/repositories/prescription-sample.repository'
-import { ProductRepository } from '../../../../_libs/database/repositories/product.repository'
 import {
-  PrescriptionSampleCreateBody,
-  PrescriptionSampleGetManyQuery,
-  PrescriptionSamplePaginationQuery,
-  PrescriptionSampleRelationQuery,
-  PrescriptionSampleUpdateBody,
+    PrescriptionSampleCreateBody,
+    PrescriptionSampleGetManyQuery,
+    PrescriptionSamplePaginationQuery,
+    PrescriptionSampleRelationQuery,
+    PrescriptionSampleUpdateBody,
 } from './request'
 
 @Injectable()

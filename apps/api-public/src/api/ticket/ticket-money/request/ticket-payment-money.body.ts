@@ -1,18 +1,18 @@
+import { IsEnumValue } from '@libs/common/transform-validate/class-validator.custom'
+import { DiscountType } from '@libs/database/common/variable'
+import { TicketItemType } from '@libs/database/entities/payment-ticket-item.entity'
+import { PaymentActionType } from '@libs/database/entities/payment.entity'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import {
-  IsArray,
-  IsDefined,
-  IsIn,
-  IsInt,
-  IsNumber,
-  IsString,
-  ValidateNested,
+    IsArray,
+    IsDefined,
+    IsIn,
+    IsInt,
+    IsNumber,
+    IsString,
+    ValidateNested,
 } from 'class-validator'
-import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { DiscountType } from '../../../../../../_libs/database/common/variable'
-import { TicketItemType } from '../../../../../../_libs/database/entities/payment-ticket-item.entity'
-import { PaymentActionType } from '../../../../../../_libs/database/entities/payment.entity'
 
 class PaymentTicketItemBody {
   @Expose()

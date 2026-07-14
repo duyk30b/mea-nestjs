@@ -1,15 +1,15 @@
+import { BaseResponse } from '@libs/common/interceptor'
+import { External, TExternal } from '@libs/common/request/external.request'
 import { Body, Controller, Post } from '@nestjs/common'
 import { ApiTags } from '@nestjs/swagger'
-import { BaseResponse } from '../../../../_libs/common/interceptor'
-import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { ApiAuthService } from './api-auth.service'
 import {
-  ForgotPasswordBody,
-  LoginBody,
-  LoginRootBody,
-  LogoutBody,
-  RefreshTokenBody,
-  ResetPasswordBody,
+    ForgotPasswordBody,
+    LoginBody,
+    LoginRootBody,
+    LogoutBody,
+    RefreshTokenBody,
+    ResetPasswordBody,
 } from './request'
 
 @ApiTags('Auth')

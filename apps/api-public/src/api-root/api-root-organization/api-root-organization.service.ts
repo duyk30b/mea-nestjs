@@ -1,30 +1,30 @@
+import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
+import { ESArray } from '@libs/common/helpers'
+import * as AllEntity from '@libs/database/entities'
+import {
+    Customer,
+    Distributor,
+    Image,
+    Organization,
+    Product,
+} from '@libs/database/entities'
+import {
+    ImageRepository,
+    OrganizationPaymentRepository,
+    UserRepository,
+} from '@libs/database/repositories'
+import { OrganizationRepository } from '@libs/database/repositories/organization.repository'
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import { EntityManager } from 'typeorm'
-import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
-import { ESArray } from '../../../../_libs/common/helpers'
-import * as AllEntity from '../../../../_libs/database/entities'
-import {
-  Customer,
-  Distributor,
-  Image,
-  Organization,
-  Product,
-} from '../../../../_libs/database/entities'
-import {
-  ImageRepository,
-  OrganizationPaymentRepository,
-  UserRepository,
-} from '../../../../_libs/database/repositories'
-import { OrganizationRepository } from '../../../../_libs/database/repositories/organization.repository'
 import { OrganizationRelationQuery } from '../../api/api-organization/request'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
-  RootOrganizationClearBody,
-  RootOrganizationCreateBody,
-  RootOrganizationPaginationQuery,
-  RootOrganizationPaymentMoneyBody,
-  RootOrganizationUpdateBody,
+    RootOrganizationClearBody,
+    RootOrganizationCreateBody,
+    RootOrganizationPaginationQuery,
+    RootOrganizationPaymentMoneyBody,
+    RootOrganizationUpdateBody,
 } from './request'
 
 @Injectable()

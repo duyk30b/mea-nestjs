@@ -99,7 +99,7 @@ export class Version1011756024045544 implements MigrationInterface {
                 `)
 
             await queryRunner.commitTransaction()
-        } catch (error) {
+        } catch (error: any) {
             await queryRunner.rollbackTransaction()
             throw error
         }

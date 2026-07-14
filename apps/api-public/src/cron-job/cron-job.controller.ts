@@ -1,6 +1,6 @@
+import { IsRoot } from '@libs/common/guards/root.guard'
 import { Controller, Get, Post } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { IsRoot } from '../../../_libs/common/guards/root.guard'
 import { PostgresqlJob } from './postgresql.job'
 
 @Controller('cron-job')

@@ -55,7 +55,7 @@ export class CacheTokenService {
       const key = this.getKeyClient({ oid, uid, clientId })
       const token = await this.redisService.get(key)
       return !!token
-    } catch (error) {
+    } catch (error: any) {
       return false
     }
   }

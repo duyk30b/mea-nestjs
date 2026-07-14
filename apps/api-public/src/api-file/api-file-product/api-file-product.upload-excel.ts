@@ -1,11 +1,9 @@
-import { Injectable } from '@nestjs/common'
-import { DataSource } from 'typeorm'
-import { FileUploadDto } from '../../../../_libs/common/dto/file'
-import { ESArray } from '../../../../_libs/common/helpers'
-import { BusinessError } from '../../../../_libs/database/common/error'
-import { MovementType } from '../../../../_libs/database/common/variable'
-import { BatchInsertType } from '../../../../_libs/database/entities/batch.entity'
-import { ProductMovementInsertType } from '../../../../_libs/database/entities/product-movement.entity'
+import { FileUploadDto } from '@libs/common/dto/file'
+import { ESArray } from '@libs/common/helpers'
+import { BusinessError } from '@libs/database/common/error'
+import { MovementType } from '@libs/database/common/variable'
+import { BatchInsertType } from '@libs/database/entities/batch.entity'
+import { ProductMovementInsertType } from '@libs/database/entities/product-movement.entity'
 import {
   ProductInsertType,
   ProductType,
@@ -13,14 +11,16 @@ import {
   SplitBatchByDistributor,
   SplitBatchByExpiryDate,
   SplitBatchByWarehouse,
-} from '../../../../_libs/database/entities/product.entity'
+} from '@libs/database/entities/product.entity'
 import {
   BatchManager,
   ProductGroupRepository,
   ProductManager,
   ProductMovementManager,
-} from '../../../../_libs/database/repositories'
-import { ApiProductGroupService } from '../../api/api-product-group/api-product-group.service'
+} from '@libs/database/repositories'
+import { Injectable } from '@nestjs/common'
+import { DataSource } from 'typeorm'
+import { ProductGroupService } from '../../api/master-data/product_group/product-group.service'
 import { ExcelProcess } from '../common/excel-process'
 import { ProductExcelRules } from './product-excel.rule'
 
@@ -57,7 +57,7 @@ export class ApiFileProductUploadExcel {
     private readonly productManager: ProductManager,
     private readonly batchManager: BatchManager,
     private readonly productMovementManager: ProductMovementManager,
-    private readonly apiProductGroupService: ApiProductGroupService
+    private readonly productGroupService: ProductGroupService
   ) { }
 
   async uploadExcel(options: { oid: number; userId: number; file: FileUploadDto }) {
@@ -79,7 +79,7 @@ export class ApiFileProductUploadExcel {
     })
 
     const groupNameList = dataConvertList.map((i) => i.productGroupName || '')
-    const productGroupList = await this.apiProductGroupService.createByGroupName(oid, groupNameList)
+    const productGroupList = await this.productGroupService.createByGroupName(oid, groupNameList)
     const productGroupMapName = ESArray.arrayToKeyValue(productGroupList, 'name')
 
     const dataPlainList: DataPlain[] = dataConvertList.map((item, index) => {

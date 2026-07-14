@@ -1,17 +1,17 @@
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { ESArray } from '@libs/common/helpers'
+import { BaseResponse } from '@libs/common/interceptor/transform-response.interceptor'
+import {
+    LaboratoryGroupInsertType,
+    LaboratoryGroupUpdateType,
+} from '@libs/database/entities/laboratory-group.entity'
+import { LaboratoryGroupRepository } from '@libs/database/repositories/laboratory-group.repository'
 import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
-import { ESArray } from '../../../../../_libs/common/helpers'
-import { BaseResponse } from '../../../../../_libs/common/interceptor/transform-response.interceptor'
 import {
-  LaboratoryGroupInsertType,
-  LaboratoryGroupUpdateType,
-} from '../../../../../_libs/database/entities/laboratory-group.entity'
-import { LaboratoryGroupRepository } from '../../../../../_libs/database/repositories/laboratory-group.repository'
-import {
-  LaboratoryGroupGetManyQuery,
-  LaboratoryGroupPaginationQuery,
-  LaboratoryGroupReplaceAllBody,
-  LaboratoryGroupUpsertBody,
+    LaboratoryGroupGetManyQuery,
+    LaboratoryGroupPaginationQuery,
+    LaboratoryGroupReplaceAllBody,
+    LaboratoryGroupUpsertBody,
 } from './request'
 
 @Injectable()

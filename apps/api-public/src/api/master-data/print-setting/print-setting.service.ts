@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common'
-import { PrintSettingInsertType } from '../../../../../_libs/database/entities/print-setting.entity'
+import { PrintSettingInsertType } from '@libs/database/entities/print-setting.entity'
 import {
-  PrintSettingManager,
-  PrintSettingRepository,
-} from '../../../../../_libs/database/repositories'
+    PrintSettingManager,
+    PrintSettingRepository,
+} from '@libs/database/repositories'
+import { Injectable } from '@nestjs/common'
 import { PrintSettingGetManyQuery, PrintSettingReplaceAllBody } from './request'
 
 @Injectable()

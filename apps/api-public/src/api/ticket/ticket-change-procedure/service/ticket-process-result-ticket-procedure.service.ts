@@ -1,64 +1,64 @@
+import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
+import { FileUploadDto } from '@libs/common/dto/file'
+import { ESArray } from '@libs/common/helpers'
+import { GenerateId } from '@libs/database/common/generate-id'
+import {
+    DeliveryStatus,
+    DiscountType,
+    MovementType,
+    PaymentMoneyStatus,
+    TicketRegimenStatus,
+} from '@libs/database/common/variable'
+import {
+    Batch,
+    Customer,
+    Image,
+    Product,
+    TicketBatch,
+    TicketPaymentDetail,
+    TicketProduct,
+    TicketRegimen,
+    TicketRegimenItem,
+    TicketUser,
+} from '@libs/database/entities'
+import { ImageInteractType } from '@libs/database/entities/image.entity'
+import {
+    MoneyDirection,
+    PaymentActionType,
+    PaymentInsertType,
+    PaymentPersonType,
+    PaymentVoucherType,
+} from '@libs/database/entities/payment.entity'
+import { PositionType } from '@libs/database/entities/position.entity'
+import { TicketBatchInsertType } from '@libs/database/entities/ticket-batch.entity'
+import {
+    TicketProcedureStatus,
+    TicketProcedureType,
+} from '@libs/database/entities/ticket-procedure.entity'
+import {
+    TicketProductInsertType,
+    TicketProductType,
+} from '@libs/database/entities/ticket-product.entity'
+import { TicketStatus } from '@libs/database/entities/ticket.entity'
+import {
+    ProductPickupManager,
+    ProductPutawayManager,
+    TicketChangeItemMoneyManager,
+    TicketUserCommon,
+} from '@libs/database/operations'
+import {
+    CustomerRepository,
+    PaymentRepository,
+    TicketBatchRepository,
+    TicketPaymentDetailRepository,
+    TicketProcedureRepository,
+    TicketProductRepository,
+    TicketRegimenItemRepository,
+    TicketRegimenRepository,
+    TicketRepository,
+    TicketUserRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { CacheDataService } from '../../../../../../_libs/common/cache-data/cache-data.service'
-import { FileUploadDto } from '../../../../../../_libs/common/dto/file'
-import { ESArray } from '../../../../../../_libs/common/helpers'
-import { GenerateId } from '../../../../../../_libs/database/common/generate-id'
-import {
-  DeliveryStatus,
-  DiscountType,
-  MovementType,
-  PaymentMoneyStatus,
-  TicketRegimenStatus,
-} from '../../../../../../_libs/database/common/variable'
-import {
-  Batch,
-  Customer,
-  Image,
-  Product,
-  TicketBatch,
-  TicketPaymentDetail,
-  TicketProduct,
-  TicketRegimen,
-  TicketRegimenItem,
-  TicketUser,
-} from '../../../../../../_libs/database/entities'
-import { ImageInteractType } from '../../../../../../_libs/database/entities/image.entity'
-import {
-  MoneyDirection,
-  PaymentActionType,
-  PaymentInsertType,
-  PaymentPersonType,
-  PaymentVoucherType,
-} from '../../../../../../_libs/database/entities/payment.entity'
-import { PositionType } from '../../../../../../_libs/database/entities/position.entity'
-import { TicketBatchInsertType } from '../../../../../../_libs/database/entities/ticket-batch.entity'
-import {
-  TicketProcedureStatus,
-  TicketProcedureType,
-} from '../../../../../../_libs/database/entities/ticket-procedure.entity'
-import {
-  TicketProductInsertType,
-  TicketProductType,
-} from '../../../../../../_libs/database/entities/ticket-product.entity'
-import { TicketStatus } from '../../../../../../_libs/database/entities/ticket.entity'
-import {
-  ProductPickupManager,
-  ProductPutawayManager,
-  TicketChangeItemMoneyManager,
-  TicketUserCommon,
-} from '../../../../../../_libs/database/operations'
-import {
-  CustomerRepository,
-  PaymentRepository,
-  TicketBatchRepository,
-  TicketPaymentDetailRepository,
-  TicketProcedureRepository,
-  TicketProductRepository,
-  TicketRegimenItemRepository,
-  TicketRegimenRepository,
-  TicketRepository,
-  TicketUserRepository,
-} from '../../../../../../_libs/database/repositories'
 import { ImageManagerService } from '../../../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../../../socket/socket-emit.service'
 import { TicketProcessResultTicketProcedureBody } from '../request'
@@ -693,7 +693,7 @@ export class TicketProcessResultTicketProcedureService {
       if (customerModified) {
         this.socketEmitService.customerUpsert(oid, { customer: customerModified })
       }
-    } catch (error) {
+    } catch (error: any) {
       await transaction.rollback()
       throw error
     }

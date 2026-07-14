@@ -1,20 +1,18 @@
-import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { ESArray } from '../../../../_libs/common/helpers'
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { ESArray } from '@libs/common/helpers'
 import {
   Customer,
-  CustomerSource,
   Room,
   Ticket,
   TicketReception,
-} from '../../../../_libs/database/entities'
+} from '@libs/database/entities'
 import {
   CustomerRepository,
-  CustomerSourceRepository,
   RoomRepository,
   TicketReceptionRepository,
   TicketRepository,
-} from '../../../../_libs/database/repositories'
+} from '@libs/database/repositories'
+import { Injectable } from '@nestjs/common'
 import {
   TicketReceptionGetOneQuery,
   TicketReceptionPaginationQuery,
@@ -27,7 +25,6 @@ export class TicketReceptionService {
     private readonly ticketReceptionRepository: TicketReceptionRepository,
     private readonly ticketRepository: TicketRepository,
     private readonly customerRepository: CustomerRepository,
-    private readonly customerSourceRepository: CustomerSourceRepository,
     private readonly roomRepository: RoomRepository
   ) { }
 
@@ -43,7 +40,6 @@ export class TicketReceptionService {
         ticketId: filter?.ticketId,
         roomId: filter?.roomId,
         customerId: filter?.customerId,
-        customerSourceId: filter?.customerSourceId,
         receptionAt: filter?.receptionAt,
       },
       sort,
@@ -88,9 +84,6 @@ export class TicketReceptionService {
     const ticketIdList = ESArray.uniqueArray(ticketReceptionList.map((i) => i.ticketId))
     const roomIdList = ESArray.uniqueArray(ticketReceptionList.map((i) => i.roomId))
     const customerIdList = ESArray.uniqueArray(ticketReceptionList.map((i) => i.customerId))
-    const customerSourceIdList = ESArray.uniqueArray(
-      ticketReceptionList.map((i) => i.customerSourceId)
-    )
 
     const dataPromise = await Promise.all([
       relation?.ticket && ticketIdList.length
@@ -102,20 +95,15 @@ export class TicketReceptionService {
       relation?.customer && customerIdList.length
         ? this.customerRepository.findManyBy({ oid, id: { IN: customerIdList } })
         : <Customer[]>[],
-      relation?.customerSource && customerSourceIdList.length
-        ? this.customerSourceRepository.findManyBy({ oid, id: { IN: customerSourceIdList } })
-        : <CustomerSource[]>[],
     ])
 
     const ticketList: Ticket[] = dataPromise[0]
     const roomList: Room[] = dataPromise[1]
     const customerList: Customer[] = dataPromise[2]
-    const customerSourceList: CustomerSource[] = dataPromise[3]
 
     const ticketMap = ESArray.arrayToKeyValue(ticketList, 'id')
     const roomMap = ESArray.arrayToKeyValue(roomList, 'id')
     const customerMap = ESArray.arrayToKeyValue(customerList, 'id')
-    const customerSourceMap = ESArray.arrayToKeyValue(customerSourceList, 'id')
 
     ticketReceptionList.forEach((reception: TicketReception) => {
       if (relation.ticket) {
@@ -126,9 +114,6 @@ export class TicketReceptionService {
       }
       if (relation.customer) {
         reception.customer = customerMap[reception.customerId]
-      }
-      if (relation.customerSource) {
-        reception.customerSource = customerSourceMap[reception.customerSourceId]
       }
     })
 

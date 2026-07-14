@@ -28,13 +28,9 @@ export default class TicketReception {
   @Expose()
   customerId: number
 
-  @Column({ default: 0 })
-  @Expose()
-  customerSourceId: number
-
   @Column({ type: 'smallint', default: 1 })
   @Expose()
-  isFirstReception: number
+  isMainReception: number
 
   @Column({
     type: 'bigint',

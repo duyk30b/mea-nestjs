@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common'
-import { ESArray } from '../../../../../_libs/common/helpers'
-import { Laboratory } from '../../../../../_libs/database/entities'
+import { ESArray } from '@libs/common/helpers'
+import { Laboratory } from '@libs/database/entities'
 import {
-  LaboratoryRepository,
-  TicketLaboratoryRepository,
-} from '../../../../../_libs/database/repositories'
+    LaboratoryRepository,
+    TicketLaboratoryRepository,
+} from '@libs/database/repositories'
+import { Injectable } from '@nestjs/common'
 import { StatisticTicketLaboratoryQuery } from './request'
 
 @Injectable()

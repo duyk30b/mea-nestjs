@@ -1,18 +1,18 @@
-import { Injectable } from '@nestjs/common'
-import { TicketRegimen, TicketUser } from '../../../../../../_libs/database/entities'
-import { PositionType } from '../../../../../../_libs/database/entities/position.entity'
+import { TicketRegimen, TicketUser } from '@libs/database/entities'
+import { PositionType } from '@libs/database/entities/position.entity'
 import TicketProcedure, {
-  TicketProcedureType,
-} from '../../../../../../_libs/database/entities/ticket-procedure.entity'
-import Ticket, { TicketStatus } from '../../../../../../_libs/database/entities/ticket.entity'
-import { TicketChangeItemMoneyManager } from '../../../../../../_libs/database/operations/ticket-base/ticket-change-item-money.manager'
-import { TicketUserCommon } from '../../../../../../_libs/database/operations/ticket-item/ticket-change-user/ticket-user.common'
+    TicketProcedureType,
+} from '@libs/database/entities/ticket-procedure.entity'
+import Ticket, { TicketStatus } from '@libs/database/entities/ticket.entity'
+import { TicketChangeItemMoneyManager } from '@libs/database/operations/ticket-base/ticket-change-item-money.manager'
+import { TicketUserCommon } from '@libs/database/operations/ticket-item/ticket-change-user/ticket-user.common'
 import {
-  TicketProcedureRepository,
-  TicketRegimenRepository,
-  TicketRepository,
-  TicketUserRepository,
-} from '../../../../../../_libs/database/repositories'
+    TicketProcedureRepository,
+    TicketRegimenRepository,
+    TicketRepository,
+    TicketUserRepository,
+} from '@libs/database/repositories'
+import { Injectable } from '@nestjs/common'
 import { SocketEmitService } from '../../../../socket/socket-emit.service'
 import { TicketUpdateUserTicketProcedureBody } from '../request'
 

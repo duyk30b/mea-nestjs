@@ -1,12 +1,12 @@
+import {
+    ConditionTimestamp,
+    createConditionEnum,
+    transformConditionEnum,
+} from '@libs/common/dto'
+import { SortQuery } from '@libs/common/dto/query'
+import { PurchaseOrderStatus } from '@libs/database/entities/purchase-order.entity'
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
 import { IsBoolean, IsNumber, IsOptional, ValidateNested } from 'class-validator'
-import {
-  ConditionTimestamp,
-  createConditionEnum,
-  transformConditionEnum,
-} from '../../../../../../_libs/common/dto'
-import { SortQuery } from '../../../../../../_libs/common/dto/query'
-import { PurchaseOrderStatus } from '../../../../../../_libs/database/entities/purchase-order.entity'
 
 export class PurchaseOrderRelationQuery {
   @Expose()

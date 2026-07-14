@@ -1,16 +1,16 @@
+import { ESArray } from '@libs/common/helpers'
+import { Product } from '@libs/database/entities'
+import {
+    BatchRepository,
+    ProductGroupRepository,
+    ProductRepository,
+} from '@libs/database/repositories'
+import {
+    CustomStyleExcel,
+    excelOneSheetWorkbook,
+} from '@libs/file/excel-one-sheet.util'
 import { Injectable } from '@nestjs/common'
 import { Cell, Workbook, Worksheet } from 'exceljs'
-import { ESArray } from '../../../../_libs/common/helpers'
-import { Product } from '../../../../_libs/database/entities'
-import {
-  BatchRepository,
-  ProductGroupRepository,
-  ProductRepository,
-} from '../../../../_libs/database/repositories'
-import {
-  CustomStyleExcel,
-  excelOneSheetWorkbook,
-} from '../../../../_libs/file/excel-one-sheet.util'
 import { ProductExcelRules } from './product-excel.rule'
 
 @Injectable()

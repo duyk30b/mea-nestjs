@@ -3,18 +3,18 @@ import { DataSource } from 'typeorm'
 import { BusinessError } from '../../common/error'
 import { Customer } from '../../entities'
 import Payment, {
-  MoneyDirection,
-  PaymentActionType,
-  PaymentInsertType,
-  PaymentPersonType,
-  PaymentVoucherType,
+    MoneyDirection,
+    PaymentActionType,
+    PaymentInsertType,
+    PaymentPersonType,
+    PaymentVoucherType,
 } from '../../entities/payment.entity'
 import { TicketStatus } from '../../entities/ticket.entity'
 import {
-  CustomerRepository,
-  PaymentRepository,
-  TicketRepository,
-  WalletRepository,
+    CustomerRepository,
+    PaymentRepository,
+    TicketRepository,
+    WalletRepository,
 } from '../../repositories'
 
 @Injectable()
@@ -127,7 +127,7 @@ export class TicketCloseOperation {
         ticketModified,
         paymentCreated,
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('error:', error)
       await queryRunner.rollbackTransaction()
       throw error

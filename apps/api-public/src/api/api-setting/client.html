@@ -11,7 +11,7 @@
         const response = await fetch('http://localhost:20000/google-driver/login')
         const data = await response.json()
         const popup = window.open(data.data, '_blank', 'width=1000,height=700')
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error getting auth URL:', error)
       }
     }
@@ -21,7 +21,7 @@
         const response = await fetch('http://localhost:20000/google-driver/get-all-folders')
         const data = await response.json()
         document.getElementById('folder-list').innerHTML = JSON.stringify(data, null, 2)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error getting auth URL:', error)
       }
     }

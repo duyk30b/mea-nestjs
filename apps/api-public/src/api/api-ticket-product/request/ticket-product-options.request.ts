@@ -1,12 +1,12 @@
+import {
+    ConditionTimestamp,
+    createConditionEnum,
+    transformConditionEnum,
+} from '@libs/common/dto'
+import { SortQuery } from '@libs/common/dto/query'
+import { DeliveryStatus, PaymentMoneyStatus } from '@libs/database/common/variable'
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
 import { IsBoolean, IsInt, IsOptional, ValidateNested } from 'class-validator'
-import {
-  ConditionTimestamp,
-  createConditionEnum,
-  transformConditionEnum,
-} from '../../../../../_libs/common/dto'
-import { SortQuery } from '../../../../../_libs/common/dto/query'
-import { DeliveryStatus, PaymentMoneyStatus } from '../../../../../_libs/database/common/variable'
 
 export class TicketProductRelationQuery {
   @Expose()

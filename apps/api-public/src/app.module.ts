@@ -1,24 +1,24 @@
+import { CacheDataModule } from '@libs/common/cache-data/cache-data.module'
+import { OrganizationGuard } from '@libs/common/guards/organization.guard'
+import { UserGuard } from '@libs/common/guards/user.guard'
+import { AccessLogInterceptor } from '@libs/common/interceptor'
+import { JwtExtendModule } from '@libs/common/jwt-extend/jwt-extend.module'
+import { DetectClientMiddleware } from '@libs/common/middleware/detect-client.middleware'
+import { PostgresqlModule } from '@libs/database/postgresql.module'
+import { MongoDbConnectModule } from '@libs/mongo/mongodb-connect.module'
+import { GoogleDriverModule } from '@libs/transporter/google-driver/google-driver.module'
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core'
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler'
 import {
-  HeaderResolver,
-  I18nJsonLoader,
-  I18nMiddleware,
-  I18nModule,
-  QueryResolver,
+    HeaderResolver,
+    I18nJsonLoader,
+    I18nMiddleware,
+    I18nModule,
+    QueryResolver,
 } from 'nestjs-i18n'
 import * as path from 'path'
-import { CacheDataModule } from '../../_libs/common/cache-data/cache-data.module'
-import { OrganizationGuard } from '../../_libs/common/guards/organization.guard'
-import { UserGuard } from '../../_libs/common/guards/user.guard.'
-import { AccessLogInterceptor } from '../../_libs/common/interceptor'
-import { JwtExtendModule } from '../../_libs/common/jwt-extend/jwt-extend.module'
-import { DetectClientMiddleware } from '../../_libs/common/middleware/detect-client.middleware'
-import { PostgresqlModule } from '../../_libs/database/postgresql.module'
-import { MongoDbConnectModule } from '../../_libs/mongo/mongodb-connect.module'
-import { GoogleDriverModule } from '../../_libs/transporter/google-driver/google-driver.module'
 import { AuthModule } from './api-auth/auth.module'
 import { ApiFileModule } from './api-file/api-file.module'
 import { ApiRootModule } from './api-root/api-root.module'

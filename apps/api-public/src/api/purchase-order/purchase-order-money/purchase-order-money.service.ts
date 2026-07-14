@@ -1,10 +1,10 @@
-import { Injectable } from '@nestjs/common'
-import { BusinessError } from '../../../../../_libs/database/common/error'
-import { PaymentActionType } from '../../../../../_libs/database/entities/payment.entity'
+import { BusinessError } from '@libs/database/common/error'
+import { PaymentActionType } from '@libs/database/entities/payment.entity'
 import {
-  PurchaseOrderPaymentOperation,
-  PurchaseOrderPaymentOperationPropType,
-} from '../../../../../_libs/database/operations'
+    PurchaseOrderPaymentOperation,
+    PurchaseOrderPaymentOperationPropType,
+} from '@libs/database/operations'
+import { Injectable } from '@nestjs/common'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { PurchaseOrderPayDebtBody, PurchaseOrderPaymentMoneyBody } from './request'
 

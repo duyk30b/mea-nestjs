@@ -1,37 +1,37 @@
-import { Injectable } from '@nestjs/common'
-import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { ESArray } from '../../../../_libs/common/helpers'
-import { Batch, Organization, Product, ProductGroup } from '../../../../_libs/database/entities'
+import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { ESArray } from '@libs/common/helpers'
+import { Batch, Organization, Product, ProductGroup } from '@libs/database/entities'
 import Discount, {
-  DiscountInsertType,
-  DiscountInteractType,
-} from '../../../../_libs/database/entities/discount.entity'
+    DiscountInsertType,
+    DiscountInteractType,
+} from '@libs/database/entities/discount.entity'
 import Position, {
-  PositionInsertType,
-  PositionType,
-} from '../../../../_libs/database/entities/position.entity'
-import { ProductOperation } from '../../../../_libs/database/operations'
+    PositionInsertType,
+    PositionType,
+} from '@libs/database/entities/position.entity'
+import { ProductOperation } from '@libs/database/operations'
 import {
-  BatchRepository,
-  DiscountRepository,
-  PositionRepository,
-  ProductGroupRepository,
-  ProductRepository,
-} from '../../../../_libs/database/repositories'
-import { OrganizationRepository } from '../../../../_libs/database/repositories/organization.repository'
-import { ProductMovementRepository } from '../../../../_libs/database/repositories/product-movement.repository'
-import { PurchaseOrderItemRepository } from '../../../../_libs/database/repositories/purchase-order-item.repository'
-import { TicketProductRepository } from '../../../../_libs/database/repositories/ticket-product.repository'
+    BatchRepository,
+    DiscountRepository,
+    PositionRepository,
+    ProductGroupRepository,
+    ProductRepository,
+} from '@libs/database/repositories'
+import { OrganizationRepository } from '@libs/database/repositories/organization.repository'
+import { ProductMovementRepository } from '@libs/database/repositories/product-movement.repository'
+import { PurchaseOrderItemRepository } from '@libs/database/repositories/purchase-order-item.repository'
+import { TicketProductRepository } from '@libs/database/repositories/ticket-product.repository'
+import { Injectable } from '@nestjs/common'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
-  ProductCreateBody,
-  ProductGetManyQuery,
-  ProductGetOneQuery,
-  ProductMergeBody,
-  ProductPaginationQuery,
-  ProductRelationQuery,
-  ProductUpdateBody,
+    ProductCreateBody,
+    ProductGetManyQuery,
+    ProductGetOneQuery,
+    ProductMergeBody,
+    ProductPaginationQuery,
+    ProductRelationQuery,
+    ProductUpdateBody,
 } from './request'
 
 @Injectable()
@@ -202,7 +202,7 @@ export class ApiProductService {
       let bodyWarehouseIdList = []
       try {
         bodyWarehouseIdList = JSON.parse(productBody.warehouseIds)
-      } catch (error) { }
+      } catch (error: any) { }
       if (bodyWarehouseIdList.includes(0)) {
         // trường hợp này được quản lý mọi kho
       } else {

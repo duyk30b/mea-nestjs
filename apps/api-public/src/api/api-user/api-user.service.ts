@@ -1,28 +1,28 @@
+import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
+import { CacheTokenService } from '@libs/common/cache-data/cache-token.service'
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { encrypt } from '@libs/common/helpers/string.helper'
+import { BaseResponse } from '@libs/common/interceptor/transform-response.interceptor'
+import { User } from '@libs/database/entities'
+import Device from '@libs/database/entities/device'
+import { UserRoleInsertType } from '@libs/database/entities/user-role.entity'
+import { UserRoomInsertType } from '@libs/database/entities/user-room.entity'
+import {
+    RoleRepository,
+    RoomRepository,
+    UserRepository,
+    UserRoleRepository,
+    UserRoomRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
 import * as bcrypt from 'bcrypt'
-import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
-import { CacheTokenService } from '../../../../_libs/common/cache-data/cache-token.service'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { encrypt } from '../../../../_libs/common/helpers/string.helper'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { User } from '../../../../_libs/database/entities'
-import Device from '../../../../_libs/database/entities/device'
-import { UserRoleInsertType } from '../../../../_libs/database/entities/user-role.entity'
-import { UserRoomInsertType } from '../../../../_libs/database/entities/user-room.entity'
-import {
-  RoleRepository,
-  RoomRepository,
-  UserRepository,
-  UserRoleRepository,
-  UserRoomRepository,
-} from '../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../socket/socket-emit.service'
 import {
-  UserCreateBody,
-  UserGetManyQuery,
-  UserGetOneQuery,
-  UserPaginationQuery,
-  UserUpdateBody,
+    UserCreateBody,
+    UserGetManyQuery,
+    UserGetOneQuery,
+    UserPaginationQuery,
+    UserUpdateBody,
 } from './request'
 
 @Injectable()

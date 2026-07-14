@@ -1,15 +1,15 @@
+import { IdParam } from '@libs/common/dto'
+import { IsRoot } from '@libs/common/guards/root.guard'
+import { BaseResponse } from '@libs/common/interceptor'
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
-import { IdParam } from '../../../../_libs/common/dto'
-import { IsRoot } from '../../../../_libs/common/guards/root.guard'
-import { BaseResponse } from '../../../../_libs/common/interceptor'
 import { ApiRootOrganizationService } from './api-root-organization.service'
 import {
-  RootOrganizationClearBody,
-  RootOrganizationCreateBody,
-  RootOrganizationPaginationQuery,
-  RootOrganizationPaymentMoneyBody,
-  RootOrganizationUpdateBody,
+    RootOrganizationClearBody,
+    RootOrganizationCreateBody,
+    RootOrganizationPaginationQuery,
+    RootOrganizationPaymentMoneyBody,
+    RootOrganizationUpdateBody,
 } from './request'
 
 @ApiTags('Root')

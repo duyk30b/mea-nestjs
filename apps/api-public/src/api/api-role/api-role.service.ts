@@ -1,18 +1,18 @@
+import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { BaseResponse } from '@libs/common/interceptor/transform-response.interceptor'
+import {
+    RoleRepository,
+    UserRepository,
+    UserRoleRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { CacheDataService } from '../../../../_libs/common/cache-data/cache-data.service'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
 import {
-  RoleRepository,
-  UserRepository,
-  UserRoleRepository,
-} from '../../../../_libs/database/repositories'
-import {
-  RoleCreateBody,
-  RoleGetManyQuery,
-  RoleGetOneQuery,
-  RolePaginationQuery,
-  RoleUpdateBody,
+    RoleCreateBody,
+    RoleGetManyQuery,
+    RoleGetOneQuery,
+    RolePaginationQuery,
+    RoleUpdateBody,
 } from './request'
 
 @Injectable()

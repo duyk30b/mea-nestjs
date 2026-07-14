@@ -1,30 +1,30 @@
-import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
-import { ESArray } from '../../../../../_libs/common/helpers'
-import { BusinessError } from '../../../../../_libs/database/common/error'
-import { Discount, Procedure, ProcedureGroup } from '../../../../../_libs/database/entities'
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { ESArray } from '@libs/common/helpers'
+import { BusinessError } from '@libs/database/common/error'
+import { Discount, Procedure, ProcedureGroup } from '@libs/database/entities'
 import {
-  DiscountInsertType,
-  DiscountInteractType,
-} from '../../../../../_libs/database/entities/discount.entity'
+    DiscountInsertType,
+    DiscountInteractType,
+} from '@libs/database/entities/discount.entity'
 import Position, {
-  PositionInsertType,
-  PositionType,
-} from '../../../../../_libs/database/entities/position.entity'
+    PositionInsertType,
+    PositionType,
+} from '@libs/database/entities/position.entity'
 import {
-  DiscountRepository,
-  PositionRepository,
-  ProcedureGroupRepository,
-} from '../../../../../_libs/database/repositories'
-import { ProcedureRepository } from '../../../../../_libs/database/repositories/procedure.repository'
-import { TicketProcedureRepository } from '../../../../../_libs/database/repositories/ticket-procedure.repository'
+    DiscountRepository,
+    PositionRepository,
+    ProcedureGroupRepository,
+} from '@libs/database/repositories'
+import { ProcedureRepository } from '@libs/database/repositories/procedure.repository'
+import { TicketProcedureRepository } from '@libs/database/repositories/ticket-procedure.repository'
+import { Injectable } from '@nestjs/common'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import {
-  ProcedureGetManyQuery,
-  ProcedureGetOneQuery,
-  ProcedurePaginationQuery,
-  ProcedureRelationQuery,
-  ProcedureUpsertBody,
+    ProcedureGetManyQuery,
+    ProcedureGetOneQuery,
+    ProcedurePaginationQuery,
+    ProcedureRelationQuery,
+    ProcedureUpsertBody,
 } from './request'
 
 @Injectable()

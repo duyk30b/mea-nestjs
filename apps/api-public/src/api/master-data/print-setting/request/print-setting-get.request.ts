@@ -1,11 +1,11 @@
+import { LimitQuery, PaginationQuery } from '@libs/common/dto'
 import { ApiPropertyOptional, IntersectionType, PickType } from '@nestjs/swagger'
 import { Expose, Transform, plainToInstance } from 'class-transformer'
 import { IsObject, ValidateNested } from 'class-validator'
-import { LimitQuery, PaginationQuery } from '../../../../../../_libs/common/dto'
 import {
-  PrintSettingFilterQuery,
-  PrintSettingRelationQuery,
-  PrintSettingSortQuery,
+    PrintSettingFilterQuery,
+    PrintSettingRelationQuery,
+    PrintSettingSortQuery,
 } from './print-setting-options.request'
 
 export class PrintSettingGetQuery {

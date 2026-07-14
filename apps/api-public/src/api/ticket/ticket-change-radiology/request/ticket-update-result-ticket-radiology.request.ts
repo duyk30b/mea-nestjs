@@ -1,17 +1,17 @@
+import { MultipleFileUpload } from '@libs/common/dto/file'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
 import {
-  IsArray,
-  IsDefined,
-  IsInt,
-  IsNumber,
-  IsObject,
-  IsString,
-  validateSync,
-  ValidationError,
+    IsArray,
+    IsDefined,
+    IsInt,
+    IsNumber,
+    IsObject,
+    IsString,
+    validateSync,
+    ValidationError,
 } from 'class-validator'
 import * as DOMPurify from 'isomorphic-dompurify'
-import { MultipleFileUpload } from '../../../../../../_libs/common/dto/file'
 import { TicketUserBasicBody } from '../../ticket-change-user/request'
 
 export class TicketRadiologyUpdateBody extends MultipleFileUpload {

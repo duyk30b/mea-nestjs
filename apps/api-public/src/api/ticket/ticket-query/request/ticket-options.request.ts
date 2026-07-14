@@ -1,5 +1,3 @@
-import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsNumber, IsObject, IsOptional, ValidateNested } from 'class-validator'
 import {
   ConditionNumber,
   ConditionTimestamp,
@@ -7,9 +5,11 @@ import {
   createConditionEnum,
   transformConditionEnum,
   transformConditionNumber,
-} from '../../../../../../_libs/common/dto'
-import { DeliveryStatus } from '../../../../../../_libs/database/common/variable'
-import { TicketStatus } from '../../../../../../_libs/database/entities/ticket.entity'
+} from '@libs/common/dto'
+import { DeliveryStatus } from '@libs/database/common/variable'
+import { TicketStatus } from '@libs/database/entities/ticket.entity'
+import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
+import { IsBoolean, IsIn, IsNumber, IsObject, IsOptional, ValidateNested } from 'class-validator'
 
 export class TicketRelationQuery {
   @Expose()
@@ -83,10 +83,6 @@ export class TicketRelationQuery {
   @Expose()
   @IsBoolean()
   imageList?: boolean
-
-  @Expose()
-  @IsBoolean()
-  customerSource?: boolean
 
   @Expose()
   @IsBoolean()

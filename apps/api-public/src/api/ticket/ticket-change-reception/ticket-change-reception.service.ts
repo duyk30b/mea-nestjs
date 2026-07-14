@@ -1,20 +1,16 @@
-import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
-import { ESTimer } from '../../../../../_libs/common/helpers/time.helper'
-import { BusinessError } from '../../../../../_libs/database/common/error'
-import { GenerateId } from '../../../../../_libs/database/common/generate-id'
-import { DeliveryStatus, DiscountType } from '../../../../../_libs/database/common/variable'
-import { Customer, TicketUser } from '../../../../../_libs/database/entities'
-import { AppointmentStatus } from '../../../../../_libs/database/entities/appointment.entity'
-import { PositionType } from '../../../../../_libs/database/entities/position.entity'
-import { TicketAttributeInsertType } from '../../../../../_libs/database/entities/ticket-attribute.entity'
-import { TicketPaymentDetailInsertType } from '../../../../../_libs/database/entities/ticket-payment-detail.entity'
-import { TicketReceptionInsertType } from '../../../../../_libs/database/entities/ticket-reception.entity'
-import Ticket, { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
-import {
-  TicketChangeTicketUserOperation,
-  TicketUserAddType,
-} from '../../../../../_libs/database/operations'
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { ESTimer } from '@libs/common/helpers/time.helper'
+import { BusinessError } from '@libs/database/common/error'
+import { GenerateId } from '@libs/database/common/generate-id'
+import { DeliveryStatus, DiscountType } from '@libs/database/common/variable'
+import { Customer, TicketUser } from '@libs/database/entities'
+import { AppointmentStatus } from '@libs/database/entities/appointment.entity'
+import { PositionType } from '@libs/database/entities/position.entity'
+import { TicketAttributeInsertType } from '@libs/database/entities/ticket-attribute.entity'
+import { TicketPaymentDetailInsertType } from '@libs/database/entities/ticket-payment-detail.entity'
+import { TicketReceptionInsertType } from '@libs/database/entities/ticket-reception.entity'
+import Ticket, { TicketStatus } from '@libs/database/entities/ticket.entity'
+import { TicketChangeTicketUserOperation, TicketUserAddType } from '@libs/database/operations'
 import {
   AppointmentRepository,
   CustomerRepository,
@@ -22,7 +18,8 @@ import {
   TicketPaymentDetailRepository,
   TicketReceptionRepository,
   TicketRepository,
-} from '../../../../../_libs/database/repositories'
+} from '@libs/database/repositories'
+import { Injectable } from '@nestjs/common'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { TicketDestroyService } from '../ticket-action/ticket-destroy.service'
 import { TicketAddTicketProcedureListService } from '../ticket-change-procedure/service/ticket-add-ticket-procedure-list.service'
@@ -60,17 +57,17 @@ export class TicketChangeReceptionService {
       customer = await this.customerRepository.insertOne({
         ...body.customer,
         debt: 0,
+        isHasTicket: 0,
         oid,
         customerCode,
       })
-      this.socketEmitService.customerUpsert(oid, { customer })
     } else {
       customer = await this.customerRepository.findOneBy({
         oid,
         id: body.customerId,
       })
     }
-    if (!customer) throw new BusinessException('error.SystemError')
+    if (!customer) throw new BusinessException('error.Database.NotFound')
 
     if (!body.ticketId) {
       const ticketIdGenerate = await this.ticketRepository.nextId({
@@ -87,7 +84,6 @@ export class TicketChangeReceptionService {
         status: body.status,
         createdAt: ticketReceptionAdd.receptionAt,
         receptionAt: ticketReceptionAdd.receptionAt,
-        customerSourceId: ticketReceptionAdd.customerSourceId,
 
         dailyIndex,
         year: ESTimer.info(ticketReceptionAdd.receptionAt, 7).year,
@@ -115,6 +111,7 @@ export class TicketChangeReceptionService {
         debtTotal: 0,
         imageDiagnosisIds: JSON.stringify([]),
         endedAt: null,
+        isFirstVisit: customer.isHasTicket ? 0 : 1,
       })
       if (body.isPaymentEachItem) {
         const ticketPaymentDetailInsert: TicketPaymentDetailInsertType = {
@@ -134,11 +131,7 @@ export class TicketChangeReceptionService {
     }
     if (body.ticketId) {
       ticket = await this.ticketRepository.updateOne(
-        {
-          oid,
-          id: body.ticketId,
-          customerId: customer.id,
-        },
+        { oid, id: body.ticketId, customerId: customer.id },
         { receptionAt: ticketReceptionAdd.receptionAt }
       )
     }
@@ -171,12 +164,11 @@ export class TicketChangeReceptionService {
     const ticketReceptionInsert: TicketReceptionInsertType = {
       oid,
       customerId: customer.id,
-      customerSourceId: ticketReceptionAdd.customerSourceId,
       roomId: ticketReceptionAdd.roomId,
       receptionAt: ticketReceptionAdd.receptionAt,
       reason: ticketReceptionAdd.reason,
       ticketId: ticket.id,
-      isFirstReception: body.ticketId ? 0 : 1,
+      isMainReception: body.ticketId ? 0 : 1,
     }
     const ticketReceptionCreated =
       await this.ticketReceptionRepository.insertOne(ticketReceptionInsert)
@@ -236,11 +228,20 @@ export class TicketChangeReceptionService {
       ticket.ticketRegimenList = result.ticketRegimenCreatedList
     }
 
+    if (customer.isHasTicket === 0) {
+      customer = await this.customerRepository.updateOne(
+        { oid, id: customer.id },
+        { isHasTicket: 1 }
+      )
+    }
+
     ticket.customer = customer
     ticket.ticketReceptionList = await this.ticketReceptionRepository.findManyBy({
       oid,
       ticketId: ticket.id,
     })
+
+    this.socketEmitService.customerUpsert(oid, { customer })
     this.socketEmitService.socketRoomTicketPaginationChange(oid, {
       roomId: ticket.roomId,
     })
@@ -264,7 +265,7 @@ export class TicketChangeReceptionService {
       ticketId: ticket.id,
     })
     const findIndex = ticketReceptionList.findIndex((i) => {
-      return i.id === ticketReceptionId && !i.isFirstReception
+      return i.id === ticketReceptionId && !i.isMainReception
     })
     if (findIndex === -1) {
       throw new BusinessError('Phiếu khám đã hoạt động, không thể xóa')
@@ -295,7 +296,6 @@ export class TicketChangeReceptionService {
       { oid, id: ticketReceptionId },
       {
         roomId: ticketReceptionUpdate.roomId,
-        customerSourceId: ticketReceptionUpdate.customerSourceId,
         receptionAt: ticketReceptionUpdate.receptionAt,
         reason: ticketReceptionUpdate.reason,
       }
@@ -305,16 +305,13 @@ export class TicketChangeReceptionService {
       { oid, id: ticketId },
       {
         receptionAt: ticketReceptionUpdate.receptionAt,
-        createdAt: ticketReceptionModified.isFirstReception
+        createdAt: ticketReceptionModified.isMainReception
           ? ticketReceptionUpdate.receptionAt
           : undefined,
-        customerSourceId: ticketReceptionModified.isFirstReception
-          ? ticketReceptionUpdate.customerSourceId
-          : undefined,
-        roomId: ticketReceptionModified.isFirstReception ? ticketReceptionUpdate.roomId : undefined,
-        year: ticketReceptionModified.isFirstReception ? receptionTime.year : undefined,
-        month: ticketReceptionModified.isFirstReception ? receptionTime.month + 1 : undefined,
-        date: ticketReceptionModified.isFirstReception ? receptionTime.date : undefined,
+        roomId: ticketReceptionModified.isMainReception ? ticketReceptionUpdate.roomId : undefined,
+        year: ticketReceptionModified.isMainReception ? receptionTime.year : undefined,
+        month: ticketReceptionModified.isMainReception ? receptionTime.month + 1 : undefined,
+        date: ticketReceptionModified.isMainReception ? receptionTime.date : undefined,
       }
     )
 

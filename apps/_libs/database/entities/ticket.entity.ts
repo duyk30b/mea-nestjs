@@ -61,9 +61,9 @@ export default class Ticket {
   @Expose()
   customerId: number
 
-  @Column({ default: 0 })
+  @Column({ type: 'smallint', default: 0 })
   @Expose()
-  customerSourceId: number
+  isFirstVisit: number
 
   @Column({ default: 0 })
   @Expose()

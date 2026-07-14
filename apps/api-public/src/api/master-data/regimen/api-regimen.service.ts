@@ -1,31 +1,31 @@
-import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
-import { ESArray, ESTimer } from '../../../../../_libs/common/helpers'
-import { BusinessError } from '../../../../../_libs/database/common/error'
-import { Discount, Procedure, Regimen, RegimenItem } from '../../../../../_libs/database/entities'
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { ESArray, ESTimer } from '@libs/common/helpers'
+import { BusinessError } from '@libs/database/common/error'
+import { Discount, Procedure, Regimen, RegimenItem } from '@libs/database/entities'
 import {
-  DiscountInsertType,
-  DiscountInteractType,
-} from '../../../../../_libs/database/entities/discount.entity'
+    DiscountInsertType,
+    DiscountInteractType,
+} from '@libs/database/entities/discount.entity'
 import Position, {
-  PositionInsertType,
-  PositionType,
-} from '../../../../../_libs/database/entities/position.entity'
-import { RegimenItemInsertType } from '../../../../../_libs/database/entities/regimen-item.entity'
+    PositionInsertType,
+    PositionType,
+} from '@libs/database/entities/position.entity'
+import { RegimenItemInsertType } from '@libs/database/entities/regimen-item.entity'
 import {
-  DiscountRepository,
-  PositionRepository,
-  ProcedureRepository,
-  RegimenItemRepository,
-} from '../../../../../_libs/database/repositories'
-import { RegimenRepository } from '../../../../../_libs/database/repositories/regimen.repository'
+    DiscountRepository,
+    PositionRepository,
+    ProcedureRepository,
+    RegimenItemRepository,
+} from '@libs/database/repositories'
+import { RegimenRepository } from '@libs/database/repositories/regimen.repository'
+import { Injectable } from '@nestjs/common'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import {
-  RegimenGetManyQuery,
-  RegimenGetOneQuery,
-  RegimenPaginationQuery,
-  RegimenRelationQuery,
-  RegimenUpsertWrapBody,
+    RegimenGetManyQuery,
+    RegimenGetOneQuery,
+    RegimenPaginationQuery,
+    RegimenRelationQuery,
+    RegimenUpsertWrapBody,
 } from './request'
 
 @Injectable()

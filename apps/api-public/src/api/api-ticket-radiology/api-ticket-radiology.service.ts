@@ -1,26 +1,26 @@
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { ESArray } from '@libs/common/helpers/array.helper'
+import {
+    Customer,
+    Image,
+    Ticket,
+    TicketRadiology,
+    TicketUser,
+} from '@libs/database/entities'
+import { PositionType } from '@libs/database/entities/position.entity'
+import {
+    CustomerRepository,
+    TicketRepository,
+    TicketUserRepository,
+} from '@libs/database/repositories'
+import { ImageRepository } from '@libs/database/repositories/image.repository'
+import { TicketRadiologyRepository } from '@libs/database/repositories/ticket-radiology.repository'
 import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { ESArray } from '../../../../_libs/common/helpers/array.helper'
 import {
-  Customer,
-  Image,
-  Ticket,
-  TicketRadiology,
-  TicketUser,
-} from '../../../../_libs/database/entities'
-import { PositionType } from '../../../../_libs/database/entities/position.entity'
-import {
-  CustomerRepository,
-  TicketRepository,
-  TicketUserRepository,
-} from '../../../../_libs/database/repositories'
-import { ImageRepository } from '../../../../_libs/database/repositories/image.repository'
-import { TicketRadiologyRepository } from '../../../../_libs/database/repositories/ticket-radiology.repository'
-import {
-  TicketRadiologyGetManyQuery,
-  TicketRadiologyGetOneQuery,
-  TicketRadiologyPaginationQuery,
-  TicketRadiologyRelationQuery,
+    TicketRadiologyGetManyQuery,
+    TicketRadiologyGetOneQuery,
+    TicketRadiologyPaginationQuery,
+    TicketRadiologyRelationQuery,
 } from './request'
 
 @Injectable()

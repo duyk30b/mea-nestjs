@@ -1,29 +1,29 @@
 /* eslint-disable max-len */
+import { FileUploadDto } from '@libs/common/dto/file'
+import { BusinessError } from '@libs/database/common/error'
+import { Ticket, TicketUser } from '@libs/database/entities'
+import Image, { ImageInteractType } from '@libs/database/entities/image.entity'
+import { PositionType } from '@libs/database/entities/position.entity'
+import { TicketRadiologyStatus } from '@libs/database/entities/ticket-radiology.entity'
+import {
+    TicketChangeTicketUserOperation,
+    TicketDestroyTicketRadiologyOperation,
+    TicketUpdateTicketRadiologyOperation,
+} from '@libs/database/operations'
+import {
+    TicketRadiologyManager,
+    TicketRadiologyRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { FileUploadDto } from '../../../../../_libs/common/dto/file'
-import { BusinessError } from '../../../../../_libs/database/common/error'
-import { Ticket, TicketUser } from '../../../../../_libs/database/entities'
-import Image, { ImageInteractType } from '../../../../../_libs/database/entities/image.entity'
-import { PositionType } from '../../../../../_libs/database/entities/position.entity'
-import { TicketRadiologyStatus } from '../../../../../_libs/database/entities/ticket-radiology.entity'
-import {
-  TicketChangeTicketUserOperation,
-  TicketDestroyTicketRadiologyOperation,
-  TicketUpdateTicketRadiologyOperation,
-} from '../../../../../_libs/database/operations'
-import {
-  TicketRadiologyManager,
-  TicketRadiologyRepository,
-} from '../../../../../_libs/database/repositories'
 import { ImageManagerService } from '../../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { ApiTicketRadiologyService } from '../../api-ticket-radiology/api-ticket-radiology.service'
 import { TicketRadiologyPostQuery } from '../../api-ticket-radiology/request'
 import {
-  TicketCancelResultTicketRadiologyBody,
-  TicketUpdatePriorityTicketRadiologyBody,
-  TicketUpdateRequestTicketRadiologyBody,
-  TicketUpdateResultTicketRadiologyBody,
+    TicketCancelResultTicketRadiologyBody,
+    TicketUpdatePriorityTicketRadiologyBody,
+    TicketUpdateRequestTicketRadiologyBody,
+    TicketUpdateResultTicketRadiologyBody,
 } from './request'
 
 @Injectable()

@@ -1,11 +1,11 @@
+import { Radiology } from '@libs/database/entities'
+import { RadiologyRepository } from '@libs/database/repositories'
+import {
+    CustomStyleExcel,
+    excelOneSheetWorkbook,
+} from '@libs/file/excel-one-sheet.util'
 import { Injectable } from '@nestjs/common'
 import { Cell, Workbook, Worksheet } from 'exceljs'
-import { Radiology } from '../../../../_libs/database/entities'
-import { RadiologyRepository } from '../../../../_libs/database/repositories'
-import {
-  CustomStyleExcel,
-  excelOneSheetWorkbook,
-} from '../../../../_libs/file/excel-one-sheet.util'
 import { RadiologyExcelRules } from './radiology-excel.rule'
 
 @Injectable()

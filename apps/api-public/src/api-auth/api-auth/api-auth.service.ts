@@ -1,27 +1,27 @@
+import { CacheTokenService } from '@libs/common/cache-data/cache-token.service'
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { decrypt, encrypt } from '@libs/common/helpers/string.helper'
+import { BaseResponse } from '@libs/common/interceptor/transform-response.interceptor'
+import { JwtExtendService } from '@libs/common/jwt-extend/jwt-extend.service'
+import { JwtConfig } from '@libs/common/jwt-extend/jwt.config'
+import { TExternal } from '@libs/common/request/external.request'
+import { OrganizationStatus } from '@libs/database/entities/organization.entity'
+import User from '@libs/database/entities/user.entity'
+import { OrganizationRepository } from '@libs/database/repositories/organization.repository'
+import { UserRepository } from '@libs/database/repositories/user.repository'
+import { GlobalConfig } from '@libs/environments'
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common'
 import { ConfigType } from '@nestjs/config'
 import { InjectEntityManager } from '@nestjs/typeorm'
 import * as bcrypt from 'bcrypt'
 import { DataSource, EntityManager } from 'typeorm'
-import { CacheTokenService } from '../../../../_libs/common/cache-data/cache-token.service'
-import { BusinessException } from '../../../../_libs/common/exception-filter/exception-filter'
-import { decrypt, encrypt } from '../../../../_libs/common/helpers/string.helper'
-import { BaseResponse } from '../../../../_libs/common/interceptor/transform-response.interceptor'
-import { JwtExtendService } from '../../../../_libs/common/jwt-extend/jwt-extend.service'
-import { JwtConfig } from '../../../../_libs/common/jwt-extend/jwt.config'
-import { TExternal } from '../../../../_libs/common/request/external.request'
-import { OrganizationStatus } from '../../../../_libs/database/entities/organization.entity'
-import User from '../../../../_libs/database/entities/user.entity'
-import { OrganizationRepository } from '../../../../_libs/database/repositories/organization.repository'
-import { UserRepository } from '../../../../_libs/database/repositories/user.repository'
-import { GlobalConfig } from '../../../../_libs/environments'
 import { EmailService } from '../../components/email/email.service'
 import {
-  ForgotPasswordBody,
-  LoginBody,
-  LoginRootBody,
-  LogoutBody,
-  ResetPasswordBody,
+    ForgotPasswordBody,
+    LoginBody,
+    LoginRootBody,
+    LogoutBody,
+    ResetPasswordBody,
 } from './request'
 
 @Injectable()
@@ -332,7 +332,7 @@ export class ApiAuthService {
     let hash: string
     try {
       hash = decrypt(body.token, this.jwtConfig.accessKey)
-    } catch (error) {
+    } catch (error: any) {
       throw new HttpException('Thời gian reset password đã quá hạn', HttpStatus.BAD_GATEWAY)
     }
     if (user.hashPassword !== hash) {

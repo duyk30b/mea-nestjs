@@ -71,7 +71,7 @@ export class DetectClientMiddleware implements NestMiddleware {
             // dataExternal.organization = await this.cacheDataService.getOrganization(dataExternal.oid)
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         dataExternal.error = error.message
       }
     }

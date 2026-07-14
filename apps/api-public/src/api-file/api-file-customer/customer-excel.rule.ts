@@ -25,18 +25,25 @@ export const CustomerExcelRules = {
     type: 'string',
     required: false,
   },
-  citizenIdCard: {
-    title: 'CCCD',
-    width: 20,
-    type: 'string',
-    required: false,
-  },
   debt: {
     title: 'Nợ',
     width: 12,
     type: 'number',
     required: false,
   },
+  customerGroupName: {
+    title: 'Nhóm khách hàng',
+    width: 20,
+    type: 'string',
+    required: false,
+  },
+  customerSourceName: {
+    title: 'Nguồn khách hàng',
+    width: 20,
+    type: 'string',
+    required: false,
+  },
+
   birthday: {
     title: 'Ngày sinh',
     width: 15,
@@ -82,6 +89,12 @@ export const CustomerExcelRules = {
   zalo: {
     title: 'Zalo',
     width: 40,
+    type: 'string',
+    required: false,
+  },
+  citizenIdCard: {
+    title: 'CCCD',
+    width: 20,
     type: 'string',
     required: false,
   },

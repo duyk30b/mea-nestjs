@@ -1,8 +1,8 @@
+import { IsEnumValue } from '@libs/common/transform-validate/class-validator.custom'
+import { PositionType } from '@libs/database/entities/position.entity'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import { IsArray, IsDefined, IsNumber, IsString, ValidateNested } from 'class-validator'
-import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { PositionType } from '../../../../../../_libs/database/entities/position.entity'
 
 export class TicketUserAddBody {
   @ApiProperty({ example: 56 })

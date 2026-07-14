@@ -1,36 +1,36 @@
-import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
-import { ESArray } from '../../../../../_libs/common/helpers/array.helper'
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { ESArray } from '@libs/common/helpers/array.helper'
 import {
-  Laboratory,
-  LaboratoryGroup,
-  Procedure,
-  Product,
-  Radiology,
-  Regimen,
-} from '../../../../../_libs/database/entities'
+    Laboratory,
+    LaboratoryGroup,
+    Procedure,
+    Product,
+    Radiology,
+    Regimen,
+} from '@libs/database/entities'
 import Position, {
-  PositionInsertType,
-  PositionType,
-} from '../../../../../_libs/database/entities/position.entity'
+    PositionInsertType,
+    PositionType,
+} from '@libs/database/entities/position.entity'
 import {
-  LaboratoryGroupRepository,
-  LaboratoryRepository,
-  ProcedureRepository,
-  ProductRepository,
-  RadiologyRepository,
-  RegimenRepository,
-} from '../../../../../_libs/database/repositories'
-import { PositionRepository } from '../../../../../_libs/database/repositories/position.repository'
+    LaboratoryGroupRepository,
+    LaboratoryRepository,
+    ProcedureRepository,
+    ProductRepository,
+    RadiologyRepository,
+    RegimenRepository,
+} from '@libs/database/repositories'
+import { PositionRepository } from '@libs/database/repositories/position.repository'
+import { Injectable } from '@nestjs/common'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import {
-  PositionCreateBody,
-  PositionGetManyQuery,
-  PositionGetOneQuery,
-  PositionPaginationQuery,
-  PositionRelationQuery,
-  PositionReplaceListBody,
-  PositionUpdateBody,
+    PositionCreateBody,
+    PositionGetManyQuery,
+    PositionGetOneQuery,
+    PositionPaginationQuery,
+    PositionRelationQuery,
+    PositionReplaceListBody,
+    PositionUpdateBody,
 } from './request'
 
 @Injectable()

@@ -1,25 +1,25 @@
-import { Injectable } from '@nestjs/common'
-import { CacheDataService } from '../../../../../_libs/common/cache-data/cache-data.service'
-import { Customer, Payment, TicketProduct } from '../../../../../_libs/database/entities'
-import { PaymentActionType } from '../../../../../_libs/database/entities/payment.entity'
-import Ticket, { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
+import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
+import { Customer, Payment, TicketProduct } from '@libs/database/entities'
+import { PaymentActionType } from '@libs/database/entities/payment.entity'
+import Ticket, { TicketStatus } from '@libs/database/entities/ticket.entity'
 import {
-  TicketCloseOperation,
-  TicketPaymentOperation,
-  TicketReopenOperation,
-  TicketReturnProductOperation,
-  TicketSendProductOperation,
-} from '../../../../../_libs/database/operations'
-import { TicketRepository } from '../../../../../_libs/database/repositories'
+    TicketCloseOperation,
+    TicketPaymentOperation,
+    TicketReopenOperation,
+    TicketReturnProductOperation,
+    TicketSendProductOperation,
+} from '@libs/database/operations'
+import { TicketRepository } from '@libs/database/repositories'
+import { Injectable } from '@nestjs/common'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { TicketSendProductAndPaymentBody } from '../ticket-action/request'
 import { TicketDestroyService } from '../ticket-action/ticket-destroy.service'
 import {
-  TicketOrderDebtSuccessInsertBody,
-  TicketOrderDebtSuccessUpdateBody,
-  TicketOrderDepositedUpdateBody,
-  TicketOrderDraftInsertBody,
-  TicketOrderDraftUpdateBody,
+    TicketOrderDebtSuccessInsertBody,
+    TicketOrderDebtSuccessUpdateBody,
+    TicketOrderDepositedUpdateBody,
+    TicketOrderDraftInsertBody,
+    TicketOrderDraftUpdateBody,
 } from './request'
 import { TicketOrderBasicUpsertService } from './service/ticket-order-basic-upsert.service'
 

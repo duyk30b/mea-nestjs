@@ -1,7 +1,7 @@
+import { IsGmail, IsNumberGreaterThan } from '@libs/common/transform-validate/class-validator.custom'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import { IsDefined, IsOptional, IsString, MinLength, Validate } from 'class-validator'
-import { IsGmail, IsNumberGreaterThan } from '../../../../../_libs/common/transform-validate/class-validator.custom'
 
 export class VerifyOrganizationEmailQuery {
   @ApiProperty({ example: 4 })

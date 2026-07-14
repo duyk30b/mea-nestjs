@@ -32,7 +32,7 @@
   "js/ts.preferences.quoteStyle": "single",
   "js/ts.format.semicolons": "remove",
   "js/ts.updateImportsOnFileMove.enabled": "always",
-  "js/ts.preferences.importModuleSpecifier": "relative",
+  "js/ts.preferences.importModuleSpecifier": "non-relative",
   "js/ts.inlayHints.parameterNames.enabled": "literals",
   "git.allowForcePush": true,
   "cSpell.language": "en,vi",

@@ -3,18 +3,18 @@ import { DataSource } from 'typeorm'
 import { BusinessError } from '../../common/error'
 import { Distributor } from '../../entities'
 import Payment, {
-  MoneyDirection,
-  PaymentActionType,
-  PaymentInsertType,
-  PaymentPersonType,
-  PaymentVoucherType,
+    MoneyDirection,
+    PaymentActionType,
+    PaymentInsertType,
+    PaymentPersonType,
+    PaymentVoucherType,
 } from '../../entities/payment.entity'
 import { PurchaseOrderStatus } from '../../entities/purchase-order.entity'
 import {
-  DistributorRepository,
-  PaymentRepository,
-  PurchaseOrderRepository,
-  WalletRepository,
+    DistributorRepository,
+    PaymentRepository,
+    PurchaseOrderRepository,
+    WalletRepository,
 } from '../../repositories'
 
 @Injectable()
@@ -146,7 +146,7 @@ export class PurchaseOrderTerminalOperation {
         distributorModified,
         paymentCreated,
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('error:', error)
       await queryRunner.rollbackTransaction()
       throw error

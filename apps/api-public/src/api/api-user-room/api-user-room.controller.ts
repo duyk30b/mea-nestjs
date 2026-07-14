@@ -1,10 +1,10 @@
+import { UserPermission } from '@libs/common/guards/user.guard'
+import { External, TExternal } from '@libs/common/request/external.request'
 import { Controller, Get, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { UserPermission } from '../../../../_libs/common/guards/user.guard.'
-import { External, TExternal } from '../../../../_libs/common/request/external.request'
 import { ApiUserRoomService } from './api-user-room.service'
 import {
-  UserRoomGetManyQuery,
+    UserRoomGetManyQuery,
 } from './request'
 
 @ApiTags('UserRoom')

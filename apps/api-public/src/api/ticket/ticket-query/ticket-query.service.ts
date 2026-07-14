@@ -1,6 +1,5 @@
-import { Injectable } from '@nestjs/common'
-import { BusinessException } from '../../../../../_libs/common/exception-filter/exception-filter'
-import { ESArray } from '../../../../../_libs/common/helpers'
+import { BusinessException } from '@libs/common/exception-filter/exception-filter'
+import { ESArray } from '@libs/common/helpers'
 import {
   Appointment,
   Customer,
@@ -21,10 +20,10 @@ import {
   TicketRegimenItem,
   TicketSurcharge,
   TicketUser,
-} from '../../../../../_libs/database/entities'
-import { ImageInteractType } from '../../../../../_libs/database/entities/image.entity'
-import Payment, { PaymentVoucherType } from '../../../../../_libs/database/entities/payment.entity'
-import TicketProduct from '../../../../../_libs/database/entities/ticket-product.entity'
+} from '@libs/database/entities'
+import { ImageInteractType } from '@libs/database/entities/image.entity'
+import Payment, { PaymentVoucherType } from '@libs/database/entities/payment.entity'
+import TicketProduct from '@libs/database/entities/ticket-product.entity'
 import {
   AppointmentRepository,
   CustomerRepository,
@@ -45,9 +44,10 @@ import {
   TicketRegimenRepository,
   TicketSurchargeRepository,
   TicketUserRepository,
-} from '../../../../../_libs/database/repositories'
-import { ImageRepository } from '../../../../../_libs/database/repositories/image.repository'
-import { TicketRepository } from '../../../../../_libs/database/repositories/ticket.repository'
+} from '@libs/database/repositories'
+import { ImageRepository } from '@libs/database/repositories/image.repository'
+import { TicketRepository } from '@libs/database/repositories/ticket.repository'
+import { Injectable } from '@nestjs/common'
 import { TicketGetManyQuery, TicketPaginationQuery, TicketRelationQuery } from './request'
 
 @Injectable()
@@ -150,7 +150,6 @@ export class TicketQueryService {
     const { oid, ticketList, relation } = options
     const ticketIdList = ESArray.uniqueArray(ticketList.map((i) => i.id))
     const customerIdList = ESArray.uniqueArray(ticketList.map((i) => i.customerId))
-    const customerSourceIdList = ticketList.map((i) => i.customerSourceId).filter((i) => !!i)
     const ticketIdPaymentEachItemList = ticketList
       .filter((i) => i.isPaymentEachItem)
       .map((i) => i.id)
@@ -283,11 +282,6 @@ export class TicketQueryService {
             },
           })
         : undefined,
-      relation?.customerSource && customerSourceIdList?.length
-        ? this.customerSourceRepository.findMany({
-            condition: { oid, id: { IN: customerSourceIdList } },
-          })
-        : undefined,
       relation?.toAppointment && ticketIdList.length
         ? this.appointmentRepository.findMany({
             condition: { oid, fromTicketId: { IN: ticketIdList } },
@@ -313,8 +307,7 @@ export class TicketQueryService {
     const ticketRadiologyList: TicketRadiology[] = dataPromise[15] || []
     const ticketUserList: TicketUser[] = dataPromise[16] || []
     const imageList: Image[] = dataPromise[17] || []
-    const customerSourceList: CustomerSource[] = dataPromise[18] || []
-    const toAppointmentList: Appointment[] = dataPromise[19] || []
+    const toAppointmentList: Appointment[] = dataPromise[18] || []
 
     ticketList.forEach((ticket: Ticket) => {
       if (relation?.customer) {
@@ -406,11 +399,6 @@ export class TicketQueryService {
       if (relation?.imageList) {
         ticket.imageList = imageList.filter((i) => {
           return i.ticketId === ticket.id
-        })
-      }
-      if (relation?.customerSource) {
-        ticket.customerSource = (customerSourceList || []).find((i) => {
-          return i.id === ticket.customerSourceId
         })
       }
       if (relation?.toAppointment) {

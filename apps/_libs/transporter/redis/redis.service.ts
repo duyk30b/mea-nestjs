@@ -21,7 +21,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       })
       await this.redisClient.connect()
       this.logger.log('Redis connection established')
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Redis connection error', error)
     }
   }
@@ -35,7 +35,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   async get(key: string): Promise<string> {
     try {
       return await this.redisClient.get(key)
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Error getting key ${key}`, error)
       throw error
     }
@@ -66,7 +66,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       } else {
         await this.redisClient.set(key, value)
       }
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Error setting key ${key}`, error)
       throw error
     }
@@ -75,7 +75,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   async del(key: string) {
     try {
       await this.redisClient.del(key)
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Error deleting key ${key}`, error)
       throw error
     }

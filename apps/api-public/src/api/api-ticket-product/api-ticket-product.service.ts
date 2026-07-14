@@ -1,9 +1,9 @@
+import { ProductRepository } from '@libs/database/repositories'
+import { TicketProductRepository } from '@libs/database/repositories/ticket-product.repository'
 import { Injectable } from '@nestjs/common'
-import { ProductRepository } from '../../../../_libs/database/repositories'
-import { TicketProductRepository } from '../../../../_libs/database/repositories/ticket-product.repository'
 import {
-  TicketProductGetManyQuery,
-  TicketProductPaginationQuery,
+    TicketProductGetManyQuery,
+    TicketProductPaginationQuery,
 } from './request'
 
 @Injectable()

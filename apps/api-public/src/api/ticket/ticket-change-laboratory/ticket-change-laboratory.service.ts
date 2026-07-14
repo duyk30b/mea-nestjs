@@ -1,26 +1,26 @@
+import { ESArray } from '@libs/common/helpers'
+import { BusinessError } from '@libs/database/common/error'
+import {
+    PaymentMoneyStatus,
+    TicketLaboratoryStatus,
+} from '@libs/database/common/variable'
+import { TicketLaboratoryResult } from '@libs/database/entities'
+import { TicketLaboratoryResultInsertType } from '@libs/database/entities/ticket-laboratory-result.entity'
+import {
+    TicketDestroyTicketLaboratoryGroupOperation,
+    TicketDestroyTicketLaboratoryOperation,
+} from '@libs/database/operations'
+import {
+    TicketLaboratoryGroupRepository,
+    TicketLaboratoryRepository,
+    TicketLaboratoryResultRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { ESArray } from '../../../../../_libs/common/helpers'
-import { BusinessError } from '../../../../../_libs/database/common/error'
-import {
-  PaymentMoneyStatus,
-  TicketLaboratoryStatus,
-} from '../../../../../_libs/database/common/variable'
-import { TicketLaboratoryResult } from '../../../../../_libs/database/entities'
-import { TicketLaboratoryResultInsertType } from '../../../../../_libs/database/entities/ticket-laboratory-result.entity'
-import {
-  TicketDestroyTicketLaboratoryGroupOperation,
-  TicketDestroyTicketLaboratoryOperation,
-} from '../../../../../_libs/database/operations'
-import {
-  TicketLaboratoryGroupRepository,
-  TicketLaboratoryRepository,
-  TicketLaboratoryResultRepository,
-} from '../../../../../_libs/database/repositories'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 import { TicketLaboratoryGroupPostQuery } from '../../api-ticket-laboratory-group/request'
 import {
-  TicketUpdatePriorityTicketLaboratoryBody,
-  TicketUpdateResultLaboratoryGroupBody,
+    TicketUpdatePriorityTicketLaboratoryBody,
+    TicketUpdateResultLaboratoryGroupBody,
 } from './request'
 
 @Injectable()

@@ -1,18 +1,18 @@
+import { MultipleFileUpload } from '@libs/common/dto/file'
+import { IsEnumValue } from '@libs/common/transform-validate/class-validator.custom'
+import { PickupStrategy } from '@libs/database/common/variable'
 import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Transform } from 'class-transformer'
 import {
-  IsArray,
-  IsDefined,
-  IsInt,
-  IsNumber,
-  IsObject,
-  IsString,
-  validateSync,
-  ValidationError,
+    IsArray,
+    IsDefined,
+    IsInt,
+    IsNumber,
+    IsObject,
+    IsString,
+    validateSync,
+    ValidationError,
 } from 'class-validator'
-import { MultipleFileUpload } from '../../../../../../_libs/common/dto/file'
-import { IsEnumValue } from '../../../../../../_libs/common/transform-validate/class-validator.custom'
-import { PickupStrategy } from '../../../../../../_libs/database/common/variable'
 import { TicketUserBasicBody } from '../../ticket-change-user/request'
 
 class ImagesChangeBody {
@@ -106,7 +106,7 @@ export class TicketProcessResultTicketProcedureBody extends MultipleFileUpload {
         return JSON.stringify(errValidate)
       }
       return instance
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })
@@ -136,7 +136,7 @@ export class TicketProcessResultTicketProcedureBody extends MultipleFileUpload {
         return JSON.stringify(errValidate)
       }
       return instance
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })
@@ -169,7 +169,7 @@ export class TicketProcessResultTicketProcedureBody extends MultipleFileUpload {
       })
       if (err.length) return JSON.stringify(err)
       else return result
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })
@@ -202,7 +202,7 @@ export class TicketProcessResultTicketProcedureBody extends MultipleFileUpload {
       })
       if (err.length) return JSON.stringify(err)
       else return result
-    } catch (error) {
+    } catch (error: any) {
       return error.message
     }
   })

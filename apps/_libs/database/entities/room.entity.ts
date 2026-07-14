@@ -5,10 +5,11 @@ import UserRoom from './user-room.entity'
 export enum RoomType {
   TicketOrder = 1,
   TicketClinic = 2,
-  Product = 3,
-  Procedure = 4,
-  Laboratory = 5,
-  Radiology = 6,
+  TicketReception = 3,
+  Product = 4,
+  Procedure = 5,
+  Laboratory = 6,
+  Radiology = 7,
 }
 
 @Entity('Room')

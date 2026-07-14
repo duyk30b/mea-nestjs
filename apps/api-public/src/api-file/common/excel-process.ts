@@ -1,6 +1,6 @@
+import { FileUploadDto } from '@libs/common/dto/file'
+import { BusinessError } from '@libs/database/common/error'
 import { Row, Workbook } from 'exceljs'
-import { FileUploadDto } from '../../../../_libs/common/dto/file'
-import { BusinessError } from '../../../../_libs/database/common/error'
 
 export type ExcelRuleType = {
   title: string
@@ -49,6 +49,17 @@ export class ExcelProcess {
         if (colIndex === 0) continue
 
         const cell = row.getCell(colIndex)
+
+        // console.log({
+        //   address: cell.address,
+        //   typeofValue: typeof cell.value,
+        //   value: cell.value,
+        //   text: cell.text,
+        //   model: cell.model,
+        //   type: cell.type,
+        //   numFmt: cell.numFmt,
+        //   effectiveType: cell.effectiveType,
+        // })
         const value = cell.value
         if (value == null) {
           excelDataRow.push(undefined) // cột không có giá trị
@@ -83,7 +94,7 @@ export class ExcelProcess {
         const rule = excelRules[key]
         const msgPrefix =
           `STT ${excelDataRow[0]}, hàng ${rowNumber}, `
-          + `cột ${ExcelColumnName[index]}, ${rule.title}: `
+          + `cột ${ExcelColumnName[index]}, ${rule.title}, giá trị "${v}". Lỗi: `
         let msgError = ''
         if (rule.required && (v == null || v === '')) {
           msgError = `${msgPrefix} không được để trống`

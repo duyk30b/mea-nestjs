@@ -1,35 +1,35 @@
+import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
+import { BusinessError } from '@libs/database/common/error'
+import { DeliveryStatus, MovementType } from '@libs/database/common/variable'
+import {
+    PaymentPersonType,
+    PaymentVoucherType,
+} from '@libs/database/entities/payment.entity'
+import { TicketRadiologyStatus } from '@libs/database/entities/ticket-radiology.entity'
+import { TicketStatus } from '@libs/database/entities/ticket.entity'
+import {
+    AppointmentRepository,
+    PaymentRepository,
+    PaymentTicketItemRepository,
+    ProductMovementRepository,
+    TicketAttributeRepository,
+    TicketBatchRepository,
+    TicketExpenseRepository,
+    TicketLaboratoryGroupRepository,
+    TicketLaboratoryRepository,
+    TicketLaboratoryResultRepository,
+    TicketPaymentDetailRepository,
+    TicketProcedureRepository,
+    TicketProductRepository,
+    TicketRadiologyRepository,
+    TicketReceptionRepository,
+    TicketRegimenItemRepository,
+    TicketRegimenRepository,
+    TicketRepository,
+    TicketSurchargeRepository,
+    TicketUserRepository,
+} from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { CacheDataService } from '../../../../../_libs/common/cache-data/cache-data.service'
-import { BusinessError } from '../../../../../_libs/database/common/error'
-import { DeliveryStatus, MovementType } from '../../../../../_libs/database/common/variable'
-import {
-  PaymentPersonType,
-  PaymentVoucherType,
-} from '../../../../../_libs/database/entities/payment.entity'
-import { TicketRadiologyStatus } from '../../../../../_libs/database/entities/ticket-radiology.entity'
-import { TicketStatus } from '../../../../../_libs/database/entities/ticket.entity'
-import {
-  AppointmentRepository,
-  PaymentRepository,
-  PaymentTicketItemRepository,
-  ProductMovementRepository,
-  TicketAttributeRepository,
-  TicketBatchRepository,
-  TicketExpenseRepository,
-  TicketLaboratoryGroupRepository,
-  TicketLaboratoryRepository,
-  TicketLaboratoryResultRepository,
-  TicketPaymentDetailRepository,
-  TicketProcedureRepository,
-  TicketProductRepository,
-  TicketRadiologyRepository,
-  TicketReceptionRepository,
-  TicketRegimenItemRepository,
-  TicketRegimenRepository,
-  TicketRepository,
-  TicketSurchargeRepository,
-  TicketUserRepository,
-} from '../../../../../_libs/database/repositories'
 import { ImageManagerService } from '../../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
 
