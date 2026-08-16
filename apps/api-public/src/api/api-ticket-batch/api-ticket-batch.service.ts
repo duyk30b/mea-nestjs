@@ -19,7 +19,6 @@ export class ApiTicketBatchService {
         customerId: filter?.customerId,
         productId: filter?.productId,
         ticketId: filter?.ticketId,
-        deliveryStatus: filter?.deliveryStatus,
       },
       sort,
     })
@@ -38,7 +37,6 @@ export class ApiTicketBatchService {
         customerId: filter?.customerId,
         productId: filter?.productId,
         ticketId: filter?.ticketId,
-        deliveryStatus: filter?.deliveryStatus,
       },
       relationLoadStrategy: 'query',
       sort,

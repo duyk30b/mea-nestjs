@@ -22,7 +22,7 @@ export default class TicketPaymentDetail {
 
   @Column({ default: 0 })
   @Expose()
-  paidItem: number // tiền thanh toán vào Ticket
+  paidItem: number // tiền thanh toán vào TicketItem
 
   @Column({ default: 0 })
   @Expose()
@@ -31,18 +31,6 @@ export default class TicketPaymentDetail {
   @Column({ default: 0 })
   @Expose()
   paidDiscount: number // tiền thanh toán vào chiết khấu // là số âm nhé
-
-  @Column({ default: 0 })
-  @Expose()
-  debtItem: number // tiền nợ của Item
-
-  @Column({ default: 0 })
-  @Expose()
-  debtSurcharge: number // tiền thanh toán vào phụ phí
-
-  @Column({ default: 0 })
-  @Expose()
-  debtDiscount: number // tiền thanh toán vào chiết khấu // là số âm nhé
 
   static fromRaw(raw: { [P in keyof TicketPaymentDetail]: any }) {
     if (!raw) return null

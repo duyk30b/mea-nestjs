@@ -28,7 +28,7 @@
 - totalMoneyAdd = 0
 - procedureMoneyAdd = 0
 - ticketRegimenItem: (quantityExpected: 0, quantityFinish: 0), quantityPayment = 0
-- ticketProcedureInRegimen: status = Pending, paymentMoneyStatus = NoEffect
+- ticketProcedureInRegimen: status = Pending, ticketItemPaymentType = NoEffect
 - Khi nhấn thanh toán không hiện gợi ý số tiền (đang hướng có thể xử lý bằng cách ticket: moneyExpected)
 
 2. Xóa
@@ -39,7 +39,7 @@
 - totalMoneyAdd = 0
 - procedureMoneyAdd = 0
 - ticketRegimenItem: (quantityExpected: 0, quantityFinish: 0), quantityPayment = 0
-- ticketProcedureInRegimen: status = Pending, paymentMoneyStatus = NoEffect
+- ticketProcedureInRegimen: status = Pending, ticketItemPaymentType = NoEffect
 
 2. Xóa
 - ticket: totalMoney không thay đổi
@@ -50,11 +50,11 @@
 # Chốt 1 vài logic
 - Lưu thanh toán ở regimenItem: quantityPayment chỉ sử dụng cho trường hợp thanh toán lẻ, 
   ==> trường hợp ticketPaid luôn = 0
-- ticketProcedure: paymentMoneyStatus luôn là NoEffect
+- ticketProcedure: ticketItemPaymentType luôn là NoEffect
 - Xóa: - được quyền xóa tất cả TicketProcedure 
        - nếu muốn xóa hết thì phải hoàn trả thanh toán (chỉ trong trường hợp thanh toán lẻ)
 - Thực hiện: - chỉ thực hiện thay đổi status
-- PaymentMoneyStatus của TicketProduct chỉ được gen ở front-end, đếm theo số thứ tự
+- TicketItemPaymentType của TicketProduct chỉ được gen ở front-end, đếm theo số thứ tự
 
 - Logic của paymentMoney
   + paymentMoney thể hiện liệu trình này đã sử dụng hết bao nhiêu tiền

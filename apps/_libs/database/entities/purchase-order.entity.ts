@@ -2,17 +2,16 @@ import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm'
 import { DeliveryStatus, DiscountType } from '../common/variable'
 import Distributor from './distributor.entity'
-import Payment from './payment.entity'
+import PaymentPurchaseOrder from './payment_purchase_order.entity'
 import PurchaseOrderItem from './purchase-order-item.entity'
 
 export enum PurchaseOrderStatus {
-  Schedule = 1,
-  Draft = 2,
-  Deposited = 3,
-  Executing = 4,
-  Debt = 5,
-  Completed = 6,
-  Cancelled = 7,
+  Draft = 1, // Nháp
+  Schedule = 2, // Đặt hàng
+  Executing = 3, // Đang thực hiện
+  Debt = 4, // Đã đóng
+  Completed = 5, // Hoàn thành
+  Cancelled = 6, // Hủy
 }
 
 @Entity('PurchaseOrder')
@@ -125,6 +124,17 @@ export default class PurchaseOrder {
 
   @Column({
     type: 'bigint',
+    default: () => '(EXTRACT(epoch FROM now()) * (1000))',
+    transformer: {
+      to: (value) => value,
+      from: (value) => (value == null ? value : Number(value)),
+    },
+  })
+  @Expose()
+  updatedAt: number
+
+  @Column({
+    type: 'bigint',
     nullable: true,
     transformer: {
       to: (value) => value,
@@ -144,8 +154,11 @@ export default class PurchaseOrder {
   distributor: Distributor
 
   @Expose()
-  @OneToMany(() => Payment, (payment) => payment.purchaseOrder)
-  paymentList: Payment[]
+  @OneToMany(
+    () => PaymentPurchaseOrder,
+    (paymentPurchaseOrder) => paymentPurchaseOrder.purchaseOrder
+  )
+  paymentPurchaseOrderList: PaymentPurchaseOrder[]
 
   static fromRaw(raw: { [P in keyof PurchaseOrder]: any }) {
     if (!raw) return null
@@ -175,7 +188,7 @@ export default class PurchaseOrder {
 export type PurchaseOrderRelationType = {
   [P in keyof Pick<
     PurchaseOrder,
-    'distributor' | 'paymentList' | 'purchaseOrderItemList'
+    'distributor' | 'paymentPurchaseOrderList' | 'purchaseOrderItemList'
   >]?: boolean
 }
 

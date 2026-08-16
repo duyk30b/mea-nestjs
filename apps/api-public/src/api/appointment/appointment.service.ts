@@ -2,16 +2,13 @@ import { BusinessException } from '@libs/common/exception-filter/exception-filte
 import { ESArray } from '@libs/common/helpers'
 import { ESTimer } from '@libs/common/helpers/time.helper'
 import { DeliveryStatus, DiscountType } from '@libs/database/common/variable'
-import { Customer, CustomerSource } from '@libs/database/entities'
-import Appointment, {
-  AppointmentStatus,
-} from '@libs/database/entities/appointment.entity'
+import { Customer } from '@libs/database/entities'
+import Appointment, { AppointmentStatus } from '@libs/database/entities/appointment.entity'
 import { TicketPaymentDetailInsertType } from '@libs/database/entities/ticket-payment-detail.entity'
 import Ticket, { TicketStatus } from '@libs/database/entities/ticket.entity'
 import {
   AppointmentRepository,
   CustomerRepository,
-  CustomerSourceRepository,
   TicketAttributeRepository,
   TicketPaymentDetailRepository,
   TicketRepository,
@@ -37,7 +34,7 @@ export class AppointmentService {
     private readonly ticketRepository: TicketRepository,
     private readonly ticketPaymentDetailRepository: TicketPaymentDetailRepository,
     private readonly ticketAttributeRepository: TicketAttributeRepository
-  ) { }
+  ) {}
 
   async pagination(oid: number, query: AppointmentPaginationQuery) {
     const { page, limit, filter, sort, relation } = query
@@ -107,16 +104,16 @@ export class AppointmentService {
     const promiseData = await Promise.all([
       relation?.customer
         ? this.customerRepository.findManyBy({
-          oid,
-          id: { IN: ESArray.uniqueArray(customerIdList) },
-        })
+            oid,
+            id: { IN: ESArray.uniqueArray(customerIdList) },
+          })
         : undefined,
 
       relation?.toTicket && toTicketIdList.length
         ? this.ticketRepository.findManyBy({
-          oid,
-          id: { IN: ESArray.uniqueArray(toTicketIdList) },
-        })
+            oid,
+            id: { IN: ESArray.uniqueArray(toTicketIdList) },
+          })
         : undefined,
     ])
 
@@ -225,7 +222,7 @@ export class AppointmentService {
         date: ESTimer.info(receptionAt, 7).date,
 
         note: '',
-        deliveryStatus: DeliveryStatus.NoStock,
+        deliveryStatus: DeliveryStatus.Empty,
         procedureMoney: 0,
         productMoney: 0,
         radiologyMoney: 0,
@@ -248,7 +245,10 @@ export class AppointmentService {
       })
 
       if (customer.isHasTicket === 0) {
-        customer = await this.customerRepository.updateOne({ oid, id: customer.id }, { isHasTicket: 1 })
+        customer = await this.customerRepository.updateOne(
+          { oid, id: customer.id },
+          { isHasTicket: 1 }
+        )
       }
       if (body.isPaymentEachItem) {
         const ticketPaymentDetailInsert: TicketPaymentDetailInsertType = {
@@ -259,9 +259,6 @@ export class AppointmentService {
           paidItem: 0,
           paidSurcharge: 0,
           paidDiscount: 0,
-          debtItem: 0,
-          debtSurcharge: 0,
-          debtDiscount: 0,
         }
         await this.ticketPaymentDetailRepository.insertOneBasic(ticketPaymentDetailInsert)
       }

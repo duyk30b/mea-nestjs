@@ -1,26 +1,26 @@
 import { BusinessException } from '@libs/common/exception-filter/exception-filter'
 import { ESArray } from '@libs/common/helpers/array.helper'
 import {
-    Customer,
-    Image,
-    Ticket,
-    TicketRadiology,
-    TicketUser,
+  Customer,
+  Image,
+  Ticket,
+  TicketRadiology,
+  TicketUser,
 } from '@libs/database/entities'
 import { PositionType } from '@libs/database/entities/position.entity'
 import {
-    CustomerRepository,
-    TicketRepository,
-    TicketUserRepository,
+  CustomerRepository,
+  TicketRepository,
+  TicketUserRepository,
 } from '@libs/database/repositories'
 import { ImageRepository } from '@libs/database/repositories/image.repository'
 import { TicketRadiologyRepository } from '@libs/database/repositories/ticket-radiology.repository'
 import { Injectable } from '@nestjs/common'
 import {
-    TicketRadiologyGetManyQuery,
-    TicketRadiologyGetOneQuery,
-    TicketRadiologyPaginationQuery,
-    TicketRadiologyRelationQuery,
+  TicketRadiologyGetManyQuery,
+  TicketRadiologyGetOneQuery,
+  TicketRadiologyPaginationQuery,
+  TicketRadiologyRelationQuery,
 } from './request'
 
 @Injectable()
@@ -44,7 +44,7 @@ export class ApiTicketRadiologyService {
         roomId: filter?.roomId,
         customerId: filter?.customerId,
         status: filter?.status,
-        paymentMoneyStatus: filter?.paymentMoneyStatus,
+        ticketItemPaymentType: filter?.ticketItemPaymentType,
         radiologyId: filter?.radiologyId,
         ticketId: filter?.ticketId,
         createdAt: filter?.createdAt,
@@ -92,7 +92,7 @@ export class ApiTicketRadiologyService {
         radiologyId: filter?.radiologyId,
         roomId: filter?.roomId,
         status: filter?.status,
-        paymentMoneyStatus: filter?.paymentMoneyStatus,
+        ticketItemPaymentType: filter?.ticketItemPaymentType,
 
         createdAt: filter?.createdAt,
         completedAt: filter?.completedAt,

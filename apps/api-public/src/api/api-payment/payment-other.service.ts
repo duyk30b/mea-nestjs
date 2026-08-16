@@ -1,15 +1,13 @@
-import { BusinessError } from '@libs/database/common/error'
 import {
-    MoneyDirection,
-    PaymentActionType,
-    PaymentInsertType,
-    PaymentPersonType,
-    PaymentVoucherType,
+  MoneyDirection,
+  PaymentActionType,
+  PaymentInsertType,
+  PaymentPersonType,
 } from '@libs/database/entities/payment.entity'
 import {
-    PurchaseOrderRepository,
-    TicketRepository,
-    WalletRepository,
+  PurchaseOrderRepository,
+  TicketRepository,
+  WalletRepository,
 } from '@libs/database/repositories'
 import { PaymentRepository } from '@libs/database/repositories/payment.repository'
 import { Injectable } from '@nestjs/common'
@@ -22,7 +20,7 @@ export class PaymentOtherService {
     private readonly ticketRepository: TicketRepository,
     private readonly purchaseOrderRepository: PurchaseOrderRepository,
     private readonly walletRepository: WalletRepository
-  ) { }
+  ) {}
 
   async updateInfo(options: {
     oid: number
@@ -31,65 +29,12 @@ export class PaymentOtherService {
     body: PaymentUpdateInfoBody
   }) {
     const { oid, userId, paymentId, body } = options
-    const time = Date.now()
 
-    const paymentOrigin = await this.paymentRepository.findOneBy({ oid, id: paymentId })
-    if (paymentOrigin.cashierId !== userId) {
-      throw new BusinessError('Không được sửa phiếu thanh toán do tài khoản khác tạo phiếu')
-    }
-
-    let walletOpenMoney = paymentOrigin.walletOpenMoney
-    let walletCloseMoney = paymentOrigin.walletCloseMoney
-    if (body.walletId !== paymentOrigin.walletId) {
-      const moneyTransfer = paymentOrigin.paidTotal
-      if (moneyTransfer) {
-        if (paymentOrigin.walletId && paymentOrigin.walletId !== '0') {
-          const walletOldModified = await this.walletRepository.updateOne(
-            { oid, id: paymentOrigin.walletId },
-            { money: () => `money - ${moneyTransfer}` }
-          )
-          const paymentInsert: PaymentInsertType = {
-            oid,
-            voucherType: PaymentVoucherType.Other,
-            voucherId: '0',
-            personType: PaymentPersonType.Other,
-            personId: 0,
-
-            cashierId: userId,
-            walletId: paymentOrigin.walletId,
-            createdAt: time,
-            moneyDirection: MoneyDirection.Other,
-            paymentActionType: PaymentActionType.Other,
-            note: body.note || 'Sửa phương thức thanh toán',
-
-            hasPaymentItem: 0,
-            paidTotal: 0,
-            debtTotal: 0,
-            personOpenDebt: 0,
-            personCloseDebt: 0,
-            walletOpenMoney: walletOldModified.money + moneyTransfer,
-            walletCloseMoney: walletOldModified.money,
-          }
-          await this.paymentRepository.insertOneBasic(paymentInsert)
-        }
-        if (body.walletId && body.walletId !== '0') {
-          const walletNewModified = await this.walletRepository.updateOne(
-            { oid, id: body.walletId },
-            { money: () => `money + ${moneyTransfer}` }
-          )
-          walletCloseMoney = walletNewModified.money
-          walletOpenMoney = walletNewModified.money - moneyTransfer
-        }
-      }
-    }
     const payment = await this.paymentRepository.updateOne(
       { oid, id: paymentId, cashierId: userId }, // chỉ sửa phiếu do chính mình tạo ra
       {
         createdAt: body.createdAt,
         note: body.note,
-        walletId: body.walletId,
-        walletOpenMoney,
-        walletCloseMoney,
       }
     )
     return { payment }
@@ -111,8 +56,6 @@ export class PaymentOtherService {
 
     const paymentInsert: PaymentInsertType = {
       oid,
-      voucherType: PaymentVoucherType.Other,
-      voucherId: '0',
       personType: PaymentPersonType.Other,
       personId: 0,
 
@@ -120,10 +63,9 @@ export class PaymentOtherService {
       walletId: body.walletId || '0',
       createdAt: Date.now(),
       moneyDirection: MoneyDirection.Out,
-      paymentActionType: PaymentActionType.Other,
+      paymentActionType: PaymentActionType.UserCreate,
       note: body.note || '',
 
-      hasPaymentItem: 0,
       paidTotal: -body.paidAmount,
       debtTotal: 0,
       personOpenDebt: 0,
@@ -150,8 +92,6 @@ export class PaymentOtherService {
     }
     const paymentInsert: PaymentInsertType = {
       oid,
-      voucherType: PaymentVoucherType.Other,
-      voucherId: '0',
       personType: PaymentPersonType.Other,
       personId: 0,
 
@@ -159,10 +99,9 @@ export class PaymentOtherService {
       walletId: body.walletId || '0',
       createdAt: Date.now(),
       moneyDirection: MoneyDirection.In,
-      paymentActionType: PaymentActionType.Other,
+      paymentActionType: PaymentActionType.UserCreate,
       note: body.note || '',
 
-      hasPaymentItem: 0,
       paidTotal: body.paidAmount,
       debtTotal: 0,
       personOpenDebt: 0,
@@ -176,32 +115,12 @@ export class PaymentOtherService {
 
   async destroy(options: { oid: number; userId: number; paymentId: string }) {
     const { oid, userId, paymentId } = options
-    const payment = await this.paymentRepository.findOneBy({ oid, id: paymentId })
-    if (payment.cashierId !== userId) {
-      throw new BusinessError('Không được phép xóa phiếu thanh toán của nhân viên khác tạo')
-    }
-    if (payment.voucherType === PaymentVoucherType.Ticket) {
-      const ticket = await this.ticketRepository.findOneBy({
-        oid,
-        id: payment.voucherId,
-      })
-      if (ticket) {
-        throw new BusinessError('Không được phép xóa phiếu thanh toán của khách hàng')
-      }
-    }
-    if (payment.voucherType === PaymentVoucherType.PurchaseOrder) {
-      const purchaseOrder = await this.purchaseOrderRepository.findOneBy({
-        oid,
-        id: payment.voucherId,
-      })
-      if (purchaseOrder) {
-        throw new BusinessError('Không được phép xóa phiếu thanh toán của nhà cung cấp')
-      }
-    }
     await this.paymentRepository.deleteMany({
       oid,
       id: paymentId,
       cashierId: userId, // chỉ được xóa phiếu do chính mình tạo ra
+      paymentActionType: PaymentActionType.UserCreate, // chỉ được xóa phiếu do chính mình tạo ra
     })
+    return { success: true }
   }
 }

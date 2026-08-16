@@ -2,20 +2,20 @@ import { UserPermission, UserPermissionOr } from '@libs/common/guards/user.guard
 import { BaseResponse } from '@libs/common/interceptor'
 import { External, TExternal } from '@libs/common/request/external.request'
 import { PermissionId } from '@libs/permission/permission.enum'
-import { Body, Controller, Delete, Param, Post } from '@nestjs/common'
+import { Body, Controller, Param, Post } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { TicketParams } from '../ticket-query/request'
 import {
-    TicketChangeAllMoneyBody,
-    TicketChangeSurchargeListBody,
-    TicketClinicChangeDiscountBody,
-    TicketReturnProductListBody,
-    TicketSendProductListBody,
-    TicketTerminalBody,
+  TicketChangeAllMoneyBody,
+  TicketChangeSurchargeListBody,
+  TicketClinicChangeDiscountBody,
+  TicketReturnProductListBody,
+  TicketShipProductListBody,
+  TicketTerminalBody,
 } from './request'
 import { TicketChangeAllMoneyService } from './service/ticket-change-all-money.service'
 import { TicketActionService } from './ticket-action.service'
-import { TicketDestroyService } from './ticket-destroy.service'
+import { TicketCancelService } from './ticket-cancel.service'
 
 @ApiTags('Ticket')
 @ApiBearerAuth('access-token')
@@ -23,9 +23,9 @@ import { TicketDestroyService } from './ticket-destroy.service'
 export class TicketActionController {
   constructor(
     private readonly ticketActionService: TicketActionService,
-    private readonly ticketDestroyService: TicketDestroyService,
+    private readonly ticketCancelService: TicketCancelService,
     private readonly ticketChangeAllMoneyService: TicketChangeAllMoneyService
-  ) { }
+  ) {}
 
   @Post('/:ticketId/start-executing')
   @UserPermission(PermissionId.TICKET_START_EXECUTING)
@@ -70,24 +70,54 @@ export class TicketActionController {
     return { data }
   }
 
-  @Post('/:ticketId/send-product')
-  @UserPermission(PermissionId.TICKET_CHANGE_PRODUCT_SEND_PRODUCT)
-  async sendProduct(
+  @Post('/:ticketId/ship-product-all')
+  @UserPermission(PermissionId.TICKET_CHANGE_PRODUCT_SHIP_PRODUCT)
+  async shipProductAll(
     @External() { oid, uid }: TExternal,
-    @Param() { ticketId }: TicketParams,
-    @Body() body: TicketSendProductListBody
+    @Param() { ticketId }: TicketParams
   ): Promise<BaseResponse> {
-    const data = await this.ticketActionService.sendProduct({
+    const data = await this.ticketActionService.shipProduct({
       oid,
       ticketId,
-      body,
+      shipType: 'ALL',
     })
     return { data }
   }
 
-  @Post('/:ticketId/return-product')
+  @Post('/:ticketId/ship-product-list')
+  @UserPermission(PermissionId.TICKET_CHANGE_PRODUCT_SHIP_PRODUCT)
+  async shipProduct(
+    @External() { oid, uid }: TExternal,
+    @Param() { ticketId }: TicketParams,
+    @Body() body: TicketShipProductListBody
+  ): Promise<BaseResponse> {
+    const data = await this.ticketActionService.shipProduct({
+      oid,
+      ticketId,
+      shipType: 'PARTIAL',
+      shipList: body.shipProductList,
+    })
+    return { data }
+  }
+
+  @Post('/:ticketId/return-product-all')
   @UserPermission(PermissionId.TICKET_CHANGE_PRODUCT_RETURN_PRODUCT)
-  async returnProduct(
+  async returnProductAll(
+    @External() { oid, uid }: TExternal,
+    @Param() { ticketId }: TicketParams
+  ): Promise<BaseResponse> {
+    const data = await this.ticketActionService.returnProduct({
+      oid,
+      ticketId,
+      returnType: 'ALL',
+      options: { changePendingIfNoStock: true },
+    })
+    return { data }
+  }
+
+  @Post('/:ticketId/return-product-list')
+  @UserPermission(PermissionId.TICKET_CHANGE_PRODUCT_RETURN_PRODUCT)
+  async returnProductList(
     @External() { oid, uid }: TExternal,
     @Param() { ticketId }: TicketParams,
     @Body() body: TicketReturnProductListBody
@@ -95,7 +125,8 @@ export class TicketActionController {
     const data = await this.ticketActionService.returnProduct({
       oid,
       ticketId,
-      body,
+      returnType: 'PARTIAL',
+      returnList: body.returnProductList,
     })
     return { data }
   }
@@ -116,7 +147,7 @@ export class TicketActionController {
     @External() { oid, uid }: TExternal,
     @Param() { ticketId }: TicketParams
   ): Promise<BaseResponse> {
-    const data = await this.ticketActionService.reopen({ oid, userId: uid, ticketId })
+    const data = await this.ticketActionService.reopen({ oid, ticketId })
     return { data }
   }
 
@@ -127,7 +158,7 @@ export class TicketActionController {
     @Param() { ticketId }: TicketParams,
     @Body() body: TicketTerminalBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketActionService.terminate({
+    const data = await this.ticketCancelService.terminate({
       oid,
       userId: uid,
       ticketId,
@@ -142,7 +173,7 @@ export class TicketActionController {
     @External() { oid }: TExternal,
     @Param() { ticketId }: TicketParams
   ): Promise<BaseResponse> {
-    const data = await this.ticketDestroyService.destroy({
+    const data = await this.ticketCancelService.destroy({
       oid,
       ticketId,
     })

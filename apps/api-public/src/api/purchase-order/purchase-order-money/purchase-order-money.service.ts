@@ -1,8 +1,8 @@
-import { BusinessError } from '@libs/database/common/error'
+import { PurchaseOrderActionType } from '@libs/database/common/variable'
 import { PaymentActionType } from '@libs/database/entities/payment.entity'
 import {
-    PurchaseOrderPaymentOperation,
-    PurchaseOrderPaymentOperationPropType,
+  PurchaseOrderChangeDebtOperation,
+  PurchaseOrderChangePaidOperation,
 } from '@libs/database/operations'
 import { Injectable } from '@nestjs/common'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
@@ -12,8 +12,9 @@ import { PurchaseOrderPayDebtBody, PurchaseOrderPaymentMoneyBody } from './reque
 export class PurchaseOrderMoneyService {
   constructor(
     private readonly socketEmitService: SocketEmitService,
-    private readonly purchaseOrderPaymentOperation: PurchaseOrderPaymentOperation
-  ) { }
+    private readonly purchaseOrderChangePaidOperation: PurchaseOrderChangePaidOperation,
+    private readonly purchaseOrderChangeDebtOperation: PurchaseOrderChangeDebtOperation
+  ) {}
 
   async paymentMoney(data: {
     oid: number
@@ -22,64 +23,61 @@ export class PurchaseOrderMoneyService {
     body: PurchaseOrderPaymentMoneyBody
   }) {
     const { oid, userId, purchaseOrderId, body } = data
-    const paymentResult = await this.purchaseOrderPaymentOperation.startPaymentMoney({
+    const paymentResult = await this.purchaseOrderChangePaidOperation.startPaymentMoney({
       oid,
       purchaseOrderId,
-      userId,
+      cashierId: userId,
       walletId: body.walletId,
       paymentActionType: body.paymentActionType,
-      paidTotal: body.paidTotal,
-      debtTotal: body.debtTotal,
       time: Date.now(),
       note: body.note,
+      paidTotal: body.paidTotal,
+      purchaseOrderActionType: body.purchaseOrderActionType,
     })
-    const { purchaseOrderModified, distributorModified, paymentCreated } = paymentResult
-    this.socketEmitService.socketPurchaseOrderListChange(oid, {
-      purchaseOrderUpsertedList: [purchaseOrderModified],
+    const { purchaseOrderModified, distributorModified, paymentPurchaseOrderCreated } =
+      paymentResult
+
+    purchaseOrderModified.distributor = distributorModified
+    this.socketEmitService.socketPurchaseOrderChange(oid, {
+      purchaseOrderId,
+      purchaseOrderModified,
+      paymentPurchaseOrderCreatedList: [paymentPurchaseOrderCreated],
     })
     this.socketEmitService.socketMasterDataChange(oid, { distributor: true })
-    return { purchaseOrderModified, distributorModified, paymentCreated }
+    return { purchaseOrderModified }
   }
 
   async payDebt(data: { oid: number; userId: number; body: PurchaseOrderPayDebtBody }) {
     const { oid, userId, body } = data
 
-    const totalMoneyReduce = body.dataList.reduce((acc, item) => {
-      return acc + item.debtTotalMinus
-    }, 0)
-    if (body.totalMoney !== totalMoneyReduce) {
-      throw new BusinessError('Tổng số tiền không khớp', {
-        totalMoney: body.totalMoney,
-        totalMoneyReduce,
-      })
-    }
-
-    const paymentPropList = body.dataList.map((i) => {
-      const paymentProp: PurchaseOrderPaymentOperationPropType = {
-        oid,
-        purchaseOrderId: i.purchaseOrderId,
-        userId,
-        walletId: body.walletId,
-        time: Date.now(),
-        note: body.note,
-        paymentActionType: PaymentActionType.PayDebt,
-        paidTotal: i.debtTotalMinus,
-        debtTotal: -i.debtTotalMinus,
-      }
-      return paymentProp
+    const payDebtResult = await this.purchaseOrderChangeDebtOperation.startChangeDebt({
+      oid,
+      distributorId: body.distributorId,
+      cashierId: userId,
+      walletId: body.walletId,
+      time: Date.now(),
+      note: body.note,
+      paymentActionType: PaymentActionType.PayDebt,
+      purchaseOrderActionType: PurchaseOrderActionType.PayDebt,
+      changeDebtList: body.changeDebtList,
     })
 
-    const paymentListResult =
-      await this.purchaseOrderPaymentOperation.startPaymentMoneyList(paymentPropList)
+    const { distributorModified, purchaseOrderModifiedList, paymentPurchaseOrderCreatedList } =
+      payDebtResult
 
-    paymentListResult.forEach((paymentResult) => {
-      this.socketEmitService.socketPurchaseOrderListChange(oid, {
-        purchaseOrderUpsertedList: [paymentResult.purchaseOrderModified],
+    purchaseOrderModifiedList.forEach((purchaseOrderModified) => {
+      purchaseOrderModified.distributor = distributorModified
+      this.socketEmitService.socketPurchaseOrderChange(oid, {
+        purchaseOrderId: purchaseOrderModified.id,
+        purchaseOrderModified,
+        paymentPurchaseOrderCreatedList: paymentPurchaseOrderCreatedList.filter((p) => {
+          return p.purchaseOrderId === purchaseOrderModified.id
+        }),
       })
     })
 
     this.socketEmitService.socketMasterDataChange(oid, { distributor: true })
 
-    return paymentListResult
+    return { purchaseOrderModifiedList, distributorModified }
   }
 }

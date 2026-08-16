@@ -7,42 +7,62 @@ import { Controller, Param, Post } from '@nestjs/common'
 import { Body } from '@nestjs/common/decorators/http/route-params.decorator'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { PurchaseOrderPaymentMoneyBody } from '../purchase-order-money/request'
-import { PurchaseOrderActionService } from './purchase-order-action.service'
-import { PurchaseOrderTerminalBody } from './request'
+import { PurchaseOrderActionService } from './purchase_order_action.service'
+import { PurchaseOrderCancelService } from './purchase_order_cancel.service'
+import {
+  PurchaseOrderReceiveProductListBody,
+  PurchaseOrderReturnProductListBody,
+  PurchaseOrderTerminalBody,
+} from './request'
 
 @ApiTags('PurchaseOrder')
 @ApiBearerAuth('access-token')
 @Controller('purchase-order')
 export class ApiPurchaseOrderActionController {
-  constructor(private readonly purchaseOrderActionService: PurchaseOrderActionService) { }
+  constructor(
+    private readonly purchaseOrderActionService: PurchaseOrderActionService,
+    private readonly purchaseOrderCancelService: PurchaseOrderCancelService
+  ) {}
 
   // ================== ACTION ================== //
-
-  @Post('/:id/destroy')
-  @UserPermissionOr(
-    PermissionId.PURCHASE_ORDER_DRAFT_CRUD,
-    PermissionId.PURCHASE_ORDER_DEPOSITED_DESTROY,
-    PermissionId.PURCHASE_ORDER_CANCELLED_DESTROY
-  )
-  async draftDestroy(
-    @External() { oid }: TExternal,
-    @Param() { id }: GenerateIdParam
+  @Post('/:id/receive-product-list')
+  @UserPermission(PermissionId.PURCHASE_ORDER_RECEIVE_PRODUCT)
+  async receiveProduct(
+    @External() { oid, uid }: TExternal,
+    @Param() { id }: GenerateIdParam,
+    @Body() body: PurchaseOrderReceiveProductListBody
   ): Promise<BaseResponse> {
-    const data = await this.purchaseOrderActionService.destroy({
+    const data = await this.purchaseOrderActionService.receiveProduct({
       oid,
       purchaseOrderId: id,
+      receiveType: 'PARTIAL',
+      receiveList: body.receiveList,
     })
     return { data }
   }
 
-  @Post('/:id/send-product-and-payment-and-close')
-  @UserPermission(PermissionId.PURCHASE_ORDER_SEND_PRODUCT, PermissionId.PURCHASE_ORDER_CLOSE)
-  async sendProductAndPaymentAndClose(
+  @Post('/:id/receive-product-all')
+  @UserPermission(PermissionId.PURCHASE_ORDER_RECEIVE_PRODUCT)
+  async receiveProductAll(
+    @External() { oid, uid }: TExternal,
+    @Param() { id }: GenerateIdParam
+  ): Promise<BaseResponse> {
+    const data = await this.purchaseOrderActionService.receiveProduct({
+      oid,
+      purchaseOrderId: id,
+      receiveType: 'ALL',
+    })
+    return { data }
+  }
+
+  @Post('/:id/receive-product-and-payment-and-close')
+  @UserPermission(PermissionId.PURCHASE_ORDER_RECEIVE_PRODUCT, PermissionId.PURCHASE_ORDER_CLOSE)
+  async receiveProductAndPaymentAndClose(
     @External() { oid, uid }: TExternal,
     @Param() { id }: GenerateIdParam,
     @Body() body: PurchaseOrderPaymentMoneyBody
   ): Promise<BaseResponse> {
-    const data = await this.purchaseOrderActionService.sendProductAndPaymentAndClose({
+    const data = await this.purchaseOrderActionService.receiveProductAndPaymentAndClose({
       oid,
       userId: uid,
       purchaseOrderId: id,
@@ -51,16 +71,33 @@ export class ApiPurchaseOrderActionController {
     return { data }
   }
 
-  @Post('/:id/send-product')
-  @UserPermission(PermissionId.PURCHASE_ORDER_SEND_PRODUCT)
-  async sendProduct(
+  @Post('/:id/return-product-list')
+  @UserPermission(PermissionId.PURCHASE_ORDER_RETURN_PRODUCT)
+  async returnProductList(
+    @External() { oid, uid }: TExternal,
+    @Param() { id }: GenerateIdParam,
+    @Body() body: PurchaseOrderReturnProductListBody
+  ): Promise<BaseResponse> {
+    const data = await this.purchaseOrderActionService.returnProduct({
+      oid,
+      purchaseOrderId: id,
+      returnType: 'PARTIAL',
+      returnList: body.returnList,
+    })
+    return { data }
+  }
+
+  @Post('/:id/return-product-all')
+  @UserPermission(PermissionId.PURCHASE_ORDER_RETURN_PRODUCT)
+  async returnProductAll(
     @External() { oid, uid }: TExternal,
     @Param() { id }: GenerateIdParam
   ): Promise<BaseResponse> {
-    const data = await this.purchaseOrderActionService.sendProduct({
+    const data = await this.purchaseOrderActionService.returnProduct({
+      returnType: 'ALL',
       oid,
-      userId: uid,
       purchaseOrderId: id,
+      options: { keepQuantity: true },
     })
     return { data }
   }
@@ -79,6 +116,19 @@ export class ApiPurchaseOrderActionController {
     return { data }
   }
 
+  @Post('/:id/reopen')
+  @UserPermission(PermissionId.PURCHASE_ORDER_REOPEN)
+  async reopen(
+    @External() { oid, uid }: TExternal,
+    @Param() { id }: GenerateIdParam
+  ): Promise<BaseResponse> {
+    const data = await this.purchaseOrderActionService.reopen({
+      oid,
+      purchaseOrderId: id,
+    })
+    return { data }
+  }
+
   @Post('/:id/terminate')
   @UserPermission(PermissionId.PURCHASE_ORDER_TERMINATE)
   async terminate(
@@ -86,11 +136,28 @@ export class ApiPurchaseOrderActionController {
     @Param() { id }: GenerateIdParam,
     @Body() body: PurchaseOrderTerminalBody
   ): Promise<BaseResponse> {
-    const data = await this.purchaseOrderActionService.terminate({
+    const data = await this.purchaseOrderCancelService.terminate({
       oid,
       userId: uid,
       purchaseOrderId: id,
       body,
+    })
+    return { data }
+  }
+
+  @Post('/:id/destroy')
+  @UserPermissionOr(
+    PermissionId.PURCHASE_ORDER_DRAFT_CRUD,
+    PermissionId.PURCHASE_ORDER_DEPOSITED_DESTROY,
+    PermissionId.PURCHASE_ORDER_CANCELLED_DESTROY
+  )
+  async destroy(
+    @External() { oid }: TExternal,
+    @Param() { id }: GenerateIdParam
+  ): Promise<BaseResponse> {
+    const data = await this.purchaseOrderCancelService.destroy({
+      oid,
+      purchaseOrderId: id,
     })
     return { data }
   }

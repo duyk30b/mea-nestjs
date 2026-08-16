@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, Repository } from 'typeorm'
-import { DeliveryStatus, DiscountType } from '../common/variable'
+import { DeliveryStatus } from '../common/variable'
 import { TicketProduct } from '../entities'
 import {
   TicketProductInsertType,
@@ -23,40 +23,6 @@ export class TicketProductManager extends _PostgreSqlManager<
   constructor() {
     super(TicketProduct)
   }
-
-  async calculatorDeliveryStatus(options: {
-    manager: EntityManager
-    oid: number
-    ticketId: string
-    ticketProductList?: TicketProduct[]
-  }) {
-    const { manager, oid, ticketId } = options
-    let { ticketProductList } = options
-    if (!ticketProductList) {
-      ticketProductList = await this.findManyBy(manager, { oid, ticketId })
-    }
-
-    let deliveryStatus = DeliveryStatus.Delivered
-    if (!ticketProductList.length) {
-      deliveryStatus = DeliveryStatus.NoStock
-    } else if (ticketProductList.every((i) => i.deliveryStatus === DeliveryStatus.NoStock)) {
-      deliveryStatus = DeliveryStatus.NoStock
-    } else if (ticketProductList.some((i) => i.deliveryStatus === DeliveryStatus.Pending)) {
-      deliveryStatus = DeliveryStatus.Pending
-    }
-
-    return { deliveryStatus, ticketProductList }
-  }
-}
-
-export type TicketProductUpdateMoneyType = {
-  id: number
-  productId: number
-  quantity: number
-  discountMoney: number
-  discountPercent: number
-  discountType: DiscountType
-  actualPrice: number
 }
 
 @Injectable()
@@ -72,5 +38,33 @@ export class TicketProductRepository extends _PostgreSqlRepository<
     @InjectRepository(TicketProduct) private ticketProductRepository: Repository<TicketProduct>
   ) {
     super(TicketProduct, ticketProductRepository)
+  }
+
+  async calculatorDeliveryStatus(options: {
+    manager: EntityManager
+    oid: number
+    ticketId: string
+    ticketProductList?: TicketProduct[]
+  }) {
+    const { manager, oid, ticketId } = options
+    let { ticketProductList } = options
+    if (!ticketProductList) {
+      ticketProductList = await this.managerFindManyBy(manager, { oid, ticketId })
+    }
+
+    let deliveryStatus = DeliveryStatus.Delivered
+    if (!ticketProductList.length) {
+      deliveryStatus = DeliveryStatus.Empty
+    } else if (ticketProductList.every((i) => i.quantity === 0)) {
+      deliveryStatus = DeliveryStatus.Empty
+    } else if (ticketProductList.every((i) => i.quantity === i.quantityCompleted)) {
+      deliveryStatus = DeliveryStatus.Delivered
+    } else if (ticketProductList.every((i) => i.quantityCompleted === 0)) {
+      deliveryStatus = DeliveryStatus.Pending
+    } else {
+      deliveryStatus = DeliveryStatus.Partial
+    }
+
+    return { deliveryStatus, ticketProductList }
   }
 }

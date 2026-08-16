@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
-import { DiscountType, PaymentMoneyStatus } from '../common/variable'
+import { DiscountType, TicketItemPaymentType } from '../common/variable'
 import Customer from './customer.entity'
 import Image from './image.entity'
 import Radiology from './radiology.entity'
@@ -61,9 +61,9 @@ export default class TicketRadiology {
   @Expose()
   status: TicketRadiologyStatus
 
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
+  @Column({ type: 'smallint', default: TicketItemPaymentType.TicketPaid })
   @Expose()
-  paymentMoneyStatus: PaymentMoneyStatus
+  ticketItemPaymentType: TicketItemPaymentType
 
   @Column({
     type: 'bigint',
@@ -114,10 +114,6 @@ export default class TicketRadiology {
   @Column({ default: 0 })
   @Expose()
   paid: number // tiền đã thanh toán
-
-  @Column({ default: 0 })
-  @Expose()
-  debt: number // tiền nợ
 
   @Column({
     type: 'bigint',
@@ -189,7 +185,6 @@ export default class TicketRadiology {
     entity.discountPercent = Number(raw.discountPercent)
     entity.actualPrice = Number(raw.actualPrice)
     entity.paid = Number(raw.paid)
-    entity.debt = Number(raw.debt)
 
     entity.createdAt = Number(raw.createdAt)
     entity.completedAt = raw.completedAt == null ? raw.completedAt : Number(raw.completedAt)
@@ -208,10 +203,10 @@ export type TicketRadiologyRelationType = {
   >]?: boolean
 } & {
   [P in keyof Pick<TicketRadiology, 'radiology'>]?:
-  | {
-    [P in keyof Pick<Radiology, 'radiologyGroup' | 'templateHtml'>]?: boolean
-  }
-  | boolean
+    | {
+        [P in keyof Pick<Radiology, 'radiologyGroup' | 'templateHtml'>]?: boolean
+      }
+    | boolean
 }
 
 export type TicketRadiologyInsertType = Omit<

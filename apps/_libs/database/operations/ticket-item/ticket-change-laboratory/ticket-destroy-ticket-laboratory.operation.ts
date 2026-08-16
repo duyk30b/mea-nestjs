@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { PaymentMoneyStatus, TicketLaboratoryStatus } from '../../../common/variable'
+import { TicketItemPaymentType, TicketLaboratoryStatus } from '../../../common/variable'
 import { TicketLaboratoryGroup } from '../../../entities'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import {
-  TicketLaboratoryGroupManager,
-  TicketLaboratoryManager,
-  TicketLaboratoryResultManager,
-  TicketManager,
+    TicketLaboratoryGroupManager,
+    TicketLaboratoryManager,
+    TicketLaboratoryResultManager,
+    TicketManager,
 } from '../../../repositories'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
 
@@ -46,8 +46,8 @@ export class TicketDestroyTicketLaboratoryOperation {
           ticketId,
           id: ticketLaboratoryId,
           status: TicketLaboratoryStatus.Pending,
-          paymentMoneyStatus: {
-            IN: [PaymentMoneyStatus.PendingPayment, PaymentMoneyStatus.TicketPaid],
+          ticketItemPaymentType: {
+            IN: [TicketItemPaymentType.PendingPayment, TicketItemPaymentType.TicketPaid],
           },
         }
       )
@@ -76,7 +76,7 @@ export class TicketDestroyTicketLaboratoryOperation {
             id: ticketLaboratoryDestroyed.ticketLaboratoryGroupId,
           })
       } else {
-        const { paymentMoneyStatus } = TicketLaboratoryGroup.calculatorPaymentMoneyStatus({
+        const { ticketItemPaymentType } = TicketLaboratoryGroup.calculatorTicketItemPaymentType({
           ticketLaboratoryList: ticketLaboratoryRemainList,
         })
         ticketLaboratoryGroupModified =
@@ -87,7 +87,7 @@ export class TicketDestroyTicketLaboratoryOperation {
               ticketId,
               id: ticketLaboratoryDestroyed.ticketLaboratoryGroupId,
             },
-            { paymentMoneyStatus }
+            { ticketItemPaymentType }
           )
       }
 

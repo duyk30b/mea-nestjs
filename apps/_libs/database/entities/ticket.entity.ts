@@ -5,7 +5,7 @@ import Appointment from './appointment.entity'
 import CustomerSource from './customer-source.entity'
 import Customer from './customer.entity'
 import Image from './image.entity'
-import Payment from './payment.entity'
+import PaymentTicket from './payment_ticket.entity'
 import TicketAttribute from './ticket-attribute.entity'
 import TicketBatch from './ticket-batch.entity'
 import TicketExpense from './ticket-expense.entity'
@@ -23,21 +23,19 @@ import TicketSurcharge from './ticket-surcharge.entity'
 import TicketUser from './ticket-user.entity'
 
 export enum TicketStatus {
-  Schedule = 1,
-  Draft = 2,
-  Deposited = 3,
-  Executing = 4,
-  Debt = 5,
-  Completed = 6,
-  Cancelled = 7,
+  Draft = 1,
+  Schedule = 2,
+  Executing = 3,
+  Debt = 4,
+  Completed = 5,
+  Cancelled = 6,
 }
 
 export const TicketStatusText = {
-  [TicketStatus.Schedule]: 'Hẹn trước',
   [TicketStatus.Draft]: 'Nháp',
-  [TicketStatus.Deposited]: 'Đặt chỗ',
+  [TicketStatus.Schedule]: 'Hẹn trước',
   [TicketStatus.Executing]: 'Đang xử lý',
-  [TicketStatus.Debt]: 'Đang nợ',
+  [TicketStatus.Debt]: 'Nợ',
   [TicketStatus.Completed]: 'Hoàn thành',
   [TicketStatus.Cancelled]: 'Đã hủy',
 }
@@ -77,7 +75,7 @@ export default class Ticket {
   @Expose()
   status: TicketStatus
 
-  @Column({ type: 'smallint', default: DeliveryStatus.NoStock })
+  @Column({ type: 'smallint', default: DeliveryStatus.Empty })
   @Expose()
   deliveryStatus: DeliveryStatus
 
@@ -221,7 +219,7 @@ export default class Ticket {
 
   @Column({ default: 0 })
   @Expose()
-  debtTotal: number // tổng tiền nợ
+  debtTotal: number // Khi có nợ: paidTotal + debtTotal = totalMoney
 
   @Column({ type: 'varchar', length: 100, default: JSON.stringify([]) })
   @Expose()
@@ -284,7 +282,7 @@ export default class Ticket {
   ticketPaymentDetail: TicketPaymentDetail
 
   @Expose()
-  paymentList: Payment[]
+  paymentTicketList: PaymentTicket[]
 
   @Expose()
   ticketReceptionList: TicketReception[]
@@ -395,7 +393,7 @@ export type TicketRelationType = {
     | 'ticketUserList'
     | 'imageList'
     | 'customerSource'
-    | 'paymentList'
+    | 'paymentTicketList'
   >]?: boolean
 }
 
@@ -406,8 +404,8 @@ export type TicketInsertType = Omit<
 
 export type TicketUpdateType = {
   [K in Exclude<keyof Ticket, keyof TicketRelationType | keyof Pick<Ticket, 'oid' | 'id'>>]:
-  | Ticket[K]
-  | (() => string)
+    | Ticket[K]
+    | (() => string)
 }
 
 export type TicketSortType = {

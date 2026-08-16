@@ -3,22 +3,22 @@ import { SortQuery } from '@libs/common/dto/query'
 import { valuesEnum } from '@libs/common/helpers/typescript.helper'
 import { IsEnumValue } from '@libs/common/transform-validate/class-validator.custom'
 import {
-    MoneyDirection,
-    PaymentPersonType,
-    PaymentVoucherType,
+  MoneyDirection,
+  PaymentActionType,
+  PaymentPersonType,
 } from '@libs/database/entities/payment.entity'
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
-import { IsBoolean, IsIn, IsNumber, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator'
+import {
+  IsBoolean,
+  IsIn,
+  IsNumber,
+  IsObject,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator'
 
 export class PaymentRelationQuery {
-  @Expose()
-  @IsBoolean()
-  ticket: boolean
-
-  @Expose()
-  @IsBoolean()
-  purchaseOrder?: boolean
-
   @Expose()
   @IsBoolean()
   customer?: boolean
@@ -40,31 +40,17 @@ export class PaymentRelationQuery {
   wallet?: boolean
 
   @Expose()
-  @IsBoolean()
-  paymentTicketItemList?: boolean
+  @IsObject()
+  paymentTicketList?: { ticket?: boolean }
+
+  @Expose()
+  @IsObject()
+  paymentPurchaseOrderList?: { purchaseOrder?: boolean }
 }
 
 const ConditionEnumMoneyDirection = createConditionEnum(MoneyDirection)
 
 export class PaymentFilterQuery {
-  @Expose()
-  @Transform((params: TransformFnParams) => transformConditionEnum(params, MoneyDirection))
-  @IsOptional()
-  moneyDirection: MoneyDirection | InstanceType<typeof ConditionEnumMoneyDirection>
-
-  @Expose()
-  @IsEnumValue(PaymentVoucherType)
-  @IsIn(valuesEnum(PaymentVoucherType))
-  voucherType: PaymentVoucherType
-
-  @Expose()
-  @IsString()
-  voucherId: string
-
-  @Expose()
-  @IsString()
-  walletId: string
-
   @Expose()
   @IsEnumValue(PaymentPersonType)
   @IsIn(valuesEnum(PaymentPersonType))
@@ -77,6 +63,20 @@ export class PaymentFilterQuery {
   @Expose()
   @IsNumber()
   cashierId: number
+
+  @Expose()
+  @IsString()
+  walletId: string
+
+  @Expose()
+  @IsEnumValue(PaymentActionType)
+  @IsIn(valuesEnum(PaymentActionType))
+  paymentActionType: PaymentActionType
+
+  @Expose()
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, MoneyDirection))
+  @IsOptional()
+  moneyDirection: MoneyDirection | InstanceType<typeof ConditionEnumMoneyDirection>
 
   @Expose()
   @Type(() => ConditionTimestamp)

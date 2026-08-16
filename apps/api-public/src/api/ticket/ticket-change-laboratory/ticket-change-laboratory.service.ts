@@ -1,7 +1,7 @@
 import { ESArray } from '@libs/common/helpers'
 import { BusinessError } from '@libs/database/common/error'
 import {
-    PaymentMoneyStatus,
+    TicketItemPaymentType,
     TicketLaboratoryStatus,
 } from '@libs/database/common/variable'
 import { TicketLaboratoryResult } from '@libs/database/entities'
@@ -79,8 +79,8 @@ export class TicketChangeLaboratoryService {
       throw new BusinessError('Phiếu đã hoàn thành không thể xóa')
     }
     if (
-      [PaymentMoneyStatus.PartialPaid, PaymentMoneyStatus.FullPaid].includes(
-        ticketLaboratoryGroupOrigin.paymentMoneyStatus
+      [TicketItemPaymentType.PartialPaid, TicketItemPaymentType.FullPaid].includes(
+        ticketLaboratoryGroupOrigin.ticketItemPaymentType
       )
     ) {
       throw new BusinessError('Phiếu đã đóng tiền không thể xóa')

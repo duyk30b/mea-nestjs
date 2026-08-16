@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
-import { PaymentMoneyStatus, TicketLaboratoryStatus } from '../common/variable'
+import { TicketItemPaymentType, TicketLaboratoryStatus } from '../common/variable'
 import Customer from './customer.entity'
 import LaboratoryGroup from './laboratory-group.entity'
 import TicketLaboratoryResult from './ticket-laboratory-result.entity'
@@ -40,9 +40,9 @@ export default class TicketLaboratoryGroup {
   @Expose()
   status: TicketLaboratoryStatus
 
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
+  @Column({ type: 'smallint', default: TicketItemPaymentType.TicketPaid })
   @Expose()
-  paymentMoneyStatus: PaymentMoneyStatus
+  ticketItemPaymentType: TicketItemPaymentType
 
   @Column({
     type: 'bigint',
@@ -112,23 +112,21 @@ export default class TicketLaboratoryGroup {
     return raws.map((i) => TicketLaboratoryGroup.fromRaw(i))
   }
 
-  static calculatorPaymentMoneyStatus(options: { ticketLaboratoryList?: TicketLaboratory[] }) {
+  static calculatorTicketItemPaymentType(options: { ticketLaboratoryList?: TicketLaboratory[] }) {
     const { ticketLaboratoryList } = options
 
-    let paymentMoneyStatus = PaymentMoneyStatus.TicketPaid
+    let ticketItemPaymentType = TicketItemPaymentType.TicketPaid
 
-    if (ticketLaboratoryList.every((i) => i.paymentMoneyStatus === PaymentMoneyStatus.FullPaid)) {
-      paymentMoneyStatus = PaymentMoneyStatus.FullPaid
+    if (ticketLaboratoryList.every((i) => i.ticketItemPaymentType === TicketItemPaymentType.FullPaid)) {
+      ticketItemPaymentType = TicketItemPaymentType.FullPaid
     } else if (
-      ticketLaboratoryList.every((i) => i.paymentMoneyStatus === PaymentMoneyStatus.PendingPayment)
+      ticketLaboratoryList.every((i) => i.ticketItemPaymentType === TicketItemPaymentType.PendingPayment)
     ) {
-      paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
+      ticketItemPaymentType = TicketItemPaymentType.PendingPayment
     } else if (ticketLaboratoryList.some((i) => i.paid)) {
-      paymentMoneyStatus = PaymentMoneyStatus.PartialPaid
-    } else if (ticketLaboratoryList.some((i) => i.debt)) {
-      paymentMoneyStatus = PaymentMoneyStatus.Debt
+      ticketItemPaymentType = TicketItemPaymentType.PartialPaid
     }
-    return { paymentMoneyStatus }
+    return { ticketItemPaymentType }
   }
 }
 

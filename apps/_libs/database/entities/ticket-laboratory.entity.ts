@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm'
-import { DiscountType, PaymentMoneyStatus, TicketLaboratoryStatus } from '../common/variable'
+import { DiscountType, TicketItemPaymentType, TicketLaboratoryStatus } from '../common/variable'
 import Customer from './customer.entity'
 import Laboratory from './laboratory.entity'
 import TicketUser from './ticket-user.entity'
@@ -51,9 +51,9 @@ export default class TicketLaboratory {
   @Expose()
   status: TicketLaboratoryStatus
 
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
+  @Column({ type: 'smallint', default: TicketItemPaymentType.TicketPaid })
   @Expose()
-  paymentMoneyStatus: PaymentMoneyStatus
+  ticketItemPaymentType: TicketItemPaymentType
 
   @Column({
     type: 'bigint',
@@ -104,10 +104,6 @@ export default class TicketLaboratory {
   @Column({ default: 0 })
   @Expose()
   paid: number // tiền đã thanh toán
-
-  @Column({ default: 0 })
-  @Expose()
-  debt: number // tiền nợ
 
   @Column({
     type: 'bigint',
@@ -165,7 +161,6 @@ export default class TicketLaboratory {
     entity.discountPercent = Number(raw.discountPercent)
     entity.actualPrice = Number(raw.actualPrice)
     entity.paid = Number(raw.paid)
-    entity.debt = Number(raw.debt)
 
     entity.createdAt = Number(raw.createdAt)
     entity.completedAt = raw.completedAt == null ? raw.completedAt : Number(raw.completedAt)

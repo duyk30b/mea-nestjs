@@ -76,7 +76,7 @@ export class TicketUpdateCommissionTicketUserOperator {
         if (!ticketItem) ticketUserRemoveList.push(tu)
         actualPrice = Math.round(ticketItem.unitActualPrice / ticketItem.unitRate)
         expectedPrice = Math.round(ticketItem.unitExpectedPrice / ticketItem.unitRate)
-        quantity = ticketItem.unitQuantity * ticketItem.unitRate
+        quantity = ticketItem.quantity
       }
       if (tu.positionType === PositionType.LaboratoryRequest) {
         const ticketItem = ticketLaboratoryMap[tu.ticketItemId]

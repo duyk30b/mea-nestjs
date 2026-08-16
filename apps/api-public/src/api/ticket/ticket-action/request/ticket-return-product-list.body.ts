@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger'
 import { Expose, Type } from 'class-transformer'
 import { ArrayMinSize, IsArray, IsDefined, IsInt, IsString, ValidateNested } from 'class-validator'
 
-class ReturnListBody {
+class ReturnProductListBody {
   @ApiProperty({ example: 56 })
   @Expose()
   @IsDefined()
@@ -15,23 +15,16 @@ class ReturnListBody {
   @IsDefined()
   @IsInt()
   @IsNumberGreaterThan(0)
-  unitQuantityReturn: number
-
-  @ApiProperty({ example: 3 })
-  @Expose()
-  @IsDefined()
-  @IsInt()
-  @IsNumberGreaterThan(0)
-  unitRate: number
+  quantityExecute: number
 }
 
 export class TicketReturnProductListBody {
-  @ApiProperty({ type: ReturnListBody, isArray: true })
+  @ApiProperty({ type: ReturnProductListBody, isArray: true })
   @Expose()
-  @Type(() => ReturnListBody)
+  @Type(() => ReturnProductListBody)
   @IsDefined()
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  returnList: ReturnListBody[]
+  returnProductList: ReturnProductListBody[]
 }

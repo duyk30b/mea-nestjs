@@ -9,7 +9,7 @@ import {
 } from '@libs/common/dto'
 import { SortQuery } from '@libs/common/dto/query'
 import {
-    PaymentMoneyStatus,
+    TicketItemPaymentType,
     TicketRegimenStatus,
 } from '@libs/database/common/variable'
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
@@ -40,7 +40,7 @@ export class TicketRegimenRelationQuery {
   ticketUserRequestList?: boolean
 }
 
-const ConditionEnumPaymentMoneyStatus = createConditionEnum(PaymentMoneyStatus)
+const ConditionEnumTicketItemPaymentType = createConditionEnum(TicketItemPaymentType)
 const ConditionEnumTicketRegimenStatus = createConditionEnum(TicketRegimenStatus)
 
 export class TicketRegimenFilterQuery {

@@ -1,26 +1,29 @@
 import {
-    Batch,
-    Customer,
-    Image,
-    Organization,
-    Product,
-    PurchaseOrder,
-    Ticket,
-    TicketAttribute,
-    TicketBatch,
-    TicketExpense,
-    TicketLaboratory,
-    TicketLaboratoryGroup,
-    TicketLaboratoryResult,
-    TicketPaymentDetail,
-    TicketProcedure,
-    TicketProduct,
-    TicketRadiology,
-    TicketReception,
-    TicketRegimen,
-    TicketRegimenItem,
-    TicketSurcharge,
-    TicketUser,
+  Batch,
+  Customer,
+  Image,
+  Organization,
+  PaymentPurchaseOrder,
+  PaymentTicket,
+  Product,
+  PurchaseOrder,
+  PurchaseOrderItem,
+  Ticket,
+  TicketAttribute,
+  TicketBatch,
+  TicketExpense,
+  TicketLaboratory,
+  TicketLaboratoryGroup,
+  TicketLaboratoryResult,
+  TicketPaymentDetail,
+  TicketProcedure,
+  TicketProduct,
+  TicketRadiology,
+  TicketReception,
+  TicketRegimen,
+  TicketRegimenItem,
+  TicketSurcharge,
+  TicketUser,
 } from '@libs/database/entities'
 import { Injectable } from '@nestjs/common'
 import { Server } from 'socket.io'
@@ -37,9 +40,9 @@ export class SocketEmitService {
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SERVER_EMIT_DEMO, { dataDemo })
   }
 
-  socketRoomTicketPaginationChange(oid: number, data: { roomId: number }) {
+  socketTicketPaginationChange(oid: number, data: { roomId: number }) {
     if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_ROOM_TICKET_PAGINATION_CHANGE, data)
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_PAGINATION_CHANGE, data)
   }
 
   socketTicketChange(
@@ -48,6 +51,7 @@ export class SocketEmitService {
       ticketId: string
       ticketModified?: Ticket
       ticketPaymentDetailModified?: TicketPaymentDetail
+      paymentTicketCreatedList?: PaymentTicket[]
       imageList?: { destroyedList?: Image[]; upsertedList?: Image[] }
       ticketAttribute?: { destroyedList?: TicketAttribute[]; upsertedList?: TicketAttribute[] }
       ticketUser?: { destroyedList?: TicketUser[]; upsertedList?: TicketUser[] }
@@ -76,6 +80,30 @@ export class SocketEmitService {
   ) {
     if (!this.io) return
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_TICKET_CHANGE, data)
+  }
+
+  socketPurchaseOrderPaginationChange(
+    oid: number,
+    data: { purchaseOrderCreated?: PurchaseOrder; purchaseOrderDestroyed?: PurchaseOrder }
+  ) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_PURCHASE_ORDER_PAGINATION_CHANGE, data)
+  }
+
+  socketPurchaseOrderChange(
+    oid: number,
+    data: {
+      purchaseOrderId: string
+      purchaseOrderModified?: PurchaseOrder
+      purchaseOrderItem?: {
+        destroyedList?: PurchaseOrderItem[]
+        upsertedList?: PurchaseOrderItem[]
+      }
+      paymentPurchaseOrderCreatedList?: PaymentPurchaseOrder[]
+    }
+  ) {
+    if (!this.io) return
+    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_PURCHASE_ORDER_CHANGE, data)
   }
 
   socketMasterDataChange(
@@ -131,16 +159,5 @@ export class SocketEmitService {
       return
     }
     this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_PRODUCT_LIST_CHANGE, data)
-  }
-
-  socketPurchaseOrderListChange(
-    oid: number,
-    data: {
-      purchaseOrderDestroyedList?: PurchaseOrder[]
-      purchaseOrderUpsertedList?: PurchaseOrder[]
-    }
-  ) {
-    if (!this.io) return
-    this.io.in(oid.toString()).emit(SOCKET_EVENT.SOCKET_PURCHASE_ORDER_LIST_CHANGE, data)
   }
 }

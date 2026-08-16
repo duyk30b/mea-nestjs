@@ -1,8 +1,5 @@
 import { GenerateId } from '@libs/database/common/generate-id'
-import {
-    PaymentMoneyStatus,
-    TicketLaboratoryStatus,
-} from '@libs/database/common/variable'
+import { TicketItemPaymentType, TicketLaboratoryStatus } from '@libs/database/common/variable'
 import { TicketLaboratoryGroupInsertType } from '@libs/database/entities/ticket-laboratory-group.entity'
 import { TicketLaboratoryInsertType } from '@libs/database/entities/ticket-laboratory.entity'
 import Ticket, { TicketStatus } from '@libs/database/entities/ticket.entity'
@@ -24,7 +21,7 @@ export class TicketAddTicketLaboratoryGroupService {
     private ticketLaboratoryRepository: TicketLaboratoryRepository,
     private ticketLaboratoryGroupRepository: TicketLaboratoryGroupRepository,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
-  ) { }
+  ) {}
 
   async addTicketLaboratoryGroup(props: {
     oid: number
@@ -57,9 +54,9 @@ export class TicketAddTicketLaboratoryGroupService {
               roomId: tlgAddOther.roomId,
               customerId: ticketOrigin.customerId,
               status: TicketLaboratoryStatus.Pending,
-              paymentMoneyStatus: ticketOrigin.isPaymentEachItem
-                ? PaymentMoneyStatus.PendingPayment
-                : PaymentMoneyStatus.TicketPaid,
+              ticketItemPaymentType: ticketOrigin.isPaymentEachItem
+                ? TicketItemPaymentType.PendingPayment
+                : TicketItemPaymentType.TicketPaid,
               completedAt: null,
               result: '',
             } satisfies TicketLaboratoryGroupInsertType
@@ -81,12 +78,11 @@ export class TicketAddTicketLaboratoryGroupService {
                   ticketLaboratoryGroupId: tlgCreatedList[tlgAddIndex].id,
                   roomId: tlgCreatedList[tlgAddIndex].roomId,
                   status: TicketLaboratoryStatus.Pending,
-                  paymentMoneyStatus: ticketOrigin.isPaymentEachItem
-                    ? PaymentMoneyStatus.PendingPayment
-                    : PaymentMoneyStatus.TicketPaid,
+                  ticketItemPaymentType: ticketOrigin.isPaymentEachItem
+                    ? TicketItemPaymentType.PendingPayment
+                    : TicketItemPaymentType.TicketPaid,
                   completedAt: null,
                   paid: 0,
-                  debt: 0,
                 } satisfies TicketLaboratoryInsertType
                 return tlEntity
               })

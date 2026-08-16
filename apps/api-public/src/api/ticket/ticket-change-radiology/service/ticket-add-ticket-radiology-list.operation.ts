@@ -1,4 +1,4 @@
-import { PaymentMoneyStatus } from '@libs/database/common/variable'
+import { TicketItemPaymentType } from '@libs/database/common/variable'
 import {
     TicketRadiologyInsertType,
     TicketRadiologyStatus,
@@ -52,18 +52,17 @@ export class TicketAddTicketRadiologyListService {
           customerId,
           completedAt: null,
           imageIds: '[]',
-          paymentMoneyStatus: (() => {
+          ticketItemPaymentType: (() => {
             if (i.ticketRadiology.actualPrice === 0) {
-              return PaymentMoneyStatus.NoEffect
+              return TicketItemPaymentType.NoEffect
             }
             if (ticketOrigin.isPaymentEachItem) {
-              return PaymentMoneyStatus.PendingPayment
+              return TicketItemPaymentType.PendingPayment
             } else {
-              return PaymentMoneyStatus.TicketPaid
+              return TicketItemPaymentType.TicketPaid
             }
           })(),
           paid: 0,
-          debt: 0,
         }
         return insert
       })

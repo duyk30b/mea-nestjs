@@ -2,35 +2,27 @@ import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
 import Customer from './customer.entity'
 import Distributor from './distributor.entity'
-import PaymentTicketItem from './payment-ticket-item.entity'
-import PurchaseOrder from './purchase-order.entity'
-import Ticket from './ticket.entity'
+import PaymentPurchaseOrder from './payment_purchase_order.entity'
+import PaymentTicket from './payment_ticket.entity'
 import User from './user.entity'
 import Wallet from './wallet.entity'
 
 export enum PaymentPersonType {
   Other = 0,
-  Distributor = 1,
-  Customer = 2,
+  Distributor = 1, // PurchaseOrder
+  Customer = 2, // Ticket
   Employee = 3,
 }
 
-export enum PaymentVoucherType {
-  Other = 0, // Không xác định
-  PurchaseOrder = 1,
-  Ticket = 2,
-}
-
 export enum PaymentActionType {
-  Other = 0, // Tạm ứng
   PaymentMoney = 1, // Thanh toán
   RefundMoney = 2, // Hoàn tiền
   Debit = 3, // Ghi nợ
-  CancelDebt = 4, // Hủy nợ
-  PayDebt = 5, // Trả nợ
-  Close = 6, // Đóng phiếu
-  Terminal = 7, // Hủy phiếu
-  FixByExcel = 8,
+  PayDebt = 4, // Trả nợ
+  RefundDebt = 5, // Hủy nợ
+  FixCustomerByExcel = 6, // Sửa customer bằng excel
+  FixWallet = 7, // Sửa ví
+  UserCreate = 8, // Tạo phiếu thanh toán
 }
 
 export enum MoneyDirection {
@@ -53,14 +45,6 @@ export default class Payment {
   @Expose()
   id: string
 
-  @Column({ type: 'smallint', default: PaymentVoucherType.Other })
-  @Expose()
-  voucherType: PaymentVoucherType
-
-  @Column({ type: 'bigint', default: 0 }) // ticketId hoặc purchaseOrderId
-  @Expose()
-  voucherId: string
-
   @Column({ type: 'smallint', default: PaymentPersonType.Other })
   @Expose()
   personType: PaymentPersonType
@@ -69,9 +53,25 @@ export default class Payment {
   @Expose()
   personId: number
 
+  @Column({ default: 0 }) // thu ngân viên thực hiện giao dịch
+  @Expose()
+  cashierId: number
+
   @Column({ type: 'bigint', default: 0 })
   @Expose()
   walletId: string
+
+  @Column({ type: 'smallint' })
+  @Expose()
+  paymentActionType: PaymentActionType
+
+  @Column({ type: 'smallint' })
+  @Expose()
+  moneyDirection: MoneyDirection
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  @Expose()
+  note: string // Ghi chú
 
   @Column({
     type: 'bigint',
@@ -80,29 +80,9 @@ export default class Payment {
   @Expose()
   createdAt: number
 
-  @Column({ type: 'smallint' })
-  @Expose()
-  moneyDirection: MoneyDirection
-
-  @Column({ type: 'smallint' })
-  @Expose()
-  paymentActionType: PaymentActionType
-
-  @Column({ default: 0 }) // distributorId hoặc customerId hoặc userId
-  @Expose()
-  cashierId: number
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  @Expose()
-  note: string // Ghi chú
-
-  @Column({ type: 'smallint', default: 0 })
-  @Expose()
-  hasPaymentItem: number
-
   @Column({ default: 0 })
   @Expose()
-  paidTotal: number // tổng tiền thanh toán
+  paidTotal: number // tổng tiền thanh toán, + là tiền vào, - là tiền ra
 
   @Column({ default: 0 })
   @Expose()
@@ -141,12 +121,6 @@ export default class Payment {
   walletCloseMoney: number
 
   @Expose()
-  ticket: Ticket
-
-  @Expose()
-  purchaseOrder: PurchaseOrder
-
-  @Expose()
   customer: Customer
 
   @Expose()
@@ -159,7 +133,10 @@ export default class Payment {
   cashier: User
 
   @Expose()
-  paymentTicketItemList: PaymentTicketItem[]
+  paymentTicketList: PaymentTicket[]
+
+  @Expose()
+  paymentPurchaseOrderList: PaymentPurchaseOrder[]
 
   @Expose()
   @ManyToOne((type) => Wallet, (wallet) => wallet.paymentList, {
@@ -174,6 +151,8 @@ export default class Payment {
     Object.assign(entity, raw)
 
     entity.createdAt = Number(raw.createdAt)
+    entity.paidTotal = Number(raw.paidTotal)
+    entity.debtTotal = Number(raw.debtTotal)
     entity.personOpenDebt = Number(raw.personOpenDebt)
     entity.personCloseDebt = Number(raw.personCloseDebt)
     entity.walletOpenMoney = Number(raw.walletOpenMoney)
@@ -190,14 +169,13 @@ export default class Payment {
 export type PaymentRelationType = {
   [P in keyof Pick<
     Payment,
-    | 'ticket'
-    | 'purchaseOrder'
     | 'customer'
     | 'distributor'
     | 'employee'
     | 'wallet'
     | 'cashier'
-    | 'paymentTicketItemList'
+    | 'paymentTicketList'
+    | 'paymentPurchaseOrderList'
   >]?: boolean
 }
 
@@ -205,8 +183,8 @@ export type PaymentInsertType = Omit<Payment, keyof PaymentRelationType | keyof 
 
 export type PaymentUpdateType = {
   [K in Exclude<keyof Payment, keyof PaymentRelationType | keyof Pick<Payment, 'oid' | 'id'>>]:
-  | Payment[K]
-  | (() => string)
+    | Payment[K]
+    | (() => string)
 }
 
 export type PaymentSortType = {

@@ -3,60 +3,51 @@ import { FileUploadDto } from '@libs/common/dto/file'
 import { ESArray } from '@libs/common/helpers'
 import { GenerateId } from '@libs/database/common/generate-id'
 import {
-    DeliveryStatus,
-    DiscountType,
-    MovementType,
-    PaymentMoneyStatus,
-    TicketRegimenStatus,
+  DeliveryStatus,
+  DiscountType,
+  MovementType,
+  TicketItemPaymentType,
+  TicketRegimenStatus,
 } from '@libs/database/common/variable'
 import {
-    Batch,
-    Customer,
-    Image,
-    Product,
-    TicketBatch,
-    TicketPaymentDetail,
-    TicketProduct,
-    TicketRegimen,
-    TicketRegimenItem,
-    TicketUser,
+  Batch,
+  Customer,
+  Image,
+  Product,
+  TicketBatch,
+  TicketPaymentDetail,
+  TicketProduct,
+  TicketRegimen,
+  TicketRegimenItem,
+  TicketUser,
 } from '@libs/database/entities'
 import { ImageInteractType } from '@libs/database/entities/image.entity'
-import {
-    MoneyDirection,
-    PaymentActionType,
-    PaymentInsertType,
-    PaymentPersonType,
-    PaymentVoucherType,
-} from '@libs/database/entities/payment.entity'
 import { PositionType } from '@libs/database/entities/position.entity'
 import { TicketBatchInsertType } from '@libs/database/entities/ticket-batch.entity'
 import {
-    TicketProcedureStatus,
-    TicketProcedureType,
+  TicketProcedureStatus,
+  TicketProcedureType,
 } from '@libs/database/entities/ticket-procedure.entity'
 import {
-    TicketProductInsertType,
-    TicketProductType,
+  TicketProductInsertType,
+  TicketProductType,
 } from '@libs/database/entities/ticket-product.entity'
 import { TicketStatus } from '@libs/database/entities/ticket.entity'
 import {
-    ProductPickupManager,
-    ProductPutawayManager,
-    TicketChangeItemMoneyManager,
-    TicketUserCommon,
+  ProductPickupManager,
+  ProductPutawayManager,
+  TicketChangeItemMoneyManager,
+  TicketUserCommon,
 } from '@libs/database/operations'
 import {
-    CustomerRepository,
-    PaymentRepository,
-    TicketBatchRepository,
-    TicketPaymentDetailRepository,
-    TicketProcedureRepository,
-    TicketProductRepository,
-    TicketRegimenItemRepository,
-    TicketRegimenRepository,
-    TicketRepository,
-    TicketUserRepository,
+  TicketBatchRepository,
+  TicketPaymentDetailRepository,
+  TicketProcedureRepository,
+  TicketProductRepository,
+  TicketRegimenItemRepository,
+  TicketRegimenRepository,
+  TicketRepository,
+  TicketUserRepository,
 } from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
 import { ImageManagerService } from '../../../../components/image-manager/image-manager.service'
@@ -71,8 +62,6 @@ export class TicketProcessResultTicketProcedureService {
     private imageManagerService: ImageManagerService,
     private ticketRepository: TicketRepository,
     private ticketPaymentDetailRepository: TicketPaymentDetailRepository,
-    private customerRepository: CustomerRepository,
-    private paymentRepository: PaymentRepository,
     private ticketProcedureRepository: TicketProcedureRepository,
     private ticketRegimenRepository: TicketRegimenRepository,
     private ticketRegimenItemRepository: TicketRegimenItemRepository,
@@ -83,7 +72,7 @@ export class TicketProcessResultTicketProcedureService {
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager,
     private productPickupManager: ProductPickupManager,
     private productPutawayManager: ProductPutawayManager
-  ) { }
+  ) {}
 
   async processResultTicketProcedure(props: {
     oid: number
@@ -111,7 +100,6 @@ export class TicketProcessResultTicketProcedureService {
             IN: [
               TicketStatus.Draft,
               TicketStatus.Schedule,
-              TicketStatus.Deposited,
               TicketStatus.Executing,
             ],
           },
@@ -257,7 +245,7 @@ export class TicketProcessResultTicketProcedureService {
                 warehouseId: i.warehouseId,
                 productId: i.productId,
                 batchId: i.batchId,
-                quantity: i.unitQuantity * i.unitRate,
+                quantity: i.quantityCompleted,
                 costAmount: i.costAmount,
                 expectedPrice: Math.round(i.unitExpectedPrice / i.unitRate),
                 actualPrice: Math.round(i.unitActualPrice / i.unitRate),
@@ -311,10 +299,10 @@ export class TicketProcessResultTicketProcedureService {
               unitActualPrice: 0,
 
               costAmount: i.pickupCostAmount,
-              unitQuantity: i.pickupQuantity / 1, // chỗ này thì chỉ cho lấy unitRate = 1
-              deliveryStatus: DeliveryStatus.Delivered,
+              quantity: i.pickupQuantity,
+              quantityCompleted: i.pickupQuantity,
 
-              paymentMoneyStatus: PaymentMoneyStatus.NoEffect,
+              ticketItemPaymentType: TicketItemPaymentType.NoEffect,
               pickupStrategy: i.pickupStrategy,
               warehouseIds: JSON.stringify([]),
               productId: i.productId,
@@ -325,11 +313,10 @@ export class TicketProcessResultTicketProcedureService {
               priority: 0,
               createdAt,
               unitRate: 1,
-              unitQuantityPrescription: 0,
+              quantityPrescription: 0,
               printPrescription: 0,
               hintUsage: '',
               paid: 0,
-              debt: 0,
             }
             return insert
           })
@@ -359,9 +346,8 @@ export class TicketProcessResultTicketProcedureService {
               warehouseId: batchOrigin?.warehouseId || 0,
               productId: i.productId,
               batchId: i.batchId || 0, // thằng pickupStrategy.NoImpact luôn lấy batchId = 0
-              deliveryStatus: DeliveryStatus.Delivered,
               unitRate: 1,
-              unitQuantity: i.pickupQuantity / ticketProductCreated.unitRate,
+              quantityCompleted: i.pickupQuantity,
               costAmount: i.pickupCostAmount,
               unitActualPrice: ticketProductCreated.unitActualPrice,
               unitExpectedPrice: ticketProductCreated.unitExpectedPrice,
@@ -376,13 +362,11 @@ export class TicketProcessResultTicketProcedureService {
       }
 
       // === 5. Calculator
-      let paymentMoneyStatus = ticketProcedureOrigin.paymentMoneyStatus
+      let ticketItemPaymentType = ticketProcedureOrigin.ticketItemPaymentType
       let ticketProcedureStatus = ticketProcedureOrigin.status
       let paidItemAdd = 0
       let paidWaitAdd = 0
-      let debtItemAdd = 0
       let ticketProcedurePaidUpdate = ticketProcedureOrigin.paid
-      let ticketProcedureDebtUpdate = ticketProcedureOrigin.debt
       let procedureMoneyAdd = 0
       let itemsDiscountAdd = 0
 
@@ -404,74 +388,72 @@ export class TicketProcessResultTicketProcedureService {
           return acc + cur.quantity * cur.commissionMoney
         }, 0)
 
-      // === 5.3. TH Hoàn thành: Tính toán TicketProcedureStatus và PaymentMoneyStatus ===
+      // === 5.3. TH Hoàn thành: Tính toán TicketProcedureStatus và TicketItemPaymentType ===
       if (ticketProcedureResult.completedAt) {
         ticketProcedureStatus = TicketProcedureStatus.Completed
         const moneyAmountTemp = ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice
         // A.1. Với trường hợp NoEffect
-        if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.NoEffect) {
+        if (ticketProcedureOrigin.ticketItemPaymentType === TicketItemPaymentType.NoEffect) {
           if (ticketOrigin.isPaymentEachItem) {
             if (ticketPaymentDetailOrigin.paidWait >= moneyAmountTemp) {
               // transfer tiền từ paidWait vào paidItem
-              paymentMoneyStatus = PaymentMoneyStatus.FullPaid
+              ticketItemPaymentType = TicketItemPaymentType.FullPaid
               paidWaitAdd = -moneyAmountTemp
               paidItemAdd = moneyAmountTemp
               ticketProcedurePaidUpdate = moneyAmountTemp
             } else {
               // không đủ tiền thì thôi, vẫn ở trạng thái Pending
-              paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
+              ticketItemPaymentType = TicketItemPaymentType.PendingPayment
             }
           } else {
             // tính tiền theo Ticket thì chuyển sang trạng thái đã thanh toán theo ticket (cập nhật tiền tí nữa sẽ tính ở dưới)
-            paymentMoneyStatus = PaymentMoneyStatus.TicketPaid
+            ticketItemPaymentType = TicketItemPaymentType.TicketPaid
           }
         }
         // A.2. Với trường hợp PendingPayment
-        if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.PendingPayment) {
+        if (ticketProcedureOrigin.ticketItemPaymentType === TicketItemPaymentType.PendingPayment) {
           if (ticketPaymentDetailOrigin.paidWait >= moneyAmountTemp) {
             // transfer tiền từ paidWait vào paidItem
-            paymentMoneyStatus = PaymentMoneyStatus.FullPaid
+            ticketItemPaymentType = TicketItemPaymentType.FullPaid
             paidWaitAdd = -moneyAmountTemp
             paidItemAdd = moneyAmountTemp
             ticketProcedurePaidUpdate = moneyAmountTemp
           } else {
             // không đủ tiền thì thôi, vẫn ở trạng thái Pending
-            paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
+            ticketItemPaymentType = TicketItemPaymentType.PendingPayment
           }
         }
       }
 
-      // === 5.4. TH Hủy: Tính toán TicketProcedureStatus và PaymentMoneyStatus ===
+      // === 5.4. TH Hủy: Tính toán TicketProcedureStatus và TicketItemPaymentType ===
       if (ticketProcedureOrigin.completedAt && !ticketProcedureResult.completedAt) {
         // Tính lại ticketPaid và ticketDebt
-        if (ticketProcedureOrigin.paid || ticketProcedureOrigin.debt) {
+        if (ticketProcedureOrigin.paid) {
           ticketProcedurePaidUpdate = 0
-          ticketProcedureDebtUpdate = 0
           if (ticketOrigin.isPaymentEachItem) {
             paidItemAdd = -ticketProcedureOrigin.paid
             paidWaitAdd = ticketProcedureOrigin.paid
-            debtItemAdd = -ticketProcedureOrigin.debt
           }
         }
         if (ticketProcedureOrigin.ticketProcedureType === TicketProcedureType.Normal) {
           ticketProcedureStatus = TicketProcedureStatus.Pending
-          if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.TicketPaid) {
-            paymentMoneyStatus = PaymentMoneyStatus.TicketPaid
+          if (ticketProcedureOrigin.ticketItemPaymentType === TicketItemPaymentType.TicketPaid) {
+            ticketItemPaymentType = TicketItemPaymentType.TicketPaid
           } else {
-            paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
+            ticketItemPaymentType = TicketItemPaymentType.PendingPayment
           }
         }
         if (ticketProcedureOrigin.ticketProcedureType === TicketProcedureType.InRegimen) {
-          // Nếu hủy thì paymentMoneyStatus và status về Pending hoặc NoEffect
+          // Nếu hủy thì ticketItemPaymentType và status về Pending hoặc NoEffect
           if (ticketRegimenOrigin.isEffectTotalMoney) {
             ticketProcedureStatus = TicketProcedureStatus.Pending
-            if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.TicketPaid) {
-              paymentMoneyStatus = PaymentMoneyStatus.TicketPaid
+            if (ticketProcedureOrigin.ticketItemPaymentType === TicketItemPaymentType.TicketPaid) {
+              ticketItemPaymentType = TicketItemPaymentType.TicketPaid
             } else {
-              paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
+              ticketItemPaymentType = TicketItemPaymentType.PendingPayment
             }
           } else {
-            paymentMoneyStatus = PaymentMoneyStatus.NoEffect
+            ticketItemPaymentType = TicketItemPaymentType.NoEffect
             ticketProcedureStatus = TicketProcedureStatus.NoEffect
           }
         }
@@ -488,20 +470,19 @@ export class TicketProcessResultTicketProcedureService {
           result: ticketProcedureResult.result,
           completedAt: ticketProcedureResult.completedAt,
           status: ticketProcedureStatus,
-          paymentMoneyStatus,
+          ticketItemPaymentType,
           paid: ticketProcedurePaidUpdate,
-          debt: ticketProcedureDebtUpdate,
         }
       )
 
       if (ticketProcedureModified.completedAt) {
-        if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.NoEffect) {
+        if (ticketProcedureOrigin.ticketItemPaymentType === TicketItemPaymentType.NoEffect) {
           procedureMoneyAdd = ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice
           itemsDiscountAdd = ticketProcedureOrigin.quantity * ticketProcedureOrigin.discountMoney
         }
       }
       if (ticketProcedureOrigin.completedAt && !ticketProcedureModified.completedAt) {
-        if (ticketProcedureModified.paymentMoneyStatus === PaymentMoneyStatus.NoEffect) {
+        if (ticketProcedureModified.ticketItemPaymentType === TicketItemPaymentType.NoEffect) {
           procedureMoneyAdd = -ticketProcedureOrigin.quantity * ticketProcedureOrigin.actualPrice
           itemsDiscountAdd = -ticketProcedureOrigin.quantity * ticketProcedureOrigin.discountMoney
         }
@@ -515,7 +496,6 @@ export class TicketProcessResultTicketProcedureService {
         || procedureMoneyAdd !== 0
         || paidItemAdd !== 0
         || paidWaitAdd !== 0
-        || debtItemAdd !== 0
       ) {
         ticketModified = await this.ticketChangeItemMoneyManager.changeItemMoney({
           manager,
@@ -527,47 +507,11 @@ export class TicketProcessResultTicketProcedureService {
             procedureMoneyAdd,
             itemsDiscountAdd,
           },
-          other: {
-            debtTotalAdd: debtItemAdd,
-          },
           ticketPaymentDetail: {
             paidWaitAdd,
             paidItemAdd,
-            debtItemAdd,
           },
         })
-      }
-      if (debtItemAdd) {
-        const timePayment = Date.now()
-        customerModified = await this.customerRepository.managerUpdateOne(
-          manager,
-          { oid, id: customerId },
-          { updatedAt: timePayment, debt: () => `debt + ${debtItemAdd}` }
-        )
-        const paymentInsert: PaymentInsertType = {
-          oid,
-          voucherType: PaymentVoucherType.Ticket,
-          voucherId: ticketId,
-          personType: PaymentPersonType.Customer,
-          personId: customerId,
-
-          cashierId: 0,
-          walletId: '0',
-          createdAt: timePayment,
-          paymentActionType: PaymentActionType.Other,
-          moneyDirection: MoneyDirection.Other,
-          note: '',
-
-          hasPaymentItem: 0,
-          paidTotal: 0,
-          debtTotal: debtItemAdd,
-          personOpenDebt: customerModified.debt - debtItemAdd,
-          personCloseDebt: customerModified.debt,
-          walletOpenMoney: 0,
-          walletCloseMoney: 0,
-        }
-
-        const paymentCreated = await this.paymentRepository.managerInsertOne(manager, paymentInsert)
       }
 
       // Tính toán cho TicketProcedure Regimen
@@ -584,12 +528,12 @@ export class TicketProcessResultTicketProcedureService {
             moneyAmountUsedAdd =
               ticketProcedureModified.quantity * ticketProcedureModified.actualPrice
           }
-          if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.NoEffect) {
+          if (ticketProcedureOrigin.ticketItemPaymentType === TicketItemPaymentType.NoEffect) {
             quantityActualAdd = ticketProcedureModified.quantity
             moneyAmountActualAdd =
               ticketProcedureModified.quantity * ticketProcedureModified.actualPrice
           }
-          if (ticketProcedureOrigin.paymentMoneyStatus === PaymentMoneyStatus.PendingPayment) {
+          if (ticketProcedureOrigin.ticketItemPaymentType === TicketItemPaymentType.PendingPayment) {
           }
         }
 
@@ -598,7 +542,7 @@ export class TicketProcessResultTicketProcedureService {
           quantityUsedAdd = -ticketProcedureModified.quantity
           moneyAmountUsedAdd =
             -ticketProcedureModified.quantity * ticketProcedureModified.actualPrice
-          if (ticketProcedureModified.paymentMoneyStatus === PaymentMoneyStatus.NoEffect) {
+          if (ticketProcedureModified.ticketItemPaymentType === TicketItemPaymentType.NoEffect) {
             quantityActualAdd = -ticketProcedureModified.quantity
             moneyAmountActualAdd =
               -ticketProcedureModified.quantity * ticketProcedureModified.actualPrice
@@ -643,7 +587,6 @@ export class TicketProcessResultTicketProcedureService {
           || moneyAmountActualAdd !== 0
           || moneyAmountUsedAdd !== 0
           || paidItemAdd !== 0
-          || debtItemAdd !== 0
         ) {
           ticketRegimenModified = await this.ticketRegimenRepository.managerUpdateOne(
             manager,
@@ -655,7 +598,6 @@ export class TicketProcessResultTicketProcedureService {
               moneyAmountActual: () => `"moneyAmountActual" + ${moneyAmountActualAdd}`,
               moneyAmountUsed: () => `"moneyAmountUsed" + ${moneyAmountUsedAdd}`,
               paidItem: () => `paidItem + ${paidItemAdd}`,
-              debtItem: () => `debtItem + ${debtItemAdd}`,
             }
           )
         }

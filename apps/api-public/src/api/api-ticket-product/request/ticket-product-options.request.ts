@@ -1,10 +1,6 @@
-import {
-    ConditionTimestamp,
-    createConditionEnum,
-    transformConditionEnum,
-} from '@libs/common/dto'
+import { ConditionTimestamp, createConditionEnum, transformConditionEnum } from '@libs/common/dto'
 import { SortQuery } from '@libs/common/dto/query'
-import { DeliveryStatus, PaymentMoneyStatus } from '@libs/database/common/variable'
+import { DeliveryStatus, TicketItemPaymentType } from '@libs/database/common/variable'
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
 import { IsBoolean, IsInt, IsOptional, ValidateNested } from 'class-validator'
 
@@ -23,13 +19,13 @@ export class TicketProductRelationQuery {
 }
 
 const ConditionEnumDeliveryStatus = createConditionEnum(DeliveryStatus)
-const ConditionEnumPaymentMoneyStatus = createConditionEnum(PaymentMoneyStatus)
+const ConditionEnumTicketItemPaymentType = createConditionEnum(TicketItemPaymentType)
 
 export class TicketProductFilterQuery {
   @Expose()
-  @Transform((params: TransformFnParams) => transformConditionEnum(params, PaymentMoneyStatus))
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketItemPaymentType))
   @IsOptional()
-  paymentMoneyStatus: PaymentMoneyStatus | InstanceType<typeof ConditionEnumPaymentMoneyStatus>
+  ticketItemPaymentType: TicketItemPaymentType | InstanceType<typeof ConditionEnumTicketItemPaymentType>
 
   @Expose()
   @IsInt()
@@ -44,14 +40,9 @@ export class TicketProductFilterQuery {
   ticketId: string
 
   @Expose()
-  @Transform((params: TransformFnParams) => transformConditionEnum(params, DeliveryStatus))
-  @IsOptional()
-  deliveryStatus: DeliveryStatus | InstanceType<typeof ConditionEnumDeliveryStatus>
-
-  @Expose()
   @Type(() => ConditionTimestamp)
   @ValidateNested({ each: true })
   createdAt: ConditionTimestamp
 }
 
-export class TicketProductSortQuery extends SortQuery { }
+export class TicketProductSortQuery extends SortQuery {}

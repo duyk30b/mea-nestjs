@@ -1,8 +1,8 @@
-import { createConditionEnum, transformConditionEnum } from '@libs/common/dto'
+import { createConditionEnum } from '@libs/common/dto'
 import { SortQuery } from '@libs/common/dto/query'
 import { DeliveryStatus } from '@libs/database/common/variable'
-import { Expose, Transform, TransformFnParams } from 'class-transformer'
-import { IsBoolean, IsIn, IsInt, IsOptional, IsString } from 'class-validator'
+import { Expose } from 'class-transformer'
+import { IsBoolean, IsIn, IsInt, IsString } from 'class-validator'
 
 export class TicketBatchRelationQuery {
   @Expose()
@@ -36,11 +36,6 @@ export class TicketBatchFilterQuery {
   @Expose()
   @IsString()
   ticketId: string
-
-  @Expose()
-  @Transform((params: TransformFnParams) => transformConditionEnum(params, DeliveryStatus))
-  @IsOptional()
-  deliveryStatus: DeliveryStatus | InstanceType<typeof ConditionEnumDeliveryStatus>
 }
 
 export class TicketBatchSortQuery extends SortQuery {

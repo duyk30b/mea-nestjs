@@ -1,12 +1,16 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
-import { DeliveryStatus, PaymentMoneyStatus } from '../../../common/variable'
+import { DeliveryStatus, TicketItemPaymentType } from '../../../common/variable'
 import { TicketProduct, TicketUser } from '../../../entities'
 import { PositionType } from '../../../entities/position.entity'
 import { TicketProductType } from '../../../entities/ticket-product.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
-import { TicketManager, TicketProductManager, TicketUserManager } from '../../../repositories'
+import {
+    TicketProductRepository,
+    TicketRepository,
+    TicketUserRepository,
+} from '../../../repositories'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
 import { TicketUserCommon } from '../ticket-change-user/ticket-user.common'
 
@@ -14,8 +18,8 @@ export type TicketProductUpdateDtoType = {
   [K in keyof Pick<
     TicketProduct,
     | 'unitRate'
-    | 'unitQuantity'
-    | 'unitQuantityPrescription'
+    | 'quantity'
+    | 'quantityPrescription'
     | 'printPrescription'
     | 'unitExpectedPrice'
     | 'discountType'
@@ -30,12 +34,12 @@ export type TicketProductUpdateDtoType = {
 export class TicketUpdateTicketProductOperation {
   constructor(
     private dataSource: DataSource,
-    private ticketManager: TicketManager,
-    private ticketProductManager: TicketProductManager,
+    private ticketRepository: TicketRepository,
+    private ticketProductRepository: TicketProductRepository,
+    private ticketUserRepository: TicketUserRepository,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager,
-    private ticketUserManager: TicketUserManager,
     private ticketUserCommon: TicketUserCommon
-  ) { }
+  ) {}
 
   async updateTicketProduct<T extends TicketProductUpdateDtoType>(params: {
     oid: number
@@ -57,7 +61,7 @@ export class TicketUpdateTicketProductOperation {
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. UPDATE TICKET FOR TRANSACTION ===
-      const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(
+      const ticketOrigin = await this.ticketRepository.managerUpdateOne(
         manager,
         { oid, id: ticketId, status: TicketStatus.Executing },
         { updatedAt: Date.now() }
@@ -65,7 +69,7 @@ export class TicketUpdateTicketProductOperation {
       let ticketModified: Ticket = ticketOrigin
 
       // === 2. UPDATE TICKET PRODUCT ===
-      const ticketProductOrigin = await this.ticketProductManager.updateOneAndReturnEntity(
+      const ticketProductOrigin = await this.ticketProductRepository.managerUpdateOne(
         manager,
         { oid, id: ticketProductId, type: ticketProductType },
         { ticketId }
@@ -77,22 +81,20 @@ export class TicketUpdateTicketProductOperation {
       let itemsCostAmountAdd = 0
       if (ticketProductUpdateDto) {
         if (
-          [DeliveryStatus.Pending, DeliveryStatus.NoStock].includes(
-            ticketProductOrigin.deliveryStatus
-          )
+          ticketProductOrigin.quantityCompleted === 0
           && [
-            PaymentMoneyStatus.TicketPaid,
-            PaymentMoneyStatus.PendingPayment,
-            PaymentMoneyStatus.NoEffect,
-          ].includes(ticketProductOrigin.paymentMoneyStatus)
+            TicketItemPaymentType.TicketPaid,
+            TicketItemPaymentType.PendingPayment,
+            TicketItemPaymentType.NoEffect,
+          ].includes(ticketProductOrigin.ticketItemPaymentType)
         ) {
-          ticketProductModified = await this.ticketProductManager.updateOneAndReturnEntity(
+          ticketProductModified = await this.ticketProductRepository.managerUpdateOne(
             manager,
             { oid, id: ticketProductId },
             {
               unitRate: ticketProductUpdateDto.unitRate,
-              unitQuantity: ticketProductUpdateDto.unitQuantity,
-              unitQuantityPrescription: ticketProductUpdateDto.unitQuantityPrescription,
+              quantity: ticketProductUpdateDto.quantity,
+              quantityPrescription: ticketProductUpdateDto.quantityPrescription,
               printPrescription: ticketProductUpdateDto.printPrescription,
               unitExpectedPrice: ticketProductUpdateDto.unitExpectedPrice,
               discountType: ticketProductUpdateDto.discountType,
@@ -100,35 +102,35 @@ export class TicketUpdateTicketProductOperation {
               discountPercent: ticketProductUpdateDto.discountPercent,
               unitActualPrice: ticketProductUpdateDto.unitActualPrice,
               hintUsage: ticketProductUpdateDto.hintUsage,
-              deliveryStatus:
-                ticketProductUpdateDto.unitQuantity === 0
-                  ? DeliveryStatus.NoStock
-                  : DeliveryStatus.Pending,
-              paymentMoneyStatus: (() => {
+              ticketItemPaymentType: (() => {
                 if (ticketProductUpdateDto.unitActualPrice === 0) {
-                  return PaymentMoneyStatus.NoEffect
+                  return TicketItemPaymentType.NoEffect
                 }
                 if (ticketOrigin.isPaymentEachItem) {
-                  return PaymentMoneyStatus.PendingPayment
+                  return TicketItemPaymentType.PendingPayment
                 } else {
-                  return PaymentMoneyStatus.TicketPaid
+                  return TicketItemPaymentType.TicketPaid
                 }
               })(),
             }
           )
           productMoneyAdd =
-            ticketProductModified.unitQuantity * ticketProductModified.unitActualPrice
-            - ticketProductOrigin.unitQuantity * ticketProductOrigin.unitActualPrice
+            (ticketProductModified.quantity * ticketProductModified.unitActualPrice)
+              / ticketProductModified.unitRate
+            - (ticketProductOrigin.quantity * ticketProductOrigin.unitActualPrice)
+              / ticketProductOrigin.unitRate
           itemsDiscountAdd =
-            ticketProductModified.unitQuantity * ticketProductModified.unitDiscountMoney
-            - ticketProductOrigin.unitQuantity * ticketProductOrigin.unitDiscountMoney
+            (ticketProductModified.quantity * ticketProductModified.unitDiscountMoney)
+              / ticketProductModified.unitRate
+            - (ticketProductOrigin.quantity * ticketProductOrigin.unitDiscountMoney)
+              / ticketProductOrigin.unitRate
           itemsCostAmountAdd = ticketProductModified.costAmount - ticketProductOrigin.costAmount
         } else {
-          ticketProductModified = await this.ticketProductManager.updateOneAndReturnEntity(
+          ticketProductModified = await this.ticketProductRepository.managerUpdateOne(
             manager,
             { oid, id: ticketProductId },
             {
-              unitQuantityPrescription: ticketProductUpdateDto.unitQuantityPrescription,
+              quantityPrescription: ticketProductUpdateDto.quantityPrescription,
               printPrescription: ticketProductUpdateDto.printPrescription,
               hintUsage: ticketProductUpdateDto.hintUsage,
             }
@@ -140,7 +142,7 @@ export class TicketUpdateTicketProductOperation {
       let ticketUserCreatedList: TicketUser[] = []
       let commissionMoneyAdd = 0
       if (ticketUserRequestList) {
-        ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+        ticketUserDestroyList = await this.ticketUserRepository.managerDelete(manager, {
           oid,
           ticketId,
           positionType: PositionType.ProductRequest,
@@ -179,9 +181,9 @@ export class TicketUpdateTicketProductOperation {
 
       // === 4. ReCalculator DeliveryStatus
       let deliveryStatus = ticketOrigin.deliveryStatus
-      if (ticketProductModified.deliveryStatus !== DeliveryStatus.Delivered) {
-        if (ticketProductModified.unitQuantity === 0) {
-          const calc = await this.ticketProductManager.calculatorDeliveryStatus({
+      if (ticketProductModified.quantityCompleted == 0) {
+        if (ticketProductModified.quantity === 0) {
+          const calc = await this.ticketProductRepository.calculatorDeliveryStatus({
             manager,
             oid,
             ticketId,

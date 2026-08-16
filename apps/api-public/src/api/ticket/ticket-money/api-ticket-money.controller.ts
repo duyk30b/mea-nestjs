@@ -5,19 +5,14 @@ import { PermissionId } from '@libs/permission/permission.enum'
 import { Body, Controller, Param, Post } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 import { TicketParams } from '../ticket-query/request'
-import {
-    TicketPayDebtBody,
-    TicketPaymentMoneyBody,
-} from './request'
+import { TicketChangeDebtBody, TicketPaymentMoneyBody } from './request'
 import { TicketMoneyService } from './ticket-money.service'
 
 @ApiTags('Ticket')
 @ApiBearerAuth('access-token')
 @Controller('ticket')
 export class ApiTicketMoneyController {
-  constructor(
-    private readonly ticketMoneyService: TicketMoneyService
-  ) { }
+  constructor(private readonly ticketMoneyService: TicketMoneyService) {}
 
   @Post(':ticketId/payment-money')
   @UserPermission(PermissionId.TICKET_PAYMENT_MONEY)
@@ -35,13 +30,13 @@ export class ApiTicketMoneyController {
     return { data }
   }
 
-  @Post('pay-debt')
+  @Post('change-debt')
   @UserPermission(PermissionId.TICKET_PAYMENT_MONEY)
-  async payDebt(
+  async changeDebt(
     @External() { oid, uid }: TExternal,
-    @Body() body: TicketPayDebtBody
+    @Body() body: TicketChangeDebtBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketMoneyService.payDebt({
+    const data = await this.ticketMoneyService.changeDebt({
       oid,
       userId: uid,
       body,

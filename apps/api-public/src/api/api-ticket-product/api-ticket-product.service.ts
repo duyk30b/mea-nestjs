@@ -2,8 +2,8 @@ import { ProductRepository } from '@libs/database/repositories'
 import { TicketProductRepository } from '@libs/database/repositories/ticket-product.repository'
 import { Injectable } from '@nestjs/common'
 import {
-    TicketProductGetManyQuery,
-    TicketProductPaginationQuery,
+  TicketProductGetManyQuery,
+  TicketProductPaginationQuery,
 } from './request'
 
 @Injectable()
@@ -25,7 +25,6 @@ export class ApiTicketProductService {
         customerId: filter?.customerId,
         productId: filter?.productId,
         ticketId: filter?.ticketId,
-        deliveryStatus: filter?.deliveryStatus,
         createdAt: filter?.createdAt,
       },
       sort,
@@ -44,7 +43,6 @@ export class ApiTicketProductService {
         customerId: filter?.customerId,
         productId: filter?.productId,
         ticketId: filter?.ticketId,
-        deliveryStatus: filter?.deliveryStatus,
         createdAt: filter?.createdAt,
       },
       limit,
@@ -58,7 +56,7 @@ export class ApiTicketProductService {
     await this.ticketProductRepository.deleteBasic({
       oid,
       id: ticketProductId,
-      unitQuantity: 0,
+      quantity: 0,
     })
     return { ticketProductId }
   }

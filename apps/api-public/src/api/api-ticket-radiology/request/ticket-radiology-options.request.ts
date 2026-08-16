@@ -1,12 +1,12 @@
 import {
-    ConditionString,
-    ConditionTimestamp,
-    createConditionEnum,
-    transformConditionEnum,
-    transformConditionString,
+  ConditionString,
+  ConditionTimestamp,
+  createConditionEnum,
+  transformConditionEnum,
+  transformConditionString,
 } from '@libs/common/dto'
 import { SortQuery } from '@libs/common/dto/query'
-import { PaymentMoneyStatus } from '@libs/database/common/variable'
+import { TicketItemPaymentType } from '@libs/database/common/variable'
 import { TicketRadiologyStatus } from '@libs/database/entities/ticket-radiology.entity'
 import { Expose, Transform, TransformFnParams, Type } from 'class-transformer'
 import { IsBoolean, IsIn, IsInt, IsObject, IsOptional, ValidateNested } from 'class-validator'
@@ -38,7 +38,7 @@ export class TicketRadiologyRelationQuery {
 }
 
 const ConditionEnumTicketRadiologyStatus = createConditionEnum(TicketRadiologyStatus)
-const ConditionEnumPaymentMoneyStatus = createConditionEnum(PaymentMoneyStatus)
+const ConditionEnumTicketItemPaymentType = createConditionEnum(TicketItemPaymentType)
 
 export class TicketRadiologyFilterQuery {
   @Expose()
@@ -73,9 +73,9 @@ export class TicketRadiologyFilterQuery {
   status?: TicketRadiologyStatus | InstanceType<typeof ConditionEnumTicketRadiologyStatus>
 
   @Expose()
-  @Transform((params: TransformFnParams) => transformConditionEnum(params, PaymentMoneyStatus))
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketItemPaymentType))
   @IsOptional()
-  paymentMoneyStatus?: PaymentMoneyStatus | InstanceType<typeof ConditionEnumPaymentMoneyStatus>
+  ticketItemPaymentType?: TicketItemPaymentType | InstanceType<typeof ConditionEnumTicketItemPaymentType>
 
   @Expose()
   @Type(() => ConditionTimestamp)

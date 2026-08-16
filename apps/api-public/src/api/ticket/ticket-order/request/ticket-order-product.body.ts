@@ -1,7 +1,7 @@
 import { valuesEnum } from '@libs/common/helpers/typescript.helper'
 import {
-    IsEnumValue,
-    IsNumberGreaterThan,
+  IsEnumValue,
+  IsNumberGreaterThan,
 } from '@libs/common/transform-validate/class-validator.custom'
 import { DiscountType, PickupStrategy } from '@libs/database/common/variable'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
@@ -63,7 +63,7 @@ export class TicketOrderProductBody {
   @IsDefined()
   @IsInt()
   @IsNumberGreaterThan(0)
-  unitQuantity: number
+  quantity: number
 
   @ApiProperty({ example: 25_000 })
   @Expose()

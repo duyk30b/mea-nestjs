@@ -8,7 +8,7 @@ import {
   CustomerGroupRepository,
   CustomerSourceRepository,
   PaymentRepository,
-  PaymentTicketItemRepository,
+  PaymentTicketRepository,
   TicketRepository,
 } from '@libs/database/repositories'
 import { CustomerRepository } from '@libs/database/repositories/customer.repository'
@@ -33,10 +33,10 @@ export class CustomerService {
     private readonly customerGroupRepository: CustomerGroupRepository,
     private readonly customerSourceRepository: CustomerSourceRepository,
     private readonly paymentRepository: PaymentRepository,
-    private readonly paymentTicketItemRepository: PaymentTicketItemRepository,
+    private readonly paymentTicketRepository: PaymentTicketRepository,
     private readonly organizationRepository: OrganizationRepository,
     private readonly ticketRepository: TicketRepository
-  ) { }
+  ) {}
 
   async pagination(oid: number, query: CustomerPaginationQuery) {
     const { page, limit, filter, sort, relation } = query
@@ -152,13 +152,17 @@ export class CustomerService {
       ])
 
       if (paymentDestroyedList.length) {
-        await this.paymentTicketItemRepository.deleteBasic({
+        await this.paymentTicketRepository.deleteBasic({
           oid,
           paymentId: { IN: paymentDestroyedList.map((i) => i.id) },
         })
       }
 
-      await this.organizationRepository.updateDataVersion(oid, { product: false, batch: false, customer: true })
+      await this.organizationRepository.updateDataVersion(oid, {
+        product: false,
+        batch: false,
+        customer: true,
+      })
       this.cacheDataService.clearOrganization(oid)
     }
 
@@ -178,15 +182,15 @@ export class CustomerService {
     const [customerGroupList, customerSourceList] = await Promise.all([
       relation?.customerGroup && customerGroupIdList.length
         ? this.customerGroupRepository.findManyBy({
-          oid,
-          id: { IN: customerGroupIdList },
-        })
+            oid,
+            id: { IN: customerGroupIdList },
+          })
         : <CustomerGroup[]>[],
       relation?.customerSource && customerSourceIdList.length
         ? this.customerSourceRepository.findManyBy({
-          oid,
-          id: { IN: customerSourceIdList },
-        })
+            oid,
+            id: { IN: customerSourceIdList },
+          })
         : <CustomerSource[]>[],
     ])
 

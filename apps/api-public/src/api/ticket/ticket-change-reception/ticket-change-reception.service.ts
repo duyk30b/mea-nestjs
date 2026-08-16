@@ -21,7 +21,7 @@ import {
 } from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
-import { TicketDestroyService } from '../ticket-action/ticket-destroy.service'
+import { TicketCancelService } from '../ticket-action/ticket-cancel.service'
 import { TicketAddTicketProcedureListService } from '../ticket-change-procedure/service/ticket-add-ticket-procedure-list.service'
 import { TicketCreateTicketReceptionBody, TicketUpdateTicketReceptionBody } from './request'
 
@@ -37,8 +37,8 @@ export class TicketChangeReceptionService {
     private readonly ticketAttributeRepository: TicketAttributeRepository,
     private readonly ticketChangeTicketUserOperation: TicketChangeTicketUserOperation,
     private readonly ticketAddTicketProcedureListService: TicketAddTicketProcedureListService,
-    private readonly ticketDestroyService: TicketDestroyService
-  ) { }
+    private readonly ticketCancelService: TicketCancelService
+  ) {}
 
   async receptionCreate(options: { oid: number; body: TicketCreateTicketReceptionBody }) {
     const { oid, body } = options
@@ -91,7 +91,7 @@ export class TicketChangeReceptionService {
         date: ESTimer.info(ticketReceptionAdd.receptionAt, 7).date,
 
         note: ticketReceptionAdd.reason,
-        deliveryStatus: DeliveryStatus.NoStock,
+        deliveryStatus: DeliveryStatus.Empty,
         procedureMoney: 0,
         productMoney: 0,
         radiologyMoney: 0,
@@ -114,7 +114,7 @@ export class TicketChangeReceptionService {
         isFirstVisit: customer.isHasTicket ? 0 : 1,
       })
       if (body.isPaymentEachItem) {
-        const ticketPaymentDetailInsert: TicketPaymentDetailInsertType = {
+        await this.ticketPaymentDetailRepository.insertOneBasic({
           oid,
           id: ticketIdGenerate,
           ticketId: ticketIdGenerate,
@@ -122,11 +122,7 @@ export class TicketChangeReceptionService {
           paidItem: 0,
           paidSurcharge: 0,
           paidDiscount: 0,
-          debtItem: 0,
-          debtSurcharge: 0,
-          debtDiscount: 0,
-        }
-        await this.ticketPaymentDetailRepository.insertOneBasic(ticketPaymentDetailInsert)
+        } satisfies TicketPaymentDetailInsertType)
       }
     }
     if (body.ticketId) {
@@ -242,9 +238,7 @@ export class TicketChangeReceptionService {
     })
 
     this.socketEmitService.customerUpsert(oid, { customer })
-    this.socketEmitService.socketRoomTicketPaginationChange(oid, {
-      roomId: ticket.roomId,
-    })
+    this.socketEmitService.socketTicketPaginationChange(oid, { roomId: ticket.roomId })
     return { ticket, ticketReceptionCreated }
   }
 
@@ -255,8 +249,8 @@ export class TicketChangeReceptionService {
     if (
       [TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Cancelled].includes(ticket.status)
     ) {
-      await this.ticketDestroyService.destroy({ oid, ticketId })
-      this.socketEmitService.socketRoomTicketPaginationChange(oid, { roomId: ticket.roomId })
+      await this.ticketCancelService.destroy({ oid, ticketId })
+      this.socketEmitService.socketTicketPaginationChange(oid, { roomId: ticket.roomId })
       return { ticketDestroyedId: ticketId }
     }
 

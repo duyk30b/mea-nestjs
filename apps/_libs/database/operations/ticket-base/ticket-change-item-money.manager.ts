@@ -13,7 +13,7 @@ export class TicketChangeItemMoneyManager {
     @InjectEntityManager() private manager: EntityManager,
     private ticketRepository: TicketRepository,
     private ticketPaymentDetailRepository: TicketPaymentDetailRepository
-  ) { }
+  ) {}
 
   async changeItemMoney(props: {
     manager?: EntityManager
@@ -40,7 +40,6 @@ export class TicketChangeItemMoneyManager {
     ticketPaymentDetail?: {
       paidWaitAdd: number
       paidItemAdd: number
-      debtItemAdd: number
     }
   }) {
     const { oid, ticketId, itemMoney, other, ticketPaymentDetail } = props
@@ -130,7 +129,6 @@ export class TicketChangeItemMoneyManager {
         {
           paidWait: () => `"paidWait" + ${ticketPaymentDetail.paidWaitAdd}`,
           paidItem: () => `"paidItem" + ${ticketPaymentDetail.paidItemAdd}`,
-          debtItem: () => `"debtItem" + ${ticketPaymentDetail.debtItemAdd}`,
         }
       )
     }

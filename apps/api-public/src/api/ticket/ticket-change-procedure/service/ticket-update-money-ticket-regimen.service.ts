@@ -1,9 +1,6 @@
 import { ESArray } from '@libs/common/helpers'
 import { BusinessError } from '@libs/database/common/error'
-import {
-    PaymentMoneyStatus,
-    TicketRegimenStatus,
-} from '@libs/database/common/variable'
+import { TicketItemPaymentType, TicketRegimenStatus } from '@libs/database/common/variable'
 import { TicketUser } from '@libs/database/entities'
 import { PositionType } from '@libs/database/entities/position.entity'
 import TicketProcedure, {
@@ -37,7 +34,7 @@ export class TicketUpdateMoneyTicketRegimenService {
     private ticketUserRepository: TicketUserRepository,
     private ticketUserCommon: TicketUserCommon,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
-  ) { }
+  ) {}
 
   async updateMoneyTicketRegimen(props: {
     oid: number
@@ -68,12 +65,7 @@ export class TicketUpdateMoneyTicketRegimenService {
         // Vẫn cho sửa nếu chưa thanh toán
         // throw new BusinessError('Trạng thái liệu trình không hợp lệ')
       }
-      if (
-        ticketRegimenOrigin.paid > 0
-        || ticketRegimenOrigin.paidItem > 0
-        || ticketRegimenOrigin.debt > 0
-        || ticketRegimenOrigin.debtItem > 0
-      ) {
+      if (ticketRegimenOrigin.paid > 0 || ticketRegimenOrigin.paidItem > 0) {
         throw new BusinessError('Không thể sửa phiếu đã thanh toán')
       }
 
@@ -139,11 +131,9 @@ export class TicketUpdateMoneyTicketRegimenService {
       // Nếu đã có buổi thanh toán rồi thì không sửa được
       ticketProcedureModifiedList.forEach((tp) => {
         if (
-          [
-            PaymentMoneyStatus.FullPaid,
-            PaymentMoneyStatus.PartialPaid,
-            PaymentMoneyStatus.Debt,
-          ].includes(tp.paymentMoneyStatus)
+          [TicketItemPaymentType.FullPaid, TicketItemPaymentType.PartialPaid].includes(
+            tp.ticketItemPaymentType
+          )
         ) {
           throw new BusinessError('Đã có dịch vụ đã thanh toán, không thể sửa')
         }
@@ -161,11 +151,11 @@ export class TicketUpdateMoneyTicketRegimenService {
             { positionType: PositionType.RegimenRequest, ticketItemId: ticketRegimenId },
             ...(ticketProcedureOriginList.length
               ? [
-                {
-                  positionType: PositionType.ProcedureResult,
-                  ticketItemId: { IN: ticketProcedureOriginList.map((i) => i.id) },
-                },
-              ]
+                  {
+                    positionType: PositionType.ProcedureResult,
+                    ticketItemId: { IN: ticketProcedureOriginList.map((i) => i.id) },
+                  },
+                ]
               : []),
           ],
           positionType: { IN: [PositionType.RegimenRequest] },
@@ -234,7 +224,7 @@ export class TicketUpdateMoneyTicketRegimenService {
                 .filter((tp) => {
                   return (
                     tp.ticketRegimenItemId === tri.id
-                    && tp.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+                    && tp.ticketItemPaymentType !== TicketItemPaymentType.NoEffect
                   )
                 })
                 .reduce((acc, item) => acc + item.quantity * item.actualPrice, 0),

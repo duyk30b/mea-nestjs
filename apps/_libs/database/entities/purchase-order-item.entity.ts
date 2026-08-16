@@ -69,7 +69,11 @@ export default class PurchaseOrderItem {
 
   @Column({ default: 0 })
   @Expose()
-  unitQuantity: number
+  quantity: number
+
+  @Column({ default: 0 })
+  @Expose()
+  quantityCompleted: number
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()
@@ -98,7 +102,8 @@ export default class PurchaseOrderItem {
     Object.assign(entity, raw)
     entity.expiryDate = raw.expiryDate == null ? raw.expiryDate : Number(raw.expiryDate)
     entity.unitCostPrice = Number(raw.unitCostPrice)
-    entity.unitQuantity = Number(raw.unitQuantity)
+    entity.quantity = Number(raw.quantity)
+    entity.quantityCompleted = Number(raw.quantityCompleted)
 
     return entity
   }

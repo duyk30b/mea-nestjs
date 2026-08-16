@@ -1,27 +1,26 @@
 import { ESArray } from '@libs/common/helpers/array.helper'
 import {
-    Customer,
-    Distributor,
-    PaymentTicketItem,
-    PurchaseOrder,
-    Ticket,
-    User,
-    Wallet,
+  Customer,
+  Distributor,
+  PaymentPurchaseOrder,
+  PaymentTicket,
+  PurchaseOrder,
+  Ticket,
+  User,
+  Wallet,
 } from '@libs/database/entities'
-import Payment, {
-    PaymentPersonType,
-    PaymentVoucherType,
-} from '@libs/database/entities/payment.entity'
+import Payment, { PaymentPersonType } from '@libs/database/entities/payment.entity'
 import {
-    CustomerRepository,
-    DistributorRepository,
-    PaymentTicketItemRepository,
-    PurchaseOrderRepository,
-    TicketRepository,
-    UserRepository,
-    WalletRepository,
+  CustomerRepository,
+  DistributorRepository,
+  PaymentPurchaseOrderRepository,
+  PaymentRepository,
+  PaymentTicketRepository,
+  PurchaseOrderRepository,
+  TicketRepository,
+  UserRepository,
+  WalletRepository,
 } from '@libs/database/repositories'
-import { PaymentRepository } from '@libs/database/repositories/payment.repository'
 import { Injectable } from '@nestjs/common'
 import { PaymentGetManyQuery, PaymentPaginationQuery } from './request'
 import { PaymentRelationQuery } from './request/payment.options'
@@ -30,14 +29,15 @@ import { PaymentRelationQuery } from './request/payment.options'
 export class ApiPaymentService {
   constructor(
     private readonly paymentRepository: PaymentRepository,
-    private readonly paymentTicketItemRepository: PaymentTicketItemRepository,
+    private readonly paymentTicketRepository: PaymentTicketRepository,
+    private readonly paymentPurchaseOrderRepository: PaymentPurchaseOrderRepository,
     private readonly walletRepository: WalletRepository,
     private readonly customerRepository: CustomerRepository,
-    private readonly ticketRepository: TicketRepository,
-    private readonly purchaseOrderRepository: PurchaseOrderRepository,
     private readonly distributorRepository: DistributorRepository,
-    private readonly userRepository: UserRepository
-  ) { }
+    private readonly userRepository: UserRepository,
+    private readonly ticketRepository: TicketRepository,
+    private readonly purchaseOrderRepository: PurchaseOrderRepository
+  ) {}
 
   async pagination(oid: number, query: PaymentPaginationQuery) {
     const { page, limit, relation, filter, sort } = query
@@ -46,13 +46,12 @@ export class ApiPaymentService {
       limit,
       condition: {
         oid,
-        voucherType: filter?.voucherType,
-        voucherId: filter?.voucherId,
         personType: filter?.personType,
         personId: filter?.personId,
-        walletId: filter?.walletId,
-        moneyDirection: filter?.moneyDirection,
         cashierId: filter?.cashierId,
+        walletId: filter?.walletId,
+        paymentActionType: filter?.paymentActionType,
+        moneyDirection: filter?.moneyDirection,
         createdAt: filter?.createdAt,
       },
       sort,
@@ -72,13 +71,12 @@ export class ApiPaymentService {
       limit,
       condition: {
         oid,
-        voucherType: filter?.voucherType,
-        voucherId: filter?.voucherId,
         personType: filter?.personType,
         personId: filter?.personId,
-        walletId: filter?.walletId,
-        moneyDirection: filter?.moneyDirection,
         cashierId: filter?.cashierId,
+        walletId: filter?.walletId,
+        paymentActionType: filter?.paymentActionType,
+        moneyDirection: filter?.moneyDirection,
         createdAt: filter?.createdAt,
       },
       sort,
@@ -93,14 +91,13 @@ export class ApiPaymentService {
 
   async generateRelation(paymentList: Payment[], relation: PaymentRelationQuery) {
     const paymentIdList = paymentList.map((i) => i.id)
-    const paymentIdListHasPaymentItem = paymentList.filter((i) => i.hasPaymentItem).map((i) => i.id)
 
-    const ticketIdList = paymentList
-      .filter((i) => i.voucherType === PaymentVoucherType.Ticket)
-      .map((i) => i.voucherId)
-    const purchaseOrderIdList = paymentList
-      .filter((i) => i.voucherType === PaymentVoucherType.PurchaseOrder)
-      .map((i) => i.voucherId)
+    const paymentIdListForCustomer = paymentList
+      .filter((i) => i.personType === PaymentPersonType.Customer)
+      .map((i) => i.id)
+    const paymentIdListForDistributor = paymentList
+      .filter((i) => i.personType === PaymentPersonType.Distributor)
+      .map((i) => i.id)
 
     const customerIdList = paymentList
       .filter((i) => i.personType === PaymentPersonType.Customer)
@@ -116,61 +113,81 @@ export class ApiPaymentService {
     const userIdList = [...cashierIdList, ...employeeIdList]
 
     const [
-      ticketList,
-      purchaseOrderList,
       customerList,
       distributorList,
       userList,
       walletList,
-      paymentTicketItemList,
+      paymentTicketList,
+      paymentPurchaseOrderList,
     ] = await Promise.all([
-      relation?.ticket && ticketIdList.length
-        ? this.ticketRepository.findManyBy({
-          id: { IN: ESArray.uniqueArray(ticketIdList) },
-        })
-        : <Ticket[]>[],
-      relation?.purchaseOrder && purchaseOrderIdList.length
-        ? this.purchaseOrderRepository.findManyBy({
-          id: { IN: ESArray.uniqueArray(purchaseOrderIdList) },
-        })
-        : <PurchaseOrder[]>[],
       relation?.customer && customerIdList.length
         ? this.customerRepository.findManyBy({ id: { IN: ESArray.uniqueArray(customerIdList) } })
         : <Customer[]>[],
       relation?.distributor && distributorIdList.length
         ? this.distributorRepository.findManyBy({
-          id: { IN: ESArray.uniqueArray(distributorIdList) },
-        })
+            id: { IN: ESArray.uniqueArray(distributorIdList) },
+          })
         : <Distributor[]>[],
       (relation?.employee || relation?.cashier) && userIdList.length
         ? this.userRepository.findManyBy({ id: { IN: ESArray.uniqueArray(userIdList) } })
         : <User[]>[],
       relation?.wallet && walletIdList.length
         ? this.walletRepository.findManyBy({
-          id: { IN: ESArray.uniqueArray(walletIdList) },
-        })
+            id: { IN: ESArray.uniqueArray(walletIdList) },
+          })
         : <Wallet[]>[],
-      relation?.paymentTicketItemList && paymentIdListHasPaymentItem.length
-        ? this.paymentTicketItemRepository.findManyBy({
-          paymentId: { IN: paymentIdListHasPaymentItem },
-        })
-        : <PaymentTicketItem[]>[],
+      relation?.paymentTicketList && paymentIdListForCustomer.length
+        ? this.paymentTicketRepository.findManyBy({
+            paymentId: { IN: paymentIdListForCustomer },
+          })
+        : <PaymentTicket[]>[],
+      relation?.paymentPurchaseOrderList && paymentIdListForDistributor.length
+        ? this.paymentPurchaseOrderRepository.findManyBy({
+            paymentId: { IN: paymentIdListForDistributor },
+          })
+        : <PaymentPurchaseOrder[]>[],
     ])
 
-    const ticketMap = ESArray.arrayToKeyValue(ticketList, 'id')
-    const purchaseOrderMap = ESArray.arrayToKeyValue(purchaseOrderList, 'id')
     const customerMap = ESArray.arrayToKeyValue(customerList, 'id')
     const distributorMap = ESArray.arrayToKeyValue(distributorList, 'id')
     const userMap = ESArray.arrayToKeyValue(userList, 'id')
     const walletMap = ESArray.arrayToKeyValue(walletList, 'id')
 
+    const ticketIdList = ESArray.uniqueArray(paymentTicketList.map((i) => i.ticketId))
+    const purchaseOrderIdList = ESArray.uniqueArray(
+      paymentPurchaseOrderList.map((i) => i.purchaseOrderId)
+    )
+
+    const [ticketList, purchaseOrderList] = await Promise.all([
+      ticketIdList.length
+        ? this.ticketRepository.findManyBy({ id: { IN: ticketIdList } })
+        : <Ticket[]>[],
+      purchaseOrderIdList.length
+        ? this.purchaseOrderRepository.findManyBy({ id: { IN: purchaseOrderIdList } })
+        : <PurchaseOrder[]>[],
+    ])
+
+    const ticketMap = ESArray.arrayToKeyValue(ticketList, 'id')
+    const purchaseOrderMap = ESArray.arrayToKeyValue(purchaseOrderList, 'id')
+
+    if (relation?.paymentTicketList) {
+      paymentTicketList.forEach((paymentTicket) => {
+        if (relation?.paymentTicketList?.ticket) {
+          paymentTicket.ticket = ticketMap[paymentTicket.ticketId]
+        }
+      })
+    }
+
+    if (relation?.paymentPurchaseOrderList) {
+      paymentPurchaseOrderList.forEach((paymentPurchaseOrder) => {
+        if (relation?.paymentPurchaseOrderList?.purchaseOrder) {
+          paymentPurchaseOrder.purchaseOrder =
+            purchaseOrderMap[paymentPurchaseOrder.purchaseOrderId]
+        }
+      })
+    }
+
     paymentList.forEach((payment: Payment) => {
-      if (relation?.ticket) {
-        payment.ticket = ticketMap[payment.voucherId]
-      }
-      if (relation?.purchaseOrder) {
-        payment.purchaseOrder = purchaseOrderMap[payment.voucherId]
-      }
       if (relation?.customer && payment.personType === PaymentPersonType.Customer) {
         payment.customer = customerMap[payment.personId]
       }
@@ -183,13 +200,18 @@ export class ApiPaymentService {
       if (relation?.cashier) {
         payment.cashier = userMap[payment.cashierId]
       }
-      if (relation?.paymentTicketItemList) {
-        payment.paymentTicketItemList = paymentTicketItemList.filter(
-          (i) => i.paymentId === payment.id
-        )
-      }
       if (relation?.wallet) {
         payment.wallet = walletMap[payment.walletId]
+      }
+      if (relation?.paymentTicketList) {
+        payment.paymentTicketList = paymentTicketList.filter((i) => {
+          return i.paymentId === payment.id
+        })
+      }
+      if (relation?.paymentPurchaseOrderList) {
+        payment.paymentPurchaseOrderList = paymentPurchaseOrderList.filter((i) => {
+          return i.paymentId === payment.id
+        })
       }
     })
 

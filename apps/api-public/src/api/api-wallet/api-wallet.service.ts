@@ -2,20 +2,19 @@ import { BusinessException } from '@libs/common/exception-filter/exception-filte
 import { BusinessError } from '@libs/database/common/error'
 import { GenerateId } from '@libs/database/common/generate-id'
 import {
-    MoneyDirection,
-    PaymentActionType,
-    PaymentInsertType,
-    PaymentPersonType,
-    PaymentVoucherType,
+  MoneyDirection,
+  PaymentActionType,
+  PaymentInsertType,
+  PaymentPersonType,
 } from '@libs/database/entities/payment.entity'
 import { PaymentRepository } from '@libs/database/repositories'
 import { WalletRepository } from '@libs/database/repositories/wallet.repository'
 import { Injectable } from '@nestjs/common'
 import {
-    WalletCreateBody,
-    WalletGetManyQuery,
-    WalletPaginationQuery,
-    WalletUpdateBody,
+  WalletCreateBody,
+  WalletGetManyQuery,
+  WalletPaginationQuery,
+  WalletUpdateBody,
 } from './request'
 
 @Injectable()
@@ -23,7 +22,7 @@ export class ApiWalletService {
   constructor(
     private readonly walletRepository: WalletRepository,
     private paymentRepository: PaymentRepository
-  ) { }
+  ) {}
 
   async pagination(oid: number, query: WalletPaginationQuery) {
     const { page, limit, filter, sort, relation } = query
@@ -100,30 +99,25 @@ export class ApiWalletService {
     const walletOrigin = await this.walletRepository.findOneBy({ oid, id: walletId })
 
     if (walletOrigin.money !== body.money) {
-      const paymentInsert: PaymentInsertType = {
+      await this.paymentRepository.insertOneBasic({
         oid,
-        voucherType: PaymentVoucherType.Other,
-        voucherId: '0',
         personType: PaymentPersonType.Other,
         personId: 0,
+        cashierId: userId,
 
-        createdAt: Date.now(),
         walletId,
-        paymentActionType: PaymentActionType.Other,
+        paymentActionType: PaymentActionType.FixWallet,
         moneyDirection: MoneyDirection.Other,
         note: 'Sửa ví',
+        createdAt: Date.now(),
 
-        hasPaymentItem: 0,
         paidTotal: 0,
         debtTotal: 0,
         personOpenDebt: 0,
         personCloseDebt: 0,
-        cashierId: userId,
         walletOpenMoney: walletOrigin.money,
         walletCloseMoney: body.money,
-      }
-
-      await this.paymentRepository.insertOneBasic(paymentInsert)
+      } satisfies PaymentInsertType)
     }
     const wallet = await this.walletRepository.updateOne({ id: walletId, oid }, { ...body, code })
     return { wallet }

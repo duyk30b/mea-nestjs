@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { PaymentMoneyStatus } from '../../../common/variable'
+import { TicketItemPaymentType } from '../../../common/variable'
 import { PositionType } from '../../../entities/position.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import { TicketManager, TicketRadiologyManager, TicketUserManager } from '../../../repositories'
@@ -38,15 +38,14 @@ export class TicketDestroyTicketRadiologyOperation {
         {
           oid,
           id: ticketRadiologyId,
-          paymentMoneyStatus: {
+          ticketItemPaymentType: {
             IN: [
-              PaymentMoneyStatus.TicketPaid,
-              PaymentMoneyStatus.PendingPayment,
-              PaymentMoneyStatus.NoEffect,
+              TicketItemPaymentType.TicketPaid,
+              TicketItemPaymentType.PendingPayment,
+              TicketItemPaymentType.NoEffect,
             ],
           },
           paid: 0,
-          debt: 0,
         }
       )
 

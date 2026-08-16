@@ -1,11 +1,7 @@
 import { ESArray } from '@libs/common/helpers'
-import { DeliveryStatus } from '@libs/database/common/variable'
 import { Product } from '@libs/database/entities'
 import { StatisticProductOperation } from '@libs/database/operations'
-import {
-    ProductRepository,
-    TicketProductRepository,
-} from '@libs/database/repositories'
+import { ProductRepository, TicketProductRepository } from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
 import { StatisticProductHighMoneyQuery } from './request'
 import { StatisticTicketProductQuery } from './request/statistic-ticket-product.query'
@@ -16,7 +12,7 @@ export class StatisticProductService {
     private readonly productRepository: ProductRepository,
     private readonly ticketProductRepository: TicketProductRepository,
     private readonly statisticProductOperation: StatisticProductOperation
-  ) { }
+  ) {}
 
   async sumWarehouse(oid: number) {
     const data = await this.statisticProductOperation.sumWarehouse(oid)
@@ -40,19 +36,28 @@ export class StatisticProductService {
       this.ticketProductRepository.findAndSelect({
         condition: {
           oid,
-          deliveryStatus: { IN: [DeliveryStatus.Delivered] },
-          unitQuantity: { GT: 0 },
+          quantityCompleted: { GT: 0 },
+          quantity: { GT: 0 },
           createdAt: filter?.createdAt,
         },
         groupBy: ['productId'],
         select: ['productId'],
         aggregate: {
           count: { COUNT: '*' },
-          sumQuantity: { SUM: [{ MUL: ['unitQuantity', 'unitRate'] }] },
+          sumQuantity: { SUM: ['quantity'] },
           sumCostAmount: { SUM: ['costAmount'] },
-          sumActualAmount: { SUM: [{ MUL: ['unitQuantity', 'unitActualPrice'] }] },
+          sumActualAmount: {
+            SUM: [{ DIV: [{ MUL: ['quantity', 'unitActualPrice'] }, 'unitRate'] }],
+          },
           sumProfitAmount: {
-            SUM: [{ SUB: [{ MUL: ['unitQuantity', 'unitActualPrice'] }, 'costAmount'] }],
+            SUM: [
+              {
+                SUB: [
+                  { DIV: [{ MUL: ['quantity', 'unitActualPrice'] }, 'unitRate'] },
+                  'costAmount',
+                ],
+              },
+            ],
           },
         },
         orderBy: sortStatistic || { productId: 'DESC' },
@@ -62,8 +67,8 @@ export class StatisticProductService {
       this.ticketProductRepository.countGroup({
         condition: {
           oid,
-          deliveryStatus: { IN: [DeliveryStatus.Delivered] },
-          unitQuantity: { GT: 0 },
+          quantityCompleted: { GT: 0 },
+          quantity: { GT: 0 },
           createdAt: filter?.createdAt,
         },
         groupBy: ['productId'],

@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
-import { DiscountType, PaymentMoneyStatus } from '../common/variable'
+import { DiscountType, TicketItemPaymentType } from '../common/variable'
 import Customer from './customer.entity'
 import Image from './image.entity'
 import Procedure from './procedure.entity'
@@ -106,13 +106,9 @@ export default class TicketProcedure {
   @Expose()
   paid: number // tiền đã thanh toán
 
-  @Column({ default: 0 })
+  @Column({ type: 'smallint', default: TicketItemPaymentType.TicketPaid })
   @Expose()
-  debt: number // tiền nợ
-
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
-  @Expose()
-  paymentMoneyStatus: PaymentMoneyStatus
+  ticketItemPaymentType: TicketItemPaymentType
 
   @Column({ type: 'smallint', default: TicketProcedureStatus.NoAction })
   @Expose()
@@ -194,7 +190,6 @@ export default class TicketProcedure {
     entity.discountPercent = Number(raw.discountPercent)
     entity.actualPrice = Number(raw.actualPrice)
     entity.paid = Number(raw.paid)
-    entity.debt = Number(raw.debt)
 
     entity.createdAt = Number(raw.createdAt)
     entity.completedAt = raw.completedAt == null ? raw.completedAt : Number(raw.completedAt)

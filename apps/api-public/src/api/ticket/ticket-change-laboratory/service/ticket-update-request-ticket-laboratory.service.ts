@@ -1,5 +1,5 @@
 import { BusinessError } from '@libs/database/common/error'
-import { PaymentMoneyStatus } from '@libs/database/common/variable'
+import { TicketItemPaymentType } from '@libs/database/common/variable'
 import { TicketUser } from '@libs/database/entities'
 import { PositionType } from '@libs/database/entities/position.entity'
 import TicketLaboratory from '@libs/database/entities/ticket-laboratory.entity'
@@ -53,8 +53,8 @@ export class TicketUpdateRequestTicketLaboratoryService {
       })
 
       if (
-        [PaymentMoneyStatus.PartialPaid, PaymentMoneyStatus.FullPaid].includes(
-          ticketLaboratoryOrigin.paymentMoneyStatus
+        [TicketItemPaymentType.PartialPaid, TicketItemPaymentType.FullPaid].includes(
+          ticketLaboratoryOrigin.ticketItemPaymentType
         )
       ) {
         throw new BusinessError('Xét nghiệm đã thanh toán không thể sửa')

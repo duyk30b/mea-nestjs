@@ -1,16 +1,20 @@
+import { SocketEmitService } from '@api-public/socket/socket-emit.service'
 import { Distributor, PurchaseOrder } from '@libs/database/entities'
 import { Injectable } from '@nestjs/common'
 import {
-    PurchaseOrderDebtSuccessInsertBody,
-    PurchaseOrderDepositedUpdateBody,
-    PurchaseOrderDraftInsertBody,
-    PurchaseOrderDraftUpdateBody,
+  PurchaseOrderDebtSuccessInsertBody,
+  PurchaseOrderDepositedUpdateBody,
+  PurchaseOrderDraftInsertBody,
+  PurchaseOrderDraftUpdateBody,
 } from './request'
 import { PurchaseOrderBasicUpsertService } from './service/purchase-order-basic-upsert.service'
 
 @Injectable()
 export class ApiPurchaseOrderReceptionService {
-  constructor(private purchaseOrderBasicUpsertService: PurchaseOrderBasicUpsertService) { }
+  constructor(
+    private socketEmitService: SocketEmitService,
+    private purchaseOrderBasicUpsertService: PurchaseOrderBasicUpsertService
+  ) {}
 
   async draftInsert(props: {
     oid: number
@@ -26,7 +30,9 @@ export class ApiPurchaseOrderReceptionService {
       body,
     })
 
-    return { purchaseOrderCreated: result.purchaseOrder }
+    const purchaseOrderCreated = result.purchaseOrder
+    this.socketEmitService.socketPurchaseOrderPaginationChange(oid, { purchaseOrderCreated })
+    return { purchaseOrderCreated }
   }
 
   async draftUpdate(props: {

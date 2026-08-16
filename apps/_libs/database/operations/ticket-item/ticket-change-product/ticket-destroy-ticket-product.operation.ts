@@ -1,21 +1,25 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { DeliveryStatus, PaymentMoneyStatus } from '../../../common/variable'
+import { TicketItemPaymentType } from '../../../common/variable'
 import { PositionType } from '../../../entities/position.entity'
 import { TicketProductType } from '../../../entities/ticket-product.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
-import { TicketManager, TicketProductManager, TicketUserManager } from '../../../repositories'
+import {
+    TicketProductRepository,
+    TicketRepository,
+    TicketUserRepository,
+} from '../../../repositories'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
 
 @Injectable()
 export class TicketDestroyTicketProductOperation {
   constructor(
     private dataSource: DataSource,
-    private ticketManager: TicketManager,
-    private ticketProductManager: TicketProductManager,
-    private ticketUserManager: TicketUserManager,
+    private ticketRepository: TicketRepository,
+    private ticketProductRepository: TicketProductRepository,
+    private ticketUserRepository: TicketUserRepository,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
-  ) { }
+  ) {}
 
   async destroyTicketProduct(params: {
     oid: number
@@ -28,34 +32,30 @@ export class TicketDestroyTicketProductOperation {
 
     const transaction = await this.dataSource.transaction('READ UNCOMMITTED', async (manager) => {
       // === 1. UPDATE TICKET FOR TRANSACTION ===
-      const ticketOrigin = await this.ticketManager.updateOneAndReturnEntity(
+      const ticketOrigin = await this.ticketRepository.managerUpdateOne(
         manager,
         { oid, id: ticketId, status: TicketStatus.Executing },
         { updatedAt: Date.now() }
       )
 
       // === 2. DELETE TICKET PRODUCT ===
-      const ticketProductDestroy = await this.ticketProductManager.deleteOneAndReturnEntity(
-        manager,
-        {
-          oid,
-          deliveryStatus: { IN: [DeliveryStatus.NoStock, DeliveryStatus.Pending] },
-          paymentMoneyStatus: {
-            IN: [
-              PaymentMoneyStatus.PendingPayment,
-              PaymentMoneyStatus.TicketPaid,
-              PaymentMoneyStatus.NoEffect,
-            ],
-          },
-          id: ticketProductId,
-          type: ticketProductType,
-          paid: 0,
-          debt: 0,
-        }
-      )
+      const ticketProductDestroy = await this.ticketProductRepository.managerDeleteOne(manager, {
+        oid,
+        quantityCompleted: 0,
+        ticketItemPaymentType: {
+          IN: [
+            TicketItemPaymentType.PendingPayment,
+            TicketItemPaymentType.TicketPaid,
+            TicketItemPaymentType.NoEffect,
+          ],
+        },
+        id: ticketProductId,
+        type: ticketProductType,
+        paid: 0,
+      })
 
       // === 3. DELETE TICKET USER ===
-      const ticketUserDestroyList = await this.ticketUserManager.deleteAndReturnEntity(manager, {
+      const ticketUserDestroyList = await this.ticketUserRepository.managerDelete(manager, {
         oid,
         positionType: PositionType.ProductRequest,
         ticketItemId: ticketProductDestroy.id,
@@ -63,8 +63,8 @@ export class TicketDestroyTicketProductOperation {
 
       // === 4. ReCalculator DeliveryStatus
       let deliveryStatus = ticketOrigin.deliveryStatus
-      if (ticketProductDestroy.deliveryStatus === DeliveryStatus.Pending) {
-        const calcDeliveryStatus = await this.ticketProductManager.calculatorDeliveryStatus({
+      if (ticketProductDestroy.quantityCompleted === 0) {
+        const calcDeliveryStatus = await this.ticketProductRepository.calculatorDeliveryStatus({
           manager,
           oid,
           ticketId,
@@ -75,10 +75,12 @@ export class TicketDestroyTicketProductOperation {
 
       // === 5. UPDATE TICKET: MONEY  ===
       const productMoneyDelete =
-        ticketProductDestroy.unitQuantity * ticketProductDestroy.unitActualPrice
+        (ticketProductDestroy.quantity * ticketProductDestroy.unitActualPrice)
+        / ticketProductDestroy.unitRate
       const itemsCostAmountDelete = ticketProductDestroy.costAmount
       const itemsDiscountDelete =
-        ticketProductDestroy.unitQuantity * ticketProductDestroy.unitDiscountMoney
+        (ticketProductDestroy.quantity * ticketProductDestroy.unitDiscountMoney)
+        / ticketProductDestroy.unitRate
       const commissionMoneyDelete = ticketUserDestroyList.reduce((acc, item) => {
         return acc + item.commissionMoney * item.quantity
       }, 0)

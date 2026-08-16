@@ -17,13 +17,13 @@ class TicketProductBody {
   @Expose()
   @IsDefined()
   @IsInt()
-  unitQuantity: number
+  quantity: number
 
   @ApiProperty({ example: 4 })
   @Expose()
   @IsDefined()
   @IsInt()
-  unitQuantityPrescription: number
+  quantityPrescription: number
 
   @ApiProperty({ example: 4 })
   @Expose()

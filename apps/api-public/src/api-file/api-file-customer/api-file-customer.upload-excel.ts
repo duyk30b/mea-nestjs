@@ -9,12 +9,9 @@ import {
   PaymentActionType,
   PaymentInsertType,
   PaymentPersonType,
-  PaymentVoucherType,
 } from '@libs/database/entities/payment.entity'
 import {
-  CustomerGroupRepository,
   CustomerRepository,
-  CustomerSourceRepository,
   PaymentRepository,
   WalletRepository,
 } from '@libs/database/repositories'
@@ -57,7 +54,7 @@ export class ApiFileCustomerUploadExcel {
     private customerSourceService: CustomerSourceService,
     private paymentRepository: PaymentRepository,
     private walletRepository: WalletRepository
-  ) { }
+  ) {}
 
   async uploadExcel(options: { oid: number; userId: number; file: FileUploadDto }) {
     const { oid, userId, file } = options
@@ -246,18 +243,15 @@ export class ApiFileCustomerUploadExcel {
         const paymentInsertList = dataChangeDebt.map((i) => {
           const paymentInsert: PaymentInsertType = {
             oid,
-            voucherType: PaymentVoucherType.Other,
-            voucherId: '0',
             personType: PaymentPersonType.Customer,
             personId: i.customerId,
 
             createdAt: time,
             walletId: '0',
-            paymentActionType: PaymentActionType.FixByExcel,
+            paymentActionType: PaymentActionType.FixCustomerByExcel,
             moneyDirection: MoneyDirection.Other,
             note: 'Update Excel',
 
-            hasPaymentItem: 0,
             paidTotal: 0,
             debtTotal: i.debtUpdate - i.debtOrigin,
             personOpenDebt: i.debtOrigin,

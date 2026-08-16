@@ -230,7 +230,7 @@ export class ProductPutawayPlan {
         putawayBatchMap[batchId].putawayQuantity += mov.putawayQuantity
         putawayBatchMap[batchId].putawayCostAmount += mov.putawayCostAmount
         putawayBatchMap[batchId].closeQuantity = mov.closeQuantityBatch
-        putawayBatchMap[batchId].closeCostAmount = mov.closeQuantityBatch
+        putawayBatchMap[batchId].closeCostAmount = mov.closeCostAmountBatch
       }
 
       putawayVoucherProductMap[voucherProductId] ||= {

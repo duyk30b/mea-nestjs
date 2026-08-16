@@ -1,5 +1,5 @@
 import { BusinessError } from '@libs/database/common/error'
-import { PaymentMoneyStatus } from '@libs/database/common/variable'
+import { TicketItemPaymentType } from '@libs/database/common/variable'
 import { TicketProcedure, TicketUser } from '@libs/database/entities'
 import { PositionType } from '@libs/database/entities/position.entity'
 import { TicketProcedureType } from '@libs/database/entities/ticket-procedure.entity'
@@ -31,7 +31,7 @@ export class TicketUpdateMoneyTicketProcedureService {
     private ticketUserRepository: TicketUserRepository,
     private ticketUserCommon: TicketUserCommon,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
-  ) { }
+  ) {}
 
   async updateMoneyTicketProcedure<T extends TicketProcedureUpdateDtoType>(props: {
     oid: number
@@ -59,13 +59,10 @@ export class TicketUpdateMoneyTicketProcedureService {
       })
 
       if (
-        [
-          PaymentMoneyStatus.PartialPaid,
-          PaymentMoneyStatus.FullPaid,
-          PaymentMoneyStatus.Debt,
-        ].includes(ticketProcedureOrigin.paymentMoneyStatus)
+        [TicketItemPaymentType.PartialPaid, TicketItemPaymentType.FullPaid].includes(
+          ticketProcedureOrigin.ticketItemPaymentType
+        )
         || ticketProcedureOrigin.paid !== 0
-        || ticketProcedureOrigin.debt !== 0
       ) {
         throw new BusinessError('Không thể sửa phiếu đã thanh toán')
       }

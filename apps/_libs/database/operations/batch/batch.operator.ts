@@ -4,7 +4,7 @@ import {
   BatchManager,
   ProductManager,
   ProductMovementManager,
-  PurchaseOrderItemManager,
+  PurchaseOrderItemRepository,
   StockCheckItemManager,
   TicketBatchManager,
   TicketProductManager,
@@ -17,11 +17,11 @@ export class BatchOperator {
     private productManager: ProductManager,
     private batchManager: BatchManager,
     private productMovementManager: ProductMovementManager,
-    private purchaseOrderItemManager: PurchaseOrderItemManager,
+    private purchaseOrderItemRepository: PurchaseOrderItemRepository,
     private ticketProductManager: TicketProductManager,
     private ticketBatchManager: TicketBatchManager,
     private stockCheckItemManager: StockCheckItemManager
-  ) { }
+  ) {}
 
   async mergeBatch(options: {
     oid: number
@@ -50,7 +50,7 @@ export class BatchOperator {
         }
       )
 
-      await this.purchaseOrderItemManager.update(
+      await this.purchaseOrderItemRepository.managerUpdate(
         manager,
         { oid, productId, batchId: { IN: batchIdSourceList } },
         { batchId: batchIdTarget }

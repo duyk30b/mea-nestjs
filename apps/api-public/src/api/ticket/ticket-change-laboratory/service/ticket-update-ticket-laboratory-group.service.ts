@@ -1,8 +1,5 @@
 import { GenerateId } from '@libs/database/common/generate-id'
-import {
-    PaymentMoneyStatus,
-    TicketLaboratoryStatus,
-} from '@libs/database/common/variable'
+import { TicketItemPaymentType, TicketLaboratoryStatus } from '@libs/database/common/variable'
 import { TicketLaboratoryInsertType } from '@libs/database/entities/ticket-laboratory.entity'
 import Ticket, { TicketStatus } from '@libs/database/entities/ticket.entity'
 import { TicketChangeItemMoneyManager } from '@libs/database/operations/ticket-base/ticket-change-item-money.manager'
@@ -23,7 +20,7 @@ export class TicketUpdateTicketLaboratoryGroupService {
     private ticketLaboratoryRepository: TicketLaboratoryRepository,
     private ticketLaboratoryGroupRepository: TicketLaboratoryGroupRepository,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
-  ) { }
+  ) {}
 
   async updateTicketLaboratoryGroup(props: {
     oid: number
@@ -73,11 +70,10 @@ export class TicketUpdateTicketLaboratoryGroupService {
               roomId: tlgModified.roomId,
               status: TicketLaboratoryStatus.Pending,
               completedAt: null,
-              paymentMoneyStatus: ticketOrigin.isPaymentEachItem
-                ? PaymentMoneyStatus.PendingPayment
-                : PaymentMoneyStatus.TicketPaid,
+              ticketItemPaymentType: ticketOrigin.isPaymentEachItem
+                ? TicketItemPaymentType.PendingPayment
+                : TicketItemPaymentType.TicketPaid,
               paid: 0,
-              debt: 0,
             } satisfies TicketLaboratoryInsertType
             return tlEntity
           })

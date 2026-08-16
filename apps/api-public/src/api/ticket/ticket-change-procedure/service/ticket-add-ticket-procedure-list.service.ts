@@ -1,27 +1,21 @@
 import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
 import { ESArray, NoExtra } from '@libs/common/helpers'
 import { GenerateId } from '@libs/database/common/generate-id'
+import { TicketItemPaymentType, TicketRegimenStatus } from '@libs/database/common/variable'
 import {
-    PaymentMoneyStatus,
-    TicketRegimenStatus,
-} from '@libs/database/common/variable'
-import {
-    TicketProcedureInsertType,
-    TicketProcedureStatus,
-    TicketProcedureType,
+  TicketProcedureInsertType,
+  TicketProcedureStatus,
+  TicketProcedureType,
 } from '@libs/database/entities/ticket-procedure.entity'
 import { TicketRegimenItemInsertType } from '@libs/database/entities/ticket-regimen-item.entity'
 import { TicketRegimenInsertType } from '@libs/database/entities/ticket-regimen.entity'
 import { TicketStatus } from '@libs/database/entities/ticket.entity'
+import { TicketChangeItemMoneyManager, TicketUserCommon } from '@libs/database/operations'
 import {
-    TicketChangeItemMoneyManager,
-    TicketUserCommon,
-} from '@libs/database/operations'
-import {
-    TicketProcedureRepository,
-    TicketRegimenItemRepository,
-    TicketRegimenRepository,
-    TicketRepository,
+  TicketProcedureRepository,
+  TicketRegimenItemRepository,
+  TicketRegimenRepository,
+  TicketRepository,
 } from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
 import { SocketEmitService } from '../../../../socket/socket-emit.service'
@@ -38,7 +32,7 @@ export class TicketAddTicketProcedureListService {
     private ticketProcedureRepository: TicketProcedureRepository,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager,
     private ticketUserCommon: TicketUserCommon
-  ) { }
+  ) {}
 
   async addTicketProcedureList(props: {
     oid: number
@@ -86,7 +80,6 @@ export class TicketAddTicketProcedureListService {
               IN: [
                 TicketStatus.Draft,
                 TicketStatus.Schedule,
-                TicketStatus.Deposited,
                 TicketStatus.Executing,
               ],
             },
@@ -174,14 +167,14 @@ export class TicketAddTicketProcedureListService {
             const ticketRegimenAdd = ticketRegimenAddMap[triCreated.ticketRegimenId]
             const isEffectTotalMoney = ticketRegimenAdd.isEffectTotalMoney
 
-            let paymentMoneyStatus = PaymentMoneyStatus.NoEffect
+            let ticketItemPaymentType = TicketItemPaymentType.NoEffect
             let ticketProcedureStatus = TicketProcedureStatus.NoEffect
             if (isEffectTotalMoney) {
               ticketProcedureStatus = TicketProcedureStatus.Pending
               if (ticketOrigin.isPaymentEachItem) {
-                paymentMoneyStatus = PaymentMoneyStatus.PendingPayment
+                ticketItemPaymentType = TicketItemPaymentType.PendingPayment
               } else {
-                paymentMoneyStatus = PaymentMoneyStatus.TicketPaid
+                ticketItemPaymentType = TicketItemPaymentType.TicketPaid
               }
             }
 
@@ -198,7 +191,7 @@ export class TicketAddTicketProcedureListService {
                 createdAt,
                 ticketProcedureType: TicketProcedureType.InRegimen,
                 status: ticketProcedureStatus,
-                paymentMoneyStatus,
+                ticketItemPaymentType,
                 costAmount: 0,
                 commissionAmount: 0,
                 completedAt: null,
@@ -212,7 +205,6 @@ export class TicketAddTicketProcedureListService {
                 priority: 0,
                 quantity: 1,
                 paid: 0,
-                debt: 0,
               } satisfies TicketProcedureInsertType
               return tpInsert
             })
@@ -249,8 +241,6 @@ export class TicketAddTicketProcedureListService {
                 : 0,
               paid: 0,
               paidItem: 0,
-              debt: 0,
-              debtItem: 0,
             } satisfies TicketRegimenInsertType
             return insert
           })
@@ -294,9 +284,9 @@ export class TicketAddTicketProcedureListService {
                 ticketRegimenId: '0',
                 ticketRegimenItemId: '0',
                 indexSession: 0,
-                paymentMoneyStatus: ticketOrigin.isPaymentEachItem
-                  ? PaymentMoneyStatus.PendingPayment
-                  : PaymentMoneyStatus.TicketPaid,
+                ticketItemPaymentType: ticketOrigin.isPaymentEachItem
+                  ? TicketItemPaymentType.PendingPayment
+                  : TicketItemPaymentType.TicketPaid,
                 createdAt,
                 completedAt: null,
                 result: '',
@@ -306,7 +296,6 @@ export class TicketAddTicketProcedureListService {
                   .filter((tu) => tu.ticketItemId === tpAdd.id)
                   .reduce((acc, cur) => acc + cur.quantity * cur.commissionMoney, 0),
                 paid: 0,
-                debt: 0,
               }
               return insert
             })
@@ -316,7 +305,7 @@ export class TicketAddTicketProcedureListService {
         const itemsDiscountAdd =
           ticketProcedureRegimenCreatedList.reduce((acc, item) => {
             const discount =
-              item.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+              item.ticketItemPaymentType !== TicketItemPaymentType.NoEffect
                 ? item.quantity * item.discountMoney
                 : 0
             return acc + discount
@@ -327,7 +316,7 @@ export class TicketAddTicketProcedureListService {
         const procedureMoneyAdd =
           ticketProcedureRegimenCreatedList.reduce((acc, item) => {
             const money =
-              item.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+              item.ticketItemPaymentType !== TicketItemPaymentType.NoEffect
                 ? item.quantity * item.actualPrice
                 : 0
             return acc + money

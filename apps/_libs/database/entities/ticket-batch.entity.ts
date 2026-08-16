@@ -1,6 +1,5 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
-import { DeliveryStatus } from '../common/variable'
 import Batch from './batch.entity'
 import Customer from './customer.entity'
 import Product from './product.entity'
@@ -43,17 +42,13 @@ export default class TicketBatch {
   @Expose()
   batchId: number
 
-  @Column({ type: 'smallint', default: DeliveryStatus.Pending })
-  @Expose()
-  deliveryStatus: DeliveryStatus
-
   @Column({ type: 'smallint', default: 1 })
   @Expose()
   unitRate: number
 
   @Column({ default: 0 })
   @Expose()
-  unitQuantity: number
+  quantityCompleted: number
 
   @Column({
     type: 'bigint',
@@ -106,7 +101,7 @@ export default class TicketBatch {
     const entity = new TicketBatch()
     Object.assign(entity, raw)
 
-    entity.unitQuantity = Number(raw.unitQuantity)
+    entity.quantityCompleted = Number(raw.quantityCompleted)
     entity.costAmount = Number(raw.costAmount)
     entity.unitExpectedPrice = Number(raw.unitExpectedPrice)
     entity.unitActualPrice = Number(raw.unitActualPrice)
@@ -134,6 +129,6 @@ export type TicketBatchUpdateType = {
 
 export type TicketBatchSortType = {
   [P in keyof Pick<TicketBatch, 'oid' | 'id' | 'ticketId' | 'productId' | 'ticketProductId'>]?:
-  | 'ASC'
-  | 'DESC'
+    | 'ASC'
+    | 'DESC'
 }

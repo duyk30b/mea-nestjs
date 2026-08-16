@@ -20,7 +20,7 @@ export default class Customer extends BaseEntity {
   @Expose()
   customerSourceId: number
 
-  @Column({ type: 'smallint', default: 1 })
+  @Column({ type: 'smallint', default: 0 })
   @Expose()
   isHasTicket: number
 

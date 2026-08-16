@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
-import { PaymentMoneyStatus } from '../../../common/variable'
+import { TicketItemPaymentType } from '../../../common/variable'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import {
-  TicketLaboratoryGroupManager,
-  TicketLaboratoryManager,
-  TicketLaboratoryResultManager,
-  TicketManager,
+    TicketLaboratoryGroupManager,
+    TicketLaboratoryManager,
+    TicketLaboratoryResultManager,
+    TicketManager,
 } from '../../../repositories'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
 
@@ -43,8 +43,8 @@ export class TicketDestroyTicketLaboratoryGroupOperation {
           oid,
           ticketId,
           id: ticketLaboratoryGroupId,
-          paymentMoneyStatus: {
-            IN: [PaymentMoneyStatus.TicketPaid, PaymentMoneyStatus.PendingPayment],
+          ticketItemPaymentType: {
+            IN: [TicketItemPaymentType.TicketPaid, TicketItemPaymentType.PendingPayment],
           },
         })
 
@@ -53,8 +53,8 @@ export class TicketDestroyTicketLaboratoryGroupOperation {
           oid,
           ticketId,
           ticketLaboratoryGroupId,
-          paymentMoneyStatus: {
-            IN: [PaymentMoneyStatus.TicketPaid, PaymentMoneyStatus.PendingPayment],
+          ticketItemPaymentType: {
+            IN: [TicketItemPaymentType.TicketPaid, TicketItemPaymentType.PendingPayment],
           },
         })
 

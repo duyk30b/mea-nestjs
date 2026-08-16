@@ -1,8 +1,5 @@
 import { BusinessError } from '@libs/database/common/error'
-import {
-    PaymentMoneyStatus,
-    TicketRegimenStatus,
-} from '@libs/database/common/variable'
+import { TicketItemPaymentType, TicketRegimenStatus } from '@libs/database/common/variable'
 import { PositionType } from '@libs/database/entities/position.entity'
 import {
     TicketProcedureStatus,
@@ -32,7 +29,7 @@ export class TicketDestroyTicketRegimenService {
     private ticketProcedureRepository: TicketProcedureRepository,
     private ticketUserRepository: TicketUserRepository,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
-  ) { }
+  ) {}
 
   async destroyTicketRegimen(params: { oid: number; ticketId: string; ticketRegimenId: string }) {
     const { oid, ticketId, ticketRegimenId } = params
@@ -65,7 +62,6 @@ export class TicketDestroyTicketRegimenService {
         || ticketRegimenDestroyed.costAmount !== 0
         || ticketRegimenDestroyed.paid !== 0
         || ticketRegimenDestroyed.paidItem !== 0
-        || ticketRegimenDestroyed.debt !== 0
       ) {
         throw new BusinessError('Liệu trình đã sử dụng tiền không thể xóa')
       }
@@ -98,10 +94,10 @@ export class TicketDestroyTicketRegimenService {
         }
         if (
           ![
-            PaymentMoneyStatus.NoEffect,
-            PaymentMoneyStatus.TicketPaid,
-            PaymentMoneyStatus.PendingPayment,
-          ].includes(i.paymentMoneyStatus)
+            TicketItemPaymentType.NoEffect,
+            TicketItemPaymentType.TicketPaid,
+            TicketItemPaymentType.PendingPayment,
+          ].includes(i.ticketItemPaymentType)
         ) {
           throw new BusinessError('Không thể xóa dịch vụ đã thanh toán')
         }
@@ -118,14 +114,14 @@ export class TicketDestroyTicketRegimenService {
       // === 4. UPDATE TICKET: MONEY  ===
       const procedureMoneyDelete = ticketProcedureDestroyedList.reduce((acc, item) => {
         const money =
-          item.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+          item.ticketItemPaymentType !== TicketItemPaymentType.NoEffect
             ? item.actualPrice * item.quantity
             : 0
         return acc + money
       }, 0)
       const itemsDiscountDelete = ticketProcedureDestroyedList.reduce((acc, item) => {
         const discount =
-          item.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+          item.ticketItemPaymentType !== TicketItemPaymentType.NoEffect
             ? item.discountMoney * item.quantity
             : 0
         return acc + discount

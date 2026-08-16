@@ -1,4 +1,4 @@
-import { PaymentMoneyStatus } from '@libs/database/common/variable'
+import { TicketItemPaymentType } from '@libs/database/common/variable'
 import { TicketRegimen, TicketRegimenItem } from '@libs/database/entities'
 import { PositionType } from '@libs/database/entities/position.entity'
 import {
@@ -29,7 +29,7 @@ export class TicketDestroyTicketProcedureService {
     private ticketRegimenItemRepository: TicketRegimenItemRepository,
     private ticketUserRepository: TicketUserRepository,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
-  ) { }
+  ) {}
 
   async destroyTicketProcedure(params: {
     oid: number
@@ -54,11 +54,11 @@ export class TicketDestroyTicketProcedureService {
           oid,
           ticketId,
           id: ticketProcedureId,
-          paymentMoneyStatus: {
+          ticketItemPaymentType: {
             IN: [
-              PaymentMoneyStatus.NoEffect,
-              PaymentMoneyStatus.TicketPaid,
-              PaymentMoneyStatus.PendingPayment,
+              TicketItemPaymentType.NoEffect,
+              TicketItemPaymentType.TicketPaid,
+              TicketItemPaymentType.PendingPayment,
             ],
           },
           status: {
@@ -70,7 +70,6 @@ export class TicketDestroyTicketProcedureService {
           },
           costAmount: 0, // nếu có costAmount thì phải hủy kết quả trước
           paid: 0, // nếu có paid thì phải hủy thanh toán trước
-          debt: 0, // nếu có debt thì phải hủy thanh toán trước
         }
       )
 
@@ -99,7 +98,7 @@ export class TicketDestroyTicketProcedureService {
 
       let procedureMoneyDelete = 0
       let itemsDiscountDelete = 0
-      if (ticketProcedureDestroyed.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect) {
+      if (ticketProcedureDestroyed.ticketItemPaymentType !== TicketItemPaymentType.NoEffect) {
         procedureMoneyDelete =
           ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.actualPrice
         itemsDiscountDelete =
@@ -124,7 +123,7 @@ export class TicketDestroyTicketProcedureService {
       if (ticketProcedureDestroyed.ticketProcedureType === TicketProcedureType.InRegimen) {
         let moneyAmountActual = 0
         let quantityActual = 0
-        if (ticketProcedureDestroyed.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect) {
+        if (ticketProcedureDestroyed.ticketItemPaymentType !== TicketItemPaymentType.NoEffect) {
           moneyAmountActual =
             ticketProcedureDestroyed.quantity * ticketProcedureDestroyed.actualPrice
           quantityActual = ticketProcedureDestroyed.quantity

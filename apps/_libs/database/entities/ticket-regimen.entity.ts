@@ -73,14 +73,6 @@ export default class TicketRegimen {
   @Expose()
   paid: number // Tiền trả trực tiếp cho chính liệu trình
 
-  @Column({ default: 0 })
-  @Expose()
-  debt: number // Tiền nợ trực tiếp của chính liệu trình
-
-  @Column({ default: 0 })
-  @Expose()
-  debtItem: number // Tiền nợ trực tiếp của chính liệu trình
-
   @Column({ type: 'varchar', length: 25, default: DiscountType.VND })
   @Expose()
   discountType: DiscountType // Loại giảm giá
@@ -149,8 +141,6 @@ export default class TicketRegimen {
     entity.discountPercent = Number(raw.discountPercent)
     entity.paid = Number(raw.paid)
     entity.paidItem = Number(raw.paidItem)
-    entity.debt = Number(raw.debt)
-    entity.debtItem = Number(raw.debtItem)
 
     entity.createdAt = Number(raw.createdAt)
     entity.completedAt = raw.completedAt == null ? raw.completedAt : Number(raw.completedAt)
@@ -185,6 +175,6 @@ export type TicketRegimenUpdateType = {
 
 export type TicketRegimenSortType = {
   [P in keyof Pick<TicketRegimen, 'id' | 'customerId' | 'ticketId' | 'regimenId' | 'status'>]?:
-  | 'ASC'
-  | 'DESC'
+    | 'ASC'
+    | 'DESC'
 }

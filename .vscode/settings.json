@@ -16,7 +16,7 @@
   "workbench.editor.wrapTabs": true,
   "workbench.tree.indent": 16,
   "[typescript]": {
-    "editor.defaultFormatter": "vscode.typescript-language-features",
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.codeActionsOnSave": [
       "source.sortImports",
       "source.formatDocument",
@@ -28,6 +28,7 @@
     "**/dist": true,
     "**/data": true,
     "**/node_modules": true,
+    "package-lock.json": true,
   },
   "js/ts.preferences.quoteStyle": "single",
   "js/ts.format.semicolons": "remove",

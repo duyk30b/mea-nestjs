@@ -28,7 +28,7 @@ export class TicketChangeDiscountOperation {
         {
           oid,
           id: ticketId,
-          status: { IN: [TicketStatus.Draft, TicketStatus.Deposited, TicketStatus.Executing] },
+          status: { IN: [TicketStatus.Draft, TicketStatus.Schedule, TicketStatus.Executing] },
         },
         { updatedAt: Date.now() }
       )

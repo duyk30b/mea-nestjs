@@ -1,7 +1,4 @@
-import {
-    DeliveryStatus,
-    PaymentMoneyStatus,
-} from '@libs/database/common/variable'
+import { DeliveryStatus, TicketItemPaymentType } from '@libs/database/common/variable'
 import { TicketStatus } from '@libs/database/entities/ticket.entity'
 import {
     TicketCalculatorMoney,
@@ -31,7 +28,7 @@ export class TicketChangeAllMoneyService {
     private ticketLaboratoryRepository: TicketLaboratoryRepository,
     private ticketCalculatorMoney: TicketCalculatorMoney,
     private ticketUpdateCommissionTicketUserOperator: TicketUpdateCommissionTicketUserOperator
-  ) { }
+  ) {}
 
   async changeAllMoney(params: { oid: number; ticketId: string; body: TicketChangeAllMoneyBody }) {
     const { oid, ticketId, body } = params
@@ -48,15 +45,15 @@ export class TicketChangeAllMoneyService {
         condition: {
           oid,
           ticketId,
-          deliveryStatus: DeliveryStatus.Pending,
-          paymentMoneyStatus: {
-            IN: [PaymentMoneyStatus.TicketPaid, PaymentMoneyStatus.PendingPayment],
+          quantityCompleted: 0,
+          ticketItemPaymentType: {
+            IN: [TicketItemPaymentType.TicketPaid, TicketItemPaymentType.PendingPayment],
           },
         },
         compare: { id: { cast: 'bigint' } },
         tempList: body.ticketProductList,
         update: [
-          'unitQuantity',
+          'quantity',
           'unitDiscountMoney',
           'discountPercent',
           'discountType',
@@ -70,8 +67,8 @@ export class TicketChangeAllMoneyService {
         condition: {
           oid,
           ticketId,
-          paymentMoneyStatus: {
-            IN: [PaymentMoneyStatus.TicketPaid, PaymentMoneyStatus.PendingPayment],
+          ticketItemPaymentType: {
+            IN: [TicketItemPaymentType.TicketPaid, TicketItemPaymentType.PendingPayment],
           },
         },
         compare: { id: { cast: 'bigint' } },
@@ -85,8 +82,8 @@ export class TicketChangeAllMoneyService {
         condition: {
           oid,
           ticketId,
-          paymentMoneyStatus: {
-            IN: [PaymentMoneyStatus.TicketPaid, PaymentMoneyStatus.PendingPayment],
+          ticketItemPaymentType: {
+            IN: [TicketItemPaymentType.TicketPaid, TicketItemPaymentType.PendingPayment],
           },
         },
         compare: { id: { cast: 'bigint' } },
@@ -100,8 +97,8 @@ export class TicketChangeAllMoneyService {
         condition: {
           oid,
           ticketId,
-          paymentMoneyStatus: {
-            IN: [PaymentMoneyStatus.TicketPaid, PaymentMoneyStatus.PendingPayment],
+          ticketItemPaymentType: {
+            IN: [TicketItemPaymentType.TicketPaid, TicketItemPaymentType.PendingPayment],
           },
         },
         compare: { id: { cast: 'bigint' } },

@@ -6,13 +6,13 @@ import { GenerateId } from '../../../common/generate-id'
 import { TicketLaboratoryStatus } from '../../../common/variable'
 import { TicketLaboratoryGroup } from '../../../entities'
 import TicketLaboratory, {
-  TicketLaboratoryInsertType,
+    TicketLaboratoryInsertType,
 } from '../../../entities/ticket-laboratory.entity'
 import Ticket, { TicketStatus } from '../../../entities/ticket.entity'
 import {
-  TicketLaboratoryGroupManager,
-  TicketLaboratoryManager,
-  TicketManager,
+    TicketLaboratoryGroupManager,
+    TicketLaboratoryManager,
+    TicketManager,
 } from '../../../repositories'
 import { TicketChangeItemMoneyManager } from '../../ticket-base/ticket-change-item-money.manager'
 
@@ -28,7 +28,7 @@ export type TicketLaboratoryUpdateBasicType = Pick<
   | 'discountType'
   | 'actualPrice'
   | 'createdAt'
-  | 'paymentMoneyStatus'
+  | 'ticketItemPaymentType'
 >
 
 export type TicketLaboratoryGroupUpdateBasicType = Pick<
@@ -107,7 +107,6 @@ export class TicketChangeSelectLaboratoryOperation {
             roomId: ticketLaboratoryGroupDto.roomId,
             completedAt: null,
             paid: 0,
-            debt: 0,
             status: TicketLaboratoryStatus.Pending,
           }
           return tlEntity

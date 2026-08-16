@@ -51,7 +51,7 @@ export class PurchaseOrderItemBody {
   @Expose()
   @IsDefined()
   @IsNumberGreaterThan(0)
-  unitQuantity: number
+  quantity: number
 
   @ApiProperty({ example: 12_000 })
   @Expose()

@@ -2,9 +2,12 @@ import { BusinessException } from '@libs/common/exception-filter/exception-filte
 import { ESArray } from '@libs/common/helpers'
 import {
   Appointment,
+  Batch,
   Customer,
-  CustomerSource,
   Image,
+  Payment,
+  PaymentTicket,
+  Product,
   Ticket,
   TicketAttribute,
   TicketBatch,
@@ -14,6 +17,7 @@ import {
   TicketLaboratoryResult,
   TicketPaymentDetail,
   TicketProcedure,
+  TicketProduct,
   TicketRadiology,
   TicketReception,
   TicketRegimen,
@@ -22,13 +26,14 @@ import {
   TicketUser,
 } from '@libs/database/entities'
 import { ImageInteractType } from '@libs/database/entities/image.entity'
-import Payment, { PaymentVoucherType } from '@libs/database/entities/payment.entity'
-import TicketProduct from '@libs/database/entities/ticket-product.entity'
 import {
   AppointmentRepository,
+  BatchRepository,
   CustomerRepository,
-  CustomerSourceRepository,
+  ImageRepository,
   PaymentRepository,
+  PaymentTicketRepository,
+  ProductRepository,
   TicketAttributeRepository,
   TicketBatchRepository,
   TicketExpenseRepository,
@@ -42,11 +47,10 @@ import {
   TicketReceptionRepository,
   TicketRegimenItemRepository,
   TicketRegimenRepository,
+  TicketRepository,
   TicketSurchargeRepository,
   TicketUserRepository,
 } from '@libs/database/repositories'
-import { ImageRepository } from '@libs/database/repositories/image.repository'
-import { TicketRepository } from '@libs/database/repositories/ticket.repository'
 import { Injectable } from '@nestjs/common'
 import { TicketGetManyQuery, TicketPaginationQuery, TicketRelationQuery } from './request'
 
@@ -71,9 +75,11 @@ export class TicketQueryService {
     private readonly ticketRadiologyRepository: TicketRadiologyRepository,
     private readonly ticketLaboratoryResultRepository: TicketLaboratoryResultRepository,
     private readonly ticketUserRepository: TicketUserRepository,
-    private readonly paymentRepository: PaymentRepository,
-    private readonly customerSourceRepository: CustomerSourceRepository,
-    private readonly imageRepository: ImageRepository
+    private readonly paymentTicketRepository: PaymentTicketRepository,
+    private readonly imageRepository: ImageRepository,
+    private readonly productRepository: ProductRepository,
+    private readonly batchRepository: BatchRepository,
+    private readonly paymentRepository: PaymentRepository
   ) {}
 
   async pagination(oid: number, query: TicketPaginationQuery) {
@@ -163,12 +169,11 @@ export class TicketQueryService {
             condition: { oid, ticketId: { IN: ticketIdPaymentEachItemList } },
           })
         : undefined,
-      relation?.paymentList
-        ? this.paymentRepository.findMany({
+      relation?.paymentTicketList
+        ? this.paymentTicketRepository.findMany({
             condition: {
               oid,
-              voucherType: PaymentVoucherType.Ticket,
-              voucherId: { IN: ticketIdList },
+              ticketId: { IN: ticketIdList },
             },
             sort: { id: 'ASC' },
           })
@@ -291,7 +296,7 @@ export class TicketQueryService {
 
     const customerList: Customer[] = dataPromise[0]
     const ticketPaymentDetailList: TicketPaymentDetail[] = dataPromise[1]
-    const paymentList: Payment[] = dataPromise[2]
+    const paymentTicketList: PaymentTicket[] = dataPromise[2] || []
     const ticketReceptionList: TicketReception[] = dataPromise[3] || []
     const ticketAttributeList: TicketAttribute[] = dataPromise[4] || []
     const ticketSurchargeList: TicketSurcharge[] = dataPromise[5] || []
@@ -309,6 +314,55 @@ export class TicketQueryService {
     const imageList: Image[] = dataPromise[17] || []
     const toAppointmentList: Appointment[] = dataPromise[18] || []
 
+    const productIdList = ESArray.uniqueArray(ticketProductList.map((i) => i.productId))
+    const batchIdList = ESArray.uniqueArray([
+      ...ticketBatchList.map((i) => i.batchId),
+      ...ticketProductList.map((i) => i.batchId),
+    ]).filter((i) => !!i)
+    const paymentIdList = ESArray.uniqueArray(paymentTicketList.map((i) => i.paymentId))
+
+    const [productList, batchList, paymentList] = await Promise.all([
+      relation?.ticketProductList?.product && productIdList.length
+        ? this.productRepository.findManyBy({ id: { IN: productIdList } })
+        : <Product[]>[],
+      (relation?.ticketBatchList?.batch || relation?.ticketProductList?.batch) && batchIdList.length
+        ? this.batchRepository.findManyBy({ id: { IN: batchIdList } })
+        : <Batch[]>[],
+      relation?.paymentTicketList?.payment && paymentIdList.length
+        ? this.paymentRepository.findManyBy({ id: { IN: paymentIdList } })
+        : <Payment[]>[],
+    ])
+    const productMap = ESArray.arrayToKeyValue(productList, 'id')
+    const batchMap = ESArray.arrayToKeyValue(batchList, 'id')
+    const paymentMap = ESArray.arrayToKeyValue(paymentList, 'id')
+
+    if (relation?.ticketProductList) {
+      ticketProductList.forEach((ri) => {
+        if (relation?.ticketProductList.product) {
+          ri.product = productMap[ri.productId]
+        }
+        if (relation?.ticketProductList.batch) {
+          ri.batch = batchMap[ri.batchId]
+        }
+      })
+    }
+
+    if (relation?.ticketBatchList) {
+      ticketBatchList.forEach((ri) => {
+        if (relation?.ticketBatchList.batch) {
+          ri.batch = batchMap[ri.batchId]
+        }
+      })
+    }
+
+    if (relation?.paymentTicketList) {
+      paymentTicketList.forEach((ri) => {
+        if (relation?.paymentTicketList.payment) {
+          ri.payment = paymentMap[ri.paymentId]
+        }
+      })
+    }
+
     ticketList.forEach((ticket: Ticket) => {
       if (relation?.customer) {
         ticket.customer = customerList.find((i) => {
@@ -320,9 +374,9 @@ export class TicketQueryService {
           return i.ticketId === ticket.id
         })
       }
-      if (relation?.paymentList) {
-        ticket.paymentList = paymentList.filter((i) => {
-          return i.voucherId === ticket.id
+      if (relation?.paymentTicketList) {
+        ticket.paymentTicketList = paymentTicketList.filter((i) => {
+          return i.ticketId === ticket.id
         })
       }
       if (relation?.ticketReceptionList) {

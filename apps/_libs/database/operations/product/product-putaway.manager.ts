@@ -14,28 +14,44 @@ export class ProductPutawayManager {
     private batchRepository: BatchRepository,
     private productMovementRepository: ProductMovementRepository,
     private productPutawayOperation: ProductPutawayPlan
-  ) { }
+  ) {}
 
-  async startPutaway(props: {
-    manager: EntityManager
-    oid: number
-    voucherId: string
-    contactId: number
-    time: number
-    movementType: MovementType
-    isRefund: 0 | 1
-    voucherBatchPutawayList: {
-      voucherProductId: string
-      voucherBatchId: string // cất hàng thì dùng voucherBatch vì đã xác định rõ Batch
-      warehouseId: number
-      productId: number
-      batchId: number
-      costAmount: number // cất hàng thì dễ, vì luôn có batchId và costAmount sẵn, chỉ cần xử lý số liệu của costAmount khi bị âm thôi
-      quantity: number
-      expectedPrice: number
-      actualPrice: number
-    }[]
-  }) {
+  async startPutaway(
+    props: {
+      manager: EntityManager
+      oid: number
+      voucherId: string
+      contactId: number
+      time: number
+      movementType: MovementType
+      isRefund: 0 | 1
+      voucherBatchPutawayList: {
+        voucherProductId: string
+        voucherBatchId: string // cất hàng thì dùng voucherBatch vì đã xác định rõ Batch
+        warehouseId: number
+        productId: number
+        batchId: number
+        costAmount: number // cất hàng thì dễ, vì luôn có batchId và costAmount sẵn, chỉ cần xử lý số liệu của costAmount khi bị âm thôi
+        quantity: number
+        expectedPrice: number
+        actualPrice: number
+        productUpdateInfo?: {
+          productId: number
+          costPrice: number
+          retailPrice: number
+        }
+        batchUpdateInfo?: {
+          batchId: number
+          warehouseId: number
+          distributorId: number
+          lotNumber: string
+          expiryDate: number
+          costPrice: number
+        }
+      }[]
+    },
+    options: { updateInfo?: boolean } = {}
+  ) {
     const { manager, oid, time, voucherBatchPutawayList } = props
 
     const voucherBatchPickingMap = ESArray.arrayToKeyValue(
@@ -43,20 +59,61 @@ export class ProductPutawayManager {
       'voucherProductId'
     )
 
-    // 1. === PRODUCT ORIGIN and BATCH ORIGIN ===
-    const productIdList = voucherBatchPutawayList.map((i) => i.productId)
-    const batchIdList = voucherBatchPutawayList.map((i) => i.batchId)
-    const productOriginList = await this.productRepository.managerUpdate(
-      manager,
-      { oid, id: { IN: ESArray.uniqueArray(productIdList) }, isActive: 1 },
-      { updatedAt: time }
-    )
-    const batchOriginList = await this.batchRepository.managerUpdate(
-      manager,
-      { oid, id: { IN: ESArray.uniqueArray(batchIdList) }, isActive: 1 },
-      { updatedAt: time }
-    )
+    // 1. === Lấy thông tin gốc của sản phẩm và lô hàng để phục vụ tính toán, tiện thể update info ===
+    const productInfoTempList = Object.values(
+      ESArray.arrayToKeyValue(voucherBatchPutawayList, 'productId')
+    ).map((i) => {
+      return {
+        id: i.productId,
+        costPrice: i.productUpdateInfo?.costPrice || null,
+        retailPrice: i.productUpdateInfo?.retailPrice || null,
+        updatedAt: time,
+      }
+    })
 
+    const productOriginList = await this.productRepository.managerBulkUpdate({
+      manager,
+      condition: { oid, id: { IN: productInfoTempList.map((i) => i.id) }, isActive: 1 },
+      compare: ['id'],
+      tempList: productInfoTempList,
+      update: {
+        costPrice: options.updateInfo ? true : false,
+        retailPrice: options.updateInfo ? true : false,
+        updatedAt: true,
+      },
+      options: { requireEqualLength: true },
+    })
+
+    const batchInfoTempList = Object.values(
+      ESArray.arrayToKeyValue(voucherBatchPutawayList, 'batchId')
+    ).map((i) => {
+      return {
+        id: i.batchId,
+        warehouseId: i.batchUpdateInfo?.warehouseId || 0,
+        distributorId: i.batchUpdateInfo?.distributorId || 0,
+        lotNumber: i.batchUpdateInfo?.lotNumber || '',
+        expiryDate: i.batchUpdateInfo?.expiryDate || null,
+        costPrice: i.batchUpdateInfo?.costPrice || 0,
+        updatedAt: time,
+      }
+    })
+    const batchOriginList = await this.batchRepository.managerBulkUpdate({
+      manager,
+      condition: { oid, id: { IN: batchInfoTempList.map((i) => i.id) }, isActive: 1 },
+      compare: ['id'],
+      tempList: batchInfoTempList,
+      update: {
+        warehouseId: options.updateInfo ? true : false,
+        distributorId: options.updateInfo ? true : false,
+        lotNumber: options.updateInfo ? true : false,
+        expiryDate: options.updateInfo ? { cast: 'bigint' } : false,
+        costPrice: options.updateInfo ? true : false,
+        updatedAt: true,
+      },
+      options: { requireEqualLength: true },
+    })
+
+    // 2. === GENERATE PUTAWAY PLAN ===
     const putawayPlan = this.productPutawayOperation.generatePutawayPlan({
       productOriginList,
       batchOriginList,
@@ -73,7 +130,7 @@ export class ProductPutawayManager {
       }),
     })
 
-    // 5. === UPDATE for PRODUCT and BATCH ===
+    // 3. === UPDATE for PRODUCT and BATCH ===
     const productModifiedList = await this.productRepository.managerBulkUpdate({
       manager,
       condition: { oid },
@@ -88,7 +145,6 @@ export class ProductPutawayManager {
       update: ['quantity'],
       options: { requireEqualLength: true },
     })
-    const productModifiedMap = ESArray.arrayToKeyValue(productModifiedList, 'id')
 
     const batchModifiedList = await this.batchRepository.managerBulkUpdate({
       manager,
@@ -102,15 +158,13 @@ export class ProductPutawayManager {
             productId: i.productId,
             putawayQuantity: i.putawayQuantity,
             putawayCostAmount: i.putawayCostAmount,
+            quantity: i.closeQuantity,
+            costAmount: i.closeCostAmount,
           }
         }),
-      update: {
-        quantity: () => `"quantity" + "putawayQuantity"`,
-        costAmount: () => `"costAmount" + "putawayCostAmount"`,
-      },
+      update: ['quantity', 'costAmount'],
       options: { requireEqualLength: true },
     })
-    const batchModifiedMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')
 
     const productMovementInsertList = putawayPlan.putawayMovementList.map((paMovement) => {
       const voucherBatchPicking = voucherBatchPickingMap[paMovement.voucherProductId]
@@ -143,9 +197,7 @@ export class ProductPutawayManager {
     await this.productMovementRepository.managerInsertMany(manager, productMovementInsertList)
 
     return {
-      productOriginList,
       productModifiedList,
-      batchOriginList,
       batchModifiedList,
       putawayPlan,
     }

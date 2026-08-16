@@ -4,19 +4,19 @@ import { BusinessError } from '@libs/database/common/error'
 import { GenerateId } from '@libs/database/common/generate-id'
 import { BatchInsertType } from '@libs/database/entities/batch.entity'
 import Product, {
-    ProductInsertType,
-    ProductType,
-    SplitBatchByCostPrice,
-    SplitBatchByDistributor,
-    SplitBatchByExpiryDate,
-    SplitBatchByWarehouse,
+  ProductInsertType,
+  ProductType,
+  SplitBatchByCostPrice,
+  SplitBatchByDistributor,
+  SplitBatchByExpiryDate,
+  SplitBatchByWarehouse,
 } from '@libs/database/entities/product.entity'
 import { PurchaseOrderItemInsertType } from '@libs/database/entities/purchase-order-item.entity'
 import {
-    BatchRepository,
-    ProductGroupRepository,
-    ProductManager,
-    ProductRepository,
+  BatchRepository,
+  ProductGroupRepository,
+  ProductManager,
+  ProductRepository,
 } from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
@@ -180,7 +180,8 @@ export class ApiFilePurchaseOrderUploadExcel {
           lotNumber: plain.lotNumber,
           expiryDate: plain.expiryDate,
           unitRate: 1,
-          unitQuantity: plain.quantity * unitRate, // upload qua excel thì chỉ cho unitRate = unitRate
+          quantity: plain.quantity, // upload qua excel thì chỉ cho unitRate = unitRate
+          quantityCompleted: 0,
           unitCostPrice: plain.costPrice * unitRate,
           unitListPrice: plain.retailPrice * unitRate,
           purchaseOrderId: ' 0',

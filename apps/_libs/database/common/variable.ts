@@ -35,14 +35,6 @@ type EnumReverseKeyValue = {
   [P in DiscountType]?: keyof typeof DiscountType
 }
 
-export enum PaymentType {
-  Prepayment = 1, // Thanh toán trước mua hàng
-  ReceiveRefund = 2, // Nhận tiền hoàn trả
-  Close = 3, // Đóng hồ sơ (trả tiền khi thanh toán)
-  PayDebt = 4, // Trả nợ (thanh toán sau mua hàng )
-  Reopen = 5, // Mở lại hồ sơ
-}
-
 export enum PickupStrategy {
   Inherit = 0, // Dùng theo cấu hình mặc định hệ thống
   NoImpact = 1, // Không tác động đến kho
@@ -60,12 +52,11 @@ export enum MovementType {
 }
 
 export enum DeliveryStatus {
-  NoStock = 1, // không có hàng
+  Empty = 1, // không có hàng trong phiếu, không thể giao hàng
   Pending = 2,
-  Delivered = 3,
-  // Returned = 4,
-  // PartiallyReturned = 4,
-  // FullyReturned = 5,
+  Partial = 3,
+  Delivered = 4,
+  Cancelled = 5,
 }
 
 export enum AttributeInputType {
@@ -95,11 +86,42 @@ export enum TicketLaboratoryStatus {
   Completed = 3,
 }
 
-export enum PaymentMoneyStatus {
+export enum TicketItemPaymentType {
   NoEffect = -1, // không cần thanh toán, không cộng tiền (trường hợp vật tư tiêu hao của dịch vụ)
   TicketPaid = 1,
   PendingPayment = 2,
   PartialPaid = 3,
   FullPaid = 4,
-  Debt = 5,
+}
+
+export enum TicketActionType {
+  TicketOrderDebtSuccessCreate = 1,
+  TicketOrderDebtSuccessUpdate = 2,
+  ShipProductAndPaymentAndClose = 3,
+  PrePayment = 4,
+  PaymentMoney = 5,
+  PaymentItem = 6,
+  RefundMoney = 7,
+  RefundItem = 8,
+  PayDebt = 9,
+  RefundDebt = 10,
+  Close = 11,
+  Reopen = 12,
+  Terminal = 13,
+}
+
+export enum PurchaseOrderActionType {
+  PurchaseOrderDebtSuccessCreate = 1,
+  PurchaseOrderDebtSuccessUpdate = 2,
+  ReceiveProductAndPaymentAndClose = 3,
+  PrePayment = 4,
+  PaymentMoney = 5,
+  PaymentItem = 6,
+  RefundMoney = 7,
+  RefundItem = 8,
+  PayDebt = 9,
+  RefundDebt = 10,
+  Close = 11,
+  Reopen = 12,
+  Terminal = 13,
 }

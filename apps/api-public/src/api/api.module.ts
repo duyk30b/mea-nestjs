@@ -1,3 +1,4 @@
+import { PaymentTicketModule } from '@api-public/api/payment_ticket/payment_ticket.module'
 import { Module } from '@nestjs/common'
 import { ApiAddressModule } from './api-address/api-address.module'
 import { ApiBatchModule } from './api-batch/api-batch.module'
@@ -84,8 +85,10 @@ import { TicketModule } from './ticket/ticket.module'
 
     TicketModule,
     TicketReceptionModule,
+
+    PaymentTicketModule,
   ],
   controllers: [],
   providers: [],
 })
-export class ApiModule { }
+export class ApiModule {}

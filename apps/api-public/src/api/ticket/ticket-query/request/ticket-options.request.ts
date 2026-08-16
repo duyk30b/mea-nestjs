@@ -21,8 +21,8 @@ export class TicketRelationQuery {
   ticketPaymentDetail?: boolean
 
   @Expose()
-  @IsBoolean()
-  paymentList?: boolean
+  @IsObject()
+  paymentTicketList?: { payment?: boolean }
 
   @Expose()
   @IsBoolean()

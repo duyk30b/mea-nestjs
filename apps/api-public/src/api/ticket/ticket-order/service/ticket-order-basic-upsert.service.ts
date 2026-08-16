@@ -1,27 +1,27 @@
 import { ESTimer } from '@libs/common/helpers'
 import { GenerateId } from '@libs/database/common/generate-id'
-import { DeliveryStatus, PaymentMoneyStatus } from '@libs/database/common/variable'
+import { DeliveryStatus, TicketItemPaymentType } from '@libs/database/common/variable'
 import { TicketAttributeInsertType } from '@libs/database/entities/ticket-attribute.entity'
 import { TicketExpenseInsertType } from '@libs/database/entities/ticket-expense.entity'
 import {
-  TicketProcedureInsertType,
-  TicketProcedureStatus,
-  TicketProcedureType,
+    TicketProcedureInsertType,
+    TicketProcedureStatus,
+    TicketProcedureType,
 } from '@libs/database/entities/ticket-procedure.entity'
 import {
-  TicketProductInsertType,
-  TicketProductType,
+    TicketProductInsertType,
+    TicketProductType,
 } from '@libs/database/entities/ticket-product.entity'
 import { TicketSurchargeInsertType } from '@libs/database/entities/ticket-surcharge.entity'
 import Ticket, { TicketInsertType, TicketStatus } from '@libs/database/entities/ticket.entity'
 import {
-  CustomerRepository,
-  TicketAttributeRepository,
-  TicketExpenseRepository,
-  TicketProcedureRepository,
-  TicketProductRepository,
-  TicketRepository,
-  TicketSurchargeRepository,
+    CustomerRepository,
+    TicketAttributeRepository,
+    TicketExpenseRepository,
+    TicketProcedureRepository,
+    TicketProductRepository,
+    TicketRepository,
+    TicketSurchargeRepository,
 } from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
@@ -38,7 +38,7 @@ export class TicketOrderBasicUpsertService {
     private ticketProcedureRepository: TicketProcedureRepository,
     private ticketSurchargeRepository: TicketSurchargeRepository,
     private ticketExpenseRepository: TicketExpenseRepository
-  ) { }
+  ) {}
 
   async startUpsert(props: {
     oid: number
@@ -73,7 +73,7 @@ export class TicketOrderBasicUpsertService {
           status: TicketStatus.Draft,
           deliveryStatus: body.ticketOrderProductBodyList.length
             ? DeliveryStatus.Pending
-            : DeliveryStatus.NoStock,
+            : DeliveryStatus.Empty,
           itemsCostAmount: 0, // costAmount chỉ tính toán khi gửi hàng
           profit: body.ticketOrderBasic.totalMoney - body.ticketOrderBasic.expense - 0,
           paidTotal: 0,
@@ -124,17 +124,16 @@ export class TicketOrderBasicUpsertService {
             oid,
             ticketId: ticket.id,
             customerId,
-            deliveryStatus: DeliveryStatus.Pending,
-            unitQuantityPrescription: i.unitQuantity,
-            unitQuantity: i.unitQuantity,
+            quantityPrescription: i.quantity,
+            quantity: i.quantity,
+            quantityCompleted: 0,
             type: TicketProductType.Prescription,
-            paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
+            ticketItemPaymentType: TicketItemPaymentType.TicketPaid,
             costAmount: 0, // costAmount chỉ tính toán khi gửi hàng
             ticketProcedureId: '0',
             createdAt,
             printPrescription: 1,
             paid: 0,
-            debt: 0,
           }
           return ticketProduct
         })
@@ -163,9 +162,8 @@ export class TicketOrderBasicUpsertService {
             indexSession: 0,
             commissionAmount: 0,
             ticketProcedureType: TicketProcedureType.Normal,
-            paymentMoneyStatus: PaymentMoneyStatus.TicketPaid,
+            ticketItemPaymentType: TicketItemPaymentType.TicketPaid,
             paid: i.actualPrice * i.quantity,
-            debt: 0,
           }
           return ticketProcedure
         })

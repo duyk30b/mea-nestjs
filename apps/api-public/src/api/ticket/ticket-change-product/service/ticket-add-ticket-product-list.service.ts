@@ -1,18 +1,12 @@
 import { GenerateId } from '@libs/database/common/generate-id'
-import {
-    DeliveryStatus,
-    PaymentMoneyStatus,
-} from '@libs/database/common/variable'
+import { DeliveryStatus, TicketItemPaymentType } from '@libs/database/common/variable'
 import {
     TicketProductInsertType,
     TicketProductType,
 } from '@libs/database/entities/ticket-product.entity'
 import Ticket, { TicketStatus } from '@libs/database/entities/ticket.entity'
 import { TicketChangeItemMoneyManager } from '@libs/database/operations/ticket-base/ticket-change-item-money.manager'
-import {
-    TicketManager,
-    TicketProductRepository,
-} from '@libs/database/repositories'
+import { TicketManager, TicketProductRepository } from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { SocketEmitService } from '../../../../socket/socket-emit.service'
@@ -26,7 +20,7 @@ export class TicketAddTicketProductService {
     private ticketManager: TicketManager,
     private ticketProductRepository: TicketProductRepository,
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
-  ) { }
+  ) {}
 
   async addTicketProductList(props: {
     oid: number
@@ -56,23 +50,22 @@ export class TicketAddTicketProductService {
           oid,
           ticketId,
           customerId: ticketOrigin.customerId,
-          deliveryStatus: DeliveryStatus.Pending,
           costAmount: 0, // costAmount chỉ tính chính xác khi gửi hàng
+          quantityCompleted: 0,
           pickupStrategy: i.pickupStrategy, // nếu không xuất kho thì costAmount lấy giá trị trên luôn
           type: ticketProductType,
           ticketProcedureId: '0',
-          paymentMoneyStatus: (() => {
+          ticketItemPaymentType: (() => {
             if (i.unitActualPrice === 0) {
-              return PaymentMoneyStatus.NoEffect
+              return TicketItemPaymentType.NoEffect
             }
             if (ticketOrigin.isPaymentEachItem) {
-              return PaymentMoneyStatus.PendingPayment
+              return TicketItemPaymentType.PendingPayment
             } else {
-              return PaymentMoneyStatus.TicketPaid
+              return TicketItemPaymentType.TicketPaid
             }
           })(),
           paid: 0,
-          debt: 0,
         }
         return insert
       })
@@ -83,10 +76,10 @@ export class TicketAddTicketProductService {
 
       // === 5. UPDATE TICKET: MONEY  ===
       const productMoneyAdd = ticketProductList.reduce((acc, cur) => {
-        return acc + cur.unitQuantity * cur.unitActualPrice
+        return acc + cur.quantity * cur.unitActualPrice / cur.unitRate
       }, 0)
       const itemsDiscountAdd = ticketProductList.reduce((acc, cur) => {
-        return acc + cur.unitQuantity * cur.unitDiscountMoney
+        return acc + cur.quantity * cur.unitDiscountMoney / cur.unitRate
       }, 0)
       const itemsCostAmountAdd = ticketProductList.reduce((acc, cur) => {
         return acc + cur.costAmount

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
 import { NoExtra } from '../../../../common/helpers/typescript.helper'
-import { PaymentMoneyStatus } from '../../../common/variable'
+import { TicketItemPaymentType } from '../../../common/variable'
 import { TicketUser } from '../../../entities'
 import { PositionType } from '../../../entities/position.entity'
 import TicketRadiology from '../../../entities/ticket-radiology.entity'
@@ -56,10 +56,10 @@ export class TicketUpdateTicketRadiologyOperation {
       if (ticketRadiologyUpdateDto) {
         if (
           [
-            PaymentMoneyStatus.TicketPaid,
-            PaymentMoneyStatus.PendingPayment,
-            PaymentMoneyStatus.NoEffect,
-          ].includes(ticketRadiologyOrigin.paymentMoneyStatus)
+            TicketItemPaymentType.TicketPaid,
+            TicketItemPaymentType.PendingPayment,
+            TicketItemPaymentType.NoEffect,
+          ].includes(ticketRadiologyOrigin.ticketItemPaymentType)
         ) {
           ticketRadiologyModified = await this.ticketRadiologyManager.updateOneAndReturnEntity(
             manager,
@@ -70,14 +70,14 @@ export class TicketUpdateTicketRadiologyOperation {
               discountMoney: ticketRadiologyUpdateDto.discountMoney,
               discountPercent: ticketRadiologyUpdateDto.discountPercent,
               actualPrice: ticketRadiologyUpdateDto.actualPrice,
-              paymentMoneyStatus: (() => {
+              ticketItemPaymentType: (() => {
                 if (ticketRadiologyUpdateDto.actualPrice === 0) {
-                  return PaymentMoneyStatus.NoEffect
+                  return TicketItemPaymentType.NoEffect
                 }
                 if (ticketOrigin.isPaymentEachItem) {
-                  return PaymentMoneyStatus.PendingPayment
+                  return TicketItemPaymentType.PendingPayment
                 } else {
-                  return PaymentMoneyStatus.TicketPaid
+                  return TicketItemPaymentType.TicketPaid
                 }
               })(),
             }

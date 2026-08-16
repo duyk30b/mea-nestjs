@@ -118,6 +118,7 @@ export class ProductPickupPlan {
     const pickupMovementList: PickupMovement[] = []
     voucherProductList.forEach((voucherProduct) => {
       const { voucherProductId, productId, pickupStrategy } = voucherProduct
+      
       // nếu sản phẩm chưa có lô hoặc lựa chọn không trừ kho thì không trừ
       const productOrigin = productOriginMap[productId]
       if (!productOrigin) {
@@ -367,7 +368,7 @@ export class ProductPickupPlan {
         pickupBatchMap[batchId].pickupQuantity += mov.pickupQuantity
         pickupBatchMap[batchId].pickupCostAmount += mov.pickupCostAmount
         pickupBatchMap[batchId].closeQuantity = mov.closeQuantityBatch
-        pickupBatchMap[batchId].closeCostAmount = mov.closeQuantityBatch
+        pickupBatchMap[batchId].closeCostAmount = mov.closeCostAmountBatch
       }
 
       pickupVoucherProductMap[voucherProductId] ||= {

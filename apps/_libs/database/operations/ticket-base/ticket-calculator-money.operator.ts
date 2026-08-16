@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common'
-import { DiscountType, PaymentMoneyStatus } from '../../common/variable'
+import { DiscountType, TicketItemPaymentType } from '../../common/variable'
 import {
-  Ticket,
-  TicketLaboratory,
-  TicketProcedure,
-  TicketProduct,
-  TicketRadiology,
-  TicketUser,
+    Ticket,
+    TicketLaboratory,
+    TicketProcedure,
+    TicketProduct,
+    TicketRadiology,
+    TicketUser,
 } from '../../entities'
 
 @Injectable()
@@ -34,28 +34,28 @@ export class TicketCalculatorMoney {
 
     const productMoney = ticketProductList
       .filter((i) => {
-        return i.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+        return i.ticketItemPaymentType !== TicketItemPaymentType.NoEffect
       })
       .reduce((acc, item) => {
-        return acc + item.unitQuantity * item.unitActualPrice
+        return acc + item.quantity * item.unitActualPrice / item.unitRate
       }, 0)
     const procedureMoney = ticketProcedureList
       .filter((i) => {
-        return i.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+        return i.ticketItemPaymentType !== TicketItemPaymentType.NoEffect
       })
       .reduce((acc, item) => {
         return acc + item.quantity * item.actualPrice
       }, 0)
     const laboratoryMoney = ticketLaboratoryList
       .filter((i) => {
-        return i.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+        return i.ticketItemPaymentType !== TicketItemPaymentType.NoEffect
       })
       .reduce((acc, item) => {
         return acc + item.actualPrice
       }, 0)
     const radiologyMoney = ticketRadiologyList
       .filter((i) => {
-        return i.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+        return i.ticketItemPaymentType !== TicketItemPaymentType.NoEffect
       })
       .reduce((acc, item) => {
         return acc + item.actualPrice
@@ -63,28 +63,28 @@ export class TicketCalculatorMoney {
 
     const productDiscount = ticketProductList
       .filter((i) => {
-        return i.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+        return i.ticketItemPaymentType !== TicketItemPaymentType.NoEffect
       })
       .reduce((acc, item) => {
-        return acc + item.unitQuantity * item.unitDiscountMoney
+        return acc + item.quantity * item.unitDiscountMoney / item.unitRate
       }, 0)
     const procedureDiscount = ticketProcedureList
       .filter((i) => {
-        return i.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+        return i.ticketItemPaymentType !== TicketItemPaymentType.NoEffect
       })
       .reduce((acc, item) => {
         return acc + item.quantity * item.discountMoney
       }, 0)
     const laboratoryDiscount = ticketLaboratoryList
       .filter((i) => {
-        return i.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+        return i.ticketItemPaymentType !== TicketItemPaymentType.NoEffect
       })
       .reduce((acc, item) => {
         return acc + item.discountMoney
       }, 0)
     const radiologyDiscount = ticketRadiologyList
       .filter((i) => {
-        return i.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+        return i.ticketItemPaymentType !== TicketItemPaymentType.NoEffect
       })
       .reduce((acc, item) => {
         return acc + item.discountMoney
@@ -92,28 +92,28 @@ export class TicketCalculatorMoney {
 
     const productCostAmount = ticketProductList
       .filter((i) => {
-        return i.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+        return i.ticketItemPaymentType !== TicketItemPaymentType.NoEffect
       })
       .reduce((acc, item) => {
         return acc + item.costAmount
       }, 0)
     const procedureCostAmount = ticketProcedureList
       .filter((i) => {
-        return i.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+        return i.ticketItemPaymentType !== TicketItemPaymentType.NoEffect
       })
       .reduce((acc, item) => {
         return acc + 0 // chưa có costAmount
       }, 0)
     const laboratoryCostAmount = ticketLaboratoryList
       .filter((i) => {
-        return i.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+        return i.ticketItemPaymentType !== TicketItemPaymentType.NoEffect
       })
       .reduce((acc, item) => {
         return acc + item.costPrice
       }, 0)
     const radiologyCostAmount = ticketRadiologyList
       .filter((i) => {
-        return i.paymentMoneyStatus !== PaymentMoneyStatus.NoEffect
+        return i.ticketItemPaymentType !== TicketItemPaymentType.NoEffect
       })
       .reduce((acc, item) => {
         return acc + item.costPrice

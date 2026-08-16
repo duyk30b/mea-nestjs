@@ -1,11 +1,6 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm'
-import {
-  DeliveryStatus,
-  DiscountType,
-  PaymentMoneyStatus,
-  PickupStrategy,
-} from '../common/variable'
+import { DiscountType, PickupStrategy, TicketItemPaymentType } from '../common/variable'
 import Batch from './batch.entity'
 import Customer from './customer.entity'
 import Product from './product.entity'
@@ -33,22 +28,6 @@ export default class TicketProduct {
   @Expose()
   priority: number
 
-  @Column({ type: 'smallint', default: TicketProductType.Prescription })
-  @Expose()
-  type: TicketProductType
-
-  @Column({ default: PickupStrategy.AutoWithFIFO, type: 'smallint' })
-  @Expose()
-  pickupStrategy: PickupStrategy
-
-  @Column({ type: 'smallint', default: DeliveryStatus.Pending })
-  @Expose()
-  deliveryStatus: DeliveryStatus
-
-  @Column({ type: 'smallint', default: PaymentMoneyStatus.TicketPaid })
-  @Expose()
-  paymentMoneyStatus: PaymentMoneyStatus
-
   @Column()
   @Expose()
   customerId: number
@@ -73,13 +52,21 @@ export default class TicketProduct {
   @Expose()
   ticketProcedureId: string
 
+  @Column({ type: 'smallint', default: TicketProductType.Prescription })
+  @Expose()
+  type: TicketProductType
+
+  @Column({ default: PickupStrategy.AutoWithFIFO, type: 'smallint' })
+  @Expose()
+  pickupStrategy: PickupStrategy
+
+  @Column({ type: 'smallint', default: TicketItemPaymentType.TicketPaid })
+  @Expose()
+  ticketItemPaymentType: TicketItemPaymentType
+
   @Column({ type: 'smallint', default: 1 })
   @Expose()
   unitRate: number
-
-  @Column({ default: 0 })
-  @Expose()
-  unitQuantityPrescription: number
 
   @Column({ type: 'smallint', default: 1 })
   @Expose()
@@ -87,7 +74,15 @@ export default class TicketProduct {
 
   @Column({ default: 0 })
   @Expose()
-  unitQuantity: number
+  quantityPrescription: number
+
+  @Column({ default: 0 })
+  @Expose()
+  quantity: number
+
+  @Column({ default: 0 })
+  @Expose()
+  quantityCompleted: number
 
   @Column({
     type: 'bigint',
@@ -139,10 +134,6 @@ export default class TicketProduct {
   @Expose()
   paid: number // tiền đã thanh toán
 
-  @Column({ default: 0 })
-  @Expose()
-  debt: number // tiền nợ
-
   @Column({
     type: 'bigint',
     nullable: true,
@@ -182,8 +173,9 @@ export default class TicketProduct {
     const entity = new TicketProduct()
     Object.assign(entity, raw)
 
-    entity.unitQuantity = Number(raw.unitQuantity)
-    entity.unitQuantityPrescription = Number(raw.unitQuantityPrescription)
+    entity.quantity = Number(raw.quantity)
+    entity.quantityPrescription = Number(raw.quantityPrescription)
+    entity.quantityCompleted = Number(raw.quantityCompleted)
     entity.costAmount = Number(raw.costAmount)
 
     entity.unitExpectedPrice = Number(raw.unitExpectedPrice)
@@ -191,7 +183,6 @@ export default class TicketProduct {
     entity.discountPercent = Number(raw.discountPercent)
     entity.unitActualPrice = Number(raw.unitActualPrice)
     entity.paid = Number(raw.paid)
-    entity.debt = Number(raw.debt)
 
     return entity
   }
@@ -216,6 +207,6 @@ export type TicketProductUpdateType = {
 
 export type TicketProductSortType = {
   [P in keyof Pick<TicketProduct, 'oid' | 'id' | 'ticketId' | 'productId' | 'priority'>]?:
-  | 'ASC'
-  | 'DESC'
+    | 'ASC'
+    | 'DESC'
 }

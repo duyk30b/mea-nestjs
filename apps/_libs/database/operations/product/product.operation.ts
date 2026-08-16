@@ -7,9 +7,8 @@ import { ProductMovementInsertType } from '../../entities/product-movement.entit
 import {
   BatchManager,
   ProductManager,
-  ProductMovementManager,
   ProductMovementRepository,
-  PurchaseOrderItemManager,
+  PurchaseOrderItemRepository,
   StockCheckItemManager,
   TicketBatchManager,
   TicketProductManager,
@@ -21,13 +20,13 @@ export class ProductOperation {
     private dataSource: DataSource,
     private productManager: ProductManager,
     private batchManager: BatchManager,
-    private purchaseOrderItemManager: PurchaseOrderItemManager,
+    private purchaseOrderItemRepository: PurchaseOrderItemRepository,
     private ticketProductManager: TicketProductManager,
     private ticketBatchManager: TicketBatchManager,
     private stockCheckItemManager: StockCheckItemManager,
     private productMovementRepository: ProductMovementRepository,
     @InjectEntityManager() private manager: EntityManager
-  ) { }
+  ) {}
 
   async reCalculateQuantityBySumBatch(options: { oid: number; productId: number }) {
     const { oid, productId } = options
@@ -92,7 +91,7 @@ export class ProductOperation {
         { oid, productId: { IN: productIdSourceList } },
         { productId: productIdTarget }
       )
-      await this.purchaseOrderItemManager.update(
+      await this.purchaseOrderItemRepository.managerUpdate(
         manager,
         { oid, productId: { IN: productIdSourceList } },
         { productId: productIdTarget }

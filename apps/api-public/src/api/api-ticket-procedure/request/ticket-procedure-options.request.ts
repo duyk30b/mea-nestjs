@@ -8,7 +8,7 @@ import {
 } from '@libs/common/dto'
 import { SortQuery } from '@libs/common/dto/query'
 import { IsEnumValue } from '@libs/common/transform-validate/class-validator.custom'
-import { PaymentMoneyStatus } from '@libs/database/common/variable'
+import { TicketItemPaymentType } from '@libs/database/common/variable'
 import {
     TicketProcedureStatus,
     TicketProcedureType,
@@ -42,7 +42,7 @@ export class TicketProcedureRelationQuery {
   ticketUserResultList?: boolean
 }
 
-const ConditionEnumPaymentMoneyStatus = createConditionEnum(PaymentMoneyStatus)
+const ConditionEnumTicketItemPaymentType = createConditionEnum(TicketItemPaymentType)
 const ConditionEnumTicketProcedureStatus = createConditionEnum(TicketProcedureStatus)
 
 export class TicketProcedureFilterQuery {
@@ -78,9 +78,9 @@ export class TicketProcedureFilterQuery {
   ticketProcedureType?: TicketProcedureType
 
   @Expose()
-  @Transform((params: TransformFnParams) => transformConditionEnum(params, PaymentMoneyStatus))
+  @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketItemPaymentType))
   @IsOptional()
-  paymentMoneyStatus?: PaymentMoneyStatus | InstanceType<typeof ConditionEnumPaymentMoneyStatus>
+  ticketItemPaymentType?: TicketItemPaymentType | InstanceType<typeof ConditionEnumTicketItemPaymentType>
 
   @Expose()
   @Transform((params: TransformFnParams) => transformConditionEnum(params, TicketProcedureStatus))

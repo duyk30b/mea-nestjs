@@ -1,4 +1,5 @@
 import { IsEnumValue } from '@libs/common/transform-validate/class-validator.custom'
+import { PurchaseOrderActionType } from '@libs/database/common/variable'
 import { PaymentActionType } from '@libs/database/entities/payment.entity'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Expose } from 'class-transformer'
@@ -18,13 +19,13 @@ export class PurchaseOrderPaymentMoneyBody {
 
   @Expose()
   @IsDefined()
-  @IsNumber()
-  paidTotal: number
+  @IsEnumValue(PurchaseOrderActionType)
+  purchaseOrderActionType: PurchaseOrderActionType
 
   @Expose()
   @IsDefined()
   @IsNumber()
-  debtTotal: number
+  paidTotal: number
 
   @ApiPropertyOptional({ example: 'Khách hàng còn bo thêm tiền' })
   @Expose()

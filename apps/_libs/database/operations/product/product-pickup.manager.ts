@@ -14,7 +14,7 @@ export class ProductPickupManager {
     private batchRepository: BatchRepository,
     private productMovementRepository: ProductMovementRepository,
     private productPickupPlan: ProductPickupPlan
-  ) { }
+  ) {}
 
   async startPickup(props: {
     manager: EntityManager
@@ -84,8 +84,8 @@ export class ProductPickupManager {
       tempList: pickupPlan.pickupProductList.map((i) => {
         return {
           id: i.productId,
-          quantity: i.closeQuantity,
           pickupQuantity: i.pickupQuantity, // không được cộng trừ thẳng vì ở đây có trường hợp NoImpact
+          quantity: i.closeQuantity,
         }
       }),
       update: ['quantity'],
@@ -105,12 +105,11 @@ export class ProductPickupManager {
             productId: i.productId,
             pickupQuantity: i.pickupQuantity,
             pickupCostAmount: i.pickupCostAmount,
+            quantity: i.closeQuantity,
+            costAmount: i.closeCostAmount,
           }
         }),
-      update: {
-        quantity: () => `"quantity" - "pickupQuantity"`,
-        costAmount: () => `"costAmount" - "pickupCostAmount"`,
-      },
+      update: ['quantity', 'costAmount'],
       options: { requireEqualLength: true },
     })
     const batchModifiedMap = ESArray.arrayToKeyValue(batchModifiedList, 'id')

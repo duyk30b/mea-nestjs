@@ -1,17 +1,17 @@
+import { TicketPaymentMoneyBasicBody } from '@api-public/api/ticket/ticket-action/request'
 import { GenerateIdParam } from '@libs/common/dto'
 import { UserPermission } from '@libs/common/guards/user.guard'
 import { BaseResponse } from '@libs/common/interceptor'
 import { External, TExternal } from '@libs/common/request/external.request'
 import { PermissionId } from '@libs/permission/permission.enum'
-import { Body, Controller, Delete, Param, Patch, Post } from '@nestjs/common'
+import { Body, Controller, Param, Post } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { TicketSendProductAndPaymentBody } from '../ticket-action/request'
 import {
-    TicketOrderDebtSuccessInsertBody,
-    TicketOrderDebtSuccessUpdateBody,
-    TicketOrderDepositedUpdateBody,
-    TicketOrderDraftInsertBody,
-    TicketOrderDraftUpdateBody,
+  TicketOrderDebtSuccessInsertBody,
+  TicketOrderDebtSuccessUpdateBody,
+  TicketOrderDepositedUpdateBody,
+  TicketOrderDraftInsertBody,
+  TicketOrderDraftUpdateBody,
 } from './request'
 import { TicketOrderService } from './ticket-order.service'
 
@@ -19,7 +19,7 @@ import { TicketOrderService } from './ticket-order.service'
 @ApiBearerAuth('access-token')
 @Controller('ticket')
 export class TicketOrderController {
-  constructor(private readonly ticketOrderService: TicketOrderService) { }
+  constructor(private readonly ticketOrderService: TicketOrderService) {}
 
   @Post('/order/draft-insert')
   @UserPermission(PermissionId.TICKET_DRAFT_CRUD)
@@ -76,7 +76,7 @@ export class TicketOrderController {
     PermissionId.TICKET_DRAFT_CRUD,
     PermissionId.TICKET_CHANGE_PRODUCT,
     PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST,
-    PermissionId.TICKET_CHANGE_PRODUCT_SEND_PRODUCT,
+    PermissionId.TICKET_CHANGE_PRODUCT_SHIP_PRODUCT,
     PermissionId.TICKET_PAYMENT_MONEY,
     PermissionId.TICKET_CLOSE
   )
@@ -97,7 +97,7 @@ export class TicketOrderController {
     PermissionId.TICKET_DRAFT_CRUD,
     PermissionId.TICKET_CHANGE_PRODUCT,
     PermissionId.TICKET_CHANGE_PROCEDURE_REQUEST,
-    PermissionId.TICKET_CHANGE_PRODUCT_SEND_PRODUCT,
+    PermissionId.TICKET_CHANGE_PRODUCT_SHIP_PRODUCT,
     PermissionId.TICKET_CHANGE_PRODUCT_RETURN_PRODUCT,
     PermissionId.TICKET_PAYMENT_MONEY,
     PermissionId.TICKET_REOPEN,
@@ -131,18 +131,18 @@ export class TicketOrderController {
     return { data }
   }
 
-  @Post('/order/:id/send-product-and-payment-and-close')
+  @Post('/order/:id/ship-product-and-payment-and-close')
   @UserPermission(
-    PermissionId.TICKET_CHANGE_PRODUCT_SEND_PRODUCT,
+    PermissionId.TICKET_CHANGE_PRODUCT_SHIP_PRODUCT,
     PermissionId.TICKET_PAYMENT_MONEY,
     PermissionId.TICKET_CLOSE
   )
-  async sendProductAndPaymentAndClose(
+  async shipProductAndPaymentAndClose(
     @External() { oid, uid }: TExternal,
     @Param() { id }: GenerateIdParam,
-    @Body() body: TicketSendProductAndPaymentBody
+    @Body() body: TicketPaymentMoneyBasicBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketOrderService.sendProductAndPaymentAndClose({
+    const data = await this.ticketOrderService.shipProductAndPaymentAndClose({
       oid,
       userId: uid,
       ticketId: id,

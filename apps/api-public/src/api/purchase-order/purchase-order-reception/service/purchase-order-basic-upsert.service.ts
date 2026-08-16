@@ -6,22 +6,22 @@ import { DeliveryStatus } from '@libs/database/common/variable'
 import { PurchaseOrder } from '@libs/database/entities'
 import { BatchInsertType } from '@libs/database/entities/batch.entity'
 import Product, {
-    ProductType,
-    SplitBatchByCostPrice,
-    SplitBatchByDistributor,
-    SplitBatchByExpiryDate,
-    SplitBatchByWarehouse,
+  ProductType,
+  SplitBatchByCostPrice,
+  SplitBatchByDistributor,
+  SplitBatchByExpiryDate,
+  SplitBatchByWarehouse,
 } from '@libs/database/entities/product.entity'
 import { PurchaseOrderItemInsertType } from '@libs/database/entities/purchase-order-item.entity'
 import {
-    PurchaseOrderInsertType,
-    PurchaseOrderStatus,
+  PurchaseOrderInsertType,
+  PurchaseOrderStatus,
 } from '@libs/database/entities/purchase-order.entity'
 import {
-    BatchRepository,
-    ProductRepository,
-    PurchaseOrderItemRepository,
-    PurchaseOrderRepository,
+  BatchRepository,
+  ProductRepository,
+  PurchaseOrderItemRepository,
+  PurchaseOrderRepository,
 } from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
 import { DataSource } from 'typeorm'
@@ -36,7 +36,7 @@ export class PurchaseOrderBasicUpsertService {
     private purchaseOrderItemRepository: PurchaseOrderItemRepository,
     private readonly productRepository: ProductRepository,
     private readonly batchRepository: BatchRepository
-  ) { }
+  ) {}
 
   async startUpsert(props: {
     oid: number
@@ -61,12 +61,13 @@ export class PurchaseOrderBasicUpsertService {
           status: PurchaseOrderStatus.Draft,
           deliveryStatus: body.purchaseOrderItemList.length
             ? DeliveryStatus.Pending
-            : DeliveryStatus.NoStock,
+            : DeliveryStatus.Empty,
           paid: 0,
           debt: 0,
           year: ESTimer.info(startedAt, 7).year,
           month: ESTimer.info(startedAt, 7).month + 1,
           date: ESTimer.info(startedAt, 7).date,
+          updatedAt: Date.now(),
           endedAt: null,
         }
         purchaseOrder = await this.purchaseOrderRepository.managerInsertOne(
@@ -186,7 +187,8 @@ export class PurchaseOrderBasicUpsertService {
           oid,
           purchaseOrderId: purchaseOrder.id,
           distributorId,
-          unitQuantity: i.unitQuantity,
+          quantity: i.quantity,
+          quantityCompleted: 0,
         }
         return purchaseOrderItem
       })
