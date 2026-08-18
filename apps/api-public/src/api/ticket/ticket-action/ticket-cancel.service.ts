@@ -181,7 +181,12 @@ export class TicketCancelService {
           id: ticketId,
           oid,
           status: {
-            IN: [TicketStatus.Schedule, TicketStatus.Draft, TicketStatus.Cancelled],
+            IN: [
+              TicketStatus.Schedule,
+              TicketStatus.Draft,
+              TicketStatus.Executing, // cho phép xóa phiếu đang thực hiện, miễn là các item đều chưa xử lý
+              TicketStatus.Cancelled,
+            ],
           },
           paidTotal: 0,
           debtTotal: 0,

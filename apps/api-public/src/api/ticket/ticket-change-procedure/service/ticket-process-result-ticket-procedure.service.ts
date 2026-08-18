@@ -271,7 +271,7 @@ export class TicketProcessResultTicketProcedureService {
                 productId: i.productId,
                 batchId: 0,
                 warehouseIds: i.warehouseIds,
-                quantity: i.unitQuantity * i.unitRate,
+                quantity: i.quantity,
                 pickupStrategy: i.pickupStrategy,
                 expectedPrice: 0,
                 actualPrice: 0,

@@ -91,7 +91,7 @@ export class TicketUpdateItemsMoneyOperation {
               "discountType"    = temp."discountType",
               "actualPrice"     = temp."actualPrice",
               "deliveryStatus"  = CASE 
-                                      WHEN (temp."quantity" = 0) THEN ${DeliveryStatus.NoStock} 
+                                      WHEN (temp."quantity" = 0) THEN ${DeliveryStatus.Empty} 
                                       ELSE ${DeliveryStatus.Pending} 
                                   END
           FROM (VALUES `
@@ -107,7 +107,7 @@ export class TicketUpdateItemsMoneyOperation {
                        "discountMoney", "discountPercent", "discountType", "actualPrice"
                       )
           WHERE   tp."id"             = temp."ticketProductId"
-              AND tp."deliveryStatus" IN (${DeliveryStatus.NoStock}, ${DeliveryStatus.Pending}) 
+              AND tp."deliveryStatus" IN (${DeliveryStatus.Empty}, ${DeliveryStatus.Pending}) 
               AND tp."ticketId"       = ${ticketId}
               AND tp."oid"            = ${oid}
           RETURNING tp.*;   
@@ -249,7 +249,7 @@ export class TicketUpdateItemsMoneyOperation {
         return acc + item.actualPrice * item.quantity
       }, 0)
       const productMoneyUpdate = ticketProductList.reduce((acc, item) => {
-        return acc + item.unitActualPrice * item.unitQuantity
+        return acc + item.unitActualPrice * item.quantity / item.unitRate
       }, 0)
       const laboratoryMoneyUpdate = ticketLaboratoryList.reduce((acc, item) => {
         return acc + item.actualPrice

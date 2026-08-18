@@ -461,10 +461,11 @@ export class TicketPaymentMoneyOperation {
           paid: () => `"paid" + "paidAdd"`,
           ticketItemPaymentType: (t: string, u: string) => {
             return `CASE
-                          WHEN("paid" + "paidAdd" = "${u}"."unitQuantity" * "${u}"."unitActualPrice")
+                          WHEN("paid" + "paidAdd" = "${u}"."quantity" * "${u}"."unitActualPrice" / "${u}"."unitRate")
                             THEN ${TicketItemPaymentType.FullPaid} 
-                          WHEN("paid" + "paidAdd" < "${u}"."unitQuantity" * "${u}"."unitActualPrice" 
-                            AND "paid" + "paidAdd" > 0) THEN ${TicketItemPaymentType.PartialPaid} 
+                          WHEN("paid" + "paidAdd" < "${u}"."quantity" * "${u}"."unitActualPrice" / "${u}"."unitRate" 
+                            AND "paid" + "paidAdd" > 0) 
+                            THEN ${TicketItemPaymentType.PartialPaid} 
                           WHEN("paid" + "paidAdd" = 0) THEN ${TicketItemPaymentType.PendingPayment} 
                           ELSE "ticketItemPaymentType"
                       END`

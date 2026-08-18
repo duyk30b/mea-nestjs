@@ -103,6 +103,16 @@ export class Version2607251784954301533 implements MigrationInterface {
           DROP COLUMN "voucherType",
           DROP COLUMN "voucherId",
           DROP COLUMN "hasPaymentItem";
+
+        UPDATE  "Payment" "payment"
+        SET     "paymentActionType" = CASE 
+                    WHEN("paymentActionType" = 4) THEN 5
+                    WHEN("paymentActionType" = 5) THEN 4
+                    WHEN("paymentActionType" = 6) THEN 3
+                    WHEN("paymentActionType" = 7) THEN 5
+                    WHEN("paymentActionType" = 8) THEN 6
+                    ELSE "paymentActionType"
+                END;
       `)
 
       await queryRunner.query(`

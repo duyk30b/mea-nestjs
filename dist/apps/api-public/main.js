@@ -19408,10 +19408,11 @@ let TicketPaymentMoneyOperation = class TicketPaymentMoneyOperation {
                     paid: () => `"paid" + "paidAdd"`,
                     ticketItemPaymentType: (t, u) => {
                         return `CASE
-                          WHEN("paid" + "paidAdd" = "${u}"."unitQuantity" * "${u}"."unitActualPrice")
+                          WHEN("paid" + "paidAdd" = "${u}"."quantity" * "${u}"."unitActualPrice" / "${u}"."unitRate")
                             THEN ${variable_1.TicketItemPaymentType.FullPaid} 
-                          WHEN("paid" + "paidAdd" < "${u}"."unitQuantity" * "${u}"."unitActualPrice" 
-                            AND "paid" + "paidAdd" > 0) THEN ${variable_1.TicketItemPaymentType.PartialPaid} 
+                          WHEN("paid" + "paidAdd" < "${u}"."quantity" * "${u}"."unitActualPrice" / "${u}"."unitRate" 
+                            AND "paid" + "paidAdd" > 0) 
+                            THEN ${variable_1.TicketItemPaymentType.PartialPaid} 
                           WHEN("paid" + "paidAdd" = 0) THEN ${variable_1.TicketItemPaymentType.PendingPayment} 
                           ELSE "ticketItemPaymentType"
                       END`;
@@ -30625,7 +30626,12 @@ let TicketCancelService = class TicketCancelService {
                 id: ticketId,
                 oid,
                 status: {
-                    IN: [ticket_entity_1.TicketStatus.Schedule, ticket_entity_1.TicketStatus.Draft, ticket_entity_1.TicketStatus.Cancelled],
+                    IN: [
+                        ticket_entity_1.TicketStatus.Schedule,
+                        ticket_entity_1.TicketStatus.Draft,
+                        ticket_entity_1.TicketStatus.Executing,
+                        ticket_entity_1.TicketStatus.Cancelled,
+                    ],
                 },
                 paidTotal: 0,
                 debtTotal: 0,
@@ -67369,6 +67375,7 @@ let TicketActionService = class TicketActionService {
         }
         const debtFix = ticketOrigin.totalMoney - ticketOrigin.paidTotal - ticketOrigin.debtTotal;
         const paymentTicketCreatedList = [];
+        let customerModified = null;
         if (debtFix !== 0) {
             const changeDebtResult = await this.ticketChangeDebtOperation.startChangeDebt({
                 oid,
@@ -67383,6 +67390,7 @@ let TicketActionService = class TicketActionService {
                 ],
             });
             paymentTicketCreatedList.push(changeDebtResult.paymentTicketCreatedList[0]);
+            customerModified = changeDebtResult.customerModified;
         }
         const closeResult = await this.ticketOpenCloseOperation.startClose({
             oid,
@@ -67391,6 +67399,10 @@ let TicketActionService = class TicketActionService {
             userId,
         });
         const { ticketModified } = closeResult;
+        if (customerModified) {
+            ticketModified.customer = customerModified;
+            this.socketEmitService.customerUpsert(oid, { customer: customerModified });
+        }
         this.socketEmitService.socketTicketChange(oid, {
             ticketId,
             ticketModified,
@@ -70272,7 +70284,7 @@ let TicketProcessResultTicketProcedureService = class TicketProcessResultTicketP
                                 productId: i.productId,
                                 batchId: 0,
                                 warehouseIds: i.warehouseIds,
-                                quantity: i.unitQuantity * i.unitRate,
+                                quantity: i.quantity,
                                 pickupStrategy: i.pickupStrategy,
                                 expectedPrice: 0,
                                 actualPrice: 0,
@@ -71940,7 +71952,7 @@ __decorate([
     (0, class_validator_1.IsDefined)(),
     (0, class_validator_1.IsNumber)(),
     __metadata("design:type", Number)
-], TicketProductConsumableBody.prototype, "unitQuantity", void 0);
+], TicketProductConsumableBody.prototype, "quantity", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({ example: 56 }),
     (0, class_transformer_1.Expose)(),

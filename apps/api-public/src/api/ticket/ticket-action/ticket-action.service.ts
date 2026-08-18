@@ -1,6 +1,6 @@
 import { CacheDataService } from '@libs/common/cache-data/cache-data.service'
 import { TicketActionType } from '@libs/database/common/variable'
-import { PaymentTicket } from '@libs/database/entities'
+import { Customer, PaymentTicket } from '@libs/database/entities'
 import { PaymentActionType } from '@libs/database/entities/payment.entity'
 import TicketProduct from '@libs/database/entities/ticket-product.entity'
 import { TicketSurchargeInsertType } from '@libs/database/entities/ticket-surcharge.entity'
@@ -232,6 +232,7 @@ export class TicketActionService {
 
     const debtFix = ticketOrigin.totalMoney - ticketOrigin.paidTotal - ticketOrigin.debtTotal
     const paymentTicketCreatedList: PaymentTicket[] = []
+    let customerModified: Customer = null
 
     if (debtFix !== 0) {
       const changeDebtResult = await this.ticketChangeDebtOperation.startChangeDebt({
@@ -247,6 +248,7 @@ export class TicketActionService {
         ],
       })
       paymentTicketCreatedList.push(changeDebtResult.paymentTicketCreatedList[0])
+      customerModified = changeDebtResult.customerModified
     }
 
     const closeResult = await this.ticketOpenCloseOperation.startClose({
@@ -257,6 +259,11 @@ export class TicketActionService {
     })
 
     const { ticketModified } = closeResult
+
+    if (customerModified) {
+      ticketModified.customer = customerModified
+      this.socketEmitService.customerUpsert(oid, { customer: customerModified })
+    }
     this.socketEmitService.socketTicketChange(oid, {
       ticketId,
       ticketModified,
