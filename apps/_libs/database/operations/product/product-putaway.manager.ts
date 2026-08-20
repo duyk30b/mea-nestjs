@@ -65,8 +65,8 @@ export class ProductPutawayManager {
     ).map((i) => {
       return {
         id: i.productId,
-        costPrice: i.productUpdateInfo?.costPrice || null,
-        retailPrice: i.productUpdateInfo?.retailPrice || null,
+        costPrice: i.productUpdateInfo?.costPrice || 0,
+        retailPrice: i.productUpdateInfo?.retailPrice || 0,
         updatedAt: time,
       }
     })

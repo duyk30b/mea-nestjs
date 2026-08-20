@@ -30,10 +30,11 @@ export class ApiTicketMoneyController {
     return { data }
   }
 
-  @Post('change-debt')
+  @Post('change-debt/:ticketIdListString')
   @UserPermission(PermissionId.TICKET_PAYMENT_MONEY)
   async changeDebt(
     @External() { oid, uid }: TExternal,
+    @Param('ticketIdListString') ticketIdListString: string,
     @Body() body: TicketChangeDebtBody
   ): Promise<BaseResponse> {
     const data = await this.ticketMoneyService.changeDebt({

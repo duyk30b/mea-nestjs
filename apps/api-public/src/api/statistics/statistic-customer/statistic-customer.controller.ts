@@ -10,12 +10,19 @@ import { StatisticCustomerService } from './statistic-customer.service'
 @ApiBearerAuth('access-token')
 @Controller('statistic/customer')
 export class StatisticCustomerController {
-  constructor(private readonly statisticProcedureService: StatisticCustomerService) { }
+  constructor(private readonly statisticCustomerService: StatisticCustomerService) {}
 
-  @Get('sum-customer-debt')
+  @Get('sum-debt')
   @UserPermission(PermissionId.STATISTIC_CUSTOMER)
-  async sumCustomerDebt(@External() { oid }: TExternal): Promise<BaseResponse> {
-    const data = await this.statisticProcedureService.sumCustomerDebt(oid)
+  async customerSumDebt(@External() { oid }: TExternal): Promise<BaseResponse> {
+    const data = await this.statisticCustomerService.customerSumDebt(oid)
+    return { data }
+  }
+
+  @Get('group-by-customer-group')
+  @UserPermission(PermissionId.STATISTIC_CUSTOMER)
+  async customerGroupByCustomerGroup(@External() { oid }: TExternal): Promise<BaseResponse> {
+    const data = await this.statisticCustomerService.customerGroupByCustomerGroup(oid)
     return { data }
   }
 }

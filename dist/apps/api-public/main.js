@@ -17080,8 +17080,8 @@ let ProductPutawayManager = class ProductPutawayManager {
         const productInfoTempList = Object.values(array_helper_1.ESArray.arrayToKeyValue(voucherBatchPutawayList, 'productId')).map((i) => {
             return {
                 id: i.productId,
-                costPrice: i.productUpdateInfo?.costPrice || null,
-                retailPrice: i.productUpdateInfo?.retailPrice || null,
+                costPrice: i.productUpdateInfo?.costPrice || 0,
+                retailPrice: i.productUpdateInfo?.retailPrice || 0,
                 updatedAt: time,
             };
         });
@@ -63205,7 +63205,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c;
+var _a, _b, _c, _d, _e;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.StatisticCustomerController = void 0;
 const user_guard_1 = __webpack_require__(186);
@@ -63215,23 +63215,35 @@ const common_1 = __webpack_require__(4);
 const swagger_1 = __webpack_require__(29);
 const statistic_customer_service_1 = __webpack_require__(756);
 let StatisticCustomerController = class StatisticCustomerController {
-    constructor(statisticProcedureService) {
-        this.statisticProcedureService = statisticProcedureService;
+    constructor(statisticCustomerService) {
+        this.statisticCustomerService = statisticCustomerService;
     }
-    async sumCustomerDebt({ oid }) {
-        const data = await this.statisticProcedureService.sumCustomerDebt(oid);
+    async customerSumDebt({ oid }) {
+        const data = await this.statisticCustomerService.customerSumDebt(oid);
+        return { data };
+    }
+    async customerGroupByCustomerGroup({ oid }) {
+        const data = await this.statisticCustomerService.customerGroupByCustomerGroup(oid);
         return { data };
     }
 };
 exports.StatisticCustomerController = StatisticCustomerController;
 __decorate([
-    (0, common_1.Get)('sum-customer-debt'),
+    (0, common_1.Get)('sum-debt'),
     (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.STATISTIC_CUSTOMER),
     __param(0, (0, external_request_1.External)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [typeof (_b = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _b : Object]),
     __metadata("design:returntype", typeof (_c = typeof Promise !== "undefined" && Promise) === "function" ? _c : Object)
-], StatisticCustomerController.prototype, "sumCustomerDebt", null);
+], StatisticCustomerController.prototype, "customerSumDebt", null);
+__decorate([
+    (0, common_1.Get)('group-by-customer-group'),
+    (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.STATISTIC_CUSTOMER),
+    __param(0, (0, external_request_1.External)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [typeof (_d = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _d : Object]),
+    __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
+], StatisticCustomerController.prototype, "customerGroupByCustomerGroup", null);
 exports.StatisticCustomerController = StatisticCustomerController = __decorate([
     (0, swagger_1.ApiTags)('Statistic'),
     (0, swagger_1.ApiBearerAuth)('access-token'),
@@ -63254,27 +63266,53 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
+var _a, _b;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.StatisticCustomerService = void 0;
+const helpers_1 = __webpack_require__(140);
 const repositories_1 = __webpack_require__(41);
 const common_1 = __webpack_require__(4);
 let StatisticCustomerService = class StatisticCustomerService {
-    constructor(customerRepository) {
+    constructor(customerRepository, customerGroupRepository) {
         this.customerRepository = customerRepository;
+        this.customerGroupRepository = customerGroupRepository;
     }
-    async sumCustomerDebt(oid) {
+    async customerSumDebt(oid) {
         const { dataRaws } = await this.customerRepository.findAndSelect({
             condition: { oid },
             aggregate: { sumDebt: { SUM: ['debt'] } },
         });
         return { customerSumDebt: Number(dataRaws[0].sumDebt) };
     }
+    async customerGroupByCustomerGroup(oid) {
+        const customerGroupList = await this.customerGroupRepository.findMany({
+            condition: { oid },
+        });
+        const customerGroupMap = helpers_1.ESArray.arrayToKeyValue(customerGroupList, 'id');
+        const { dataRaws } = await this.customerRepository.findAndSelect({
+            condition: { oid },
+            groupBy: ['customerGroupId'],
+            select: ['customerGroupId'],
+            aggregate: {
+                countCustomer: { COUNT: '*' },
+                sumDebt: { SUM: ['debt'] },
+            },
+        });
+        const statisticData = dataRaws.map((i) => {
+            return {
+                customerGroupId: i.customerGroupId,
+                countCustomer: Number(i.countCustomer),
+                sumDebt: Number(i.sumDebt),
+                customerGroup: customerGroupMap[i.customerGroupId] ?? null,
+            };
+        });
+        return { statisticData };
+    }
 };
 exports.StatisticCustomerService = StatisticCustomerService;
 exports.StatisticCustomerService = StatisticCustomerService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof repositories_1.CustomerRepository !== "undefined" && repositories_1.CustomerRepository) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [typeof (_a = typeof repositories_1.CustomerRepository !== "undefined" && repositories_1.CustomerRepository) === "function" ? _a : Object, typeof (_b = typeof repositories_1.CustomerGroupRepository !== "undefined" && repositories_1.CustomerGroupRepository) === "function" ? _b : Object])
 ], StatisticCustomerService);
 
 
@@ -75437,7 +75475,7 @@ let ApiTicketMoneyController = class ApiTicketMoneyController {
         });
         return { data };
     }
-    async changeDebt({ oid, uid }, body) {
+    async changeDebt({ oid, uid }, ticketIdListString, body) {
         const data = await this.ticketMoneyService.changeDebt({
             oid,
             userId: uid,
@@ -75458,12 +75496,13 @@ __decorate([
     __metadata("design:returntype", typeof (_e = typeof Promise !== "undefined" && Promise) === "function" ? _e : Object)
 ], ApiTicketMoneyController.prototype, "prepaymentMoney", null);
 __decorate([
-    (0, common_1.Post)('change-debt'),
+    (0, common_1.Post)('change-debt/:ticketIdListString'),
     (0, user_guard_1.UserPermission)(permission_enum_1.PermissionId.TICKET_PAYMENT_MONEY),
     __param(0, (0, external_request_1.External)()),
-    __param(1, (0, common_1.Body)()),
+    __param(1, (0, common_1.Param)('ticketIdListString')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_f = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _f : Object, typeof (_g = typeof request_2.TicketChangeDebtBody !== "undefined" && request_2.TicketChangeDebtBody) === "function" ? _g : Object]),
+    __metadata("design:paramtypes", [typeof (_f = typeof external_request_1.TExternal !== "undefined" && external_request_1.TExternal) === "function" ? _f : Object, String, typeof (_g = typeof request_2.TicketChangeDebtBody !== "undefined" && request_2.TicketChangeDebtBody) === "function" ? _g : Object]),
     __metadata("design:returntype", typeof (_h = typeof Promise !== "undefined" && Promise) === "function" ? _h : Object)
 ], ApiTicketMoneyController.prototype, "changeDebt", null);
 exports.ApiTicketMoneyController = ApiTicketMoneyController = __decorate([
