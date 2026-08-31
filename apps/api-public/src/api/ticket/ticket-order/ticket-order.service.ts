@@ -409,7 +409,7 @@ export class TicketOrderService {
 
     return {
       ticketModified,
-      ticketProductModifiedAll: ticketProductModifiedAll || [],
+      ticketProductModifiedAll: ticketProductModifiedAll || undefined,
     }
   }
 }

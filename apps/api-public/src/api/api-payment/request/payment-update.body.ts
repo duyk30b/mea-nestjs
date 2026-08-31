@@ -13,4 +13,10 @@ export class PaymentUpdateInfoBody {
   @Expose()
   @IsString()
   note: string
+
+  @ApiProperty({ example: 12 })
+  @Expose()
+  @IsDefined()
+  @IsString()
+  walletId: string
 }

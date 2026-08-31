@@ -88,7 +88,11 @@ export class TicketShipProductOperation {
         })
       }
       if (ticketProductActionList.length === 0) {
-        throw new Error(`${PREFIX}, ticketProductActionList is empty`)
+        return {
+          ticketModified,
+          productModifiedList: [],
+          batchModifiedList: [],
+        }
       }
 
       // === 2. Start Pickup Product ===

@@ -1,3 +1,4 @@
+import { BusinessError } from '@libs/database/common/error'
 import {
   MoneyDirection,
   PaymentActionType,
@@ -29,12 +30,82 @@ export class PaymentOtherService {
     body: PaymentUpdateInfoBody
   }) {
     const { oid, userId, paymentId, body } = options
+    const time = Date.now()
 
+    const paymentOrigin = await this.paymentRepository.findOneBy({ oid, id: paymentId })
+    if (paymentOrigin.cashierId !== userId) {
+      throw new BusinessError('Không được sửa phiếu thanh toán do tài khoản khác tạo phiếu')
+    }
+
+    let walletOpenMoneyUpdate = paymentOrigin.walletOpenMoney
+    let walletCloseMoneyUpdate = paymentOrigin.walletCloseMoney
+    if (body.walletId !== paymentOrigin.walletId) {
+      const moneyTransfer = paymentOrigin.paidTotal
+      if (moneyTransfer) {
+        if (paymentOrigin.walletId && paymentOrigin.walletId !== '0') {
+          const walletOldModified = await this.walletRepository.updateOne(
+            { oid, id: paymentOrigin.walletId },
+            { money: () => `money - ${moneyTransfer}` }
+          )
+          const paymentReplaceInsert: PaymentInsertType = {
+            oid,
+            personType: PaymentPersonType.Other,
+            personId: 0,
+
+            cashierId: userId,
+            walletId: paymentOrigin.walletId,
+            createdAt: paymentOrigin.createdAt,
+            moneyDirection: MoneyDirection.Other,
+            paymentActionType: PaymentActionType.FixWallet,
+            note: body.note || 'Sửa phương thức thanh toán',
+
+            paidTotal: 0,
+            debtTotal: 0,
+            personOpenDebt: 0,
+            personCloseDebt: 0,
+            walletOpenMoney: paymentOrigin.walletOpenMoney,
+            walletCloseMoney: paymentOrigin.walletCloseMoney,
+          }
+
+          const paymentFixInsert: PaymentInsertType = {
+            oid,
+            personType: PaymentPersonType.Other,
+            personId: 0,
+
+            cashierId: userId,
+            walletId: paymentOrigin.walletId,
+            createdAt: time,
+            moneyDirection: MoneyDirection.Other,
+            paymentActionType: PaymentActionType.FixWallet,
+            note: body.note || 'Sửa phương thức thanh toán',
+
+            paidTotal: 0,
+            debtTotal: 0,
+            personOpenDebt: 0,
+            personCloseDebt: 0,
+            walletOpenMoney: walletOldModified.money + moneyTransfer,
+            walletCloseMoney: walletOldModified.money,
+          }
+          await this.paymentRepository.insertMany([paymentReplaceInsert, paymentFixInsert])
+        }
+        if (body.walletId && body.walletId !== '0') {
+          const walletNewModified = await this.walletRepository.updateOne(
+            { oid, id: body.walletId },
+            { money: () => `money + ${moneyTransfer}` }
+          )
+          walletCloseMoneyUpdate = walletNewModified.money
+          walletOpenMoneyUpdate = walletNewModified.money - moneyTransfer
+        }
+      }
+    }
     const payment = await this.paymentRepository.updateOne(
       { oid, id: paymentId, cashierId: userId }, // chỉ sửa phiếu do chính mình tạo ra
       {
         createdAt: body.createdAt,
         note: body.note,
+        walletId: body.walletId,
+        walletOpenMoney: walletOpenMoneyUpdate,
+        walletCloseMoney: walletCloseMoneyUpdate,
       }
     )
     return { payment }

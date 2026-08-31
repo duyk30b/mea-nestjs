@@ -157,7 +157,7 @@ export class TicketActionService {
       time,
       allowNegativeQuantity,
     })
-    const { ticketModified, ticketProductModifiedAll } = sendProductResult
+    const { ticketModified } = sendProductResult
     if (!options?.noEmitTicket) {
       this.socketEmitService.socketTicketChange(oid, { ticketId, ticketModified })
     }
@@ -167,16 +167,16 @@ export class TicketActionService {
         batchUpsertedList: sendProductResult.batchModifiedList,
       })
     }
-    if (ticketProductModifiedAll) {
+    if (sendProductResult.ticketProductModifiedAll) {
       this.socketEmitService.socketTicketChange(oid, {
         ticketId,
-        ticketProduct: { upsertedList: ticketProductModifiedAll },
+        ticketProduct: { upsertedList: sendProductResult.ticketProductModifiedAll },
       })
     }
 
     return {
       ticketModified,
-      ticketProductModifiedAll,
+      ticketProductModifiedAll: sendProductResult.ticketProductModifiedAll || undefined,
     }
   }
 

@@ -1,3 +1,4 @@
+import { FileStatisticModule } from '@api-public/api/file-statistic-api/file-statistic.module'
 import { PaymentTicketModule } from '@api-public/api/payment_ticket/payment_ticket.module'
 import { Module } from '@nestjs/common'
 import { ApiAddressModule } from './api-address/api-address.module'
@@ -87,6 +88,8 @@ import { TicketModule } from './ticket/ticket.module'
     TicketReceptionModule,
 
     PaymentTicketModule,
+
+    FileStatisticModule,
   ],
   controllers: [],
   providers: [],

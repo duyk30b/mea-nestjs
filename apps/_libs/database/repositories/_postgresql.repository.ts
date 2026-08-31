@@ -36,6 +36,11 @@ export abstract class _PostgreSqlRepository<
     return this.repository.manager
   }
 
+  async rawQuery(query: string, parameters?: any[]) {
+    const raws = await this.repository.query(query, parameters)
+    return raws
+  }
+
   async getMaxId() {
     const queryResult = await this.repository.query(
       `SELECT last_value FROM "${this.entity['name']}_id_seq"`
@@ -272,8 +277,8 @@ export abstract class _PostgreSqlRepository<
       console.log(`Insert ${this.entity['name']} failed, upsertList: `, upsertList)
       throw new Error(
         `Insert ${this.entity['name']} failed: `
-        + `upsertResult.raw?.length = ${upsertResult.raw?.length}`
-        + `upsertList.length = ${upsertList.length}`
+          + `upsertResult.raw?.length = ${upsertResult.raw?.length}`
+          + `upsertList.length = ${upsertList.length}`
       )
     }
     return this.entity.fromRaws(upsertResult.raw)
@@ -360,8 +365,8 @@ export abstract class _PostgreSqlRepository<
     dataRaws: ((SELECT extends (keyof _ENTITY)[]
       ? { [P in SELECT[number]]: _ENTITY[P] }
       : SELECT extends { [P in keyof _ENTITY]?: boolean }
-      ? { [P in keyof SELECT as SELECT[P] extends true ? P : never]: _ENTITY }
-      : never) & { [P in keyof Aggregate]: string })[]
+        ? { [P in keyof SELECT as SELECT[P] extends true ? P : never]: _ENTITY }
+        : never) & { [P in keyof Aggregate]: string })[]
   }> {
     const { condition, select, aggregate, groupBy, orderBy, page, limit } = options
     const where = this.getWhereOptions(condition)
@@ -649,21 +654,21 @@ export abstract class _PostgreSqlRepository<
     tempList: T[]
     condition?: BaseCondition<_ENTITY>
     compare:
-    | Extract<keyof T, keyof _ENTITY>[]
-    | {
-      [P in Extract<keyof T, keyof _ENTITY>]?:
-      | boolean
-      | { cast: 'int' | 'bigint' | 'numeric' | 'text' }
-      | ((t?: string, u?: string) => string)
-    }
+      | Extract<keyof T, keyof _ENTITY>[]
+      | {
+          [P in Extract<keyof T, keyof _ENTITY>]?:
+            | boolean
+            | { cast: 'int' | 'bigint' | 'numeric' | 'text' }
+            | ((t?: string, u?: string) => string)
+        }
     update:
-    | Extract<keyof T, keyof _ENTITY>[]
-    | {
-      [P in keyof _ENTITY]?:
-      | boolean
-      | { cast: 'int' | 'bigint' | 'numeric' | 'text' }
-      | ((t?: string, u?: string) => string)
-    }
+      | Extract<keyof T, keyof _ENTITY>[]
+      | {
+          [P in keyof _ENTITY]?:
+            | boolean
+            | { cast: 'int' | 'bigint' | 'numeric' | 'text' }
+            | ((t?: string, u?: string) => string)
+        }
     options?: { requireEqualLength?: boolean }
   }) {
     const manager = options.manager || this.repository.manager
@@ -675,9 +680,9 @@ export abstract class _PostgreSqlRepository<
     let compareName: string[] = []
     let compareObject: {
       [P in Extract<keyof T, keyof _ENTITY>]?:
-      | boolean
-      | { cast: 'int' | 'bigint' | 'numeric' | 'text' }
-      | ((t?: string, u?: string) => string)
+        | boolean
+        | { cast: 'int' | 'bigint' | 'numeric' | 'text' }
+        | ((t?: string, u?: string) => string)
     } = {}
     let conditionRaw = ''
     if (options.condition) {
@@ -697,9 +702,9 @@ export abstract class _PostgreSqlRepository<
     let updateName: string[] = []
     let updateObject: {
       [P in Extract<keyof T, keyof _ENTITY>]?:
-      | boolean
-      | { cast: 'int' | 'bigint' | 'numeric' | 'text' }
-      | ((t?: string, u?: string) => string)
+        | boolean
+        | { cast: 'int' | 'bigint' | 'numeric' | 'text' }
+        | ((t?: string, u?: string) => string)
     } = {}
 
     if (Array.isArray(options.update)) {
@@ -729,30 +734,31 @@ export abstract class _PostgreSqlRepository<
       }).join(`,
               `)}
       FROM (VALUES `
-      + tempList
-        .map((record) => {
-          return `(${tempColumns
-            .map((field) => {
-              if (record[field] === null) {
-                return `NULL`
-              } else if (typeof record[field] === 'number') {
-                return `${record[field]}`
-              } else if (typeof record[field] === 'string') {
-                return `'${record[field]}'`
-              } else {
-                return `${record[field]}`
-              }
-            })
-            .join(', ')})`
-        })
-        .join(', ')
-      + `) 
+        + tempList
+          .map((record) => {
+            return `(${tempColumns
+              .map((field) => {
+                if (record[field] === null) {
+                  return `NULL`
+                } else if (typeof record[field] === 'number') {
+                  return `${record[field]}`
+                } else if (typeof record[field] === 'string') {
+                  return `'${record[field]}'`
+                } else {
+                  return `${record[field]}`
+                }
+              })
+              .join(', ')})`
+          })
+          .join(', ')
+        + `) 
           AS temp(${tempColumns.map((field) => `"${field}"`).join(', ')})
-      WHERE   ${conditionRaw
-        ? conditionRaw
-        + ` 
+      WHERE   ${
+        conditionRaw
+          ? conditionRaw
+            + ` 
           AND `
-        : ''
+          : ''
       }${compareName.map((field) => {
         if (typeof compareObject[field] === 'function') {
           return `"${tableName}"."${field}" = ${compareObject[field]('temp', tableName)}`
@@ -773,8 +779,8 @@ export abstract class _PostgreSqlRepository<
         console.log(`Update ${tableName} failed, tempList: `, tempList)
         throw new Error(
           `Update ${tableName} failed: `
-          + `modifiedRaw[0].length = ${modifiedRaw[0].length}, `
-          + `tempList.length = ${tempList.length}`
+            + `modifiedRaw[0].length = ${modifiedRaw[0].length}, `
+            + `tempList.length = ${tempList.length}`
         )
       }
     }
