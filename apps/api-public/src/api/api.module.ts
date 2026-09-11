@@ -1,4 +1,4 @@
-import { FileStatisticModule } from '@api-public/api/file-statistic-api/file-statistic.module'
+import { FileApiModule } from '@api-public/api/file-api/file-api.module'
 import { PaymentTicketModule } from '@api-public/api/payment_ticket/payment_ticket.module'
 import { Module } from '@nestjs/common'
 import { ApiAddressModule } from './api-address/api-address.module'
@@ -8,7 +8,6 @@ import { ApiExpenseModule } from './api-expense/api-expense.module'
 import { ApiICDModule } from './api-icd/api-icd.module'
 import { ApiLaboratorySampleModule } from './api-laboratory-sample/api-laboratory-sample.module'
 import { ApiOrganizationModule } from './api-organization/api-organization.module'
-import { ApiPaymentModule } from './api-payment/api-payment.module'
 import { ApiPermissionModule } from './api-permission/api-permission.module'
 import { ApiPrescriptionSampleModule } from './api-prescription-sample/api-prescription-sample.module'
 import { ApiProductMovementModule } from './api-product-movement/api-product-movement.module'
@@ -34,6 +33,7 @@ import { ApiWarehouseModule } from './api-warehouse/api-warehouse.module'
 import { AppointmentModule } from './appointment/appointment.module'
 import { CustomerModule } from './customer/customer.module'
 import { MasterDataModule } from './master-data/master-data.module'
+import { PaymentModule } from './payment-api/payment.module'
 import { ApiPurchaseOrderModule } from './purchase-order/api-purchase-order.module'
 import { StatisticModule } from './statistics/statistic.module'
 import { TicketReceptionModule } from './ticket-reception/ticket-reception.module'
@@ -63,7 +63,6 @@ import { TicketModule } from './ticket/ticket.module'
     ApiPurchaseOrderModule,
     ApiPurchaseOrderItemModule,
     ApiStockCheckModule,
-    ApiPaymentModule,
 
     ApiTicketUserModule,
     ApiTicketProcedureModule,
@@ -87,9 +86,10 @@ import { TicketModule } from './ticket/ticket.module'
     TicketModule,
     TicketReceptionModule,
 
+    PaymentModule,
     PaymentTicketModule,
 
-    FileStatisticModule,
+    FileApiModule,
   ],
   controllers: [],
   providers: [],

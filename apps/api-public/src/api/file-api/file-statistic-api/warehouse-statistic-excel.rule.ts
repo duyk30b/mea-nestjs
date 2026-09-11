@@ -1,4 +1,4 @@
-import { ExcelRuleType } from '../../api-file/common/excel-process'
+import { ExcelRuleType } from '@api-public/api/file-api/common/excel-process'
 
 export const WarehouseStatisticExcelRules = {
   _num: {

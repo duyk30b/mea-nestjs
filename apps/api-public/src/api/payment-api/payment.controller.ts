@@ -1,3 +1,8 @@
+import {
+  PaymentGetManyQuery,
+  PaymentPaginationQuery,
+} from '@api-public/resource/payment-resource/payment.query'
+import { PaymentResource } from '@api-public/resource/payment-resource/payment.resource'
 import { GenerateIdParam } from '@libs/common/dto'
 import { UserPermission } from '@libs/common/guards/user.guard'
 import { BaseResponse } from '@libs/common/interceptor'
@@ -5,23 +10,18 @@ import { External, TExternal } from '@libs/common/request/external.request'
 import { PermissionId } from '@libs/permission/permission.enum'
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { ApiPaymentService } from './api-payment.service'
-import { PaymentOtherService } from './payment-other.service'
-import {
-    OtherPaymentBody,
-    PaymentGetManyQuery,
-    PaymentPaginationQuery,
-    PaymentUpdateInfoBody,
-} from './request'
+import { PaymentService } from './payment.service'
+import { OtherPaymentBody, PaymentUpdateInfoBody } from './request'
 
 @ApiTags('Payment')
 @ApiBearerAuth('access-token')
 @Controller('payment')
-export class ApiPaymentController {
+export class PaymentController {
   constructor(
-    private readonly apiPaymentService: ApiPaymentService,
-    private readonly paymentOtherService: PaymentOtherService
-  ) { }
+    private readonly apiPaymentService: PaymentService,
+    private readonly paymentService: PaymentService,
+    private readonly paymentResource: PaymentResource
+  ) {}
 
   @Get('pagination')
   @UserPermission() // tạm thời để thế này trước
@@ -29,7 +29,7 @@ export class ApiPaymentController {
     @External() { oid }: TExternal,
     @Query() query: PaymentPaginationQuery
   ): Promise<BaseResponse> {
-    const data = await this.apiPaymentService.pagination(oid, query)
+    const data = await this.paymentResource.pagination(oid, query)
     return { data }
   }
 
@@ -39,7 +39,27 @@ export class ApiPaymentController {
     @External() { oid }: TExternal,
     @Query() query: PaymentGetManyQuery
   ): Promise<BaseResponse> {
-    const data = await this.apiPaymentService.getMany(oid, query)
+    const data = await this.paymentResource.getMany(oid, query)
+    return { data }
+  }
+
+  @Get('sum-money')
+  @UserPermission() // tạm thời để thế này trước
+  async sumMoney(
+    @External() { oid }: TExternal,
+    @Query() query: PaymentGetManyQuery
+  ): Promise<BaseResponse> {
+    const data = await this.paymentResource.sumMoney(oid, query)
+    return { data }
+  }
+
+  @Get('list-by-ticket-id/:ticketId')
+  @UserPermission() // tạm thời để thế này trước
+  async listByTicket(
+    @External() { oid }: TExternal,
+    @Param('ticketId') ticketId: string
+  ): Promise<BaseResponse> {
+    const data = await this.paymentService.listByTicketId(oid, ticketId)
     return { data }
   }
 
@@ -50,22 +70,12 @@ export class ApiPaymentController {
     @Param() { id }: GenerateIdParam,
     @Body() body: PaymentUpdateInfoBody
   ): Promise<BaseResponse> {
-    const data = await this.paymentOtherService.updateInfo({
+    const data = await this.paymentService.updateInfo({
       oid,
       paymentId: id,
       body,
       userId: user.id,
     })
-    return { data }
-  }
-
-  @Get('sum-money')
-  @UserPermission() // tạm thời để thế này trước
-  async sumMoney(
-    @External() { oid }: TExternal,
-    @Query() query: PaymentGetManyQuery
-  ): Promise<BaseResponse> {
-    const data = await this.apiPaymentService.sumMoney(oid, query)
     return { data }
   }
 
@@ -75,7 +85,7 @@ export class ApiPaymentController {
     @External() { oid, user }: TExternal,
     @Body() body: OtherPaymentBody
   ): Promise<BaseResponse> {
-    const data = await this.paymentOtherService.createMoneyOut({
+    const data = await this.paymentService.createMoneyOut({
       oid,
       body,
       userId: user.id,
@@ -89,7 +99,7 @@ export class ApiPaymentController {
     @External() { oid, user }: TExternal,
     @Body() body: OtherPaymentBody
   ): Promise<BaseResponse> {
-    const data = await this.paymentOtherService.createMoneyIn({
+    const data = await this.paymentService.createMoneyIn({
       oid,
       body,
       userId: user.id,
@@ -103,7 +113,7 @@ export class ApiPaymentController {
     @External() { oid, user }: TExternal,
     @Param() { id }: GenerateIdParam
   ): Promise<BaseResponse> {
-    const data = await this.paymentOtherService.destroy({
+    const data = await this.paymentService.destroy({
       oid,
       paymentId: id,
       userId: user.id,

@@ -6,24 +6,13 @@ import { ProductMovementInsertType } from '@libs/database/entities/product-movem
 import { ProductOperation } from '@libs/database/operations'
 import { BatchOperator } from '@libs/database/operations/batch/batch.operator'
 import {
-    BatchRepository,
-    OrganizationRepository,
-    ProductMovementRepository,
-    ProductRepository,
-    PurchaseOrderItemRepository,
-    TicketBatchRepository,
-    TicketProductRepository,
+  BatchRepository,
+  OrganizationRepository,
+  ProductMovementRepository,
 } from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
 import { SocketEmitService } from '../../socket/socket-emit.service'
-import {
-    BatchGetManyQuery,
-    BatchGetOneQuery,
-    BatchMergeBody,
-    BatchPaginationQuery,
-    BatchUpdateInfoAndQuantityBody,
-    BatchUpdateInfoBody,
-} from './request'
+import { BatchMergeBody, BatchUpdateInfoAndQuantityBody, BatchUpdateInfoBody } from './request'
 
 @Injectable()
 export class ApiBatchService {
@@ -33,68 +22,9 @@ export class ApiBatchService {
     private readonly organizationRepository: OrganizationRepository,
     private readonly batchRepository: BatchRepository,
     private readonly batchOperator: BatchOperator,
-    private readonly productRepository: ProductRepository,
-    private readonly ticketBatchRepository: TicketBatchRepository,
-    private readonly ticketProductRepository: TicketProductRepository,
-    private readonly purchaseOrderItemRepository: PurchaseOrderItemRepository,
     private readonly productMovementRepository: ProductMovementRepository,
     private readonly productOperation: ProductOperation
-  ) { }
-
-  async pagination(oid: number, query: BatchPaginationQuery) {
-    const { page, limit, filter, sort, relation } = query
-    const { total, data } = await this.batchRepository.pagination({
-      relation,
-      relationLoadStrategy: 'query',
-      page,
-      limit,
-      condition: {
-        oid,
-        id: filter?.id,
-        warehouseId: filter?.warehouseId,
-        distributorId: filter?.distributorId,
-        productId: filter?.productId,
-        quantity: filter?.quantity,
-        expiryDate: filter?.expiryDate,
-        updatedAt: filter?.updatedAt,
-        registeredAt: filter?.registeredAt,
-      },
-      sort,
-    })
-
-    return { batchList: data, page, limit, total }
-  }
-
-  async getList(oid: number, query: BatchGetManyQuery) {
-    const { limit, filter, relation, sort } = query
-    const batchList = await this.batchRepository.findMany({
-      relation,
-      relationLoadStrategy: 'query',
-      condition: {
-        oid,
-        id: filter?.id,
-        warehouseId: filter?.warehouseId,
-        distributorId: filter?.distributorId,
-        productId: filter?.productId,
-        quantity: filter?.quantity,
-        expiryDate: filter?.expiryDate,
-        updatedAt: filter?.updatedAt,
-        registeredAt: filter?.registeredAt,
-        $OR: filter?.$OR,
-      },
-      limit,
-      sort: sort || undefined,
-    })
-    return { batchList }
-  }
-
-  async getOne(oid: number, id: number, query: BatchGetOneQuery) {
-    const batch = await this.batchRepository.findOne({
-      relation: query.relation,
-      condition: { oid, id },
-    })
-    return { batch }
-  }
+  ) {}
 
   async updateInfo(oid: number, id: number, body: BatchUpdateInfoBody) {
     const batch = await this.batchRepository.updateOne({ id, oid }, body)

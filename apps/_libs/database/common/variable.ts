@@ -101,13 +101,14 @@ export enum TicketActionType {
   PrePayment = 4,
   PaymentMoney = 5,
   PaymentItem = 6,
-  RefundMoney = 7,
-  RefundItem = 8,
-  PayDebt = 9,
-  RefundDebt = 10,
-  Close = 11,
-  Reopen = 12,
-  Terminal = 13,
+  DebitItem = 7,
+  RefundMoney = 8,
+  RefundItem = 9,
+  PayDebt = 10,
+  RefundDebt = 11,
+  Close = 12,
+  Reopen = 13,
+  Terminal = 14,
 }
 
 export enum PurchaseOrderActionType {

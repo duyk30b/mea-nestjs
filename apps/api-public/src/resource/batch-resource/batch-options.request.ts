@@ -1,8 +1,4 @@
-import {
-    ConditionNumber,
-    ConditionTimestamp,
-    transformConditionNumber,
-} from '@libs/common/dto'
+import { ConditionNumber, ConditionTimestamp, transformConditionNumber } from '@libs/common/dto'
 import { SortQuery } from '@libs/common/dto/query'
 import { Expose, Transform, Type } from 'class-transformer'
 import { IsArray, IsBoolean, IsIn, IsOptional, ValidateNested } from 'class-validator'
@@ -11,6 +7,10 @@ export class BatchRelationQuery {
   @Expose()
   @IsBoolean()
   product: boolean
+
+  @Expose()
+  @IsBoolean()
+  distributor: boolean
 }
 export class BatchFilterQuery {
   @Expose()

@@ -14,14 +14,14 @@ import { TicketMoneyService } from './ticket-money.service'
 export class ApiTicketMoneyController {
   constructor(private readonly ticketMoneyService: TicketMoneyService) {}
 
-  @Post(':ticketId/payment-money')
+  @Post(':ticketId/change-paid')
   @UserPermission(PermissionId.TICKET_PAYMENT_MONEY)
-  async prepaymentMoney(
+  async changePaid(
     @External() { oid, uid }: TExternal,
     @Param() { ticketId }: TicketParams,
     @Body() body: TicketPaymentMoneyBody
   ): Promise<BaseResponse> {
-    const data = await this.ticketMoneyService.paymentMoney({
+    const data = await this.ticketMoneyService.startChangePaid({
       oid,
       ticketId,
       userId: uid,

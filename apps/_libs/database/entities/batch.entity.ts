@@ -1,5 +1,6 @@
+import Distributor from '@libs/database/entities/distributor.entity'
 import { Exclude, Expose } from 'class-transformer'
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, Unique } from 'typeorm'
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm'
 import Product from './product.entity'
 
 @Entity('Batch')
@@ -106,6 +107,9 @@ export default class Batch {
   @JoinColumn({ name: 'productId', referencedColumnName: 'id' })
   product: Product
 
+  @Expose()
+  distributor: Distributor
+
   static fromRaw(raw: { [P in keyof Batch]: any }) {
     if (!raw) return null
     const entity = new Batch()
@@ -128,7 +132,7 @@ export default class Batch {
 }
 
 export type BatchRelationType = {
-  [P in keyof Pick<Batch, 'product'>]?: boolean
+  [P in keyof Pick<Batch, 'product' | 'distributor'>]?: boolean
 }
 
 export type BatchInsertType = Omit<
@@ -138,12 +142,12 @@ export type BatchInsertType = Omit<
 
 export type BatchUpdateType = {
   [K in Exclude<keyof Batch, keyof BatchRelationType | keyof Pick<Batch, 'oid' | 'id'>>]:
-  | Batch[K]
-  | (() => string)
+    | Batch[K]
+    | (() => string)
 }
 
 export type BatchSortType = {
   [P in keyof Pick<Batch, 'id' | 'productId' | 'quantity' | 'expiryDate' | 'registeredAt'>]?:
-  | 'ASC'
-  | 'DESC'
+    | 'ASC'
+    | 'DESC'
 }

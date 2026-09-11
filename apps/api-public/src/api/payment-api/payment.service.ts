@@ -5,23 +5,34 @@ import {
   PaymentInsertType,
   PaymentPersonType,
 } from '@libs/database/entities/payment.entity'
-import {
-  PurchaseOrderRepository,
-  TicketRepository,
-  WalletRepository,
-} from '@libs/database/repositories'
+import { PaymentTicketRepository, WalletRepository } from '@libs/database/repositories'
 import { PaymentRepository } from '@libs/database/repositories/payment.repository'
 import { Injectable } from '@nestjs/common'
 import { OtherPaymentBody, PaymentUpdateInfoBody } from './request'
 
 @Injectable()
-export class PaymentOtherService {
+export class PaymentService {
   constructor(
     private readonly paymentRepository: PaymentRepository,
-    private readonly ticketRepository: TicketRepository,
-    private readonly purchaseOrderRepository: PurchaseOrderRepository,
+    private readonly paymentTicketRepository: PaymentTicketRepository,
     private readonly walletRepository: WalletRepository
   ) {}
+
+  async listByTicketId(oid: number, ticketId: string) {
+    const paymentTicketList = await this.paymentTicketRepository.findManyBy({ oid, ticketId })
+    const paymentIdList = paymentTicketList.map((pt) => pt.paymentId)
+    const paymentList = await this.paymentRepository.findMany({
+      condition: { oid, id: { IN: paymentIdList } },
+      sort: { createdAt: 'ASC' },
+    })
+
+    paymentList.forEach((payment) => {
+      payment.paymentTicketList = paymentTicketList.filter((pt) => {
+        return pt.paymentId === payment.id
+      })
+    })
+    return { paymentList }
+  }
 
   async updateInfo(options: {
     oid: number

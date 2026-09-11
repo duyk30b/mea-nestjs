@@ -87,7 +87,7 @@ export class ApiFileCustomerDownloadExcel {
     })
 
     const workbook = excelOneSheetWorkbook({
-      layout: { sheetName: 'Sản phẩm' },
+      layout: { sheetName: 'Khách hàng' },
       headerSheet: (worksheet: Worksheet) => {
         const rowTitle = worksheet.addRow(Object.values(CustomerExcelRules).map((i) => i.title))
         rowTitle.height = 32

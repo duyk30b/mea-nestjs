@@ -1,26 +1,28 @@
+import {
+  BatchGetManyQuery,
+  BatchGetOneQuery,
+  BatchPaginationQuery,
+} from '@api-public/resource/batch-resource/batch-get.query'
+import { BatchResource } from '@api-public/resource/batch-resource/batch.resource'
 import { IdParam } from '@libs/common/dto/param'
 import { OrganizationPermission } from '@libs/common/guards/organization.guard'
 import { UserPermission } from '@libs/common/guards/user.guard'
 import { BaseResponse } from '@libs/common/interceptor'
 import { External, TExternal } from '@libs/common/request/external.request'
 import { PermissionId } from '@libs/permission/permission.enum'
-import { Body, Controller, Delete, Get, Param, Post, Query } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger'
 import { ApiBatchService } from './api-batch.service'
-import {
-    BatchGetManyQuery,
-    BatchGetOneQuery,
-    BatchMergeBody,
-    BatchPaginationQuery,
-    BatchUpdateInfoAndQuantityBody,
-    BatchUpdateInfoBody,
-} from './request'
+import { BatchMergeBody, BatchUpdateInfoAndQuantityBody, BatchUpdateInfoBody } from './request'
 
 @ApiTags('Batch')
 @ApiBearerAuth('access-token')
 @Controller('batch')
 export class ApiBatchController {
-  constructor(private readonly apiBatchService: ApiBatchService) { }
+  constructor(
+    private readonly batchResource: BatchResource,
+    private readonly apiBatchService: ApiBatchService
+  ) {}
 
   @Get('pagination')
   @OrganizationPermission(PermissionId.PRODUCT)
@@ -28,7 +30,7 @@ export class ApiBatchController {
     @External() { oid }: TExternal,
     @Query() query: BatchPaginationQuery
   ): Promise<BaseResponse> {
-    const data = await this.apiBatchService.pagination(oid, query)
+    const data = await this.batchResource.pagination(oid, query)
     return { data }
   }
 
@@ -38,7 +40,7 @@ export class ApiBatchController {
     @External() { oid }: TExternal,
     @Query() query: BatchGetManyQuery
   ): Promise<BaseResponse> {
-    const data = await this.apiBatchService.getList(oid, query)
+    const data = await this.batchResource.getList(oid, query)
     return { data }
   }
 
@@ -49,7 +51,7 @@ export class ApiBatchController {
     @Param() { id }: IdParam,
     @Query() query: BatchGetOneQuery
   ): Promise<BaseResponse> {
-    const data = await this.apiBatchService.getOne(oid, id, query)
+    const data = await this.batchResource.getOne(oid, id, query)
     return { data }
   }
 

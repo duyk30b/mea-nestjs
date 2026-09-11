@@ -110,7 +110,7 @@ export class TicketCancelService {
     }
 
     if (ticketModified.paidTotal > 0) {
-      const paymentResult = await this.ticketPaymentMoneyOperation.startPaymentMoney({
+      const paymentResult = await this.ticketPaymentMoneyOperation.startChangePaid({
         oid,
         cashierId: userId,
         walletId: body.walletId,
@@ -119,6 +119,7 @@ export class TicketCancelService {
         paymentActionType: PaymentActionType.RefundMoney,
         ticketActionType: TicketActionType.Terminal,
         paidTotal: -ticketOrigin.paidTotal,
+        debtTotal: 0,
         ticketId,
         isPaymentEachItem: 0,
       })

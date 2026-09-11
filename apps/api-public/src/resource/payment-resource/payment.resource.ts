@@ -1,3 +1,7 @@
+import {
+  PaymentGetManyQuery,
+  PaymentPaginationQuery,
+} from '@api-public/resource/payment-resource/payment.query'
 import { ESArray } from '@libs/common/helpers/array.helper'
 import {
   Customer,
@@ -22,11 +26,10 @@ import {
   WalletRepository,
 } from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
-import { PaymentGetManyQuery, PaymentPaginationQuery } from './request'
-import { PaymentRelationQuery } from './request/payment.options'
+import { PaymentRelationQuery } from './payment.options'
 
 @Injectable()
-export class ApiPaymentService {
+export class PaymentResource {
   constructor(
     private readonly paymentRepository: PaymentRepository,
     private readonly paymentTicketRepository: PaymentTicketRepository,

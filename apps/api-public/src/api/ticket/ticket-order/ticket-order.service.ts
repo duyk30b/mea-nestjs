@@ -131,7 +131,7 @@ export class TicketOrderService {
     }
 
     if (paidTotal > 0) {
-      const prepaymentResult = await this.ticketPaymentMoneyOperation.startPaymentMoney({
+      const prepaymentResult = await this.ticketPaymentMoneyOperation.startChangePaid({
         oid,
         cashierId: userId,
         walletId: body.walletId,
@@ -140,6 +140,7 @@ export class TicketOrderService {
         time,
         note: '',
         paidTotal,
+        debtTotal: 0,
         ticketId,
         isPaymentEachItem: 0,
       })
@@ -238,7 +239,7 @@ export class TicketOrderService {
     }
 
     if (ticketModified.paidTotal != paidUpdate) {
-      const paymentResult = await this.ticketPaymentMoneyOperation.startPaymentMoney({
+      const paymentResult = await this.ticketPaymentMoneyOperation.startChangePaid({
         oid,
         cashierId: userId,
         walletId: body.walletId,
@@ -249,6 +250,7 @@ export class TicketOrderService {
         time,
         note: '',
         paidTotal: paidUpdate - ticketModified.paidTotal,
+        debtTotal: 0,
         ticketId,
         ticketActionType: TicketActionType.TicketOrderDebtSuccessUpdate,
         isPaymentEachItem: 0,
@@ -339,7 +341,7 @@ export class TicketOrderService {
     const ticketProductModifiedAll = shipProductResult.ticketProductModifiedAll
 
     if (body.paidAmount > 0) {
-      const prepaymentResult = await this.ticketPaymentMoneyOperation.startPaymentMoney({
+      const prepaymentResult = await this.ticketPaymentMoneyOperation.startChangePaid({
         oid,
         cashierId: userId,
         walletId: body.walletId,
@@ -347,6 +349,7 @@ export class TicketOrderService {
         time,
         note: '',
         paidTotal: body.paidAmount,
+        debtTotal: 0,
         ticketId,
         ticketActionType: TicketActionType.ShipProductAndPaymentAndClose,
         isPaymentEachItem: 0,

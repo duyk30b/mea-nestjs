@@ -215,11 +215,11 @@ export default class Ticket {
 
   @Column({ default: 0 })
   @Expose()
-  paidTotal: number // tổng tiền thanh toán
+  paidTotal: number // totalMoney = paidTotal + debtTotal = paidWait + paidItem + paidSurcharge + paidDiscount
 
-  @Column({ default: 0 })
-  @Expose()
-  debtTotal: number // Khi có nợ: paidTotal + debtTotal = totalMoney
+  @Column({ default: 0 }) // Luôn luôn: paidTotal + debtTotal = totalMoney
+  @Expose() // Tất cả item nợ cũng đã được cộng vào debtTotal, item nợ cũng được tính là đã thanh toán
+  debtTotal: number // totalMoney = paidTotal + debtTotal = paidWait + paidItem + paidSurcharge + paidDiscount
 
   @Column({ type: 'varchar', length: 100, default: JSON.stringify([]) })
   @Expose()

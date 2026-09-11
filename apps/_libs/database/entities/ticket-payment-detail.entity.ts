@@ -1,6 +1,8 @@
 import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, PrimaryColumn } from 'typeorm'
 
+// Lưu ý: totalMoney = paidTotal + debtTotal = paidWait + paidItem + paidSurcharge + paidDiscount
+
 @Entity('TicketPaymentDetail')
 @Index('IDX_TicketPaymentDetail__oid_ticketId', ['oid', 'ticketId'])
 export default class TicketPaymentDetail {

@@ -91,8 +91,8 @@ export class TicketPaymentMoneyOperation {
     private ticketChangeItemMoneyManager: TicketChangeItemMoneyManager
   ) {}
 
-  // thanh toán mà không ảnh hưởng đến nợ
-  async startPaymentMoney(props: {
+  // thanh toán (có bolus thêm trường hợp ghi nợ item)
+  async startChangePaid(props: {
     oid: number
     ticketId: string
     cashierId: number
@@ -100,6 +100,7 @@ export class TicketPaymentMoneyOperation {
     paymentActionType: PaymentActionType
     ticketActionType: TicketActionType
     paidTotal: number
+    debtTotal: number
     isPaymentEachItem: 0 | 1
     paymentTicketItemMap?: PaymentTicketItemMapType // trường hợp trả tiền vào item thì chọn options này
     note: string
@@ -113,13 +114,14 @@ export class TicketPaymentMoneyOperation {
         time,
         note,
         paidTotal,
+        debtTotal,
         ticketId,
         ticketActionType,
         isPaymentEachItem,
         paymentTicketItemMap, // dùng cho trường hợp trả tiền vào item, isPaymentEachItem = 1
       } = props
       const walletId = props.walletId || '0'
-      const PREFIX = `ticketId=${ticketId} startPayment failed`
+      const PREFIX = `ticketId=${ticketId} startChangePaid failed`
 
       const ticketPaymentItemBodyList = [
         ...(paymentTicketItemMap?.paymentTicketRegimenList || []),
@@ -149,6 +151,7 @@ export class TicketPaymentMoneyOperation {
         },
         {
           paidTotal: () => `"paidTotal" + ${paidTotal}`,
+          debtTotal: () => `"debtTotal" + ${debtTotal}`,
           status: () => ` CASE
                             WHEN("status" = ${TicketStatus.Draft}) THEN ${TicketStatus.Schedule} 
                             ELSE "status"
@@ -166,9 +169,10 @@ export class TicketPaymentMoneyOperation {
           return acc + item.paidMoney
         }, 0)
 
-        if (paidTotal !== paidWait + paidDiscount + paidSurcharge + paidItemReduce) {
+        if (paidTotal + debtTotal !== paidWait + paidDiscount + paidSurcharge + paidItemReduce) {
           throw new BusinessError(PREFIX, 'Số tiền thanh toán trong PaymentTicketMap không đúng', {
             paidTotal,
+            debtTotal,
           })
         }
         ticketPaymentDetailModified = await this.ticketPaymentDetailRepository.managerUpdateOne(
@@ -183,28 +187,33 @@ export class TicketPaymentMoneyOperation {
         )
       }
 
-      const customerModified = await this.customerRepository.managerFindOneBy(manager, {
-        oid,
-        id: customerId,
-      })
-      const customerOpenDebt = customerModified.debt
+      const customerModified = await this.customerRepository.managerUpdateOne(
+        manager,
+        { oid, id: customerId },
+        { debt: () => `debt + ${debtTotal}` }
+      )
+
       const customerCloseDebt = customerModified.debt
+      const customerOpenDebt = customerCloseDebt - debtTotal
+
       let walletOpenMoney = 0
       let walletCloseMoney = 0
 
-      if (walletId && walletId !== '0') {
-        const walletModified = await this.walletRepository.managerUpdateOne(
-          manager,
-          { oid, id: walletId },
-          { money: () => `money + ${paidTotal}` }
-        )
-        walletCloseMoney = walletModified.money
-        walletOpenMoney = walletModified.money - paidTotal
-      } else {
-        // validate wallet
-        const walletList = await this.walletRepository.managerFindManyBy(manager, { oid })
-        if (walletList.length) {
-          throw new BusinessError(PREFIX, 'Chưa chọn phương thức thanh toán')
+      if (paidTotal != 0) {
+        if (walletId && walletId !== '0') {
+          const walletModified = await this.walletRepository.managerUpdateOne(
+            manager,
+            { oid, id: walletId },
+            { money: () => `money + ${paidTotal}` }
+          )
+          walletCloseMoney = walletModified.money
+          walletOpenMoney = walletModified.money - paidTotal
+        } else {
+          // validate wallet
+          const walletList = await this.walletRepository.managerFindManyBy(manager, { oid })
+          if (walletList.length) {
+            throw new BusinessError(PREFIX, 'Chưa chọn phương thức thanh toán')
+          }
         }
       }
 
@@ -213,6 +222,8 @@ export class TicketPaymentMoneyOperation {
         moneyDirection = MoneyDirection.In
       } else if (paidTotal < 0) {
         moneyDirection = MoneyDirection.Out
+      } else {
+        moneyDirection = MoneyDirection.Other
       }
 
       const paymentCreated = await this.paymentRepository.managerInsertOne(manager, {
@@ -228,7 +239,7 @@ export class TicketPaymentMoneyOperation {
         createdAt: time,
 
         paidTotal,
-        debtTotal: 0,
+        debtTotal,
         personOpenDebt: customerOpenDebt,
         personCloseDebt: customerCloseDebt,
         walletOpenMoney,
@@ -256,7 +267,7 @@ export class TicketPaymentMoneyOperation {
           quantity: 1,
           unitRate: 1,
           paidMoney: paidTotal,
-          debtMoney: 0,
+          debtMoney: debtTotal,
           createdAt: time,
         } satisfies PaymentTicketInsertType)
       }

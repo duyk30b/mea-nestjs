@@ -3,20 +3,19 @@ import { ApiPropertyOptional, IntersectionType, PickType } from '@nestjs/swagger
 import { Expose, Transform, plainToInstance } from 'class-transformer'
 import { IsObject, ValidateNested } from 'class-validator'
 import {
-    PaymentFilterQuery,
-    PaymentRelationQuery,
-    PaymentResponseQuery,
-    PaymentSortQuery,
-} from './payment.options'
+    DistributorFilterQuery,
+    DistributorRelationQuery,
+    DistributorSortQuery,
+} from './distributor-options.request'
 
-export class PaymentGetQuery {
-  @ApiPropertyOptional({ type: String, example: JSON.stringify(<PaymentRelationQuery>{}) })
+export class DistributorGetQuery {
+  @ApiPropertyOptional({ type: String, example: JSON.stringify(<DistributorRelationQuery>{}) })
   @Expose()
   @Transform(({ value }) => {
     try {
       if (!value) return undefined // return undefined để không validate nữa
       const plain = JSON.parse(value)
-      return plainToInstance(PaymentRelationQuery, plain, {
+      return plainToInstance(DistributorRelationQuery, plain, {
         exposeUnsetFields: false,
         excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
       })
@@ -26,43 +25,18 @@ export class PaymentGetQuery {
   })
   @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
-  relation: PaymentRelationQuery
-
-  @ApiPropertyOptional({
-    type: String,
-    example: JSON.stringify(<PaymentFilterQuery>{
-      personId: 1,
-    }),
-  })
-  @Expose()
-  @Transform(({ value }) => {
-    try {
-      if (!value) return undefined // return undefined để không validate nữa
-      const plain = JSON.parse(value)
-      return plainToInstance(PaymentFilterQuery, plain, {
-        exposeUnsetFields: false,
-        excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
-      })
-    } catch (error: any) {
-      return error.message
-    }
-  })
-  @IsObject({ message: ({ value }) => value })
-  @ValidateNested({ each: true })
-  filter?: PaymentFilterQuery
+  relation: DistributorRelationQuery
 
   @ApiPropertyOptional({
     type: String,
-    example: JSON.stringify(<PaymentSortQuery>{
-      id: 'ASC',
-    }),
+    example: JSON.stringify(<DistributorFilterQuery>{ isActive: 1, debt: { GT: 15000 } }),
   })
   @Expose()
   @Transform(({ value }) => {
     try {
       if (!value) return undefined // return undefined để không validate nữa
       const plain = JSON.parse(value)
-      return plainToInstance(PaymentSortQuery, plain, {
+      return plainToInstance(DistributorFilterQuery, plain, {
         exposeUnsetFields: false,
         excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
       })
@@ -72,34 +46,38 @@ export class PaymentGetQuery {
   })
   @IsObject({ message: ({ value }) => value })
   @ValidateNested({ each: true })
-  sort?: PaymentSortQuery
+  filter?: DistributorFilterQuery
+
+  @ApiPropertyOptional({
+    type: String,
+    example: JSON.stringify(<DistributorSortQuery>{ id: 'ASC' }),
+  })
+  @Expose()
+  @Transform(({ value }) => {
+    try {
+      if (!value) return undefined // return undefined để không validate nữa
+      const plain = JSON.parse(value)
+      return plainToInstance(DistributorSortQuery, plain, {
+        exposeUnsetFields: false,
+        excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
+      })
+    } catch (error: any) {
+      return error.message
+    }
+  })
+  @IsObject({ message: ({ value }) => value })
+  @ValidateNested({ each: true })
+  sort?: DistributorSortQuery
 }
 
-export class PaymentPaginationQuery extends IntersectionType(PaymentGetQuery, PaginationQuery) { }
+export class DistributorPaginationQuery extends IntersectionType(
+  DistributorGetQuery,
+  PaginationQuery
+) { }
 
-export class PaymentGetManyQuery extends IntersectionType(
-  PickType(PaymentGetQuery, ['filter', 'relation', 'sort']),
+export class DistributorGetManyQuery extends IntersectionType(
+  PickType(DistributorGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
 ) { }
 
-export class PaymentGetOneQuery extends PickType(PaymentGetQuery, ['relation']) { }
-
-export class PaymentPostQuery {
-  @ApiPropertyOptional({ type: String, example: JSON.stringify(<PaymentResponseQuery>{}) })
-  @Expose()
-  @Transform(({ value }) => {
-    try {
-      if (!value) return undefined // return undefined để không validate nữa
-      const plain = JSON.parse(value)
-      return plainToInstance(PaymentResponseQuery, plain, {
-        exposeUnsetFields: false,
-        excludeExtraneousValues: false, // không bỏ qua field thừa, để validate chết nó
-      })
-    } catch (error: any) {
-      return error.message
-    }
-  })
-  @IsObject({ message: ({ value }) => value })
-  @ValidateNested({ each: true })
-  response: PaymentResponseQuery
-}
+export class DistributorGetOneQuery extends PickType(DistributorGetQuery, ['relation']) { }

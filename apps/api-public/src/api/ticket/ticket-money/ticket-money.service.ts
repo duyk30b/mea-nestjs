@@ -16,14 +16,14 @@ export class TicketMoneyService {
     private ticketChangeDebtOperation: TicketChangeDebtOperation
   ) {}
 
-  async paymentMoney(data: {
+  async startChangePaid(data: {
     oid: number
     ticketId: string
     userId: number
     body: TicketPaymentMoneyBody
   }) {
     const { oid, ticketId, userId, body } = data
-    const paymentResult = await this.ticketPaymentMoneyOperation.startPaymentMoney({
+    const paymentResult = await this.ticketPaymentMoneyOperation.startChangePaid({
       oid,
       cashierId: userId,
       walletId: body.walletId,
@@ -31,6 +31,7 @@ export class TicketMoneyService {
       time: Date.now(),
       note: body.note,
       paidTotal: body.paidTotal,
+      debtTotal: body.debtTotal,
       ticketId,
       ticketActionType: body.ticketActionType,
       isPaymentEachItem: body.isPaymentEachItem,

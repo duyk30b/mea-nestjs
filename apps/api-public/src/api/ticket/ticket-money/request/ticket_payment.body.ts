@@ -187,6 +187,11 @@ export class TicketPaymentMoneyBody {
   @IsNumber()
   paidTotal: number
 
+  @Expose()
+  @IsDefined()
+  @IsNumber()
+  debtTotal: number
+
   @ApiPropertyOptional({ example: 'Khách hàng còn bo thêm tiền' })
   @Expose()
   @IsString()
