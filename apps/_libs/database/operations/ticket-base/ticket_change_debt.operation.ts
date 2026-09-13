@@ -131,6 +131,14 @@ export class TicketChangeDebtOperation {
         }
       })
 
+      let moneyDirection = MoneyDirection.Other
+      if (paidTotal > 0) {
+        moneyDirection = MoneyDirection.In
+      }
+      if (paidTotal < 0) {
+        moneyDirection = MoneyDirection.Out
+      }
+
       const paymentInsert: PaymentInsertType = {
         oid,
         personType: PaymentPersonType.Customer,
@@ -139,7 +147,7 @@ export class TicketChangeDebtOperation {
         cashierId,
         walletId: walletId || '0',
         paymentActionType,
-        moneyDirection: paidTotal > 0 ? MoneyDirection.In : MoneyDirection.Other,
+        moneyDirection,
         note,
         createdAt: time,
 

@@ -138,6 +138,14 @@ export class PurchaseOrderChangeDebtOperation {
         }
       })
 
+      let moneyDirection = MoneyDirection.Other
+      if (paidTotal > 0) {
+        moneyDirection = MoneyDirection.Out
+      }
+      if (paidTotal < 0) {
+        moneyDirection = MoneyDirection.In
+      }
+
       const paymentInsert: PaymentInsertType = {
         oid,
         personType: PaymentPersonType.Distributor,
@@ -146,7 +154,7 @@ export class PurchaseOrderChangeDebtOperation {
         cashierId,
         walletId: walletId || '0',
         paymentActionType,
-        moneyDirection: paidTotal > 0 ? MoneyDirection.Out : MoneyDirection.In,
+        moneyDirection,
         note,
         createdAt: time,
 

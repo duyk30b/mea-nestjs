@@ -14,6 +14,13 @@ export enum PaymentPersonType {
   Employee = 3,
 }
 
+export const PaymentPersonTypeText = {
+  [PaymentPersonType.Other]: 'Khác',
+  [PaymentPersonType.Distributor]: 'Nhà cung cấp',
+  [PaymentPersonType.Customer]: 'Khách hàng',
+  [PaymentPersonType.Employee]: 'Nhân viên',
+}
+
 export enum PaymentActionType {
   PaymentMoney = 1, // Thanh toán
   RefundMoney = 2, // Hoàn tiền
@@ -25,10 +32,27 @@ export enum PaymentActionType {
   UserCreate = 8, // Tạo phiếu thanh toán
 }
 
+export const PaymentActionTypeText = {
+  [PaymentActionType.PaymentMoney]: 'Thanh toán',
+  [PaymentActionType.RefundMoney]: 'Hoàn tiền',
+  [PaymentActionType.Debit]: 'Ghi nợ',
+  [PaymentActionType.RefundDebt]: 'Hủy nợ',
+  [PaymentActionType.PayDebt]: 'Trả nợ',
+  [PaymentActionType.FixCustomerByExcel]: 'Sửa KH bằng excel',
+  [PaymentActionType.FixWallet]: 'Sửa ví',
+  [PaymentActionType.UserCreate]: 'Tạo phiếu thanh toán',
+}
+
 export enum MoneyDirection {
   Other = 0,
   In = 1,
   Out = 2,
+}
+
+export const MoneyDirectionText = {
+  [MoneyDirection.Other]: 'Khác',
+  [MoneyDirection.In]: 'Phiếu thu',
+  [MoneyDirection.Out]: 'Phiếu chi',
 }
 
 @Entity('Payment')

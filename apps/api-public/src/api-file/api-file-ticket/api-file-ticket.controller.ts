@@ -13,7 +13,7 @@ export class ApiFileTicketController {
   constructor(private readonly apiFileTicketDownloadExcel: ApiFileTicketDownloadExcel) { }
 
   @Get('download-excel')
-  @UserPermission(PermissionId.FILE_EXCEL_DOWNLOAD_TICKET_ORDER)
+  @UserPermission(PermissionId.FILE_EXCEL_DOWNLOAD_TICKET)
   async downloadExcel(
     @External() { user, organization }: TExternal,
     @Query() query: TicketGetManyQuery
