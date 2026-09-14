@@ -1,8 +1,8 @@
+import { TicketRadiologyGetQuery } from '@api-public/resource/ticket-radiology/ticket-radiology.query'
 import { PaginationQuery } from '@libs/common/dto'
 import { ApiPropertyOptional, IntersectionType, PickType } from '@nestjs/swagger'
 import { Expose, plainToInstance, Transform } from 'class-transformer'
 import { IsIn, IsObject, ValidateNested } from 'class-validator'
-import { TicketRadiologyGetQuery } from '../../../api-ticket-radiology/request/ticket-radiology.query'
 
 class StatisticTicketRadiologySortQuery {
   @Expose()

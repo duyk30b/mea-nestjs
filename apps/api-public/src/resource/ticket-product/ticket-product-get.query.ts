@@ -3,9 +3,9 @@ import { ApiPropertyOptional, IntersectionType, PickType } from '@nestjs/swagger
 import { Expose, Transform, plainToInstance } from 'class-transformer'
 import { IsObject, ValidateNested } from 'class-validator'
 import {
-    TicketProductFilterQuery,
-    TicketProductRelationQuery,
-    TicketProductSortQuery,
+  TicketProductFilterQuery,
+  TicketProductRelationQuery,
+  TicketProductSortQuery,
 } from './ticket-product-options.request'
 
 export class TicketProductGetQuery {
@@ -77,11 +77,11 @@ export class TicketProductGetQuery {
 export class TicketProductPaginationQuery extends IntersectionType(
   TicketProductGetQuery,
   PaginationQuery
-) { }
+) {}
 
 export class TicketProductGetManyQuery extends IntersectionType(
   PickType(TicketProductGetQuery, ['filter', 'relation', 'sort']),
   LimitQuery
-) { }
+) {}
 
-export class TicketProductGetOneQuery extends PickType(TicketProductGetQuery, ['relation']) { }
+export class TicketProductGetOneQuery extends PickType(TicketProductGetQuery, ['relation']) {}

@@ -1,8 +1,8 @@
+import { TicketProcedureGetQuery } from '@api-public/resource/ticket-procedure/ticket-procedure-get.query'
 import { PaginationQuery } from '@libs/common/dto'
 import { ApiPropertyOptional, IntersectionType, PickType } from '@nestjs/swagger'
 import { Expose, plainToInstance, Transform } from 'class-transformer'
 import { IsIn, IsObject, ValidateNested } from 'class-validator'
-import { TicketProcedureGetQuery } from '../../../api-ticket-procedure/request'
 
 class StatisticTicketProcedureSortQuery {
   @Expose()

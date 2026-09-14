@@ -1,17 +1,24 @@
+import {
+  TicketProductGetManyQuery,
+  TicketProductPaginationQuery,
+} from '@api-public/resource/ticket-product/ticket-product-get.query'
+import { TicketProductResource } from '@api-public/resource/ticket-product/ticket-product.resource'
 import { GenerateIdParam } from '@libs/common/dto'
 import { UserPermission } from '@libs/common/guards/user.guard'
 import { BaseResponse } from '@libs/common/interceptor'
 import { External, TExternal } from '@libs/common/request/external.request'
 import { Controller, Get, Param, Post, Query } from '@nestjs/common'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
-import { ApiTicketProductService } from './api-ticket-product.service'
-import { TicketProductGetManyQuery, TicketProductPaginationQuery } from './request'
+import { TicketProductService } from './ticket-product.service'
 
 @ApiTags('TicketProduct')
 @ApiBearerAuth('access-token')
 @Controller('ticket-product')
-export class ApiTicketProductController {
-  constructor(private readonly apiTicketProductService: ApiTicketProductService) { }
+export class TicketProductController {
+  constructor(
+    private readonly ticketProductResource: TicketProductResource,
+    private readonly ticketProductService: TicketProductService
+  ) {}
 
   @Get('pagination')
   @UserPermission()
@@ -19,7 +26,7 @@ export class ApiTicketProductController {
     @External() { oid }: TExternal,
     @Query() query: TicketProductPaginationQuery
   ): Promise<BaseResponse> {
-    const data = await this.apiTicketProductService.pagination(oid, query)
+    const data = await this.ticketProductResource.pagination(oid, query)
     return { data }
   }
 
@@ -29,7 +36,7 @@ export class ApiTicketProductController {
     @External() { oid }: TExternal,
     @Query() query: TicketProductGetManyQuery
   ): Promise<BaseResponse> {
-    const data = await this.apiTicketProductService.getList(oid, query)
+    const data = await this.ticketProductResource.getList(oid, query)
     return { data }
   }
 
@@ -39,7 +46,7 @@ export class ApiTicketProductController {
     @External() { oid }: TExternal,
     @Param() { id }: GenerateIdParam
   ): Promise<BaseResponse> {
-    const data = await this.apiTicketProductService.destroyZero(oid, id)
+    const data = await this.ticketProductService.destroyZero(oid, id)
     return { data }
   }
 }

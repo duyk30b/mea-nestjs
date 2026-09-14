@@ -1,29 +1,29 @@
+import { TicketProcedureResource } from '@api-public/resource/ticket-procedure/ticket-procedure.resource'
 import { BusinessException } from '@libs/common/exception-filter/exception-filter'
 import { ESArray } from '@libs/common/helpers/array.helper'
 import {
-    Customer,
-    Regimen,
-    Ticket,
-    TicketProcedure,
-    TicketRegimen,
-    TicketUser,
+  Customer,
+  Regimen,
+  Ticket,
+  TicketProcedure,
+  TicketRegimen,
+  TicketUser,
 } from '@libs/database/entities'
 import { PositionType } from '@libs/database/entities/position.entity'
 import { TicketProcedureType } from '@libs/database/entities/ticket-procedure.entity'
 import {
-    CustomerRepository,
-    RegimenRepository,
-    TicketRepository,
+  CustomerRepository,
+  RegimenRepository,
+  TicketRepository,
 } from '@libs/database/repositories'
 import { TicketRegimenRepository } from '@libs/database/repositories/ticket-regimen.repository'
 import { TicketUserRepository } from '@libs/database/repositories/ticket-user.repository'
 import { Injectable } from '@nestjs/common'
-import { ApiTicketProcedureService } from '../api-ticket-procedure/api-ticket-procedure.service'
 import {
-    TicketRegimenGetManyQuery,
-    TicketRegimenGetOneQuery,
-    TicketRegimenPaginationQuery,
-    TicketRegimenRelationQuery,
+  TicketRegimenGetManyQuery,
+  TicketRegimenGetOneQuery,
+  TicketRegimenPaginationQuery,
+  TicketRegimenRelationQuery,
 } from './request'
 
 @Injectable()
@@ -34,8 +34,8 @@ export class ApiTicketRegimenService {
     private readonly customerRepository: CustomerRepository,
     private readonly regimenRepository: RegimenRepository,
     private readonly ticketUserRepository: TicketUserRepository,
-    private readonly apiTicketProcedureService: ApiTicketProcedureService
-  ) { }
+    private readonly ticketProcedureResource: TicketProcedureResource
+  ) {}
 
   async pagination(oid: number, query: TicketRegimenPaginationQuery) {
     const { page, limit, filter, relation, sort } = query
@@ -125,27 +125,27 @@ export class ApiTicketRegimenService {
 
       relation?.ticketUserRequestList && ticketRegimenIdList.length
         ? this.ticketUserRepository.findManyBy({
-          oid,
-          ticketId: { IN: ESArray.uniqueArray(ticketIdList) },
-          positionType: { IN: [PositionType.RegimenRequest] },
-          ticketItemId: { IN: ticketRegimenIdList },
-        })
+            oid,
+            ticketId: { IN: ESArray.uniqueArray(ticketIdList) },
+            positionType: { IN: [PositionType.RegimenRequest] },
+            ticketItemId: { IN: ticketRegimenIdList },
+          })
         : <TicketUser[]>[],
       relation?.ticketProcedureList && ticketRegimenIdList.length
-        ? this.apiTicketProcedureService.getList(oid, {
-          relation: {
-            imageList: true,
-            ticketUserResultList: true,
-          },
-          filter: {
-            oid,
-            customerId: { IN: customerIdList },
-            ticketRegimenId: { IN: ticketRegimenIdList },
-            ticketProcedureType: TicketProcedureType.InRegimen,
-            // ticketId: { IN: ticketIdList }, // ticketProcedure có thể gắn với bất kỳ ticketId nào sử dụng nó
-          },
-          sort: { completedAt: 'ASC', id: 'ASC' },
-        })
+        ? this.ticketProcedureResource.getList(oid, {
+            relation: {
+              imageList: true,
+              ticketUserResultList: true,
+            },
+            filter: {
+              oid,
+              customerId: { IN: customerIdList },
+              ticketRegimenId: { IN: ticketRegimenIdList },
+              ticketProcedureType: TicketProcedureType.InRegimen,
+              // ticketId: { IN: ticketIdList }, // ticketProcedure có thể gắn với bất kỳ ticketId nào sử dụng nó
+            },
+            sort: { completedAt: 'ASC', id: 'ASC' },
+          })
         : undefined,
     ])
 

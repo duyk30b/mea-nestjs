@@ -1,32 +1,32 @@
+import {
+  TicketProcedureGetManyQuery,
+  TicketProcedureGetOneQuery,
+  TicketProcedurePaginationQuery,
+} from '@api-public/resource/ticket-procedure/ticket-procedure-get.query'
+import { TicketProcedureRelationQuery } from '@api-public/resource/ticket-procedure/ticket-procedure-options.request'
 import { BusinessException } from '@libs/common/exception-filter/exception-filter'
 import { ESArray } from '@libs/common/helpers/array.helper'
 import {
-    Customer,
-    Image,
-    Procedure,
-    Ticket,
-    TicketProcedure,
-    TicketUser,
+  Customer,
+  Image,
+  Procedure,
+  Ticket,
+  TicketProcedure,
+  TicketUser,
 } from '@libs/database/entities'
 import { PositionType } from '@libs/database/entities/position.entity'
 import {
-    CustomerRepository,
-    ProcedureRepository,
-    TicketRepository,
+  CustomerRepository,
+  ProcedureRepository,
+  TicketRepository,
 } from '@libs/database/repositories'
 import { ImageRepository } from '@libs/database/repositories/image.repository'
 import { TicketProcedureRepository } from '@libs/database/repositories/ticket-procedure.repository'
 import { TicketUserRepository } from '@libs/database/repositories/ticket-user.repository'
 import { Injectable } from '@nestjs/common'
-import {
-    TicketProcedureGetManyQuery,
-    TicketProcedureGetOneQuery,
-    TicketProcedurePaginationQuery,
-    TicketProcedureRelationQuery,
-} from './request'
 
 @Injectable()
-export class ApiTicketProcedureService {
+export class TicketProcedureResource {
   constructor(
     private readonly ticketProcedureRepository: TicketProcedureRepository,
     private readonly ticketRepository: TicketRepository,
@@ -34,7 +34,7 @@ export class ApiTicketProcedureService {
     private readonly procedureRepository: ProcedureRepository,
     private readonly ticketUserRepository: TicketUserRepository,
     private readonly imageRepository: ImageRepository
-  ) { }
+  ) {}
 
   async pagination(oid: number, query: TicketProcedurePaginationQuery) {
     const { page, limit, filter, relation, sort } = query
@@ -130,34 +130,34 @@ export class ApiTicketProcedureService {
     const [ticketList, customerList, procedureList, ticketUserList, imageList] = await Promise.all([
       relation?.ticket && ticketIdList.length
         ? this.ticketRepository.findManyBy({
-          id: { IN: ESArray.uniqueArray(ticketIdList) },
-        })
+            id: { IN: ESArray.uniqueArray(ticketIdList) },
+          })
         : <Ticket[]>[],
       relation?.customer && customerIdList.length
         ? this.customerRepository.findManyBy({
-          id: { IN: ESArray.uniqueArray(customerIdList) },
-        })
+            id: { IN: ESArray.uniqueArray(customerIdList) },
+          })
         : <Customer[]>[],
       relation?.procedure && procedureIdList.length
         ? this.procedureRepository.findManyBy({
-          id: { IN: ESArray.uniqueArray(procedureIdList) },
-        })
+            id: { IN: ESArray.uniqueArray(procedureIdList) },
+          })
         : <Procedure[]>[],
 
       (relation?.ticketUserRequestList || relation?.ticketUserResultList)
-        && ticketProcedureIdList.length
+      && ticketProcedureIdList.length
         ? this.ticketUserRepository.findManyBy({
-          oid,
-          ticketId: { IN: ESArray.uniqueArray(ticketIdList) },
-          positionType: { IN: [PositionType.ProcedureRequest, PositionType.ProcedureResult] },
-          ticketItemId: { IN: ESArray.uniqueArray(ticketProcedureIdList) },
-        })
+            oid,
+            ticketId: { IN: ESArray.uniqueArray(ticketIdList) },
+            positionType: { IN: [PositionType.ProcedureRequest, PositionType.ProcedureResult] },
+            ticketItemId: { IN: ESArray.uniqueArray(ticketProcedureIdList) },
+          })
         : <TicketUser[]>[],
 
       relation?.imageList && imageIdList.length
         ? this.imageRepository.findManyBy({
-          id: { IN: ESArray.uniqueArray(imageIdList) },
-        })
+            id: { IN: ESArray.uniqueArray(imageIdList) },
+          })
         : <Image[]>[],
     ])
 

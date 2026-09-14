@@ -1,5 +1,6 @@
 import { FileApiModule } from '@api-public/api/file-api/file-api.module'
 import { PaymentTicketModule } from '@api-public/api/payment_ticket/payment_ticket.module'
+import { TicketItemApiModule } from '@api-public/api/ticket-item-api/ticket-item.module'
 import { Module } from '@nestjs/common'
 import { ApiAddressModule } from './api-address/api-address.module'
 import { ApiBatchModule } from './api-batch/api-batch.module'
@@ -20,9 +21,6 @@ import { ApiStockCheckModule } from './api-stock-check/api-stock-check.module'
 import { ApiTicketBatchModule } from './api-ticket-batch/api-ticket-batch.module'
 import { ApiTicketLaboratoryGroupModule } from './api-ticket-laboratory-group/api-ticket-laboratory-group.module'
 import { ApiTicketLaboratoryModule } from './api-ticket-laboratory/api-ticket-laboratory.module'
-import { ApiTicketProcedureModule } from './api-ticket-procedure/api-ticket-procedure.module'
-import { ApiTicketProductModule } from './api-ticket-product/api-ticket-product.module'
-import { ApiTicketRadiologyModule } from './api-ticket-radiology/api-ticket-radiology.module'
 import { ApiTicketRegimenModule } from './api-ticket-regimen/api-ticket-regimen.module'
 import { ApiTicketUserModule } from './api-ticket-user/api-ticket-user.module'
 import { ApiUserRoleModule } from './api-user-role/api-user-role.module'
@@ -65,13 +63,10 @@ import { TicketModule } from './ticket/ticket.module'
     ApiStockCheckModule,
 
     ApiTicketUserModule,
-    ApiTicketProcedureModule,
     ApiTicketRegimenModule,
-    ApiTicketProductModule,
     ApiTicketBatchModule,
     ApiTicketLaboratoryModule,
     ApiTicketLaboratoryGroupModule,
-    ApiTicketRadiologyModule,
 
     AppointmentModule,
     MasterDataModule,
@@ -85,6 +80,7 @@ import { TicketModule } from './ticket/ticket.module'
 
     TicketModule,
     TicketReceptionModule,
+    TicketItemApiModule,
 
     PaymentModule,
     PaymentTicketModule,

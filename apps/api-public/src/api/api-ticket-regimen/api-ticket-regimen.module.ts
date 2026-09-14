@@ -1,12 +1,12 @@
+import { TicketProcedureResource } from '@api-public/resource/ticket-procedure/ticket-procedure.resource'
 import { Module } from '@nestjs/common'
-import { ApiTicketProcedureService } from '../api-ticket-procedure/api-ticket-procedure.service'
 import { ApiTicketRegimenController } from './api-ticket-regimen.controller'
 import { ApiTicketRegimenService } from './api-ticket-regimen.service'
 
 @Module({
   imports: [],
   controllers: [ApiTicketRegimenController],
-  providers: [ApiTicketRegimenService, ApiTicketProcedureService],
+  providers: [TicketProcedureResource, ApiTicketRegimenService],
   exports: [ApiTicketRegimenService],
 })
-export class ApiTicketRegimenModule { }
+export class ApiTicketRegimenModule {}

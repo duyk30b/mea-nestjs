@@ -1,8 +1,15 @@
+import { TicketRadiologyRelationQuery } from '@api-public/resource/ticket-radiology/ticket-radiology-options.request'
+import {
+  TicketRadiologyGetManyQuery,
+  TicketRadiologyGetOneQuery,
+  TicketRadiologyPaginationQuery,
+} from '@api-public/resource/ticket-radiology/ticket-radiology.query'
 import { BusinessException } from '@libs/common/exception-filter/exception-filter'
 import { ESArray } from '@libs/common/helpers/array.helper'
 import {
   Customer,
   Image,
+  Radiology,
   Ticket,
   TicketRadiology,
   TicketUser,
@@ -10,28 +17,24 @@ import {
 import { PositionType } from '@libs/database/entities/position.entity'
 import {
   CustomerRepository,
+  RadiologyRepository,
   TicketRepository,
   TicketUserRepository,
 } from '@libs/database/repositories'
 import { ImageRepository } from '@libs/database/repositories/image.repository'
 import { TicketRadiologyRepository } from '@libs/database/repositories/ticket-radiology.repository'
 import { Injectable } from '@nestjs/common'
-import {
-  TicketRadiologyGetManyQuery,
-  TicketRadiologyGetOneQuery,
-  TicketRadiologyPaginationQuery,
-  TicketRadiologyRelationQuery,
-} from './request'
 
 @Injectable()
-export class ApiTicketRadiologyService {
+export class TicketRadiologyResource {
   constructor(
     private readonly ticketRadiologyRepository: TicketRadiologyRepository,
+    private readonly radiologyRepository: RadiologyRepository,
     private readonly customerRepository: CustomerRepository,
     private readonly ticketUserRepository: TicketUserRepository,
     private readonly ticketRepository: TicketRepository,
     private readonly imageRepository: ImageRepository
-  ) { }
+  ) {}
 
   async pagination(oid: number, query: TicketRadiologyPaginationQuery) {
     const { page, limit, filter, relation, sort } = query
@@ -115,13 +118,17 @@ export class ApiTicketRadiologyService {
     const { oid, ticketRadiologyList, relation } = object
 
     const ticketRadiologyIdList = ESArray.uniqueArray(ticketRadiologyList.map((i) => i.id))
+    const radiologyIdList = ESArray.uniqueArray(ticketRadiologyList.map((i) => i.radiologyId))
     const customerIdList = ESArray.uniqueArray(ticketRadiologyList.map((i) => i.customerId))
     const ticketIdList = ESArray.uniqueArray(ticketRadiologyList.map((i) => i.ticketId))
     const imageIdList: number[] = ESArray.uniqueArray(
       ticketRadiologyList.map((i) => JSON.parse(i.imageIds) as number[]).flat()
     )
 
-    const [ticketList, customerList, ticketUserList, imageList] = await Promise.all([
+    const [radiologyList, ticketList, customerList, ticketUserList, imageList] = await Promise.all([
+      relation?.radiology && radiologyIdList.length
+        ? this.radiologyRepository.findManyBy({ id: { IN: radiologyIdList } })
+        : <Radiology[]>[],
       relation?.ticket && ticketIdList.length
         ? this.ticketRepository.findManyBy({ id: { IN: ticketIdList } })
         : <Ticket[]>[],
@@ -130,17 +137,17 @@ export class ApiTicketRadiologyService {
         : <Customer[]>[],
 
       (relation?.ticketUserRequestList || relation?.ticketUserResultList)
-        && ticketIdList.length
-        && ticketRadiologyIdList.length
+      && ticketIdList.length
+      && ticketRadiologyIdList.length
         ? this.ticketUserRepository.findMany({
-          condition: {
-            oid,
-            ticketId: { IN: ticketIdList },
-            positionType: PositionType.RadiologyRequest,
-            ticketItemId: { IN: ticketRadiologyIdList },
-          },
-          sort: { id: 'ASC' },
-        })
+            condition: {
+              oid,
+              ticketId: { IN: ticketIdList },
+              positionType: PositionType.RadiologyRequest,
+              ticketItemId: { IN: ticketRadiologyIdList },
+            },
+            sort: { id: 'ASC' },
+          })
         : <TicketUser[]>[],
       relation?.imageList && imageIdList.length
         ? this.imageRepository.findManyByIds(imageIdList)
@@ -148,9 +155,14 @@ export class ApiTicketRadiologyService {
     ])
     const imageMap = ESArray.arrayToKeyValue(imageList, 'id')
 
+    const radiologyMap = ESArray.arrayToKeyValue(radiologyList, 'id')
+    const customerMap = ESArray.arrayToKeyValue(customerList, 'id')
+    const ticketMap = ESArray.arrayToKeyValue(ticketList, 'id')
+
     ticketRadiologyList.forEach((tr: TicketRadiology) => {
-      tr.ticket = ticketList.find((t) => t.id === tr.ticketId)
-      tr.customer = customerList.find((c) => c.id === tr.customerId)
+      tr.ticket = ticketMap[tr.ticketId]
+      tr.customer = customerMap[tr.customerId]
+      tr.radiology = radiologyMap[tr.radiologyId]
 
       if (relation.ticketUserRequestList) {
         tr.ticketUserRequestList = ticketUserList.filter((tu) => {

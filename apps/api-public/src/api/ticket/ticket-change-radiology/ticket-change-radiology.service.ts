@@ -1,4 +1,6 @@
 /* eslint-disable max-len */
+import { TicketRadiologyPostQuery } from '@api-public/resource/ticket-radiology/ticket-radiology.query'
+import { TicketRadiologyResource } from '@api-public/resource/ticket-radiology/ticket-radiology.resource'
 import { FileUploadDto } from '@libs/common/dto/file'
 import { BusinessError } from '@libs/database/common/error'
 import { Ticket, TicketUser } from '@libs/database/entities'
@@ -6,24 +8,19 @@ import Image, { ImageInteractType } from '@libs/database/entities/image.entity'
 import { PositionType } from '@libs/database/entities/position.entity'
 import { TicketRadiologyStatus } from '@libs/database/entities/ticket-radiology.entity'
 import {
-    TicketChangeTicketUserOperation,
-    TicketDestroyTicketRadiologyOperation,
-    TicketUpdateTicketRadiologyOperation,
+  TicketChangeTicketUserOperation,
+  TicketDestroyTicketRadiologyOperation,
+  TicketUpdateTicketRadiologyOperation,
 } from '@libs/database/operations'
-import {
-    TicketRadiologyManager,
-    TicketRadiologyRepository,
-} from '@libs/database/repositories'
+import { TicketRadiologyManager, TicketRadiologyRepository } from '@libs/database/repositories'
 import { Injectable } from '@nestjs/common'
 import { ImageManagerService } from '../../../components/image-manager/image-manager.service'
 import { SocketEmitService } from '../../../socket/socket-emit.service'
-import { ApiTicketRadiologyService } from '../../api-ticket-radiology/api-ticket-radiology.service'
-import { TicketRadiologyPostQuery } from '../../api-ticket-radiology/request'
 import {
-    TicketCancelResultTicketRadiologyBody,
-    TicketUpdatePriorityTicketRadiologyBody,
-    TicketUpdateRequestTicketRadiologyBody,
-    TicketUpdateResultTicketRadiologyBody,
+  TicketCancelResultTicketRadiologyBody,
+  TicketUpdatePriorityTicketRadiologyBody,
+  TicketUpdateRequestTicketRadiologyBody,
+  TicketUpdateResultTicketRadiologyBody,
 } from './request'
 
 @Injectable()
@@ -35,9 +32,9 @@ export class TicketChangeRadiologyService {
     private readonly ticketRadiologyManager: TicketRadiologyManager,
     private readonly ticketDestroyTicketRadiologyOperation: TicketDestroyTicketRadiologyOperation,
     private readonly ticketUpdateTicketRadiologyOperation: TicketUpdateTicketRadiologyOperation,
-    private readonly apiTicketRadiologyService: ApiTicketRadiologyService,
+    private readonly ticketRadiologyResource: TicketRadiologyResource,
     private readonly ticketChangeTicketUserOperation: TicketChangeTicketUserOperation
-  ) { }
+  ) {}
 
   async destroyTicketRadiology(options: {
     oid: number
@@ -213,7 +210,7 @@ export class TicketChangeRadiologyService {
       ticketModified = changeUserResult.ticketModified
     }
 
-    await this.apiTicketRadiologyService.generateRelation({
+    await this.ticketRadiologyResource.generateRelation({
       oid,
       ticketRadiologyList: [ticketRadiologyModified],
       relation: { imageList: true },
