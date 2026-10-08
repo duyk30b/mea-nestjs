@@ -7,7 +7,11 @@ import { IsBoolean, IsIn, IsInt, IsOptional, ValidateNested } from 'class-valida
 export class TicketLaboratoryRelationQuery {
   @Expose()
   @IsOptional()
-  laboratoryList: boolean
+  laboratory: boolean
+
+  @Expose()
+  @IsOptional()
+  laboratoryGroup: boolean
 
   @Expose()
   @IsBoolean()
@@ -15,11 +19,11 @@ export class TicketLaboratoryRelationQuery {
 
   @Expose()
   @IsBoolean()
-  ticketUserList: boolean
+  ticket: boolean
 
   @Expose()
   @IsBoolean()
-  ticket: boolean
+  ticketUserRequestList: boolean
 }
 
 const ConditionEnumTicketLaboratoryStatus = createConditionEnum(TicketLaboratoryStatus)

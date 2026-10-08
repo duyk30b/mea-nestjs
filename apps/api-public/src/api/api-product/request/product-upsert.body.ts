@@ -1,23 +1,24 @@
 import { IsEnumValue } from '@libs/common/transform-validate/class-validator.custom'
 import {
-    ProductType,
-    SplitBatchByCostPrice,
-    SplitBatchByDistributor,
-    SplitBatchByExpiryDate,
-    SplitBatchByWarehouse,
+  ProductType,
+  SplitBatchByCostPrice,
+  SplitBatchByDistributor,
+  SplitBatchByExpiryDate,
+  SplitBatchByWarehouse,
 } from '@libs/database/entities/product.entity'
 import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger'
 import { Expose, Transform, Type } from 'class-transformer'
 import {
-    IsArray,
-    IsBoolean,
-    IsDefined,
-    IsIn,
-    IsInt,
-    IsNumber,
-    IsString,
-    ValidateNested,
-    validateSync,
+  IsArray,
+  IsBoolean,
+  IsDefined,
+  IsIn,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+  validateSync,
 } from 'class-validator'
 import { DiscountUpdateBody } from '../../master-data/discount/request'
 import { PositionBasicBody } from '../../master-data/position/request'
@@ -34,7 +35,7 @@ export class UnitConversionBody {
   rate: number
 
   @Expose()
-  @IsBoolean()
+  @IsOptional()
   default: boolean
 }
 

@@ -20,7 +20,6 @@ import { ApiSettingModule } from './api-setting/api-setting.module'
 import { ApiStockCheckModule } from './api-stock-check/api-stock-check.module'
 import { ApiTicketBatchModule } from './api-ticket-batch/api-ticket-batch.module'
 import { ApiTicketLaboratoryGroupModule } from './api-ticket-laboratory-group/api-ticket-laboratory-group.module'
-import { ApiTicketLaboratoryModule } from './api-ticket-laboratory/api-ticket-laboratory.module'
 import { ApiTicketRegimenModule } from './api-ticket-regimen/api-ticket-regimen.module'
 import { ApiTicketUserModule } from './api-ticket-user/api-ticket-user.module'
 import { ApiUserRoleModule } from './api-user-role/api-user-role.module'
@@ -65,7 +64,6 @@ import { TicketModule } from './ticket/ticket.module'
     ApiTicketUserModule,
     ApiTicketRegimenModule,
     ApiTicketBatchModule,
-    ApiTicketLaboratoryModule,
     ApiTicketLaboratoryGroupModule,
 
     AppointmentModule,

@@ -81,11 +81,16 @@ export class TicketReturnProductOperation {
       }
       executeList = executeList.filter((i) => i.quantityExecute > 0)
 
-      if (!executeList.length) {
-        throw new Error(`${PREFIX}: executeList is empty`)
-      }
       if (executeList.length !== ticketBatchOriginList.length) {
         throw new Error(`${PREFIX}: executeList length does not match ticketBatchOriginList length`)
+      }
+      if (!executeList.length) {
+        return {
+          ticketModified: ticketOrigin,
+          productModifiedList: [],
+          batchModifiedList: [],
+          ticketUserModifiedList: [],
+        }
       }
 
       const ticketBatchOriginMap = ESArray.arrayToKeyValue(ticketBatchOriginList, 'id')

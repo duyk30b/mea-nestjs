@@ -2,6 +2,7 @@ import { Exclude, Expose } from 'class-transformer'
 import { Column, Entity, Index, JoinColumn, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm'
 import { DiscountType, TicketItemPaymentType, TicketLaboratoryStatus } from '../common/variable'
 import Customer from './customer.entity'
+import LaboratoryGroup from './laboratory-group.entity'
 import Laboratory from './laboratory.entity'
 import TicketUser from './ticket-user.entity'
 import Ticket from './ticket.entity'
@@ -144,11 +145,14 @@ export default class TicketLaboratory {
   laboratory: Laboratory
 
   @Expose()
+  laboratoryGroup: LaboratoryGroup
+
+  @Expose()
   @OneToMany(() => Laboratory, (laboratory) => laboratory.ticketLaboratory)
   laboratoryList: Laboratory[]
 
   @Expose()
-  ticketUserList: TicketUser[]
+  ticketUserRequestList: TicketUser[]
 
   static fromRaw(raw: { [P in keyof TicketLaboratory]: any }) {
     if (!raw) return null
@@ -175,7 +179,7 @@ export default class TicketLaboratory {
 export type TicketLaboratoryRelationType = {
   [P in keyof Pick<
     TicketLaboratory,
-    'ticket' | 'customer' | 'laboratory' | 'ticketUserList' | 'laboratoryList'
+    'ticket' | 'customer' | 'laboratory' | 'laboratoryGroup' | 'ticketUserRequestList' | 'laboratoryList'
   >]?: boolean
 }
 
